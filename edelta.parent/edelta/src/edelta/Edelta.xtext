@@ -1,0 +1,9 @@
+grammar edelta.Edelta with org.eclipse.xtext.common.Terminals
+
+generate edelta "http://www.Edelta.edelta"
+
+Model:
+	greetings+=Greeting*;
+	
+Greeting:
+	'Hello' name=ID '!';
