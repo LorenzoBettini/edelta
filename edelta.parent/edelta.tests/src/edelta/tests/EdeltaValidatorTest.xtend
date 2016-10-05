@@ -22,7 +22,7 @@ class EdeltaValidatorTest {
 	@Test
 	def void testCanReferToEcoreMetamodel() {
 		'''
-			metamodel "edelta"
+			metamodel "http://www.eclipse.org/emf/2002/Ecore"
 		'''.parse.assertNoErrors
 	}
 
