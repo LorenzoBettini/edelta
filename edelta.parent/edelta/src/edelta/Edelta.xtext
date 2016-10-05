@@ -1,4 +1,4 @@
-grammar edelta.Edelta with org.eclipse.xtext.common.Terminals
+grammar edelta.Edelta with org.eclipse.xtext.xbase.Xbase
 
 generate edelta "http://www.Edelta.edelta"
 
