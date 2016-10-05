@@ -4,7 +4,7 @@
 package edelta.tests
 
 import com.google.inject.Inject
-import edelta.edelta.Model
+import edelta.edelta.EdeltaProgram
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
 import org.eclipse.xtext.junit4.util.ParseHelper
@@ -17,12 +17,12 @@ import org.junit.runner.RunWith
 class EdeltaParsingTest{
 
 	@Inject
-	ParseHelper<Model> parseHelper
+	ParseHelper<EdeltaProgram> parseHelper
 
 	@Test 
 	def void loadModel() {
 		val result = parseHelper.parse('''
-			Hello Xtext!
+			metamodel "ecore"
 		''')
 		Assert.assertNotNull(result)
 	}
