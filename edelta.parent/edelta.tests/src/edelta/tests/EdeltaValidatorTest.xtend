@@ -8,31 +8,22 @@ import edelta.edelta.EdeltaProgram
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
 import org.eclipse.xtext.junit4.util.ParseHelper
-import org.junit.Assert
+import org.eclipse.xtext.junit4.validation.ValidationTestHelper
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
-class EdeltaParsingTest {
+class EdeltaValidatorTest {
 
 	@Inject extension ParseHelper<EdeltaProgram>
+	@Inject extension ValidationTestHelper
 
 	@Test
-	def void testSingleMetamodel() {
-		val result = parse('''
-			metamodel "ecore"
-		''')
-		Assert.assertNotNull(result)
-	}
-
-	@Test
-	def void testTwoMetamodels() {
-		val result = parse('''
-			metamodel "ecore"
-			metamodel "type"
-		''')
-		Assert.assertNotNull(result)
+	def void testCanReferToEcoreMetamodel() {
+		'''
+			metamodel "edelta"
+		'''.parse.assertNoErrors
 	}
 
 }

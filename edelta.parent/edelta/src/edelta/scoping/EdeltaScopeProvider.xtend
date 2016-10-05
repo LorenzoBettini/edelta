@@ -3,6 +3,8 @@
  */
 package edelta.scoping
 
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EReference
 
 /**
  * This class contains custom scoping description.
@@ -12,4 +14,9 @@ package edelta.scoping
  */
 class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 
+	override getScope(EObject context, EReference reference) {
+		println("getScope")
+		super.getScope(context, reference)
+	}
+	
 }
