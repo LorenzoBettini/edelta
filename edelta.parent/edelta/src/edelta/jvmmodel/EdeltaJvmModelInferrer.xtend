@@ -5,7 +5,6 @@ package edelta.jvmmodel
 
 import com.google.inject.Inject
 import edelta.edelta.EdeltaProgram
-import org.eclipse.xtext.common.types.JvmDeclaredType
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
@@ -29,11 +28,11 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 	 * 
 	 * @param element
 	 *            the model to create one or more
-	 *            {@link JvmDeclaredType declared
+	 *            {@link org.eclipse.xtext.common.types.JvmDeclaredType declared
 	 *            types} from.
 	 * @param acceptor
 	 *            each created
-	 *            {@link JvmDeclaredType type}
+	 *            {@link org.eclipse.xtext.common.types.JvmDeclaredType type}
 	 *            without a container should be passed to the acceptor in order
 	 *            get attached to the current resource. The acceptor's
 	 *            {@link IJvmDeclaredTypeAcceptor#accept(org.eclipse.xtext.common.types.JvmDeclaredType)
