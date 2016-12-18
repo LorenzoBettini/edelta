@@ -5,6 +5,9 @@ package edelta.scoping
 
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
+import edelta.edelta.EdeltaPackage
+import edelta.edelta.EdeltaProgram
+import org.eclipse.xtext.scoping.Scopes
 
 /**
  * This class contains custom scoping description.
@@ -15,7 +18,12 @@ import org.eclipse.emf.ecore.EReference
 class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 
 	override getScope(EObject context, EReference reference) {
-		println("getScope")
+		if (reference == EdeltaPackage.Literals.EDELTA_PROGRAM__ECLASSES) {
+			val prog = context as EdeltaProgram
+			return Scopes.scopeFor(
+				prog.metamodels.map[EClassifiers].flatten
+			)
+		}
 		super.getScope(context, reference)
 	}
 	

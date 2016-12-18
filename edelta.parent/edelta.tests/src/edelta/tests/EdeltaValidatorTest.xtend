@@ -26,4 +26,13 @@ class EdeltaValidatorTest {
 		'''.parse.assertNoErrors
 	}
 
+	@Test
+	def void testCanReferToEClass() {
+		'''
+			metamodel "http://www.eclipse.org/emf/2002/Ecore"
+			
+			eclass EClass
+		'''.parse.assertNoErrors
+	}
+
 }

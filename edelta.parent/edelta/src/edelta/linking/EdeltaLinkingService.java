@@ -42,10 +42,14 @@ public class EdeltaLinkingService extends DefaultLinkingService {
 
 	@Override
 	public List<EObject> getLinkedObjects(EObject context, EReference ref, INode node) throws IllegalNodeException {
+		List<EObject> linkedObjects = super.getLinkedObjects(context, ref, node);
+		if (!linkedObjects.isEmpty()) {
+			return linkedObjects;
+		}
 		if (ref == EdeltaPackage.eINSTANCE.getEdeltaProgram_Metamodels()) {
 			return getPackage((EdeltaProgram)context, (ILeafNode) node);
 		}
-		return super.getLinkedObjects(context, ref, node);
+		return linkedObjects;
 	}
 
 	private List<EObject> getPackage(EdeltaProgram context, ILeafNode text) {

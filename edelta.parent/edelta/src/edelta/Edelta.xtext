@@ -6,4 +6,5 @@ generate edelta "http://www.Edelta.edelta"
 
 EdeltaProgram:
 	('metamodel' metamodels+=[ecore::EPackage|STRING])*
+	('eclass' eclasses+=[ecore::EClass])*
 ;
