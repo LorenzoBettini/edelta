@@ -1,0 +1,3 @@
+metamodel "myexample"
+ 
+eclass MyExampleEClass
