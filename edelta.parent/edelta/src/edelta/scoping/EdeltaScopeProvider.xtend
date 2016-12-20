@@ -21,7 +21,9 @@ class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 		if (reference == EdeltaPackage.Literals.EDELTA_PROGRAM__ECLASSES) {
 			val prog = context as EdeltaProgram
 			return Scopes.scopeFor(
-				prog.metamodels.map[EClassifiers].flatten
+				prog.metamodels.map[
+					EClassifiers
+				].flatten
 			)
 		}
 		super.getScope(context, reference)
