@@ -3,20 +3,15 @@
  */
 package edelta.tests
 
-import com.google.inject.Inject
-import edelta.edelta.EdeltaProgram
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
-import org.eclipse.xtext.junit4.util.ParseHelper
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
-class EdeltaParsingTest {
-
-	@Inject extension ParseHelper<EdeltaProgram>
+class EdeltaParsingTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testSingleMetamodel() {
