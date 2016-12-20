@@ -25,6 +25,9 @@ class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 					EClassifiers
 				].flatten
 			)
+		} else if (reference == EdeltaPackage.Literals.EDELTA_PROGRAM__METAMODELS) {
+			val del = delegateGetScope(context, reference)
+//			println(del)
 		}
 		super.getScope(context, reference)
 	}
