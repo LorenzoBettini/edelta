@@ -9,23 +9,23 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(XtextRunner)
-@InjectWith(EdeltaInjectorProvider)
+@InjectWith(EdeltaInjectorProviderCustom)
 class EdeltaValidatorTest extends EdeltaAbstractTest {
 
 	@Test
-	def void testCanReferToEcoreMetamodel() {
+	def void testCanReferToMetamodel() {
 		'''
-			metamodel "http://www.eclipse.org/emf/2002/Ecore"
-		'''.parse.assertNoErrors
+			metamodel "foo"
+		'''.parseWithTestEcore.assertNoErrors
 	}
 
 	@Test
 	def void testCanReferToEClass() {
 		'''
-			metamodel "http://www.eclipse.org/emf/2002/Ecore"
+			metamodel "foo"
 			
-			eclass EClass
-		'''.parse.assertNoErrors
+			eclass FooClass
+		'''.parseWithTestEcore.assertNoErrors
 	}
 
 }
