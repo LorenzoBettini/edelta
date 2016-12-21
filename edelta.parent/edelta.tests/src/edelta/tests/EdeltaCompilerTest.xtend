@@ -108,6 +108,29 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		)
 	}
 
+	@Test
+	def void testOperationAccessingLib() {
+		operationAccessingLib.checkCompilation(
+			'''
+			package foo;
+			
+			import edelta.lib.EdeltaLibrary;
+			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.xtext.xbase.lib.Extension;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 {
+			  @Extension
+			  private EdeltaLibrary lib;
+			  
+			  public EClass bar(final String s) {
+			    return this.lib.newEClass(s);
+			  }
+			}
+			'''
+		)
+	}
+
 	def private checkCompilation(CharSequence input, CharSequence expectedGeneratedJava) {
 		checkCompilation(input, expectedGeneratedJava, true)
 	}

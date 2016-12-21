@@ -34,4 +34,14 @@ class Inputs {
 		}
 		'''
 	}
+
+	def operationAccessingLib() {
+		'''
+		package foo;
+		
+		def bar(String s) {
+			newEClass(s)
+		}
+		'''
+	}
 }
