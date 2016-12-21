@@ -10,4 +10,11 @@ EdeltaProgram:
 	importSection=XImportSection?
 	('metamodel' metamodels+=[ecore::EPackage|STRING])*
 	('eclass' eclasses+=[ecore::EClass])*
+	operations+=EdeltaOperation*
 ;
+
+EdeltaOperation:
+	'def' name=ValidID
+		'(' (params+=FullJvmFormalParameter (',' params+=FullJvmFormalParameter)*)? ')'
+		(':' type=JvmTypeReference)? 
+		body=XBlockExpression;

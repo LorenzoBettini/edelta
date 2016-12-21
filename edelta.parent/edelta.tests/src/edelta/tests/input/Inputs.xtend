@@ -14,4 +14,24 @@ class Inputs {
 			eclass FooClass
 		'''
 	}
+
+	def operationWithInferredReturnType() {
+		'''
+		package foo;
+		
+		def bar(String s) {
+			s.empty
+		}
+		'''
+	}
+
+	def operationWithReturnType() {
+		'''
+		package foo;
+		
+		def bar(String s) : boolean {
+			s.empty
+		}
+		'''
+	}
 }

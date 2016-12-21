@@ -14,7 +14,7 @@ import edelta.lib.EdeltaLibrary
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
- *
+ * 
  * <p>The JVM model should contain all elements that would appear in the Java code 
  * which is generated from the source model. Other models link against the JVM model rather than the source model.</p>     
  */
@@ -56,6 +56,15 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 			members += program.toField("lib", EdeltaLibrary.typeRef) => [
 				annotations += Extension.annotationRef
 			]
+			for (o : program.operations) {
+				members += o.toMethod(o.name, o.type ?: inferredType) [
+					documentation = o.documentation
+					for (p : o.params) {
+						parameters += p.toParameter(p.name, p.parameterType)
+					}
+					body = o.body
+				]
+			}
 		]
 	}
 }

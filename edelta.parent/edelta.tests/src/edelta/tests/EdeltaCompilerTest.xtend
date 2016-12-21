@@ -64,6 +64,50 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		)
 	}
 
+	@Test
+	def void testOperationWithInferredReturnType() {
+		operationWithInferredReturnType.checkCompilation(
+			'''
+			package foo;
+			
+			import edelta.lib.EdeltaLibrary;
+			import org.eclipse.xtext.xbase.lib.Extension;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 {
+			  @Extension
+			  private EdeltaLibrary lib;
+			  
+			  public boolean bar(final String s) {
+			    return s.isEmpty();
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
+	def void testOperationWithReturnType() {
+		operationWithReturnType.checkCompilation(
+			'''
+			package foo;
+			
+			import edelta.lib.EdeltaLibrary;
+			import org.eclipse.xtext.xbase.lib.Extension;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 {
+			  @Extension
+			  private EdeltaLibrary lib;
+			  
+			  public boolean bar(final String s) {
+			    return s.isEmpty();
+			  }
+			}
+			'''
+		)
+	}
+
 	def private checkCompilation(CharSequence input, CharSequence expectedGeneratedJava) {
 		checkCompilation(input, expectedGeneratedJava, true)
 	}
