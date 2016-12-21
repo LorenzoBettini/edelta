@@ -3,10 +3,10 @@
  */
 package edelta.scoping
 
-import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.EReference
 import edelta.edelta.EdeltaPackage
 import edelta.edelta.EdeltaProgram
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.scoping.Scopes
 
 /**
@@ -21,15 +21,12 @@ class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 		if (reference == EdeltaPackage.Literals.EDELTA_PROGRAM__ECLASSES) {
 			val prog = context as EdeltaProgram
 			return Scopes.scopeFor(
-				prog.metamodels.map[
+				prog.metamodels.map [
 					EClassifiers
 				].flatten
 			)
-		} else if (reference == EdeltaPackage.Literals.EDELTA_PROGRAM__METAMODELS) {
-			val del = delegateGetScope(context, reference)
-//			println(del)
 		}
 		super.getScope(context, reference)
 	}
-	
+
 }
