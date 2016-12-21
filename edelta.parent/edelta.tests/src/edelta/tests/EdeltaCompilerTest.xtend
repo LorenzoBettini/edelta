@@ -32,8 +32,13 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
+			import edelta.lib.EdeltaLibrary;
+			import org.eclipse.xtext.xbase.lib.Extension;
+			
 			@SuppressWarnings("all")
 			public class MyFile0 {
+			  @Extension
+			  private EdeltaLibrary lib;
 			}
 			'''
 		)
@@ -47,8 +52,13 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package foo;
 			
+			import edelta.lib.EdeltaLibrary;
+			import org.eclipse.xtext.xbase.lib.Extension;
+			
 			@SuppressWarnings("all")
 			public class MyFile0 {
+			  @Extension
+			  private EdeltaLibrary lib;
 			}
 			'''
 		)

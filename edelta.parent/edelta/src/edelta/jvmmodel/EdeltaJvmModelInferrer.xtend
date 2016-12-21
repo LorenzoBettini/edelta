@@ -10,6 +10,7 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
+import edelta.lib.EdeltaLibrary
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -52,7 +53,9 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 	def dispatch void infer(EdeltaProgram program, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		val className = program.fullyQualifiedName
 		acceptor.accept(program.toClass(className)) [
-			
+			members += program.toField("lib", EdeltaLibrary.typeRef) => [
+				annotations += Extension.annotationRef
+			]
 		]
 	}
 }
