@@ -7,3 +7,4 @@ Bundle-Vendor: Lorenzo Bettini
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.xtext.xbase.lib;visibility:=reexport,
  org.eclipse.emf.ecore;visibility:=reexport
+Export-Package: edelta.lib
