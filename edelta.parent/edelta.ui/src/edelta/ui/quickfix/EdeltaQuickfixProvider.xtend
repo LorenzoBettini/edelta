@@ -3,14 +3,14 @@
  */
 package edelta.ui.quickfix
 
-import org.eclipse.xtext.xbase.ui.quickfix.XbaseQuickfixProvider
+import org.eclipse.xtext.xbase.annotations.ui.quickfix.XbaseWithAnnotationsQuickfixProvider
 
 /**
  * Custom quickfixes.
  *
  * See https://www.eclipse.org/Xtext/documentation/310_eclipse_support.html#quick-fixes
  */
-class EdeltaQuickfixProvider extends XbaseQuickfixProvider {
+class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider {
 
 //	@Fix(EdeltaValidator.INVALID_NAME)
 //	def capitalizeName(Issue issue, IssueResolutionAcceptor acceptor) {
