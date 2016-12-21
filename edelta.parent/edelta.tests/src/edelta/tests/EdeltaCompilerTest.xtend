@@ -131,6 +131,38 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		)
 	}
 
+	@Test
+	def void testOperationNewEClassWithInitializer() {
+		operationNewEClassWithInitializer.checkCompilation(
+			'''
+			package foo;
+			
+			import edelta.lib.EdeltaLibrary;
+			import java.util.function.Consumer;
+			import org.eclipse.emf.common.util.EList;
+			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.xtext.xbase.lib.Extension;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 {
+			  @Extension
+			  private EdeltaLibrary lib;
+			  
+			  public EClass bar(final String s) {
+			    final Consumer<EClass> _function = new Consumer<EClass>() {
+			      public void accept(final EClass it) {
+			        EList<EClass> _eSuperTypes = it.getESuperTypes();
+			        EClass _newEClass = MyFile0.this.lib.newEClass("Base");
+			        _eSuperTypes.add(_newEClass);
+			      }
+			    };
+			    return this.lib.newEClass(s, _function);
+			  }
+			}
+			'''
+		)
+	}
+
 	def private checkCompilation(CharSequence input, CharSequence expectedGeneratedJava) {
 		checkCompilation(input, expectedGeneratedJava, true)
 	}

@@ -44,4 +44,16 @@ class Inputs {
 		}
 		'''
 	}
+
+	def operationNewEClassWithInitializer() {
+		'''
+		package foo;
+		
+		def bar(String s) {
+			newEClass(s) [
+				ESuperTypes += newEClass("Base")
+			]
+		}
+		'''
+	}
 }
