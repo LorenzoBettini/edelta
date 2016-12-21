@@ -15,6 +15,7 @@ import org.eclipse.xtext.junit4.validation.ValidationTestHelper
 import org.eclipse.xtext.resource.XtextResourceSet
 import org.junit.runner.RunWith
 import edelta.tests.input.Inputs
+import org.eclipse.emf.ecore.resource.ResourceSet
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -28,6 +29,21 @@ abstract class EdeltaAbstractTest {
 	protected extension Inputs = new Inputs
 
 	def protected parseWithTestEcore(CharSequence input) {
+		input.parse(resourceSetWithTestEcore)
+	}
+
+	def protected resourceSetWithTestEcore() {
+		val resourceSet = resourceSetProvider.get
+		addEPackageForTests(resourceSet)
+	}
+
+	def protected addEPackageForTests(ResourceSet resourceSet) {
+		val resource = resourceSet.createResource(URI.createURI("foo.ecore"))
+		resource.contents += EPackageForTests
+		resourceSet
+	}
+
+	def protected EPackageForTests() {
 		val fooPackage = EcoreFactory.eINSTANCE.createEPackage => [
 			name = "foo"
 			nsPrefix = "foo"
@@ -36,9 +52,6 @@ abstract class EdeltaAbstractTest {
 		fooPackage.EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
 			name = "FooClass"
 		]
-		val resourceSet = resourceSetProvider.get
-		val resource = resourceSet.createResource(URI.createURI("foo.ecore"))
-		resource.contents += fooPackage
-		input.parse(resourceSet)
+		fooPackage
 	}
 }
