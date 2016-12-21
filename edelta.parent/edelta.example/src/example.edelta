@@ -1,0 +1,8 @@
+// IMPORTANT: ecores must be in source directories
+// otherwise you can't refer to them
+
+metamodel "myexample"
+metamodel "myecore"
+
+eclass MyExampleEClass // from myexample ecore in model project
+eclass MyEClass // from myecore ecore in this project

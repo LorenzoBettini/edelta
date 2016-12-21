@@ -3,15 +3,13 @@
  */
 package edelta
 
-import edelta.linking.EdeltaLinkingService
-
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
 class EdeltaRuntimeModule extends AbstractEdeltaRuntimeModule {
 	
-	override bindILinkingService() {
-		EdeltaLinkingService
-	}
+//	override bindILinkingService() {
+//		EdeltaLinkingService
+//	}
 	
 }

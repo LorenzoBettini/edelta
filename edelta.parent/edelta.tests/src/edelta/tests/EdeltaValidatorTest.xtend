@@ -3,36 +3,29 @@
  */
 package edelta.tests
 
-import com.google.inject.Inject
-import edelta.edelta.EdeltaProgram
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
-import org.eclipse.xtext.junit4.util.ParseHelper
-import org.eclipse.xtext.junit4.validation.ValidationTestHelper
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(XtextRunner)
-@InjectWith(EdeltaInjectorProvider)
-class EdeltaValidatorTest {
-
-	@Inject extension ParseHelper<EdeltaProgram>
-	@Inject extension ValidationTestHelper
+@InjectWith(EdeltaInjectorProviderCustom)
+class EdeltaValidatorTest extends EdeltaAbstractTest {
 
 	@Test
-	def void testCanReferToEcoreMetamodel() {
+	def void testCanReferToMetamodel() {
 		'''
-			metamodel "http://www.eclipse.org/emf/2002/Ecore"
-		'''.parse.assertNoErrors
+			metamodel "foo"
+		'''.parseWithTestEcore.assertNoErrors
 	}
 
 	@Test
 	def void testCanReferToEClass() {
 		'''
-			metamodel "http://www.eclipse.org/emf/2002/Ecore"
+			metamodel "foo"
 			
-			eclass EClass
-		'''.parse.assertNoErrors
+			eclass FooClass
+		'''.parseWithTestEcore.assertNoErrors
 	}
 
 }
