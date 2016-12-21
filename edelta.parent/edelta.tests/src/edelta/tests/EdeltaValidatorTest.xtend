@@ -14,18 +14,12 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testCanReferToMetamodel() {
-		'''
-			metamodel "foo"
-		'''.parseWithTestEcore.assertNoErrors
+		referenceToMetamodel.parseWithTestEcore.assertNoErrors
 	}
 
 	@Test
 	def void testCanReferToEClass() {
-		'''
-			metamodel "foo"
-			
-			eclass FooClass
-		'''.parseWithTestEcore.assertNoErrors
+		referenceToEClass.parseWithTestEcore.assertNoErrors
 	}
 
 }

@@ -14,6 +14,7 @@ import org.eclipse.xtext.junit4.util.ParseHelper
 import org.eclipse.xtext.junit4.validation.ValidationTestHelper
 import org.eclipse.xtext.resource.XtextResourceSet
 import org.junit.runner.RunWith
+import edelta.tests.input.Inputs
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -24,6 +25,7 @@ abstract class EdeltaAbstractTest {
 
 	@Inject protected extension ParseHelper<EdeltaProgram>
 	@Inject protected extension ValidationTestHelper
+	protected extension Inputs = new Inputs
 
 	def protected parseWithTestEcore(CharSequence input) {
 		val fooPackage = EcoreFactory.eINSTANCE.createEPackage => [
