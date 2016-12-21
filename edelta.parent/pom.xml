@@ -21,6 +21,7 @@
 		<module>edelta.target</module>
 		<module>edelta.feature</module>
 		<module>edelta.repository</module>
+		<module>edelta.lib.tests</module>
 		<module>edelta.tests</module>
 		<module>edelta.ui.tests</module>
 	</modules>
