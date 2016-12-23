@@ -7,6 +7,7 @@ import edelta.edelta.EdeltaPackage
 import edelta.edelta.EdeltaProgram
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
+import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.scoping.Scopes
 
 /**
@@ -18,8 +19,8 @@ import org.eclipse.xtext.scoping.Scopes
 class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 
 	override getScope(EObject context, EReference reference) {
-		if (reference == EdeltaPackage.Literals.EDELTA_PROGRAM__ECLASSES) {
-			val prog = context as EdeltaProgram
+		if (reference == EdeltaPackage.Literals.EDELTA_ECLASS_EXPRESSION__ECLASS) {
+			val prog = EcoreUtil2.getContainerOfType(context, EdeltaProgram)
 			return Scopes.scopeFor(
 				prog.metamodels.map [
 					EClassifiers
