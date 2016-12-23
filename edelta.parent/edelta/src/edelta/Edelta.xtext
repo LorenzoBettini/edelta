@@ -14,7 +14,6 @@ EdeltaProgram:
 	// the main expression
 	=>importSection=XImportSection?
 	('metamodel' metamodels+=[ecore::EPackage|STRING])*
-	('eclass' eclasses+=[ecore::EClass])*
 	operations+=EdeltaOperation*
 	main=EdeltaMain
 ;
@@ -37,4 +36,9 @@ EdeltaOperation:
 EdeltaMain returns xbase::XBlockExpression:
 	{EdeltaMain}
 	(expressions+=XExpressionOrVarDeclaration ';'?)*
+;
+
+XPrimaryExpression returns xbase::XExpression:
+	{EdeltaEClassExpression} 'eclass' eclass=[ecore::EClass] |
+	super
 ;
