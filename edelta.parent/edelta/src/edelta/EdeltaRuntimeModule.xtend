@@ -5,6 +5,8 @@ package edelta
 
 import edelta.scoping.EdeltaQualifiedNameProvider
 import edelta.typesystem.EdeltaTypeComputer
+import edelta.compiler.EdeltaXbaseCompiler
+import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -22,4 +24,7 @@ class EdeltaRuntimeModule extends AbstractEdeltaRuntimeModule {
 		EdeltaTypeComputer
 	}
 
+	def Class<? extends XbaseCompiler> bindXbaseCompiler() {
+		EdeltaXbaseCompiler
+	}
 }

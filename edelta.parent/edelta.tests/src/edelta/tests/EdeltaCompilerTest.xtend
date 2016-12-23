@@ -32,11 +32,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
+			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaLibrary;
 			import org.eclipse.xtext.xbase.lib.Extension;
 			
 			@SuppressWarnings("all")
-			public class MyFile0 {
+			public class MyFile0 extends AbstractEdelta {
 			  @Extension
 			  private EdeltaLibrary lib;
 			}
@@ -52,11 +53,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package foo;
 			
+			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaLibrary;
 			import org.eclipse.xtext.xbase.lib.Extension;
 			
 			@SuppressWarnings("all")
-			public class MyFile0 {
+			public class MyFile0 extends AbstractEdelta {
 			  @Extension
 			  private EdeltaLibrary lib;
 			}
@@ -70,11 +72,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package foo;
 			
+			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaLibrary;
 			import org.eclipse.xtext.xbase.lib.Extension;
 			
 			@SuppressWarnings("all")
-			public class MyFile0 {
+			public class MyFile0 extends AbstractEdelta {
 			  @Extension
 			  private EdeltaLibrary lib;
 			  
@@ -92,11 +95,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package foo;
 			
+			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaLibrary;
 			import org.eclipse.xtext.xbase.lib.Extension;
 			
 			@SuppressWarnings("all")
-			public class MyFile0 {
+			public class MyFile0 extends AbstractEdelta {
 			  @Extension
 			  private EdeltaLibrary lib;
 			  
@@ -114,12 +118,13 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package foo;
 			
+			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaLibrary;
 			import org.eclipse.emf.ecore.EClass;
 			import org.eclipse.xtext.xbase.lib.Extension;
 			
 			@SuppressWarnings("all")
-			public class MyFile0 {
+			public class MyFile0 extends AbstractEdelta {
 			  @Extension
 			  private EdeltaLibrary lib;
 			  
@@ -137,6 +142,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package foo;
 			
+			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaLibrary;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.common.util.EList;
@@ -144,7 +150,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			import org.eclipse.xtext.xbase.lib.Extension;
 			
 			@SuppressWarnings("all")
-			public class MyFile0 {
+			public class MyFile0 extends AbstractEdelta {
 			  @Extension
 			  private EdeltaLibrary lib;
 			  
@@ -169,13 +175,14 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package foo;
 			
+			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaLibrary;
 			import org.eclipse.emf.ecore.EClass;
 			import org.eclipse.xtext.xbase.lib.Extension;
 			import org.eclipse.xtext.xbase.lib.InputOutput;
 			
 			@SuppressWarnings("all")
-			public class MyFile0 {
+			public class MyFile0 extends AbstractEdelta {
 			  @Extension
 			  private EdeltaLibrary lib;
 			  
@@ -183,9 +190,36 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    return this.lib.newEClass(s);
 			  }
 			  
-			  public void execute() {
+			  @Override
+			  public void execute() throws Exception {
 			    EClass _bar = this.bar("foo");
 			    InputOutput.<EClass>println(_bar);
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
+	def void testCompilationOfEclassExpression() {
+		eclassExpression.checkCompilation(
+			'''
+			package foo;
+			
+			import edelta.lib.AbstractEdelta;
+			import edelta.lib.EdeltaLibrary;
+			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.xtext.xbase.lib.Extension;
+			import org.eclipse.xtext.xbase.lib.InputOutput;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  @Extension
+			  private EdeltaLibrary lib;
+			  
+			  @Override
+			  public void execute() throws Exception {"temp"
+			    InputOutput.<EClass>println("temp");
 			  }
 			}
 			'''

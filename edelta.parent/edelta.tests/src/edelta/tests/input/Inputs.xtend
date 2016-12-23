@@ -80,4 +80,14 @@ class Inputs {
 		println(bar("foo"))
 		'''
 	}
+
+	def eclassExpression() {
+		'''
+		package foo;
+		
+		metamodel "foo"
+		
+		println(eclass FooClass)
+		'''
+	}
 }

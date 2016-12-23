@@ -11,6 +11,7 @@ import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import edelta.lib.EdeltaLibrary
+import edelta.lib.AbstractEdelta
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -53,6 +54,7 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 	def dispatch void infer(EdeltaProgram program, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		val className = program.fullyQualifiedName
 		acceptor.accept(program.toClass(className)) [
+			superTypes += AbstractEdelta.typeRef
 			members += program.toField("lib", EdeltaLibrary.typeRef) => [
 				annotations += Extension.annotationRef
 			]
@@ -67,6 +69,8 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 			}
 			if (!program.main.expressions.empty) {
 				members += program.main.toMethod("execute", Void.TYPE.typeRef) [
+					annotations += Override.annotationRef
+					exceptions += Exception.typeRef
 					body = program.main
 				]
 			}
