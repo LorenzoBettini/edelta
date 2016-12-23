@@ -15,6 +15,18 @@ class Inputs {
 		'''
 	}
 
+	def useImportedJavaTypes() {
+		'''
+		package foo;
+		
+		import java.util.List
+		
+		def bar(List<String> s) {
+			s.empty
+		}
+		'''
+	}
+
 	def operationWithInferredReturnType() {
 		'''
 		package foo;
