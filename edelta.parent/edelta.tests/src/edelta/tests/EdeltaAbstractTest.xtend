@@ -54,4 +54,8 @@ abstract class EdeltaAbstractTest {
 		]
 		fooPackage
 	}
+
+	def protected lastExpression(EdeltaProgram p) {
+		p.main.expressions.last
+	}
 }
