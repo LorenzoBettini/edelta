@@ -68,4 +68,16 @@ class Inputs {
 		}
 		'''
 	}
+
+	def programWithMainExpression() {
+		'''
+		package foo;
+		
+		def bar(String s) {
+			newEClass(s)
+		}
+		
+		println(bar("foo"))
+		'''
+	}
 }

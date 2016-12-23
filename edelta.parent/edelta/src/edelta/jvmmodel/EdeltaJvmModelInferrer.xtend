@@ -65,6 +65,11 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 					body = o.body
 				]
 			}
+			if (!program.main.expressions.empty) {
+				members += program.main.toMethod("execute", Void.TYPE.typeRef) [
+					body = program.main
+				]
+			}
 		]
 	}
 }
