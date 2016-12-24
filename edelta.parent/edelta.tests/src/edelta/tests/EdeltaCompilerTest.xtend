@@ -218,8 +218,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  private EdeltaLibrary lib;
 			  
 			  @Override
-			  public void execute() throws Exception {"temp"
-			    InputOutput.<EClass>println("temp");
+			  public void execute() throws Exception {
+			    InputOutput.<EClass>println(null);
 			  }
 			}
 			'''

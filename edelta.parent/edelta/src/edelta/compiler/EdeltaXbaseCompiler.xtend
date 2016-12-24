@@ -10,7 +10,7 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 	override protected doInternalToJavaStatement(XExpression obj, ITreeAppendable appendable, boolean isReferenced) {
 		switch (obj) {
 			EdeltaEClassExpression: {
-				appendable.append('"temp"')
+//				appendable.append('null')
 			}
 			default:
 				super.doInternalToJavaStatement(obj, appendable, isReferenced)
@@ -20,7 +20,7 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 	override protected internalToConvertedExpression(XExpression obj, ITreeAppendable appendable) {
 		switch (obj) {
 			EdeltaEClassExpression: {
-				appendable.append('"temp"')
+				appendable.append('null')
 			}
 			default:
 				super.internalToConvertedExpression(obj, appendable)
