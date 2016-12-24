@@ -5,6 +5,7 @@ package edelta.lib;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -54,4 +55,14 @@ public abstract class AbstractEdelta {
 		resourceSet.getResource(uri, true);
 	}
 
+	public EPackage getEPackage(String name) {
+		return resourceSet.getResources().
+			stream().
+			flatMap(resource -> resource.getContents().stream()).
+			filter(o -> o instanceof EPackage).
+			map(o -> (EPackage) o).
+			filter(p -> p.getName().equals(name)).
+			findAny().
+			orElse(null);
+	}
 }

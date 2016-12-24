@@ -6,6 +6,7 @@ package edelta.lib.tests;
 import java.net.URL;
 
 import org.eclipse.emf.common.util.WrappedException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,7 +30,7 @@ public class EdeltaTest {
 
 	@Test
 	public void testLoadEcoreFile() {
-		loadTestEcore();
+		loadTestEcore("My.ecore");
 	}
 
 	@Test(expected=WrappedException.class)
@@ -37,8 +38,17 @@ public class EdeltaTest {
 		edelta.loadEcoreFile("foo.ecore");
 	}
 
-	private void loadTestEcore() {
-		URL url = getClass().getClassLoader().getResource("My.ecore");
-		edelta.loadEcoreFile(url.getPath());
+	@Test
+	public void testGetEPackage() {
+		loadTestEcore("My.ecore");
+		loadTestEcore("My2.ecore");
+		Assert.assertNotNull(edelta.getEPackage("mypackage"));
+		Assert.assertNotNull(edelta.getEPackage("myotherpackage"));
+		Assert.assertNull(edelta.getEPackage("foo"));
+	}
+
+	private void loadTestEcore(String ecoreFile) {
+		URL url = getClass().getClassLoader().getResource(ecoreFile);
+		edelta.loadEcoreFile("testecores/"+ecoreFile);
 	}
 }
