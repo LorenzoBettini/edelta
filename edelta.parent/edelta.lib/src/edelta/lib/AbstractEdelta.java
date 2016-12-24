@@ -3,8 +3,7 @@
  */
 package edelta.lib;
 
-import java.io.File;
-
+import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -19,6 +18,8 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
  *
  */
 public abstract class AbstractEdelta {
+
+	private static final Logger LOG = Logger.getLogger(AbstractEdelta.class);
 
 	/**
 	 * Here we store all the Ecores used by the Edelta
@@ -47,9 +48,10 @@ public abstract class AbstractEdelta {
 	}
 
 	public void loadEcoreFile(String path) {
-		File file = new File(path);
-		URI uri = URI.createFileURI(file.getAbsolutePath());
+		URI uri = URI.createFileURI(path);
 		// Demand load resource for this file.
+		LOG.info("loading " + path);
 		resourceSet.getResource(uri, true);
 	}
+
 }
