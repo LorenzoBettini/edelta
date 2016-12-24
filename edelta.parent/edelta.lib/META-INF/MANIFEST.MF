@@ -6,5 +6,6 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Lorenzo Bettini
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.xtext.xbase.lib;visibility:=reexport,
- org.eclipse.emf.ecore;visibility:=reexport
+ org.eclipse.emf.ecore;visibility:=reexport,
+ org.eclipse.emf.ecore.xmi;visibility:=reexport
 Export-Package: edelta.lib
