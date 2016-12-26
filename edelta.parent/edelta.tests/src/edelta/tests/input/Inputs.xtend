@@ -81,6 +81,17 @@ class Inputs {
 		'''
 	}
 
+	def eclassifierExpression() {
+		'''
+		package foo;
+		
+		metamodel "foo"
+		
+		eclassifier FooClass
+		println(eclassifier FooClass)
+		'''
+	}
+
 	def eclassExpression() {
 		'''
 		package foo;
@@ -89,6 +100,17 @@ class Inputs {
 		
 		eclass FooClass
 		println(eclass FooClass)
+		'''
+	}
+
+	def edatatypeExpression() {
+		'''
+		package foo;
+		
+		metamodel "foo"
+		
+		edatatype FooDataType
+		println(edatatype FooDataType)
 		'''
 	}
 }

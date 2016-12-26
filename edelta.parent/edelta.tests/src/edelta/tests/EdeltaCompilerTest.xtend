@@ -201,6 +201,33 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCompilationOfEclassifierExpression() {
+		eclassifierExpression.checkCompilation(
+			'''
+			package foo;
+			
+			import edelta.lib.AbstractEdelta;
+			import edelta.lib.EdeltaLibrary;
+			import org.eclipse.emf.ecore.EClassifier;
+			import org.eclipse.xtext.xbase.lib.Extension;
+			import org.eclipse.xtext.xbase.lib.InputOutput;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  @Extension
+			  private EdeltaLibrary lib;
+			  
+			  @Override
+			  public void execute() throws Exception {
+			    getEClassifier("foo", "FooClass");
+			    InputOutput.<EClassifier>println(getEClassifier("foo", "FooClass"));
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
 	def void testCompilationOfEclassExpression() {
 		eclassExpression.checkCompilation(
 			'''
@@ -251,6 +278,33 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			}
 			''',
 			false
+		)
+	}
+
+	@Test
+	def void testCompilationOfEdataTypeExpression() {
+		edatatypeExpression.checkCompilation(
+			'''
+			package foo;
+			
+			import edelta.lib.AbstractEdelta;
+			import edelta.lib.EdeltaLibrary;
+			import org.eclipse.emf.ecore.EDataType;
+			import org.eclipse.xtext.xbase.lib.Extension;
+			import org.eclipse.xtext.xbase.lib.InputOutput;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  @Extension
+			  private EdeltaLibrary lib;
+			  
+			  @Override
+			  public void execute() throws Exception {
+			    getEDataType("foo", "FooDataType");
+			    InputOutput.<EDataType>println(getEDataType("foo", "FooDataType"));
+			  }
+			}
+			'''
 		)
 	}
 
