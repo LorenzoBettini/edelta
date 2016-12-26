@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
 /**
  * Tests for the base class of generated Edelta programs.
@@ -22,12 +23,18 @@ import edelta.lib.AbstractEdelta;
  */
 public class EdeltaTest {
 
-	private AbstractEdelta edelta;
+	private static final class TestableEdelta extends AbstractEdelta {
+		@Override
+		public void ensureEPackageIsLoaded(String packageName) throws EdeltaPackageNotLoadedException {
+			super.ensureEPackageIsLoaded(packageName);
+		}
+	}
+
+	private TestableEdelta edelta;
 
 	@Before
 	public void init() {
-		edelta = new AbstractEdelta() {
-		};
+		edelta = new TestableEdelta();
 	}
 
 	@Test
@@ -75,6 +82,17 @@ public class EdeltaTest {
 		loadTestEcore("My.ecore");
 		assertNull(edelta.getEDataType("mypackage", "MyClass"));
 		assertNotNull(edelta.getEDataType("mypackage", "MyDataType"));
+	}
+
+	@Test
+	public void testEnsureEPackageIsLoaded() throws EdeltaPackageNotLoadedException {
+		loadTestEcore("My.ecore");
+		edelta.ensureEPackageIsLoaded("mypackage");
+	}
+
+	@Test(expected=EdeltaPackageNotLoadedException.class)
+	public void testEnsureEPackageIsLoadedWhenNotLoaded() throws EdeltaPackageNotLoadedException {
+		edelta.ensureEPackageIsLoaded("mypackage");
 	}
 
 	private void loadTestEcore(String ecoreFile) {
