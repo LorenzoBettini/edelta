@@ -12,6 +12,8 @@ import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
 import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EClassifier
+import org.eclipse.emf.ecore.EDataType
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -20,8 +22,18 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	@Inject extension IBatchTypeResolver
 
 	@Test
+	def void testTypeOfEclassifierExpression() {
+		"eclassifier FooClass".assertType(EClassifier)
+	}
+
+	@Test
 	def void testTypeOfEclassExpression() {
 		"eclass FooClass".assertType(EClass)
+	}
+
+	@Test
+	def void testTypeOfEDatatyeExpression() {
+		"edatatype FooDataType".assertType(EDataType)
 	}
 
 	def private assertType(CharSequence input, Class<?> expected) {
