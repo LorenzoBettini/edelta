@@ -5,6 +5,9 @@ package edelta.lib;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -55,14 +58,38 @@ public abstract class AbstractEdelta {
 		resourceSet.getResource(uri, true);
 	}
 
-	public EPackage getEPackage(String name) {
+	public EPackage getEPackage(String packageName) {
 		return resourceSet.getResources().
 			stream().
-			flatMap(resource -> resource.getContents().stream()).
+			map(resource -> resource.getContents().get(0)).
 			filter(o -> o instanceof EPackage).
 			map(o -> (EPackage) o).
-			filter(p -> p.getName().equals(name)).
+			filter(p -> p.getName().equals(packageName)).
 			findAny().
 			orElse(null);
+	}
+
+	public EClassifier getEClassifier(String packageName, String classifierName) {
+		EPackage p = getEPackage(packageName);
+		if (p == null) {
+			return null;
+		}
+		return p.getEClassifier(classifierName);
+	}
+
+	public EClass getEClass(String packageName, String className) {
+		EClassifier c = getEClassifier(packageName, className);
+		if (c instanceof EClass) {
+			return (EClass) c;
+		}
+		return null;
+	}
+
+	public EDataType getEDataType(String packageName, String datatypeName) {
+		EClassifier c = getEClassifier(packageName, datatypeName);
+		if (c instanceof EDataType) {
+			return (EDataType) c;
+		}
+		return null;
 	}
 }

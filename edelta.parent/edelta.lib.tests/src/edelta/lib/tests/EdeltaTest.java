@@ -3,10 +3,12 @@
  */
 package edelta.lib.tests;
 
-import java.net.URL;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import org.eclipse.emf.common.util.WrappedException;
-import org.junit.Assert;
+import org.eclipse.emf.ecore.EPackage;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,13 +44,40 @@ public class EdeltaTest {
 	public void testGetEPackage() {
 		loadTestEcore("My.ecore");
 		loadTestEcore("My2.ecore");
-		Assert.assertNotNull(edelta.getEPackage("mypackage"));
-		Assert.assertNotNull(edelta.getEPackage("myotherpackage"));
-		Assert.assertNull(edelta.getEPackage("foo"));
+		EPackage ePackage = edelta.getEPackage("mypackage");
+		assertEquals("mypackage", ePackage.getName());
+		assertNotNull(ePackage);
+		assertNotNull(edelta.getEPackage("myotherpackage"));
+		assertNull(edelta.getEPackage("foo"));
+	}
+
+	@Test
+	public void testGetEClassifier() {
+		loadTestEcore("My.ecore");
+		loadTestEcore("My2.ecore");
+		assertNotNull(edelta.getEClassifier("mypackage", "MyClass"));
+		assertNotNull(edelta.getEClassifier("mypackage", "MyDataType"));
+		// wrong package
+		assertNull(edelta.getEClassifier("myotherpackage", "MyDataType"));
+		// package does not exist
+		assertNull(edelta.getEClassifier("foo", "MyDataType"));
+	}
+
+	@Test
+	public void testGetEClass() {
+		loadTestEcore("My.ecore");
+		assertNotNull(edelta.getEClass("mypackage", "MyClass"));
+		assertNull(edelta.getEClass("mypackage", "MyDataType"));
+	}
+
+	@Test
+	public void testGetEDataType() {
+		loadTestEcore("My.ecore");
+		assertNull(edelta.getEDataType("mypackage", "MyClass"));
+		assertNotNull(edelta.getEDataType("mypackage", "MyDataType"));
 	}
 
 	private void loadTestEcore(String ecoreFile) {
-		URL url = getClass().getClassLoader().getResource(ecoreFile);
 		edelta.loadEcoreFile("testecores/"+ecoreFile);
 	}
 }
