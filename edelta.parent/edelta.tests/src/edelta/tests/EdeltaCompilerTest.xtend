@@ -219,10 +219,37 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  @Override
 			  public void execute() throws Exception {
-			    InputOutput.<EClass>println(null);
+			    InputOutput.<EClass>println(getEClass("foo", "FooClass"));
 			  }
 			}
 			'''
+		)
+	}
+
+	@Test
+	def void testCompilationOfEclassExpressionWithNonExistantEClass() {
+		"println(eclass Foo)".checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import edelta.lib.EdeltaLibrary;
+			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.xtext.xbase.lib.Extension;
+			import org.eclipse.xtext.xbase.lib.InputOutput;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  @Extension
+			  private EdeltaLibrary lib;
+			  
+			  @Override
+			  public void execute() throws Exception {
+			    InputOutput.<EClass>println(getEClass("null", "null"));
+			  }
+			}
+			''',
+			false
 		)
 	}
 

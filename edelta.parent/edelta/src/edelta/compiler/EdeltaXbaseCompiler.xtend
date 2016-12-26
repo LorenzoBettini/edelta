@@ -20,7 +20,10 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 	override protected internalToConvertedExpression(XExpression obj, ITreeAppendable appendable) {
 		switch (obj) {
 			EdeltaEClassExpression: {
-				appendable.append('null')
+				val eClass = obj.eclass
+				appendable.append('getEClass("' + eClass.EPackage?.name +
+					'", "' + eClass.name + '")'
+				)
 			}
 			default:
 				super.internalToConvertedExpression(obj, appendable)
