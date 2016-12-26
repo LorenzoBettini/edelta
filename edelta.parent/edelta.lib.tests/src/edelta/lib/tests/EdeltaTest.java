@@ -38,6 +38,11 @@ public class EdeltaTest {
 	}
 
 	@Test
+	public void testDefaultExecuteDoesNotThrow() throws Exception {
+		edelta.execute();
+	}
+
+	@Test
 	public void testLoadEcoreFile() {
 		loadTestEcore("My.ecore");
 	}
