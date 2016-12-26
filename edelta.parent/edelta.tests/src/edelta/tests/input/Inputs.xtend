@@ -87,6 +87,7 @@ class Inputs {
 		
 		metamodel "foo"
 		
+		eclass FooClass
 		println(eclass FooClass)
 		'''
 	}

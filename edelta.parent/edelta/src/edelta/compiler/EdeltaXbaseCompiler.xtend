@@ -10,7 +10,11 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 	override protected doInternalToJavaStatement(XExpression obj, ITreeAppendable appendable, boolean isReferenced) {
 		switch (obj) {
 			EdeltaEClassExpression: {
-//				appendable.append('null')
+				if (!isReferenced) {
+					appendable.newLine
+					compileEdeltaEClassExpression(obj, appendable)
+					appendable.append(";")
+				}
 			}
 			default:
 				super.doInternalToJavaStatement(obj, appendable, isReferenced)
@@ -20,14 +24,17 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 	override protected internalToConvertedExpression(XExpression obj, ITreeAppendable appendable) {
 		switch (obj) {
 			EdeltaEClassExpression: {
-				val eClass = obj.eclass
-				appendable.append('getEClass("' + eClass.EPackage?.name +
-					'", "' + eClass.name + '")'
-				)
+				compileEdeltaEClassExpression(obj, appendable)
 			}
 			default:
 				super.internalToConvertedExpression(obj, appendable)
 		}
 	}
 
+	private def void compileEdeltaEClassExpression(EdeltaEClassExpression obj, ITreeAppendable appendable) {
+		val eClass = obj.eclass
+		appendable.append(
+			'getEClass("' + eClass.EPackage?.name + '", "' + eClass.name + '")'
+		)
+	}
 }

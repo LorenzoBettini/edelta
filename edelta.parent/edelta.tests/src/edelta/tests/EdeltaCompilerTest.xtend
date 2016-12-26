@@ -219,6 +219,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  @Override
 			  public void execute() throws Exception {
+			    getEClass("foo", "FooClass");
 			    InputOutput.<EClass>println(getEClass("foo", "FooClass"));
 			  }
 			}
