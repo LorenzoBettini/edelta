@@ -39,6 +39,8 @@ EdeltaMain returns xbase::XBlockExpression:
 ;
 
 XPrimaryExpression returns xbase::XExpression:
+	{EdeltaEClassifierExpression} 'eclassifier' eclassifier=[ecore::EClassifier] |
 	{EdeltaEClassExpression} 'eclass' eclass=[ecore::EClass] |
+	{EdeltaEDataTypeExpression} 'edatatype' edatatype=[ecore::EDataType] |
 	super
 ;
