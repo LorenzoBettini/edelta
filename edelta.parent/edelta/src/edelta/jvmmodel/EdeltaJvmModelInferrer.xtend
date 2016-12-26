@@ -5,13 +5,12 @@ package edelta.jvmmodel
 
 import com.google.inject.Inject
 import edelta.edelta.EdeltaProgram
+import edelta.lib.AbstractEdelta
 import org.eclipse.xtext.common.types.JvmDeclaredType
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
-import edelta.lib.EdeltaLibrary
-import edelta.lib.AbstractEdelta
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -55,9 +54,6 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 		val className = program.fullyQualifiedName
 		acceptor.accept(program.toClass(className)) [
 			superTypes += AbstractEdelta.typeRef
-			members += program.toField("lib", EdeltaLibrary.typeRef) => [
-				annotations += Extension.annotationRef
-			]
 			for (o : program.operations) {
 				members += o.toMethod(o.name, o.type ?: inferredType) [
 					documentation = o.documentation
