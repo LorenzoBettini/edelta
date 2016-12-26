@@ -5,10 +5,13 @@ package edelta.lib;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -122,6 +125,30 @@ public abstract class AbstractEdelta {
 		EClassifier c = getEClassifier(packageName, datatypeName);
 		if (c instanceof EDataType) {
 			return (EDataType) c;
+		}
+		return null;
+	}
+
+	public EStructuralFeature getEStructuralFeature(String packageName, String className, String featureName) {
+		EClass c = getEClass(packageName, className);
+		if (c == null) {
+			return null;
+		}
+		return c.getEStructuralFeature(featureName);
+	}
+
+	public EAttribute getEAttribute(String packageName, String className, String attributeName) {
+		EStructuralFeature f = getEStructuralFeature(packageName, className, attributeName);
+		if (f instanceof EAttribute) {
+			return (EAttribute) f;
+		}
+		return null;
+	}
+
+	public EReference getEReference(String packageName, String className, String referenceName) {
+		EStructuralFeature f = getEStructuralFeature(packageName, className, referenceName);
+		if (f instanceof EReference) {
+			return (EReference) f;
 		}
 		return null;
 	}
