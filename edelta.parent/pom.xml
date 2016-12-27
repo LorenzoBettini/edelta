@@ -15,13 +15,13 @@
 	</properties>
 	<modules>
 		<module>edelta.lib</module>
+		<module>edelta.lib.tests</module>
 		<module>edelta</module>
 		<module>edelta.ide</module>
 		<module>edelta.ui</module>
 		<module>edelta.target</module>
 		<module>edelta.feature</module>
 		<module>edelta.repository</module>
-		<module>edelta.lib.tests</module>
 		<module>edelta.tests</module>
 		<module>edelta.ui.tests</module>
 	</modules>
