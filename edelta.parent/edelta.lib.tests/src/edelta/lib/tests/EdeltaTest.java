@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.emf.common.util.WrappedException;
@@ -27,6 +28,13 @@ import edelta.lib.exception.EdeltaPackageNotLoadedException;
  *
  */
 public class EdeltaTest {
+
+	private static final String MYOTHERPACKAGE = "myotherpackage";
+	private static final String MYPACKAGE = "mypackage";
+	private static final String MODIFIED = "modified";
+	private static final String MY2_ECORE = "My2.ecore";
+	private static final String MY_ECORE = "My.ecore";
+	private static final String TESTECORES = "testecores/";
 
 	private static final class TestableEdelta extends AbstractEdelta {
 		@Override
@@ -49,7 +57,7 @@ public class EdeltaTest {
 
 	@Test
 	public void testLoadEcoreFile() {
-		loadTestEcore("My.ecore");
+		loadTestEcore(MY_ECORE);
 	}
 
 	@Test(expected=WrappedException.class)
@@ -59,122 +67,137 @@ public class EdeltaTest {
 
 	@Test
 	public void testGetEPackage() {
-		loadTestEcore("My.ecore");
-		loadTestEcore("My2.ecore");
-		EPackage ePackage = edelta.getEPackage("mypackage");
-		assertEquals("mypackage", ePackage.getName());
+		loadTestEcore(MY_ECORE);
+		loadTestEcore(MY2_ECORE);
+		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
+		assertEquals(MYPACKAGE, ePackage.getName());
 		assertNotNull(ePackage);
-		assertNotNull(edelta.getEPackage("myotherpackage"));
+		assertNotNull(edelta.getEPackage(MYOTHERPACKAGE));
 		assertNull(edelta.getEPackage("foo"));
 	}
 
 	@Test
 	public void testGetEClassifier() {
-		loadTestEcore("My.ecore");
-		loadTestEcore("My2.ecore");
-		assertNotNull(edelta.getEClassifier("mypackage", "MyClass"));
-		assertNotNull(edelta.getEClassifier("mypackage", "MyDataType"));
+		loadTestEcore(MY_ECORE);
+		loadTestEcore(MY2_ECORE);
+		assertNotNull(edelta.getEClassifier(MYPACKAGE, "MyClass"));
+		assertNotNull(edelta.getEClassifier(MYPACKAGE, "MyDataType"));
 		// wrong package
-		assertNull(edelta.getEClassifier("myotherpackage", "MyDataType"));
+		assertNull(edelta.getEClassifier(MYOTHERPACKAGE, "MyDataType"));
 		// package does not exist
 		assertNull(edelta.getEClassifier("foo", "MyDataType"));
 	}
 
 	@Test
 	public void testGetEClass() {
-		loadTestEcore("My.ecore");
-		assertNotNull(edelta.getEClass("mypackage", "MyClass"));
-		assertNull(edelta.getEClass("mypackage", "MyDataType"));
+		loadTestEcore(MY_ECORE);
+		assertNotNull(edelta.getEClass(MYPACKAGE, "MyClass"));
+		assertNull(edelta.getEClass(MYPACKAGE, "MyDataType"));
 	}
 
 	@Test
 	public void testGetEDataType() {
-		loadTestEcore("My.ecore");
-		assertNull(edelta.getEDataType("mypackage", "MyClass"));
-		assertNotNull(edelta.getEDataType("mypackage", "MyDataType"));
+		loadTestEcore(MY_ECORE);
+		assertNull(edelta.getEDataType(MYPACKAGE, "MyClass"));
+		assertNotNull(edelta.getEDataType(MYPACKAGE, "MyDataType"));
 	}
 
 	@Test
 	public void testEnsureEPackageIsLoaded() throws EdeltaPackageNotLoadedException {
-		loadTestEcore("My.ecore");
-		edelta.ensureEPackageIsLoaded("mypackage");
+		loadTestEcore(MY_ECORE);
+		edelta.ensureEPackageIsLoaded(MYPACKAGE);
 	}
 
 	@Test(expected=EdeltaPackageNotLoadedException.class)
 	public void testEnsureEPackageIsLoadedWhenNotLoaded() throws EdeltaPackageNotLoadedException {
-		edelta.ensureEPackageIsLoaded("mypackage");
+		edelta.ensureEPackageIsLoaded(MYPACKAGE);
 	}
 
 	@Test
 	public void testGetEStructuralFeature() {
-		loadTestEcore("My.ecore");
+		loadTestEcore(MY_ECORE);
 		assertEStructuralFeature(
-			edelta.getEStructuralFeature("mypackage", "MyDerivedClass", "myBaseAttribute"),
+			edelta.getEStructuralFeature(MYPACKAGE, "MyDerivedClass", "myBaseAttribute"),
 				"myBaseAttribute");
 		assertEStructuralFeature(
-			edelta.getEStructuralFeature("mypackage", "MyDerivedClass", "myDerivedAttribute"),
+			edelta.getEStructuralFeature(MYPACKAGE, "MyDerivedClass", "myDerivedAttribute"),
 				"myDerivedAttribute");
 	}
 
 	@Test
 	public void testGetEAttribute() {
-		loadTestEcore("My.ecore");
+		loadTestEcore(MY_ECORE);
 		assertEAttribute(
-			edelta.getEAttribute("mypackage", "MyDerivedClass", "myBaseAttribute"),
+			edelta.getEAttribute(MYPACKAGE, "MyDerivedClass", "myBaseAttribute"),
 				"myBaseAttribute");
 		assertEAttribute(
-			edelta.getEAttribute("mypackage", "MyDerivedClass", "myDerivedAttribute"),
+			edelta.getEAttribute(MYPACKAGE, "MyDerivedClass", "myDerivedAttribute"),
 				"myDerivedAttribute");
 	}
 
 	@Test
 	public void testGetEReference() {
-		loadTestEcore("My.ecore");
+		loadTestEcore(MY_ECORE);
 		assertEReference(
-			edelta.getEReference("mypackage", "MyDerivedClass", "myBaseReference"),
+			edelta.getEReference(MYPACKAGE, "MyDerivedClass", "myBaseReference"),
 				"myBaseReference");
 		assertEReference(
-			edelta.getEReference("mypackage", "MyDerivedClass", "myDerivedReference"),
+			edelta.getEReference(MYPACKAGE, "MyDerivedClass", "myDerivedReference"),
 				"myDerivedReference");
 	}
 
 	@Test
 	public void testGetEStructuralFeatureWithNonExistantClass() {
-		loadTestEcore("My.ecore");
+		loadTestEcore(MY_ECORE);
 		assertNull(
-			edelta.getEStructuralFeature("mypackage", "foo", "foo"));
+			edelta.getEStructuralFeature(MYPACKAGE, "foo", "foo"));
 	}
 
 	@Test
 	public void testGetEStructuralFeatureWithNonExistantFeature() {
-		loadTestEcore("My.ecore");
+		loadTestEcore(MY_ECORE);
 		assertNull(
-			edelta.getEStructuralFeature("mypackage", "MyDerivedClass", "foo"));
+			edelta.getEStructuralFeature(MYPACKAGE, "MyDerivedClass", "foo"));
 	}
 
 	@Test
 	public void testGetEAttributeWithEReference() {
-		loadTestEcore("My.ecore");
+		loadTestEcore(MY_ECORE);
 		assertNull(
-			edelta.getEAttribute("mypackage", "MyDerivedClass", "myDerivedReference"));
+			edelta.getEAttribute(MYPACKAGE, "MyDerivedClass", "myDerivedReference"));
 	}
 
 	@Test
 	public void testGetEReferenceWithEAttribute() {
-		loadTestEcore("My.ecore");
+		loadTestEcore(MY_ECORE);
 		assertNull(
-			edelta.getEReference("mypackage", "MyDerivedClass", "myDerivedAttribute"));
+			edelta.getEReference(MYPACKAGE, "MyDerivedClass", "myDerivedAttribute"));
 	}
 
 	@Test
 	public void testSaveModifiedEcores() throws IOException {
-		loadTestEcore("My.ecore");
-		loadTestEcore("My2.ecore");
-		edelta.saveModifiedEcores("modified");
+		loadTestEcore(MY_ECORE);
+		loadTestEcore(MY2_ECORE);
+		wipeModifiedDirectoryContents();
+		edelta.saveModifiedEcores(MODIFIED);
+		// we did not modify anything so the generated files and the
+		// original ones must be the same
+		EPackage p1 = edelta.getEPackage(MYPACKAGE);
+		TestableEdelta edelta2 = new TestableEdelta();
+		edelta2.loadEcoreFile(MODIFIED+"/"+MY_ECORE);
+		EPackage p2 = edelta2.getEPackage(MYPACKAGE);
+		assertEquals(p1.getName(), p2.getName());
+	}
+
+	private void wipeModifiedDirectoryContents() {
+		File dir = new File(MODIFIED);
+		for (File file : dir.listFiles())
+			if (!file.isDirectory() && !file.getName().equals(".gitignore"))
+				file.delete();
 	}
 
 	private void loadTestEcore(String ecoreFile) {
-		edelta.loadEcoreFile("testecores/"+ecoreFile);
+		edelta.loadEcoreFile(TESTECORES+ecoreFile);
 	}
 
 	private void assertEAttribute(EAttribute f, String expectedName) {
