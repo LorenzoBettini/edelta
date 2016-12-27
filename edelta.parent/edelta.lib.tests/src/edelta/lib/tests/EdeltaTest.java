@@ -8,7 +8,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import org.eclipse.emf.common.util.WrappedException;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -100,7 +103,80 @@ public class EdeltaTest {
 		edelta.ensureEPackageIsLoaded("mypackage");
 	}
 
+	@Test
+	public void testGetEStructuralFeature() {
+		loadTestEcore("My.ecore");
+		assertEStructuralFeature(
+			edelta.getEStructuralFeature("mypackage", "MyDerivedClass", "myBaseAttribute"),
+				"myBaseAttribute");
+		assertEStructuralFeature(
+			edelta.getEStructuralFeature("mypackage", "MyDerivedClass", "myDerivedAttribute"),
+				"myDerivedAttribute");
+	}
+
+	@Test
+	public void testGetEAttribute() {
+		loadTestEcore("My.ecore");
+		assertEAttribute(
+			edelta.getEAttribute("mypackage", "MyDerivedClass", "myBaseAttribute"),
+				"myBaseAttribute");
+		assertEAttribute(
+			edelta.getEAttribute("mypackage", "MyDerivedClass", "myDerivedAttribute"),
+				"myDerivedAttribute");
+	}
+
+	@Test
+	public void testGetEReference() {
+		loadTestEcore("My.ecore");
+		assertEReference(
+			edelta.getEReference("mypackage", "MyDerivedClass", "myBaseReference"),
+				"myBaseReference");
+		assertEReference(
+			edelta.getEReference("mypackage", "MyDerivedClass", "myDerivedReference"),
+				"myDerivedReference");
+	}
+
+	@Test
+	public void testGetEStructuralFeatureWithNonExistantClass() {
+		loadTestEcore("My.ecore");
+		assertNull(
+			edelta.getEStructuralFeature("mypackage", "foo", "foo"));
+	}
+
+	@Test
+	public void testGetEStructuralFeatureWithNonExistantFeature() {
+		loadTestEcore("My.ecore");
+		assertNull(
+			edelta.getEStructuralFeature("mypackage", "MyDerivedClass", "foo"));
+	}
+
+	@Test
+	public void testGetEAttributeWithEReference() {
+		loadTestEcore("My.ecore");
+		assertNull(
+			edelta.getEAttribute("mypackage", "MyDerivedClass", "myDerivedReference"));
+	}
+
+	@Test
+	public void testGetEReferenceWithEAttribute() {
+		loadTestEcore("My.ecore");
+		assertNull(
+			edelta.getEReference("mypackage", "MyDerivedClass", "myDerivedAttribute"));
+	}
+
 	private void loadTestEcore(String ecoreFile) {
 		edelta.loadEcoreFile("testecores/"+ecoreFile);
+	}
+
+	private void assertEAttribute(EAttribute f, String expectedName) {
+		assertEStructuralFeature(f, expectedName);
+	}
+
+	private void assertEReference(EReference f, String expectedName) {
+		assertEStructuralFeature(f, expectedName);
+	}
+
+	private void assertEStructuralFeature(EStructuralFeature f, String expectedName) {
+		assertEquals(expectedName, f.getName());
 	}
 }
