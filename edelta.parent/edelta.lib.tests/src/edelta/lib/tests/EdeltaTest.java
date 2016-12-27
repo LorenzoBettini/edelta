@@ -7,6 +7,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.io.IOException;
+
 import org.eclipse.emf.common.util.WrappedException;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EPackage;
@@ -162,6 +164,13 @@ public class EdeltaTest {
 		loadTestEcore("My.ecore");
 		assertNull(
 			edelta.getEReference("mypackage", "MyDerivedClass", "myDerivedAttribute"));
+	}
+
+	@Test
+	public void testSaveModifiedEcores() throws IOException {
+		loadTestEcore("My.ecore");
+		loadTestEcore("My2.ecore");
+		edelta.saveModifiedEcores("modified");
 	}
 
 	private void loadTestEcore(String ecoreFile) {

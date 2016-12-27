@@ -3,6 +3,15 @@
  */
 package edelta.lib;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
+
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
@@ -30,6 +39,12 @@ import edelta.lib.exception.EdeltaPackageNotLoadedException;
 public abstract class AbstractEdelta {
 
 	private static final Logger LOG = Logger.getLogger(AbstractEdelta.class);
+
+	/**
+	 * Here we store the association between the Ecore file name and the
+	 * corresponding loaded Resource.
+	 */
+	private HashMap<String, Resource> ecoreToResourceMap = new LinkedHashMap<String, Resource>();
 
 	/**
 	 * Here we store all the Ecores used by the Edelta
@@ -90,8 +105,32 @@ public abstract class AbstractEdelta {
 	public void loadEcoreFile(String path) {
 		URI uri = URI.createFileURI(path);
 		// Demand load resource for this file.
-		LOG.info("loading " + path);
-		resourceSet.getResource(uri, true);
+		LOG.info("Loading " + path);
+		ecoreToResourceMap.put(path, resourceSet.getResource(uri, true));
+	}
+
+	/**
+	 * Saves the modified EPackages as Ecore files in the specified
+	 * output path.
+	 * 
+	 * The final path of the generated Ecore files is made of the
+	 * specified outputPath and the original loaded Ecore
+	 * file names.
+	 * 
+	 * @param outputPath
+	 * @throws IOException 
+	 */
+	public void saveModifiedEcores(String outputPath) throws IOException {
+		for (Entry<String, Resource> entry : ecoreToResourceMap.entrySet()) {
+			Path p = Paths.get(entry.getKey());
+			String file = outputPath + "/" + p.getFileName().toString();
+			LOG.info("Saving " + file);
+			File newFile = new File(file);
+			FileOutputStream fos = new FileOutputStream(newFile);
+			entry.getValue().save(fos, null);
+			fos.flush();
+			fos.close();
+		}
 	}
 
 	public EPackage getEPackage(String packageName) {
