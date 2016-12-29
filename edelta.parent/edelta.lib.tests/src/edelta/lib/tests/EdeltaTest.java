@@ -4,6 +4,7 @@
 package edelta.lib.tests;
 
 import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
+import static edelta.testutils.EdeltaTestUtils.compareFileContents;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -20,7 +21,6 @@ import org.junit.Test;
 
 import edelta.lib.AbstractEdelta;
 import edelta.lib.exception.EdeltaPackageNotLoadedException;
-import edelta.testutils.EdeltaTestUtils;
 
 /**
  * Tests for the base class of generated Edelta programs.
@@ -183,9 +183,9 @@ public class EdeltaTest {
 		edelta.saveModifiedEcores(MODIFIED);
 		// we did not modify anything so the generated files and the
 		// original ones must be the same
-		EdeltaTestUtils.compareFileContents(
+		compareFileContents(
 				TESTECORES+"/"+MY_ECORE, MODIFIED+"/"+MY_ECORE);
-		EdeltaTestUtils.compareFileContents(
+		compareFileContents(
 				TESTECORES+"/"+MY2_ECORE, MODIFIED+"/"+MY2_ECORE);
 	}
 
