@@ -15,6 +15,7 @@
 	</properties>
 	<modules>
 		<module>edelta.lib</module>
+		<module>edelta.testutils</module>
 		<module>edelta.lib.tests</module>
 		<module>edelta</module>
 		<module>edelta.ide</module>
