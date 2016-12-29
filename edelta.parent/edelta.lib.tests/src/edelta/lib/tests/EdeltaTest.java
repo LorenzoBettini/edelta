@@ -33,6 +33,7 @@ public class EdeltaTest {
 	private static final String MYOTHERPACKAGE = "myotherpackage";
 	private static final String MYPACKAGE = "mypackage";
 	private static final String MODIFIED = "modified";
+	private static final String EXPECTATIONS = "expectations";
 	private static final String MY2_ECORE = "My2.ecore";
 	private static final String MY_ECORE = "My.ecore";
 	private static final String TESTECORES = "testecores/";
@@ -187,6 +188,24 @@ public class EdeltaTest {
 				TESTECORES+"/"+MY_ECORE, MODIFIED+"/"+MY_ECORE);
 		compareFileContents(
 				TESTECORES+"/"+MY2_ECORE, MODIFIED+"/"+MY2_ECORE);
+	}
+
+	@Test
+	public void testSaveModifiedEcoresAfterRemovingBaseClass() throws IOException {
+		loadTestEcore(MY_ECORE);
+		// modify the ecore model by removing MyBaseClass
+		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
+		ePackage.getEClassifiers().remove(
+			edelta.getEClass(MYPACKAGE, "MyBaseClass"));
+		// also unset it as a superclass, or the model won't be valid
+		edelta.getEClass(MYPACKAGE, "MyDerivedClass").getESuperTypes().clear();
+		wipeModifiedDirectoryContents();
+		edelta.saveModifiedEcores(MODIFIED);
+		compareFileContents(
+				EXPECTATIONS+"/"+
+					"testSaveModifiedEcoresAfterRemovingBaseClass"+"/"+
+						MY_ECORE,
+				MODIFIED+"/"+MY_ECORE);
 	}
 
 	private void wipeModifiedDirectoryContents() {
