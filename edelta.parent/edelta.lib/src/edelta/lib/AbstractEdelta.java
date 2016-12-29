@@ -25,6 +25,7 @@ import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.xtext.xbase.lib.Extension;
 
@@ -60,8 +61,11 @@ public abstract class AbstractEdelta {
 	public AbstractEdelta() {
 		// Register the appropriate resource factory to handle all file extensions.
 		resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put
+			("ecore", 
+			new EcoreResourceFactoryImpl());
+		resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put
 			(Resource.Factory.Registry.DEFAULT_EXTENSION, 
-			 new XMIResourceFactoryImpl());
+			new XMIResourceFactoryImpl());
 
 		// Register the Ecore package to ensure it is available during loading.
 		resourceSet.getPackageRegistry().put
@@ -103,9 +107,12 @@ public abstract class AbstractEdelta {
 	}
 
 	public void loadEcoreFile(String path) {
-		URI uri = URI.createFileURI(path);
+		// make sure we have a complete file URI,
+		// otherwise the saved modified ecore will contain
+		// wrong references (i.e., with the prefixed relative path)
+		URI uri = URI.createFileURI(Paths.get(path).toAbsolutePath().toString());
 		// Demand load resource for this file.
-		LOG.info("Loading " + path);
+		LOG.info("Loading " + path + " (URI: " + uri + ")");
 		ecoreToResourceMap.put(path, resourceSet.getResource(uri, true));
 	}
 

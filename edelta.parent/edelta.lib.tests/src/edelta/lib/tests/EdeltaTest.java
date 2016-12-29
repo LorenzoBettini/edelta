@@ -20,6 +20,7 @@ import org.junit.Test;
 
 import edelta.lib.AbstractEdelta;
 import edelta.lib.exception.EdeltaPackageNotLoadedException;
+import edelta.testutils.EdeltaTestUtils;
 
 /**
  * Tests for the base class of generated Edelta programs.
@@ -182,11 +183,10 @@ public class EdeltaTest {
 		edelta.saveModifiedEcores(MODIFIED);
 		// we did not modify anything so the generated files and the
 		// original ones must be the same
-		EPackage p1 = edelta.getEPackage(MYPACKAGE);
-		TestableEdelta edelta2 = new TestableEdelta();
-		edelta2.loadEcoreFile(MODIFIED+"/"+MY_ECORE);
-		EPackage p2 = edelta2.getEPackage(MYPACKAGE);
-		assertEquals(p1.getName(), p2.getName());
+		EdeltaTestUtils.compareFileContents(
+				TESTECORES+"/"+MY_ECORE, MODIFIED+"/"+MY_ECORE);
+		EdeltaTestUtils.compareFileContents(
+				TESTECORES+"/"+MY2_ECORE, MODIFIED+"/"+MY2_ECORE);
 	}
 
 	private void wipeModifiedDirectoryContents() {

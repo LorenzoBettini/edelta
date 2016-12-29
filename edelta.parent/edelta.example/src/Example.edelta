@@ -4,9 +4,9 @@
 metamodel "myexample"
 metamodel "myecore"
 
-eclass MyExampleEClass // from myexample ecore in model project
-eclass MyEClass // from myecore ecore in this project
-
 def createClass(String name) {
 	newEClass(name)
 }
+
+eclass MyExampleEClass // from myexample ecore in model project
+eclass MyEClass // from myecore ecore in this project
