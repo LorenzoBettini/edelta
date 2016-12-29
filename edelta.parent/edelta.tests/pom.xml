@@ -21,7 +21,6 @@
 				<version>${tycho-version}</version>
 				<configuration>
 					<failIfNoTests>false</failIfNoTests>
-					<redirectTestOutputToFile>false</redirectTestOutputToFile>
 				</configuration>
 			</plugin>
 		</plugins>
