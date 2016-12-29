@@ -3,11 +3,11 @@
  */
 package edelta.lib.tests;
 
+import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.emf.common.util.WrappedException;
@@ -190,10 +190,7 @@ public class EdeltaTest {
 	}
 
 	private void wipeModifiedDirectoryContents() {
-		File dir = new File(MODIFIED);
-		for (File file : dir.listFiles())
-			if (!file.isDirectory() && !file.getName().equals(".gitignore"))
-				file.delete();
+		cleanDirectory(MODIFIED);
 	}
 
 	private void loadTestEcore(String ecoreFile) {
