@@ -56,9 +56,9 @@ public class PDETargetPlatformUtils {
 		Bundle[] bundles = Platform.getBundle("org.eclipse.core.runtime").getBundleContext().getBundles();
 		List<ITargetLocation> bundleContainers = new ArrayList<ITargetLocation>();
 		Set<File> dirs = new HashSet<File>();
-//		System.out.println("Bundles for the target platform:");
+		System.out.println("Bundles for the target platform:");
 		for (Bundle bundle : bundles) {
-//			System.out.print(bundle);
+			System.out.print(bundle);
 //			AbstractBundle bundleImpl = (AbstractBundle) bundle;
 //			BaseData bundleData = (BaseData) bundleImpl.getBundleData();
 			EquinoxBundle bundleImpl = (EquinoxBundle) bundle;
@@ -71,7 +71,7 @@ public class PDETargetPlatformUtils {
 			}
 		}
 		System.out.println("");
-//		System.out.println("Bundles added the target platform.");
+		System.out.println("Bundles added the target platform.");
 		targetDef.setTargetLocations(bundleContainers.toArray(new ITargetLocation[bundleContainers.size()]));
 		targetDef.setArch(Platform.getOSArch());
 		targetDef.setOS(Platform.getOS());
