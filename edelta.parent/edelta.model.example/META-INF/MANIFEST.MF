@@ -1,7 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: edelta.model.example
+Bundle-Name: Edelta Model Example Project
 Bundle-SymbolicName: edelta.model.example; singleton:=true
-Bundle-Version: 0.1.0.qualifier
+Bundle-Version: 1.0.0.qualifier
 Require-Bundle: org.eclipse.emf.ecore
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Vendor: Lorenzo Bettini

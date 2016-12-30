@@ -1,15 +1,17 @@
 package edelta;
 
-import edelta.lib.EdeltaLibrary;
+import edelta.lib.AbstractEdelta;
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.xtext.xbase.lib.Extension;
 
 @SuppressWarnings("all")
-public class Example {
-  @Extension
-  private EdeltaLibrary lib;
-  
+public class Example extends AbstractEdelta {
   public EClass createClass(final String name) {
     return this.lib.newEClass(name);
+  }
+  
+  @Override
+  public void execute() throws Exception {
+    getEClass("myexample", "MyExampleEClass");
+    getEClass("myecore", "MyEClass");
   }
 }
