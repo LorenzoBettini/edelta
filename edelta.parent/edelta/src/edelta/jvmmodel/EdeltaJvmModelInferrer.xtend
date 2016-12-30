@@ -76,7 +76,9 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 					'''
 				]
 			}
-			if (!program.main.expressions.empty) {
+			val main = program.main
+			// main could be null in an incomplete program, without a name
+			if (main !== null && !main.expressions.empty) {
 				members += program.main.toMethod("execute", Void.TYPE.typeRef) [
 					annotations += Override.annotationRef
 					exceptions += Exception.typeRef
