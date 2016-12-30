@@ -4,6 +4,11 @@
       label="Edelta Feature "
       version="1.0.0.qualifier">
 
+   <requires>
+      <import feature="org.eclipse.xtext.xbase" version="2.10.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.xtext.ui" version="2.10.0" match="greaterOrEqual"/>
+   </requires>
+
    <plugin
          id="edelta"
          download-size="0"
