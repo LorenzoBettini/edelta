@@ -180,6 +180,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			@SuppressWarnings("all")
 			public class MyFile0 extends AbstractEdelta {
 			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
 			  public void execute() throws Exception {
 			    getEClassifier("foo", "FooClass");
 			    InputOutput.<EClassifier>println(getEClassifier("foo", "FooClass"));
@@ -201,6 +206,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends AbstractEdelta {
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
 			  @Override
 			  public void execute() throws Exception {
 			    getEClass("foo", "FooClass");
@@ -245,6 +255,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends AbstractEdelta {
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
 			  @Override
 			  public void execute() throws Exception {
 			    getEDataType("foo", "FooDataType");

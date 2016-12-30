@@ -63,6 +63,19 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 					body = o.body
 				]
 			}
+			if (!program.metamodels.empty) {
+				members += program.toMethod("performSanityChecks", Void.TYPE.typeRef) [
+					annotations += Override.annotationRef
+					exceptions += Exception.typeRef
+					// for each reference to a metamodel, we generate a sanity check
+					// to make sure that at run-time all the referred Ecores are loaded
+					body = '''
+						«FOR p : program.metamodels»
+						ensureEPackageIsLoaded("«p.name»");
+						«ENDFOR»
+					'''
+				]
+			}
 			if (!program.main.expressions.empty) {
 				members += program.main.toMethod("execute", Void.TYPE.typeRef) [
 					annotations += Override.annotationRef
