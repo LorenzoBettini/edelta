@@ -128,4 +128,12 @@ class Inputs {
 		println(ereference myReference)
 		'''
 	}
+
+	def createEClass() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo
+		'''
+	}
 }

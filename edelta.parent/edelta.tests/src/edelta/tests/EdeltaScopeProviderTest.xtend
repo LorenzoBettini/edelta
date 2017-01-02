@@ -77,6 +77,14 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		// we skip nsURI references, like http://foo
 	}
 
+	@Test
+	def void testScopeForCreateEClassPackage() {
+		createEClass.parseWithTestEcore.lastExpression.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreCreateEClassExpression_Epackage,
+			"foo")
+		// we skip nsURI references, like http://foo
+	}
+
 	def private assertScope(EObject context, EReference reference, CharSequence expected) {
 		expected.toString.assertEquals(
 			context.getScope(reference).

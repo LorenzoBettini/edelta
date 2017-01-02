@@ -31,4 +31,9 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	def void testUseImportedJavaTypes() {
 		useImportedJavaTypes.parse.assertNoErrors
 	}
+
+	@Test
+	def void testCreateEClass() {
+		createEClass.parseWithTestEcore.assertNoErrors
+	}
 }
