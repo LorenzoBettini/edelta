@@ -25,6 +25,11 @@ public class Example extends AbstractEdelta {
   }
   
   @Override
+  public void performSanityChecks() throws Exception {
+    ensureEPackageIsLoaded("myecore");
+  }
+  
+  @Override
   public void execute() throws Exception {
     final EPackage p = getEClass("myecore", "MyEClass").getEPackage();
     EList<EClassifier> _eClassifiers = p.getEClassifiers();
