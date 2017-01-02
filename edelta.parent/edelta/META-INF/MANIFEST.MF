@@ -30,5 +30,6 @@ Export-Package: edelta,
  edelta.serializer,
  edelta.services,
  edelta.typesystem,
+ edelta.util,
  edelta.validation
 Import-Package: org.apache.log4j

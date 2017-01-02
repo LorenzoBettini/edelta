@@ -5,7 +5,7 @@ package edelta.scoping
 
 import com.google.inject.Inject
 import edelta.edelta.EdeltaPackage
-import edelta.edelta.EdeltaProgram
+import edelta.util.EdeltaModelUtil
 import java.util.List
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
@@ -14,7 +14,6 @@ import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
-import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.Scopes
 import org.eclipse.xtext.scoping.impl.FilteringScope
@@ -29,6 +28,7 @@ import org.eclipse.xtext.util.IResourceScopeCache
 class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 
 	@Inject IResourceScopeCache cache
+	@Inject extension EdeltaModelUtil
 
 	override getScope(EObject context, EReference reference) {
 		if (reference == EdeltaPackage.Literals.EDELTA_ECLASSIFIER_EXPRESSION__ECLASSIFIER) {
@@ -66,10 +66,6 @@ class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 		].flatten.toList
 	}
 	
-	private def EdeltaProgram getProgram(EObject context) {
-		EcoreUtil2.getContainerOfType(context, EdeltaProgram)
-	}
-
 	private def IScope scopeForEClass(EObject context) {
 		cache.get("scopeEClass", context.eResource) [
 			Scopes.scopeFor(getEClasses(context))
