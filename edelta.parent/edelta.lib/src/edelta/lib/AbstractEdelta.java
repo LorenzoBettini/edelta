@@ -74,12 +74,14 @@ public abstract class AbstractEdelta {
 	}
 
 	/**
-	 * Performs the actual execution of the transformation.
+	 * Performs the actual execution of the transformation, to be
+	 * called by clients.
 	 * 
 	 * @throws Exception
 	 */
 	public void execute() throws Exception {
 		performSanityChecks();
+		doExecute();
 	}
 
 	/**
@@ -90,6 +92,16 @@ public abstract class AbstractEdelta {
 	 * @throws Exception
 	 */
 	protected void performSanityChecks() throws Exception {
+		// to be implemented by the generated code
+	}
+
+	/**
+	 * Actual implementation of the transformation, to be generated
+	 * by the Edelta DSL compiler.
+	 * 
+	 * @throws Exception
+	 */
+	protected void doExecute() throws Exception {
 		// to be implemented by the generated code
 	}
 

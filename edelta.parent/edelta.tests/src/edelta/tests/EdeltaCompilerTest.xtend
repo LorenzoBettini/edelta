@@ -158,7 +158,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  }
 			  
 			  @Override
-			  public void execute() throws Exception {
+			  protected void doExecute() throws Exception {
 			    EClass _bar = this.bar("foo");
 			    InputOutput.<EClass>println(_bar);
 			  }
@@ -185,7 +185,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  }
 			  
 			  @Override
-			  public void execute() throws Exception {
+			  protected void doExecute() throws Exception {
 			    getEClassifier("foo", "FooClass");
 			    InputOutput.<EClassifier>println(getEClassifier("foo", "FooClass"));
 			  }
@@ -212,7 +212,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  }
 			  
 			  @Override
-			  public void execute() throws Exception {
+			  protected void doExecute() throws Exception {
 			    getEClass("foo", "FooClass");
 			    InputOutput.<EClass>println(getEClass("foo", "FooClass"));
 			  }
@@ -234,7 +234,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			@SuppressWarnings("all")
 			public class MyFile0 extends AbstractEdelta {
 			  @Override
-			  public void execute() throws Exception {
+			  protected void doExecute() throws Exception {
 			    InputOutput.<EClass>println(getEClass("null", "null"));
 			  }
 			}
@@ -261,7 +261,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  }
 			  
 			  @Override
-			  public void execute() throws Exception {
+			  protected void doExecute() throws Exception {
 			    getEDataType("foo", "FooDataType");
 			    InputOutput.<EDataType>println(getEDataType("foo", "FooDataType"));
 			  }

@@ -11,6 +11,7 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
+import org.eclipse.xtext.common.types.JvmVisibility
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -79,7 +80,8 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 			val main = program.main
 			// main could be null in an incomplete program, without a name
 			if (main !== null && !main.expressions.empty) {
-				members += program.main.toMethod("execute", Void.TYPE.typeRef) [
+				members += program.main.toMethod("doExecute", Void.TYPE.typeRef) [
+					visibility = JvmVisibility.PROTECTED
 					annotations += Override.annotationRef
 					exceptions += Exception.typeRef
 					body = program.main
