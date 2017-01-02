@@ -2,6 +2,7 @@ package com.example;
 
 import edelta.lib.AbstractEdelta;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
@@ -39,12 +40,22 @@ public class Example extends AbstractEdelta {
     EClass _createClass = this.createClass("NewClass");
     final Procedure1<EClass> _function = (EClass it) -> {
       EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
-      EReference _newEReference = this.lib.newEReference("myReference");
-      final Procedure1<EReference> _function_1 = (EReference it_1) -> {
-        it_1.setEType(getEClass("myecore", "MyEClass"));
+      EAttribute _newEAttribute = this.lib.newEAttribute("myStringAttribute");
+      final Procedure1<EAttribute> _function_1 = (EAttribute it_1) -> {
+        it_1.setEType(getEDataType("ecore", "EString"));
       };
-      EReference _doubleArrow = ObjectExtensions.<EReference>operator_doubleArrow(_newEReference, _function_1);
+      EAttribute _doubleArrow = ObjectExtensions.<EAttribute>operator_doubleArrow(_newEAttribute, _function_1);
       _eStructuralFeatures.add(_doubleArrow);
+      EList<EStructuralFeature> _eStructuralFeatures_1 = it.getEStructuralFeatures();
+      EReference _newEReference = this.lib.newEReference("myReference");
+      final Procedure1<EReference> _function_2 = (EReference it_1) -> {
+        it_1.setEType(getEClass("myecore", "MyEClass"));
+        it_1.setUpperBound((-1));
+        it_1.setContainment(true);
+        it_1.setLowerBound(0);
+      };
+      EReference _doubleArrow_1 = ObjectExtensions.<EReference>operator_doubleArrow(_newEReference, _function_2);
+      _eStructuralFeatures_1.add(_doubleArrow_1);
     };
     EClass _doubleArrow = ObjectExtensions.<EClass>operator_doubleArrow(_createClass, _function);
     _eClassifiers.add(_doubleArrow);

@@ -19,7 +19,13 @@ def createClass(String name) {
 
 val p = (eclass MyEClass).EPackage
 p.EClassifiers += createClass("NewClass") => [
+	EStructuralFeatures += newEAttribute("myStringAttribute") => [
+		EType = edatatype EString
+	]
 	EStructuralFeatures += newEReference("myReference") => [
-		EType = eclass MyEClass
+		EType = (eclass MyEClass)
+		upperBound = -1;
+		containment = true;
+		lowerBound = 0
 	]
 ]
