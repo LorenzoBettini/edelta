@@ -9,6 +9,7 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.scoping.Scopes
+import org.eclipse.xtext.scoping.impl.FilteringScope
 
 /**
  * This class contains custom scoping description.
@@ -26,6 +27,10 @@ class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 					EClassifiers
 				].flatten
 			)
+		} else if (reference == EdeltaPackage.Literals.EDELTA_PROGRAM__METAMODELS) {
+			return new FilteringScope(delegateGetScope(context, reference)) [
+				"false".equals(getUserData("nsURI"))
+			]
 		}
 		super.getScope(context, reference)
 	}

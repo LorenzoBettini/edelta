@@ -25,7 +25,8 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	def void testCanReferToMetamodel() {
 		referenceToMetamodel.parseWithTestEcore.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaProgram_Metamodels,
-			"foo, http://foo")
+			"foo")
+		// we skip nsURI references, like http://foo
 	}
 
 	def private assertScope(EObject context, EReference reference, CharSequence expected) {
