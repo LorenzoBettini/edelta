@@ -14,6 +14,9 @@ import static extension org.junit.Assert.*
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EDataType
+import org.eclipse.emf.ecore.EStructuralFeature
+import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EReference
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -34,6 +37,21 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	@Test
 	def void testTypeOfEDatatyeExpression() {
 		"edatatype FooDataType".assertType(EDataType)
+	}
+
+	@Test
+	def void testTypeOfEFeatureExpression() {
+		"efeature myAttribute".assertType(EStructuralFeature)
+	}
+
+	@Test
+	def void testTypeOfEAttributeExpression() {
+		"eattribute myAttribute".assertType(EAttribute)
+	}
+
+	@Test
+	def void testTypeOfEReferenceExpression() {
+		"ereference myReference".assertType(EReference)
 	}
 
 	def private assertType(CharSequence input, Class<?> expected) {

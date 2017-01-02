@@ -53,6 +53,30 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		// we skip nsURI references, like http://foo
 	}
 
+	@Test
+	def void testScopeForEAttribute() {
+		referenceToMetamodel.parseWithTestEcore.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEAttributeExpression_Eattribute,
+			"myAttribute")
+		// we skip nsURI references, like http://foo
+	}
+
+	@Test
+	def void testScopeForEReference() {
+		referenceToMetamodel.parseWithTestEcore.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEReferenceExpression_Ereference,
+			"myReference")
+		// we skip nsURI references, like http://foo
+	}
+
+	@Test
+	def void testScopeForEFeature() {
+		referenceToMetamodel.parseWithTestEcore.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEFeatureExpression_Efeature,
+			"myAttribute, myReference")
+		// we skip nsURI references, like http://foo
+	}
+
 	def private assertScope(EObject context, EReference reference, CharSequence expected) {
 		expected.toString.assertEquals(
 			context.getScope(reference).

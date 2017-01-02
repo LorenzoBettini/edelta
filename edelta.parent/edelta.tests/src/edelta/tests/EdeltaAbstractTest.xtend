@@ -51,6 +51,12 @@ abstract class EdeltaAbstractTest {
 		]
 		fooPackage.EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
 			name = "FooClass"
+			EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
+				name = "myAttribute"
+			]
+			EStructuralFeatures += EcoreFactory.eINSTANCE.createEReference => [
+				name = "myReference"
+			]
 		]
 		fooPackage.EClassifiers += EcoreFactory.eINSTANCE.createEDataType => [
 			name = "FooDataType"

@@ -148,4 +148,21 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		newBuilder.append('metamodel "mypackage" edatatype ').
 			assertText('MyDataType')
 	}
+
+	@Test def void testEFeature() {
+		newBuilder.append('metamodel "mypackage" efeature ').
+			assertText('myAttribute', 'myBaseAttribute', 'myDerivedAttribute',
+				'myReference', 'myBaseReference', 'myDerivedReference'
+			)
+	}
+
+	@Test def void testEAttribute() {
+		newBuilder.append('metamodel "mypackage" eattribute ').
+			assertText('myAttribute', 'myBaseAttribute', 'myDerivedAttribute')
+	}
+
+	@Test def void testEReference() {
+		newBuilder.append('metamodel "mypackage" ereference ').
+			assertText('myReference', 'myBaseReference', 'myDerivedReference')
+	}
 }

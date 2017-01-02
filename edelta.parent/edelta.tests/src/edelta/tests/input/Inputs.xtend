@@ -113,4 +113,19 @@ class Inputs {
 		println(edatatype FooDataType)
 		'''
 	}
+
+	def efeatureExpressions() {
+		'''
+		package foo;
+		
+		metamodel "foo"
+		
+		efeature myAttribute
+		println(efeature myAttribute)
+		eattribute myAttribute
+		println(eattribute myAttribute)
+		ereference myReference
+		println(ereference myReference)
+		'''
+	}
 }

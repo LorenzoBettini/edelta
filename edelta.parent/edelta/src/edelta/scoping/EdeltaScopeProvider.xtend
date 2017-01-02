@@ -17,6 +17,8 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.Scopes
 import org.eclipse.xtext.scoping.impl.FilteringScope
 import org.eclipse.xtext.util.IResourceScopeCache
+import org.eclipse.emf.ecore.EStructuralFeature
+import org.eclipse.emf.ecore.EAttribute
 
 /**
  * This class contains custom scoping description.
@@ -33,8 +35,14 @@ class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 			return scopeForEClassifier(context)
 		} else if (reference == EdeltaPackage.Literals.EDELTA_ECLASS_EXPRESSION__ECLASS) {
 			return scopeForEClass(context)
-		} if (reference == EdeltaPackage.Literals.EDELTA_EDATA_TYPE_EXPRESSION__EDATATYPE) {
+		} else if (reference == EdeltaPackage.Literals.EDELTA_EDATA_TYPE_EXPRESSION__EDATATYPE) {
 			return scopeForEDataType(context)
+		} else if (reference == EdeltaPackage.Literals.EDELTA_EFEATURE_EXPRESSION__EFEATURE) {
+			return scopeForEStructuralFeature(context)
+		} else if (reference == EdeltaPackage.Literals.EDELTA_EATTRIBUTE_EXPRESSION__EATTRIBUTE) {
+			return scopeForEAttribute(context)
+		} else if (reference == EdeltaPackage.Literals.EDELTA_EREFERENCE_EXPRESSION__EREFERENCE) {
+			return scopeForEReference(context)
 		} else if (reference == EdeltaPackage.Literals.EDELTA_PROGRAM__METAMODELS) {
 			return new FilteringScope(delegateGetScope(context, reference)) [
 				"false".equals(getUserData("nsURI"))
@@ -51,15 +59,19 @@ class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 	
 	private def List<EClassifier> getClassifiers(EObject context) {
 		val prog = EcoreUtil2.getContainerOfType(context, EdeltaProgram)
-		prog.metamodels.map [
+		prog.metamodels.map[
 			EClassifiers
 		].flatten.toList
 	}
 
 	private def IScope scopeForEClass(EObject context) {
 		cache.get("scopeEClass", context.eResource) [
-			Scopes.scopeFor(getClassifiers(context).filter(EClass).toList)
+			Scopes.scopeFor(getEClasses(context))
 		]
+	}
+	
+	private def List<EClass> getEClasses(EObject context) {
+		getClassifiers(context).filter(EClass).toList
 	}
 
 	private def IScope scopeForEDataType(EObject context) {
@@ -68,4 +80,27 @@ class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 		]
 	}
 
+	private def IScope scopeForEStructuralFeature(EObject context) {
+		cache.get("scopeEStructuralFeature", context.eResource) [
+			Scopes.scopeFor(getFeatures(context))
+		]
+	}
+
+	private def List<EStructuralFeature> getFeatures(EObject context) {
+		getEClasses(context).map[
+			EStructuralFeatures
+		].flatten.toList
+	}
+
+	private def IScope scopeForEAttribute(EObject context) {
+		cache.get("scopeEAttribute", context.eResource) [
+			Scopes.scopeFor(getFeatures(context).filter(EAttribute).toList)
+		]
+	}
+
+	private def IScope scopeForEReference(EObject context) {
+		cache.get("scopeEReference", context.eResource) [
+			Scopes.scopeFor(getFeatures(context).filter(EReference).toList)
+		]
+	}
 }

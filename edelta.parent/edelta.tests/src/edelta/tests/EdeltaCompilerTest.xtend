@@ -270,6 +270,61 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		)
 	}
 
+	@Test
+	def void testCompilationOfFeatureExpressions() {
+		efeatureExpressions.checkCompilation(
+			'''
+			package foo;
+			
+			import edelta.lib.AbstractEdelta;
+			import org.eclipse.emf.ecore.EAttribute;
+			import org.eclipse.emf.ecore.EReference;
+			import org.eclipse.emf.ecore.EStructuralFeature;
+			import org.eclipse.xtext.xbase.lib.InputOutput;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    getEStructuralFeature("foo", "FooClass", "myAttribute");
+			    InputOutput.<EStructuralFeature>println(getEStructuralFeature("foo", "FooClass", "myAttribute"));
+			    getEAttribute("foo", "FooClass", "myAttribute");
+			    InputOutput.<EAttribute>println(getEAttribute("foo", "FooClass", "myAttribute"));
+			    getEReference("foo", "FooClass", "myReference");
+			    InputOutput.<EReference>println(getEReference("foo", "FooClass", "myReference"));
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
+	def void testCompilationOfFeatureExpressionWithNonExistantFeature() {
+		"println(efeature Foo)".checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import org.eclipse.emf.ecore.EStructuralFeature;
+			import org.eclipse.xtext.xbase.lib.InputOutput;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  @Override
+			  protected void doExecute() throws Exception {
+			    InputOutput.<EStructuralFeature>println(getEStructuralFeature("null", "null", "null"));
+			  }
+			}
+			''',
+			false
+		)
+	}
+
 	def private checkCompilation(CharSequence input, CharSequence expectedGeneratedJava) {
 		checkCompilation(input, expectedGeneratedJava, true)
 	}
