@@ -5,7 +5,9 @@ package edelta.lib.tests;
 
 import static org.junit.Assert.*;
 
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EReference;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,6 +38,34 @@ public class EdeltaLibraryTest {
 			cl.setName("changed");
 		});
 		assertEquals("changed", c.getName());
+	}
+
+	@Test
+	public void testNewEAttribute() {
+		EAttribute e = lib.newEAttribute("test");
+		assertEquals("test", e.getName());
+	}
+
+	@Test
+	public void testNewEAttributeWithInitializer() {
+		EAttribute e = lib.newEAttribute("test", ee -> {
+			ee.setName("changed");
+		});
+		assertEquals("changed", e.getName());
+	}
+
+	@Test
+	public void testNewEReference() {
+		EReference e = lib.newEReference("test");
+		assertEquals("test", e.getName());
+	}
+
+	@Test
+	public void testNewEReferenceWithInitializer() {
+		EReference e = lib.newEReference("test", ee -> {
+			ee.setName("changed");
+		});
+		assertEquals("changed", e.getName());
 	}
 
 }
