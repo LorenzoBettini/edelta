@@ -22,16 +22,42 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	@Inject extension IScopeProvider
 
 	@Test
-	def void testCanReferToMetamodel() {
+	def void testScopeForMetamodel() {
 		referenceToMetamodel.parseWithTestEcore.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaProgram_Metamodels,
 			"foo")
 		// we skip nsURI references, like http://foo
 	}
 
+	@Test
+	def void testScopeForEClassifier() {
+		referenceToMetamodel.parseWithTestEcore.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEClassifierExpression_Eclassifier,
+			"FooClass, FooDataType")
+		// we skip nsURI references, like http://foo
+	}
+
+	@Test
+	def void testScopeForEClass() {
+		referenceToMetamodel.parseWithTestEcore.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEClassExpression_Eclass,
+			"FooClass")
+		// we skip nsURI references, like http://foo
+	}
+
+	@Test
+	def void testScopeForEDataType() {
+		referenceToMetamodel.parseWithTestEcore.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEDataTypeExpression_Edatatype,
+			"FooDataType")
+		// we skip nsURI references, like http://foo
+	}
+
 	def private assertScope(EObject context, EReference reference, CharSequence expected) {
 		expected.toString.assertEquals(
-			context.getScope(reference).allElements.map[name].join(", ")
+			context.getScope(reference).
+				allElements.
+				map[name].join(", ")
 		)
 	}
 }
