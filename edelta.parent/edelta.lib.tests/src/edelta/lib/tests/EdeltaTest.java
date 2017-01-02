@@ -68,6 +68,18 @@ public class EdeltaTest {
 	}
 
 	@Test
+	public void testEcorePackageIsAlwaysAvailable() {
+		EPackage ePackage = edelta.getEPackage("ecore");
+		assertNotNull(ePackage);
+		assertEquals("ecore", ePackage.getName());
+	}
+
+	@Test
+	public void testEcoreStuffIsAlwaysAvailable() {
+		assertNotNull(edelta.getEClassifier("ecore", "EClass"));
+	}
+
+	@Test
 	public void testGetEPackage() {
 		loadTestEcore(MY_ECORE);
 		loadTestEcore(MY2_ECORE);

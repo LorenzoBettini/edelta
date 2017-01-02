@@ -141,6 +141,10 @@ public abstract class AbstractEdelta {
 	}
 
 	public EPackage getEPackage(String packageName) {
+		// Ecore package is implicitly available
+		if (EcorePackage.eNAME.equals(packageName)) {
+			return EcorePackage.eINSTANCE;
+		}
 		return resourceSet.getResources().
 			stream().
 			map(resource -> resource.getContents().get(0)).
