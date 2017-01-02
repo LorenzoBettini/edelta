@@ -136,4 +136,14 @@ class Inputs {
 			createEClass NewClass in foo
 		'''
 	}
+
+	def referenceToCreatedEClass() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo
+			
+			eclass NewClass
+		'''
+	}
 }

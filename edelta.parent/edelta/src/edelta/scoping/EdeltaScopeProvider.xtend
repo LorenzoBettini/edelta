@@ -61,9 +61,11 @@ class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 	
 	private def List<EClassifier> getClassifiers(EObject context) {
 		val prog = getProgram(context)
-		prog.metamodels.map[
+		// also add derived EClasses
+		(prog.metamodels.map[
 			EClassifiers
-		].flatten.toList
+		].flatten +
+		context.eResource.contents.filter(EClassifier)).toList
 	}
 	
 	private def IScope scopeForEClass(EObject context) {

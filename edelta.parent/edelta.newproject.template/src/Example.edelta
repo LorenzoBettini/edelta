@@ -29,3 +29,5 @@ p.EClassifiers += createClass("NewClass") => [
 		lowerBound = 0
 	]
 ]
+
+
