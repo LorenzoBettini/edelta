@@ -3,6 +3,7 @@
  */
 package edelta.scoping
 
+import com.google.inject.Inject
 import edelta.edelta.EdeltaPackage
 import edelta.edelta.EdeltaProgram
 import org.eclipse.emf.ecore.EObject
@@ -10,6 +11,7 @@ import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.scoping.Scopes
 import org.eclipse.xtext.scoping.impl.FilteringScope
+import org.eclipse.xtext.util.IResourceScopeCache
 
 /**
  * This class contains custom scoping description.
@@ -19,14 +21,18 @@ import org.eclipse.xtext.scoping.impl.FilteringScope
  */
 class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 
+	@Inject IResourceScopeCache cache
+
 	override getScope(EObject context, EReference reference) {
 		if (reference == EdeltaPackage.Literals.EDELTA_ECLASS_EXPRESSION__ECLASS) {
 			val prog = EcoreUtil2.getContainerOfType(context, EdeltaProgram)
-			return Scopes.scopeFor(
-				prog.metamodels.map [
-					EClassifiers
-				].flatten
-			)
+			return cache.get("scopeEClass", context.eResource) [
+				return Scopes.scopeFor(
+					prog.metamodels.map [
+						EClassifiers
+					].flatten.toList
+				)
+			]
 		} else if (reference == EdeltaPackage.Literals.EDELTA_PROGRAM__METAMODELS) {
 			return new FilteringScope(delegateGetScope(context, reference)) [
 				"false".equals(getUserData("nsURI"))
