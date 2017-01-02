@@ -43,6 +43,17 @@ public class EdeltaTestUtils {
 	 * @throws IOException
 	 */
 	public static void compareFileContents(String file1, String file2) throws IOException {
-		Assert.assertEquals(loadFile(file1), loadFile(file2));
+		Assert.assertEquals(removeCR(loadFile(file1)), removeCR(loadFile(file2)));
+	}
+
+	/**
+	 * Makes sure that there are no OS dependent line endings,
+	 * for example CR on Windows.
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static String removeCR(String s) {
+		return s.replaceAll("\r", "");
 	}
 }
