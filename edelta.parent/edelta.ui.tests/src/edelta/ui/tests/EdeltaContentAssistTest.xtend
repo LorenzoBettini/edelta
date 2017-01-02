@@ -1,30 +1,31 @@
 package edelta.ui.tests
 
+import edelta.ui.internal.EdeltaActivator
 import edelta.ui.tests.utils.PDETargetPlatformUtils
 import edelta.ui.tests.utils.PluginProjectHelper
+import java.io.BufferedReader
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.util.stream.Collectors
+import org.eclipse.core.resources.IFile
 import org.eclipse.core.runtime.NullProgressMonitor
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.jdt.core.IJavaProject
+import org.eclipse.ui.IEditorPart
+import org.eclipse.ui.PlatformUI
+import org.eclipse.ui.part.FileEditorInput
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
+import org.eclipse.xtext.ui.editor.XtextEditor
+import org.eclipse.xtext.ui.editor.utils.EditorUtils
 import org.eclipse.xtext.xbase.junit.ui.AbstractContentAssistTest
+import org.junit.After
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
-import edelta.ui.internal.EdeltaActivator
 
 import static org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil.*
-import java.io.InputStream
-import org.eclipse.xtext.ui.editor.XtextEditor
-import org.eclipse.core.resources.IFile
-import org.eclipse.xtext.ui.editor.utils.EditorUtils
-import org.eclipse.ui.IEditorPart
-import org.eclipse.ui.PlatformUI
-import org.eclipse.ui.part.FileEditorInput
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.util.stream.Collectors
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaUiInjectorProvider)
@@ -72,6 +73,14 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		pluginJavaProject.project.delete(true, new NullProgressMonitor)
 	}
 
+	@After
+	def void after() {
+		// we need to close existing editors since we use the
+		// resource of the open editor to test the content assist
+		// so we must make sure we always use a freshly opened editor
+		closeEditors
+	}
+
 	override getJavaProject(ResourceSet resourceSet) {
 		pluginJavaProject
 	}
@@ -109,6 +118,10 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		}
 	}
 
+	def static void closeEditors() {
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().closeAllEditors(false);
+	}
+
 	@Test def void testMetamodelsEcore() {
 		newBuilder.append("metamodel ").assertProposal('"ecore"')
 	}
@@ -119,5 +132,20 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	@Test def void testNoNSURIProposalMetamodels() {
 		newBuilder.append("metamodel <|>").assertNoProposalAtCursor('"http://my.package.org"')
+	}
+
+	@Test def void testEClassifier() {
+		newBuilder.append('metamodel "mypackage" eclassifier ').
+			assertText('MyClass', 'MyBaseClass', 'MyDerivedClass', 'MyDataType')
+	}
+
+	@Test def void testEClass() {
+		newBuilder.append('metamodel "mypackage" eclass ').
+			assertText('MyClass', 'MyBaseClass', 'MyDerivedClass')
+	}
+
+	@Test def void testEDataType() {
+		newBuilder.append('metamodel "mypackage" edatatype ').
+			assertText('MyDataType')
 	}
 }
