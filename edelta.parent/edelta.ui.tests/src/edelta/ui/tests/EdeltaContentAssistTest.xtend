@@ -116,4 +116,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	@Test def void testMetamodelsLocalToProject() {
 		newBuilder.append("metamodel ").assertProposal('"mypackage"')
 	}
+
+	@Test def void testNoNSURIProposalMetamodels() {
+		newBuilder.append("metamodel <|>").assertNoProposalAtCursor('"http://my.package.org"')
+	}
 }
