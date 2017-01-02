@@ -54,6 +54,11 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 		"ereference myReference".assertType(EReference)
 	}
 
+	@Test
+	def void testTypeOfCreateEClassExpression() {
+		"createEClass Test in foo".assertType(EClass)
+	}
+
 	def private assertType(CharSequence input, Class<?> expected) {
 		input.parseWithTestEcore.lastExpression => [
 			expected.canonicalName.assertEquals(
