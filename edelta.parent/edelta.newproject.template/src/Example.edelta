@@ -4,6 +4,7 @@
 package com.example
 
 metamodel "myecore"
+metamodel "ecore"
 
 /*
  * Reusable function to create a new EClass with the
@@ -17,4 +18,8 @@ def createClass(String name) {
 }
 
 val p = (eclass MyEClass).EPackage
-p.EClassifiers += createClass("NewClass")
+p.EClassifiers += createClass("NewClass") => [
+	EStructuralFeatures += newEReference("myReference") => [
+		EType = eclass MyEClass
+	]
+]

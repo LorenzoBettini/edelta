@@ -10,8 +10,16 @@ public class Example extends AbstractEdelta {
   }
   
   @Override
-  public void execute() throws Exception {
+  public void performSanityChecks() throws Exception {
+    ensureEPackageIsLoaded("ecore");
+    ensureEPackageIsLoaded("myexample");
+    ensureEPackageIsLoaded("myecore");
+  }
+  
+  @Override
+  protected void doExecute() throws Exception {
     getEClass("myexample", "MyExampleEClass");
     getEClass("myecore", "MyEClass");
+    getEClass("ecore", "EAnnotation");
   }
 }

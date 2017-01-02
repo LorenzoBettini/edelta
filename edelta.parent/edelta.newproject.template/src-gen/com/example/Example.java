@@ -5,6 +5,8 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
@@ -27,13 +29,24 @@ public class Example extends AbstractEdelta {
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("myecore");
+    ensureEPackageIsLoaded("ecore");
   }
   
   @Override
-  public void execute() throws Exception {
+  protected void doExecute() throws Exception {
     final EPackage p = getEClass("myecore", "MyEClass").getEPackage();
     EList<EClassifier> _eClassifiers = p.getEClassifiers();
     EClass _createClass = this.createClass("NewClass");
-    _eClassifiers.add(_createClass);
+    final Procedure1<EClass> _function = (EClass it) -> {
+      EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
+      EReference _newEReference = this.lib.newEReference("myReference");
+      final Procedure1<EReference> _function_1 = (EReference it_1) -> {
+        it_1.setEType(getEClass("myecore", "MyEClass"));
+      };
+      EReference _doubleArrow = ObjectExtensions.<EReference>operator_doubleArrow(_newEReference, _function_1);
+      _eStructuralFeatures.add(_doubleArrow);
+    };
+    EClass _doubleArrow = ObjectExtensions.<EClass>operator_doubleArrow(_createClass, _function);
+    _eClassifiers.add(_doubleArrow);
   }
 }
