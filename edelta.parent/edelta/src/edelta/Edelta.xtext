@@ -35,9 +35,20 @@ EdeltaOperation:
 
 EdeltaMain returns xbase::XBlockExpression:
 	{EdeltaMain}
-	(expressions+=XExpressionOrVarDeclaration ';'?)*
+	(expressions+=MainBlockExpression ';'?)*
 ;
 
+MainBlockExpression returns xbase::XExpression:
+	EdeltaEcoreManipulationExpression |
+	XExpressionOrVarDeclaration
+;
+
+EdeltaEcoreManipulationExpression returns xbase::XExpression:
+	{EdeltaEcoreCreateEClassExpression}
+	'createEClass' name=ValidID 'in' epackage=[ecore::EPackage]
+;
+
+// redefine Xbase primary expression with our special expressions
 XPrimaryExpression returns xbase::XExpression:
 	{EdeltaEClassifierExpression} 'eclassifier' eclassifier=[ecore::EClassifier] |
 	{EdeltaEClassExpression} 'eclass' eclass=[ecore::EClass] |
