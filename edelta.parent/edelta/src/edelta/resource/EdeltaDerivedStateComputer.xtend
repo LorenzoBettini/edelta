@@ -23,7 +23,9 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 				allContents.
 				filter(EdeltaEcoreCreateEClassExpression).toMap[
 					exp |
-					newEClass(exp.name)
+					newEClass(exp.name) => [
+						exp.epackage.EClassifiers += it
+					]
 				]
 			targetToSourceMap.clear
 			targetToSourceMap = createdEClasses

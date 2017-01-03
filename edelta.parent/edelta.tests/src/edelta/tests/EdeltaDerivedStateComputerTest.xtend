@@ -3,6 +3,8 @@
  */
 package edelta.tests
 
+import com.google.inject.Inject
+import edelta.resource.EdeltaDerivedStateComputer
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.junit4.InjectWith
@@ -12,8 +14,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import com.google.inject.Inject
-import edelta.resource.EdeltaDerivedStateComputer
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -22,7 +22,23 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	@Inject extension EdeltaDerivedStateComputer
 
 	@Test
-	def void testDerivedState() {
+	def void testDerivedStateForCreatedEClass() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		
+		createEClass First in foo
+		'''.
+		parseWithTestEcore
+		val resource = program.eResource as DerivedStateAwareResource
+		val derivedEClass = resource.contents.last as EClass
+		assertEquals("First", derivedEClass.name)
+		assertEquals("foo", derivedEClass.EPackage.name)
+	}
+
+	@Test
+	def void testDerivedStateIsCorrectlyDiscarted() {
 		val program = '''
 		package test
 		
