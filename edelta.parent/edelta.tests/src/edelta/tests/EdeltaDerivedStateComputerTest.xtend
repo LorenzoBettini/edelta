@@ -38,6 +38,34 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testDerivedStateForCreatedEClassWithMissingReferredPackage() {
+		val program = '''
+		package test
+		
+		createEClass First in foo
+		'''.
+		parseWithTestEcore
+		val resource = program.eResource as DerivedStateAwareResource
+		val derivedEClass = resource.contents.last as EClass
+		assertEquals("First", derivedEClass.name)
+		assertNull(derivedEClass.EPackage.name)
+	}
+
+	@Test
+	def void testDerivedStateForCreatedEClassWithMissingPackage() {
+		val program = '''
+		package test
+		
+		createEClass First in 
+		'''.
+		parseWithTestEcore
+		val resource = program.eResource as DerivedStateAwareResource
+		val derivedEClass = resource.contents.last as EClass
+		assertEquals("First", derivedEClass.name)
+		assertNull(derivedEClass.EPackage)
+	}
+
+	@Test
 	def void testDerivedStateIsCorrectlyDiscarted() {
 		val program = '''
 		package test
