@@ -142,7 +142,7 @@ class Inputs {
 			metamodel "foo"
 			
 			createEClass NewClass in foo
-			
+			//val created = createEClass NewClass2 in foo
 			eclass NewClass
 		'''
 	}

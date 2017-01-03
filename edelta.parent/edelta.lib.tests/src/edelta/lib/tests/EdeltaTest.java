@@ -8,11 +8,13 @@ import static edelta.testutils.EdeltaTestUtils.compareFileContents;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 import java.io.IOException;
 
 import org.eclipse.emf.common.util.WrappedException;
 import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -218,6 +220,15 @@ public class EdeltaTest {
 					"testSaveModifiedEcoresAfterRemovingBaseClass"+"/"+
 						MY_ECORE,
 				MODIFIED+"/"+MY_ECORE);
+	}
+
+	@Test
+	public void testCreateEClass() throws IOException {
+		loadTestEcore(MY_ECORE);
+		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
+		assertNull(ePackage.getEClassifier("NewClass"));
+		EClass createEClass = edelta.createEClass(MYPACKAGE, "NewClass", null);
+		assertSame(createEClass, ePackage.getEClassifier("NewClass"));
 	}
 
 	private void wipeModifiedDirectoryContents() {

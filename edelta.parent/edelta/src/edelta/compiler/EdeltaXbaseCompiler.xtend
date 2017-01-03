@@ -11,6 +11,8 @@ import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
+import edelta.edelta.EdeltaEcoreCreateEClassExpression
+import org.eclipse.emf.ecore.EPackage
 
 class EdeltaXbaseCompiler extends XbaseCompiler {
 
@@ -46,6 +48,11 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 					compileEdeltaEReferenceExpression(obj, appendable)
 				]
 			}
+			EdeltaEcoreCreateEClassExpression: {
+				compileAsStatementIfNotReferenced(appendable, isReferenced) [
+					compileEdeltaCreateEClassExpression(obj, appendable)
+				]
+			}
 			default:
 				super.doInternalToJavaStatement(obj, appendable, isReferenced)
 		}
@@ -70,6 +77,9 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 			}
 			EdeltaEReferenceExpression: {
 				compileEdeltaEReferenceExpression(obj, appendable)
+			}
+			EdeltaEcoreCreateEClassExpression: {
+				compileEdeltaCreateEClassExpression(obj, appendable)
 			}
 			default:
 				super.internalToConvertedExpression(obj, appendable)
@@ -126,6 +136,17 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 		)
 	}
 
+	private def void compileEdeltaCreateEClassExpression(EdeltaEcoreCreateEClassExpression obj, ITreeAppendable appendable) {
+		appendable.append(
+			'createEClass("' +
+			getEPackageNameOrNull(obj.epackage) +
+			'", "' +
+			obj.name +
+			'", null' +
+			')'
+		)
+	}
+
 	private def void compileAsStatementIfNotReferenced(ITreeAppendable appendable, boolean isReferenced,
 		()=>void compileLambda) {
 		if (!isReferenced) {
@@ -139,7 +160,18 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 		eClassifier?.EPackage?.name
 	}
 
+	private def String getEPackageNameOrNull(EPackage e) {
+		e?.name
+	}
+
 	private def String getEClassNameOrNull(EStructuralFeature eFeature) {
 		eFeature.EContainingClass?.name
 	}
+
+	override protected internalCanCompileToJavaExpression(XExpression expression, ITreeAppendable appendable) {
+		if (expression instanceof EdeltaEcoreCreateEClassExpression)
+			return false
+		return super.internalCanCompileToJavaExpression(expression, appendable)
+	}
+	
 }

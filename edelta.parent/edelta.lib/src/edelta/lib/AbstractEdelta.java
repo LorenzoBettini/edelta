@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
@@ -214,4 +215,11 @@ public abstract class AbstractEdelta {
 		}
 		return null;
 	}
+
+	public EClass createEClass(String packageName, String name, Consumer<EClass> initializer) {
+		EClass newEClass = lib.newEClass(name, initializer);
+		getEPackage(packageName).getEClassifiers().add(newEClass);
+		return newEClass;
+	}
+
 }
