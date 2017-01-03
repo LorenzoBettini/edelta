@@ -17,6 +17,7 @@ import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EReference
+import edelta.edelta.EdeltaEcoreCreateEClassExpression
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -59,10 +60,27 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 		"createEClass Test in foo".assertType(EClass)
 	}
 
+	@Test
+	def void testTypeOfCreateEAttributeExpression() {
+		"createEClass Test in foo {
+			createEAttribute myAttribute
+		}".assertTypeOfCreateEClassBody(EAttribute)
+	}
+
 	def private assertType(CharSequence input, Class<?> expected) {
 		input.parseWithTestEcore.lastExpression => [
 			expected.canonicalName.assertEquals(
 				resolveTypes.getActualType(it).identifier
+			)
+		]
+	}
+
+	def private assertTypeOfCreateEClassBody(CharSequence input, Class<?> expected) {
+		input.parseWithTestEcore.lastExpression => [
+			expected.canonicalName.assertEquals(
+				resolveTypes.getActualType(
+					(it as EdeltaEcoreCreateEClassExpression).body.expressions.last
+				).identifier
 			)
 		]
 	}
