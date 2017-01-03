@@ -84,16 +84,31 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 	}
 
 	private def void compileEdeltaEClassifierExpression(EdeltaEClassifierExpression obj, ITreeAppendable appendable) {
-		val e = obj.eclassifier
-		appendable.append(
-			'getEClassifier("' + getEPackageNameOrNull(e) + '", "' + e.name + '")'
+		compileEdeltaEClassifierExpressionCommon(
+			obj.eclassifier, appendable, 'getEClassifier'
 		)
 	}
 
 	private def void compileEdeltaEClassExpression(EdeltaEClassExpression obj, ITreeAppendable appendable) {
-		val e = obj.eclass
+		compileEdeltaEClassifierExpressionCommon(
+			obj.eclass, appendable, 'getEClass'
+		)
+	}
+
+	private def void compileEdeltaEDataTypeExpression(EdeltaEDataTypeExpression obj, ITreeAppendable appendable) {
+		compileEdeltaEClassifierExpressionCommon(
+			obj.edatatype, appendable, 'getEDataType'
+		)
+	}
+
+	private def void compileEdeltaEClassifierExpressionCommon(EClassifier e, ITreeAppendable appendable, String libMethodName) {
 		appendable.append(
-			'getEClass("' + getEPackageNameOrNull(e) + '", "' + e.name + '")'
+			libMethodName +
+				'("' +
+				getEPackageNameOrNull(e) +
+				'", "' +
+				e.name +
+				'")'
 		)
 	}
 
@@ -123,13 +138,6 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 				getEClassNameOrNull(e) +
 				'", "' +
 				e.name + '")'
-		)
-	}
-
-	private def void compileEdeltaEDataTypeExpression(EdeltaEDataTypeExpression obj, ITreeAppendable appendable) {
-		val e = obj.edatatype
-		appendable.append(
-			'getEDataType("' + getEPackageNameOrNull(e) + '", "' + e.name + '")'
 		)
 	}
 
