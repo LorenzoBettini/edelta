@@ -12,6 +12,9 @@ import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.eclipse.xtext.common.types.JvmVisibility
+import edelta.edelta.EdeltaEcoreCreateEClassExpression
+import edelta.compiler.EdeltaCompilerUtil
+import org.eclipse.emf.ecore.EClass
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -27,6 +30,8 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 	@Inject extension JvmTypesBuilder
 
 	@Inject extension IQualifiedNameProvider
+
+	@Inject extension EdeltaCompilerUtil
 
 	/**
 	 * The dispatch method {@code infer} is called for each instance of the
@@ -86,6 +91,16 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 					exceptions += Exception.typeRef
 					body = program.main
 				]
+				main.expressions.
+					filter(EdeltaEcoreCreateEClassExpression).
+					filter[body !== null].
+					forEach[
+						e |
+						members += e.toMethod(e.methodName, Void.TYPE.typeRef) [
+							parameters += e.toParameter("it", typeRef(EClass))
+							body = e.body
+						]
+					]
 			}
 		]
 	}

@@ -32,5 +32,6 @@ p.EClassifiers += createClass("NewClass") => [
 
 createEClass MyNewClass in myecore
 
-eclass MyNewClass
-
+createEClass MyDerivedNewClass in myecore {
+	ESuperTypes += eclass MyNewClass
+}

@@ -134,7 +134,11 @@ class Inputs {
 		'''
 			metamodel "foo"
 			
-			createEClass NewClass in foo
+			createEClass MyNewClass in foo
+			
+			createEClass MyDerivedNewClass in foo {
+				ESuperTypes += eclass MyNewClass
+			}
 		'''
 	}
 

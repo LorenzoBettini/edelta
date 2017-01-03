@@ -10,4 +10,5 @@
         eType="#//MyEClass" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MyNewClass"/>
+  <eClassifiers xsi:type="ecore:EClass" name="MyDerivedNewClass" eSuperTypes="#//MyNewClass"/>
 </ecore:EPackage>

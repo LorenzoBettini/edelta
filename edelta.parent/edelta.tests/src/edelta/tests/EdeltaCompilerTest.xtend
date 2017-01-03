@@ -328,6 +328,38 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testCreateEClass() {
+		createEClass.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import org.eclipse.emf.common.util.EList;
+			import org.eclipse.emf.ecore.EClass;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    createEClass("foo", "MyNewClass", null);
+			    createEClass("foo", "MyDerivedNewClass", this::_createEClass_MyDerivedNewClass_in_foo);
+			  }
+			  
+			  public void _createEClass_MyDerivedNewClass_in_foo(final EClass it) {
+			    EList<EClass> _eSuperTypes = it.getESuperTypes();
+			    _eSuperTypes.add(getEClass("foo", "MyNewClass"));
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
+	def void testReferenceToCreatedEClass() {
 		referenceToCreatedEClass.checkCompilation(
 			'''
 			package edelta;

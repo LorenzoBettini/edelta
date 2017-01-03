@@ -13,8 +13,11 @@ import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import org.eclipse.emf.ecore.EPackage
+import com.google.inject.Inject
 
 class EdeltaXbaseCompiler extends XbaseCompiler {
+
+	@Inject extension EdeltaCompilerUtil
 
 	override protected doInternalToJavaStatement(XExpression obj, ITreeAppendable appendable, boolean isReferenced) {
 		switch (obj) {
@@ -142,12 +145,16 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 	}
 
 	private def void compileEdeltaCreateEClassExpression(EdeltaEcoreCreateEClassExpression obj, ITreeAppendable appendable) {
+		var String consumerArgument = "null"
+		if (obj.body !== null)
+			consumerArgument = "this::" + obj.methodName
 		appendable.append(
 			'createEClass("' +
 			getEPackageNameOrNull(obj.epackage) +
 			'", "' +
 			obj.name +
-			'", null' +
+			'", ' +
+			consumerArgument +
 			')'
 		)
 	}
