@@ -12,10 +12,14 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import com.google.inject.Inject
+import edelta.resource.EdeltaDerivedStateComputer
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
 class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
+
+	@Inject extension EdeltaDerivedStateComputer
 
 	@Test
 	def void testDerivedState() {
@@ -34,6 +38,35 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		resource.discardDerivedState
 		// only program must be there and the inferred Jvm Type
 		assertEquals("test.__synthetic0", (resource.contents.last as JvmGenericType).identifier)
+	}
+
+	@Test
+	def void testSourceElementOfNull() {
+		assertNull(getPrimarySourceElement(null))
+	}
+
+	@Test
+	def void testSourceElementOfNotDerived() {
+		assertNull('''
+		package test
+		'''.
+		parse.getPrimarySourceElement
+		)
+	}
+
+	@Test
+	def void testSourceElementOfCreateEClass() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		
+		createEClass First in foo
+		'''.
+		parseWithTestEcore
+		val e = program.lastExpression
+		val derived = (program.eResource.contents.last as EClass)
+		assertSame(e, derived.getPrimarySourceElement)
 	}
 
 }
