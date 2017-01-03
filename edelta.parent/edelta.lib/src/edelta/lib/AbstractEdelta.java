@@ -26,6 +26,7 @@ import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.xtext.xbase.lib.Extension;
@@ -222,4 +223,7 @@ public abstract class AbstractEdelta {
 		return newEClass;
 	}
 
+	public void removeEClassifier(String packageName, String name) {
+		EcoreUtil.delete(getEClassifier(packageName, name), true);
+	}
 }
