@@ -14,6 +14,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import org.eclipse.emf.ecore.EAttribute
+import edelta.edelta.EdeltaEcoreCreateEClassExpression
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -85,6 +87,25 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testDerivedStateForCreatedEAttribute() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		
+		createEClass First in foo {
+			createEAttribute newAttribute
+		}
+		'''.
+		parseWithTestEcore
+		val resource = program.eResource as DerivedStateAwareResource
+		val derivedEClass = resource.contents.last as EClass
+		val derivedEAttribute = derivedEClass.EStructuralFeatures.head as EAttribute
+		assertEquals("newAttribute", derivedEAttribute.name)
+		assertEquals("First", derivedEAttribute.EContainingClass.name)
+	}
+
+	@Test
 	def void testSourceElementOfNull() {
 		assertNull(getPrimarySourceElement(null))
 	}
@@ -111,6 +132,25 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		val e = program.lastExpression
 		val derived = (program.eResource.contents.last as EClass)
 		assertSame(e, derived.getPrimarySourceElement)
+	}
+
+	@Test
+	def void testSourceElementOfCreateEAttribute() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		
+		createEClass First in foo {
+			createEAttribute newAttribute
+		}
+		'''.
+		parseWithTestEcore
+		val e = (program.lastExpression as EdeltaEcoreCreateEClassExpression).
+			body.expressions.last
+		val derivedEClass = (program.eResource.contents.last as EClass)
+		val derivedEAttribute = derivedEClass.EStructuralFeatures.head
+		assertSame(e, derivedEAttribute.getPrimarySourceElement)
 	}
 
 }

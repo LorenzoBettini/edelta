@@ -21,7 +21,7 @@ class EdeltaLocationInFileProviderTest extends EdeltaAbstractTest {
 	@Inject extension ILocationInFileProvider
 
 	@Test
-	def void testDerivedState() {
+	def void testDerivedEClass() {
 		val input = '''
 		package test
 		
@@ -38,4 +38,25 @@ class EdeltaLocationInFileProviderTest extends EdeltaAbstractTest {
 		assertEquals(originalTextRegion, derivedTextRegion)
 	}
 
+	@Test
+	def void testDerivedAttribute() {
+		val input = '''
+		package test
+		
+		metamodel "foo"
+		
+		createEClass First in foo {
+			createEAttribute newAttribute
+		}
+		'''
+		val program = input.parseWithTestEcore
+		val e = (program.lastExpression as EdeltaEcoreCreateEClassExpression).
+			body.expressions.last
+		val derived = (program.eResource.contents.last as EClass).
+			EStructuralFeatures.last
+		val originalTextRegion = getSignificantTextRegion(e)
+		val derivedTextRegion = getSignificantTextRegion(derived)
+		// the derived EAttribute is mapped to the original creation expression
+		assertEquals(originalTextRegion, derivedTextRegion)
+	}
 }

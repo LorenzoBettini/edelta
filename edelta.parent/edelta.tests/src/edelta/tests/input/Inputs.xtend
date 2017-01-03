@@ -150,4 +150,15 @@ class Inputs {
 			eclass NewClass
 		'''
 	}
+
+	def referenceToCreatedEAttribute() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				createEAttribute newAttribute
+			}
+			eattribute newAttribute
+		'''
+	}
 }

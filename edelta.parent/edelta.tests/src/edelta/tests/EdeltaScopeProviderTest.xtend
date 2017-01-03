@@ -34,7 +34,6 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		referenceToMetamodel.parseWithTestEcore.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEClassifierExpression_Eclassifier,
 			"FooClass, FooDataType")
-		// we skip nsURI references, like http://foo
 	}
 
 	@Test
@@ -42,7 +41,6 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		referenceToMetamodel.parseWithTestEcore.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEClassExpression_Eclass,
 			"FooClass")
-		// we skip nsURI references, like http://foo
 	}
 
 	@Test
@@ -50,7 +48,6 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		referenceToMetamodel.parseWithTestEcore.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEDataTypeExpression_Edatatype,
 			"FooDataType")
-		// we skip nsURI references, like http://foo
 	}
 
 	@Test
@@ -58,7 +55,6 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		referenceToMetamodel.parseWithTestEcore.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEAttributeExpression_Eattribute,
 			"myAttribute")
-		// we skip nsURI references, like http://foo
 	}
 
 	@Test
@@ -66,7 +62,6 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		referenceToMetamodel.parseWithTestEcore.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEReferenceExpression_Ereference,
 			"myReference")
-		// we skip nsURI references, like http://foo
 	}
 
 	@Test
@@ -74,7 +69,6 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		referenceToMetamodel.parseWithTestEcore.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEFeatureExpression_Efeature,
 			"myAttribute, myReference")
-		// we skip nsURI references, like http://foo
 	}
 
 	@Test
@@ -82,7 +76,6 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		createEClass.parseWithTestEcore.lastExpression.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreCreateEClassExpression_Epackage,
 			"foo")
-		// we skip nsURI references, like http://foo
 	}
 
 	@Test
@@ -90,7 +83,15 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		referenceToCreatedEClass.parseWithTestEcore.lastExpression.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEClassExpression_Eclass,
 			"FooClass, NewClass")
-		// we skip nsURI references, like http://foo
+		// NewClass is the one created in the program
+	}
+
+	@Test
+	def void testScopeForReferenceToCreatedEAttribute() {
+		referenceToCreatedEAttribute.parseWithTestEcore.lastExpression.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEAttributeExpression_Eattribute,
+			"myAttribute, newAttribute")
+		// newAttribute is the one created in the program
 	}
 
 	def private assertScope(EObject context, EReference reference, CharSequence expected) {
