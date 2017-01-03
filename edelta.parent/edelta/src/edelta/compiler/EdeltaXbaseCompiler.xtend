@@ -78,9 +78,6 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 			EdeltaEReferenceExpression: {
 				compileEdeltaEReferenceExpression(obj, appendable)
 			}
-			EdeltaEcoreCreateEClassExpression: {
-				compileEdeltaCreateEClassExpression(obj, appendable)
-			}
 			default:
 				super.internalToConvertedExpression(obj, appendable)
 		}
@@ -157,7 +154,7 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 	}
 
 	private def String getEPackageNameOrNull(EClassifier eClassifier) {
-		eClassifier?.EPackage?.name
+		eClassifier?.EPackage.getEPackageNameOrNull
 	}
 
 	private def String getEPackageNameOrNull(EPackage e) {
@@ -168,10 +165,4 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 		eFeature.EContainingClass?.name
 	}
 
-	override protected internalCanCompileToJavaExpression(XExpression expression, ITreeAppendable appendable) {
-		if (expression instanceof EdeltaEcoreCreateEClassExpression)
-			return false
-		return super.internalCanCompileToJavaExpression(expression, appendable)
-	}
-	
 }

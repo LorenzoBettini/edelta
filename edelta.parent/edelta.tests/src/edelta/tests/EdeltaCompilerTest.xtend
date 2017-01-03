@@ -297,6 +297,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    InputOutput.<EAttribute>println(getEAttribute("foo", "FooClass", "myAttribute"));
 			    getEReference("foo", "FooClass", "myReference");
 			    InputOutput.<EReference>println(getEReference("foo", "FooClass", "myReference"));
+			    final EReference ref = getEReference("foo", "FooClass", "myReference");
 			  }
 			}
 			'''
