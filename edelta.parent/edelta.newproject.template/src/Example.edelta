@@ -30,7 +30,7 @@ p.EClassifiers += createClass("NewClass") => [
 	]
 ]
 
-//createEClass MyNewClass in myecore
-//
-//eclass MyNewClass
+createEClass MyNewClass in myecore
+
+eclass MyNewClass
 

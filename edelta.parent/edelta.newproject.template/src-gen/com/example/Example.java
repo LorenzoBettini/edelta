@@ -59,5 +59,7 @@ public class Example extends AbstractEdelta {
     };
     EClass _doubleArrow = ObjectExtensions.<EClass>operator_doubleArrow(_createClass, _function);
     _eClassifiers.add(_doubleArrow);
+    createEClass("myecore", "MyNewClass", null);
+    getEClass("myecore", "MyNewClass");
   }
 }
