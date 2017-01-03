@@ -347,8 +347,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    getEClass("foo", "NewClass");
 			  }
 			}
-			''',
-			false
+			'''
 		)
 	}
 
