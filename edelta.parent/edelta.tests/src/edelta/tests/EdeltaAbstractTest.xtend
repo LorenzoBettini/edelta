@@ -6,16 +6,19 @@ package edelta.tests
 import com.google.inject.Inject
 import com.google.inject.Provider
 import edelta.edelta.EdeltaProgram
+import edelta.tests.input.Inputs
 import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
+import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
 import org.eclipse.xtext.junit4.util.ParseHelper
 import org.eclipse.xtext.junit4.validation.ValidationTestHelper
 import org.eclipse.xtext.resource.XtextResourceSet
 import org.junit.runner.RunWith
-import edelta.tests.input.Inputs
-import org.eclipse.emf.ecore.resource.ResourceSet
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -66,5 +69,10 @@ abstract class EdeltaAbstractTest {
 
 	def protected lastExpression(EdeltaProgram p) {
 		p.main.expressions.last
+	}
+
+	def protected getDerivedStateLastEClass(EObject context) {
+		val derivedEPackage = context.eResource.contents.last as EPackage
+		derivedEPackage.EClassifiers.last as EClass
 	}
 }

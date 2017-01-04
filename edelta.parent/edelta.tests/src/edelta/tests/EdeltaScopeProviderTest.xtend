@@ -4,6 +4,8 @@
 package edelta.tests
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaEClassExpression
+import edelta.edelta.EdeltaPackage
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.junit4.InjectWith
@@ -13,7 +15,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
-import edelta.edelta.EdeltaPackage
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -82,15 +83,30 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	def void testScopeForReferenceToCreatedEClass() {
 		referenceToCreatedEClass.parseWithTestEcore.lastExpression.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEClassExpression_Eclass,
-			"FooClass, NewClass")
+			"NewClass, FooClass")
 		// NewClass is the one created in the program
+	}
+
+	@Test
+	def void testScopeForReferenceToCreatedEClassWithTheSameNameAsAnExistingEClass() {
+		// our created EClass with the same name as an existing one must be
+		// the one that is actually linked
+		val prog = referenceToCreatedEClassWithTheSameNameAsAnExistingEClass.
+			parseWithTestEcore
+		val expressions = prog.main.expressions
+		val eclassExp = expressions.last as EdeltaEClassExpression
+		assertSame(
+			// the one created by the derived state computer
+			prog.derivedStateLastEClass,
+			eclassExp.eclass
+		)
 	}
 
 	@Test
 	def void testScopeForReferenceToCreatedEAttribute() {
 		referenceToCreatedEAttribute.parseWithTestEcore.lastExpression.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEAttributeExpression_Eattribute,
-			"myAttribute, newAttribute")
+			"newAttribute, myAttribute")
 		// newAttribute is the one created in the program
 	}
 

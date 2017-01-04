@@ -4,8 +4,9 @@
 package edelta.tests
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.resource.EdeltaDerivedStateComputer
-import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
@@ -14,8 +15,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import org.eclipse.emf.ecore.EAttribute
-import edelta.edelta.EdeltaEcoreCreateEClassExpression
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -33,8 +32,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		createEClass First in foo
 		'''.
 		parseWithTestEcore
-		val resource = program.eResource as DerivedStateAwareResource
-		val derivedEClass = resource.contents.last as EClass
+		val derivedEClass = program.getDerivedStateLastEClass
 		assertEquals("First", derivedEClass.name)
 		assertEquals("foo", derivedEClass.EPackage.name)
 	}
@@ -47,8 +45,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		createEClass First in foo
 		'''.
 		parseWithTestEcore
-		val resource = program.eResource as DerivedStateAwareResource
-		val derivedEClass = resource.contents.last as EClass
+		val derivedEClass = program.getDerivedStateLastEClass
 		assertEquals("First", derivedEClass.name)
 		assertNull(derivedEClass.EPackage.name)
 	}
@@ -62,9 +59,8 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		'''.
 		parseWithTestEcore
 		val resource = program.eResource as DerivedStateAwareResource
-		val derivedEClass = resource.contents.last as EClass
-		assertEquals("First", derivedEClass.name)
-		assertNull(derivedEClass.EPackage)
+		// only program must be there and the inferred Jvm Type
+		assertEquals("test.__synthetic0", (resource.contents.last as JvmGenericType).identifier)
 	}
 
 	@Test
@@ -78,7 +74,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		'''.
 		parseWithTestEcore
 		val resource = program.eResource as DerivedStateAwareResource
-		assertEquals("First", (resource.contents.last as EClass).name)
+		assertEquals("First", program.getDerivedStateLastEClass.name)
 		// discard derived state
 		program.main.expressions.clear
 		resource.discardDerivedState
@@ -98,8 +94,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		}
 		'''.
 		parseWithTestEcore
-		val resource = program.eResource as DerivedStateAwareResource
-		val derivedEClass = resource.contents.last as EClass
+		val derivedEClass = program.getDerivedStateLastEClass
 		val derivedEAttribute = derivedEClass.EStructuralFeatures.head as EAttribute
 		assertEquals("newAttribute", derivedEAttribute.name)
 		assertEquals("First", derivedEAttribute.EContainingClass.name)
@@ -130,7 +125,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		'''.
 		parseWithTestEcore
 		val e = program.lastExpression
-		val derived = (program.eResource.contents.last as EClass)
+		val derived = program.getDerivedStateLastEClass
 		assertSame(e, derived.getPrimarySourceElement)
 	}
 
@@ -148,7 +143,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		parseWithTestEcore
 		val e = (program.lastExpression as EdeltaEcoreCreateEClassExpression).
 			body.expressions.last
-		val derivedEClass = (program.eResource.contents.last as EClass)
+		val derivedEClass = program.getDerivedStateLastEClass
 		val derivedEAttribute = derivedEClass.EStructuralFeatures.head
 		assertSame(e, derivedEAttribute.getPrimarySourceElement)
 	}

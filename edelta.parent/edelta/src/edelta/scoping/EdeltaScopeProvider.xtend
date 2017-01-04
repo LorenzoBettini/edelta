@@ -12,6 +12,7 @@ import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.scoping.IScope
@@ -61,9 +62,14 @@ class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 	
 	private def List<EClassifier> getClassifiers(EObject context) {
 		val prog = getProgram(context)
-		// there's no need to add derived EClasses created in the program
-		// since the derived state computer inserts them in the referred EPackage
-		(prog.metamodels.map[
+		// we also must explicitly consider the derived EPackage
+		// created by our derived state computer, containing EClasses
+		// created in the program
+		(context.eResource.contents.filter(EPackage).
+			map[EClassifiers].
+			flatten
+		+
+		prog.metamodels.map[
 			EClassifiers
 		].flatten).toList
 	}

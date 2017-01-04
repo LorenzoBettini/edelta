@@ -151,6 +151,15 @@ class Inputs {
 		'''
 	}
 
+	def referenceToCreatedEClassWithTheSameNameAsAnExistingEClass() {
+		'''
+			metamodel "foo"
+			
+			createEClass FooClass in foo
+			eclass FooClass
+		'''
+	}
+
 	def referenceToCreatedEAttribute() {
 		'''
 			metamodel "foo"
