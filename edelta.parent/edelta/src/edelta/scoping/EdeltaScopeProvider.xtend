@@ -5,6 +5,7 @@ package edelta.scoping
 
 import com.google.inject.Inject
 import edelta.edelta.EdeltaPackage
+import edelta.resource.EdeltaDerivedStateComputer
 import edelta.util.EdeltaModelUtil
 import java.util.List
 import org.eclipse.emf.ecore.EAttribute
@@ -12,7 +13,6 @@ import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.scoping.IScope
@@ -30,6 +30,7 @@ class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 
 	@Inject IResourceScopeCache cache
 	@Inject extension EdeltaModelUtil
+	@Inject extension EdeltaDerivedStateComputer
 
 	override getScope(EObject context, EReference reference) {
 		if (reference == EdeltaPackage.Literals.EDELTA_ECLASSIFIER_EXPRESSION__ECLASSIFIER) {
@@ -62,16 +63,18 @@ class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 	
 	private def List<EClassifier> getClassifiers(EObject context) {
 		val prog = getProgram(context)
-		// we also must explicitly consider the derived EPackage
+		// we also must explicitly consider the derived EPackages
 		// created by our derived state computer, containing EClasses
 		// created in the program
-		(context.eResource.contents.filter(EPackage).
-			map[EClassifiers].
-			flatten
+		(
+			context.eResource.derivedEPackages.
+				map[EClassifiers].
+				flatten
 		+
-		prog.metamodels.map[
-			EClassifiers
-		].flatten).toList
+			prog.metamodels.
+				map[EClassifiers].
+				flatten
+		).toList
 	}
 	
 	private def IScope scopeForEClass(EObject context) {

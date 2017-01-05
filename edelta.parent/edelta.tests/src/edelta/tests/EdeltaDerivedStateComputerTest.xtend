@@ -88,6 +88,22 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testDerivedEPackages() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		
+		createEClass First in foo
+		createEClass Second in foo
+		'''.
+		parseWithTestEcore
+		val derivedEPackages = program.eResource.derivedEPackages
+		assertEquals(1, derivedEPackages.size)
+		assertEquals("foo", derivedEPackages.head.name)
+	}
+
+	@Test
 	def void testInstallDerivedStateDuringPreIndexingPhase() {
 		val program = '''
 		package test

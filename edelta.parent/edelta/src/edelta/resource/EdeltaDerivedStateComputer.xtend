@@ -61,6 +61,10 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 		getOrInstallAdapter(resource).nameToEPackageMap
 	}
 
+	def derivedEPackages(Resource resource) {
+		nameToEPackageMap(resource).values
+	}
+
 	override installDerivedState(DerivedStateAwareResource resource, boolean preIndexingPhase) {
 		super.installDerivedState(resource, preIndexingPhase)
 		if (!preIndexingPhase) {
