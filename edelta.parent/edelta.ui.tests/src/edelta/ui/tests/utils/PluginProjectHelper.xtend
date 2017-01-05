@@ -39,8 +39,23 @@ class PluginProjectHelper {
 		);
 		projectFactory.addRequiredBundles(requiredBundles);
 		val result = projectFactory.createProject(new NullProgressMonitor(), null);
-		JavaProjectSetupUtil.makeJava5Compliant(JavaCore.create(result));
+		makeJava8Compliant(JavaCore.create(result));
 		return JavaProjectSetupUtil.findJavaProject(projectName);
+	}
+
+	def static void makeJava8Compliant(IJavaProject javaProject) {
+		val options= javaProject.getOptions(false);
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
+		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_CODEGEN_INLINE_JSR_BYTECODE, JavaCore.ENABLED);
+		options.put(JavaCore.COMPILER_LOCAL_VARIABLE_ATTR, JavaCore.GENERATE);
+		options.put(JavaCore.COMPILER_LINE_NUMBER_ATTR, JavaCore.GENERATE);
+		options.put(JavaCore.COMPILER_SOURCE_FILE_ATTR, JavaCore.GENERATE);
+		options.put(JavaCore.COMPILER_CODEGEN_UNUSED_LOCAL, JavaCore.PRESERVE);
+		javaProject.setOptions(options);
 	}
 
 	def assertNoErrors() {
@@ -72,7 +87,7 @@ class PluginProjectHelper {
 		assertEquals(expected.toString().replaceAll("\r", ""), actual.toString());
 	}
 
-	def void clearJdtIndex() {
+	def static void clearJdtIndex() {
 		val jdtMetadata = JavaCore.getPlugin().getStateLocation().toFile();
 		var success = false;
 		try {
@@ -84,11 +99,11 @@ class PluginProjectHelper {
 		System.err.println("Clean up index " + jdtMetadata.getAbsolutePath() + ": " + success);
 	}
 
-	def void cleanFolder(File parentFolder) throws FileNotFoundException {
+	def static void cleanFolder(File parentFolder) throws FileNotFoundException {
 		cleanFolder(parentFolder, [true]);
 	}
 
-	def void cleanFolder(File parentFolder, FileFilter myFilter) throws FileNotFoundException {
+	def static void cleanFolder(File parentFolder, FileFilter myFilter) throws FileNotFoundException {
 		if (!parentFolder.exists()) {
 			throw new FileNotFoundException(parentFolder.getAbsolutePath());
 		}
