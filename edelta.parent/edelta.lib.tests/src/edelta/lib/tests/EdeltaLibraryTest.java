@@ -14,13 +14,15 @@ import org.junit.Test;
 import edelta.lib.EdeltaLibrary;
 
 /**
+ * Library functions for manipulating an Ecore model.
+ * 
  * @author Lorenzo Bettini
  *
  */
 public class EdeltaLibraryTest {
 
 	private EdeltaLibrary lib;
-	
+
 	@Before
 	public void initLib() {
 		lib = new EdeltaLibrary();

@@ -9,4 +9,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="myReference" upperBound="-1"
         eType="#//MyEClass" containment="true"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MyNewClass"/>
+  <eClassifiers xsi:type="ecore:EClass" name="MyDerivedNewClass" eSuperTypes="#//MyNewClass"/>
 </ecore:EPackage>

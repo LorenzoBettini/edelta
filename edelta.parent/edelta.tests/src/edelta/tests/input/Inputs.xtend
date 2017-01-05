@@ -126,6 +126,48 @@ class Inputs {
 		println(eattribute myAttribute)
 		ereference myReference
 		println(ereference myReference)
+		val ref = ereference myReference
+		'''
+	}
+
+	def createEClass() {
+		'''
+			metamodel "foo"
+			
+			createEClass MyNewClass in foo
+			
+			createEClass MyDerivedNewClass in foo {
+				ESuperTypes += eclass MyNewClass
+			}
+		'''
+	}
+
+	def referenceToCreatedEClass() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo
+			eclass NewClass
+		'''
+	}
+
+	def referenceToCreatedEClassWithTheSameNameAsAnExistingEClass() {
+		'''
+			metamodel "foo"
+			
+			createEClass FooClass in foo
+			eclass FooClass
+		'''
+	}
+
+	def referenceToCreatedEAttribute() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				createEAttribute newAttribute
+			}
+			eattribute newAttribute
 		'''
 	}
 }

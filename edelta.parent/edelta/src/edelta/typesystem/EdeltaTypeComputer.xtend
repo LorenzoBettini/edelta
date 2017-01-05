@@ -14,6 +14,8 @@ import org.eclipse.xtext.xbase.annotations.typesystem.XbaseWithAnnotationsTypeCo
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputationState
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EReference
+import edelta.edelta.EdeltaEcoreCreateEClassExpression
+import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 
 class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 	def dispatch void computeTypes(EdeltaEClassifierExpression e, ITypeComputationState state) {
@@ -38,5 +40,13 @@ class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 
 	def dispatch void computeTypes(EdeltaEReferenceExpression e, ITypeComputationState state) {
 		state.acceptActualType(getRawTypeForName(EReference, state))
+	}
+
+	def dispatch void computeTypes(EdeltaEcoreCreateEClassExpression e, ITypeComputationState state) {
+		state.acceptActualType(getRawTypeForName(EClass, state))
+	}
+
+	def dispatch void computeTypes(EdeltaEcoreCreateEAttributeExpression e, ITypeComputationState state) {
+		state.acceptActualType(getRawTypeForName(EAttribute, state))
 	}
 }

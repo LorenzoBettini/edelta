@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
@@ -25,6 +26,7 @@ import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.xtext.xbase.lib.Extension;
@@ -213,5 +215,15 @@ public abstract class AbstractEdelta {
 			return (EReference) f;
 		}
 		return null;
+	}
+
+	public EClass createEClass(String packageName, String name, Consumer<EClass> initializer) {
+		EClass newEClass = lib.newEClass(name, initializer);
+		getEPackage(packageName).getEClassifiers().add(newEClass);
+		return newEClass;
+	}
+
+	public void removeEClassifier(String packageName, String name) {
+		EcoreUtil.delete(getEClassifier(packageName, name), true);
 	}
 }

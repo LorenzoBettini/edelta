@@ -8,11 +8,13 @@ import static edelta.testutils.EdeltaTestUtils.compareFileContents;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 import java.io.IOException;
 
 import org.eclipse.emf.common.util.WrappedException;
 import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -218,6 +220,44 @@ public class EdeltaTest {
 					"testSaveModifiedEcoresAfterRemovingBaseClass"+"/"+
 						MY_ECORE,
 				MODIFIED+"/"+MY_ECORE);
+	}
+
+	@Test
+	public void testSaveModifiedEcoresAfterRemovingBaseClass2() throws IOException {
+		loadTestEcore(MY_ECORE);
+		// modify the ecore model by removing MyBaseClass
+		// this will also remove existing references, so the model
+		// is still valid
+		edelta.removeEClassifier(MYPACKAGE, "MyBaseClass");
+		wipeModifiedDirectoryContents();
+		edelta.saveModifiedEcores(MODIFIED);
+		compareFileContents(
+				EXPECTATIONS+"/"+
+					"testSaveModifiedEcoresAfterRemovingBaseClass"+"/"+
+						MY_ECORE,
+				MODIFIED+"/"+MY_ECORE);
+	}
+
+	@Test
+	public void testCreateEClass() throws IOException {
+		loadTestEcore(MY_ECORE);
+		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
+		assertNull(ePackage.getEClassifier("NewClass"));
+		EClass createEClass = edelta.createEClass(MYPACKAGE, "NewClass", null);
+		assertSame(createEClass, ePackage.getEClassifier("NewClass"));
+	}
+
+	@Test
+	public void testRemoveEClassifier() throws IOException {
+		loadTestEcore(MY_ECORE);
+		// check that the superclass is set
+		assertSame(
+			edelta.getEClassifier(MYPACKAGE, "MyBaseClass"),
+			edelta.getEClass(MYPACKAGE, "MyDerivedClass").getESuperTypes().get(0));
+		// modify the ecore model by removing MyBaseClass
+		edelta.removeEClassifier(MYPACKAGE, "MyBaseClass");
+		// check that MyDerivedClass is not its subclass anymore
+		assertEquals(0, edelta.getEClass(MYPACKAGE, "MyDerivedClass").getESuperTypes().size());
 	}
 
 	private void wipeModifiedDirectoryContents() {
