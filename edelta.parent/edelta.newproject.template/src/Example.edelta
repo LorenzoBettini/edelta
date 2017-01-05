@@ -1,0 +1,31 @@
+// IMPORTANT: ecores must be in a source directory
+// otherwise you can't refer to them
+
+package com.example
+
+metamodel "myecore"
+metamodel "ecore"
+
+/*
+ * Reusable function to create a new EClass with the
+ * specified name, setting MyEClass as its superclass
+ * @param name
+ */
+def createClass(String name) {
+	newEClass(name) => [
+		ESuperTypes += (eclass MyEClass)
+	]
+}
+
+val p = (eclass MyEClass).EPackage
+p.EClassifiers += createClass("NewClass") => [
+	EStructuralFeatures += newEAttribute("myStringAttribute") => [
+		EType = edatatype EString
+	]
+	EStructuralFeatures += newEReference("myReference") => [
+		EType = (eclass MyEClass)
+		upperBound = -1;
+		containment = true;
+		lowerBound = 0
+	]
+]

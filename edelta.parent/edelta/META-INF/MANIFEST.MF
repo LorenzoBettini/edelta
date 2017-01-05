@@ -15,17 +15,20 @@ Require-Bundle: org.eclipse.xtext,
  org.objectweb.asm;bundle-version="[5.0.1,6.0.0)";resolution:=optional,
  org.eclipse.xtext.util,
  org.eclipse.xtend.lib,
- org.eclipse.emf.common
+ org.eclipse.emf.common,
+ edelta.lib;visibility:=reexport
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: edelta.edelta.impl,
+Export-Package: edelta,
+ edelta.compiler,
+ edelta.edelta,
+ edelta.edelta.impl,
+ edelta.edelta.util,
  edelta.jvmmodel,
- edelta.services,
  edelta.parser.antlr,
  edelta.parser.antlr.internal,
- edelta.edelta,
- edelta,
- edelta.edelta.util,
- edelta.validation,
+ edelta.scoping,
  edelta.serializer,
- edelta.scoping
+ edelta.services,
+ edelta.typesystem,
+ edelta.validation
 Import-Package: org.apache.log4j

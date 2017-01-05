@@ -1,23 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<feature id="edelta.feature"
-	label="Edelta Feature "
-	version="1.0.0.qualifier">
-	<plugin
-			id="edelta"
-			download-size="0"
-			install-size="0"
-			version="0.0.0"
-			unpack="false"/>
-	<plugin
-			id="edelta.ide"
-			download-size="0"
-			install-size="0"
-			version="0.0.0"
-			unpack="false"/>
-	<plugin
-			id="edelta.ui"
-			download-size="0"
-			install-size="0"
-			version="0.0.0"
-			unpack="false"/>
+<feature
+      id="edelta.feature"
+      label="Edelta Feature "
+      version="1.0.0.qualifier">
+
+   <requires>
+      <import feature="org.eclipse.xtext.xbase" version="2.10.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.xtext.ui" version="2.10.0" match="greaterOrEqual"/>
+   </requires>
+
+   <plugin
+         id="edelta"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edelta.ide"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edelta.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edelta.lib"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>

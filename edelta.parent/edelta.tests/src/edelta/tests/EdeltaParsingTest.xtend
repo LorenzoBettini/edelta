@@ -14,6 +14,13 @@ import org.junit.runner.RunWith
 class EdeltaParsingTest extends EdeltaAbstractTest {
 
 	@Test
+	def void testEmptyProgram() {
+		val result = parse('''
+		''')
+		Assert.assertNotNull(result)
+	}
+
+	@Test
 	def void testSingleMetamodel() {
 		val result = parse('''
 			metamodel "ecore"

@@ -7,13 +7,17 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<tycho-version>0.23.1</tycho-version>
+		<tycho-version>0.25.0</tycho-version>
 		<xtextVersion>2.10.0</xtextVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		<tycho.testArgLine></tycho.testArgLine>
 	</properties>
 	<modules>
+		<module>edelta.lib</module>
+		<module>edelta.testutils</module>
+		<module>edelta.lib.tests</module>
 		<module>edelta</module>
 		<module>edelta.ide</module>
 		<module>edelta.ui</module>
@@ -99,6 +103,11 @@
 							<os>linux</os>
 							<ws>gtk</ws>
 							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86</arch>
 						</environment>
 					</environments>
 				</configuration>

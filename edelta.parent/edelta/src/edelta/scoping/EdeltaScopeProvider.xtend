@@ -3,11 +3,22 @@
  */
 package edelta.scoping
 
+import com.google.inject.Inject
 import edelta.edelta.EdeltaPackage
 import edelta.edelta.EdeltaProgram
+import java.util.List
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EClassifier
+import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
+import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.Scopes
+import org.eclipse.xtext.scoping.impl.FilteringScope
+import org.eclipse.xtext.util.IResourceScopeCache
+import org.eclipse.emf.ecore.EStructuralFeature
+import org.eclipse.emf.ecore.EAttribute
 
 /**
  * This class contains custom scoping description.
@@ -17,16 +28,79 @@ import org.eclipse.xtext.scoping.Scopes
  */
 class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 
+	@Inject IResourceScopeCache cache
+
 	override getScope(EObject context, EReference reference) {
-		if (reference == EdeltaPackage.Literals.EDELTA_PROGRAM__ECLASSES) {
-			val prog = context as EdeltaProgram
-			return Scopes.scopeFor(
-				prog.metamodels.map [
-					EClassifiers
-				].flatten
-			)
+		if (reference == EdeltaPackage.Literals.EDELTA_ECLASSIFIER_EXPRESSION__ECLASSIFIER) {
+			return scopeForEClassifier(context)
+		} else if (reference == EdeltaPackage.Literals.EDELTA_ECLASS_EXPRESSION__ECLASS) {
+			return scopeForEClass(context)
+		} else if (reference == EdeltaPackage.Literals.EDELTA_EDATA_TYPE_EXPRESSION__EDATATYPE) {
+			return scopeForEDataType(context)
+		} else if (reference == EdeltaPackage.Literals.EDELTA_EFEATURE_EXPRESSION__EFEATURE) {
+			return scopeForEStructuralFeature(context)
+		} else if (reference == EdeltaPackage.Literals.EDELTA_EATTRIBUTE_EXPRESSION__EATTRIBUTE) {
+			return scopeForEAttribute(context)
+		} else if (reference == EdeltaPackage.Literals.EDELTA_EREFERENCE_EXPRESSION__EREFERENCE) {
+			return scopeForEReference(context)
+		} else if (reference == EdeltaPackage.Literals.EDELTA_PROGRAM__METAMODELS) {
+			return new FilteringScope(delegateGetScope(context, reference)) [
+				"false".equals(getUserData("nsURI"))
+			]
 		}
 		super.getScope(context, reference)
 	}
 
+	private def IScope scopeForEClassifier(EObject context) {
+		cache.get("scopeEClassifer", context.eResource) [
+			Scopes.scopeFor(getClassifiers(context))
+		]
+	}
+	
+	private def List<EClassifier> getClassifiers(EObject context) {
+		val prog = EcoreUtil2.getContainerOfType(context, EdeltaProgram)
+		prog.metamodels.map[
+			EClassifiers
+		].flatten.toList
+	}
+
+	private def IScope scopeForEClass(EObject context) {
+		cache.get("scopeEClass", context.eResource) [
+			Scopes.scopeFor(getEClasses(context))
+		]
+	}
+	
+	private def List<EClass> getEClasses(EObject context) {
+		getClassifiers(context).filter(EClass).toList
+	}
+
+	private def IScope scopeForEDataType(EObject context) {
+		cache.get("scopeEDataType", context.eResource) [
+			Scopes.scopeFor(getClassifiers(context).filter(EDataType).toList)
+		]
+	}
+
+	private def IScope scopeForEStructuralFeature(EObject context) {
+		cache.get("scopeEStructuralFeature", context.eResource) [
+			Scopes.scopeFor(getFeatures(context))
+		]
+	}
+
+	private def List<EStructuralFeature> getFeatures(EObject context) {
+		getEClasses(context).map[
+			EStructuralFeatures
+		].flatten.toList
+	}
+
+	private def IScope scopeForEAttribute(EObject context) {
+		cache.get("scopeEAttribute", context.eResource) [
+			Scopes.scopeFor(getFeatures(context).filter(EAttribute).toList)
+		]
+	}
+
+	private def IScope scopeForEReference(EObject context) {
+		cache.get("scopeEReference", context.eResource) [
+			Scopes.scopeFor(getFeatures(context).filter(EReference).toList)
+		]
+	}
 }

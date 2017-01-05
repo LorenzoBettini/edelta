@@ -13,6 +13,11 @@ import org.junit.runner.RunWith
 class EdeltaValidatorTest extends EdeltaAbstractTest {
 
 	@Test
+	def void testEmptyProgram() {
+		''''''.parse.assertNoErrors
+	}
+
+	@Test
 	def void testCanReferToMetamodel() {
 		referenceToMetamodel.parseWithTestEcore.assertNoErrors
 	}
@@ -22,4 +27,8 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		referenceToEClass.parseWithTestEcore.assertNoErrors
 	}
 
+	@Test
+	def void testUseImportedJavaTypes() {
+		useImportedJavaTypes.parse.assertNoErrors
+	}
 }

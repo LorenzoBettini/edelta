@@ -1,8 +1,14 @@
 // IMPORTANT: ecores must be in source directories
 // otherwise you can't refer to them
 
+metamodel "ecore"
 metamodel "myexample"
 metamodel "myecore"
 
+def createClass(String name) {
+	newEClass(name)
+}
+
 eclass MyExampleEClass // from myexample ecore in model project
 eclass MyEClass // from myecore ecore in this project
+eclass EAnnotation
