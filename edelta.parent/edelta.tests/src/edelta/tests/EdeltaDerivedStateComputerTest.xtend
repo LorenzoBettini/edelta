@@ -4,8 +4,10 @@
 package edelta.tests
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaEClassExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.resource.EdeltaDerivedStateComputer
+import edelta.resource.EdeltaDerivedStateComputer.EdeltaDerivedStateAdapter
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl
@@ -13,12 +15,14 @@ import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
 import org.eclipse.xtext.resource.DerivedStateAwareResource
+import org.eclipse.xtext.resource.XtextResource
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import org.eclipse.xtext.resource.XtextResource
-import edelta.resource.EdeltaDerivedStateComputer.EdeltaDerivedStateAdapter
+import java.util.Map
+import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.common.notify.impl.AdapterImpl
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -30,11 +34,23 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	 * Make protected members public for testing
 	 */
 	static class TestableEdeltaDerivedStateComputer extends EdeltaDerivedStateComputer {
-		
+
 		override public getOrInstallAdapter(Resource resource) {
 			super.getOrInstallAdapter(resource)
 		}
-		
+
+		override public unloadDerivedPackages(Map<String, EPackage> nameToEPackageMap) {
+			super.unloadDerivedPackages(nameToEPackageMap)
+		}
+
+		override public derivedToSourceMap(Resource resource) {
+			super.derivedToSourceMap(resource)
+		}
+
+		override public nameToEPackageMap(Resource resource) {
+			super.nameToEPackageMap(resource)
+		}
+
 	}
 
 	@Test
@@ -163,6 +179,88 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		resource.discardDerivedState
 		// only program must be there and the inferred Jvm Type
 		assertEquals("test.__synthetic0", (resource.contents.last as JvmGenericType).identifier)
+	}
+
+	@Test
+	def void testDerivedStateIsCorrectlyDiscartedAndUnloaded() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		
+		createEClass First in foo
+		eclass First
+		'''.
+		parseWithTestEcore
+		val resource = program.eResource as DerivedStateAwareResource
+		val derivedStateEClass = program.getDerivedStateLastEClass
+		val eclassRef = program.main.expressions.last as EdeltaEClassExpression
+		assertSame(derivedStateEClass, eclassRef.eclass)
+		assertEquals("First", derivedStateEClass.name)
+		assertFalse("should be resolved now", eclassRef.eclass.eIsProxy)
+		// discard derived state
+		program.main.expressions.remove(0)
+		resource.discardDerivedState
+		// the reference to the EClass is still there
+		assertSame(derivedStateEClass, eclassRef.eclass)
+		// but the EClass is now a proxy
+		assertTrue("should be a proxy now", eclassRef.eclass.eIsProxy)
+	}
+
+	@Test
+	def void testAdaptersAreRemovedFromDerivedEPackagesAfterUnloading() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		
+		createEClass First in foo
+		eclass First
+		'''.
+		parseWithTestEcore
+		val resource = program.eResource as DerivedStateAwareResource
+		val derivedToSourceMap = resource.derivedToSourceMap
+		val nameToEPackageMap = resource.nameToEPackageMap
+		assertFalse(resource.eAdapters.empty)
+		assertFalse(derivedToSourceMap.empty)
+		assertFalse(nameToEPackageMap.empty)
+		// explicitly add an adapter to the EPackage
+		nameToEPackageMap.values.head.eAdapters += new AdapterImpl
+		assertTrue(nameToEPackageMap.values.forall[!eAdapters.empty])
+		// unload packages
+		unloadDerivedPackages(nameToEPackageMap)
+		// maps are not empty yet
+		assertFalse(derivedToSourceMap.empty)
+		assertFalse(nameToEPackageMap.empty)
+		assertFalse(resource.eAdapters.empty)
+		// but adapters have been removed from EPackage
+		assertTrue(nameToEPackageMap.values.forall[eAdapters.empty])
+	}
+
+	@Test
+	def void testMapsAreClearedAfterDiscarding() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		
+		createEClass First in foo
+		eclass First
+		'''.
+		parseWithTestEcore
+		val resource = program.eResource as DerivedStateAwareResource
+		val derivedToSourceMap = resource.derivedToSourceMap
+		val nameToEPackageMap = resource.nameToEPackageMap
+		assertFalse(resource.eAdapters.empty)
+		assertFalse(derivedToSourceMap.empty)
+		assertFalse(nameToEPackageMap.empty)
+		// discard derived state
+		program.main.expressions.remove(0)
+		resource.discardDerivedState
+		// maps are empty now
+		assertTrue(derivedToSourceMap.empty)
+		assertTrue(nameToEPackageMap.empty)
+		assertFalse(resource.eAdapters.empty)
 	}
 
 	@Test

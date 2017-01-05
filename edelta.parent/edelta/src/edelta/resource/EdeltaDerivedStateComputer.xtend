@@ -16,6 +16,7 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.Constants
 import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader.GenericUnloader
 import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator
@@ -28,6 +29,8 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 	var String languageName;
 
 	@Inject extension EdeltaLibrary
+
+	@Inject GenericUnloader unloader
 
 	public static class EdeltaDerivedStateAdapter extends AdapterImpl {
 		var Map<EObject, EObject> targetToSourceMap = newHashMap()
@@ -108,18 +111,30 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 	}
 
 	override discardDerivedState(DerivedStateAwareResource resource) {
+		val derivedToSourceMap = resource.derivedToSourceMap
+		val nameToEPackageMap = resource.nameToEPackageMap
+		unloadDerivedPackages(nameToEPackageMap)
 		super.discardDerivedState(resource)
-		resource.derivedToSourceMap.clear
-		resource.nameToEPackageMap.clear
+		derivedToSourceMap.clear
+		nameToEPackageMap.clear
 	}
 
-	override getPrimarySourceElement(EObject jvmElement) {
-		if (jvmElement !== null) {
-			val sourceElement = jvmElement.resource.derivedToSourceMap.get(jvmElement)
+	/**
+	 * Unload (turn them into proxies) all derived Ecore elements
+	 */
+	protected def void unloadDerivedPackages(Map<String, EPackage> nameToEPackageMap) {
+		for (p : nameToEPackageMap.values) {
+			unloader.unloadRoot(p)
+		}
+	}
+
+	override getPrimarySourceElement(EObject element) {
+		if (element !== null) {
+			val sourceElement = element.resource.derivedToSourceMap.get(element)
 			if (sourceElement !== null)
 				return sourceElement
 		}
-		return super.getPrimarySourceElement(jvmElement)
+		return super.getPrimarySourceElement(element)
 	}
 
 }
