@@ -128,13 +128,13 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 		}
 	}
 
-	override getPrimarySourceElement(EObject jvmElement) {
-		if (jvmElement !== null) {
-			val sourceElement = jvmElement.resource.derivedToSourceMap.get(jvmElement)
+	override getPrimarySourceElement(EObject element) {
+		if (element !== null) {
+			val sourceElement = element.resource.derivedToSourceMap.get(element)
 			if (sourceElement !== null)
 				return sourceElement
 		}
-		return super.getPrimarySourceElement(jvmElement)
+		return super.getPrimarySourceElement(element)
 	}
 
 }
