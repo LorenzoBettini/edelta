@@ -165,4 +165,15 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		newBuilder.append('metamodel "mypackage" ereference ').
 			assertText('myReference', 'myBaseReference', 'myDerivedReference')
 	}
+
+	@Test def void testEClassifierAfterCreatingAnEClass() {
+		newBuilder.append('''
+			metamodel "mypackage"
+			
+			createEClass AAA in mypackage
+			
+			eclassifier 
+			''').
+			assertText('AAA', 'MyClass', 'MyBaseClass', 'MyDerivedClass', 'MyDataType')
+	}
 }
