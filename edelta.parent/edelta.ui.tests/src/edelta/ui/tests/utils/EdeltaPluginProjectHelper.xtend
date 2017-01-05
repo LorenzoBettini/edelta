@@ -1,6 +1,6 @@
 package edelta.ui.tests.utils
 
-import edelta.ui.internal.EdeltaActivator
+import com.google.inject.Inject
 import org.eclipse.ui.PlatformUI
 
 import static org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil.*
@@ -13,15 +13,15 @@ import static org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil.*
  */
 class EdeltaPluginProjectHelper {
 
+	@Inject PluginProjectHelper pluginProjectHelper
+
 	val public static PROJECT_NAME = "customPluginProject"
 
-	def static createEdeltaPluginProject(String projectName, String...dependencies) {
-		val injector = EdeltaActivator.getInstance().getInjector(EdeltaActivator.EDELTA_EDELTA);
-		val projectHelper = injector.getInstance(PluginProjectHelper)
-		val pluginJavaProject = projectHelper.createJavaPluginProject(
+	def createEdeltaPluginProject(String projectName, String...dependencies) {
+		val pluginJavaProject = pluginProjectHelper.createJavaPluginProject(
 			projectName, (#["edelta.lib"]+dependencies).toList
 		)
-		createFile(PROJECT_NAME+"/src/My.ecore",
+		createFile(projectName+"/src/My.ecore",
 			'''
 			<?xml version="1.0" encoding="UTF-8"?>
 			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
