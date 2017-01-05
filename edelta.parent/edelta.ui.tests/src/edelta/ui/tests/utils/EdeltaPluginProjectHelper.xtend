@@ -30,7 +30,7 @@ class EdeltaPluginProjectHelper {
 			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="myAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
 			    <eStructuralFeatures xsi:type="ecore:EReference" name="myReference" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"/>
 			  </eClassifiers>
-			  <eClassifiers xsi:type="ecore:EDataType" name="MyDataType"/>
+			  <eClassifiers xsi:type="ecore:EDataType" name="MyDataType" instanceClassName="java.lang.String"/>
 			  <eClassifiers xsi:type="ecore:EClass" name="MyBaseClass">
 			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="myBaseAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
 			    <eStructuralFeatures xsi:type="ecore:EReference" name="myBaseReference" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"/>
