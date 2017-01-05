@@ -2,7 +2,6 @@ package edelta.ui.tests
 
 import edelta.ui.internal.EdeltaActivator
 import edelta.ui.tests.utils.PDETargetPlatformUtils
-import edelta.ui.tests.utils.PluginProjectHelper
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -25,6 +24,7 @@ import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 
+import static edelta.ui.tests.utils.EdeltaPluginProjectHelper.*
 import static org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil.*
 
 @RunWith(XtextRunner)
@@ -33,18 +33,14 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	static IJavaProject pluginJavaProject
 
-	val static PROJECT_NAME = "customPluginProject"
-
 	@BeforeClass
 	def static void setUp() {
 		// needed when building with Tycho, otherwise, dependencies
 		// in the MANIFEST of the created project will not be visible
 		PDETargetPlatformUtils.setTargetPlatform();
-
+		
 		closeWelcomePage
-		val injector = EdeltaActivator.getInstance().getInjector(EdeltaActivator.EDELTA_EDELTA);
-		val projectHelper = injector.getInstance(PluginProjectHelper)
-		pluginJavaProject = projectHelper.createJavaPluginProject(PROJECT_NAME, newArrayList("edelta.lib"))
+		pluginJavaProject = createEdeltaPluginProject(PROJECT_NAME)
 		createFile(PROJECT_NAME+"/src/My.ecore",
 			'''
 			<?xml version="1.0" encoding="UTF-8"?>
@@ -109,13 +105,6 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	def private IEditorPart openEditor(IFile file, String editorId) {
 		return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
 				new FileEditorInput(file), editorId);
-	}
-
-	def static protected void closeWelcomePage() {
-		if (PlatformUI.getWorkbench().getIntroManager().getIntro() != null) {
-			PlatformUI.getWorkbench().getIntroManager().closeIntro(
-					PlatformUI.getWorkbench().getIntroManager().getIntro());
-		}
 	}
 
 	def static void closeEditors() {
