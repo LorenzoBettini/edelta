@@ -16,6 +16,7 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.Constants
 import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader.GenericUnloader
 import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator
@@ -28,6 +29,8 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 	var String languageName;
 
 	@Inject extension EdeltaLibrary
+
+	@Inject GenericUnloader unloader
 
 	public static class EdeltaDerivedStateAdapter extends AdapterImpl {
 		var Map<EObject, EObject> targetToSourceMap = newHashMap()
@@ -108,6 +111,10 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 	}
 
 	override discardDerivedState(DerivedStateAwareResource resource) {
+		// unload (turn them into proxies) all derived Ecore elements
+		for (p : resource.derivedEPackages) {
+			unloader.unloadRoot(p)
+		}
 		super.discardDerivedState(resource)
 		resource.derivedToSourceMap.clear
 		resource.nameToEPackageMap.clear
