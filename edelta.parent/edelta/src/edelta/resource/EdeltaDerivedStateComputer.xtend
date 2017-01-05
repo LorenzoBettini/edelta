@@ -69,9 +69,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 		super.installDerivedState(resource, preIndexingPhase)
 		if (!preIndexingPhase) {
 			val targetToSourceMap = resource.derivedToSourceMap
-			targetToSourceMap.clear
 			val nameToEPackageMap = resource.nameToEPackageMap
-			nameToEPackageMap.clear
 			for (exp :resource.allContents.toIterable.filter(EdeltaEcoreCreateEClassExpression)) {
 				val derivedEClass = newEClass(exp.name) => [
 					// could be null in an incomplete expression
