@@ -15,9 +15,6 @@ import edelta.resource.EdeltaLocationInFileProvider
  */
 class EdeltaRuntimeModule extends AbstractEdeltaRuntimeModule {
 
-//	override bindILinkingService() {
-//		EdeltaLinkingService
-//	}
 	override bindIQualifiedNameProvider() {
 		EdeltaQualifiedNameProvider
 	}

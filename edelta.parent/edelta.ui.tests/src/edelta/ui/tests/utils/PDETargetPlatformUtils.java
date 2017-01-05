@@ -16,6 +16,7 @@ import org.eclipse.pde.core.target.ITargetPlatformService;
 import org.eclipse.pde.core.target.LoadTargetDefinitionJob;
 import org.eclipse.pde.internal.core.target.TargetPlatformService;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  * Implements workaround suggested here:
@@ -49,16 +50,26 @@ public class PDETargetPlatformUtils {
 			System.out.println("Using the Workbench's target platform");
 			return;
 		}
-		
 		ITargetPlatformService tpService = TargetPlatformService.getDefault();
 		ITargetDefinition targetDef = tpService.newTarget();
+		Bundle currentBundle = FrameworkUtil.getBundle(PDETargetPlatformUtils.class);
+		System.out.println("Current bundle: " + currentBundle);
 		targetDef.setName("Tycho platform");
 		Bundle[] bundles = Platform.getBundle("org.eclipse.core.runtime").getBundleContext().getBundles();
 		List<ITargetLocation> bundleContainers = new ArrayList<ITargetLocation>();
 		Set<File> dirs = new HashSet<File>();
 		System.out.println("Bundles for the target platform:");
 		for (Bundle bundle : bundles) {
-			System.out.print(bundle);
+			if (bundle.equals(currentBundle)) {
+				// we skip the current bundle, otherwise the folder for the target platform
+				// will include the absolute directory of the maven parent project
+				// since the projects are nested in the parent project the result
+				// would be that Java packages of our project will be available twice
+				// and Java won't be able to find our classes leading in compilation
+				// errors during our tests.
+				System.err.println("*** Skipping current bundle: " + currentBundle);
+				continue;
+			}
 //			AbstractBundle bundleImpl = (AbstractBundle) bundle;
 //			BaseData bundleData = (BaseData) bundleImpl.getBundleData();
 			EquinoxBundle bundleImpl = (EquinoxBundle) bundle;
@@ -67,7 +78,9 @@ public class PDETargetPlatformUtils {
 			File folder = file.getParentFile();
 			if (!dirs.contains(folder)) {
 				dirs.add(folder);
-				bundleContainers.add(tpService.newDirectoryLocation(folder.getAbsolutePath()));
+				String absolutePath = folder.getAbsolutePath();
+				System.out.println(bundle + " - " + absolutePath);
+				bundleContainers.add(tpService.newDirectoryLocation(absolutePath));
 			}
 		}
 		System.out.println("");
