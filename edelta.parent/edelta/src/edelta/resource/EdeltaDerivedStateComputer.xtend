@@ -113,13 +113,19 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 	override discardDerivedState(DerivedStateAwareResource resource) {
 		val derivedToSourceMap = resource.derivedToSourceMap
 		val nameToEPackageMap = resource.nameToEPackageMap
-		// unload (turn them into proxies) all derived Ecore elements
-		for (p : nameToEPackageMap.values) {
-			unloader.unloadRoot(p)
-		}
+		unloadDerivedPackages(nameToEPackageMap)
 		super.discardDerivedState(resource)
 		derivedToSourceMap.clear
 		nameToEPackageMap.clear
+	}
+
+	/**
+	 * Unload (turn them into proxies) all derived Ecore elements
+	 */
+	protected def void unloadDerivedPackages(Map<String, EPackage> nameToEPackageMap) {
+		for (p : nameToEPackageMap.values) {
+			unloader.unloadRoot(p)
+		}
 	}
 
 	override getPrimarySourceElement(EObject jvmElement) {
