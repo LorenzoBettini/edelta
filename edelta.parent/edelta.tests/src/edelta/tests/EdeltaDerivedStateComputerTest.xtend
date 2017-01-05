@@ -238,7 +238,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testAreClearedAfterDiscarding() {
+	def void testMapsAreClearedAfterDiscarding() {
 		val program = '''
 		package test
 		
