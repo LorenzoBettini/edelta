@@ -73,7 +73,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 			for (exp :resource.allContents.toIterable.filter(EdeltaEcoreCreateEClassExpression)) {
 				val derivedEClass = newEClass(exp.name) => [
 					// could be null in an incomplete expression
-					addToDerivedEPackage(resource, exp.epackage)
+					addToDerivedEPackage(nameToEPackageMap, exp.epackage)
 				]
 				targetToSourceMap.put(derivedEClass, exp)
 				for (e : EcoreUtil2.getAllContentsOfType(exp, EdeltaEcoreCreateEAttributeExpression)) {
@@ -93,10 +93,9 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 	 * must not add them to the original referred package or we would mess
 	 * with Ecore original packages.
 	 */
-	def private addToDerivedEPackage(EClass created, Resource resource, EPackage referredEPackage) {
+	def private addToDerivedEPackage(EClass created, Map<String, EPackage> nameToEPackageMap, EPackage referredEPackage) {
 		if (referredEPackage !== null) {
 			val referredEPackageName = referredEPackage.name
-			val nameToEPackageMap = resource.nameToEPackageMap
 			var derivedEPackage = nameToEPackageMap.get(referredEPackageName)
 			if (derivedEPackage === null) {
 				derivedEPackage = EcoreFactory.eINSTANCE.createEPackage => [
