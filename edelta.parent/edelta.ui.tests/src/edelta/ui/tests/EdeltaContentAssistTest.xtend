@@ -2,7 +2,6 @@ package edelta.ui.tests
 
 import edelta.ui.internal.EdeltaActivator
 import edelta.ui.tests.utils.PDETargetPlatformUtils
-import edelta.ui.tests.utils.PluginProjectHelper
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -25,15 +24,15 @@ import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 
+import static edelta.ui.tests.utils.EdeltaPluginProjectHelper.*
 import static org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil.*
+import edelta.ui.tests.utils.EdeltaPluginProjectHelper
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaUiInjectorProvider)
 class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	static IJavaProject pluginJavaProject
-
-	val static PROJECT_NAME = "customPluginProject"
 
 	@BeforeClass
 	def static void setUp() {
@@ -43,29 +42,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 		closeWelcomePage
 		val injector = EdeltaActivator.getInstance().getInjector(EdeltaActivator.EDELTA_EDELTA);
-		val projectHelper = injector.getInstance(PluginProjectHelper)
-		pluginJavaProject = projectHelper.createJavaPluginProject(PROJECT_NAME, newArrayList("edelta.lib"))
-		createFile(PROJECT_NAME+"/src/My.ecore",
-			'''
-			<?xml version="1.0" encoding="UTF-8"?>
-			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="mypackage" nsURI="http://my.package.org" nsPrefix="mypackage">
-			  <eClassifiers xsi:type="ecore:EClass" name="MyClass">
-			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="myAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-			    <eStructuralFeatures xsi:type="ecore:EReference" name="myReference" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"/>
-			  </eClassifiers>
-			  <eClassifiers xsi:type="ecore:EDataType" name="MyDataType"/>
-			  <eClassifiers xsi:type="ecore:EClass" name="MyBaseClass">
-			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="myBaseAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-			    <eStructuralFeatures xsi:type="ecore:EReference" name="myBaseReference" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"/>
-			  </eClassifiers>
-			  <eClassifiers xsi:type="ecore:EClass" name="MyDerivedClass" eSuperTypes="#//MyBaseClass">
-			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="myDerivedAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-			    <eStructuralFeatures xsi:type="ecore:EReference" name="myDerivedReference" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"/>
-			  </eClassifiers>
-			</ecore:EPackage>
-			'''
-		)
+		val projectHelper = injector.getInstance(EdeltaPluginProjectHelper)
+		pluginJavaProject = projectHelper.createEdeltaPluginProject(PROJECT_NAME)
 	}
 
 	@AfterClass
@@ -109,13 +87,6 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	def private IEditorPart openEditor(IFile file, String editorId) {
 		return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
 				new FileEditorInput(file), editorId);
-	}
-
-	def static protected void closeWelcomePage() {
-		if (PlatformUI.getWorkbench().getIntroManager().getIntro() != null) {
-			PlatformUI.getWorkbench().getIntroManager().closeIntro(
-					PlatformUI.getWorkbench().getIntroManager().getIntro());
-		}
 	}
 
 	def static void closeEditors() {
