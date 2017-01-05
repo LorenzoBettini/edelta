@@ -7,6 +7,8 @@ import com.google.inject.Inject
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.resource.EdeltaDerivedStateComputer
 import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.emf.ecore.resource.impl.ResourceImpl
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
@@ -15,12 +17,44 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import org.eclipse.xtext.resource.XtextResource
+import edelta.resource.EdeltaDerivedStateComputer.EdeltaDerivedStateAdapter
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
 class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 
-	@Inject extension EdeltaDerivedStateComputer
+	@Inject extension TestableEdeltaDerivedStateComputer
+
+	/**
+	 * Make protected members public for testing
+	 */
+	static class TestableEdeltaDerivedStateComputer extends EdeltaDerivedStateComputer {
+		
+		override public getOrInstallAdapter(Resource resource) {
+			super.getOrInstallAdapter(resource)
+		}
+		
+	}
+
+	@Test
+	def void testGetOrInstallAdapterWithNotXtextResource() {
+		assertNotNull(getOrInstallAdapter(new ResourceImpl))
+	}
+
+	@Test
+	def void testGetOrInstallAdapterWithXtextResourceOfADifferentLanguage() {
+		val res = new XtextResource
+		res.languageName = "foo"
+		assertNotNull(getOrInstallAdapter(res))
+	}
+
+	@Test
+	def void testIsAdapterFor() {
+		val adapter = getOrInstallAdapter(new ResourceImpl)
+		assertTrue(adapter.isAdapterForType(EdeltaDerivedStateAdapter))
+		assertFalse(adapter.isAdapterForType(String))
+	}
 
 	@Test
 	def void testDerivedStateForCreatedEClass() {
@@ -35,6 +69,39 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		val derivedEClass = program.getDerivedStateLastEClass
 		assertEquals("First", derivedEClass.name)
 		assertEquals("foo", derivedEClass.EPackage.name)
+	}
+
+	@Test
+	def void testDerivedStateForTwoCreatedEClass() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		
+		createEClass First in foo
+		createEClass Second in foo
+		'''.
+		parseWithTestEcore
+		val derivedEClass = program.getDerivedStateLastEClass
+		assertEquals("Second", derivedEClass.name)
+		assertEquals("foo", derivedEClass.EPackage.name)
+	}
+
+	@Test
+	def void testInstallDerivedStateDuringPreIndexingPhase() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		
+		createEClass First in foo
+		'''.
+		parseWithTestEcore
+		val resource = program.eResource as DerivedStateAwareResource
+		installDerivedState(program.eResource as DerivedStateAwareResource, true)
+		// only program must be there and the inferred Jvm Type
+		// since we don't install anything during preIndexingPhase
+		assertEquals("test.__synthetic0", (resource.contents.last as JvmGenericType).identifier)
 	}
 
 	@Test
