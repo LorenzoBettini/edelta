@@ -165,7 +165,10 @@ class Inputs {
 			metamodel "foo"
 			
 			createEClass NewClass in foo {
-				createEAttribute newAttribute
+				createEAttribute newAttribute {
+					name = "changed"
+				}
+				createEAttribute newAttribute2
 			}
 			eattribute newAttribute
 		'''

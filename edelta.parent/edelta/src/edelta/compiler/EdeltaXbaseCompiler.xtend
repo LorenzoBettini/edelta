@@ -1,19 +1,20 @@
 package edelta.compiler
 
+import com.google.inject.Inject
 import edelta.edelta.EdeltaEAttributeExpression
 import edelta.edelta.EdeltaEClassExpression
 import edelta.edelta.EdeltaEClassifierExpression
 import edelta.edelta.EdeltaEDataTypeExpression
 import edelta.edelta.EdeltaEFeatureExpression
 import edelta.edelta.EdeltaEReferenceExpression
+import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
+import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import org.eclipse.emf.ecore.EClassifier
+import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
-import edelta.edelta.EdeltaEcoreCreateEClassExpression
-import org.eclipse.emf.ecore.EPackage
-import com.google.inject.Inject
 
 class EdeltaXbaseCompiler extends XbaseCompiler {
 
@@ -54,6 +55,11 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 			EdeltaEcoreCreateEClassExpression: {
 				compileAsStatementIfNotReferenced(appendable, isReferenced) [
 					compileEdeltaCreateEClassExpression(obj, appendable)
+				]
+			}
+			EdeltaEcoreCreateEAttributeExpression: {
+				compileAsStatementIfNotReferenced(appendable, isReferenced) [
+					compileEdeltaCreateEAttributeExpression(obj, appendable)
 				]
 			}
 			default:
@@ -145,18 +151,32 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 	}
 
 	private def void compileEdeltaCreateEClassExpression(EdeltaEcoreCreateEClassExpression obj, ITreeAppendable appendable) {
-		var String consumerArgument = "null"
-		if (obj.body !== null)
-			consumerArgument = "this::" + obj.methodName
 		appendable.append(
 			'createEClass("' +
 			getEPackageNameOrNull(obj.epackage) +
 			'", "' +
 			obj.name +
 			'", ' +
-			consumerArgument +
+			obj.body.consumerArgumentForBody +
 			')'
 		)
+	}
+
+	private def void compileEdeltaCreateEAttributeExpression(EdeltaEcoreCreateEAttributeExpression obj, ITreeAppendable appendable) {
+		appendable.append(
+			'createEAttribute(it, "' +
+			obj.name +
+			'", ' +
+			obj.body.consumerArgumentForBody +
+			')'
+		)
+	}
+
+	private def consumerArgumentForBody(XExpression body) {
+		var String consumerArgument = "null"
+		if (body !== null)
+			consumerArgument = "this::" + (body.eContainer as XExpression).methodName
+		return consumerArgument
 	}
 
 	private def void compileAsStatementIfNotReferenced(ITreeAppendable appendable, boolean isReferenced,

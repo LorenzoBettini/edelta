@@ -223,6 +223,12 @@ public abstract class AbstractEdelta {
 		return newEClass;
 	}
 
+	public EAttribute createEAttribute(EClass eClass, String attributeName, Consumer<EAttribute> initializer) {
+		EAttribute newAttribute = lib.newEAttribute(attributeName, initializer);
+		eClass.getEStructuralFeatures().add(newAttribute);
+		return newAttribute;
+	}
+
 	public void removeEClassifier(String packageName, String name) {
 		EcoreUtil.delete(getEClassifier(packageName, name), true);
 	}

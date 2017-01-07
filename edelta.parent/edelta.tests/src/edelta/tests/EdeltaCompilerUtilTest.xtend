@@ -38,6 +38,34 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testMethodNameForCreatedEAttribute() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		
+		createEClass First in foo {
+			createEAttribute inFirst {}
+		}
+		createEClass Second in foo {
+			createEAttribute inSecond {}
+		}
+		createEClass Third in {
+			createEAttribute inSecond {}
+		}
+		'''.
+		parseWithTestEcore
+		program.main.expressions => [
+			assertEquals("_createEAttribute_inFirst_in_createEClass_First_in_foo",
+				get(0).createEClassExpression.body.expressions.head.methodName)
+			assertEquals("_createEAttribute_inSecond_in_createEClass_Second_in_foo",
+				get(1).createEClassExpression.body.expressions.head.methodName)
+			assertEquals("_createEAttribute_inSecond_in_createEClass_Third_in_",
+				get(2).createEClassExpression.body.expressions.head.methodName)
+		]
+	}
+
+	@Test
 	def void testMethodNameForXExpression() {
 		val program = '''
 		package test

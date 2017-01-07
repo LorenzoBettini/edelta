@@ -32,6 +32,7 @@ import edelta.lib.exception.EdeltaPackageNotLoadedException;
  */
 public class EdeltaTest {
 
+	private static final String MY_CLASS = "MyClass";
 	private static final String MYOTHERPACKAGE = "myotherpackage";
 	private static final String MYPACKAGE = "mypackage";
 	private static final String MODIFIED = "modified";
@@ -96,7 +97,7 @@ public class EdeltaTest {
 	public void testGetEClassifier() {
 		loadTestEcore(MY_ECORE);
 		loadTestEcore(MY2_ECORE);
-		assertNotNull(edelta.getEClassifier(MYPACKAGE, "MyClass"));
+		assertNotNull(edelta.getEClassifier(MYPACKAGE, MY_CLASS));
 		assertNotNull(edelta.getEClassifier(MYPACKAGE, "MyDataType"));
 		// wrong package
 		assertNull(edelta.getEClassifier(MYOTHERPACKAGE, "MyDataType"));
@@ -107,14 +108,14 @@ public class EdeltaTest {
 	@Test
 	public void testGetEClass() {
 		loadTestEcore(MY_ECORE);
-		assertNotNull(edelta.getEClass(MYPACKAGE, "MyClass"));
+		assertNotNull(edelta.getEClass(MYPACKAGE, MY_CLASS));
 		assertNull(edelta.getEClass(MYPACKAGE, "MyDataType"));
 	}
 
 	@Test
 	public void testGetEDataType() {
 		loadTestEcore(MY_ECORE);
-		assertNull(edelta.getEDataType(MYPACKAGE, "MyClass"));
+		assertNull(edelta.getEDataType(MYPACKAGE, MY_CLASS));
 		assertNotNull(edelta.getEDataType(MYPACKAGE, "MyDataType"));
 	}
 
@@ -245,6 +246,16 @@ public class EdeltaTest {
 		assertNull(ePackage.getEClassifier("NewClass"));
 		EClass createEClass = edelta.createEClass(MYPACKAGE, "NewClass", null);
 		assertSame(createEClass, ePackage.getEClassifier("NewClass"));
+	}
+
+	@Test
+	public void testCreateEAttribute() throws IOException {
+		loadTestEcore(MY_ECORE);
+		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
+		EClass eClass = (EClass) ePackage.getEClassifier(MY_CLASS);
+		assertNull(eClass.getEStructuralFeature("newAttribute"));
+		EAttribute createEAttribute = edelta.createEAttribute(eClass, "newAttribute", null);
+		assertSame(createEAttribute, eClass.getEStructuralFeature("newAttribute"));
 	}
 
 	@Test

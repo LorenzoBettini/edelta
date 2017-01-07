@@ -5,6 +5,8 @@ package edelta.tests
 
 import com.google.inject.Inject
 import com.google.inject.Provider
+import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
+import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaProgram
 import edelta.tests.input.Inputs
 import org.eclipse.emf.common.util.URI
@@ -18,6 +20,7 @@ import org.eclipse.xtext.junit4.XtextRunner
 import org.eclipse.xtext.junit4.util.ParseHelper
 import org.eclipse.xtext.junit4.validation.ValidationTestHelper
 import org.eclipse.xtext.resource.XtextResourceSet
+import org.eclipse.xtext.xbase.XExpression
 import org.junit.runner.RunWith
 
 @RunWith(XtextRunner)
@@ -69,6 +72,14 @@ abstract class EdeltaAbstractTest {
 
 	def protected lastExpression(EdeltaProgram p) {
 		p.main.expressions.last
+	}
+
+	def protected getCreateEClassExpression(XExpression e) {
+		e as EdeltaEcoreCreateEClassExpression
+	}
+
+	def protected getCreateEAttributExpression(XExpression e) {
+		e as EdeltaEcoreCreateEAttributeExpression
 	}
 
 	def protected getDerivedStateLastEClass(EObject context) {

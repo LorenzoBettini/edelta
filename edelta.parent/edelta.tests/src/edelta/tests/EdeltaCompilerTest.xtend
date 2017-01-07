@@ -383,6 +383,44 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		)
 	}
 
+	@Test
+	def void testReferenceToCreatedEAttribute() {
+		referenceToCreatedEAttribute.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import org.eclipse.emf.ecore.EAttribute;
+			import org.eclipse.emf.ecore.EClass;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    createEClass("foo", "NewClass", this::_createEClass_NewClass_in_foo);
+			    getEAttribute("foo", "NewClass", "newAttribute");
+			  }
+			  
+			  public void _createEClass_NewClass_in_foo(final EClass it) {
+			    {
+			      createEAttribute(it, "newAttribute", this::_createEAttribute_newAttribute_in_createEClass_NewClass_in_foo);
+			      createEAttribute(it, "newAttribute2", null);
+			    }
+			  }
+			  
+			  public void _createEAttribute_newAttribute_in_createEClass_NewClass_in_foo(final EAttribute it) {
+			    it.setName("changed");
+			  }
+			}
+			'''
+		)
+	}
+
 	def private checkCompilation(CharSequence input, CharSequence expectedGeneratedJava) {
 		checkCompilation(input, expectedGeneratedJava, true)
 	}

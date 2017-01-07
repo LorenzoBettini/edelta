@@ -15,6 +15,8 @@ import org.eclipse.xtext.common.types.JvmVisibility
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.compiler.EdeltaCompilerUtil
 import org.eclipse.emf.ecore.EClass
+import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
+import org.eclipse.emf.ecore.EAttribute
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -100,6 +102,16 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 							parameters += e.toParameter("it", typeRef(EClass))
 							body = e.body
 						]
+						e.body.expressions.
+							filter(EdeltaEcoreCreateEAttributeExpression).
+							filter[body !== null].
+							forEach[
+								ea |
+								members += ea.toMethod(ea.methodName, Void.TYPE.typeRef) [
+									parameters += ea.toParameter("it", typeRef(EAttribute))
+									body = ea.body
+								]
+							]
 					]
 			}
 		]
