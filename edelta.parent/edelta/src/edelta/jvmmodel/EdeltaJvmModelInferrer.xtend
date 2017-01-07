@@ -17,6 +17,8 @@ import edelta.compiler.EdeltaCompilerUtil
 import org.eclipse.emf.ecore.EClass
 import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.xtext.xbase.XExpression
+import org.eclipse.emf.ecore.ENamedElement
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -98,22 +100,24 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 					filter[body !== null].
 					forEach[
 						e |
-						members += e.toMethod(e.methodName, Void.TYPE.typeRef) [
-							parameters += e.toParameter("it", typeRef(EClass))
-							body = e.body
-						]
+						members += e.toMethodForConsumer(EClass, e.body)
 						e.body.expressions.
 							filter(EdeltaEcoreCreateEAttributeExpression).
 							filter[body !== null].
 							forEach[
 								ea |
-								members += ea.toMethod(ea.methodName, Void.TYPE.typeRef) [
-									parameters += ea.toParameter("it", typeRef(EAttribute))
-									body = ea.body
-								]
+								members += ea.toMethodForConsumer(EAttribute, ea.body)
 							]
 					]
 			}
+		]
+	}
+
+	def private toMethodForConsumer(XExpression e, Class<? extends ENamedElement> typeForParameter,
+			XExpression bodyForExpression) {
+		e.toMethod(e.methodName, Void.TYPE.typeRef) [
+			parameters += e.toParameter("it", typeRef(typeForParameter))
+			body = bodyForExpression
 		]
 	}
 }
