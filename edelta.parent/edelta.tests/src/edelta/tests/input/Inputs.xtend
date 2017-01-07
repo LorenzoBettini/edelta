@@ -17,9 +17,9 @@ class Inputs {
 
 	def useImportedJavaTypes() {
 		'''
-		package foo;
-		
 		import java.util.List
+
+		package foo;
 		
 		def bar(List<String> s) {
 			s.empty
