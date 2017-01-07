@@ -34,4 +34,8 @@ createEClass MyNewClass in myecore
 
 createEClass MyDerivedNewClass in myecore {
 	ESuperTypes += eclass MyNewClass
+	createEAttribute myNewAttribute {
+		EType = edatatype EInt
+		upperBound = -1;
+	}
 }
