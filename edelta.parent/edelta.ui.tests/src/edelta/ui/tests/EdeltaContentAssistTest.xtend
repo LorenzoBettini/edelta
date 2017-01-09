@@ -44,6 +44,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		val injector = EdeltaActivator.getInstance().getInjector(EdeltaActivator.EDELTA_EDELTA);
 		val projectHelper = injector.getInstance(EdeltaPluginProjectHelper)
 		pluginJavaProject = projectHelper.createEdeltaPluginProject(PROJECT_NAME)
+		waitForBuild
 	}
 
 	@AfterClass
