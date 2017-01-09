@@ -24,7 +24,8 @@ Require-Bundle: edelta,
  org.eclipse.core.resources
 Import-Package: org.apache.log4j
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: edelta.ui.quickfix,
- edelta.ui.contentassist,
- edelta.ui.internal
+Export-Package: edelta.ui.contentassist,
+ edelta.ui.internal,
+ edelta.ui.quickfix,
+ edelta.ui.wizard
 Bundle-Activator: edelta.ui.internal.EdeltaActivator
