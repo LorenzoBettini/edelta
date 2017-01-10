@@ -588,4 +588,19 @@
 			type="text">
 		</fileTypes>
 	</extension>
+	<extension
+		point="org.eclipse.ui.newWizards">
+		<wizard
+        category="edelta.ui.category"
+        class="edelta.ui.EdeltaExecutableExtensionFactory:edelta.ui.wizard.EdeltaNewProjectWizard"
+        icon="icons/newpprj_wiz.png"
+        id="edelta.ui.wizard.EdeltaNewProjectWizard"
+        name="Edelta Project"
+        project="true">
+		</wizard>
+  <category
+        id="edelta.ui.category"
+        name="Edelta">
+  </category>
+	</extension>
 </plugin>

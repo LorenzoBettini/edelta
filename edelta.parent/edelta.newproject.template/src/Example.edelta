@@ -17,9 +17,12 @@ def createClass(String name) {
 	]
 }
 
+// refer to EClasses with "eclass"
 val p = (eclass MyEClass).EPackage
+// create new EClasses manually...
 p.EClassifiers += createClass("NewClass") => [
 	EStructuralFeatures += newEAttribute("myStringAttribute") => [
+		// refer to EDataTypes with "edatatype"
 		EType = edatatype EString
 	]
 	EStructuralFeatures += newEReference("myReference") => [
@@ -30,6 +33,7 @@ p.EClassifiers += createClass("NewClass") => [
 	]
 ]
 
+// ... or using Edelta DSL specific syntax
 createEClass MyNewClass in myecore
 
 createEClass MyDerivedNewClass in myecore {
