@@ -46,6 +46,11 @@ public class EdeltaTest {
 		public void ensureEPackageIsLoaded(String packageName) throws EdeltaPackageNotLoadedException {
 			super.ensureEPackageIsLoaded(packageName);
 		}
+
+		@Override
+		public void runInitializers() {
+			super.runInitializers();
+		}
 	}
 
 	private TestableEdelta edelta;
@@ -246,6 +251,21 @@ public class EdeltaTest {
 		assertNull(ePackage.getEClassifier("NewClass"));
 		EClass createEClass = edelta.createEClass(MYPACKAGE, "NewClass", null);
 		assertSame(createEClass, ePackage.getEClassifier("NewClass"));
+	}
+
+	@Test
+	public void testCreateEClassLaterInitialization() throws IOException {
+		loadTestEcore(MY_ECORE);
+		// refers to an EClass that is created later
+		EClass newClass1 = edelta.createEClass(MYPACKAGE, "NewClass1",
+			c -> c.getESuperTypes().add(edelta.getEClass(MYPACKAGE, "NewClass2")),
+			c -> c.getESuperTypes().add(edelta.getEClass(MYPACKAGE, "NewClass3"))
+		);
+		EClass newClass2 = edelta.createEClass(MYPACKAGE, "NewClass2", null);
+		EClass newClass3 = edelta.createEClass(MYPACKAGE, "NewClass3");
+		edelta.runInitializers();
+		assertSame(newClass2, newClass1.getESuperTypes().get(0));
+		assertSame(newClass3, newClass1.getESuperTypes().get(1));
 	}
 
 	@Test

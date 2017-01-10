@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
@@ -55,6 +57,12 @@ public abstract class AbstractEdelta {
 	private ResourceSet resourceSet = new ResourceSetImpl();
 
 	/**
+	 * Initializers for EClassifiers which will be executed later, after
+	 * all EClassifiers have been created.
+	 */
+	private List<Runnable> eClassifierInitializers = new LinkedList<>();
+
+	/**
 	 * This will be used in the generated code with extension methods.
 	 */
 	@Extension
@@ -84,6 +92,7 @@ public abstract class AbstractEdelta {
 	public void execute() throws Exception {
 		performSanityChecks();
 		doExecute();
+		runInitializers();
 	}
 
 	/**
@@ -105,6 +114,13 @@ public abstract class AbstractEdelta {
 	 */
 	protected void doExecute() throws Exception {
 		// to be implemented by the generated code
+	}
+
+	/**
+	 * Executes the initializers previously saved.
+	 */
+	protected void runInitializers() {
+		eClassifierInitializers.forEach(r -> r.run());
 	}
 
 	/**
@@ -217,10 +233,31 @@ public abstract class AbstractEdelta {
 		return null;
 	}
 
-	public EClass createEClass(String packageName, String name, Consumer<EClass> initializer) {
-		EClass newEClass = lib.newEClass(name, initializer);
+	public EClass createEClass(String packageName, String name) {
+		final EClass newEClass = lib.newEClass(name);
 		getEPackage(packageName).getEClassifiers().add(newEClass);
 		return newEClass;
+	}
+
+	public EClass createEClass(String packageName, String name, final Consumer<EClass> initializer) {
+		final EClass newEClass = createEClass(packageName, name);
+		safeAddInitializer(newEClass, initializer);
+		return newEClass;
+	}
+
+	public EClass createEClass(String packageName, String name, final Consumer<EClass> initializer1, final Consumer<EClass> initializer2) {
+		final EClass newEClass = createEClass(packageName, name);
+		safeAddInitializer(newEClass, initializer1);
+		safeAddInitializer(newEClass, initializer2);
+		return newEClass;
+	}
+
+	private void safeAddInitializer(final EClass newEClass, final Consumer<EClass> initializer) {
+		if (initializer == null)
+			return;
+		eClassifierInitializers.add(
+			() -> initializer.accept(newEClass)
+		);
 	}
 
 	public EAttribute createEAttribute(EClass eClass, String attributeName, Consumer<EAttribute> initializer) {
