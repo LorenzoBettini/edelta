@@ -241,22 +241,22 @@ public abstract class AbstractEdelta {
 
 	public EClass createEClass(String packageName, String name, final Consumer<EClass> initializer) {
 		final EClass newEClass = createEClass(packageName, name);
-		safeAddInitializer(newEClass, initializer);
+		safeAddInitializer(eClassifierInitializers, newEClass, initializer);
 		return newEClass;
 	}
 
 	public EClass createEClass(String packageName, String name, final Consumer<EClass> initializer1, final Consumer<EClass> initializer2) {
 		final EClass newEClass = createEClass(packageName, name);
-		safeAddInitializer(newEClass, initializer1);
-		safeAddInitializer(newEClass, initializer2);
+		safeAddInitializer(eClassifierInitializers, newEClass, initializer1);
+		safeAddInitializer(eClassifierInitializers, newEClass, initializer2);
 		return newEClass;
 	}
 
-	private void safeAddInitializer(final EClass newEClass, final Consumer<EClass> initializer) {
+	private <T> void safeAddInitializer(List<Runnable> list, final T element, final Consumer<T> initializer) {
 		if (initializer == null)
 			return;
-		eClassifierInitializers.add(
-			() -> initializer.accept(newEClass)
+		list.add(
+			() -> initializer.accept(element)
 		);
 	}
 
