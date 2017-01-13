@@ -1,0 +1,2 @@
+# setting the version in pom.xml and MANIFEST.MF files
+mvn org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=0.0.1-SNAPSHOT -Dtycho.mode=maven
