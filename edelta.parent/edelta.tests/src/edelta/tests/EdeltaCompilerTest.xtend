@@ -346,7 +346,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  @Override
 			  protected void doExecute() throws Exception {
 			    createEClass("foo", "MyNewClass", null);
-			    createEClass("foo", "MyDerivedNewClass", this::_createEClass_MyDerivedNewClass_in_foo);
+			    createEClass("foo", "MyDerivedNewClass", createList(this::_createEClass_MyDerivedNewClass_in_foo));
 			  }
 			  
 			  public void _createEClass_MyDerivedNewClass_in_foo(final EClass it) {
@@ -402,13 +402,13 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  @Override
 			  protected void doExecute() throws Exception {
-			    createEClass("foo", "NewClass", this::_createEClass_NewClass_in_foo);
+			    createEClass("foo", "NewClass", createList(this::_createEClass_NewClass_in_foo));
 			    getEAttribute("foo", "NewClass", "newAttribute");
 			  }
 			  
 			  public void _createEClass_NewClass_in_foo(final EClass it) {
 			    {
-			      createEAttribute(it, "newAttribute", this::_createEAttribute_newAttribute_in_createEClass_NewClass_in_foo);
+			      createEAttribute(it, "newAttribute", createList(this::_createEAttribute_newAttribute_in_createEClass_NewClass_in_foo));
 			      createEAttribute(it, "newAttribute2", null);
 			    }
 			  }

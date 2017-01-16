@@ -175,7 +175,7 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 	private def consumerArgumentForBody(XExpression body) {
 		var String consumerArgument = "null"
 		if (body !== null)
-			consumerArgument = "this::" + (body.eContainer as XExpression).methodName
+			consumerArgument = "createList(this::" + (body.eContainer as XExpression).methodName + ")"
 		return consumerArgument
 	}
 
