@@ -60,7 +60,7 @@ public class Example extends AbstractEdelta {
     EClass _doubleArrow = ObjectExtensions.<EClass>operator_doubleArrow(_createClass, _function);
     _eClassifiers.add(_doubleArrow);
     createEClass("myecore", "MyNewClass", null);
-    createEClass("myecore", "MyDerivedNewClass", this::_createEClass_MyDerivedNewClass_in_myecore);
+    createEClass("myecore", "MyDerivedNewClass", createList(this::_createEClass_MyDerivedNewClass_in_myecore));
     createEClass("myecore", "MyOtherNewClass", null);
   }
   
@@ -70,7 +70,7 @@ public class Example extends AbstractEdelta {
       _eSuperTypes.add(getEClass("myecore", "MyNewClass"));
       EList<EClass> _eSuperTypes_1 = it.getESuperTypes();
       _eSuperTypes_1.add(getEClass("myecore", "MyOtherNewClass"));
-      createEAttribute(it, "myNewAttribute", this::_createEAttribute_myNewAttribute_in_createEClass_MyDerivedNewClass_in_myecore);
+      createEAttribute(it, "myNewAttribute", createList(this::_createEAttribute_myNewAttribute_in_createEClass_MyDerivedNewClass_in_myecore));
     }
   }
   
