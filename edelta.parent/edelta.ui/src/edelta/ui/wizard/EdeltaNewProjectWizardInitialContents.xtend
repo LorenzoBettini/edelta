@@ -56,11 +56,14 @@ class EdeltaNewProjectWizardInitialContents {
 			
 			createEClass MyDerivedNewClass in myecore {
 				ESuperTypes += eclass MyNewClass
+				ESuperTypes += eclass MyOtherNewClass
 				createEAttribute myNewAttribute {
 					EType = edatatype EInt
 					upperBound = -1;
 				}
 			}
+			
+			createEClass MyOtherNewClass in myecore
 			'''
 			)
 		fsa.generateFile(

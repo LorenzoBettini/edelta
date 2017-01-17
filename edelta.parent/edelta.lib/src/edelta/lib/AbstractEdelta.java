@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
@@ -30,6 +32,8 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.xtext.xbase.lib.Extension;
+
+import com.google.common.collect.ImmutableList;
 
 import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
@@ -53,6 +57,18 @@ public abstract class AbstractEdelta {
 	 * Here we store all the Ecores used by the Edelta
 	 */
 	private ResourceSet resourceSet = new ResourceSetImpl();
+
+	/**
+	 * Initializers for EClassifiers which will be executed later, after
+	 * all EClassifiers have been created.
+	 */
+	private List<Runnable> eClassifierInitializers = new LinkedList<>();
+
+	/**
+	 * Initializers for EStructuralFeatures which will be executed later, after
+	 * all EStructuralFeatures have been created.
+	 */
+	private List<Runnable> eStructuralFeaturesInitializers = new LinkedList<>();
 
 	/**
 	 * This will be used in the generated code with extension methods.
@@ -84,6 +100,7 @@ public abstract class AbstractEdelta {
 	public void execute() throws Exception {
 		performSanityChecks();
 		doExecute();
+		runInitializers();
 	}
 
 	/**
@@ -105,6 +122,14 @@ public abstract class AbstractEdelta {
 	 */
 	protected void doExecute() throws Exception {
 		// to be implemented by the generated code
+	}
+
+	/**
+	 * Executes the initializers previously saved.
+	 */
+	protected void runInitializers() {
+		eClassifierInitializers.forEach(r -> r.run());
+		eStructuralFeaturesInitializers.forEach(r -> r.run());
 	}
 
 	/**
@@ -217,15 +242,33 @@ public abstract class AbstractEdelta {
 		return null;
 	}
 
-	public EClass createEClass(String packageName, String name, Consumer<EClass> initializer) {
-		EClass newEClass = lib.newEClass(name, initializer);
+	public EClass createEClass(String packageName, String name, final List<Consumer<EClass>> initializers) {
+		final EClass newEClass = lib.newEClass(name);
 		getEPackage(packageName).getEClassifiers().add(newEClass);
+		if (initializers != null)
+			initializers.forEach(i -> safeAddInitializer(eClassifierInitializers, newEClass, i));
 		return newEClass;
 	}
 
-	public EAttribute createEAttribute(EClass eClass, String attributeName, Consumer<EAttribute> initializer) {
-		EAttribute newAttribute = lib.newEAttribute(attributeName, initializer);
+	protected <E> List<E> createList(E e) {
+		return ImmutableList.of(e);
+	}
+
+	protected <E> List<E> createList(E e1, E e2) {
+		return ImmutableList.of(e1, e2);
+	}
+
+	private <T> void safeAddInitializer(List<Runnable> list, final T element, final Consumer<T> initializer) {
+		list.add(
+			() -> initializer.accept(element)
+		);
+	}
+
+	public EAttribute createEAttribute(EClass eClass, String attributeName, final List<Consumer<EAttribute>> initializers) {
+		EAttribute newAttribute = lib.newEAttribute(attributeName);
 		eClass.getEStructuralFeatures().add(newAttribute);
+		if (initializers != null)
+			initializers.forEach(i -> safeAddInitializer(eStructuralFeaturesInitializers, newAttribute, i));
 		return newAttribute;
 	}
 
