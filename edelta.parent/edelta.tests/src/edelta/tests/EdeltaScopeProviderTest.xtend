@@ -31,6 +31,13 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testScopeForMetamodels() {
+		referencesToMetamodels.parseWithTestEcores.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaProgram_Metamodels,
+			"foo, bar")
+	}
+
+	@Test
 	def void testScopeForEClassifier() {
 		referenceToMetamodel.parseWithTestEcore.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEClassifierExpression_Eclassifier,

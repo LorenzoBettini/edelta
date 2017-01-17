@@ -38,6 +38,10 @@ abstract class EdeltaAbstractTest {
 		input.parse(resourceSetWithTestEcore)
 	}
 
+	def protected parseWithTestEcores(CharSequence input) {
+		input.parse(resourceSetWithTestEcores)
+	}
+
 	def protected resourceSetWithTestEcore() {
 		val resourceSet = resourceSetProvider.get
 		addEPackageForTests(resourceSet)
@@ -46,6 +50,17 @@ abstract class EdeltaAbstractTest {
 	def protected addEPackageForTests(ResourceSet resourceSet) {
 		val resource = resourceSet.createResource(URI.createURI("foo.ecore"))
 		resource.contents += EPackageForTests
+		resourceSet
+	}
+
+	def protected resourceSetWithTestEcores() {
+		val resourceSet = resourceSetWithTestEcore
+		addEPackageForTests2(resourceSet)
+	}
+
+	def protected addEPackageForTests2(ResourceSet resourceSet) {
+		val resource = resourceSet.createResource(URI.createURI("bar.ecore"))
+		resource.contents += EPackageForTests2
 		resourceSet
 	}
 
@@ -66,6 +81,27 @@ abstract class EdeltaAbstractTest {
 		]
 		fooPackage.EClassifiers += EcoreFactory.eINSTANCE.createEDataType => [
 			name = "FooDataType"
+		]
+		fooPackage
+	}
+
+	def protected EPackageForTests2() {
+		val fooPackage = EcoreFactory.eINSTANCE.createEPackage => [
+			name = "bar"
+			nsPrefix = "bar"
+			nsURI = "http://bar"
+		]
+		fooPackage.EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
+			name = "BarClass"
+			EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
+				name = "myAttribute"
+			]
+			EStructuralFeatures += EcoreFactory.eINSTANCE.createEReference => [
+				name = "myReference"
+			]
+		]
+		fooPackage.EClassifiers += EcoreFactory.eINSTANCE.createEDataType => [
+			name = "BarDataType"
 		]
 		fooPackage
 	}

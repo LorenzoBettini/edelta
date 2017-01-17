@@ -7,6 +7,13 @@ class Inputs {
 		'''
 	}
 
+	def referencesToMetamodels() {
+		'''
+			metamodel "foo"
+			metamodel "bar"
+		'''
+	}
+
 	def referenceToEClass() {
 		'''
 			metamodel "foo"
