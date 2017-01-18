@@ -4,11 +4,11 @@
 package edelta.util
 
 import com.google.inject.Inject
-import edelta.edelta.EdeltaProgram
 import edelta.resource.EdeltaDerivedStateComputer
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EDataType
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.util.IResourceScopeCache
 
@@ -23,6 +23,7 @@ import org.eclipse.xtext.util.IResourceScopeCache
 class EdeltaEcoreHelper {
 
 	@Inject IResourceScopeCache cache
+	@Inject extension EdeltaModelUtil
 	@Inject extension EdeltaDerivedStateComputer
 
 	/**
@@ -31,19 +32,19 @@ class EdeltaEcoreHelper {
 	 * available classifiers in the current program, including the
 	 * created ones by the derived state computer.
 	 */
-	def getEClassifiers(EdeltaProgram context, EPackage epackage) {
+	def getEClassifiers(EObject context, EPackage epackage) {
 		getEClassifiers(context, epackage, null)
 	}
 
-	def getEClasses(EdeltaProgram context, EPackage epackage) {
+	def getEClasses(EObject context, EPackage epackage) {
 		getEClassifiers(context, epackage, EClass)
 	}
 
-	def getEDataTypes(EdeltaProgram context, EPackage epackage) {
+	def getEDataTypes(EObject context, EPackage epackage) {
 		getEClassifiers(context, epackage, EDataType)
 	}
 
-	def private getEClassifiers(EdeltaProgram context,
+	def private getEClassifiers(EObject context,
 			EPackage epackage,
 			Class<? extends EClassifier> kind
 	) {
@@ -60,13 +61,14 @@ class EdeltaEcoreHelper {
 			}
 	}
 
-	def private getEClassifiers(EdeltaProgram prog) {
-		cache.get("getEClassifiers", prog.eResource) [
+	def private getEClassifiers(EObject context) {
+		cache.get("getEClassifiers", context.eResource) [
+			val prog = getProgram(context)
 			// we also must explicitly consider the derived EPackages
 			// created by our derived state computer, containing EClasses
 			// created in the program
 			(
-				prog.eResource.derivedEPackages.
+				context.eResource.derivedEPackages.
 					map[getEClassifiers].
 					flatten
 			+
@@ -77,13 +79,13 @@ class EdeltaEcoreHelper {
 		]
 	}
 
-	def private getEClasses(EdeltaProgram context) {
+	def private getEClasses(EObject context) {
 		cache.get("getEClasses", context.eResource) [
 			getEClassifiers(context).filter(EClass).toList
 		]
 	}
 
-	def private getEDataTypes(EdeltaProgram context) {
+	def private getEDataTypes(EObject context) {
 		cache.get("getEDataTypes", context.eResource) [
 			getEClassifiers(context).filter(EDataType).toList
 		]
