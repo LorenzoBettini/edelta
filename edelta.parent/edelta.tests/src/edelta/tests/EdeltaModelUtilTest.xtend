@@ -5,13 +5,12 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.util.EdeltaModelUtil
-import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import static extension org.junit.Assert.*
+import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -20,28 +19,14 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 	@Inject extension EdeltaModelUtil
 
 	@Test
-	def void testScopeForMetamodel() {
+	def void testGetProgram() {
 		'''
-		metamodel "foo"
-		
-		createEClass First in foo 	// 0
-		createEClass Second in foo	// 1
-		eclass Second				// 2
-		createEClass Third in foo	// 3
-		eclass Third				// 4
-		'''.
-		parseWithTestEcore.main.expressions => [
-			assertClassesCreationBefore(get(0), "")
-			assertClassesCreationBefore(get(1), "First")
-			assertClassesCreationBefore(get(2), "First, Second")
-			assertClassesCreationBefore(get(3), "First, Second")
-			assertClassesCreationBefore(get(4), "First, Second, Third")
+			metamodel "foo"
+			
+			createEClass First in foo
+		'''.parseWithTestEcore => [
+			assertSame(it, getProgram(lastExpression))
 		]
 	}
 
-	def private assertClassesCreationBefore(EObject context, CharSequence expected) {
-		expected.toString.assertEquals(
-			context.getEClassesCreatedBefore.map[name].join(", ")
-		)
-	}
 }
