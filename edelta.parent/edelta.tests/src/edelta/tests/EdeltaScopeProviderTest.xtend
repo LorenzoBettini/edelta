@@ -23,6 +23,16 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	@Inject extension IScopeProvider
 
 	@Test
+	def void testSuperScope() {
+		// just check that nothing wrong happens when we call super.getScope
+		'''
+		metamodel "foo"
+		
+		this.
+		'''.parse.lastExpression.getScope(EdeltaPackage.eINSTANCE.edeltaProgram_Main)
+	}
+
+	@Test
 	def void testScopeForMetamodel() {
 		referenceToMetamodel.parseWithTestEcore.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaProgram_Metamodels,
