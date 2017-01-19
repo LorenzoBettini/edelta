@@ -30,7 +30,7 @@ XImportDeclaration returns xtype::XImportDeclaration:
 EdeltaOperation:
 	{EdeltaOperation} 'def' name=ValidID
 		'(' (params+=FullJvmFormalParameter (',' params+=FullJvmFormalParameter)*)? ')'
-		(':' type=JvmTypeReference)? 
+		(':' type=JvmTypeReference)?
 		body=XBlockExpression;
 
 EdeltaMain returns xbase::XBlockExpression:
