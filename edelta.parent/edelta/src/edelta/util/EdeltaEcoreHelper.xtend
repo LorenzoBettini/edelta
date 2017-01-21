@@ -11,6 +11,8 @@ import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.util.IResourceScopeCache
+import org.eclipse.emf.ecore.ENamedElement
+import java.util.Collections
 
 /**
  * Helper methods for accessing Ecore elements.
@@ -99,4 +101,17 @@ class EdeltaEcoreHelper {
 //		]
 //	}
 
+	def dispatch Iterable<? extends ENamedElement> getENamedElements(ENamedElement e) {
+		Collections.emptyList
+	}
+
+	def dispatch Iterable<? extends ENamedElement> getENamedElements(EPackage e) {
+		val classifiers = e.getEClassifiers
+		classifiers +
+		classifiers.map[getENamedElements].flatten
+	}
+
+	def dispatch Iterable<? extends ENamedElement> getENamedElements(EClass e) {
+		e.EAllStructuralFeatures
+	}
 }
