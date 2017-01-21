@@ -30,6 +30,8 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				myAttribute
 				myReference
 				FooDataType
+				FooEnum
+				FooEnumLiteral
 				BarClass
 				myAttribute
 				myReference
@@ -51,6 +53,8 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				myAttribute
 				myReference
 				FooDataType
+				FooEnum
+				FooEnumLiteral
 				foo
 				'''
 			)
@@ -66,6 +70,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				'''
 				FooClass
 				FooDataType
+				FooEnum
 				'''
 			)
 		]
@@ -80,6 +85,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				NewClass
 				FooClass
 				FooDataType
+				FooEnum
 				'''
 			)
 		// NewClass is the one created in the program
@@ -93,6 +99,18 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			assertNamedElements(
 				'''
 
+				'''
+			)
+		]
+	}
+
+	@Test
+	def void testENumENamedElements() {
+		referenceToMetamodel.parseWithTestEcore => [
+			getENamedElements(getEClassifierByName("foo", "FooEnum"), it).
+			assertNamedElements(
+				'''
+				FooEnumLiteral
 				'''
 			)
 		]

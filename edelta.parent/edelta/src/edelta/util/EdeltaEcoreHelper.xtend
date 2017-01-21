@@ -7,6 +7,7 @@ import com.google.inject.Inject
 import edelta.resource.EdeltaDerivedStateComputer
 import java.util.Collections
 import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
@@ -63,5 +64,9 @@ class EdeltaEcoreHelper {
 
 	def dispatch Iterable<? extends ENamedElement> getENamedElements(EClass e, EObject context) {
 		e.EAllStructuralFeatures
+	}
+
+	def dispatch Iterable<? extends ENamedElement> getENamedElements(EEnum e, EObject context) {
+		e.ELiterals
 	}
 }

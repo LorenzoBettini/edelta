@@ -87,6 +87,12 @@ abstract class EdeltaAbstractTest {
 		fooPackage.EClassifiers += EcoreFactory.eINSTANCE.createEDataType => [
 			name = "FooDataType"
 		]
+		fooPackage.EClassifiers += EcoreFactory.eINSTANCE.createEEnum => [
+			name = "FooEnum"
+			ELiterals += EcoreFactory.eINSTANCE.createEEnumLiteral => [
+				name = "FooEnumLiteral"
+			]
+		]
 		fooPackage
 	}
 
