@@ -54,6 +54,28 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testDirectEcoreReferenceIncomplete() {
+		parse('''
+			ecoreref 
+		''').
+		lastExpression.
+		edeltaEcoreReferenceExpression => [
+			assertNull(reference)
+		]
+	}
+
+	@Test
+	def void testDirectEcoreReferenceIncomplete2() {
+		parse('''
+			ecoreref (
+		''').
+		lastExpression.
+		edeltaEcoreReferenceExpression => [
+			assertNull(reference.edeltaEcoreDirectReference.enamedelement)
+		]
+	}
+
+	@Test
 	def void testQualifiedEcoreReference() {
 		parse('''
 			ecoreref foo.bar
@@ -80,6 +102,19 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testQualifiedEcoreReference3() {
+		parse('''
+			ecoreref (foo.bar.baz)
+		''').
+		lastExpression.
+		edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference => [
+			assertEquals("foo.bar", qualification.textualRepresentation)
+			assertEquals("baz", textualReferenceRepresentation)
+			assertEquals("foo.bar.baz", textualRepresentation)
+		]
+	}
+
+	@Test
 	def void testQualifiedEcoreReferenceIncomplete() {
 		parse('''
 			ecoreref foo.
@@ -87,7 +122,20 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 		lastExpression.
 		edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference => [
 			assertEquals("foo", qualification.textualRepresentation)
-			assertNull("baz", enamedelement)
+			assertNull(enamedelement)
+			assertEquals("foo.", textualRepresentation)
+		]
+	}
+
+	@Test
+	def void testQualifiedEcoreReferenceIncomplete2() {
+		parse('''
+			ecoreref (foo.
+		''').
+		lastExpression.
+		edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference => [
+			assertEquals("foo", qualification.textualRepresentation)
+			assertNull(enamedelement)
 			assertEquals("foo.", textualRepresentation)
 		]
 	}
