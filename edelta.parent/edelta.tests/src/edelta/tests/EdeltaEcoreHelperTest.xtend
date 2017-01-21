@@ -86,6 +86,38 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testEDataTypeENamedElements() {
+		referenceToMetamodel.parseWithTestEcore => [
+			getENamedElements(getEClassifierByName("foo", "FooDataType"), it).
+			assertNamedElements(
+				'''
+
+				'''
+			)
+		]
+	}
+
+	@Test(expected=IllegalArgumentException)
+	def void testNullENamedElements() {
+		referenceToMetamodel.parseWithTestEcore => [
+			getENamedElements(null, it)
+		]
+	}
+
+	@Test
+	def void testEClassENamedElements() {
+		referenceToMetamodel.parseWithTestEcore => [
+			getENamedElements(getEClassifierByName("foo", "FooClass"), it).
+			assertNamedElements(
+				'''
+				myAttribute
+				myReference
+				'''
+			)
+		]
+	}
+
 //	@Test
 //	def void testEClassifiersWithCreatedEClass() {
 //		referenceToCreatedEClass.parseWithTestEcore.
@@ -155,5 +187,10 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	def private getEPackageByName(EdeltaProgram context, String packagename) {
 		context.eResource.resourceSet.resources.filter(XMIResource).
 			map[contents.head as EPackage].findFirst[name == packagename]
+	}
+
+	def private getEClassifierByName(EdeltaProgram context, String packagename, String classifiername) {
+		getEPackageByName(context, packagename).EClassifiers.
+			findFirst[name == classifiername]
 	}
 }
