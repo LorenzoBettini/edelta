@@ -3,11 +3,16 @@
  */
 package edelta.tests
 
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+
+import static org.junit.Assert.*
+import static edelta.edelta.EdeltaPackage.Literals.*
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -35,6 +40,66 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 			metamodel "type"
 		''')
 		Assert.assertNotNull(result)
+	}
+
+	@Test
+	def void testDirectEcoreReference() {
+		parse('''
+			ecoreref foo
+		''').
+		lastExpression.
+		edeltaEcoreReferenceExpression => [
+			assertNotNull(reference.edeltaEcoreDirectReference.enamedelement)
+		]
+	}
+
+	@Test
+	def void testQualifiedEcoreReference() {
+		parse('''
+			ecoreref foo.bar
+		''').
+		lastExpression.
+		edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference => [
+			assertEquals("foo", qualification.textualRepresentation)
+			assertEquals("bar", textualReferenceRepresentation)
+			assertEquals("foo.bar", textualRepresentation)
+		]
+	}
+
+	@Test
+	def void testQualifiedEcoreReference2() {
+		parse('''
+			ecoreref foo.bar.baz
+		''').
+		lastExpression.
+		edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference => [
+			assertEquals("foo.bar", qualification.textualRepresentation)
+			assertEquals("baz", textualReferenceRepresentation)
+			assertEquals("foo.bar.baz", textualRepresentation)
+		]
+	}
+
+	@Test
+	def void testQualifiedEcoreReferenceIncomplete() {
+		parse('''
+			ecoreref foo.
+		''').
+		lastExpression.
+		edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference => [
+			assertEquals("foo", qualification.textualRepresentation)
+			assertNull("baz", enamedelement)
+			assertEquals("foo.", textualRepresentation)
+		]
+	}
+
+	def private getTextualRepresentation(EObject o) {
+		NodeModelUtils.getTokenText(NodeModelUtils.findActualNodeFor(o))
+	}
+
+	def private getTextualReferenceRepresentation(EObject o) {
+		NodeModelUtils.getTokenText(
+			NodeModelUtils.findNodesForFeature(o, EDELTA_ECORE_REFERENCE__ENAMEDELEMENT).head
+		)
 	}
 
 }

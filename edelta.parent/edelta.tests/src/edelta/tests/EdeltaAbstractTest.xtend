@@ -7,6 +7,8 @@ import com.google.inject.Inject
 import com.google.inject.Provider
 import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
+import edelta.edelta.EdeltaEcoreDirectReference
+import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaProgram
 import edelta.tests.input.Inputs
 import org.eclipse.emf.common.util.URI
@@ -22,6 +24,7 @@ import org.eclipse.xtext.junit4.validation.ValidationTestHelper
 import org.eclipse.xtext.resource.XtextResourceSet
 import org.eclipse.xtext.xbase.XExpression
 import org.junit.runner.RunWith
+import edelta.edelta.EdeltaEcoreReferenceExpression
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -121,5 +124,17 @@ abstract class EdeltaAbstractTest {
 	def protected getDerivedStateLastEClass(EObject context) {
 		val derivedEPackage = context.eResource.contents.last as EPackage
 		derivedEPackage.EClassifiers.last as EClass
+	}
+
+	def protected getEdeltaEcoreReferenceExpression(XExpression e) {
+		e as EdeltaEcoreReferenceExpression
+	}
+
+	def protected getEdeltaEcoreDirectReference(EObject e) {
+		e as EdeltaEcoreDirectReference
+	}
+
+	def protected getEdeltaEcoreQualifiedReference(EObject e) {
+		e as EdeltaEcoreQualifiedReference
 	}
 }
