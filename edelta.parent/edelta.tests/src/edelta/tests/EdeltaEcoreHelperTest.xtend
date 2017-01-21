@@ -14,13 +14,28 @@ import org.eclipse.xtext.junit4.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import static extension org.junit.Assert.*
-
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
 class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 
 	@Inject extension EdeltaEcoreHelper
+
+	@Test
+	def void testProgramENamedElements() {
+		referenceToCreatedEClass.parseWithTestEcore.
+			getENamedElements.
+			assertNamedElements(
+				'''
+				NewClass
+				FooClass
+				myAttribute
+				myReference
+				FooDataType
+				foo
+				'''
+			)
+		// NewClass is the one created in the program
+	}
 
 	@Test
 	def void testEPackageENamedElements() {
@@ -30,8 +45,6 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				'''
 				FooClass
 				FooDataType
-				myAttribute
-				myReference
 				'''
 			)
 	}
@@ -98,7 +111,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 
 	def private assertNamedElements(Iterable<? extends ENamedElement> elements, CharSequence expected) {
 		expected.assertEqualsStrings(
-			elements.map[name].join("\n")
+			elements.map[name].join("\n") + "\n"
 		)
 	}
 

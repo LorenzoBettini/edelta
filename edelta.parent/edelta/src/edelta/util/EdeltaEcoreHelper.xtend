@@ -13,6 +13,9 @@ import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.util.IResourceScopeCache
 import org.eclipse.emf.ecore.ENamedElement
 import java.util.Collections
+import edelta.edelta.EdeltaProgram
+import org.eclipse.emf.ecore.util.EcoreUtil
+import org.eclipse.xtext.EcoreUtil2
 
 /**
  * Helper methods for accessing Ecore elements.
@@ -101,14 +104,36 @@ class EdeltaEcoreHelper {
 //		]
 //	}
 
+	def dispatch Iterable<? extends ENamedElement> getENamedElements(EdeltaProgram e) {
+		cache.get("getENamedElements", e.eResource) [
+			// we also must explicitly consider the derived EPackages
+			// created by our derived state computer, containing EClasses
+			// created in the program
+			(
+				e.eResource.derivedEPackages.
+					getAllENamedElements
+			+
+				e.metamodels.getAllENamedElements
+			+
+				e.metamodels
+			).toList
+		]
+	}
+
+	def private getAllENamedElements(Iterable<EPackage> e) {
+		e.map[getAllENamedElements].flatten
+	}
+
+	def private getAllENamedElements(EPackage e) {
+		EcoreUtil2.getAllContentsOfType(e, ENamedElement)
+	}
+
 	def dispatch Iterable<? extends ENamedElement> getENamedElements(ENamedElement e) {
 		Collections.emptyList
 	}
 
 	def dispatch Iterable<? extends ENamedElement> getENamedElements(EPackage e) {
-		val classifiers = e.getEClassifiers
-		classifiers +
-		classifiers.map[getENamedElements].flatten
+		e.getEClassifiers
 	}
 
 	def dispatch Iterable<? extends ENamedElement> getENamedElements(EClass e) {
