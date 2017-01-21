@@ -26,6 +26,8 @@ import org.eclipse.xtext.xbase.XExpression
 import org.junit.runner.RunWith
 import edelta.edelta.EdeltaEcoreReferenceExpression
 
+import static extension org.junit.Assert.*
+
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
 abstract class EdeltaAbstractTest {
@@ -107,6 +109,11 @@ abstract class EdeltaAbstractTest {
 			name = "BarDataType"
 		]
 		fooPackage
+	}
+
+	def protected assertEqualsStrings(CharSequence expected, CharSequence actual) {
+		expected.toString.replaceAll("\r", "").
+			assertEquals(actual.toString.replaceAll("\r", ""))
 	}
 
 	def protected lastExpression(EdeltaProgram p) {
