@@ -104,18 +104,19 @@ class EdeltaEcoreHelper {
 //		]
 //	}
 
-	def dispatch Iterable<? extends ENamedElement> getENamedElements(EdeltaProgram e) {
-		cache.get("getENamedElements", e.eResource) [
+	def Iterable<? extends ENamedElement> getProgramENamedElements(EObject context) {
+		cache.get("getENamedElements", context.eResource) [
+			val prog = getProgram(context)
 			// we also must explicitly consider the derived EPackages
 			// created by our derived state computer, containing EClasses
 			// created in the program
 			(
-				e.eResource.derivedEPackages.
+				prog.eResource.derivedEPackages.
 					getAllENamedElements
 			+
-				e.metamodels.getAllENamedElements
+				prog.metamodels.getAllENamedElements
 			+
-				e.metamodels
+				prog.metamodels
 			).toList
 		]
 	}
@@ -128,15 +129,16 @@ class EdeltaEcoreHelper {
 		EcoreUtil2.getAllContentsOfType(e, ENamedElement)
 	}
 
-	def dispatch Iterable<? extends ENamedElement> getENamedElements(ENamedElement e) {
+	def dispatch Iterable<? extends ENamedElement> getENamedElements(ENamedElement e, EObject context) {
 		Collections.emptyList
 	}
 
-	def dispatch Iterable<? extends ENamedElement> getENamedElements(EPackage e) {
-		e.getEClassifiers
+	def dispatch Iterable<? extends ENamedElement> getENamedElements(EPackage e, EObject context) {
+		val derived = context.eResource.derivedEPackages.findFirst[name == e.name]
+		(derived?.getEClassifiers ?: emptyList) + e.getEClassifiers
 	}
 
-	def dispatch Iterable<? extends ENamedElement> getENamedElements(EClass e) {
+	def dispatch Iterable<? extends ENamedElement> getENamedElements(EClass e, EObject context) {
 		e.EAllStructuralFeatures
 	}
 }

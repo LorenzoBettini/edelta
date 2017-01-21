@@ -22,8 +22,28 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testProgramENamedElements() {
-		referenceToCreatedEClass.parseWithTestEcore.
-			getENamedElements.
+		referencesToMetamodels.parseWithTestEcores.
+			getProgramENamedElements.
+			assertNamedElements(
+				'''
+				FooClass
+				myAttribute
+				myReference
+				FooDataType
+				BarClass
+				myAttribute
+				myReference
+				BarDataType
+				foo
+				bar
+				'''
+			)
+	}
+
+	@Test
+	def void testProgramWithCreatedEClassENamedElements() {
+		referenceToCreatedEClass.parseWithTestEcore => [
+			getProgramENamedElements.
 			assertNamedElements(
 				'''
 				NewClass
@@ -35,18 +55,35 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				'''
 			)
 		// NewClass is the one created in the program
+		]
 	}
 
 	@Test
 	def void testEPackageENamedElements() {
-		referenceToMetamodel.parseWithTestEcore.
-			metamodels.head.getENamedElements.
+		referenceToMetamodel.parseWithTestEcore => [
+			getENamedElements(getEPackageByName("foo"), it).
 			assertNamedElements(
 				'''
 				FooClass
 				FooDataType
 				'''
 			)
+		]
+	}
+
+	@Test
+	def void testEPackageENamedElementsWithCreatedEClass() {
+		referenceToCreatedEClass.parseWithTestEcore => [
+			getENamedElements(getEPackageByName("foo"), it).
+			assertNamedElements(
+				'''
+				NewClass
+				FooClass
+				FooDataType
+				'''
+			)
+		// NewClass is the one created in the program
+		]
 	}
 
 //	@Test
