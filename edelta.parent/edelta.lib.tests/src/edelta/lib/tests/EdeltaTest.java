@@ -140,6 +140,13 @@ public class EdeltaTest {
 	}
 
 	@Test
+	public void testGetEEnum() {
+		loadTestEcore(MY_ECORE);
+		assertNull(edelta.getEEnum(MYPACKAGE, MY_CLASS));
+		assertNotNull(edelta.getEEnum(MYPACKAGE, "MyEnum"));
+	}
+
+	@Test
 	public void testEnsureEPackageIsLoaded() throws EdeltaPackageNotLoadedException {
 		loadTestEcore(MY_ECORE);
 		edelta.ensureEPackageIsLoaded(MYPACKAGE);
@@ -209,6 +216,15 @@ public class EdeltaTest {
 		loadTestEcore(MY_ECORE);
 		assertNull(
 			edelta.getEReference(MYPACKAGE, "MyDerivedClass", "myDerivedAttribute"));
+	}
+
+	@Test
+	public void testGetEEnumLiteral() {
+		loadTestEcore(MY_ECORE);
+		assertNull(
+			edelta.getEEnumLiteral(MYPACKAGE, "MyDerivedClass", "myDerivedAttribute"));
+		assertNotNull(
+				edelta.getEEnumLiteral(MYPACKAGE, "MyEnum", "MyEnumLiteral"));
 	}
 
 	@Test

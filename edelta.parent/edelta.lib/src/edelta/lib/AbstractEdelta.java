@@ -21,6 +21,8 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
+import org.eclipse.emf.ecore.EEnum;
+import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -218,6 +220,14 @@ public abstract class AbstractEdelta {
 		return null;
 	}
 
+	public EEnum getEEnum(String packageName, String enumName) {
+		EClassifier c = getEClassifier(packageName, enumName);
+		if (c instanceof EEnum) {
+			return (EEnum) c;
+		}
+		return null;
+	}
+
 	public EStructuralFeature getEStructuralFeature(String packageName, String className, String featureName) {
 		EClass c = getEClass(packageName, className);
 		if (c == null) {
@@ -240,6 +250,14 @@ public abstract class AbstractEdelta {
 			return (EReference) f;
 		}
 		return null;
+	}
+
+	public EEnumLiteral getEEnumLiteral(String packageName, String enumName, String enumLiteralName) {
+		EEnum eenum = getEEnum(packageName, enumName);
+		if (eenum == null) {
+			return null;
+		}
+		return eenum.getEEnumLiteral(enumLiteralName);
 	}
 
 	public EClass createEClass(String packageName, String name, final List<Consumer<EClass>> initializers) {
