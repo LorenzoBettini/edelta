@@ -14,11 +14,59 @@ class Inputs {
 		'''
 	}
 
+	def referenceToEPackage() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(foo)
+		'''
+	}
+
 	def referenceToEClass() {
 		'''
 			metamodel "foo"
 			
-			ecoreref FooClass
+			ecoreref(FooClass)
+		'''
+	}
+
+	def referenceToEDataType() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(FooDataType)
+		'''
+	}
+
+	def referenceToEEnum() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(FooEnum)
+		'''
+	}
+
+	def referenceToEAttribute() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(myAttribute)
+		'''
+	}
+
+	def referenceToEReference() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(myReference)
+		'''
+	}
+
+	def referenceToEEnumLiteral() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(FooEnumLiteral)
 		'''
 	}
 
