@@ -19,6 +19,10 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.Scopes
 import org.eclipse.xtext.scoping.impl.FilteringScope
 import org.eclipse.xtext.util.IResourceScopeCache
+import edelta.util.EdeltaEcoreHelper
+
+import static edelta.edelta.EdeltaPackage.Literals.*
+import edelta.edelta.EdeltaEcoreQualifiedReference
 
 /**
  * This class contains custom scoping description.
@@ -31,8 +35,15 @@ class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 	@Inject IResourceScopeCache cache
 	@Inject extension EdeltaModelUtil
 	@Inject extension EdeltaDerivedStateComputer
+	@Inject extension EdeltaEcoreHelper
 
 	override getScope(EObject context, EReference reference) {
+		if (reference == EDELTA_ECORE_REFERENCE__ENAMEDELEMENT) {
+			if (context instanceof EdeltaEcoreQualifiedReference) {
+				return Scopes.scopeFor(getENamedElements(context.qualification.enamedelement, context))
+			}
+			return Scopes.scopeFor(getProgramENamedElements(context))
+		}
 		if (reference == EdeltaPackage.Literals.EDELTA_ECLASSIFIER_EXPRESSION__ECLASSIFIER) {
 			return scopeForEClassifier(context)
 		} else if (reference == EdeltaPackage.Literals.EDELTA_ECLASS_EXPRESSION__ECLASS) {

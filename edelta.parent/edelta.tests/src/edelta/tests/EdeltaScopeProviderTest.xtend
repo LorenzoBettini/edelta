@@ -26,7 +26,10 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	def void testScopeForMetamodel() {
 		referenceToMetamodel.parseWithTestEcore.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaProgram_Metamodels,
-			"foo")
+			'''
+			foo
+			'''
+			)
 		// we skip nsURI references, like http://foo
 	}
 
@@ -34,65 +37,151 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	def void testScopeForMetamodels() {
 		referencesToMetamodels.parseWithTestEcores.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaProgram_Metamodels,
-			"foo, bar")
+			'''
+			foo
+			bar
+			'''
+			)
 	}
 
 	@Test
-	def void testScopeForEClassifier() {
+	def void testScopeForEnamedElementInProgram() {
 		referenceToMetamodel.parseWithTestEcore.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEClassifierExpression_Eclassifier,
-			"FooClass, FooDataType")
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			FooClass
+			myAttribute
+			myReference
+			FooDataType
+			FooEnum
+			FooEnumLiteral
+			foo
+			''')
 	}
 
 	@Test
-	def void testScopeForEClass() {
-		referenceToMetamodel.parseWithTestEcore.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEClassExpression_Eclass,
-			"FooClass")
+	def void testScopeForEnamedElementInEcoreReferenceExpression() {
+		'''
+		metamodel "foo"
+		ecoreref 
+		'''.parseWithTestEcore.lastExpression.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			FooClass
+			myAttribute
+			myReference
+			FooDataType
+			FooEnum
+			FooEnumLiteral
+			foo
+			''')
 	}
 
 	@Test
-	def void testScopeForEDataType() {
-		referenceToMetamodel.parseWithTestEcore.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEDataTypeExpression_Edatatype,
-			"FooDataType")
+	def void testScopeForEnamedElementInEcoreReferenceExpressionWithTwoMetamodels() {
+		'''
+		metamodel "foo"
+		metamodel "bar"
+		ecoreref 
+		'''.parseWithTestEcores.lastExpression.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			FooClass
+			myAttribute
+			myReference
+			FooDataType
+			FooEnum
+			FooEnumLiteral
+			BarClass
+			myAttribute
+			myReference
+			BarDataType
+			foo
+			bar
+			''')
 	}
 
 	@Test
-	def void testScopeForEAttribute() {
-		referenceToMetamodel.parseWithTestEcore.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEAttributeExpression_Eattribute,
-			"myAttribute")
+	def void testScopeForEnamedElementInEcoreReferenceExpressionQualifiedPackage() {
+		'''
+		metamodel "foo"
+		metamodel "bar"
+		ecoreref foo.
+		'''.parseWithTestEcores.
+			lastExpression.
+			edeltaEcoreReferenceExpression.reference.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			FooClass
+			FooDataType
+			FooEnum
+			''')
 	}
 
 	@Test
-	def void testScopeForEReference() {
-		referenceToMetamodel.parseWithTestEcore.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEReferenceExpression_Ereference,
-			"myReference")
+	def void testScopeForEnamedElementInEcoreReferenceExpressionQualifiedEClass() {
+		'''
+		metamodel "foo"
+		metamodel "bar"
+		ecoreref foo.FooClass.
+		'''.parseWithTestEcore.lastExpression.
+			edeltaEcoreReferenceExpression.reference.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			myAttribute
+			myReference
+			''')
 	}
 
-	@Test
-	def void testScopeForEFeature() {
-		referenceToMetamodel.parseWithTestEcore.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEFeatureExpression_Efeature,
-			"myAttribute, myReference")
-	}
-
-	@Test
-	def void testScopeForCreateEClassPackage() {
-		createEClass.parseWithTestEcore.lastExpression.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreCreateEClassExpression_Epackage,
-			"foo")
-	}
-
-	@Test
-	def void testScopeForReferenceToCreatedEClass() {
-		referenceToCreatedEClass.parseWithTestEcore.lastExpression.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEClassExpression_Eclass,
-			"NewClass, FooClass")
-		// NewClass is the one created in the program
-	}
+//	@Test
+//	def void testScopeForEClass() {
+//		referenceToMetamodel.parseWithTestEcore.
+//			assertScope(EdeltaPackage.eINSTANCE.edeltaEClassExpression_Eclass,
+//			"FooClass")
+//	}
+//
+//	@Test
+//	def void testScopeForEDataType() {
+//		referenceToMetamodel.parseWithTestEcore.
+//			assertScope(EdeltaPackage.eINSTANCE.edeltaEDataTypeExpression_Edatatype,
+//			"FooDataType")
+//	}
+//
+//	@Test
+//	def void testScopeForEAttribute() {
+//		referenceToMetamodel.parseWithTestEcore.
+//			assertScope(EdeltaPackage.eINSTANCE.edeltaEAttributeExpression_Eattribute,
+//			"myAttribute")
+//	}
+//
+//	@Test
+//	def void testScopeForEReference() {
+//		referenceToMetamodel.parseWithTestEcore.
+//			assertScope(EdeltaPackage.eINSTANCE.edeltaEReferenceExpression_Ereference,
+//			"myReference")
+//	}
+//
+//	@Test
+//	def void testScopeForEFeature() {
+//		referenceToMetamodel.parseWithTestEcore.
+//			assertScope(EdeltaPackage.eINSTANCE.edeltaEFeatureExpression_Efeature,
+//			"myAttribute, myReference")
+//	}
+//
+//	@Test
+//	def void testScopeForCreateEClassPackage() {
+//		createEClass.parseWithTestEcore.lastExpression.
+//			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreCreateEClassExpression_Epackage,
+//			"foo")
+//	}
+//
+//	@Test
+//	def void testScopeForReferenceToCreatedEClass() {
+//		referenceToCreatedEClass.parseWithTestEcore.lastExpression.
+//			assertScope(EdeltaPackage.eINSTANCE.edeltaEClassExpression_Eclass,
+//			"NewClass, FooClass")
+//		// NewClass is the one created in the program
+//	}
 
 	@Test
 	def void testScopeForReferenceToCreatedEClassWithTheSameNameAsAnExistingEClass() {
@@ -109,19 +198,19 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		)
 	}
 
-	@Test
-	def void testScopeForReferenceToCreatedEAttribute() {
-		referenceToCreatedEAttribute.parseWithTestEcore.lastExpression.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEAttributeExpression_Eattribute,
-			"newAttribute, newAttribute2, myAttribute")
-		// newAttributes are the ones created in the program
-	}
+//	@Test
+//	def void testScopeForReferenceToCreatedEAttribute() {
+//		referenceToCreatedEAttribute.parseWithTestEcore.lastExpression.
+//			assertScope(EdeltaPackage.eINSTANCE.edeltaEAttributeExpression_Eattribute,
+//			"newAttribute, newAttribute2, myAttribute")
+//		// newAttributes are the ones created in the program
+//	}
 
 	def private assertScope(EObject context, EReference reference, CharSequence expected) {
-		expected.toString.assertEquals(
+		expected.toString.assertEqualsStrings(
 			context.getScope(reference).
 				allElements.
-				map[name].join(", ")
+				map[name].join("\n") + "\n"
 		)
 	}
 }

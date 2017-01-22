@@ -18,7 +18,7 @@ class Inputs {
 		'''
 			metamodel "foo"
 			
-			eclass FooClass
+			ecoreref FooClass
 		'''
 	}
 
