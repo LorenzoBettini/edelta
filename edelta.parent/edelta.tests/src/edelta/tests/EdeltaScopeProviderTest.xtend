@@ -4,7 +4,7 @@
 package edelta.tests
 
 import com.google.inject.Inject
-import edelta.edelta.EdeltaEClassExpression
+import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaPackage
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
@@ -14,7 +14,7 @@ import org.eclipse.xtext.scoping.IScopeProvider
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import static extension org.junit.Assert.*
+import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -200,11 +200,11 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		val prog = referenceToCreatedEClassWithTheSameNameAsAnExistingEClass.
 			parseWithTestEcore
 		val expressions = prog.main.expressions
-		val eclassExp = expressions.last as EdeltaEClassExpression
+		val eclassExp = expressions.last as EdeltaEcoreReferenceExpression
 		assertSame(
 			// the one created by the derived state computer
 			prog.derivedStateLastEClass,
-			eclassExp.eclass
+			eclassExp.reference.enamedelement
 		)
 	}
 

@@ -163,7 +163,7 @@ class Inputs {
 			metamodel "foo"
 			
 			createEClass FooClass in foo
-			eclass FooClass
+			ecoreref FooClass
 		'''
 	}
 
