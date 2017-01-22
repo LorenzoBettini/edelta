@@ -4,11 +4,8 @@
 package edelta.tests
 
 import com.google.inject.Inject
-import edelta.edelta.EdeltaProgram
 import edelta.util.EdeltaEcoreHelper
 import org.eclipse.emf.ecore.ENamedElement
-import org.eclipse.emf.ecore.EPackage
-import org.eclipse.emf.ecore.xmi.XMIResource
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
 import org.junit.Test
@@ -202,13 +199,4 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 		)
 	}
 
-	def private getEPackageByName(EdeltaProgram context, String packagename) {
-		context.eResource.resourceSet.resources.filter(XMIResource).
-			map[contents.head as EPackage].findFirst[name == packagename]
-	}
-
-	def private getEClassifierByName(EdeltaProgram context, String packagename, String classifiername) {
-		getEPackageByName(context, packagename).EClassifiers.
-			findFirst[name == classifiername]
-	}
 }

@@ -9,6 +9,7 @@ import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreDirectReference
 import edelta.edelta.EdeltaEcoreQualifiedReference
+import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaProgram
 import edelta.tests.input.Inputs
 import org.eclipse.emf.common.util.URI
@@ -17,6 +18,7 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.resource.ResourceSet
+import org.eclipse.emf.ecore.xmi.XMIResource
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
 import org.eclipse.xtext.junit4.util.ParseHelper
@@ -24,7 +26,6 @@ import org.eclipse.xtext.junit4.validation.ValidationTestHelper
 import org.eclipse.xtext.resource.XtextResourceSet
 import org.eclipse.xtext.xbase.XExpression
 import org.junit.runner.RunWith
-import edelta.edelta.EdeltaEcoreReferenceExpression
 
 import static extension org.junit.Assert.*
 
@@ -120,6 +121,16 @@ abstract class EdeltaAbstractTest {
 	def protected assertEqualsStrings(CharSequence expected, CharSequence actual) {
 		expected.toString.replaceAll("\r", "").
 			assertEquals(actual.toString.replaceAll("\r", ""))
+	}
+
+	def protected getEPackageByName(EdeltaProgram context, String packagename) {
+		context.eResource.resourceSet.resources.filter(XMIResource).
+			map[contents.head as EPackage].findFirst[name == packagename]
+	}
+
+	def protected getEClassifierByName(EdeltaProgram context, String packagename, String classifiername) {
+		getEPackageByName(context, packagename).EClassifiers.
+			findFirst[name == classifiername]
 	}
 
 	def protected lastExpression(EdeltaProgram p) {
