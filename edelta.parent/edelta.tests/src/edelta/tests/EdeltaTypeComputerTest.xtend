@@ -18,9 +18,13 @@ import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EReference
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
+import org.eclipse.emf.ecore.EEnum
+import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EEnumLiteral
+import org.eclipse.emf.ecore.ENamedElement
 
 @RunWith(XtextRunner)
-@InjectWith(EdeltaInjectorProvider)
+@InjectWith(EdeltaInjectorProviderCustom)
 class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 
 	@Inject extension IBatchTypeResolver
@@ -53,6 +57,46 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	@Test
 	def void testTypeOfEReferenceExpression() {
 		"ereference myReference".assertType(EReference)
+	}
+
+	@Test
+	def void testTypeOfReferenceToEPackage() {
+		referenceToEPackage.assertType(EPackage)
+	}
+
+	@Test
+	def void testTypeOfReferenceToEClass() {
+		referenceToEClass.assertType(EClass)
+	}
+
+	@Test
+	def void testTypeOfReferenceToEDataType() {
+		referenceToEDataType.assertType(EDataType)
+	}
+
+	@Test
+	def void testTypeOfReferenceToEEnum() {
+		referenceToEEnum.assertType(EEnum)
+	}
+
+	@Test
+	def void testTypeOfReferenceToEAttribute() {
+		referenceToEAttribute.assertType(EAttribute)
+	}
+
+	@Test
+	def void testTypeOfReferenceToEReference() {
+		referenceToEReference.assertType(EReference)
+	}
+
+	@Test
+	def void testTypeOfReferenceToEEnumLiteral() {
+		referenceToEEnumLiteral.assertType(EEnumLiteral)
+	}
+
+	@Test
+	def void testTypeOfReferenceToUnresolvedENamedElement() {
+		"ecoreref(NonExistant)".assertType(ENamedElement)
 	}
 
 	@Test
