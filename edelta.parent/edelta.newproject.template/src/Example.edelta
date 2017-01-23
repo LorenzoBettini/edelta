@@ -45,5 +45,7 @@ createEClass MyDerivedNewClass in myecore {
 	}
 }
 
+//ecoreref(MyDerivedNewClass.myNewAttribute)
+
 createEClass MyOtherNewClass in myecore
 
