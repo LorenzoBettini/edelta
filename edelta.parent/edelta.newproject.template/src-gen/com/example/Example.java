@@ -5,9 +5,11 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
@@ -61,6 +63,15 @@ public class Example extends AbstractEdelta {
     _eClassifiers.add(_doubleArrow);
     createEClass("myecore", "MyNewClass", null);
     createEClass("myecore", "MyDerivedNewClass", createList(this::_createEClass_MyDerivedNewClass_in_myecore));
+    getEAttribute("myecore", "MyDerivedNewClass", "myNewAttribute");
+    EList<EEnumLiteral> _eLiterals = getEEnum("myecore", "MyENum").getELiterals();
+    EEnumLiteral _createEEnumLiteral = EcoreFactory.eINSTANCE.createEEnumLiteral();
+    final Procedure1<EEnumLiteral> _function_1 = (EEnumLiteral it) -> {
+      it.setName("AnotherEnumLiteral");
+      it.setValue(3);
+    };
+    EEnumLiteral _doubleArrow_1 = ObjectExtensions.<EEnumLiteral>operator_doubleArrow(_createEEnumLiteral, _function_1);
+    _eLiterals.add(_doubleArrow_1);
     createEClass("myecore", "MyOtherNewClass", null);
   }
   

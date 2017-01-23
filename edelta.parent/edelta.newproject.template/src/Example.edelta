@@ -1,3 +1,5 @@
+import org.eclipse.emf.ecore.EcoreFactory
+
 // IMPORTANT: ecores must be in a source directory
 // otherwise you can't refer to them
 
@@ -45,7 +47,12 @@ createEClass MyDerivedNewClass in myecore {
 	}
 }
 
-//ecoreref(MyDerivedNewClass.myNewAttribute)
+ecoreref(MyDerivedNewClass.myNewAttribute)
+
+ecoreref(MyENum).ELiterals += EcoreFactory.eINSTANCE.createEEnumLiteral => [
+	name = "AnotherEnumLiteral"
+	value = 3
+]
 
 createEClass MyOtherNewClass in myecore
 
