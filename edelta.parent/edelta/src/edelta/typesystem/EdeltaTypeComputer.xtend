@@ -13,14 +13,14 @@ import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EDataType
+import org.eclipse.emf.ecore.EEnum
+import org.eclipse.emf.ecore.EEnumLiteral
+import org.eclipse.emf.ecore.ENamedElement
+import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.xbase.annotations.typesystem.XbaseWithAnnotationsTypeComputer
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputationState
-import org.eclipse.emf.ecore.EPackage
-import org.eclipse.emf.ecore.EEnum
-import org.eclipse.emf.ecore.EEnumLiteral
-import org.eclipse.emf.ecore.ENamedElement
 
 class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 	def dispatch void computeTypes(EdeltaEClassifierExpression e, ITypeComputationState state) {
@@ -56,7 +56,12 @@ class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 	}
 
 	def dispatch void computeTypes(EdeltaEcoreReferenceExpression e, ITypeComputationState state) {
-		val enamedelement = e.reference.enamedelement;
+		val reference = e.reference
+		if (reference === null) {
+			state.acceptActualType(getPrimitiveVoid(state))
+			return
+		}
+		val enamedelement = reference.enamedelement;
 		val type = switch (enamedelement) {
 			case enamedelement.eIsProxy: ENamedElement
 			EPackage: EPackage

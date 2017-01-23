@@ -100,6 +100,16 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testTypeOfReferenceToNullNamedElement() {
+		"ecoreref".assertPrimitiveVoid
+	}
+
+	@Test
+	def void testTypeOfReferenceToNullNamedElement2() {
+		"ecoreref()".assertPrimitiveVoid
+	}
+
+	@Test
 	def void testTypeOfCreateEClassExpression() {
 		"createEClass Test in foo".assertType(EClass)
 	}
@@ -114,6 +124,14 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	def private assertType(CharSequence input, Class<?> expected) {
 		input.parseWithTestEcore.lastExpression => [
 			expected.canonicalName.assertEquals(
+				resolveTypes.getActualType(it).identifier
+			)
+		]
+	}
+
+	def private assertPrimitiveVoid(CharSequence input) {
+		input.parseWithTestEcore.lastExpression => [
+			"void".assertEquals(
 				resolveTypes.getActualType(it).identifier
 			)
 		]
