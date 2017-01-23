@@ -157,4 +157,56 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 			)
 		]
 	}
+
+	@Test
+	def void testGetStringForEcoreReferenceExpressionEClass() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(FooClass)
+		'''.parseWithTestEcore.
+		lastExpression.edeltaEcoreReferenceExpression => [
+			'getEClass("foo", "FooClass")'.
+				assertEquals(stringForEcoreReferenceExpression)
+		]
+	}
+
+	@Test
+	def void testGetStringForEcoreReferenceExpressionEAttribute() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(myAttribute)
+		'''.parseWithTestEcore.
+		lastExpression.edeltaEcoreReferenceExpression => [
+			'getEAttribute("foo", "FooClass", "myAttribute")'.
+				assertEquals(stringForEcoreReferenceExpression)
+		]
+	}
+
+	@Test
+	def void testGetStringForEcoreReferenceExpressionIncomplete() {
+		'''
+			metamodel "foo"
+			
+			ecoreref
+		'''.parseWithTestEcore.
+		lastExpression.edeltaEcoreReferenceExpression => [
+			'null'.
+				assertEquals(stringForEcoreReferenceExpression)
+		]
+	}
+
+	@Test
+	def void testGetStringForEcoreReferenceExpressionUnresolved() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(NonExistant)
+		'''.parseWithTestEcore.
+		lastExpression.edeltaEcoreReferenceExpression => [
+			'getENamedElement("", "", "")'.
+				assertEquals(stringForEcoreReferenceExpression)
+		]
+	}
 }
