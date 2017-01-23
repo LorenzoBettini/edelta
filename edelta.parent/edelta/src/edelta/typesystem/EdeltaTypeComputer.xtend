@@ -56,12 +56,11 @@ class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 	}
 
 	def dispatch void computeTypes(EdeltaEcoreReferenceExpression e, ITypeComputationState state) {
-		val reference = e.reference
-		if (reference === null) {
+		val enamedelement = e.reference?.enamedelement;
+		if (enamedelement === null) {
 			state.acceptActualType(getPrimitiveVoid(state))
 			return
 		}
-		val enamedelement = reference.enamedelement;
 		val type = switch (enamedelement) {
 			case enamedelement.eIsProxy: ENamedElement
 			EPackage: EPackage
