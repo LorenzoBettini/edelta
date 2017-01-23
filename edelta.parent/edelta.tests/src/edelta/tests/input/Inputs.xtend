@@ -185,6 +185,23 @@ class Inputs {
 		'''
 	}
 
+	def ecoreReferenceExpressions() {
+		'''
+		package foo;
+		
+		metamodel "foo"
+		
+		ecoreref(FooClass)
+		println(ecoreref(FooClass))
+		ecoreref(myAttribute)
+		println(ecoreref(myAttribute))
+		ecoreref(FooEnum)
+		println(ecoreref(FooEnum))
+		ecoreref(FooEnumLiteral)
+		println(ecoreref(FooEnumLiteral))
+		'''
+	}
+
 	def createEClass() {
 		'''
 			metamodel "foo"

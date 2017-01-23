@@ -195,6 +195,42 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCompilationOfEcoreReferenceExpression() {
+		ecoreReferenceExpressions.checkCompilation(
+			'''
+			package foo;
+			
+			import edelta.lib.AbstractEdelta;
+			import org.eclipse.emf.ecore.EAttribute;
+			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.emf.ecore.EEnum;
+			import org.eclipse.emf.ecore.EEnumLiteral;
+			import org.eclipse.xtext.xbase.lib.InputOutput;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    getEClass("foo", "FooClass");
+			    InputOutput.<EClass>println(getEClass("foo", "FooClass"));
+			    getEAttribute("foo", "FooClass", "myAttribute");
+			    InputOutput.<EAttribute>println(getEAttribute("foo", "FooClass", "myAttribute"));
+			    getEEnum("foo", "FooEnum");
+			    InputOutput.<EEnum>println(getEEnum("foo", "FooEnum"));
+			    getEEnumLiteral("foo", "FooEnum", "FooEnumLiteral");
+			    InputOutput.<EEnumLiteral>println(getEEnumLiteral("foo", "FooEnum", "FooEnumLiteral"));
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
 	def void testCompilationOfEclassExpression() {
 		eclassExpression.checkCompilation(
 			'''

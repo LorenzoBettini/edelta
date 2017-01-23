@@ -9,6 +9,7 @@ import edelta.edelta.EdeltaEFeatureExpression
 import edelta.edelta.EdeltaEReferenceExpression
 import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
+import edelta.edelta.EdeltaEcoreReferenceExpression
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.xbase.XExpression
@@ -61,6 +62,11 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 					compileEdeltaCreateEAttributeExpression(obj, appendable)
 				]
 			}
+			EdeltaEcoreReferenceExpression: {
+				compileAsStatementIfNotReferenced(appendable, isReferenced) [
+					compileEdeltaEcoreReferenceExpression(obj, appendable)
+				]
+			}
 			default:
 				super.doInternalToJavaStatement(obj, appendable, isReferenced)
 		}
@@ -86,9 +92,16 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 			EdeltaEReferenceExpression: {
 				compileEdeltaEReferenceExpression(obj, appendable)
 			}
+			EdeltaEcoreReferenceExpression: {
+				compileEdeltaEcoreReferenceExpression(obj, appendable)
+			}
 			default:
 				super.internalToConvertedExpression(obj, appendable)
 		}
+	}
+
+	private def void compileEdeltaEcoreReferenceExpression(EdeltaEcoreReferenceExpression obj, ITreeAppendable appendable) {
+		appendable.append(obj.stringForEcoreReferenceExpression)
 	}
 
 	private def void compileEdeltaEClassifierExpression(EdeltaEClassifierExpression obj, ITreeAppendable appendable) {
