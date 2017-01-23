@@ -11,6 +11,7 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
+import org.eclipse.emf.ecore.EEnumLiteral
 
 /**
  * Utilities for Edelta compiler
@@ -51,6 +52,10 @@ class EdeltaCompilerUtil {
 		eFeature.EContainingClass?.name
 	}
 
+	def String getEEnumNameOrNull(EEnumLiteral literal) {
+		literal.EEnum?.name
+	}
+
 	def getStringForEcoreReferenceExpression(EdeltaEcoreReferenceExpression e) {
 		val type = e.resolveTypes.getActualType(e)
 		val enamedelement = e.reference?.enamedelement
@@ -58,6 +63,8 @@ class EdeltaCompilerUtil {
 			return '''get«type.simpleName»("«enamedelement.EPackageNameOrNull»", "«enamedelement.name»")'''
 		} else if (enamedelement instanceof EStructuralFeature) {
 			return '''get«type.simpleName»("«enamedelement.EContainingClass.EPackageNameOrNull»", "«enamedelement.EClassNameOrNull»", "«enamedelement.name»")'''
+		} else if (enamedelement instanceof EEnumLiteral) {
+			return '''get«type.simpleName»("«enamedelement.EEnum.EPackageNameOrNull»", "«enamedelement.EEnumNameOrNull»", "«enamedelement.name»")'''
 		} else
 			return "null"
 	}

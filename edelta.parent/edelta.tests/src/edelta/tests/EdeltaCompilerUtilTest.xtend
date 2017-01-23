@@ -13,6 +13,8 @@ import org.junit.runner.RunWith
 import static extension org.junit.Assert.*
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EStructuralFeature
+import org.eclipse.emf.ecore.EEnumLiteral
+import org.eclipse.emf.ecore.EcoreFactory
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -159,6 +161,26 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testEEnumNameOrNull() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(FooEnumLiteral)
+		'''.parseWithTestEcore.
+		main.expressions => [
+			"FooEnum".
+				assertEquals(
+					(head.edeltaEcoreReferenceExpression.
+						reference.enamedelement as EEnumLiteral
+					).EEnumNameOrNull
+				)
+			assertNull(
+				(EcoreFactory.eINSTANCE.createEEnumLiteral).EEnumNameOrNull
+			)
+		]
+	}
+
+	@Test
 	def void testGetStringForEcoreReferenceExpressionEClass() {
 		'''
 			metamodel "foo"
@@ -180,6 +202,19 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 		'''.parseWithTestEcore.
 		lastExpression.edeltaEcoreReferenceExpression => [
 			'getEAttribute("foo", "FooClass", "myAttribute")'.
+				assertEquals(stringForEcoreReferenceExpression)
+		]
+	}
+
+	@Test
+	def void testGetStringForEcoreReferenceExpressionEEnumLiteral() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(FooEnumLiteral)
+		'''.parseWithTestEcore.
+		lastExpression.edeltaEcoreReferenceExpression => [
+			'getEEnumLiteral("foo", "FooEnum", "FooEnumLiteral")'.
 				assertEquals(stringForEcoreReferenceExpression)
 		]
 	}
