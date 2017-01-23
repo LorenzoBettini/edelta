@@ -10,7 +10,6 @@ import edelta.edelta.EdeltaEReferenceExpression
 import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import org.eclipse.emf.ecore.EClassifier
-import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
@@ -172,13 +171,6 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 		)
 	}
 
-	private def consumerArgumentForBody(XExpression body) {
-		var String consumerArgument = "null"
-		if (body !== null)
-			consumerArgument = "createList(this::" + (body.eContainer as XExpression).methodName + ")"
-		return consumerArgument
-	}
-
 	private def void compileAsStatementIfNotReferenced(ITreeAppendable appendable, boolean isReferenced,
 		()=>void compileLambda) {
 		if (!isReferenced) {
@@ -186,18 +178,6 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 			compileLambda.apply
 			appendable.append(";")
 		}
-	}
-
-	private def String getEPackageNameOrNull(EClassifier eClassifier) {
-		eClassifier?.EPackage.getEPackageNameOrNull
-	}
-
-	private def String getEPackageNameOrNull(EPackage e) {
-		e?.name
-	}
-
-	private def String getEClassNameOrNull(EStructuralFeature eFeature) {
-		eFeature.EContainingClass?.name
 	}
 
 }
