@@ -161,7 +161,7 @@ class Inputs {
 			createEClass MyNewClass in foo
 			
 			createEClass MyDerivedNewClass in foo {
-				ESuperTypes += eclass MyNewClass
+				ESuperTypes += ecoreref(MyNewClass)
 			}
 		'''
 	}
