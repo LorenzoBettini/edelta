@@ -25,6 +25,7 @@
 		<module>edelta.repository</module>
 		<module>edelta.tests</module>
 		<module>edelta.ui.tests</module>
+		<module>edelta.tests.report</module>
 	</modules>
 
 	<profiles>
