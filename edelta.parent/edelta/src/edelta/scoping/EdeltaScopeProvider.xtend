@@ -59,8 +59,10 @@ class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 		} else if (reference == EdeltaPackage.Literals.EDELTA_ECORE_CREATE_ECLASS_EXPRESSION__EPACKAGE) {
 			return Scopes.scopeFor(getProgram(context).metamodels)
 		} else if (reference == EdeltaPackage.Literals.EDELTA_PROGRAM__METAMODELS) {
-			return new FilteringScope(delegateGetScope(context, reference)) [
-				"false".equals(getUserData("nsURI"))
+			return cache.get("scopeMetamodels", context.eResource) [
+				return new FilteringScope(delegateGetScope(context, reference)) [
+					"false".equals(getUserData("nsURI"))
+				]
 			]
 		}
 		super.getScope(context, reference)
