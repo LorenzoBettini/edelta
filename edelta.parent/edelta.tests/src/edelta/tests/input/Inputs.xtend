@@ -199,6 +199,7 @@ class Inputs {
 		println(ecoreref(FooEnum))
 		ecoreref(FooEnumLiteral)
 		println(ecoreref(FooEnumLiteral))
+		val ref = ecoreref(myReference)
 		'''
 	}
 

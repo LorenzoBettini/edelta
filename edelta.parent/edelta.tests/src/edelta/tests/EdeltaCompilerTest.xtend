@@ -205,6 +205,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			import org.eclipse.emf.ecore.EClass;
 			import org.eclipse.emf.ecore.EEnum;
 			import org.eclipse.emf.ecore.EEnumLiteral;
+			import org.eclipse.emf.ecore.EReference;
 			import org.eclipse.xtext.xbase.lib.InputOutput;
 			
 			@SuppressWarnings("all")
@@ -224,6 +225,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    InputOutput.<EEnum>println(getEEnum("foo", "FooEnum"));
 			    getEEnumLiteral("foo", "FooEnum", "FooEnumLiteral");
 			    InputOutput.<EEnumLiteral>println(getEEnumLiteral("foo", "FooEnum", "FooEnumLiteral"));
+			    final EReference ref = getEReference("foo", "FooClass", "myReference");
 			  }
 			}
 			'''
