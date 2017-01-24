@@ -16,6 +16,8 @@ class EdeltaNewProjectWizardInitialContents {
 		fsa.generateFile(
 			"src/Example." + fileExtensionProvider.primaryFileExtension,
 			'''
+			import org.eclipse.emf.ecore.EcoreFactory
+			
 			// IMPORTANT: ecores must be in a source directory
 			// otherwise you can't refer to them
 			
@@ -31,37 +33,47 @@ class EdeltaNewProjectWizardInitialContents {
 			 */
 			def createClass(String name) {
 				newEClass(name) => [
-					ESuperTypes += (eclass MyEClass)
+					ESuperTypes += ecoreref(MyEClass)
 				]
 			}
 			
-			// refer to EClasses with "eclass"
-			val p = (eclass MyEClass).EPackage
+			// refer to Ecore elements with "ecoreref()"
+			val p = ecoreref(MyEClass).EPackage
 			// create new EClasses manually...
 			p.EClassifiers += createClass("NewClass") => [
 				EStructuralFeatures += newEAttribute("myStringAttribute") => [
-					// refer to EDataTypes with "edatatype"
-					EType = edatatype EString
+					// refer to EDataTypes with "ecoreref()"
+					EType = ecoreref(EString)
 				]
 				EStructuralFeatures += newEReference("myReference") => [
-					EType = (eclass MyEClass)
+					EType = ecoreref(MyEClass)
 					upperBound = -1;
 					containment = true;
 					lowerBound = 0
 				]
 			]
 			
+			// modify existing Ecore elements manually
+			ecoreref(MyENum).ELiterals += EcoreFactory.eINSTANCE.createEEnumLiteral => [
+				name = "AnotherEnumLiteral"
+				value = 3
+			]
+			
 			// ... or using Edelta DSL specific syntax
 			createEClass MyNewClass in myecore
 			
 			createEClass MyDerivedNewClass in myecore {
-				ESuperTypes += eclass MyNewClass
-				ESuperTypes += eclass MyOtherNewClass
+				// new Ecore elements created in the program can be referred:
+				ESuperTypes += ecoreref(MyNewClass)
+				ESuperTypes += ecoreref(MyOtherNewClass)
 				createEAttribute myNewAttribute {
-					EType = edatatype EInt
+					EType = ecoreref(EInt)
 					upperBound = -1;
 				}
 			}
+			
+			// You can fully qualify Ecore references
+			ecoreref(MyDerivedNewClass.myNewAttribute)
 			
 			createEClass MyOtherNewClass in myecore
 			'''
@@ -74,6 +86,10 @@ class EdeltaNewProjectWizardInitialContents {
 			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="myecore" nsURI="http://www.eclipse.org/emf/2002/Myecore" nsPrefix="myecore">
 			  <eClassifiers xsi:type="ecore:EClass" name="MyEClass">
 			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="astring" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+			  </eClassifiers>
+			  <eClassifiers xsi:type="ecore:EEnum" name="MyENum">
+			    <eLiterals name="FirstEnumLiteral"/>
+			    <eLiterals name="SecondEnumLiteral" value="1"/>
 			  </eClassifiers>
 			</ecore:EPackage>
 			'''
