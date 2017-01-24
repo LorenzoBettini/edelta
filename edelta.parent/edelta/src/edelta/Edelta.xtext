@@ -69,11 +69,19 @@ EdeltaEcoreFeatureManipulationExpression returns xbase::XExpression:
 
 // redefine Xbase primary expression with our special expressions
 XPrimaryExpression returns xbase::XExpression:
-	{EdeltaEClassifierExpression} 'eclassifier' eclassifier=[ecore::EClassifier] |
-	{EdeltaEClassExpression} 'eclass' eclass=[ecore::EClass] |
-	{EdeltaEDataTypeExpression} 'edatatype' edatatype=[ecore::EDataType] |
-	{EdeltaEFeatureExpression} 'efeature' efeature=[ecore::EStructuralFeature] |
-	{EdeltaEAttributeExpression} 'eattribute' eattribute=[ecore::EAttribute] |
-	{EdeltaEReferenceExpression} 'ereference' ereference=[ecore::EReference] |
+	{EdeltaEcoreReferenceExpression} 'ecoreref' '(' reference=EdeltaEcoreReference ')' |
 	super
 ;
+
+EdeltaEcoreReference:
+	EdeltaEcoreDirectReference
+	(
+		{EdeltaEcoreQualifiedReference.qualification=current} '.'
+		enamedelement=[ecore::ENamedElement]
+	)*
+;
+
+EdeltaEcoreDirectReference returns EdeltaEcoreReference:
+	{EdeltaEcoreDirectReference} enamedelement=[ecore::ENamedElement]
+;
+

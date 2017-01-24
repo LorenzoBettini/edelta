@@ -4,6 +4,11 @@
   <eClassifiers xsi:type="ecore:EClass" name="MyEClass">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="astring" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="MyENum">
+    <eLiterals name="FirstEnumLiteral"/>
+    <eLiterals name="SecondEnumLiteral" value="1"/>
+    <eLiterals name="AnotherEnumLiteral" value="3"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="NewClass" eSuperTypes="#//MyEClass">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="myStringAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="myReference" upperBound="-1"

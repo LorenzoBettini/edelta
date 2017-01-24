@@ -4,11 +4,13 @@
 package edelta.tests
 
 import com.google.inject.Inject
-import edelta.edelta.EdeltaEClassExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.resource.EdeltaDerivedStateComputer
 import edelta.resource.EdeltaDerivedStateComputer.EdeltaDerivedStateAdapter
+import java.util.Map
+import org.eclipse.emf.common.notify.impl.AdapterImpl
 import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl
 import org.eclipse.xtext.common.types.JvmGenericType
@@ -20,9 +22,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import java.util.Map
-import org.eclipse.emf.ecore.EPackage
-import org.eclipse.emf.common.notify.impl.AdapterImpl
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -189,22 +188,23 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		metamodel "foo"
 		
 		createEClass First in foo
-		eclass First
+		ecoreref(First)
 		'''.
 		parseWithTestEcore
 		val resource = program.eResource as DerivedStateAwareResource
 		val derivedStateEClass = program.getDerivedStateLastEClass
-		val eclassRef = program.main.expressions.last as EdeltaEClassExpression
-		assertSame(derivedStateEClass, eclassRef.eclass)
+		val eclassRef = program.main.expressions.last.
+			edeltaEcoreReferenceExpression.reference.enamedelement
+		assertSame(derivedStateEClass, eclassRef)
 		assertEquals("First", derivedStateEClass.name)
-		assertFalse("should be resolved now", eclassRef.eclass.eIsProxy)
+		assertFalse("should be resolved now", eclassRef.eIsProxy)
 		// discard derived state
 		program.main.expressions.remove(0)
 		resource.discardDerivedState
 		// the reference to the EClass is still there
-		assertSame(derivedStateEClass, eclassRef.eclass)
+		assertSame(derivedStateEClass, eclassRef)
 		// but the EClass is now a proxy
-		assertTrue("should be a proxy now", eclassRef.eclass.eIsProxy)
+		assertTrue("should be a proxy now", eclassRef.eIsProxy)
 	}
 
 	@Test

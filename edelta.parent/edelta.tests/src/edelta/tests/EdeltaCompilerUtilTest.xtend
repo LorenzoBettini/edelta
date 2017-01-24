@@ -10,7 +10,11 @@ import org.eclipse.xtext.junit4.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import static org.junit.Assert.*
+import static extension org.junit.Assert.*
+import org.eclipse.emf.ecore.EClassifier
+import org.eclipse.emf.ecore.EStructuralFeature
+import org.eclipse.emf.ecore.EEnumLiteral
+import org.eclipse.emf.ecore.EcoreFactory
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -83,4 +87,161 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 		assertNull("_createEClass_First_in_foo", methodName(null))
 	}
 
+	@Test
+	def void testConsumerArgumentForBody() {
+		createEClass.parseWithTestEcore.
+		main.expressions => [
+			"null".
+				assertEquals(head.createEClassExpression.body.consumerArgumentForBody)
+			"createList(this::_createEClass_MyDerivedNewClass_in_foo)".
+				assertEquals(last.createEClassExpression.body.consumerArgumentForBody)
+		]
+	}
+
+	@Test
+	def void testEPackageNameOrNull() {
+		'''
+			metamodel "foo"
+			
+			createEClass MyNewClass in foo
+
+			createEClass MyNewClass in NonExistant
+			
+			createEClass MyDerivedNewClass 
+		'''.parseWithTestEcore.
+		main.expressions => [
+			"foo".
+				assertEquals(head.createEClassExpression.epackage.EPackageNameOrNull)
+			assertNull(get(1).createEClassExpression.epackage.EPackageNameOrNull)
+			assertNull(last.createEClassExpression.epackage.EPackageNameOrNull)
+		]
+	}
+
+	@Test
+	def void testEClassifierEPackageNameOrNull() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(FooClass)
+		'''.parseWithTestEcore.
+		main.expressions => [
+			"foo".
+				assertEquals(
+					(head.edeltaEcoreReferenceExpression.
+						reference.enamedelement as EClassifier
+					).EPackageNameOrNull
+				)
+			assertNull(
+				(null as EClassifier).EPackageNameOrNull
+			)
+		]
+	}
+
+	@Test
+	def void testEClassNameOrNull() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(myAttribute)
+			ecoreref(nonExistantAttribute)
+		'''.parseWithTestEcore.
+		main.expressions => [
+			"FooClass".
+				assertEquals(
+					(head.edeltaEcoreReferenceExpression.
+						reference.enamedelement as EStructuralFeature
+					).EClassNameOrNull
+				)
+			assertNull(
+				(last.edeltaEcoreReferenceExpression.
+					reference.enamedelement as EStructuralFeature
+				).EClassNameOrNull
+			)
+		]
+	}
+
+	@Test
+	def void testEEnumNameOrNull() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(FooEnumLiteral)
+		'''.parseWithTestEcore.
+		main.expressions => [
+			"FooEnum".
+				assertEquals(
+					(head.edeltaEcoreReferenceExpression.
+						reference.enamedelement as EEnumLiteral
+					).EEnumNameOrNull
+				)
+			assertNull(
+				(EcoreFactory.eINSTANCE.createEEnumLiteral).EEnumNameOrNull
+			)
+		]
+	}
+
+	@Test
+	def void testGetStringForEcoreReferenceExpressionEClass() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(FooClass)
+		'''.parseWithTestEcore.
+		lastExpression.edeltaEcoreReferenceExpression => [
+			'getEClass("foo", "FooClass")'.
+				assertEquals(stringForEcoreReferenceExpression)
+		]
+	}
+
+	@Test
+	def void testGetStringForEcoreReferenceExpressionEAttribute() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(myAttribute)
+		'''.parseWithTestEcore.
+		lastExpression.edeltaEcoreReferenceExpression => [
+			'getEAttribute("foo", "FooClass", "myAttribute")'.
+				assertEquals(stringForEcoreReferenceExpression)
+		]
+	}
+
+	@Test
+	def void testGetStringForEcoreReferenceExpressionEEnumLiteral() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(FooEnumLiteral)
+		'''.parseWithTestEcore.
+		lastExpression.edeltaEcoreReferenceExpression => [
+			'getEEnumLiteral("foo", "FooEnum", "FooEnumLiteral")'.
+				assertEquals(stringForEcoreReferenceExpression)
+		]
+	}
+
+	@Test
+	def void testGetStringForEcoreReferenceExpressionIncomplete() {
+		'''
+			metamodel "foo"
+			
+			ecoreref
+		'''.parseWithTestEcore.
+		lastExpression.edeltaEcoreReferenceExpression => [
+			'null'.
+				assertEquals(stringForEcoreReferenceExpression)
+		]
+	}
+
+	@Test
+	def void testGetStringForEcoreReferenceExpressionUnresolved() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(NonExistant)
+		'''.parseWithTestEcore.
+		lastExpression.edeltaEcoreReferenceExpression => [
+			'getENamedElement("", "", "")'.
+				assertEquals(stringForEcoreReferenceExpression)
+		]
+	}
 }

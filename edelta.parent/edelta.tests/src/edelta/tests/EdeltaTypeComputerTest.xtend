@@ -4,6 +4,15 @@
 package edelta.tests
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaEcoreCreateEClassExpression
+import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EDataType
+import org.eclipse.emf.ecore.EEnum
+import org.eclipse.emf.ecore.EEnumLiteral
+import org.eclipse.emf.ecore.ENamedElement
+import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.junit4.XtextRunner
 import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
@@ -11,48 +20,61 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
-import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.EClassifier
-import org.eclipse.emf.ecore.EDataType
-import org.eclipse.emf.ecore.EStructuralFeature
-import org.eclipse.emf.ecore.EAttribute
-import org.eclipse.emf.ecore.EReference
-import edelta.edelta.EdeltaEcoreCreateEClassExpression
 
 @RunWith(XtextRunner)
-@InjectWith(EdeltaInjectorProvider)
+@InjectWith(EdeltaInjectorProviderCustom)
 class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 
 	@Inject extension IBatchTypeResolver
 
 	@Test
-	def void testTypeOfEclassifierExpression() {
-		"eclassifier FooClass".assertType(EClassifier)
+	def void testTypeOfReferenceToEPackage() {
+		referenceToEPackage.assertType(EPackage)
 	}
 
 	@Test
-	def void testTypeOfEclassExpression() {
-		"eclass FooClass".assertType(EClass)
+	def void testTypeOfReferenceToEClass() {
+		referenceToEClass.assertType(EClass)
 	}
 
 	@Test
-	def void testTypeOfEDatatyeExpression() {
-		"edatatype FooDataType".assertType(EDataType)
+	def void testTypeOfReferenceToEDataType() {
+		referenceToEDataType.assertType(EDataType)
 	}
 
 	@Test
-	def void testTypeOfEFeatureExpression() {
-		"efeature myAttribute".assertType(EStructuralFeature)
+	def void testTypeOfReferenceToEEnum() {
+		referenceToEEnum.assertType(EEnum)
 	}
 
 	@Test
-	def void testTypeOfEAttributeExpression() {
-		"eattribute myAttribute".assertType(EAttribute)
+	def void testTypeOfReferenceToEAttribute() {
+		referenceToEAttribute.assertType(EAttribute)
 	}
 
 	@Test
-	def void testTypeOfEReferenceExpression() {
-		"ereference myReference".assertType(EReference)
+	def void testTypeOfReferenceToEReference() {
+		referenceToEReference.assertType(EReference)
+	}
+
+	@Test
+	def void testTypeOfReferenceToEEnumLiteral() {
+		referenceToEEnumLiteral.assertType(EEnumLiteral)
+	}
+
+	@Test
+	def void testTypeOfReferenceToUnresolvedENamedElement() {
+		"ecoreref(NonExistant)".assertType(ENamedElement)
+	}
+
+	@Test
+	def void testTypeOfReferenceToNullNamedElement() {
+		"ecoreref".assertPrimitiveVoid
+	}
+
+	@Test
+	def void testTypeOfReferenceToNullNamedElement2() {
+		"ecoreref()".assertPrimitiveVoid
 	}
 
 	@Test
@@ -70,6 +92,14 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	def private assertType(CharSequence input, Class<?> expected) {
 		input.parseWithTestEcore.lastExpression => [
 			expected.canonicalName.assertEquals(
+				resolveTypes.getActualType(it).identifier
+			)
+		]
+	}
+
+	def private assertPrimitiveVoid(CharSequence input) {
+		input.parseWithTestEcore.lastExpression => [
+			"void".assertEquals(
 				resolveTypes.getActualType(it).identifier
 			)
 		]

@@ -46,7 +46,7 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 			
 			metamodel "mypackage"
 			
-			eclassifier MyClass
+			ecoreref(MyClass)
 			'''
 		)
 		// we need to wait for build twice when we run all the UI tests
@@ -68,7 +68,7 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 			
 			metamodel "mypackage"
 			
-			eclassifier Foo
+			ecoreref(Foo)
 			'''
 		)
 		// we need to wait for build twice when we run all the UI tests

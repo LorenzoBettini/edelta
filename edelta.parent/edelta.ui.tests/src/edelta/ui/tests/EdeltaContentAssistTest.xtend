@@ -106,36 +106,26 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		newBuilder.append("metamodel <|>").assertNoProposalAtCursor('"http://my.package.org"')
 	}
 
-	@Test def void testEClassifier() {
-		newBuilder.append('metamodel "mypackage" eclassifier ').
-			assertText('MyClass', 'MyBaseClass', 'MyDerivedClass', 'MyDataType')
+	@Test def void testUnqualifiedEcoreReference() {
+		newBuilder.append('metamodel "mypackage" ecoreref(').
+			assertText('''
+				MyBaseClass
+				MyClass
+				MyDataType
+				MyDerivedClass
+				myAttribute
+				myBaseAttribute
+				myBaseReference
+				myDerivedAttribute
+				myDerivedReference
+				myReference
+				mypackage
+				'''.fromLinesOfStringsToStringArray)
 	}
 
-	@Test def void testEClass() {
-		newBuilder.append('metamodel "mypackage" eclass ').
-			assertText('MyClass', 'MyBaseClass', 'MyDerivedClass')
-	}
-
-	@Test def void testEDataType() {
-		newBuilder.append('metamodel "mypackage" edatatype ').
-			assertText('MyDataType')
-	}
-
-	@Test def void testEFeature() {
-		newBuilder.append('metamodel "mypackage" efeature ').
-			assertText('myAttribute', 'myBaseAttribute', 'myDerivedAttribute',
-				'myReference', 'myBaseReference', 'myDerivedReference'
-			)
-	}
-
-	@Test def void testEAttribute() {
-		newBuilder.append('metamodel "mypackage" eattribute ').
-			assertText('myAttribute', 'myBaseAttribute', 'myDerivedAttribute')
-	}
-
-	@Test def void testEReference() {
-		newBuilder.append('metamodel "mypackage" ereference ').
-			assertText('myReference', 'myBaseReference', 'myDerivedReference')
+	@Test def void testQualifiedEcoreReference() {
+		newBuilder.append('metamodel "mypackage" ecoreref(MyClass.').
+			assertText('myAttribute', 'myReference')
 	}
 
 	@Test def void testEClassifierAfterCreatingAnEClass() {
@@ -144,8 +134,12 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			
 			createEClass AAA in mypackage
 			
-			eclassifier 
+			ecoreref(
 			''').
-			assertText('AAA', 'MyClass', 'MyBaseClass', 'MyDerivedClass', 'MyDataType')
+			assertProposal('AAA')
+	}
+
+	def private fromLinesOfStringsToStringArray(CharSequence strings) {
+		strings.toString.replaceAll("\r", "").split("\n")
 	}
 }

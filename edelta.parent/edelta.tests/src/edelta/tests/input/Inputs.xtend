@@ -7,11 +7,66 @@ class Inputs {
 		'''
 	}
 
+	def referencesToMetamodels() {
+		'''
+			metamodel "foo"
+			metamodel "bar"
+		'''
+	}
+
+	def referenceToEPackage() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(foo)
+		'''
+	}
+
 	def referenceToEClass() {
 		'''
 			metamodel "foo"
 			
-			eclass FooClass
+			ecoreref(FooClass)
+		'''
+	}
+
+	def referenceToEDataType() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(FooDataType)
+		'''
+	}
+
+	def referenceToEEnum() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(FooEnum)
+		'''
+	}
+
+	def referenceToEAttribute() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(myAttribute)
+		'''
+	}
+
+	def referenceToEReference() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(myReference)
+		'''
+	}
+
+	def referenceToEEnumLiteral() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(FooEnumLiteral)
 		'''
 	}
 
@@ -81,52 +136,21 @@ class Inputs {
 		'''
 	}
 
-	def eclassifierExpression() {
+	def ecoreReferenceExpressions() {
 		'''
 		package foo;
 		
 		metamodel "foo"
 		
-		eclassifier FooClass
-		println(eclassifier FooClass)
-		'''
-	}
-
-	def eclassExpression() {
-		'''
-		package foo;
-		
-		metamodel "foo"
-		
-		eclass FooClass
-		println(eclass FooClass)
-		'''
-	}
-
-	def edatatypeExpression() {
-		'''
-		package foo;
-		
-		metamodel "foo"
-		
-		edatatype FooDataType
-		println(edatatype FooDataType)
-		'''
-	}
-
-	def efeatureExpressions() {
-		'''
-		package foo;
-		
-		metamodel "foo"
-		
-		efeature myAttribute
-		println(efeature myAttribute)
-		eattribute myAttribute
-		println(eattribute myAttribute)
-		ereference myReference
-		println(ereference myReference)
-		val ref = ereference myReference
+		ecoreref(FooClass)
+		println(ecoreref(FooClass))
+		ecoreref(myAttribute)
+		println(ecoreref(myAttribute))
+		ecoreref(FooEnum)
+		println(ecoreref(FooEnum))
+		ecoreref(FooEnumLiteral)
+		println(ecoreref(FooEnumLiteral))
+		val ref = ecoreref(myReference)
 		'''
 	}
 
@@ -137,7 +161,7 @@ class Inputs {
 			createEClass MyNewClass in foo
 			
 			createEClass MyDerivedNewClass in foo {
-				ESuperTypes += eclass MyNewClass
+				ESuperTypes += ecoreref(MyNewClass)
 			}
 		'''
 	}
@@ -147,7 +171,7 @@ class Inputs {
 			metamodel "foo"
 			
 			createEClass NewClass in foo
-			eclass NewClass
+			ecoreref(NewClass)
 		'''
 	}
 
@@ -156,7 +180,7 @@ class Inputs {
 			metamodel "foo"
 			
 			createEClass FooClass in foo
-			eclass FooClass
+			ecoreref(FooClass)
 		'''
 	}
 
@@ -170,7 +194,7 @@ class Inputs {
 				}
 				createEAttribute newAttribute2
 			}
-			eattribute newAttribute
+			ecoreref(newAttribute)
 		'''
 	}
 }
