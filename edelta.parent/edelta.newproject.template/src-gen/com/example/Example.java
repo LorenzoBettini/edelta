@@ -61,9 +61,6 @@ public class Example extends AbstractEdelta {
     };
     EClass _doubleArrow = ObjectExtensions.<EClass>operator_doubleArrow(_createClass, _function);
     _eClassifiers.add(_doubleArrow);
-    createEClass("myecore", "MyNewClass", null);
-    createEClass("myecore", "MyDerivedNewClass", createList(this::_createEClass_MyDerivedNewClass_in_myecore));
-    getEAttribute("myecore", "MyDerivedNewClass", "myNewAttribute");
     EList<EEnumLiteral> _eLiterals = getEEnum("myecore", "MyENum").getELiterals();
     EEnumLiteral _createEEnumLiteral = EcoreFactory.eINSTANCE.createEEnumLiteral();
     final Procedure1<EEnumLiteral> _function_1 = (EEnumLiteral it) -> {
@@ -72,6 +69,9 @@ public class Example extends AbstractEdelta {
     };
     EEnumLiteral _doubleArrow_1 = ObjectExtensions.<EEnumLiteral>operator_doubleArrow(_createEEnumLiteral, _function_1);
     _eLiterals.add(_doubleArrow_1);
+    createEClass("myecore", "MyNewClass", null);
+    createEClass("myecore", "MyDerivedNewClass", createList(this::_createEClass_MyDerivedNewClass_in_myecore));
+    getEAttribute("myecore", "MyDerivedNewClass", "myNewAttribute");
     createEClass("myecore", "MyOtherNewClass", null);
   }
   

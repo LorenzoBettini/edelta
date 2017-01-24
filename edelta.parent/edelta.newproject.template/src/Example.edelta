@@ -15,44 +15,47 @@ metamodel "ecore"
  */
 def createClass(String name) {
 	newEClass(name) => [
-		ESuperTypes += (eclass MyEClass)
+		ESuperTypes += ecoreref(MyEClass)
 	]
 }
 
-// refer to EClasses with "eclass"
-val p = (eclass MyEClass).EPackage
+// refer to Ecore elements with "ecoreref()"
+val p = ecoreref(MyEClass).EPackage
 // create new EClasses manually...
 p.EClassifiers += createClass("NewClass") => [
 	EStructuralFeatures += newEAttribute("myStringAttribute") => [
-		// refer to EDataTypes with "edatatype"
-		EType = edatatype EString
+		// refer to EDataTypes with "ecoreref()"
+		EType = ecoreref(EString)
 	]
 	EStructuralFeatures += newEReference("myReference") => [
-		EType = (eclass MyEClass)
+		EType = ecoreref(MyEClass)
 		upperBound = -1;
 		containment = true;
 		lowerBound = 0
 	]
 ]
 
-// ... or using Edelta DSL specific syntax
-createEClass MyNewClass in myecore
-
-createEClass MyDerivedNewClass in myecore {
-	ESuperTypes += eclass MyNewClass
-	ESuperTypes += eclass MyOtherNewClass
-	createEAttribute myNewAttribute {
-		EType = edatatype EInt
-		upperBound = -1;
-	}
-}
-
-ecoreref(MyDerivedNewClass.myNewAttribute)
-
+// modify existing Ecore elements manually
 ecoreref(MyENum).ELiterals += EcoreFactory.eINSTANCE.createEEnumLiteral => [
 	name = "AnotherEnumLiteral"
 	value = 3
 ]
+
+// ... or using Edelta DSL specific syntax
+createEClass MyNewClass in myecore
+
+createEClass MyDerivedNewClass in myecore {
+	// new Ecore elements created in the program can be referred:
+	ESuperTypes += ecoreref(MyNewClass)
+	ESuperTypes += ecoreref(MyOtherNewClass)
+	createEAttribute myNewAttribute {
+		EType = ecoreref(EInt)
+		upperBound = -1;
+	}
+}
+
+// You can fully qualify Ecore references
+ecoreref(MyDerivedNewClass.myNewAttribute)
 
 createEClass MyOtherNewClass in myecore
 
