@@ -73,7 +73,7 @@ class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 			Scopes.scopeFor(getClassifiers(context))
 		]
 	}
-	
+
 	private def List<EClassifier> getClassifiers(EObject context) {
 		val prog = getProgram(context)
 		// we also must explicitly consider the derived EPackages
@@ -89,13 +89,13 @@ class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 				flatten
 		).toList
 	}
-	
+
 	private def IScope scopeForEClass(EObject context) {
 		cache.get("scopeEClass", context.eResource) [
 			Scopes.scopeFor(getEClasses(context))
 		]
 	}
-	
+
 	private def List<EClass> getEClasses(EObject context) {
 		getClassifiers(context).filter(EClass).toList
 	}
