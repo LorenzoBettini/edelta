@@ -207,41 +207,19 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testCompilationOfEclassExpressionWithNonExistantEClass() {
-		"println(eclass Foo)".checkCompilation(
+		"println(ecoreref(Foo))".checkCompilation(
 			'''
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
-			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.emf.ecore.ENamedElement;
 			import org.eclipse.xtext.xbase.lib.InputOutput;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends AbstractEdelta {
 			  @Override
 			  protected void doExecute() throws Exception {
-			    InputOutput.<EClass>println(getEClass("null", "null"));
-			  }
-			}
-			''',
-			false
-		)
-	}
-
-	@Test
-	def void testCompilationOfFeatureExpressionWithNonExistantFeature() {
-		"println(efeature Foo)".checkCompilation(
-			'''
-			package edelta;
-			
-			import edelta.lib.AbstractEdelta;
-			import org.eclipse.emf.ecore.EStructuralFeature;
-			import org.eclipse.xtext.xbase.lib.InputOutput;
-			
-			@SuppressWarnings("all")
-			public class MyFile0 extends AbstractEdelta {
-			  @Override
-			  protected void doExecute() throws Exception {
-			    InputOutput.<EStructuralFeature>println(getEStructuralFeature("null", "null", "null"));
+			    InputOutput.<ENamedElement>println(getENamedElement("", "", ""));
 			  }
 			}
 			''',
