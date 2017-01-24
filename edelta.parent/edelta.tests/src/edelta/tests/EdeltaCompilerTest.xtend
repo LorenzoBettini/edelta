@@ -168,33 +168,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCompilationOfEclassifierExpression() {
-		eclassifierExpression.checkCompilation(
-			'''
-			package foo;
-			
-			import edelta.lib.AbstractEdelta;
-			import org.eclipse.emf.ecore.EClassifier;
-			import org.eclipse.xtext.xbase.lib.InputOutput;
-			
-			@SuppressWarnings("all")
-			public class MyFile0 extends AbstractEdelta {
-			  @Override
-			  public void performSanityChecks() throws Exception {
-			    ensureEPackageIsLoaded("foo");
-			  }
-			  
-			  @Override
-			  protected void doExecute() throws Exception {
-			    getEClassifier("foo", "FooClass");
-			    InputOutput.<EClassifier>println(getEClassifier("foo", "FooClass"));
-			  }
-			}
-			'''
-		)
-	}
-
-	@Test
 	def void testCompilationOfEcoreReferenceExpression() {
 		ecoreReferenceExpressions.checkCompilation(
 			'''
@@ -233,33 +206,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCompilationOfEclassExpression() {
-		eclassExpression.checkCompilation(
-			'''
-			package foo;
-			
-			import edelta.lib.AbstractEdelta;
-			import org.eclipse.emf.ecore.EClass;
-			import org.eclipse.xtext.xbase.lib.InputOutput;
-			
-			@SuppressWarnings("all")
-			public class MyFile0 extends AbstractEdelta {
-			  @Override
-			  public void performSanityChecks() throws Exception {
-			    ensureEPackageIsLoaded("foo");
-			  }
-			  
-			  @Override
-			  protected void doExecute() throws Exception {
-			    getEClass("foo", "FooClass");
-			    InputOutput.<EClass>println(getEClass("foo", "FooClass"));
-			  }
-			}
-			'''
-		)
-	}
-
-	@Test
 	def void testCompilationOfEclassExpressionWithNonExistantEClass() {
 		"println(eclass Foo)".checkCompilation(
 			'''
@@ -278,67 +224,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			}
 			''',
 			false
-		)
-	}
-
-	@Test
-	def void testCompilationOfEdataTypeExpression() {
-		edatatypeExpression.checkCompilation(
-			'''
-			package foo;
-			
-			import edelta.lib.AbstractEdelta;
-			import org.eclipse.emf.ecore.EDataType;
-			import org.eclipse.xtext.xbase.lib.InputOutput;
-			
-			@SuppressWarnings("all")
-			public class MyFile0 extends AbstractEdelta {
-			  @Override
-			  public void performSanityChecks() throws Exception {
-			    ensureEPackageIsLoaded("foo");
-			  }
-			  
-			  @Override
-			  protected void doExecute() throws Exception {
-			    getEDataType("foo", "FooDataType");
-			    InputOutput.<EDataType>println(getEDataType("foo", "FooDataType"));
-			  }
-			}
-			'''
-		)
-	}
-
-	@Test
-	def void testCompilationOfFeatureExpressions() {
-		efeatureExpressions.checkCompilation(
-			'''
-			package foo;
-			
-			import edelta.lib.AbstractEdelta;
-			import org.eclipse.emf.ecore.EAttribute;
-			import org.eclipse.emf.ecore.EReference;
-			import org.eclipse.emf.ecore.EStructuralFeature;
-			import org.eclipse.xtext.xbase.lib.InputOutput;
-			
-			@SuppressWarnings("all")
-			public class MyFile0 extends AbstractEdelta {
-			  @Override
-			  public void performSanityChecks() throws Exception {
-			    ensureEPackageIsLoaded("foo");
-			  }
-			  
-			  @Override
-			  protected void doExecute() throws Exception {
-			    getEStructuralFeature("foo", "FooClass", "myAttribute");
-			    InputOutput.<EStructuralFeature>println(getEStructuralFeature("foo", "FooClass", "myAttribute"));
-			    getEAttribute("foo", "FooClass", "myAttribute");
-			    InputOutput.<EAttribute>println(getEAttribute("foo", "FooClass", "myAttribute"));
-			    getEReference("foo", "FooClass", "myReference");
-			    InputOutput.<EReference>println(getEReference("foo", "FooClass", "myReference"));
-			    final EReference ref = getEReference("foo", "FooClass", "myReference");
-			  }
-			}
-			'''
 		)
 	}
 

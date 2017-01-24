@@ -136,55 +136,6 @@ class Inputs {
 		'''
 	}
 
-	def eclassifierExpression() {
-		'''
-		package foo;
-		
-		metamodel "foo"
-		
-		eclassifier FooClass
-		println(eclassifier FooClass)
-		'''
-	}
-
-	def eclassExpression() {
-		'''
-		package foo;
-		
-		metamodel "foo"
-		
-		eclass FooClass
-		println(eclass FooClass)
-		'''
-	}
-
-	def edatatypeExpression() {
-		'''
-		package foo;
-		
-		metamodel "foo"
-		
-		edatatype FooDataType
-		println(edatatype FooDataType)
-		'''
-	}
-
-	def efeatureExpressions() {
-		'''
-		package foo;
-		
-		metamodel "foo"
-		
-		efeature myAttribute
-		println(efeature myAttribute)
-		eattribute myAttribute
-		println(eattribute myAttribute)
-		ereference myReference
-		println(ereference myReference)
-		val ref = ereference myReference
-		'''
-	}
-
 	def ecoreReferenceExpressions() {
 		'''
 		package foo;
