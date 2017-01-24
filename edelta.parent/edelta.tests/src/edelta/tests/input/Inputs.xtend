@@ -220,7 +220,7 @@ class Inputs {
 			metamodel "foo"
 			
 			createEClass NewClass in foo
-			eclass NewClass
+			ecoreref(NewClass)
 		'''
 	}
 
@@ -229,7 +229,7 @@ class Inputs {
 			metamodel "foo"
 			
 			createEClass FooClass in foo
-			ecoreref FooClass
+			ecoreref(FooClass)
 		'''
 	}
 
@@ -243,7 +243,7 @@ class Inputs {
 				}
 				createEAttribute newAttribute2
 			}
-			eattribute newAttribute
+			ecoreref(newAttribute)
 		'''
 	}
 }
