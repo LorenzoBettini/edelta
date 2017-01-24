@@ -170,13 +170,25 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		)
 	}
 
-//	@Test
-//	def void testScopeForReferenceToCreatedEAttribute() {
-//		referenceToCreatedEAttribute.parseWithTestEcore.lastExpression.
-//			assertScope(EdeltaPackage.eINSTANCE.edeltaEAttributeExpression_Eattribute,
-//			"newAttribute, newAttribute2, myAttribute")
-//		// newAttributes are the ones created in the program
-//	}
+	@Test
+	def void testScopeForReferenceToCreatedEAttribute() {
+		referenceToCreatedEAttribute.parseWithTestEcore.lastExpression.
+			edeltaEcoreReferenceExpression.reference.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			NewClass
+			newAttribute
+			newAttribute2
+			FooClass
+			myAttribute
+			myReference
+			FooDataType
+			FooEnum
+			FooEnumLiteral
+			foo
+			''')
+		// newAttributes are the ones created in the program
+	}
 
 	def private assertScope(EObject context, EReference reference, CharSequence expected) {
 		expected.toString.assertEqualsStrings(
