@@ -181,6 +181,7 @@
 					<configuration>
 						<outputDirectory>${basedir}/xtend-gen</outputDirectory>
 						<testOutputDirectory>${basedir}/xtend-gen</testOutputDirectory>
+						<xtendAsPrimaryDebugSource>true</xtendAsPrimaryDebugSource>
 					</configuration>
 				</plugin>
 				<plugin>
