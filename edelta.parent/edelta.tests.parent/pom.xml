@@ -10,8 +10,8 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<tycho.testArgLine></tycho.testArgLine>
 		<jacoco-version>0.7.8</jacoco-version>
+		<os-jvm-flags />
 	</properties>
 
 	<profiles>
