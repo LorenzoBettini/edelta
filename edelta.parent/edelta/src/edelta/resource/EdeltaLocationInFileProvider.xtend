@@ -17,8 +17,6 @@ class EdeltaLocationInFileProvider extends JvmLocationInFileProvider {
 	@Inject extension EdeltaDerivedStateComputer
 
 	override protected convertToSource(EObject element) {
-		if (element === null)
-			return null
 		return element.getPrimarySourceElement ?:
 			super.convertToSource(element)
 	}

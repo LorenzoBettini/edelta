@@ -58,4 +58,5 @@ class EdeltaLocationInFileProviderTest extends EdeltaAbstractTest {
 		// the derived EAttribute is mapped to the original creation expression
 		assertEquals(originalTextRegion, derivedTextRegion)
 	}
+
 }
