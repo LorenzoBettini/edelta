@@ -9,7 +9,7 @@ node {
       mvnHome = tool 'M3'
    }
    stage('Build') {
-      wrap([$class: 'Xvfb', displayNameOffset: 100]) {
+      wrap([$class: 'Xvfb', autoDisplayName: true]) {
         // Run the maven build
         sh "'${mvnHome}/bin/mvn' -f edelta.parent/pom.xml clean verify"
       }
