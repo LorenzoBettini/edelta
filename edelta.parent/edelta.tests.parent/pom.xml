@@ -42,6 +42,8 @@
 								<exclude>**/*Abstract*UiModule.class</exclude>
 								<exclude>**/*Abstract*ProposalProvider.class</exclude>
 								<exclude>**/internal/*.class</exclude>
+								<exclude>**/*NewProjectWizard.class</exclude>
+								<exclude>**/*ProjectCreator.class</exclude>
 							</excludes>
 						</configuration>
 						<executions>
