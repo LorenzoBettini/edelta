@@ -36,4 +36,18 @@
 		</profile>
 	</profiles>
 
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>edelta.lib</artifactId>
+			<version>${project.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>edelta.lib.tests</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 </project>
