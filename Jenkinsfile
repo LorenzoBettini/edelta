@@ -11,7 +11,7 @@ node {
    stage('Build') {
       wrap([$class: 'Xvfb', displayNameOffset: 100]) {
         // Run the maven build
-        sh "'${mvnHome}/bin/mvn' -f edelta.parent/pom.xml clean verify"
+        sh "'${mvnHome}/bin/mvn' -f edelta.parent/pom.xml clean verify -Pjacoco"
       }
    }
    stage('Results') {
