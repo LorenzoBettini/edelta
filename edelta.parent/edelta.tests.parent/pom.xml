@@ -26,6 +26,24 @@
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
 						<version>${jacoco-version}</version>
+						<configuration>
+							<excludes>
+								<!-- EMF model Java classes -->
+								<exclude>**/edelta/edelta/**/*.class</exclude>
+								<!-- Antlr generated Java classes -->
+								<exclude>**/antlr/**/*.class</exclude>
+								<!-- We don't have a custom serializer -->
+								<exclude>**/serializer/*.class</exclude>
+								<!-- generated files -->
+								<exclude>**/*Abstract*RuntimeModule.class</exclude>
+								<exclude>**/*StandaloneSetup*.class</exclude>
+								<exclude>**/*Abstract*Validator.class</exclude>
+								<exclude>**/*GrammarAccess*.class</exclude>
+								<exclude>**/*Abstract*UiModule.class</exclude>
+								<exclude>**/*Abstract*ProposalProvider.class</exclude>
+								<exclude>**/internal/*.class</exclude>
+							</excludes>
+						</configuration>
 						<executions>
 							<execution>
 								<goals>
