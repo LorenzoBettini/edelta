@@ -12,7 +12,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<tycho.testArgLine></tycho.testArgLine>
 	</properties>
 	<modules>
 		<module>edelta.lib</module>
@@ -172,13 +171,16 @@
 						<execution>
 							<goals>
 								<goal>compile</goal>
+								<goal>xtend-install-debug-info</goal>
 								<goal>testCompile</goal>
+								<goal>xtend-test-install-debug-info</goal>
 							</goals>
 						</execution>
 					</executions>
 					<configuration>
 						<outputDirectory>${basedir}/xtend-gen</outputDirectory>
 						<testOutputDirectory>${basedir}/xtend-gen</testOutputDirectory>
+						<xtendAsPrimaryDebugSource>true</xtendAsPrimaryDebugSource>
 					</configuration>
 				</plugin>
 				<plugin>
