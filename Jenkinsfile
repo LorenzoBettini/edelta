@@ -17,4 +17,9 @@ node {
       junit '**/target/surefire-reports/TEST-*.xml'
       archive '**/target/repository/'
    }
+   stage('Code Coverage') {
+     step([$class: 'JacocoPublisher',
+       execPattern: '**/**.exec',
+       exclusionPattern: '**/*Test*.class'])
+   }
 }
