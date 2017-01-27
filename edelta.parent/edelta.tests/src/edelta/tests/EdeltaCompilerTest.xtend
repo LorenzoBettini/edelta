@@ -42,6 +42,22 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testIncompleteProgram() {
+		'''metamodel '''.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			}
+			''',
+			false
+		)
+	}
+
+	@Test
 	def void testProgramWithPackage() {
 		'''
 		package foo
