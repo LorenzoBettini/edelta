@@ -16,5 +16,13 @@ node {
    stage('Results') {
       junit '**/target/surefire-reports/TEST-*.xml'
       archive '**/target/repository/'
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: true,
+        keepAll: true,
+        reportDir: 'edelta.parent/edelta.tests.report/target/site/jacoco-aggregate',
+        reportFiles: 'index.html',
+        reportName: 'Jacoco HTML Report'
+      ])
    }
 }
