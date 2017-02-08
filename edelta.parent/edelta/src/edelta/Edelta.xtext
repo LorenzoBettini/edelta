@@ -20,6 +20,7 @@ EdeltaProgram:
 
 // we need to add a semantic predicate here as well, for the same
 // reason as above
+@Override 
 XImportDeclaration returns xtype::XImportDeclaration:
 	(=>'import' (
 		(static?='static' extension?='extension'? importedType=[types::JvmDeclaredType|QualifiedNameInStaticImport] (wildcard?='*' | memberName=ValidID)) 
@@ -68,6 +69,7 @@ EdeltaEcoreFeatureManipulationExpression returns xbase::XExpression:
 ;
 
 // redefine Xbase primary expression with our special expressions
+@Override 
 XPrimaryExpression returns xbase::XExpression:
 	{EdeltaEcoreReferenceExpression} 'ecoreref' '(' reference=EdeltaEcoreReference ')' |
 	super

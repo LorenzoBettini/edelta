@@ -6,25 +6,32 @@ package edelta.tests
 import com.google.common.base.Joiner
 import com.google.inject.Inject
 import org.eclipse.xtext.diagnostics.Severity
-import org.eclipse.xtext.junit4.InjectWith
-import org.eclipse.xtext.junit4.TemporaryFolder
-import org.eclipse.xtext.junit4.XtextRunner
 import org.eclipse.xtext.resource.FileExtensionProvider
-import org.eclipse.xtext.xbase.compiler.CompilationTestHelper
-import org.eclipse.xtext.xbase.compiler.CompilationTestHelper.Result
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.xbase.testing.CompilationTestHelper
+import org.eclipse.xtext.xbase.testing.CompilationTestHelper.Result
+import org.eclipse.xtext.xbase.testing.TemporaryFolder
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
+import org.junit.Before
+import org.eclipse.xtext.util.JavaVersion
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
 class EdeltaCompilerTest extends EdeltaAbstractTest {
 
 	@Rule @Inject public TemporaryFolder temporaryFolder
-	@Inject extension CompilationTestHelper
+	@Inject extension CompilationTestHelper compilationTestHelper
 	@Inject private FileExtensionProvider extensionProvider
+
+	@Before
+	def void setup() {
+		compilationTestHelper.javaVersion = JavaVersion.JAVA8
+	}
 
 	@Test
 	def void testEmptyProgram() {
@@ -143,12 +150,10 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			@SuppressWarnings("all")
 			public class MyFile0 extends AbstractEdelta {
 			  public EClass bar(final String s) {
-			    final Consumer<EClass> _function = new Consumer<EClass>() {
-			      public void accept(final EClass it) {
-			        EList<EClass> _eSuperTypes = it.getESuperTypes();
-			        EClass _newEClass = MyFile0.this.lib.newEClass("Base");
-			        _eSuperTypes.add(_newEClass);
-			      }
+			    final Consumer<EClass> _function = (EClass it) -> {
+			      EList<EClass> _eSuperTypes = it.getESuperTypes();
+			      EClass _newEClass = this.lib.newEClass("Base");
+			      _eSuperTypes.add(_newEClass);
 			    };
 			    return this.lib.newEClass(s, _function);
 			  }
@@ -175,8 +180,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  @Override
 			  protected void doExecute() throws Exception {
-			    EClass _bar = this.bar("foo");
-			    InputOutput.<EClass>println(_bar);
+			    InputOutput.<EClass>println(this.bar("foo"));
 			  }
 			}
 			'''
@@ -350,7 +354,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				assertNoValidationErrors
 			}
 
-			if (expectedGeneratedJava != null) {
+			if (expectedGeneratedJava !== null) {
 				assertGeneratedJavaCode(expectedGeneratedJava)
 			}
 

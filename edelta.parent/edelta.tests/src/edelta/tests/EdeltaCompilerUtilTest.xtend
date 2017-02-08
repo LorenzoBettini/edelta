@@ -5,16 +5,16 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.compiler.EdeltaCompilerUtil
-import org.eclipse.xtext.junit4.InjectWith
-import org.eclipse.xtext.junit4.XtextRunner
+import org.eclipse.emf.ecore.EClassifier
+import org.eclipse.emf.ecore.EEnumLiteral
+import org.eclipse.emf.ecore.EStructuralFeature
+import org.eclipse.emf.ecore.EcoreFactory
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
-import org.eclipse.emf.ecore.EClassifier
-import org.eclipse.emf.ecore.EStructuralFeature
-import org.eclipse.emf.ecore.EEnumLiteral
-import org.eclipse.emf.ecore.EcoreFactory
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)

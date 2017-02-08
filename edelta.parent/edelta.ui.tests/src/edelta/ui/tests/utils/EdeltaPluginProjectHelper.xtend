@@ -46,7 +46,7 @@ class EdeltaPluginProjectHelper {
 	}
 
 	def static void closeWelcomePage() {
-		if (PlatformUI.getWorkbench().getIntroManager().getIntro() != null) {
+		if (PlatformUI.getWorkbench().getIntroManager().getIntro() !== null) {
 			PlatformUI.getWorkbench().getIntroManager().closeIntro(
 					PlatformUI.getWorkbench().getIntroManager().getIntro());
 		}

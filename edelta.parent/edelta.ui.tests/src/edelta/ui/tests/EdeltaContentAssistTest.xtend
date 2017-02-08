@@ -1,6 +1,7 @@
 package edelta.ui.tests
 
 import edelta.ui.internal.EdeltaActivator
+import edelta.ui.tests.utils.EdeltaPluginProjectHelper
 import edelta.ui.tests.utils.PDETargetPlatformUtils
 import java.io.BufferedReader
 import java.io.InputStream
@@ -13,8 +14,8 @@ import org.eclipse.jdt.core.IJavaProject
 import org.eclipse.ui.IEditorPart
 import org.eclipse.ui.PlatformUI
 import org.eclipse.ui.part.FileEditorInput
-import org.eclipse.xtext.junit4.InjectWith
-import org.eclipse.xtext.junit4.XtextRunner
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.editor.XtextEditor
 import org.eclipse.xtext.ui.editor.utils.EditorUtils
 import org.eclipse.xtext.xbase.junit.ui.AbstractContentAssistTest
@@ -26,7 +27,6 @@ import org.junit.runner.RunWith
 
 import static edelta.ui.tests.utils.EdeltaPluginProjectHelper.*
 import static org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil.*
-import edelta.ui.tests.utils.EdeltaPluginProjectHelper
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaUiInjectorProvider)

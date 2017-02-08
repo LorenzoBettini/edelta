@@ -5,9 +5,9 @@ import edelta.ui.tests.utils.EdeltaPluginProjectHelper
 import edelta.ui.tests.utils.PDETargetPlatformUtils
 import edelta.ui.tests.utils.PluginProjectHelper
 import org.eclipse.core.resources.IProject
-import org.eclipse.xtext.junit4.InjectWith
-import org.eclipse.xtext.junit4.XtextRunner
 import org.eclipse.xtext.junit4.ui.AbstractWorkbenchTest
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
