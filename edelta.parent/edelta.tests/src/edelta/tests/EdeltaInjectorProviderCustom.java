@@ -2,7 +2,7 @@ package edelta.tests;
 
 import org.eclipse.xtext.ecore.EcoreSupportStandaloneSetup;
 import org.eclipse.xtext.util.JavaVersion;
-import org.eclipse.xtext.xbase.compiler.OnTheFlyJavaCompiler2;
+import org.eclipse.xtext.xbase.testing.OnTheFlyJavaCompiler2;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;
