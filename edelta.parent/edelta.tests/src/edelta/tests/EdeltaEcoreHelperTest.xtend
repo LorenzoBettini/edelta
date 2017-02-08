@@ -5,7 +5,6 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.util.EdeltaEcoreHelper
-import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
@@ -131,12 +130,6 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				'''
 			)
 		]
-	}
-
-	def private assertNamedElements(Iterable<? extends ENamedElement> elements, CharSequence expected) {
-		expected.assertEqualsStrings(
-			elements.map[name].join("\n") + "\n"
-		)
 	}
 
 }

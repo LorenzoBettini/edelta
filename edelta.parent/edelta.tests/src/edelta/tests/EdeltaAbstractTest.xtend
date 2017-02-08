@@ -14,6 +14,7 @@ import edelta.edelta.EdeltaProgram
 import edelta.tests.input.Inputs
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
@@ -121,6 +122,12 @@ abstract class EdeltaAbstractTest {
 	def protected assertEqualsStrings(CharSequence expected, CharSequence actual) {
 		expected.toString.replaceAll("\r", "").
 			assertEquals(actual.toString.replaceAll("\r", ""))
+	}
+
+	def protected assertNamedElements(Iterable<? extends ENamedElement> elements, CharSequence expected) {
+		expected.assertEqualsStrings(
+			elements.map[name].join("\n") + "\n"
+		)
 	}
 
 	def protected getEPackageByName(EdeltaProgram context, String packagename) {
