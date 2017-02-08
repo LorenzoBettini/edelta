@@ -17,14 +17,21 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
+import org.junit.Before
+import org.eclipse.xtext.util.JavaVersion
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
 class EdeltaCompilerTest extends EdeltaAbstractTest {
 
 	@Rule @Inject public TemporaryFolder temporaryFolder
-	@Inject extension CompilationTestHelper
+	@Inject extension CompilationTestHelper compilationTestHelper
 	@Inject private FileExtensionProvider extensionProvider
+
+	@Before
+	def void setup() {
+		compilationTestHelper.javaVersion = JavaVersion.JAVA8
+	}
 
 	@Test
 	def void testEmptyProgram() {
