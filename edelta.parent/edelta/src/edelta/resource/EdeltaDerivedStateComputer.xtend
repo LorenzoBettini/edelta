@@ -20,6 +20,8 @@ import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader.GenericUnloader
 import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator
+import edelta.edelta.EdeltaEcoreReference
+import java.util.List
 
 @Singleton
 class EdeltaDerivedStateComputer extends JvmModelAssociator {
@@ -74,7 +76,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 			val targetToSourceMap = resource.derivedToSourceMap
 			val nameToEPackageMap = resource.nameToEPackageMap
 			for (exp :resource.allContents.toIterable.filter(EdeltaEcoreCreateEClassExpression)) {
-				val derivedEClass = newEClass(exp.name) => [
+				val derivedEClass = createDerivedStateEClass(exp.name, #[]) => [
 					// could be null in an incomplete expression
 					addToDerivedEPackage(nameToEPackageMap, exp.epackage)
 				]
@@ -88,6 +90,12 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 			// we must add only the created EPackages
 			resource.contents += nameToEPackageMap.values
 		}
+	}
+
+	def private createDerivedStateEClass(String name, List<EdeltaEcoreReference> refs) {
+		new EdeltaDerivedStateEClass(refs) => [
+			it.name = name
+		]
 	}
 
 	/**
