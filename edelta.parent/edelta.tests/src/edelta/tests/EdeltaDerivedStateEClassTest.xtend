@@ -35,7 +35,7 @@ class EdeltaDerivedStateEClassTest extends EdeltaAbstractTest {
 			lastExpression.edeltaEcoreReferenceExpression.reference
 		val c = new EdeltaDerivedStateEClass(#[ref])
 		assertNamedElements(c.EAllStructuralFeatures,
-			// this are inherited from the ecore reference FooClass
+			// these are inherited from the ecore reference FooClass
 			'''
 			myAttribute
 			myReference
