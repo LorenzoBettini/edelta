@@ -27,6 +27,10 @@ node {
    }
    stage('Code Coverage') {
      step([$class: 'JacocoPublisher',
+       changeBuildStatus: true,
+       minimumClassCoverage: 100,
+       minimumInstructionCoverage: 100,
+       minimumLineCoverage: 100,
        execPattern: '**/**.exec',
        sourcePattern: '**/edelta/src,**/edelta.ui/src,**/edelta.lib/src',
        classPattern: '**/edelta/**/classes,**/edelta.lib/**/classes,**/edelta.ui/**/classes',
