@@ -46,7 +46,11 @@ MainBlockExpression returns xbase::XExpression:
 
 EdeltaEcoreClassifierManipulationExpression returns xbase::XExpression:
 	{EdeltaEcoreCreateEClassExpression}
-	'createEClass' name=ValidID 'in' epackage=[ecore::EPackage]
+	'createEClass' name=ValidID
+	'in' epackage=[ecore::EPackage]
+	(
+		'extends' ecoreReferenceSuperTypes+=EdeltaEcoreReference (',' ecoreReferenceSuperTypes+=EdeltaEcoreReference)*
+	)?
 	body=EdeltaEcoreManipulationBlockExpression
 ;
 
