@@ -1,21 +1,18 @@
 package edelta.typesystem
 
+import com.google.inject.Inject
 import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.EDataType
-import org.eclipse.emf.ecore.EEnum
-import org.eclipse.emf.ecore.EEnumLiteral
-import org.eclipse.emf.ecore.ENamedElement
-import org.eclipse.emf.ecore.EPackage
-import org.eclipse.emf.ecore.EReference
+import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.annotations.typesystem.XbaseWithAnnotationsTypeComputer
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputationState
-import org.eclipse.xtext.xbase.XExpression
 
 class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
+
+	@Inject extension EdeltaEcoreTypeHelper
 
 	override void computeTypes(XExpression e, ITypeComputationState state) {
 		switch (e) {
@@ -40,16 +37,7 @@ class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 			state.acceptActualType(getPrimitiveVoid(state))
 			return
 		}
-		val type = switch (enamedelement) {
-			case enamedelement.eIsProxy: ENamedElement
-			EPackage: EPackage
-			EClass: EClass
-			EEnum: EEnum
-			EDataType: EDataType
-			EReference: EReference
-			EEnumLiteral: EEnumLiteral
-			default: EAttribute
-		}
+		val type = enamedelement.correspondingENamedElement
 		state.acceptActualType(getRawTypeForName(type, state))
 	}
 }
