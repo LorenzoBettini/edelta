@@ -69,10 +69,13 @@ public class Example extends AbstractEdelta {
     };
     EEnumLiteral _doubleArrow_1 = ObjectExtensions.<EEnumLiteral>operator_doubleArrow(_createEEnumLiteral, _function_1);
     _eLiterals.add(_doubleArrow_1);
-    createEClass("myecore", "MyNewClass", null);
+    createEClass("myecore", "MyNewClass", createList(this::_createEClass_MyNewClass_in_myecore));
     createEClass("myecore", "MyDerivedNewClass", createList(this::_createEClass_MyDerivedNewClass_in_myecore));
     getEAttribute("myecore", "MyDerivedNewClass", "myNewAttribute");
-    createEClass("myecore", "MyOtherNewClass", null);
+    createEClass("myecore", "MyOtherNewClass", createList(this::_createEClass_MyOtherNewClass_in_myecore));
+  }
+  
+  public void _createEClass_MyNewClass_in_myecore(final EClass it) {
   }
   
   public void _createEClass_MyDerivedNewClass_in_myecore(final EClass it) {
@@ -90,5 +93,8 @@ public class Example extends AbstractEdelta {
       it.setEType(getEDataType("ecore", "EInt"));
       it.setUpperBound((-1));
     }
+  }
+  
+  public void _createEClass_MyOtherNewClass_in_myecore(final EClass it) {
   }
 }
