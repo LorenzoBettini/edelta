@@ -3,6 +3,8 @@
  */
 package edelta.tests
 
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
@@ -50,5 +52,60 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	@Test
 	def void testCreateEClassWithSuperTypesOk() {
 		createEClassWithSuperTypes.parseWithTestEcore.assertNoErrors
+	}
+
+	@Test
+	def void testCreateEClassWithSuperTypesNotEClass() {
+		'''
+			metamodel "foo"
+			
+			createEClass MyNewClass in foo
+				extends FooDataType, FooClass, FooEnum {}
+		'''.parseWithTestEcore.assertErrorsAsStrings(
+			'''
+			Not an EClass: EDataType
+			Not an EClass: EEnum
+			'''
+		)
+	}
+
+	@Test
+	def void testCreateEClassWithSuperTypesNotEClassWithNullRef() {
+		'''
+			metamodel "foo"
+			
+			createEClass MyNewClass in foo
+				extends FooDataType, , FooEnum {}
+		'''.parseWithTestEcore.assertErrorsAsStrings(
+			'''
+			Not an EClass: EDataType
+			Not an EClass: EEnum
+			extraneous input ',' expecting RULE_ID
+			'''
+		)
+	}
+
+	@Test
+	def void testCreateEClassWithSuperTypesNotEClassWithUnresolvedRef() {
+		'''
+			metamodel "foo"
+			
+			createEClass MyNewClass in foo
+				extends FooDataType, AAA, FooEnum {}
+		'''.parseWithTestEcore.assertErrorsAsStrings(
+			'''
+			AAA cannot be resolved.
+			Not an EClass: EDataType
+			Not an EClass: EEnum
+			'''
+		)
+		// type mismatch error has not been reported on AAA
+		// since it can't be resolved
+	}
+
+	def private assertErrorsAsStrings(EObject o, CharSequence expected) {
+		expected.toString.trim.assertEqualsStrings(
+			o.validate.filter[severity == Severity.ERROR].
+				map[message].sort.join("\n"))
 	}
 }

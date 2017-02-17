@@ -3,23 +3,43 @@
  */
 package edelta.validation
 
+import edelta.edelta.EdeltaEcoreCreateEClassExpression
+import org.eclipse.xtext.validation.Check
+import com.google.inject.Inject
+import edelta.typesystem.EdeltaEcoreTypeHelper
+import org.eclipse.emf.ecore.EClass
+
+import static edelta.edelta.EdeltaPackage.Literals.*
 
 /**
  * This class contains custom validation rules. 
- *
+ * 
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#validation
  */
 class EdeltaValidator extends AbstractEdeltaValidator {
-	
-//	public static val INVALID_NAME = 'invalidName'
-//
-//	@Check
-//	def checkGreetingStartsWithCapital(Greeting greeting) {
-//		if (!Character.isUpperCase(greeting.name.charAt(0))) {
-//			warning('Name should start with a capital', 
-//					EdeltaPackage.Literals.GREETING__NAME,
-//					INVALID_NAME)
-//		}
-//	}
-	
+
+	public static val PREFIX = "edelta."
+	public static val NOT_AN_ECLASS = PREFIX + "NotAnEClass"
+
+	@Inject extension EdeltaEcoreTypeHelper
+
+	@Check
+	def checkValidSuperType(EdeltaEcoreCreateEClassExpression e) {
+		for (s : e.ecoreReferenceSuperTypes) {
+			val namedelement = s.enamedelement
+			// avoid reporting type mismatch on unresolved elements
+			// an 'unresolved' error has already been reported
+			if (!namedelement.eIsProxy) {
+				val t = s.enamedelement.correspondingENamedElement
+				if (EClass != t) {
+					error(
+						"Not an EClass: " + t.simpleName,
+						s, EDELTA_ECORE_REFERENCE__ENAMEDELEMENT,
+						NOT_AN_ECLASS
+					)
+				}
+			}
+		}
+	}
+
 }
