@@ -76,7 +76,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 			val targetToSourceMap = resource.derivedToSourceMap
 			val nameToEPackageMap = resource.nameToEPackageMap
 			for (exp :resource.allContents.toIterable.filter(EdeltaEcoreCreateEClassExpression)) {
-				val derivedEClass = createDerivedStateEClass(exp.name, #[]) => [
+				val derivedEClass = createDerivedStateEClass(exp.name, exp.ecoreReferenceSuperTypes) => [
 					// could be null in an incomplete expression
 					addToDerivedEPackage(nameToEPackageMap, exp.epackage)
 				]
