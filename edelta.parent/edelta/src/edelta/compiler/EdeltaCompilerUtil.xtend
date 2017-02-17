@@ -34,10 +34,7 @@ class EdeltaCompilerUtil {
 	}
 
 	def consumerArgumentForBody(XExpression body) {
-		var String consumerArgument = "null"
-		if (body !== null)
-			consumerArgument = "createList(this::" + (body.eContainer as XExpression).methodName + ")"
-		return consumerArgument
+		return "createList(this::" + (body.eContainer as XExpression).methodName + ")"
 	}
 
 	def String getEPackageNameOrNull(EClassifier eClassifier) {

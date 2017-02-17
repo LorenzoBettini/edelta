@@ -187,7 +187,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		
 		metamodel "foo"
 		
-		createEClass First in foo
+		createEClass First in foo {}
 		ecoreref(First)
 		'''.
 		parseWithTestEcore

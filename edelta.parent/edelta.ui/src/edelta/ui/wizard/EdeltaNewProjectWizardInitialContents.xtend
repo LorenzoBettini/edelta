@@ -60,7 +60,7 @@ class EdeltaNewProjectWizardInitialContents {
 			]
 			
 			// ... or using Edelta DSL specific syntax
-			createEClass MyNewClass in myecore
+			createEClass MyNewClass in myecore {}
 			
 			createEClass MyDerivedNewClass in myecore {
 				// new Ecore elements created in the program can be referred:
@@ -75,7 +75,7 @@ class EdeltaNewProjectWizardInitialContents {
 			// You can fully qualify Ecore references
 			ecoreref(MyDerivedNewClass.myNewAttribute)
 			
-			createEClass MyOtherNewClass in myecore
+			createEClass MyOtherNewClass in myecore {}
 			'''
 			)
 		fsa.generateFile(
