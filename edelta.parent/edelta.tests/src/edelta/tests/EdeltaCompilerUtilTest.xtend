@@ -88,13 +88,30 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testConsumerArgumentForBody() {
-		createEClass.parseWithTestEcore.
+	def void testConsumerArgumentForBodyNotSpecified() {
+		'''
+			metamodel "foo"
+			
+			createEClass MyNewClass in foo
+		'''.parseWithTestEcore.
 		main.expressions => [
-			"null".
+			"createList(this::_createEClass_MyNewClass_in_foo)".
 				assertEquals(head.createEClassExpression.body.consumerArgumentForBody)
+		]
+	}
+
+	@Test
+	def void testConsumerArgumentForBody() {
+		'''
+			metamodel "foo"
+			
+			createEClass MyDerivedNewClass in foo {
+				ESuperTypes += ecoreref(MyNewClass)
+			}
+		'''.parseWithTestEcore.
+		main.expressions => [
 			"createList(this::_createEClass_MyDerivedNewClass_in_foo)".
-				assertEquals(last.createEClassExpression.body.consumerArgumentForBody)
+				assertEquals(head.createEClassExpression.body.consumerArgumentForBody)
 		]
 	}
 
