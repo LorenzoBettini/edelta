@@ -158,7 +158,7 @@ class Inputs {
 		'''
 			metamodel "foo"
 			
-			createEClass MyNewClass in foo
+			createEClass MyNewClass in foo {}
 			
 			createEClass MyDerivedNewClass in foo {
 				ESuperTypes += ecoreref(MyNewClass)
@@ -170,7 +170,7 @@ class Inputs {
 		'''
 			metamodel "foo"
 			
-			createEClass NewClass in foo
+			createEClass NewClass in foo {}
 			ecoreref(NewClass)
 		'''
 	}
@@ -179,7 +179,7 @@ class Inputs {
 		'''
 			metamodel "foo"
 			
-			createEClass FooClass in foo
+			createEClass FooClass in foo {}
 			ecoreref(FooClass)
 		'''
 	}
@@ -192,7 +192,7 @@ class Inputs {
 				createEAttribute newAttribute {
 					name = "changed"
 				}
-				createEAttribute newAttribute2
+				createEAttribute newAttribute2 {}
 			}
 			ecoreref(newAttribute)
 		'''

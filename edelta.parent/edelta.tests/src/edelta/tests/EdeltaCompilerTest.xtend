@@ -266,8 +266,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  @Override
 			  protected void doExecute() throws Exception {
-			    createEClass("foo", "MyNewClass", null);
+			    createEClass("foo", "MyNewClass", createList(this::_createEClass_MyNewClass_in_foo));
 			    createEClass("foo", "MyDerivedNewClass", createList(this::_createEClass_MyDerivedNewClass_in_foo));
+			  }
+			  
+			  public void _createEClass_MyNewClass_in_foo(final EClass it) {
 			  }
 			  
 			  public void _createEClass_MyDerivedNewClass_in_foo(final EClass it) {
@@ -286,6 +289,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
+			import org.eclipse.emf.ecore.EClass;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends AbstractEdelta {
@@ -296,8 +300,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  @Override
 			  protected void doExecute() throws Exception {
-			    createEClass("foo", "NewClass", null);
+			    createEClass("foo", "NewClass", createList(this::_createEClass_NewClass_in_foo));
 			    getEClass("foo", "NewClass");
+			  }
+			  
+			  public void _createEClass_NewClass_in_foo(final EClass it) {
 			  }
 			}
 			'''
@@ -330,12 +337,15 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public void _createEClass_NewClass_in_foo(final EClass it) {
 			    {
 			      createEAttribute(it, "newAttribute", createList(this::_createEAttribute_newAttribute_in_createEClass_NewClass_in_foo));
-			      createEAttribute(it, "newAttribute2", null);
+			      createEAttribute(it, "newAttribute2", createList(this::_createEAttribute_newAttribute2_in_createEClass_NewClass_in_foo));
 			    }
 			  }
 			  
 			  public void _createEAttribute_newAttribute_in_createEClass_NewClass_in_foo(final EAttribute it) {
 			    it.setName("changed");
+			  }
+			  
+			  public void _createEAttribute_newAttribute2_in_createEClass_NewClass_in_foo(final EAttribute it) {
 			  }
 			}
 			'''
