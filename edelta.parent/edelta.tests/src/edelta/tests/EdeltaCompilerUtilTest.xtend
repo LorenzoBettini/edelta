@@ -88,7 +88,7 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testConsumerArgumentForBodyNull() {
+	def void testConsumerArgumentForBodyNotSpecified() {
 		'''
 			metamodel "foo"
 			
