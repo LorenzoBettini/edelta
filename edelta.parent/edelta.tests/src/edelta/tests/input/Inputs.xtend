@@ -171,7 +171,7 @@ class Inputs {
 			metamodel "foo"
 			
 			createEClass MyNewClass in foo
-				extends Foo
+				extends FooClass
 			{
 				
 			}

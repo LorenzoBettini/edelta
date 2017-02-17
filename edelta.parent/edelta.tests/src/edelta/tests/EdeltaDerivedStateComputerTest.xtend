@@ -88,14 +88,8 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testDerivedStateForCreatedEClassWithSuperTypes() {
-		val program = '''
-		package test
-		
-		metamodel "foo"
-		
-		createEClass First in foo extends FooClass {}
-		'''.
-		parseWithTestEcore
+		val program = createEClassWithSuperTypes.
+			parseWithTestEcore
 		val derivedEClass = program.getDerivedStateLastEClass
 		// inherited from FooClass
 		assertNamedElements(derivedEClass.EAllStructuralFeatures,
