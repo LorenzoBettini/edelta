@@ -103,7 +103,6 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 						members += e.toMethodForConsumer(EClass, e.body)
 						e.body.expressions.
 							filter(EdeltaEcoreCreateEAttributeExpression).
-							filter[body !== null].
 							forEach[
 								ea |
 								members += ea.toMethodForConsumer(EAttribute, ea.body)
