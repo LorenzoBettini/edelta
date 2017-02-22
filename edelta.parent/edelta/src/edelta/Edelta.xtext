@@ -5,7 +5,8 @@ import "http://www.eclipse.org/xtext/xbase/Xbase" as xbase
 import "http://www.eclipse.org/xtext/xbase/Xtype" as xtype
 import "http://www.eclipse.org/xtext/common/JavaVMTypes" as types
 
-generate edelta "http://www.Edelta.edelta"
+//generate edelta "http://www.Edelta.edelta"
+import "http://www.Edelta.edelta"
 
 EdeltaProgram:
 	{EdeltaProgram}

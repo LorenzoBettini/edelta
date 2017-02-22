@@ -31,6 +31,8 @@ Workflow {
 		language = StandardLanguage {
 			name = "edelta.Edelta"
 			fileExtensions = "edelta"
+			// lines to refer to our custom genmodel
+			referencedResource = "platform:/resource/edelta/model/custom/Edelta.genmodel"
 
 			serializer = {
 				generateStub = false
