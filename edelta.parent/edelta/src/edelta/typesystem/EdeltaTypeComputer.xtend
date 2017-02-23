@@ -14,6 +14,7 @@ import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.xbase.annotations.typesystem.XbaseWithAnnotationsTypeComputer
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputationState
 import org.eclipse.xtext.xbase.XExpression
+import edelta.edelta.EdeltaEcoreReference
 
 class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 
@@ -22,6 +23,7 @@ class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 			EdeltaEcoreCreateEClassExpression: _computeTypes(e, state)
 			EdeltaEcoreCreateEAttributeExpression: _computeTypes(e, state)
 			EdeltaEcoreReferenceExpression: _computeTypes(e, state)
+			EdeltaEcoreReference: _computeTypes(e, state)
 			default: super.computeTypes(e, state)
 		}
 	}
@@ -40,6 +42,12 @@ class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 			state.acceptActualType(getPrimitiveVoid(state))
 			return
 		}
+		val result = state.withNonVoidExpectation.computeTypes(e.reference)
+		state.acceptActualType(result.actualExpressionType)
+	}
+
+	def void _computeTypes(EdeltaEcoreReference e, ITypeComputationState state) {
+		val enamedelement = e.enamedelement;
 		val type = switch (enamedelement) {
 			case enamedelement.eIsProxy: ENamedElement
 			EPackage: EPackage
