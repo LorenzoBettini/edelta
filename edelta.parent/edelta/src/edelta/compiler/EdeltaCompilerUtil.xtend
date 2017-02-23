@@ -13,6 +13,7 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
+import edelta.edelta.EdeltaEcoreBaseManipulationWithBlockExpression
 
 /**
  * Utilities for Edelta compiler
@@ -34,8 +35,8 @@ class EdeltaCompilerUtil {
 		'''_createEAttribute_«e.name»_in«e.getContainerOfType(EdeltaEcoreCreateEClassExpression).methodName»'''
 	}
 
-	def consumerArgumentForBody(XExpression body) {
-		return "createList(this::" + (body.eContainer as XExpression).methodName + ")"
+	def consumerArgumentForBody(EdeltaEcoreBaseManipulationWithBlockExpression e) {
+		return "createList(this::" + e.methodName + ")"
 	}
 
 	def String getEPackageNameOrNull(EClassifier eClassifier) {
