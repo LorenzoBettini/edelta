@@ -3,6 +3,9 @@
  */
 package edelta
 
+import com.google.inject.Injector
+import edelta.edelta.EdeltaPackage
+import org.eclipse.emf.ecore.EPackage
 
 /**
  * Initialization support for running Xtext languages without Equinox extension registry.
@@ -12,4 +15,12 @@ class EdeltaStandaloneSetup extends EdeltaStandaloneSetupGenerated {
 	def static void doSetup() {
 		new EdeltaStandaloneSetup().createInjectorAndDoEMFRegistration()
 	}
+
+	override register(Injector injector) {
+		if (!EPackage.Registry.INSTANCE.containsKey("http://www.Edelta.edelta")) {
+			EPackage.Registry.INSTANCE.put("http://www.Edelta.edelta", EdeltaPackage.eINSTANCE);
+		}
+		super.register(injector)
+	}
+
 }
