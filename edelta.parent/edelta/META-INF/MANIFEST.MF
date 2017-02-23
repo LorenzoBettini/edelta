@@ -16,7 +16,8 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.xtext.util,
  org.eclipse.xtend.lib,
  org.eclipse.emf.common,
- edelta.lib;visibility:=reexport
+ edelta.lib;visibility:=reexport,
+ edelta.mwe2;resolution:=optional
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: edelta,
  edelta.compiler,
