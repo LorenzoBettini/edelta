@@ -39,6 +39,24 @@ class EdeltaCompilerUtil {
 		return "createList(this::" + e.methodName + ")"
 	}
 
+	def consumerArguments(EdeltaEcoreCreateEClassExpression e) {
+		val ecoreRefSuperTypes = e.ecoreReferenceSuperTypes
+		if (!ecoreRefSuperTypes.empty) {
+			return '''
+			
+			  createList(
+			    c -> {
+			      «FOR ref : ecoreRefSuperTypes»
+			      c.getESuperTypes().add(«ref.stringForEcoreReference»);
+			      «ENDFOR»
+			    },
+			    this::«e.methodName»
+			  )
+			'''
+		}
+		return "createList(this::" + e.methodName + ")"
+	}
+
 	def String getEPackageNameOrNull(EClassifier eClassifier) {
 		eClassifier?.EPackage.getEPackageNameOrNull
 	}
