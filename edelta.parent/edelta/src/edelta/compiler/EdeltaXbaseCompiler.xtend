@@ -55,7 +55,7 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 			'", "' +
 			obj.name +
 			'", ' +
-			obj.consumerArgumentForBody +
+			obj.consumerArguments +
 			')'
 		)
 	}
@@ -65,7 +65,7 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 			'createEAttribute(it, "' +
 			obj.name +
 			'", ' +
-			obj.consumerArgumentForBody +
+			obj.consumerArguments +
 			')'
 		)
 	}

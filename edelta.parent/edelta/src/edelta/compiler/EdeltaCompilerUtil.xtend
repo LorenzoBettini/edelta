@@ -35,7 +35,7 @@ class EdeltaCompilerUtil {
 		'''_createEAttribute_«e.name»_in«e.getContainerOfType(EdeltaEcoreCreateEClassExpression).methodName»'''
 	}
 
-	def consumerArgumentForBody(EdeltaEcoreBaseManipulationWithBlockExpression e) {
+	def consumerArguments(EdeltaEcoreBaseManipulationWithBlockExpression e) {
 		return "createList(this::" + e.methodName + ")"
 	}
 
