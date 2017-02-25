@@ -29,6 +29,11 @@ class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 	}
 
 	def void _computeTypes(EdeltaEcoreCreateEClassExpression e, ITypeComputationState state) {
+		for (ecoreRefSuperType : e.ecoreReferenceSuperTypes) {
+			state.
+				withExpectation(getRawTypeForName(EClass, state)).
+				computeTypes(ecoreRefSuperType)
+		}
 		state.acceptActualType(getRawTypeForName(EClass, state))
 	}
 
@@ -49,7 +54,19 @@ class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 	def void _computeTypes(EdeltaEcoreReference e, ITypeComputationState state) {
 		val enamedelement = e.enamedelement;
 		val type = switch (enamedelement) {
-			case enamedelement.eIsProxy: ENamedElement
+			case enamedelement.eIsProxy: {
+				// if it's unresolved, but there's a type expectation, then
+				// we assign to this reference the expected type: this way
+				// we will only get an error due to unresolved reference
+				// and not an addition type mismatch error, which would be
+				// superfluous
+				val expectation = state.expectations.findFirst[expectedType !== null]
+				if (expectation !== null) {
+					state.acceptActualType(expectation.expectedType)
+					return
+				}
+				ENamedElement
+			}
 			EPackage: EPackage
 			EClass: EClass
 			EEnum: EEnum
