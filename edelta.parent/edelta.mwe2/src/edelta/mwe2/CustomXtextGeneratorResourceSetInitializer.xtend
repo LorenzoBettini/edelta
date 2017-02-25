@@ -13,6 +13,10 @@ import org.eclipse.xtext.resource.IResourceServiceProvider
 import org.eclipse.xtext.util.internal.Log
 import org.eclipse.xtext.xtext.generator.XtextGeneratorResourceSetInitializer
 
+/**
+ * See https://www.eclipse.org/forums/index.php/t/1084593/ and
+ * https://github.com/eclipse/xtext-core/issues/41
+ */
 @Log
 class CustomXtextGeneratorResourceSetInitializer extends XtextGeneratorResourceSetInitializer {
 	
