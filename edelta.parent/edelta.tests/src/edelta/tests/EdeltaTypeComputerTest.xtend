@@ -4,7 +4,6 @@
 package edelta.tests
 
 import com.google.inject.Inject
-import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EDataType
@@ -109,7 +108,7 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 		input.parseWithTestEcore.lastExpression => [
 			expected.canonicalName.assertEquals(
 				resolveTypes.getActualType(
-					(it as EdeltaEcoreCreateEClassExpression).body.expressions.last
+					createEClassExpression.body.expressions.last
 				).identifier
 			)
 		]
