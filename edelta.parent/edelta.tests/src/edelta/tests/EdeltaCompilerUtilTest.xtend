@@ -96,7 +96,7 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 		'''.parseWithTestEcore.
 		main.expressions => [
 			"createList(this::_createEClass_MyNewClass_in_foo)".
-				assertEquals(head.createEClassExpression.body.consumerArgumentForBody)
+				assertEquals(head.createEClassExpression.consumerArguments)
 		]
 	}
 
@@ -111,7 +111,7 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 		'''.parseWithTestEcore.
 		main.expressions => [
 			"createList(this::_createEClass_MyDerivedNewClass_in_foo)".
-				assertEquals(head.createEClassExpression.body.consumerArgumentForBody)
+				assertEquals(head.createEClassExpression.consumerArguments)
 		]
 	}
 

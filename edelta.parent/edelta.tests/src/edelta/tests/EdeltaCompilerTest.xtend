@@ -300,7 +300,14 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  @Override
 			  protected void doExecute() throws Exception {
-			    createEClass("foo", "MyNewClass", createList(this::_createEClass_MyNewClass_in_foo));
+			    createEClass("foo", "MyNewClass", 
+			      createList(
+			        c -> {
+			          c.getESuperTypes().add(getEClass("foo", "FooClass"));
+			        },
+			        this::_createEClass_MyNewClass_in_foo
+			      )
+			    );
 			  }
 			  
 			  public void _createEClass_MyNewClass_in_foo(final EClass it) {

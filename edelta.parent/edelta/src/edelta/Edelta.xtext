@@ -5,7 +5,8 @@ import "http://www.eclipse.org/xtext/xbase/Xbase" as xbase
 import "http://www.eclipse.org/xtext/xbase/Xtype" as xtype
 import "http://www.eclipse.org/xtext/common/JavaVMTypes" as types
 
-generate edelta "http://www.Edelta.edelta"
+//generate edelta "http://www.Edelta.edelta"
+import "http://www.Edelta.edelta"
 
 EdeltaProgram:
 	{EdeltaProgram}
@@ -69,8 +70,15 @@ EdeltaEcoreManipulationExpression returns xbase::XExpression:
 EdeltaEcoreFeatureManipulationExpression returns xbase::XExpression:
 	{EdeltaEcoreCreateEAttributeExpression}
 	'createEAttribute' name=ValidID
-	body=XBlockExpression
+	body=EdeltaEcoreManipualtionStandardBlockExpression 
 ;
+
+// we force the rule type to be XBlockExpression
+EdeltaEcoreManipualtionStandardBlockExpression returns xbase::XBlockExpression:
+	{xbase::XBlockExpression}
+	'{'
+		(expressions+=XExpressionOrVarDeclaration ';'?)*
+	'}';
 
 // redefine Xbase primary expression with our special expressions
 @Override 
