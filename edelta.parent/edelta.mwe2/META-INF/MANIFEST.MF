@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: edelta.mwe2
+Bundle-Vendor: My Company
+Bundle-Version: 0.0.1.qualifier
+Bundle-SymbolicName: edelta.mwe2;singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.xtext.xtext.generator
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: edelta.mwe2
+Import-Package: org.apache.log4j
