@@ -38,6 +38,10 @@ class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 	}
 
 	def void _computeTypes(EdeltaEcoreCreateEAttributeExpression e, ITypeComputationState state) {
+		val etypeRef = e.ecoreReferenceDataType
+		state.
+			withExpectation(getRawTypeForName(EDataType, state)).
+			computeTypes(etypeRef)
 		state.acceptActualType(getRawTypeForName(EAttribute, state))
 	}
 
