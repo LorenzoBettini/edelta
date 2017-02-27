@@ -72,7 +72,15 @@ public class Example extends AbstractEdelta {
     createEClass("myecore", "MyNewClass", createList(this::_createEClass_MyNewClass_in_myecore));
     createEClass("myecore", "MyDerivedNewClass", createList(this::_createEClass_MyDerivedNewClass_in_myecore));
     getEAttribute("myecore", "MyDerivedNewClass", "myNewAttribute");
-    createEClass("myecore", "MyOtherNewClass", createList(this::_createEClass_MyOtherNewClass_in_myecore));
+    createEClass("myecore", "MyOtherNewClass", 
+      createList(
+        c -> {
+          c.getESuperTypes().add(getEClass("myecore", "MyDerivedNewClass"));
+          c.getESuperTypes().add(getEClass("myecore", "MyNewClass"));
+        },
+        this::_createEClass_MyOtherNewClass_in_myecore
+      )
+    );
   }
   
   public void _createEClass_MyNewClass_in_myecore(final EClass it) {
@@ -82,8 +90,6 @@ public class Example extends AbstractEdelta {
     {
       EList<EClass> _eSuperTypes = it.getESuperTypes();
       _eSuperTypes.add(getEClass("myecore", "MyNewClass"));
-      EList<EClass> _eSuperTypes_1 = it.getESuperTypes();
-      _eSuperTypes_1.add(getEClass("myecore", "MyOtherNewClass"));
       createEAttribute(it, "myNewAttribute", createList(this::_createEAttribute_myNewAttribute_in_createEClass_MyDerivedNewClass_in_myecore));
     }
   }
@@ -96,5 +102,6 @@ public class Example extends AbstractEdelta {
   }
   
   public void _createEClass_MyOtherNewClass_in_myecore(final EClass it) {
+    getEAttribute("myecore", "MyDerivedNewClass", "myNewAttribute");
   }
 }
