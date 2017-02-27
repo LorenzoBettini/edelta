@@ -13,7 +13,6 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
-import edelta.edelta.EdeltaEcoreBaseManipulationWithBlockExpression
 
 /**
  * Utilities for Edelta compiler
@@ -35,10 +34,6 @@ class EdeltaCompilerUtil {
 		'''_createEAttribute_«e.name»_in«e.getContainerOfType(EdeltaEcoreCreateEClassExpression).methodName»'''
 	}
 
-	def consumerArguments(EdeltaEcoreBaseManipulationWithBlockExpression e) {
-		return "createList(this::" + e.methodName + ")"
-	}
-
 	def consumerArguments(EdeltaEcoreCreateEClassExpression e) {
 		val ecoreRefSuperTypes = e.ecoreReferenceSuperTypes
 		if (!ecoreRefSuperTypes.empty) {
@@ -50,6 +45,20 @@ class EdeltaCompilerUtil {
 			      c.getESuperTypes().add(«ref.stringForEcoreReference»);
 			      «ENDFOR»
 			    },
+			    this::«e.methodName»
+			  )
+			'''
+		}
+		return "createList(this::" + e.methodName + ")"
+	}
+
+	def consumerArguments(EdeltaEcoreCreateEAttributeExpression e) {
+		val ecoreRefType = e.ecoreReferenceDataType
+		if (ecoreRefType !== null) {
+			return '''
+			
+			  createList(
+			    a -> a.setEType(«ecoreRefType.stringForEcoreReference»),
 			    this::«e.methodName»
 			  )
 			'''
