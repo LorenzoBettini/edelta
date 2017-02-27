@@ -65,7 +65,6 @@ class EdeltaNewProjectWizardInitialContents {
 			createEClass MyDerivedNewClass in myecore {
 				// new Ecore elements created in the program can be referred:
 				ESuperTypes += ecoreref(MyNewClass)
-				ESuperTypes += ecoreref(MyOtherNewClass)
 				createEAttribute myNewAttribute {
 					EType = ecoreref(EInt)
 					upperBound = -1;
@@ -75,7 +74,14 @@ class EdeltaNewProjectWizardInitialContents {
 			// You can fully qualify Ecore references
 			ecoreref(MyDerivedNewClass.myNewAttribute)
 			
-			createEClass MyOtherNewClass in myecore {}
+			// You can specify superclasses for created EClasses...
+			createEClass MyOtherNewClass in myecore
+				extends MyDerivedNewClass, MyNewClass
+			{
+				// ...note that inherited attributes are
+				// immediately available in the program
+				ecoreref(MyOtherNewClass.myNewAttribute)
+			}
 			'''
 			)
 		fsa.generateFile(
