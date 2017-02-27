@@ -1,5 +1,7 @@
 package edelta.testutils;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -44,6 +46,18 @@ public class EdeltaTestUtils {
 	 */
 	public static void compareFileContents(String file1, String file2) throws IOException {
 		Assert.assertEquals(removeCR(loadFile(file1)), removeCR(loadFile(file2)));
+	}
+
+	/**
+	 * Compares the file contents with the specified string using
+	 * {@link Assert#assertEquals(Object, Object)}
+	 * 
+	 * @param file1
+	 * @param expectedContents
+	 * @throws IOException
+	 */
+	public static void compareSingleFileContents(String file1, String expectedContents) throws IOException {
+		assertEquals(removeCR(loadFile(file1)), removeCR(expectedContents));
 	}
 
 	/**
