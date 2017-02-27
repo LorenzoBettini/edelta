@@ -42,6 +42,51 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testConsumerArgumentForCreateEClassSuperTypesEmpty() {
+		'''
+			metamodel "foo"
+			
+			createEClass MyDerivedNewClass in foo {
+			}
+		'''.parseWithTestEcore.
+		main.expressions => [
+			'''
+createList(this::_createEClass_MyDerivedNewClass_in_foo)
+			'''.toString.trim.
+				assertEquals(
+					head.
+						createEClassExpression.
+						consumerArguments.trim
+				)
+		]
+	}
+
+	@Test
+	def void testConsumerArgumentForCreateEClassSuperTypes() {
+		'''
+			metamodel "foo"
+			
+			createEClass MyDerivedNewClass in foo extends FooClass {
+			}
+		'''.parseWithTestEcore.
+		main.expressions => [
+			'''
+createList(
+    c -> {
+      c.getESuperTypes().add(getEClass("foo", "FooClass"));
+    },
+    this::_createEClass_MyDerivedNewClass_in_foo
+  )
+			'''.toString.trim.
+				assertEquals(
+					head.
+						createEClassExpression.
+						consumerArguments.trim
+				)
+		]
+	}
+
+	@Test
 	def void testMethodNameForCreatedEAttribute() {
 		val program = '''
 		package test
@@ -66,6 +111,53 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 				get(1).createEClassExpression.body.expressions.head.methodName)
 			assertEquals("_createEAttribute_inSecond_in_createEClass_Third_in_",
 				get(2).createEClassExpression.body.expressions.head.methodName)
+		]
+	}
+
+	@Test
+	def void testConsumerArgumentForCreateEAttributeType() {
+		'''
+			metamodel "foo"
+			
+			createEClass MyDerivedNewClass in foo {
+				createEAttribute attr type FooDataType
+			}
+		'''.parseWithTestEcore.
+		main.expressions => [
+			'''
+createList(
+    a -> a.setEType(getEDataType("foo", "FooDataType")),
+    this::_createEAttribute_attr_in_createEClass_MyDerivedNewClass_in_foo
+  )
+			'''.toString.trim.
+				assertEquals(
+					head.
+						createEClassExpression.
+						body.expressions.last.createEAttributExpression.
+						consumerArguments.trim
+				)
+		]
+	}
+
+	@Test
+	def void testConsumerArgumentForCreateEAttributeNullType() {
+		'''
+			metamodel "foo"
+			
+			createEClass MyDerivedNewClass in foo {
+				createEAttribute attr 
+			}
+		'''.parseWithTestEcore.
+		main.expressions => [
+			'''
+createList(this::_createEAttribute_attr_in_createEClass_MyDerivedNewClass_in_foo)
+			'''.toString.trim.
+				assertEquals(
+					head.
+						createEClassExpression.
+						body.expressions.last.createEAttributExpression.
+						consumerArguments.trim
+				)
 		]
 	}
 

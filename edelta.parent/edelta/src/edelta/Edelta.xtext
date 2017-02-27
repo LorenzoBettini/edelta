@@ -70,6 +70,7 @@ EdeltaEcoreManipulationExpression returns xbase::XExpression:
 EdeltaEcoreFeatureManipulationExpression returns xbase::XExpression:
 	{EdeltaEcoreCreateEAttributeExpression}
 	'createEAttribute' name=ValidID
+	'type' ecoreReferenceDataType=EdeltaEcoreReference
 	body=EdeltaEcoreManipualtionStandardBlockExpression 
 ;
 

@@ -65,8 +65,7 @@ class EdeltaNewProjectWizardInitialContents {
 			createEClass MyDerivedNewClass in myecore {
 				// new Ecore elements created in the program can be referred:
 				ESuperTypes += ecoreref(MyNewClass)
-				createEAttribute myNewAttribute {
-					EType = ecoreref(EInt)
+				createEAttribute myNewAttribute type EInt {
 					upperBound = -1;
 				}
 			}

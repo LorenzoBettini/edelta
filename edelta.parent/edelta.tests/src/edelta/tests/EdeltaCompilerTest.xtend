@@ -420,8 +420,18 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public void _createEClass_NewClass_in_foo(final EClass it) {
 			    {
-			      createEAttribute(it, "newAttribute", createList(this::_createEAttribute_newAttribute_in_createEClass_NewClass_in_foo));
-			      createEAttribute(it, "newAttribute2", createList(this::_createEAttribute_newAttribute2_in_createEClass_NewClass_in_foo));
+			      createEAttribute(it, "newAttribute", 
+			        createList(
+			          a -> a.setEType(getEDataType("foo", "FooDataType")),
+			          this::_createEAttribute_newAttribute_in_createEClass_NewClass_in_foo
+			        )
+			      );
+			      createEAttribute(it, "newAttribute2", 
+			        createList(
+			          a -> a.setEType(getEDataType("foo", "FooDataType")),
+			          this::_createEAttribute_newAttribute2_in_createEClass_NewClass_in_foo
+			        )
+			      );
 			    }
 			  }
 			  
