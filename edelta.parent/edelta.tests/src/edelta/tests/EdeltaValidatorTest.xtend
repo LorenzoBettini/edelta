@@ -3,6 +3,8 @@
  */
 package edelta.tests
 
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
@@ -45,5 +47,70 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	@Test
 	def void testReferenceToCreatedEAttribute() {
 		referenceToCreatedEAttribute.parseWithTestEcore.assertNoErrors
+	}
+
+	@Test
+	def void testCreateEClassWithSuperTypesOk() {
+		createEClassWithSuperTypes.parseWithTestEcore.assertNoErrors
+	}
+
+	@Test
+	def void testCreateEClassWithSuperTypes2Ok() {
+		createEClassWithSuperTypes2.parseWithTestEcore.assertNoErrors
+	}
+
+	@Test
+	def void testCreateEClassWithSuperTypesNotEClass() {
+		'''
+			metamodel "foo"
+			
+			createEClass MyNewClass in foo
+				extends FooDataType, FooClass, FooEnum {}
+		'''.parseWithTestEcore.assertErrorsAsStrings(
+			'''
+			Type mismatch: cannot convert from EDataType to EClass
+			Type mismatch: cannot convert from EEnum to EClass
+			'''
+		)
+	}
+
+	@Test
+	def void testCreateEClassWithSuperTypesNotEClassWithNullRef() {
+		'''
+			metamodel "foo"
+			
+			createEClass MyNewClass in foo
+				extends FooDataType, , FooEnum {}
+		'''.parseWithTestEcore.assertErrorsAsStrings(
+			'''
+			Type mismatch: cannot convert from EDataType to EClass
+			Type mismatch: cannot convert from EEnum to EClass
+			extraneous input ',' expecting RULE_ID
+			'''
+		)
+	}
+
+	@Test
+	def void testCreateEClassWithSuperTypesNotEClassWithUnresolvedRef() {
+		'''
+			metamodel "foo"
+			
+			createEClass MyNewClass in foo
+				extends FooDataType, AAA, FooEnum {}
+		'''.parseWithTestEcore.assertErrorsAsStrings(
+			'''
+			AAA cannot be resolved.
+			Type mismatch: cannot convert from EDataType to EClass
+			Type mismatch: cannot convert from EEnum to EClass
+			'''
+		)
+		// type mismatch error has not been reported on AAA
+		// since it can't be resolved
+	}
+
+	def private assertErrorsAsStrings(EObject o, CharSequence expected) {
+		expected.toString.trim.assertEqualsStrings(
+			o.validate.filter[severity == Severity.ERROR].
+				map[message].sort.join("\n"))
 	}
 }

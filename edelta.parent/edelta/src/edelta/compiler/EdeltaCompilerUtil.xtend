@@ -35,7 +35,25 @@ class EdeltaCompilerUtil {
 		'''_createEAttribute_«e.name»_in«e.getContainerOfType(EdeltaEcoreCreateEClassExpression).methodName»'''
 	}
 
-	def consumerArgumentForBody(EdeltaEcoreBaseManipulationWithBlockExpression e) {
+	def consumerArguments(EdeltaEcoreBaseManipulationWithBlockExpression e) {
+		return "createList(this::" + e.methodName + ")"
+	}
+
+	def consumerArguments(EdeltaEcoreCreateEClassExpression e) {
+		val ecoreRefSuperTypes = e.ecoreReferenceSuperTypes
+		if (!ecoreRefSuperTypes.empty) {
+			return '''
+			
+			  createList(
+			    c -> {
+			      «FOR ref : ecoreRefSuperTypes»
+			      c.getESuperTypes().add(«ref.stringForEcoreReference»);
+			      «ENDFOR»
+			    },
+			    this::«e.methodName»
+			  )
+			'''
+		}
 		return "createList(this::" + e.methodName + ")"
 	}
 

@@ -87,6 +87,20 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testDerivedStateForCreatedEClassWithSuperTypes() {
+		val program = createEClassWithSuperTypes.
+			parseWithTestEcore
+		val derivedEClass = program.getDerivedStateLastEClass
+		// inherited from FooClass
+		assertNamedElements(derivedEClass.EAllStructuralFeatures,
+			'''
+			myAttribute
+			myReference
+			'''
+		)
+	}
+
+	@Test
 	def void testDerivedStateForTwoCreatedEClass() {
 		val program = '''
 		package test

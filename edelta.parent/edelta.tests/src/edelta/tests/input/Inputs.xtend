@@ -166,6 +166,32 @@ class Inputs {
 		'''
 	}
 
+	def createEClassWithSuperTypes() {
+		'''
+			metamodel "foo"
+			
+			createEClass MyNewClass in foo
+				extends FooClass
+			{
+				
+			}
+		'''
+	}
+
+	def createEClassWithSuperTypes2() {
+		'''
+			metamodel "foo"
+			
+			createEClass BaseClass in foo {}
+			
+			createEClass MyNewClass in foo
+				extends FooClass, BaseClass
+			{
+				
+			}
+		'''
+	}
+
 	def referenceToCreatedEClass() {
 		'''
 			metamodel "foo"

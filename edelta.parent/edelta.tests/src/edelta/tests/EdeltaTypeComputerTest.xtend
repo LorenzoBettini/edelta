@@ -88,6 +88,16 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 		}".assertTypeOfCreateEClassBody(EAttribute)
 	}
 
+	@Test
+	def void testTypeOfUnresolvedEcoreRefSuperTypeIsStillEClass() {
+		'''
+			metamodel "foo"
+			
+			createEClass MyNewClass in foo
+				extends AAA {}
+		'''.assertTypeOfCreateEClassSuperType(EClass)
+	}
+
 	def private assertType(CharSequence input, Class<?> expected) {
 		input.parseWithTestEcore.lastExpression => [
 			expected.canonicalName.assertEquals(
@@ -109,6 +119,16 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 			expected.canonicalName.assertEquals(
 				resolveTypes.getActualType(
 					createEClassExpression.body.expressions.last
+				).identifier
+			)
+		]
+	}
+
+	def private assertTypeOfCreateEClassSuperType(CharSequence input, Class<?> expected) {
+		input.parseWithTestEcore.lastExpression => [
+			expected.canonicalName.assertEquals(
+				resolveTypes.getActualType(
+					createEClassExpression.ecoreReferenceSuperTypes.last
 				).identifier
 			)
 		]
