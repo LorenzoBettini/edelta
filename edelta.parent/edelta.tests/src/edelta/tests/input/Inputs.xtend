@@ -215,10 +215,10 @@ class Inputs {
 			metamodel "foo"
 			
 			createEClass NewClass in foo {
-				createEAttribute newAttribute {
+				createEAttribute newAttribute type FooDataType {
 					name = "changed"
 				}
-				createEAttribute newAttribute2 {}
+				createEAttribute newAttribute2 type FooDataType {}
 			}
 			ecoreref(newAttribute)
 		'''
