@@ -90,15 +90,17 @@ public class Example extends AbstractEdelta {
     {
       EList<EClass> _eSuperTypes = it.getESuperTypes();
       _eSuperTypes.add(getEClass("myecore", "MyNewClass"));
-      createEAttribute(it, "myNewAttribute", createList(this::_createEAttribute_myNewAttribute_in_createEClass_MyDerivedNewClass_in_myecore));
+      createEAttribute(it, "myNewAttribute", 
+        createList(
+          a -> a.setEType(getEDataType("ecore", "EInt")),
+          this::_createEAttribute_myNewAttribute_in_createEClass_MyDerivedNewClass_in_myecore
+        )
+      );
     }
   }
   
   public void _createEAttribute_myNewAttribute_in_createEClass_MyDerivedNewClass_in_myecore(final EAttribute it) {
-    {
-      it.setEType(getEDataType("ecore", "EInt"));
-      it.setUpperBound((-1));
-    }
+    it.setUpperBound((-1));
   }
   
   public void _createEClass_MyOtherNewClass_in_myecore(final EClass it) {
