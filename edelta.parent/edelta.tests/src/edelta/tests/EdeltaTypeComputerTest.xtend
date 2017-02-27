@@ -98,6 +98,16 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 		'''.assertTypeOfCreateEClassSuperType(EClass)
 	}
 
+	@Test
+	def void testTypeOfNullEcoreRefSuperTypeIsStillEClass() {
+		'''
+			metamodel "foo"
+			
+			createEClass MyNewClass in foo
+				extends {}
+		'''.assertTypeOfCreateEClassSuperType(EClass)
+	}
+
 	def private assertType(CharSequence input, Class<?> expected) {
 		input.parseWithTestEcore.lastExpression => [
 			expected.canonicalName.assertEquals(
