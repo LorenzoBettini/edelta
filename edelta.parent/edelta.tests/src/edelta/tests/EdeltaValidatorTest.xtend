@@ -55,6 +55,11 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCreateEClassWithSuperTypes2Ok() {
+		createEClassWithSuperTypes2.parseWithTestEcore.assertNoErrors
+	}
+
+	@Test
 	def void testCreateEClassWithSuperTypesNotEClass() {
 		'''
 			metamodel "foo"

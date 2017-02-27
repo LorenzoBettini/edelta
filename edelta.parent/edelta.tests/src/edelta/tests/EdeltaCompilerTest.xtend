@@ -320,6 +320,48 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCreateEClassWithSuperTypes2() {
+		createEClassWithSuperTypes2.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import org.eclipse.emf.ecore.EClass;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    createEClass("foo", "BaseClass", createList(this::_createEClass_BaseClass_in_foo));
+			    createEClass("foo", "MyNewClass", 
+			      createList(
+			        c -> {
+			          c.getESuperTypes().add(getEClass("foo", "FooClass"));
+			          c.getESuperTypes().add(getEClass("foo", "BaseClass"));
+			        },
+			        this::_createEClass_MyNewClass_in_foo
+			      )
+			    );
+			  }
+			  
+			  public void _createEClass_BaseClass_in_foo(final EClass it) {
+			  }
+			  
+			  public void _createEClass_MyNewClass_in_foo(final EClass it) {
+			  }
+			}
+			''',
+			false // otherwise we get Cyclic linking detected
+			// though standard validation works...
+		)
+	}
+
+	@Test
 	def void testReferenceToCreatedEClass() {
 		referenceToCreatedEClass.checkCompilation(
 			'''
