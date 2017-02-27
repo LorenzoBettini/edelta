@@ -72,6 +72,9 @@ abstract class EdeltaAbstractTest {
 	}
 
 	def protected EPackageForTests() {
+		// if you add something to this ecore, which is created on the fly,
+		// and you have a test for the generated Java code, then you must also
+		// update testecores/foo.ecore accordingly
 		val fooPackage = EcoreFactory.eINSTANCE.createEPackage => [
 			name = "foo"
 			nsPrefix = "foo"

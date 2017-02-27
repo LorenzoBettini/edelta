@@ -9,16 +9,18 @@ import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.resource.FileExtensionProvider
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.util.JavaVersion
+import org.eclipse.xtext.xbase.lib.util.ReflectExtensions
 import org.eclipse.xtext.xbase.testing.CompilationTestHelper
 import org.eclipse.xtext.xbase.testing.CompilationTestHelper.Result
 import org.eclipse.xtext.xbase.testing.TemporaryFolder
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
-import org.junit.Before
-import org.eclipse.xtext.util.JavaVersion
+import static edelta.testutils.EdeltaTestUtils.*
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -27,6 +29,9 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	@Rule @Inject public TemporaryFolder temporaryFolder
 	@Inject extension CompilationTestHelper compilationTestHelper
 	@Inject private FileExtensionProvider extensionProvider
+	@Inject extension ReflectExtensions
+
+	private static final String MODIFIED = "modified";
 
 	@Before
 	def void setup() {
@@ -431,6 +436,23 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		)
 	}
 
+	@Test
+	def void testExecutionCreateEClassWithSuperTypes2() {
+		createEClassWithSuperTypes2.checkCompiledCodeExecution(
+			'''
+			<?xml version="1.0" encoding="UTF-8"?>
+			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="foo" nsURI="http://foo" nsPrefix="foo">
+			  <eClassifiers xsi:type="ecore:EClass" name="FooClass"/>
+			  <eClassifiers xsi:type="ecore:EClass" name="BaseClass"/>
+			  <eClassifiers xsi:type="ecore:EClass" name="MyNewClass" eSuperTypes="#//FooClass #//BaseClass"/>
+			</ecore:EPackage>
+			''',
+			false // otherwise we get Cyclic linking detected
+			// though standard validation works...
+		)
+	}
+
 	def private checkCompilation(CharSequence input, CharSequence expectedGeneratedJava) {
 		checkCompilation(input, expectedGeneratedJava, true)
 	}
@@ -481,5 +503,32 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		val rs = resourceSet(pairs)
 		addEPackageForTests(rs)
 		return rs
+	}
+
+	def private checkCompiledCodeExecution(CharSequence input, CharSequence expectedGeneratedEcore,
+			boolean checkValidationErrors) {
+		wipeModifiedDirectoryContents
+		val rs = createResourceSet(input)
+		rs.compile [
+			if (checkValidationErrors) {
+				assertNoValidationErrors
+			}
+
+			if (checkValidationErrors) {
+				assertGeneratedJavaCodeCompiles
+			}
+
+			val genClass = compiledClass
+			val edeltaObj = genClass.newInstance
+			// load ecore files
+			edeltaObj.invoke("loadEcoreFile", #["testecores/foo.ecore"])
+			edeltaObj.invoke("execute")
+			edeltaObj.invoke("saveModifiedEcores", #[MODIFIED])
+			compareSingleFileContents(MODIFIED+"/foo.ecore", expectedGeneratedEcore.toString)
+		]
+	}
+
+	def private void wipeModifiedDirectoryContents() {
+		cleanDirectory(MODIFIED);
 	}
 }
