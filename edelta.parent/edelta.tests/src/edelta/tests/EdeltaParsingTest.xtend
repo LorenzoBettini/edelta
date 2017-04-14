@@ -140,6 +140,46 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testEdeltaUseAsIncomplete() {
+		'''
+		use
+		'''.parse.useAsClauses.head => [
+			assertNull(type)
+			assertNull(name)
+		]
+	}
+
+	@Test
+	def void testEdeltaUseAsIncompleteNoType() {
+		'''
+		use as foo
+		'''.parse.useAsClauses.head => [
+			assertNull(type)
+			assertNotNull(name)
+		]
+	}
+
+	@Test
+	def void testEdeltaUseAsIncompleteNoName() {
+		'''
+		use Foo as 
+		'''.parse.useAsClauses.head => [
+			assertNotNull(type)
+			assertNull(name)
+		]
+	}
+
+	@Test
+	def void testEdeltaUseAs() {
+		'''
+		use Foo as foo
+		'''.parse.useAsClauses.head => [
+			assertNotNull(type)
+			assertNotNull(name)
+		]
+	}
+
 	def private getTextualRepresentation(EObject o) {
 		NodeModelUtils.getTokenText(NodeModelUtils.findActualNodeFor(o))
 	}
