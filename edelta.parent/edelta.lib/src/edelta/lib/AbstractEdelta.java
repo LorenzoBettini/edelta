@@ -8,15 +8,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 import org.apache.log4j.Logger;
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
@@ -26,13 +23,8 @@ import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
-import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.xtext.xbase.lib.Extension;
 
 import com.google.common.collect.ImmutableList;
@@ -50,15 +42,9 @@ public abstract class AbstractEdelta {
 	private static final Logger LOG = Logger.getLogger(AbstractEdelta.class);
 
 	/**
-	 * Here we store the association between the Ecore file name and the
-	 * corresponding loaded Resource.
+	 * For loading ecores and all other runtime {@link EPackage} management.
 	 */
-	private HashMap<String, Resource> ecoreToResourceMap = new LinkedHashMap<String, Resource>();
-
-	/**
-	 * Here we store all the Ecores used by the Edelta
-	 */
-	private ResourceSet resourceSet = new ResourceSetImpl();
+	private EdeltaEPackageManager packageManager;
 
 	/**
 	 * Initializers for EClassifiers which will be executed later, after
@@ -79,18 +65,7 @@ public abstract class AbstractEdelta {
 	protected EdeltaLibrary lib = new EdeltaLibrary();
 
 	public AbstractEdelta() {
-		// Register the appropriate resource factory to handle all file extensions.
-		resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put
-			("ecore", 
-			new EcoreResourceFactoryImpl());
-		resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put
-			(Resource.Factory.Registry.DEFAULT_EXTENSION, 
-			new XMIResourceFactoryImpl());
-
-		// Register the Ecore package to ensure it is available during loading.
-		resourceSet.getPackageRegistry().put
-			(EcorePackage.eNS_URI, 
-			 EcorePackage.eINSTANCE);
+		packageManager = new EdeltaEPackageManager();
 	}
 
 	/**
@@ -148,13 +123,7 @@ public abstract class AbstractEdelta {
 	}
 
 	public void loadEcoreFile(String path) {
-		// make sure we have a complete file URI,
-		// otherwise the saved modified ecore will contain
-		// wrong references (i.e., with the prefixed relative path)
-		URI uri = URI.createFileURI(Paths.get(path).toAbsolutePath().toString());
-		// Demand load resource for this file.
-		LOG.info("Loading " + path + " (URI: " + uri + ")");
-		ecoreToResourceMap.put(path, resourceSet.getResource(uri, true));
+		packageManager.loadEcoreFile(path);
 	}
 
 	/**
@@ -169,7 +138,7 @@ public abstract class AbstractEdelta {
 	 * @throws IOException 
 	 */
 	public void saveModifiedEcores(String outputPath) throws IOException {
-		for (Entry<String, Resource> entry : ecoreToResourceMap.entrySet()) {
+		for (Entry<String, Resource> entry : packageManager.getResourceMapEntrySet()) {
 			Path p = Paths.get(entry.getKey());
 			String outputFileName = outputPath + "/" + p.getFileName().toString();
 			LOG.info("Saving " + outputFileName);
@@ -182,18 +151,7 @@ public abstract class AbstractEdelta {
 	}
 
 	public EPackage getEPackage(String packageName) {
-		// Ecore package is implicitly available
-		if (EcorePackage.eNAME.equals(packageName)) {
-			return EcorePackage.eINSTANCE;
-		}
-		return resourceSet.getResources().
-			stream().
-			map(resource -> resource.getContents().get(0)).
-			filter(o -> o instanceof EPackage).
-			map(o -> (EPackage) o).
-			filter(p -> p.getName().equals(packageName)).
-			findAny().
-			orElse(null);
+		return packageManager.getEPackage(packageName);
 	}
 
 	public EClassifier getEClassifier(String packageName, String classifierName) {
