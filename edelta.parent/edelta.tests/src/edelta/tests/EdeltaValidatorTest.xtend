@@ -134,6 +134,20 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		)
 	}
 
+	@Test
+	def void testInvalidUseAsAbstractEdelta() {
+		val input = '''
+		import edelta.tests.additional.MyCustomAbstractEdelta;
+		use MyCustomAbstractEdelta as foo
+		'''
+		input.parse.assertError(
+			EDELTA_USE_AS,
+			EdeltaValidator.TYPE_MISMATCH,
+			input.lastIndexOf("MyCustomAbstractEdelta"), "MyCustomAbstractEdelta".length,
+			"Cannot be an abstract type"
+		)
+	}
+
 	def private assertErrorsAsStrings(EObject o, CharSequence expected) {
 		expected.toString.trim.assertEqualsStrings(
 			o.validate.filter[severity == Severity.ERROR].

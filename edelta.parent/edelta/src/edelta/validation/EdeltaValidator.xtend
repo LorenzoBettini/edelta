@@ -13,6 +13,7 @@ import org.eclipse.xtext.xbase.typesystem.util.CommonTypeComputationServices
 import edelta.lib.AbstractEdelta
 
 import static edelta.edelta.EdeltaPackage.Literals.*
+import org.eclipse.xtext.common.types.JvmGenericType
 
 /**
  * This class contains custom validation rules. 
@@ -34,6 +35,15 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 				EDELTA_USE_AS__TYPE,
 				TYPE_MISMATCH
 			)
+		} else {
+			val type = useAs.type.type
+			if ((type as JvmGenericType).isAbstract) {
+				error(
+					"Cannot be an abstract type",
+					EDELTA_USE_AS__TYPE,
+					TYPE_MISMATCH
+				)
+			}
 		}
 	}
 
