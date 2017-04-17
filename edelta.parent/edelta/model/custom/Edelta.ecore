@@ -7,6 +7,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType ../../../org.eclipse.emf.ecore/model/Ecore.ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="metamodels" unique="false"
         upperBound="-1" eType="ecore:EClass ../../../org.eclipse.emf.ecore/model/Ecore.ecore#//EPackage"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="useAsClauses" upperBound="-1"
+        eType="#//EdeltaUseAs" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="operations" upperBound="-1"
         eType="#//EdeltaOperation" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="main" eType="ecore:EClass ../../../org.eclipse.xtext.xbase/model/Xbase.ecore#//XBlockExpression"
@@ -53,4 +55,9 @@
         containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EdeltaEcoreDirectReference" eSuperTypes="#//EdeltaEcoreReference"/>
+  <eClassifiers xsi:type="ecore:EClass" name="EdeltaUseAs">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="ecore:EClass ../../../org.eclipse.xtext.common.types/model/JavaVMTypes.ecore#//JvmTypeReference"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType ../../../org.eclipse.emf.ecore/model/Ecore.ecore#//EString"/>
+  </eClassifiers>
 </ecore:EPackage>

@@ -463,6 +463,96 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		)
 	}
 
+	@Test
+	def void testUseAs() {
+		useAs.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import edelta.tests.additional.MyCustomEdelta;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  private MyCustomEdelta my;
+			  
+			  public MyFile0() {
+			    my = new MyCustomEdelta(this);
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    this.my.myMethod();
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
+	def void testInvalidUseAs() {
+		'''
+			import edelta.tests.additional.MyCustomEdelta
+			
+			metamodel "foo"
+			
+			use MyCustomEdelta as
+			use as my
+			
+			my.myMethod()
+		'''.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import edelta.tests.additional.MyCustomEdelta;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  private Object my;
+			  
+			  public MyFile0() {
+			     = new MyCustomEdelta(this);
+			    my = new (this);
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    this.my./* name is null */;
+			  }
+			}
+			''',
+			false
+		)
+	}
+
+	@Test
+	def void testUseAsExecution() {
+		// the new created EClass is created by calling a method
+		// of a custom Edelta implementation that is used in the program
+		useAs2.checkCompiledCodeExecution(
+			'''
+			<?xml version="1.0" encoding="UTF-8"?>
+			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="foo" nsURI="http://foo" nsPrefix="foo">
+			  <eClassifiers xsi:type="ecore:EClass" name="FooClass"/>
+			  <eClassifiers xsi:type="ecore:EClass" name="ANewClass"/>
+			</ecore:EPackage>
+			''',
+			true
+		)
+	}
+
 	def private checkCompilation(CharSequence input, CharSequence expectedGeneratedJava) {
 		checkCompilation(input, expectedGeneratedJava, true)
 	}

@@ -42,7 +42,16 @@ public class EdeltaTest {
 	private static final String MY_ECORE = "My.ecore";
 	private static final String TESTECORES = "testecores/";
 
-	private static final class TestableEdelta extends AbstractEdelta {
+	protected static final class TestableEdelta extends AbstractEdelta {
+
+		public TestableEdelta() {
+			super();
+		}
+
+		public TestableEdelta(AbstractEdelta other) {
+			super(other);
+		}
+
 		@Override
 		public void ensureEPackageIsLoaded(String packageName) throws EdeltaPackageNotLoadedException {
 			super.ensureEPackageIsLoaded(packageName);
@@ -68,7 +77,7 @@ public class EdeltaTest {
 		}
 	}
 
-	private TestableEdelta edelta;
+	protected TestableEdelta edelta;
 
 	@Before
 	public void init() {
@@ -104,6 +113,17 @@ public class EdeltaTest {
 
 	@Test
 	public void testGetEPackage() {
+		tryToRetrieveSomeEPackages();
+	}
+
+	@Test
+	public void testGetEPackageWithOtherEdelta() {
+		TestableEdelta other = edelta;
+		edelta = new TestableEdelta(other);
+		tryToRetrieveSomeEPackages();
+	}
+
+	private void tryToRetrieveSomeEPackages() {
 		loadTestEcore(MY_ECORE);
 		loadTestEcore(MY2_ECORE);
 		EPackage ePackage = edelta.getEPackage(MYPACKAGE);

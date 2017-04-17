@@ -64,6 +64,18 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 		val className = program.fullyQualifiedName
 		acceptor.accept(program.toClass(className)) [
 			superTypes += AbstractEdelta.typeRef
+			for (u : program.useAsClauses) {
+				members += u.toField(u.name, u.type)
+			}
+			if (!program.useAsClauses.empty) {
+				members += program.toConstructor[
+					body = '''
+					«FOR u : program.useAsClauses»
+					«u.name» = new «u.type»(this);
+					«ENDFOR»
+					'''
+				]
+			}
 			for (o : program.operations) {
 				members += o.toMethod(o.name, o.type ?: inferredType) [
 					documentation = o.documentation

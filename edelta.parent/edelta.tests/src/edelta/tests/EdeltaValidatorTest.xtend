@@ -10,6 +10,10 @@ import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
 
+import static edelta.edelta.EdeltaPackage.Literals.*
+import edelta.lib.AbstractEdelta
+import edelta.validation.EdeltaValidator
+
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
 class EdeltaValidatorTest extends EdeltaAbstractTest {
@@ -106,6 +110,42 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		)
 		// type mismatch error has not been reported on AAA
 		// since it can't be resolved
+	}
+
+	@Test
+	def void testValidUseAs() {
+		'''
+		import edelta.tests.additional.MyCustomEdelta;
+		use MyCustomEdelta as foo
+		'''.parse.assertNoIssues
+	}
+
+	@Test
+	def void testInvalidUseAsNotAnEdelta() {
+		val input = '''
+		import java.util.List;
+		use List as foo
+		'''
+		input.parse.assertError(
+			EDELTA_USE_AS,
+			EdeltaValidator.TYPE_MISMATCH,
+			input.lastIndexOf("List"), 4,
+			"Not a valid type: must be an " + AbstractEdelta.name
+		)
+	}
+
+	@Test
+	def void testInvalidUseAsAbstractEdelta() {
+		val input = '''
+		import edelta.tests.additional.MyCustomAbstractEdelta;
+		use MyCustomAbstractEdelta as foo
+		'''
+		input.parse.assertError(
+			EDELTA_USE_AS,
+			EdeltaValidator.TYPE_MISMATCH,
+			input.lastIndexOf("MyCustomAbstractEdelta"), "MyCustomAbstractEdelta".length,
+			"Cannot be an abstract type"
+		)
 	}
 
 	def private assertErrorsAsStrings(EObject o, CharSequence expected) {
