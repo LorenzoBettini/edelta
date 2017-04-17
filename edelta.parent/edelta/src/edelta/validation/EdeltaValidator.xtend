@@ -42,12 +42,6 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 		actualType.isSubtypeOf(expected)
 	}
 
-	def isConformant(EObject context, JvmTypeReference expected, JvmTypeReference actual) {
-		val actualType = actual.toLightweightTypeReference(context)
-		val expectedType = expected.toLightweightTypeReference(context)
-		expectedType.isAssignableFrom(actualType)
-	}
-
 	def toLightweightTypeReference(JvmTypeReference typeRef, EObject context) {
 		return newTypeReferenceOwner(context).toLightweightTypeReference(typeRef)
 	}
