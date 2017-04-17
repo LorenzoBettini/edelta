@@ -6,6 +6,8 @@ package edelta.lib;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
@@ -89,5 +91,9 @@ public class EdeltaEPackageManager {
 			filter(p -> p.getName().equals(packageName)).
 			findAny().
 			orElse(null);
+	}
+
+	public Set<Entry<String, Resource>> getResourceMapEntrySet() {
+		return ecoreToResourceMap.entrySet();
 	}
 }
