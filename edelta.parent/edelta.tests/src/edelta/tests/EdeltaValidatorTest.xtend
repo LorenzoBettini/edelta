@@ -108,6 +108,14 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		// since it can't be resolved
 	}
 
+	@Test
+	def void testValidUseAs() {
+		'''
+		import edelta.tests.additional.MyCustomEdelta;
+		use MyCustomEdelta as foo
+		'''.parse.assertNoErrors
+	}
+
 	def private assertErrorsAsStrings(EObject o, CharSequence expected) {
 		expected.toString.trim.assertEqualsStrings(
 			o.validate.filter[severity == Severity.ERROR].
