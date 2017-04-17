@@ -67,6 +67,15 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 			for (u : program.useAsClauses) {
 				members += u.toField(u.name, u.type)
 			}
+			if (!program.useAsClauses.empty) {
+				members += program.toConstructor[
+					body = '''
+					«FOR u : program.useAsClauses»
+					«u.name» = new «u.type»(this);
+					«ENDFOR»
+					'''
+				]
+			}
 			for (o : program.operations) {
 				members += o.toMethod(o.name, o.type ?: inferredType) [
 					documentation = o.documentation

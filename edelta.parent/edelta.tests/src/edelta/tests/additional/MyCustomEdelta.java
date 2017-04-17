@@ -1,5 +1,7 @@
 package edelta.tests.additional;
 
+import org.eclipse.emf.ecore.EStructuralFeature;
+
 import edelta.lib.AbstractEdelta;
 
 /**
@@ -17,4 +19,7 @@ public class MyCustomEdelta extends AbstractEdelta {
 		super(other);
 	}
 
+	public EStructuralFeature myMethod() {
+		return getEStructuralFeature("foo", "FooClass", "myAttribute");
+	}
 }
