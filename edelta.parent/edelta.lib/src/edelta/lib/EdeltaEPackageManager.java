@@ -43,7 +43,7 @@ public class EdeltaEPackageManager {
 	/**
 	 * Performs EMF initialization (resource factories and package registry)
 	 */
-	public void doEmfInitialization() {
+	public EdeltaEPackageManager() {
 		// Register the appropriate resource factory to handle all file extensions.
 		resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put
 			("ecore", 
