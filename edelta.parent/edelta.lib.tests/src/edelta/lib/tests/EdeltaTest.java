@@ -42,7 +42,7 @@ public class EdeltaTest {
 	private static final String MY_ECORE = "My.ecore";
 	private static final String TESTECORES = "testecores/";
 
-	private static final class TestableEdelta extends AbstractEdelta {
+	protected static final class TestableEdelta extends AbstractEdelta {
 
 		public TestableEdelta() {
 			super();
@@ -77,7 +77,7 @@ public class EdeltaTest {
 		}
 	}
 
-	private TestableEdelta edelta;
+	protected TestableEdelta edelta;
 
 	@Before
 	public void init() {
