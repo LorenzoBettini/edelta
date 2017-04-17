@@ -27,7 +27,8 @@ node {
    }
    stage('Code Coverage') {
      step([$class: 'JacocoPublisher',
-       changeBuildStatus: true,
+       // disabled for https://issues.jenkins-ci.org/browse/JENKINS-43225
+       // changeBuildStatus: true,
        minimumClassCoverage: '90',
        minimumInstructionCoverage: '90',
        minimumLineCoverage: '90',
