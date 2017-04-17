@@ -69,6 +69,15 @@ public abstract class AbstractEdelta {
 	}
 
 	/**
+	 * Reuses the {@link EdeltaEPackageManager} from the other object.
+	 * 
+	 * @param other
+	 */
+	public AbstractEdelta(AbstractEdelta other) {
+		packageManager = other.packageManager;
+	}
+
+	/**
 	 * Performs the actual execution of the transformation, to be
 	 * called by clients.
 	 * 
