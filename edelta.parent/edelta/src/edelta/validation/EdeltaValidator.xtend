@@ -3,6 +3,17 @@
  */
 package edelta.validation
 
+import com.google.inject.Inject
+import edelta.edelta.EdeltaUseAs
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.common.types.JvmTypeReference
+import org.eclipse.xtext.validation.Check
+import org.eclipse.xtext.xbase.typesystem.references.StandardTypeReferenceOwner
+import org.eclipse.xtext.xbase.typesystem.util.CommonTypeComputationServices
+import edelta.lib.AbstractEdelta
+
+import static edelta.edelta.EdeltaPackage.Literals.*
+
 /**
  * This class contains custom validation rules. 
  * 
@@ -10,4 +21,38 @@ package edelta.validation
  */
 class EdeltaValidator extends AbstractEdeltaValidator {
 
+	public static val PREFIX = "edelta.";
+	public static val TYPE_MISMATCH = PREFIX + "TypeMismatch";
+
+	@Inject CommonTypeComputationServices services
+
+	@Check
+	def void checkValidUseAs(EdeltaUseAs useAs) {
+		if (!isConformant(useAs, AbstractEdelta, useAs.type)) {
+			error(
+				"Not a valid type: must be an " + AbstractEdelta.name,
+				EDELTA_USE_AS__TYPE,
+				TYPE_MISMATCH
+			)
+		}
+	}
+
+	def isConformant(EObject context, Class<?> expected, JvmTypeReference actual) {
+		val actualType = actual.toLightweightTypeReference(context)
+		actualType.isSubtypeOf(expected)
+	}
+
+	def isConformant(EObject context, JvmTypeReference expected, JvmTypeReference actual) {
+		val actualType = actual.toLightweightTypeReference(context)
+		val expectedType = expected.toLightweightTypeReference(context)
+		expectedType.isAssignableFrom(actualType)
+	}
+
+	def toLightweightTypeReference(JvmTypeReference typeRef, EObject context) {
+		return newTypeReferenceOwner(context).toLightweightTypeReference(typeRef)
+	}
+
+	def protected newTypeReferenceOwner(EObject context) {
+		return new StandardTypeReferenceOwner(services, context);
+	}
 }
