@@ -117,7 +117,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		'''
 		import edelta.tests.additional.MyCustomEdelta;
 		use MyCustomEdelta as foo
-		'''.parse.assertNoErrors
+		'''.parse.assertNoIssues
 	}
 
 	@Test
