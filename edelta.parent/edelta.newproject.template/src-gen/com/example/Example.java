@@ -15,6 +15,14 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class Example extends AbstractEdelta {
+  public Example() {
+    
+  }
+  
+  public Example(final AbstractEdelta other) {
+    super(other);
+  }
+  
   /**
    * Reusable function to create a new EClass with the
    * specified name, setting MyEClass as its superclass
