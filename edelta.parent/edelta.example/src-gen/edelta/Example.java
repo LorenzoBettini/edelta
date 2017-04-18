@@ -5,6 +5,14 @@ import org.eclipse.emf.ecore.EClass;
 
 @SuppressWarnings("all")
 public class Example extends AbstractEdelta {
+  public Example() {
+    
+  }
+  
+  public Example(final AbstractEdelta other) {
+    super(other);
+  }
+  
   public EClass createClass(final String name) {
     return this.lib.newEClass(name);
   }

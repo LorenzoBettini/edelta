@@ -1,0 +1,10 @@
+// IMPORTANT: ecores must be in source directories
+// otherwise you can't refer to them
+
+metamodel "ecore"
+metamodel "myexample"
+metamodel "myecore"
+
+use Example as example
+
+example.createClass("Foo")
