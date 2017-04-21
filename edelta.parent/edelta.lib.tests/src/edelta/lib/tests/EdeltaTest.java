@@ -365,6 +365,19 @@ public class EdeltaTest {
 		assertEquals(0, edelta.getEClass(MYPACKAGE, "MyDerivedClass").getESuperTypes().size());
 	}
 
+	@Test
+	public void testRenameEClassifier() throws IOException {
+		loadTestEcore(MY_ECORE);
+		// check that the superclass is set
+		assertSame(
+			edelta.getEClassifier(MYPACKAGE, "MyBaseClass"),
+			edelta.getEClass(MYPACKAGE, "MyDerivedClass").getESuperTypes().get(0));
+		// modify the ecore model by renaming MyBaseClass
+		edelta.renameEClassifier(MYPACKAGE, "MyBaseClass", "RENAMED");
+		// check that MyDerivedClass has the renamed superclass
+		assertEquals("RENAMED", edelta.getEClass(MYPACKAGE, "MyDerivedClass").getESuperTypes().get(0).getName());
+	}
+
 	private void wipeModifiedDirectoryContents() {
 		cleanDirectory(MODIFIED);
 	}

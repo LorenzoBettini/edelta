@@ -260,4 +260,8 @@ public abstract class AbstractEdelta {
 	public void removeEClassifier(String packageName, String name) {
 		EcoreUtil.delete(getEClassifier(packageName, name), true);
 	}
+
+	public void renameEClassifier(String packageName, String name, String newName) {
+		getEClassifier(packageName, name).setName(newName);
+	}
 }
