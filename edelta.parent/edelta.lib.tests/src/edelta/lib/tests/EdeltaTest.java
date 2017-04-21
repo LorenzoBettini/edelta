@@ -378,6 +378,22 @@ public class EdeltaTest {
 		assertEquals("RENAMED", edelta.getEClass(MYPACKAGE, "MyDerivedClass").getESuperTypes().get(0).getName());
 	}
 
+	@Test
+	public void testSaveModifiedEcoresAfterRenamingBaseClass() throws IOException {
+		loadTestEcore(MY_ECORE);
+		// modify the ecore model by renaming MyBaseClass
+		// this will also renaming existing references, so the model
+		// is still valid
+		edelta.renameEClassifier(MYPACKAGE, "MyBaseClass", "RENAMED");
+		wipeModifiedDirectoryContents();
+		edelta.saveModifiedEcores(MODIFIED);
+		compareFileContents(
+				EXPECTATIONS+"/"+
+					"testSaveModifiedEcoresAfterRenamingBaseClass"+"/"+
+						MY_ECORE,
+				MODIFIED+"/"+MY_ECORE);
+	}
+
 	private void wipeModifiedDirectoryContents() {
 		cleanDirectory(MODIFIED);
 	}
