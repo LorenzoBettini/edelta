@@ -7,15 +7,18 @@ import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
 import static edelta.testutils.EdeltaTestUtils.compareFileContents;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 import java.io.IOException;
 import java.util.List;
 
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.WrappedException;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -390,6 +393,46 @@ public class EdeltaTest {
 		compareFileContents(
 				EXPECTATIONS+"/"+
 					"testSaveModifiedEcoresAfterRenamingBaseClass"+"/"+
+						MY_ECORE,
+				MODIFIED+"/"+MY_ECORE);
+	}
+
+	@Test
+	public void testCopyEClassifier() throws IOException {
+		loadTestEcore(MY_ECORE);
+		// modify the ecore model by copying MyBaseClass
+		EClass original = edelta.getEClass(MYPACKAGE, "MyDerivedClass");
+		EClass copy = (EClass) edelta.copyEClassifier(MYPACKAGE, "MyDerivedClass");
+		// check that the copy has the same attributes as the original one (in turn, copied)
+		EList<EStructuralFeature> originalFeatures = original.getEAllStructuralFeatures();
+		EList<EStructuralFeature> copiedFeatures = copy.getEAllStructuralFeatures();
+		assertEquals(originalFeatures.size(), copiedFeatures.size());
+		assertSame(original.getESuperTypes().get(0), copy.getESuperTypes().get(0));
+		// inherited features are references so they're not copied
+		assertSame(originalFeatures.get(0), copiedFeatures.get(0));
+		assertSame(originalFeatures.get(1), copiedFeatures.get(1));
+		// declared features are instead copied
+		assertNotSame(originalFeatures.get(2), copiedFeatures.get(2));
+		assertNotSame(originalFeatures.get(3), copiedFeatures.get(3));
+		assertEquals(originalFeatures.get(2).getName(), copiedFeatures.get(2).getName());
+		assertEquals(originalFeatures.get(3).getName(), copiedFeatures.get(3).getName());
+	}
+
+	@Test
+	public void testSaveModifiedEcoresAfterCopyingDerivedClass() throws IOException {
+		loadTestEcore(MY_ECORE);
+		// modify the ecore model by copying MyDerivedClass
+		// and then rename it to avoid having duplicates in the saved ecore
+		// which would not be valid
+		EClassifier copy = edelta.copyEClassifier(MYPACKAGE, "MyDerivedClass");
+		copy.setName("COPIED");
+		EPackage p = edelta.getEPackage(MYPACKAGE);
+		p.getEClassifiers().add(copy);
+		wipeModifiedDirectoryContents();
+		edelta.saveModifiedEcores(MODIFIED);
+		compareFileContents(
+				EXPECTATIONS+"/"+
+					"testSaveModifiedEcoresAfterCopyingDerivedClass"+"/"+
 						MY_ECORE,
 				MODIFIED+"/"+MY_ECORE);
 	}

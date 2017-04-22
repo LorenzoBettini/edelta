@@ -264,4 +264,8 @@ public abstract class AbstractEdelta {
 	public void renameEClassifier(String packageName, String name, String newName) {
 		getEClassifier(packageName, name).setName(newName);
 	}
+
+	public EClassifier copyEClassifier(String packageName, String classifierName) {
+		return EcoreUtil.copy(getEClassifier(packageName, classifierName));
+	}
 }
