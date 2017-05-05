@@ -5,11 +5,7 @@ package edelta.lib.tests;
 
 import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
 import static edelta.testutils.EdeltaTestUtils.compareFileContents;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,9 +15,15 @@ import org.eclipse.emf.common.util.WrappedException;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.EGenericType;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.ETypeParameter;
+import org.eclipse.emf.ecore.EcoreFactory;
+import org.eclipse.emf.ecore.impl.BasicEObjectImpl;
+import org.eclipse.emf.ecore.impl.EGenericTypeImpl;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,6 +45,8 @@ public class EdeltaTest {
 	private static final String EXPECTATIONS = "expectations";
 	private static final String MY2_ECORE = "My2.ecore";
 	private static final String MY_ECORE = "My.ecore";
+	private static final String TEST_ECORE_FOR_REFERENCES = "TestEcoreForReferences.ecore";
+	private static final String TEST_PACKAGE_FOR_REFERENCES = "testecoreforreferences";
 	private static final String TESTECORES = "testecores/";
 
 	protected static final class TestableEdelta extends AbstractEdelta {
@@ -416,6 +420,33 @@ public class EdeltaTest {
 		assertNotSame(originalFeatures.get(3), copiedFeatures.get(3));
 		assertEquals(originalFeatures.get(2).getName(), copiedFeatures.get(2).getName());
 		assertEquals(originalFeatures.get(3).getName(), copiedFeatures.get(3).getName());
+	}
+
+	@Test
+	public void testCopyEClassifierDoesNotResolveProxies() throws IOException {
+		loadTestEcore(TEST_ECORE_FOR_REFERENCES);
+		// modify the ecore model by copying MyBaseClass
+		EClass original = edelta.getEClass(TEST_PACKAGE_FOR_REFERENCES, "MyClass");
+		EClass referred = edelta.getEClass(TEST_PACKAGE_FOR_REFERENCES, "MyReferredType");
+		ETypeParameter typePar = original.getETypeParameters().get(0);
+		EGenericType genericType = typePar.getEBounds().get(0);
+		EClassifier eClassifier = genericType.getEClassifier();
+		assertNull(eClassifier);
+		// force creation of proxy for the reference EGenericType.eClassifier
+		eClassifier = EcoreFactory.eINSTANCE.createEClass();
+		((BasicEObjectImpl) eClassifier).eSetProxyURI(EcoreUtil.getURI(referred));
+		assertTrue(eClassifier.eIsProxy());
+		genericType.setEClassifier(eClassifier);
+		// perform copy and make sure proxy resolution is not triggered during the copy
+		EClass copy = (EClass) edelta.copyEClassifier(TEST_PACKAGE_FOR_REFERENCES, "MyClass");
+		ETypeParameter typeParCopied = copy.getETypeParameters().get(0);
+		EGenericType genericTypeCopied = typeParCopied.getEBounds().get(0);
+		// use basicGet, otherwise we trigger resolution of proxies
+		eClassifier = ((EGenericTypeImpl)genericTypeCopied).basicGetEClassifier();
+		assertTrue(eClassifier.eIsProxy());
+		// proxy resolution is not triggered in the original object either
+		eClassifier = ((EGenericTypeImpl)genericType).basicGetEClassifier();
+		assertTrue(eClassifier.eIsProxy());
 	}
 
 	@Test
