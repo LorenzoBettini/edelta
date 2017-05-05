@@ -180,6 +180,36 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testChangeEClass() {
+		'''
+		changeEClass foo
+		'''.parse.lastExpression.changeEClassExpression => [
+			assertNotNull(original)
+			assertNull(name)
+		]
+	}
+
+	@Test
+	def void testChangeEClassWithNewName() {
+		'''
+		changeEClass foo newName bar
+		'''.parse.lastExpression.changeEClassExpression => [
+			assertNotNull(original)
+			assertNotNull(name)
+		]
+	}
+
+	@Test
+	def void testChangeEClassWithNewNameButNoOriginal() {
+		'''
+		changeEClass newName bar
+		'''.parse.lastExpression.changeEClassExpression => [
+			assertNotNull(original)
+			assertNull(name) // not recognized as newName
+		]
+	}
+
 	def private getTextualRepresentation(EObject o) {
 		NodeModelUtils.getTokenText(NodeModelUtils.findActualNodeFor(o))
 	}

@@ -58,6 +58,12 @@ EdeltaEcoreClassifierManipulationExpression returns xbase::XExpression:
 		'extends' ecoreReferenceSuperTypes+=EdeltaEcoreReference (',' ecoreReferenceSuperTypes+=EdeltaEcoreReference)*
 	)?
 	body=EdeltaEcoreManipulationBlockExpression
+	|
+	{EdeltaEcoreChangeEClassExpression}
+	'changeEClass'
+	original=EdeltaEcoreReference
+	('newName' name=ValidID)?
+	body=EdeltaEcoreManipulationBlockExpression
 ;
 
 EdeltaEcoreManipulationBlockExpression returns xbase::XBlockExpression:
