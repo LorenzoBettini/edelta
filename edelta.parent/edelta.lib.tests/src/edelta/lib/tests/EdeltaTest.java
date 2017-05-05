@@ -5,7 +5,12 @@ package edelta.lib.tests;
 
 import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
 import static edelta.testutils.EdeltaTestUtils.compareFileContents;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,7 +24,6 @@ import org.eclipse.emf.ecore.EGenericType;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.ETypeParameter;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.impl.BasicEObjectImpl;
 import org.eclipse.emf.ecore.impl.EGenericTypeImpl;
@@ -424,23 +428,23 @@ public class EdeltaTest {
 
 	@Test
 	public void testCopyEClassifierDoesNotResolveProxies() throws IOException {
+		// We use EGenericType for playing with references and proxies, since using
+		// EClass.superTypes for that does not seem to be easy...
 		loadTestEcore(TEST_ECORE_FOR_REFERENCES);
 		// modify the ecore model by copying MyBaseClass
 		EClass original = edelta.getEClass(TEST_PACKAGE_FOR_REFERENCES, "MyClass");
 		EClass referred = edelta.getEClass(TEST_PACKAGE_FOR_REFERENCES, "MyReferredType");
-		ETypeParameter typePar = original.getETypeParameters().get(0);
-		EGenericType genericType = typePar.getEBounds().get(0);
+		EGenericType genericType = original.getETypeParameters().get(0).getEBounds().get(0);
 		EClassifier eClassifier = genericType.getEClassifier();
 		assertNull(eClassifier);
-		// force creation of proxy for the reference EGenericType.eClassifier
+		// explicitly set proxy for the reference EGenericType.eClassifier
 		eClassifier = EcoreFactory.eINSTANCE.createEClass();
 		((BasicEObjectImpl) eClassifier).eSetProxyURI(EcoreUtil.getURI(referred));
 		assertTrue(eClassifier.eIsProxy());
 		genericType.setEClassifier(eClassifier);
 		// perform copy and make sure proxy resolution is not triggered during the copy
 		EClass copy = (EClass) edelta.copyEClassifier(TEST_PACKAGE_FOR_REFERENCES, "MyClass");
-		ETypeParameter typeParCopied = copy.getETypeParameters().get(0);
-		EGenericType genericTypeCopied = typeParCopied.getEBounds().get(0);
+		EGenericType genericTypeCopied = copy.getETypeParameters().get(0).getEBounds().get(0);
 		// use basicGet, otherwise we trigger resolution of proxies
 		eClassifier = ((EGenericTypeImpl)genericTypeCopied).basicGetEClassifier();
 		assertTrue(eClassifier.eIsProxy());
