@@ -14,6 +14,7 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
+import org.eclipse.emf.ecore.ENamedElement
 
 /**
  * Utilities for Edelta compiler
@@ -32,7 +33,7 @@ class EdeltaCompilerUtil {
 	}
 
 	def dispatch String methodName(EdeltaEcoreChangeEClassExpression e) {
-		'''_changeEClass_«e.name»_in_«e.epackage?.name»'''
+		'''_changeEClass_«e.original.nameOrNull»_in_«e.epackage?.name»'''
 	}
 
 	def dispatch String methodName(EdeltaEcoreCreateEAttributeExpression e) {
@@ -94,6 +95,10 @@ class EdeltaCompilerUtil {
 
 	def String getEClassNameOrNull(EStructuralFeature eFeature) {
 		eFeature.EContainingClass?.name
+	}
+
+	def String getNameOrNull(ENamedElement e) {
+		e?.name
 	}
 
 	def String getEEnumNameOrNull(EEnumLiteral literal) {

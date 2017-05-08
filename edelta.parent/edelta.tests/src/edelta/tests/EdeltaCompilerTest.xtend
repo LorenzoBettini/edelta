@@ -678,6 +678,65 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		)
 	}
 
+	@Test
+	def void testReferenceToChangedEClassRenamed() {
+		referenceToChangedEClassWithANewName.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import org.eclipse.emf.ecore.EAttribute;
+			import org.eclipse.emf.ecore.EClass;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  public MyFile0() {
+			    
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    createEClass("foo", "NewClass", createList(this::_createEClass_NewClass_in_foo));
+			    getEAttribute("foo", "NewClass", "newAttribute");
+			  }
+			  
+			  public void _createEClass_NewClass_in_foo(final EClass it) {
+			    {
+			      createEAttribute(it, "newAttribute", 
+			        createList(
+			          a -> a.setEType(getEDataType("foo", "FooDataType")),
+			          this::_createEAttribute_newAttribute_in_createEClass_NewClass_in_foo
+			        )
+			      );
+			      createEAttribute(it, "newAttribute2", 
+			        createList(
+			          a -> a.setEType(getEDataType("foo", "FooDataType")),
+			          this::_createEAttribute_newAttribute2_in_createEClass_NewClass_in_foo
+			        )
+			      );
+			    }
+			  }
+			  
+			  public void _createEAttribute_newAttribute_in_createEClass_NewClass_in_foo(final EAttribute it) {
+			    it.setName("changed");
+			  }
+			  
+			  public void _createEAttribute_newAttribute2_in_createEClass_NewClass_in_foo(final EAttribute it) {
+			  }
+			}
+			'''
+		)
+	}
+
 	def private checkCompilation(CharSequence input, CharSequence expectedGeneratedJava) {
 		checkCompilation(input, expectedGeneratedJava, true)
 	}
