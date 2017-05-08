@@ -29,7 +29,7 @@ class EdeltaEcoreHelper {
 	@Inject extension EdeltaDerivedStateComputer
 
 	def Iterable<? extends ENamedElement> getProgramENamedElements(EObject context) {
-		cache.get("getENamedElements", context.eResource) [
+		cache.get("getProgramENamedElements", context.eResource) [
 			val prog = getProgram(context)
 			// we also must explicitly consider the derived EPackages
 			// created by our derived state computer, containing EClasses
