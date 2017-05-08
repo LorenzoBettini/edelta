@@ -61,7 +61,8 @@ EdeltaEcoreClassifierManipulationExpression returns xbase::XExpression:
 	|
 	{EdeltaEcoreChangeEClassExpression}
 	'changeEClass'
-	original=EdeltaEcoreReference
+	epackage=[ecore::EPackage] '.'
+	original=[ecore::EClass]
 	('newName' name=ValidID)?
 	body=EdeltaEcoreManipulationBlockExpression
 ;

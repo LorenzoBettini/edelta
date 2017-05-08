@@ -183,7 +183,7 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 	@Test
 	def void testChangeEClass() {
 		'''
-		changeEClass foo
+		changeEClass foo.Bar
 		'''.parse.lastExpression.changeEClassExpression => [
 			assertNotNull(original)
 			assertNull(name)
@@ -193,7 +193,7 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 	@Test
 	def void testChangeEClassWithNewName() {
 		'''
-		changeEClass foo newName bar
+		changeEClass foo.Bar newName bar
 		'''.parse.lastExpression.changeEClassExpression => [
 			assertNotNull(original)
 			assertNotNull(name)
@@ -205,7 +205,7 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 		'''
 		changeEClass newName bar
 		'''.parse.lastExpression.changeEClassExpression => [
-			assertNotNull(original)
+			assertNull(original)
 			assertNull(name) // not recognized as newName
 		]
 	}
