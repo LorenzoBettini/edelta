@@ -29,11 +29,11 @@ class EdeltaCompilerUtil {
 	}
 
 	def dispatch String methodName(EdeltaEcoreCreateEClassExpression e) {
-		'''_createEClass_«e.name»_in_«e.epackage?.name»'''
+		'''_createEClass_«e.name»_in_«e.epackage.EPackageNameOrNull»'''
 	}
 
 	def dispatch String methodName(EdeltaEcoreChangeEClassExpression e) {
-		'''_changeEClass_«e.original.nameOrNull»_in_«e.epackage?.name»'''
+		'''_changeEClass_«e.original.nameOrNull»_in_«e.epackage.EPackageNameOrNull»'''
 	}
 
 	def dispatch String methodName(EdeltaEcoreCreateEAttributeExpression e) {
