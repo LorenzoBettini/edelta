@@ -418,7 +418,7 @@ public class EdeltaTest {
 			edelta.getEClassifier(MYPACKAGE, "MyBaseClass"),
 			edelta.getEClass(MYPACKAGE, "MyDerivedClass").getESuperTypes().get(0));
 		// modify the ecore model by renaming MyBaseClass
-		edelta.renameEClassifier(MYPACKAGE, "MyBaseClass", "RENAMED");
+		edelta.getEClassifier(MYPACKAGE, "MyBaseClass").setName("RENAMED");
 		// check that MyDerivedClass has the renamed superclass
 		assertEquals("RENAMED", edelta.getEClass(MYPACKAGE, "MyDerivedClass").getESuperTypes().get(0).getName());
 	}
@@ -429,7 +429,7 @@ public class EdeltaTest {
 		// modify the ecore model by renaming MyBaseClass
 		// this will also renaming existing references, so the model
 		// is still valid
-		edelta.renameEClassifier(MYPACKAGE, "MyBaseClass", "RENAMED");
+		edelta.getEClassifier(MYPACKAGE, "MyBaseClass").setName("RENAMED");
 		wipeModifiedDirectoryContents();
 		edelta.saveModifiedEcores(MODIFIED);
 		compareFileContents(
