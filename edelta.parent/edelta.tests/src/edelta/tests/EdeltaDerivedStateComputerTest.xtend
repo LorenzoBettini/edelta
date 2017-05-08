@@ -343,4 +343,50 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		assertSame(e, derivedEAttribute.getPrimarySourceElement)
 	}
 
+	@Test
+	def void testDerivedEPackagesWithChangeEClass() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		
+		changeEClass foo.First {}
+		changeEClass foo.Second {}
+		'''.
+		parseWithTestEcore
+		val derivedEPackages = program.eResource.derivedEPackages
+		assertEquals(1, derivedEPackages.size)
+		assertEquals("foo", derivedEPackages.head.name)
+	}
+
+	@Test
+	def void testDerivedEClassesWithChangeEClass() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		
+		changeEClass foo.FooClass {}
+		'''.
+		parseWithTestEcore
+		val derivedEClass = program.getDerivedStateLastEClass
+		assertEquals("FooClass", derivedEClass.name)
+	}
+
+	@Test
+	def void testDerivedEClassesWithChangeEClassNoOriginalReference() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		
+		changeEClass foo. {}
+		'''.
+		parseWithTestEcore
+		val derivedEPackages = program.eResource.derivedEPackages
+		assertEquals(0, derivedEPackages.size)
+		// no EPackage is added to the derived state, since
+		// we don't refer to any existing class
+	}
+
 }
