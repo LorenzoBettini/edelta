@@ -190,6 +190,48 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		// newAttributes are the ones created in the program
 	}
 
+//	@Test
+//	def void testScopeForReferenceToEPackageInChangeEClass() {
+//		'''
+//			metamodel "foo"
+//			
+//			createEClass NewClass in foo {}
+//			changeEClass foo.Test {}
+//		'''
+//		.parseWithTestEcore.lastExpression.
+//			changeEClassExpression.
+//			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreBaseEClassManipulationWithBlockExpression_Epackage,
+//			'''
+//			foo
+//			''')
+//	}
+
+	@Test
+	def void testScopeForReferenceToEClassInChangeEClass() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {}
+			changeEClass foo.Test {}
+		'''
+		.parseWithTestEcore.lastExpression.
+			changeEClassExpression.original.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreChangeEClassExpression_Original,
+			'''
+			NewClass
+			newAttribute
+			newAttribute2
+			FooClass
+			myAttribute
+			myReference
+			FooDataType
+			FooEnum
+			FooEnumLiteral
+			foo
+			''')
+		// newAttributes are the ones created in the program
+	}
+
 	def private assertScope(EObject context, EReference reference, CharSequence expected) {
 		expected.toString.assertEqualsStrings(
 			context.getScope(reference).
