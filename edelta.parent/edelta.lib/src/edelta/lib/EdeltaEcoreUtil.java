@@ -20,12 +20,13 @@ public class EdeltaEcoreUtil {
 		EcoreUtil.delete(eClassifier, true);
 	}
 
-	public static EClassifier copyEClassifier(EClassifier eClassifier) {
+	@SuppressWarnings("unchecked")
+	public static <T extends EClassifier> T copyEClassifier(T eClassifier) {
 		// we must not resolve proxies, that's why we don't simply call EcoreUtil.copy
 		Copier copier = new Copier(false);
 		EObject result = copier.copy(eClassifier);
 		copier.copyReferences();
-		return (EClassifier) result;
+		return (T) result;
 	}
 
 }
