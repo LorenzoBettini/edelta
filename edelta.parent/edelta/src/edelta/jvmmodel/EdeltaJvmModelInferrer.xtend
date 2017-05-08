@@ -4,21 +4,21 @@
 package edelta.jvmmodel
 
 import com.google.inject.Inject
+import edelta.compiler.EdeltaCompilerUtil
+import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
+import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaProgram
 import edelta.lib.AbstractEdelta
+import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.xtext.common.types.JvmDeclaredType
+import org.eclipse.xtext.common.types.JvmVisibility
 import org.eclipse.xtext.naming.IQualifiedNameProvider
+import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
-import org.eclipse.xtext.common.types.JvmVisibility
-import edelta.edelta.EdeltaEcoreCreateEClassExpression
-import edelta.compiler.EdeltaCompilerUtil
-import org.eclipse.emf.ecore.EClass
-import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
-import org.eclipse.emf.ecore.EAttribute
-import org.eclipse.xtext.xbase.XExpression
-import org.eclipse.emf.ecore.ENamedElement
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -112,7 +112,7 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 					body = program.main
 				]
 				main.expressions.
-					filter(EdeltaEcoreCreateEClassExpression).
+					filter(EdeltaEcoreBaseEClassManipulationWithBlockExpression).
 					filter[body !== null].
 					forEach[
 						e |

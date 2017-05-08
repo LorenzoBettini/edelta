@@ -96,7 +96,7 @@ createList(
 		'''.parseWithTestEcore.
 		main.expressions => [
 			'''
-createList(this::_changeEClass__in_foo)
+createList(this::_changeEClass_FooClass_in_foo)
 			'''.toString.trim.
 				assertEquals(
 					head.
@@ -118,7 +118,7 @@ createList(this::_changeEClass__in_foo)
 			'''
 createList(
     c -> c.setName("Renamed"),
-    this::_changeEClass_Renamed_in_foo
+    this::_changeEClass_FooClass_in_foo
   )
 			'''.toString.trim.
 				assertEquals(
@@ -330,6 +330,14 @@ createList(this::_createEAttribute_attr_in_createEClass_MyDerivedNewClass_in_foo
 				(EcoreFactory.eINSTANCE.createEEnumLiteral).EEnumNameOrNull
 			)
 		]
+	}
+
+	@Test
+	def void testNameOrNull() {
+		assertNull(getNameOrNull(null))
+		assertEquals("Test", getNameOrNull(
+			EcoreFactory.eINSTANCE.createEClass => [ name = "Test" ]
+		))
 	}
 
 	@Test

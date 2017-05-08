@@ -685,7 +685,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
-			import org.eclipse.emf.ecore.EAttribute;
 			import org.eclipse.emf.ecore.EClass;
 			
 			@SuppressWarnings("all")
@@ -705,32 +704,16 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  @Override
 			  protected void doExecute() throws Exception {
-			    createEClass("foo", "NewClass", createList(this::_createEClass_NewClass_in_foo));
-			    getEAttribute("foo", "NewClass", "newAttribute");
+			    changeEClass("foo", "FooClass", 
+			      createList(
+			        c -> c.setName("RenamedClass"),
+			        this::_changeEClass_FooClass_in_foo
+			      )
+			    );
+			    getEClass("foo", "RenamedClass");
 			  }
 			  
-			  public void _createEClass_NewClass_in_foo(final EClass it) {
-			    {
-			      createEAttribute(it, "newAttribute", 
-			        createList(
-			          a -> a.setEType(getEDataType("foo", "FooDataType")),
-			          this::_createEAttribute_newAttribute_in_createEClass_NewClass_in_foo
-			        )
-			      );
-			      createEAttribute(it, "newAttribute2", 
-			        createList(
-			          a -> a.setEType(getEDataType("foo", "FooDataType")),
-			          this::_createEAttribute_newAttribute2_in_createEClass_NewClass_in_foo
-			        )
-			      );
-			    }
-			  }
-			  
-			  public void _createEAttribute_newAttribute_in_createEClass_NewClass_in_foo(final EAttribute it) {
-			    it.setName("changed");
-			  }
-			  
-			  public void _createEAttribute_newAttribute2_in_createEClass_NewClass_in_foo(final EAttribute it) {
+			  public void _changeEClass_FooClass_in_foo(final EClass it) {
 			  }
 			}
 			'''

@@ -1,6 +1,7 @@
 package edelta.compiler
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaEcoreChangeEClassExpression
 import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreReferenceExpression
@@ -17,6 +18,11 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 			EdeltaEcoreCreateEClassExpression: {
 				compileAsStatementIfNotReferenced(appendable, isReferenced) [
 					compileEdeltaCreateEClassExpression(obj, appendable)
+				]
+			}
+			EdeltaEcoreChangeEClassExpression: {
+				compileAsStatementIfNotReferenced(appendable, isReferenced) [
+					compileEdeltaChangeEClassExpression(obj, appendable)
 				]
 			}
 			EdeltaEcoreCreateEAttributeExpression: {
@@ -54,6 +60,18 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 			getEPackageNameOrNull(obj.epackage) +
 			'", "' +
 			obj.name +
+			'", ' +
+			obj.consumerArguments +
+			')'
+		)
+	}
+
+	private def void compileEdeltaChangeEClassExpression(EdeltaEcoreChangeEClassExpression obj, ITreeAppendable appendable) {
+		appendable.append(
+			'changeEClass("' +
+			getEPackageNameOrNull(obj.epackage) +
+			'", "' +
+			obj.original.nameOrNull +
 			'", ' +
 			obj.consumerArguments +
 			')'
