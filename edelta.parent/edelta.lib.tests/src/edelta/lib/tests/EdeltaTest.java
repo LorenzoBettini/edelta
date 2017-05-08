@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
 /**
@@ -86,6 +87,12 @@ public class EdeltaTest {
 		public void fooConsumer(EClass e) {
 			
 		}
+	}
+
+	{
+		new EdeltaEcoreUtil() {
+			// just to have code coverage of protected constructor
+		};
 	}
 
 	protected TestableEdelta edelta;

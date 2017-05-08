@@ -16,6 +16,10 @@ import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
  */
 public class EdeltaEcoreUtil {
 
+	protected EdeltaEcoreUtil() {
+		// empty constructor never to be called
+	}
+
 	public static void removeEClassifier(EClassifier eClassifier) {
 		EcoreUtil.delete(eClassifier, true);
 	}
