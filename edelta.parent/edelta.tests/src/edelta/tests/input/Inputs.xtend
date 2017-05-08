@@ -223,7 +223,10 @@ class Inputs {
 		'''
 			metamodel "foo"
 			
-			changeEClass foo.FooClass newName RenamedClass {}
+			changeEClass foo.FooClass newName RenamedClass {
+				createEAttribute anotherAttr type FooDataType {
+				}
+			}
 			ecoreref(RenamedClass)
 		'''
 	}

@@ -15,6 +15,7 @@ import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
 import org.eclipse.emf.ecore.ENamedElement
+import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
 
 /**
  * Utilities for Edelta compiler
@@ -37,7 +38,7 @@ class EdeltaCompilerUtil {
 	}
 
 	def dispatch String methodName(EdeltaEcoreCreateEAttributeExpression e) {
-		'''_createEAttribute_«e.name»_in«e.getContainerOfType(EdeltaEcoreCreateEClassExpression).methodName»'''
+		'''_createEAttribute_«e.name»_in«e.getContainerOfType(EdeltaEcoreBaseEClassManipulationWithBlockExpression).methodName»'''
 	}
 
 	def consumerArguments(EdeltaEcoreCreateEClassExpression e) {
