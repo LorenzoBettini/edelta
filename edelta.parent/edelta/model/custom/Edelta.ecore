@@ -42,7 +42,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="ecoreReferenceSuperTypes"
         upperBound="-1" eType="#//EdeltaEcoreReference" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="EdeltaEcoreChangeEClassExpression" eSuperTypes="#//EdeltaEcoreBaseManipulationWithBlockExpression">
+  <eClassifiers xsi:type="ecore:EClass" name="EdeltaEcoreChangeEClassExpression" eSuperTypes="#//EdeltaEcoreBaseEClassManipulationWithBlockExpression">
     <eStructuralFeatures xsi:type="ecore:EReference" name="original" eType="#//EdeltaEcoreReference"
         containment="true"/>
   </eClassifiers>
