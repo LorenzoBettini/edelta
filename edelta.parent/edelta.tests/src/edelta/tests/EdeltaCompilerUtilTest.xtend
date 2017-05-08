@@ -87,6 +87,49 @@ createList(
 	}
 
 	@Test
+	def void testConsumerArgumentForChaneEClassWithNoChange() {
+		'''
+			metamodel "foo"
+			
+			changeEClass foo.FooClass {
+			}
+		'''.parseWithTestEcore.
+		main.expressions => [
+			'''
+createList(this::_changeEClass_FooClass_in_foo)
+			'''.toString.trim.
+				assertEquals(
+					head.
+						changeEClassExpression.
+						consumerArguments.trim
+				)
+		]
+	}
+
+	@Test
+	def void testConsumerArgumentForChaneEClassWithNewName() {
+		'''
+			metamodel "foo"
+			
+			changeEClass foo.FooClass newName Renamed {
+			}
+		'''.parseWithTestEcore.
+		main.expressions => [
+			'''
+createList(
+    c -> c.setName("Renamed"),
+    this::_changeEClass_FooClass_in_foo
+  )
+			'''.toString.trim.
+				assertEquals(
+					head.
+						changeEClassExpression.
+						consumerArguments.trim
+				)
+		]
+	}
+
+	@Test
 	def void testMethodNameForCreatedEAttribute() {
 		val program = '''
 		package test
@@ -287,6 +330,14 @@ createList(this::_createEAttribute_attr_in_createEClass_MyDerivedNewClass_in_foo
 				(EcoreFactory.eINSTANCE.createEEnumLiteral).EEnumNameOrNull
 			)
 		]
+	}
+
+	@Test
+	def void testNameOrNull() {
+		assertNull(getNameOrNull(null))
+		assertEquals("Test", getNameOrNull(
+			EcoreFactory.eINSTANCE.createEClass => [ name = "Test" ]
+		))
 	}
 
 	@Test

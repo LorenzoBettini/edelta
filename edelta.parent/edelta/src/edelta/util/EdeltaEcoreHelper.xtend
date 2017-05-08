@@ -53,6 +53,10 @@ class EdeltaEcoreHelper {
 		EcoreUtil2.getAllContentsOfType(e, ENamedElement)
 	}
 
+	def getAllEClasses(EPackage e) {
+		e.EClassifiers.filter(EClass)
+	}
+
 	def dispatch Iterable<? extends ENamedElement> getENamedElements(ENamedElement e, EObject context) {
 		Collections.emptyList
 	}

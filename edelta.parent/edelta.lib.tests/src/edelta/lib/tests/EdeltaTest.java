@@ -7,22 +7,32 @@ import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
 import static edelta.testutils.EdeltaTestUtils.compareFileContents;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
 
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.WrappedException;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.EGenericType;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.EcoreFactory;
+import org.eclipse.emf.ecore.impl.BasicEObjectImpl;
+import org.eclipse.emf.ecore.impl.EGenericTypeImpl;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.Before;
 import org.junit.Test;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
 /**
@@ -40,6 +50,8 @@ public class EdeltaTest {
 	private static final String EXPECTATIONS = "expectations";
 	private static final String MY2_ECORE = "My2.ecore";
 	private static final String MY_ECORE = "My.ecore";
+	private static final String TEST_ECORE_FOR_REFERENCES = "TestEcoreForReferences.ecore";
+	private static final String TEST_PACKAGE_FOR_REFERENCES = "testecoreforreferences";
 	private static final String TESTECORES = "testecores/";
 
 	protected static final class TestableEdelta extends AbstractEdelta {
@@ -75,6 +87,12 @@ public class EdeltaTest {
 		public void fooConsumer(EClass e) {
 			
 		}
+	}
+
+	{
+		new EdeltaEcoreUtil() {
+			// just to have code coverage of protected constructor
+		};
 	}
 
 	protected TestableEdelta edelta;
@@ -323,6 +341,33 @@ public class EdeltaTest {
 	}
 
 	@Test
+	public void testChangeEClass() throws IOException {
+		loadTestEcore(MY_ECORE);
+		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
+		assertNotNull(ePackage.getEClassifier(MY_CLASS));
+		EClass cl = edelta.changeEClass(MYPACKAGE, MY_CLASS, null);
+		assertSame(cl, ePackage.getEClassifier(MY_CLASS));
+	}
+
+	@Test
+	public void testChangeEClassLaterInitialization() throws IOException {
+		loadTestEcore(MY_ECORE);
+		// refers to an EClass that is created later
+		EClass cl1 = edelta.changeEClass(MYPACKAGE, MY_CLASS,
+			edelta.createList(
+				c -> c.getESuperTypes().add(edelta.getEClass(MYPACKAGE, "NewClass2")),
+				c -> c.getESuperTypes().add(edelta.getEClass(MYPACKAGE, "NewClass3"))
+			)
+		);
+		EClass newClass2 = edelta.createEClass(MYPACKAGE, "NewClass2",
+			edelta.createList(edelta::fooConsumer));
+		EClass newClass3 = edelta.createEClass(MYPACKAGE, "NewClass3", null);
+		edelta.runInitializers();
+		assertSame(newClass2, cl1.getESuperTypes().get(0));
+		assertSame(newClass3, cl1.getESuperTypes().get(1));
+	}
+
+	@Test
 	public void testCreateEAttribute() throws IOException {
 		loadTestEcore(MY_ECORE);
 		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
@@ -363,6 +408,102 @@ public class EdeltaTest {
 		edelta.removeEClassifier(MYPACKAGE, "MyBaseClass");
 		// check that MyDerivedClass is not its subclass anymore
 		assertEquals(0, edelta.getEClass(MYPACKAGE, "MyDerivedClass").getESuperTypes().size());
+	}
+
+	@Test
+	public void testRenameEClassifier() throws IOException {
+		loadTestEcore(MY_ECORE);
+		// check that the superclass is set
+		assertSame(
+			edelta.getEClassifier(MYPACKAGE, "MyBaseClass"),
+			edelta.getEClass(MYPACKAGE, "MyDerivedClass").getESuperTypes().get(0));
+		// modify the ecore model by renaming MyBaseClass
+		edelta.getEClassifier(MYPACKAGE, "MyBaseClass").setName("RENAMED");
+		// check that MyDerivedClass has the renamed superclass
+		assertEquals("RENAMED", edelta.getEClass(MYPACKAGE, "MyDerivedClass").getESuperTypes().get(0).getName());
+	}
+
+	@Test
+	public void testSaveModifiedEcoresAfterRenamingBaseClass() throws IOException {
+		loadTestEcore(MY_ECORE);
+		// modify the ecore model by renaming MyBaseClass
+		// this will also renaming existing references, so the model
+		// is still valid
+		edelta.getEClassifier(MYPACKAGE, "MyBaseClass").setName("RENAMED");
+		wipeModifiedDirectoryContents();
+		edelta.saveModifiedEcores(MODIFIED);
+		compareFileContents(
+				EXPECTATIONS+"/"+
+					"testSaveModifiedEcoresAfterRenamingBaseClass"+"/"+
+						MY_ECORE,
+				MODIFIED+"/"+MY_ECORE);
+	}
+
+	@Test
+	public void testCopyEClassifier() throws IOException {
+		loadTestEcore(MY_ECORE);
+		// modify the ecore model by copying MyBaseClass
+		EClass original = edelta.getEClass(MYPACKAGE, "MyDerivedClass");
+		EClass copy = (EClass) edelta.copyEClassifier(MYPACKAGE, "MyDerivedClass");
+		// check that the copy has the same attributes as the original one (in turn, copied)
+		EList<EStructuralFeature> originalFeatures = original.getEAllStructuralFeatures();
+		EList<EStructuralFeature> copiedFeatures = copy.getEAllStructuralFeatures();
+		assertEquals(originalFeatures.size(), copiedFeatures.size());
+		assertSame(original.getESuperTypes().get(0), copy.getESuperTypes().get(0));
+		// inherited features are references so they're not copied
+		assertSame(originalFeatures.get(0), copiedFeatures.get(0));
+		assertSame(originalFeatures.get(1), copiedFeatures.get(1));
+		// declared features are instead copied
+		assertNotSame(originalFeatures.get(2), copiedFeatures.get(2));
+		assertNotSame(originalFeatures.get(3), copiedFeatures.get(3));
+		assertEquals(originalFeatures.get(2).getName(), copiedFeatures.get(2).getName());
+		assertEquals(originalFeatures.get(3).getName(), copiedFeatures.get(3).getName());
+	}
+
+	@Test
+	public void testCopyEClassifierDoesNotResolveProxies() throws IOException {
+		// We use EGenericType for playing with references and proxies, since using
+		// EClass.superTypes for that does not seem to be easy...
+		loadTestEcore(TEST_ECORE_FOR_REFERENCES);
+		// modify the ecore model by copying MyBaseClass
+		EClass original = edelta.getEClass(TEST_PACKAGE_FOR_REFERENCES, "MyClass");
+		EClass referred = edelta.getEClass(TEST_PACKAGE_FOR_REFERENCES, "MyReferredType");
+		EGenericType genericType = original.getETypeParameters().get(0).getEBounds().get(0);
+		EClassifier eClassifier = genericType.getEClassifier();
+		assertNull(eClassifier);
+		// explicitly set proxy for the reference EGenericType.eClassifier
+		eClassifier = EcoreFactory.eINSTANCE.createEClass();
+		((BasicEObjectImpl) eClassifier).eSetProxyURI(EcoreUtil.getURI(referred));
+		assertTrue(eClassifier.eIsProxy());
+		genericType.setEClassifier(eClassifier);
+		// perform copy and make sure proxy resolution is not triggered during the copy
+		EClass copy = (EClass) edelta.copyEClassifier(TEST_PACKAGE_FOR_REFERENCES, "MyClass");
+		EGenericType genericTypeCopied = copy.getETypeParameters().get(0).getEBounds().get(0);
+		// use basicGet, otherwise we trigger resolution of proxies
+		eClassifier = ((EGenericTypeImpl)genericTypeCopied).basicGetEClassifier();
+		assertTrue(eClassifier.eIsProxy());
+		// proxy resolution is not triggered in the original object either
+		eClassifier = ((EGenericTypeImpl)genericType).basicGetEClassifier();
+		assertTrue(eClassifier.eIsProxy());
+	}
+
+	@Test
+	public void testSaveModifiedEcoresAfterCopyingDerivedClass() throws IOException {
+		loadTestEcore(MY_ECORE);
+		// modify the ecore model by copying MyDerivedClass
+		// and then rename it to avoid having duplicates in the saved ecore
+		// which would not be valid
+		EClassifier copy = edelta.copyEClassifier(MYPACKAGE, "MyDerivedClass");
+		copy.setName("COPIED");
+		EPackage p = edelta.getEPackage(MYPACKAGE);
+		p.getEClassifiers().add(copy);
+		wipeModifiedDirectoryContents();
+		edelta.saveModifiedEcores(MODIFIED);
+		compareFileContents(
+				EXPECTATIONS+"/"+
+					"testSaveModifiedEcoresAfterCopyingDerivedClass"+"/"+
+						MY_ECORE,
+				MODIFIED+"/"+MY_ECORE);
 	}
 
 	private void wipeModifiedDirectoryContents() {

@@ -29,4 +29,15 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testGetChangeEClass() {
+		'''
+			metamodel "foo"
+			
+			changeEClass foo.First
+		'''.parseWithTestEcore => [
+			assertSame(lastExpression, getChangeEClass(lastExpression))
+		]
+	}
+
 }

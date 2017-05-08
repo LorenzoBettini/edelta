@@ -180,6 +180,56 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testChangeEClass() {
+		'''
+		changeEClass foo.Bar
+		'''.parse.lastExpression.changeEClassExpression => [
+			assertNotNull(original)
+			assertNull(name)
+		]
+	}
+
+	@Test
+	def void testChangeEClassWithNoEPackage() {
+		'''
+		changeEClass .Bar
+		'''.parse.lastExpression.changeEClassExpression => [
+			assertNotNull(epackage) // the epackage is still present as proxy
+			assertNull(original) // the EClass reference is instead null
+		]
+	}
+
+	@Test
+	def void testChangeEClassWithNewName() {
+		'''
+		changeEClass foo.Bar newName bar
+		'''.parse.lastExpression.changeEClassExpression => [
+			assertNotNull(original)
+			assertNotNull(name)
+		]
+	}
+
+	@Test
+	def void testChangeEClassWithNewNameButNoOriginal() {
+		'''
+		changeEClass newName bar
+		'''.parse.lastExpression.changeEClassExpression => [
+			assertNull(original)
+			assertNull(name) // not recognized as newName
+		]
+	}
+
+	@Test
+	def void testChangeEClassWithNoOriginal() {
+		'''
+		changeEClass 
+		'''.parse.lastExpression.changeEClassExpression => [
+			assertNull(epackage)
+			assertNull(original)
+		]
+	}
+
 	def private getTextualRepresentation(EObject o) {
 		NodeModelUtils.getTokenText(NodeModelUtils.findActualNodeFor(o))
 	}

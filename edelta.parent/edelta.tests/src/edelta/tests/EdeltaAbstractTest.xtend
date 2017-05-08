@@ -5,6 +5,7 @@ package edelta.tests
 
 import com.google.inject.Inject
 import com.google.inject.Provider
+import edelta.edelta.EdeltaEcoreChangeEClassExpression
 import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreDirectReference
@@ -149,6 +150,10 @@ abstract class EdeltaAbstractTest {
 
 	def protected getCreateEClassExpression(XExpression e) {
 		e as EdeltaEcoreCreateEClassExpression
+	}
+
+	def protected getChangeEClassExpression(XExpression e) {
+		e as EdeltaEcoreChangeEClassExpression
 	}
 
 	def protected getCreateEAttributExpression(XExpression e) {

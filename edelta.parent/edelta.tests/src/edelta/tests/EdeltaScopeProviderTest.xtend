@@ -190,6 +190,112 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		// newAttributes are the ones created in the program
 	}
 
+	@Test
+	def void testScopeForReferenceToEPackageInChangeEClass() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {}
+			changeEClass foo.Test {}
+		'''
+		.parseWithTestEcore.lastExpression.
+			changeEClassExpression.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreBaseEClassManipulationWithBlockExpression_Epackage,
+			'''
+			foo
+			''')
+	}
+
+	@Test
+	def void testScopeForReferenceToEClassInChangeEClass() {
+		'''
+			metamodel "foo"
+			metamodel "bar"
+			
+			createEClass NewClass in foo {}
+			changeEClass foo.Test {}
+		'''
+		.parseWithTestEcore.lastExpression.
+			changeEClassExpression.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreChangeEClassExpression_Original,
+			'''
+			FooClass
+			''')
+		// created EClass are not in the scope for changeEClass
+	}
+
+	@Test
+	def void testScopeForReferenceToChangedEClassWithTheSameNameAsAnExistingEClass() {
+		// our changed EClass with the same name as an existing one must be
+		// the one that is actually linked
+		val prog = referenceToChangedEClassWithTheSameNameAsAnExistingEClass.
+			parseWithTestEcore
+		val expressions = prog.main.expressions
+		val eclassExp = expressions.last as EdeltaEcoreReferenceExpression
+		assertSame(
+			// the one created by the derived state computer
+			prog.derivedStateLastEClass,
+			eclassExp.reference.enamedelement
+		)
+	}
+
+	@Test
+	def void testScopeForReferenceToChangedEClassWithNewName() {
+		// our changed EClass with the new name must be
+		// the one that is actually linked
+		val prog = referenceToChangedEClassWithANewName.
+			parseWithTestEcore
+		val expressions = prog.main.expressions
+		val eclassExp = expressions.last as EdeltaEcoreReferenceExpression
+		assertSame(
+			// the one created by the derived state computer
+			prog.derivedStateLastEClass,
+			eclassExp.reference.enamedelement
+		)
+	}
+
+	@Test
+	def void testScopeForReferenceToChangedEClassWithNewName2() {
+		// our changed EClass with the same name as an existing one must be
+		// the one that is actually linked
+		referenceToChangedEClassWithANewName.
+			parseWithTestEcore.lastExpression.
+			edeltaEcoreReferenceExpression.reference.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			RenamedClass
+			myAttribute
+			myReference
+			FooClass
+			myAttribute
+			myReference
+			FooDataType
+			FooEnum
+			FooEnumLiteral
+			foo
+			''')
+			// RenamedClass and FooClass (the original referred) are both returned
+			// by the scope provider
+	}
+
+	@Test
+	def void testScopeForEnamedElementInEcoreReferenceExpressionReferringToRenamedEClass() {
+		'''
+		metamodel "foo"
+		metamodel "bar"
+		changeEClass foo.FooClass newName RenamedClass {}
+		ecoreref foo.RenamedClass.
+		'''.parseWithTestEcore.lastExpression.
+			edeltaEcoreReferenceExpression.reference.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			myAttribute
+			myReference
+			''')
+		// we renamed FooClass, but its attributes are still visible through
+		// the renamed class
+	}
+
 	def private assertScope(EObject context, EReference reference, CharSequence expected) {
 		expected.toString.assertEqualsStrings(
 			context.getScope(reference).

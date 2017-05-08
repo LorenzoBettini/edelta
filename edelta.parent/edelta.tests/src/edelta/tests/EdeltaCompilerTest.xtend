@@ -571,6 +571,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="foo" nsURI="http://foo" nsPrefix="foo">
 			  <eClassifiers xsi:type="ecore:EClass" name="FooClass"/>
+			  <eClassifiers xsi:type="ecore:EClass" name="FooDerivedClass" eSuperTypes="#//FooClass"/>
 			  <eClassifiers xsi:type="ecore:EClass" name="BaseClass"/>
 			  <eClassifiers xsi:type="ecore:EClass" name="MyNewClass" eSuperTypes="#//FooClass #//BaseClass"/>
 			</ecore:EPackage>
@@ -671,10 +672,69 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="foo" nsURI="http://foo" nsPrefix="foo">
 			  <eClassifiers xsi:type="ecore:EClass" name="FooClass"/>
+			  <eClassifiers xsi:type="ecore:EClass" name="FooDerivedClass" eSuperTypes="#//FooClass"/>
 			  <eClassifiers xsi:type="ecore:EClass" name="ANewClass"/>
 			</ecore:EPackage>
 			''',
 			true
+		)
+	}
+
+	@Test
+	def void testReferenceToChangedEClassRenamed() {
+		referenceToChangedEClassWithANewName.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import org.eclipse.emf.ecore.EClass;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  public MyFile0() {
+			    
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    changeEClass("foo", "FooClass", 
+			      createList(
+			        c -> c.setName("RenamedClass"),
+			        this::_changeEClass_FooClass_in_foo
+			      )
+			    );
+			    getEClass("foo", "RenamedClass");
+			  }
+			  
+			  public void _changeEClass_FooClass_in_foo(final EClass it) {
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
+	def void testExecutionChangeEClassWithNewName() {
+		referenceToChangedEClassWithANewName.checkCompiledCodeExecution(
+			'''
+			<?xml version="1.0" encoding="UTF-8"?>
+			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="foo" nsURI="http://foo" nsPrefix="foo">
+			  <eClassifiers xsi:type="ecore:EClass" name="RenamedClass"/>
+			  <eClassifiers xsi:type="ecore:EClass" name="FooDerivedClass" eSuperTypes="#//RenamedClass"/>
+			</ecore:EPackage>
+			''',
+			false // otherwise we get Cyclic linking detected
+			// though standard validation works...
 		)
 	}
 

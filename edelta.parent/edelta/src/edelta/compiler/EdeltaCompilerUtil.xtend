@@ -1,6 +1,7 @@
 package edelta.compiler
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaEcoreChangeEClassExpression
 import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreReference
@@ -13,6 +14,7 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
+import org.eclipse.emf.ecore.ENamedElement
 
 /**
  * Utilities for Edelta compiler
@@ -27,7 +29,11 @@ class EdeltaCompilerUtil {
 	}
 
 	def dispatch String methodName(EdeltaEcoreCreateEClassExpression e) {
-		'''_createEClass_«e.name»_in_«e.epackage?.name»'''
+		'''_createEClass_«e.name»_in_«e.epackage.EPackageNameOrNull»'''
+	}
+
+	def dispatch String methodName(EdeltaEcoreChangeEClassExpression e) {
+		'''_changeEClass_«e.original.nameOrNull»_in_«e.epackage.EPackageNameOrNull»'''
 	}
 
 	def dispatch String methodName(EdeltaEcoreCreateEAttributeExpression e) {
@@ -45,6 +51,19 @@ class EdeltaCompilerUtil {
 			      c.getESuperTypes().add(«ref.stringForEcoreReference»);
 			      «ENDFOR»
 			    },
+			    this::«e.methodName»
+			  )
+			'''
+		}
+		return "createList(this::" + e.methodName + ")"
+	}
+
+	def consumerArguments(EdeltaEcoreChangeEClassExpression e) {
+		if (e.name !== null) {
+			return '''
+			
+			  createList(
+			    c -> c.setName("«e.name»"),
 			    this::«e.methodName»
 			  )
 			'''
@@ -76,6 +95,10 @@ class EdeltaCompilerUtil {
 
 	def String getEClassNameOrNull(EStructuralFeature eFeature) {
 		eFeature.EContainingClass?.name
+	}
+
+	def String getNameOrNull(ENamedElement e) {
+		e?.name
 	}
 
 	def String getEEnumNameOrNull(EEnumLiteral literal) {

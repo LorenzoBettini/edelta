@@ -24,7 +24,6 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.xbase.lib.Extension;
 
 import com.google.common.collect.ImmutableList;
@@ -235,6 +234,13 @@ public abstract class AbstractEdelta {
 		return newEClass;
 	}
 
+	public EClass changeEClass(String packageName, String name, final List<Consumer<EClass>> initializers) {
+		final EClass changedEClass = getEClass(packageName, name);
+		if (initializers != null)
+			initializers.forEach(i -> safeAddInitializer(eClassifierInitializers, changedEClass, i));
+		return changedEClass;
+	}
+
 	protected <E> List<E> createList(E e) {
 		return ImmutableList.of(e);
 	}
@@ -258,6 +264,11 @@ public abstract class AbstractEdelta {
 	}
 
 	public void removeEClassifier(String packageName, String name) {
-		EcoreUtil.delete(getEClassifier(packageName, name), true);
+		EdeltaEcoreUtil.removeEClassifier(getEClassifier(packageName, name));
+	}
+
+	public EClassifier copyEClassifier(String packageName, String classifierName) {
+		EClassifier eClassifier = getEClassifier(packageName, classifierName);
+		return EdeltaEcoreUtil.copyEClassifier(eClassifier);
 	}
 }

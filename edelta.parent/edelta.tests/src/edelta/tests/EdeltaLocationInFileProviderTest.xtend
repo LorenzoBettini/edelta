@@ -29,7 +29,7 @@ class EdeltaLocationInFileProviderTest extends EdeltaAbstractTest {
 		createEClass First in foo
 		'''
 		val program = input.parseWithTestEcore
-		val e = program.lastExpression as EdeltaEcoreCreateEClassExpression
+		val e = program.lastExpression.createEClassExpression
 		val derived = program.getDerivedStateLastEClass
 		val originalTextRegion = getSignificantTextRegion(e)
 		val derivedTextRegion = getSignificantTextRegion(derived)
@@ -59,4 +59,21 @@ class EdeltaLocationInFileProviderTest extends EdeltaAbstractTest {
 		assertEquals(originalTextRegion, derivedTextRegion)
 	}
 
+	@Test
+	def void testDerivedEClassWithChangeEClass() {
+		val input = '''
+		package test
+		
+		metamodel "foo"
+		
+		changeEClass foo.First {}
+		'''
+		val program = input.parseWithTestEcore
+		val e = program.lastExpression.changeEClassExpression
+		val derived = program.getDerivedStateLastEClass
+		val originalTextRegion = getSignificantTextRegion(e)
+		val derivedTextRegion = getSignificantTextRegion(derived)
+		// the derived EClass is mapped to the change expression
+		assertEquals(originalTextRegion, derivedTextRegion)
+	}
 }

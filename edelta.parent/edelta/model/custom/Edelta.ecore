@@ -34,10 +34,16 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="body" eType="ecore:EClass ../../../org.eclipse.xtext.xbase/model/Xbase.ecore#//XBlockExpression"
         containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="EdeltaEcoreCreateEClassExpression" eSuperTypes="#//EdeltaEcoreBaseManipulationWithBlockExpression">
+  <eClassifiers xsi:type="ecore:EClass" name="EdeltaEcoreBaseEClassManipulationWithBlockExpression"
+      eSuperTypes="#//EdeltaEcoreBaseManipulationWithBlockExpression">
     <eStructuralFeatures xsi:type="ecore:EReference" name="epackage" eType="ecore:EClass ../../../org.eclipse.emf.ecore/model/Ecore.ecore#//EPackage"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EdeltaEcoreCreateEClassExpression" eSuperTypes="#//EdeltaEcoreBaseEClassManipulationWithBlockExpression">
     <eStructuralFeatures xsi:type="ecore:EReference" name="ecoreReferenceSuperTypes"
         upperBound="-1" eType="#//EdeltaEcoreReference" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EdeltaEcoreChangeEClassExpression" eSuperTypes="#//EdeltaEcoreBaseEClassManipulationWithBlockExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="original" eType="ecore:EClass ../../../org.eclipse.emf.ecore/model/Ecore.ecore#//EClass"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EdeltaEcoreManipulationBlockExpression"
       eSuperTypes="../../../org.eclipse.xtext.xbase/model/Xbase.ecore#//XBlockExpression"/>

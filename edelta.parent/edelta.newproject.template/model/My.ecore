@@ -8,4 +8,5 @@
     <eLiterals name="FirstEnumLiteral"/>
     <eLiterals name="SecondEnumLiteral" value="1"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MyOtherEClass"/>
 </ecore:EPackage>

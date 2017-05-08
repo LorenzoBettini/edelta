@@ -12,3 +12,7 @@ def createClass(String name) {
 ecoreref(MyExampleEClass) // from myexample ecore in model project
 ecoreref(MyEClass) // from myecore ecore in this project
 ecoreref(EAnnotation) // from EMF ecore
+
+//changeEClass myecore.MyEClass {
+//	
+//}
