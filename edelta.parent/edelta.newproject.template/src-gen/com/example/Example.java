@@ -89,6 +89,14 @@ public class Example extends AbstractEdelta {
         this::_createEClass_MyOtherNewClass_in_myecore
       )
     );
+    changeEClass("myecore", "MyOtherEClass", 
+      createList(
+        c -> c.setName("RenamedEClass"),
+        this::_changeEClass_MyOtherEClass_in_myecore
+      )
+    );
+    getEClass("myecore", "MyOtherEClass");
+    getEClass("myecore", "RenamedEClass");
   }
   
   public void _createEClass_MyNewClass_in_myecore(final EClass it) {
@@ -113,5 +121,8 @@ public class Example extends AbstractEdelta {
   
   public void _createEClass_MyOtherNewClass_in_myecore(final EClass it) {
     getEAttribute("myecore", "MyDerivedNewClass", "myNewAttribute");
+  }
+  
+  public void _changeEClass_MyOtherEClass_in_myecore(final EClass it) {
   }
 }

@@ -81,6 +81,17 @@ class EdeltaNewProjectWizardInitialContents {
 				// immediately available in the program
 				ecoreref(MyOtherNewClass.myNewAttribute)
 			}
+			
+			// You can change an existing EClass, e.g.,
+			// changing its name
+			changeEClass myecore.MyOtherEClass newName RenamedEClass {
+				
+			}
+			
+			// as usual, renamed EClass are available both with the old name
+			ecoreref(MyOtherEClass)
+			// and with the new one
+			ecoreref(RenamedEClass)
 			'''
 			)
 		fsa.generateFile(
@@ -96,6 +107,7 @@ class EdeltaNewProjectWizardInitialContents {
 			    <eLiterals name="FirstEnumLiteral"/>
 			    <eLiterals name="SecondEnumLiteral" value="1"/>
 			  </eClassifiers>
+			  <eClassifiers xsi:type="ecore:EClass" name="MyOtherEClass"/>
 			</ecore:EPackage>
 			'''
 			)
