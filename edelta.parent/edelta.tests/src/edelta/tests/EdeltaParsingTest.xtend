@@ -191,6 +191,16 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testChangeEClassWithNoEPackage() {
+		'''
+		changeEClass .Bar
+		'''.parse.lastExpression.changeEClassExpression => [
+			assertNotNull(epackage) // the epackage is still present as proxy
+			assertNull(original) // the EClass reference is instead null
+		]
+	}
+
+	@Test
 	def void testChangeEClassWithNewName() {
 		'''
 		changeEClass foo.Bar newName bar
