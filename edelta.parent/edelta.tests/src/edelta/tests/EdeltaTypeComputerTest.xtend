@@ -120,6 +120,11 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 		'''.assertTypeOfCreateEClassSuperType(EClass)
 	}
 
+	@Test
+	def void testTypeOfChangeEClassExpression() {
+		"changeEClass foo.Test {}".assertType(EClass)
+	}
+
 	def private assertType(CharSequence input, Class<?> expected) {
 		input.parseWithTestEcore.lastExpression => [
 			expected.canonicalName.assertEquals(
