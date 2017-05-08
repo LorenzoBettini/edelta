@@ -1,6 +1,7 @@
 package edelta.compiler
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaEcoreChangeEClassExpression
 import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreReference
@@ -30,6 +31,10 @@ class EdeltaCompilerUtil {
 		'''_createEClass_«e.name»_in_«e.epackage?.name»'''
 	}
 
+	def dispatch String methodName(EdeltaEcoreChangeEClassExpression e) {
+		'''_changeEClass_«e.name»_in_«e.epackage?.name»'''
+	}
+
 	def dispatch String methodName(EdeltaEcoreCreateEAttributeExpression e) {
 		'''_createEAttribute_«e.name»_in«e.getContainerOfType(EdeltaEcoreCreateEClassExpression).methodName»'''
 	}
@@ -45,6 +50,18 @@ class EdeltaCompilerUtil {
 			      c.getESuperTypes().add(«ref.stringForEcoreReference»);
 			      «ENDFOR»
 			    },
+			    this::«e.methodName»
+			  )
+			'''
+		}
+		return "createList(this::" + e.methodName + ")"
+	}
+
+	def consumerArguments(EdeltaEcoreChangeEClassExpression e) {
+		if (e.name !== null) {
+			return '''
+			  createList(
+			    c -> c.setName(«e.name»),
 			    this::«e.methodName»
 			  )
 			'''
