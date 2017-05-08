@@ -7,6 +7,7 @@ import edelta.edelta.EdeltaEcoreChangeEClassExpression
 import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreReference
+import edelta.lib.EdeltaEcoreUtil
 import edelta.lib.EdeltaLibrary
 import java.util.List
 import java.util.Map
@@ -23,7 +24,6 @@ import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader.GenericUnloader
 import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator
-import edelta.lib.EdeltaEcoreUtil
 
 @Singleton
 class EdeltaDerivedStateComputer extends JvmModelAssociator {
@@ -102,7 +102,9 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 			// now that all derived EPackages are created let's start processing
 			// changes to EClasses
 			for (exp : changeEClassExpressions) {
-				addToDerivedEPackage(EdeltaEcoreUtil.copyEClassifier(exp.original), nameToEPackageMap, exp.epackage)
+				val derivedEClass = EdeltaEcoreUtil.copyEClassifier(exp.original)
+				addToDerivedEPackage(derivedEClass, nameToEPackageMap, exp.epackage)
+				targetToSourceMap.put(derivedEClass, exp)
 			}
 		}
 	}

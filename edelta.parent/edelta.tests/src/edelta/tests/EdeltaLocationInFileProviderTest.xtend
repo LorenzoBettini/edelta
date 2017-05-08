@@ -73,8 +73,7 @@ class EdeltaLocationInFileProviderTest extends EdeltaAbstractTest {
 		val derived = program.getDerivedStateLastEClass
 		val originalTextRegion = getSignificantTextRegion(e)
 		val derivedTextRegion = getSignificantTextRegion(derived)
-		// the derived EClass is not mapped to the change expression
-		// since we don't specify a new name
-		assertNotEquals(originalTextRegion, derivedTextRegion)
+		// the derived EClass is mapped to the change expression
+		assertEquals(originalTextRegion, derivedTextRegion)
 	}
 }
