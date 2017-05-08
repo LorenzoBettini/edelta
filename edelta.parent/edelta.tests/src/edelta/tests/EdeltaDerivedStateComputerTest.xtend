@@ -389,4 +389,19 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		// we don't refer to any existing class
 	}
 
+	@Test
+	def void testDerivedEClassesWithChangeEClassWithNewName() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		
+		changeEClass foo.FooClass newName Renamed {}
+		'''.
+		parseWithTestEcore
+		val derivedEClass = program.getDerivedStateLastEClass
+		assertEquals("Renamed", derivedEClass.name)
+		val derivedEPackages = program.eResource.derivedEPackages
+		assertEquals(1, derivedEPackages.head.EClassifiers.size)
+	}
 }

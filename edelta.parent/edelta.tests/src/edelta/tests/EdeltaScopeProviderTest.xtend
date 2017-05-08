@@ -239,6 +239,45 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		)
 	}
 
+	@Test
+	def void testScopeForReferenceToChangedEClassWithNewName() {
+		// our changed EClass with the new name must be
+		// the one that is actually linked
+		val prog = referenceToChangedEClassWithANewName.
+			parseWithTestEcore
+		val expressions = prog.main.expressions
+		val eclassExp = expressions.last as EdeltaEcoreReferenceExpression
+		assertSame(
+			// the one created by the derived state computer
+			prog.derivedStateLastEClass,
+			eclassExp.reference.enamedelement
+		)
+	}
+
+	@Test
+	def void testScopeForReferenceToChangedEClassWithNewName2() {
+		// our changed EClass with the same name as an existing one must be
+		// the one that is actually linked
+		referenceToChangedEClassWithANewName.
+			parseWithTestEcore.lastExpression.
+			edeltaEcoreReferenceExpression.reference.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			RenamedClass
+			myAttribute
+			myReference
+			FooClass
+			myAttribute
+			myReference
+			FooDataType
+			FooEnum
+			FooEnumLiteral
+			foo
+			''')
+			// RenamedClass and FooClass (the original referred) are both returned
+			// by the scope provider
+	}
+
 	def private assertScope(EObject context, EReference reference, CharSequence expected) {
 		expected.toString.assertEqualsStrings(
 			context.getScope(reference).

@@ -36,6 +36,8 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 
 	@Inject GenericUnloader unloader
 
+	@Inject EdeltaChangeRunner changeRunner
+
 	public static class EdeltaDerivedStateAdapter extends AdapterImpl {
 		var Map<EObject, EObject> targetToSourceMap = newHashMap()
 		var Map<String, EPackage> nameToEPackageMap = newHashMap()
@@ -105,6 +107,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 				val derivedEClass = EdeltaEcoreUtil.copyEClassifier(exp.original)
 				addToDerivedEPackage(derivedEClass, nameToEPackageMap, exp.epackage)
 				targetToSourceMap.put(derivedEClass, exp)
+				changeRunner.performChanges(derivedEClass, exp)
 			}
 		}
 	}
