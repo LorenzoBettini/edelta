@@ -38,19 +38,6 @@ class EdeltaEcoreHelper {
 				prog.eResource.derivedEPackages.
 					getAllENamedElements
 			+
-				prog.getOriginalEcoresENamedElements
-			).toList
-		]
-	}
-
-	/**
-	 * This will not return the derived state computer elements, but only the
-	 * elements available in the referred ecores.
-	 */
-	def Iterable<? extends ENamedElement> getOriginalEcoresENamedElements(EObject context) {
-		cache.get("getOriginalEcoresENamedElements", context.eResource) [
-			val prog = getProgram(context)
-			(
 				prog.metamodels.getAllENamedElements
 			+
 				prog.metamodels
