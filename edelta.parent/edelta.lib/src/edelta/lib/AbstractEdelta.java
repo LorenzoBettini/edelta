@@ -234,6 +234,13 @@ public abstract class AbstractEdelta {
 		return newEClass;
 	}
 
+	public EClass changeEClass(String packageName, String name, final List<Consumer<EClass>> initializers) {
+		final EClass changedEClass = getEClass(packageName, name);
+		if (initializers != null)
+			initializers.forEach(i -> safeAddInitializer(eClassifierInitializers, changedEClass, i));
+		return changedEClass;
+	}
+
 	protected <E> List<E> createList(E e) {
 		return ImmutableList.of(e);
 	}

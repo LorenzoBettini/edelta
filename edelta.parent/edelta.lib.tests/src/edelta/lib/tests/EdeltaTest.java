@@ -341,6 +341,33 @@ public class EdeltaTest {
 	}
 
 	@Test
+	public void testChangeEClass() throws IOException {
+		loadTestEcore(MY_ECORE);
+		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
+		assertNotNull(ePackage.getEClassifier(MY_CLASS));
+		EClass cl = edelta.changeEClass(MYPACKAGE, MY_CLASS, null);
+		assertSame(cl, ePackage.getEClassifier(MY_CLASS));
+	}
+
+	@Test
+	public void testChangeEClassLaterInitialization() throws IOException {
+		loadTestEcore(MY_ECORE);
+		// refers to an EClass that is created later
+		EClass cl1 = edelta.changeEClass(MYPACKAGE, MY_CLASS,
+			edelta.createList(
+				c -> c.getESuperTypes().add(edelta.getEClass(MYPACKAGE, "NewClass2")),
+				c -> c.getESuperTypes().add(edelta.getEClass(MYPACKAGE, "NewClass3"))
+			)
+		);
+		EClass newClass2 = edelta.createEClass(MYPACKAGE, "NewClass2",
+			edelta.createList(edelta::fooConsumer));
+		EClass newClass3 = edelta.createEClass(MYPACKAGE, "NewClass3", null);
+		edelta.runInitializers();
+		assertSame(newClass2, cl1.getESuperTypes().get(0));
+		assertSame(newClass3, cl1.getESuperTypes().get(1));
+	}
+
+	@Test
 	public void testCreateEAttribute() throws IOException {
 		loadTestEcore(MY_ECORE);
 		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
