@@ -60,8 +60,9 @@ class EdeltaCompilerUtil {
 	def consumerArguments(EdeltaEcoreChangeEClassExpression e) {
 		if (e.name !== null) {
 			return '''
+			
 			  createList(
-			    c -> c.setName(«e.name»),
+			    c -> c.setName("«e.name»"),
 			    this::«e.methodName»
 			  )
 			'''

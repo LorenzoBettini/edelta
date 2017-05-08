@@ -117,9 +117,9 @@ createList(this::_changeEClass__in_foo)
 		main.expressions => [
 			'''
 createList(
-  c -> c.setName(Renamed),
-  this::_changeEClass_Renamed_in_foo
-)
+    c -> c.setName("Renamed"),
+    this::_changeEClass_Renamed_in_foo
+  )
 			'''.toString.trim.
 				assertEquals(
 					head.
