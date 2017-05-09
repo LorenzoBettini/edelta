@@ -58,4 +58,23 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 		// so the return type is inferred as Object
 		)
 	}
+
+	@Test
+	def void testOutlineWithCreateEClass() {
+		'''
+		createEClass A in foo {
+			createEAttribute attr type EString {
+			}
+		}
+		'''.assertAllLabels(
+		'''
+		test
+		  doExecute() : void
+		  null
+		    A
+		      attr
+		'''
+		// The package cannot be resolved, that's why it's shown as null
+		)
+	}
 }
