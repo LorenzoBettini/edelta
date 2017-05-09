@@ -3,13 +3,22 @@
  */
 package edelta.ui.outline
 
+import edelta.edelta.EdeltaMain
+import edelta.edelta.EdeltaOperation
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider
 
 /**
  * Customization of the default outline structure.
- *
+ * 
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#outline
  */
 class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 
+	def _isLeaf(EdeltaOperation m) {
+		true
+	}
+
+	def _isLeaf(EdeltaMain m) {
+		true
+	}
 }

@@ -4,8 +4,13 @@
 package edelta.ui.labeling
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaMain
+import edelta.edelta.EdeltaOperation
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider
+import org.eclipse.xtext.common.types.JvmOperation
 import org.eclipse.xtext.xbase.annotations.ui.labeling.XbaseWithAnnotationsLabelProvider
+import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 
 /**
  * Provides labels for EObjects.
@@ -14,18 +19,30 @@ import org.eclipse.xtext.xbase.annotations.ui.labeling.XbaseWithAnnotationsLabel
  */
 class EdeltaLabelProvider extends XbaseWithAnnotationsLabelProvider {
 
+	@Inject extension IJvmModelAssociations
+
 	@Inject
 	new(AdapterFactoryLabelProvider delegate) {
 		super(delegate);
 	}
 
-	// Labels and icons can be computed like this:
+	def text(EdeltaOperation m) {
+		text(m.inferredJavaMethod)
+	}
+
+	def image(EdeltaOperation m) {
+		imageDescriptor(m.inferredJavaMethod)
+	}
+
+	def text(EdeltaMain m) {
+		text(m.inferredJavaMethod)
+	}
 	
-//	def text(Greeting ele) {
-//		'A greeting to ' + ele.name
-//	}
-//
-//	def image(Greeting ele) {
-//		'Greeting.gif'
-//	}
+	def image(EdeltaMain m) {
+		imageDescriptor(m.inferredJavaMethod)
+	}
+
+	private def inferredJavaMethod(EObject e) {
+		e.jvmElements.filter(JvmOperation).head
+	}
 }
