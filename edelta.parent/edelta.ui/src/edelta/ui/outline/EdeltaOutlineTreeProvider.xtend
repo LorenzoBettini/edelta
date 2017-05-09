@@ -21,8 +21,6 @@ class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	@Inject extension EdeltaDerivedStateComputer
 
 	def protected void _createChildren(IOutlineNode parentNode, EdeltaProgram p) {
-		// this way the nodes will appear in the same order as
-		// specified in the program text
 		for (o : p.operations) {
 			createNode(parentNode, o)
 		}
