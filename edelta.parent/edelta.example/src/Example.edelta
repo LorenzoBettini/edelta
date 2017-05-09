@@ -16,3 +16,7 @@ ecoreref(EAnnotation) // from EMF ecore
 //changeEClass myecore.MyEClass {
 //	
 //}
+
+//createEClass Foo in myecore {
+//	
+//}
