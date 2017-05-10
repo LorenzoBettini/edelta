@@ -15,7 +15,6 @@ import org.eclipse.emf.common.notify.impl.AdapterImpl
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
-import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.Constants
@@ -135,7 +134,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 		val referredEPackageName = referredEPackage.name
 		var derivedEPackage = nameToEPackageMap.get(referredEPackageName)
 		if (derivedEPackage === null) {
-			derivedEPackage = EcoreFactory.eINSTANCE.createEPackage => [
+			derivedEPackage = new EdeltaDerivedStateEPackage => [
 				name = referredEPackageName
 			]
 			nameToEPackageMap.put(referredEPackageName, derivedEPackage)

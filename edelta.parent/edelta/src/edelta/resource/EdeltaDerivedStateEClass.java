@@ -28,7 +28,7 @@ public class EdeltaDerivedStateEClass extends EClassImpl {
 		super();
 		this.ecoreReferences = ecoreReferences;
 	}
-	
+
 	@Override
 	public EList<EClass> getESuperTypes() {
 		if (eSuperTypes == null) {
