@@ -51,16 +51,16 @@ class EdeltaEcoreHelper {
 	def private Iterable<ENamedElement> getAllENamedElements(EPackage e) {
 		val classifiers = e.EClassifiers
 		val inner = classifiers.map[
-				switch (it) {
-					// important: don't use EAllStructuralFeatures
-					// or we can get into
-					// Cyclic linking detected : EdeltaEcoreReference.enamedelement->EdeltaEcoreReference.enamedelement
-					// when we resolve ecore reference to supertypes
-					EClass: EStructuralFeatures
-					EEnum: ELiterals
-					default: <ENamedElement>emptyList
-				}
-			].flatten
+			switch (it) {
+				// important: don't use EAllStructuralFeatures
+				// or we can get into
+				// Cyclic linking detected : EdeltaEcoreReference.enamedelement->EdeltaEcoreReference.enamedelement
+				// when we resolve ecore reference to supertypes
+				EClass: EStructuralFeatures
+				EEnum: ELiterals
+				default: <ENamedElement>emptyList
+			}
+		].flatten
 		classifiers + inner
 	}
 
