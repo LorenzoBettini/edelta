@@ -60,10 +60,10 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
 			FooClass
-			myAttribute
-			myReference
 			FooDataType
 			FooEnum
+			myAttribute
+			myReference
 			FooEnumLiteral
 			foo
 			''')
@@ -78,10 +78,10 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
 			FooClass
-			myAttribute
-			myReference
 			FooDataType
 			FooEnum
+			myAttribute
+			myReference
 			FooEnumLiteral
 			foo
 			''')
@@ -97,15 +97,15 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
 			FooClass
-			myAttribute
-			myReference
 			FooDataType
 			FooEnum
-			FooEnumLiteral
-			BarClass
 			myAttribute
 			myReference
+			FooEnumLiteral
+			BarClass
 			BarDataType
+			myAttribute
+			myReference
 			foo
 			bar
 			''')
@@ -180,10 +180,10 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			newAttribute
 			newAttribute2
 			FooClass
-			myAttribute
-			myReference
 			FooDataType
 			FooEnum
+			myAttribute
+			myReference
 			FooEnumLiteral
 			foo
 			''')
@@ -267,10 +267,10 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			myAttribute
 			myReference
 			FooClass
-			myAttribute
-			myReference
 			FooDataType
 			FooEnum
+			myAttribute
+			myReference
 			FooEnumLiteral
 			foo
 			''')
