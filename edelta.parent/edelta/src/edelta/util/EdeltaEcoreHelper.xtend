@@ -11,7 +11,6 @@ import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
-import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.util.IResourceScopeCache
 
 /**
@@ -49,8 +48,20 @@ class EdeltaEcoreHelper {
 		e.map[getAllENamedElements].flatten
 	}
 
-	def private getAllENamedElements(EPackage e) {
-		EcoreUtil2.getAllContentsOfType(e, ENamedElement)
+	def private Iterable<ENamedElement> getAllENamedElements(EPackage e) {
+		val classifiers = e.EClassifiers
+		val inner = classifiers.map[
+			switch (it) {
+				// important: don't use EAllStructuralFeatures
+				// or we can get into
+				// Cyclic linking detected : EdeltaEcoreReference.enamedelement->EdeltaEcoreReference.enamedelement
+				// when we resolve ecore reference to supertypes
+				EClass: EStructuralFeatures
+				EEnum: ELiterals
+				default: <ENamedElement>emptyList
+			}
+		].flatten
+		classifiers + inner
 	}
 
 	def getAllEClasses(EPackage e) {
@@ -75,4 +86,5 @@ class EdeltaEcoreHelper {
 	def dispatch Iterable<? extends ENamedElement> getENamedElements(EEnum e, EObject context) {
 		e.ELiterals
 	}
+
 }

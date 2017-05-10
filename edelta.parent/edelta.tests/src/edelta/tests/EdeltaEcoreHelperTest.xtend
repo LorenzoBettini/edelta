@@ -23,15 +23,15 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			assertNamedElements(
 				'''
 				FooClass
-				myAttribute
-				myReference
 				FooDataType
 				FooEnum
-				FooEnumLiteral
-				BarClass
 				myAttribute
 				myReference
+				FooEnumLiteral
+				BarClass
 				BarDataType
+				myAttribute
+				myReference
 				foo
 				bar
 				'''
@@ -46,10 +46,10 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				'''
 				NewClass
 				FooClass
-				myAttribute
-				myReference
 				FooDataType
 				FooEnum
+				myAttribute
+				myReference
 				FooEnumLiteral
 				foo
 				'''

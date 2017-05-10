@@ -411,9 +411,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public void _createEClass_MyNewClass_in_foo(final EClass it) {
 			  }
 			}
-			''',
-			false // otherwise we get Cyclic linking detected
-			// though standard validation works...
+			'''
 		)
 	}
 
@@ -461,9 +459,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public void _createEClass_MyNewClass_in_foo(final EClass it) {
 			  }
 			}
-			''',
-			false // otherwise we get Cyclic linking detected
-			// though standard validation works...
+			'''
 		)
 	}
 
@@ -577,8 +573,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  <eClassifiers xsi:type="ecore:EClass" name="MyNewClass" eSuperTypes="#//FooClass #//BaseClass"/>
 			</ecore:EPackage>
 			''',
-			false // otherwise we get Cyclic linking detected
-			// though standard validation works...
+			true
 		)
 	}
 
@@ -748,8 +743,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  <eClassifiers xsi:type="ecore:EDataType" name="FooDataType" instanceClassName="java.lang.String"/>
 			</ecore:EPackage>
 			''',
-			false // otherwise we get Cyclic linking detected
-			// though standard validation works...
+			true
 		)
 	}
 
