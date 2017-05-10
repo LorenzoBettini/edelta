@@ -9,6 +9,7 @@ import edelta.compiler.EdeltaXbaseCompiler
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import edelta.resource.EdeltaDerivedStateComputer
 import edelta.resource.EdeltaLocationInFileProvider
+import edelta.resource.EdeltaResourceDescriptionStrategy
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -29,6 +30,10 @@ class EdeltaRuntimeModule extends AbstractEdeltaRuntimeModule {
 
 	override bindILocationInFileProvider() {
 		EdeltaLocationInFileProvider
+	}
+
+	override bindIDefaultResourceDescriptionStrategy() {
+		EdeltaResourceDescriptionStrategy
 	}
 
 	def Class<? extends XbaseCompiler> bindXbaseCompiler() {
