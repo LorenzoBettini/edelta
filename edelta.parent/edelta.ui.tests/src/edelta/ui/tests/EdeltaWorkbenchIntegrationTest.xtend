@@ -54,10 +54,7 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 		projectHelper.assertNoErrors
 		waitForBuild
 		projectHelper.assertNoErrors
-		val srcGenFolder = project.getFolder("src-gen/foo")
-		assertTrue("src-gen/foo does not exist", srcGenFolder.exists)
-		val genfile = srcGenFolder.getFile("Test.java")
-		assertTrue("Test.java does not exist", genfile.exists())
+		assertSrcGenFolderFile("foo", "Test.java")
 	}
 
 	@Test def void testInvalidProject() {
@@ -114,9 +111,15 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 		projectHelper.assertNoErrors
 		waitForBuild
 		projectHelper.assertNoErrors
-		val srcGenFolder = project.getFolder("src-gen/foo")
-		assertTrue("src-gen/foo does not exist", srcGenFolder.exists)
-		val genfile = srcGenFolder.getFile("Test.java")
-		assertTrue("Test.java does not exist", genfile.exists())
+		assertSrcGenFolderFile("foo", "Test.java")
+		assertSrcGenFolderFile("foo", "Test2.java")
+	}
+
+	def private assertSrcGenFolderFile(String expectedSubDir, String expectedFile) {
+		val expectedSrcGenFolderSubDir = "src-gen/" + expectedSubDir
+		val srcGenFolder = project.getFolder(expectedSrcGenFolderSubDir)
+		assertTrue(expectedSrcGenFolderSubDir + " does not exist", srcGenFolder.exists)
+		val genfile = srcGenFolder.getFile(expectedFile)
+		assertTrue(expectedFile + " does not exist", genfile.exists())
 	}
 }
