@@ -54,10 +54,7 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 		projectHelper.assertNoErrors
 		waitForBuild
 		projectHelper.assertNoErrors
-		val srcGenFolder = project.getFolder("src-gen/foo")
-		assertTrue("src-gen/foo does not exist", srcGenFolder.exists)
-		val genfile = srcGenFolder.getFile("Test.java")
-		assertTrue("Test.java does not exist", genfile.exists())
+		assertSrcGenFolderFile("foo", "Test.java")
 	}
 
 	@Test def void testInvalidProject() {
@@ -77,5 +74,52 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 		projectHelper.assertErrors(
 		'''Foo cannot be resolved.'''
 		)
+	}
+
+	@Test def void testDerivedStateEPackagesDontInterfereWithOtherEdeltaFiles() {
+		createFile(
+			TEST_PROJECT + "/src/Test.edelta",
+			'''
+			package foo
+			
+			metamodel "mypackage"
+			
+			createEClass NewClass in mypackage {
+				
+			}
+			'''
+		)
+		// we need to wait for build twice when we run all the UI tests
+		waitForBuild
+		projectHelper.assertNoErrors
+		waitForBuild
+		projectHelper.assertNoErrors
+		createFile(
+			TEST_PROJECT + "/src/Test2.edelta",
+			'''
+			package foo
+			
+			metamodel "mypackage"
+			
+			createEClass NewClass in mypackage {
+				
+			}
+			'''
+		)
+		// we need to wait for build twice when we run all the UI tests
+		waitForBuild
+		projectHelper.assertNoErrors
+		waitForBuild
+		projectHelper.assertNoErrors
+		assertSrcGenFolderFile("foo", "Test.java")
+		assertSrcGenFolderFile("foo", "Test2.java")
+	}
+
+	def private assertSrcGenFolderFile(String expectedSubDir, String expectedFile) {
+		val expectedSrcGenFolderSubDir = "src-gen/" + expectedSubDir
+		val srcGenFolder = project.getFolder(expectedSrcGenFolderSubDir)
+		assertTrue(expectedSrcGenFolderSubDir + " does not exist", srcGenFolder.exists)
+		val genfile = srcGenFolder.getFile(expectedFile)
+		assertTrue(expectedFile + " does not exist", genfile.exists())
 	}
 }
