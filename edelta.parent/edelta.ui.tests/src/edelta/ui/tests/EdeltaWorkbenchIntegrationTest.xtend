@@ -78,4 +78,45 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 		'''Foo cannot be resolved.'''
 		)
 	}
+
+	@Test def void testDerivedStateEPackagesDontInterfereWithOtherEdeltaFiles() {
+		createFile(
+			TEST_PROJECT + "/src/Test.edelta",
+			'''
+			package foo
+			
+			metamodel "mypackage"
+			
+			createEClass NewClass in mypackage {
+				
+			}
+			'''
+		)
+		// we need to wait for build twice when we run all the UI tests
+		waitForBuild
+		projectHelper.assertNoErrors
+		waitForBuild
+		projectHelper.assertNoErrors
+		createFile(
+			TEST_PROJECT + "/src/Test2.edelta",
+			'''
+			package foo
+			
+			metamodel "mypackage"
+			
+			createEClass NewClass in mypackage {
+				
+			}
+			'''
+		)
+		// we need to wait for build twice when we run all the UI tests
+		waitForBuild
+		projectHelper.assertNoErrors
+		waitForBuild
+		projectHelper.assertNoErrors
+		val srcGenFolder = project.getFolder("src-gen/foo")
+		assertTrue("src-gen/foo does not exist", srcGenFolder.exists)
+		val genfile = srcGenFolder.getFile("Test.java")
+		assertTrue("Test.java does not exist", genfile.exists())
+	}
 }
