@@ -27,9 +27,9 @@ class PluginProjectHelper {
 
 	@Inject PluginProjectFactory projectFactory
 
-	def IJavaProject createJavaPluginProject(String projectName, List<String> requiredBundles) {
+	def IJavaProject createJavaPluginProject(String projectName, List<String> requiredBundles, List<String> additionalSrcFolders) {
 		projectFactory.setProjectName(projectName);
-		projectFactory.addFolders(newArrayList("src"));
+		projectFactory.addFolders((#["src"]+additionalSrcFolders).toList);
 		projectFactory.addBuilderIds(JavaCore.BUILDER_ID, "org.eclipse.pde.ManifestBuilder",
 			"org.eclipse.pde.SchemaBuilder", XtextProjectHelper.BUILDER_ID);
 		projectFactory.addProjectNatures(
