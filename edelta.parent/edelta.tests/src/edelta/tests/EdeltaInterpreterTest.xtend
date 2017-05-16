@@ -26,12 +26,11 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			}
 		'''.parse
 		program.lastExpression.createEClassExpression => [
-			val result = interpreter.run(it)
-			println(result)
 			val derivedEClass = program.getDerivedStateLastEClass
+			val result = interpreter.run(it, derivedEClass)
+			println(result)
 			assertEquals("NewClass", derivedEClass.name)
-			// when this works this must be true
-			assertEquals(false, derivedEClass.abstract)
+			assertEquals(true, derivedEClass.abstract)
 		]
 	}
 
