@@ -1,6 +1,9 @@
 package edelta.tests.additional;
 
+import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.EcorePackage;
 
 import edelta.lib.AbstractEdelta;
 
@@ -25,5 +28,11 @@ public class MyCustomEdelta extends AbstractEdelta {
 
 	public void createANewEClass() {
 		createEClass("foo", "ANewClass", null);
+	}
+
+	public void createANewEAttribute(EClass c) {
+		createEAttribute(c, "aNewAttr", createList(
+			(EAttribute a) -> a.setEType(EcorePackage.eINSTANCE.getEString())
+		));
 	}
 }

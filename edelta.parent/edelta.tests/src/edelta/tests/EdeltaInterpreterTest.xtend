@@ -94,6 +94,27 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testCreateEClassAndCallOperationFromUseAs() {
+		'''
+			import edelta.tests.additional.MyCustomEdelta
+			
+			metamodel "foo"
+			
+			use MyCustomEdelta as my
+			
+			createEClass NewClass in foo {
+				my.createANewEAttribute(it)
+			}
+		'''.assertAfterInterpretationOfEdeltaCreateExpression [ derivedEClass |
+			assertEquals("NewClass", derivedEClass.name)
+			assertEquals(1, derivedEClass.EStructuralFeatures.size)
+			val attr = derivedEClass.EStructuralFeatures.head
+			assertEquals("newTestAttr", attr.name)
+			assertEquals("FooDataType", attr.EType.name)
+		]
+	}
+
 	def assertAfterInterpretationOfEdeltaCreateExpression(CharSequence input, (EClass)=>void testExecutor) {
 		val program = input.parseWithTestEcore
 		program.lastExpression.createEClassExpression => [
