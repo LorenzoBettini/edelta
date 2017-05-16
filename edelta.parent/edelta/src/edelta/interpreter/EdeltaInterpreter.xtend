@@ -55,7 +55,7 @@ class EdeltaInterpreter extends XbaseInterpreter {
 		}
 		val original = jvmField.sourceElements.head
 		if (original !== null) {
-			return original
+			return jvmField
 		}
 		return super.featureCallField(jvmField, receiver)
 	}
