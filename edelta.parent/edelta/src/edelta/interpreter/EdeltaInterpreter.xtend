@@ -1,21 +1,28 @@
 package edelta.interpreter
 
+import com.google.inject.Inject
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
+import edelta.edelta.EdeltaEcoreReference
+import edelta.edelta.EdeltaEcoreReferenceExpression
+import edelta.lib.EdeltaLibrary
+import java.util.List
 import org.eclipse.emf.ecore.EClass
+import org.eclipse.xtext.common.types.JvmField
+import org.eclipse.xtext.common.types.JvmGenericType
+import org.eclipse.xtext.common.types.JvmOperation
 import org.eclipse.xtext.naming.QualifiedName
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
-import org.eclipse.xtext.common.types.JvmGenericType
-import org.eclipse.xtext.common.types.JvmField
-import edelta.lib.EdeltaLibrary
-import edelta.edelta.EdeltaEcoreReferenceExpression
-import edelta.edelta.EdeltaEcoreReference
+import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
+import edelta.edelta.EdeltaOperation
 
 class EdeltaInterpreter extends XbaseInterpreter {
 
 	val lib = new EdeltaLibrary
+
+	@Inject extension IJvmModelAssociations
 
 	def run(EdeltaEcoreCreateEClassExpression e, EClass c, JvmGenericType javaType) {
 		evaluate(
@@ -47,6 +54,24 @@ class EdeltaInterpreter extends XbaseInterpreter {
 			}
 		}
 		return super.featureCallField(jvmField, receiver)
+	}
+
+	override protected invokeOperation(JvmOperation operation, Object receiver, List<Object> argumentValues,
+			IEvaluationContext parentContext, CancelIndicator indicator) {
+		val originalOperation = operation.sourceElements.head
+		if (originalOperation instanceof EdeltaOperation) {
+			val context = parentContext.fork
+			var index = 0
+			for (param : operation.parameters) {
+				context.newValue(QualifiedName.create(param.name), argumentValues.get(index))
+				index = index + 1	
+			}
+			val result = evaluate(originalOperation.body, context, CancelIndicator.NullImpl)
+			if(result.exception !== null)
+				throw result.exception
+			return result.result
+		}
+		return super.invokeOperation(operation, receiver, argumentValues, parentContext, indicator)
 	}
 
 }

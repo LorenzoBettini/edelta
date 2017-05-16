@@ -54,23 +54,25 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-//	@Test
-//	def void testCreateEClassAndCallOperation() {
-//		'''
-//			metamodel "foo"
-//			
-//			def op(EClass c) : void {
-//				c.abstract = true
-//			}
-//			
-//			createEClass NewClass in foo {
-//				op(it)
-//			}
-//		'''.assertAfterInterpretationOfEdeltaCreateExpression [ derivedEClass |
-//			assertEquals("NewClass", derivedEClass.name)
-//			assertEquals(true, derivedEClass.abstract)
-//		]
-//	}
+	@Test
+	def void testCreateEClassAndCallOperation() {
+		'''
+			import org.eclipse.emf.ecore.EClass
+			
+			metamodel "foo"
+			
+			def op(EClass c) : void {
+				c.abstract = true
+			}
+			
+			createEClass NewClass in foo {
+				op(it)
+			}
+		'''.assertAfterInterpretationOfEdeltaCreateExpression [ derivedEClass |
+			assertEquals("NewClass", derivedEClass.name)
+			assertEquals(true, derivedEClass.abstract)
+		]
+	}
 
 	def assertAfterInterpretationOfEdeltaCreateExpression(CharSequence input, (EClass)=>void testExecutor) {
 		val program = input.parseWithTestEcore
