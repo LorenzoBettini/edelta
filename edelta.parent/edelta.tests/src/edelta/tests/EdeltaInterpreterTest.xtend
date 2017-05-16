@@ -12,6 +12,7 @@ import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
 import org.eclipse.xtext.common.types.JvmGenericType
+import edelta.tests.additional.MyCustomException
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -71,6 +72,25 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		'''.assertAfterInterpretationOfEdeltaCreateExpression [ derivedEClass |
 			assertEquals("NewClass", derivedEClass.name)
 			assertEquals(true, derivedEClass.abstract)
+		]
+	}
+
+	@Test(expected=MyCustomException)
+	def void testCreateEClassAndCallOperationThatThrows() {
+		'''
+			import org.eclipse.emf.ecore.EClass
+			import edelta.tests.additional.MyCustomException
+			
+			metamodel "foo"
+			
+			def op(EClass c) : void {
+				throw new MyCustomException
+			}
+			
+			createEClass NewClass in foo {
+				op(it)
+			}
+		'''.assertAfterInterpretationOfEdeltaCreateExpression [ derivedEClass |
 		]
 	}
 
