@@ -66,10 +66,7 @@ class EdeltaInterpreter extends XbaseInterpreter {
 				context.newValue(QualifiedName.create(param.name), argumentValues.get(index))
 				index = index + 1	
 			}
-			val result = evaluate(originalOperation.body, context, CancelIndicator.NullImpl)
-			if(result.exception !== null)
-				throw result.exception
-			return result.result
+			return evaluate(originalOperation.body, context, CancelIndicator.NullImpl)
 		}
 		return super.invokeOperation(operation, receiver, argumentValues, parentContext, indicator)
 	}
