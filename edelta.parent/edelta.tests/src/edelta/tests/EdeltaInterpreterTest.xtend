@@ -24,7 +24,6 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	@Test
 	def void testCreateEClass() {
 		'''
-			metamodel "ecore"
 			metamodel "foo"
 			
 			createEClass NewClass in foo {
@@ -39,41 +38,42 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	@Test
 	def void testCreateEClassAndCallLibMethod() {
 		'''
-			metamodel "ecore"
 			metamodel "foo"
 			
 			createEClass NewClass in foo {
-				EStructuralFeatures += newEAttribute("newAttr") [
-					EType = ecoreref(EString)
+				EStructuralFeatures += newEAttribute("newTestAttr") [
+					EType = ecoreref(FooDataType)
 				]
 			}
 		'''.assertAfterInterpretationOfEdeltaCreateExpression [ derivedEClass |
 			assertEquals("NewClass", derivedEClass.name)
 			assertEquals(1, derivedEClass.EStructuralFeatures.size)
+			val attr = derivedEClass.EStructuralFeatures.head
+			assertEquals("newTestAttr", attr.name)
+			assertEquals("FooDataType", attr.EType.name)
 		]
 	}
 
-	@Test
-	def void testCreateEClassAndCallOperation() {
-		'''
-			metamodel "ecore"
-			metamodel "foo"
-			
-			def op(EClass c) : void {
-				c.abstract = true
-			}
-			
-			createEClass NewClass in foo {
-				op(it)
-			}
-		'''.assertAfterInterpretationOfEdeltaCreateExpression [ derivedEClass |
-			assertEquals("NewClass", derivedEClass.name)
-			assertEquals(true, derivedEClass.abstract)
-		]
-	}
+//	@Test
+//	def void testCreateEClassAndCallOperation() {
+//		'''
+//			metamodel "foo"
+//			
+//			def op(EClass c) : void {
+//				c.abstract = true
+//			}
+//			
+//			createEClass NewClass in foo {
+//				op(it)
+//			}
+//		'''.assertAfterInterpretationOfEdeltaCreateExpression [ derivedEClass |
+//			assertEquals("NewClass", derivedEClass.name)
+//			assertEquals(true, derivedEClass.abstract)
+//		]
+//	}
 
 	def assertAfterInterpretationOfEdeltaCreateExpression(CharSequence input, (EClass)=>void testExecutor) {
-		val program = input.parse
+		val program = input.parseWithTestEcore
 		program.lastExpression.createEClassExpression => [
 			val derivedEClass = program.getDerivedStateLastEClass
 			val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
