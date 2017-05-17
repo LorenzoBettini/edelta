@@ -3,6 +3,7 @@ package edelta.resource
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.google.inject.name.Named
+import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
 import edelta.edelta.EdeltaEcoreChangeEClassExpression
 import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
@@ -84,11 +85,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 					addToDerivedEPackage(nameToEPackageMap, exp.epackage)
 				]
 				targetToSourceMap.put(derivedEClass, exp)
-				for (e : EcoreUtil2.getAllContentsOfType(exp, EdeltaEcoreCreateEAttributeExpression)) {
-					val derivedEAttribute = newEAttribute(e.name)
-					derivedEClass.EStructuralFeatures += derivedEAttribute
-					targetToSourceMap.put(derivedEAttribute, e)
-				}
+				handleCreateEAttribute(exp, derivedEClass, targetToSourceMap)
 			}
 			val changeEClassExpressions = resource.
 				allContents.toIterable.
@@ -107,7 +104,16 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 				addToDerivedEPackage(derivedEClass, nameToEPackageMap, exp.epackage)
 				targetToSourceMap.put(derivedEClass, exp)
 				changeRunner.performChanges(derivedEClass, exp)
+				handleCreateEAttribute(exp, derivedEClass, targetToSourceMap)
 			}
+		}
+	}
+
+	private def void handleCreateEAttribute(EdeltaEcoreBaseEClassManipulationWithBlockExpression exp, EClass derivedEClass, Map<EObject, EObject> targetToSourceMap) {
+		for (e : EcoreUtil2.getAllContentsOfType(exp, EdeltaEcoreCreateEAttributeExpression)) {
+			val derivedEAttribute = newEAttribute(e.name)
+			derivedEClass.EStructuralFeatures += derivedEAttribute
+			targetToSourceMap.put(derivedEAttribute, e)
 		}
 	}
 
