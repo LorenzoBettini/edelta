@@ -17,6 +17,7 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
+import edelta.edelta.EdeltaUseAs
 
 class EdeltaInterpreter extends XbaseInterpreter {
 
@@ -56,9 +57,10 @@ class EdeltaInterpreter extends XbaseInterpreter {
 	}
 
 	override protected featureCallField(JvmField jvmField, Object receiver) {
-		val original = jvmField.sourceElements.head
-		if (original !== null) {
-			return jvmField
+		val useAs = jvmField.sourceElements.filter(EdeltaUseAs).head
+		if (useAs !== null) {
+			val javaType = getJavaType(useAs.type.type)
+			return javaType.newInstance
 		}
 		return super.featureCallField(jvmField, receiver)
 	}

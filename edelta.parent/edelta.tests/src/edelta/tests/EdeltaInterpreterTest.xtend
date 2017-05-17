@@ -110,8 +110,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			assertEquals("NewClass", derivedEClass.name)
 			assertEquals(1, derivedEClass.EStructuralFeatures.size)
 			val attr = derivedEClass.EStructuralFeatures.head
-			assertEquals("newTestAttr", attr.name)
-			assertEquals("FooDataType", attr.EType.name)
+			assertEquals("aNewAttr", attr.name)
+			assertEquals("EString", attr.EType.name)
 		]
 	}
 
