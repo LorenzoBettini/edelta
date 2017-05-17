@@ -19,6 +19,7 @@ import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
+import edelta.resource.IEdeltaEcoreModelAssociations
 
 class EdeltaInterpreter extends XbaseInterpreter {
 
@@ -28,6 +29,7 @@ class EdeltaInterpreter extends XbaseInterpreter {
 
 	@Inject extension IJvmModelAssociations
 	@Inject extension EdeltaInterpreterHelper
+	@Inject extension IEdeltaEcoreModelAssociations
 
 	def run(EdeltaEcoreCreateEClassExpression e, EClass c, JvmGenericType javaType) {
 		evaluate(
@@ -55,7 +57,10 @@ class EdeltaInterpreter extends XbaseInterpreter {
 		} else if (expression instanceof EdeltaEcoreReference) {
 			return expression.enamedelement
 		} else if (expression instanceof EdeltaEcoreCreateEAttributeExpression) {
-			return null
+			val attr = expression.getEAttributeElement
+			val newContext = context.fork
+			newContext.assignValue(QualifiedName.create("it"), attr)
+			return evaluate(expression.body, newContext, indicator)
 		}
 		return super.doEvaluate(expression, context, indicator)
 	}
@@ -78,7 +83,7 @@ class EdeltaInterpreter extends XbaseInterpreter {
 				context.newValue(QualifiedName.create(param.name), argumentValues.get(index))
 				index = index + 1	
 			}
-			return evaluate(originalOperation.body, context, CancelIndicator.NullImpl)
+			return evaluate(originalOperation.body, context, indicator)
 		}
 		return super.invokeOperation(operation, receiver, argumentValues, parentContext, indicator)
 	}
