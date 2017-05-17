@@ -34,4 +34,9 @@ public class MyCustomEdelta extends AbstractEdelta {
 		EAttribute a = createEAttribute(c, "aNewAttr", null);
 		a.setEType(EcorePackage.eINSTANCE.getEString());
 	}
+
+	public void setAttributeBounds(EAttribute a, int low, int upper) {
+		a.setLowerBound(low);
+		a.setUpperBound(upper);
+	}
 }
