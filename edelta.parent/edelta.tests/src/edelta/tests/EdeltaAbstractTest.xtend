@@ -27,6 +27,7 @@ import org.eclipse.xtext.xbase.XExpression
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
+import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -151,6 +152,10 @@ abstract class EdeltaAbstractTest {
 
 	def protected getChangeEClassExpression(XExpression e) {
 		e as EdeltaEcoreChangeEClassExpression
+	}
+
+	def protected getManipulationEClassExpression(XExpression e) {
+		e as EdeltaEcoreBaseEClassManipulationWithBlockExpression
 	}
 
 	def protected getCreateEAttributExpression(XExpression e) {

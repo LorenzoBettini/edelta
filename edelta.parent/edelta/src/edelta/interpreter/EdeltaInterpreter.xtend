@@ -1,12 +1,14 @@
 package edelta.interpreter
 
 import com.google.inject.Inject
-import edelta.edelta.EdeltaEcoreCreateEClassExpression
+import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
+import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaOperation
 import edelta.edelta.EdeltaUseAs
 import edelta.lib.AbstractEdelta
+import edelta.resource.IEdeltaEcoreModelAssociations
 import java.util.List
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.xtext.common.types.JvmField
@@ -18,8 +20,6 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
-import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
-import edelta.resource.IEdeltaEcoreModelAssociations
 
 class EdeltaInterpreter extends XbaseInterpreter {
 
@@ -31,7 +31,7 @@ class EdeltaInterpreter extends XbaseInterpreter {
 	@Inject extension EdeltaInterpreterHelper
 	@Inject extension IEdeltaEcoreModelAssociations
 
-	def run(EdeltaEcoreCreateEClassExpression e, EClass c, JvmGenericType javaType) {
+	def run(EdeltaEcoreBaseEClassManipulationWithBlockExpression e, EClass c, JvmGenericType javaType) {
 		evaluate(
 			e,
 			createContext() => [
@@ -50,7 +50,7 @@ class EdeltaInterpreter extends XbaseInterpreter {
 	}
 
 	override protected doEvaluate(XExpression expression, IEvaluationContext context, CancelIndicator indicator) {
-		if (expression instanceof EdeltaEcoreCreateEClassExpression) {
+		if (expression instanceof EdeltaEcoreBaseEClassManipulationWithBlockExpression) {
 			return super.doEvaluate(expression.body, context, indicator)
 		} else if (expression instanceof EdeltaEcoreReferenceExpression) {
 			return doEvaluate(expression.reference, context, indicator)
