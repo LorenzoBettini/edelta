@@ -263,6 +263,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			RenamedClass
 			myAttribute
 			myReference
+			anotherAttr
 			FooClass
 			FooDataType
 			FooEnum
@@ -273,6 +274,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			''')
 			// RenamedClass and FooClass (the original referred) are both returned
 			// by the scope provider
+			// anotherAttr is created in the changeEClass expression
 	}
 
 	@Test
