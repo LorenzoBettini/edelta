@@ -7,7 +7,7 @@ import com.google.inject.Inject
 import edelta.edelta.EdeltaMain
 import edelta.edelta.EdeltaOperation
 import edelta.edelta.EdeltaProgram
-import edelta.resource.EdeltaDerivedStateComputer
+import edelta.resource.IEdeltaEcoreModelAssociations
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider
 
@@ -18,7 +18,7 @@ import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider
  */
 class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 
-	@Inject extension EdeltaDerivedStateComputer
+	@Inject extension IEdeltaEcoreModelAssociations
 
 	def protected void _createChildren(IOutlineNode parentNode, EdeltaProgram p) {
 		for (o : p.operations) {
