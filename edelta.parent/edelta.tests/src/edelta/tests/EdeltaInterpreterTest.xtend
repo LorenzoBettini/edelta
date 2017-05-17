@@ -130,6 +130,28 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testCreateEClassAndCreateEAttribute() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				createEAttribute newTestAttr type FooDataType {
+					lowerBound = -1
+				}
+			}
+		'''.assertAfterInterpretationOfEdeltaCreateExpression [ derivedEClass |
+			assertEquals("NewClass", derivedEClass.name)
+			assertEquals(1, derivedEClass.EStructuralFeatures.size)
+			val attr = derivedEClass.EStructuralFeatures.head
+			assertEquals("newTestAttr", attr.name)
+			// TODO: when implemented
+			// indeed createEAttribute in the derived state computer
+			// does not assign to the attribute a type.
+			// assertEquals("FooDataType", attr.EType.name)
+		]
+	}
+
 	def assertAfterInterpretationOfEdeltaCreateExpression(CharSequence input, (EClass)=>void testExecutor) {
 		assertAfterInterpretationOfEdeltaCreateExpression(input, true, testExecutor)
 	}

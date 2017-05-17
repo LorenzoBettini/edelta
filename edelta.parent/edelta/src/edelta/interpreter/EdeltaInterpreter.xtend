@@ -18,6 +18,7 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
+import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 
 class EdeltaInterpreter extends XbaseInterpreter {
 
@@ -53,6 +54,8 @@ class EdeltaInterpreter extends XbaseInterpreter {
 			return doEvaluate(expression.reference, context, indicator)
 		} else if (expression instanceof EdeltaEcoreReference) {
 			return expression.enamedelement
+		} else if (expression instanceof EdeltaEcoreCreateEAttributeExpression) {
+			return null
 		}
 		return super.doEvaluate(expression, context, indicator)
 	}
