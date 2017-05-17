@@ -4,10 +4,10 @@ import com.google.inject.Inject
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
-import edelta.lib.EdeltaLibrary
+import edelta.edelta.EdeltaOperation
+import edelta.lib.AbstractEdelta
 import java.util.List
 import org.eclipse.emf.ecore.EClass
-import org.eclipse.xtext.common.types.JvmField
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.common.types.JvmOperation
 import org.eclipse.xtext.naming.QualifiedName
@@ -16,11 +16,12 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
-import edelta.edelta.EdeltaOperation
 
 class EdeltaInterpreter extends XbaseInterpreter {
 
-	val lib = new EdeltaLibrary
+	val edelta = new AbstractEdelta() {
+		
+	}
 
 	@Inject extension IJvmModelAssociations
 
@@ -29,8 +30,14 @@ class EdeltaInterpreter extends XbaseInterpreter {
 			e,
 			createContext() => [
 				newValue(QualifiedName.create("it"), c)
-				newValue(QualifiedName.create("this"), javaType)
-				newValue(QualifiedName.create(javaType.simpleName), javaType)
+				// 'this' and the name of the inferred class are mapped
+				// to an instance of AbstractEdelta, so that all reflective
+				// accesses, e.g., the inherited field 'lib', work out of the box
+				// calls to operations defined in the sources are intercepted
+				// in our custom invokeOperation and in that case we interpret the
+				// original source's XBlockExpression
+				newValue(QualifiedName.create("this"), edelta)
+				newValue(QualifiedName.create(javaType.simpleName), edelta)
 			],
 			CancelIndicator.NullImpl
 		)
@@ -45,15 +52,6 @@ class EdeltaInterpreter extends XbaseInterpreter {
 			return expression.enamedelement
 		}
 		return super.doEvaluate(expression, context, indicator)
-	}
-
-	override protected featureCallField(JvmField jvmField, Object receiver) {
-		if (receiver instanceof JvmGenericType) {
-			if (jvmField.simpleName == "lib") {
-				return lib
-			}
-		}
-		return super.featureCallField(jvmField, receiver)
 	}
 
 	override protected invokeOperation(JvmOperation operation, Object receiver, List<Object> argumentValues,
