@@ -14,7 +14,7 @@ import com.google.inject.Singleton
 @Singleton
 class EdeltaLocationInFileProvider extends JvmLocationInFileProvider {
 
-	@Inject extension EdeltaDerivedStateComputer
+	@Inject extension IEdeltaEcoreModelAssociations
 
 	override protected convertToSource(EObject element) {
 		return element.getPrimarySourceElement ?:
