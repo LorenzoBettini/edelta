@@ -6,16 +6,14 @@ import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
+import edelta.util.EdeltaModelUtil
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EEnumLiteral
+import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
-
-import static extension org.eclipse.xtext.EcoreUtil2.*
-import org.eclipse.emf.ecore.ENamedElement
-import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
 
 /**
  * Utilities for Edelta compiler
@@ -25,6 +23,7 @@ import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
 class EdeltaCompilerUtil {
 
 	@Inject extension IBatchTypeResolver
+	@Inject extension EdeltaModelUtil
 
 	def dispatch String methodName(XExpression e) {
 	}
@@ -38,7 +37,7 @@ class EdeltaCompilerUtil {
 	}
 
 	def dispatch String methodName(EdeltaEcoreCreateEAttributeExpression e) {
-		'''_createEAttribute_«e.name»_in«e.getContainerOfType(EdeltaEcoreBaseEClassManipulationWithBlockExpression).methodName»'''
+		'''_createEAttribute_«e.name»_in«e.getEClassManipulation.methodName»'''
 	}
 
 	def consumerArguments(EdeltaEcoreCreateEClassExpression e) {
