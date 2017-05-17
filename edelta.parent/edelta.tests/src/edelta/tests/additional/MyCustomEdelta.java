@@ -31,8 +31,7 @@ public class MyCustomEdelta extends AbstractEdelta {
 	}
 
 	public void createANewEAttribute(EClass c) {
-		createEAttribute(c, "aNewAttr", createList(
-			(EAttribute a) -> a.setEType(EcorePackage.eINSTANCE.getEString())
-		));
+		EAttribute a = createEAttribute(c, "aNewAttr", null);
+		a.setEType(EcorePackage.eINSTANCE.getEString());
 	}
 }
