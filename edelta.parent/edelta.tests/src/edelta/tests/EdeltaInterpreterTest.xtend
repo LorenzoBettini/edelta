@@ -115,6 +115,21 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test(expected=IllegalStateException)
+	def void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() {
+		'''
+			metamodel "foo"
+			
+			use NonExistant as my
+			
+			createEClass NewClass in foo {
+				my.createANewEAttribute(it)
+			}
+		'''.assertAfterInterpretationOfEdeltaCreateExpression(false) [ derivedEClass |
+			// will not get here
+		]
+	}
+
 	def assertAfterInterpretationOfEdeltaCreateExpression(CharSequence input, (EClass)=>void testExecutor) {
 		assertAfterInterpretationOfEdeltaCreateExpression(input, true, testExecutor)
 	}

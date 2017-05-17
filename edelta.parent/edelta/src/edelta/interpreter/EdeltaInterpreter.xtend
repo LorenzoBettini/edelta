@@ -5,6 +5,7 @@ import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaOperation
+import edelta.edelta.EdeltaUseAs
 import edelta.lib.AbstractEdelta
 import java.util.List
 import org.eclipse.emf.ecore.EClass
@@ -17,7 +18,6 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
-import edelta.edelta.EdeltaUseAs
 
 class EdeltaInterpreter extends XbaseInterpreter {
 
@@ -26,6 +26,7 @@ class EdeltaInterpreter extends XbaseInterpreter {
 	}
 
 	@Inject extension IJvmModelAssociations
+	@Inject extension EdeltaInterpreterHelper
 
 	def run(EdeltaEcoreCreateEClassExpression e, EClass c, JvmGenericType javaType) {
 		evaluate(
@@ -59,8 +60,7 @@ class EdeltaInterpreter extends XbaseInterpreter {
 	override protected featureCallField(JvmField jvmField, Object receiver) {
 		val useAs = jvmField.sourceElements.filter(EdeltaUseAs).head
 		if (useAs !== null) {
-			val javaType = getJavaType(useAs.type.type)
-			return javaType.newInstance
+			return safeInstantiate(javaReflectAccess, useAs)
 		}
 		return super.featureCallField(jvmField, receiver)
 	}
