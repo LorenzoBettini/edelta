@@ -419,4 +419,22 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		assertEquals("newAttribute", derivedEAttribute.name)
 		assertEquals("FooClass", derivedEAttribute.EContainingClass.name)
 	}
+
+	@Test
+	def void testDerivedStateForCreatedEAttributeInChangeEClassWithNewName() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		
+		changeEClass foo.FooClass newName Renamed {
+			createEAttribute newAttribute
+		}
+		'''.
+		parseWithTestEcore
+		val derivedEClass = program.getDerivedStateLastEClass
+		val derivedEAttribute = derivedEClass.EStructuralFeatures.last as EAttribute
+		assertEquals("newAttribute", derivedEAttribute.name)
+		assertEquals("Renamed", derivedEAttribute.EContainingClass.name)
+	}
 }
