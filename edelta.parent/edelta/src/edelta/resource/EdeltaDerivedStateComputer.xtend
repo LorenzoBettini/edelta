@@ -26,7 +26,7 @@ import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator
 
 @Singleton
-class EdeltaDerivedStateComputer extends JvmModelAssociator {
+class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEcoreModelAssociations {
 
 	@Inject
 	@Named(Constants.LANGUAGE_NAME)
@@ -70,7 +70,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator {
 		getOrInstallAdapter(resource).nameToEPackageMap
 	}
 
-	def derivedEPackages(Resource resource) {
+	override derivedEPackages(Resource resource) {
 		nameToEPackageMap(resource).values
 	}
 
