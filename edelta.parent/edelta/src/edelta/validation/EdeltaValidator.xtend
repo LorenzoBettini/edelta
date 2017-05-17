@@ -37,12 +37,16 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 			)
 		} else {
 			val type = useAs.type.type
-			if ((type as JvmGenericType).isAbstract) {
-				error(
-					"Cannot be an abstract type",
-					EDELTA_USE_AS__TYPE,
-					TYPE_MISMATCH
-				)
+			if (type instanceof JvmGenericType) {
+				// otherwise it's a JvmVoid, which means, unresolved
+				// and an error is issued by other validators
+				if (type.isAbstract) {
+					error(
+						"Cannot be an abstract type",
+						EDELTA_USE_AS__TYPE,
+						TYPE_MISMATCH
+					)
+				}
 			}
 		}
 	}

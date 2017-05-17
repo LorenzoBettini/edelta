@@ -145,6 +145,16 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		)
 	}
 
+	@Test
+	def void testInvalidUseAsUnresolvedProxy() {
+		val input = '''
+		use Unknown as foo
+		'''
+		input.parse.assertErrorsAsStrings(
+			"Unknown cannot be resolved to a type."
+		)
+	}
+
 	def private assertErrorsAsStrings(EObject o, CharSequence expected) {
 		expected.toString.trim.assertEqualsStrings(
 			o.validate.filter[severity == Severity.ERROR].
