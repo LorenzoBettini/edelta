@@ -10,6 +10,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import org.eclipse.emf.ecore.EcoreFactory
+import edelta.edelta.EdeltaFactory
+import org.eclipse.emf.ecore.EcorePackage
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -66,4 +69,21 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testSafeSetEAttributeType() {
+		val attr = EcoreFactory.eINSTANCE.createEAttribute
+		interpreterHelper.safeSetEAttributeType(attr,
+			EdeltaFactory.eINSTANCE.createEdeltaEcoreDirectReference => [
+				// something that is not an EClassifier
+				enamedelement = EcoreFactory.eINSTANCE.createEReference
+			]
+		)
+		assertNull(attr.EType)
+		interpreterHelper.safeSetEAttributeType(attr,
+			EdeltaFactory.eINSTANCE.createEdeltaEcoreDirectReference => [
+				enamedelement = EcorePackage.eINSTANCE.EString
+			]
+		)
+		assertEquals(EcorePackage.eINSTANCE.EString, attr.EType)
+	}
 }

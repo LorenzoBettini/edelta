@@ -146,10 +146,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			val attr = derivedEClass.EStructuralFeatures.head
 			assertEquals("newTestAttr", attr.name)
 			assertEquals(-1, attr.lowerBound)
-			// TODO: when implemented
-			// indeed createEAttribute in the derived state computer
-			// does not assign to the attribute a type.
-			// assertEquals("FooDataType", attr.EType.name)
+			assertEquals("FooDataType", attr.EType.name)
 		]
 	}
 

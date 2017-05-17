@@ -3,11 +3,15 @@
  */
 package edelta.interpreter;
 
+import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.xtext.common.types.JvmTypeReference;
 import org.eclipse.xtext.common.types.util.JavaReflectAccess;
 
 import com.google.inject.Singleton;
 
+import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaUseAs;
 
 /**
@@ -31,6 +35,14 @@ public class EdeltaInterpreterHelper {
 			return javaType.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			return DEFAULT_INSTANCE;
+		}
+	}
+
+	public void safeSetEAttributeType(EAttribute attr, EdeltaEcoreReference ecoreRef) {
+		ENamedElement ref = ecoreRef.getEnamedelement();
+		if (ref instanceof EClassifier) {
+			EClassifier type = (EClassifier) ref;
+			attr.setEType(type);
 		}
 	}
 }
