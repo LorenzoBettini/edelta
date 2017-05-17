@@ -5,6 +5,7 @@ package edelta.resource;
 
 import java.util.Collection;
 
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -23,5 +24,7 @@ public interface IEdeltaEcoreModelAssociations {
 
 	Collection<EPackage> derivedEPackages(Resource resource);
 
-	public EObject getPrimarySourceElement(EObject jvmElement);
+	EObject getPrimarySourceElement(EObject jvmElement);
+
+	EAttribute getEAttributeElement(EObject soureElement);
 }
