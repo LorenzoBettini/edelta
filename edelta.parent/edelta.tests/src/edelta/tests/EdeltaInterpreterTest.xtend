@@ -116,7 +116,14 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	def assertAfterInterpretationOfEdeltaCreateExpression(CharSequence input, (EClass)=>void testExecutor) {
+		assertAfterInterpretationOfEdeltaCreateExpression(input, true, testExecutor)
+	}
+
+	def assertAfterInterpretationOfEdeltaCreateExpression(CharSequence input, boolean doValidate, (EClass)=>void testExecutor) {
 		val program = input.parseWithTestEcore
+		if (doValidate) {
+			program.assertNoErrors
+		}
 		program.lastExpression.createEClassExpression => [
 			val derivedEClass = program.getDerivedStateLastEClass
 			val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
