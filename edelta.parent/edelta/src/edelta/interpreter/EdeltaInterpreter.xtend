@@ -59,7 +59,7 @@ class EdeltaInterpreter extends XbaseInterpreter {
 		} else if (expression instanceof EdeltaEcoreCreateEAttributeExpression) {
 			val attr = expression.getEAttributeElement
 			val newContext = context.fork
-			newContext.assignValue(QualifiedName.create("it"), attr)
+			newContext.newValue(QualifiedName.create("it"), attr)
 			return evaluate(expression.body, newContext, indicator)
 		}
 		return super.doEvaluate(expression, context, indicator)
