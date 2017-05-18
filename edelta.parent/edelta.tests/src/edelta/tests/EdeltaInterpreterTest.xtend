@@ -9,12 +9,12 @@ import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationResult
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+import static edelta.interpreter.EdeltaInterpreter.*
 import static org.junit.Assert.*
-import org.junit.Before
-import edelta.tests.additional.MyCustomException
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
