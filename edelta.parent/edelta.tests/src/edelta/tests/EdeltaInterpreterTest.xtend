@@ -239,25 +239,25 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		EdeltaInterpreter.INTERPRETER_TIMEOUT = 2000;
 		'''
 			import org.eclipse.emf.ecore.EClass
-						
+
 			metamodel "foo"
 			
 			def op(EClass c) : void {
-				while (true) {
+				var i = 10;
+				while (i >= 0) {
 					Thread.sleep(1000);
+					i++
 				}
+				// this will never be executed
+				c.abstract = true
 			}
 			
 			createEClass NewClass in foo {
 				op(it)
 			}
 		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
-			assertEquals("Renamed", derivedEClass.name)
-			val attr = derivedEClass.EStructuralFeatures.last
-			assertEquals("newTestAttr", attr.name)
-			assertEquals(1, attr.lowerBound)
-			assertEquals(-1, attr.upperBound)
-			assertEquals("FooDataType", attr.EType.name)
+			assertEquals("NewClass", derivedEClass.name)
+			assertEquals(false, derivedEClass.abstract)
 		]
 	}
 
@@ -274,13 +274,15 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			val derivedEClass = program.getDerivedStateLastEClass
 			val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
 			val result = interpreter.run(it, derivedEClass, inferredJavaClass)
-			if (result.exception !== null)
+			// result can be null due to a timeout
+			if (result?.exception !== null)
 				throw result.exception
 			testExecutor.apply(derivedEClass)
-			assertTrue(
-				"not expected result of type " + result.class.name,
-				result instanceof DefaultEvaluationResult
-			)
+			if (result !== null)
+				assertTrue(
+					"not expected result of type " + result.class.name,
+					result instanceof DefaultEvaluationResult
+				)
 		]
 	}
 }
