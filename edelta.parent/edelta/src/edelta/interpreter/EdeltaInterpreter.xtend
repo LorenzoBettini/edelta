@@ -71,7 +71,7 @@ class EdeltaInterpreter extends XbaseInterpreter {
 			safeSetEAttributeType(attr, expression.ecoreReferenceDataType)
 			val newContext = context.fork
 			newContext.newValue(QualifiedName.create("it"), attr)
-			return evaluate(expression.body, newContext, indicator)
+			return internalEvaluate(expression.body, newContext, indicator)
 		}
 		return super.doEvaluate(expression, context, indicator)
 	}
@@ -94,7 +94,7 @@ class EdeltaInterpreter extends XbaseInterpreter {
 				context.newValue(QualifiedName.create(param.name), argumentValues.get(index))
 				index = index + 1	
 			}
-			return evaluate(originalOperation.body, context, indicator)
+			return internalEvaluate(originalOperation.body, context, indicator)
 		}
 		return super.invokeOperation(operation, receiver, argumentValues, parentContext, indicator)
 	}
