@@ -23,13 +23,23 @@ import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 
 class EdeltaInterpreter extends XbaseInterpreter {
 
+	@Inject extension IJvmModelAssociations
+	@Inject extension EdeltaInterpreterHelper
+	@Inject extension IEdeltaEcoreModelAssociations
+
+	var static public int INTERPRETER_TIMEOUT = 2000;
+
 	val edelta = new AbstractEdelta() {
 		
 	}
 
-	@Inject extension IJvmModelAssociations
-	@Inject extension EdeltaInterpreterHelper
-	@Inject extension IEdeltaEcoreModelAssociations
+	private static class TimeoutCancelIndicator implements CancelIndicator {
+		private long stopAt = System.currentTimeMillis() + INTERPRETER_TIMEOUT;
+
+		override boolean isCanceled() {
+			return System.currentTimeMillis() > stopAt;
+		}
+	}
 
 	def run(EdeltaEcoreBaseEClassManipulationWithBlockExpression e, EClass c, JvmGenericType javaType) {
 		evaluate(
@@ -45,7 +55,7 @@ class EdeltaInterpreter extends XbaseInterpreter {
 				newValue(QualifiedName.create("this"), edelta)
 				newValue(QualifiedName.create(javaType.simpleName), edelta)
 			],
-			CancelIndicator.NullImpl
+			new TimeoutCancelIndicator
 		)
 	}
 
