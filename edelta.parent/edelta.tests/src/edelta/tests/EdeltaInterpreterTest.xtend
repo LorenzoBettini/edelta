@@ -2,6 +2,7 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.interpreter.EdeltaInterpreter
+import edelta.tests.additional.MyCustomException
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.testing.InjectWith
