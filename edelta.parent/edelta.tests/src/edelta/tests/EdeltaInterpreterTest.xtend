@@ -2,6 +2,7 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.interpreter.EdeltaInterpreter
+import edelta.tests.additional.MyCustomException
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.testing.InjectWith
@@ -74,7 +75,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test
+	@Test(expected=MyCustomException)
 	def void testCreateEClassAndCallOperationThatThrows() {
 		'''
 			import org.eclipse.emf.ecore.EClass
@@ -90,7 +91,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				op(it)
 			}
 		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
-			// nothing bad happens, exception is not shown
+			// never gets here
 		]
 	}
 
