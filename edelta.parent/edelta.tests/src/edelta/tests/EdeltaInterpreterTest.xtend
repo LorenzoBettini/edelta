@@ -12,6 +12,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import org.junit.Before
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -20,6 +21,14 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	@Inject EdeltaInterpreter interpreter
 
 	@Inject extension IJvmModelAssociations
+
+	@Before
+	def void disableTimeout() {
+		// for standard tests we disable the timeout
+		// actually we set it to several minutes
+		// this also makes it easier to debug tests
+		EdeltaInterpreter.INTERPRETER_TIMEOUT = 1200000;
+	}
 
 	@Test
 	def void testCreateEClass() {
@@ -225,6 +234,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testTimeoutInCancelIndicator() {
+		// in this test we really need the timeout
+		EdeltaInterpreter.INTERPRETER_TIMEOUT = 2000;
 		'''
 			import org.eclipse.emf.ecore.EClass
 						
