@@ -13,6 +13,7 @@ import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
 import org.junit.Before
+import edelta.tests.additional.MyCustomException
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -83,7 +84,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test
+	@Test(expected=MyCustomException)
 	def void testCreateEClassAndCallOperationThatThrows() {
 		'''
 			import org.eclipse.emf.ecore.EClass
@@ -99,7 +100,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				op(it)
 			}
 		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
-			// nothing bad happens, exception is not shown
+			// never gets here
 		]
 	}
 
