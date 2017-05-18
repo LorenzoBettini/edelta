@@ -223,6 +223,32 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testTimeoutInCancelIndicator() {
+		'''
+			import org.eclipse.emf.ecore.EClass
+						
+			metamodel "foo"
+			
+			def op(EClass c) : void {
+				while (true) {
+					Thread.sleep(1000);
+				}
+			}
+			
+			createEClass NewClass in foo {
+				op(it)
+			}
+		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
+			assertEquals("Renamed", derivedEClass.name)
+			val attr = derivedEClass.EStructuralFeatures.last
+			assertEquals("newTestAttr", attr.name)
+			assertEquals(1, attr.lowerBound)
+			assertEquals(-1, attr.upperBound)
+			assertEquals("FooDataType", attr.EType.name)
+		]
+	}
+
 	def assertAfterInterpretationOfEdeltaManipulationExpression(CharSequence input, (EClass)=>void testExecutor) {
 		assertAfterInterpretationOfEdeltaManipulationExpression(input, true, testExecutor)
 	}
