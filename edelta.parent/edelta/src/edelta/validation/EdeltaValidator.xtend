@@ -24,6 +24,7 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 
 	public static val PREFIX = "edelta.";
 	public static val TYPE_MISMATCH = PREFIX + "TypeMismatch";
+	public static val INTERPRETER_TIMEOUT = PREFIX + "InterpreterTimeout";
 
 	@Inject CommonTypeComputationServices services
 

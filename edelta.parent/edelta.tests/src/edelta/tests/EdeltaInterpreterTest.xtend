@@ -1,8 +1,10 @@
 package edelta.tests
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaPackage
 import edelta.interpreter.EdeltaInterpreter
 import edelta.tests.additional.MyCustomException
+import edelta.validation.EdeltaValidator
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.testing.InjectWith
@@ -238,7 +240,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	def void testTimeoutInCancelIndicator() {
 		// in this test we really need the timeout
 		EdeltaInterpreter.INTERPRETER_TIMEOUT = 2000;
-		'''
+		val input = '''
 			import org.eclipse.emf.ecore.EClass
 
 			metamodel "foo"
@@ -256,9 +258,16 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			createEClass NewClass in foo {
 				op(it)
 			}
-		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
+		'''
+		input.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
 			assertEquals("NewClass", derivedEClass.name)
 			assertEquals(false, derivedEClass.abstract)
+			derivedEClass.assertWarning(
+				EdeltaPackage.eINSTANCE.edeltaEcoreCreateEClassExpression,
+				EdeltaValidator.INTERPRETER_TIMEOUT,
+				input.lastIndexOf("{"), 11,
+				"Timeout interpreting initialization block"
+			)
 		]
 	}
 
