@@ -1,8 +1,10 @@
 package edelta.tests
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
 import edelta.edelta.EdeltaPackage
 import edelta.interpreter.EdeltaInterpreter
+import edelta.resource.EdeltaDerivedStateComputer
 import edelta.tests.additional.MyCustomException
 import edelta.validation.EdeltaValidator
 import org.eclipse.emf.ecore.EClass
@@ -26,12 +28,30 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Inject extension IJvmModelAssociations
 
+	@Inject EdeltaDerivedStateComputer derivedStateComputer
+
 	@Before
 	def void disableTimeout() {
 		// for standard tests we disable the timeout
 		// actually we set it to several minutes
 		// this also makes it easier to debug tests
 		EdeltaInterpreter.INTERPRETER_TIMEOUT = 1200000;
+	}
+
+	@Before
+	def void disableInterpreterInDerivedStateComputer() {
+		// derived state computer is a singleton so we can
+		// safely set its interpreter globally
+		derivedStateComputer.interpreter = new EdeltaInterpreter() {
+
+			override run(EdeltaEcoreBaseEClassManipulationWithBlockExpression e, EClass c, JvmGenericType javaType) {
+				// avoid the derived state computer run the interpreter
+				// since the tests in this class must concern interpreter only
+				// and we don't want side effects from the derived state computer
+				// running the interpreter
+			}
+
+		}
 	}
 
 	@Test
