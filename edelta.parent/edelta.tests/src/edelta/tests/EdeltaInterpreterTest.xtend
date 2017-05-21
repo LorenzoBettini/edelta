@@ -1,17 +1,21 @@
 package edelta.tests
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaPackage
 import edelta.interpreter.EdeltaInterpreter
 import edelta.tests.additional.MyCustomException
+import edelta.validation.EdeltaValidator
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationResult
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+import static edelta.interpreter.EdeltaInterpreter.*
 import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
@@ -21,6 +25,14 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	@Inject EdeltaInterpreter interpreter
 
 	@Inject extension IJvmModelAssociations
+
+	@Before
+	def void disableTimeout() {
+		// for standard tests we disable the timeout
+		// actually we set it to several minutes
+		// this also makes it easier to debug tests
+		EdeltaInterpreter.INTERPRETER_TIMEOUT = 1200000;
+	}
 
 	@Test
 	def void testCreateEClass() {
@@ -224,6 +236,41 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testTimeoutInCancelIndicator() {
+		// in this test we really need the timeout
+		EdeltaInterpreter.INTERPRETER_TIMEOUT = 2000;
+		val input = '''
+			import org.eclipse.emf.ecore.EClass
+
+			metamodel "foo"
+			
+			def op(EClass c) : void {
+				var i = 10;
+				while (i >= 0) {
+					Thread.sleep(1000);
+					i++
+				}
+				// this will never be executed
+				c.abstract = true
+			}
+			
+			createEClass NewClass in foo {
+				op(it)
+			}
+		'''
+		input.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
+			assertEquals("NewClass", derivedEClass.name)
+			assertEquals(false, derivedEClass.abstract)
+			derivedEClass.assertWarning(
+				EdeltaPackage.eINSTANCE.edeltaEcoreCreateEClassExpression,
+				EdeltaValidator.INTERPRETER_TIMEOUT,
+				input.lastIndexOf("{"), 11,
+				"Timeout interpreting initialization block"
+			)
+		]
+	}
+
 	def assertAfterInterpretationOfEdeltaManipulationExpression(CharSequence input, (EClass)=>void testExecutor) {
 		assertAfterInterpretationOfEdeltaManipulationExpression(input, true, testExecutor)
 	}
@@ -237,13 +284,15 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			val derivedEClass = program.getDerivedStateLastEClass
 			val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
 			val result = interpreter.run(it, derivedEClass, inferredJavaClass)
-			if (result.exception !== null)
+			// result can be null due to a timeout
+			if (result?.exception !== null)
 				throw result.exception
 			testExecutor.apply(derivedEClass)
-			assertTrue(
-				"not expected result of type " + result.class.name,
-				result instanceof DefaultEvaluationResult
-			)
+			if (result !== null)
+				assertTrue(
+					"not expected result of type " + result.class.name,
+					result instanceof DefaultEvaluationResult
+				)
 		]
 	}
 }

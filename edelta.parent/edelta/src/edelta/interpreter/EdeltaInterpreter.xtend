@@ -9,30 +9,44 @@ import edelta.edelta.EdeltaOperation
 import edelta.edelta.EdeltaUseAs
 import edelta.lib.AbstractEdelta
 import edelta.resource.IEdeltaEcoreModelAssociations
+import edelta.validation.EdeltaValidator
 import java.util.List
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.xtext.common.types.JvmField
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.common.types.JvmOperation
+import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.naming.QualifiedName
 import org.eclipse.xtext.util.CancelIndicator
+import org.eclipse.xtext.validation.EObjectDiagnosticImpl
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
+import edelta.edelta.EdeltaPackage
 
 class EdeltaInterpreter extends XbaseInterpreter {
-
-	val edelta = new AbstractEdelta() {
-		
-	}
 
 	@Inject extension IJvmModelAssociations
 	@Inject extension EdeltaInterpreterHelper
 	@Inject extension IEdeltaEcoreModelAssociations
 
+	var static public int INTERPRETER_TIMEOUT = 2000;
+
+	val edelta = new AbstractEdelta() {
+		
+	}
+
+	private static class TimeoutCancelIndicator implements CancelIndicator {
+		private long stopAt = System.currentTimeMillis() + INTERPRETER_TIMEOUT;
+
+		override boolean isCanceled() {
+			return System.currentTimeMillis() > stopAt;
+		}
+	}
+
 	def run(EdeltaEcoreBaseEClassManipulationWithBlockExpression e, EClass c, JvmGenericType javaType) {
-		evaluate(
+		val result = evaluate(
 			e,
 			createContext() => [
 				newValue(QualifiedName.create("it"), c)
@@ -45,7 +59,24 @@ class EdeltaInterpreter extends XbaseInterpreter {
 				newValue(QualifiedName.create("this"), edelta)
 				newValue(QualifiedName.create(javaType.simpleName), edelta)
 			],
-			CancelIndicator.NullImpl
+			new TimeoutCancelIndicator
+		)
+		if (result === null) {
+			addWarning(e)
+		}
+		return result
+	}
+
+	def private addWarning(EdeltaEcoreBaseEClassManipulationWithBlockExpression e) {
+		e.eResource.getWarnings().add(
+			new EObjectDiagnosticImpl(
+				Severity.WARNING,
+				EdeltaValidator.INTERPRETER_TIMEOUT,
+				"Timeout interpreting initialization block ("+INTERPRETER_TIMEOUT+"ms).",
+				e,
+				EdeltaPackage.eINSTANCE.edeltaEcoreBaseManipulationWithBlockExpression_Body,
+				-1,
+				#[])
 		)
 	}
 
