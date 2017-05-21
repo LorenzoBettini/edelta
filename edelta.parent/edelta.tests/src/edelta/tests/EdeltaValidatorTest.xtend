@@ -155,6 +155,33 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		)
 	}
 
+	@Test
+	def void testChangeEClassCannotReferToCreatedEClass() {
+		val input = '''
+		metamodel "foo"
+		
+		createEClass NewClass in foo {}
+		
+		changeEClass foo.NewClass {} // ERROR
+		changeEClass foo.FooClass {} // OK
+		'''
+		input.parseWithTestEcore.assertErrorsAsStrings(
+			"NewClass cannot be resolved."
+		)
+	}
+
+	@Test
+	def void testCreateEClassCanReferToRenamedEClass() {
+		val input = '''
+		metamodel "foo"
+		
+		createEClass NewClass in foo extends Renamed {}
+		
+		changeEClass foo.FooClass newName Renamed {}
+		'''
+		input.parseWithTestEcore.assertNoIssues
+	}
+
 	def private assertErrorsAsStrings(EObject o, CharSequence expected) {
 		expected.toString.trim.assertEqualsStrings(
 			o.validate.filter[severity == Severity.ERROR].
