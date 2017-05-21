@@ -231,6 +231,18 @@ class Inputs {
 		'''
 	}
 
+	def referenceToCreatedEAttributeSimple() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				createEAttribute newAttribute type FooDataType {}
+				createEAttribute newAttribute2 type FooDataType {}
+			}
+			ecoreref(newAttribute)
+		'''
+	}
+
 	def referenceToCreatedEAttribute() {
 		'''
 			metamodel "foo"

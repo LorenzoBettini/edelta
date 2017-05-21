@@ -169,7 +169,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testScopeForReferenceToCreatedEAttribute() {
-		referenceToCreatedEAttribute.parseWithTestEcore.lastExpression.
+		referenceToCreatedEAttributeSimple.parseWithTestEcore.lastExpression.
 			edeltaEcoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
@@ -184,7 +184,28 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			FooEnumLiteral
 			foo
 			''')
-		// newAttributes are the ones created in the program
+		// newAttributes is the one created in the program
+	}
+
+	@Test
+	def void testScopeForReferenceToCreatedEAttributeChangingNameInBody() {
+		referenceToCreatedEAttribute.parseWithTestEcore.lastExpression.
+			edeltaEcoreReferenceExpression.reference.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			NewClass
+			changed
+			newAttribute2
+			FooClass
+			FooDataType
+			FooEnum
+			myAttribute
+			myReference
+			FooEnumLiteral
+			foo
+			''')
+		// changed is the one created in the program, and whose
+		// name is changed in the body
 	}
 
 	@Test
