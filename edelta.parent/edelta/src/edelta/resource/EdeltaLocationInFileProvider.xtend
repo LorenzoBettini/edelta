@@ -1,9 +1,10 @@
 package edelta.resource
 
-import org.eclipse.xtext.xbase.jvmmodel.JvmLocationInFileProvider
-import org.eclipse.emf.ecore.EObject
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import edelta.services.IEdeltaEcoreModelAssociations
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.xbase.jvmmodel.JvmLocationInFileProvider
 
 /**
  * Customization for locating Edelta Ecore operations corresponding

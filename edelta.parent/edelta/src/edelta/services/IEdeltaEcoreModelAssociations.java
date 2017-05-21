@@ -1,7 +1,7 @@
 /**
  * 
  */
-package edelta.resource;
+package edelta.services;
 
 import java.util.Collection;
 

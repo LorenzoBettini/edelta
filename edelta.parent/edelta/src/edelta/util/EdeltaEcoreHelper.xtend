@@ -1,7 +1,7 @@
 package edelta.util
 
 import com.google.inject.Inject
-import edelta.resource.IEdeltaEcoreModelAssociations
+import edelta.services.IEdeltaEcoreModelAssociations
 import java.util.Collections
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EEnum

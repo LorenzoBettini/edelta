@@ -6,9 +6,10 @@ import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaOperation
+import edelta.edelta.EdeltaPackage
 import edelta.edelta.EdeltaUseAs
 import edelta.lib.AbstractEdelta
-import edelta.resource.IEdeltaEcoreModelAssociations
+import edelta.services.IEdeltaEcoreModelAssociations
 import edelta.validation.EdeltaValidator
 import java.util.List
 import org.eclipse.emf.ecore.EClass
@@ -23,7 +24,6 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
-import edelta.edelta.EdeltaPackage
 
 class EdeltaInterpreter extends XbaseInterpreter {
 
