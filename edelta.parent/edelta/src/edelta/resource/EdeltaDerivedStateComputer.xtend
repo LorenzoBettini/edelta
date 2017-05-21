@@ -8,6 +8,7 @@ import edelta.edelta.EdeltaEcoreChangeEClassExpression
 import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreReference
+import edelta.interpreter.EdeltaInterpreter
 import edelta.lib.EdeltaEcoreUtil
 import edelta.lib.EdeltaLibrary
 import edelta.services.IEdeltaEcoreModelAssociations
@@ -39,6 +40,13 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	@Inject GenericUnloader unloader
 
 	@Inject EdeltaChangeRunner changeRunner
+
+	var EdeltaInterpreter interpreter
+
+	@Inject
+	def setInterpreter(EdeltaInterpreter interpreter) {
+		this.interpreter = interpreter
+	}
 
 	public static class EdeltaDerivedStateAdapter extends AdapterImpl {
 		var Map<EObject, EObject> targetToSourceMap = newHashMap()
@@ -144,7 +152,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 			derivedEPackage.EClassifiers += created
 		}
 	}
-	
+
 	def private EPackage getOrAddDerivedStateEPackage(EPackage referredEPackage, Map<String, EPackage> nameToEPackageMap) {
 		val referredEPackageName = referredEPackage.name
 		var derivedEPackage = nameToEPackageMap.get(referredEPackageName)
