@@ -39,6 +39,9 @@ public class EdeltaInterpreterHelper {
 	}
 
 	public void safeSetEAttributeType(EAttribute attr, EdeltaEcoreReference ecoreRef) {
+		if (ecoreRef == null) {
+			return;
+		}
 		ENamedElement ref = ecoreRef.getEnamedelement();
 		if (ref instanceof EClassifier) {
 			EClassifier type = (EClassifier) ref;

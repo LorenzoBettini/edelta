@@ -86,4 +86,11 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 		)
 		assertEquals(EcorePackage.eINSTANCE.EString, attr.EType)
 	}
+
+	@Test
+	def void testSafeSetEAttributeTypeWithNullType() {
+		val attr = EcoreFactory.eINSTANCE.createEAttribute
+		interpreterHelper.safeSetEAttributeType(attr, null)
+		assertNull(attr.EType)
+	}
 }
