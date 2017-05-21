@@ -499,6 +499,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testReferenceToCreatedEAttribute() {
+		// note that ecoreref(newAttribute) is translated into
+		// getEAttribute("foo", "NewClass", "changed");
+		// because the name of the created EAttribute is changed
+		// in the initialization block and the interpreter is executed
+		// thus, it is safe to refer to the created EAttribute with
+		// the most up to date name.
 		referenceToCreatedEAttribute.checkCompilation(
 			'''
 			package edelta;
@@ -525,7 +531,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  @Override
 			  protected void doExecute() throws Exception {
 			    createEClass("foo", "NewClass", createList(this::_createEClass_NewClass_in_foo));
-			    getEAttribute("foo", "NewClass", "newAttribute");
+			    getEAttribute("foo", "NewClass", "changed");
 			  }
 			  
 			  public void _createEClass_NewClass_in_foo(final EClass it) {
