@@ -8,7 +8,7 @@ import edelta.edelta.EdeltaEcoreChangeEClassExpression
 import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreReference
-import edelta.interpreter.EdeltaInterpreter
+import edelta.interpreter.IEdeltaInterpreter
 import edelta.lib.EdeltaEcoreUtil
 import edelta.lib.EdeltaLibrary
 import edelta.services.IEdeltaEcoreModelAssociations
@@ -23,6 +23,7 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.Constants
 import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader.GenericUnloader
 import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
@@ -41,10 +42,10 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 
 	@Inject EdeltaChangeRunner changeRunner
 
-	var EdeltaInterpreter interpreter
+	var IEdeltaInterpreter interpreter
 
 	@Inject
-	def setInterpreter(EdeltaInterpreter interpreter) {
+	def setInterpreter(IEdeltaInterpreter interpreter) {
 		this.interpreter = interpreter
 	}
 
@@ -52,6 +53,8 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		var Map<EObject, EObject> targetToSourceMap = newHashMap()
 		var Map<String, EPackage> nameToEPackageMap = newHashMap()
 		var Map<EObject, EAttribute> opToEAttributeMap = newHashMap()
+		var Map<EdeltaEcoreBaseEClassManipulationWithBlockExpression, EClass>
+			opToEClassMap = newHashMap
 
 		override boolean isAdapterForType(Object type) {
 			return EdeltaDerivedStateAdapter === type;
@@ -85,22 +88,31 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		getOrInstallAdapter(resource).opToEAttributeMap
 	}
 
+	def protected opToEClassMap(Resource resource) {
+		getOrInstallAdapter(resource).opToEClassMap
+	}
+
 	override derivedEPackages(Resource resource) {
 		nameToEPackageMap(resource).values
 	}
 
 	override installDerivedState(DerivedStateAwareResource resource, boolean preIndexingPhase) {
 		super.installDerivedState(resource, preIndexingPhase)
+		val programJvmType = resource.contents.head.jvmElements.filter(JvmGenericType).head
 		if (!preIndexingPhase) {
 			val targetToSourceMap = resource.derivedToSourceMap
 			val nameToEPackageMap = resource.nameToEPackageMap
 			val opToEAttributeMap = resource.opToEAttributeMap
-			for (exp :resource.allContents.toIterable.filter(EdeltaEcoreCreateEClassExpression)) {
+			val opToEClassMap = resource.opToEClassMap
+
+			val createEClassExpressions = resource.allContents.toIterable.filter(EdeltaEcoreCreateEClassExpression).toList
+			for (exp : createEClassExpressions) {
 				val derivedEClass = createDerivedStateEClass(exp.name, exp.ecoreReferenceSuperTypes) => [
 					// could be null in an incomplete expression
 					addToDerivedEPackage(nameToEPackageMap, exp.epackage)
 				]
 				targetToSourceMap.put(derivedEClass, exp)
+				opToEClassMap.put(exp, derivedEClass)
 				handleCreateEAttribute(exp, derivedEClass, targetToSourceMap, opToEAttributeMap)
 			}
 			val changeEClassExpressions = resource.
@@ -119,9 +131,25 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 				val derivedEClass = EdeltaEcoreUtil.copyEClassifier(exp.original)
 				addToDerivedEPackage(derivedEClass, nameToEPackageMap, exp.epackage)
 				targetToSourceMap.put(derivedEClass, exp)
+				opToEClassMap.put(exp, derivedEClass)
 				changeRunner.performChanges(derivedEClass, exp)
 				handleCreateEAttribute(exp, derivedEClass, targetToSourceMap, opToEAttributeMap)
 			}
+			runInterpreter(createEClassExpressions, opToEClassMap, programJvmType)
+			runInterpreter(changeEClassExpressions, opToEClassMap, programJvmType)
+		}
+	}
+
+	private def void runInterpreter(List<? extends EdeltaEcoreBaseEClassManipulationWithBlockExpression> expressions,
+		Map<EdeltaEcoreBaseEClassManipulationWithBlockExpression, EClass> opToEClassMap,
+		JvmGenericType jvmGenericType
+	) {
+		for (e : expressions) {
+			interpreter.run(
+				e,
+				opToEClassMap.get(e),
+				jvmGenericType
+			)
 		}
 	}
 
