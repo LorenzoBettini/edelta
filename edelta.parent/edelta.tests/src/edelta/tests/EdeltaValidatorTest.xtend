@@ -70,9 +70,12 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		'''.parseWithTestEcore.assertErrorsAsStrings(
 			'''
 			Type mismatch: cannot convert from EDataType to EClass
+			Type mismatch: cannot convert from EDataType to EClass
+			Type mismatch: cannot convert from EEnum to EClass
 			Type mismatch: cannot convert from EEnum to EClass
 			'''
 		)
+		// mismatch errors are duplicate due to the interpreter
 	}
 
 	@Test
@@ -85,10 +88,13 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		'''.parseWithTestEcore.assertErrorsAsStrings(
 			'''
 			Type mismatch: cannot convert from EDataType to EClass
+			Type mismatch: cannot convert from EDataType to EClass
+			Type mismatch: cannot convert from EEnum to EClass
 			Type mismatch: cannot convert from EEnum to EClass
 			extraneous input ',' expecting RULE_ID
 			'''
 		)
+		// mismatch errors are duplicate due to the interpreter
 	}
 
 	@Test
@@ -102,11 +108,14 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 			'''
 			AAA cannot be resolved.
 			Type mismatch: cannot convert from EDataType to EClass
+			Type mismatch: cannot convert from EDataType to EClass
+			Type mismatch: cannot convert from EEnum to EClass
 			Type mismatch: cannot convert from EEnum to EClass
 			'''
 		)
 		// type mismatch error has not been reported on AAA
 		// since it can't be resolved
+		// mismatch errors are duplicate due to the interpreter
 	}
 
 	@Test
