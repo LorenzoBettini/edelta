@@ -81,8 +81,10 @@ class EdeltaInterpreter extends XbaseInterpreter {
 	}
 
 	override protected doEvaluate(XExpression expression, IEvaluationContext context, CancelIndicator indicator) {
+		if (expression === null)
+			return null
 		if (expression instanceof EdeltaEcoreBaseEClassManipulationWithBlockExpression) {
-			return super.doEvaluate(expression.body, context, indicator)
+			return doEvaluate(expression.body, context, indicator)
 		} else if (expression instanceof EdeltaEcoreReferenceExpression) {
 			return doEvaluate(expression.reference, context, indicator)
 		} else if (expression instanceof EdeltaEcoreReference) {

@@ -291,6 +291,24 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testNullBody() {
+		val input = '''
+			import org.eclipse.emf.ecore.EClass
+
+			metamodel "foo"
+
+			createEClass NewClass1 in foo
+			
+			// here the body is null, but the interpreter
+			// avoids NPE
+			createEClass NewClass in 
+		'''
+		input.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ derivedEClass |
+			assertEquals("NewClass1", derivedEClass.name)
+		]
+	}
+
 	def assertAfterInterpretationOfEdeltaManipulationExpression(CharSequence input, (EClass)=>void testExecutor) {
 		assertAfterInterpretationOfEdeltaManipulationExpression(input, true, testExecutor)
 	}
