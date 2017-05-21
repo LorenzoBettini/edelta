@@ -309,6 +309,21 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test(expected=IllegalArgumentException)
+	def void testOperationWithErrorsDueToWrongParsing() {
+		val input = '''
+			package test
+			
+			metamodel "foo"
+			
+			createEClass First in foo
+			eclass First
+		'''
+		input.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ derivedEClass |
+			assertEquals("First", derivedEClass.name)
+		]
+	}
+
 	def assertAfterInterpretationOfEdeltaManipulationExpression(CharSequence input, (EClass)=>void testExecutor) {
 		assertAfterInterpretationOfEdeltaManipulationExpression(input, true, testExecutor)
 	}
