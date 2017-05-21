@@ -1,9 +1,11 @@
 package edelta.tests
 
 import com.google.inject.Inject
+import com.google.inject.Injector
 import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
 import edelta.edelta.EdeltaPackage
 import edelta.interpreter.EdeltaInterpreter
+import edelta.interpreter.IEdeltaInterpreter
 import edelta.resource.EdeltaDerivedStateComputer
 import edelta.tests.additional.MyCustomException
 import edelta.validation.EdeltaValidator
@@ -24,11 +26,18 @@ import static org.junit.Assert.*
 @InjectWith(EdeltaInjectorProviderCustom)
 class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
-	@Inject EdeltaInterpreter interpreter
+	protected IEdeltaInterpreter interpreter
 
 	@Inject extension IJvmModelAssociations
 
 	@Inject EdeltaDerivedStateComputer derivedStateComputer
+
+	@Inject Injector injector
+
+	@Before
+	def void createInterpreter() {
+		interpreter = injector.getInstance(EdeltaInterpreter)
+	}
 
 	@Before
 	def void disableTimeout() {
@@ -43,14 +52,12 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		// derived state computer is a singleton so we can
 		// safely set its interpreter globally
 		derivedStateComputer.interpreter = new EdeltaInterpreter() {
-
 			override run(EdeltaEcoreBaseEClassManipulationWithBlockExpression e, EClass c, JvmGenericType javaType) {
 				// avoid the derived state computer run the interpreter
 				// since the tests in this class must concern interpreter only
 				// and we don't want side effects from the derived state computer
 				// running the interpreter
 			}
-
 		}
 	}
 
@@ -324,11 +331,11 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	def assertAfterInterpretationOfEdeltaManipulationExpression(CharSequence input, (EClass)=>void testExecutor) {
+	def protected assertAfterInterpretationOfEdeltaManipulationExpression(CharSequence input, (EClass)=>void testExecutor) {
 		assertAfterInterpretationOfEdeltaManipulationExpression(input, true, testExecutor)
 	}
 
-	def assertAfterInterpretationOfEdeltaManipulationExpression(CharSequence input, boolean doValidate, (EClass)=>void testExecutor) {
+	def protected assertAfterInterpretationOfEdeltaManipulationExpression(CharSequence input, boolean doValidate, (EClass)=>void testExecutor) {
 		val program = input.parseWithTestEcore
 		if (doValidate) {
 			program.assertNoErrors

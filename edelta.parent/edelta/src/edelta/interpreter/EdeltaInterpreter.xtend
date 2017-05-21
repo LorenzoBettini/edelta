@@ -25,7 +25,7 @@ import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 
-class EdeltaInterpreter extends XbaseInterpreter {
+class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
 	@Inject extension IJvmModelAssociations
 	@Inject extension EdeltaInterpreterHelper
@@ -45,7 +45,7 @@ class EdeltaInterpreter extends XbaseInterpreter {
 		}
 	}
 
-	def run(EdeltaEcoreBaseEClassManipulationWithBlockExpression e, EClass c, JvmGenericType javaType) {
+	override run(EdeltaEcoreBaseEClassManipulationWithBlockExpression e, EClass c, JvmGenericType javaType) {
 		val result = evaluate(
 			e,
 			createContext() => [

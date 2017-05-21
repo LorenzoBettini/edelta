@@ -11,6 +11,8 @@ import edelta.scoping.EdeltaQualifiedNameProvider
 import edelta.services.IEdeltaEcoreModelAssociations
 import edelta.typesystem.EdeltaTypeComputer
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
+import edelta.interpreter.IEdeltaInterpreter
+import edelta.interpreter.EdeltaSafeInterpreter
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -43,5 +45,9 @@ class EdeltaRuntimeModule extends AbstractEdeltaRuntimeModule {
 
 	def Class<? extends IEdeltaEcoreModelAssociations> bindIEdeltaEcoreModelAssociations() {
 		EdeltaDerivedStateComputer
+	}
+
+	def Class<? extends IEdeltaInterpreter> bindIEdeltaInterpreter() {
+		EdeltaSafeInterpreter
 	}
 }
