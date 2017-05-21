@@ -19,7 +19,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import static edelta.interpreter.EdeltaInterpreter.*
 import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
@@ -34,17 +33,17 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Inject Injector injector
 
-	@Before
-	def void createInterpreter() {
-		interpreter = injector.getInstance(EdeltaInterpreter)
+	def IEdeltaInterpreter createInterpreter() {
+		injector.getInstance(EdeltaInterpreter)
 	}
 
 	@Before
-	def void disableTimeout() {
+	def void setupInterpreter() {
+		interpreter = createInterpreter
 		// for standard tests we disable the timeout
 		// actually we set it to several minutes
 		// this also makes it easier to debug tests
-		EdeltaInterpreter.INTERPRETER_TIMEOUT = 1200000;
+		interpreter.interpreterTimeout = 1200000;
 	}
 
 	@Before
@@ -266,7 +265,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	@Test
 	def void testTimeoutInCancelIndicator() {
 		// in this test we really need the timeout
-		EdeltaInterpreter.INTERPRETER_TIMEOUT = 2000;
+		interpreter.interpreterTimeout = 2000;
 		val input = '''
 			import org.eclipse.emf.ecore.EClass
 

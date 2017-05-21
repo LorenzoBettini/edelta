@@ -16,8 +16,8 @@ class EdeltaSafeInterpreterTest extends EdeltaInterpreterTest {
 
 	@Inject Injector injector
 
-	override void createInterpreter() {
-		interpreter = injector.getInstance(EdeltaSafeInterpreter)
+	override createInterpreter() {
+		injector.getInstance(EdeltaSafeInterpreter)
 	}
 
 	@Test

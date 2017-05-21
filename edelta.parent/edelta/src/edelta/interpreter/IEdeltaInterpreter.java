@@ -17,4 +17,6 @@ public interface IEdeltaInterpreter {
 
 	IEvaluationResult run(EdeltaEcoreBaseEClassManipulationWithBlockExpression exp, EClass eClass,
 			JvmGenericType jvmGenericType);
+
+	void setInterpreterTimeout(int interpreterTimeout);
 }

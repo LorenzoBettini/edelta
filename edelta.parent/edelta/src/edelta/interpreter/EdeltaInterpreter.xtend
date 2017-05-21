@@ -31,18 +31,14 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 	@Inject extension EdeltaInterpreterHelper
 	@Inject extension IEdeltaEcoreModelAssociations
 
-	var static public int INTERPRETER_TIMEOUT = 2000;
+	var int interpreterTimeout = 2000;
 
 	val edelta = new AbstractEdelta() {
 		
 	}
 
-	private static class TimeoutCancelIndicator implements CancelIndicator {
-		private long stopAt = System.currentTimeMillis() + INTERPRETER_TIMEOUT;
-
-		override boolean isCanceled() {
-			return System.currentTimeMillis() > stopAt;
-		}
+	override void setInterpreterTimeout(int interpreterTimeout) {
+		this.interpreterTimeout = interpreterTimeout
 	}
 
 	override run(EdeltaEcoreBaseEClassManipulationWithBlockExpression e, EClass c, JvmGenericType javaType) {
@@ -59,7 +55,12 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 				newValue(QualifiedName.create("this"), edelta)
 				newValue(QualifiedName.create(javaType.simpleName), edelta)
 			],
-			new TimeoutCancelIndicator
+			new CancelIndicator() {
+				private long stopAt = System.currentTimeMillis() + interpreterTimeout;
+				override boolean isCanceled() {
+					return System.currentTimeMillis() > stopAt;
+				}
+			}
 		)
 		if (result === null) {
 			addWarning(e)
@@ -72,7 +73,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 			new EObjectDiagnosticImpl(
 				Severity.WARNING,
 				EdeltaValidator.INTERPRETER_TIMEOUT,
-				"Timeout interpreting initialization block ("+INTERPRETER_TIMEOUT+"ms).",
+				"Timeout interpreting initialization block ("+interpreterTimeout+"ms).",
 				e,
 				EdeltaPackage.eINSTANCE.edeltaEcoreBaseManipulationWithBlockExpression_Body,
 				-1,

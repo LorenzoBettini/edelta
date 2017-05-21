@@ -32,4 +32,9 @@ public class EdeltaSafeInterpreter implements IEdeltaInterpreter {
 		return null;
 	}
 
+	@Override
+	public void setInterpreterTimeout(int interpreterTimeout) {
+		delegate.setInterpreterTimeout(interpreterTimeout);
+	}
+
 }
