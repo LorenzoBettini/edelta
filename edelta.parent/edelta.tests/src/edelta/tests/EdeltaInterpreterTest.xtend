@@ -2,11 +2,9 @@ package edelta.tests
 
 import com.google.inject.Inject
 import com.google.inject.Injector
-import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
 import edelta.edelta.EdeltaPackage
 import edelta.interpreter.EdeltaInterpreter
 import edelta.interpreter.IEdeltaInterpreter
-import edelta.resource.EdeltaDerivedStateComputer
 import edelta.tests.additional.MyCustomException
 import edelta.validation.EdeltaValidator
 import org.eclipse.emf.ecore.EClass
@@ -22,14 +20,12 @@ import org.junit.runner.RunWith
 import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
-@InjectWith(EdeltaInjectorProviderCustom)
+@InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
 class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	protected IEdeltaInterpreter interpreter
 
 	@Inject extension IJvmModelAssociations
-
-	@Inject EdeltaDerivedStateComputer derivedStateComputer
 
 	@Inject Injector injector
 
@@ -44,20 +40,6 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		// actually we set it to several minutes
 		// this also makes it easier to debug tests
 		interpreter.interpreterTimeout = 1200000;
-	}
-
-	@Before
-	def void disableInterpreterInDerivedStateComputer() {
-		// derived state computer is a singleton so we can
-		// safely set its interpreter globally
-		derivedStateComputer.interpreter = new EdeltaInterpreter() {
-			override run(EdeltaEcoreBaseEClassManipulationWithBlockExpression e, EClass c, JvmGenericType javaType) {
-				// avoid the derived state computer run the interpreter
-				// since the tests in this class must concern interpreter only
-				// and we don't want side effects from the derived state computer
-				// running the interpreter
-			}
-		}
 	}
 
 	@Test

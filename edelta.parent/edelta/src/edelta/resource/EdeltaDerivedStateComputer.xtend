@@ -42,12 +42,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 
 	@Inject EdeltaChangeRunner changeRunner
 
-	var IEdeltaInterpreter interpreter
-
-	@Inject
-	def setInterpreter(IEdeltaInterpreter interpreter) {
-		this.interpreter = interpreter
-	}
+	@Inject IEdeltaInterpreter interpreter
 
 	public static class EdeltaDerivedStateAdapter extends AdapterImpl {
 		var Map<EObject, EObject> targetToSourceMap = newHashMap()
@@ -140,7 +135,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		}
 	}
 
-	private def void runInterpreter(List<? extends EdeltaEcoreBaseEClassManipulationWithBlockExpression> expressions,
+	protected def void runInterpreter(List<? extends EdeltaEcoreBaseEClassManipulationWithBlockExpression> expressions,
 		Map<EdeltaEcoreBaseEClassManipulationWithBlockExpression, EClass> opToEClassMap,
 		JvmGenericType jvmGenericType
 	) {
