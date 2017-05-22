@@ -8,8 +8,6 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.xtext.common.types.JvmGenericType;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationResult;
 
-import com.google.inject.Inject;
-
 import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression;
 
 /**
@@ -18,17 +16,15 @@ import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression;
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaSafeInterpreter implements IEdeltaInterpreter {
+public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 
 	private static final Logger LOG = Logger.getLogger(EdeltaSafeInterpreter.class);
-
-	@Inject private EdeltaInterpreter delegate;
 
 	@Override
 	public IEvaluationResult run(EdeltaEcoreBaseEClassManipulationWithBlockExpression exp, EClass eClass,
 			JvmGenericType jvmGenericType) {
 		try {
-			IEvaluationResult result = delegate.run(exp, eClass, jvmGenericType);
+			IEvaluationResult result = super.run(exp, eClass, jvmGenericType);
 			if (result != null) {
 				Throwable exception = result.getException();
 				if (exception != null) {
@@ -42,11 +38,6 @@ public class EdeltaSafeInterpreter implements IEdeltaInterpreter {
 			e.printStackTrace();
 		}
 		return null;
-	}
-
-	@Override
-	public void setInterpreterTimeout(int interpreterTimeout) {
-		delegate.setInterpreterTimeout(interpreterTimeout);
 	}
 
 }

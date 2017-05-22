@@ -19,4 +19,6 @@ public interface IEdeltaInterpreter {
 			JvmGenericType jvmGenericType);
 
 	void setInterpreterTimeout(int interpreterTimeout);
+
+	public void setClassLoader(ClassLoader classLoader);
 }
