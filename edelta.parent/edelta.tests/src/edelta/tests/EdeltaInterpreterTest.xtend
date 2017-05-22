@@ -95,6 +95,23 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testCreateEClassAndCallJvmOperationFromSuperclass() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				// call method from superclass AbstractEdelta
+				EStructuralFeatures += ^createEAttribute(it, "aNewAttr", null)
+			}
+		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
+			assertEquals("NewClass", derivedEClass.name)
+			assertEquals(1, derivedEClass.EStructuralFeatures.size)
+			val attr = derivedEClass.EStructuralFeatures.head
+			assertEquals("aNewAttr", attr.name)
+		]
+	}
+
 	@Test(expected=MyCustomException)
 	def void testCreateEClassAndCallOperationThatThrows() {
 		'''
