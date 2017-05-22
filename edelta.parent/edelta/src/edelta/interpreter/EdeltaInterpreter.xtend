@@ -115,16 +115,14 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 			IEvaluationContext parentContext, CancelIndicator indicator) {
 		val declaringType = operation.declaringType
 		if (declaringType == programInferredJavaType) {
-			val originalOperation = operation.sourceElements.head
-			if (originalOperation instanceof EdeltaOperation) {
-				val context = parentContext.fork
-				var index = 0
-				for (param : operation.parameters) {
-					context.newValue(QualifiedName.create(param.name), argumentValues.get(index))
-					index = index + 1	
-				}
-				return internalEvaluate(originalOperation.body, context, indicator)
+			val originalOperation = operation.sourceElements.head as EdeltaOperation
+			val context = parentContext.fork
+			var index = 0
+			for (param : operation.parameters) {
+				context.newValue(QualifiedName.create(param.name), argumentValues.get(index))
+				index = index + 1	
 			}
+			return internalEvaluate(originalOperation.body, context, indicator)
 		}
 		return super.invokeOperation(operation, receiver, argumentValues, parentContext, indicator)
 	}
