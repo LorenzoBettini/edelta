@@ -125,4 +125,52 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 		'''
 		)
 	}
+
+	@Test
+	def void testOutlineWithCreateEClassAndInterpretedNewAttributeWithUseAs() {
+		createFile(
+			TEST_PROJECT + "/src/Refactorings.edelta",
+			'''
+			import org.eclipse.emf.ecore.EClass
+			
+			package com.example
+			
+			metamodel "mypackage"
+			
+			def myNewAttribute(EClass c, String name) {
+				c.EStructuralFeatures += newEAttribute(name) => [
+					EType = ecoreref(MyDataType)
+				]
+			}
+			'''
+		)
+		// wait for build so that ecores are indexed
+		// and then found by the test programs
+		waitForBuild
+
+		'''
+		package com.example
+		
+		metamodel "mypackage"
+		// don't rely on ecore, since the input files are not saved
+		// during the test, thus external libraries are not seen
+		// metamodel "ecore"
+		
+		use Refactorings as my
+		
+		createEClass A in mypackage {
+			my.myNewAttribute(it, "foo")
+		}
+		'''.assertAllLabels(
+		'''
+		com.example
+		  doExecute() : void
+		  mypackage
+		    A
+		'''
+		)
+		// TODO: when interpreter's classloader is fixed
+		// we should be able to interpret call to operations
+		// in the source folders.
+	}
 }
