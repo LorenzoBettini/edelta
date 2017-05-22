@@ -33,6 +33,8 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
 	var int interpreterTimeout = 2000;
 
+	var JvmGenericType programInferredJavaType;
+
 	val edelta = new AbstractEdelta() {
 		
 	}
@@ -41,7 +43,8 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 		this.interpreterTimeout = interpreterTimeout
 	}
 
-	override run(EdeltaEcoreBaseEClassManipulationWithBlockExpression e, EClass c, JvmGenericType javaType) {
+	override run(EdeltaEcoreBaseEClassManipulationWithBlockExpression e, EClass c, JvmGenericType programInferredJavaType) {
+		this.programInferredJavaType = programInferredJavaType
 		val result = evaluate(
 			e,
 			createContext() => [
@@ -53,7 +56,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 				// in our custom invokeOperation and in that case we interpret the
 				// original source's XBlockExpression
 				newValue(QualifiedName.create("this"), edelta)
-				newValue(QualifiedName.create(javaType.simpleName), edelta)
+				newValue(QualifiedName.create(programInferredJavaType.simpleName), edelta)
 			],
 			new CancelIndicator() {
 				private long stopAt = System.currentTimeMillis() + interpreterTimeout;
@@ -110,15 +113,18 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
 	override protected invokeOperation(JvmOperation operation, Object receiver, List<Object> argumentValues,
 			IEvaluationContext parentContext, CancelIndicator indicator) {
-		val originalOperation = operation.sourceElements.head
-		if (originalOperation instanceof EdeltaOperation) {
-			val context = parentContext.fork
-			var index = 0
-			for (param : operation.parameters) {
-				context.newValue(QualifiedName.create(param.name), argumentValues.get(index))
-				index = index + 1	
+		val declaringType = operation.declaringType
+		if (declaringType == programInferredJavaType) {
+			val originalOperation = operation.sourceElements.head
+			if (originalOperation instanceof EdeltaOperation) {
+				val context = parentContext.fork
+				var index = 0
+				for (param : operation.parameters) {
+					context.newValue(QualifiedName.create(param.name), argumentValues.get(index))
+					index = index + 1	
+				}
+				return internalEvaluate(originalOperation.body, context, indicator)
 			}
-			return internalEvaluate(originalOperation.body, context, indicator)
 		}
 		return super.invokeOperation(operation, receiver, argumentValues, parentContext, indicator)
 	}
