@@ -45,6 +45,8 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 
 	@Inject IEdeltaInterpreter interpreter
 
+	@Inject EdeltaInterpreterConfigurator interpreterConfigurator
+
 	public static class EdeltaDerivedStateAdapter extends AdapterImpl {
 		var Map<EObject, EObject> targetToSourceMap = newHashMap()
 		var Map<String, EPackage> nameToEPackageMap = newHashMap()
@@ -131,7 +133,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 				changeRunner.performChanges(derivedEClass, exp)
 				handleCreateEAttribute(exp, derivedEClass, targetToSourceMap, opToEAttributeMap)
 			}
-			EdeltaInterpreterConfigurator.configureInterpreter(interpreter, resource)
+			interpreterConfigurator.configureInterpreter(interpreter, resource)
 			runInterpreter(createEClassExpressions, opToEClassMap, programJvmType)
 			runInterpreter(changeEClassExpressions, opToEClassMap, programJvmType)
 		}

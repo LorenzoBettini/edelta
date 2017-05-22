@@ -20,6 +20,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.xtext.resource.XtextResourceSet;
 
+import com.google.inject.Inject;
+
 import edelta.interpreter.IEdeltaInterpreter;
 
 /**
@@ -31,7 +33,10 @@ import edelta.interpreter.IEdeltaInterpreter;
  */
 public class EdeltaInterpreterConfigurator {
 
-	public static void configureInterpreter(IEdeltaInterpreter interpreter2, Resource resource) {
+	@Inject
+	private ClassLoader parentClassLoader;
+
+	public void configureInterpreter(IEdeltaInterpreter interpreter2, Resource resource) {
 		ResourceSet set = resource.getResourceSet();
 		if (set instanceof XtextResourceSet) {
 			Object context = ((XtextResourceSet) set).getClasspathURIContext();
@@ -75,7 +80,9 @@ public class EdeltaInterpreterConfigurator {
 							urls.add(entry.getPath().toFile().toURI().toURL());
 						}
 					}
-					URLClassLoader cl = new URLClassLoader(urls.toArray(new URL[urls.size()]));
+					URLClassLoader cl = new URLClassLoader(
+							urls.toArray(new URL[urls.size()]),
+							parentClassLoader);
 					interpreter2.setClassLoader(cl);
 				} catch (Exception e) {
 					e.printStackTrace();
