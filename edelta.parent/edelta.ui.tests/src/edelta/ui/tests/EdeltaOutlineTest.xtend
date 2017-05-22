@@ -167,10 +167,8 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 		  doExecute() : void
 		  mypackage
 		    A
+		      foo
 		'''
 		)
-		// TODO: when interpreter's classloader is fixed
-		// we should be able to interpret call to operations
-		// in the source folders.
 	}
 }
