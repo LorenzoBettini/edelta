@@ -28,6 +28,7 @@ import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader.GenericUnloader
 import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator
+import edelta.interpreter.internal.EdeltaInterpreterConfigurator
 
 @Singleton
 class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEcoreModelAssociations {
@@ -130,6 +131,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 				changeRunner.performChanges(derivedEClass, exp)
 				handleCreateEAttribute(exp, derivedEClass, targetToSourceMap, opToEAttributeMap)
 			}
+			EdeltaInterpreterConfigurator.configureInterpreter(interpreter, resource)
 			runInterpreter(createEClassExpressions, opToEClassMap, programJvmType)
 			runInterpreter(changeEClassExpressions, opToEClassMap, programJvmType)
 		}

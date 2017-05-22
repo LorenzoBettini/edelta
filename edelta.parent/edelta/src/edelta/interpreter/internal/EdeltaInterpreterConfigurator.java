@@ -3,6 +3,8 @@
  */
 package edelta.interpreter.internal;
 
+import static com.google.common.collect.Sets.newHashSet;
+
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Set;
@@ -17,9 +19,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.xtext.resource.XtextResourceSet;
-import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter;
 
-import static com.google.common.collect.Sets.newHashSet;
+import edelta.interpreter.IEdeltaInterpreter;
 
 /**
  * Sets the classloader of the interpreter so that if finds classes in
@@ -30,7 +31,7 @@ import static com.google.common.collect.Sets.newHashSet;
  */
 public class EdeltaInterpreterConfigurator {
 
-	public void configureInterpreter(XbaseInterpreter interpreter2, Resource resource) {
+	public static void configureInterpreter(IEdeltaInterpreter interpreter2, Resource resource) {
 		ResourceSet set = resource.getResourceSet();
 		if (set instanceof XtextResourceSet) {
 			Object context = ((XtextResourceSet) set).getClasspathURIContext();
