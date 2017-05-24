@@ -481,7 +481,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testInterpretedChangeEClassAndMoveEAttribute() {
+	def void testInterpretedChangeEClassAndRenameEAttribute() {
 		val program = '''
 			metamodel "foo"
 			
