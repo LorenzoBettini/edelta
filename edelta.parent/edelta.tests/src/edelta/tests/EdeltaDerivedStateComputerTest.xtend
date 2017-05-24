@@ -457,4 +457,26 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		assertNotNull(derivedEAttribute)
 		assertSame(derivedEAttribute, e.getEAttributeElement)
 	}
+
+	@Test
+	def void testInterpretedCreateEClassAndCallOperationFromUseAs() {
+		val program = '''
+			import edelta.tests.additional.MyCustomEdelta
+			
+			metamodel "foo"
+			
+			use MyCustomEdelta as my
+			
+			createEClass NewClass in foo {
+				my.createANewEAttribute(it)
+			}
+		'''.
+		parseWithTestEcore
+		val derivedEClass = program.getDerivedStateLastEClass
+		assertEquals("NewClass", derivedEClass.name)
+		assertEquals(1, derivedEClass.EStructuralFeatures.size)
+		val attr = derivedEClass.EStructuralFeatures.head
+		assertEquals("aNewAttr", attr.name)
+		assertEquals("EString", attr.EType.name)
+	}
 }
