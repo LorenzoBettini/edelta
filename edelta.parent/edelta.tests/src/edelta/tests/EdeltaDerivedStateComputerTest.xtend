@@ -479,4 +479,22 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		assertEquals("aNewAttr", attr.name)
 		assertEquals("EString", attr.EType.name)
 	}
+
+	@Test
+	def void testInterpretedChangeEClassAndMoveEAttribute() {
+		val program = '''
+			metamodel "foo"
+			
+			changeEClass foo.FooClass {
+				val attr = ecoreref(FooClass.myAttribute)
+				attr.name = "renamed"
+			}
+		'''.
+		parseWithTestEcore
+		val derivedEClass = program.getDerivedStateLastEClass
+		assertEquals("FooClass", derivedEClass.name)
+		val attr = derivedEClass.EStructuralFeatures.head
+		assertEquals("renamed", attr.name)
+		program.assertNoErrors
+	}
 }
