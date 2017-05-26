@@ -19,6 +19,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EStructuralFeature
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -496,5 +498,42 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		val attr = derivedEClass.EStructuralFeatures.head
 		assertEquals("renamed", attr.name)
 		program.assertNoErrors
+	}
+
+	@Test
+	def void testInterpretedCreateEClassAndMoveEAttribute() {
+		val program = '''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				val attr = ecoreref(FooClass.myAttribute)
+				EStructuralFeatures += attr
+			}
+		'''.
+		parseWithTestEcore
+		val derivedEClass = program.getDerivedStateLastEClass
+		assertEquals("NewClass", derivedEClass.name)
+		val attr = derivedEClass.EStructuralFeatures.head
+		assertEquals("myAttribute", attr.name)
+		program.validate
+		program.assertNoErrors
+		// check that the reference is not dangling
+		// that is, the attribute is still contained in the original class
+		// at this point of the program
+		// otherwise in the editor we then get an unresolved error.
+		val ecoreref = program.lastExpression.createEClassExpression.body.expressions.head.
+			variableDeclaration.right.
+			edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference
+		val eClass = ecoreref.qualification.enamedelement as EClass
+		val eAttr = ecoreref.enamedelement as EAttribute
+		// TODO: when interpreter is done on a copy of the model this
+		// should be true
+		assertEClassContainsFeature(eClass, eAttr, false)
+	}
+
+	def private assertEClassContainsFeature(EClass c, EStructuralFeature f, boolean expected) {
+		assertEquals(expected,
+			c.EStructuralFeatures.contains(f)
+		)
 	}
 }

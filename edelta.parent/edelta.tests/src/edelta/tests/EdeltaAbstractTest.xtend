@@ -28,6 +28,7 @@ import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
 import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
+import org.eclipse.xtext.xbase.XVariableDeclaration
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -177,5 +178,9 @@ abstract class EdeltaAbstractTest {
 
 	def protected getEdeltaEcoreQualifiedReference(EObject e) {
 		e as EdeltaEcoreQualifiedReference
+	}
+
+	def protected getVariableDeclaration(XExpression e) {
+		e as XVariableDeclaration
 	}
 }
