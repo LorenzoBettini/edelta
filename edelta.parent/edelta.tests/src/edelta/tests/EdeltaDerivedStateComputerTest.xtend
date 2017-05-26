@@ -2,12 +2,16 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
+import edelta.edelta.EdeltaEcoreQualifiedReference
+import edelta.edelta.EdeltaProgram
 import edelta.resource.EdeltaDerivedStateComputer
 import edelta.resource.EdeltaDerivedStateComputer.EdeltaDerivedStateAdapter
 import java.util.Map
 import org.eclipse.emf.common.notify.impl.AdapterImpl
 import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl
 import org.eclipse.xtext.common.types.JvmGenericType
@@ -19,8 +23,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.EStructuralFeature
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -498,6 +500,16 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		val attr = derivedEClass.EStructuralFeatures.head
 		assertEquals("renamed", attr.name)
 		program.assertNoErrors
+		// check that the reference is not dangling
+		// that is, the attribute is still contained in the original class
+		// at this point of the program
+		// otherwise in the editor we then get an unresolved error.
+		val ecoreref = getEcoreRefInManipulationExpressionBlock(program)
+		val eClass = ecoreref.qualification.enamedelement as EClass
+		val eAttr = ecoreref.enamedelement as EAttribute
+		// This holds since changeEClass creates a deep copy
+		// so the original attribute is not changed
+		assertEClassContainsFeature(eClass, eAttr, true)
 	}
 
 	@Test
@@ -521,14 +533,18 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		// that is, the attribute is still contained in the original class
 		// at this point of the program
 		// otherwise in the editor we then get an unresolved error.
-		val ecoreref = program.lastExpression.createEClassExpression.body.expressions.head.
-			variableDeclaration.right.
-			edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference
+		val ecoreref = getEcoreRefInManipulationExpressionBlock(program)
 		val eClass = ecoreref.qualification.enamedelement as EClass
 		val eAttr = ecoreref.enamedelement as EAttribute
 		// TODO: when interpreter is done on a copy of the model this
 		// should be true
 		assertEClassContainsFeature(eClass, eAttr, false)
+	}
+
+	protected def EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {
+		program.lastExpression.getManipulationEClassExpression.body.expressions.head.
+			variableDeclaration.right.
+			edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference
 	}
 
 	def private assertEClassContainsFeature(EClass c, EStructuralFeature f, boolean expected) {
