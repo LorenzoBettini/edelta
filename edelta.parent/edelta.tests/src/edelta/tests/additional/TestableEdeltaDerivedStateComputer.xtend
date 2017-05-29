@@ -28,8 +28,4 @@ class TestableEdeltaDerivedStateComputer extends EdeltaDerivedStateComputer {
 			super.nameToEPackageMap(resource)
 		}
 
-		override public opToEAttributeMap(Resource resource) {
-			super.opToEAttributeMap(resource)
-		}
-
 }
