@@ -51,6 +51,14 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 			super.nameToEPackageMap(resource)
 		}
 
+		override public opToEAttributeMap(Resource resource) {
+			super.opToEAttributeMap(resource)
+		}
+
+		override public opToEClassMap(Resource resource) {
+			super.opToEClassMap(resource)
+		}
+
 	}
 
 	@Test
@@ -259,22 +267,29 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		
 		metamodel "foo"
 		
-		createEClass First in foo
-		eclass First
+		createEClass First in foo {
+			createEAttribute myAttr type FooDataType {}
+		}
 		'''.
 		parseWithTestEcore
 		val resource = program.eResource as DerivedStateAwareResource
 		val derivedToSourceMap = resource.derivedToSourceMap
 		val nameToEPackageMap = resource.nameToEPackageMap
+		val opToEAttributeMap = resource.opToEAttributeMap
+		val opToEClassMap = resource.opToEClassMap
 		assertFalse(resource.eAdapters.empty)
 		assertFalse(derivedToSourceMap.empty)
 		assertFalse(nameToEPackageMap.empty)
+		assertFalse(opToEAttributeMap.empty)
+		assertFalse(opToEClassMap.empty)
 		// discard derived state
 		program.main.expressions.remove(0)
 		resource.discardDerivedState
 		// maps are empty now
 		assertTrue(derivedToSourceMap.empty)
 		assertTrue(nameToEPackageMap.empty)
+		assertTrue(opToEAttributeMap.empty)
+		assertTrue(opToEClassMap.empty)
 		assertFalse(resource.eAdapters.empty)
 	}
 
