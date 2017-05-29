@@ -2,13 +2,10 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
-import edelta.resource.EdeltaDerivedStateComputer
 import edelta.resource.EdeltaDerivedStateComputer.EdeltaDerivedStateAdapter
-import java.util.Map
+import edelta.tests.additional.TestableEdeltaDerivedStateComputer
 import org.eclipse.emf.common.notify.impl.AdapterImpl
 import org.eclipse.emf.ecore.EAttribute
-import org.eclipse.emf.ecore.EPackage
-import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.resource.DerivedStateAwareResource
@@ -21,41 +18,10 @@ import org.junit.runner.RunWith
 import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
-@InjectWith(EdeltaInjectorProviderCustom)
+@InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
 class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 
 	@Inject extension TestableEdeltaDerivedStateComputer
-
-	/**
-	 * Make protected members public for testing
-	 */
-	static class TestableEdeltaDerivedStateComputer extends EdeltaDerivedStateComputer {
-
-		override public getOrInstallAdapter(Resource resource) {
-			super.getOrInstallAdapter(resource)
-		}
-
-		override public unloadDerivedPackages(Map<String, EPackage> nameToEPackageMap) {
-			super.unloadDerivedPackages(nameToEPackageMap)
-		}
-
-		override public derivedToSourceMap(Resource resource) {
-			super.derivedToSourceMap(resource)
-		}
-
-		override public nameToEPackageMap(Resource resource) {
-			super.nameToEPackageMap(resource)
-		}
-
-		override public opToEAttributeMap(Resource resource) {
-			super.opToEAttributeMap(resource)
-		}
-
-		override public opToEClassMap(Resource resource) {
-			super.opToEClassMap(resource)
-		}
-
-	}
 
 	@Test
 	def void testGetOrInstallAdapterWithNotXtextResource() {
