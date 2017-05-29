@@ -195,10 +195,14 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	override discardDerivedState(DerivedStateAwareResource resource) {
 		val derivedToSourceMap = resource.derivedToSourceMap
 		val nameToEPackageMap = resource.nameToEPackageMap
+		val opToEAttributeMap = resource.opToEAttributeMap
+		val opToEClassMap = resource.opToEClassMap
 		unloadDerivedPackages(nameToEPackageMap)
 		super.discardDerivedState(resource)
 		derivedToSourceMap.clear
 		nameToEPackageMap.clear
+		opToEAttributeMap.clear
+		opToEClassMap.clear
 	}
 
 	/**
