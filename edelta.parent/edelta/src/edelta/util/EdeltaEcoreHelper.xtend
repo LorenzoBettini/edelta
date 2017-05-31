@@ -70,7 +70,7 @@ class EdeltaEcoreHelper {
 	}
 
 	def dispatch Iterable<? extends ENamedElement> getENamedElements(EPackage e, EObject context) {
-		cache.get("getENamedElements" -> e.name, context.eResource) [
+		cache.get("getEPackageENamedElements" -> e.name, context.eResource) [
 			val derived = context.eResource.derivedEPackages.findFirst[name == e.name]
 			((derived?.getEClassifiers ?: emptyList) + e.getEClassifiers).toList
 		]
