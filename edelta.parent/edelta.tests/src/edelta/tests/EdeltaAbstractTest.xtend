@@ -29,6 +29,7 @@ import org.junit.runner.RunWith
 import static extension org.junit.Assert.*
 import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
+import edelta.resource.EdeltaDerivedStateEPackage
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -164,7 +165,7 @@ abstract class EdeltaAbstractTest {
 	}
 
 	def protected getDerivedStateLastEClass(EObject context) {
-		val derivedEPackage = context.eResource.contents.last as EPackage
+		val derivedEPackage = context.eResource.contents.last as EdeltaDerivedStateEPackage
 		derivedEPackage.EClassifiers.last as EClass
 	}
 

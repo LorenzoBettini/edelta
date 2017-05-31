@@ -210,20 +210,27 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		val resource = program.eResource as DerivedStateAwareResource
 		val derivedToSourceMap = resource.derivedToSourceMap
 		val nameToEPackageMap = resource.nameToEPackageMap
+		val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
 		assertFalse(resource.eAdapters.empty)
 		assertFalse(derivedToSourceMap.empty)
 		assertFalse(nameToEPackageMap.empty)
+		assertFalse(nameToCopiedEPackageMap.empty)
 		// explicitly add an adapter to the EPackage
 		nameToEPackageMap.values.head.eAdapters += new AdapterImpl
 		assertTrue(nameToEPackageMap.values.forall[!eAdapters.empty])
+		nameToCopiedEPackageMap.values.head.eAdapters += new AdapterImpl
+		assertTrue(nameToCopiedEPackageMap.values.forall[!eAdapters.empty])
 		// unload packages
 		unloadDerivedPackages(nameToEPackageMap)
+		unloadDerivedPackages(nameToCopiedEPackageMap)
 		// maps are not empty yet
 		assertFalse(derivedToSourceMap.empty)
 		assertFalse(nameToEPackageMap.empty)
+		assertFalse(nameToCopiedEPackageMap.empty)
 		assertFalse(resource.eAdapters.empty)
 		// but adapters have been removed from EPackage
 		assertTrue(nameToEPackageMap.values.forall[eAdapters.empty])
+		assertTrue(nameToCopiedEPackageMap.values.forall[eAdapters.empty])
 	}
 
 	@Test
@@ -241,11 +248,13 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		val resource = program.eResource as DerivedStateAwareResource
 		val derivedToSourceMap = resource.derivedToSourceMap
 		val nameToEPackageMap = resource.nameToEPackageMap
+		val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
 		val opToEAttributeMap = resource.opToEAttributeMap
 		val opToEClassMap = resource.opToEClassMap
 		assertFalse(resource.eAdapters.empty)
 		assertFalse(derivedToSourceMap.empty)
 		assertFalse(nameToEPackageMap.empty)
+		assertFalse(nameToCopiedEPackageMap.empty)
 		assertFalse(opToEAttributeMap.empty)
 		assertFalse(opToEClassMap.empty)
 		// discard derived state
@@ -254,6 +263,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		// maps are empty now
 		assertTrue(derivedToSourceMap.empty)
 		assertTrue(nameToEPackageMap.empty)
+		assertTrue(nameToCopiedEPackageMap.empty)
 		assertTrue(opToEAttributeMap.empty)
 		assertTrue(opToEClassMap.empty)
 		assertFalse(resource.eAdapters.empty)
