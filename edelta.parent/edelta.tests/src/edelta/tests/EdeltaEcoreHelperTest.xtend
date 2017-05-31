@@ -122,6 +122,20 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testENumENamedElementsWithCreatedEClass() {
+		referenceToCreatedEClass.parseWithTestEcore => [
+			getENamedElements(getEClassifierByName("foo", "FooEnum"), it).
+			assertNamedElements(
+				'''
+				FooEnumLiteral
+				FooEnumLiteral
+				'''
+			)
+			// we also have copied EPackages, that's why the elements appear twice
+		]
+	}
+
+	@Test
 	def void testNullENamedElements() {
 		referenceToMetamodel.parseWithTestEcore => [
 			Assert.assertTrue(getENamedElements(null, it).isEmpty)
@@ -138,6 +152,22 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				myReference
 				'''
 			)
+		]
+	}
+
+	@Test
+	def void testEClassENamedElementsWithCreatedEClass() {
+		referenceToCreatedEClass.parseWithTestEcore => [
+			getENamedElements(getEClassifierByName("foo", "FooClass"), it).
+			assertNamedElements(
+				'''
+				myAttribute
+				myReference
+				myAttribute
+				myReference
+				'''
+			)
+			// we also have copied EPackages, that's why the elements appear twice
 		]
 	}
 

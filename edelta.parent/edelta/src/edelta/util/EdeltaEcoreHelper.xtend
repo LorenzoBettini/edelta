@@ -87,8 +87,20 @@ class EdeltaEcoreHelper {
 					}
 					return e.getEClassifiers
 				]
-			EClass: e.EAllStructuralFeatures
-			EEnum: e.ELiterals
+			EClass: 
+				cache.get("getEClassENamedElements" -> e.name, context.eResource) [
+					e.EPackage.getENamedElements(context).
+						filter(EClass).
+						filter[name == e.name].
+						map[EAllStructuralFeatures].flatten
+				]
+			EEnum:
+				cache.get("getEEnumENamedElements" -> e.name, context.eResource) [
+					e.EPackage.getENamedElements(context).
+						filter(EEnum).
+						filter[name == e.name].
+						map[ELiterals].flatten
+				]
 			default: Collections.emptyList
 		}
 	}
