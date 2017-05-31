@@ -2,6 +2,7 @@ package edelta.util
 
 import com.google.inject.Inject
 import edelta.services.IEdeltaEcoreModelAssociations
+import java.util.Collection
 import java.util.Collections
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EEnum
@@ -71,8 +72,11 @@ class EdeltaEcoreHelper {
 
 	def dispatch Iterable<? extends ENamedElement> getENamedElements(EPackage e, EObject context) {
 		cache.get("getEPackageENamedElements" -> e.name, context.eResource) [
-			val derived = context.eResource.derivedEPackages.findFirst[name == e.name]
-			((derived?.getEClassifiers ?: emptyList) + e.getEClassifiers).toList
+			val derived = context.eResource.derivedEPackages.getEPackageByName(e.name)
+			if (derived !== null) {
+				return (derived.getEClassifiers + e.getEClassifiers).toList
+			}
+			return e.getEClassifiers
 		]
 	}
 
@@ -84,4 +88,7 @@ class EdeltaEcoreHelper {
 		e.ELiterals
 	}
 
+	def private getEPackageByName(Collection<EPackage> epackages, String packageName) {
+		return epackages.findFirst[name == packageName]
+	}
 }
