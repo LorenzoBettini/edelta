@@ -19,7 +19,7 @@ import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import static org.junit.Assert.*
+import static extension org.junit.Assert.*
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
@@ -533,6 +533,56 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		// TODO: when interpreter is done on a copy of the model this
 		// should be true
 		assertEClassContainsFeature(eClass, eAttr, false)
+	}
+
+	@Test
+	def void testInterpretedRemovedEClassDoesNotTouchTheOriginalEcore() {
+		val program = '''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				ecoreref(FooClass).EPackage.EClassifiers.remove(ecoreref(FooClass))
+			}
+		'''.
+		parseWithTestEcore
+		val derivedEClass = program.getDerivedStateLastEClass
+		assertEquals("NewClass", derivedEClass.name)
+		program.validate
+		// TODO
+		// don't check for errors: there's a dangling reference because
+		// of the removed FooClass
+		// program.assertNoErrors
+		program.copiedEPackages.head.
+			EClassifiers.findFirst[name == "FooClass"].
+			assertNull
+		program.getEPackageByName("foo").
+			EClassifiers.findFirst[name == "FooClass"].
+			assertNotNull
+	}
+
+	@Test
+	def void testInterpretedRemovedEClassDoesNotTouchTheOriginalEcore_Qualified() {
+		val program = '''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				ecoreref(foo.FooClass).EPackage.EClassifiers.remove(ecoreref(foo.FooClass))
+			}
+		'''.
+		parseWithTestEcore
+		val derivedEClass = program.getDerivedStateLastEClass
+		assertEquals("NewClass", derivedEClass.name)
+		program.validate
+		// TODO
+		// don't check for errors: there's a dangling reference because
+		// of the removed FooClass
+		// program.assertNoErrors
+		program.copiedEPackages.head.
+			EClassifiers.findFirst[name == "FooClass"].
+			assertNull
+		program.getEPackageByName("foo").
+			EClassifiers.findFirst[name == "FooClass"].
+			assertNotNull
 	}
 
 	protected def EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {
