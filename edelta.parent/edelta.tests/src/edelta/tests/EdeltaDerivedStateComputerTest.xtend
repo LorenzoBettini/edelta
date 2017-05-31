@@ -92,7 +92,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testDerivedEPackages() {
+	def void testDerivedAndCopiedEPackages() {
 		val program = '''
 		package test
 		
@@ -102,9 +102,12 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		createEClass Second in foo
 		'''.
 		parseWithTestEcore
-		val derivedEPackages = program.eResource.derivedEPackages
-		assertEquals(1, derivedEPackages.size)
-		assertEquals("foo", derivedEPackages.head.name)
+		var packages = program.eResource.derivedEPackages
+		assertEquals(1, packages.size)
+		assertEquals("foo", packages.head.name)
+		packages = program.eResource.copiedEPackages
+		assertEquals(1, packages.size)
+		assertEquals("foo", packages.head.name)
 	}
 
 	@Test
