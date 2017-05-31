@@ -4,15 +4,17 @@
 package edelta
 
 import edelta.compiler.EdeltaXbaseCompiler
+import edelta.interpreter.EdeltaSafeInterpreter
+import edelta.interpreter.IEdeltaInterpreter
 import edelta.resource.EdeltaDerivedStateComputer
 import edelta.resource.EdeltaLocationInFileProvider
 import edelta.resource.EdeltaResourceDescriptionStrategy
 import edelta.scoping.EdeltaQualifiedNameProvider
 import edelta.services.IEdeltaEcoreModelAssociations
 import edelta.typesystem.EdeltaTypeComputer
+import edelta.validation.EdeltaDiagnosticConverter
+import org.eclipse.xtext.validation.IDiagnosticConverter
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
-import edelta.interpreter.IEdeltaInterpreter
-import edelta.interpreter.EdeltaSafeInterpreter
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -49,5 +51,9 @@ class EdeltaRuntimeModule extends AbstractEdeltaRuntimeModule {
 
 	def Class<? extends IEdeltaInterpreter> bindIEdeltaInterpreter() {
 		EdeltaSafeInterpreter
+	}
+
+	def Class<? extends IDiagnosticConverter> bindIDiagnosticConverter() {
+		return EdeltaDiagnosticConverter
 	}
 }

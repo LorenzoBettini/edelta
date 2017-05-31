@@ -548,10 +548,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		val derivedEClass = program.getDerivedStateLastEClass
 		assertEquals("NewClass", derivedEClass.name)
 		program.validate
-		// TODO
-		// don't check for errors: there's a dangling reference because
-		// of the removed FooClass
-		// program.assertNoErrors
+		program.assertNoErrors
 		program.copiedEPackages.head.
 			EClassifiers.findFirst[name == "FooClass"].
 			assertNull
@@ -573,10 +570,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		val derivedEClass = program.getDerivedStateLastEClass
 		assertEquals("NewClass", derivedEClass.name)
 		program.validate
-		// TODO
-		// don't check for errors: there's a dangling reference because
-		// of the removed FooClass
-		// program.assertNoErrors
+		program.assertNoErrors
 		program.copiedEPackages.head.
 			EClassifiers.findFirst[name == "FooClass"].
 			assertNull
