@@ -31,8 +31,13 @@ class EdeltaEcoreHelper {
 			// we also must explicitly consider the derived EPackages
 			// created by our derived state computer, containing EClasses
 			// created in the program
+			// and also copied elements for interpreting without
+			// breaking the original EMF package registries classes
 			(
 				prog.eResource.derivedEPackages.
+					getAllENamedElements
+			+
+				prog.eResource.copiedEPackages.
 					getAllENamedElements
 			+
 				prog.metamodels.getAllENamedElements
@@ -74,7 +79,13 @@ class EdeltaEcoreHelper {
 		cache.get("getEPackageENamedElements" -> e.name, context.eResource) [
 			val derived = context.eResource.derivedEPackages.getEPackageByName(e.name)
 			if (derived !== null) {
-				return (derived.getEClassifiers + e.getEClassifiers).toList
+				// there'll also be copied epackages
+				val copied = context.eResource.copiedEPackages.getEPackageByName(e.name)
+				return (
+					derived.getEClassifiers +
+					copied.getEClassifiers +
+					e.getEClassifiers
+				).toList
 			}
 			return e.getEClassifiers
 		]
