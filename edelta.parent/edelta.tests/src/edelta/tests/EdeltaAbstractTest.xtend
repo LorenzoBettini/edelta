@@ -169,6 +169,10 @@ abstract class EdeltaAbstractTest {
 		derivedEPackage.EClassifiers.last as EClass
 	}
 
+	def protected getCopiedEPackages(EObject context) {
+		context.eResource.contents.filter(EPackage).filter[!(it instanceof EdeltaDerivedStateEPackage)]
+	}
+
 	def protected getEdeltaEcoreReferenceExpression(XExpression e) {
 		e as EdeltaEcoreReferenceExpression
 	}

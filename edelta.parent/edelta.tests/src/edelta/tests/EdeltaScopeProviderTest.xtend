@@ -13,6 +13,7 @@ import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
 import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EDataType
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -169,6 +170,34 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testScopeForReferenceToCopiedEPackageEClassifierAfterCreatingEClass() {
+		val prog = createEClassAndReferenceToExistingEDataType.
+			parseWithTestEcore
+		val expressions = prog.main.expressions
+		val eclassExp = expressions.last as EdeltaEcoreReferenceExpression
+		val dataType = eclassExp.reference.enamedelement as EDataType
+		// must be a reference to the copied EPackage's datatype
+		assertSame(
+			prog.copiedEPackages.head.EClassifiers.filter(EDataType).head,
+			dataType
+		)
+	}
+
+	@Test
+	def void testScopeForFullyQualifiedReferenceToCopiedEPackageEClassifierAfterCreatingEClass() {
+		val prog = createEClassAndReferenceToExistingEDataTypeFullyQualified.
+			parseWithTestEcore
+		val expressions = prog.main.expressions
+		val eclassExp = expressions.last as EdeltaEcoreReferenceExpression
+		val dataType = eclassExp.reference.enamedelement as EDataType
+		// must be a reference to the copied EPackage's datatype
+		assertSame(
+			prog.copiedEPackages.head.EClassifiers.filter(EDataType).head,
+			dataType
+		)
+	}
+
+	@Test
 	def void testScopeForReferenceToCreatedEAttribute() {
 		referenceToCreatedEAttributeSimple.parseWithTestEcore.lastExpression.
 			edeltaEcoreReferenceExpression.reference.
@@ -183,9 +212,16 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			myAttribute
 			myReference
 			FooEnumLiteral
+			FooClass
+			FooDataType
+			FooEnum
+			myAttribute
+			myReference
+			FooEnumLiteral
 			foo
 			''')
 		// newAttributes is the one created in the program
+		// we also have copied EPackages, that's why elements appear twice
 	}
 
 	@Test
@@ -203,10 +239,17 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			myAttribute
 			myReference
 			FooEnumLiteral
+			FooClass
+			FooDataType
+			FooEnum
+			myAttribute
+			myReference
+			FooEnumLiteral
 			foo
 			''')
 		// changed is the one created in the program, and whose
 		// name is changed in the body
+		// we also have copied EPackages, that's why elements appear twice
 	}
 
 	@Test
@@ -310,11 +353,18 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			myAttribute
 			myReference
 			FooEnumLiteral
+			FooClass
+			FooDataType
+			FooEnum
+			myAttribute
+			myReference
+			FooEnumLiteral
 			foo
 			''')
 			// RenamedClass and FooClass (the original referred) are both returned
 			// by the scope provider
 			// anotherAttr is created in the changeEClass expression
+			// we also have copied EPackages, that's why elements appear twice
 	}
 
 	@Test

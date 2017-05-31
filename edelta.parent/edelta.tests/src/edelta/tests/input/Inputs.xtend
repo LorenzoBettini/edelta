@@ -201,6 +201,24 @@ class Inputs {
 		'''
 	}
 
+	def createEClassAndReferenceToExistingEDataType() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {}
+			ecoreref(FooDataType)
+		'''
+	}
+
+	def createEClassAndReferenceToExistingEDataTypeFullyQualified() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {}
+			ecoreref(foo.FooDataType)
+		'''
+	}
+
 	def referenceToCreatedEClassWithTheSameNameAsAnExistingEClass() {
 		'''
 			metamodel "foo"

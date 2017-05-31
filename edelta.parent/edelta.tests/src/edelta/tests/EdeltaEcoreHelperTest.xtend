@@ -48,10 +48,17 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				myAttribute
 				myReference
 				FooEnumLiteral
+				FooClass
+				FooDataType
+				FooEnum
+				myAttribute
+				myReference
+				FooEnumLiteral
 				foo
 				'''
 			)
 		// NewClass is the one created in the program
+		// we also have copied EPackages, that's why the classes appear twice
 		]
 	}
 
@@ -79,9 +86,13 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				FooClass
 				FooDataType
 				FooEnum
+				FooClass
+				FooDataType
+				FooEnum
 				'''
 			)
 		// NewClass is the one created in the program
+		// we also have copied EPackages, that's why the classes appear twice
 		]
 	}
 
