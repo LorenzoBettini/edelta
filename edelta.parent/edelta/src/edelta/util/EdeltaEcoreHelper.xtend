@@ -27,24 +27,42 @@ class EdeltaEcoreHelper {
 
 	def Iterable<? extends ENamedElement> getProgramENamedElements(EObject context) {
 		cache.get("getProgramENamedElements", context.eResource) [
-			val prog = getProgram(context)
-			// we also must explicitly consider the derived EPackages
-			// created by our derived state computer, containing EClasses
-			// created in the program
-			// and also copied elements for interpreting without
-			// breaking the original EMF package registries classes
-			(
-				prog.eResource.derivedEPackages.
-					getAllENamedElements
-			+
-				prog.eResource.copiedEPackages.
-					getAllENamedElements
-			+
-				prog.metamodels.getAllENamedElements
-			+
-				prog.metamodels
-			).toList
+			getProgramENamedElementsInternal(context, true)
 		]
+	}
+
+	def Iterable<? extends ENamedElement> getProgramENamedElementsWithoutCopiedEPackages(EObject context) {
+		cache.get("getProgramENamedElementsWithoutCopiedEPackages", context.eResource) [
+			getProgramENamedElementsInternal(context, false)
+		]
+	}
+
+	def private Iterable<? extends ENamedElement> getProgramENamedElementsInternal(EObject context,
+			boolean includeCopiedEPackages
+	) {
+		val prog = getProgram(context)
+		// we also must explicitly consider the derived EPackages
+		// created by our derived state computer, containing EClasses
+		// created in the program
+		// and also copied elements for interpreting without
+		// breaking the original EMF package registries classes
+		(
+			prog.eResource.derivedEPackages.
+				getAllENamedElements
+		+
+			{ 
+				if (includeCopiedEPackages) {
+					prog.eResource.copiedEPackages.
+						getAllENamedElements
+				} else {
+					emptyList
+				}
+			}
+		+
+			prog.metamodels.getAllENamedElements
+		+
+			prog.metamodels
+		).toList
 	}
 
 	def private getAllENamedElements(Iterable<EPackage> e) {
@@ -72,8 +90,14 @@ class EdeltaEcoreHelper {
 	}
 
 	def Iterable<? extends ENamedElement> getENamedElements(ENamedElement e, EObject context) {
+		getENamedElementsInternal(e, context, true)
+	}
+
+	def private Iterable<? extends ENamedElement> getENamedElementsInternal(ENamedElement e,
+		EObject context, boolean includeCopiedEPackages
+	) {
 		switch (e) {
-			EPackage: 
+			EPackage:
 				cache.get("getEPackageENamedElements" -> e.name, context.eResource) [
 					val derived = context.eResource.derivedEPackages.getByName(e.name)
 					if (derived !== null) {
@@ -87,7 +111,7 @@ class EdeltaEcoreHelper {
 					}
 					return e.getEClassifiers
 				]
-			EClass: 
+			EClass:
 				cache.get("getEClassENamedElements" -> e.name, context.eResource) [
 					e.EPackage.getENamedElements(context).
 						filter(EClass).
