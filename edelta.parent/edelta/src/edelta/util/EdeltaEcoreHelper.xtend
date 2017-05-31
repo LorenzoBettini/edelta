@@ -71,35 +71,29 @@ class EdeltaEcoreHelper {
 		e.EClassifiers.filter(EClass)
 	}
 
-	def dispatch Iterable<? extends ENamedElement> getENamedElements(ENamedElement e, EObject context) {
-		Collections.emptyList
+	def Iterable<? extends ENamedElement> getENamedElements(ENamedElement e, EObject context) {
+		switch (e) {
+			EPackage: 
+				cache.get("getEPackageENamedElements" -> e.name, context.eResource) [
+					val derived = context.eResource.derivedEPackages.getByName(e.name)
+					if (derived !== null) {
+						// there'll also be copied epackages
+						val copied = context.eResource.copiedEPackages.getByName(e.name)
+						return (
+							derived.getEClassifiers +
+							copied.getEClassifiers +
+							e.getEClassifiers
+						).toList
+					}
+					return e.getEClassifiers
+				]
+			EClass: e.EAllStructuralFeatures
+			EEnum: e.ELiterals
+			default: Collections.emptyList
+		}
 	}
 
-	def dispatch Iterable<? extends ENamedElement> getENamedElements(EPackage e, EObject context) {
-		cache.get("getEPackageENamedElements" -> e.name, context.eResource) [
-			val derived = context.eResource.derivedEPackages.getEPackageByName(e.name)
-			if (derived !== null) {
-				// there'll also be copied epackages
-				val copied = context.eResource.copiedEPackages.getEPackageByName(e.name)
-				return (
-					derived.getEClassifiers +
-					copied.getEClassifiers +
-					e.getEClassifiers
-				).toList
-			}
-			return e.getEClassifiers
-		]
-	}
-
-	def dispatch Iterable<? extends ENamedElement> getENamedElements(EClass e, EObject context) {
-		e.EAllStructuralFeatures
-	}
-
-	def dispatch Iterable<? extends ENamedElement> getENamedElements(EEnum e, EObject context) {
-		e.ELiterals
-	}
-
-	def private getEPackageByName(Collection<EPackage> epackages, String packageName) {
-		return epackages.findFirst[name == packageName]
+	def private <T extends ENamedElement> getByName(Collection<T> namedElements, String packageName) {
+		return namedElements.findFirst[name == packageName]
 	}
 }

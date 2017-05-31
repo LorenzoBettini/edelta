@@ -6,6 +6,7 @@ import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.Assert
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -120,10 +121,10 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test(expected=IllegalArgumentException)
+	@Test
 	def void testNullENamedElements() {
 		referenceToMetamodel.parseWithTestEcore => [
-			getENamedElements(null, it)
+			Assert.assertTrue(getENamedElements(null, it).isEmpty)
 		]
 	}
 
