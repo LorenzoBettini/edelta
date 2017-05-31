@@ -14,6 +14,7 @@ import org.junit.runner.RunWith
 import static org.junit.Assert.*
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EDataType
+import org.eclipse.emf.ecore.EClass
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -331,6 +332,28 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			// the one created by the derived state computer
 			prog.derivedStateLastEClass.EStructuralFeatures.head,
 			referredAttr
+		)
+	}
+
+	@Test
+	def void testScopeForReferenceToCopiedEClassAfterCreatingEClass() {
+		val prog = '''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				val c = ecoreref(FooClass)
+			}
+		'''.
+		parseWithTestEcore
+		val expressions = prog.main.expressions
+		val changeEClass = expressions.last.createEClassExpression
+		val referred = changeEClass.body.expressions.
+			last.variableDeclaration.right.edeltaEcoreReferenceExpression.
+			reference.enamedelement as EClass
+		assertSame(
+			// the one copied by the derived state computer
+			prog.copiedEPackages.head.EClassifiers.filter(EClass).head,
+			referred
 		)
 	}
 
