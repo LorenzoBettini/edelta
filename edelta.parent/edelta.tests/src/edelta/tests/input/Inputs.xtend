@@ -231,6 +231,16 @@ class Inputs {
 		'''
 	}
 
+	def referenceToChangedEClassCopiedAttribute() {
+		'''
+			metamodel "foo"
+			
+			changeEClass foo.FooClass {
+				val attr = ecoreref(FooClass.myAttribute)
+			}
+		'''
+	}
+
 	def referenceToCreatedEAttributeSimple() {
 		'''
 			metamodel "foo"

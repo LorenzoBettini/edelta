@@ -12,6 +12,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import org.eclipse.emf.ecore.EAttribute
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -249,7 +250,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		val prog = referenceToChangedEClassWithTheSameNameAsAnExistingEClass.
 			parseWithTestEcore
 		val expressions = prog.main.expressions
-		val eclassExp = expressions.last as EdeltaEcoreReferenceExpression
+		val eclassExp = expressions.last.edeltaEcoreReferenceExpression
 		assertSame(
 			// the one created by the derived state computer
 			prog.derivedStateLastEClass,
@@ -264,11 +265,29 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		val prog = referenceToChangedEClassWithANewName.
 			parseWithTestEcore
 		val expressions = prog.main.expressions
-		val eclassExp = expressions.last as EdeltaEcoreReferenceExpression
+		val eclassExp = expressions.last.edeltaEcoreReferenceExpression
 		assertSame(
 			// the one created by the derived state computer
 			prog.derivedStateLastEClass,
 			eclassExp.reference.enamedelement
+		)
+	}
+
+	@Test
+	def void testScopeForReferenceToChangedEClassCopiedAttribute() {
+		// our changed EClass referred attribute must be the one
+		// of the copy, not the original one
+		val prog = referenceToChangedEClassCopiedAttribute.
+			parseWithTestEcore
+		val expressions = prog.main.expressions
+		val changeEClass = expressions.last.changeEClassExpression
+		val referredAttr = changeEClass.body.expressions.
+			last.variableDeclaration.right.edeltaEcoreReferenceExpression.
+			reference.enamedelement as EAttribute
+		assertSame(
+			// the one created by the derived state computer
+			prog.derivedStateLastEClass.EStructuralFeatures.head,
+			referredAttr
 		)
 	}
 
