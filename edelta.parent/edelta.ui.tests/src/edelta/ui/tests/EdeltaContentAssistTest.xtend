@@ -139,6 +139,17 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			assertProposal('AAA')
 	}
 
+	@Test def void testEClassifierAfterRenamingAnEClass() {
+		newBuilder.append('''
+			metamodel "mypackage"
+			
+			changeEClass mypackage.MyClass newName Renamed {}
+			
+			ecoreref(
+			''').
+			assertProposal('Renamed')
+	}
+
 	def private fromLinesOfStringsToStringArray(CharSequence strings) {
 		strings.toString.replaceAll("\r", "").split("\n")
 	}
