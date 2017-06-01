@@ -2,7 +2,6 @@ package edelta.util
 
 import com.google.inject.Inject
 import edelta.services.IEdeltaEcoreModelAssociations
-import java.util.Collection
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.ENamedElement
@@ -40,32 +39,34 @@ class EdeltaEcoreHelper {
 			boolean includeCopiedEPackages
 	) {
 		val prog = getProgram(context)
+		val epackages = getProgramEPackages(context, includeCopiedEPackages)
+		(
+			epackages.map[getAllENamedElements].flatten
+		+
+			prog.metamodels
+		).toList
+	}
+
+	def private Iterable<? extends EPackage> getProgramEPackages(EObject context, boolean includeCopiedEPackages) {
+		val prog = getProgram(context)
 		// we also must explicitly consider the derived EPackages
 		// created by our derived state computer, containing EClasses
 		// created in the program
 		// and also copied elements for interpreting without
 		// breaking the original EMF package registries classes
 		(
-			prog.eResource.derivedEPackages.
-				getAllENamedElements
+			prog.eResource.derivedEPackages
 		+
 			{ 
 				if (includeCopiedEPackages) {
-					prog.eResource.copiedEPackages.
-						getAllENamedElements
+					prog.eResource.copiedEPackages
 				} else {
 					emptyList
 				}
 			}
 		+
-			prog.metamodels.getAllENamedElements
-		+
 			prog.metamodels
-		).toList
-	}
-
-	def private getAllENamedElements(Iterable<EPackage> e) {
-		e.map[getAllENamedElements].flatten
+		)
 	}
 
 	def private Iterable<ENamedElement> getAllENamedElements(EPackage e) {
@@ -150,7 +151,7 @@ class EdeltaEcoreHelper {
 		return e.getEClassifiers
 	}
 
-	def private <T extends ENamedElement> getByName(Collection<T> namedElements, String packageName) {
-		return namedElements.findFirst[name == packageName]
+	def <T extends ENamedElement> getByName(Iterable<T> namedElements, String nameToSearch) {
+		return namedElements.findFirst[name == nameToSearch]
 	}
 }
