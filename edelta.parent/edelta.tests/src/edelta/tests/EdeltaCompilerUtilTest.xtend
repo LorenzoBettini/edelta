@@ -426,4 +426,15 @@ createList(this::_createEAttribute_attr_in_createEClass_MyDerivedNewClass_in_foo
 				assertEquals(stringForEcoreReferenceExpression)
 		]
 	}
+
+	@Test
+	def void testGetStringForEcoreReferenceExpressionEClassWhenChangeEClassRemovingAttribute() {
+		changeEClassRemovingAttribute.parseWithTestEcore.
+		lastExpression.
+			changeEClassExpression.body.expressions.head.variableDeclaration.right.
+			edeltaEcoreReferenceExpression => [
+			'getEAttribute("foo", "FooClass", "myAttribute")'.
+				assertEquals(stringForEcoreReferenceExpression)
+		]
+	}
 }

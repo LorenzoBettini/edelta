@@ -751,7 +751,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCompilationAfterInterpretationStealingAttribute() {
+	def void testCompilationAfterInterpretationCreateEClassStealingAttribute() {
 		createEClassStealingAttribute.checkCompilation(
 			'''
 			package edelta;
@@ -795,6 +795,54 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			// it must be getEAttribute("foo", "FooClass", "myAttribute")
 			// since we use the originalENamedElement
 			// (the interpeter changed the container of myAttribute to NewClass)
+		)
+	}
+
+	@Test
+	def void testCompilationAfterInterpretationChangeEClassRemovingAttribute() {
+		changeEClassRemovingAttribute.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import org.eclipse.emf.common.util.EList;
+			import org.eclipse.emf.ecore.EAttribute;
+			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.emf.ecore.EStructuralFeature;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  public MyFile0() {
+			    
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    changeEClass("foo", "FooClass", createList(this::_changeEClass_FooClass_in_foo));
+			  }
+			  
+			  public void _changeEClass_FooClass_in_foo(final EClass it) {
+			    {
+			      final EAttribute attr = getEAttribute("foo", "FooClass", "myAttribute");
+			      EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
+			      _eStructuralFeatures.remove(attr);
+			    }
+			  }
+			}
+			'''
+			// Note:
+			// it must be getEAttribute("foo", "FooClass", "myAttribute")
+			// since we use the originalENamedElement
+			// (the interpeter removes the myAttribute from FooClass)
 		)
 	}
 

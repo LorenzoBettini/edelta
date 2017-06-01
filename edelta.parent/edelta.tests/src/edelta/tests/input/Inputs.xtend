@@ -319,4 +319,15 @@ class Inputs {
 			}
 		'''
 	}
+
+	def changeEClassRemovingAttribute() {
+		'''
+			metamodel "foo"
+			
+			changeEClass foo.FooClass {
+				val attr = ecoreref(FooClass.myAttribute)
+				EStructuralFeatures -= attr
+			}
+		'''
+	}
 }

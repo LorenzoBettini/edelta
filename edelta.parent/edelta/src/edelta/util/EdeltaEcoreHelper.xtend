@@ -138,15 +138,20 @@ class EdeltaEcoreHelper {
 	def private getEPackageENamedElementsInternal(EPackage e, EObject context, boolean includeCopiedEPackages) {
 		val derived = context.eResource.derivedEPackages.getByName(e.name)
 		if (derived !== null) {
-			// there'll also be copied epackages
-			var copiedEClassifiers = emptyList
-			if (includeCopiedEPackages)
-				copiedEClassifiers = context.eResource.copiedEPackages.getByName(e.name).getEClassifiers
-			return (
-				derived.getEClassifiers +
-				copiedEClassifiers +
-				e.getEClassifiers
-			).toList
+			if (includeCopiedEPackages) {
+				// there'll also be copied epackages
+				val copiedEClassifiers = context.eResource.copiedEPackages.getByName(e.name).getEClassifiers
+				return (
+					derived.getEClassifiers +
+					copiedEClassifiers +
+					e.getEClassifiers
+				).toList
+			} else {
+				return (
+					e.getEClassifiers +
+					derived.getEClassifiers
+				).toList
+			}
 		}
 		return e.getEClassifiers
 	}

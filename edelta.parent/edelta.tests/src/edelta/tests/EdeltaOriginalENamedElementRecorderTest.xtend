@@ -99,6 +99,20 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test def void testChangedEClassifierDirectReference() {
+		'''
+			metamodel "foo"
+			
+			changeEClass foo.FooClass {}
+			ecoreref(FooClass)
+		'''.parseWithTestEcore => [
+			val ref = lastExpression.edeltaEcoreReferenceExpression.reference
+			ref.recordOriginalENamedElement
+			val original = metamodels.last.getEClassiferByName("FooClass")
+			assertSame(original, ref.originalEnamedelement)
+		]
+	}
+
 	@Test def void testCreatedEClassifierQualifiedReference() {
 		'''
 			metamodel "foo"

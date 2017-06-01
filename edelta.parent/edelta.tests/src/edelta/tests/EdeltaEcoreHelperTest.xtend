@@ -123,10 +123,10 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			getENamedElementsWithoutCopiedEPackages(getEPackageByName("foo"), it).
 			assertNamedElements(
 				'''
-				NewClass
 				FooClass
 				FooDataType
 				FooEnum
+				NewClass
 				'''
 			)
 		// NewClass is the one created in the program
