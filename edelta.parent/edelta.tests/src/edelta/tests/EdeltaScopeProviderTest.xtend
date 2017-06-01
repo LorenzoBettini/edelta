@@ -403,9 +403,13 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			'''
 			myAttribute
 			myReference
+			myAttribute
+			myReference
 			''')
 		// we renamed FooClass, but its attributes are still visible through
 		// the renamed class
+		// they're duplicate since we also have the ones of the copied EPackages
+		// and since recording original references clear the IResourceScopeCache?
 	}
 
 	def private assertScope(EObject context, EReference reference, CharSequence expected) {

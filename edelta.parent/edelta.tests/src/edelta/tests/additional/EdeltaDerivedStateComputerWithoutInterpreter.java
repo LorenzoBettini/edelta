@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.common.types.JvmGenericType;
 
 import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression;
@@ -27,5 +28,10 @@ public class EdeltaDerivedStateComputerWithoutInterpreter extends EdeltaDerivedS
 			Map<EdeltaEcoreBaseEClassManipulationWithBlockExpression, EClass> opToEClassMap,
 			JvmGenericType jvmGenericType) {
 		// No interpreter is run
+	}
+
+	@Override
+	protected void recordEcoreReferenceOriginalENamedElement(Resource resource) {
+		// No recording is done
 	}
 }

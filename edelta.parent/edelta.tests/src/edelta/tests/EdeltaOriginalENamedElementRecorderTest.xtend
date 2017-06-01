@@ -11,7 +11,7 @@ import org.junit.runner.RunWith
 import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
-@InjectWith(EdeltaInjectorProviderCustom)
+@InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
 class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 
 	@Inject extension EdeltaOriginalENamedElementRecorder

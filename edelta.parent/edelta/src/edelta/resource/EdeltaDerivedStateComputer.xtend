@@ -9,8 +9,10 @@ import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreReference
 import edelta.interpreter.IEdeltaInterpreter
+import edelta.interpreter.internal.EdeltaInterpreterConfigurator
 import edelta.lib.EdeltaEcoreUtil
 import edelta.lib.EdeltaLibrary
+import edelta.scoping.EdeltaOriginalENamedElementRecorder
 import edelta.services.IEdeltaEcoreModelAssociations
 import java.util.List
 import java.util.Map
@@ -28,7 +30,7 @@ import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader.GenericUnloader
 import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator
-import edelta.interpreter.internal.EdeltaInterpreterConfigurator
+import edelta.edelta.EdeltaEcoreReferenceExpression
 
 @Singleton
 class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEcoreModelAssociations {
@@ -46,6 +48,8 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	@Inject IEdeltaInterpreter interpreter
 
 	@Inject EdeltaInterpreterConfigurator interpreterConfigurator
+
+	@Inject EdeltaOriginalENamedElementRecorder originalENamedElementRecorder
 
 	public static class EdeltaDerivedStateAdapter extends AdapterImpl {
 		var Map<EObject, EObject> targetToSourceMap = newHashMap()
@@ -144,6 +148,9 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 				changeRunner.performChanges(derivedEClass, exp)
 				handleCreateEAttribute(exp, derivedEClass, targetToSourceMap, opToEAttributeMap)
 			}
+			// record original ecore references before running the interpreter
+			recordEcoreReferenceOriginalENamedElement(resource)
+			// configure and run the interpreter
 			interpreterConfigurator.configureInterpreter(interpreter, resource)
 			runInterpreter(createEClassExpressions, opToEClassMap, programJvmType)
 			runInterpreter(changeEClassExpressions, opToEClassMap, programJvmType)
@@ -160,6 +167,14 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 				opToEClassMap.get(e),
 				jvmGenericType
 			)
+		}
+	}
+
+	protected def void recordEcoreReferenceOriginalENamedElement(Resource resource) {
+		val references = resource.allContents.
+			toIterable.filter(EdeltaEcoreReferenceExpression).toList
+		for (r : references) {
+			originalENamedElementRecorder.recordOriginalENamedElement(r.reference)
 		}
 	}
 
