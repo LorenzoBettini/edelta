@@ -308,4 +308,15 @@ class Inputs {
 			my.createANewEClass()
 		'''
 	}
+
+	def createEClassStealingAttribute() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				val attr = ecoreref(FooClass.myAttribute)
+				EStructuralFeatures += attr
+			}
+		'''
+	}
 }

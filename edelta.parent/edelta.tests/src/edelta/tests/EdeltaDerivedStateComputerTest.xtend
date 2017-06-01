@@ -507,15 +507,8 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testInterpretedCreateEClassAndMoveEAttribute() {
-		val program = '''
-			metamodel "foo"
-			
-			createEClass NewClass in foo {
-				val attr = ecoreref(FooClass.myAttribute)
-				EStructuralFeatures += attr
-			}
-		'''.
+	def void testInterpretedCreateEClassAndStealEAttribute() {
+		val program = createEClassStealingAttribute.
 		parseWithTestEcore
 		val derivedEClass = program.getDerivedStateLastEClass
 		assertEquals("NewClass", derivedEClass.name)

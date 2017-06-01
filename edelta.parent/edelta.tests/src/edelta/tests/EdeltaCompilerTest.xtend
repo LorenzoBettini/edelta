@@ -750,6 +750,52 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		)
 	}
 
+	@Test
+	def void testCompilationAfterInterpretationStealingAttribute() {
+		createEClassStealingAttribute.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import org.eclipse.emf.common.util.EList;
+			import org.eclipse.emf.ecore.EAttribute;
+			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.emf.ecore.EStructuralFeature;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  public MyFile0() {
+			    
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    createEClass("foo", "NewClass", createList(this::_createEClass_NewClass_in_foo));
+			  }
+			  
+			  public void _createEClass_NewClass_in_foo(final EClass it) {
+			    {
+			      final EAttribute attr = getEAttribute("foo", "NewClass", "myAttribute");
+			      EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
+			      _eStructuralFeatures.add(attr);
+			    }
+			  }
+			}
+			'''
+			// TODO the above compilation is not correct:
+			// it should be getEAttribute("foo", "FooClass", "myAttribute")
+		)
+	}
+
 	def private checkCompilation(CharSequence input, CharSequence expectedGeneratedJava) {
 		checkCompilation(input, expectedGeneratedJava, true)
 	}
