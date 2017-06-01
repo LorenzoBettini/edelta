@@ -30,6 +30,7 @@ import static extension org.junit.Assert.*
 import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import edelta.resource.EdeltaDerivedStateEPackage
+import org.eclipse.emf.ecore.EClassifier
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -171,6 +172,14 @@ abstract class EdeltaAbstractTest {
 
 	def protected getCopiedEPackages(EObject context) {
 		context.eResource.contents.filter(EPackage).filter[!(it instanceof EdeltaDerivedStateEPackage)]
+	}
+
+	def protected getEClassiferByName(EPackage p, String nameToSearch) {
+		p.EClassifiers.findFirst[name == nameToSearch]
+	}
+
+	def protected getEStructuralFeatureByName(EClassifier e, String nameToSearch) {
+		(e as EClass).EStructuralFeatures.findFirst[name == nameToSearch]
 	}
 
 	def protected getEdeltaEcoreReferenceExpression(XExpression e) {
