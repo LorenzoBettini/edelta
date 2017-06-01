@@ -784,15 +784,17 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public void _createEClass_NewClass_in_foo(final EClass it) {
 			    {
-			      final EAttribute attr = getEAttribute("foo", "NewClass", "myAttribute");
+			      final EAttribute attr = getEAttribute("foo", "FooClass", "myAttribute");
 			      EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
 			      _eStructuralFeatures.add(attr);
 			    }
 			  }
 			}
 			'''
-			// TODO the above compilation is not correct:
-			// it should be getEAttribute("foo", "FooClass", "myAttribute")
+			// Note:
+			// it must be getEAttribute("foo", "FooClass", "myAttribute")
+			// since we use the originalENamedElement
+			// (the interpeter changed the container of myAttribute to NewClass)
 		)
 	}
 
