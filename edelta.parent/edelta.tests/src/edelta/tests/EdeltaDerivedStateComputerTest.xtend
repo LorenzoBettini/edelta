@@ -521,11 +521,14 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		// at this point of the program
 		// otherwise in the editor we then get an unresolved error.
 		val ecoreref = getEcoreRefInManipulationExpressionBlock(program)
-		val eClass = ecoreref.qualification.enamedelement as EClass
-		val eAttr = ecoreref.enamedelement as EAttribute
-		// TODO: when interpreter is done on a copy of the model this
-		// should be true
+		var eClass = ecoreref.qualification.enamedelement as EClass
+		var eAttr = ecoreref.enamedelement as EAttribute
+		// Note that the interpreter changed the attribute container
 		assertEClassContainsFeature(eClass, eAttr, false)
+		// but the original enamed element stored in the reference is OK
+		eClass = ecoreref.qualification.originalEnamedelement as EClass
+		eAttr = ecoreref.originalEnamedelement as EAttribute
+		assertEClassContainsFeature(eClass, eAttr, true)
 	}
 
 	@Test
