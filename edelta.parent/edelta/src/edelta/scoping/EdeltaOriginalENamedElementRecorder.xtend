@@ -27,6 +27,8 @@ class EdeltaOriginalENamedElementRecorder {
 	@Inject IResourceScopeCache cache
 
 	def void recordOriginalENamedElement(EdeltaEcoreReference edeltaEcoreReference) {
+		if (edeltaEcoreReference === null)
+			return
 		val enamedElement = edeltaEcoreReference.enamedelement
 		edeltaEcoreReference.originalEnamedelement = retrieveOriginalElement(enamedElement, edeltaEcoreReference)
 		if (edeltaEcoreReference instanceof EdeltaEcoreQualifiedReference) {

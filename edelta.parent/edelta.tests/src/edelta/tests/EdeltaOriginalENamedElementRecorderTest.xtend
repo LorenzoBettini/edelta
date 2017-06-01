@@ -16,6 +16,17 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 
 	@Inject extension EdeltaOriginalENamedElementRecorder
 
+	@Test def void testNull() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {}
+			ecoreref(FooClass)
+		'''.parseWithTestEcore => [
+			recordOriginalENamedElement(null)
+		]
+	}
+
 	@Test def void testNullENamedElement() {
 		'''
 			metamodel "foo"
