@@ -139,6 +139,41 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			assertProposal('AAA')
 	}
 
+	@Test def void testEClassifierAfterRenamingAnEClass() {
+		newBuilder.append('''
+			metamodel "mypackage"
+			
+			changeEClass mypackage.MyClass newName Renamed {}
+			
+			ecoreref(
+			''').
+			assertProposal('Renamed')
+	}
+
+	@Test def void testCreatedEAttributeDuringInterpretationIsProposed() {
+		newBuilder.append('''
+			import org.eclipse.emf.ecore.EClass
+			
+			metamodel "mypackage"
+			// don't rely on ecore, since the input files are not saved
+			// during the test, thus external libraries are not seen
+			// metamodel "ecore"
+			
+			def myNewAttribute(EClass c, String name) {
+				c.EStructuralFeatures += newEAttribute(name) => [
+					EType = ecoreref(MyDataType)
+				]
+			}
+			
+			createEClass A in mypackage {
+				myNewAttribute(it, "foo")
+			}
+			
+			ecoreref(
+			''').
+			assertProposal('foo')
+	}
+
 	def private fromLinesOfStringsToStringArray(CharSequence strings) {
 		strings.toString.replaceAll("\r", "").split("\n")
 	}

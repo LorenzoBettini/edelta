@@ -28,6 +28,14 @@ class EdeltaResourceDescriptionStrategyTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testReferenceToOurMetamodel() {
+		'''
+			metamodel "ecore"
+			metamodel "foo"
+		'''.assertExportedEPackages("")
+	}
+
+	@Test
 	def void testCreateEClass() {
 		'''
 			metamodel "ecore"

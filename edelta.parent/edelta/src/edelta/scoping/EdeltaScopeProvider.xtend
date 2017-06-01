@@ -5,7 +5,6 @@ package edelta.scoping
 
 import com.google.inject.Inject
 import edelta.edelta.EdeltaEcoreQualifiedReference
-import edelta.edelta.EdeltaPackage
 import edelta.util.EdeltaEcoreHelper
 import edelta.util.EdeltaModelUtil
 import org.eclipse.emf.ecore.EObject
@@ -34,11 +33,11 @@ class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 				return Scopes.scopeFor(getENamedElements(context.qualification.enamedelement, context))
 			}
 			return Scopes.scopeFor(getProgramENamedElements(context))
-		} else if (reference == EdeltaPackage.Literals.EDELTA_ECORE_BASE_ECLASS_MANIPULATION_WITH_BLOCK_EXPRESSION__EPACKAGE) {
+		} else if (reference == EDELTA_ECORE_BASE_ECLASS_MANIPULATION_WITH_BLOCK_EXPRESSION__EPACKAGE) {
 			return Scopes.scopeFor(getProgram(context).metamodels)
-		} else if (reference == EdeltaPackage.Literals.EDELTA_ECORE_CHANGE_ECLASS_EXPRESSION__ORIGINAL) {
+		} else if (reference == EDELTA_ECORE_CHANGE_ECLASS_EXPRESSION__ORIGINAL) {
 			return Scopes.scopeFor(getChangeEClass(context).epackage.allEClasses)
-		} else if (reference == EdeltaPackage.Literals.EDELTA_PROGRAM__METAMODELS) {
+		} else if (reference == EDELTA_PROGRAM__METAMODELS) {
 			return cache.get("scopeMetamodels", context.eResource) [
 				return new FilteringScope(delegateGetScope(context, reference)) [
 					"false".equals(getUserData("nsURI"))

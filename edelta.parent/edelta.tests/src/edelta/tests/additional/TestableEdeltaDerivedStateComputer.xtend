@@ -13,26 +13,30 @@ import org.eclipse.emf.ecore.resource.Resource
 @Singleton
 class TestableEdeltaDerivedStateComputer extends EdeltaDerivedStateComputer {
 	override public getOrInstallAdapter(Resource resource) {
-			super.getOrInstallAdapter(resource)
-		}
+		super.getOrInstallAdapter(resource)
+	}
 
-		override public unloadDerivedPackages(Map<String, EPackage> nameToEPackageMap) {
-			super.unloadDerivedPackages(nameToEPackageMap)
-		}
+	override public unloadDerivedPackages(Map<String, EPackage> nameToEPackageMap) {
+		super.unloadDerivedPackages(nameToEPackageMap)
+	}
 
-		override public derivedToSourceMap(Resource resource) {
-			super.derivedToSourceMap(resource)
-		}
+	override public derivedToSourceMap(Resource resource) {
+		super.derivedToSourceMap(resource)
+	}
 
-		override public nameToEPackageMap(Resource resource) {
-			super.nameToEPackageMap(resource)
-		}
+	override public nameToEPackageMap(Resource resource) {
+		super.nameToEPackageMap(resource)
+	}
 
-		override public opToEAttributeMap(Resource resource) {
-			super.opToEAttributeMap(resource)
-		}
+	override public nameToCopiedEPackageMap(Resource resource) {
+		super.nameToCopiedEPackageMap(resource)
+	}
 
-		override public opToEClassMap(Resource resource) {
-			super.opToEClassMap(resource)
-		}
+	override public opToEAttributeMap(Resource resource) {
+		super.opToEAttributeMap(resource)
+	}
+
+	override public opToEClassMap(Resource resource) {
+		super.opToEClassMap(resource)
+	}
 }

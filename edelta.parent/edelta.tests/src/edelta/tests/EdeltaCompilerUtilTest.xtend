@@ -401,4 +401,40 @@ createList(this::_createEAttribute_attr_in_createEClass_MyDerivedNewClass_in_foo
 				assertEquals(stringForEcoreReferenceExpression)
 		]
 	}
+
+	@Test
+	def void testGetStringForEcoreReferenceExpressionEClassInThePresenceOfCreateEClass() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {}
+			ecoreref(FooClass)
+		'''.parseWithTestEcore.
+		lastExpression.edeltaEcoreReferenceExpression => [
+			'getEClass("foo", "FooClass")'.
+				assertEquals(stringForEcoreReferenceExpression)
+		]
+	}
+
+	@Test
+	def void testGetStringForEcoreReferenceExpressionEClassWhenCreateEClassStealingAttribute() {
+		createEClassStealingAttribute.parseWithTestEcore.
+		lastExpression.
+			createEClassExpression.body.expressions.head.variableDeclaration.right.
+			edeltaEcoreReferenceExpression => [
+			'getEAttribute("foo", "FooClass", "myAttribute")'.
+				assertEquals(stringForEcoreReferenceExpression)
+		]
+	}
+
+	@Test
+	def void testGetStringForEcoreReferenceExpressionEClassWhenChangeEClassRemovingAttribute() {
+		changeEClassRemovingAttribute.parseWithTestEcore.
+		lastExpression.
+			changeEClassExpression.body.expressions.head.variableDeclaration.right.
+			edeltaEcoreReferenceExpression => [
+			'getEAttribute("foo", "FooClass", "myAttribute")'.
+				assertEquals(stringForEcoreReferenceExpression)
+		]
+	}
 }

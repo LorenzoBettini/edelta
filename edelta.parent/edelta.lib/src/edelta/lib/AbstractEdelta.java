@@ -269,6 +269,6 @@ public abstract class AbstractEdelta {
 
 	public EClassifier copyEClassifier(String packageName, String classifierName) {
 		EClassifier eClassifier = getEClassifier(packageName, classifierName);
-		return EdeltaEcoreUtil.copyEClassifier(eClassifier);
+		return EdeltaEcoreUtil.copyENamedElement(eClassifier);
 	}
 }

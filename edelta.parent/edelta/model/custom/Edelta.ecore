@@ -26,6 +26,9 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EdeltaEcoreReference" eSuperTypes="../../../org.eclipse.xtext.xbase/model/Xbase.ecore#//XExpression">
     <eStructuralFeatures xsi:type="ecore:EReference" name="enamedelement" eType="ecore:EClass ../../../org.eclipse.emf.ecore/model/Ecore.ecore#//ENamedElement"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="originalEnamedelement"
+        eType="ecore:EClass ../../../org.eclipse.emf.ecore/model/Ecore.ecore#//ENamedElement"
+        transient="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EdeltaMain" eSuperTypes="../../../org.eclipse.xtext.xbase/model/Xbase.ecore#//XBlockExpression"/>
   <eClassifiers xsi:type="ecore:EClass" name="EdeltaEcoreBaseManipulationWithBlockExpression"

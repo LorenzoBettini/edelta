@@ -2,10 +2,14 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
+import edelta.edelta.EdeltaEcoreQualifiedReference
+import edelta.edelta.EdeltaProgram
 import edelta.resource.EdeltaDerivedStateComputer.EdeltaDerivedStateAdapter
 import edelta.tests.additional.TestableEdeltaDerivedStateComputer
 import org.eclipse.emf.common.notify.impl.AdapterImpl
 import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.resource.DerivedStateAwareResource
@@ -15,7 +19,7 @@ import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import static org.junit.Assert.*
+import static extension org.junit.Assert.*
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
@@ -88,7 +92,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testDerivedEPackages() {
+	def void testDerivedAndCopiedEPackages() {
 		val program = '''
 		package test
 		
@@ -98,9 +102,12 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		createEClass Second in foo
 		'''.
 		parseWithTestEcore
-		val derivedEPackages = program.eResource.derivedEPackages
-		assertEquals(1, derivedEPackages.size)
-		assertEquals("foo", derivedEPackages.head.name)
+		var packages = program.eResource.derivedEPackages
+		assertEquals(1, packages.size)
+		assertEquals("foo", packages.head.name)
+		packages = program.eResource.copiedEPackages
+		assertEquals(1, packages.size)
+		assertEquals("foo", packages.head.name)
 	}
 
 	@Test
@@ -206,20 +213,27 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		val resource = program.eResource as DerivedStateAwareResource
 		val derivedToSourceMap = resource.derivedToSourceMap
 		val nameToEPackageMap = resource.nameToEPackageMap
+		val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
 		assertFalse(resource.eAdapters.empty)
 		assertFalse(derivedToSourceMap.empty)
 		assertFalse(nameToEPackageMap.empty)
+		assertFalse(nameToCopiedEPackageMap.empty)
 		// explicitly add an adapter to the EPackage
 		nameToEPackageMap.values.head.eAdapters += new AdapterImpl
 		assertTrue(nameToEPackageMap.values.forall[!eAdapters.empty])
+		nameToCopiedEPackageMap.values.head.eAdapters += new AdapterImpl
+		assertTrue(nameToCopiedEPackageMap.values.forall[!eAdapters.empty])
 		// unload packages
 		unloadDerivedPackages(nameToEPackageMap)
+		unloadDerivedPackages(nameToCopiedEPackageMap)
 		// maps are not empty yet
 		assertFalse(derivedToSourceMap.empty)
 		assertFalse(nameToEPackageMap.empty)
+		assertFalse(nameToCopiedEPackageMap.empty)
 		assertFalse(resource.eAdapters.empty)
 		// but adapters have been removed from EPackage
 		assertTrue(nameToEPackageMap.values.forall[eAdapters.empty])
+		assertTrue(nameToCopiedEPackageMap.values.forall[eAdapters.empty])
 	}
 
 	@Test
@@ -237,11 +251,13 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		val resource = program.eResource as DerivedStateAwareResource
 		val derivedToSourceMap = resource.derivedToSourceMap
 		val nameToEPackageMap = resource.nameToEPackageMap
+		val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
 		val opToEAttributeMap = resource.opToEAttributeMap
 		val opToEClassMap = resource.opToEClassMap
 		assertFalse(resource.eAdapters.empty)
 		assertFalse(derivedToSourceMap.empty)
 		assertFalse(nameToEPackageMap.empty)
+		assertFalse(nameToCopiedEPackageMap.empty)
 		assertFalse(opToEAttributeMap.empty)
 		assertFalse(opToEClassMap.empty)
 		// discard derived state
@@ -250,6 +266,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		// maps are empty now
 		assertTrue(derivedToSourceMap.empty)
 		assertTrue(nameToEPackageMap.empty)
+		assertTrue(nameToCopiedEPackageMap.empty)
 		assertTrue(opToEAttributeMap.empty)
 		assertTrue(opToEClassMap.empty)
 		assertFalse(resource.eAdapters.empty)
@@ -477,5 +494,96 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		val attr = derivedEClass.EStructuralFeatures.head
 		assertEquals("renamed", attr.name)
 		program.assertNoErrors
+		// check that the reference is not dangling
+		// that is, the attribute is still contained in the original class
+		// at this point of the program
+		// otherwise in the editor we then get an unresolved error.
+		val ecoreref = getEcoreRefInManipulationExpressionBlock(program)
+		val eClass = ecoreref.qualification.enamedelement as EClass
+		val eAttr = ecoreref.enamedelement as EAttribute
+		// This holds since changeEClass creates a deep copy
+		// so the original attribute is not changed
+		assertEClassContainsFeature(eClass, eAttr, true)
+	}
+
+	@Test
+	def void testInterpretedCreateEClassAndStealEAttribute() {
+		val program = createEClassStealingAttribute.
+		parseWithTestEcore
+		val derivedEClass = program.getDerivedStateLastEClass
+		assertEquals("NewClass", derivedEClass.name)
+		val attr = derivedEClass.EStructuralFeatures.head
+		assertEquals("myAttribute", attr.name)
+		program.validate
+		program.assertNoErrors
+		// check that the reference is not dangling
+		// that is, the attribute is still contained in the original class
+		// at this point of the program
+		// otherwise in the editor we then get an unresolved error.
+		val ecoreref = getEcoreRefInManipulationExpressionBlock(program)
+		var eClass = ecoreref.qualification.enamedelement as EClass
+		var eAttr = ecoreref.enamedelement as EAttribute
+		// Note that the interpreter changed the attribute container
+		assertEClassContainsFeature(eClass, eAttr, false)
+		// but the original enamed element stored in the reference is OK
+		eClass = ecoreref.qualification.originalEnamedelement as EClass
+		eAttr = ecoreref.originalEnamedelement as EAttribute
+		assertEClassContainsFeature(eClass, eAttr, true)
+	}
+
+	@Test
+	def void testInterpretedRemovedEClassDoesNotTouchTheOriginalEcore() {
+		val program = '''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				ecoreref(FooClass).EPackage.EClassifiers.remove(ecoreref(FooClass))
+			}
+		'''.
+		parseWithTestEcore
+		val derivedEClass = program.getDerivedStateLastEClass
+		assertEquals("NewClass", derivedEClass.name)
+		program.validate
+		program.assertNoErrors
+		program.copiedEPackages.head.
+			EClassifiers.findFirst[name == "FooClass"].
+			assertNull
+		program.getEPackageByName("foo").
+			EClassifiers.findFirst[name == "FooClass"].
+			assertNotNull
+	}
+
+	@Test
+	def void testInterpretedRemovedEClassDoesNotTouchTheOriginalEcore_Qualified() {
+		val program = '''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				ecoreref(foo.FooClass).EPackage.EClassifiers.remove(ecoreref(foo.FooClass))
+			}
+		'''.
+		parseWithTestEcore
+		val derivedEClass = program.getDerivedStateLastEClass
+		assertEquals("NewClass", derivedEClass.name)
+		program.validate
+		program.assertNoErrors
+		program.copiedEPackages.head.
+			EClassifiers.findFirst[name == "FooClass"].
+			assertNull
+		program.getEPackageByName("foo").
+			EClassifiers.findFirst[name == "FooClass"].
+			assertNotNull
+	}
+
+	protected def EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {
+		program.lastExpression.getManipulationEClassExpression.body.expressions.head.
+			variableDeclaration.right.
+			edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference
+	}
+
+	def private assertEClassContainsFeature(EClass c, EStructuralFeature f, boolean expected) {
+		assertEquals(expected,
+			c.EStructuralFeatures.contains(f)
+		)
 	}
 }

@@ -221,6 +221,27 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		)
 	}
 
+	@Test
+	def void testUnresolvedEcoreReference() {
+		'''
+		metamodel "foo"
+		
+		ecoreref(NonExistant)
+		ecoreref(FooClass)
+		'''.parseWithTestEcore.assertErrorsAsStrings("NonExistant cannot be resolved.")
+	}
+
+	@Test
+	def void testNoDanglingReferencesAfterInterpretation() {
+		'''
+		metamodel "foo"
+		
+		createEClass NewClass in foo {
+			ecoreref(foo.FooClass).EPackage.EClassifiers.remove(ecoreref(foo.FooClass))
+		}
+		'''.parseWithTestEcore.assertNoErrors
+	}
+
 	def private assertErrorsAsStrings(EObject o, CharSequence expected) {
 		expected.toString.trim.assertEqualsStrings(
 			o.validate.filter[severity == Severity.ERROR].

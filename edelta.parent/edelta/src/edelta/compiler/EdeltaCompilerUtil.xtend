@@ -114,7 +114,9 @@ class EdeltaCompilerUtil {
 
 	def getStringForEcoreReference(EdeltaEcoreReference e) {
 		val type = e.resolveTypes.getActualType(e)
-		val enamedelement = e.enamedelement
+		// in case there's the original referred ENamedElement we use that one
+		// since the interpreter could have changed the container of the ENamedElement
+		val enamedelement = e.originalEnamedelement ?: e.enamedelement
 		if (enamedelement instanceof EClassifier) {
 			return '''get«type.simpleName»("«enamedelement.EPackageNameOrNull»", "«enamedelement.name»")'''
 		} else if (enamedelement instanceof EEnumLiteral) {

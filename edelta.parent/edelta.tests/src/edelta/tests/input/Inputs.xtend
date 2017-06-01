@@ -201,6 +201,24 @@ class Inputs {
 		'''
 	}
 
+	def createEClassAndReferenceToExistingEDataType() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {}
+			ecoreref(FooDataType)
+		'''
+	}
+
+	def createEClassAndReferenceToExistingEDataTypeFullyQualified() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {}
+			ecoreref(foo.FooDataType)
+		'''
+	}
+
 	def referenceToCreatedEClassWithTheSameNameAsAnExistingEClass() {
 		'''
 			metamodel "foo"
@@ -228,6 +246,16 @@ class Inputs {
 				}
 			}
 			ecoreref(RenamedClass)
+		'''
+	}
+
+	def referenceToChangedEClassCopiedAttribute() {
+		'''
+			metamodel "foo"
+			
+			changeEClass foo.FooClass {
+				val attr = ecoreref(FooClass.myAttribute)
+			}
 		'''
 	}
 
@@ -278,6 +306,28 @@ class Inputs {
 			use MyCustomEdelta as my
 			
 			my.createANewEClass()
+		'''
+	}
+
+	def createEClassStealingAttribute() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				val attr = ecoreref(FooClass.myAttribute)
+				EStructuralFeatures += attr
+			}
+		'''
+	}
+
+	def changeEClassRemovingAttribute() {
+		'''
+			metamodel "foo"
+			
+			changeEClass foo.FooClass {
+				val attr = ecoreref(FooClass.myAttribute)
+				EStructuralFeatures -= attr
+			}
 		'''
 	}
 }

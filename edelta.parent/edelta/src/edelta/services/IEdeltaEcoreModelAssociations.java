@@ -24,6 +24,8 @@ public interface IEdeltaEcoreModelAssociations {
 
 	Collection<EPackage> derivedEPackages(Resource resource);
 
+	Collection<EPackage> copiedEPackages(Resource resource);
+
 	EObject getPrimarySourceElement(EObject jvmElement);
 
 	EAttribute getEAttributeElement(EObject soureElement);
