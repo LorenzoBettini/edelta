@@ -166,4 +166,20 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 			assertSame(original, ref.originalEnamedelement)
 		]
 	}
+
+	@Test def void testEEnumLiteraDirectReference() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {}
+			ecoreref(FooEnumLiteral)
+		'''.parseWithTestEcore => [
+			val ref = lastExpression.edeltaEcoreReferenceExpression.reference
+			ref.recordOriginalENamedElement
+			val original = metamodels.last.
+				getEClassiferByName("FooEnum").
+				getEEnumLiteralByName("FooEnumLiteral")
+			assertSame(original, ref.originalEnamedelement)
+		]
+	}
 }

@@ -31,6 +31,7 @@ import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import edelta.resource.EdeltaDerivedStateEPackage
 import org.eclipse.emf.ecore.EClassifier
+import org.eclipse.emf.ecore.EEnum
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -180,6 +181,10 @@ abstract class EdeltaAbstractTest {
 
 	def protected getEStructuralFeatureByName(EClassifier e, String nameToSearch) {
 		(e as EClass).EStructuralFeatures.findFirst[name == nameToSearch]
+	}
+
+	def protected getEEnumLiteralByName(EClassifier e, String nameToSearch) {
+		(e as EEnum).ELiterals.findFirst[name == nameToSearch]
 	}
 
 	def protected getEdeltaEcoreReferenceExpression(XExpression e) {
