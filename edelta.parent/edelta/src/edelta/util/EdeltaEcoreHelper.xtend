@@ -3,7 +3,6 @@ package edelta.util
 import com.google.inject.Inject
 import edelta.services.IEdeltaEcoreModelAssociations
 import java.util.Collection
-import java.util.Collections
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.ENamedElement
@@ -93,40 +92,62 @@ class EdeltaEcoreHelper {
 		getENamedElementsInternal(e, context, true)
 	}
 
+	def Iterable<? extends ENamedElement> getENamedElementsWithoutCopiedEPackages(ENamedElement e, EObject context) {
+		getENamedElementsInternal(e, context, false)
+	}
+
 	def private Iterable<? extends ENamedElement> getENamedElementsInternal(ENamedElement e,
 		EObject context, boolean includeCopiedEPackages
 	) {
 		switch (e) {
 			EPackage:
-				cache.get("getEPackageENamedElements" -> e.name, context.eResource) [
-					val derived = context.eResource.derivedEPackages.getByName(e.name)
-					if (derived !== null) {
-						// there'll also be copied epackages
-						val copied = context.eResource.copiedEPackages.getByName(e.name)
-						return (
-							derived.getEClassifiers +
-							copied.getEClassifiers +
-							e.getEClassifiers
-						).toList
-					}
-					return e.getEClassifiers
-				]
+				if (includeCopiedEPackages)
+					cache.get("getEPackageENamedElements" -> e.name, context.eResource) [
+						return getEPackageENamedElementsInternal(e, context, true)
+					]
+				else
+					cache.get("getEPackageENamedElementsWithoutCopiedEPackages" -> e.name, context.eResource) [
+						return getEPackageENamedElementsInternal(e, context, false)
+					]
 			EClass:
-				cache.get("getEClassENamedElements" -> e.name, context.eResource) [
-					e.EPackage.getENamedElements(context).
-						filter(EClass).
-						filter[name == e.name].
-						map[EAllStructuralFeatures].flatten
-				]
+				if (includeCopiedEPackages)
+					cache.get("getEClassENamedElements" -> e.name, context.eResource) [
+						e.EPackage.getENamedElements(context).
+							filter(EClass).
+							filter[name == e.name].
+							map[EAllStructuralFeatures].flatten
+					]
+				else
+					e.EAllStructuralFeatures
 			EEnum:
-				cache.get("getEEnumENamedElements" -> e.name, context.eResource) [
-					e.EPackage.getENamedElements(context).
-						filter(EEnum).
-						filter[name == e.name].
-						map[ELiterals].flatten
-				]
-			default: Collections.emptyList
+				if (includeCopiedEPackages)
+					cache.get("getEEnumENamedElements" -> e.name, context.eResource) [
+						e.EPackage.getENamedElements(context).
+							filter(EEnum).
+							filter[name == e.name].
+							map[ELiterals].flatten
+					]
+				else
+					e.ELiterals
+			default:
+				emptyList
 		}
+	}
+
+	def private getEPackageENamedElementsInternal(EPackage e, EObject context, boolean includeCopiedEPackages) {
+		val derived = context.eResource.derivedEPackages.getByName(e.name)
+		if (derived !== null) {
+			// there'll also be copied epackages
+			var copiedEClassifiers = emptyList
+			if (includeCopiedEPackages)
+				copiedEClassifiers = context.eResource.copiedEPackages.getByName(e.name).getEClassifiers
+			return (
+				derived.getEClassifiers +
+				copiedEClassifiers +
+				e.getEClassifiers
+			).toList
+		}
+		return e.getEClassifiers
 	}
 
 	def private <T extends ENamedElement> getByName(Collection<T> namedElements, String packageName) {

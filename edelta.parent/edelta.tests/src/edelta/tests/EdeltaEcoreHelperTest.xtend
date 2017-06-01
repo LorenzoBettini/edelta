@@ -118,6 +118,22 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testEPackageENamedElementsWithCreatedEClassWithoutCopiedEPackages() {
+		referenceToCreatedEClass.parseWithTestEcore => [
+			getENamedElementsWithoutCopiedEPackages(getEPackageByName("foo"), it).
+			assertNamedElements(
+				'''
+				NewClass
+				FooClass
+				FooDataType
+				FooEnum
+				'''
+			)
+		// NewClass is the one created in the program
+		]
+	}
+
+	@Test
 	def void testEDataTypeENamedElements() {
 		referenceToMetamodel.parseWithTestEcore => [
 			getENamedElements(getEClassifierByName("foo", "FooDataType"), it).
@@ -148,6 +164,19 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			assertNamedElements(
 				'''
 				FooEnumLiteral
+				FooEnumLiteral
+				'''
+			)
+			// we also have copied EPackages, that's why the elements appear twice
+		]
+	}
+
+	@Test
+	def void testENumENamedElementsWithCreatedEClassWithoutCopiedEPackages() {
+		referenceToCreatedEClass.parseWithTestEcore => [
+			getENamedElementsWithoutCopiedEPackages(getEClassifierByName("foo", "FooEnum"), it).
+			assertNamedElements(
+				'''
 				FooEnumLiteral
 				'''
 			)
@@ -188,6 +217,19 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				'''
 			)
 			// we also have copied EPackages, that's why the elements appear twice
+		]
+	}
+
+	@Test
+	def void testEClassENamedElementsWithCreatedEClassWithoutCopiedEPackages() {
+		referenceToCreatedEClass.parseWithTestEcore => [
+			getENamedElementsWithoutCopiedEPackages(getEClassifierByName("foo", "FooClass"), it).
+			assertNamedElements(
+				'''
+				myAttribute
+				myReference
+				'''
+			)
 		]
 	}
 
