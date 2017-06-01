@@ -1,6 +1,7 @@
 package edelta.tests
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaFactory
 import edelta.scoping.EdeltaOriginalENamedElementRecorder
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
@@ -8,7 +9,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import edelta.edelta.EdeltaFactory
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -136,6 +136,30 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 				getEdeltaEcoreQualifiedReference
 			ref.recordOriginalENamedElement
 			val originalEClass = metamodels.last.getEClassiferByName("FooClass")
+			assertSame(originalEClass, ref.qualification.originalEnamedelement)
+			val original = originalEClass.
+				getEStructuralFeatureByName("myAttribute")
+			assertSame(original, ref.originalEnamedelement)
+		]
+	}
+
+	@Test def void testEStrucutralFeatureFullyQualifiedReference() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {}
+			ecoreref(foo.FooClass.myAttribute)
+		'''.parseWithTestEcore => [
+			val ref = lastExpression.
+				edeltaEcoreReferenceExpression.reference.
+				getEdeltaEcoreQualifiedReference
+			ref.recordOriginalENamedElement
+			val originalPackage = metamodels.last
+			assertSame(originalPackage,
+				ref.qualification.
+					edeltaEcoreQualifiedReference.qualification.originalEnamedelement
+			)
+			val originalEClass = originalPackage.getEClassiferByName("FooClass")
 			assertSame(originalEClass, ref.qualification.originalEnamedelement)
 			val original = originalEClass.
 				getEStructuralFeatureByName("myAttribute")
