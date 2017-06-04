@@ -8,19 +8,18 @@ node {
       mvnHome = tool 'M3'
    }
    stage('Build') {
-      try {
-        wrap([$class: 'Xvfb', autoDisplayName: true]) {
-          // Run the maven build
-          sh (script:
-            "'${mvnHome}/bin/mvn' -f edelta.parent/pom.xml clean verify -Pjacoco",
-            returnStatus: true
-          )
-        }
-      } finally {
-        junit '**/target/surefire-reports/TEST-*.xml'
+      wrap([$class: 'Xvfb', autoDisplayName: true]) {
+        // Run the maven build
+        // returnStatus: true here will ensure the build stays yellow
+        // when test cases are failing
+        sh (script:
+          "'${mvnHome}/bin/mvn' -f edelta.parent/pom.xml clean verify -Pjacoco",
+          returnStatus: true
+        )
       }
    }
    stage('Results') {
+      junit '**/target/surefire-reports/TEST-*.xml'
       archive '**/target/repository/'
       publishHTML(target: [
         allowMissing: false,
