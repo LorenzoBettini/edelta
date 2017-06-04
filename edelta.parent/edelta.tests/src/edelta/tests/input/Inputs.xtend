@@ -330,4 +330,31 @@ class Inputs {
 			}
 		'''
 	}
+
+	def createEClassAndAddEAttributeUsingLibMethod() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				EStructuralFeatures += newEAttribute("newTestAttr") [
+					EType = ecoreref(FooDataType)
+				]
+			}
+		'''
+	}
+
+	def createEClassAndAddEAttributeUsingLibMethodAndReference() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				EStructuralFeatures += newEAttribute("newTestAttr") [
+					EType = ecoreref(FooDataType)
+				]
+			}
+			
+			ecoreref(newTestAttr)
+		'''
+	}
+
 }

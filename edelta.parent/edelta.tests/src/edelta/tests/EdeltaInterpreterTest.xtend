@@ -58,15 +58,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testCreateEClassAndCallLibMethod() {
-		'''
-			metamodel "foo"
-			
-			createEClass NewClass in foo {
-				EStructuralFeatures += newEAttribute("newTestAttr") [
-					EType = ecoreref(FooDataType)
-				]
-			}
-		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
+		createEClassAndAddEAttributeUsingLibMethod.
+		assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
 			assertEquals("NewClass", derivedEClass.name)
 			assertEquals(1, derivedEClass.EStructuralFeatures.size)
 			val attr = derivedEClass.EStructuralFeatures.head
