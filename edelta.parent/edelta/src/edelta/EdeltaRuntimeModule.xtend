@@ -15,6 +15,7 @@ import edelta.typesystem.EdeltaTypeComputer
 import edelta.validation.EdeltaDiagnosticConverter
 import org.eclipse.xtext.validation.IDiagnosticConverter
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
+import edelta.resource.EdeltaEObjectAtOffsetHelper
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -39,6 +40,10 @@ class EdeltaRuntimeModule extends AbstractEdeltaRuntimeModule {
 
 	override bindIDefaultResourceDescriptionStrategy() {
 		EdeltaResourceDescriptionStrategy
+	}
+
+	override bindEObjectAtOffsetHelper() {
+		EdeltaEObjectAtOffsetHelper
 	}
 
 	def Class<? extends XbaseCompiler> bindXbaseCompiler() {
