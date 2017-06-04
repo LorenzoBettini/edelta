@@ -11,7 +11,10 @@ node {
       try {
         wrap([$class: 'Xvfb', autoDisplayName: true]) {
           // Run the maven build
-          sh "'${mvnHome}/bin/mvn' -f edelta.parent/pom.xml clean verify -Pjacoco"
+          sh (script:
+            "'${mvnHome}/bin/mvn' -f edelta.parent/pom.xml clean verify -Pjacoco",
+            returnStatus: true
+          )
         }
       } finally {
         junit '**/target/surefire-reports/TEST-*.xml'
