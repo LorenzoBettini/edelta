@@ -45,11 +45,36 @@ class EdeltaEObjectAtOffsetHelperTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test def void testUnresolved() {
+		'''
+		metamodel "foo"
+		
+		ecoreref(NonExistant)
+		'''.resolveAtOffset[
+			it, linked |
+			linked.eIsProxy.assertTrue
+		]
+	}
+
+	@Test def void testNonEcoreReference() {
+		'''
+		metamodel "foo"
+		
+		val String s = null
+		'''.resolveAtOffset("Str")[
+			it, linked |
+			lastExpression.variableDeclaration.
+				type.type.eIsProxy.assertFalse
+		]
+	}
+
 	def private resolveAtOffset(CharSequence input, (EdeltaProgram, EObject)=>void tester) {
+		resolveAtOffset(input, "ecoreref(", tester)
+	}
+
+	def private resolveAtOffset(CharSequence input, String stringRegion, (EdeltaProgram, EObject)=>void tester) {
 		val prog = input.parseWithTestEcore
-		prog.assertNoErrors
-		val string = "ecoreref("
-		val offset = input.toString.lastIndexOf(string) + string.length + 1
+		val offset = input.toString.lastIndexOf(stringRegion) + stringRegion.length + 1
 		val crossRefNode = (prog.
 			eResource as XtextResource).
 			getCrossReferenceNode(new TextRegion(offset, 0));
