@@ -26,15 +26,28 @@ class EdeltaEObjectAtOffsetHelperTest extends EdeltaAbstractTest {
 		ecoreref(FooClass)
 		'''.resolveAtOffset[
 			it, linked |
-			lastExpression.
-				edeltaEcoreReferenceExpression.
-				reference.enamedelement.
+			metamodels.head.getEClassifier("FooClass").
+				assertSame(linked)
+		]
+	}
+
+	@Test def void testWithManipulationExpressions() {
+		'''
+		metamodel "foo"
+		
+		createEClass NewClass in foo {}
+		
+		ecoreref(FooClass)
+		'''.resolveAtOffset[
+			it, linked |
+			metamodels.head.getEClassifier("FooClass").
 				assertSame(linked)
 		]
 	}
 
 	def private resolveAtOffset(CharSequence input, (EdeltaProgram, EObject)=>void tester) {
 		val prog = input.parseWithTestEcore
+		prog.assertNoErrors
 		val string = "ecoreref("
 		val offset = input.toString.lastIndexOf(string) + string.length + 1
 		val crossRefNode = (prog.
