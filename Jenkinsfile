@@ -8,13 +8,16 @@ node {
       mvnHome = tool 'M3'
    }
    stage('Build') {
-      wrap([$class: 'Xvfb', autoDisplayName: true]) {
-        // Run the maven build
-        sh "'${mvnHome}/bin/mvn' -f edelta.parent/pom.xml clean verify -Pjacoco"
+      try {
+        wrap([$class: 'Xvfb', autoDisplayName: true]) {
+          // Run the maven build
+          sh "'${mvnHome}/bin/mvn' -f edelta.parent/pom.xml clean verify -Pjacoco"
+        }
+      } finally {
+        junit '**/target/surefire-reports/TEST-*.xml'
       }
    }
    stage('Results') {
-      junit '**/target/surefire-reports/TEST-*.xml'
       archive '**/target/repository/'
       publishHTML(target: [
         allowMissing: false,
