@@ -10,7 +10,12 @@ node {
    stage('Build') {
       wrap([$class: 'Xvfb', autoDisplayName: true]) {
         // Run the maven build
-        sh "'${mvnHome}/bin/mvn' -f edelta.parent/pom.xml clean verify -Pjacoco"
+        // returnStatus: true here will ensure the build stays yellow
+        // when test cases are failing
+        sh (script:
+          "'${mvnHome}/bin/mvn' -f edelta.parent/pom.xml clean verify -Pjacoco",
+          returnStatus: true
+        )
       }
    }
    stage('Results') {
