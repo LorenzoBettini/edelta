@@ -2,6 +2,7 @@ package edelta.tests
 
 import com.google.inject.Inject
 import com.google.inject.Provider
+import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
 import edelta.edelta.EdeltaEcoreChangeEClassExpression
 import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
@@ -9,9 +10,12 @@ import edelta.edelta.EdeltaEcoreDirectReference
 import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaProgram
+import edelta.resource.EdeltaDerivedStateEPackage
 import edelta.tests.input.Inputs
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EClassifier
+import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
@@ -24,14 +28,10 @@ import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.testing.util.ParseHelper
 import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import org.eclipse.xtext.xbase.XExpression
+import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
-import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
-import org.eclipse.xtext.xbase.XVariableDeclaration
-import edelta.resource.EdeltaDerivedStateEPackage
-import org.eclipse.emf.ecore.EClassifier
-import org.eclipse.emf.ecore.EEnum
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -167,8 +167,12 @@ abstract class EdeltaAbstractTest {
 	}
 
 	def protected getDerivedStateLastEClass(EObject context) {
-		val derivedEPackage = context.eResource.contents.last as EdeltaDerivedStateEPackage
+		val derivedEPackage = getDerivedStateLastEPackage(context)
 		derivedEPackage.EClassifiers.last as EClass
+	}
+	
+	protected def EdeltaDerivedStateEPackage getDerivedStateLastEPackage(EObject context) {
+		context.eResource.contents.last as EdeltaDerivedStateEPackage
 	}
 
 	def protected getCopiedEPackages(EObject context) {

@@ -332,7 +332,9 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			program.assertNoErrors
 		}
 		program.lastExpression.getManipulationEClassExpression => [
-			val derivedEClass = program.getDerivedStateLastEClass
+			// mimic the behavior of derived state computer that runs the interpreter
+			// on a copied EPackage, not on the original one
+			val derivedEClass = program.getCopiedEPackages.head.EClassifiers.head as EClass
 			val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
 			val result = interpreter.run(it, derivedEClass, inferredJavaClass)
 			// result can be null due to a timeout
