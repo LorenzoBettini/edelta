@@ -505,6 +505,9 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		// in the initialization block and the interpreter is executed
 		// thus, it is safe to refer to the created EAttribute with
 		// the most up to date name.
+		// TODO: is this correct? References should be kept by name
+		// and we should issue an error on the original reference which
+		// is not valid anymore
 		referenceToCreatedEAttribute.checkCompilation(
 			'''
 			package edelta;
