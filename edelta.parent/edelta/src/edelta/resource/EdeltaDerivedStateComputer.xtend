@@ -31,6 +31,7 @@ import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator
 import edelta.edelta.EdeltaEcoreReferenceExpression
+import edelta.edelta.EdeltaProgram
 
 @Singleton
 class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEcoreModelAssociations {
@@ -109,7 +110,8 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 
 	override installDerivedState(DerivedStateAwareResource resource, boolean preIndexingPhase) {
 		super.installDerivedState(resource, preIndexingPhase)
-		val programJvmType = resource.contents.head.jvmElements.filter(JvmGenericType).head
+		val program = resource.contents.head as EdeltaProgram
+		val programJvmType = program.jvmElements.filter(JvmGenericType).head
 		if (!preIndexingPhase) {
 			val targetToSourceMap = resource.derivedToSourceMap
 			val nameToEPackageMap = resource.nameToEPackageMap
@@ -152,20 +154,22 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 			recordEcoreReferenceOriginalENamedElement(resource)
 			// configure and run the interpreter
 			interpreterConfigurator.configureInterpreter(interpreter, resource)
-			runInterpreter(createEClassExpressions, opToEClassMap, programJvmType)
-			runInterpreter(changeEClassExpressions, opToEClassMap, programJvmType)
+			val packages = (nameToCopiedEPackageMap.values + program.metamodels).toList
+			runInterpreter(createEClassExpressions, opToEClassMap, programJvmType, packages)
+			runInterpreter(changeEClassExpressions, opToEClassMap, programJvmType, packages)
 		}
 	}
 
 	protected def void runInterpreter(List<? extends EdeltaEcoreBaseEClassManipulationWithBlockExpression> expressions,
 		Map<EdeltaEcoreBaseEClassManipulationWithBlockExpression, EClass> opToEClassMap,
-		JvmGenericType jvmGenericType
+		JvmGenericType jvmGenericType, List<EPackage> packages
 	) {
 		for (e : expressions) {
 			interpreter.run(
 				e,
 				opToEClassMap.get(e),
-				jvmGenericType
+				jvmGenericType,
+				packages
 			)
 		}
 	}

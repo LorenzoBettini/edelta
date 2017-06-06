@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.common.types.JvmGenericType;
 
@@ -26,7 +27,7 @@ public class EdeltaDerivedStateComputerWithoutInterpreter extends EdeltaDerivedS
 	@Override
 	protected void runInterpreter(List<? extends EdeltaEcoreBaseEClassManipulationWithBlockExpression> expressions,
 			Map<EdeltaEcoreBaseEClassManipulationWithBlockExpression, EClass> opToEClassMap,
-			JvmGenericType jvmGenericType) {
+			JvmGenericType jvmGenericType, List<EPackage> packages) {
 		// No interpreter is run
 	}
 

@@ -3,8 +3,11 @@
  */
 package edelta.interpreter;
 
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.common.types.JvmGenericType;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationResult;
 
@@ -22,9 +25,9 @@ public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 
 	@Override
 	public IEvaluationResult run(EdeltaEcoreBaseEClassManipulationWithBlockExpression exp, EClass eClass,
-			JvmGenericType jvmGenericType) {
+			JvmGenericType jvmGenericType, List<EPackage> packages) {
 		try {
-			IEvaluationResult result = super.run(exp, eClass, jvmGenericType);
+			IEvaluationResult result = super.run(exp, eClass, jvmGenericType, packages);
 			if (result != null) {
 				Throwable exception = result.getException();
 				if (exception != null) {
