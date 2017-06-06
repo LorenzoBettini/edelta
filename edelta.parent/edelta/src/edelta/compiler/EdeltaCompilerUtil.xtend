@@ -125,7 +125,7 @@ class EdeltaCompilerUtil {
 		builder.toString
 	}
 
-	def void buildMethodToCallForEcoreReference(EdeltaEcoreReference e, (String, List<String>)=>void acceptor) {
+	def void buildMethodToCallForEcoreReference(EdeltaEcoreReference e, (String, List<Object>)=>void acceptor) {
 		val type = e.resolveTypes.getActualType(e)
 		// in case there's the original referred ENamedElement we use that one
 		// since the interpreter could have changed the container of the ENamedElement
