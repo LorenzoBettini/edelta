@@ -203,24 +203,28 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 			Map<String, EPackage> nameToCopiedEPackageMap, EPackage referredEPackage
 	) {
 		if (referredEPackage !== null) {
-			var derivedEPackage = getOrAddDerivedStateEPackage(referredEPackage, nameToEPackageMap, nameToCopiedEPackageMap)
-			derivedEPackage.EClassifiers += created
+			val packages = getOrAddDerivedStateEPackage(referredEPackage, nameToEPackageMap, nameToCopiedEPackageMap)
+			packages.key.EClassifiers.add(created)
+			// in copied EPackages we add the created or modified EClass so that they appear first
+			packages.value.EClassifiers.add(0, EdeltaEcoreUtil.copyENamedElement(created))
 		}
 	}
 
-	def private EPackage getOrAddDerivedStateEPackage(EPackage referredEPackage, Map<String, EPackage> nameToEPackageMap,
+	def private getOrAddDerivedStateEPackage(EPackage referredEPackage, Map<String, EPackage> nameToEPackageMap,
 			Map<String, EPackage> nameToCopiedEPackageMap
 	) {
 		val referredEPackageName = referredEPackage.name
 		var derivedEPackage = nameToEPackageMap.get(referredEPackageName)
+		var copiedEPackage = nameToCopiedEPackageMap.get(referredEPackageName)
 		if (derivedEPackage === null) {
 			derivedEPackage = new EdeltaDerivedStateEPackage => [
 				name = referredEPackageName
 			]
 			nameToEPackageMap.put(referredEPackageName, derivedEPackage)
-			nameToCopiedEPackageMap.put(referredEPackageName, EdeltaEcoreUtil.copyENamedElement(referredEPackage))
+			copiedEPackage = EdeltaEcoreUtil.copyENamedElement(referredEPackage)
+			nameToCopiedEPackageMap.put(referredEPackageName, copiedEPackage)
 		}
-		derivedEPackage
+		derivedEPackage -> copiedEPackage
 	}
 
 	override discardDerivedState(DerivedStateAwareResource resource) {
