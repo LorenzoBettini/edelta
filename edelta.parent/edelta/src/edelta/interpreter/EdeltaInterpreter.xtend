@@ -24,6 +24,7 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
+import org.eclipse.emf.ecore.EAttribute
 
 class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
@@ -94,7 +95,18 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 		} else if (expression instanceof EdeltaEcoreReference) {
 			return expression.enamedelement
 		} else if (expression instanceof EdeltaEcoreCreateEAttributeExpression) {
-			val attr = expression.getEAttributeElement
+			val createEAttributeJvmOperation = 
+				programInferredJavaType.allFeatures.filter(JvmOperation).
+				findFirst[simpleName == "createEAttribute"]
+			val List<Object> arguments = #[
+				context.getValue(QualifiedName.create("it")), // the EClass
+				expression.name, // attribute name
+				null
+			]
+			val attr = super.invokeOperation(
+				createEAttributeJvmOperation, edelta,
+				arguments, context, indicator
+			) as EAttribute
 			safeSetEAttributeType(attr, expression.ecoreReferenceDataType)
 			val newContext = context.fork
 			newContext.newValue(QualifiedName.create("it"), attr)
