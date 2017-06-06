@@ -6,6 +6,7 @@ package edelta.lib;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
 
@@ -32,6 +33,12 @@ public class EdeltaEcoreUtil {
 		EObject result = copier.copy(element);
 		copier.copyReferences();
 		return (T) result;
+	}
+
+	public static <T extends EClassifier> T copyEClassifierIntoEPackage(EPackage p, T element) {
+		T copied = copyENamedElement(element);
+		p.getEClassifiers().add(0, copied);
+		return copied;
 	}
 
 }
