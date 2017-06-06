@@ -352,7 +352,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			reference.enamedelement as EClass
 		assertSame(
 			// the one copied by the derived state computer
-			prog.copiedEPackages.head.EClassifiers.filter(EClass).head,
+			prog.copiedEPackages.head.getEClassiferByName("FooClass"),
 			referred
 		)
 	}
