@@ -142,10 +142,10 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 			// changes to EClasses
 			for (exp : changeEClassExpressions) {
 				val derivedEClass = EdeltaEcoreUtil.copyENamedElement(exp.original)
+				changeRunner.performChanges(derivedEClass, exp)
 				addToDerivedEPackage(derivedEClass, nameToEPackageMap, nameToCopiedEPackageMap, exp.epackage)
 				targetToSourceMap.put(derivedEClass, exp)
 				opToEClassMap.put(exp, derivedEClass)
-				changeRunner.performChanges(derivedEClass, exp)
 				handleCreateEAttribute(exp, derivedEClass, targetToSourceMap, opToEAttributeMap)
 			}
 			// record original ecore references before running the interpreter
