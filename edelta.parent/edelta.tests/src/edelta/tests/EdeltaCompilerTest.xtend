@@ -499,14 +499,10 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testReferenceToCreatedEAttribute() {
-		// note that ecoreref(newAttribute) is translated into
-		// getEAttribute("foo", "NewClass", "changed");
-		// because the name of the created EAttribute is changed
+		// the name of the created EAttribute is changed
 		// in the initialization block and the interpreter is executed
-		// thus, it is safe to refer to the created EAttribute with
-		// the most up to date name.
-		// TODO: is this correct? References should be kept by name
-		// and we should issue an error on the original reference which
+		// thus, we can access them both.
+		// TODO: we should issue an error on the original reference which
 		// is not valid anymore
 		referenceToCreatedEAttribute.checkCompilation(
 			'''
@@ -534,6 +530,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  @Override
 			  protected void doExecute() throws Exception {
 			    createEClass("foo", "NewClass", createList(this::_createEClass_NewClass_in_foo));
+			    getEAttribute("foo", "NewClass", "newAttribute");
 			    getEAttribute("foo", "NewClass", "changed");
 			  }
 			  

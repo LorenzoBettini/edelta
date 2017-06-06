@@ -282,6 +282,7 @@ class Inputs {
 				createEAttribute newAttribute2 type FooDataType {}
 			}
 			ecoreref(newAttribute)
+			ecoreref(changed)
 		'''
 	}
 
