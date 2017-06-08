@@ -35,6 +35,8 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
 	var JvmGenericType programInferredJavaType;
 
+	val IT_QUALIFIED_NAME = QualifiedName.create("it")
+
 	val edelta = new AbstractEdelta() {
 		
 	}
@@ -48,7 +50,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 		val result = evaluate(
 			e,
 			createContext() => [
-				newValue(QualifiedName.create("it"), c)
+				newValue(IT_QUALIFIED_NAME, c)
 				// 'this' and the name of the inferred class are mapped
 				// to an instance of AbstractEdelta, so that all reflective
 				// accesses, e.g., the inherited field 'lib', work out of the box
@@ -97,7 +99,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 			val attr = expression.getEAttributeElement
 			safeSetEAttributeType(attr, expression.ecoreReferenceDataType)
 			val newContext = context.fork
-			newContext.newValue(QualifiedName.create("it"), attr)
+			newContext.newValue(IT_QUALIFIED_NAME, attr)
 			return internalEvaluate(expression.body, newContext, indicator)
 		}
 		return super.doEvaluate(expression, context, indicator)
