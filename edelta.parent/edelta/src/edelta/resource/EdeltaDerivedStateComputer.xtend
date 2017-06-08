@@ -8,6 +8,7 @@ import edelta.edelta.EdeltaEcoreChangeEClassExpression
 import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreReference
+import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.interpreter.IEdeltaInterpreter
 import edelta.interpreter.internal.EdeltaInterpreterConfigurator
 import edelta.lib.EdeltaEcoreUtil
@@ -17,7 +18,6 @@ import edelta.services.IEdeltaEcoreModelAssociations
 import java.util.List
 import java.util.Map
 import org.eclipse.emf.common.notify.impl.AdapterImpl
-import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
@@ -30,7 +30,6 @@ import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader.GenericUnloader
 import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator
-import edelta.edelta.EdeltaEcoreReferenceExpression
 
 @Singleton
 class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEcoreModelAssociations {
@@ -55,7 +54,6 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		var Map<EObject, EObject> targetToSourceMap = newHashMap()
 		var Map<String, EPackage> nameToEPackageMap = newHashMap()
 		var Map<String, EPackage> nameToCopiedEPackageMap = newHashMap()
-		var Map<EObject, EAttribute> opToEAttributeMap = newHashMap()
 		var Map<EdeltaEcoreBaseEClassManipulationWithBlockExpression, EClass>
 			opToEClassMap = newHashMap
 
@@ -91,10 +89,6 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		getOrInstallAdapter(resource).nameToCopiedEPackageMap
 	}
 
-	def protected opToEAttributeMap(Resource resource) {
-		getOrInstallAdapter(resource).opToEAttributeMap
-	}
-
 	def protected opToEClassMap(Resource resource) {
 		getOrInstallAdapter(resource).opToEClassMap
 	}
@@ -114,7 +108,6 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 			val targetToSourceMap = resource.derivedToSourceMap
 			val nameToEPackageMap = resource.nameToEPackageMap
 			val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
-			val opToEAttributeMap = resource.opToEAttributeMap
 			val opToEClassMap = resource.opToEClassMap
 
 			val createEClassExpressions = resource.allContents.toIterable.filter(EdeltaEcoreCreateEClassExpression).toList
@@ -125,7 +118,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 				]
 				targetToSourceMap.put(derivedEClass, exp)
 				opToEClassMap.put(exp, derivedEClass)
-				handleCreateEAttribute(exp, derivedEClass, targetToSourceMap, opToEAttributeMap)
+				handleCreateEAttribute(exp, derivedEClass, targetToSourceMap)
 			}
 			val changeEClassExpressions = resource.
 				allContents.toIterable.
@@ -146,7 +139,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 				targetToSourceMap.put(derivedEClass, exp)
 				opToEClassMap.put(exp, derivedEClass)
 				changeRunner.performChanges(derivedEClass, exp)
-				handleCreateEAttribute(exp, derivedEClass, targetToSourceMap, opToEAttributeMap)
+				handleCreateEAttribute(exp, derivedEClass, targetToSourceMap)
 			}
 			// record original ecore references before running the interpreter
 			recordEcoreReferenceOriginalENamedElement(resource)
@@ -178,12 +171,11 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		}
 	}
 
-	private def void handleCreateEAttribute(EdeltaEcoreBaseEClassManipulationWithBlockExpression exp, EClass derivedEClass, Map<EObject, EObject> targetToSourceMap, Map<EObject, EAttribute> opToEAttributeMap) {
+	private def void handleCreateEAttribute(EdeltaEcoreBaseEClassManipulationWithBlockExpression exp, EClass derivedEClass, Map<EObject, EObject> targetToSourceMap) {
 		for (e : EcoreUtil2.getAllContentsOfType(exp, EdeltaEcoreCreateEAttributeExpression)) {
 			val derivedEAttribute = newEAttribute(e.name)
 			derivedEClass.EStructuralFeatures += derivedEAttribute
 			targetToSourceMap.put(derivedEAttribute, e)
-			opToEAttributeMap.put(e, derivedEAttribute)
 		}
 	}
 
@@ -227,7 +219,6 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		val derivedToSourceMap = resource.derivedToSourceMap
 		val nameToEPackageMap = resource.nameToEPackageMap
 		val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
-		val opToEAttributeMap = resource.opToEAttributeMap
 		val opToEClassMap = resource.opToEClassMap
 		unloadDerivedPackages(nameToEPackageMap)
 		unloadDerivedPackages(nameToCopiedEPackageMap)
@@ -235,7 +226,6 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		derivedToSourceMap.clear
 		nameToEPackageMap.clear
 		nameToCopiedEPackageMap.clear
-		opToEAttributeMap.clear
 		opToEClassMap.clear
 	}
 
@@ -255,10 +245,6 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 				return sourceElement
 		}
 		return super.getPrimarySourceElement(element)
-	}
-
-	override getEAttributeElement(EObject sourceElement) {
-		sourceElement.resource.opToEAttributeMap.get(sourceElement)
 	}
 
 }

@@ -9,9 +9,10 @@ import edelta.edelta.EdeltaOperation
 import edelta.edelta.EdeltaPackage
 import edelta.edelta.EdeltaUseAs
 import edelta.lib.AbstractEdelta
-import edelta.services.IEdeltaEcoreModelAssociations
+import edelta.util.EdeltaEcoreHelper
 import edelta.validation.EdeltaValidator
 import java.util.List
+import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.xtext.common.types.JvmField
 import org.eclipse.xtext.common.types.JvmGenericType
@@ -24,14 +25,11 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
-import org.eclipse.emf.ecore.EAttribute
-import edelta.util.EdeltaEcoreHelper
 
 class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
 	@Inject extension IJvmModelAssociations
 	@Inject extension EdeltaInterpreterHelper
-	@Inject extension IEdeltaEcoreModelAssociations
 	@Inject extension EdeltaEcoreHelper
 
 	var int interpreterTimeout = 2000;
