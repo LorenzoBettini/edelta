@@ -24,12 +24,15 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
+import org.eclipse.emf.ecore.EAttribute
+import edelta.util.EdeltaEcoreHelper
 
 class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
 	@Inject extension IJvmModelAssociations
 	@Inject extension EdeltaInterpreterHelper
 	@Inject extension IEdeltaEcoreModelAssociations
+	@Inject extension EdeltaEcoreHelper
 
 	var int interpreterTimeout = 2000;
 
@@ -96,7 +99,9 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 		} else if (expression instanceof EdeltaEcoreReference) {
 			return expression.enamedelement
 		} else if (expression instanceof EdeltaEcoreCreateEAttributeExpression) {
-			val attr = expression.getEAttributeElement
+			val eclass = context.getValue(IT_QUALIFIED_NAME) as EClass
+			val attr = eclass.EStructuralFeatures.filter(EAttribute).
+				getByName(expression.name)
 			safeSetEAttributeType(attr, expression.ecoreReferenceDataType)
 			val newContext = context.fork
 			newContext.newValue(IT_QUALIFIED_NAME, attr)
