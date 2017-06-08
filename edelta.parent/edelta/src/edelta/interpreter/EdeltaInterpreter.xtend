@@ -9,9 +9,10 @@ import edelta.edelta.EdeltaOperation
 import edelta.edelta.EdeltaPackage
 import edelta.edelta.EdeltaUseAs
 import edelta.lib.AbstractEdelta
-import edelta.services.IEdeltaEcoreModelAssociations
+import edelta.util.EdeltaEcoreHelper
 import edelta.validation.EdeltaValidator
 import java.util.List
+import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.xtext.common.types.JvmField
 import org.eclipse.xtext.common.types.JvmGenericType
@@ -29,11 +30,13 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
 	@Inject extension IJvmModelAssociations
 	@Inject extension EdeltaInterpreterHelper
-	@Inject extension IEdeltaEcoreModelAssociations
+	@Inject extension EdeltaEcoreHelper
 
 	var int interpreterTimeout = 2000;
 
 	var JvmGenericType programInferredJavaType;
+
+	val IT_QUALIFIED_NAME = QualifiedName.create("it")
 
 	val edelta = new AbstractEdelta() {
 		
@@ -48,7 +51,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 		val result = evaluate(
 			e,
 			createContext() => [
-				newValue(QualifiedName.create("it"), c)
+				newValue(IT_QUALIFIED_NAME, c)
 				// 'this' and the name of the inferred class are mapped
 				// to an instance of AbstractEdelta, so that all reflective
 				// accesses, e.g., the inherited field 'lib', work out of the box
@@ -94,10 +97,12 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 		} else if (expression instanceof EdeltaEcoreReference) {
 			return expression.enamedelement
 		} else if (expression instanceof EdeltaEcoreCreateEAttributeExpression) {
-			val attr = expression.getEAttributeElement
+			val eclass = context.getValue(IT_QUALIFIED_NAME) as EClass
+			val attr = eclass.EStructuralFeatures.filter(EAttribute).
+				getByName(expression.name)
 			safeSetEAttributeType(attr, expression.ecoreReferenceDataType)
 			val newContext = context.fork
-			newContext.newValue(QualifiedName.create("it"), attr)
+			newContext.newValue(IT_QUALIFIED_NAME, attr)
 			return internalEvaluate(expression.body, newContext, indicator)
 		}
 		return super.doEvaluate(expression, context, indicator)

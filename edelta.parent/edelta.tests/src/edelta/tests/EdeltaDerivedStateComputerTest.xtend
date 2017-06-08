@@ -252,13 +252,11 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		val derivedToSourceMap = resource.derivedToSourceMap
 		val nameToEPackageMap = resource.nameToEPackageMap
 		val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
-		val opToEAttributeMap = resource.opToEAttributeMap
 		val opToEClassMap = resource.opToEClassMap
 		assertFalse(resource.eAdapters.empty)
 		assertFalse(derivedToSourceMap.empty)
 		assertFalse(nameToEPackageMap.empty)
 		assertFalse(nameToCopiedEPackageMap.empty)
-		assertFalse(opToEAttributeMap.empty)
 		assertFalse(opToEClassMap.empty)
 		// discard derived state
 		program.main.expressions.remove(0)
@@ -267,7 +265,6 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		assertTrue(derivedToSourceMap.empty)
 		assertTrue(nameToEPackageMap.empty)
 		assertTrue(nameToCopiedEPackageMap.empty)
-		assertTrue(opToEAttributeMap.empty)
 		assertTrue(opToEClassMap.empty)
 		assertFalse(resource.eAdapters.empty)
 	}
@@ -434,26 +431,6 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		val derivedEAttribute = derivedEClass.EStructuralFeatures.last as EAttribute
 		assertEquals("newAttribute", derivedEAttribute.name)
 		assertEquals("Renamed", derivedEAttribute.EContainingClass.name)
-	}
-
-	@Test
-	def void testGetEAttributeElement() {
-		val program = '''
-		package test
-		
-		metamodel "foo"
-		
-		createEClass First in foo {
-			createEAttribute newAttribute
-		}
-		'''.
-		parseWithTestEcore
-		val e = (program.lastExpression as EdeltaEcoreCreateEClassExpression).
-			body.expressions.last
-		val derivedEClass = program.getDerivedStateLastEClass
-		val derivedEAttribute = derivedEClass.EStructuralFeatures.head
-		assertNotNull(derivedEAttribute)
-		assertSame(derivedEAttribute, e.getEAttributeElement)
 	}
 
 	@Test
