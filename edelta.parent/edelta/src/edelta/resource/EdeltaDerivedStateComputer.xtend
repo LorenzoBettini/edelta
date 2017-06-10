@@ -114,13 +114,11 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 
 			val createEClassExpressions = resource.allContents.toIterable.filter(EdeltaEcoreCreateEClassExpression).toList
 			for (exp : createEClassExpressions) {
-				val derivedEClass = createDerivedStateEClass(exp.name, exp.ecoreReferenceSuperTypes) => [
-					// could be null in an incomplete expression
-					addToDerivedEPackage(nameToEPackageMap, nameToCopiedEPackageMap, exp.epackage)
-				]
+				val derivedEClass = createDerivedStateEClass(exp.name, exp.ecoreReferenceSuperTypes)
 				targetToSourceMap.put(derivedEClass, exp)
 				opToEClassMap.put(exp, derivedEClass)
 				handleCreateEAttribute(exp, derivedEClass, targetToSourceMap)
+				addToDerivedEPackage(derivedEClass, nameToEPackageMap, nameToCopiedEPackageMap, exp.epackage)
 			}
 			val changeEClassExpressions = resource.
 				allContents.toIterable.
@@ -138,10 +136,10 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 			for (exp : changeEClassExpressions) {
 				val derivedEClass = EdeltaEcoreUtil.copyENamedElement(exp.original)
 				changeRunner.performChanges(derivedEClass, exp)
-				addToDerivedEPackage(derivedEClass, nameToEPackageMap, nameToCopiedEPackageMap, exp.epackage)
 				targetToSourceMap.put(derivedEClass, exp)
 				opToEClassMap.put(exp, derivedEClass)
 				handleCreateEAttribute(exp, derivedEClass, targetToSourceMap)
+				addToDerivedEPackage(derivedEClass, nameToEPackageMap, nameToCopiedEPackageMap, exp.epackage)
 			}
 			// record original ecore references before running the interpreter
 			recordEcoreReferenceOriginalENamedElement(resource)
