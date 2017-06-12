@@ -466,10 +466,16 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 			}
 		'''.
 		parseWithTestEcore
+		// the interpreter acts on the copied EPackage
+		val attr = program.copiedEPackages.
+			head.getEClassiferByName("FooClass").
+			getEAttributeByName("renamed")
+		assertNotNull("renamed", attr.name)
+		// the derivedEClass' EAttribute is not changed
 		val derivedEClass = program.getDerivedStateLastEClass
 		assertEquals("FooClass", derivedEClass.name)
-		val attr = derivedEClass.EStructuralFeatures.head
-		assertEquals("renamed", attr.name)
+		val origAttr = derivedEClass.EStructuralFeatures.head
+		assertEquals("myAttribute", origAttr.name)
 		program.assertNoErrors
 		// check that the reference is not dangling
 		// that is, the attribute is still contained in the original class
