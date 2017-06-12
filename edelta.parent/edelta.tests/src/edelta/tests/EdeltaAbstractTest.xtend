@@ -32,6 +32,7 @@ import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
+import org.eclipse.emf.ecore.EAttribute
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -185,6 +186,11 @@ abstract class EdeltaAbstractTest {
 
 	def protected getEStructuralFeatureByName(EClassifier e, String nameToSearch) {
 		(e as EClass).EStructuralFeatures.findFirst[name == nameToSearch]
+	}
+
+	def protected getEAttributeByName(EClassifier e, String nameToSearch) {
+		(e as EClass).EStructuralFeatures.
+			filter(EAttribute).findFirst[name == nameToSearch]
 	}
 
 	def protected getEEnumLiteralByName(EClassifier e, String nameToSearch) {

@@ -207,4 +207,22 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 			assertSame(original, ref.originalEnamedelement)
 		]
 	}
+
+	@Test def void testCreatedEAttributeDirectReference() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				createEAttribute newAttribute type FooDataType {
+				}
+			}
+			ecoreref(newAttribute)
+		'''.parseWithTestEcore => [
+			val ref = lastExpression.edeltaEcoreReferenceExpression.reference
+			ref.recordOriginalENamedElement
+			val original = derivedStateLastEClass.
+				getEAttributeByName("newAttribute")
+			assertSame(original, ref.originalEnamedelement)
+		]
+	}
 }
