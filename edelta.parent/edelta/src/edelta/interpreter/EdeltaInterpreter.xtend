@@ -103,7 +103,6 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 			buildMethodToCallForEcoreReference(expression) [
 				methodName, args |
 				val op = findJvmOperation(methodName)
-				println(args)
 				val ref = super.invokeOperation(
 					op, edelta,
 					args, context, indicator
