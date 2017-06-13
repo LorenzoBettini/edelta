@@ -10,9 +10,11 @@ import edelta.edelta.EdeltaEcoreDirectReference
 import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaProgram
+import edelta.interpreter.IEdeltaInterpreter
 import edelta.resource.EdeltaDerivedStateEPackage
 import edelta.tests.input.Inputs
 import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EEnum
@@ -22,6 +24,7 @@ import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.xmi.XMIResource
+import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.resource.XtextResourceSet
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
@@ -29,10 +32,11 @@ import org.eclipse.xtext.testing.util.ParseHelper
 import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
+import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationResult
+import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
-import org.eclipse.emf.ecore.EAttribute
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -43,6 +47,8 @@ abstract class EdeltaAbstractTest {
 
 	@Inject protected extension ParseHelper<EdeltaProgram>
 	@Inject protected extension ValidationTestHelper
+	@Inject extension IJvmModelAssociations
+
 	protected extension Inputs = new Inputs
 
 	def protected parseWithTestEcore(CharSequence input) {
@@ -136,6 +142,27 @@ abstract class EdeltaAbstractTest {
 			elements.map[name].join("\n") + "\n"
 		)
 	}
+
+	def protected assertAfterInterpretationOfEdeltaManipulationExpression(IEdeltaInterpreter interpreter, EdeltaProgram program, boolean doValidate, (EClass)=>void testExecutor) {
+		program.lastExpression.getManipulationEClassExpression => [
+			// mimic the behavior of derived state computer that runs the interpreter
+			// on a copied EPackage, not on the original one
+			val packages = program.getCopiedEPackages.toList
+			val eclass = packages.head.EClassifiers.head as EClass
+			val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
+			val result = interpreter.run(it, eclass, inferredJavaClass, packages)
+			// result can be null due to a timeout
+			if (result?.exception !== null)
+				throw result.exception
+			testExecutor.apply(eclass)
+			if (result !== null)
+				assertTrue(
+					"not expected result of type " + result.class.name,
+					result instanceof DefaultEvaluationResult
+				)
+		]
+	}
+
 
 	def protected getEPackageByName(EdeltaProgram context, String packagename) {
 		context.eResource.resourceSet.resources.filter(XMIResource).
