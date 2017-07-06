@@ -207,9 +207,12 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			NewClass
 			newAttribute
 			newAttribute2
+			NewClass
 			FooClass
 			FooDataType
 			FooEnum
+			newAttribute
+			newAttribute2
 			myAttribute
 			myReference
 			FooEnumLiteral
@@ -234,9 +237,12 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			NewClass
 			changed
 			newAttribute2
+			NewClass
 			FooClass
 			FooDataType
 			FooEnum
+			newAttribute
+			newAttribute2
 			myAttribute
 			myReference
 			FooEnumLiteral
@@ -370,9 +376,13 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			myAttribute
 			myReference
 			anotherAttr
+			RenamedClass
 			FooClass
 			FooDataType
 			FooEnum
+			myAttribute
+			myReference
+			anotherAttr
 			myAttribute
 			myReference
 			FooEnumLiteral
@@ -401,6 +411,8 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			edeltaEcoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
+			myAttribute
+			myReference
 			myAttribute
 			myReference
 			myAttribute
