@@ -198,9 +198,18 @@ abstract class EdeltaAbstractTest {
 		val derivedEPackage = getDerivedStateLastEPackage(context)
 		derivedEPackage.EClassifiers.last as EClass
 	}
-	
+
 	protected def EdeltaDerivedStateEPackage getDerivedStateLastEPackage(EObject context) {
 		context.eResource.contents.last as EdeltaDerivedStateEPackage
+	}
+
+	def protected getLastCopiedEClass(EObject context) {
+		val p = getLastCopiedEPackage(context)
+		p.EClassifiers.filter(EClass).last as EClass
+	}
+
+	def protected getLastCopiedEPackage(EObject context) {
+		getCopiedEPackages(context).last
 	}
 
 	def protected getCopiedEPackages(EObject context) {
