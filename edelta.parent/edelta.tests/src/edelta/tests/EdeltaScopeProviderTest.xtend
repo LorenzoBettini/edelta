@@ -415,13 +415,17 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			myReference
 			myAttribute
 			myReference
-			myAttribute
-			myReference
 			''')
 		// we renamed FooClass, but its attributes are still visible through
 		// the renamed class
 		// they're duplicate since we also have the ones of the copied EPackages
-		// and since recording original references clear the IResourceScopeCache?
+		// Note that they appear twice and not 3 times, because we only select
+		// those in RenamedClass, not also the ones in FooClass.
+		// foo in foo.RenamedClass refers to the derived state EPackage
+		// and edelta.util.EdeltaEcoreHelper.getEPackageENamedElementsInternal(EPackage, EObject, boolean)
+		// does not consider the passed EPackage as the program imported metamodel
+		// so it does not risk using the passed EPackage and the retrieved derived state
+		// epackage twice for retrieving EClassifiers.
 	}
 
 	def private assertScope(EObject context, EReference reference, CharSequence expected) {
