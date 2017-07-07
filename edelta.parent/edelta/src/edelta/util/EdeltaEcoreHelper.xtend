@@ -102,14 +102,9 @@ class EdeltaEcoreHelper {
 	) {
 		switch (e) {
 			EPackage:
-				if (includeCopiedEPackages)
-					cache.get("getEPackageENamedElements" -> e.name, context.eResource) [
-						return getEPackageENamedElementsInternal(e, context, true)
-					]
-				else
-					cache.get("getEPackageENamedElementsWithoutCopiedEPackages" -> e.name, context.eResource) [
-						return getEPackageENamedElementsInternal(e, context, false)
-					]
+				cache.get("getEPackageENamedElements" + includeCopiedEPackages -> e.name, context.eResource) [
+					return getEPackageENamedElementsInternal(e, context, includeCopiedEPackages)
+				]
 			EClass:
 				if (includeCopiedEPackages)
 					cache.get("getEClassENamedElements" -> e.name, context.eResource) [
