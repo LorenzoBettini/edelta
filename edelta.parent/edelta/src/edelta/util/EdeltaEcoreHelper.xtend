@@ -106,25 +106,19 @@ class EdeltaEcoreHelper {
 					return getEPackageENamedElementsInternal(e, context, includeCopiedEPackages)
 				]
 			EClass:
-				if (includeCopiedEPackages)
-					cache.get("getEClassENamedElements" -> e.name, context.eResource) [
-						e.EPackage.getENamedElements(context).
-							filter(EClass).
-							filter[name == e.name].
-							map[EAllStructuralFeatures].flatten
-					]
-				else
-					e.EAllStructuralFeatures
+				cache.get("getEClassENamedElements" + includeCopiedEPackages -> e.name, context.eResource) [
+					e.EPackage.getENamedElementsInternal(context, includeCopiedEPackages).
+						filter(EClass).
+						filter[name == e.name].
+						map[EAllStructuralFeatures].flatten
+				]
 			EEnum:
-				if (includeCopiedEPackages)
-					cache.get("getEEnumENamedElements" -> e.name, context.eResource) [
-						e.EPackage.getENamedElements(context).
-							filter(EEnum).
-							filter[name == e.name].
-							map[ELiterals].flatten
-					]
-				else
-					e.ELiterals
+				cache.get("getEEnumENamedElements" + includeCopiedEPackages -> e.name, context.eResource) [
+					e.EPackage.getENamedElementsInternal(context, includeCopiedEPackages).
+						filter(EEnum).
+						filter[name == e.name].
+						map[ELiterals].flatten
+				]
 			default:
 				emptyList
 		}
