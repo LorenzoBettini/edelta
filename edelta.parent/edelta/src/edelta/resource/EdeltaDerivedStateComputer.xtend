@@ -116,9 +116,8 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 			for (exp : createEClassExpressions) {
 				val derivedEClass = createDerivedStateEClass(exp.name, exp.ecoreReferenceSuperTypes)
 				targetToSourceMap.put(derivedEClass, exp)
-				opToEClassMap.put(exp, derivedEClass)
 				handleCreateEAttribute(exp, derivedEClass, targetToSourceMap)
-				addToDerivedEPackage(derivedEClass, nameToEPackageMap, nameToCopiedEPackageMap, exp.epackage)
+				addToDerivedEPackage(derivedEClass, exp, opToEClassMap, nameToEPackageMap, nameToCopiedEPackageMap, exp.epackage)
 			}
 			val changeEClassExpressions = resource.
 				allContents.toIterable.
@@ -137,9 +136,8 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 				val derivedEClass = EdeltaEcoreUtil.copyENamedElement(exp.original)
 				changeRunner.performChanges(derivedEClass, exp)
 				targetToSourceMap.put(derivedEClass, exp)
-				opToEClassMap.put(exp, derivedEClass)
 				handleCreateEAttribute(exp, derivedEClass, targetToSourceMap)
-				addToDerivedEPackage(derivedEClass, nameToEPackageMap, nameToCopiedEPackageMap, exp.epackage)
+				addToDerivedEPackage(derivedEClass, exp, opToEClassMap, nameToEPackageMap, nameToCopiedEPackageMap, exp.epackage)
 			}
 			// record original ecore references before running the interpreter
 			recordEcoreReferenceOriginalENamedElement(resource)
@@ -193,14 +191,19 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	 * must not add them to the original referred package or we would mess
 	 * with Ecore original packages.
 	 */
-	def private addToDerivedEPackage(EClass created, Map<String, EPackage> nameToEPackageMap,
-			Map<String, EPackage> nameToCopiedEPackageMap, EPackage referredEPackage
+	def private addToDerivedEPackage(EClass created,
+			EdeltaEcoreBaseEClassManipulationWithBlockExpression op,
+			Map<EdeltaEcoreBaseEClassManipulationWithBlockExpression, EClass> opToEClassMap,
+			Map<String, EPackage> nameToEPackageMap,
+			Map<String, EPackage> nameToCopiedEPackageMap,
+			EPackage referredEPackage
 	) {
 		if (referredEPackage !== null) {
 			val packages = getOrAddDerivedStateEPackage(referredEPackage, nameToEPackageMap, nameToCopiedEPackageMap)
 			packages.key.EClassifiers.add(created)
 			// in copied EPackages we add the created or modified EClass so that they appear first
 			packages.value.EClassifiers.add(0, EdeltaEcoreUtil.copyENamedElement(created))
+			opToEClassMap.put(op, created)
 		}
 	}
 
