@@ -286,6 +286,20 @@ class Inputs {
 		'''
 	}
 
+	def referenceToCreatedEAttributeRenamedInChangedEClass() {
+		'''
+			metamodel "foo"
+			
+			changeEClass foo.FooClass {
+				createEAttribute newAttribute type FooDataType {
+					name = "changed"
+				}
+			}
+			ecoreref(newAttribute)
+			ecoreref(changed)
+		'''
+	}
+
 	def referenceToCreatedEClassRenamed() {
 		'''
 			metamodel "foo"
@@ -294,6 +308,18 @@ class Inputs {
 				name = "changed"
 			}
 			ecoreref(NewClass)
+			ecoreref(changed)
+		'''
+	}
+
+	def referenceToChangedEClassRenamed() {
+		'''
+			metamodel "foo"
+			
+			changeEClass foo.FooClass {
+				name = "changed"
+			}
+			ecoreref(FooClass)
 			ecoreref(changed)
 		'''
 	}

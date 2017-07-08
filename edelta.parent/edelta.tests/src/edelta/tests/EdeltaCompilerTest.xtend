@@ -542,6 +542,48 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testReferenceToChangeEClassRenamed() {
+		// the name of the created EClass is changed
+		// in the initialization block and the interpreter is executed
+		// thus, we can access them both.
+		referenceToChangedEClassRenamed.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import org.eclipse.emf.ecore.EClass;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  public MyFile0() {
+			    
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    changeEClass("foo", "FooClass", createList(this::_changeEClass_FooClass_in_foo));
+			    getEClass("foo", "FooClass");
+			    getEClass("foo", "changed");
+			  }
+			  
+			  public void _changeEClass_FooClass_in_foo(final EClass it) {
+			    it.setName("changed");
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
 	def void testReferenceToCreatedEAttributeRenamed() {
 		// the name of the created EAttribute is changed
 		// in the initialization block and the interpreter is executed
@@ -600,6 +642,60 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  }
 			  
 			  public void _createEAttribute_newAttribute2_in_createEClass_NewClass_in_foo(final EAttribute it) {
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
+	def void testReferenceToCreatedEAttributeRenamedInChangedEClass() {
+		// the name of the created EAttribute is changed
+		// in the initialization block and the interpreter is executed
+		// thus, we can access them both.
+		// TODO: we should issue an error on the original reference which
+		// is not valid anymore
+		referenceToCreatedEAttributeRenamedInChangedEClass.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import org.eclipse.emf.ecore.EAttribute;
+			import org.eclipse.emf.ecore.EClass;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  public MyFile0() {
+			    
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    changeEClass("foo", "FooClass", createList(this::_changeEClass_FooClass_in_foo));
+			    getEAttribute("foo", "FooClass", "newAttribute");
+			    getEAttribute("foo", "FooClass", "changed");
+			  }
+			  
+			  public void _changeEClass_FooClass_in_foo(final EClass it) {
+			    createEAttribute(it, "newAttribute", 
+			      createList(
+			        a -> a.setEType(getEDataType("foo", "FooDataType")),
+			        this::_createEAttribute_newAttribute_in_changeEClass_FooClass_in_foo
+			      )
+			    );
+			  }
+			  
+			  public void _createEAttribute_newAttribute_in_changeEClass_FooClass_in_foo(final EAttribute it) {
+			    it.setName("changed");
 			  }
 			}
 			'''
