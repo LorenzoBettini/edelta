@@ -2,6 +2,7 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.compiler.EdeltaCompilerUtil
+import edelta.edelta.EdeltaFactory
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EEnumLiteral
 import org.eclipse.emf.ecore.EStructuralFeature
@@ -435,6 +436,15 @@ createList(this::_createEAttribute_attr_in_createEClass_MyDerivedNewClass_in_foo
 			edeltaEcoreReferenceExpression => [
 			'getEAttribute("foo", "FooClass", "myAttribute")'.
 				assertEquals(stringForEcoreReferenceExpression)
+		]
+	}
+
+	@Test
+	def void testBuildMethodToCallForEcoreReferenceWithNullType() {
+		val ref = EdeltaFactory.eINSTANCE.createEdeltaEcoreDirectReference
+		buildMethodToCallForEcoreReference(ref, null) [
+			s, args |
+			"getENamedElement".assertEquals(s)
 		]
 	}
 }

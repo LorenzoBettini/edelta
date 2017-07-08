@@ -15,6 +15,7 @@ import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
 import java.util.List
+import org.eclipse.xtext.xbase.typesystem.references.LightweightTypeReference
 
 /**
  * Utilities for Edelta compiler
@@ -90,12 +91,16 @@ class EdeltaCompilerUtil {
 		eClassifier?.EPackage.getEPackageNameOrNull
 	}
 
+	def String getEPackageNameOrNull(EStructuralFeature f) {
+		f?.EContainingClass.getEPackageNameOrNull
+	}
+
 	def String getEPackageNameOrNull(EPackage e) {
 		e?.name
 	}
 
 	def String getEClassNameOrNull(EStructuralFeature eFeature) {
-		eFeature.EContainingClass?.name
+		eFeature?.EContainingClass?.name
 	}
 
 	def String getNameOrNull(ENamedElement e) {
@@ -127,23 +132,33 @@ class EdeltaCompilerUtil {
 
 	def void buildMethodToCallForEcoreReference(EdeltaEcoreReference e, (String, List<Object>)=>void acceptor) {
 		val type = e.resolveTypes.getActualType(e)
+		buildMethodToCallForEcoreReference(e, type, acceptor)
+	}
+
+	def void buildMethodToCallForEcoreReference(EdeltaEcoreReference e, LightweightTypeReference type, (String, List<Object>)=>void acceptor) {
 		// in case there's the original referred ENamedElement we use that one
 		// since the interpreter could have changed the container of the ENamedElement
 		val enamedelement = e.originalEnamedelement ?: e.enamedelement
+		// type seems to be null during content assist tests
+		val typeName = type?.simpleName ?: "ENamedElement"
 		if (enamedelement instanceof EClassifier) {
 			acceptor.apply(
-				'''get«type.simpleName»''',
+				'''get«typeName»''',
 				#[enamedelement.EPackageNameOrNull, enamedelement.name])
 		} else if (enamedelement instanceof EEnumLiteral) {
 			acceptor.apply(
-				'''get«type.simpleName»''',
+				'''get«typeName»''',
 				#[enamedelement.EEnum.EPackageNameOrNull, enamedelement.EEnumNameOrNull, enamedelement.name])
 		} else {
 			// unresolved proxies are of type EAttribute so we cast it to EStructuralFeature
 			val f = enamedelement as EStructuralFeature
 			acceptor.apply(
-				'''get«type.simpleName»''',
-				#[f.EContainingClass.EPackageNameOrNull, f.EClassNameOrNull, f.name])
+				'''get«typeName»''',
+				#[
+					f.EPackageNameOrNull,
+					f.EClassNameOrNull,
+					f.nameOrNull
+				])
 		}
 	}
 }
