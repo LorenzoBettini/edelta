@@ -447,12 +447,17 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 			}
 		'''.
 		parseWithTestEcore
-		val derivedEClass = program.getDerivedStateLastEClass
-		assertEquals("NewClass", derivedEClass.name)
-		assertEquals(1, derivedEClass.EStructuralFeatures.size)
-		val attr = derivedEClass.EStructuralFeatures.head
+		// the interpreter acts on copied epackages
+		var eclass = program.getCopiedEClass("NewClass")
+		assertEquals("NewClass", eclass.name)
+		assertEquals(1, eclass.EStructuralFeatures.size)
+		val attr = eclass.EStructuralFeatures.head
 		assertEquals("aNewAttr", attr.name)
 		assertEquals("EString", attr.EType.name)
+		// Note that the derived state EClass is not modified:
+		eclass = program.derivedStateLastEClass
+		assertEquals("NewClass", eclass.name)
+		assertEquals(0, eclass.EStructuralFeatures.size)
 	}
 
 	@Test
