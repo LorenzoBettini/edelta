@@ -498,13 +498,13 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToCreatedEAttribute() {
+	def void testReferenceToCreatedEAttributeRenamed() {
 		// the name of the created EAttribute is changed
 		// in the initialization block and the interpreter is executed
 		// thus, we can access them both.
 		// TODO: we should issue an error on the original reference which
 		// is not valid anymore
-		referenceToCreatedEAttribute.checkCompilation(
+		referenceToCreatedEAttributeRenamed.checkCompilation(
 			'''
 			package edelta;
 			

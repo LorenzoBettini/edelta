@@ -271,7 +271,7 @@ class Inputs {
 		'''
 	}
 
-	def referenceToCreatedEAttribute() {
+	def referenceToCreatedEAttributeRenamed() {
 		'''
 			metamodel "foo"
 			

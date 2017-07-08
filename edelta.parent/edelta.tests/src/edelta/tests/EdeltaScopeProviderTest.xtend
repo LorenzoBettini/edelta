@@ -230,7 +230,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testScopeForReferenceToCreatedEAttributeChangingNameInBody() {
-		referenceToCreatedEAttribute.parseWithTestEcore.lastExpression.
+		referenceToCreatedEAttributeRenamed.parseWithTestEcore.lastExpression.
 			edeltaEcoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
