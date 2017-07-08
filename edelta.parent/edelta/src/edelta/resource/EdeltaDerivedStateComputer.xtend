@@ -202,8 +202,9 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 			val packages = getOrAddDerivedStateEPackage(referredEPackage, nameToEPackageMap, nameToCopiedEPackageMap)
 			packages.key.EClassifiers.add(created)
 			// in copied EPackages we add the created or modified EClass so that they appear first
-			packages.value.EClassifiers.add(0, EdeltaEcoreUtil.copyENamedElement(created))
-			opToEClassMap.put(op, created)
+			val copyOfCreated = EdeltaEcoreUtil.copyENamedElement(created)
+			packages.value.EClassifiers.add(0, copyOfCreated)
+			opToEClassMap.put(op, copyOfCreated)
 		}
 	}
 
