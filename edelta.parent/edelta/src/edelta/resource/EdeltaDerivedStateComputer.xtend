@@ -218,7 +218,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 			copiedEPackage = EdeltaEcoreUtil.copyENamedElement(referredEPackage)
 			nameToCopiedEPackageMap.put(referredEPackageName, copiedEPackage)
 		}
-		derivedEPackage -> copiedEPackage
+		return derivedEPackage -> copiedEPackage
 	}
 
 	override discardDerivedState(DerivedStateAwareResource resource) {
