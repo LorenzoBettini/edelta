@@ -286,6 +286,18 @@ class Inputs {
 		'''
 	}
 
+	def referenceToCreatedEClassRenamed() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				name = "changed"
+			}
+			ecoreref(NewClass)
+			ecoreref(changed)
+		'''
+	}
+
 	def useAs() {
 		'''
 			import edelta.tests.additional.MyCustomEdelta

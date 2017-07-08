@@ -498,6 +498,50 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testReferenceToCreatedEClassRenamed() {
+		// the name of the created EClass is changed
+		// in the initialization block and the interpreter is executed
+		// thus, we can access them both.
+		// TODO: we should issue an error on the original reference which
+		// is not valid anymore
+		referenceToCreatedEClassRenamed.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import org.eclipse.emf.ecore.EClass;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  public MyFile0() {
+			    
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    createEClass("foo", "NewClass", createList(this::_createEClass_NewClass_in_foo));
+			    getEClass("foo", "NewClass");
+			    getEClass("foo", "changed");
+			  }
+			  
+			  public void _createEClass_NewClass_in_foo(final EClass it) {
+			    it.setName("changed");
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
 	def void testReferenceToCreatedEAttributeRenamed() {
 		// the name of the created EAttribute is changed
 		// in the initialization block and the interpreter is executed
