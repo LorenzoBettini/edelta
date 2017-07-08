@@ -235,13 +235,13 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
 			NewClass
-			changed
+			newAttribute
 			newAttribute2
 			NewClass
 			FooClass
 			FooDataType
 			FooEnum
-			newAttribute
+			changed
 			newAttribute2
 			myAttribute
 			myReference
