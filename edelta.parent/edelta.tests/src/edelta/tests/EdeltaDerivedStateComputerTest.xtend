@@ -497,10 +497,11 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	@Test
 	def void testInterpretedCreateEClassAndStealEAttribute() {
 		val program = createEClassStealingAttribute.
-		parseWithTestEcore
-		val derivedEClass = program.getDerivedStateLastEClass
-		assertEquals("NewClass", derivedEClass.name)
-		val attr = derivedEClass.EStructuralFeatures.head
+			parseWithTestEcore
+		// the interpretation is done on copied epackages
+		val ec = program.getCopiedEClass("NewClass")
+		assertEquals("NewClass", ec.name)
+		val attr = ec.EStructuralFeatures.head
 		assertEquals("myAttribute", attr.name)
 		program.validate
 		program.assertNoErrors
