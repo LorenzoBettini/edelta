@@ -38,7 +38,6 @@ public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 			return result;
 		} catch (RuntimeException e) {
 			LOG.debug("while interpreting", e);
-			e.printStackTrace();
 		}
 		return null;
 	}
