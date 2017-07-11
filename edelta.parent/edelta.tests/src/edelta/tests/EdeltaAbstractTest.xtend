@@ -22,6 +22,7 @@ import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
+import org.eclipse.emf.ecore.EcorePackage
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.xmi.XMIResource
 import org.eclipse.xtext.common.types.JvmGenericType
@@ -37,6 +38,7 @@ import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
+import java.nio.file.Paths
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -57,6 +59,21 @@ abstract class EdeltaAbstractTest {
 
 	def protected parseWithTestEcores(CharSequence input) {
 		input.parse(resourceSetWithTestEcores)
+	}
+
+	def protected parseWithLoadedEcore(String path, CharSequence input) {
+		val resourceSet = resourceSetProvider.get
+		// Register the Ecore package to ensure it is available during loading.
+		val uri = URI.createFileURI(Paths.get(path).toAbsolutePath().toString());
+		resourceSet.getResource(uri, true);
+		val prog = input.parse(resourceSet)
+		prog.metamodels += EcorePackage.eINSTANCE
+		return prog
+	}
+
+	def protected createTestResource(ResourceSet resourceSet, String ecoreName, EPackage epackage) {
+		val resource = resourceSet.createResource(URI.createURI(ecoreName + ".ecore"))
+		resource.contents += epackage
 	}
 
 	def protected resourceSetWithTestEcore() {

@@ -578,6 +578,23 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		program.metamodels.head.EClassifiers.head.name = "bar"
 	}
 
+	@Test
+	def void testPersonListExample() {
+		val prog = parseWithLoadedEcore("src/edelta/tests/input/models/PersonList.ecore",
+			'''
+			package gssi.personexample
+			
+			metamodel "PersonList"
+			//metamodel "ecore"
+			
+			ecoreref(Person.lastname)
+			ecoreref(EString)
+			'''
+		)
+		prog.assertNoErrors
+		println()
+	}
+
 	protected def EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {
 		program.lastExpression.getManipulationEClassExpression.body.expressions.head.
 			variableDeclaration.right.
