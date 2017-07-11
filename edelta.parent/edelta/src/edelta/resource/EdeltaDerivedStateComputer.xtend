@@ -208,7 +208,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		}
 	}
 
-	def private getOrAddDerivedStateEPackage(EPackage referredEPackage, Map<String, EPackage> nameToEPackageMap,
+	def protected getOrAddDerivedStateEPackage(EPackage referredEPackage, Map<String, EPackage> nameToEPackageMap,
 			Map<String, EPackage> nameToCopiedEPackageMap
 	) {
 		val referredEPackageName = referredEPackage.name

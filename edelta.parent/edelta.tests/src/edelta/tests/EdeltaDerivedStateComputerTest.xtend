@@ -20,6 +20,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
+import edelta.tests.additional.EdeltaEContentAdapter.EdeltaEContentAdapterException
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
@@ -562,6 +563,19 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		program.getEPackageByName("foo").
 			EClassifiers.findFirst[name == "FooClass"].
 			assertNotNull
+	}
+
+	@Test(expected=EdeltaEContentAdapterException)
+	def void testContentAdapter() {
+		val program = '''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				ecoreref(foo.FooClass).EPackage.EClassifiers.remove(ecoreref(foo.FooClass))
+			}
+		'''.
+		parseWithTestEcore
+		program.metamodels.head.EClassifiers.head.name = "bar"
 	}
 
 	protected def EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {
