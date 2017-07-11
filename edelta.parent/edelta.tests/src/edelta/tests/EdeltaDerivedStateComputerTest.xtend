@@ -592,12 +592,41 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 			
 			use MMrefactorings as refactorings
 			
-			ecoreref(Person.lastname)
-			ecoreref(EString)
+			changeEClass PersonList.Person {
+				refactorings.
+					introduceSubclasses(
+						ecoreref(Person.gender),
+						ecoreref(Person.gender).EAttributeType as EEnum,
+						it
+					);
+				EStructuralFeatures+=
+					refactorings.mergeAttributes("name",
+						ecoreref(Person.firstname).EType,
+						#[ecoreref(Person.firstname),ecoreref(Person.lastname)]
+					);
+			}
+			
+			createEClass Place in PersonList {
+				abstract = true
+				refactorings.extractSuperclass(it,
+					#[ecoreref(LivingPlace.address), ecoreref(WorkPlace.address)]);
+			}
+			
+			createEClass WorkingPosition in PersonList {
+				createEAttribute description type EString {}
+				refactorings.extractMetaClass(it,ecoreref(Person.works),"position","works");
+			}
+			
+			changeEClass PersonList.List {
+				EStructuralFeatures+=
+					refactorings.mergeReferences("places",
+						ecoreref(Place),
+						#[ecoreref(List.wplaces),ecoreref(List.lplaces)]
+					);	
+			}
 			'''
 		)
 		prog.assertNoErrors
-		println()
 	}
 
 	protected def EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {
