@@ -582,10 +582,15 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	def void testPersonListExample() {
 		val prog = parseWithLoadedEcore("src/edelta/tests/input/models/PersonList.ecore",
 			'''
+			import gssi.refactorings.MMrefactorings
+			import org.eclipse.emf.ecore.EEnum
+			
 			package gssi.personexample
 			
 			metamodel "PersonList"
 			//metamodel "ecore"
+			
+			use MMrefactorings as refactorings
 			
 			ecoreref(Person.lastname)
 			ecoreref(EString)
