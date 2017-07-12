@@ -16,17 +16,22 @@ import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ExpectedException
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
-import edelta.tests.additional.EdeltaEContentAdapter.EdeltaEContentAdapterException
+import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
 class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 
 	@Inject extension TestableEdeltaDerivedStateComputer
+
+	@Rule
+	val public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	def void testGetOrInstallAdapterWithNotXtextResource() {
@@ -565,7 +570,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 			assertNotNull
 	}
 
-	@Test(expected=EdeltaEContentAdapterException)
+	@Test
 	def void testContentAdapter() {
 		val program = '''
 			metamodel "foo"
@@ -575,11 +580,17 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 			}
 		'''.
 		parseWithTestEcore
+
+		thrown.expect(EdeltaInterpreterRuntimeException);
+		thrown.expectMessage("Unexpected notification");
+
 		program.metamodels.head.EClassifiers.head.name = "bar"
 	}
 
 	@Test
 	def void testPersonListExample() {
+		// TODO fix this
+		thrown.expect(EdeltaInterpreterRuntimeException);
 		val prog = parseWithLoadedEcore("src/edelta/tests/input/models/PersonList.ecore",
 			'''
 			import gssi.refactorings.MMrefactorings

@@ -6,6 +6,8 @@ package edelta.tests.additional;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.util.EContentAdapter;
 
+import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException;
+
 /**
  * Used in tests to make sure that the original imported Ecore models are not
  * touched during interpretation.
@@ -15,7 +17,7 @@ import org.eclipse.emf.ecore.util.EContentAdapter;
  */
 public class EdeltaEContentAdapter extends EContentAdapter {
 
-	public static class EdeltaEContentAdapterException extends RuntimeException {
+	public static class EdeltaEContentAdapterException extends EdeltaInterpreterRuntimeException {
 		private static final long serialVersionUID = 1L;
 
 		public EdeltaEContentAdapterException(Notification notification) {
