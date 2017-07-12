@@ -13,6 +13,7 @@ import edelta.edelta.EdeltaProgram
 import edelta.interpreter.IEdeltaInterpreter
 import edelta.resource.EdeltaDerivedStateEPackage
 import edelta.tests.input.Inputs
+import java.nio.file.Paths
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
@@ -38,7 +39,6 @@ import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
-import java.nio.file.Paths
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -67,7 +67,7 @@ abstract class EdeltaAbstractTest {
 		val uri = URI.createFileURI(Paths.get(path).toAbsolutePath().toString());
 		resourceSet.getResource(uri, true);
 		val prog = input.parse(resourceSet)
-		prog.metamodels += EcorePackage.eINSTANCE
+		prog.metamodels += EPackage.Registry.INSTANCE.get(EcorePackage.eNS_URI) as EPackage
 		return prog
 	}
 
