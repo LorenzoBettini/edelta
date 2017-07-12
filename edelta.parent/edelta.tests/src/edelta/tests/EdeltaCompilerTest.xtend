@@ -21,7 +21,7 @@ import static edelta.testutils.EdeltaTestUtils.*
 import static extension org.junit.Assert.*
 
 @RunWith(XtextRunner)
-@InjectWith(EdeltaInjectorProviderCustom)
+@InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
 class EdeltaCompilerTest extends EdeltaAbstractTest {
 
 	@Rule @Inject public TemporaryFolder temporaryFolder
