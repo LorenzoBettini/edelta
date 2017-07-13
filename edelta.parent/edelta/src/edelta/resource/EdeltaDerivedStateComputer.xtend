@@ -112,7 +112,10 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 			val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
 			val opToEClassMap = resource.opToEClassMap
 
-			val createEClassExpressions = resource.allContents.toIterable.filter(EdeltaEcoreCreateEClassExpression).toList
+			val createEClassExpressions = resource.
+				allContents.toIterable.
+				filter(EdeltaEcoreCreateEClassExpression).
+				toList
 			for (exp : createEClassExpressions) {
 				val derivedEClass = createDerivedStateEClass(exp.name, exp.ecoreReferenceSuperTypes)
 				targetToSourceMap.put(derivedEClass, exp)
@@ -144,8 +147,17 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 			// configure and run the interpreter
 			interpreterConfigurator.configureInterpreter(interpreter, resource)
 			val packages = (nameToCopiedEPackageMap.values + program.metamodels).toList
-			runInterpreter(createEClassExpressions, opToEClassMap, programJvmType, packages)
-			runInterpreter(changeEClassExpressions, opToEClassMap, programJvmType, packages)
+			val manipulationEClassExpressions = resource.
+				allContents.toIterable.
+				filter(EdeltaEcoreBaseEClassManipulationWithBlockExpression).
+				filter[
+					if (it instanceof EdeltaEcoreChangeEClassExpression)
+						original !== null
+					else
+						true
+				].
+				toList
+			runInterpreter(manipulationEClassExpressions, opToEClassMap, programJvmType, packages)
 		}
 	}
 
