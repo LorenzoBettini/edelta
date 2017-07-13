@@ -2,7 +2,9 @@ package edelta.tests.additional
 
 import com.google.inject.Singleton
 import edelta.resource.EdeltaDerivedStateComputer
+import java.util.Collection
 import java.util.Map
+import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
 
@@ -46,4 +48,8 @@ class TestableEdeltaDerivedStateComputer extends EdeltaDerivedStateComputer {
 		return result
 	}
 
+	override public getEClassWithTheSameName(Collection<EPackage> packages, EClass original) {
+		super.getEClassWithTheSameName(packages, original)
+	}
+	
 }

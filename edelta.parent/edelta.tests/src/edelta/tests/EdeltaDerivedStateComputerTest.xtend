@@ -23,6 +23,7 @@ import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
 import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException
+import org.eclipse.emf.ecore.EcoreFactory
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
@@ -568,6 +569,24 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		program.getEPackageByName("foo").
 			EClassifiers.findFirst[name == "FooClass"].
 			assertNotNull
+	}
+
+	@Test
+	def void testGetEClassWithTheSameName() {
+		val program = '''
+			metamodel "foo"
+			
+			changeEClass foo.FooClass {
+			}
+		'''.
+		parseWithTestEcore
+		val original = program.lastExpression.changeEClassExpression.original
+		val copies = program.copiedEPackages.toList
+		assertNotNull(copies.getEClassWithTheSameName(original))
+		val fake = EcoreFactory.eINSTANCE.createEClass => [name="fake"]
+		assertNull(copies.getEClassWithTheSameName(fake))
+		copies.clear
+		assertNull(copies.getEClassWithTheSameName(original))
 	}
 
 	@Test
