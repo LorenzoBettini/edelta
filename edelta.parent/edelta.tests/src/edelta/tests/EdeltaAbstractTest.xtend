@@ -23,7 +23,6 @@ import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
-import org.eclipse.emf.ecore.EcorePackage
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.xmi.XMIResource
 import org.eclipse.xtext.common.types.JvmGenericType
@@ -63,11 +62,12 @@ abstract class EdeltaAbstractTest {
 
 	def protected parseWithLoadedEcore(String path, CharSequence input) {
 		val resourceSet = resourceSetProvider.get
-		// Register the Ecore package to ensure it is available during loading.
+		// Loads the Ecore package to ensure it is available during loading.
+		resourceSet.getResource(URI.createFileURI(
+			Paths.get("src/edelta/tests/input/models/EcoreForTests.ecore").toAbsolutePath().toString()), true)
 		val uri = URI.createFileURI(Paths.get(path).toAbsolutePath().toString());
 		resourceSet.getResource(uri, true);
 		val prog = input.parse(resourceSet)
-		prog.metamodels += EPackage.Registry.INSTANCE.get(EcorePackage.eNS_URI) as EPackage
 		return prog
 	}
 

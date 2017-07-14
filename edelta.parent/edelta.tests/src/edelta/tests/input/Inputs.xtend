@@ -404,7 +404,7 @@ class Inputs {
 		package gssi.personexample
 		
 		metamodel "PersonList"
-		//metamodel "ecore"
+		metamodel "ecore"
 		
 		use MMrefactorings as refactorings
 		
