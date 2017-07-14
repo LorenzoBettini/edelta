@@ -52,6 +52,10 @@ abstract class EdeltaAbstractTest {
 
 	protected extension Inputs = new Inputs
 
+	protected static String ECORE_PATH = "src/edelta/tests/input/models/EcoreForTests.ecore"
+	protected static String PERSON_LIST_ECORE = "PersonList.ecore"
+	protected static String PERSON_LIST_ECORE_PATH = "src/edelta/tests/input/models/" + PERSON_LIST_ECORE
+
 	def protected parseWithTestEcore(CharSequence input) {
 		input.parse(resourceSetWithTestEcore)
 	}
@@ -64,7 +68,7 @@ abstract class EdeltaAbstractTest {
 		val resourceSet = resourceSetProvider.get
 		// Loads the Ecore package to ensure it is available during loading.
 		resourceSet.getResource(URI.createFileURI(
-			Paths.get("src/edelta/tests/input/models/EcoreForTests.ecore").toAbsolutePath().toString()), true)
+			Paths.get(ECORE_PATH).toAbsolutePath().toString()), true)
 		val uri = URI.createFileURI(Paths.get(path).toAbsolutePath().toString());
 		resourceSet.getResource(uri, true);
 		val prog = input.parse(resourceSet)
