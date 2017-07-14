@@ -2,6 +2,7 @@ package edelta.tests
 
 import com.google.common.base.Joiner
 import com.google.inject.Inject
+import edelta.testutils.EdeltaTestUtils
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.resource.FileExtensionProvider
@@ -20,7 +21,6 @@ import org.junit.runner.RunWith
 import static edelta.testutils.EdeltaTestUtils.*
 
 import static extension org.junit.Assert.*
-import edelta.tests.additional.EdeltaFileUtils
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
@@ -1194,8 +1194,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 
 	def private createResourceSetWithEcore(String ecoreName, String ecorePath, CharSequence input) {
 		val pairs = newArrayList(
-			"EcoreForTests.ecore" -> EdeltaFileUtils.readFileAsString(ECORE_PATH),
-			ecoreName -> EdeltaFileUtils.readFileAsString(ecorePath),
+			"EcoreForTests.ecore" -> EdeltaTestUtils.loadFile(ECORE_PATH),
+			ecoreName -> EdeltaTestUtils.loadFile(ecorePath),
 			"Example." + 
 					extensionProvider.getPrimaryFileExtension() -> input
 		)
