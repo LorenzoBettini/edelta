@@ -623,50 +623,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	@Test
 	def void testPersonListExample() {
 		val prog = parseWithLoadedEcore("src/edelta/tests/input/models/PersonList.ecore",
-			'''
-			import gssi.refactorings.MMrefactorings
-			import org.eclipse.emf.ecore.EEnum
-			
-			package gssi.personexample
-			
-			metamodel "PersonList"
-			//metamodel "ecore"
-			
-			use MMrefactorings as refactorings
-			
-			changeEClass PersonList.Person {
-				refactorings.
-					introduceSubclasses(
-						ecoreref(Person.gender),
-						ecoreref(Person.gender).EAttributeType as EEnum,
-						it
-					);
-				EStructuralFeatures+=
-					refactorings.mergeAttributes("name",
-						ecoreref(Person.firstname).EType,
-						#[ecoreref(Person.firstname),ecoreref(Person.lastname)]
-					);
-			}
-			
-			createEClass Place in PersonList {
-				abstract = true
-				refactorings.extractSuperclass(it,
-					#[ecoreref(LivingPlace.address), ecoreref(WorkPlace.address)]);
-			}
-			
-			createEClass WorkingPosition in PersonList {
-				createEAttribute description type EString {}
-				refactorings.extractMetaClass(it,ecoreref(Person.works),"position","works");
-			}
-			
-			changeEClass PersonList.List {
-				EStructuralFeatures+=
-					refactorings.mergeReferences("places",
-						ecoreref(Place),
-						#[ecoreref(List.wplaces),ecoreref(List.lplaces)]
-					);	
-			}
-			'''
+			personListExample
 		)
 		prog.assertNoErrors
 	}
