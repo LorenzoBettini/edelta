@@ -622,8 +622,6 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testPersonListExample() {
-		// TODO fix this
-		thrown.expect(EdeltaInterpreterRuntimeException);
 		val prog = parseWithLoadedEcore("src/edelta/tests/input/models/PersonList.ecore",
 			'''
 			import gssi.refactorings.MMrefactorings
