@@ -590,6 +590,20 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testGetEClassWithTheSameNameNotFound() {
+		// make sure there's no NPE
+		val program = '''
+			metamodel "foo"
+			
+			changeEClass foo.NonExistant {
+			}
+		'''.
+		parseWithTestEcore
+		val original = program.lastExpression.changeEClassExpression.original
+		assertNotNull(original)
+	}
+
+	@Test
 	def void testContentAdapter() {
 		val program = '''
 			metamodel "foo"
