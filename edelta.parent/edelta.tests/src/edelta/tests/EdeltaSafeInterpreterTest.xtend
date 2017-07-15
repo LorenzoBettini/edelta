@@ -9,6 +9,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -47,6 +48,26 @@ class EdeltaSafeInterpreterTest extends EdeltaInterpreterTest {
 			}
 		'''.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ derivedEClass |
 			assertEquals("NewClass", derivedEClass.name)
+		]
+	}
+
+	@Test(expected=EdeltaInterpreterRuntimeException)
+	def void testEdeltaInterpreterRuntimeExceptionIsThrown() {
+		'''
+			import org.eclipse.emf.ecore.EClass
+			import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException
+			
+			metamodel "foo"
+			
+			def op(EClass c) : void {
+				throw new EdeltaInterpreterRuntimeException("test")
+			}
+			
+			createEClass NewClass in foo {
+				op(it)
+			}
+		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
+			// never gets here
 		]
 	}
 }

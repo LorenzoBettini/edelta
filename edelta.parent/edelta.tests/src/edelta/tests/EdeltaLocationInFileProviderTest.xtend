@@ -63,7 +63,7 @@ class EdeltaLocationInFileProviderTest extends EdeltaAbstractTest {
 		
 		metamodel "foo"
 		
-		changeEClass foo.First {}
+		changeEClass foo.FooClass {}
 		'''
 		val program = input.parseWithTestEcore
 		val e = program.lastExpression.changeEClassExpression

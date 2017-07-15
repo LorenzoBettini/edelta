@@ -13,6 +13,7 @@ import edelta.edelta.EdeltaProgram
 import edelta.interpreter.IEdeltaInterpreter
 import edelta.resource.EdeltaDerivedStateEPackage
 import edelta.tests.input.Inputs
+import java.nio.file.Paths
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
@@ -51,6 +52,10 @@ abstract class EdeltaAbstractTest {
 
 	protected extension Inputs = new Inputs
 
+	protected static String ECORE_PATH = "src/edelta/tests/input/models/EcoreForTests.ecore"
+	protected static String PERSON_LIST_ECORE = "PersonList.ecore"
+	protected static String PERSON_LIST_ECORE_PATH = "src/edelta/tests/input/models/" + PERSON_LIST_ECORE
+
 	def protected parseWithTestEcore(CharSequence input) {
 		input.parse(resourceSetWithTestEcore)
 	}
@@ -59,15 +64,28 @@ abstract class EdeltaAbstractTest {
 		input.parse(resourceSetWithTestEcores)
 	}
 
+	def protected parseWithLoadedEcore(String path, CharSequence input) {
+		val resourceSet = resourceSetProvider.get
+		// Loads the Ecore package to ensure it is available during loading.
+		resourceSet.getResource(createFileURIFromPath(ECORE_PATH), true)
+		val uri = createFileURIFromPath(path);
+		resourceSet.getResource(uri, true);
+		val prog = input.parse(resourceSet)
+		return prog
+	}
+	
+	protected def URI createFileURIFromPath(String path) {
+		URI.createFileURI(
+			Paths.get(path).toAbsolutePath().toString())
+	}
+
 	def protected resourceSetWithTestEcore() {
 		val resourceSet = resourceSetProvider.get
 		addEPackageForTests(resourceSet)
 	}
 
 	def protected addEPackageForTests(ResourceSet resourceSet) {
-		val resource = resourceSet.createResource(URI.createURI("foo.ecore"))
-		resource.contents += EPackageForTests
-		resourceSet
+		resourceSet.createTestResource("foo", EPackageForTests)
 	}
 
 	def protected resourceSetWithTestEcores() {
@@ -76,8 +94,12 @@ abstract class EdeltaAbstractTest {
 	}
 
 	def protected addEPackageForTests2(ResourceSet resourceSet) {
-		val resource = resourceSet.createResource(URI.createURI("bar.ecore"))
-		resource.contents += EPackageForTests2
+		resourceSet.createTestResource("bar.", EPackageForTests2)
+	}
+
+	def protected createTestResource(ResourceSet resourceSet, String ecoreName, EPackage epackage) {
+		val resource = resourceSet.createResource(URI.createURI(ecoreName + ".ecore"))
+		resource.contents += epackage
 		resourceSet
 	}
 

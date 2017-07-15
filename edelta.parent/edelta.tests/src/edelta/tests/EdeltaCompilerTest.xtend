@@ -2,6 +2,8 @@ package edelta.tests
 
 import com.google.common.base.Joiner
 import com.google.inject.Inject
+import edelta.testutils.EdeltaTestUtils
+import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.resource.FileExtensionProvider
 import org.eclipse.xtext.testing.InjectWith
@@ -16,11 +18,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import static extension org.junit.Assert.*
 import static edelta.testutils.EdeltaTestUtils.*
 
+import static extension org.junit.Assert.*
+
 @RunWith(XtextRunner)
-@InjectWith(EdeltaInjectorProviderCustom)
+@InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
 class EdeltaCompilerTest extends EdeltaAbstractTest {
 
 	@Rule @Inject public TemporaryFolder temporaryFolder
@@ -1034,6 +1037,105 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		)
 	}
 
+	@Test
+	def void testCompilationOfPersonListExample() {
+		val rs = createResourceSetWithEcore(
+			PERSON_LIST_ECORE, PERSON_LIST_ECORE_PATH,
+			personListExample
+		)
+		rs.
+		checkCompilation(
+			'''
+			package gssi.personexample;
+			
+			import edelta.lib.AbstractEdelta;
+			import gssi.refactorings.MMrefactorings;
+			import java.util.Collections;
+			import org.eclipse.emf.common.util.EList;
+			import org.eclipse.emf.ecore.EAttribute;
+			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.emf.ecore.EDataType;
+			import org.eclipse.emf.ecore.EEnum;
+			import org.eclipse.emf.ecore.EReference;
+			import org.eclipse.emf.ecore.EStructuralFeature;
+			import org.eclipse.xtext.xbase.lib.CollectionLiterals;
+			
+			@SuppressWarnings("all")
+			public class Example extends AbstractEdelta {
+			  private MMrefactorings refactorings;
+			  
+			  public Example() {
+			    refactorings = new MMrefactorings(this);
+			  }
+			  
+			  public Example(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("PersonList");
+			    ensureEPackageIsLoaded("ecore");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    changeEClass("PersonList", "Person", createList(this::_changeEClass_Person_in_PersonList));
+			    createEClass("PersonList", "Place", createList(this::_createEClass_Place_in_PersonList));
+			    createEClass("PersonList", "WorkingPosition", createList(this::_createEClass_WorkingPosition_in_PersonList));
+			    changeEClass("PersonList", "List", createList(this::_changeEClass_List_in_PersonList));
+			  }
+			  
+			  public void _changeEClass_Person_in_PersonList(final EClass it) {
+			    {
+			      EDataType _eAttributeType = getEAttribute("PersonList", "Person", "gender").getEAttributeType();
+			      this.refactorings.introduceSubclasses(
+			        getEAttribute("PersonList", "Person", "gender"), 
+			        ((EEnum) _eAttributeType), it);
+			      EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
+			      EAttribute _mergeAttributes = this.refactorings.mergeAttributes("name", 
+			        getEAttribute("PersonList", "Person", "firstname").getEType(), 
+			        Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname"))));
+			      _eStructuralFeatures.add(_mergeAttributes);
+			    }
+			  }
+			  
+			  public void _createEClass_Place_in_PersonList(final EClass it) {
+			    {
+			      it.setAbstract(true);
+			      this.refactorings.extractSuperclass(it, 
+			        Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "LivingPlace", "address"), getEAttribute("PersonList", "WorkPlace", "address"))));
+			    }
+			  }
+			  
+			  public void _createEClass_WorkingPosition_in_PersonList(final EClass it) {
+			    {
+			      createEAttribute(it, "description", 
+			        createList(
+			          a -> a.setEType(getEDataType("ecore", "EString")),
+			          this::_createEAttribute_description_in_createEClass_WorkingPosition_in_PersonList
+			        )
+			      );
+			      this.refactorings.extractMetaClass(it, getEReference("PersonList", "Person", "works"), "position", "works");
+			    }
+			  }
+			  
+			  public void _createEAttribute_description_in_createEClass_WorkingPosition_in_PersonList(final EAttribute it) {
+			  }
+			  
+			  public void _changeEClass_List_in_PersonList(final EClass it) {
+			    EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
+			    EReference _mergeReferences = this.refactorings.mergeReferences("places", 
+			      getEClass("PersonList", "Place"), 
+			      Collections.<EReference>unmodifiableList(CollectionLiterals.<EReference>newArrayList(getEReference("PersonList", "List", "wplaces"), getEReference("PersonList", "List", "lplaces"))));
+			    _eStructuralFeatures.add(_mergeReferences);
+			  }
+			}
+			''',
+			true
+		)
+	}
+
 	def private checkCompilation(CharSequence input, CharSequence expectedGeneratedJava) {
 		checkCompilation(input, expectedGeneratedJava, true)
 	}
@@ -1041,15 +1143,17 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	def private checkCompilation(CharSequence input, CharSequence expectedGeneratedJava,
 		boolean checkValidationErrors) {
 		val rs = createResourceSet(input)
+		checkCompilation(rs, expectedGeneratedJava, checkValidationErrors)
+	}
+	
+	private def void checkCompilation(ResourceSet rs, CharSequence expectedGeneratedJava, boolean checkValidationErrors) {
 		rs.compile [
 			if (checkValidationErrors) {
 				assertNoValidationErrors
 			}
-
 			if (expectedGeneratedJava !== null) {
 				assertGeneratedJavaCode(expectedGeneratedJava)
 			}
-
 			if (checkValidationErrors) {
 				assertGeneratedJavaCodeCompiles
 			}
@@ -1086,6 +1190,17 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		return rs
 	}
 
+	def private createResourceSetWithEcore(String ecoreName, String ecorePath, CharSequence input) {
+		val pairs = newArrayList(
+			"EcoreForTests.ecore" -> EdeltaTestUtils.loadFile(ECORE_PATH),
+			ecoreName -> EdeltaTestUtils.loadFile(ecorePath),
+			"Example." + 
+					extensionProvider.getPrimaryFileExtension() -> input
+		)
+		val rs = resourceSet(pairs)
+		return rs
+	}
+
 	def private checkCompiledCodeExecution(CharSequence input, CharSequence expectedGeneratedEcore,
 			boolean checkValidationErrors) {
 		wipeModifiedDirectoryContents
@@ -1094,11 +1209,9 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			if (checkValidationErrors) {
 				assertNoValidationErrors
 			}
-
 			if (checkValidationErrors) {
 				assertGeneratedJavaCodeCompiles
 			}
-
 			val genClass = compiledClass
 			val edeltaObj = genClass.newInstance
 			// load ecore files
@@ -1112,4 +1225,5 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	def private void wipeModifiedDirectoryContents() {
 		cleanDirectory(MODIFIED);
 	}
+
 }

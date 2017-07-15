@@ -324,6 +324,38 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testScopeForReferenceToChangedEClassWithNewName2() {
+		referenceToChangedEClassWithANewName.
+			parseWithTestEcore.lastExpression.
+			edeltaEcoreReferenceExpression.reference.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			RenamedClass
+			myAttribute
+			myReference
+			anotherAttr
+			RenamedClass
+			FooDataType
+			FooEnum
+			myAttribute
+			myReference
+			anotherAttr
+			FooEnumLiteral
+			FooClass
+			FooDataType
+			FooEnum
+			myAttribute
+			myReference
+			FooEnumLiteral
+			foo
+			''')
+			// RenamedClass and FooClass (the original referred) are both returned
+			// by the scope provider
+			// anotherAttr is created in the changeEClass expression
+			// we also have copied EPackages, that's why elements appear twice
+	}
+
+	@Test
 	def void testScopeForReferenceToChangedEClassCopiedAttribute() {
 		// our changed EClass referred attribute must be the one
 		// of the copy, not the original one
@@ -361,43 +393,6 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			prog.copiedEPackages.head.getEClassiferByName("FooClass"),
 			referred
 		)
-	}
-
-	@Test
-	def void testScopeForReferenceToChangedEClassWithNewName2() {
-		// our changed EClass with the same name as an existing one must be
-		// the one that is actually linked
-		referenceToChangedEClassWithANewName.
-			parseWithTestEcore.lastExpression.
-			edeltaEcoreReferenceExpression.reference.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
-			'''
-			RenamedClass
-			myAttribute
-			myReference
-			anotherAttr
-			RenamedClass
-			FooClass
-			FooDataType
-			FooEnum
-			myAttribute
-			myReference
-			anotherAttr
-			myAttribute
-			myReference
-			FooEnumLiteral
-			FooClass
-			FooDataType
-			FooEnum
-			myAttribute
-			myReference
-			FooEnumLiteral
-			foo
-			''')
-			// RenamedClass and FooClass (the original referred) are both returned
-			// by the scope provider
-			// anotherAttr is created in the changeEClass expression
-			// we also have copied EPackages, that's why elements appear twice
 	}
 
 	@Test

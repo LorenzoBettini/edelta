@@ -16,6 +16,8 @@ import edelta.lib.EdeltaEcoreUtil
 import edelta.lib.EdeltaLibrary
 import edelta.scoping.EdeltaOriginalENamedElementRecorder
 import edelta.services.IEdeltaEcoreModelAssociations
+import edelta.util.EdeltaEcoreHelper
+import java.util.Collection
 import java.util.List
 import java.util.Map
 import org.eclipse.emf.common.notify.impl.AdapterImpl
@@ -40,6 +42,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	var String languageName;
 
 	@Inject extension EdeltaLibrary
+	@Inject extension EdeltaEcoreHelper
 
 	@Inject GenericUnloader unloader
 
@@ -128,19 +131,25 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 				filter[original !== null].
 				toList
 			for (exp : changeEClassExpressions) {
+				// make sure packages under refactoring are copied
+				// even if we don't use derived state epackages for changeEClass
 				getOrAddDerivedStateEPackage(exp.epackage, nameToEPackageMap, nameToCopiedEPackageMap)
 			}
 			// we must add only the copied and the created EPackages
-			resource.contents += nameToCopiedEPackageMap.values
+			val copies = nameToCopiedEPackageMap.values
+			resource.contents += copies
 			resource.contents += nameToEPackageMap.values
 			// now that all derived EPackages are created let's start processing
 			// changes to EClasses
 			for (exp : changeEClassExpressions) {
-				val derivedEClass = EdeltaEcoreUtil.copyENamedElement(exp.original)
-				changeRunner.performChanges(derivedEClass, exp)
-				targetToSourceMap.put(derivedEClass, exp)
-				handleCreateEAttribute(exp, derivedEClass, targetToSourceMap)
-				addToDerivedEPackage(derivedEClass, exp, opToEClassMap, nameToEPackageMap, nameToCopiedEPackageMap, exp.epackage)
+				val changedEClass = copies.getEClassWithTheSameName(exp.original)
+				if (changedEClass !== null) {
+					changeRunner.performChanges(changedEClass, exp)
+					targetToSourceMap.put(changedEClass, exp)
+					handleCreateEAttribute(exp, changedEClass, targetToSourceMap)
+					opToEClassMap.put(exp, changedEClass)
+					addToDerivedEPackage(changedEClass, exp, opToEClassMap, nameToEPackageMap, nameToCopiedEPackageMap, exp.epackage)
+				}
 			}
 			// record original ecore references before running the interpreter
 			recordEcoreReferenceOriginalENamedElement(resource)
@@ -203,7 +212,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	 * must not add them to the original referred package or we would mess
 	 * with Ecore original packages.
 	 */
-	def private addToDerivedEPackage(EClass created,
+	def private addToDerivedEPackage(EClass eClassToManipulate,
 			EdeltaEcoreBaseEClassManipulationWithBlockExpression op,
 			Map<EdeltaEcoreBaseEClassManipulationWithBlockExpression, EClass> opToEClassMap,
 			Map<String, EPackage> nameToEPackageMap,
@@ -212,15 +221,15 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	) {
 		if (referredEPackage !== null) {
 			val packages = getOrAddDerivedStateEPackage(referredEPackage, nameToEPackageMap, nameToCopiedEPackageMap)
-			packages.key.EClassifiers.add(created)
+			packages.key.EClassifiers.add(eClassToManipulate)
 			// in copied EPackages we add the created or modified EClass so that they appear first
-			val copyOfCreated = EdeltaEcoreUtil.copyENamedElement(created)
+			val copyOfCreated = EdeltaEcoreUtil.copyENamedElement(eClassToManipulate)
 			packages.value.EClassifiers.add(0, copyOfCreated)
 			opToEClassMap.put(op, copyOfCreated)
 		}
 	}
 
-	def private getOrAddDerivedStateEPackage(EPackage referredEPackage, Map<String, EPackage> nameToEPackageMap,
+	def protected getOrAddDerivedStateEPackage(EPackage referredEPackage, Map<String, EPackage> nameToEPackageMap,
 			Map<String, EPackage> nameToCopiedEPackageMap
 	) {
 		val referredEPackageName = referredEPackage.name
@@ -269,4 +278,12 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		return super.getPrimarySourceElement(element)
 	}
 
+	def protected getEClassWithTheSameName(Collection<EPackage> packages, EClass original) {
+		val epackage = original.EPackage
+		if (epackage !== null) {
+			return packages.getByName(epackage.name)?.
+				EClassifiers?.filter(EClass)?.getByName(original.name)
+		}
+		return null
+	}
 }

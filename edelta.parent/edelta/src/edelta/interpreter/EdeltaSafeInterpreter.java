@@ -14,7 +14,8 @@ import org.eclipse.xtext.xbase.interpreter.IEvaluationResult;
 import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression;
 
 /**
- * An interpreter that swallows {@link RuntimeException}.
+ * An interpreter that swallows all {@link RuntimeException}s except for
+ * {@link EdeltaInterpreterRuntimeException}.
  * 
  * @author Lorenzo Bettini
  *
@@ -22,6 +23,25 @@ import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression;
 public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 
 	private static final Logger LOG = Logger.getLogger(EdeltaSafeInterpreter.class);
+
+	/**
+	 * This exception will always be rethrown by the safe interpreter.
+	 * 
+	 * @author Lorenzo Bettini
+	 *
+	 */
+	public static class EdeltaInterpreterRuntimeException extends RuntimeException {
+
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * @param message
+		 */
+		public EdeltaInterpreterRuntimeException(String message) {
+			super(message);
+		}
+
+	}
 
 	@Override
 	public IEvaluationResult run(EdeltaEcoreBaseEClassManipulationWithBlockExpression exp, EClass eClass,
@@ -31,12 +51,18 @@ public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 			if (result != null) {
 				Throwable exception = result.getException();
 				if (exception != null) {
+					if (exception instanceof EdeltaInterpreterRuntimeException) {
+						throw (EdeltaInterpreterRuntimeException) exception;
+					}
 					LOG.debug("result of interpreting", exception);
 					exception.printStackTrace();
 				}
 			}
 			return result;
 		} catch (RuntimeException e) {
+			if (e instanceof EdeltaInterpreterRuntimeException) {
+				throw (EdeltaInterpreterRuntimeException) e;
+			}
 			LOG.debug("while interpreting", e);
 		}
 		return null;

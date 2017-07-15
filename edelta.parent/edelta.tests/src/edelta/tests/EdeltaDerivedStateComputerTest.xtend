@@ -16,16 +16,23 @@ import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ExpectedException
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
+import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException
+import org.eclipse.emf.ecore.EcoreFactory
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
 class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 
 	@Inject extension TestableEdeltaDerivedStateComputer
+
+	@Rule
+	val public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	def void testGetOrInstallAdapterWithNotXtextResource() {
@@ -562,6 +569,63 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		program.getEPackageByName("foo").
 			EClassifiers.findFirst[name == "FooClass"].
 			assertNotNull
+	}
+
+	@Test
+	def void testGetEClassWithTheSameName() {
+		val program = '''
+			metamodel "foo"
+			
+			changeEClass foo.FooClass {
+			}
+		'''.
+		parseWithTestEcore
+		val original = program.lastExpression.changeEClassExpression.original
+		val copies = program.copiedEPackages.toList
+		assertNotNull(copies.getEClassWithTheSameName(original))
+		val fake = EcoreFactory.eINSTANCE.createEClass => [name="fake"]
+		assertNull(copies.getEClassWithTheSameName(fake))
+		copies.clear
+		assertNull(copies.getEClassWithTheSameName(original))
+	}
+
+	@Test
+	def void testGetEClassWithTheSameNameNotFound() {
+		// make sure there's no NPE
+		val program = '''
+			metamodel "foo"
+			
+			changeEClass foo.NonExistant {
+			}
+		'''.
+		parseWithTestEcore
+		val original = program.lastExpression.changeEClassExpression.original
+		assertNotNull(original)
+	}
+
+	@Test
+	def void testContentAdapter() {
+		val program = '''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				ecoreref(foo.FooClass).EPackage.EClassifiers.remove(ecoreref(foo.FooClass))
+			}
+		'''.
+		parseWithTestEcore
+
+		thrown.expect(EdeltaInterpreterRuntimeException);
+		thrown.expectMessage("Unexpected notification");
+
+		program.metamodels.head.EClassifiers.head.name = "bar"
+	}
+
+	@Test
+	def void testPersonListExample() {
+		val prog = parseWithLoadedEcore(PERSON_LIST_ECORE_PATH,
+			personListExample
+		)
+		prog.assertNoErrors
 	}
 
 	protected def EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {
