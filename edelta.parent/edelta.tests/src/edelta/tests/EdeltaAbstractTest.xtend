@@ -67,12 +67,16 @@ abstract class EdeltaAbstractTest {
 	def protected parseWithLoadedEcore(String path, CharSequence input) {
 		val resourceSet = resourceSetProvider.get
 		// Loads the Ecore package to ensure it is available during loading.
-		resourceSet.getResource(URI.createFileURI(
-			Paths.get(ECORE_PATH).toAbsolutePath().toString()), true)
-		val uri = URI.createFileURI(Paths.get(path).toAbsolutePath().toString());
+		resourceSet.getResource(createFileURIFromPath(ECORE_PATH), true)
+		val uri = createFileURIFromPath(path);
 		resourceSet.getResource(uri, true);
 		val prog = input.parse(resourceSet)
 		return prog
+	}
+	
+	protected def URI createFileURIFromPath(String path) {
+		URI.createFileURI(
+			Paths.get(path).toAbsolutePath().toString())
 	}
 
 	def protected resourceSetWithTestEcore() {
