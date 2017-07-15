@@ -4,11 +4,11 @@ set -ev
 if [ "$TRAVIS_OS_NAME" == "osx" ]; then
 	if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then
 		echo "Build on MacOSX: Pull Request"
-		mvn -f edelta.parent/pom.xml clean verify
+		mvn -f edelta.parent/pom.xml clean verify -Dtycho.disableP2Mirrors=true
 	else
 		echo "Skipping build on MacOSX for standard commit"
 	fi
 else
 	echo "Build on Linux"
-	mvn -f edelta.parent/pom.xml clean verify -Pjacoco coveralls:report
+	mvn -f edelta.parent/pom.xml clean verify -Pjacoco coveralls:report -Dtycho.disableP2Mirrors=true
 fi 
