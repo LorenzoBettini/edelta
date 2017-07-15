@@ -1,6 +1,7 @@
 package edelta.interpreter
 
 import com.google.inject.Inject
+import edelta.compiler.EdeltaCompilerUtil
 import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
 import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreReference
@@ -8,18 +9,19 @@ import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaOperation
 import edelta.edelta.EdeltaPackage
 import edelta.edelta.EdeltaUseAs
-import edelta.lib.AbstractEdelta
 import edelta.util.EdeltaEcoreHelper
 import edelta.validation.EdeltaValidator
 import java.util.List
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.common.types.JvmField
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.common.types.JvmOperation
 import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.naming.QualifiedName
 import org.eclipse.xtext.util.CancelIndicator
+import org.eclipse.xtext.util.Wrapper
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
@@ -30,6 +32,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
 	@Inject extension IJvmModelAssociations
 	@Inject extension EdeltaInterpreterHelper
+	@Inject extension EdeltaCompilerUtil
 	@Inject extension EdeltaEcoreHelper
 
 	var int interpreterTimeout = 2000;
@@ -38,16 +41,17 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
 	val IT_QUALIFIED_NAME = QualifiedName.create("it")
 
-	val edelta = new AbstractEdelta() {
-		
-	}
+	var EdeltaInterpterEdeltaImpl edelta
 
 	override void setInterpreterTimeout(int interpreterTimeout) {
 		this.interpreterTimeout = interpreterTimeout
 	}
 
-	override run(EdeltaEcoreBaseEClassManipulationWithBlockExpression e, EClass c, JvmGenericType programInferredJavaType) {
+	override run(EdeltaEcoreBaseEClassManipulationWithBlockExpression e, EClass c,
+		JvmGenericType programInferredJavaType, List<EPackage> packages
+	) {
 		this.programInferredJavaType = programInferredJavaType
+		edelta = new EdeltaInterpterEdeltaImpl(packages)
 		val result = evaluate(
 			e,
 			createContext() => [
@@ -95,7 +99,17 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 		} else if (expression instanceof EdeltaEcoreReferenceExpression) {
 			return doEvaluate(expression.reference, context, indicator)
 		} else if (expression instanceof EdeltaEcoreReference) {
-			return expression.enamedelement
+			val elementWrapper = new Wrapper
+			buildMethodToCallForEcoreReference(expression) [
+				methodName, args |
+				val op = findJvmOperation(methodName)
+				val ref = super.invokeOperation(
+					op, edelta,
+					args, context, indicator
+				)
+				elementWrapper.set(ref)
+			]
+			return elementWrapper.get
 		} else if (expression instanceof EdeltaEcoreCreateEAttributeExpression) {
 			val eclass = context.getValue(IT_QUALIFIED_NAME) as EClass
 			val attr = eclass.EStructuralFeatures.filter(EAttribute).
@@ -106,6 +120,11 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 			return internalEvaluate(expression.body, newContext, indicator)
 		}
 		return super.doEvaluate(expression, context, indicator)
+	}
+
+	def private findJvmOperation(String methodName) {
+		programInferredJavaType.allFeatures.filter(JvmOperation).
+				findFirst[simpleName == methodName]
 	}
 
 	override protected featureCallField(JvmField jvmField, Object receiver) {

@@ -48,7 +48,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testReferenceToCreatedEAttribute() {
-		referenceToCreatedEAttribute.parseWithTestEcore.assertNoErrors
+		referenceToCreatedEAttributeRenamed.parseWithTestEcore.assertNoErrors
 	}
 
 	@Test

@@ -87,6 +87,7 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 		  mypackage
 		    A
 		      attr
+		    «allOtherContents»
 		'''
 		)
 	}
@@ -122,6 +123,7 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 		  mypackage
 		    A
 		      foo
+		    «allOtherContents»
 		'''
 		)
 	}
@@ -168,7 +170,23 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 		  mypackage
 		    A
 		      foo
+		    «allOtherContents»
 		'''
 		)
 	}
+
+	def private allOtherContents()
+	'''
+	    MyClass
+	      myAttribute
+	      myReference
+	    MyDataType
+	    MyBaseClass
+	      myBaseAttribute
+	      myBaseReference
+	    MyDerivedClass
+	      myDerivedAttribute
+	      myDerivedReference
+	      MyBaseClass
+	'''
 }

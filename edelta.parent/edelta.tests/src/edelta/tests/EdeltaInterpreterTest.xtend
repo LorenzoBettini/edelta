@@ -8,11 +8,8 @@ import edelta.interpreter.IEdeltaInterpreter
 import edelta.tests.additional.MyCustomException
 import edelta.validation.EdeltaValidator
 import org.eclipse.emf.ecore.EClass
-import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
-import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationResult
-import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,8 +21,6 @@ import static org.junit.Assert.*
 class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	protected IEdeltaInterpreter interpreter
-
-	@Inject extension IJvmModelAssociations
 
 	@Inject Injector injector
 
@@ -331,19 +326,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		if (doValidate) {
 			program.assertNoErrors
 		}
-		program.lastExpression.getManipulationEClassExpression => [
-			val derivedEClass = program.getDerivedStateLastEClass
-			val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
-			val result = interpreter.run(it, derivedEClass, inferredJavaClass)
-			// result can be null due to a timeout
-			if (result?.exception !== null)
-				throw result.exception
-			testExecutor.apply(derivedEClass)
-			if (result !== null)
-				assertTrue(
-					"not expected result of type " + result.class.name,
-					result instanceof DefaultEvaluationResult
-				)
-		]
+		assertAfterInterpretationOfEdeltaManipulationExpression(interpreter, program, doValidate, testExecutor)
 	}
+
 }

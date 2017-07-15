@@ -102,58 +102,51 @@ class EdeltaEcoreHelper {
 	) {
 		switch (e) {
 			EPackage:
-				if (includeCopiedEPackages)
-					cache.get("getEPackageENamedElements" -> e.name, context.eResource) [
-						return getEPackageENamedElementsInternal(e, context, true)
-					]
-				else
-					cache.get("getEPackageENamedElementsWithoutCopiedEPackages" -> e.name, context.eResource) [
-						return getEPackageENamedElementsInternal(e, context, false)
-					]
+				cache.get("getEPackageENamedElements" + includeCopiedEPackages -> e.name, context.eResource) [
+					return getEPackageENamedElementsInternal(e, context, includeCopiedEPackages)
+				]
 			EClass:
-				if (includeCopiedEPackages)
-					cache.get("getEClassENamedElements" -> e.name, context.eResource) [
-						e.EPackage.getENamedElements(context).
-							filter(EClass).
-							filter[name == e.name].
-							map[EAllStructuralFeatures].flatten
-					]
-				else
-					e.EAllStructuralFeatures
+				cache.get("getEClassENamedElements" + includeCopiedEPackages -> e.name, context.eResource) [
+					e.EPackage.getENamedElementsInternal(context, includeCopiedEPackages).
+						filter(EClass).
+						filter[name == e.name].
+						map[EAllStructuralFeatures].flatten
+				]
 			EEnum:
-				if (includeCopiedEPackages)
-					cache.get("getEEnumENamedElements" -> e.name, context.eResource) [
-						e.EPackage.getENamedElements(context).
-							filter(EEnum).
-							filter[name == e.name].
-							map[ELiterals].flatten
-					]
-				else
-					e.ELiterals
+				cache.get("getEEnumENamedElements" + includeCopiedEPackages -> e.name, context.eResource) [
+					e.EPackage.getENamedElementsInternal(context, includeCopiedEPackages).
+						filter(EEnum).
+						filter[name == e.name].
+						map[ELiterals].flatten
+				]
 			default:
 				emptyList
 		}
 	}
 
-	def private getEPackageENamedElementsInternal(EPackage e, EObject context, boolean includeCopiedEPackages) {
-		val derived = context.eResource.derivedEPackages.getByName(e.name)
+	def private getEPackageENamedElementsInternal(EPackage ePackage, EObject context, boolean includeCopiedEPackages) {
+		val ePackageName = ePackage.name
+		val imported = getProgram(context).metamodels.getByName(ePackageName)
+		val derived = context.eResource.derivedEPackages.getByName(ePackageName)
 		if (derived !== null) {
 			if (includeCopiedEPackages) {
 				// there'll also be copied epackages
-				val copiedEClassifiers = context.eResource.copiedEPackages.getByName(e.name).getEClassifiers
+				val copiedEClassifiers = context.eResource.
+					copiedEPackages.getByName(ePackageName).
+					getEClassifiers
 				return (
 					derived.getEClassifiers +
 					copiedEClassifiers +
-					e.getEClassifiers
+					imported.getEClassifiers
 				).toList
 			} else {
 				return (
-					e.getEClassifiers +
+					imported.getEClassifiers +
 					derived.getEClassifiers
 				).toList
 			}
 		}
-		return e.getEClassifiers
+		return imported.getEClassifiers
 	}
 
 	def <T extends ENamedElement> getByName(Iterable<T> namedElements, String nameToSearch) {

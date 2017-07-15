@@ -43,6 +43,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			assertNamedElements(
 				'''
 				NewClass
+				NewClass
 				FooClass
 				FooDataType
 				FooEnum
@@ -103,6 +104,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			getENamedElements(getEPackageByName("foo"), it).
 			assertNamedElements(
 				'''
+				NewClass
 				NewClass
 				FooClass
 				FooDataType

@@ -14,6 +14,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.WrappedException;
@@ -21,6 +22,7 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EGenericType;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -488,6 +490,50 @@ public class EdeltaTest {
 	}
 
 	@Test
+	public void testCopyEClassifierForEOppositeReferenceDoesNotWork() throws IOException {
+		loadTestEcore(TEST_ECORE_FOR_REFERENCES);
+		EPackage original = edelta.getEPackage(TEST_PACKAGE_FOR_REFERENCES);
+		EClass person = getEClassByName(original.getEClassifiers(), "Person");
+		EClass workplace = getEClassByName(original.getEClassifiers(), "WorkPlace");
+		EReference works = getEReferenceByName(person.getEStructuralFeatures(), "works");
+		EReference persons = getEReferenceByName(workplace.getEStructuralFeatures(), "persons");
+		assertSame(works.getEOpposite(), persons);
+		// perform copy and EOpposite referes to the original opposite
+		// and that is bad for us!
+		EPackage another = EcoreFactory.eINSTANCE.createEPackage();
+		another.setName(TEST_PACKAGE_FOR_REFERENCES);
+		person = (EClass) edelta.copyEClassifier(TEST_PACKAGE_FOR_REFERENCES, "Person");
+		workplace = (EClass) edelta.copyEClassifier(TEST_PACKAGE_FOR_REFERENCES, "WorkPlace");
+		another.getEClassifiers().add(person);
+		another.getEClassifiers().add(workplace);
+		works = getEReferenceByName(person.getEStructuralFeatures(), "works");
+		persons = getEReferenceByName(workplace.getEStructuralFeatures(), "persons");
+		assertNotNull(works.getEOpposite());
+		assertNotNull(persons.getEOpposite());
+		assertNotSame(works.getEOpposite(), persons);
+	}
+
+	@Test
+	public void testCopyEClassifierForEOppositeReferenceWorksWhenEPackageIsCopied() throws IOException {
+		loadTestEcore(TEST_ECORE_FOR_REFERENCES);
+		EPackage original = edelta.getEPackage(TEST_PACKAGE_FOR_REFERENCES);
+		EClass person = getEClassByName(original.getEClassifiers(), "Person");
+		EClass workplace = getEClassByName(original.getEClassifiers(), "WorkPlace");
+		EReference works = getEReferenceByName(person.getEStructuralFeatures(), "works");
+		EReference persons = getEReferenceByName(workplace.getEStructuralFeatures(), "persons");
+		assertSame(works.getEOpposite(), persons);
+		// perform copy and EOpposite referes to the original opposite
+		// and that is bad for us!
+		EPackage another = EdeltaEcoreUtil.copyENamedElement(original);
+		another.setName(TEST_PACKAGE_FOR_REFERENCES);
+		person = (EClass) getEClassByName(another.getEClassifiers(), "Person");
+		workplace = (EClass) getEClassByName(another.getEClassifiers(), "WorkPlace");
+		works = getEReferenceByName(person.getEStructuralFeatures(), "works");
+		persons = getEReferenceByName(workplace.getEStructuralFeatures(), "persons");
+		assertSame(works.getEOpposite(), persons);
+	}
+
+	@Test
 	public void testSaveModifiedEcoresAfterCopyingDerivedClass() throws IOException {
 		loadTestEcore(MY_ECORE);
 		// modify the ecore model by copying MyDerivedClass
@@ -504,6 +550,39 @@ public class EdeltaTest {
 					"testSaveModifiedEcoresAfterCopyingDerivedClass"+"/"+
 						MY_ECORE,
 				MODIFIED+"/"+MY_ECORE);
+	}
+
+	@Test
+	public void testCopyEClassifierIntoEPackageDoesNotResolveProxies() throws IOException {
+		// We use EGenericType for playing with references and proxies, since using
+		// EClass.superTypes for that does not seem to be easy...
+		loadTestEcore(TEST_ECORE_FOR_REFERENCES);
+		// modify the ecore model by copying MyBaseClass
+		EClass original = edelta.getEClass(TEST_PACKAGE_FOR_REFERENCES, "MyClass");
+		EClass referred = edelta.getEClass(TEST_PACKAGE_FOR_REFERENCES, "MyReferredType");
+		EGenericType genericType = original.getETypeParameters().get(0).getEBounds().get(0);
+		EClassifier eClassifier = genericType.getEClassifier();
+		assertNull(eClassifier);
+		// explicitly set proxy for the reference EGenericType.eClassifier
+		eClassifier = EcoreFactory.eINSTANCE.createEClass();
+		((BasicEObjectImpl) eClassifier).eSetProxyURI(EcoreUtil.getURI(referred));
+		assertTrue(eClassifier.eIsProxy());
+		genericType.setEClassifier(eClassifier);
+		// perform copy and make sure proxy resolution is not triggered during the copy
+		EPackage copiedEPackage = EdeltaEcoreUtil.copyENamedElement(edelta.getEPackage(TEST_PACKAGE_FOR_REFERENCES));
+		EClass copy = (EClass) EdeltaEcoreUtil.copyEClassifierIntoEPackage(copiedEPackage, original);
+		// copied EClassifier is the first one
+		assertSame(
+			copy,
+			copiedEPackage.getEClassifiers().get(0)
+		);
+		EGenericType genericTypeCopied = copy.getETypeParameters().get(0).getEBounds().get(0);
+		// use basicGet, otherwise we trigger resolution of proxies
+		eClassifier = ((EGenericTypeImpl)genericTypeCopied).basicGetEClassifier();
+		assertTrue(eClassifier.eIsProxy());
+		// proxy resolution is not triggered in the original object either
+		eClassifier = ((EGenericTypeImpl)genericType).basicGetEClassifier();
+		assertTrue(eClassifier.eIsProxy());
 	}
 
 	private void wipeModifiedDirectoryContents() {
@@ -524,5 +603,30 @@ public class EdeltaTest {
 
 	private void assertEStructuralFeature(EStructuralFeature f, String expectedName) {
 		assertEquals(expectedName, f.getName());
+	}
+
+	private EClass getEClassByName(List<EClassifier> classifiers, String nameToSearch) {
+		return getByName(
+				classifiers.stream().
+				filter(e -> e instanceof EClass).
+				map(e -> (EClass)e).
+				collect(Collectors.toList()),
+			nameToSearch);
+	}
+
+	private EReference getEReferenceByName(List<EStructuralFeature> features, String nameToSearch) {
+		return getByName(
+				features.stream().
+				filter(e -> e instanceof EReference).
+				map(e -> (EReference)e).
+				collect(Collectors.toList()),
+			nameToSearch);
+	}
+
+	private <T extends ENamedElement> T getByName(List<T> namedElements, String nameToSearch) {
+		return namedElements.
+				stream().
+				filter(e -> e.getName().contentEquals(nameToSearch)).
+				findFirst().get();
 	}
 }

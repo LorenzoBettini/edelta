@@ -16,16 +16,23 @@ import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ExpectedException
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
+import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException
+import org.eclipse.emf.ecore.EcoreFactory
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
 class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 
 	@Inject extension TestableEdeltaDerivedStateComputer
+
+	@Rule
+	val public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	def void testGetOrInstallAdapterWithNotXtextResource() {
@@ -447,12 +454,17 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 			}
 		'''.
 		parseWithTestEcore
-		val derivedEClass = program.getDerivedStateLastEClass
-		assertEquals("NewClass", derivedEClass.name)
-		assertEquals(1, derivedEClass.EStructuralFeatures.size)
-		val attr = derivedEClass.EStructuralFeatures.head
+		// the interpreter acts on copied epackages
+		var eclass = program.getCopiedEClass("NewClass")
+		assertEquals("NewClass", eclass.name)
+		assertEquals(1, eclass.EStructuralFeatures.size)
+		val attr = eclass.EStructuralFeatures.head
 		assertEquals("aNewAttr", attr.name)
 		assertEquals("EString", attr.EType.name)
+		// Note that the derived state EClass is not modified:
+		eclass = program.derivedStateLastEClass
+		assertEquals("NewClass", eclass.name)
+		assertEquals(0, eclass.EStructuralFeatures.size)
 	}
 
 	@Test
@@ -466,10 +478,16 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 			}
 		'''.
 		parseWithTestEcore
+		// the interpreter acts on the copied EPackage
+		val attr = program.copiedEPackages.
+			head.getEClassiferByName("FooClass").
+			getEAttributeByName("renamed")
+		assertNotNull("renamed", attr.name)
+		// the derivedEClass' EAttribute is not changed
 		val derivedEClass = program.getDerivedStateLastEClass
 		assertEquals("FooClass", derivedEClass.name)
-		val attr = derivedEClass.EStructuralFeatures.head
-		assertEquals("renamed", attr.name)
+		val origAttr = derivedEClass.EStructuralFeatures.head
+		assertEquals("myAttribute", origAttr.name)
 		program.assertNoErrors
 		// check that the reference is not dangling
 		// that is, the attribute is still contained in the original class
@@ -486,10 +504,11 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	@Test
 	def void testInterpretedCreateEClassAndStealEAttribute() {
 		val program = createEClassStealingAttribute.
-		parseWithTestEcore
-		val derivedEClass = program.getDerivedStateLastEClass
-		assertEquals("NewClass", derivedEClass.name)
-		val attr = derivedEClass.EStructuralFeatures.head
+			parseWithTestEcore
+		// the interpretation is done on copied epackages
+		val ec = program.getCopiedEClass("NewClass")
+		assertEquals("NewClass", ec.name)
+		val attr = ec.EStructuralFeatures.head
 		assertEquals("myAttribute", attr.name)
 		program.validate
 		program.assertNoErrors
@@ -550,6 +569,63 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		program.getEPackageByName("foo").
 			EClassifiers.findFirst[name == "FooClass"].
 			assertNotNull
+	}
+
+	@Test
+	def void testGetEClassWithTheSameName() {
+		val program = '''
+			metamodel "foo"
+			
+			changeEClass foo.FooClass {
+			}
+		'''.
+		parseWithTestEcore
+		val original = program.lastExpression.changeEClassExpression.original
+		val copies = program.copiedEPackages.toList
+		assertNotNull(copies.getEClassWithTheSameName(original))
+		val fake = EcoreFactory.eINSTANCE.createEClass => [name="fake"]
+		assertNull(copies.getEClassWithTheSameName(fake))
+		copies.clear
+		assertNull(copies.getEClassWithTheSameName(original))
+	}
+
+	@Test
+	def void testGetEClassWithTheSameNameNotFound() {
+		// make sure there's no NPE
+		val program = '''
+			metamodel "foo"
+			
+			changeEClass foo.NonExistant {
+			}
+		'''.
+		parseWithTestEcore
+		val original = program.lastExpression.changeEClassExpression.original
+		assertNotNull(original)
+	}
+
+	@Test
+	def void testContentAdapter() {
+		val program = '''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				ecoreref(foo.FooClass).EPackage.EClassifiers.remove(ecoreref(foo.FooClass))
+			}
+		'''.
+		parseWithTestEcore
+
+		thrown.expect(EdeltaInterpreterRuntimeException);
+		thrown.expectMessage("Unexpected notification");
+
+		program.metamodels.head.EClassifiers.head.name = "bar"
+	}
+
+	@Test
+	def void testPersonListExample() {
+		val prog = parseWithLoadedEcore(PERSON_LIST_ECORE_PATH,
+			personListExample
+		)
+		prog.assertNoErrors
 	}
 
 	protected def EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {

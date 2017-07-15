@@ -271,7 +271,7 @@ class Inputs {
 		'''
 	}
 
-	def referenceToCreatedEAttribute() {
+	def referenceToCreatedEAttributeRenamed() {
 		'''
 			metamodel "foo"
 			
@@ -282,6 +282,45 @@ class Inputs {
 				createEAttribute newAttribute2 type FooDataType {}
 			}
 			ecoreref(newAttribute)
+			ecoreref(changed)
+		'''
+	}
+
+	def referenceToCreatedEAttributeRenamedInChangedEClass() {
+		'''
+			metamodel "foo"
+			
+			changeEClass foo.FooClass {
+				createEAttribute newAttribute type FooDataType {
+					name = "changed"
+				}
+			}
+			ecoreref(newAttribute)
+			ecoreref(changed)
+		'''
+	}
+
+	def referenceToCreatedEClassRenamed() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				name = "changed"
+			}
+			ecoreref(NewClass)
+			ecoreref(changed)
+		'''
+	}
+
+	def referenceToChangedEClassRenamed() {
+		'''
+			metamodel "foo"
+			
+			changeEClass foo.FooClass {
+				name = "changed"
+			}
+			ecoreref(FooClass)
+			ecoreref(changed)
 		'''
 	}
 
@@ -356,5 +395,51 @@ class Inputs {
 			ecoreref(newTestAttr)
 		'''
 	}
+
+	def personListExample()
+	'''
+		import gssi.refactorings.MMrefactorings
+		import org.eclipse.emf.ecore.EEnum
+		
+		package gssi.personexample
+		
+		metamodel "PersonList"
+		metamodel "ecore"
+		
+		use MMrefactorings as refactorings
+		
+		changeEClass PersonList.Person {
+			refactorings.
+				introduceSubclasses(
+					ecoreref(Person.gender),
+					ecoreref(Person.gender).EAttributeType as EEnum,
+					it
+				);
+			EStructuralFeatures+=
+				refactorings.mergeAttributes("name",
+					ecoreref(Person.firstname).EType,
+					#[ecoreref(Person.firstname),ecoreref(Person.lastname)]
+				);
+		}
+		
+		createEClass Place in PersonList {
+			abstract = true
+			refactorings.extractSuperclass(it,
+				#[ecoreref(LivingPlace.address), ecoreref(WorkPlace.address)]);
+		}
+		
+		createEClass WorkingPosition in PersonList {
+			createEAttribute description type EString {}
+			refactorings.extractMetaClass(it,ecoreref(Person.works),"position","works");
+		}
+		
+		changeEClass PersonList.List {
+			EStructuralFeatures+=
+				refactorings.mergeReferences("places",
+					ecoreref(Place),
+					#[ecoreref(List.wplaces),ecoreref(List.lplaces)]
+				);	
+		}
+	'''
 
 }

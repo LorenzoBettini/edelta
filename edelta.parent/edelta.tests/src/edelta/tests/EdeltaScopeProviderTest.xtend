@@ -207,9 +207,12 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			NewClass
 			newAttribute
 			newAttribute2
+			NewClass
 			FooClass
 			FooDataType
 			FooEnum
+			newAttribute
+			newAttribute2
 			myAttribute
 			myReference
 			FooEnumLiteral
@@ -227,16 +230,19 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testScopeForReferenceToCreatedEAttributeChangingNameInBody() {
-		referenceToCreatedEAttribute.parseWithTestEcore.lastExpression.
+		referenceToCreatedEAttributeRenamed.parseWithTestEcore.lastExpression.
 			edeltaEcoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
 			NewClass
-			changed
+			newAttribute
 			newAttribute2
+			NewClass
 			FooClass
 			FooDataType
 			FooEnum
+			changed
+			newAttribute2
 			myAttribute
 			myReference
 			FooEnumLiteral
@@ -318,6 +324,38 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testScopeForReferenceToChangedEClassWithNewName2() {
+		referenceToChangedEClassWithANewName.
+			parseWithTestEcore.lastExpression.
+			edeltaEcoreReferenceExpression.reference.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			RenamedClass
+			myAttribute
+			myReference
+			anotherAttr
+			RenamedClass
+			FooDataType
+			FooEnum
+			myAttribute
+			myReference
+			anotherAttr
+			FooEnumLiteral
+			FooClass
+			FooDataType
+			FooEnum
+			myAttribute
+			myReference
+			FooEnumLiteral
+			foo
+			''')
+			// RenamedClass and FooClass (the original referred) are both returned
+			// by the scope provider
+			// anotherAttr is created in the changeEClass expression
+			// we also have copied EPackages, that's why elements appear twice
+	}
+
+	@Test
 	def void testScopeForReferenceToChangedEClassCopiedAttribute() {
 		// our changed EClass referred attribute must be the one
 		// of the copy, not the original one
@@ -352,42 +390,9 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			reference.enamedelement as EClass
 		assertSame(
 			// the one copied by the derived state computer
-			prog.copiedEPackages.head.EClassifiers.filter(EClass).head,
+			prog.copiedEPackages.head.getEClassiferByName("FooClass"),
 			referred
 		)
-	}
-
-	@Test
-	def void testScopeForReferenceToChangedEClassWithNewName2() {
-		// our changed EClass with the same name as an existing one must be
-		// the one that is actually linked
-		referenceToChangedEClassWithANewName.
-			parseWithTestEcore.lastExpression.
-			edeltaEcoreReferenceExpression.reference.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
-			'''
-			RenamedClass
-			myAttribute
-			myReference
-			anotherAttr
-			FooClass
-			FooDataType
-			FooEnum
-			myAttribute
-			myReference
-			FooEnumLiteral
-			FooClass
-			FooDataType
-			FooEnum
-			myAttribute
-			myReference
-			FooEnumLiteral
-			foo
-			''')
-			// RenamedClass and FooClass (the original referred) are both returned
-			// by the scope provider
-			// anotherAttr is created in the changeEClass expression
-			// we also have copied EPackages, that's why elements appear twice
 	}
 
 	@Test
@@ -409,7 +414,13 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		// we renamed FooClass, but its attributes are still visible through
 		// the renamed class
 		// they're duplicate since we also have the ones of the copied EPackages
-		// and since recording original references clear the IResourceScopeCache?
+		// Note that they appear twice and not 3 times, because we only select
+		// those in RenamedClass, not also the ones in FooClass.
+		// foo in foo.RenamedClass refers to the derived state EPackage
+		// and edelta.util.EdeltaEcoreHelper.getEPackageENamedElementsInternal(EPackage, EObject, boolean)
+		// does not consider the passed EPackage as the program imported metamodel
+		// so it does not risk using the passed EPackage and the retrieved derived state
+		// epackage twice for retrieving EClassifiers.
 	}
 
 	def private assertScope(EObject context, EReference reference, CharSequence expected) {
