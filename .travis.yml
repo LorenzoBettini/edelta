@@ -18,7 +18,7 @@ cache:
 install: true
 
 before_install:
- - echo "MAVEN_OPTS='-Xmx2048m -XX:MaxPermSize=512m'" > ~/.mavenrc
+ - echo "MAVEN_OPTS='-Xmx2048m'" > ~/.mavenrc
  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then export JAVA_HOME=$(/usr/libexec/java_home); fi
  - echo $JAVA_HOME
 
