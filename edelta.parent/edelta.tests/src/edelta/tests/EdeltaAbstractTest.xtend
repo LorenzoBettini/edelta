@@ -75,20 +75,13 @@ abstract class EdeltaAbstractTest {
 		return prog
 	}
 
-	def protected createTestResource(ResourceSet resourceSet, String ecoreName, EPackage epackage) {
-		val resource = resourceSet.createResource(URI.createURI(ecoreName + ".ecore"))
-		resource.contents += epackage
-	}
-
 	def protected resourceSetWithTestEcore() {
 		val resourceSet = resourceSetProvider.get
 		addEPackageForTests(resourceSet)
 	}
 
 	def protected addEPackageForTests(ResourceSet resourceSet) {
-		val resource = resourceSet.createResource(URI.createURI("foo.ecore"))
-		resource.contents += EPackageForTests
-		resourceSet
+		resourceSet.createTestResource("foo", EPackageForTests)
 	}
 
 	def protected resourceSetWithTestEcores() {
@@ -97,8 +90,12 @@ abstract class EdeltaAbstractTest {
 	}
 
 	def protected addEPackageForTests2(ResourceSet resourceSet) {
-		val resource = resourceSet.createResource(URI.createURI("bar.ecore"))
-		resource.contents += EPackageForTests2
+		resourceSet.createTestResource("bar.", EPackageForTests2)
+	}
+
+	def protected createTestResource(ResourceSet resourceSet, String ecoreName, EPackage epackage) {
+		val resource = resourceSet.createResource(URI.createURI(ecoreName + ".ecore"))
+		resource.contents += epackage
 		resourceSet
 	}
 
