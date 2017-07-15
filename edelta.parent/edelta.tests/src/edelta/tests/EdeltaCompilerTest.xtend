@@ -1151,11 +1151,9 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			if (checkValidationErrors) {
 				assertNoValidationErrors
 			}
-		
 			if (expectedGeneratedJava !== null) {
 				assertGeneratedJavaCode(expectedGeneratedJava)
 			}
-		
 			if (checkValidationErrors) {
 				assertGeneratedJavaCodeCompiles
 			}
@@ -1211,11 +1209,9 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			if (checkValidationErrors) {
 				assertNoValidationErrors
 			}
-
 			if (checkValidationErrors) {
 				assertGeneratedJavaCodeCompiles
 			}
-
 			val genClass = compiledClass
 			val edeltaObj = genClass.newInstance
 			// load ecore files
