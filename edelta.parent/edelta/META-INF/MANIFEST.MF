@@ -17,13 +17,16 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.xtend.lib,
  org.eclipse.emf.common,
  edelta.lib;visibility:=reexport,
- edelta.mwe2;resolution:=optional
+ edelta.mwe2;resolution:=optional,
+ org.eclipse.jdt.core,
+ org.eclipse.core.resources
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: edelta,
  edelta.compiler,
  edelta.edelta,
  edelta.edelta.impl,
  edelta.edelta.util,
+ edelta.interpreter,
  edelta.jvmmodel,
  edelta.parser.antlr,
  edelta.parser.antlr.internal,

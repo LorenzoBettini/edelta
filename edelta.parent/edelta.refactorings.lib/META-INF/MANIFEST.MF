@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Edelta Refactorings Lib
+Bundle-Vendor: Lorenzo Bettini
+Bundle-Version: 0.0.1.qualifier
+Bundle-SymbolicName: edelta.refactorings.lib; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: edelta.lib
+Import-Package: org.apache.log4j,
+ org.apache.commons.logging
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: gssi.refactorings

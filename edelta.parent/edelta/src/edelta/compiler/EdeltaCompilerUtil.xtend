@@ -14,6 +14,7 @@ import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
+import java.util.List
 
 /**
  * Utilities for Edelta compiler
@@ -113,16 +114,36 @@ class EdeltaCompilerUtil {
 	}
 
 	def getStringForEcoreReference(EdeltaEcoreReference e) {
+		val builder = new StringBuilder
+		buildMethodToCallForEcoreReference(e) [
+			name, args |
+			builder.append(name)
+			builder.append("(")
+			builder.append(args.map['''"«it»"'''].join(", "))
+			builder.append(")")
+		]
+		builder.toString
+	}
+
+	def void buildMethodToCallForEcoreReference(EdeltaEcoreReference e, (String, List<Object>)=>void acceptor) {
 		val type = e.resolveTypes.getActualType(e)
-		val enamedelement = e.enamedelement
+		// in case there's the original referred ENamedElement we use that one
+		// since the interpreter could have changed the container of the ENamedElement
+		val enamedelement = e.originalEnamedelement ?: e.enamedelement
 		if (enamedelement instanceof EClassifier) {
-			return '''get«type.simpleName»("«enamedelement.EPackageNameOrNull»", "«enamedelement.name»")'''
+			acceptor.apply(
+				'''get«type.simpleName»''',
+				#[enamedelement.EPackageNameOrNull, enamedelement.name])
 		} else if (enamedelement instanceof EEnumLiteral) {
-			return '''get«type.simpleName»("«enamedelement.EEnum.EPackageNameOrNull»", "«enamedelement.EEnumNameOrNull»", "«enamedelement.name»")'''
+			acceptor.apply(
+				'''get«type.simpleName»''',
+				#[enamedelement.EEnum.EPackageNameOrNull, enamedelement.EEnumNameOrNull, enamedelement.name])
 		} else {
 			// unresolved proxies are of type EAttribute so we cast it to EStructuralFeature
 			val f = enamedelement as EStructuralFeature
-			return '''get«type.simpleName»("«f.EContainingClass.EPackageNameOrNull»", "«f.EClassNameOrNull»", "«f.name»")'''
+			acceptor.apply(
+				'''get«type.simpleName»''',
+				#[f.EContainingClass.EPackageNameOrNull, f.EClassNameOrNull, f.name])
 		}
 	}
 }

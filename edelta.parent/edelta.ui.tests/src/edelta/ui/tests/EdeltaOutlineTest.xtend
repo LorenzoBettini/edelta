@@ -87,7 +87,106 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 		  mypackage
 		    A
 		      attr
+		    «allOtherContents»
 		'''
 		)
 	}
+
+	@Test
+	def void testOutlineWithCreateEClassAndInterpretedNewAttribute() {
+		// wait for build so that ecores are indexed
+		// and then found by the test programs
+		waitForBuild
+
+		'''
+		import org.eclipse.emf.ecore.EClass
+		
+		metamodel "mypackage"
+		// don't rely on ecore, since the input files are not saved
+		// during the test, thus external libraries are not seen
+		// metamodel "ecore"
+		
+		def myNewAttribute(EClass c, String name) {
+			c.EStructuralFeatures += newEAttribute(name) => [
+				EType = ecoreref(MyDataType)
+			]
+		}
+		
+		createEClass A in mypackage {
+			myNewAttribute(it, "foo")
+		}
+		'''.assertAllLabels(
+		'''
+		test
+		  myNewAttribute(EClass, String) : boolean
+		  doExecute() : void
+		  mypackage
+		    A
+		      foo
+		    «allOtherContents»
+		'''
+		)
+	}
+
+	@Test
+	def void testOutlineWithCreateEClassAndInterpretedNewAttributeWithUseAs() {
+		createFile(
+			TEST_PROJECT + "/src/Refactorings.edelta",
+			'''
+			import org.eclipse.emf.ecore.EClass
+			
+			package com.example
+			
+			metamodel "mypackage"
+			
+			def myNewAttribute(EClass c, String name) {
+				c.EStructuralFeatures += newEAttribute(name) => [
+					EType = ecoreref(MyDataType)
+				]
+			}
+			'''
+		)
+		// wait for build so that ecores are indexed
+		// and then found by the test programs
+		waitForBuild
+
+		'''
+		package com.example
+		
+		metamodel "mypackage"
+		// don't rely on ecore, since the input files are not saved
+		// during the test, thus external libraries are not seen
+		// metamodel "ecore"
+		
+		use Refactorings as my
+		
+		createEClass A in mypackage {
+			my.myNewAttribute(it, "foo")
+		}
+		'''.assertAllLabels(
+		'''
+		com.example
+		  doExecute() : void
+		  mypackage
+		    A
+		      foo
+		    «allOtherContents»
+		'''
+		)
+	}
+
+	def private allOtherContents()
+	'''
+	    MyClass
+	      myAttribute
+	      myReference
+	    MyDataType
+	    MyBaseClass
+	      myBaseAttribute
+	      myBaseReference
+	    MyDerivedClass
+	      myDerivedAttribute
+	      myDerivedReference
+	      MyBaseClass
+	'''
 }

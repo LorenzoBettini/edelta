@@ -1,7 +1,7 @@
 /**
  * 
  */
-package edelta.resource;
+package edelta.services;
 
 import java.util.Collection;
 
@@ -23,5 +23,7 @@ public interface IEdeltaEcoreModelAssociations {
 
 	Collection<EPackage> derivedEPackages(Resource resource);
 
-	public EObject getPrimarySourceElement(EObject jvmElement);
+	Collection<EPackage> copiedEPackages(Resource resource);
+
+	EObject getPrimarySourceElement(EObject jvmElement);
 }

@@ -1,5 +1,8 @@
 package edelta.tests
 
+import edelta.edelta.EdeltaPackage
+import edelta.lib.AbstractEdelta
+import edelta.validation.EdeltaValidator
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.testing.InjectWith
@@ -8,8 +11,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static edelta.edelta.EdeltaPackage.Literals.*
-import edelta.lib.AbstractEdelta
-import edelta.validation.EdeltaValidator
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -47,7 +48,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testReferenceToCreatedEAttribute() {
-		referenceToCreatedEAttribute.parseWithTestEcore.assertNoErrors
+		referenceToCreatedEAttributeRenamed.parseWithTestEcore.assertNoErrors
 	}
 
 	@Test
@@ -70,9 +71,12 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		'''.parseWithTestEcore.assertErrorsAsStrings(
 			'''
 			Type mismatch: cannot convert from EDataType to EClass
+			Type mismatch: cannot convert from EDataType to EClass
+			Type mismatch: cannot convert from EEnum to EClass
 			Type mismatch: cannot convert from EEnum to EClass
 			'''
 		)
+		// mismatch errors are duplicate due to the interpreter
 	}
 
 	@Test
@@ -85,10 +89,13 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		'''.parseWithTestEcore.assertErrorsAsStrings(
 			'''
 			Type mismatch: cannot convert from EDataType to EClass
+			Type mismatch: cannot convert from EDataType to EClass
+			Type mismatch: cannot convert from EEnum to EClass
 			Type mismatch: cannot convert from EEnum to EClass
 			extraneous input ',' expecting RULE_ID
 			'''
 		)
+		// mismatch errors are duplicate due to the interpreter
 	}
 
 	@Test
@@ -102,11 +109,14 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 			'''
 			AAA cannot be resolved.
 			Type mismatch: cannot convert from EDataType to EClass
+			Type mismatch: cannot convert from EDataType to EClass
+			Type mismatch: cannot convert from EEnum to EClass
 			Type mismatch: cannot convert from EEnum to EClass
 			'''
 		)
 		// type mismatch error has not been reported on AAA
 		// since it can't be resolved
+		// mismatch errors are duplicate due to the interpreter
 	}
 
 	@Test
@@ -180,6 +190,56 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		changeEClass foo.FooClass newName Renamed {}
 		'''
 		input.parseWithTestEcore.assertNoIssues
+	}
+
+	@Test
+	def void testTimeoutInCancelIndicator() {
+		val input = '''
+			import org.eclipse.emf.ecore.EClass
+
+			metamodel "foo"
+			
+			def op(EClass c) : void {
+				var i = 10;
+				while (i >= 0) {
+					Thread.sleep(1000);
+					i++
+				}
+				// this will never be executed
+				c.abstract = true
+			}
+			
+			createEClass NewClass in foo {
+				op(it)
+			}
+		'''
+		input.parseWithTestEcore.assertWarning(
+			EdeltaPackage.eINSTANCE.edeltaEcoreCreateEClassExpression,
+			EdeltaValidator.INTERPRETER_TIMEOUT,
+			input.lastIndexOf("{"), 11,
+			"Timeout interpreting initialization block"
+		)
+	}
+
+	@Test
+	def void testUnresolvedEcoreReference() {
+		'''
+		metamodel "foo"
+		
+		ecoreref(NonExistant)
+		ecoreref(FooClass)
+		'''.parseWithTestEcore.assertErrorsAsStrings("NonExistant cannot be resolved.")
+	}
+
+	@Test
+	def void testNoDanglingReferencesAfterInterpretation() {
+		'''
+		metamodel "foo"
+		
+		createEClass NewClass in foo {
+			ecoreref(foo.FooClass).EPackage.EClassifiers.remove(ecoreref(foo.FooClass))
+		}
+		'''.parseWithTestEcore.assertNoErrors
 	}
 
 	def private assertErrorsAsStrings(EObject o, CharSequence expected) {

@@ -16,6 +16,7 @@
 	</properties>
 	<modules>
 		<module>edelta.lib</module>
+		<module>edelta.refactorings.lib</module>
 		<module>edelta.testutils</module>
 		<module>edelta.lib.tests</module>
 		<module>edelta.mwe2</module>
