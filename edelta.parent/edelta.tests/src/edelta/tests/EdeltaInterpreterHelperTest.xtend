@@ -1,8 +1,11 @@
 package edelta.tests
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaFactory
 import edelta.interpreter.EdeltaInterpreterHelper
 import edelta.tests.additional.MyCustomEdelta
+import org.eclipse.emf.ecore.EcoreFactory
+import org.eclipse.emf.ecore.EcorePackage
 import org.eclipse.xtext.common.types.util.JavaReflectAccess
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
@@ -10,9 +13,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import org.eclipse.emf.ecore.EcoreFactory
-import edelta.edelta.EdeltaFactory
-import org.eclipse.emf.ecore.EcorePackage
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)

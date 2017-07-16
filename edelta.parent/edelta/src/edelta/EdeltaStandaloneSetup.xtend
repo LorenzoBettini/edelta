@@ -6,6 +6,7 @@ package edelta
 import com.google.inject.Injector
 import edelta.edelta.EdeltaPackage
 import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.xml.namespace.XMLNamespacePackage
 
 /**
  * Initialization support for running Xtext languages without Equinox extension registry.
@@ -19,6 +20,9 @@ class EdeltaStandaloneSetup extends EdeltaStandaloneSetupGenerated {
 	override register(Injector injector) {
 		if (!EPackage.Registry.INSTANCE.containsKey("http://www.Edelta.edelta")) {
 			EPackage.Registry.INSTANCE.put("http://www.Edelta.edelta", EdeltaPackage.eINSTANCE);
+		}
+		if (!EPackage.Registry.INSTANCE.containsKey(XMLNamespacePackage.eNS_URI)) {
+			EPackage.Registry.INSTANCE.put(XMLNamespacePackage.eNS_URI, XMLNamespacePackage.eINSTANCE);
 		}
 		super.register(injector)
 	}

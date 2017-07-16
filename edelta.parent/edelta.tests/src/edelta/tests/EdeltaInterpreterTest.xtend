@@ -1,37 +1,40 @@
 package edelta.tests
 
 import com.google.inject.Inject
+import com.google.inject.Injector
 import edelta.edelta.EdeltaPackage
 import edelta.interpreter.EdeltaInterpreter
+import edelta.interpreter.IEdeltaInterpreter
 import edelta.tests.additional.MyCustomException
 import edelta.validation.EdeltaValidator
 import org.eclipse.emf.ecore.EClass
-import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
-import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationResult
-import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import static edelta.interpreter.EdeltaInterpreter.*
 import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
-@InjectWith(EdeltaInjectorProviderCustom)
+@InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
 class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
-	@Inject EdeltaInterpreter interpreter
+	protected IEdeltaInterpreter interpreter
 
-	@Inject extension IJvmModelAssociations
+	@Inject Injector injector
+
+	def IEdeltaInterpreter createInterpreter() {
+		injector.getInstance(EdeltaInterpreter)
+	}
 
 	@Before
-	def void disableTimeout() {
+	def void setupInterpreter() {
+		interpreter = createInterpreter
 		// for standard tests we disable the timeout
 		// actually we set it to several minutes
 		// this also makes it easier to debug tests
-		EdeltaInterpreter.INTERPRETER_TIMEOUT = 1200000;
+		interpreter.interpreterTimeout = 1200000;
 	}
 
 	@Test
@@ -50,15 +53,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testCreateEClassAndCallLibMethod() {
-		'''
-			metamodel "foo"
-			
-			createEClass NewClass in foo {
-				EStructuralFeatures += newEAttribute("newTestAttr") [
-					EType = ecoreref(FooDataType)
-				]
-			}
-		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
+		createEClassAndAddEAttributeUsingLibMethod.
+		assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
 			assertEquals("NewClass", derivedEClass.name)
 			assertEquals(1, derivedEClass.EStructuralFeatures.size)
 			val attr = derivedEClass.EStructuralFeatures.head
@@ -84,6 +80,23 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
 			assertEquals("NewClass", derivedEClass.name)
 			assertEquals(true, derivedEClass.abstract)
+		]
+	}
+
+	@Test
+	def void testCreateEClassAndCallJvmOperationFromSuperclass() {
+		'''
+			metamodel "foo"
+			
+			createEClass NewClass in foo {
+				// call method from superclass AbstractEdelta
+				EStructuralFeatures += ^createEAttribute(it, "aNewAttr", null)
+			}
+		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
+			assertEquals("NewClass", derivedEClass.name)
+			assertEquals(1, derivedEClass.EStructuralFeatures.size)
+			val attr = derivedEClass.EStructuralFeatures.head
+			assertEquals("aNewAttr", attr.name)
 		]
 	}
 
@@ -239,7 +252,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	@Test
 	def void testTimeoutInCancelIndicator() {
 		// in this test we really need the timeout
-		EdeltaInterpreter.INTERPRETER_TIMEOUT = 2000;
+		interpreter.interpreterTimeout = 2000;
 		val input = '''
 			import org.eclipse.emf.ecore.EClass
 
@@ -304,28 +317,16 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	def assertAfterInterpretationOfEdeltaManipulationExpression(CharSequence input, (EClass)=>void testExecutor) {
+	def protected assertAfterInterpretationOfEdeltaManipulationExpression(CharSequence input, (EClass)=>void testExecutor) {
 		assertAfterInterpretationOfEdeltaManipulationExpression(input, true, testExecutor)
 	}
 
-	def assertAfterInterpretationOfEdeltaManipulationExpression(CharSequence input, boolean doValidate, (EClass)=>void testExecutor) {
+	def protected assertAfterInterpretationOfEdeltaManipulationExpression(CharSequence input, boolean doValidate, (EClass)=>void testExecutor) {
 		val program = input.parseWithTestEcore
 		if (doValidate) {
 			program.assertNoErrors
 		}
-		program.lastExpression.getManipulationEClassExpression => [
-			val derivedEClass = program.getDerivedStateLastEClass
-			val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
-			val result = interpreter.run(it, derivedEClass, inferredJavaClass)
-			// result can be null due to a timeout
-			if (result?.exception !== null)
-				throw result.exception
-			testExecutor.apply(derivedEClass)
-			if (result !== null)
-				assertTrue(
-					"not expected result of type " + result.class.name,
-					result instanceof DefaultEvaluationResult
-				)
-		]
+		assertAfterInterpretationOfEdeltaManipulationExpression(interpreter, program, doValidate, testExecutor)
 	}
+
 }

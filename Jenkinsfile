@@ -13,7 +13,7 @@ node {
         // returnStatus: true here will ensure the build stays yellow
         // when test cases are failing
         sh (script:
-          "'${mvnHome}/bin/mvn' -f edelta.parent/pom.xml clean verify -Pjacoco",
+          "'${mvnHome}/bin/mvn' -f edelta.parent/pom.xml -fae clean verify -Pjacoco",
           returnStatus: true
         )
       }
