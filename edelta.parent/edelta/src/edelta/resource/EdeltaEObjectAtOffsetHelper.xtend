@@ -13,7 +13,7 @@ import org.eclipse.xtext.xbase.linking.BrokenConstructorCallAwareEObjectAtOffset
 class EdeltaEObjectAtOffsetHelper extends BrokenConstructorCallAwareEObjectAtOffsetHelper {
 
 	override protected resolveCrossReferencedElement(INode node) {
-		val 	referenceOwner = NodeModelUtils.findActualSemanticObjectFor(node);
+		val referenceOwner = NodeModelUtils.findActualSemanticObjectFor(node);
 		if (referenceOwner instanceof EdeltaEcoreReference) {
 			val original = referenceOwner.originalEnamedelement
 			if (original !== null)
