@@ -20,7 +20,7 @@
 		<!-- since this could be used in the pluginManagement section, we need to make sure
 			the path always points to this pom's directory; project.basedir will always point
 			to the directory of the pom where the pluginManagement's plugins are used -->
-		<ant-files-path>${project.basedir}/../edelta.parent/releng/releasing</ant-files-path>
+		<ant-files-path>${project.basedir}/../releng/releasing</ant-files-path>
 
 		<!-- pass "-n" to perform a trial run with no changes made -->
 		<dryrun></dryrun>
