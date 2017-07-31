@@ -18,7 +18,7 @@ cache:
 install: true
 
 before_install:
-# - echo "MAVEN_OPTS='-Xmx3G'" > ~/.mavenrc
+ - echo "MAVEN_OPTS='-Xmx768m -Xms256m -Xss1m'" > ~/.mavenrc
  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then export JAVA_HOME=$(/usr/libexec/java_home); fi
  - echo $JAVA_HOME
 
