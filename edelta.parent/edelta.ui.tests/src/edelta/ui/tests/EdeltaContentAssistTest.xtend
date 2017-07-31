@@ -18,7 +18,7 @@ import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.editor.XtextEditor
 import org.eclipse.xtext.ui.editor.utils.EditorUtils
-import org.eclipse.xtext.xbase.junit.ui.AbstractContentAssistTest
+import org.eclipse.xtext.ui.testing.AbstractContentAssistTest
 import org.junit.After
 import org.junit.AfterClass
 import org.junit.BeforeClass
@@ -26,7 +26,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static edelta.ui.tests.utils.EdeltaPluginProjectHelper.*
-import static org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil.*
+import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaUiInjectorProvider)
