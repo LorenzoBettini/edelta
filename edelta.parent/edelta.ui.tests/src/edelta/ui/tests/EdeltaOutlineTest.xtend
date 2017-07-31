@@ -4,13 +4,13 @@ import com.google.inject.Inject
 import edelta.ui.internal.EdeltaActivator
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper
 import org.eclipse.core.runtime.CoreException
-import org.eclipse.xtext.junit4.ui.AbstractOutlineTest
+import org.eclipse.xtext.ui.testing.AbstractOutlineTest
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import static org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil.*
+import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaUiInjectorProvider)
