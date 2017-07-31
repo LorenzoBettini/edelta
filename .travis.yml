@@ -34,4 +34,4 @@ after_success:
  - find ./edelta.parent/edelta.ui.tests/target/ -name "*.log"
 
 after_failure:
- - find ./edelta.parent/edelta.ui.tests/target/ -name "*.log" -exec less {} \;
+ - find ./edelta.parent/edelta.ui.tests/target/ -name "*.log" -exec cat {} \;
