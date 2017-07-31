@@ -1,4 +1,4 @@
-sudo: false
+sudo: true
 
 language: java
 
@@ -18,7 +18,7 @@ cache:
 install: true
 
 before_install:
- - echo "MAVEN_OPTS='-Xmx2048m'" > ~/.mavenrc
+# - echo "MAVEN_OPTS='-Xmx768m -Xms256m -Xss1m'" > ~/.mavenrc
  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then export JAVA_HOME=$(/usr/libexec/java_home); fi
  - echo $JAVA_HOME
 
@@ -34,4 +34,4 @@ after_success:
  - find ./edelta.parent/edelta.ui.tests/target/ -name "*.log"
 
 after_failure:
- - find ./edelta.parent/edelta.ui.tests/target/ -name "*.log" -exec less {} \;
+ - find ./edelta.parent/edelta.ui.tests/target/ -name "*.log" -exec cat {} \;

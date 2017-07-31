@@ -13,7 +13,47 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
+
+		<!-- properties for deploying the composite update site and zipped products on Bintray -->
+
+		<!-- since this could be used in the pluginManagement section, we need to make sure
+			the path always points to this pom's directory; project.basedir will always point
+			to the directory of the pom where the pluginManagement's plugins are used -->
+		<ant-files-path>${project.basedir}/../releng/releasing</ant-files-path>
+
+		<!-- pass "-n" to perform a trial run with no changes made -->
+		<dryrun></dryrun>
+
+		<!-- for deployment on bintray -->
+		<!-- The name of your own Bintray repository -->
+		<bintray.repo>edelta</bintray.repo>
+		<!-- The name of your own Bintray repository's package for releases -->
+		<bintray.package>releases</bintray.package>
+		<!-- The label for the Composite sites -->
+		<site.label>Edelta Site</site.label>
+
+		<!-- If the Bintray repository is owned by someone different from your
+			user, then specify the bintray.owner explicitly -->
+		<bintray.owner>${bintray.user}</bintray.owner>
+		<!-- Define bintray.user and bintray.apikey in some secret place,
+			like .m2/settings.xml -->
+
+		<!-- Default values for remote directories -->
+		<bintray.base.path></bintray.base.path>
+		<bintray.releases.path>${bintray.base.path}releases</bintray.releases.path>
+		<bintray.composite.path>${bintray.base.path}updates</bintray.composite.path>
+		<bintray.zip.path>${bintray.base.path}zipped</bintray.zip.path>
+		<bintray.products.path>${bintray.base.path}products</bintray.products.path>
+		<!-- note that the following must be consistent with the path schema
+			used to publish child composite repositories and actual released p2 repositories -->
+		<child.repository.path.prefix>../../releases/</child.repository.path.prefix>
+
+		<!-- set it to true to have a self contained p2 repository https://wiki.eclipse.org/Tycho/eclipse-repository#Creating_a_self-contained_p2_repository -->
+		<!-- We handle that at .site and .ide.site level -->
+		<!-- <includeAllDependencies>true</includeAllDependencies>  -->
 	</properties>
+
 	<modules>
 		<module>edelta.lib</module>
 		<module>edelta.refactorings.lib</module>
@@ -26,6 +66,8 @@
 		<module>edelta.target</module>
 		<module>edelta.feature</module>
 		<module>edelta.repository</module>
+		<module>edelta.product.ui.feature</module>
+		<module>edelta.product.repository</module>
 		<module>edelta.tests</module>
 		<module>edelta.ui.tests</module>
 		<module>edelta.tests.report</module>
@@ -33,7 +75,7 @@
 
 	<profiles>
 		<profile>
-			<id>release</id>
+			<id>release-composite</id>
 			<activation>
 				<activeByDefault>false</activeByDefault>
 			</activation>
@@ -75,6 +117,62 @@
 					</plugin>
 				</plugins>
 			</build>
+		</profile>
+		<profile>
+			<id>release-ide-composite</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<skipTests>true</skipTests>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.eclipse.tycho.extras</groupId>
+						<artifactId>tycho-pack200b-plugin</artifactId>
+						<version>${tycho-version}</version>
+						<executions>
+							<execution>
+								<id>pack200-pack</id>
+								<goals>
+									<goal>pack</goal>
+								</goals>
+								<phase>package</phase>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.eclipse.tycho</groupId>
+						<artifactId>tycho-p2-plugin</artifactId>
+						<version>${tycho-version}</version>
+						<executions>
+							<execution>
+								<id>p2-metadata</id>
+								<goals>
+									<goal>p2-metadata</goal>
+								</goals>
+								<phase>package</phase>
+							</execution>
+						</executions>
+						<configuration>
+							<defaultP2Metadata>false</defaultP2Metadata>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>release-snapshots</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<includeAllDependencies>false</includeAllDependencies>
+				<bintray.package>snapshots</bintray.package>
+				<bintray.base.path>snapshots/</bintray.base.path>
+				<site.label>Edelta Snapshot Site</site.label>
+			</properties>
 		</profile>
 	</profiles>
 
@@ -154,11 +252,6 @@
 							<os>linux</os>
 							<ws>gtk</ws>
 							<arch>x86_64</arch>
-						</environment>
-						<environment>
-							<os>linux</os>
-							<ws>gtk</ws>
-							<arch>x86</arch>
 						</environment>
 					</environments>
 					<includePackedArtifacts>true</includePackedArtifacts>

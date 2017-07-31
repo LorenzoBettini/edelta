@@ -6,6 +6,7 @@ logs.zip
 *.orig
 *.java._trace
 *.smap
+*.log
 
 # src-gen is excluded on a per project basis
 #src-gen/
