@@ -7,10 +7,17 @@
 
 Copy the following URL and paste it into your Eclipse "Install New Software" dialog ("Help" => "Install New Software..."), wait for the list of available features to show and select the latest version of "Edelta Feature". (The URL is NOT meant to be opened with a browser)
 
-https://dl.bintray.com/lorenzobettini/edelta/snapshots/updates/
+https://dl.bintray.com/lorenzobettini/edelta/updates/
 
 IMPORTANT: Edelta requires Xtext, if this is not already installed, all dependencies will be automatically installed form this update site, which is self-contained.
 
 ### Pre-configured Eclipse distributions with Edelta installed, for several architectures.
 
-Download a complete Eclipse distribution with Edelta installed; choose the one for your OS and architecture: https://dl.bintray.com/lorenzobettini/edelta/snapshots/products/
+Download a complete Eclipse distribution with Edelta installed; choose the one for your OS and architecture: https://dl.bintray.com/lorenzobettini/edelta/products/
+
+### Development Snapshots
+
+These are development snapshots, which might be unstable (Note: the snapshots update site always includes the releases update site):
+
+https://dl.bintray.com/lorenzobettini/edelta/snapshots/updates/
+https://dl.bintray.com/lorenzobettini/edelta/snapshots/products/
