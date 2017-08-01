@@ -2,7 +2,7 @@
 <feature
       id="edelta.feature"
       label="Edelta Feature "
-      version="0.0.1.qualifier">
+      version="0.1.0.qualifier">
 
    <requires>
       <import feature="org.eclipse.xtext.xbase" version="2.12.0" match="equivalent"/>
