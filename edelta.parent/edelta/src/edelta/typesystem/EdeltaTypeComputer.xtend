@@ -57,7 +57,8 @@ class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 			state.acceptActualType(getPrimitiveVoid(state))
 			return
 		}
-		val result = state.withNonVoidExpectation.computeTypes(e.reference)
+		// reuse the same expectations for the reference
+		val result = state.computeTypes(e.reference)
 		state.acceptActualType(result.actualExpressionType)
 	}
 
@@ -72,8 +73,13 @@ class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 				// superfluous
 				val expectation = state.expectations.findFirst[expectedType !== null]
 				if (expectation !== null) {
-					state.acceptActualType(expectation.expectedType)
-					return
+					// for unresolved proxies the type must be at least ENamedElement
+					val atLeast = getRawTypeForName(ENamedElement, state)
+					val expectedType = expectation.expectedType
+					if (atLeast.isAssignableFrom(expectedType)) {
+						state.acceptActualType(expectedType)
+						return
+					}
 				}
 				ENamedElement
 			}
