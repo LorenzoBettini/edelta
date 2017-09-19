@@ -66,6 +66,12 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	@Test
 	def void testTypeOfReferenceToUnresolvedENamedElementWithExpectations() {
 		"val org.eclipse.emf.ecore.EClass c = ecoreref(NonExistant)".
+			assertTypeOfRightExpression(EClass)
+	}
+
+	@Test
+	def void testTypeOfReferenceToUnresolvedENamedElementAtLeastENamedElement() {
+		"val Object c = ecoreref(NonExistant)".
 			assertTypeOfRightExpression(ENamedElement)
 	}
 
