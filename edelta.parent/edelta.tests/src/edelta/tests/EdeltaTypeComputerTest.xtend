@@ -64,6 +64,12 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testTypeOfReferenceToUnresolvedENamedElementWithExpectations() {
+		"val org.eclipse.emf.ecore.EClass c = ecoreref(NonExistant)".
+			assertTypeOfRightExpression(ENamedElement)
+	}
+
+	@Test
 	def void testTypeOfReferenceToNullNamedElement() {
 		"ecoreref".assertPrimitiveVoid
 	}
@@ -169,4 +175,13 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 		]
 	}
 
+	def private assertTypeOfRightExpression(CharSequence input, Class<?> expected) {
+		input.parseWithTestEcore.lastExpression => [
+			expected.canonicalName.assertEquals(
+				resolveTypes.getActualType(
+					variableDeclaration.right
+				).identifier
+			)
+		]
+	}
 }
