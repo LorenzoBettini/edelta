@@ -122,7 +122,7 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 		  doExecute() : void
 		  mypackage
 		    A
-		      foo
+		      foo : MyDataType
 		    «allOtherContents»
 		'''
 		)
@@ -178,15 +178,15 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 	def private allOtherContents()
 	'''
 	    MyClass
-	      myAttribute
-	      myReference
-	    MyDataType
+	      myAttribute : EString
+	      myReference : EObject
+	    MyDataType [java.lang.String]
 	    MyBaseClass
-	      myBaseAttribute
-	      myBaseReference
-	    MyDerivedClass
-	      myDerivedAttribute
-	      myDerivedReference
+	      myBaseAttribute : EString
+	      myBaseReference : EObject
+	    MyDerivedClass -> MyBaseClass
+	      myDerivedAttribute : EString
+	      myDerivedReference : EObject
 	      MyBaseClass
 	'''
 }

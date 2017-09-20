@@ -11,6 +11,7 @@ import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider
 import org.eclipse.xtext.common.types.JvmOperation
 import org.eclipse.xtext.xbase.annotations.ui.labeling.XbaseWithAnnotationsLabelProvider
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
+import org.eclipse.emf.ecore.ENamedElement
 
 /**
  * Provides labels for EObjects.
@@ -21,9 +22,12 @@ class EdeltaLabelProvider extends XbaseWithAnnotationsLabelProvider {
 
 	@Inject extension IJvmModelAssociations
 
+	var AdapterFactoryLabelProvider delegate
+
 	@Inject
 	new(AdapterFactoryLabelProvider delegate) {
 		super(delegate);
+		this.delegate = delegate
 	}
 
 	def text(EdeltaOperation m) {
@@ -37,7 +41,13 @@ class EdeltaLabelProvider extends XbaseWithAnnotationsLabelProvider {
 	def text(EdeltaMain m) {
 		text(m.inferredJavaMethod)
 	}
-	
+
+	def text(ENamedElement e) {
+		// delegate to the default Ecore edit label provider
+		// for Ecore model elements.
+		delegate.getText(e)
+	}
+
 	def image(EdeltaMain m) {
 		imageDescriptor(m.inferredJavaMethod)
 	}
