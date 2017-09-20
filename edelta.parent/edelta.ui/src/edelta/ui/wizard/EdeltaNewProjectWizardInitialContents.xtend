@@ -16,7 +16,7 @@ class EdeltaNewProjectWizardInitialContents {
 		fsa.generateFile(
 			"src/Example." + fileExtensionProvider.primaryFileExtension,
 			'''
-			import org.eclipse.emf.ecore.EcoreFactory
+			import org.eclipse.emf.ecore.EClass
 			
 			// IMPORTANT: ecores must be in a source directory
 			// otherwise you can't refer to them
@@ -27,71 +27,55 @@ class EdeltaNewProjectWizardInitialContents {
 			metamodel "ecore"
 			
 			/*
-			 * Reusable function to create a new EClass with the
-			 * specified name, setting MyEClass as its superclass
-			 * @param name
+			 * Reusable function to add standard features to an
+			 * {@link EClass}.
+			 * 
+			 * @param c
 			 */
-			def createClass(String name) {
-				newEClass(name) => [
-					ESuperTypes += ecoreref(MyEClass)
-				]
-			}
-			
-			// refer to Ecore elements with "ecoreref()"
-			val p = ecoreref(MyEClass).EPackage
-			// create new EClasses manually...
-			p.EClassifiers += createClass("NewClass") => [
-				EStructuralFeatures += newEAttribute("myStringAttribute") => [
-					// refer to EDataTypes with "ecoreref()"
+			def addStandardFeatures(EClass c) {
+				// use standard EMF API to add manually features
+				c.EStructuralFeatures += newEAttribute("name") => [
+					// refer to Ecore elements with "ecoreref()"
 					EType = ecoreref(EString)
 				]
-				EStructuralFeatures += newEReference("myReference") => [
-					EType = ecoreref(MyEClass)
-					upperBound = -1;
-					containment = true;
-					lowerBound = 0
-				]
-			]
-			
-			// modify existing Ecore elements manually
-			ecoreref(MyENum).ELiterals += EcoreFactory.eINSTANCE.createEEnumLiteral => [
-				name = "AnotherEnumLiteral"
-				value = 3
-			]
-			
-			// ... or using Edelta DSL specific syntax
-			createEClass MyNewClass in myecore {}
-			
-			createEClass MyDerivedNewClass in myecore {
-				// new Ecore elements created in the program can be referred:
-				ESuperTypes += ecoreref(MyNewClass)
-				createEAttribute myNewAttribute type EInt {
-					upperBound = -1;
-				}
+				// and supertypes
+				c.ESuperTypes += ecoreref(MyEClass)
 			}
 			
-			// You can fully qualify Ecore references
-			ecoreref(MyDerivedNewClass.myNewAttribute)
-			
-			// You can specify superclasses for created EClasses...
-			createEClass MyOtherNewClass in myecore
-				extends MyDerivedNewClass, MyNewClass
-			{
-				// ...note that inherited attributes are
-				// immediately available in the program
-				ecoreref(MyOtherNewClass.myNewAttribute)
-			}
-			
-			// You can change an existing EClass, e.g.,
-			// changing its name
-			changeEClass myecore.MyOtherEClass newName RenamedEClass {
+			// create new EClass with Edelta DSL syntax
+			createEClass NewClass in myecore {
+				// the created EClass is available through the
+				// special implicit parameter 'it' in this block
 				
+				// reuse your functions
+				addStandardFeatures(it)
+				
+				// create new features with Edelta DSL syntax
+				createEAttribute age type EInt {
+					// the created EAttribute is available through the
+					// special implicit parameter 'it' in this block
+					// which can be used as implicit receiver, like 'this'
+					lowerBound = 1
+				}
+				
+				// or manually with EMF API
+				EStructuralFeatures += newEReference("myReference") => [
+					// references to Ecore elements can be fully qualified
+					EType = ecoreref(myecore.MyEClass)
+					upperBound = -1
+					lowerBound = 0
+					containment = true
+				]
 			}
 			
-			// as usual, renamed EClass are available both with the old name
-			ecoreref(MyOtherEClass)
-			// and with the new one
-			ecoreref(RenamedEClass)
+			// change existing EClass
+			changeEClass myecore.MyEClass {
+				EStructuralFeatures += newEReference("myOtherReference") => [
+					// new elements are immediately available
+					EType = ecoreref(myecore.NewClass)
+					containment = false
+				]
+			}
 			'''
 			)
 		fsa.generateFile(
