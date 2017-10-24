@@ -43,8 +43,9 @@
    </plugins>
 
    <features>
-      <feature id="edelta.feature"/>
       <feature id="edelta.product.ui.feature"/>
+      <feature id="edelta.feature" installMode="root"/>
+      <feature id="edelta.feature.source" installMode="root"/>
    </features>
 
    <configurations>
@@ -58,6 +59,5 @@
       <property name="org.eclipse.ui/org.eclipse.ui.edit.text.encoding" value="UTF-8" />
       <property name="osgi.instance.area.default" value="@user.home/workspace-edelta" />
    </configurations>
-
 
 </product>
