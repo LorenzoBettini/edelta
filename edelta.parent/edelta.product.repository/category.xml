@@ -6,6 +6,6 @@
    <feature id="edelta.feature.source" version="0.0.0">
       <category name="main.source"/>
    </feature>
-   <category-def name="main" label="Edelta 0.1.x"/>
-   <category-def name="main.source" label="Edelta 0.1.x (Sources)"/>
+   <category-def name="main" label="Edelta 0.2.x"/>
+   <category-def name="main.source" label="Edelta 0.2.x (Sources)"/>
 </site>
