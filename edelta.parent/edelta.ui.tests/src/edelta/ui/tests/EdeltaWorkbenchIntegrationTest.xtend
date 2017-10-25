@@ -1,13 +1,13 @@
 package edelta.ui.tests
 
 import com.google.inject.Inject
-import edelta.testutils.PDETargetPlatformUtils
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper
+import edelta.ui.tests.utils.PDETargetPlatformUtils
 import edelta.ui.tests.utils.PluginProjectHelper
 import org.eclipse.core.resources.IProject
+import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
-import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test

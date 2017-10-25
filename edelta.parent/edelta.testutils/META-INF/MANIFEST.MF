@@ -6,7 +6,4 @@ Bundle-Version: 0.2.0.qualifier
 Bundle-Vendor: Lorenzo Bettini
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: edelta.testutils
-Require-Bundle: org.junit;bundle-version="4.12.0",
- org.eclipse.core.runtime,
- org.eclipse.pde.core,
- org.eclipse.core.resources
+Require-Bundle: org.junit;bundle-version="4.12.0"
