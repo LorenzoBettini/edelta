@@ -62,6 +62,7 @@
 		<module>edelta</module>
 		<module>edelta.ide</module>
 		<module>edelta.ui</module>
+		<module>edelta.compilation.feature</module>
 		<module>edelta.library.compilation</module>
 		<module>edelta.refactorings.lib</module>
 		<module>edelta.target</module>

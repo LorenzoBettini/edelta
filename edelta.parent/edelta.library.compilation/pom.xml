@@ -42,11 +42,11 @@
 										<id>org.eclipse.rcp</id>
 										<versionRange>0.0.0</versionRange>
 									</requirement>
-									<!-- We specify our plugin so that we're sure we're using also all 
+									<!-- We specify our feature so that we're sure we're using also all 
 										the required software -->
 									<requirement>
-										<type>eclipse-plugin</type>
-										<id>edelta.ui</id>
+										<type>eclipse-feature</type>
+										<id>edelta.compilation.feature</id>
 										<versionRange>0.0.0</versionRange>
 									</requirement>
 									<!-- See https://github.com/LorenzoBettini/jbase/issues/3 https://www.eclipse.org/forums/index.php/t/1073366/ -->
@@ -85,11 +85,11 @@
 										<id>org.eclipse.rcp</id>
 										<versionRange>0.0.0</versionRange>
 									</requirement>
-									<!-- We specify our plugin so that we're sure we're using also all 
+									<!-- We specify our feature so that we're sure we're using also all 
 										the required software -->
 									<requirement>
-										<type>eclipse-plugin</type>
-										<id>edelta.ui</id>
+										<type>eclipse-feature</type>
+										<id>edelta.compilation.feature</id>
 										<versionRange>0.0.0</versionRange>
 									</requirement>
 								</extraRequirements>
