@@ -101,7 +101,7 @@ public class MMrefactorings extends AbstractEdelta {
   }
   
   /**
-   * @param extracted_class the EClass created from outside representing the extracted metaclass
+   * @param extracted_class the created EClass created representing the extracted metaclass
    * @param f
    * @param _in
    * @param _out
