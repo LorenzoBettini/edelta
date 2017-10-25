@@ -1,8 +1,8 @@
 package edelta.ui.tests
 
+import edelta.testutils.PDETargetPlatformUtils
 import edelta.ui.internal.EdeltaActivator
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper
-import edelta.ui.tests.utils.PDETargetPlatformUtils
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader

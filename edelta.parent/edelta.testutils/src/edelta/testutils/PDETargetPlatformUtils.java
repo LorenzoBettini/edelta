@@ -1,4 +1,4 @@
-package edelta.ui.tests.utils;
+package edelta.testutils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -28,6 +28,7 @@ import org.osgi.framework.FrameworkUtil;
  * 
  * @author Lorenzo Bettini - some adaptations
  */
+@SuppressWarnings("restriction")
 public class PDETargetPlatformUtils {
 	
 	private static boolean targetPlatformAlreadySet = false;

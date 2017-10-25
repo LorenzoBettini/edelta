@@ -17,6 +17,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edelta.testutils.PDETargetPlatformUtils;
+
 /**
  * Utility class that runs Eclipse, import the projects that we want to
  * compile and compile it with the Edelta compiler, so that java._trace files
