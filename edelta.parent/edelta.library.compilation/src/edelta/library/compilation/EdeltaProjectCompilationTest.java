@@ -14,7 +14,7 @@ import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class EdeltaProjectCompilation {
+public class EdeltaProjectCompilationTest {
 
 	@BeforeClass
 	public static void init() throws Exception {
