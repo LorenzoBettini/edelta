@@ -10,7 +10,7 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<jacoco-version>0.7.8</jacoco-version>
+		<jacoco-version>0.7.9</jacoco-version>
 		<os-jvm-flags />
 	</properties>
 
