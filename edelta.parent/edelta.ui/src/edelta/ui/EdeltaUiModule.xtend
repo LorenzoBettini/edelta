@@ -3,8 +3,10 @@
  */
 package edelta.ui
 
-import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 import edelta.ui.wizard.EdeltaProjectCreatorCustom
+import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
+import org.eclipse.xtext.ui.editor.model.IResourceForEditorInputFactory
+import org.eclipse.xtext.xbase.ui.editor.XbaseResourceForEditorInputFactory
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
@@ -14,6 +16,10 @@ class EdeltaUiModule extends AbstractEdeltaUiModule {
 
 	override bindIProjectCreator() {
 		EdeltaProjectCreatorCustom
+	}
+
+	override Class<? extends IResourceForEditorInputFactory> bindIResourceForEditorInputFactory() {
+		return XbaseResourceForEditorInputFactory
 	}
 
 }
