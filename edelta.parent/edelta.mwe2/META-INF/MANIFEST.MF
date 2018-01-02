@@ -5,7 +5,8 @@ Bundle-Vendor: Lorenzo Bettini
 Bundle-Version: 0.2.1.qualifier
 Bundle-SymbolicName: edelta.mwe2;singleton:=true
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.eclipse.xtext.xtext.generator
+Require-Bundle: org.eclipse.xtext.xtext.generator,
+ org.eclipse.emf.mwe.utils
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: edelta.mwe2
 Import-Package: org.apache.log4j
