@@ -1,3 +1,5 @@
+import gssi.refactorings.MMrefactorings
+
 // IMPORTANT: ecores must be in source directories
 // otherwise you can't refer to them
 
@@ -6,5 +8,10 @@ metamodel "myexample"
 metamodel "myecore"
 
 use Example as example
+use MMrefactorings as std
 
-example.createClass("Foo")
+//example.createClass("Foo")
+
+createEClass ANewClass in myecore {
+	std.addMandatoryAttr("name", ecoreref(EString), it)
+}

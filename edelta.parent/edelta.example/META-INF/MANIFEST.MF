@@ -5,5 +5,6 @@ Bundle-SymbolicName: edelta.example
 Bundle-Version: 0.2.1.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: edelta.model.example;bundle-version="0.1.0",
- edelta.lib
+ edelta.lib,
+ edelta.refactorings.lib;bundle-version="0.2.1"
 Bundle-Vendor: Lorenzo Bettini
