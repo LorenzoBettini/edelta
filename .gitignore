@@ -4,7 +4,7 @@ bin/
 *~
 logs.zip
 *.orig
-*.java._trace
+#*.java._trace
 *.smap
 *.log
 
