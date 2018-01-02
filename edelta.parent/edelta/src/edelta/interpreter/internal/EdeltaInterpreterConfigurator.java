@@ -67,14 +67,18 @@ public class EdeltaInterpreterConfigurator {
 						} else if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT) {
 							IPath outputLocation = entry.getOutputLocation();
 							if (outputLocation == null) {
-								IProject project = (IProject) jp.getProject().getWorkspace().getRoot()
-										.getContainerForLocation(entry.getPath());
+								IProject project = (IProject) root.getProject(entry.getPath().toString());
 								IJavaProject javaProject = JavaCore.create(project);
-								outputLocation = javaProject.getOutputLocation();
+								if (javaProject != null)
+									outputLocation = javaProject.getOutputLocation();
 							}
-							IFolder folder = root.getFolder(outputLocation);
-							if (folder.exists()) {
-								urls.add(new URL(folder.getRawLocationURI().toASCIIString() + "/"));
+							if (outputLocation != null) {
+								IFolder folder = root.getFolder(outputLocation);
+								if (folder.exists()) {
+									urls.add(new URL(folder.getRawLocationURI().toASCIIString() + "/"));
+								}
+							} else {
+								urls.add(entry.getPath().toFile().toURI().toURL());
 							}
 						} else {
 							urls.add(entry.getPath().toFile().toURI().toURL());
