@@ -10,9 +10,9 @@ matrix:
       jdk: oraclejdk8
       env: DISPLAY=:99.0 ADDITIONAL="-Pjacoco coveralls:report"
     # only on PR
-    - os: osx
-      osx_image: xcode8
-      if: type IN (pull_request)
+    # - os: osx
+    #  osx_image: xcode8
+    #  if: type IN (pull_request)
 cache:
   directories:
   - $HOME/.m2
