@@ -10,42 +10,42 @@ package gssi.refactorings
 metamodel "ecore"
 
 def addMandatoryAttr(String attrname, EClassifier etype, EClass mc): EAttribute{
-	val a= newEAttribute(attrname)[
+	val a = newEAttribute(attrname) [
 		EType = etype;
-		lowerBound=1;
+		lowerBound = 1;
 	]
-	mc.EStructuralFeatures+=a;
+	mc.EStructuralFeatures += a;
 	return a;
 }
 
 def mergeReferences(String newAttrName, EClassifier etype, List<EReference> refs): EReference{
-	val newRef=newEReference(newAttrName)[
-		EType=etype;
+	val newRef = newEReference(newAttrName) [
+		EType = etype;
 	]
-	for(r:refs){
-		r.EContainingClass.EStructuralFeatures-=r;
+	for (r : refs) {
+		r.EContainingClass.EStructuralFeatures -= r;
 	}
 	return newRef;
 }
 
 def mergeAttributes(String newAttrName, EClassifier etype, List<EAttribute> attrs): EAttribute{
-	val newAttr=newEAttribute(newAttrName)[
-		EType=etype;
+	val newAttr = newEAttribute(newAttrName) [
+		EType = etype;
 	]
-	for(a:attrs){
-		a.EContainingClass.EStructuralFeatures-=a;
+	for (a : attrs) {
+		a.EContainingClass.EStructuralFeatures -= a;
 	}
 	return newAttr;
 }
 
 def introduceSubclasses(EAttribute attr,EEnum attr_type, EClass containingclass){
-	containingclass.abstract=true;
-	val subclasses =attr_type ;
-	for(subc:subclasses.ELiterals){
-		containingclass.EPackage.EClassifiers+=newEClass(subc.literal)[
-			ESuperTypes+=containingclass;
+	containingclass.abstract = true;
+	val subclasses = attr_type;
+	for (subc : subclasses.ELiterals) {
+		containingclass.EPackage.EClassifiers += newEClass(subc.literal) [
+			ESuperTypes += containingclass;
 		];
-		containingclass.EStructuralFeatures-=attr;
+		containingclass.EStructuralFeatures -= attr;
 	}
 }
 
@@ -55,19 +55,18 @@ def introduceSubclasses(EAttribute attr,EEnum attr_type, EClass containingclass)
  * pulled up in the superclass
  */
 def extractSuperclass(EClass superclass, List<EAttribute> attrs){
-	val extracted_attr=attrs.head;
-	//print(extracted_attr.name);
-	
+	val extracted_attr = attrs.head;
+	// print(extracted_attr.name);
 	// already created from outside in the right package
 	// extracted_attr.EContainingClass.EPackage.EClassifiers+=superclass;
-	for(attr: attrs){
+	for (attr : attrs) {
 		// set supertype of the EClass of the attribute
-		attr.EContainingClass.ESuperTypes+=superclass;
+		attr.EContainingClass.ESuperTypes += superclass;
 		// and then remove the attribute from the original EClass
-		attr.EContainingClass.EStructuralFeatures-=attr
+		attr.EContainingClass.EStructuralFeatures -= attr
 	}
-	
-	superclass.EStructuralFeatures+=extracted_attr;
+
+	superclass.EStructuralFeatures += extracted_attr;
 }
 
 /**
@@ -77,34 +76,30 @@ def extractSuperclass(EClass superclass, List<EAttribute> attrs){
  * @param _out
  */
 def extractMetaClass(EClass extracted_class, EReference f, String _in, String _out) : void {
-	val ref_in=newEReference(_in)[
-		
-		EType=extracted_class;
-		lowerBound=f.EOpposite.lowerBound;
-		upperBound=1;
-		//f.EOpposite.upperBound;
-	
+	val ref_in = newEReference(_in) [
+		EType = extracted_class;
+		lowerBound = f.EOpposite.lowerBound;
+		upperBound = 1;
+		// f.EOpposite.upperBound;
 	];
-		
-	val old_ref=newEReference(f.name)[
-		
-		lowerBound=1;
-		upperBound=1;
-		EType=f.EType;
-		EOpposite=ref_in;
-		];
-	extracted_class.EStructuralFeatures+=old_ref;
-		ref_in.EOpposite=old_ref;
-		f.EOpposite.lowerBound=1;
-		f.EOpposite.upperBound=1;
-		
-	extracted_class.EStructuralFeatures+=f.EOpposite;	
-	
+
+	val old_ref = newEReference(f.name) [
+		lowerBound = 1;
+		upperBound = 1;
+		EType = f.EType;
+		EOpposite = ref_in;
+	];
+	extracted_class.EStructuralFeatures += old_ref;
+	ref_in.EOpposite = old_ref;
+	f.EOpposite.lowerBound = 1;
+	f.EOpposite.upperBound = 1;
+
+	extracted_class.EStructuralFeatures += f.EOpposite;
+
 	// already created from outside in the right package
-	//f.EContainingClass.EPackage.EClassifiers+=extracted_class;
-	
-	f.EReferenceType.EStructuralFeatures+=ref_in;
-	f.EType=extracted_class;
-	f.containment=true;
-	f.name=_out;
+	// f.EContainingClass.EPackage.EClassifiers+=extracted_class;
+	f.EReferenceType.EStructuralFeatures += ref_in;
+	f.EType = extracted_class;
+	f.containment = true;
+	f.name = _out;
 }
