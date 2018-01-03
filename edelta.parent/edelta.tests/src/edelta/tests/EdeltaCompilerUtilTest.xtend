@@ -377,6 +377,19 @@ createList(this::_createEAttribute_attr_in_createEClass_MyDerivedNewClass_in_foo
 	}
 
 	@Test
+	def void testGetStringForEcoreReferenceExpressionEPackage() {
+		'''
+			metamodel "foo"
+			
+			ecoreref(foo)
+		'''.parseWithTestEcore.
+		lastExpression.edeltaEcoreReferenceExpression => [
+			'getEPackage("foo")'.
+				assertEquals(stringForEcoreReferenceExpression)
+		]
+	}
+
+	@Test
 	def void testGetStringForEcoreReferenceExpressionIncomplete() {
 		'''
 			metamodel "foo"

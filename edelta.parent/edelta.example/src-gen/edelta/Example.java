@@ -29,5 +29,6 @@ public class Example extends AbstractEdelta {
     getEClass("myexample", "MyExampleEClass");
     getEClass("myecore", "MyEClass");
     getEClass("ecore", "EAnnotation");
+    getEPackage("myexample").getEClassifiers();
   }
 }

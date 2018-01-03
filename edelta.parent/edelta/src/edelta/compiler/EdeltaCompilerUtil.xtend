@@ -142,6 +142,10 @@ class EdeltaCompilerUtil {
 			acceptor.apply(
 				'''get«type.simpleName»''',
 				#[enamedelement.EPackageNameOrNull, enamedelement.name])
+		} else if (enamedelement instanceof EPackage) {
+			acceptor.apply(
+				'''get«type.simpleName»''',
+				#[enamedelement.EPackageNameOrNull])
 		} else if (enamedelement instanceof EEnumLiteral) {
 			acceptor.apply(
 				'''get«type.simpleName»''',
