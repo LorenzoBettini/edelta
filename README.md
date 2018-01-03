@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/LorenzoBettini/edelta.svg?branch=master)](https://travis-ci.org/LorenzoBettini/edelta)
 [![Coverage Status](https://coveralls.io/repos/github/LorenzoBettini/edelta/badge.svg?branch=master)](https://coveralls.io/github/LorenzoBettini/edelta?branch=master)
+[![Quality Gate](https://sonarcloud.io/api/badges/gate?key=edelta%3Aedelta.parent)](https://sonarcloud.io/dashboard?id=edelta%3Aedelta.parent)
 
 ### Eclipse update site
 
@@ -14,6 +15,8 @@ IMPORTANT: Edelta requires Xtext, if this is not already installed, all dependen
 ### Pre-configured Eclipse distributions with Edelta installed, for several architectures.
 
 Download a complete Eclipse distribution with Edelta installed; choose the one for your OS and architecture: https://dl.bintray.com/lorenzobettini/edelta/products/
+
+**WARNING** If you downloaded one of Edelta Eclipse distributions earlier than version 0.3.x you won't be able to update it; please download a brand new Edelta Eclipse distribution with version at least 0.3.x (issue [#13](https://github.com/LorenzoBettini/edelta/issues/13)).
 
 ### Development Snapshots
 
