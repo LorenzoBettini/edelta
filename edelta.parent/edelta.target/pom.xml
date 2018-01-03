@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>edelta</groupId>
 		<artifactId>edelta.parent</artifactId>
-		<version>0.2.1-SNAPSHOT</version>
+		<version>0.3.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>edelta.target</artifactId>
 	<packaging>eclipse-target-definition</packaging>

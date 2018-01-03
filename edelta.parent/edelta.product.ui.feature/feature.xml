@@ -2,16 +2,13 @@
 <feature
       id="edelta.product.ui.feature"
       label="Edelta IDE External Components"
-      version="0.2.1.qualifier"
+      version="0.3.0.qualifier"
       provider-name="Lorenzo Bettini">
-
-   <includes
-         id="edelta.feature"
-         version="0.0.0"/>
 
    <requires>
       <import feature="org.eclipse.jdt" version="3.10.0.v20140925-0400" match="greaterOrEqual"/>
       <import feature="org.eclipse.platform" version="4.4.0.v20140925-0400" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.sdk"/>
    </requires>
 
 </feature>
