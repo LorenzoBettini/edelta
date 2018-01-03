@@ -148,9 +148,9 @@ public abstract class AbstractEdelta {
 	public void saveModifiedEcores(String outputPath) throws IOException {
 		for (Entry<String, Resource> entry : packageManager.getResourceMapEntrySet()) {
 			Path p = Paths.get(entry.getKey());
-			String outputFileName = outputPath + "/" + p.getFileName().toString();
-			LOG.info("Saving " + outputFileName);
-			File newFile = new File(outputFileName);
+			final String fileName = p.getFileName().toString();
+			LOG.info("Saving " + outputPath + "/" + fileName);
+			File newFile = new File(outputPath, fileName);
 			FileOutputStream fos = new FileOutputStream(newFile);
 			entry.getValue().save(fos, null);
 			fos.flush();
