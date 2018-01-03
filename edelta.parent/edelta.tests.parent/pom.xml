@@ -1,62 +1,62 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>edelta</groupId>
-		<artifactId>edelta.parent</artifactId>
-		<version>0.2.1-SNAPSHOT</version>
-	</parent>
-	<artifactId>edelta.tests.parent</artifactId>
-	<packaging>pom</packaging>
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>edelta</groupId>
+    <artifactId>edelta.parent</artifactId>
+    <version>0.2.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>edelta.tests.parent</artifactId>
+  <packaging>pom</packaging>
 
-	<properties>
-		<jacoco-version>0.7.9</jacoco-version>
-		<os-jvm-flags />
-	</properties>
+  <properties>
+    <jacoco-version>0.7.9</jacoco-version>
+    <os-jvm-flags />
+  </properties>
 
-	<profiles>
-		<profile>
-			<id>jacoco</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.jacoco</groupId>
-						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>${jacoco-version}</version>
-						<configuration>
-							<excludes>
-								<!-- EMF model Java classes -->
-								<exclude>**/edelta/edelta/**/*.class</exclude>
-								<!-- Antlr generated Java classes -->
-								<exclude>**/antlr/**/*.class</exclude>
-								<!-- We don't have a custom serializer -->
-								<exclude>**/serializer/*.class</exclude>
-								<!-- generated files -->
-								<exclude>**/*Abstract*RuntimeModule.class</exclude>
-								<exclude>**/*StandaloneSetup*.class</exclude>
-								<exclude>**/*Abstract*Validator.class</exclude>
-								<exclude>**/*GrammarAccess*.class</exclude>
-								<exclude>**/*Abstract*UiModule.class</exclude>
-								<exclude>**/*Abstract*ProposalProvider.class</exclude>
-								<exclude>**/internal/*.class</exclude>
-								<exclude>**/*NewProjectWizard.class</exclude>
-								<exclude>**/*ProjectCreator.class</exclude>
-							</excludes>
-						</configuration>
-						<executions>
-							<execution>
-								<goals>
-									<goal>prepare-agent</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
+  <profiles>
+    <profile>
+      <id>jacoco</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco-version}</version>
+            <configuration>
+              <excludes>
+                <!-- EMF model Java classes -->
+                <exclude>**/edelta/edelta/**/*.class</exclude>
+                <!-- Antlr generated Java classes -->
+                <exclude>**/antlr/**/*.class</exclude>
+                <!-- We don't have a custom serializer -->
+                <exclude>**/serializer/*.class</exclude>
+                <!-- generated files -->
+                <exclude>**/*Abstract*RuntimeModule.class</exclude>
+                <exclude>**/*StandaloneSetup*.class</exclude>
+                <exclude>**/*Abstract*Validator.class</exclude>
+                <exclude>**/*GrammarAccess*.class</exclude>
+                <exclude>**/*Abstract*UiModule.class</exclude>
+                <exclude>**/*Abstract*ProposalProvider.class</exclude>
+                <exclude>**/internal/*.class</exclude>
+                <exclude>**/*NewProjectWizard.class</exclude>
+                <exclude>**/*ProjectCreator.class</exclude>
+              </excludes>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>
