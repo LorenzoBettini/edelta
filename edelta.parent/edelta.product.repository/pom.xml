@@ -79,6 +79,8 @@
                 <product>
                   <id>edelta.eclipse.ide.product</id>
                   <archiveFileName>edelta-ide-${unqualifiedVersion}-${buildQualifier}</archiveFileName>
+                  <!-- The path where the installed product shall be stored in the archive -->
+                  <rootFolder>edelta</rootFolder>
                 </product>
               </products>
             </configuration>
