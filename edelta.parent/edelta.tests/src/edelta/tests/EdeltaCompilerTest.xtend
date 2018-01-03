@@ -264,6 +264,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			import org.eclipse.emf.ecore.EClass;
 			import org.eclipse.emf.ecore.EEnum;
 			import org.eclipse.emf.ecore.EEnumLiteral;
+			import org.eclipse.emf.ecore.EPackage;
 			import org.eclipse.emf.ecore.EReference;
 			import org.eclipse.xtext.xbase.lib.InputOutput;
 			
@@ -284,6 +285,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  @Override
 			  protected void doExecute() throws Exception {
+			    getEPackage("foo");
+			    InputOutput.<EPackage>println(getEPackage("foo"));
 			    getEClass("foo", "FooClass");
 			    InputOutput.<EClass>println(getEClass("foo", "FooClass"));
 			    getEAttribute("foo", "FooClass", "myAttribute");

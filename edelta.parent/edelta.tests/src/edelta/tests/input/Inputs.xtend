@@ -142,6 +142,8 @@ class Inputs {
 		
 		metamodel "foo"
 		
+		ecoreref(foo)
+		println(ecoreref(foo))
 		ecoreref(FooClass)
 		println(ecoreref(FooClass))
 		ecoreref(myAttribute)
