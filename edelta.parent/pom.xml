@@ -43,12 +43,16 @@
     <!-- see http://sonarqube.15.x6.nabble.com/sonar-issue-ignore-multicriteria-td5021722.html 
       and http://stackoverflow.com/questions/21825469/configure-sonar-sonar-issue-ignore-multicriteria-through-maven 
       for the multicriteria property -->
-    <sonar.issue.ignore.multicriteria>e11</sonar.issue.ignore.multicriteria>
+    <sonar.issue.ignore.multicriteria>e11,e6</sonar.issue.ignore.multicriteria>
 
-    <!-- AbstractEdelta has methods declaring to throw generic Exception
+    <!-- AbstractEdelta has methods declaring to throw generic Exception 
       but we can't predict a dedicated exception -->
     <sonar.issue.ignore.multicriteria.e11.ruleKey>squid:S00112</sonar.issue.ignore.multicriteria.e11.ruleKey>
     <sonar.issue.ignore.multicriteria.e11.resourceKey>**/AbstractEdelta.java</sonar.issue.ignore.multicriteria.e11.resourceKey>
+
+    <!-- since we use a framework, it's normal to have a deep inheritance -->
+    <sonar.issue.ignore.multicriteria.e6.ruleKey>squid:MaximumInheritanceDepth</sonar.issue.ignore.multicriteria.e6.ruleKey>
+    <sonar.issue.ignore.multicriteria.e6.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e6.resourceKey>
 
     <!-- properties for deploying the composite update site and zipped products 
       on Bintray -->
