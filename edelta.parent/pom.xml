@@ -15,6 +15,22 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
 
+    <sonar.exclusions>
+      **/example/**,
+      **/mwe2/**,
+      **/New*FileWizard*.java,
+      **/src-gen/**,
+      **/emf-gen/**,
+      **/impl/*ImplCustom.java,
+      **/tests/**,
+      **/*RuntimeModule.java,
+      **/*UiModule.java,
+      **/*StandaloneSetup*.java,
+      **/ide/**,
+      **/internal/**,
+      **/serializer/**,
+    </sonar.exclusions>
+
     <!-- properties for deploying the composite update site and zipped products 
       on Bintray -->
 
@@ -280,7 +296,6 @@
           </executions>
           <configuration>
             <outputDirectory>${basedir}/xtend-gen</outputDirectory>
-            <testOutputDirectory>${basedir}/xtend-gen</testOutputDirectory>
             <xtendAsPrimaryDebugSource>true</xtendAsPrimaryDebugSource>
           </configuration>
         </plugin>
@@ -291,10 +306,6 @@
           <configuration>
             <filesets>
               <fileset>
-                <directory>${basedir}/xtend-gen</directory>
-                <includes>
-                  <include>**/*</include>
-                </includes>
                 <directory>${basedir}/xtend-gen</directory>
                 <includes>
                   <include>**/*</include>
