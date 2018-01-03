@@ -15,6 +15,14 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
 
+    <!-- Always refer to the corresponding tests project (if it exists) otherwise 
+      Sonarqube won't be able to collect code coverage. For example, when analyzing 
+      project foo it wouldn't find code coverage information if it doesn't use 
+      foo.tests jacoco.exec. -->
+    <sonar.jacoco.reportPaths>
+      ../${project.artifactId}.tests/target/jacoco.exec
+    </sonar.jacoco.reportPaths>
+
     <sonar.exclusions>
       **/example/**,
       **/mwe2/**,
