@@ -26,7 +26,7 @@
     <sonar.exclusions>
       **/example/**,
       **/mwe2/**,
-      **/New*FileWizard*.java,
+      **/*WizardInitialContents*.java,
       **/src-gen/**,
       **/emf-gen/**,
       **/impl/*ImplCustom.java,
