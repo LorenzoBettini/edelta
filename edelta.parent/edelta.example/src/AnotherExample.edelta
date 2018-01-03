@@ -10,7 +10,7 @@ metamodel "myecore"
 use Example as example
 use MMrefactorings as std
 
-//example.createClass("Foo")
+example.createClass("Foo")
 
 createEClass ANewClass in myecore {
 	std.addMandatoryAttr("name", ecoreref(EString), it)
