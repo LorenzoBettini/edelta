@@ -11,7 +11,18 @@ import org.eclipse.xtext.xbase.annotations.formatting2.XbaseWithAnnotationsForma
 
 class EdeltaFormatter extends XbaseWithAnnotationsFormatter {
 
-	def dispatch void format(EdeltaProgram edeltaProgram, extension IFormattableDocument document) {
+	override void format(Object expr, extension IFormattableDocument document) {
+		// you could use dispatch methods, but that will generate many other
+		// if cases for inherited dispatch methods that will never be executed during the
+		// tests and I prefer to have full control on code coverage.
+		if (expr instanceof EdeltaProgram) {
+			_format(expr, document)
+		} else {
+			super.format(expr, document)
+		}
+	}
+
+	def void _format(EdeltaProgram edeltaProgram, extension IFormattableDocument document) {
 		edeltaProgram.getImportSection.format;
 		for (EdeltaUseAs edeltaUseAs : edeltaProgram.getUseAsClauses()) {
 			edeltaUseAs.format;
@@ -20,10 +31,6 @@ class EdeltaFormatter extends XbaseWithAnnotationsFormatter {
 			edeltaOperation.format;
 		}
 		edeltaProgram.getMain.format;
-	}
-
-	def dispatch void format(EdeltaUseAs edeltaUseAs, extension IFormattableDocument document) {
-		edeltaUseAs.getType.format;
 	}
 
 }
