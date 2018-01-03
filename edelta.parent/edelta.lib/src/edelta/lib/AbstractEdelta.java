@@ -113,8 +113,8 @@ public abstract class AbstractEdelta {
 	 * Executes the initializers previously saved.
 	 */
 	protected void runInitializers() {
-		eClassifierInitializers.forEach(r -> r.run());
-		eStructuralFeaturesInitializers.forEach(r -> r.run());
+		eClassifierInitializers.forEach(Runnable::run);
+		eStructuralFeaturesInitializers.forEach(Runnable::run);
 	}
 
 	/**
