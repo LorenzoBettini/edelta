@@ -52,11 +52,11 @@ class EdeltaCompilerUtil {
 			      c.getESuperTypes().add(«ref.stringForEcoreReference»);
 			      «ENDFOR»
 			    },
-			    this::«e.methodName»
+			    «e.referenceToMethodName»
 			  )
 			'''
 		}
-		return "createList(this::" + e.methodName + ")"
+		return e.createListWithReferenceToMethodName
 	}
 
 	def consumerArguments(EdeltaEcoreChangeEClassExpression e) {
@@ -65,11 +65,11 @@ class EdeltaCompilerUtil {
 			
 			  createList(
 			    c -> c.setName("«e.name»"),
-			    this::«e.methodName»
+			    «e.referenceToMethodName»
 			  )
 			'''
 		}
-		return "createList(this::" + e.methodName + ")"
+		return e.createListWithReferenceToMethodName
 	}
 
 	def consumerArguments(EdeltaEcoreCreateEAttributeExpression e) {
@@ -83,7 +83,15 @@ class EdeltaCompilerUtil {
 			  )
 			'''
 		}
-		return "createList(this::" + e.methodName + ")"
+		return e.createListWithReferenceToMethodName
+	}
+
+	def private referenceToMethodName(XExpression e) {
+		'''this::«e.methodName»'''
+	}
+
+	def private createListWithReferenceToMethodName(XExpression e) {
+		"createList(this::" + e.methodName + ")"
 	}
 
 	def String getEPackageNameOrNull(EClassifier eClassifier) {

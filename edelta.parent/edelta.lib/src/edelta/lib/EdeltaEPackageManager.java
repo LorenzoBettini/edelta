@@ -33,7 +33,7 @@ public class EdeltaEPackageManager {
 	 * Here we store the association between the Ecore file name and the
 	 * corresponding loaded Resource.
 	 */
-	private HashMap<String, Resource> ecoreToResourceMap = new LinkedHashMap<String, Resource>();
+	private HashMap<String, Resource> ecoreToResourceMap = new LinkedHashMap<>();
 
 	/**
 	 * Here we store all the Ecores used by the Edelta

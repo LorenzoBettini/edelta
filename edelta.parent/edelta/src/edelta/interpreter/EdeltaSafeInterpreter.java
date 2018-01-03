@@ -54,15 +54,13 @@ public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 					if (exception instanceof EdeltaInterpreterRuntimeException) {
 						throw (EdeltaInterpreterRuntimeException) exception;
 					}
-					LOG.debug("result of interpreting", exception);
-					exception.printStackTrace();
+					LOG.warn("result of interpreting", exception);
 				}
 			}
 			return result;
+		} catch (EdeltaInterpreterRuntimeException e) {
+			throw e;
 		} catch (RuntimeException e) {
-			if (e instanceof EdeltaInterpreterRuntimeException) {
-				throw (EdeltaInterpreterRuntimeException) e;
-			}
 			LOG.debug("while interpreting", e);
 		}
 		return null;

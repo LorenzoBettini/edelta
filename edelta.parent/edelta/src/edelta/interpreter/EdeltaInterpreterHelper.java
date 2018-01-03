@@ -23,18 +23,18 @@ import edelta.edelta.EdeltaUseAs;
 @Singleton
 public class EdeltaInterpreterHelper {
 
-	private static Object DEFAULT_INSTANCE = new Object();
+	private static Object defaultInstance = new Object();
 
 	public Object safeInstantiate(JavaReflectAccess javaReflectAccess, EdeltaUseAs useAs) {
 		JvmTypeReference typeRef = useAs.getType();
 		if (typeRef == null) {
-			return DEFAULT_INSTANCE;
+			return defaultInstance;
 		}
 		final Class<?> javaType = javaReflectAccess.getRawType(typeRef.getType());
 		try {
 			return javaType.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
-			return DEFAULT_INSTANCE;
+			return defaultInstance;
 		}
 	}
 
