@@ -36,5 +36,6 @@ Export-Package: edelta,
  edelta.services,
  edelta.typesystem,
  edelta.util,
- edelta.validation
+ edelta.validation,
+ edelta.formatting2
 Import-Package: org.apache.log4j
