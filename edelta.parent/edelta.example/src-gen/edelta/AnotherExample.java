@@ -29,6 +29,7 @@ public class AnotherExample extends AbstractEdelta {
   
   @Override
   protected void doExecute() throws Exception {
+    this.example.createClass("Foo");
     createEClass("myecore", "ANewClass", createList(this::_createEClass_ANewClass_in_myecore));
   }
   
