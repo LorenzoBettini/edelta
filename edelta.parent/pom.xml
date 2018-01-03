@@ -31,6 +31,7 @@
       **/emf-gen/**,
       **/impl/*ImplCustom.java,
       **/tests/**,
+      **/testutils/**,
       **/*RuntimeModule.java,
       **/*UiModule.java,
       **/*StandaloneSetup*.java,
