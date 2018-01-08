@@ -7,7 +7,7 @@ BINTRAY_API_KEY=$1
 PATH_TO_REPOSITORY=$2
 
 BINTRAY_USER=lorenzobettini
-BINTRAY_REPO=javamm
+BINTRAY_REPO=edelta
 
 function main() {
 remove_p2_metadata
