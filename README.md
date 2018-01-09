@@ -20,7 +20,6 @@ Download a complete Eclipse distribution with Edelta installed; choose the one f
 
 ### Development Snapshots
 
-These are development snapshots, which might be unstable (Note: the snapshots update site always includes the releases update site):
+These are temporary development snapshots, which might be unstable (Note: the snapshots update site always includes the releases update site):
 
 https://dl.bintray.com/lorenzobettini/edelta/snapshots/updates/
-https://dl.bintray.com/lorenzobettini/edelta/snapshots/products/
