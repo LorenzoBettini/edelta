@@ -89,6 +89,9 @@
     <!-- note that the following must be consistent with the path schema 
       used to publish child composite repositories and actual released p2 repositories -->
     <child.repository.path.prefix>../../releases/</child.repository.path.prefix>
+
+    <!-- for deployment on Sourceforge -->
+    <remote.dir>lbettini@frs.sourceforge.net:/home/frs/project/edelta</remote.dir>
   </properties>
 
   <modules>
