@@ -46,8 +46,14 @@
 	</target>
 
 	<target name="p2.composite.add" depends="compute.child.repository.data">
-		<add.composite.repository.internal composite.repository.location="${main.composite.repository.directory}" composite.repository.name="${main.site.composite.name}" composite.repository.child="${majorMinorVersion}" />
-		<add.composite.repository.internal composite.repository.location="${composite.repository.directory}" composite.repository.name="${site.composite.name}" composite.repository.child="${child.repository}" />
+		<add.composite.repository.internal
+			composite.repository.location="${main.composite.repository.directory}"
+			composite.repository.name="${main.site.composite.name}"
+			composite.repository.child="${majorMinorVersion}" />
+		<add.composite.repository.internal
+			composite.repository.location="${composite.repository.directory}"
+			composite.repository.name="${site.composite.name}"
+			composite.repository.child="${child.repository}" />
 	</target>
 
 	<!-- = = = = = = = = = = = = = = = = =
@@ -65,7 +71,10 @@
 			<echo message="Adding child repository    : @{composite.repository.child}" />
 
 			<p2.composite.repository>
-				<repository compressed="false" location="@{composite.repository.location}" name="@{composite.repository.name}" />
+				<repository
+					compressed="false"
+					location="@{composite.repository.location}"
+					name="@{composite.repository.name}" />
 				<add>
 					<repository location="@{composite.repository.child}" />
 				</add>
