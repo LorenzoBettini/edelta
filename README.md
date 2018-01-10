@@ -14,7 +14,7 @@ IMPORTANT: Edelta requires Xtext, if this is not already installed, all dependen
 
 ### Pre-configured Eclipse distributions with Edelta installed, for several architectures.
 
-Download a complete Eclipse distribution with Edelta installed; choose the one for your OS and architecture: https://dl.bintray.com/lorenzobettini/edelta/products/
+Download a complete Eclipse distribution with Edelta installed; choose the one for your OS and architecture: https://sourceforge.net/projects/edelta/files/products
 
 **WARNING** If you downloaded one of Edelta Eclipse distributions earlier than version 0.3.x you won't be able to update it; please download a brand new Edelta Eclipse distribution with version at least 0.3.x (issue [#13](https://github.com/LorenzoBettini/edelta/issues/13)).
 
