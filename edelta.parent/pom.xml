@@ -9,6 +9,7 @@
   <properties>
     <tycho-version>1.0.0</tycho-version>
     <xtextVersion>2.13.0</xtextVersion>
+    <eclipseVersion>oxygen</eclipseVersion>
     <mwe2Version>2.9.1.201705291010</mwe2Version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -90,9 +91,8 @@
       used to publish child composite repositories and actual released p2 repositories -->
     <child.repository.path.prefix>../../releases/</child.repository.path.prefix>
 
-    <!-- set it to true to have a self contained p2 repository https://wiki.eclipse.org/Tycho/eclipse-repository#Creating_a_self-contained_p2_repository -->
-    <!-- We handle that at .site and .ide.site level -->
-    <!-- <includeAllDependencies>true</includeAllDependencies> -->
+    <!-- for deployment on Sourceforge -->
+    <remote.dir>lbettini@frs.sourceforge.net:/home/frs/project/edelta</remote.dir>
   </properties>
 
   <modules>
@@ -211,7 +211,6 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <properties>
-        <includeAllDependencies>false</includeAllDependencies>
         <bintray.package>snapshots</bintray.package>
         <bintray.base.path>snapshots/</bintray.base.path>
         <site.label>Edelta Snapshot Site</site.label>
