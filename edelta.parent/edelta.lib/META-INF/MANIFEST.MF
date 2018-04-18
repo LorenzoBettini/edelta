@@ -11,3 +11,4 @@ Require-Bundle: org.eclipse.xtext.xbase.lib;visibility:=reexport,
  org.apache.log4j;visibility:=reexport
 Export-Package: edelta.lib,
  edelta.lib.exception
+Automatic-Module-Name: edelta.lib

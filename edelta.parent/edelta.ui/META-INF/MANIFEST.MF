@@ -29,3 +29,4 @@ Export-Package: edelta.ui.contentassist,
  edelta.ui.quickfix,
  edelta.ui.wizard
 Bundle-Activator: edelta.ui.internal.EdeltaActivator
+Automatic-Module-Name: edelta.ui
