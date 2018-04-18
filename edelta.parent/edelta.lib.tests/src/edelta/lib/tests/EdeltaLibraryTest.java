@@ -7,6 +7,8 @@ import static org.junit.Assert.*;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EEnum;
+import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EReference;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,4 +72,31 @@ public class EdeltaLibraryTest {
 		assertEquals("changed", e.getName());
 	}
 
+	@Test
+	public void testNewEEnum() {
+		EEnum e = lib.newEEnum("test");
+		assertEquals("test", e.getName());
+	}
+
+	@Test
+	public void testNewEEnumWithInitializer() {
+		EEnum e = lib.newEEnum("test", ee -> {
+			ee.setName("changed");
+		});
+		assertEquals("changed", e.getName());
+	}
+
+	@Test
+	public void testNewEEnumLiteral() {
+		EEnumLiteral e = lib.newEEnumLiteral("test");
+		assertEquals("test", e.getName());
+	}
+
+	@Test
+	public void testNewEEnumLiteralWithInitializer() {
+		EEnumLiteral e = lib.newEEnumLiteral("test", ee -> {
+			ee.setName("changed");
+		});
+		assertEquals("changed", e.getName());
+	}
 }

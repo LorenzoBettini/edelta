@@ -7,6 +7,8 @@ import java.util.function.Consumer;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EEnum;
+import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EcoreFactory;
 
@@ -59,4 +61,29 @@ public class EdeltaLibrary {
 		return e;
 	}
 
+	public EEnum newEEnum(String name) {
+		return newEEnum(name, null);
+	}
+
+	public EEnum newEEnum(String name, Consumer<EEnum> initiaizer) {
+		EEnum e = ecoreFactory.createEEnum();
+		e.setName(name);
+		if (initiaizer != null) {
+			initiaizer.accept(e);
+		}
+		return e;
+	}
+
+	public EEnumLiteral newEEnumLiteral(String name) {
+		return newEEnumLiteral(name, null);
+	}
+
+	public EEnumLiteral newEEnumLiteral(String name, Consumer<EEnumLiteral> initiaizer) {
+		EEnumLiteral e = ecoreFactory.createEEnumLiteral();
+		e.setName(name);
+		if (initiaizer != null) {
+			initiaizer.accept(e);
+		}
+		return e;
+	}
 }
