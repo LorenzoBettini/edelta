@@ -2,7 +2,7 @@
 <feature
       id="edelta.feature"
       label="Edelta Feature "
-      version="0.3.1.qualifier"
+      version="0.3.2.qualifier"
       provider-name="Lorenzo Bettini">
 
    <requires>
