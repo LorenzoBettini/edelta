@@ -3,13 +3,16 @@
  */
 package edelta.lib.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.impl.BasicEObjectImpl;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -98,5 +101,23 @@ public class EdeltaLibraryTest {
 			ee.setName("changed");
 		});
 		assertEquals("changed", e.getName());
+	}
+
+	@Test
+	public void testEObjectToString() {
+		assertEquals("ecore:EClass:eSuperTypes", lib.EObjectToString(EcorePackage.eINSTANCE.getEClass_ESuperTypes()));
+		BasicEObjectImpl o = new BasicEObjectImpl() {
+			@Override
+			public String toString() {
+				return "test";
+			}
+			
+			@Override
+			public EObject eContainer() {
+				return null;
+			}
+		};
+		assertEquals("test",
+				lib.EObjectToString(o));
 	}
 }

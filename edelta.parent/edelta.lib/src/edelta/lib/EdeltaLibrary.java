@@ -9,6 +9,8 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
+import org.eclipse.emf.ecore.ENamedElement;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EcoreFactory;
 
@@ -85,5 +87,19 @@ public class EdeltaLibrary {
 			initiaizer.accept(e);
 		}
 		return e;
+	}
+
+	/**
+	 * Returns a String representation based on the containment relation.
+	 * 
+	 * @param e
+	 * @return
+	 */
+	public String EObjectToString(EObject e) {
+		String info = e.toString();
+		if (e instanceof ENamedElement) {
+			info = ((ENamedElement) e).getName();
+		}
+		return e.eContainer() != null ? EObjectToString(e.eContainer()) + ":" + info : info;
 	}
 }
