@@ -39,3 +39,4 @@ Export-Package: edelta,
  edelta.validation,
  edelta.formatting2
 Import-Package: org.apache.log4j
+Automatic-Module-Name: edelta
