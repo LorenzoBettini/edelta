@@ -7,5 +7,6 @@ Bundle-Vendor: Lorenzo Bettini
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: edelta.lib,
  org.junit;bundle-version="4.12.0",
- edelta.testutils
+ edelta.testutils,
+ org.eclipse.xtext.util
 Automatic-Module-Name: edelta.lib.tests

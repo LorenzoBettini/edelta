@@ -12,7 +12,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -155,6 +157,33 @@ public abstract class AbstractEdelta {
 			entry.getValue().save(fos, null);
 			fos.flush();
 			fos.close();
+		}
+	}
+
+	public Logger getLogger() {
+		return Logger.getLogger(getClass());
+	}
+
+	public void logError(Supplier<String> messageSupplier) {
+		internalLog(Level.ERROR, messageSupplier);
+	}
+
+	public void logWarn(Supplier<String> messageSupplier) {
+		internalLog(Level.WARN, messageSupplier);
+	}
+
+	public void logInfo(Supplier<String> messageSupplier) {
+		internalLog(Level.INFO, messageSupplier);
+	}
+
+	public void logDebug(Supplier<String> messageSupplier) {
+		internalLog(Level.DEBUG, messageSupplier);
+	}
+
+	private void internalLog(Level level, Supplier<String> messageSupplier) {
+		Logger logger = getLogger();
+		if (logger.isEnabledFor(level)) {
+			logger.log(level, messageSupplier.get());
 		}
 	}
 

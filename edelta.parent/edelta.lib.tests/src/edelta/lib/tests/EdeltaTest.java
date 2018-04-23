@@ -6,6 +6,7 @@ package edelta.lib.tests;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
 import static edelta.testutils.EdeltaTestUtils.compareFileContents;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
@@ -30,6 +31,7 @@ import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.impl.BasicEObjectImpl;
 import org.eclipse.emf.ecore.impl.EGenericTypeImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.xtext.util.Wrapper;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -583,6 +585,39 @@ public class EdeltaTest {
 		// proxy resolution is not triggered in the original object either
 		eClassifier = ((EGenericTypeImpl)genericType).basicGetEClassifier();
 		assertTrue(eClassifier.eIsProxy());
+	}
+
+	@Test
+	public void testGetLogger() {
+		edelta.getLogger().info("test message");
+	}
+
+	@Test
+	public void testLoggers() {
+		Wrapper<Boolean> errorSupplierCalled = Wrapper.wrap(false);
+		Wrapper<Boolean> warnSupplierCalled = Wrapper.wrap(false);
+		Wrapper<Boolean> infoSupplierCalled = Wrapper.wrap(false);
+		Wrapper<Boolean> debugSupplierCalled = Wrapper.wrap(false);
+		edelta.logError(() -> {
+			errorSupplierCalled.set(true);
+			return "test logError";
+		});
+		edelta.logWarn(() -> {
+			warnSupplierCalled.set(true);
+			return "test logWarn";
+		});
+		edelta.logInfo(() -> {
+			infoSupplierCalled.set(true);
+			return "test logInfo";
+		});
+		edelta.logDebug(() -> {
+			debugSupplierCalled.set(true);
+			return "test logDebug";
+		});
+		assertTrue(errorSupplierCalled.get());
+		assertTrue(warnSupplierCalled.get());
+		assertTrue(infoSupplierCalled.get());
+		assertFalse(debugSupplierCalled.get());
 	}
 
 	private void wipeModifiedDirectoryContents() {
