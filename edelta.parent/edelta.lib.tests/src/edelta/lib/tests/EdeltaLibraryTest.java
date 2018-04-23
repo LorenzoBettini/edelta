@@ -104,8 +104,8 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
-	public void testEObjectToString() {
-		assertEquals("ecore:EClass:eSuperTypes", lib.EObjectToString(EcorePackage.eINSTANCE.getEClass_ESuperTypes()));
+	public void testGetEObjectRepr() {
+		assertEquals("ecore:EClass:eSuperTypes", lib.getEObjectRepr(EcorePackage.eINSTANCE.getEClass_ESuperTypes()));
 		BasicEObjectImpl o = new BasicEObjectImpl() {
 			@Override
 			public String toString() {
@@ -118,6 +118,6 @@ public class EdeltaLibraryTest {
 			}
 		};
 		assertEquals("test",
-				lib.EObjectToString(o));
+				lib.getEObjectRepr(o));
 	}
 }

@@ -95,11 +95,11 @@ public class EdeltaLibrary {
 	 * @param e
 	 * @return
 	 */
-	public String EObjectToString(EObject e) {
+	public String getEObjectRepr(EObject e) {
 		String info = e.toString();
 		if (e instanceof ENamedElement) {
 			info = ((ENamedElement) e).getName();
 		}
-		return e.eContainer() != null ? EObjectToString(e.eContainer()) + ":" + info : info;
+		return e.eContainer() != null ? getEObjectRepr(e.eContainer()) + ":" + info : info;
 	}
 }
