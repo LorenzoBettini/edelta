@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>edelta</groupId>
 		<artifactId>edelta.tests.parent</artifactId>
-		<version>0.3.2-SNAPSHOT</version>
+		<version>0.3.3-SNAPSHOT</version>
 		<relativePath>../edelta.tests.parent/pom.xml</relativePath>
 	</parent>
 	<artifactId>edelta.lib.tests</artifactId>
