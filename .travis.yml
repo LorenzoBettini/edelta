@@ -1,5 +1,3 @@
-sudo: true
-
 language: java
 
 matrix:
@@ -16,14 +14,9 @@ matrix:
 
 addons:
   sonarcloud:
-    branches:
-      - sonarcloud
-      - master
     organization: "lorenzobettini-github"
     token:
-      secure: "PTYpf95IAY6OPekrU8lEI2jqyt+nepe+csvlgiNjfhltOhPs00+RbHQykj66CCoXe4FOisGsN0xsG8h+zDEIZD/KXbzuS6XuEG7Qw2wVR7siSQxzxSA+299DySM82S7hpvPoj+E6b69e2FW8w2ij+yi3OJB0x8Ur2u98OZtciQLre6iA+8x5xsvrk7nGzdAMOsdqdoVJOVvXyWX7pd01eeRn4PwdLQF2DKK0j4uxMQphiPrxyrhcC8GX8aPU23V/Imw7v8wuKrdDgnvQB1KxPihKzlWsA3eWiB4uT0jfXMmzGiKnwuGu0avJ9uIY6ukSOcYvcnCnE7tE64iLKs5VCNyNwBjFn8aWaUrlKiTL5tOo4pUnH9lWUCfZeUs//RCttsWEE+9YIDR7sHJVBKygqhpY0hMr+inXRtqo5UjxgsHMcgPu92WHTVIYaCngAmjv3HmSVkMVrOHAO833cas7Nel6e8nFBQbgRaVcMLHNSgoqfp9gLHFbeOt4l87fHr84MijrJ8ms2p48ep0kH0uJtFdLv8d+MZWgeHtuTRpiTLwo2UIG6VF4AjAbz/EfmGixfnBY40q1uDEYMky5UOz0xqDurW1mFCMEP6PMRuAyiI76yLI+Mp/w9k3MeiMrYs710mvmwWInHuiYvVySEj9x6IJ57elJ6SDbbw6AOYj5PK8="
-    github_token:
-      secure: "BoC4qXZ7rDSlcNpt/DDymYy4AgmOwyOpVMi42aOBrLL2WJB71BpTiHxPLqBnJy/RiBBIG+J4l9CdIgMvO1en042sMdMPXIOfgCBpcD0lZHW9sVLhqOKtS8l59qmsA817WRkUX+jaZL4lJb5jLGNngSz7DhedkL47wcALwZr3IuzragUDO7nmqkXzvWv2BMYCGQ0ulDhLJXzvI1jJ2y2PC7x1mC0gheyw4N2NVF06C/gSiIt7hprOuS16fYeKGEFgIbmEOUTYtmqST2g2/Enfs8OS/HyaPFC9kp45LVj5GL6C408//Rg+/+nhDghfX55k7ZVrWxHFQ7pBEpxnFXaa0pa2DDQYwxJ6mDDuvPJUsTmpndh9ahgnDEXteI9ZidSVU+zT6qcEDam/iEkFDrnWKAnACIwwip5ssafDq19XES6R0MnCZat/lXy+QEvufWLI8V8eV2W2rmoYaJq0+pR/8mscJ+uPgCfb0CXkifyJJdkKGqVecJq9dgVh2jNVlA3hgHOYZ+zlly2B1F+ie2GYYKXrHE8saypm7BJ4dyF7Uz9roKtnqxHjW39UCsuiKWvyDXQ4+ivdL08/aDDKcvwkY6lsTdcv/VmIGhmbMavs+VMIo+0d9ZuNLi1GoyZNFfLg7HssOmK6u5PF59wvzhlvx42fYJAjwjfJOEYcENYcRtc="
+      secure: $SONAR_TOKEN
 
 cache:
   directories:
