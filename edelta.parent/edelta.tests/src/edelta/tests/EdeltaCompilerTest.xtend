@@ -28,10 +28,10 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 
 	@Rule @Inject public TemporaryFolder temporaryFolder
 	@Inject extension CompilationTestHelper compilationTestHelper
-	@Inject private FileExtensionProvider extensionProvider
+	@Inject FileExtensionProvider extensionProvider
 	@Inject extension ReflectExtensions
 
-	private static final String MODIFIED = "modified";
+	static final String MODIFIED = "modified";
 
 	@Before
 	def void setup() {

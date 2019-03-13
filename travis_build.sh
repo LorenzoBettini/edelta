@@ -10,5 +10,7 @@ if [ "$TRAVIS_OS_NAME" == "osx" ]; then
 	fi
 else
 	echo "Build on Linux"
-	mvn -f edelta.parent/pom.xml clean verify $ADDITIONAL
+	mvn -f edelta.parent/pom.xml clean verify $ADDITIONAL -Dtycho.disableP2Mirrors=true
 fi 
+
+#  -Dtycho.disableP2Mirrors=true

@@ -54,7 +54,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 
 	@Inject EdeltaOriginalENamedElementRecorder originalENamedElementRecorder
 
-	public static class EdeltaDerivedStateAdapter extends AdapterImpl {
+	static class EdeltaDerivedStateAdapter extends AdapterImpl {
 		var Map<EObject, EObject> targetToSourceMap = newHashMap()
 		var Map<String, EPackage> nameToEPackageMap = newHashMap()
 		var Map<String, EPackage> nameToCopiedEPackageMap = newHashMap()

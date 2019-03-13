@@ -6,7 +6,7 @@ matrix:
     # always build this environment
     - os: linux
       jdk: oraclejdk8
-      env: DISPLAY=:99.0 ADDITIONAL="-Pjacoco coveralls:report sonar:sonar"
+      env: DISPLAY=:99.0 ADDITIONAL="-Pjacoco,build-ide,test-ide coveralls:report sonar:sonar"
     # only on PR
     # - os: osx
     #  osx_image: xcode8

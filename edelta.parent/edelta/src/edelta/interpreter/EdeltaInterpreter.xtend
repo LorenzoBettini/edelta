@@ -66,7 +66,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 				newValue(QualifiedName.create(programInferredJavaType.simpleName), edelta)
 			],
 			new CancelIndicator() {
-				private long stopAt = System.currentTimeMillis() + interpreterTimeout;
+				long stopAt = System.currentTimeMillis() + interpreterTimeout;
 				override boolean isCanceled() {
 					return System.currentTimeMillis() > stopAt;
 				}
