@@ -40,7 +40,6 @@
         <configuration>
           <useUIHarness>true</useUIHarness>
           <useUIThread>false</useUIThread>
-          <!-- <product>xklaim.eclipse.sdk.product</product> -->
           <argLine>${tycho.testArgLine} ${platformSystemProperties} ${systemProperties} ${moduleProperties} -Dorg.eclipse.swtbot.search.timeout=10000</argLine>
           <testRuntime>p2Installed</testRuntime>
           <work>${test-work-directory}</work>
@@ -62,7 +61,7 @@
               <artifactItems>
                 <artifactItem>
                   <groupId>${project.groupId}</groupId>
-                  <artifactId>xklaim.product.repository</artifactId>
+                  <artifactId>edelta.product.repository</artifactId>
                   <version>${project.version}</version>
                   <type>zip</type>
                   <classifier>${tycho.env.osgi.os}.${tycho.env.osgi.ws}.${tycho.env.osgi.arch}</classifier>
