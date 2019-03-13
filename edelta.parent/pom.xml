@@ -106,8 +106,6 @@
     <module>edelta</module>
     <module>edelta.ide</module>
     <module>edelta.ui</module>
-    <!-- <module>edelta.compilation.feature</module> -->
-    <!-- <module>edelta.library.compilation</module> -->
     <module>edelta.refactorings.lib</module>
     <module>edelta.target</module>
     <module>edelta.feature</module>
@@ -118,6 +116,11 @@
     <module>edelta.product.repository</module>
     <module>edelta.tests.report</module>
   </modules>
+
+  <!-- These modules were experiments to compile edelta files
+    through the Eclipse builder:
+    edelta.compilation.feature
+    edelta.library.compilation -->
 
   <profiles>
     <profile>
