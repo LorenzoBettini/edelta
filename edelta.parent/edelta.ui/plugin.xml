@@ -484,7 +484,7 @@
 	</extension>
 	<extension point="org.eclipse.core.runtime.adapters">
 		<factory class="edelta.ui.EdeltaExecutableExtensionFactory:org.eclipse.xtext.builder.smap.StratumBreakpointAdapterFactory"
-			adaptableType="org.eclipse.xtext.ui.editor.XtextEditor">
+			adaptableType="edelta.ui.editor.EdeltaEditor">
 			<adapter type="org.eclipse.debug.ui.actions.IToggleBreakpointsTarget"/>
 		</factory> 
 	</extension>
@@ -578,12 +578,18 @@
 			class="edelta.ui.EdeltaExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
 			extensions="edelta">
 		</viewer>
+		<contentTypeBinding
+			contentTypeId="edelta.Edelta.contenttype"
+			contentViewerId="edelta.Edelta.compare.contentViewers" />
 	</extension>
 	<extension point="org.eclipse.compare.contentMergeViewers">
 		<viewer id="edelta.Edelta.compare.contentMergeViewers"
 			class="edelta.ui.EdeltaExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
 			extensions="edelta" label="Edelta Compare">
 		</viewer>
+		<contentTypeBinding
+			contentTypeId="edelta.Edelta.contenttype"
+			contentMergeViewerId="edelta.Edelta.compare.contentMergeViewers" />
 	</extension>
 	<extension point="org.eclipse.ui.editors.documentProviders">
 		<provider id="edelta.Edelta.editors.documentProviders"
