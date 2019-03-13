@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/LorenzoBettini/edelta.svg?branch=master)](https://travis-ci.org/LorenzoBettini/edelta)
 [![Coverage Status](https://coveralls.io/repos/github/LorenzoBettini/edelta/badge.svg?branch=master)](https://coveralls.io/github/LorenzoBettini/edelta?branch=master)
-[![Quality Gate](https://sonarcloud.io/api/badges/gate?key=edelta%3Aedelta.parent)](https://sonarcloud.io/dashboard?id=edelta%3Aedelta.parent)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=edelta%3Aedelta.parent&metric=alert_status)](https://sonarcloud.io/dashboard?id=edelta%3Aedelta.parent)
 
 ### Eclipse update site
 
