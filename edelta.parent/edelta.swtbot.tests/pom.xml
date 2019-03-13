@@ -40,7 +40,7 @@
         <configuration>
           <useUIHarness>true</useUIHarness>
           <useUIThread>false</useUIThread>
-          <argLine>${tycho.testArgLine} ${platformSystemProperties} ${systemProperties} ${moduleProperties} -Dorg.eclipse.swtbot.search.timeout=10000</argLine>
+          <argLine>-Dorg.eclipse.swtbot.search.timeout=10000</argLine>
           <testRuntime>p2Installed</testRuntime>
           <work>${test-work-directory}</work>
         </configuration>
