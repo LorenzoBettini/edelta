@@ -216,6 +216,16 @@
         <site.label>Edelta Snapshot Site</site.label>
       </properties>
     </profile>
+    <profile>
+      <!-- requires a built product, e.g., activate the profile build-ide as well -->
+      <id>test-ide</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>edelta.swtbot.tests</module>
+      </modules>
+    </profile>
   </profiles>
 
   <build>
