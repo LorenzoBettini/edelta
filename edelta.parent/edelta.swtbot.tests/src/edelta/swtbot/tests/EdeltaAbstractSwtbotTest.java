@@ -156,12 +156,6 @@ public abstract class EdeltaAbstractSwtbotTest {
 		return buffer.toString();
 	}
 
-	protected void createProjectAndAssertNoErrorMarker()
-			throws CoreException {
-		createProject();
-		assertErrorsInProject(0);
-	}
-
 	protected void createProject() {
 		createProjectAndAssertCreated(TEST_PROJECT);
 	}
