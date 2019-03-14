@@ -43,7 +43,7 @@
     <!-- see http://sonarqube.15.x6.nabble.com/sonar-issue-ignore-multicriteria-td5021722.html 
       and http://stackoverflow.com/questions/21825469/configure-sonar-sonar-issue-ignore-multicriteria-through-maven 
       for the multicriteria property -->
-    <sonar.issue.ignore.multicriteria>e11,e6,e12</sonar.issue.ignore.multicriteria>
+    <sonar.issue.ignore.multicriteria>e11,e6,e12,e13</sonar.issue.ignore.multicriteria>
 
     <!-- AbstractEdelta has methods declaring to throw generic Exception 
       but we can't predict a dedicated exception -->
@@ -59,6 +59,12 @@
     <sonar.issue.ignore.multicriteria.e12.resourceKey>**/xtend-gen/**/*.java</sonar.issue.ignore.multicriteria.e12.resourceKey>
     <!-- properties for deploying the composite update site and zipped products 
       on Bintray -->
+
+    <!-- Tests should include assertions
+      In this test we do not always need assertions, and we also use custom methods for
+      asserting a few things -->
+    <sonar.issue.ignore.multicriteria.e13.ruleKey>squid:S2699</sonar.issue.ignore.multicriteria.e13.ruleKey>
+    <sonar.issue.ignore.multicriteria.e13.resourceKey>**/EdeltaTest.java</sonar.issue.ignore.multicriteria.e13.resourceKey>
 
     <!-- since this could be used in the pluginManagement section, we need 
       to make sure the path always points to this pom's directory; project.basedir 
