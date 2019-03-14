@@ -16,6 +16,12 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
 
+    <!-- Define overridable properties for tycho-surefire-plugin -->
+    <platformSystemProperties></platformSystemProperties>
+    <moduleProperties></moduleProperties>
+    <systemProperties></systemProperties>
+    <additionalTestArgLine></additionalTestArgLine>
+
     <!-- Always refer to the corresponding tests project (if it exists) otherwise 
       Sonarqube won't be able to collect code coverage. For example, when analyzing 
       project foo it wouldn't find code coverage information if it doesn't use 
@@ -104,6 +110,18 @@
     <remote.dir>lbettini@frs.sourceforge.net:/home/frs/project/edelta</remote.dir>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.eclipse.xtext</groupId>
+        <artifactId>xtext-dev-bom</artifactId>
+        <version>${xtextVersion}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <modules>
     <module>edelta.lib</module>
     <module>edelta.testutils</module>
@@ -129,6 +147,27 @@
     edelta.library.compilation -->
 
   <profiles>
+    <profile>
+      <id>macos</id>
+      <activation>
+        <os>
+          <family>mac</family>
+        </os>
+      </activation>
+      <properties>
+        <!-- THE FOLLOWING LINE MUST NOT BE BROKEN BY AUTOFORMATTING -->
+        <platformSystemProperties>-XstartOnFirstThread</platformSystemProperties>
+      </properties>
+    </profile>
+    <profile>
+      <id>jdk9-or-newer</id>
+      <activation>
+        <jdk>[9,)</jdk>
+      </activation>
+      <properties>
+        <moduleProperties>--add-modules=ALL-SYSTEM</moduleProperties>
+      </properties>
+    </profile>
     <profile>
       <id>release-composite</id>
       <activation>
@@ -459,6 +498,17 @@
           <version>${tycho-version}</version>
           <configuration>
             <compilerArgument>-err:-forbidden</compilerArgument>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-surefire-plugin</artifactId>
+          <version>${tycho-version}</version>
+          <configuration>
+            <!-- THE FOLLOWING LINE MUST NOT BE BROKEN BY AUTOFORMATTING -->
+            <argLine>${additionalTestArgLine} ${platformSystemProperties} ${systemProperties} ${moduleProperties}</argLine>
+            <failIfNoTests>false</failIfNoTests>
+            <useUIHarness>false</useUIHarness>
           </configuration>
         </plugin>
         <plugin>
