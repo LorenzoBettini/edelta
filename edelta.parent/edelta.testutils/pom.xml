@@ -11,7 +11,8 @@
   <artifactId>edelta.testutils</artifactId>
   <packaging>eclipse-plugin</packaging>
 
-  <properties><!-- Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=397015 -->
+  <properties>
+    <!-- Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=397015 -->
     <sonar.sources></sonar.sources>
     <sonar.tests>src</sonar.tests>
   </properties>
