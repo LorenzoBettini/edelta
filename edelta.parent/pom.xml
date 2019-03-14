@@ -23,9 +23,6 @@
     <sonar.jacoco.reportPaths>
       ../${project.artifactId}.tests/target/jacoco.exec
     </sonar.jacoco.reportPaths>
-    <sonar.junit.reportPaths>
-      ../${project.artifactId}.tests/target/surefire-reports
-    </sonar.junit.reportPaths>
 
     <sonar.exclusions>
       **/example/**,
