@@ -8,7 +8,6 @@ import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.waitForBuild
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,12 +15,9 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
-import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
-import org.eclipse.swtbot.swt.finder.results.ListResult;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
@@ -156,12 +152,6 @@ public abstract class EdeltaAbstractSwtbotTest {
 		return buffer.toString();
 	}
 
-	protected void createProjectAndAssertNoErrorMarker()
-			throws CoreException {
-		createProject();
-		assertErrorsInProject(0);
-	}
-
 	protected void createProject() {
 		createProjectAndAssertCreated(TEST_PROJECT);
 	}
@@ -172,7 +162,6 @@ public abstract class EdeltaAbstractSwtbotTest {
 		SWTBotShell shell = bot.shell("New Project");
 		shell.activate();
 		SWTBotTreeItem categoryNode = bot.tree().expandNode(CATEGORY_NAME);
-		waitForNodes(categoryNode);
 		categoryNode.select("Edelta Project");
 		bot.button("Next >").click();
 
@@ -191,47 +180,4 @@ public abstract class EdeltaAbstractSwtbotTest {
 		assertTrue("Project doesn't exist: " + projectName, isProjectCreated(projectName));
 	}
 
-	public void waitForNodes(final SWTBotTreeItem treeItem) {
-		int retries = 3;
-		int msecs = 2000;
-		int count = 0;
-		while (count < retries) {
-			System.out.println("Checking that tree item " + treeItem.getText() + " has children...");
-			List<SWTBotTreeItem> foundItems = UIThreadRunnable.syncExec(new ListResult<SWTBotTreeItem>() {
-				@Override
-				public List<SWTBotTreeItem> run() {
-					TreeItem[] items = treeItem.widget.getItems();
-					List<SWTBotTreeItem> results = new ArrayList<SWTBotTreeItem>();
-					for (TreeItem treeItem : items) {
-						results.add(new SWTBotTreeItem(treeItem));
-					}
-					return results;
-				}
-			});
-			if (foundItems.isEmpty()) {
-				treeItem.collapse();
-				System.out.println("No chilren... retrying in " + msecs + " milliseconds..."); //$NON-NLS-1$
-				try {
-					Thread.sleep(msecs);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				treeItem.expand();
-			} else if (foundItems.size() == 1 && foundItems.get(0).getText().trim().isEmpty()) {
-				treeItem.collapse();
-				System.out.println("Only one child with empty text... retrying in " + msecs + " milliseconds..."); //$NON-NLS-1$
-				try {
-					Thread.sleep(msecs);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				treeItem.expand();
-			} else {
-				System.out.println("Found " + foundItems.size() + " items. OK!");
-				return;
-			}
-			
-			count++;
-		}
-	}
 }

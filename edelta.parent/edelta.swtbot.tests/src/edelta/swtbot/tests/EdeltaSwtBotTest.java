@@ -14,7 +14,8 @@ public class EdeltaSwtBotTest extends EdeltaAbstractSwtbotTest {
 
 	@Test
 	public void canCreateANewProject() throws CoreException {
-		createProjectAndAssertNoErrorMarker();
+		createProject();
+		assertErrorsInProject(0);
 	}
 
 }
