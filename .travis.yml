@@ -12,9 +12,10 @@ matrix:
       jdk: oraclejdk8
       env: DISPLAY=:99.0 ADDITIONAL="-Pjacoco,build-ide,test-ide coveralls:report sonar:sonar"
     # only on PR
-    # - os: osx
-    #  osx_image: xcode8
-    #  if: type IN (pull_request)
+    - os: osx
+      osx_image: xcode8.3
+      env: ADDITIONAL="-Pbuild-ide,test-ide"
+      if: type IN (pull_request)
 
 addons:
   sonarcloud:

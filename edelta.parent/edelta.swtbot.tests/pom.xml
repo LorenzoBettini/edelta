@@ -14,6 +14,7 @@
 
   <properties>
     <test-work-directory>${project.build.directory}/work/edelta</test-work-directory>
+    <os-jvm-flags />
   </properties>
 
   <profiles>
@@ -28,6 +29,7 @@
         <!-- Tycho surefire should install additional bundles in the actual 
           installation directory of the unpacked Eclipse; for Mac it is different: -->
         <test-work-directory>${project.build.directory}/work/edelta.app/Contents/Eclipse/</test-work-directory>
+        <os-jvm-flags>-XstartOnFirstThread</os-jvm-flags>
       </properties>
     </profile>
   </profiles>
@@ -40,7 +42,7 @@
         <configuration>
           <useUIHarness>true</useUIHarness>
           <useUIThread>false</useUIThread>
-          <argLine>-Dorg.eclipse.swtbot.search.timeout=10000</argLine>
+          <argLine>${os-jvm-flags} -Dorg.eclipse.swtbot.search.timeout=10000</argLine>
           <testRuntime>p2Installed</testRuntime>
           <work>${test-work-directory}</work>
         </configuration>
