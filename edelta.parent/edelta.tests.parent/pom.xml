@@ -24,6 +24,10 @@
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
+      <properties>
+        <!-- tycho.testArgLine is where jacoco stores the agent path -->
+        <additionalTestArgLine>${tycho.testArgLine}</additionalTestArgLine>
+      </properties>
       <build>
         <plugins>
           <plugin>
