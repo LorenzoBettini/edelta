@@ -119,6 +119,11 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>org.eclipse.xtext</groupId>
+        <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
+        <version>${xtextVersion}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
