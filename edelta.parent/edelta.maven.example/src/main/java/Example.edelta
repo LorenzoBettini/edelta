@@ -1,0 +1,20 @@
+import org.eclipse.emf.ecore.EcoreFactory
+
+// IMPORTANT: ecores must be in a source directory
+// otherwise you can't refer to them
+
+package com.example
+
+//metamodel "myecore"
+//metamodel "ecore"
+
+def createClass(String name) {
+	newEClass(name) => [
+		it.ESuperTypes += org.eclipse.emf.ecore.EcorePackage.Literals.ECLASS
+		// ecoreref(EClass)
+	]
+}
+
+// ... or using Edelta DSL specific syntax
+//createEClass MyNewClass in myecore {}
+
