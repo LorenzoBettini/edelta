@@ -1,0 +1,111 @@
+buildscript {
+	repositories {
+		jcenter()
+	}
+	dependencies {
+		classpath 'org.xtext:xtext-gradle-plugin:1.0.5'
+		classpath 'com.moowork.gradle:gradle-node-plugin:0.13'
+	}
+}
+
+plugins {
+	id 'com.github.johnrengelman.shadow' version '1.2.3'
+	id 'com.moowork.node' version '0.13'
+	id 'net.researchgate.release' version '2.4.0'
+}
+
+node {
+	version = '6.2.2'
+	npmVersion = '3.10.6'
+	download = true
+	workDir = file("${project.buildDir}/nodejs")
+	nodeModulesDir = file("${project.projectDir}")
+}
+
+apply plugin: 'java'
+apply plugin: 'com.moowork.node'
+
+ext.xtextVersion = '2.17.0'
+
+repositories {
+	jcenter()
+	mavenLocal()
+}
+
+dependencies {
+	compile ("edelta:edelta.ide:+") {
+		exclude group:'org.antlr', module:'stringtemplate'
+		exclude group:'com.ibm.icu', module:'icu4j'
+		exclude group:'com.itemis.xtext', module:'generator-vscode'
+	}
+}
+
+task packageShadowJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar, dependsOn: assemble) {
+	manifest.attributes 'Main-Class': 'org.eclipse.xtext.ide.server.ServerLauncher'
+	from(project.convention.getPlugin(JavaPluginConvention).sourceSets.main.output)
+	configurations = [project.configurations.runtime]
+	exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
+	baseName = 'edelta-uber'
+	classifier = null
+	version = null
+	destinationDir = file("$projectDir/src")
+	append('plugin.properties')
+}
+
+clean.doFirst {
+	delete tasks.packageShadowJar.archivePath
+}
+
+task npmInstallVsce(type: NpmTask, dependsOn: npmSetup) {
+	group 'Node'
+	description 'Installs the NodeJS package "Visual Studio Code Extension Manager"'
+	args = [ 'install', 'vsce' ]
+}
+
+npmInstall.dependsOn 'packageShadowJar'
+
+def vsce = file("$node.nodeModulesDir.path/node_modules/vsce/out/vsce")
+
+task vscodeExtension(type: Exec, dependsOn: [nodeSetup,npmInstall, npmInstallVsce]) {
+	ext.destDir = new File(buildDir, 'vscode')
+	ext.archiveName = "edelta-${project.version}.vsix"
+	ext.destPath = "$destDir/$archiveName"
+
+	workingDir projectDir
+	doFirst {
+		destDir.mkdirs()
+		commandLine nodeSetup.variant.nodeExec, vsce, 'package', '--out', destPath
+		//commandLine 'cmd.exe','/k','xxx.bat'
+	}
+}
+
+plugins.withType(com.moowork.gradle.node.NodePlugin) {
+	node {
+		workDir = file("$project.buildDir/nodejs")
+		nodeModulesDir = projectDir
+	}
+}
+
+task installExtension(type: Exec, dependsOn: vscodeExtension) {
+	if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+		commandLine 'cmd', '/c', 'code.cmd', '--install-extension', vscodeExtension.destPath
+	} else {
+		commandLine 'code', '--install-extension', vscodeExtension.destPath
+	}
+}
+
+task startCode(type:Exec, dependsOn: installExtension) {
+	if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+		commandLine 'cmd', '/k', 'code.cmd', '--new-window'
+	} else {
+		commandLine 'code', '--new-window'
+	}
+}
+
+task publish(dependsOn: vscodeExtension, type: NodeTask) {
+	script = file("$projectDir/node_modules/vsce/out/vsce")
+	args = [ 'publish', '-p', System.getenv('ACCESS_TOKEN'), project.version ]
+	execOverrides {
+		workingDir = projectDir
+	}
+}

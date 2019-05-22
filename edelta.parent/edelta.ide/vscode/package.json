@@ -1,0 +1,37 @@
+{
+	"name": "edelta",
+	"displayName": "Edelta",
+	"description": "Edelta Language",
+	"version": "0.1.0",
+	"publisher": "LorenzoBettini",
+	"engines": {
+		"vscode": "^1.2.0"
+	},
+	"categories": [
+		"Languages"
+	],
+	"activationEvents": [
+		"onLanguage:edelta"
+	],
+	"main": "src/extension",
+	"contributes": {
+		"languages": [{
+			"id": "edelta",
+			"aliases": ["edelta"],
+			"extensions": [".edelta"],
+			"configuration": "./edelta.configuration.json"
+		}],
+		"grammars": [{
+			"language": "edelta",
+			"scopeName": "text.edelta",
+			"path": "./syntaxes/edelta.tmLanguage"
+		}]
+	},
+	"devDependencies": {
+		"typescript": "^1.8.10",
+		"vscode": "^0.11.13"
+	},
+	"dependencies": {
+		"vscode-languageclient": "^2.3.0"
+	}
+}

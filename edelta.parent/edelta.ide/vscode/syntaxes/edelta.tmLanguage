@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>fileTypes</key>
+	<array>
+		<string>*.edelta</string>
+	</array>
+	<key>name</key>
+	<string>edelta</string>
+	<key>patterns</key>
+	<array>
+		<dict>
+			<key>name</key>
+			<string>keyword.control.edelta</string>
+			<key>match</key>
+			<string>\b(as|case|catch|changeEClass|createEAttribute|createEClass|def|default|do|ecoreref|else|extends|extension|false|finally|for|if|import|in|instanceof|metamodel|new|newName|null|package|return|static|super|switch|synchronized|throw|true|try|type|typeof|use|val|var|while)\b</string>
+		</dict>
+	</array>
+	<key>scopeName</key>
+	<string>text.edelta</string>
+</dict>
+</plist>
