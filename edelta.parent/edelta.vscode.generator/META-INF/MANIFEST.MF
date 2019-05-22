@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: edelta.vscode.generator
+Bundle-Vendor: Lorenzo Bettini
+Bundle-Version: 0.4.0.qualifier
+Bundle-SymbolicName: edelta.vscode.generator;singleton:=true
+Bundle-ActivationPolicy: lazy
+Import-Package: org.apache.log4j
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Automatic-Module-Name: org.example.expressions.ui
+Require-Bundle: org.eclipse.emf.mwe2.runtime;bundle-version="2.9.1",
+ org.eclipse.xtend.lib,
+ org.eclipse.xtext.xtext.generator,
+ org.eclipse.xtext
+Export-Package: com.itemis.xtext.generator.vscode
