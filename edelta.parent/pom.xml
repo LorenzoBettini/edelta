@@ -132,6 +132,7 @@
     <module>edelta.testutils</module>
     <module>edelta.lib.tests</module>
     <module>edelta.mwe2</module>
+    <module>edelta.vscode.generator</module>
     <module>edelta</module>
     <module>edelta.ide</module>
     <module>edelta.ui</module>
