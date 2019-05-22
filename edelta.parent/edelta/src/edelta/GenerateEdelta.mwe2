@@ -48,6 +48,12 @@ Workflow {
 				generate = true
 				pluginProject = true
 			}
+			fragment = com.itemis.xtext.generator.vscode.VSCodeExtensionFragment {
+				publisher = "LorenzoBettini" // this property is mandatory
+				versions = {
+					xtext = "2.17.0"
+				}
+			}
 		}
 	}
 }
