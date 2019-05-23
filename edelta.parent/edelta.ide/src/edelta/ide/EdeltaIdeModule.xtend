@@ -3,9 +3,16 @@
  */
 package edelta.ide
 
+import edelta.ide.scoping.OptimizingFeatureScopeTrackerProvider2
 
 /**
  * Use this class to register ide components.
  */
 class EdeltaIdeModule extends AbstractEdeltaIdeModule {
+	/**
+	 * Workaround for https://github.com/eclipse/xtext-extras/issues/144
+	 */
+	override bindIFeatureScopeTrackerProvider() {
+		OptimizingFeatureScopeTrackerProvider2
+	}
 }
