@@ -1,0 +1,8 @@
+For building Visual Studio Code integration
+
+install nodejs npm
+
+Run mvn clean install -DskipTests=true on the parent project
+
+cd vscode
+./gradlew clean vscodeExtension
