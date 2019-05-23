@@ -1,5 +1,4 @@
 *.jar
-!gradle-wrapper.jar
 *.vsix
 .vscode
 node_modules
