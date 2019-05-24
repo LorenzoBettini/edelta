@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: edelta.vscode.generator
 Bundle-Vendor: Lorenzo Bettini
-Bundle-Version: 0.4.0.qualifier
+Bundle-Version: 0.5.0.qualifier
 Bundle-SymbolicName: edelta.vscode.generator;singleton:=true
 Bundle-ActivationPolicy: lazy
 Import-Package: org.apache.log4j
