@@ -20,3 +20,6 @@ target
 # for Gradle builds
 build
 .gradle
+
+# for VS code node modules
+node_modules
