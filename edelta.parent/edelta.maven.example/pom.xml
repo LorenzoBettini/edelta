@@ -5,7 +5,7 @@
 
   <groupId>edelta</groupId>
   <artifactId>edelta.maven.example</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.5.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>example</name>
@@ -15,7 +15,7 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <edelta.version>0.4.0-SNAPSHOT</edelta.version>
+    <edelta.version>${project.version}</edelta.version>
     <xtextVersion>2.17.1</xtextVersion>
   </properties>
 
