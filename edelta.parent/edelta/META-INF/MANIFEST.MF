@@ -10,7 +10,8 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.equinox.common;bundle-version="3.5.0",
  org.eclipse.emf.ecore,
  org.eclipse.xtext.common.types,
- org.eclipse.xtext.xbase.lib;bundle-version="2.13.0",org.antlr.runtime;bundle-version="[3.2.0,3.2.1)",
+ org.eclipse.xtext.xbase.lib;bundle-version="2.13.0",
+ org.antlr.runtime;bundle-version="[3.2.0,3.2.1)",
  org.eclipse.xtext.util,
  org.eclipse.xtend.lib;bundle-version="2.13.0",
  org.eclipse.emf.common,
@@ -18,7 +19,7 @@ Require-Bundle: org.eclipse.xtext,
  edelta.mwe2;resolution:=optional,
  org.eclipse.jdt.core,
  org.eclipse.core.resources,
- org.objectweb.asm;bundle-version="[7.0.0,7.1.0)";resolution:=optional
+ org.objectweb.asm;bundle-version="[7.1.0,7.2.0)";resolution:=optional
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: edelta,
  edelta.compiler,
