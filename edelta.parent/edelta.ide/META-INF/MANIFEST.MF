@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: edelta.ide
 Bundle-Vendor: Lorenzo Bettini
-Bundle-Version: 0.5.0.qualifier
+Bundle-Version: 0.6.0.qualifier
 Bundle-SymbolicName: edelta.ide; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: edelta,
