@@ -9,8 +9,11 @@ matrix:
   include:
     # always build this environment
     - os: linux
+      dist: xenial
       jdk: oraclejdk8
-      env: DISPLAY=:99.0 ADDITIONAL="-Pjacoco,build-ide,test-ide coveralls:report sonar:sonar"
+      services:
+      - xvfb
+      env: ADDITIONAL="-Pjacoco,build-ide,test-ide coveralls:report sonar:sonar"
     # only on PR
     - os: osx
       osx_image: xcode10.1 # JDK 11
