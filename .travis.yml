@@ -38,9 +38,6 @@ before_install:
  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then export JAVA_HOME=$(/usr/libexec/java_home); fi
  - echo $JAVA_HOME
 
-before_script:
- - sh -e ./before_script.sh
-
 # Build on MacOSX is triggered only for pull requests
 script:
  - export
