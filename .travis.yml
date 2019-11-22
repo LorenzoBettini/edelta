@@ -35,7 +35,7 @@ install: true
 
 before_install:
 # - echo "MAVEN_OPTS='-Xmx768m -Xms256m -Xss1m'" > ~/.mavenrc
- - if [ "$TRAVIS_OS_NAME" == "osx" ]; then export JAVA_HOME=$(/usr/libexec/java_home); fi
+# - if [ "$TRAVIS_OS_NAME" == "osx" ]; then export JAVA_HOME=$(/usr/libexec/java_home); fi
  - echo $JAVA_HOME
 
 # Build on MacOSX is triggered only for pull requests
