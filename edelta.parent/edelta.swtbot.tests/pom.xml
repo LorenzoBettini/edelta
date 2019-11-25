@@ -15,7 +15,7 @@
 
   <properties>
     <test-work-directory>${project.build.directory}/work/edelta</test-work-directory>
-    <additionalTestArgLine>-Dorg.eclipse.swtbot.search.timeout=10000</additionalTestArgLine>
+    <additionalTestArgLine>-Dorg.eclipse.swtbot.search.timeout=20000</additionalTestArgLine>
     <!-- Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=397015 -->
     <sonar.sources></sonar.sources>
     <sonar.tests>src</sonar.tests>
