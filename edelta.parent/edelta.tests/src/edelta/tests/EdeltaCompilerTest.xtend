@@ -924,6 +924,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
 			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    aModificationTest(getEPackage("foo"));
+			  }
 			}
 			'''
 		)

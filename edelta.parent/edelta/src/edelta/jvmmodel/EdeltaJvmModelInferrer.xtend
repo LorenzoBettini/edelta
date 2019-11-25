@@ -132,6 +132,17 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 								members += ea.toMethodForConsumer(EAttribute, ea.body)
 							]
 					]
+			} else if (!program.modifyEcoreOperations.empty) {
+				members += program.toMethod("doExecute", Void.TYPE.typeRef) [
+					visibility = JvmVisibility.PROTECTED
+					annotations += Override.annotationRef
+					exceptions += Exception.typeRef
+					body = '''
+						«FOR o : program.modifyEcoreOperations»
+						«o.name»(getEPackage("«o.epackage.EPackageNameOrNull»"));
+						«ENDFOR»
+					'''
+				]
 			}
 		]
 	}
