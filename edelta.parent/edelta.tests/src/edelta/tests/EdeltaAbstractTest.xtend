@@ -166,7 +166,10 @@ abstract class EdeltaAbstractTest {
 		)
 	}
 
-	def protected assertAfterInterpretationOfEdeltaManipulationExpression(IEdeltaInterpreter interpreter, EdeltaProgram program, boolean doValidate, (EClass)=>void testExecutor) {
+	def protected assertAfterInterpretationOfEdeltaManipulationExpression(
+		IEdeltaInterpreter interpreter, EdeltaProgram program,
+		boolean doValidate, (EClass)=>void testExecutor
+	) {
 		program.lastExpression.getManipulationEClassExpression => [
 			// mimic the behavior of derived state computer that runs the interpreter
 			// on a copied EPackage, not on the original one
@@ -186,6 +189,28 @@ abstract class EdeltaAbstractTest {
 		]
 	}
 
+	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+		IEdeltaInterpreter interpreter, EdeltaProgram program,
+		boolean doValidate, (EPackage)=>void testExecutor
+	) {
+		program.lastModifyEcoreOperation => [
+			// mimic the behavior of derived state computer that runs the interpreter
+			// on a copied EPackage, not on the original one
+			val packages = program.getCopiedEPackages.toList
+			val epackage = packages.head
+			val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
+			val result = interpreter.run(it, epackage, inferredJavaClass, packages)
+			// result can be null due to a timeout
+			if (result?.exception !== null)
+				throw result.exception
+			testExecutor.apply(epackage)
+			if (result !== null)
+				assertTrue(
+					"not expected result of type " + result.class.name,
+					result instanceof DefaultEvaluationResult
+				)
+		]
+	}
 
 	def protected getEPackageByName(EdeltaProgram context, String packagename) {
 		context.eResource.resourceSet.resources.filter(XMIResource).
@@ -199,6 +224,10 @@ abstract class EdeltaAbstractTest {
 
 	def protected lastExpression(EdeltaProgram p) {
 		p.main.expressions.last
+	}
+
+	def protected lastModifyEcoreOperation(EdeltaProgram p) {
+		p.modifyEcoreOperations.last
 	}
 
 	def protected getCreateEClassExpression(XExpression e) {

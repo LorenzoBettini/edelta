@@ -11,6 +11,7 @@ import org.eclipse.xtext.common.types.JvmGenericType;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationResult;
 
 import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression;
+import edelta.edelta.EdeltaModifyEcoreOperation;
 
 /**
  * @author Lorenzo Bettini
@@ -19,6 +20,9 @@ import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression;
 public interface IEdeltaInterpreter {
 
 	IEvaluationResult run(EdeltaEcoreBaseEClassManipulationWithBlockExpression exp, EClass eClass,
+			JvmGenericType jvmGenericType, List<EPackage> ePackages);
+
+	IEvaluationResult run(EdeltaModifyEcoreOperation op, EPackage ePackage,
 			JvmGenericType jvmGenericType, List<EPackage> ePackages);
 
 	void setInterpreterTimeout(int interpreterTimeout);

@@ -15,6 +15,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import org.eclipse.emf.ecore.EPackage
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -317,6 +318,26 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testEcoreModifyOperation() {
+		val input = '''
+			package test
+			
+			metamodel "foo"
+			
+			modifyEcore aModificationTest epackage foo {
+				EClassifiers += newEClass("ANewClass") [
+					ESuperTypes += newEClass("Base")
+				]
+			}
+		'''
+		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation [ derivedEPackage |
+			derivedEPackage.EClassifiers.last as EClass => [
+				assertEquals("ANewClass", name)
+				assertEquals("Base", ESuperTypes.last.name)
+			]
+		]
+	}
 	def protected assertAfterInterpretationOfEdeltaManipulationExpression(CharSequence input, (EClass)=>void testExecutor) {
 		assertAfterInterpretationOfEdeltaManipulationExpression(input, true, testExecutor)
 	}
@@ -327,6 +348,22 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			program.assertNoErrors
 		}
 		assertAfterInterpretationOfEdeltaManipulationExpression(interpreter, program, doValidate, testExecutor)
+	}
+
+	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+		CharSequence input, (EPackage)=>void testExecutor
+	) {
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, true, testExecutor)
+	}
+
+	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+		CharSequence input, boolean doValidate, (EPackage)=>void testExecutor
+	) {
+		val program = input.parseWithTestEcore
+		if (doValidate) {
+			program.assertNoErrors
+		}
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(interpreter, program, doValidate, testExecutor)
 	}
 
 }

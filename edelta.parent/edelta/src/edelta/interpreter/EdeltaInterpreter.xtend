@@ -27,6 +27,7 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
+import edelta.edelta.EdeltaModifyEcoreOperation
 
 class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
@@ -78,6 +79,37 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 		return result
 	}
 
+	override run(EdeltaModifyEcoreOperation op, EPackage p,
+		JvmGenericType programInferredJavaType, List<EPackage> packages
+	) {
+		this.programInferredJavaType = programInferredJavaType
+		edelta = new EdeltaInterpreterEdeltaImpl(packages)
+		val result = evaluate(
+			op.body,
+			createContext() => [
+				newValue(IT_QUALIFIED_NAME, p)
+				// 'this' and the name of the inferred class are mapped
+				// to an instance of AbstractEdelta, so that all reflective
+				// accesses, e.g., the inherited field 'lib', work out of the box
+				// calls to operations defined in the sources are intercepted
+				// in our custom invokeOperation and in that case we interpret the
+				// original source's XBlockExpression
+				newValue(QualifiedName.create("this"), edelta)
+				newValue(QualifiedName.create(programInferredJavaType.simpleName), edelta)
+			],
+			new CancelIndicator() {
+				long stopAt = System.currentTimeMillis() + interpreterTimeout;
+				override boolean isCanceled() {
+					return System.currentTimeMillis() > stopAt;
+				}
+			}
+		)
+		if (result === null) {
+			addWarning(op)
+		}
+		return result
+	}
+
 	def private addWarning(EdeltaEcoreBaseEClassManipulationWithBlockExpression e) {
 		e.eResource.getWarnings().add(
 			new EObjectDiagnosticImpl(
@@ -91,6 +123,18 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 		)
 	}
 
+	def private addWarning(EdeltaModifyEcoreOperation op) {
+		op.eResource.getWarnings().add(
+			new EObjectDiagnosticImpl(
+				Severity.WARNING,
+				EdeltaValidator.INTERPRETER_TIMEOUT,
+				"Timeout interpreting initialization block ("+interpreterTimeout+"ms).",
+				op,
+				EdeltaPackage.eINSTANCE.edeltaModifyEcoreOperation_Body,
+				-1,
+				#[])
+		)
+	}
 	override protected doEvaluate(XExpression expression, IEvaluationContext context, CancelIndicator indicator) {
 		if (expression === null)
 			return null
