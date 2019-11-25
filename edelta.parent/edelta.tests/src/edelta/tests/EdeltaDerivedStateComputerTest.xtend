@@ -658,6 +658,29 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testInterpretedRemovedEClassInModifyEcoreDoesNotTouchTheOriginalEcore() {
+		val program = '''
+			metamodel "foo"
+			
+			modifyEcore aModificationTest epackage foo {
+				EClassifiers += newEClass("ANewClass")
+				ecoreref(FooClass).EPackage.EClassifiers.remove(ecoreref(FooClass))
+			}
+		'''.
+		parseWithTestEcore
+		val derivedEClass = program.getDerivedStateLastEClass
+		assertEquals("ANewClass", derivedEClass.name)
+		program.validate
+		program.assertNoErrors
+		program.copiedEPackages.head.
+			EClassifiers.findFirst[name == "FooClass"].
+			assertNull
+		program.getEPackageByName("foo").
+			EClassifiers.findFirst[name == "FooClass"].
+			assertNotNull
+	}
+
+	@Test
 	def void testPersonListExample() {
 		val prog = parseWithLoadedEcore(PERSON_LIST_ECORE_PATH,
 			personListExample
