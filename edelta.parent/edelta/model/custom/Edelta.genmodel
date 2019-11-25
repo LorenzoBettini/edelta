@@ -26,6 +26,7 @@
     </genClasses>
     <genClasses ecoreClass="Edelta.ecore#//EdeltaMain"/>
     <genClasses ecoreClass="Edelta.ecore#//EdeltaModifyEcoreExpression">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Edelta.ecore#//EdeltaModifyEcoreExpression/name"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaModifyEcoreExpression/epackage"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaModifyEcoreExpression/body"/>
     </genClasses>

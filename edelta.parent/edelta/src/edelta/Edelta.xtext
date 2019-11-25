@@ -53,7 +53,8 @@ MainBlockExpression returns xbase::XExpression:
 
 EdeltaModifyEcoreExpression returns xbase::XExpression:
 	{EdeltaModifyEcoreExpression}
-	'modifyEcore' epackage=[ecore::EPackage]
+	'modifyEcore' name=ValidID
+	'epackage' epackage=[ecore::EPackage]
 	body=XBlockExpression
 ;
 
