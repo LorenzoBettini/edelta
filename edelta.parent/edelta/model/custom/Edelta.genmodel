@@ -12,6 +12,7 @@
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaProgram/metamodels"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaProgram/useAsClauses"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaProgram/operations"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaProgram/modifyEcoreOperations"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaProgram/main"/>
     </genClasses>
     <genClasses ecoreClass="Edelta.ecore#//EdeltaOperation">
@@ -25,10 +26,10 @@
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaEcoreReference/originalEnamedelement"/>
     </genClasses>
     <genClasses ecoreClass="Edelta.ecore#//EdeltaMain"/>
-    <genClasses ecoreClass="Edelta.ecore#//EdeltaModifyEcoreExpression">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Edelta.ecore#//EdeltaModifyEcoreExpression/name"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaModifyEcoreExpression/epackage"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaModifyEcoreExpression/body"/>
+    <genClasses ecoreClass="Edelta.ecore#//EdeltaModifyEcoreOperation">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Edelta.ecore#//EdeltaModifyEcoreOperation/name"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaModifyEcoreOperation/epackage"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaModifyEcoreOperation/body"/>
     </genClasses>
     <genClasses ecoreClass="Edelta.ecore#//EdeltaEcoreBaseManipulationWithBlockExpression">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Edelta.ecore#//EdeltaEcoreBaseManipulationWithBlockExpression/name"/>

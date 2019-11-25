@@ -17,6 +17,7 @@ EdeltaProgram:
 	('metamodel' metamodels+=[ecore::EPackage|STRING])*
 	(useAsClauses+=EdeltaUseAs)*
 	operations+=EdeltaOperation*
+	modifyEcoreOperations+=EdeltaModifyEcoreOperation*
 	main=EdeltaMain
 ;
 
@@ -34,6 +35,13 @@ EdeltaUseAs:
 	{EdeltaUseAs} 'use' type=JvmTypeReference 'as' name=ValidID
 ;
 
+EdeltaModifyEcoreOperation:
+	{EdeltaModifyEcoreOperation}
+	'modifyEcore' name=ValidID
+	'epackage' epackage=[ecore::EPackage]
+	body=XBlockExpression
+;
+
 EdeltaOperation:
 	{EdeltaOperation} 'def' name=ValidID
 		'(' (params+=FullJvmFormalParameter (',' params+=FullJvmFormalParameter)*)? ')'
@@ -46,16 +54,8 @@ EdeltaMain returns xbase::XBlockExpression:
 ;
 
 MainBlockExpression returns xbase::XExpression:
-	EdeltaModifyEcoreExpression |
 	EdeltaEcoreClassifierManipulationExpression |
 	XExpressionOrVarDeclaration
-;
-
-EdeltaModifyEcoreExpression returns xbase::XExpression:
-	{EdeltaModifyEcoreExpression}
-	'modifyEcore' name=ValidID
-	'epackage' epackage=[ecore::EPackage]
-	body=XBlockExpression
 ;
 
 EdeltaEcoreClassifierManipulationExpression returns xbase::XExpression:

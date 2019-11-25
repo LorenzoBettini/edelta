@@ -11,6 +11,8 @@
         eType="#//EdeltaUseAs" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="operations" upperBound="-1"
         eType="#//EdeltaOperation" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="modifyEcoreOperations"
+        upperBound="-1" eType="#//EdeltaModifyEcoreOperation" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="main" eType="ecore:EClass ../../../org.eclipse.xtext.xbase/model/Xbase.ecore#//XBlockExpression"
         containment="true"/>
   </eClassifiers>
@@ -31,7 +33,7 @@
         transient="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EdeltaMain" eSuperTypes="../../../org.eclipse.xtext.xbase/model/Xbase.ecore#//XBlockExpression"/>
-  <eClassifiers xsi:type="ecore:EClass" name="EdeltaModifyEcoreExpression" eSuperTypes="../../../org.eclipse.xtext.xbase/model/Xbase.ecore#//XExpression">
+  <eClassifiers xsi:type="ecore:EClass" name="EdeltaModifyEcoreOperation">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType ../../../org.eclipse.emf.ecore/model/Ecore.ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="epackage" eType="ecore:EClass ../../../org.eclipse.emf.ecore/model/Ecore.ecore#//EPackage"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="body" eType="ecore:EClass ../../../org.eclipse.xtext.xbase/model/Xbase.ecore#//XExpression"

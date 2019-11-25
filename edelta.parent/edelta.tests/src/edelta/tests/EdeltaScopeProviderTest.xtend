@@ -431,7 +431,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			
 			modifyEcore aTest epackage foo {}
 		'''.parseWithTestEcores.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaModifyEcoreExpression_Epackage,
+			assertScope(EdeltaPackage.eINSTANCE.edeltaModifyEcoreOperation_Epackage,
 			'''
 			foo
 			bar

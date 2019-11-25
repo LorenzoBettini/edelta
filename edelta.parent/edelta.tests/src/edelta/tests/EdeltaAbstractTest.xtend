@@ -9,6 +9,7 @@ import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreDirectReference
 import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
+import edelta.edelta.EdeltaModifyEcoreOperation
 import edelta.edelta.EdeltaProgram
 import edelta.interpreter.IEdeltaInterpreter
 import edelta.resource.EdeltaDerivedStateEPackage
@@ -38,7 +39,6 @@ import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
-import edelta.edelta.EdeltaModifyEcoreExpression
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -276,8 +276,8 @@ abstract class EdeltaAbstractTest {
 		e as XVariableDeclaration
 	}
 
-	def protected getModifyEcoreExpression(XExpression e) {
-		e as EdeltaModifyEcoreExpression
+	def protected getModifyEcoreOperation(XExpression e) {
+		e as EdeltaModifyEcoreOperation
 	}
 
 }

@@ -34,7 +34,7 @@ class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 			}
 			return Scopes.scopeFor(getProgramENamedElements(context))
 		} else if (reference == EDELTA_ECORE_BASE_ECLASS_MANIPULATION_WITH_BLOCK_EXPRESSION__EPACKAGE
-				|| reference == EDELTA_MODIFY_ECORE_EXPRESSION__EPACKAGE) {
+				|| reference == EDELTA_MODIFY_ECORE_OPERATION__EPACKAGE) {
 			return Scopes.scopeFor(getProgram(context).metamodels)
 		} else if (reference == EDELTA_ECORE_CHANGE_ECLASS_EXPRESSION__ORIGINAL) {
 			return Scopes.scopeFor(getChangeEClass(context).epackage.allEClasses)
