@@ -41,7 +41,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
 	val IT_QUALIFIED_NAME = QualifiedName.create("it")
 
-	var EdeltaInterpterEdeltaImpl edelta
+	var EdeltaInterpreterEdeltaImpl edelta
 
 	override void setInterpreterTimeout(int interpreterTimeout) {
 		this.interpreterTimeout = interpreterTimeout
@@ -51,7 +51,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 		JvmGenericType programInferredJavaType, List<EPackage> packages
 	) {
 		this.programInferredJavaType = programInferredJavaType
-		edelta = new EdeltaInterpterEdeltaImpl(packages)
+		edelta = new EdeltaInterpreterEdeltaImpl(packages)
 		val result = evaluate(
 			e,
 			createContext() => [
