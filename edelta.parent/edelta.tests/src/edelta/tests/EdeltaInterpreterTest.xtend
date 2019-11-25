@@ -365,6 +365,45 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testEcoreModifyTimeoutInCancelIndicator() {
+		// in this test we really need the timeout
+		interpreter.interpreterTimeout = 2000;
+		val input = '''
+			import org.eclipse.emf.ecore.EClass
+
+			metamodel "foo"
+			
+			def op(EClass c) : void {
+				var i = 10;
+				while (i >= 0) {
+					Thread.sleep(1000);
+					i++
+				}
+				// this will never be executed
+				c.abstract = true
+			}
+			
+			modifyEcore aModificationTest epackage foo {
+				EClassifiers += newEClass("ANewClass")
+				op(EClassifiers.last as EClass)
+			}
+		'''
+		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation [ derivedEPackage |
+			derivedEPackage.EClassifiers.last as EClass => [
+				assertEquals("ANewClass", name)
+				assertEquals(false, abstract)
+				val initialIndex = input.lastIndexOf("{")
+				assertWarning(
+					EdeltaPackage.eINSTANCE.edeltaModifyEcoreOperation,
+					EdeltaValidator.INTERPRETER_TIMEOUT,
+					initialIndex, input.lastIndexOf("}") - initialIndex + 1,
+					"Timeout interpreting initialization block"
+				)
+			]
+		]
+	}
+
 	def protected assertAfterInterpretationOfEdeltaManipulationExpression(CharSequence input, (EClass)=>void testExecutor) {
 		assertAfterInterpretationOfEdeltaManipulationExpression(input, true, testExecutor)
 	}
