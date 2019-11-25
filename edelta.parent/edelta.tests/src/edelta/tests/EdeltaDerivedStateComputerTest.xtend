@@ -621,6 +621,24 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testDerivedAndCopiedEPackagesForModifyEcore() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		
+		modifyEcore aTest epackage foo {}
+		'''.
+		parseWithTestEcore
+		var packages = program.eResource.derivedEPackages
+		assertEquals(1, packages.size)
+		assertEquals("foo", packages.head.name)
+		packages = program.eResource.copiedEPackages
+		assertEquals(1, packages.size)
+		assertEquals("foo", packages.head.name)
+	}
+
+	@Test
 	def void testPersonListExample() {
 		val prog = parseWithLoadedEcore(PERSON_LIST_ECORE_PATH,
 			personListExample

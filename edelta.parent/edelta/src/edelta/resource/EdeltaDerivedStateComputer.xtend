@@ -135,6 +135,10 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 				// even if we don't use derived state epackages for changeEClass
 				getOrAddDerivedStateEPackage(exp.epackage, nameToEPackageMap, nameToCopiedEPackageMap)
 			}
+			for (epackage : program.modifyEcoreOperations.map[epackage].filterNull) {
+				// make sure packages under modification are copied
+				getOrAddDerivedStateEPackage(epackage, nameToEPackageMap, nameToCopiedEPackageMap)
+			}
 			// we must add only the copied and the created EPackages
 			val copies = nameToCopiedEPackageMap.values
 			resource.contents += copies
