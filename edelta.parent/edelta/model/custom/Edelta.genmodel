@@ -10,6 +10,7 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaProgram/importSection"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Edelta.ecore#//EdeltaProgram/name"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaProgram/metamodels"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaProgram/useAsClauses"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaProgram/operations"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaProgram/main"/>
     </genClasses>
@@ -21,17 +22,29 @@
     </genClasses>
     <genClasses ecoreClass="Edelta.ecore#//EdeltaEcoreReference">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaEcoreReference/enamedelement"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaEcoreReference/originalEnamedelement"/>
     </genClasses>
     <genClasses ecoreClass="Edelta.ecore#//EdeltaMain"/>
+    <genClasses ecoreClass="Edelta.ecore#//EdeltaModifyEcoreExpression">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaModifyEcoreExpression/epackage"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaModifyEcoreExpression/body"/>
+    </genClasses>
+    <genClasses ecoreClass="Edelta.ecore#//EdeltaEcoreBaseManipulationWithBlockExpression">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Edelta.ecore#//EdeltaEcoreBaseManipulationWithBlockExpression/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaEcoreBaseManipulationWithBlockExpression/body"/>
+    </genClasses>
+    <genClasses ecoreClass="Edelta.ecore#//EdeltaEcoreBaseEClassManipulationWithBlockExpression">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaEcoreBaseEClassManipulationWithBlockExpression/epackage"/>
+    </genClasses>
     <genClasses ecoreClass="Edelta.ecore#//EdeltaEcoreCreateEClassExpression">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Edelta.ecore#//EdeltaEcoreCreateEClassExpression/name"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaEcoreCreateEClassExpression/epackage"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaEcoreCreateEClassExpression/body"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaEcoreCreateEClassExpression/ecoreReferenceSuperTypes"/>
+    </genClasses>
+    <genClasses ecoreClass="Edelta.ecore#//EdeltaEcoreChangeEClassExpression">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaEcoreChangeEClassExpression/original"/>
     </genClasses>
     <genClasses ecoreClass="Edelta.ecore#//EdeltaEcoreManipulationBlockExpression"/>
     <genClasses ecoreClass="Edelta.ecore#//EdeltaEcoreCreateEAttributeExpression">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Edelta.ecore#//EdeltaEcoreCreateEAttributeExpression/name"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaEcoreCreateEAttributeExpression/body"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaEcoreCreateEAttributeExpression/ecoreReferenceDataType"/>
     </genClasses>
     <genClasses ecoreClass="Edelta.ecore#//EdeltaEcoreReferenceExpression">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaEcoreReferenceExpression/reference"/>
@@ -40,5 +53,9 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaEcoreQualifiedReference/qualification"/>
     </genClasses>
     <genClasses ecoreClass="Edelta.ecore#//EdeltaEcoreDirectReference"/>
+    <genClasses ecoreClass="Edelta.ecore#//EdeltaUseAs">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaUseAs/type"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Edelta.ecore#//EdeltaUseAs/name"/>
+    </genClasses>
   </genPackages>
 </genmodel:GenModel>

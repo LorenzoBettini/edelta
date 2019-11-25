@@ -46,8 +46,15 @@ EdeltaMain returns xbase::XBlockExpression:
 ;
 
 MainBlockExpression returns xbase::XExpression:
+	EdeltaModifyEcoreExpression |
 	EdeltaEcoreClassifierManipulationExpression |
 	XExpressionOrVarDeclaration
+;
+
+EdeltaModifyEcoreExpression returns xbase::XExpression:
+	{EdeltaModifyEcoreExpression}
+	'modifyEcore' epackage=[ecore::EPackage]
+	body=XBlockExpression
 ;
 
 EdeltaEcoreClassifierManipulationExpression returns xbase::XExpression:
