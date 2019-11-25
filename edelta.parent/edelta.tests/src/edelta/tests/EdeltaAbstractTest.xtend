@@ -38,6 +38,7 @@ import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
+import edelta.edelta.EdeltaModifyEcoreExpression
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -274,4 +275,9 @@ abstract class EdeltaAbstractTest {
 	def protected getVariableDeclaration(XExpression e) {
 		e as XVariableDeclaration
 	}
+
+	def protected getModifyEcoreExpression(XExpression e) {
+		e as EdeltaModifyEcoreExpression
+	}
+
 }

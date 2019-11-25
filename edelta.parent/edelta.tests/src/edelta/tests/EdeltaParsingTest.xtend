@@ -227,6 +227,36 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testModifyEcore() {
+		'''
+		modifyEcore foo {}
+		'''.parse.lastExpression.modifyEcoreExpression => [
+			assertNotNull(epackage)
+			assertNotNull(body)
+		]
+	}
+
+	@Test
+	def void testModifyEcoreWithNoBody() {
+		'''
+		modifyEcore foo
+		'''.parse.lastExpression.modifyEcoreExpression => [
+			assertNotNull(epackage)
+			assertNotNull(body)
+		]
+	}
+
+	@Test
+	def void testModifyEcoreWithNoPackage() {
+		'''
+		modifyEcore 
+		'''.parse.lastExpression.modifyEcoreExpression => [
+			assertNull(epackage)
+			assertNull(body)
+		]
+	}
+
 	def private getTextualRepresentation(EObject o) {
 		NodeModelUtils.getTokenText(NodeModelUtils.findActualNodeFor(o))
 	}
