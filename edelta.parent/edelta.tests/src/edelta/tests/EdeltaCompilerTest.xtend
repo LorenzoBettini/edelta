@@ -879,6 +879,57 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testModifyEcore() {
+		'''
+			metamodel "foo"
+			
+			modifyEcore aModificationTest epackage foo {
+				EClassifiers += newEClass("ANewClass") [
+					ESuperTypes += newEClass("Base")
+				]
+			}
+		'''.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import java.util.function.Consumer;
+			import org.eclipse.emf.common.util.EList;
+			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.emf.ecore.EClassifier;
+			import org.eclipse.emf.ecore.EPackage;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  public MyFile0() {
+			    
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  public void aModificationTest(final EPackage it) {
+			    EList<EClassifier> _eClassifiers = it.getEClassifiers();
+			    final Consumer<EClass> _function = (EClass it_1) -> {
+			      EList<EClass> _eSuperTypes = it_1.getESuperTypes();
+			      EClass _newEClass = this.lib.newEClass("Base");
+			      _eSuperTypes.add(_newEClass);
+			    };
+			    EClass _newEClass = this.lib.newEClass("ANewClass", _function);
+			    _eClassifiers.add(_newEClass);
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
 	def void testExecutionChangeEClassWithNewName() {
 		referenceToChangedEClassWithANewName.checkCompiledCodeExecution(
 			'''

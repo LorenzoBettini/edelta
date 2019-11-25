@@ -12,6 +12,7 @@ import edelta.lib.AbstractEdelta
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.ENamedElement
+import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.common.types.JvmDeclaredType
 import org.eclipse.xtext.common.types.JvmVisibility
 import org.eclipse.xtext.naming.IQualifiedNameProvider
@@ -86,6 +87,13 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 					for (p : o.params) {
 						parameters += p.toParameter(p.name, p.parameterType)
 					}
+					body = o.body
+				]
+			}
+			for (o : program.modifyEcoreOperations) {
+				members += o.toMethod(o.name, Void.TYPE.typeRef) [
+					documentation = o.documentation
+					parameters += o.epackage.toParameter("it", EPackage.typeRef)
 					body = o.body
 				]
 			}
