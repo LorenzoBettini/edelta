@@ -338,6 +338,33 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			]
 		]
 	}
+
+	@Test
+	def void testModifyEcoreAndCallOperation() {
+		'''
+			import org.eclipse.emf.ecore.EClass
+			
+			metamodel "foo"
+			
+			def op(EClass c) : void {
+				c.abstract = true
+			}
+			
+			modifyEcore aModificationTest epackage foo {
+				EClassifiers += newEClass("ANewClass") [
+					ESuperTypes += newEClass("Base")
+					op(it)
+				]
+			}
+		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation [ derivedEPackage |
+			derivedEPackage.EClassifiers.last as EClass => [
+				assertEquals("ANewClass", name)
+				assertEquals("Base", ESuperTypes.last.name)
+				assertTrue(isAbstract)
+			]
+		]
+	}
+
 	def protected assertAfterInterpretationOfEdeltaManipulationExpression(CharSequence input, (EClass)=>void testExecutor) {
 		assertAfterInterpretationOfEdeltaManipulationExpression(input, true, testExecutor)
 	}
