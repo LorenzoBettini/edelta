@@ -131,7 +131,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 				filter[original !== null].
 				toList
 			for (exp : changeEClassExpressions) {
-				// make sure packages under refactoring are copied
+				// make sure packages under modification are copied
 				// even if we don't use derived state epackages for changeEClass
 				getOrAddDerivedStateEPackage(exp.epackage, nameToEPackageMap, nameToCopiedEPackageMap)
 			}
