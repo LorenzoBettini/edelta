@@ -639,6 +639,25 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testDerivedStateForModifyEcoreCreatedEClass() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		
+		modifyEcore aModificationTest epackage foo {
+			EClassifiers += newEClass("ANewClass") [
+				ESuperTypes += newEClass("Base")
+			]
+		}
+		'''.
+		parseWithTestEcore
+		val derivedEClass = program.getDerivedStateLastEClass
+		assertEquals("ANewClass", derivedEClass.name)
+		assertEquals("foo", derivedEClass.EPackage.name)
+	}
+
+	@Test
 	def void testPersonListExample() {
 		val prog = parseWithLoadedEcore(PERSON_LIST_ECORE_PATH,
 			personListExample
