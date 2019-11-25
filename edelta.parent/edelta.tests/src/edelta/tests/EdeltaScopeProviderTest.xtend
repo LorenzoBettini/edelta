@@ -423,6 +423,22 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		// epackage twice for retrieving EClassifiers.
 	}
 
+	@Test
+	def void testScopeForModifyEcore() {
+		'''
+			metamodel "foo"
+			metamodel "bar"
+			
+			modifyEcore aTest epackage foo {}
+		'''.parseWithTestEcores.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaModifyEcoreExpression_Epackage,
+			'''
+			foo
+			bar
+			'''
+			)
+	}
+
 	def private assertScope(EObject context, EReference reference, CharSequence expected) {
 		expected.toString.assertEqualsStrings(
 			context.getScope(reference).
