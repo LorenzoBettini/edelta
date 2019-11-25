@@ -39,6 +39,7 @@ import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
+import org.eclipse.xtext.xbase.XBlockExpression
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -299,6 +300,14 @@ abstract class EdeltaAbstractTest {
 
 	def protected getEdeltaEcoreQualifiedReference(EObject e) {
 		e as EdeltaEcoreQualifiedReference
+	}
+
+	def protected getBlockLastExpression(XExpression e) {
+		(e as XBlockExpression).expressions.last
+	}
+
+	def protected getBlock(XExpression e) {
+		e as XBlockExpression
 	}
 
 	def protected getVariableDeclaration(XExpression e) {

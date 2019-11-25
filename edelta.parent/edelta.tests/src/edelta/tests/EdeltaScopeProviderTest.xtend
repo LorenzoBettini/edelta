@@ -401,7 +401,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		metamodel "foo"
 		metamodel "bar"
 		changeEClass foo.FooClass newName RenamedClass {}
-		ecoreref foo.RenamedClass.
+		ecoreref(foo.RenamedClass.
 		'''.parseWithTestEcore.lastExpression.
 			edeltaEcoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
@@ -437,6 +437,27 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			bar
 			'''
 			)
+	}
+
+	@Test
+	def void testScopeForReferenceToCopiedEClassInModifyEcore() {
+		val prog = '''
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				val c = ecoreref(FooClass)
+			}
+		'''.
+		parseWithTestEcore
+		val referred = prog.modifyEcoreOperations.last.body.
+			blockLastExpression.
+			variableDeclaration.right.edeltaEcoreReferenceExpression.
+			reference.enamedelement as EClass
+		assertSame(
+			// the one copied by the derived state computer
+			prog.copiedEPackages.head.getEClassiferByName("FooClass"),
+			referred
+		)
 	}
 
 	def private assertScope(EObject context, EReference reference, CharSequence expected) {
