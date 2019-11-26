@@ -22,13 +22,11 @@
     <systemProperties></systemProperties>
     <additionalTestArgLine></additionalTestArgLine>
 
-    <!-- Always refer to the corresponding tests project (if it exists) otherwise 
-      Sonarqube won't be able to collect code coverage. For example, when analyzing 
-      project foo it wouldn't find code coverage information if it doesn't use 
-      foo.tests jacoco.exec. -->
-    <sonar.jacoco.reportPaths>
-      ../${project.artifactId}.tests/target/jacoco.exec
-    </sonar.jacoco.reportPaths>
+    <jacoco-aggregate-report>edelta.tests.report/target/site/jacoco-aggregate/jacoco.xml</jacoco-aggregate-report>
+
+    <sonar.coverage.jacoco.xmlReportPaths>
+      ../${jacoco-aggregate-report}
+    </sonar.coverage.jacoco.xmlReportPaths>
 
     <sonar.exclusions>
       **/example/**,
@@ -517,7 +515,7 @@
           <version>4.3.0</version>
           <configuration>
             <jacocoReports>
-              <jacocoReport>${project.basedir}/edelta.tests.report/target/site/jacoco-aggregate/jacoco.xml</jacocoReport>
+              <jacocoReport>${project.basedir}/${jacoco-aggregate-report}</jacocoReport>
             </jacocoReports>
           </configuration>
         </plugin>
