@@ -25,7 +25,7 @@
     <jacoco-aggregate-report>edelta.tests.report/target/site/jacoco-aggregate/jacoco.xml</jacoco-aggregate-report>
 
     <sonar.coverage.jacoco.xmlReportPaths>
-      ../edelta.tests.report/target/site/jacoco/jacoco.xml
+      ../${jacoco-aggregate-report}
     </sonar.coverage.jacoco.xmlReportPaths>
 
     <sonar.exclusions>
