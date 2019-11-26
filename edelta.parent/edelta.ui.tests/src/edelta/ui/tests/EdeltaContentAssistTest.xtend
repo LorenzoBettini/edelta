@@ -174,6 +174,17 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			assertProposal('foo')
 	}
 
+	@Test def void testEClassifierAfterCreatingAnEClassInModifyEcore() {
+		newBuilder.append('''
+			metamodel "mypackage"
+			
+			modifyEcore aModification epackage mypackage {
+				EClassifiers += newEClass("AAA") []
+				ecoreref(
+				''').
+			assertProposal('AAA')
+	}
+
 	def private fromLinesOfStringsToStringArray(CharSequence strings) {
 		strings.toString.replaceAll("\r", "").split("\n")
 	}
