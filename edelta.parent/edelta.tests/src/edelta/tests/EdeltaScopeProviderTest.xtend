@@ -534,6 +534,26 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		// we renamed FooClass, and it can be referred
 	}
 
+	@Test
+	def void testScopeForEnamedElementInEcoreReferenceExpressionReferringToRenamedEClassInModifyEcore() {
+		'''
+		metamodel "foo"
+		metamodel "bar"
+		modifyEcore aTest epackage foo {
+			ecoreref(foo.FooClass).name = "RenamedClass"
+			ecoreref(foo.RenamedClass.)
+		}
+		'''.parseWithTestEcore.lastModifyEcoreOperation.body.blockLastExpression.
+			edeltaEcoreReferenceExpression.reference.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			myAttribute
+			myReference
+			''')
+		// we renamed FooClass, but its attributes are still visible through
+		// the renamed class
+	}
+
 	def private assertScope(EObject context, EReference reference, CharSequence expected) {
 		expected.toString.assertEqualsStrings(
 			context.getScope(reference).

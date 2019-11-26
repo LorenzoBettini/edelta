@@ -4,6 +4,7 @@
 package edelta.interpreter;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.ecore.EClass;
@@ -12,6 +13,7 @@ import org.eclipse.xtext.common.types.JvmGenericType;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationResult;
 
 import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression;
+import edelta.edelta.EdeltaModifyEcoreOperation;
 
 /**
  * An interpreter that swallows all {@link RuntimeException}s except for
@@ -46,8 +48,18 @@ public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 	@Override
 	public IEvaluationResult run(EdeltaEcoreBaseEClassManipulationWithBlockExpression exp, EClass eClass,
 			JvmGenericType jvmGenericType, List<EPackage> packages) {
+		return runSafe(() -> super.run(exp, eClass, jvmGenericType, packages));
+	}
+
+	@Override
+	public IEvaluationResult run(EdeltaModifyEcoreOperation op, EPackage p, JvmGenericType programInferredJavaType,
+			List<EPackage> packages) {
+		return runSafe(() -> super.run(op, p, programInferredJavaType, packages));
+	}
+
+	private IEvaluationResult runSafe(Supplier<IEvaluationResult> code) {
 		try {
-			IEvaluationResult result = super.run(exp, eClass, jvmGenericType, packages);
+			IEvaluationResult result = code.get();
 			if (result != null) {
 				Throwable exception = result.getException();
 				if (exception != null) {
@@ -65,5 +77,4 @@ public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 		}
 		return null;
 	}
-
 }
