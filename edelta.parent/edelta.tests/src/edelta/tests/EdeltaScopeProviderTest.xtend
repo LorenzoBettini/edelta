@@ -423,6 +423,36 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		// epackage twice for retrieving EClassifiers.
 	}
 
+	@Test
+	def void testScopeForEnamedElementInEcoreReferenceExpressionReferringToRenamedEClassInsideChangeEClass() {
+		'''
+		metamodel "foo"
+		metamodel "bar"
+		changeEClass foo.FooClass newName RenamedClass {
+			ecoreref(RenamedClass.
+		}
+		'''.parseWithTestEcore.lastExpression.
+			changeEClassExpression.body.expressions.last.
+			edeltaEcoreReferenceExpression.reference.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			myAttribute
+			myReference
+			myAttribute
+			myReference
+			''')
+		// we renamed FooClass, but its attributes are still visible through
+		// the renamed class
+		// they're duplicate since we also have the ones of the copied EPackages
+		// Note that they appear twice and not 3 times, because we only select
+		// those in RenamedClass, not also the ones in FooClass.
+		// foo in foo.RenamedClass refers to the derived state EPackage
+		// and edelta.util.EdeltaEcoreHelper.getEPackageENamedElementsInternal(EPackage, EObject, boolean)
+		// does not consider the passed EPackage as the program imported metamodel
+		// so it does not risk using the passed EPackage and the retrieved derived state
+		// epackage twice for retrieving EClassifiers.
+	}
+
 	def private assertScope(EObject context, EReference reference, CharSequence expected) {
 		expected.toString.assertEqualsStrings(
 			context.getScope(reference).
