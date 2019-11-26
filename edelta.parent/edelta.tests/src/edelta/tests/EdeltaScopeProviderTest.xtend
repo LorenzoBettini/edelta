@@ -401,7 +401,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		metamodel "foo"
 		metamodel "bar"
 		changeEClass foo.FooClass newName RenamedClass {}
-		ecoreref foo.RenamedClass.
+		ecoreref(foo.RenamedClass.
 		'''.parseWithTestEcore.lastExpression.
 			edeltaEcoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
