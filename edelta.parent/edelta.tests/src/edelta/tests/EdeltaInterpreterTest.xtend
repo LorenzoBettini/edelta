@@ -317,6 +317,22 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testUnresolvedEcoreReference() {
+		val input = '''
+			import org.eclipse.emf.ecore.EClass
+
+			metamodel "foo"
+
+			createEClass NewClass1 in foo {
+				ecoreref(nonexist) // this won't break the interpreter
+			}
+		'''
+		input.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ derivedEClass |
+			assertEquals("NewClass1", derivedEClass.name)
+		]
+	}
+
 	def protected assertAfterInterpretationOfEdeltaManipulationExpression(CharSequence input, (EClass)=>void testExecutor) {
 		assertAfterInterpretationOfEdeltaManipulationExpression(input, true, testExecutor)
 	}
