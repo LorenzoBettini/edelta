@@ -22,10 +22,10 @@
     <systemProperties></systemProperties>
     <additionalTestArgLine></additionalTestArgLine>
 
-	<jacoco-aggregate-report>${project.basedir}/edelta.tests.report/target/site/jacoco-aggregate/jacoco.xml</jacoco-aggregate-report>
+    <jacoco-aggregate-report>edelta.tests.report/target/site/jacoco-aggregate/jacoco.xml</jacoco-aggregate-report>
 
     <sonar.coverage.jacoco.xmlReportPaths>
-      ${jacoco-aggregate-report}
+      ../edelta.tests.report/target/site/jacoco/jacoco.xml
     </sonar.coverage.jacoco.xmlReportPaths>
 
     <sonar.exclusions>
@@ -515,7 +515,7 @@
           <version>4.3.0</version>
           <configuration>
             <jacocoReports>
-              <jacocoReport>${jacoco-aggregate-report}</jacocoReport>
+              <jacocoReport>${project.basedir}/${jacoco-aggregate-report}</jacocoReport>
             </jacocoReports>
           </configuration>
         </plugin>
