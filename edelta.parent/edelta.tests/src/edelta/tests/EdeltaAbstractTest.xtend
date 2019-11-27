@@ -26,6 +26,7 @@ import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.xmi.XMIResource
 import org.eclipse.xtext.common.types.JvmGenericType
+import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.resource.XtextResourceSet
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
@@ -154,6 +155,12 @@ abstract class EdeltaAbstractTest {
 		fooPackage
 	}
 
+	def protected assertErrorsAsStrings(EObject o, CharSequence expected) {
+		expected.toString.trim.assertEqualsStrings(
+			o.validate.filter[severity == Severity.ERROR].
+				map[message].sort.join("\n"))
+	}
+
 	def protected assertEqualsStrings(CharSequence expected, CharSequence actual) {
 		expected.toString.replaceAll("\r", "").
 			assertEquals(actual.toString.replaceAll("\r", ""))
@@ -229,7 +236,7 @@ abstract class EdeltaAbstractTest {
 		val p = getLastCopiedEPackage(context)
 		getCopiedEClasses(p).findFirst[name == nameToSearch]
 	}
-	
+
 	protected def getCopiedEClasses(EPackage p) {
 		p.EClassifiers.filter(EClass)
 	}
