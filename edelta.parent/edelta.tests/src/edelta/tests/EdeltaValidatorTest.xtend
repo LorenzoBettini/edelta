@@ -3,8 +3,6 @@ package edelta.tests
 import edelta.edelta.EdeltaPackage
 import edelta.lib.AbstractEdelta
 import edelta.validation.EdeltaValidator
-import org.eclipse.emf.ecore.EObject
-import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
@@ -242,9 +240,4 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		'''.parseWithTestEcore.assertNoErrors
 	}
 
-	def private assertErrorsAsStrings(EObject o, CharSequence expected) {
-		expected.toString.trim.assertEqualsStrings(
-			o.validate.filter[severity == Severity.ERROR].
-				map[message].sort.join("\n"))
-	}
 }

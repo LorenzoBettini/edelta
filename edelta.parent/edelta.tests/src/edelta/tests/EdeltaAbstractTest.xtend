@@ -40,6 +40,7 @@ import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
 import org.eclipse.xtext.xbase.XBlockExpression
+import org.eclipse.xtext.diagnostics.Severity
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -156,6 +157,12 @@ abstract class EdeltaAbstractTest {
 		fooPackage
 	}
 
+	def protected assertErrorsAsStrings(EObject o, CharSequence expected) {
+		expected.toString.trim.assertEqualsStrings(
+			o.validate.filter[severity == Severity.ERROR].
+				map[message].sort.join("\n"))
+	}
+
 	def protected assertEqualsStrings(CharSequence expected, CharSequence actual) {
 		expected.toString.replaceAll("\r", "").
 			assertEquals(actual.toString.replaceAll("\r", ""))
@@ -260,7 +267,7 @@ abstract class EdeltaAbstractTest {
 		val p = getLastCopiedEPackage(context)
 		getCopiedEClasses(p).findFirst[name == nameToSearch]
 	}
-	
+
 	protected def getCopiedEClasses(EPackage p) {
 		p.EClassifiers.filter(EClass)
 	}
