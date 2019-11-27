@@ -33,6 +33,7 @@ import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.testing.util.ParseHelper
 import org.eclipse.xtext.testing.validation.ValidationTestHelper
+import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationResult
@@ -40,8 +41,6 @@ import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
-import org.eclipse.xtext.xbase.XBlockExpression
-import org.eclipse.xtext.diagnostics.Severity
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
