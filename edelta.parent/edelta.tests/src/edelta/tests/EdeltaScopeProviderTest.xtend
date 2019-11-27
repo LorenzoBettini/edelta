@@ -3,6 +3,9 @@ package edelta.tests
 import com.google.inject.Inject
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaPackage
+import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.scoping.IScopeProvider
@@ -12,9 +15,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import org.eclipse.emf.ecore.EAttribute
-import org.eclipse.emf.ecore.EDataType
-import org.eclipse.emf.ecore.EClass
+import edelta.edelta.EdeltaEcoreQualifiedReference
+import org.eclipse.emf.ecore.EPackage
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -566,11 +568,17 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		}
 		'''.parseWithTestEcore
 		val referred = prog.lastModifyEcoreOperation.body.blockLastExpression.
-			edeltaEcoreReferenceExpression.reference.enamedelement as EClass
+			edeltaEcoreReferenceExpression.reference as EdeltaEcoreQualifiedReference
+		val copiedEPackage = prog.copiedEPackages.head
 		assertSame(
 			// the one copied by the derived state computer
-			prog.copiedEPackages.head.getEClassiferByName("RenamedClass"),
-			referred
+			copiedEPackage.getEClassiferByName("RenamedClass"),
+			referred.enamedelement as EClass
+		)
+		assertSame(
+			// the original one
+			prog.metamodels.last,
+			referred.qualification.enamedelement as EPackage
 		)
 	}
 
