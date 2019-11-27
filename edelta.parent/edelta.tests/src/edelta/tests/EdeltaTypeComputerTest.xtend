@@ -144,6 +144,42 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 		"changeEClass foo.Test {}".assertType(EClass)
 	}
 
+	@Test
+	def void testTypeForRenamedEClassInModifyEcore() {
+		val prog =
+		'''
+		metamodel "foo"
+
+		modifyEcore aTest epackage foo {
+			ecoreref(foo.FooClass).name = "RenamedClass"
+			ecoreref(RenamedClass)
+		}
+		'''.parseWithTestEcore
+		val ecoreref = prog.lastModifyEcoreOperation.body.blockLastExpression.
+			edeltaEcoreReferenceExpression
+		assertEquals(EClass.canonicalName,
+			ecoreref.resolveTypes.getActualType(ecoreref).identifier
+		)
+	}
+
+	@Test
+	def void testTypeForRenamedQualifiedEClassInModifyEcore() {
+		val prog =
+		'''
+		metamodel "foo"
+
+		modifyEcore aTest epackage foo {
+			ecoreref(foo.FooClass).name = "RenamedClass"
+			ecoreref(foo.RenamedClass)
+		}
+		'''.parseWithTestEcore
+		val ecoreref = prog.lastModifyEcoreOperation.body.blockLastExpression.
+			edeltaEcoreReferenceExpression
+		assertEquals(EClass.canonicalName,
+			ecoreref.resolveTypes.getActualType(ecoreref).identifier
+		)
+	}
+
 	def private assertType(CharSequence input, Class<?> expected) {
 		input.parseWithTestEcore.lastExpression => [
 			expected.canonicalName.assertEquals(
