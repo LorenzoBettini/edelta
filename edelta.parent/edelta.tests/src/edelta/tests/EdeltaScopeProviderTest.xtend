@@ -564,6 +564,27 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 
 		modifyEcore aTest epackage foo {
 			ecoreref(foo.FooClass).name = "RenamedClass"
+			ecoreref(RenamedClass)
+		}
+		'''.parseWithTestEcore
+		val referred = prog.lastModifyEcoreOperation.body.blockLastExpression.
+			edeltaEcoreReferenceExpression.reference
+		val copiedEPackage = prog.copiedEPackages.head
+		assertSame(
+			// the one copied by the derived state computer
+			copiedEPackage.getEClassiferByName("RenamedClass"),
+			referred.enamedelement as EClass
+		)
+	}
+
+	@Test
+	def void testLinkForRenamedQualifiedEClassInModifyEcore() {
+		val prog =
+		'''
+		metamodel "foo"
+
+		modifyEcore aTest epackage foo {
+			ecoreref(foo.FooClass).name = "RenamedClass"
 			ecoreref(foo.RenamedClass)
 		}
 		'''.parseWithTestEcore
