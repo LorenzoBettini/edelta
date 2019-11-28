@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.IJavaProject
 import org.eclipse.ui.IEditorPart
 import org.eclipse.ui.PlatformUI
 import org.eclipse.ui.part.FileEditorInput
+import org.eclipse.xtext.testing.Flaky
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.editor.XtextEditor
@@ -22,6 +23,7 @@ import org.eclipse.xtext.ui.testing.AbstractContentAssistTest
 import org.junit.After
 import org.junit.AfterClass
 import org.junit.BeforeClass
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -33,6 +35,9 @@ import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
 class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	static IJavaProject pluginJavaProject
+
+	@Rule
+	public Flaky.Rule testRule = new Flaky.Rule();
 
 	@BeforeClass
 	def static void setUp() {
@@ -150,7 +155,9 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			assertProposal('Renamed')
 	}
 
-	@Test def void testCreatedEAttributeDuringInterpretationIsProposed() {
+	@Test @Flaky
+	def void testCreatedEAttributeDuringInterpretationIsProposed() {
+		println("*** Executing testCreatedEAttributeDuringInterpretationIsProposed...")
 		newBuilder.append('''
 			import org.eclipse.emf.ecore.EClass
 			
