@@ -9,7 +9,7 @@ import org.eclipse.xtext.xbase.annotations.validation.UnresolvedAnnotationTypeAw
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 
 /**
- * When the problem is related to an unresolved feature call where the received
+ * When the problem is related to an unresolved feature call where the receiver
  * is an ecoreref expression, we must intercept that and avoid that it is being
  * generated, since during the interpretation the feature call might then be
  * resolved. We then have to deal with unresolved feature call in our validator.

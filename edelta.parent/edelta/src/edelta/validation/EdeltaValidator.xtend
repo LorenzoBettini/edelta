@@ -72,8 +72,8 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 			return // nothing to check
 		val receiver = e.memberCallTarget
 		if (receiver instanceof EdeltaEcoreReferenceExpression) {
-			val types = receiver.resolveTypes
-			val receiverType = (types).getActualType(receiver)
+			val types = e.resolveTypes
+			val receiverType = types.getActualType(receiver)
 			val args = e.syntacticArguments
 				.map[types.getActualType(it)]
 				.join(", ", [humanReadableName])
