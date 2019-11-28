@@ -24,11 +24,9 @@ public class EdeltaLinkingDiagnosticMessageProvider extends UnresolvedAnnotation
 		EObject contextObject = context.getContext();
 		if (contextObject instanceof XMemberFeatureCall) {
 			XMemberFeatureCall featureCall = (XMemberFeatureCall) contextObject;
-			if (!featureCall.isOperation()) {
-				XExpression receiver = featureCall.getMemberCallTarget();
-				if (receiver instanceof EdeltaEcoreReferenceExpression) {
-					return null;
-				}
+			XExpression receiver = featureCall.getMemberCallTarget();
+			if (receiver instanceof EdeltaEcoreReferenceExpression) {
+				return null;
 			}
 		}
 		return super.getUnresolvedProxyMessage(context);
