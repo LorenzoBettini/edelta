@@ -255,7 +255,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCallNonExistingMethodOnRenanedEClassInModifyEcore() {
+	def void testCallNonExistingMethodOnRenanedEClass() {
 		val prog =
 		'''
 		metamodel "foo"
