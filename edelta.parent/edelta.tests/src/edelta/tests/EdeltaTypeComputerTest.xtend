@@ -198,10 +198,29 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 		assertEquals(EClass.canonicalName,
 			ecoreref.resolveTypes.getActualType(ecoreref).identifier
 		)
+		prog.assertNoErrors
+	}
+
+	@Test
+	def void testTypeForRenamedEClassInModifyEcoreWhenCallingMethodNonExistingMethod() {
+		val prog =
+		'''
+		metamodel "foo"
+
+		modifyEcore aTest epackage foo {
+			ecoreref(foo.FooClass).name = "RenamedClass"
+			ecoreref(RenamedClass).nonExistant("an arg")
+		}
+		'''.parseWithTestEcore
+		val ecoreref = prog.lastModifyEcoreOperation.body.
+			getAllContentsOfType(EdeltaEcoreReferenceExpression).last
+		assertEquals(EClass.canonicalName,
+			ecoreref.resolveTypes.getActualType(ecoreref).identifier
+		)
 		// the type is manually resolved correctly,
 		// but we have errors due to unresolved getEAllStructuralFeatures
 		prog.assertErrorsAsStrings
-			("The method or field getEAllStructuralFeatures is undefined for the type ENamedElement")
+			("The method or field nonExistant(String) is undefined for the type EClass")
 	}
 
 	def private assertType(CharSequence input, Class<?> expected) {

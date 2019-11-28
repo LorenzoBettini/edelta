@@ -567,6 +567,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			ecoreref(RenamedClass)
 		}
 		'''.parseWithTestEcore
+		prog.assertNoErrors
 		val referred = prog.lastModifyEcoreOperation.body.blockLastExpression.
 			edeltaEcoreReferenceExpression.reference
 		val copiedEPackage = prog.copiedEPackages.head
@@ -588,6 +589,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			ecoreref(foo.RenamedClass)
 		}
 		'''.parseWithTestEcore
+		prog.assertNoErrors
 		val referred = prog.lastModifyEcoreOperation.body.blockLastExpression.
 			edeltaEcoreReferenceExpression.reference as EdeltaEcoreQualifiedReference
 		val copiedEPackage = prog.copiedEPackages.head
