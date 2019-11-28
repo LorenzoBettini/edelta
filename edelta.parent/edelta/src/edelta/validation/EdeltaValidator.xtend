@@ -4,16 +4,23 @@
 package edelta.validation
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaUseAs
+import edelta.lib.AbstractEdelta
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.common.types.JvmTypeReference
+import org.eclipse.xtext.common.types.JvmVoid
+import org.eclipse.xtext.diagnostics.Diagnostic
 import org.eclipse.xtext.validation.Check
+import org.eclipse.xtext.xbase.XMemberFeatureCall
+import org.eclipse.xtext.xbase.XbasePackage
+import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
+import org.eclipse.xtext.xbase.typesystem.internal.FeatureLinkHelper
 import org.eclipse.xtext.xbase.typesystem.references.StandardTypeReferenceOwner
 import org.eclipse.xtext.xbase.typesystem.util.CommonTypeComputationServices
-import edelta.lib.AbstractEdelta
 
 import static edelta.edelta.EdeltaPackage.Literals.*
-import org.eclipse.xtext.common.types.JvmGenericType
 
 /**
  * This class contains custom validation rules. 
@@ -27,6 +34,8 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	public static val INTERPRETER_TIMEOUT = PREFIX + "InterpreterTimeout";
 
 	@Inject CommonTypeComputationServices services
+	@Inject extension IBatchTypeResolver
+	@Inject extension FeatureLinkHelper
 
 	@Check
 	def void checkValidUseAs(EdeltaUseAs useAs) {
@@ -49,6 +58,31 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 					)
 				}
 			}
+		}
+	}
+
+	/**
+	 * This explicit check is required since we disabled the
+	 * default checks in {@link EdeltaLinkingDiagnosticMessageProvider}
+	 */
+	@Check
+	def void checkXMemberFeatureCall(XMemberFeatureCall e) {
+		val feature = e.feature
+		if (!(feature instanceof JvmVoid))
+			return // nothing to check
+		val receiver = e.memberCallTarget
+		if (receiver instanceof EdeltaEcoreReferenceExpression) {
+			val types = e.resolveTypes
+			val receiverType = types.getActualType(receiver)
+			val args = e.syntacticArguments
+				.map[types.getActualType(it)]
+				.join(", ", [humanReadableName])
+			var msg = '''The method or field «e.concreteSyntaxFeatureName»(«args») is undefined for the type «receiverType.humanReadableName»'''
+			error(
+				msg,
+				XbasePackage.Literals.XABSTRACT_FEATURE_CALL__FEATURE,
+				Diagnostic.LINKING_DIAGNOSTIC
+			)
 		}
 	}
 
