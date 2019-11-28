@@ -202,6 +202,25 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testTypeForRenamedQualifiedEClassInModifyEcoreWhenCallingMethod() {
+		val prog =
+		'''
+		metamodel "foo"
+
+		modifyEcore aTest epackage foo {
+			ecoreref(foo.FooClass).name = "RenamedClass"
+			ecoreref(foo.RenamedClass).getEAllStructuralFeatures
+		}
+		'''.parseWithTestEcore
+		val ecoreref = prog.lastModifyEcoreOperation.body.
+			getAllContentsOfType(EdeltaEcoreReferenceExpression).last
+		assertEquals(EClass.canonicalName,
+			ecoreref.resolveTypes.getActualType(ecoreref).identifier
+		)
+		prog.assertNoErrors
+	}
+
+	@Test
 	def void testTypeForRenamedEClassInModifyEcoreWhenCallingMethodNonExistingMethod() {
 		val prog =
 		'''
