@@ -240,4 +240,47 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		'''.parseWithTestEcore.assertNoErrors
 	}
 
+	@Test
+	def void testCallMethodOnRenanedEClassInModifyEcore() {
+		val prog =
+		'''
+		metamodel "foo"
+
+		modifyEcore aTest epackage foo {
+			ecoreref(foo.FooClass).name = "RenamedClass"
+			ecoreref(RenamedClass).getEAllStructuralFeatures
+		}
+		'''.parseWithTestEcore
+		prog.assertNoErrors
+	}
+
+	@Test
+	def void testCallMethodOnQualifiedRenanedEClassInModifyEcore() {
+		val prog =
+		'''
+		metamodel "foo"
+
+		modifyEcore aTest epackage foo {
+			ecoreref(foo.FooClass).name = "RenamedClass"
+			ecoreref(foo.RenamedClass).getEAllStructuralFeatures
+		}
+		'''.parseWithTestEcore
+		prog.assertNoErrors
+	}
+
+	@Test
+	def void testCallNonExistingMethodOnRenanedEClassInModifyEcore() {
+		val prog =
+		'''
+		metamodel "foo"
+
+		modifyEcore aTest epackage foo {
+			ecoreref(foo.FooClass).name = "RenamedClass"
+			ecoreref(RenamedClass).nonExistant("an arg")
+		}
+		'''.parseWithTestEcore
+		prog.assertErrorsAsStrings
+			("The method or field nonExistant(String) is undefined for the type EClass")
+	}
+
 }

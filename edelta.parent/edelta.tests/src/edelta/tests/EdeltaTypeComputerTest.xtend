@@ -16,8 +16,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
-import static extension org.eclipse.xtext.EcoreUtil2.*
-import edelta.edelta.EdeltaEcoreReferenceExpression
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -180,66 +178,6 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 		assertEquals(EClass.canonicalName,
 			ecoreref.resolveTypes.getActualType(ecoreref).identifier
 		)
-	}
-
-	@Test
-	def void testTypeForRenamedEClassInModifyEcoreWhenCallingMethod() {
-		val prog =
-		'''
-		metamodel "foo"
-
-		modifyEcore aTest epackage foo {
-			ecoreref(foo.FooClass).name = "RenamedClass"
-			ecoreref(RenamedClass).getEAllStructuralFeatures
-		}
-		'''.parseWithTestEcore
-		val ecoreref = prog.lastModifyEcoreOperation.body.
-			getAllContentsOfType(EdeltaEcoreReferenceExpression).last
-		assertEquals(EClass.canonicalName,
-			ecoreref.resolveTypes.getActualType(ecoreref).identifier
-		)
-		prog.assertNoErrors
-	}
-
-	@Test
-	def void testTypeForRenamedQualifiedEClassInModifyEcoreWhenCallingMethod() {
-		val prog =
-		'''
-		metamodel "foo"
-
-		modifyEcore aTest epackage foo {
-			ecoreref(foo.FooClass).name = "RenamedClass"
-			ecoreref(foo.RenamedClass).getEAllStructuralFeatures
-		}
-		'''.parseWithTestEcore
-		val ecoreref = prog.lastModifyEcoreOperation.body.
-			getAllContentsOfType(EdeltaEcoreReferenceExpression).last
-		assertEquals(EClass.canonicalName,
-			ecoreref.resolveTypes.getActualType(ecoreref).identifier
-		)
-		prog.assertNoErrors
-	}
-
-	@Test
-	def void testTypeForRenamedEClassInModifyEcoreWhenCallingMethodNonExistingMethod() {
-		val prog =
-		'''
-		metamodel "foo"
-
-		modifyEcore aTest epackage foo {
-			ecoreref(foo.FooClass).name = "RenamedClass"
-			ecoreref(RenamedClass).nonExistant("an arg")
-		}
-		'''.parseWithTestEcore
-		val ecoreref = prog.lastModifyEcoreOperation.body.
-			getAllContentsOfType(EdeltaEcoreReferenceExpression).last
-		assertEquals(EClass.canonicalName,
-			ecoreref.resolveTypes.getActualType(ecoreref).identifier
-		)
-		// the type is manually resolved correctly,
-		// but we have errors due to unresolved getEAllStructuralFeatures
-		prog.assertErrorsAsStrings
-			("The method or field nonExistant(String) is undefined for the type EClass")
 	}
 
 	def private assertType(CharSequence input, Class<?> expected) {
