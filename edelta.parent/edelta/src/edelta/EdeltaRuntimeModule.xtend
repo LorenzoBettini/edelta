@@ -16,6 +16,7 @@ import edelta.validation.EdeltaDiagnosticConverter
 import org.eclipse.xtext.validation.IDiagnosticConverter
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import edelta.resource.EdeltaEObjectAtOffsetHelper
+import edelta.validation.EdeltaLinkingDiagnosticMessageProvider
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -60,5 +61,9 @@ class EdeltaRuntimeModule extends AbstractEdeltaRuntimeModule {
 
 	def Class<? extends IDiagnosticConverter> bindIDiagnosticConverter() {
 		return EdeltaDiagnosticConverter
+	}
+
+	override bindILinkingDiagnosticMessageProvider() {
+		EdeltaLinkingDiagnosticMessageProvider
 	}
 }
