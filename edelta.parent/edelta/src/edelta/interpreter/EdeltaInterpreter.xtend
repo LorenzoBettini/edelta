@@ -28,6 +28,7 @@ import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import edelta.edelta.EdeltaModifyEcoreOperation
+import org.eclipse.xtext.util.IResourceScopeCache
 
 class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
@@ -35,6 +36,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 	@Inject extension EdeltaInterpreterHelper
 	@Inject extension EdeltaCompilerUtil
 	@Inject extension EdeltaEcoreHelper
+	@Inject IResourceScopeCache cache
 
 	var int interpreterTimeout = 2000;
 
@@ -144,6 +146,10 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 			return doEvaluate(expression.reference, context, indicator)
 		} else if (expression instanceof EdeltaEcoreReference) {
 			val elementWrapper = new Wrapper
+			// clear the cache before interpreting a ecoreref expression
+			// since in the meantime new types might be available
+			// and existing types might have been modified or renamed
+			cache.clear(expression.eResource)
 			buildMethodToCallForEcoreReference(expression) [
 				methodName, args |
 				val op = findJvmOperation(methodName)
