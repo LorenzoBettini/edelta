@@ -312,4 +312,17 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 			("The method or field nonExistant(String) is undefined for the type EClass")
 	}
 
+	@Test
+	def void testReferenceToAddedAttributeofRenamedClassInModifyEcore() {
+		'''
+		metamodel "foo"
+
+		modifyEcore aTest epackage foo {
+			ecoreref(foo.FooClass).name = "RenamedClass"
+			ecoreref(RenamedClass).EStructuralFeatures.add(
+				newEAttribute("addedAttribute"))
+			ecoreref(RenamedClass.addedAttribute)
+		}
+		'''.parseWithTestEcore.assertNoErrors
+	}
 }
