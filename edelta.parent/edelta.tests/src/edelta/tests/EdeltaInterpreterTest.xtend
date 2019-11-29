@@ -426,6 +426,26 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testModifyEcoreRenameClassAndAddAttribute2() {
+		'''
+			import org.eclipse.emf.ecore.EClass
+			
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				ecoreref(foo.FooClass).name = "RenamedClass"
+				ecoreref(RenamedClass).getEStructuralFeatures += newEAttribute("added")
+			}
+		'''.
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(true) [ derivedEPackage |
+			derivedEPackage.EClassifiers.head as EClass => [
+				assertEquals("RenamedClass", name)
+				assertEquals("added", EStructuralFeatures.last.name)
+			]
+		]
+	}
+
+	@Test
 	def void testEcoreModifyTimeoutInCancelIndicator() {
 		// in this test we really need the timeout
 		interpreter.interpreterTimeout = 2000;
