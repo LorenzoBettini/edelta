@@ -325,4 +325,19 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		}
 		'''.parseWithTestEcore.assertNoErrors
 	}
+
+	@Test
+	def void testReferenceToAddedAttributeofRenamedClassInModifyEcore2() {
+		'''
+		import org.eclipse.emf.ecore.EClass
+
+		metamodel "foo"
+
+		modifyEcore aTest epackage foo {
+			ecoreref(foo.FooClass).name = "RenamedClass"
+			ecoreref(RenamedClass).getEStructuralFeatures += newEAttribute("added")
+			ecoreref(RenamedClass.added)
+		}
+		'''.parseWithTestEcore.assertNoErrors
+	}
 }

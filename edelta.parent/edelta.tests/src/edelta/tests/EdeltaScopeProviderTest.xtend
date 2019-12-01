@@ -563,8 +563,8 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		metamodel "bar"
 		modifyEcore aTest epackage foo {
 			ecoreref(foo.FooClass).name = "RenamedClass"
-			ecoreref(RenamedClass).EStructuralFeatures.add(
-				newEAttribute("addedAttribute"))
+			ecoreref(RenamedClass).EStructuralFeatures +=
+				newEAttribute("addedAttribute")
 			ecoreref(RenamedClass.)
 		}
 		'''.parseWithTestEcore.lastModifyEcoreOperation.body.blockLastExpression.

@@ -435,6 +435,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			modifyEcore aTest epackage foo {
 				ecoreref(foo.FooClass).name = "RenamedClass"
 				ecoreref(RenamedClass).getEStructuralFeatures += newEAttribute("added")
+				ecoreref(RenamedClass.added)
 			}
 		'''.
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(true) [ derivedEPackage |
