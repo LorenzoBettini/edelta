@@ -19,6 +19,13 @@ import static org.mockito.Mockito.*
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
 class EdeltaInterpreterCacheCleanerTest {
+
+	static class SpiedProvider implements Provider<String> {
+		override get() {
+			"a string"
+		}
+	}
+
 	static val ecoreFactory = EcoreFactory.eINSTANCE
 
 	@Inject IResourceScopeCache cache
@@ -36,7 +43,7 @@ class EdeltaInterpreterCacheCleanerTest {
 		]
 		resource = new ResourceImpl
 		cacheCleaner = new EdeltaInterpreterCacheCleaner(cache, resource)
-		stringProvider = spy([|"a string"])
+		stringProvider = spy(new SpiedProvider)
 		ePackage.eAdapters += cacheCleaner
 	}
 
