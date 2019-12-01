@@ -455,7 +455,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		'''.
 		parseWithTestEcore
 		// the interpreter acts on copied epackages
-		var eclass = program.getCopiedEClass("NewClass")
+		var eclass = program.getLastCopiedEPackageFirstEClass("NewClass")
 		assertEquals("NewClass", eclass.name)
 		assertEquals(1, eclass.EStructuralFeatures.size)
 		val attr = eclass.EStructuralFeatures.head
@@ -506,7 +506,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		val program = createEClassStealingAttribute.
 			parseWithTestEcore
 		// the interpretation is done on copied epackages
-		val ec = program.getCopiedEClass("NewClass")
+		val ec = program.getLastCopiedEPackageFirstEClass("NewClass")
 		assertEquals("NewClass", ec.name)
 		val attr = ec.EStructuralFeatures.head
 		assertEquals("myAttribute", attr.name)

@@ -263,13 +263,14 @@ abstract class EdeltaAbstractTest {
 		context.eResource.contents.last as EdeltaDerivedStateEPackage
 	}
 
-	def protected getCopiedEClass(EObject context, String nameToSearch) {
-		val p = getLastCopiedEPackage(context)
-		getCopiedEClasses(p).findFirst[name == nameToSearch]
+	def protected getLastCopiedEPackageLastEClass(EObject context) {
+		val copiedEPackage = getLastCopiedEPackage(context)
+		copiedEPackage.EClassifiers.last as EClass
 	}
 
-	protected def getCopiedEClasses(EPackage p) {
-		p.EClassifiers.filter(EClass)
+	def protected getLastCopiedEPackageFirstEClass(EObject context, String nameToSearch) {
+		val p = getLastCopiedEPackage(context)
+		p.EClassifiers.findFirst[name == nameToSearch] as EClass
 	}
 
 	def protected getLastCopiedEPackage(EObject context) {
