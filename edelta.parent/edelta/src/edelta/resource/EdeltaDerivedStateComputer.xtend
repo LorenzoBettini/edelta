@@ -174,7 +174,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 			for (o : program.modifyEcoreOperations) {
 				interpreter.run(
 					o,
-					nameToEPackageMap.get(o.epackage.name),
+					nameToCopiedEPackageMap.get(o.epackage.name),
 					programJvmType,
 					packages
 				)

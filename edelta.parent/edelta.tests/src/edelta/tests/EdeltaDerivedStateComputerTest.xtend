@@ -652,9 +652,9 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		}
 		'''.
 		parseWithTestEcore
-		val derivedEClass = program.getDerivedStateLastEClass
-		assertEquals("ANewClass", derivedEClass.name)
-		assertEquals("foo", derivedEClass.EPackage.name)
+		val lastEClass = program.lastCopiedEPackageLastEClass
+		assertEquals("ANewClass", lastEClass.name)
+		assertEquals("foo", lastEClass.EPackage.name)
 	}
 
 	@Test
@@ -668,8 +668,8 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 			}
 		'''.
 		parseWithTestEcore
-		val derivedEClass = program.getDerivedStateLastEClass
-		assertEquals("ANewClass", derivedEClass.name)
+		val lastEClass = program.lastCopiedEPackageLastEClass
+		assertEquals("ANewClass", lastEClass.name)
 		program.validate
 		program.assertNoErrors
 		program.copiedEPackages.head.
