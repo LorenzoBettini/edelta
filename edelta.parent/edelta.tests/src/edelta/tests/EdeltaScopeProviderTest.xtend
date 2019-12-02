@@ -1,12 +1,14 @@
 package edelta.tests
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaPackage
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.scoping.IScopeProvider
 import org.eclipse.xtext.testing.InjectWith
@@ -15,8 +17,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import edelta.edelta.EdeltaEcoreQualifiedReference
-import org.eclipse.emf.ecore.EPackage
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -474,6 +474,29 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			''')
 		// we renamed FooClass, but its attributes are still visible through
 		// the renamed class
+	}
+
+	@Test
+	def void testScopeForFeaturesOfRenamedEClass() {
+		'''
+		metamodel "foo"
+		metamodel "bar"
+		changeEClass foo.FooClass {
+			name = "RenamedClass"
+			ecoreref(RenamedClass).EStructuralFeatures +=
+				newEAttribute("addedAttribute")
+			ecoreref(RenamedClass.)
+		}
+		'''.parseWithTestEcore.lastExpression.
+			changeEClassExpression.body.expressions.last.
+			edeltaEcoreReferenceExpression.reference.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			myAttribute
+			myReference
+			addedAttribute
+			''')
+		// we renamed FooClass, and added an attribute to the renamed class
 	}
 
 	@Test
