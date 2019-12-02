@@ -5,10 +5,12 @@ import edelta.ui.internal.EdeltaActivator
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper
 import edelta.ui.tests.utils.PDETargetPlatformUtils
 import org.eclipse.core.runtime.CoreException
+import org.eclipse.xtext.testing.Flaky
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.testing.AbstractOutlineTest
 import org.junit.BeforeClass
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -19,6 +21,9 @@ import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
 class EdeltaOutlineTest extends AbstractOutlineTest {
 
 	@Inject EdeltaPluginProjectHelper edeltaProjectHelper
+
+	@Rule
+	public Flaky.Rule testRule = new Flaky.Rule();
 
 	override protected getEditorId() {
 		EdeltaActivator.EDELTA_EDELTA
@@ -182,8 +187,9 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 		)
 	}
 
-	@Test
+	@Test @Flaky
 	def void testOutlineWithCreateEClassInModifyEcore() {
+		println("*** Executing testOutlineWithCreateEClassInModifyEcore...")
 		// wait for build so that ecores are indexed
 		// and then found by the test programs
 		waitForBuild
