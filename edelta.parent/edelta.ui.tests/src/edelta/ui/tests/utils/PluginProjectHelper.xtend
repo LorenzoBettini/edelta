@@ -10,11 +10,12 @@ import org.eclipse.core.resources.IResource
 import org.eclipse.core.runtime.NullProgressMonitor
 import org.eclipse.jdt.core.IJavaProject
 import org.eclipse.jdt.core.JavaCore
-import org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil
 import org.eclipse.xtext.ui.XtextProjectHelper
+import org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil
 import org.eclipse.xtext.ui.util.PluginProjectFactory
 
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
+import static org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil.*
 import static org.junit.Assert.*
 
 /**
@@ -36,7 +37,9 @@ class PluginProjectHelper {
 		// Since additionalSrcFolders contain crucial elements for our tests, like the .ecore files
 		// better to add additionalSrcFolders before 'src', so that at least the additionalSrcFolders
 		// are part of the project used during tests.
-		projectFactory.addFolders((additionalSrcFolders+#["src"]).toList);
+		// thus we don't do:
+		// projectFactory.addFolders((additionalSrcFolders+#["src"]).toList);
+		// but we add source folders later, which also triggers workspace build for each added source folder
 		projectFactory.addBuilderIds(JavaCore.BUILDER_ID, "org.eclipse.pde.ManifestBuilder",
 			"org.eclipse.pde.SchemaBuilder", XtextProjectHelper.BUILDER_ID);
 		projectFactory.addProjectNatures(
@@ -47,7 +50,10 @@ class PluginProjectHelper {
 		projectFactory.addRequiredBundles(requiredBundles);
 		val result = projectFactory.createProject(new NullProgressMonitor(), null);
 		makeJava8Compliant(JavaCore.create(result));
-		return JavaProjectSetupUtil.findJavaProject(projectName);
+		val javaProject = JavaProjectSetupUtil.findJavaProject(projectName)
+		addSourceFolder(javaProject, "src")
+		additionalSrcFolders.forEach[folder | addSourceFolder(javaProject, folder)]
+		return javaProject;
 	}
 
 	def static void makeJava8Compliant(IJavaProject javaProject) {
