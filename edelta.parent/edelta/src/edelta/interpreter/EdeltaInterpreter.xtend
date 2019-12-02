@@ -27,6 +27,7 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
+import org.eclipse.xtext.util.IResourceScopeCache
 
 class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
@@ -34,6 +35,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 	@Inject extension EdeltaInterpreterHelper
 	@Inject extension EdeltaCompilerUtil
 	@Inject extension EdeltaEcoreHelper
+	@Inject IResourceScopeCache cache
 
 	var int interpreterTimeout = 2000;
 
@@ -52,30 +54,43 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 	) {
 		this.programInferredJavaType = programInferredJavaType
 		edelta = new EdeltaInterpreterEdeltaImpl(packages)
-		val result = evaluate(
-			e,
-			createContext() => [
-				newValue(IT_QUALIFIED_NAME, c)
-				// 'this' and the name of the inferred class are mapped
-				// to an instance of AbstractEdelta, so that all reflective
-				// accesses, e.g., the inherited field 'lib', work out of the box
-				// calls to operations defined in the sources are intercepted
-				// in our custom invokeOperation and in that case we interpret the
-				// original source's XBlockExpression
-				newValue(QualifiedName.create("this"), edelta)
-				newValue(QualifiedName.create(programInferredJavaType.simpleName), edelta)
-			],
-			new CancelIndicator() {
-				long stopAt = System.currentTimeMillis() + interpreterTimeout;
-				override boolean isCanceled() {
-					return System.currentTimeMillis() > stopAt;
+		val cacheCleaner = new EdeltaInterpreterCacheCleaner(cache, e.eResource)
+		// clear the cache before when the interpreter modifies
+		// the EPackage of the interpreted expression
+		// since new types might be available after the interpretation
+		// and existing types might have been modified or renamed
+		// this makes sure that scoping and the type computer
+		// is performed again
+		val p = c.EPackage
+		p.eAdapters += cacheCleaner
+		try {
+			val result = evaluate(
+				e,
+				createContext() => [
+					newValue(IT_QUALIFIED_NAME, c)
+					// 'this' and the name of the inferred class are mapped
+					// to an instance of AbstractEdelta, so that all reflective
+					// accesses, e.g., the inherited field 'lib', work out of the box
+					// calls to operations defined in the sources are intercepted
+					// in our custom invokeOperation and in that case we interpret the
+					// original source's XBlockExpression
+					newValue(QualifiedName.create("this"), edelta)
+					newValue(QualifiedName.create(programInferredJavaType.simpleName), edelta)
+				],
+				new CancelIndicator() {
+					long stopAt = System.currentTimeMillis() + interpreterTimeout;
+					override boolean isCanceled() {
+						return System.currentTimeMillis() > stopAt;
+					}
 				}
+			)
+			if (result === null) {
+				addWarning(e)
 			}
-		)
-		if (result === null) {
-			addWarning(e)
+			return result
+		} finally {
+			p.eAdapters.remove(cacheCleaner)
 		}
-		return result
 	}
 
 	def private addWarning(EdeltaEcoreBaseEClassManipulationWithBlockExpression e) {
