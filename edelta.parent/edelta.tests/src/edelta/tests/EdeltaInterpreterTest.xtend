@@ -267,7 +267,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				ecoreref(RenamedClass).getEStructuralFeatures += newEAttribute("added")
 			}
 		'''.
-		assertAfterInterpretationOfEdeltaManipulationExpression [
+		assertAfterInterpretationOfEdeltaManipulationExpression(false) [
 			assertEquals("RenamedClass", name)
 			assertEquals("Base", ESuperTypes.last.name)
 			assertTrue(isAbstract)
@@ -288,7 +288,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				ecoreref(RenamedClass.added)
 			}
 		'''.
-		assertAfterInterpretationOfEdeltaManipulationExpression [
+		assertAfterInterpretationOfEdeltaManipulationExpression(false) [
 			assertEquals("RenamedClass", name)
 			assertEquals("added", EStructuralFeatures.last.name)
 		]
