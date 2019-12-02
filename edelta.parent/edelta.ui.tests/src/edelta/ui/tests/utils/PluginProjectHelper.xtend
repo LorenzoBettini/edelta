@@ -34,9 +34,6 @@ class PluginProjectHelper {
 		// ERROR org.eclipse.xtext.ui.util.JavaProjectFactory  - Build path contains duplicate entry: 'src' for project 'test'
 		// Java Model Exception: Java Model Status [Build path contains duplicate entry: 'src' for project 'test']
 		// probably due to some missing synchronization?
-		// Since additionalSrcFolders contain crucial elements for our tests, like the .ecore files
-		// better to add additionalSrcFolders before 'src', so that at least the additionalSrcFolders
-		// are part of the project used during tests.
 		// thus we don't do:
 		// projectFactory.addFolders((additionalSrcFolders+#["src"]).toList);
 		// but we add source folders later, which also triggers workspace build for each added source folder
