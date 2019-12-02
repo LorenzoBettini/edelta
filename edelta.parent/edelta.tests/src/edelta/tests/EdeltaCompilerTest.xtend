@@ -941,13 +941,18 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			modifyEcore modifyFoo epackage foo {
 				ecoreref(foo.FooClass).name = "RenamedClass"
+				ecoreref(RenamedClass).EStructuralFeatures += newEAttribute("anotherAttr") [
+					EType = ecoreref(FooDataType)
+				]
 			}
 		'''.checkCompiledCodeExecution(
 			'''
 			<?xml version="1.0" encoding="UTF-8"?>
 			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="foo" nsURI="http://foo" nsPrefix="foo">
-			  <eClassifiers xsi:type="ecore:EClass" name="RenamedClass"/>
+			  <eClassifiers xsi:type="ecore:EClass" name="RenamedClass">
+			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="anotherAttr" eType="#//FooDataType"/>
+			  </eClassifiers>
 			  <eClassifiers xsi:type="ecore:EClass" name="FooDerivedClass" eSuperTypes="#//RenamedClass"/>
 			  <eClassifiers xsi:type="ecore:EDataType" name="FooDataType" instanceClassName="java.lang.String"/>
 			</ecore:EPackage>
