@@ -225,6 +225,36 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 		)
 	}
 
+	@Test @Flaky
+	def void testOutlineWithRemovedElementsInModifyEcore() {
+		println("*** Executing testOutlineWithRemovedElementsInModifyEcore...")
+		// wait for build so that ecores are indexed
+		// and then found by the test programs
+		waitForBuild
+
+		'''
+		import org.eclipse.emf.ecore.EClass
+		
+		metamodel "mypackage"
+		
+		modifyEcore aModification epackage mypackage {
+			EClassifiers -= ecoreref(MyClass)
+			ecoreref(MyDerivedClass).ESuperTypes -= ecoreref(MyBaseClass)
+			EClassifiers -= ecoreref(MyBaseClass)
+		}
+		'''.assertAllLabels(
+		'''
+		test
+		  aModification(EPackage) : void
+		  mypackage
+		    MyDataType [java.lang.String]
+		    MyDerivedClass
+		      myDerivedAttribute : EString
+		      myDerivedReference : EObject
+		'''
+		)
+	}
+
 
 	def private allOtherContents()
 	'''
