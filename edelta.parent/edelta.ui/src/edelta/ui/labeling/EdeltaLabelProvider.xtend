@@ -12,6 +12,7 @@ import org.eclipse.xtext.common.types.JvmOperation
 import org.eclipse.xtext.xbase.annotations.ui.labeling.XbaseWithAnnotationsLabelProvider
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.eclipse.emf.ecore.ENamedElement
+import edelta.edelta.EdeltaModifyEcoreOperation
 
 /**
  * Provides labels for EObjects.
@@ -35,6 +36,14 @@ class EdeltaLabelProvider extends XbaseWithAnnotationsLabelProvider {
 	}
 
 	def image(EdeltaOperation m) {
+		imageDescriptor(m.inferredJavaMethod)
+	}
+
+	def text(EdeltaModifyEcoreOperation m) {
+		text(m.inferredJavaMethod)
+	}
+
+	def image(EdeltaModifyEcoreOperation m) {
 		imageDescriptor(m.inferredJavaMethod)
 	}
 

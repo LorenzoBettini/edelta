@@ -10,6 +10,7 @@ import edelta.edelta.EdeltaProgram
 import edelta.services.IEdeltaEcoreModelAssociations
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider
+import edelta.edelta.EdeltaModifyEcoreOperation
 
 /**
  * Customization of the default outline structure.
@@ -24,6 +25,9 @@ class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		for (o : p.operations) {
 			createNode(parentNode, o)
 		}
+		for (o : p.modifyEcoreOperations) {
+			createNode(parentNode, o)
+		}
 		createNode(parentNode, p.main)
 		for (derived : p.eResource.copiedEPackages) {
 			// the cool thing is that we don't need to provide
@@ -34,6 +38,10 @@ class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	}
 
 	def _isLeaf(EdeltaOperation m) {
+		true
+	}
+
+	def _isLeaf(EdeltaModifyEcoreOperation m) {
 		true
 	}
 
