@@ -9,21 +9,14 @@ import edelta.EdeltaStandaloneSetup;
 
 public class EdeltaInjectorProviderCustom extends EdeltaInjectorProvider {
 
-//	@Singleton
-//	private static class Java8OnTheFlyJavaCompiler2 extends OnTheFlyJavaCompiler2 {
-//		@Inject
-//		public Java8OnTheFlyJavaCompiler2(ClassLoader scope) {
-//			super(scope, JavaVersion.JAVA8);
-//		}
-//	}
-
 	@Override
 	protected Injector internalCreateInjector() {
 		return new EdeltaStandaloneSetup() {
+			@Override
 			public void register(Injector injector) {
 				EcoreSupportStandaloneSetup.setup();
 				super.register(injector);
-			};
+			}
 
 			@Override
 			public Injector createInjector() {
@@ -32,18 +25,4 @@ public class EdeltaInjectorProviderCustom extends EdeltaInjectorProvider {
 		}.createInjectorAndDoEMFRegistration();
 	}
 
-//	@Override
-//	protected EdeltaRuntimeModule createRuntimeModule() {
-//		return new EdeltaRuntimeModule() {
-//			@Override
-//			public ClassLoader bindClassLoaderToInstance() {
-//				return EdeltaInjectorProvider.class.getClassLoader();
-//			}
-//
-//			@SuppressWarnings("unused")
-//			public Class<? extends OnTheFlyJavaCompiler2> bindOnTheFlyJavaCompiler2() {
-//				return Java8OnTheFlyJavaCompiler2.class;
-//			}
-//		};
-//	}
 }
