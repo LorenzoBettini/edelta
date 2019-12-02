@@ -29,7 +29,14 @@ class PluginProjectHelper {
 
 	def IJavaProject createJavaPluginProject(String projectName, List<String> requiredBundles, List<String> additionalSrcFolders) {
 		projectFactory.setProjectName(projectName);
-		projectFactory.addFolders((#["src"]+additionalSrcFolders).toList);
+		// sometimes we get:
+		// ERROR org.eclipse.xtext.ui.util.JavaProjectFactory  - Build path contains duplicate entry: 'src' for project 'test'
+		// Java Model Exception: Java Model Status [Build path contains duplicate entry: 'src' for project 'test']
+		// probably due to some missing synchronization?
+		// Since additionalSrcFolders contain crucial elements for our tests, like the .ecore files
+		// better to add additionalSrcFolders before 'src', so that at least the additionalSrcFolders
+		// are part of the project used during tests.
+		projectFactory.addFolders((additionalSrcFolders+#["src"]).toList);
 		projectFactory.addBuilderIds(JavaCore.BUILDER_ID, "org.eclipse.pde.ManifestBuilder",
 			"org.eclipse.pde.SchemaBuilder", XtextProjectHelper.BUILDER_ID);
 		projectFactory.addProjectNatures(
