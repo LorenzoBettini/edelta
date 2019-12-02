@@ -15,6 +15,7 @@ import edelta.tests.additional.EdeltaDerivedStateComputerWithoutInterpreter;
  */
 public class EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter extends EdeltaInjectorProviderCustom {
 
+	@Override
 	protected EdeltaRuntimeModule createRuntimeModule() {
 		return new EdeltaRuntimeModule() {
 			@Override
