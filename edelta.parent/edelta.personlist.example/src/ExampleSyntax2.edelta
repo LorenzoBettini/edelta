@@ -36,7 +36,7 @@ modifyEcore introducePlace epackage PersonList {
 
 modifyEcore introduceWorkingPosition epackage PersonList {
 	val workingPositionClass = newEClass("WorkingPosition") [
-		EStructuralFeatures += newEAttribute("position") [
+		EStructuralFeatures += newEAttribute("description") [
 			EType = ecoreref(EString)
 		]
 		refactorings.extractMetaClass(it,

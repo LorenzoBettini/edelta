@@ -57,7 +57,7 @@ public class ExampleSyntax2 extends AbstractEdelta {
       final Consumer<EAttribute> _function_1 = (EAttribute it_2) -> {
         it_2.setEType(getEDataType("ecore", "EString"));
       };
-      EAttribute _newEAttribute = this.lib.newEAttribute("position", _function_1);
+      EAttribute _newEAttribute = this.lib.newEAttribute("description", _function_1);
       _eStructuralFeatures.add(_newEAttribute);
       this.refactorings.extractMetaClass(it_1, 
         getEReference("PersonList", "Person", "works"), "position", "works");
