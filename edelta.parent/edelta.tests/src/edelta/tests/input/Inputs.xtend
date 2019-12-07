@@ -398,6 +398,22 @@ class Inputs {
 		'''
 	}
 
+	def modifyEcoreUsingLibMethods() {
+		'''
+		import org.eclipse.emf.ecore.EClass
+
+		metamodel "foo"
+
+		modifyEcore aTest epackage foo {
+			addNewEClass("ANewClass") [
+				addNewEAttribute("ANewAttribute", ecoreref(FooDataType)) [
+					lowerBound = 1
+				]
+			]
+		}
+		'''
+	}
+
 	def personListExample()
 	'''
 		import gssi.refactorings.MMrefactorings

@@ -1124,6 +1124,53 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCompilationOfModifyEcoreCallingLibMethods() {
+		modifyEcoreUsingLibMethods.
+		checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import java.util.function.Consumer;
+			import org.eclipse.emf.ecore.EAttribute;
+			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.emf.ecore.EPackage;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  public MyFile0() {
+			    
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  public void aTest(final EPackage it) {
+			    final Consumer<EClass> _function = (EClass it_1) -> {
+			      final Consumer<EAttribute> _function_1 = (EAttribute it_2) -> {
+			        it_2.setLowerBound(1);
+			      };
+			      this.lib.addNewEAttribute(it_1, "ANewAttribute", getEDataType("foo", "FooDataType"), _function_1);
+			    };
+			    this.lib.addNewEClass(it, "ANewClass", _function);
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    aTest(getEPackage("foo"));
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
 	def void testCompilationOfPersonListExample() {
 		val rs = createResourceSetWithEcore(
 			PERSON_LIST_ECORE, PERSON_LIST_ECORE_PATH,

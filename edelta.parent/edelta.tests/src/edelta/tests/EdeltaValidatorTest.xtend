@@ -356,4 +356,9 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		}
 		'''.parseWithTestEcore.assertNoErrors
 	}
+
+	@Test
+	def void testValidLibMethodsInModifyEcore() {
+		modifyEcoreUsingLibMethods.parseWithTestEcore.assertNoErrors
+	}
 }
