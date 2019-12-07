@@ -110,6 +110,15 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
+	public void test_addEClass() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		EClass eClass = ecoreFactory.createEClass();
+		lib.addEClass(ePackage, eClass);
+		assertSame(eClass,
+				ePackage.getEClassifiers().get(0));
+	}
+
+	@Test
 	public void test_addNewEClass() {
 		EPackage ePackage = ecoreFactory.createEPackage();
 		EClass eClass = lib.addNewEClass(ePackage, "test");
@@ -126,6 +135,15 @@ public class EdeltaLibraryTest {
 		assertEquals("changed", eClass.getName());
 		assertSame(eClass,
 				ePackage.getEClassifiers().get(0));
+	}
+
+	@Test
+	public void test_addEAttribute() {
+		EClass eClass = ecoreFactory.createEClass();
+		EAttribute eAttribute = ecoreFactory.createEAttribute();
+		lib.addEAttribute(eClass, eAttribute);
+		assertSame(eAttribute,
+				eClass.getEStructuralFeatures().get(0));
 	}
 
 	@Test

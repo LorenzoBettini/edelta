@@ -115,14 +115,22 @@ public class EdeltaLibrary {
 		return e.eContainer() != null ? getEObjectRepr(e.eContainer()) + ":" + info : info;
 	}
 
+	public void addEClass(EPackage ePackage, EClass eClass) {
+		ePackage.getEClassifiers().add(eClass);
+	}
+
 	public EClass addNewEClass(EPackage ePackage, String name) {
 		return addNewEClass(ePackage, name, null);
 	}
 
 	public EClass addNewEClass(EPackage ePackage, String name, Consumer<EClass> initializer) {
 		EClass newEClass = newEClass(name, initializer);
-		ePackage.getEClassifiers().add(newEClass);
+		addEClass(ePackage, newEClass);
 		return newEClass;
+	}
+
+	public void addEAttribute(EClass eClass, EAttribute eAttribute) {
+		eClass.getEStructuralFeatures().add(eAttribute);
 	}
 
 	public EAttribute addNewEAttribute(EClass eClass, String name, EDataType dataType) {
@@ -131,7 +139,7 @@ public class EdeltaLibrary {
 
 	public EAttribute addNewEAttribute(EClass eClass, String name, EDataType dataType, Consumer<EAttribute> initializer) {
 		EAttribute eAttribute = newEAttribute(name, dataType, initializer);
-		eClass.getEStructuralFeatures().add(eAttribute);
+		addEAttribute(eClass, eAttribute);
 		return eAttribute;
 	}
 
