@@ -163,13 +163,45 @@ public class EdeltaLibraryTest {
 		EClass eClass = ecoreFactory.createEClass();
 		EAttribute eAttribute =
 			lib.addNewEAttribute(eClass, "test", ESTRING,
-				attr -> {
-					attr.setName("changed");
-				});
+				attr -> attr.setName("changed"));
 		assertEquals("changed", eAttribute.getName());
 		assertEquals(ESTRING, eAttribute.getEType());
 		assertEquals(ESTRING, eAttribute.getEAttributeType());
 		assertSame(eAttribute,
+				eClass.getEStructuralFeatures().get(0));
+	}
+
+	@Test
+	public void test_addEReference() {
+		EClass eClass = ecoreFactory.createEClass();
+		EReference eReference = ecoreFactory.createEReference();
+		lib.addEReference(eClass, eReference);
+		assertSame(eReference,
+				eClass.getEStructuralFeatures().get(0));
+	}
+
+	@Test
+	public void test_addNewEReference() {
+		EClass eClass = ecoreFactory.createEClass();
+		EReference eReference =
+				lib.addNewEReference(eClass, "test", EOBJECT);
+		assertEquals("test", eReference.getName());
+		assertEquals(EOBJECT, eReference.getEType());
+		assertEquals(EOBJECT, eReference.getEReferenceType());
+		assertSame(eReference,
+				eClass.getEStructuralFeatures().get(0));
+	}
+
+	@Test
+	public void test_addNewEReferenceWithInitializer() {
+		EClass eClass = ecoreFactory.createEClass();
+		EReference eReference =
+			lib.addNewEReference(eClass, "test", EOBJECT,
+				ref -> ref.setName("changed"));
+		assertEquals("changed", eReference.getName());
+		assertEquals(EOBJECT, eReference.getEType());
+		assertEquals(EOBJECT, eReference.getEReferenceType());
+		assertSame(eReference,
 				eClass.getEStructuralFeatures().get(0));
 	}
 

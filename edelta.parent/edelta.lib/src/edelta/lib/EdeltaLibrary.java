@@ -14,6 +14,7 @@ import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
 
 /**
@@ -43,21 +44,21 @@ public class EdeltaLibrary {
 		return newEAttribute(name, null);
 	}
 
-	public EAttribute newEAttribute(String name, Consumer<EAttribute> initiaizer) {
+	public EAttribute newEAttribute(String name, Consumer<EAttribute> initializer) {
 		EAttribute e = ecoreFactory.createEAttribute();
 		e.setName(name);
-		if (initiaizer != null) {
-			initiaizer.accept(e);
+		if (initializer != null) {
+			initializer.accept(e);
 		}
 		return e;
 	}
 
-	public EAttribute newEAttribute(String name, EDataType dataType, Consumer<EAttribute> initiaizer) {
+	public EAttribute newEAttribute(String name, EDataType dataType, Consumer<EAttribute> initializer) {
 		EAttribute e = ecoreFactory.createEAttribute();
 		e.setName(name);
 		e.setEType(dataType);
-		if (initiaizer != null) {
-			initiaizer.accept(e);
+		if (initializer != null) {
+			initializer.accept(e);
 		}
 		return e;
 	}
@@ -66,11 +67,21 @@ public class EdeltaLibrary {
 		return newEReference(name, null);
 	}
 
-	public EReference newEReference(String name, Consumer<EReference> initiaizer) {
+	public EReference newEReference(String name, Consumer<EReference> initializer) {
 		EReference e = ecoreFactory.createEReference();
 		e.setName(name);
-		if (initiaizer != null) {
-			initiaizer.accept(e);
+		if (initializer != null) {
+			initializer.accept(e);
+		}
+		return e;
+	}
+
+	public EReference newEReference(String name, EClass referenceType, Consumer<EReference> initializer) {
+		EReference e = ecoreFactory.createEReference();
+		e.setName(name);
+		e.setEType(referenceType);
+		if (initializer != null) {
+			initializer.accept(e);
 		}
 		return e;
 	}
@@ -115,6 +126,10 @@ public class EdeltaLibrary {
 		return e.eContainer() != null ? getEObjectRepr(e.eContainer()) + ":" + info : info;
 	}
 
+	public void addEStructuralFeature(EClass eClass, EStructuralFeature eStructuralFeature) {
+		eClass.getEStructuralFeatures().add(eStructuralFeature);
+	}
+
 	public void addEClass(EPackage ePackage, EClass eClass) {
 		ePackage.getEClassifiers().add(eClass);
 	}
@@ -130,7 +145,7 @@ public class EdeltaLibrary {
 	}
 
 	public void addEAttribute(EClass eClass, EAttribute eAttribute) {
-		eClass.getEStructuralFeatures().add(eAttribute);
+		addEStructuralFeature(eClass, eAttribute);
 	}
 
 	public EAttribute addNewEAttribute(EClass eClass, String name, EDataType dataType) {
@@ -141,6 +156,20 @@ public class EdeltaLibrary {
 		EAttribute eAttribute = newEAttribute(name, dataType, initializer);
 		addEAttribute(eClass, eAttribute);
 		return eAttribute;
+	}
+
+	public void addEReference(EClass eClass, EReference eReference) {
+		addEStructuralFeature(eClass, eReference);
+	}
+
+	public EReference addNewEReference(EClass eClass, String name, EClass referenceType) {
+		return addNewEReference(eClass, name, referenceType, null);
+	}
+
+	public EReference addNewEReference(EClass eClass, String name, EClass referenceType, Consumer<EReference> initializer) {
+		EReference eReference = newEReference(name, referenceType, initializer);
+		addEReference(eClass, eReference);
+		return eReference;
 	}
 
 }
