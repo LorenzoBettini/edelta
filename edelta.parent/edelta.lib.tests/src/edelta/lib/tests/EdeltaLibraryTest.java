@@ -4,13 +4,17 @@
 package edelta.lib.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.eclipse.emf.ecore.EcorePackage.Literals.*;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.impl.BasicEObjectImpl;
 import org.junit.Before;
@@ -27,6 +31,8 @@ import edelta.lib.EdeltaLibrary;
 public class EdeltaLibraryTest {
 
 	private EdeltaLibrary lib;
+
+	private EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
 
 	@Before
 	public void initLib() {
@@ -101,6 +107,52 @@ public class EdeltaLibraryTest {
 			ee.setName("changed");
 		});
 		assertEquals("changed", e.getName());
+	}
+
+	@Test
+	public void testAddEClass() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		EClass eClass = lib.addEClass(ePackage, "test");
+		assertEquals("test", eClass.getName());
+		assertSame(eClass,
+			ePackage.getEClassifiers().get(0));
+	}
+
+	@Test
+	public void testAddEClassWithInitializer() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		EClass eClass = lib.addEClass(ePackage, "test",
+				cl -> cl.setName("changed"));
+		assertEquals("changed", eClass.getName());
+		assertSame(eClass,
+				ePackage.getEClassifiers().get(0));
+	}
+
+	@Test
+	public void testAddEAttribute() {
+		EClass eClass = ecoreFactory.createEClass();
+		EAttribute eAttribute =
+				lib.addEAttribute(eClass, "test", ESTRING);
+		assertEquals("test", eAttribute.getName());
+		assertEquals(ESTRING, eAttribute.getEType());
+		assertEquals(ESTRING, eAttribute.getEAttributeType());
+		assertSame(eAttribute,
+				eClass.getEStructuralFeatures().get(0));
+	}
+
+	@Test
+	public void testAddEAttributeWithInitializer() {
+		EClass eClass = ecoreFactory.createEClass();
+		EAttribute eAttribute =
+			lib.addEAttribute(eClass, "test", ESTRING,
+				attr -> {
+					attr.setName("changed");
+				});
+		assertEquals("changed", eAttribute.getName());
+		assertEquals(ESTRING, eAttribute.getEType());
+		assertEquals(ESTRING, eAttribute.getEAttributeType());
+		assertSame(eAttribute,
+				eClass.getEStructuralFeatures().get(0));
 	}
 
 	@Test
