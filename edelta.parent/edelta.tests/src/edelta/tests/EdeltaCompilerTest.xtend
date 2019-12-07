@@ -1135,6 +1135,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			import org.eclipse.emf.ecore.EAttribute;
 			import org.eclipse.emf.ecore.EClass;
 			import org.eclipse.emf.ecore.EPackage;
+			import org.eclipse.emf.ecore.EReference;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends AbstractEdelta {
@@ -1152,6 +1153,10 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			        it_2.setLowerBound(1);
 			      };
 			      this.lib.addNewEAttribute(it_1, "ANewAttribute", getEDataType("foo", "FooDataType"), _function_1);
+			      final Consumer<EReference> _function_2 = (EReference it_2) -> {
+			        it_2.setLowerBound(1);
+			      };
+			      this.lib.addNewEReference(it_1, "ANewReference", getEClass("foo", "FooClass"), _function_2);
 			    };
 			    this.lib.addNewEClass(it, "ANewClass", _function);
 			  }

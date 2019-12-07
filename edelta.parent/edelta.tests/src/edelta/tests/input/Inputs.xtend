@@ -409,6 +409,9 @@ class Inputs {
 				addNewEAttribute("ANewAttribute", ecoreref(FooDataType)) [
 					lowerBound = 1
 				]
+				addNewEReference("ANewReference", ecoreref(FooClass)) [
+					lowerBound = 1
+				]
 			]
 		}
 		'''
