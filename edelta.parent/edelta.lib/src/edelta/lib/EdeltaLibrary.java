@@ -7,10 +7,12 @@ import java.util.function.Consumer;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EcoreFactory;
 
@@ -44,6 +46,16 @@ public class EdeltaLibrary {
 	public EAttribute newEAttribute(String name, Consumer<EAttribute> initiaizer) {
 		EAttribute e = ecoreFactory.createEAttribute();
 		e.setName(name);
+		if (initiaizer != null) {
+			initiaizer.accept(e);
+		}
+		return e;
+	}
+
+	public EAttribute newEAttribute(String name, EDataType dataType, Consumer<EAttribute> initiaizer) {
+		EAttribute e = ecoreFactory.createEAttribute();
+		e.setName(name);
+		e.setEType(dataType);
 		if (initiaizer != null) {
 			initiaizer.accept(e);
 		}
@@ -102,4 +114,25 @@ public class EdeltaLibrary {
 		}
 		return e.eContainer() != null ? getEObjectRepr(e.eContainer()) + ":" + info : info;
 	}
+
+	public EClass addEClass(EPackage ePackage, String name) {
+		return addEClass(ePackage, name, null);
+	}
+
+	public EClass addEClass(EPackage ePackage, String name, Consumer<EClass> initializer) {
+		EClass newEClass = newEClass(name, initializer);
+		ePackage.getEClassifiers().add(newEClass);
+		return newEClass;
+	}
+
+	public EAttribute addEAttribute(EClass eClass, String name, EDataType dataType) {
+		return addEAttribute(eClass, name, dataType, null);
+	}
+
+	public EAttribute addEAttribute(EClass eClass, String name, EDataType dataType, Consumer<EAttribute> initializer) {
+		EAttribute eAttribute = newEAttribute(name, dataType, initializer);
+		eClass.getEStructuralFeatures().add(eAttribute);
+		return eAttribute;
+	}
+
 }
