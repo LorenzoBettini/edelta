@@ -444,4 +444,58 @@ class Inputs {
 		}
 	'''
 
+	def personListExampleModifyEcore()
+	'''
+		import gssi.refactorings.MMrefactorings
+
+		metamodel "PersonList"
+		metamodel "ecore"
+
+		use MMrefactorings as refactorings
+
+		modifyEcore improvePerson epackage PersonList {
+			ecoreref(PersonList.Person) => [
+				refactorings.
+					introduceSubclasses(
+						ecoreref(Person.gender),
+						ecoreref(Gender),
+						it
+					)
+				EStructuralFeatures+=
+					refactorings.mergeAttributes("name",
+						ecoreref(Person.firstname).EType,
+						#[ecoreref(Person.firstname), ecoreref(Person.lastname)]
+					)
+			]
+		}
+		
+		modifyEcore introducePlace epackage PersonList {
+			val placeClass = newEClass("Place") [
+				abstract = true
+				refactorings.extractSuperclass(it,
+					#[ecoreref(LivingPlace.address), ecoreref(WorkPlace.address)]);
+			]
+			EClassifiers += placeClass
+		}
+		
+		modifyEcore introduceWorkingPosition epackage PersonList {
+			val workingPositionClass = newEClass("WorkingPosition") [
+				EStructuralFeatures += newEAttribute("description") [
+					EType = ecoreref(EString)
+				]
+				refactorings.extractMetaClass(it,
+					ecoreref(Person.works), "position", "works"
+				);
+			]
+			EClassifiers += workingPositionClass
+		}
+		
+		modifyEcore improveList epackage PersonList {
+			ecoreref(PersonList.List).EStructuralFeatures+=
+				refactorings.mergeReferences("places",
+					ecoreref(Place),
+					#[ecoreref(List.wplaces), ecoreref(List.lplaces)]
+				);
+		}
+	'''
 }

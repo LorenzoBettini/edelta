@@ -688,6 +688,14 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		prog.assertNoErrors
 	}
 
+	@Test
+	def void testPersonListExampleModifyEcore() {
+		val prog = parseWithLoadedEcore(PERSON_LIST_ECORE_PATH,
+			personListExampleModifyEcore
+		)
+		prog.assertNoErrors
+	}
+
 	protected def EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {
 		program.lastExpression.getManipulationEClassExpression.body.expressions.head.
 			variableDeclaration.right.
