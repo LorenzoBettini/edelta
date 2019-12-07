@@ -110,18 +110,18 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
-	public void testAddEClass() {
+	public void test_addNewEClass() {
 		EPackage ePackage = ecoreFactory.createEPackage();
-		EClass eClass = lib.addEClass(ePackage, "test");
+		EClass eClass = lib.addNewEClass(ePackage, "test");
 		assertEquals("test", eClass.getName());
 		assertSame(eClass,
 			ePackage.getEClassifiers().get(0));
 	}
 
 	@Test
-	public void testAddEClassWithInitializer() {
+	public void test_addNewEClassWithInitializer() {
 		EPackage ePackage = ecoreFactory.createEPackage();
-		EClass eClass = lib.addEClass(ePackage, "test",
+		EClass eClass = lib.addNewEClass(ePackage, "test",
 				cl -> cl.setName("changed"));
 		assertEquals("changed", eClass.getName());
 		assertSame(eClass,
@@ -129,10 +129,10 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
-	public void testAddEAttribute() {
+	public void test_addNewEAttribute() {
 		EClass eClass = ecoreFactory.createEClass();
 		EAttribute eAttribute =
-				lib.addEAttribute(eClass, "test", ESTRING);
+				lib.addNewEAttribute(eClass, "test", ESTRING);
 		assertEquals("test", eAttribute.getName());
 		assertEquals(ESTRING, eAttribute.getEType());
 		assertEquals(ESTRING, eAttribute.getEAttributeType());
@@ -141,10 +141,10 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
-	public void testAddEAttributeWithInitializer() {
+	public void test_addNewEAttributeWithInitializer() {
 		EClass eClass = ecoreFactory.createEClass();
 		EAttribute eAttribute =
-			lib.addEAttribute(eClass, "test", ESTRING,
+			lib.addNewEAttribute(eClass, "test", ESTRING,
 				attr -> {
 					attr.setName("changed");
 				});
