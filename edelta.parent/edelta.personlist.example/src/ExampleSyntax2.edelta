@@ -10,18 +10,19 @@ metamodel "ecore"
 use MMrefactorings as refactorings
 
 modifyEcore improvePerson epackage PersonList {
-	val personClass = ecoreref(PersonList.Person)
-	refactorings.
-		introduceSubclasses(
-			ecoreref(Person.gender),
-			ecoreref(Gender),
-			personClass
-		);
-	personClass.EStructuralFeatures+=
-		refactorings.mergeAttributes("name",
-			ecoreref(Person.firstname).EType,
-			#[ecoreref(Person.firstname), ecoreref(Person.lastname)]
-		);
+	ecoreref(PersonList.Person) => [
+		refactorings.
+			introduceSubclasses(
+				ecoreref(Person.gender),
+				ecoreref(Gender),
+				it
+			)
+		EStructuralFeatures+=
+			refactorings.mergeAttributes("name",
+				ecoreref(Person.firstname).EType,
+				#[ecoreref(Person.firstname), ecoreref(Person.lastname)]
+			)
+	]
 }
 
 modifyEcore introducePlace epackage PersonList {

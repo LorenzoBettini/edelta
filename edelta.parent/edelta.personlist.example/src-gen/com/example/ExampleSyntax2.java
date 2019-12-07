@@ -12,6 +12,8 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
+import org.eclipse.xtext.xbase.lib.ObjectExtensions;
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class ExampleSyntax2 extends AbstractEdelta {
@@ -26,15 +28,18 @@ public class ExampleSyntax2 extends AbstractEdelta {
   }
   
   public void improvePerson(final EPackage it) {
-    final EClass personClass = getEClass("PersonList", "Person");
-    this.refactorings.introduceSubclasses(
-      getEAttribute("PersonList", "Person", "gender"), 
-      getEEnum("PersonList", "Gender"), personClass);
-    EList<EStructuralFeature> _eStructuralFeatures = personClass.getEStructuralFeatures();
-    EAttribute _mergeAttributes = this.refactorings.mergeAttributes("name", 
-      getEAttribute("PersonList", "Person", "firstname").getEType(), 
-      Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname"))));
-    _eStructuralFeatures.add(_mergeAttributes);
+    final Procedure1<EClass> _function = (EClass it_1) -> {
+      this.refactorings.introduceSubclasses(
+        getEAttribute("PersonList", "Person", "gender"), 
+        getEEnum("PersonList", "Gender"), it_1);
+      EList<EStructuralFeature> _eStructuralFeatures = it_1.getEStructuralFeatures();
+      EAttribute _mergeAttributes = this.refactorings.mergeAttributes("name", 
+        getEAttribute("PersonList", "Person", "firstname").getEType(), 
+        Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname"))));
+      _eStructuralFeatures.add(_mergeAttributes);
+    };
+    ObjectExtensions.<EClass>operator_doubleArrow(
+      getEClass("PersonList", "Person"), _function);
   }
   
   public void introducePlace(final EPackage it) {
