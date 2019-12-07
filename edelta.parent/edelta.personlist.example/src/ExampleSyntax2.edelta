@@ -1,5 +1,4 @@
 import gssi.refactorings.MMrefactorings
-import org.eclipse.emf.ecore.EEnum
 
 // IMPORTANT: ecores must be in a source directory
 // otherwise you can't refer to them
@@ -15,13 +14,13 @@ modifyEcore improvePerson epackage PersonList {
 	refactorings.
 		introduceSubclasses(
 			ecoreref(Person.gender),
-			ecoreref(Person.gender).EAttributeType as EEnum,
+			ecoreref(Gender),
 			personClass
 		);
 	personClass.EStructuralFeatures+=
 		refactorings.mergeAttributes("name",
 			ecoreref(Person.firstname).EType,
-			#[ecoreref(Person.firstname),ecoreref(Person.lastname)]
+			#[ecoreref(Person.firstname), ecoreref(Person.lastname)]
 		);
 }
 
@@ -50,7 +49,7 @@ modifyEcore improveList epackage PersonList {
 	ecoreref(PersonList.List).EStructuralFeatures+=
 		refactorings.mergeReferences("places",
 			ecoreref(Place),
-			#[ecoreref(List.wplaces),ecoreref(List.lplaces)]
+			#[ecoreref(List.wplaces), ecoreref(List.lplaces)]
 		);
 }
 

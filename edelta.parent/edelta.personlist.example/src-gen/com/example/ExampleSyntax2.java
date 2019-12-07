@@ -8,8 +8,6 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
-import org.eclipse.emf.ecore.EDataType;
-import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -29,10 +27,9 @@ public class ExampleSyntax2 extends AbstractEdelta {
   
   public void improvePerson(final EPackage it) {
     final EClass personClass = getEClass("PersonList", "Person");
-    EDataType _eAttributeType = getEAttribute("PersonList", "Person", "gender").getEAttributeType();
     this.refactorings.introduceSubclasses(
       getEAttribute("PersonList", "Person", "gender"), 
-      ((EEnum) _eAttributeType), personClass);
+      getEEnum("PersonList", "Gender"), personClass);
     EList<EStructuralFeature> _eStructuralFeatures = personClass.getEStructuralFeatures();
     EAttribute _mergeAttributes = this.refactorings.mergeAttributes("name", 
       getEAttribute("PersonList", "Person", "firstname").getEType(), 
