@@ -27,6 +27,12 @@ public class EdeltaLibrary {
 
 	private EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
 
+	private <T extends ENamedElement> void safeRunInitializer(Consumer<T> initializer, T e) {
+		if (initializer != null) {
+			initializer.accept(e);
+		}
+	}
+
 	public EClass newEClass(String name) {
 		return newEClass(name, null);
 	}
@@ -34,9 +40,7 @@ public class EdeltaLibrary {
 	public EClass newEClass(String name, Consumer<EClass> initializer) {
 		EClass c = ecoreFactory.createEClass();
 		c.setName(name);
-		if (initializer != null) {
-			initializer.accept(c);
-		}
+		safeRunInitializer(initializer, c);
 		return c;
 	}
 
@@ -47,9 +51,7 @@ public class EdeltaLibrary {
 	public EAttribute newEAttribute(String name, Consumer<EAttribute> initializer) {
 		EAttribute e = ecoreFactory.createEAttribute();
 		e.setName(name);
-		if (initializer != null) {
-			initializer.accept(e);
-		}
+		safeRunInitializer(initializer, e);
 		return e;
 	}
 
@@ -57,9 +59,7 @@ public class EdeltaLibrary {
 		EAttribute e = ecoreFactory.createEAttribute();
 		e.setName(name);
 		e.setEType(dataType);
-		if (initializer != null) {
-			initializer.accept(e);
-		}
+		safeRunInitializer(initializer, e);
 		return e;
 	}
 
@@ -70,9 +70,7 @@ public class EdeltaLibrary {
 	public EReference newEReference(String name, Consumer<EReference> initializer) {
 		EReference e = ecoreFactory.createEReference();
 		e.setName(name);
-		if (initializer != null) {
-			initializer.accept(e);
-		}
+		safeRunInitializer(initializer, e);
 		return e;
 	}
 
@@ -80,9 +78,7 @@ public class EdeltaLibrary {
 		EReference e = ecoreFactory.createEReference();
 		e.setName(name);
 		e.setEType(referenceType);
-		if (initializer != null) {
-			initializer.accept(e);
-		}
+		safeRunInitializer(initializer, e);
 		return e;
 	}
 
@@ -90,12 +86,10 @@ public class EdeltaLibrary {
 		return newEEnum(name, null);
 	}
 
-	public EEnum newEEnum(String name, Consumer<EEnum> initiaizer) {
+	public EEnum newEEnum(String name, Consumer<EEnum> initializer) {
 		EEnum e = ecoreFactory.createEEnum();
 		e.setName(name);
-		if (initiaizer != null) {
-			initiaizer.accept(e);
-		}
+		safeRunInitializer(initializer, e);
 		return e;
 	}
 
@@ -103,12 +97,10 @@ public class EdeltaLibrary {
 		return newEEnumLiteral(name, null);
 	}
 
-	public EEnumLiteral newEEnumLiteral(String name, Consumer<EEnumLiteral> initiaizer) {
+	public EEnumLiteral newEEnumLiteral(String name, Consumer<EEnumLiteral> initializer) {
 		EEnumLiteral e = ecoreFactory.createEEnumLiteral();
 		e.setName(name);
-		if (initiaizer != null) {
-			initiaizer.accept(e);
-		}
+		safeRunInitializer(initializer, e);
 		return e;
 	}
 
@@ -142,9 +134,7 @@ public class EdeltaLibrary {
 		EClass c = ecoreFactory.createEClass();
 		c.setName(name);
 		addEClass(ePackage, c);
-		if (initializer != null) {
-			initializer.accept(c);
-		}
+		safeRunInitializer(initializer, c);
 		return c;
 	}
 
@@ -161,9 +151,7 @@ public class EdeltaLibrary {
 		e.setName(name);
 		e.setEType(dataType);
 		addEAttribute(eClass, e);
-		if (initializer != null) {
-			initializer.accept(e);
-		}
+		safeRunInitializer(initializer, e);
 		return e;
 	}
 
@@ -180,9 +168,7 @@ public class EdeltaLibrary {
 		e.setName(name);
 		e.setEType(referenceType);
 		addEReference(eClass, e);
-		if (initializer != null) {
-			initializer.accept(e);
-		}
+		safeRunInitializer(initializer, e);
 		return e;
 	}
 
