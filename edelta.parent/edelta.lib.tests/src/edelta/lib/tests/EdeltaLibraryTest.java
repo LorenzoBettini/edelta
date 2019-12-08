@@ -4,7 +4,9 @@
 package edelta.lib.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+
 import static org.eclipse.emf.ecore.EcorePackage.Literals.*;
 
 import org.eclipse.emf.ecore.EAttribute;
@@ -131,7 +133,10 @@ public class EdeltaLibraryTest {
 	public void test_addNewEClassWithInitializer() {
 		EPackage ePackage = ecoreFactory.createEPackage();
 		EClass eClass = lib.addNewEClass(ePackage, "test",
-				cl -> cl.setName("changed"));
+				cl -> {
+					assertNotNull(cl.getEPackage());
+					cl.setName("changed");
+				});
 		assertEquals("changed", eClass.getName());
 		assertSame(eClass,
 				ePackage.getEClassifiers().get(0));
@@ -163,7 +168,10 @@ public class EdeltaLibraryTest {
 		EClass eClass = ecoreFactory.createEClass();
 		EAttribute eAttribute =
 			lib.addNewEAttribute(eClass, "test", ESTRING,
-				attr -> attr.setName("changed"));
+				attr -> {
+					assertNotNull(attr.getEContainingClass());
+					attr.setName("changed");
+				});
 		assertEquals("changed", eAttribute.getName());
 		assertEquals(ESTRING, eAttribute.getEType());
 		assertEquals(ESTRING, eAttribute.getEAttributeType());
@@ -197,7 +205,10 @@ public class EdeltaLibraryTest {
 		EClass eClass = ecoreFactory.createEClass();
 		EReference eReference =
 			lib.addNewEReference(eClass, "test", EOBJECT,
-				ref -> ref.setName("changed"));
+				ref -> {
+					assertNotNull(ref.getEContainingClass());
+					ref.setName("changed");
+				});
 		assertEquals("changed", eReference.getName());
 		assertEquals(EOBJECT, eReference.getEType());
 		assertEquals(EOBJECT, eReference.getEReferenceType());

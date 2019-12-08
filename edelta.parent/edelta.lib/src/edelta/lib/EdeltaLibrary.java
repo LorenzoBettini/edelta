@@ -139,9 +139,13 @@ public class EdeltaLibrary {
 	}
 
 	public EClass addNewEClass(EPackage ePackage, String name, Consumer<EClass> initializer) {
-		EClass newEClass = newEClass(name, initializer);
-		addEClass(ePackage, newEClass);
-		return newEClass;
+		EClass c = ecoreFactory.createEClass();
+		c.setName(name);
+		addEClass(ePackage, c);
+		if (initializer != null) {
+			initializer.accept(c);
+		}
+		return c;
 	}
 
 	public void addEAttribute(EClass eClass, EAttribute eAttribute) {
@@ -153,9 +157,14 @@ public class EdeltaLibrary {
 	}
 
 	public EAttribute addNewEAttribute(EClass eClass, String name, EDataType dataType, Consumer<EAttribute> initializer) {
-		EAttribute eAttribute = newEAttribute(name, dataType, initializer);
-		addEAttribute(eClass, eAttribute);
-		return eAttribute;
+		EAttribute e = ecoreFactory.createEAttribute();
+		e.setName(name);
+		e.setEType(dataType);
+		addEAttribute(eClass, e);
+		if (initializer != null) {
+			initializer.accept(e);
+		}
+		return e;
 	}
 
 	public void addEReference(EClass eClass, EReference eReference) {
@@ -167,9 +176,14 @@ public class EdeltaLibrary {
 	}
 
 	public EReference addNewEReference(EClass eClass, String name, EClass referenceType, Consumer<EReference> initializer) {
-		EReference eReference = newEReference(name, referenceType, initializer);
-		addEReference(eClass, eReference);
-		return eReference;
+		EReference e = ecoreFactory.createEReference();
+		e.setName(name);
+		e.setEType(referenceType);
+		addEReference(eClass, e);
+		if (initializer != null) {
+			initializer.accept(e);
+		}
+		return e;
 	}
 
 }
