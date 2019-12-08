@@ -70,6 +70,15 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
+	public void testNewEAttributeWithTypeAndInitialize() {
+		EAttribute e = lib.newEAttribute("test", ESTRING, ee -> {
+			ee.setName("changed");
+		});
+		assertEquals("changed", e.getName());
+		assertEquals(ESTRING, e.getEAttributeType());
+	}
+
+	@Test
 	public void testNewEReference() {
 		EReference e = lib.newEReference("test");
 		assertEquals("test", e.getName());
@@ -81,6 +90,15 @@ public class EdeltaLibraryTest {
 			ee.setName("changed");
 		});
 		assertEquals("changed", e.getName());
+	}
+
+	@Test
+	public void testNewEReferenceWithTypeInitializer() {
+		EReference e = lib.newEReference("test", EOBJECT, ee -> {
+			ee.setName("changed");
+		});
+		assertEquals("changed", e.getName());
+		assertEquals(EOBJECT, e.getEReferenceType());
 	}
 
 	@Test
