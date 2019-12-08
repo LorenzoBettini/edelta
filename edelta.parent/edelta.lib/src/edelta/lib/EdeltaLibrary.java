@@ -83,6 +83,25 @@ public class EdeltaLibrary {
 		return e;
 	}
 
+	public EDataType newEDataType(String name) {
+		return newEDataType(name, null);
+	}
+
+	public EDataType newEDataType(String name, Consumer<EDataType> initializer) {
+		EDataType e = ecoreFactory.createEDataType();
+		e.setName(name);
+		safeRunInitializer(initializer, e);
+		return e;
+	}
+
+	public EDataType newEDataType(String name, String instanceTypeName, Consumer<EDataType> initializer) {
+		EDataType e = ecoreFactory.createEDataType();
+		e.setName(name);
+		e.setInstanceTypeName(instanceTypeName);
+		safeRunInitializer(initializer, e);
+		return e;
+	}
+
 	public EEnum newEEnum(String name) {
 		return newEEnum(name, null);
 	}

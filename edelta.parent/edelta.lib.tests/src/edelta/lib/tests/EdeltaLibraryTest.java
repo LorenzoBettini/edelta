@@ -11,6 +11,7 @@ import static org.eclipse.emf.ecore.EcorePackage.Literals.*;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EObject;
@@ -99,6 +100,31 @@ public class EdeltaLibraryTest {
 		});
 		assertEquals("changed", e.getName());
 		assertEquals(EOBJECT, e.getEReferenceType());
+	}
+
+	@Test
+	public void testNewEDataType() {
+		EDataType e = lib.newEDataType("test");
+		assertEquals("test", e.getName());
+	}
+
+	@Test
+	public void testNewEDataTypeWithInitializer() {
+		EDataType e = lib.newEDataType("test", ee -> {
+			ee.setName("changed");
+		});
+		assertEquals("changed", e.getName());
+	}
+
+	@Test
+	public void testNewEDataTypeWithTypeInitializer() {
+		EDataType e = lib.newEDataType("test", "java.lang.String", ee -> {
+			ee.setName("changed");
+		});
+		assertEquals("changed", e.getName());
+		assertEquals("java.lang.String", e.getInstanceTypeName());
+		assertEquals("java.lang.String", e.getInstanceClassName());
+		assertEquals(String.class, e.getInstanceClass());
 	}
 
 	@Test
