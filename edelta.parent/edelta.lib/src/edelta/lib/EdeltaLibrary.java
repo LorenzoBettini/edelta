@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
@@ -122,8 +123,12 @@ public class EdeltaLibrary {
 		eClass.getEStructuralFeatures().add(eStructuralFeature);
 	}
 
+	private void addEClassifier(EPackage ePackage, EClassifier eClassifier) {
+		ePackage.getEClassifiers().add(eClassifier);
+	}
+
 	public void addEClass(EPackage ePackage, EClass eClass) {
-		ePackage.getEClassifiers().add(eClass);
+		addEClassifier(ePackage, eClass);
 	}
 
 	public EClass addNewEClass(EPackage ePackage, String name) {
@@ -136,6 +141,22 @@ public class EdeltaLibrary {
 		addEClass(ePackage, c);
 		safeRunInitializer(initializer, c);
 		return c;
+	}
+
+	public void addEEnum(EPackage ePackage, EEnum eEnum) {
+		addEClassifier(ePackage, eEnum);
+	}
+
+	public EEnum addNewEEnum(EPackage ePackage, String name) {
+		return addNewEEnum(ePackage, name, null);
+	}
+
+	public EEnum addNewEEnum(EPackage ePackage, String name, Consumer<EEnum> initializer) {
+		EEnum e = ecoreFactory.createEEnum();
+		e.setName(name);
+		addEEnum(ePackage, e);
+		safeRunInitializer(initializer, e);
+		return e;
 	}
 
 	public void addEAttribute(EClass eClass, EAttribute eAttribute) {
