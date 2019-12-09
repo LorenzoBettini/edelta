@@ -178,6 +178,23 @@ public class EdeltaLibrary {
 		return e;
 	}
 
+	public void addEDataType(EPackage ePackage, EDataType eDataType) {
+		addEClassifier(ePackage, eDataType);
+	}
+
+	public EDataType addNewEDataType(EPackage ePackage, String name, String instanceTypeName) {
+		return addNewEDataType(ePackage, name, instanceTypeName, null);
+	}
+
+	public EDataType addNewEDataType(EPackage ePackage, String name, String instanceTypeName, Consumer<EDataType> initializer) {
+		EDataType e = ecoreFactory.createEDataType();
+		e.setName(name);
+		e.setInstanceTypeName(instanceTypeName);
+		addEDataType(ePackage, e);
+		safeRunInitializer(initializer, e);
+		return e;
+	}
+
 	public void addEAttribute(EClass eClass, EAttribute eAttribute) {
 		addEStructuralFeature(eClass, eAttribute);
 	}
