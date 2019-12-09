@@ -218,6 +218,43 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
+	public void test_addEDataType() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		EDataType eEnum = ecoreFactory.createEDataType();
+		lib.addEDataType(ePackage, eEnum);
+		assertSame(eEnum,
+				ePackage.getEClassifiers().get(0));
+	}
+
+	@Test
+	public void test_addNewEDataType() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		EDataType eDataType = lib.addNewEDataType(ePackage, "test", "java.lang.String");
+		assertEquals("test", eDataType.getName());
+		assertSame(eDataType,
+			ePackage.getEClassifiers().get(0));
+		assertEquals("java.lang.String", eDataType.getInstanceTypeName());
+		assertEquals("java.lang.String", eDataType.getInstanceClassName());
+		assertEquals(String.class, eDataType.getInstanceClass());
+	}
+
+	@Test
+	public void test_addNewEDataTypeWithInitializer() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		EDataType eDataType = lib.addNewEDataType(ePackage, "test", "java.lang.String",
+				cl -> {
+					assertNotNull(cl.getEPackage());
+					cl.setName("changed");
+				});
+		assertEquals("changed", eDataType.getName());
+		assertSame(eDataType,
+			ePackage.getEClassifiers().get(0));
+		assertEquals("java.lang.String", eDataType.getInstanceTypeName());
+		assertEquals("java.lang.String", eDataType.getInstanceClassName());
+		assertEquals(String.class, eDataType.getInstanceClass());
+	}
+
+	@Test
 	public void test_addEAttribute() {
 		EClass eClass = ecoreFactory.createEClass();
 		EAttribute eAttribute = ecoreFactory.createEAttribute();
