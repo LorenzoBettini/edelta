@@ -1159,6 +1159,13 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			      this.lib.addNewEReference(it_1, "ANewReference", getEClass("foo", "FooClass"), _function_2);
 			    };
 			    this.lib.addNewEClass(it, "ANewClass", _function);
+			    this.lib.addNewEEnum(it, "ANewEnum");
+			    this.lib.addNewEDataType(it, "ANewDataType", "java.lang.String");
+			    getEClass("foo", "ANewClass");
+			    getEAttribute("foo", "ANewClass", "ANewAttribute");
+			    getEReference("foo", "ANewClass", "ANewReference");
+			    getEEnum("foo", "ANewEnum");
+			    getEDataType("foo", "ANewDataType");
 			  }
 			  
 			  @Override

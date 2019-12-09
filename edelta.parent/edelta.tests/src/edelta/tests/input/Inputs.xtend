@@ -413,6 +413,13 @@ class Inputs {
 					lowerBound = 1
 				]
 			]
+			addNewEEnum("ANewEnum")
+			addNewEDataType("ANewDataType", "java.lang.String")
+			ecoreref(ANewClass)
+			ecoreref(ANewClass.ANewAttribute)
+			ecoreref(ANewClass.ANewReference)
+			ecoreref(ANewEnum)
+			ecoreref(ANewDataType)
 		}
 		'''
 	}
