@@ -1134,6 +1134,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			import java.util.function.Consumer;
 			import org.eclipse.emf.ecore.EAttribute;
 			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.emf.ecore.EEnum;
+			import org.eclipse.emf.ecore.EEnumLiteral;
 			import org.eclipse.emf.ecore.EPackage;
 			import org.eclipse.emf.ecore.EReference;
 			
@@ -1159,12 +1161,19 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			      this.lib.addNewEReference(it_1, "ANewReference", getEClass("foo", "FooClass"), _function_2);
 			    };
 			    this.lib.addNewEClass(it, "ANewClass", _function);
-			    this.lib.addNewEEnum(it, "ANewEnum");
+			    final Consumer<EEnum> _function_1 = (EEnum it_1) -> {
+			      final Consumer<EEnumLiteral> _function_2 = (EEnumLiteral it_2) -> {
+			        it_2.setValue(10);
+			      };
+			      this.lib.addNewEEnumLiteral(it_1, "ANewEnumLiteral", _function_2);
+			    };
+			    this.lib.addNewEEnum(it, "ANewEnum", _function_1);
 			    this.lib.addNewEDataType(it, "ANewDataType", "java.lang.String");
 			    getEClass("foo", "ANewClass");
 			    getEAttribute("foo", "ANewClass", "ANewAttribute");
 			    getEReference("foo", "ANewClass", "ANewReference");
 			    getEEnum("foo", "ANewEnum");
+			    getEEnumLiteral("foo", "ANewEnum", "ANewEnumLiteral");
 			    getEDataType("foo", "ANewDataType");
 			  }
 			  
