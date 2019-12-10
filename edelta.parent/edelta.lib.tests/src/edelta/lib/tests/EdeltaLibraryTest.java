@@ -218,6 +218,38 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
+	public void test_addEEnumLiteral() {
+		EEnum eEnum = ecoreFactory.createEEnum();
+		EEnumLiteral eEnumLiteral = ecoreFactory.createEEnumLiteral();
+		lib.addEEnumLiteral(eEnum, eEnumLiteral);
+		assertSame(eEnumLiteral,
+				eEnum.getELiterals().get(0));
+	}
+
+	@Test
+	public void test_addNewEEnumLiteral() {
+		EEnum eEnum = ecoreFactory.createEEnum();
+		EEnumLiteral eEnumLiteral =
+				lib.addNewEEnumLiteral(eEnum, "test");
+		assertEquals("test", eEnumLiteral.getName());
+		assertSame(eEnumLiteral,
+				eEnum.getELiterals().get(0));
+	}
+
+	@Test
+	public void test_addNewEEnumLiteralWithInitializer() {
+		EEnum eEnum = ecoreFactory.createEEnum();
+		EEnumLiteral eEnumLiteral = lib.addNewEEnumLiteral(eEnum, "test",
+				lit -> {
+					assertNotNull(lit.getEEnum());
+					lit.setName("changed");
+				});
+		assertEquals("changed", eEnumLiteral.getName());
+		assertSame(eEnumLiteral,
+				eEnum.getELiterals().get(0));
+	}
+
+	@Test
 	public void test_addEDataType() {
 		EPackage ePackage = ecoreFactory.createEPackage();
 		EDataType eEnum = ecoreFactory.createEDataType();
