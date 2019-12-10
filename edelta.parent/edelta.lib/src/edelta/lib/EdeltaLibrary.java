@@ -178,6 +178,22 @@ public class EdeltaLibrary {
 		return e;
 	}
 
+	public void addEEnumLiteral(EEnum eEnum, EEnumLiteral eEnumLiteral) {
+		eEnum.getELiterals().add(eEnumLiteral);
+	}
+
+	public EEnumLiteral addNewEEnumLiteral(EEnum eEnum, String name) {
+		return addNewEEnumLiteral(eEnum, name, null);
+	}
+
+	public EEnumLiteral addNewEEnumLiteral(EEnum eEnum, String name, Consumer<EEnumLiteral> initializer) {
+		EEnumLiteral e = ecoreFactory.createEEnumLiteral();
+		e.setName(name);
+		addEEnumLiteral(eEnum, e);
+		safeRunInitializer(initializer, e);
+		return e;
+	}
+
 	public void addEDataType(EPackage ePackage, EDataType eDataType) {
 		addEClassifier(ePackage, eDataType);
 	}
