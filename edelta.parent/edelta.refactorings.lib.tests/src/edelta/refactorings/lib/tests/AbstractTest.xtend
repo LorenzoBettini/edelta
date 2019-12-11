@@ -4,6 +4,8 @@ import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.EcorePackage
+import org.eclipse.emf.ecore.EEnum
+import org.eclipse.emf.ecore.EEnumLiteral
 
 abstract class AbstractTest {
 
@@ -25,6 +27,26 @@ abstract class AbstractTest {
 		factory.createEClass => [
 			it.name = name
 		]
+	}
+
+	def protected createEEnum(EPackage epackage, String name) {
+		val e = createEEnum(name)
+		epackage.EClassifiers += e
+		return e
+	}
+
+	protected def EEnum createEEnum(String name) {
+		factory.createEEnum => [
+			it.name = name
+		]
+	}
+
+	def protected EEnumLiteral createEEnumLiteral(EEnum en, String name) {
+		val e = factory.createEEnumLiteral => [
+			it.name = name
+		]
+		en.ELiterals += e
+		return e
 	}
 
 	def protected createEAttribute(EClass eclass, String name) {
