@@ -1041,6 +1041,79 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCompilationOfCreateEClassCallingLibMethods() {
+		createEClassUsingLibMethods.
+		checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import java.util.function.Consumer;
+			import org.eclipse.emf.ecore.EAttribute;
+			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.emf.ecore.EEnum;
+			import org.eclipse.emf.ecore.EEnumLiteral;
+			import org.eclipse.emf.ecore.EPackage;
+			import org.eclipse.emf.ecore.EReference;
+			import org.eclipse.xtext.xbase.lib.ObjectExtensions;
+			import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  public MyFile0() {
+			    
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    createEClass("foo", "ANewClass", createList(this::_createEClass_ANewClass_in_foo));
+			  }
+			  
+			  public void _createEClass_ANewClass_in_foo(final EClass it) {
+			    {
+			      final Consumer<EAttribute> _function = (EAttribute it_1) -> {
+			        it_1.setLowerBound(1);
+			      };
+			      this.lib.addNewEAttribute(it, "ANewAttribute", getEDataType("foo", "FooDataType"), _function);
+			      final Consumer<EReference> _function_1 = (EReference it_1) -> {
+			        it_1.setLowerBound(1);
+			      };
+			      this.lib.addNewEReference(it, "ANewReference", getEClass("foo", "FooClass"), _function_1);
+			      EPackage _ePackage = it.getEPackage();
+			      final Procedure1<EPackage> _function_2 = (EPackage it_1) -> {
+			        final Consumer<EEnum> _function_3 = (EEnum it_2) -> {
+			          final Consumer<EEnumLiteral> _function_4 = (EEnumLiteral it_3) -> {
+			            it_3.setValue(10);
+			          };
+			          this.lib.addNewEEnumLiteral(it_2, "ANewEnumLiteral", _function_4);
+			        };
+			        this.lib.addNewEEnum(it_1, "ANewEnum", _function_3);
+			        this.lib.addNewEDataType(it_1, "ANewDataType", "java.lang.String");
+			      };
+			      ObjectExtensions.<EPackage>operator_doubleArrow(_ePackage, _function_2);
+			      getEClass("foo", "ANewClass");
+			      getEAttribute("foo", "ANewClass", "ANewAttribute");
+			      getEReference("foo", "ANewClass", "ANewReference");
+			      getEEnum("foo", "ANewEnum");
+			      getEEnumLiteral("foo", "ANewEnum", "ANewEnumLiteral");
+			      getEDataType("foo", "ANewDataType");
+			    }
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
 	def void testCompilationOfPersonListExample() {
 		val rs = createResourceSetWithEcore(
 			PERSON_LIST_ECORE, PERSON_LIST_ECORE_PATH,
