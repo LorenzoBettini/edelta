@@ -31,7 +31,8 @@
     <sonar.exclusions>
       **/example/**,
       **/mwe2/**,
-      **/*WizardInitialContents*.java,
+      **/Messages.java,
+      **/*ProjectTemplateProvider.java,
       **/src-gen/**,
       **/emf-gen/**,
       **/impl/*ImplCustom.java,
