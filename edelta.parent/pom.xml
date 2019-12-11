@@ -125,6 +125,7 @@
   <modules>
     <module>edelta.lib</module>
     <module>edelta.testutils</module>
+    <module>edelta.testing.libraries</module>
     <module>edelta.lib.tests</module>
     <module>edelta.mwe2</module>
     <module>edelta</module>
