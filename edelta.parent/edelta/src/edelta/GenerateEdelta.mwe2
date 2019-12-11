@@ -44,9 +44,8 @@ Workflow {
 				generateStub = true
 				generateXtendStub = true
 			}
-			newProjectWizardForEclipse = {
+			projectWizard = {
 				generate = true
-				pluginProject = true
 			}
 		}
 	}
