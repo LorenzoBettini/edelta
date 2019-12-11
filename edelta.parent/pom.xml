@@ -132,6 +132,7 @@
     <module>edelta.ide</module>
     <module>edelta.ui</module>
     <module>edelta.refactorings.lib</module>
+    <module>edelta.refactorings.lib.tests</module>
     <module>edelta.target</module>
     <module>edelta.feature</module>
     <module>edelta.repository</module>
