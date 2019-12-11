@@ -33,6 +33,7 @@
       **/mwe2/**,
       **/Messages.java,
       **/*ProjectTemplateProvider.java,
+      **/HelloWorldProject.java,
       **/src-gen/**,
       **/emf-gen/**,
       **/impl/*ImplCustom.java,

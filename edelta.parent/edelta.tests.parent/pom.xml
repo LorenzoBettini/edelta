@@ -52,6 +52,7 @@
                 <exclude>**/*Abstract*ProposalProvider.class</exclude>
                 <exclude>**/internal/*.class</exclude>
                 <exclude>**/*ProjectTemplateProvider.class</exclude>
+                <exclude>**/HelloWorldProject.class</exclude>
               </excludes>
             </configuration>
             <executions>
