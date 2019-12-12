@@ -1,6 +1,7 @@
 package edelta.testutils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +19,10 @@ import org.junit.Assert;
  */
 public class EdeltaTestUtils {
 
+	private EdeltaTestUtils() {
+
+	}
+
 	/**
 	 * Removes all contents of the specified directory, skipping ".gitignore"
 	 * and possible subdirectories.
@@ -28,7 +33,7 @@ public class EdeltaTestUtils {
 		File dir = new File(directory);
 		for (File file : dir.listFiles())
 			if (!file.isDirectory() && !file.getName().equals(".gitignore"))
-				file.delete();
+				assertTrue("File not deleted " + file.getAbsolutePath(), file.delete());
 	}
 
 	public static String loadFile(String file) throws IOException {
@@ -40,12 +45,12 @@ public class EdeltaTestUtils {
 	 * Compares the two files as strings using
 	 * {@link Assert#assertEquals(Object, Object)}
 	 * 
-	 * @param file1
-	 * @param file2
+	 * @param fileWithExpectedContents
+	 * @param fileWithActualContents
 	 * @throws IOException
 	 */
-	public static void compareFileContents(String file1, String file2) throws IOException {
-		Assert.assertEquals(removeCR(loadFile(file1)), removeCR(loadFile(file2)));
+	public static void compareFileContents(String fileWithExpectedContents, String fileWithActualContents) throws IOException {
+		assertEquals(removeCR(loadFile(fileWithExpectedContents)), removeCR(loadFile(fileWithActualContents)));
 	}
 
 	/**
@@ -57,7 +62,7 @@ public class EdeltaTestUtils {
 	 * @throws IOException
 	 */
 	public static void compareSingleFileContents(String file1, String expectedContents) throws IOException {
-		assertEquals(removeCR(loadFile(file1)), removeCR(expectedContents));
+		assertEquals(removeCR(expectedContents), removeCR(loadFile(file1)));
 	}
 
 	/**

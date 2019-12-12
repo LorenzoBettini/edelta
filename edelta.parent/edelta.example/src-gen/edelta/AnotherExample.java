@@ -34,6 +34,6 @@ public class AnotherExample extends AbstractEdelta {
   }
   
   public void _createEClass_ANewClass_in_myecore(final EClass it) {
-    this.std.addMandatoryAttr("name", getEDataType("ecore", "EString"), it);
+    this.std.addMandatoryAttr(it, "name", getEDataType("ecore", "EString"));
   }
 }

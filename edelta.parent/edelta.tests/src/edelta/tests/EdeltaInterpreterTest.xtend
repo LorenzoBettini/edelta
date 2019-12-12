@@ -250,6 +250,51 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testRenameClassAndAddAttribute() {
+		'''
+			import org.eclipse.emf.ecore.EClass
+			
+			metamodel "foo"
+			
+			def op(EClass c) : void {
+				c.abstract = true
+			}
+			
+			changeEClass foo.FooClass {
+				name = "RenamedClass"
+				ecoreref(RenamedClass).ESuperTypes += newEClass("Base")
+				op(ecoreref(RenamedClass))
+				ecoreref(RenamedClass).getEStructuralFeatures += newEAttribute("added")
+			}
+		'''.
+		assertAfterInterpretationOfEdeltaManipulationExpression(false) [
+			assertEquals("RenamedClass", name)
+			assertEquals("Base", ESuperTypes.last.name)
+			assertTrue(isAbstract)
+			assertEquals("added", EStructuralFeatures.last.name)
+		]
+	}
+
+	@Test
+	def void testRenameClassAndAddAttribute2() {
+		'''
+			import org.eclipse.emf.ecore.EClass
+			
+			metamodel "foo"
+			
+			changeEClass foo.FooClass {
+				name = "RenamedClass"
+				ecoreref(RenamedClass).getEStructuralFeatures += newEAttribute("added")
+				ecoreref(RenamedClass.added)
+			}
+		'''.
+		assertAfterInterpretationOfEdeltaManipulationExpression(false) [
+			assertEquals("RenamedClass", name)
+			assertEquals("added", EStructuralFeatures.last.name)
+		]
+	}
+
+	@Test
 	def void testTimeoutInCancelIndicator() {
 		// in this test we really need the timeout
 		interpreter.interpreterTimeout = 2000;
@@ -314,6 +359,38 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		'''
 		input.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ derivedEClass |
 			assertEquals("First", derivedEClass.name)
+		]
+	}
+
+	@Test
+	def void testUnresolvedEcoreReference() {
+		val input = '''
+			import org.eclipse.emf.ecore.EClass
+
+			metamodel "foo"
+
+			createEClass NewClass1 in foo {
+				ecoreref(nonexist) // this won't break the interpreter
+			}
+		'''
+		input.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ derivedEClass |
+			assertEquals("NewClass1", derivedEClass.name)
+		]
+	}
+
+	@Test
+	def void testUnresolvedEcoreReferenceQualified() {
+		val input = '''
+			import org.eclipse.emf.ecore.EClass
+
+			metamodel "foo"
+
+			createEClass NewClass1 in foo {
+				ecoreref(nonexist.bang) // this won't break the interpreter
+			}
+		'''
+		input.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ derivedEClass |
+			assertEquals("NewClass1", derivedEClass.name)
 		]
 	}
 

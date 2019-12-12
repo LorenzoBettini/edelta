@@ -10,11 +10,12 @@ import org.eclipse.core.resources.IResource
 import org.eclipse.core.runtime.NullProgressMonitor
 import org.eclipse.jdt.core.IJavaProject
 import org.eclipse.jdt.core.JavaCore
-import org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil
 import org.eclipse.xtext.ui.XtextProjectHelper
+import org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil
 import org.eclipse.xtext.ui.util.PluginProjectFactory
 
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
+import static org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil.*
 import static org.junit.Assert.*
 
 /**
@@ -29,7 +30,13 @@ class PluginProjectHelper {
 
 	def IJavaProject createJavaPluginProject(String projectName, List<String> requiredBundles, List<String> additionalSrcFolders) {
 		projectFactory.setProjectName(projectName);
-		projectFactory.addFolders((#["src"]+additionalSrcFolders).toList);
+		// sometimes we get:
+		// ERROR org.eclipse.xtext.ui.util.JavaProjectFactory  - Build path contains duplicate entry: 'src' for project 'test'
+		// Java Model Exception: Java Model Status [Build path contains duplicate entry: 'src' for project 'test']
+		// probably due to some missing synchronization?
+		// thus we don't do:
+		// projectFactory.addFolders((additionalSrcFolders+#["src"]).toList);
+		// but we add source folders later, which also triggers workspace build for each added source folder
 		projectFactory.addBuilderIds(JavaCore.BUILDER_ID, "org.eclipse.pde.ManifestBuilder",
 			"org.eclipse.pde.SchemaBuilder", XtextProjectHelper.BUILDER_ID);
 		projectFactory.addProjectNatures(
@@ -40,7 +47,10 @@ class PluginProjectHelper {
 		projectFactory.addRequiredBundles(requiredBundles);
 		val result = projectFactory.createProject(new NullProgressMonitor(), null);
 		makeJava8Compliant(JavaCore.create(result));
-		return JavaProjectSetupUtil.findJavaProject(projectName);
+		val javaProject = JavaProjectSetupUtil.findJavaProject(projectName)
+		addSourceFolder(javaProject, "src")
+		additionalSrcFolders.forEach[folder | addSourceFolder(javaProject, folder)]
+		return javaProject;
 	}
 
 	def static void makeJava8Compliant(IJavaProject javaProject) {

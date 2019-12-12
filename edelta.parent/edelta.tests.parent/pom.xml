@@ -5,7 +5,7 @@
   <parent>
     <groupId>edelta</groupId>
     <artifactId>edelta.parent</artifactId>
-    <version>0.5.0-SNAPSHOT</version>
+    <version>0.7.0-SNAPSHOT</version>
   </parent>
   <artifactId>edelta.tests.parent</artifactId>
   <packaging>pom</packaging>
@@ -51,8 +51,8 @@
                 <exclude>**/**ExecutableExtensionFactory.class</exclude>
                 <exclude>**/*Abstract*ProposalProvider.class</exclude>
                 <exclude>**/internal/*.class</exclude>
-                <exclude>**/*NewProjectWizard.class</exclude>
-                <exclude>**/*ProjectCreator.class</exclude>
+                <exclude>**/*ProjectTemplateProvider.class</exclude>
+                <exclude>**/HelloWorldProject.class</exclude>
               </excludes>
             </configuration>
             <executions>

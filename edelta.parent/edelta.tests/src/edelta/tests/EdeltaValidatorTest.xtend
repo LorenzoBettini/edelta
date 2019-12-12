@@ -3,8 +3,6 @@ package edelta.tests
 import edelta.edelta.EdeltaPackage
 import edelta.lib.AbstractEdelta
 import edelta.validation.EdeltaValidator
-import org.eclipse.emf.ecore.EObject
-import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
@@ -242,9 +240,53 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		'''.parseWithTestEcore.assertNoErrors
 	}
 
-	def private assertErrorsAsStrings(EObject o, CharSequence expected) {
-		expected.toString.trim.assertEqualsStrings(
-			o.validate.filter[severity == Severity.ERROR].
-				map[message].sort.join("\n"))
+	@Test
+	def void testCallMethodOnRenanedEClass() {
+		val prog =
+		'''
+		metamodel "foo"
+
+		changeEClass foo.FooClass {
+			name = "RenamedClass"
+			ecoreref(RenamedClass).getEAllStructuralFeatures
+		}
+		'''.parseWithTestEcore
+		prog.assertNoErrors
 	}
+
+	@Test
+	def void testCallNonExistingMethodOnRenanedEClass() {
+		val prog =
+		'''
+		metamodel "foo"
+
+		changeEClass foo.FooClass {
+			name = "RenamedClass"
+			ecoreref(RenamedClass).nonExistant("an arg")
+		}
+		'''.parseWithTestEcore
+		prog.assertErrorsAsStrings
+			("The method or field nonExistant(String) is undefined for the type EClass")
+	}
+
+	@Test
+	def void testReferenceToAddedAttributeofRenamedClass() {
+		'''
+		import org.eclipse.emf.ecore.EClass
+
+		metamodel "foo"
+
+		changeEClass foo.FooClass {
+			name = "RenamedClass"
+			ecoreref(RenamedClass).getEStructuralFeatures += newEAttribute("added")
+			ecoreref(RenamedClass.added)
+		}
+		'''.parseWithTestEcore.assertNoErrors
+	}
+
+	@Test
+	def void testValidLibMethodsInCreateEClass() {
+		createEClassUsingLibMethods.parseWithTestEcore.assertNoErrors
+	}
+
 }

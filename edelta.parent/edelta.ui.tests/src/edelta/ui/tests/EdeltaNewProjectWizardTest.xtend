@@ -9,10 +9,12 @@ import org.eclipse.jface.viewers.StructuredSelection
 import org.eclipse.jface.wizard.Wizard
 import org.eclipse.jface.wizard.WizardDialog
 import org.eclipse.ui.PlatformUI
-import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest
+import org.eclipse.xtext.testing.Flaky
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest
 import org.junit.BeforeClass
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -25,6 +27,9 @@ class EdeltaNewProjectWizardTest extends AbstractWorkbenchTest {
 	@Inject protected PluginProjectHelper projectHelper
 
 	@Inject Provider<EdeltaTestableNewProjectWizard> wizardProvider
+
+	@Rule
+	public Flaky.Rule testRule = new Flaky.Rule();
 
 	/**
 	 * Create the wizard dialog, open it and press Finish.
@@ -67,7 +72,8 @@ class EdeltaNewProjectWizardTest extends AbstractWorkbenchTest {
 		PDETargetPlatformUtils.setTargetPlatform();
 	}
 
-	@Test def void testEdeltaNewProjectWizard() {
+	@Test @Flaky
+	def void testEdeltaNewProjectWizard() {
 		println("Creating new project wizard...")
 		val wizard = wizardProvider.get
 		wizard.init(PlatformUI.getWorkbench(), new StructuredSelection());

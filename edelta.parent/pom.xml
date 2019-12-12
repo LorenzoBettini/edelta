@@ -2,15 +2,15 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>edelta</groupId>
-  <version>0.5.0-SNAPSHOT</version>
+  <version>0.7.0-SNAPSHOT</version>
   <artifactId>edelta.parent</artifactId>
   <packaging>pom</packaging>
 
   <properties>
-    <tycho-version>1.3.0</tycho-version>
-    <xtextVersion>2.17.1</xtextVersion>
-    <eclipseVersion>2019-03</eclipseVersion>
-    <mwe2Version>2.10.0</mwe2Version>
+    <tycho-version>1.5.1</tycho-version>
+    <xtextVersion>2.20.0</xtextVersion>
+    <eclipseVersion>2019-09</eclipseVersion>
+    <mwe2Version>2.11.1</mwe2Version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -22,18 +22,18 @@
     <systemProperties></systemProperties>
     <additionalTestArgLine></additionalTestArgLine>
 
-    <!-- Always refer to the corresponding tests project (if it exists) otherwise 
-      Sonarqube won't be able to collect code coverage. For example, when analyzing 
-      project foo it wouldn't find code coverage information if it doesn't use 
-      foo.tests jacoco.exec. -->
-    <sonar.jacoco.reportPaths>
-      ../${project.artifactId}.tests/target/jacoco.exec
-    </sonar.jacoco.reportPaths>
+    <jacoco-aggregate-report>edelta.tests.report/target/site/jacoco-aggregate/jacoco.xml</jacoco-aggregate-report>
+
+    <sonar.coverage.jacoco.xmlReportPaths>
+      ../${jacoco-aggregate-report}
+    </sonar.coverage.jacoco.xmlReportPaths>
 
     <sonar.exclusions>
       **/example/**,
       **/mwe2/**,
-      **/*WizardInitialContents*.java,
+      **/Messages.java,
+      **/*ProjectTemplateProvider.java,
+      **/HelloWorldProject.java,
       **/src-gen/**,
       **/emf-gen/**,
       **/impl/*ImplCustom.java,
@@ -130,12 +130,14 @@
   <modules>
     <module>edelta.lib</module>
     <module>edelta.testutils</module>
+    <module>edelta.testing.libraries</module>
     <module>edelta.lib.tests</module>
     <module>edelta.mwe2</module>
     <module>edelta</module>
     <module>edelta.ide</module>
     <module>edelta.ui</module>
     <module>edelta.refactorings.lib</module>
+    <module>edelta.refactorings.lib.tests</module>
     <module>edelta.target</module>
     <module>edelta.feature</module>
     <module>edelta.repository</module>
@@ -522,7 +524,7 @@
           <version>4.3.0</version>
           <configuration>
             <jacocoReports>
-              <jacocoReport>${project.basedir}/edelta.tests.report/target/site/jacoco-aggregate/jacoco.xml</jacocoReport>
+              <jacocoReport>${project.basedir}/${jacoco-aggregate-report}</jacocoReport>
             </jacocoReports>
           </configuration>
         </plugin>

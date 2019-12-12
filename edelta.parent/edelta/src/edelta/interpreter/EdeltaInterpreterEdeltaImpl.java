@@ -15,11 +15,11 @@ import edelta.lib.AbstractEdelta;
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaInterpterEdeltaImpl extends AbstractEdelta {
+public class EdeltaInterpreterEdeltaImpl extends AbstractEdelta {
 
 	private Map<String, EPackage> packageMap;
 
-	public EdeltaInterpterEdeltaImpl(List<EPackage> ePackages) {
+	public EdeltaInterpreterEdeltaImpl(List<EPackage> ePackages) {
 		packageMap = ePackages.stream().collect(
 				Collectors.toMap(
 						EPackage::getName,

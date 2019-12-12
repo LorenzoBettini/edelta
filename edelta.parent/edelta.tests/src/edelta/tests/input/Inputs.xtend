@@ -398,12 +398,44 @@ class Inputs {
 		'''
 	}
 
+	def createEClassUsingLibMethods() {
+		'''
+		import org.eclipse.emf.ecore.EClass
+
+		metamodel "foo"
+
+		createEClass ANewClass in foo {
+			addNewEAttribute("ANewAttribute", ecoreref(FooDataType)) [
+				lowerBound = 1
+			]
+			addNewEReference("ANewReference", ecoreref(FooClass)) [
+				lowerBound = 1
+			]
+			// the containing EPackage
+			getEPackage => [
+				addNewEEnum("ANewEnum") [
+					addNewEEnumLiteral("ANewEnumLiteral") [
+						value = 10
+					]
+				]
+				addNewEDataType("ANewDataType", "java.lang.String")
+			]
+			ecoreref(ANewClass)
+			ecoreref(ANewClass.ANewAttribute)
+			ecoreref(ANewClass.ANewReference)
+			ecoreref(ANewEnum)
+			ecoreref(ANewEnum.ANewEnumLiteral)
+			ecoreref(ANewDataType)
+		}
+		'''
+	}
+
 	def personListExample()
 	'''
 		import gssi.refactorings.MMrefactorings
 		import org.eclipse.emf.ecore.EEnum
 		
-		package gssi.personexample
+		package com.example
 		
 		metamodel "PersonList"
 		metamodel "ecore"
@@ -413,13 +445,13 @@ class Inputs {
 		changeEClass PersonList.Person {
 			refactorings.
 				introduceSubclasses(
+					it,
 					ecoreref(Person.gender),
-					ecoreref(Person.gender).EAttributeType as EEnum,
-					it
+					ecoreref(Person.gender).EAttributeType as EEnum
 				);
 			EStructuralFeatures+=
 				refactorings.mergeAttributes("name",
-					ecoreref(Person.firstname).EType,
+					ecoreref(Person.firstname).EAttributeType,
 					#[ecoreref(Person.firstname),ecoreref(Person.lastname)]
 				);
 		}
@@ -440,7 +472,7 @@ class Inputs {
 				refactorings.mergeReferences("places",
 					ecoreref(Place),
 					#[ecoreref(List.wplaces),ecoreref(List.lplaces)]
-				);	
+				);
 		}
 	'''
 

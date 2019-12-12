@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: edelta.personlist.example
+Bundle-ManifestVersion: 2
+Bundle-Name: edelta.personlist.example
+Bundle-Vendor: Lorenzo Bettini
+Bundle-Version: 0.7.0.qualifier
+Bundle-SymbolicName: edelta.personlist.example; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: edelta.lib,
+ edelta.refactorings.lib
+Import-Package: org.apache.log4j,
+ org.apache.commons.logging
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: com.example

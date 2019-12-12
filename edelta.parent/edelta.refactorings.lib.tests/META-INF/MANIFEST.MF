@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Edelta Refactorings Lib Tests
+Bundle-SymbolicName: edelta.refactoring.lib.tests
+Bundle-Version: 0.7.0.qualifier
+Bundle-Vendor: Lorenzo Bettini
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.junit;bundle-version="4.12.0",
+ edelta.testutils,
+ org.eclipse.xtext.util,
+ edelta.testing.libraries;bundle-version="0.6.0",
+ edelta.refactorings.lib,
+ com.google.guava,
+ org.eclipse.xtext.xbase.lib,
+ org.eclipse.xtend.lib,
+ org.eclipse.xtend.lib.macro,
+ org.eclipse.emf.ecore
+Automatic-Module-Name: edelta.lib.tests

@@ -7,7 +7,7 @@
   <parent>
     <groupId>edelta</groupId>
     <artifactId>edelta.parent</artifactId>
-    <version>0.5.0-SNAPSHOT</version>
+    <version>0.7.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>edelta.swtbot.tests</artifactId>
@@ -15,7 +15,7 @@
 
   <properties>
     <test-work-directory>${project.build.directory}/work/edelta</test-work-directory>
-    <additionalTestArgLine>-Dorg.eclipse.swtbot.search.timeout=10000</additionalTestArgLine>
+    <additionalTestArgLine>-Dorg.eclipse.swtbot.search.timeout=20000</additionalTestArgLine>
     <!-- Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=397015 -->
     <sonar.sources></sonar.sources>
     <sonar.tests>src</sonar.tests>
@@ -73,7 +73,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.8</version>
         <executions>
           <execution>
             <id>unpack-product</id>

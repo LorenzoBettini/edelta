@@ -1,0 +1,44 @@
+import gssi.refactorings.MMrefactorings
+import org.eclipse.emf.ecore.EEnum
+
+// IMPORTANT: ecores must be in a source directory
+// otherwise you can't refer to them
+package com.example
+
+metamodel "PersonList"
+metamodel "ecore"
+
+use MMrefactorings as refactorings
+
+changeEClass PersonList.Person {
+	refactorings.
+		introduceSubclasses(
+			it,
+			ecoreref(Person.gender),
+			ecoreref(Person.gender).EAttributeType as EEnum
+		);
+	EStructuralFeatures+=
+		refactorings.mergeAttributes("name",
+			ecoreref(Person.firstname).EAttributeType,
+			#[ecoreref(Person.firstname),ecoreref(Person.lastname)]
+		);
+}
+
+createEClass Place in PersonList {
+	abstract = true
+	refactorings.extractSuperclass(it,
+		#[ecoreref(LivingPlace.address), ecoreref(WorkPlace.address)]);
+}
+
+createEClass WorkingPosition in PersonList {
+	createEAttribute description type EString {}
+	refactorings.extractMetaClass(it,ecoreref(Person.works),"position","works");
+}
+
+changeEClass PersonList.List {
+	EStructuralFeatures+=
+		refactorings.mergeReferences("places",
+			ecoreref(Place),
+			#[ecoreref(List.wplaces),ecoreref(List.lplaces)]
+		);
+}

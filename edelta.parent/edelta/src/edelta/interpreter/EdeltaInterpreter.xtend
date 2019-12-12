@@ -27,6 +27,7 @@ import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
+import org.eclipse.xtext.util.IResourceScopeCache
 
 class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
@@ -34,6 +35,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 	@Inject extension EdeltaInterpreterHelper
 	@Inject extension EdeltaCompilerUtil
 	@Inject extension EdeltaEcoreHelper
+	@Inject IResourceScopeCache cache
 
 	var int interpreterTimeout = 2000;
 
@@ -41,7 +43,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
 	val IT_QUALIFIED_NAME = QualifiedName.create("it")
 
-	var EdeltaInterpterEdeltaImpl edelta
+	var EdeltaInterpreterEdeltaImpl edelta
 
 	override void setInterpreterTimeout(int interpreterTimeout) {
 		this.interpreterTimeout = interpreterTimeout
@@ -51,31 +53,44 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 		JvmGenericType programInferredJavaType, List<EPackage> packages
 	) {
 		this.programInferredJavaType = programInferredJavaType
-		edelta = new EdeltaInterpterEdeltaImpl(packages)
-		val result = evaluate(
-			e,
-			createContext() => [
-				newValue(IT_QUALIFIED_NAME, c)
-				// 'this' and the name of the inferred class are mapped
-				// to an instance of AbstractEdelta, so that all reflective
-				// accesses, e.g., the inherited field 'lib', work out of the box
-				// calls to operations defined in the sources are intercepted
-				// in our custom invokeOperation and in that case we interpret the
-				// original source's XBlockExpression
-				newValue(QualifiedName.create("this"), edelta)
-				newValue(QualifiedName.create(programInferredJavaType.simpleName), edelta)
-			],
-			new CancelIndicator() {
-				long stopAt = System.currentTimeMillis() + interpreterTimeout;
-				override boolean isCanceled() {
-					return System.currentTimeMillis() > stopAt;
+		edelta = new EdeltaInterpreterEdeltaImpl(packages)
+		val cacheCleaner = new EdeltaInterpreterCacheCleaner(cache, e.eResource)
+		// clear the cache before when the interpreter modifies
+		// the EPackage of the interpreted expression
+		// since new types might be available after the interpretation
+		// and existing types might have been modified or renamed
+		// this makes sure that scoping and the type computer
+		// is performed again
+		val p = c.EPackage
+		p.eAdapters += cacheCleaner
+		try {
+			val result = evaluate(
+				e,
+				createContext() => [
+					newValue(IT_QUALIFIED_NAME, c)
+					// 'this' and the name of the inferred class are mapped
+					// to an instance of AbstractEdelta, so that all reflective
+					// accesses, e.g., the inherited field 'lib', work out of the box
+					// calls to operations defined in the sources are intercepted
+					// in our custom invokeOperation and in that case we interpret the
+					// original source's XBlockExpression
+					newValue(QualifiedName.create("this"), edelta)
+					newValue(QualifiedName.create(programInferredJavaType.simpleName), edelta)
+				],
+				new CancelIndicator() {
+					long stopAt = System.currentTimeMillis() + interpreterTimeout;
+					override boolean isCanceled() {
+						return System.currentTimeMillis() > stopAt;
+					}
 				}
+			)
+			if (result === null) {
+				addWarning(e)
 			}
-		)
-		if (result === null) {
-			addWarning(e)
+			return result
+		} finally {
+			p.eAdapters.remove(cacheCleaner)
 		}
-		return result
 	}
 
 	def private addWarning(EdeltaEcoreBaseEClassManipulationWithBlockExpression e) {
@@ -103,11 +118,16 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 			buildMethodToCallForEcoreReference(expression) [
 				methodName, args |
 				val op = findJvmOperation(methodName)
-				val ref = super.invokeOperation(
-					op, edelta,
-					args, context, indicator
-				)
-				elementWrapper.set(ref)
+				// it could be null due to an unresolved reference
+				// the returned op would be getENamedElement
+				// which does not exist in AbstractEdelta
+				if (op !== null) {
+					val ref = super.invokeOperation(
+						op, edelta,
+						args, context, indicator
+					)
+					elementWrapper.set(ref)
+				}
 			]
 			return elementWrapper.get
 		} else if (expression instanceof EdeltaEcoreCreateEAttributeExpression) {
