@@ -9,9 +9,8 @@ import org.eclipse.emf.ecore.EStructuralFeature
 package gssi.refactorings
 
 def addMandatoryAttr(EClass eClass, String attrname, EDataType dataType): EAttribute {
-	return newEAttribute(attrname, dataType) [
+	return eClass.addNewEAttribute(attrname, dataType) [
 		lowerBound = 1;
-		eClass.addEAttribute(it)
 	]
 }
 

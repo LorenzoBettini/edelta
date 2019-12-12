@@ -26,9 +26,8 @@ public class MMrefactorings extends AbstractEdelta {
   public EAttribute addMandatoryAttr(final EClass eClass, final String attrname, final EDataType dataType) {
     final Consumer<EAttribute> _function = (EAttribute it) -> {
       it.setLowerBound(1);
-      this.lib.addEAttribute(eClass, it);
     };
-    return this.lib.newEAttribute(attrname, dataType, _function);
+    return this.lib.addNewEAttribute(eClass, attrname, dataType, _function);
   }
   
   public EReference mergeReferences(final String newAttrName, final EClass etype, final List<EReference> refs) {
