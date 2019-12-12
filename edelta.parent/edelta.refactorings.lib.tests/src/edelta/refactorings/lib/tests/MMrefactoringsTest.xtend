@@ -80,7 +80,7 @@ class MMrefactoringsTest extends AbstractTest {
 		val attr = c.createEAttribute("attr") => [
 			EType = enum
 		]
-		refactorings.introduceSubclasses(attr, enum, c)
+		refactorings.introduceSubclasses(c, attr, enum)
 		assertThat(c.isAbstract).isTrue
 		assertThat(c.EStructuralFeatures).isEmpty
 		assertThat(p.EClassifiers.filter(EClass))

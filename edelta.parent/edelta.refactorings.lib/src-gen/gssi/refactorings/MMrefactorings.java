@@ -6,7 +6,6 @@ import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
@@ -40,11 +39,10 @@ public class MMrefactorings extends AbstractEdelta {
     return newRef;
   }
   
-  public EAttribute mergeAttributes(final String newAttrName, final EClassifier etype, final List<EAttribute> attrs) {
+  public EAttribute mergeAttributes(final String newAttrName, final EDataType dataType, final List<EAttribute> attrs) {
     final Consumer<EAttribute> _function = (EAttribute it) -> {
-      it.setEType(etype);
     };
-    final EAttribute newAttr = this.lib.newEAttribute(newAttrName, _function);
+    final EAttribute newAttr = this.lib.newEAttribute(newAttrName, dataType, _function);
     this.removeFeaturesFromContainingClass(attrs);
     return newAttr;
   }
@@ -57,19 +55,16 @@ public class MMrefactorings extends AbstractEdelta {
     features.forEach(_function);
   }
   
-  public void introduceSubclasses(final EAttribute attr, final EEnum attr_type, final EClass containingclass) {
+  public void introduceSubclasses(final EClass containingclass, final EAttribute attr, final EEnum enumType) {
     containingclass.setAbstract(true);
-    final EEnum subclasses = attr_type;
-    EList<EEnumLiteral> _eLiterals = subclasses.getELiterals();
+    EList<EEnumLiteral> _eLiterals = enumType.getELiterals();
     for (final EEnumLiteral subc : _eLiterals) {
       {
-        EList<EClassifier> _eClassifiers = containingclass.getEPackage().getEClassifiers();
         final Consumer<EClass> _function = (EClass it) -> {
           EList<EClass> _eSuperTypes = it.getESuperTypes();
           _eSuperTypes.add(containingclass);
         };
-        EClass _newEClass = this.lib.newEClass(subc.getLiteral(), _function);
-        _eClassifiers.add(_newEClass);
+        this.lib.addNewEClass(containingclass.getEPackage(), subc.getLiteral(), _function);
         EList<EStructuralFeature> _eStructuralFeatures = containingclass.getEStructuralFeatures();
         _eStructuralFeatures.remove(attr);
       }

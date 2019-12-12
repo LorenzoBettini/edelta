@@ -1,7 +1,6 @@
 import java.util.List
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.EReference
@@ -16,16 +15,14 @@ def addMandatoryAttr(EClass eClass, String attrname, EDataType dataType): EAttri
 	]
 }
 
-def mergeReferences(String newAttrName, EClass etype, List<EReference> refs): EReference{
+def mergeReferences(String newAttrName, EClass etype, List<EReference> refs): EReference {
 	val newRef = newEReference(newAttrName, etype) []
 	refs.removeFeaturesFromContainingClass
 	return newRef;
 }
 
-def mergeAttributes(String newAttrName, EClassifier etype, List<EAttribute> attrs) : EAttribute {
-	val newAttr = newEAttribute(newAttrName) [
-		EType = etype;
-	]
+def mergeAttributes(String newAttrName, EDataType dataType, List<EAttribute> attrs) : EAttribute {
+	val newAttr = newEAttribute(newAttrName, dataType) []
 	attrs.removeFeaturesFromContainingClass
 	return newAttr;
 }
@@ -35,11 +32,10 @@ def removeFeaturesFromContainingClass(List<? extends EStructuralFeature> feature
 		.forEach[EContainingClass.EStructuralFeatures -= it]
 }
 
-def introduceSubclasses(EAttribute attr,EEnum attr_type, EClass containingclass){
+def introduceSubclasses(EClass containingclass, EAttribute attr, EEnum enumType) {
 	containingclass.abstract = true;
-	val subclasses = attr_type;
-	for (subc : subclasses.ELiterals) {
-		containingclass.EPackage.EClassifiers += newEClass(subc.literal) [
+	for (subc : enumType.ELiterals) {
+		containingclass.EPackage.addNewEClass(subc.literal) [
 			ESuperTypes += containingclass;
 		];
 		containingclass.EStructuralFeatures -= attr;
