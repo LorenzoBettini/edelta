@@ -1122,7 +1122,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		rs.
 		checkCompilation(
 			'''
-			package gssi.personexample;
+			package com.example;
 			
 			import edelta.lib.AbstractEdelta;
 			import gssi.refactorings.MMrefactorings;
@@ -1165,12 +1165,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public void _changeEClass_Person_in_PersonList(final EClass it) {
 			    {
 			      EDataType _eAttributeType = getEAttribute("PersonList", "Person", "gender").getEAttributeType();
-			      this.refactorings.introduceSubclasses(
+			      this.refactorings.introduceSubclasses(it, 
 			        getEAttribute("PersonList", "Person", "gender"), 
-			        ((EEnum) _eAttributeType), it);
+			        ((EEnum) _eAttributeType));
 			      EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
 			      EAttribute _mergeAttributes = this.refactorings.mergeAttributes("name", 
-			        getEAttribute("PersonList", "Person", "firstname").getEType(), 
+			        getEAttribute("PersonList", "Person", "firstname").getEAttributeType(), 
 			        Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname"))));
 			      _eStructuralFeatures.add(_mergeAttributes);
 			    }
