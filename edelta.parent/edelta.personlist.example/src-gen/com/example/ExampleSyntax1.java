@@ -41,12 +41,12 @@ public class ExampleSyntax1 extends AbstractEdelta {
   public void _changeEClass_Person_in_PersonList(final EClass it) {
     {
       EDataType _eAttributeType = getEAttribute("PersonList", "Person", "gender").getEAttributeType();
-      this.refactorings.introduceSubclasses(
+      this.refactorings.introduceSubclasses(it, 
         getEAttribute("PersonList", "Person", "gender"), 
-        ((EEnum) _eAttributeType), it);
+        ((EEnum) _eAttributeType));
       EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
       EAttribute _mergeAttributes = this.refactorings.mergeAttributes("name", 
-        getEAttribute("PersonList", "Person", "firstname").getEType(), 
+        getEAttribute("PersonList", "Person", "firstname").getEAttributeType(), 
         Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname"))));
       _eStructuralFeatures.add(_mergeAttributes);
     }

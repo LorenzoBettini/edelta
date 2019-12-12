@@ -5,7 +5,7 @@ Bundle-Vendor: Lorenzo Bettini
 Bundle-Version: 0.6.0.qualifier
 Bundle-SymbolicName: edelta.refactorings.lib; singleton:=true
 Bundle-ActivationPolicy: lazy
-Require-Bundle: edelta.lib
+Require-Bundle: edelta.lib;visibility:=reexport
 Import-Package: org.apache.log4j,
  org.apache.commons.logging
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

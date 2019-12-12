@@ -1,49 +1,39 @@
 import java.util.List
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.EClassifier
+import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.EReference
+import org.eclipse.emf.ecore.EStructuralFeature
 
 package gssi.refactorings
 
-metamodel "ecore"
-
-def addMandatoryAttr(String attrname, EClassifier etype, EClass mc): EAttribute{
-	val a = newEAttribute(attrname) [
-		EType = etype;
+def addMandatoryAttr(EClass eClass, String attrname, EDataType dataType): EAttribute {
+	return eClass.addNewEAttribute(attrname, dataType) [
 		lowerBound = 1;
 	]
-	mc.EStructuralFeatures += a;
-	return a;
 }
 
-def mergeReferences(String newAttrName, EClassifier etype, List<EReference> refs): EReference{
-	val newRef = newEReference(newAttrName) [
-		EType = etype;
-	]
-	for (r : refs) {
-		r.EContainingClass.EStructuralFeatures -= r;
-	}
-	return newRef;
+def mergeReferences(String newReferenceName, EClass newReferenceType, List<EReference> refs): EReference {
+	refs.removeFeaturesFromContainingClass
+	return newEReference(newReferenceName, newReferenceType)
 }
 
-def mergeAttributes(String newAttrName, EClassifier etype, List<EAttribute> attrs): EAttribute{
-	val newAttr = newEAttribute(newAttrName) [
-		EType = etype;
-	]
-	for (a : attrs) {
-		a.EContainingClass.EStructuralFeatures -= a;
-	}
-	return newAttr;
+def mergeAttributes(String newAttrName, EDataType newAttributeType, List<EAttribute> attrs) : EAttribute {
+	attrs.removeFeaturesFromContainingClass
+	return newEAttribute(newAttrName, newAttributeType)
 }
 
-def introduceSubclasses(EAttribute attr,EEnum attr_type, EClass containingclass){
+def removeFeaturesFromContainingClass(List<? extends EStructuralFeature> features) {
+	features
+		.forEach[EContainingClass.EStructuralFeatures -= it]
+}
+
+def introduceSubclasses(EClass containingclass, EAttribute attr, EEnum enumType) {
 	containingclass.abstract = true;
-	val subclasses = attr_type;
-	for (subc : subclasses.ELiterals) {
-		containingclass.EPackage.EClassifiers += newEClass(subc.literal) [
-			ESuperTypes += containingclass;
+	for (subc : enumType.ELiterals) {
+		containingclass.EPackage.addNewEClass(subc.literal) [
+			addSuperClass(containingclass)
 		];
 		containingclass.EStructuralFeatures -= attr;
 	}
@@ -60,46 +50,47 @@ def extractSuperclass(EClass superclass, List<EAttribute> attrs){
 	// already created from outside in the right package
 	// extracted_attr.EContainingClass.EPackage.EClassifiers+=superclass;
 	for (attr : attrs) {
-		// set supertype of the EClass of the attribute
-		attr.EContainingClass.ESuperTypes += superclass;
-		// and then remove the attribute from the original EClass
-		attr.EContainingClass.EStructuralFeatures -= attr
+		attr.EContainingClass => [
+			// set supertype of the EClass of the attribute
+			addSuperClass(superclass)
+			// and then remove the attribute from the original EClass
+			EStructuralFeatures -= attr
+		]
 	}
 
 	superclass.EStructuralFeatures += extracted_attr;
 }
 
 /**
- * @param extracted_class the created EClass created representing the extracted metaclass
+ * @param extractedClass the created EClass created representing the extracted metaclass
  * @param f 
- * @param _in
- * @param _out
+ * @param inReferenceName
+ * @param outReferenceName
  */
-def extractMetaClass(EClass extracted_class, EReference f, String _in, String _out) : void {
-	val ref_in = newEReference(_in) [
-		EType = extracted_class;
+def extractMetaClass(EClass extractedClass, EReference f, String inReferenceName, String outReferenceName) : void {
+	val ref_in = newEReference(inReferenceName, extractedClass) [
 		lowerBound = f.EOpposite.lowerBound;
 		upperBound = 1;
 		// f.EOpposite.upperBound;
 	];
 
-	val old_ref = newEReference(f.name) [
+	val old_ref = newEReference(f.name, f.EReferenceType) [
 		lowerBound = 1;
 		upperBound = 1;
-		EType = f.EType;
 		EOpposite = ref_in;
 	];
-	extracted_class.EStructuralFeatures += old_ref;
+
+	extractedClass.addEReference(old_ref);
 	ref_in.EOpposite = old_ref;
 	f.EOpposite.lowerBound = 1;
 	f.EOpposite.upperBound = 1;
 
-	extracted_class.EStructuralFeatures += f.EOpposite;
+	extractedClass.addEReference(f.EOpposite);
 
 	// already created from outside in the right package
 	// f.EContainingClass.EPackage.EClassifiers+=extracted_class;
-	f.EReferenceType.EStructuralFeatures += ref_in;
-	f.EType = extracted_class;
+	f.EReferenceType.addEReference(ref_in);
+	f.EType = extractedClass;
 	f.containment = true;
-	f.name = _out;
+	f.name = outReferenceName;
 }
