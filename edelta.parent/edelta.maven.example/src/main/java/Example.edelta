@@ -23,5 +23,8 @@ def addMandatoryAttr(EClass eClass, String attrname, EDataType dataType): EAttri
 }
 
 // ... or using Edelta DSL specific syntax
-createEClass MyNewClass in myecore {}
+createEClass MyNewClass in myecore {
+	addMandatoryAttr("ANewAttribute", ecoreref(EString))
+	ecoreref(ANewAttribute)
+}
 

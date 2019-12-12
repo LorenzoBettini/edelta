@@ -51,5 +51,9 @@ public class Example extends AbstractEdelta {
   }
   
   public void _createEClass_MyNewClass_in_myecore(final EClass it) {
+    {
+      this.addMandatoryAttr(it, "ANewAttribute", getEDataType("ecore", "EString"));
+      getEAttribute("myecore", "MyNewClass", "ANewAttribute");
+    }
   }
 }
