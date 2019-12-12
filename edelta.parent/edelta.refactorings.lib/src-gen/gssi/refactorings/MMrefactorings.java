@@ -30,20 +30,14 @@ public class MMrefactorings extends AbstractEdelta {
     return this.lib.addNewEAttribute(eClass, attrname, dataType, _function);
   }
   
-  public EReference mergeReferences(final String newAttrName, final EClass etype, final List<EReference> refs) {
-    final Consumer<EReference> _function = (EReference it) -> {
-    };
-    final EReference newRef = this.lib.newEReference(newAttrName, etype, _function);
+  public EReference mergeReferences(final String newReferenceName, final EClass newReferenceType, final List<EReference> refs) {
     this.removeFeaturesFromContainingClass(refs);
-    return newRef;
+    return this.lib.newEReference(newReferenceName, newReferenceType);
   }
   
-  public EAttribute mergeAttributes(final String newAttrName, final EDataType dataType, final List<EAttribute> attrs) {
-    final Consumer<EAttribute> _function = (EAttribute it) -> {
-    };
-    final EAttribute newAttr = this.lib.newEAttribute(newAttrName, dataType, _function);
+  public EAttribute mergeAttributes(final String newAttrName, final EDataType newAttributeType, final List<EAttribute> attrs) {
     this.removeFeaturesFromContainingClass(attrs);
-    return newAttr;
+    return this.lib.newEAttribute(newAttrName, newAttributeType);
   }
   
   public void removeFeaturesFromContainingClass(final List<? extends EStructuralFeature> features) {

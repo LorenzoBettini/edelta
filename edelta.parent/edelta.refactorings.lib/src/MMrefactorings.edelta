@@ -14,16 +14,14 @@ def addMandatoryAttr(EClass eClass, String attrname, EDataType dataType): EAttri
 	]
 }
 
-def mergeReferences(String newAttrName, EClass etype, List<EReference> refs): EReference {
-	val newRef = newEReference(newAttrName, etype) []
+def mergeReferences(String newReferenceName, EClass newReferenceType, List<EReference> refs): EReference {
 	refs.removeFeaturesFromContainingClass
-	return newRef;
+	return newEReference(newReferenceName, newReferenceType)
 }
 
-def mergeAttributes(String newAttrName, EDataType dataType, List<EAttribute> attrs) : EAttribute {
-	val newAttr = newEAttribute(newAttrName, dataType) []
+def mergeAttributes(String newAttrName, EDataType newAttributeType, List<EAttribute> attrs) : EAttribute {
 	attrs.removeFeaturesFromContainingClass
-	return newAttr;
+	return newEAttribute(newAttrName, newAttributeType)
 }
 
 def removeFeaturesFromContainingClass(List<? extends EStructuralFeature> features) {
