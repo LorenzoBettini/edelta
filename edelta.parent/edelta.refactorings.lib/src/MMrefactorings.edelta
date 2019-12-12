@@ -33,7 +33,7 @@ def introduceSubclasses(EClass containingclass, EAttribute attr, EEnum enumType)
 	containingclass.abstract = true;
 	for (subc : enumType.ELiterals) {
 		containingclass.EPackage.addNewEClass(subc.literal) [
-			ESuperTypes += containingclass;
+			addSuperClass(containingclass)
 		];
 		containingclass.EStructuralFeatures -= attr;
 	}
@@ -50,10 +50,12 @@ def extractSuperclass(EClass superclass, List<EAttribute> attrs){
 	// already created from outside in the right package
 	// extracted_attr.EContainingClass.EPackage.EClassifiers+=superclass;
 	for (attr : attrs) {
-		// set supertype of the EClass of the attribute
-		attr.EContainingClass.ESuperTypes += superclass;
-		// and then remove the attribute from the original EClass
-		attr.EContainingClass.EStructuralFeatures -= attr
+		attr.EContainingClass => [
+			// set supertype of the EClass of the attribute
+			addSuperClass(superclass)
+			// and then remove the attribute from the original EClass
+			EStructuralFeatures -= attr
+		]
 	}
 
 	superclass.EStructuralFeatures += extracted_attr;

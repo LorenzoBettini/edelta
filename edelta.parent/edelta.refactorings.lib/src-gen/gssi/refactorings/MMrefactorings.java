@@ -12,6 +12,8 @@ import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
+import org.eclipse.xtext.xbase.lib.ObjectExtensions;
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class MMrefactorings extends AbstractEdelta {
@@ -54,8 +56,7 @@ public class MMrefactorings extends AbstractEdelta {
     for (final EEnumLiteral subc : _eLiterals) {
       {
         final Consumer<EClass> _function = (EClass it) -> {
-          EList<EClass> _eSuperTypes = it.getESuperTypes();
-          _eSuperTypes.add(containingclass);
+          this.lib.addSuperClass(it, containingclass);
         };
         this.lib.addNewEClass(containingclass.getEPackage(), subc.getLiteral(), _function);
         EList<EStructuralFeature> _eStructuralFeatures = containingclass.getEStructuralFeatures();
@@ -74,12 +75,13 @@ public class MMrefactorings extends AbstractEdelta {
     {
       final EAttribute extracted_attr = IterableExtensions.<EAttribute>head(attrs);
       for (final EAttribute attr : attrs) {
-        {
-          EList<EClass> _eSuperTypes = attr.getEContainingClass().getESuperTypes();
-          _eSuperTypes.add(superclass);
-          EList<EStructuralFeature> _eStructuralFeatures = attr.getEContainingClass().getEStructuralFeatures();
+        EClass _eContainingClass = attr.getEContainingClass();
+        final Procedure1<EClass> _function = (EClass it) -> {
+          this.lib.addSuperClass(it, superclass);
+          EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
           _eStructuralFeatures.remove(attr);
-        }
+        };
+        ObjectExtensions.<EClass>operator_doubleArrow(_eContainingClass, _function);
       }
       EList<EStructuralFeature> _eStructuralFeatures = superclass.getEStructuralFeatures();
       _xblockexpression = _eStructuralFeatures.add(extracted_attr);
