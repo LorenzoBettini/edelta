@@ -63,36 +63,35 @@ def extractSuperclass(EClass superclass, List<EAttribute> attrs){
 }
 
 /**
- * @param extracted_class the created EClass created representing the extracted metaclass
+ * @param extractedClass the created EClass created representing the extracted metaclass
  * @param f 
- * @param _in
- * @param _out
+ * @param inReferenceName
+ * @param outReferenceName
  */
-def extractMetaClass(EClass extracted_class, EReference f, String _in, String _out) : void {
-	val ref_in = newEReference(_in) [
-		EType = extracted_class;
+def extractMetaClass(EClass extractedClass, EReference f, String inReferenceName, String outReferenceName) : void {
+	val ref_in = newEReference(inReferenceName, extractedClass) [
 		lowerBound = f.EOpposite.lowerBound;
 		upperBound = 1;
 		// f.EOpposite.upperBound;
 	];
 
-	val old_ref = newEReference(f.name) [
+	val old_ref = newEReference(f.name, f.EReferenceType) [
 		lowerBound = 1;
 		upperBound = 1;
-		EType = f.EType;
 		EOpposite = ref_in;
 	];
-	extracted_class.EStructuralFeatures += old_ref;
+
+	extractedClass.addEReference(old_ref);
 	ref_in.EOpposite = old_ref;
 	f.EOpposite.lowerBound = 1;
 	f.EOpposite.upperBound = 1;
 
-	extracted_class.EStructuralFeatures += f.EOpposite;
+	extractedClass.addEReference(f.EOpposite);
 
 	// already created from outside in the right package
 	// f.EContainingClass.EPackage.EClassifiers+=extracted_class;
-	f.EReferenceType.EStructuralFeatures += ref_in;
-	f.EType = extracted_class;
+	f.EReferenceType.addEReference(ref_in);
+	f.EType = extractedClass;
 	f.containment = true;
-	f.name = _out;
+	f.name = outReferenceName;
 }

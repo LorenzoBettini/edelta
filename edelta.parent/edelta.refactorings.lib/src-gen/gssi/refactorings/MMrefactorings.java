@@ -95,39 +95,33 @@ public class MMrefactorings extends AbstractEdelta {
   }
   
   /**
-   * @param extracted_class the created EClass created representing the extracted metaclass
+   * @param extractedClass the created EClass created representing the extracted metaclass
    * @param f
-   * @param _in
-   * @param _out
+   * @param inReferenceName
+   * @param outReferenceName
    */
-  public void extractMetaClass(final EClass extracted_class, final EReference f, final String _in, final String _out) {
+  public void extractMetaClass(final EClass extractedClass, final EReference f, final String inReferenceName, final String outReferenceName) {
     final Consumer<EReference> _function = (EReference it) -> {
-      it.setEType(extracted_class);
       it.setLowerBound(f.getEOpposite().getLowerBound());
       it.setUpperBound(1);
     };
-    final EReference ref_in = this.lib.newEReference(_in, _function);
+    final EReference ref_in = this.lib.newEReference(inReferenceName, extractedClass, _function);
     final Consumer<EReference> _function_1 = (EReference it) -> {
       it.setLowerBound(1);
       it.setUpperBound(1);
-      it.setEType(f.getEType());
       it.setEOpposite(ref_in);
     };
-    final EReference old_ref = this.lib.newEReference(f.getName(), _function_1);
-    EList<EStructuralFeature> _eStructuralFeatures = extracted_class.getEStructuralFeatures();
-    _eStructuralFeatures.add(old_ref);
+    final EReference old_ref = this.lib.newEReference(f.getName(), f.getEReferenceType(), _function_1);
+    this.lib.addEReference(extractedClass, old_ref);
     ref_in.setEOpposite(old_ref);
     EReference _eOpposite = f.getEOpposite();
     _eOpposite.setLowerBound(1);
     EReference _eOpposite_1 = f.getEOpposite();
     _eOpposite_1.setUpperBound(1);
-    EList<EStructuralFeature> _eStructuralFeatures_1 = extracted_class.getEStructuralFeatures();
-    EReference _eOpposite_2 = f.getEOpposite();
-    _eStructuralFeatures_1.add(_eOpposite_2);
-    EList<EStructuralFeature> _eStructuralFeatures_2 = f.getEReferenceType().getEStructuralFeatures();
-    _eStructuralFeatures_2.add(ref_in);
-    f.setEType(extracted_class);
+    this.lib.addEReference(extractedClass, f.getEOpposite());
+    this.lib.addEReference(f.getEReferenceType(), ref_in);
+    f.setEType(extractedClass);
     f.setContainment(true);
-    f.setName(_out);
+    f.setName(outReferenceName);
   }
 }
