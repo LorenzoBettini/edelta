@@ -2,40 +2,37 @@ import java.util.List
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
+import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.EReference
+import org.eclipse.emf.ecore.EStructuralFeature
 
 package gssi.refactorings
 
-metamodel "ecore"
-
-def addMandatoryAttr(String attrname, EClassifier etype, EClass mc): EAttribute{
-	val a = newEAttribute(attrname) [
-		EType = etype;
+def addMandatoryAttr(EClass eClass, String attrname, EDataType dataType): EAttribute {
+	return newEAttribute(attrname, dataType) [
 		lowerBound = 1;
+		eClass.addEAttribute(it)
 	]
-	mc.EStructuralFeatures += a;
-	return a;
 }
 
-def mergeReferences(String newAttrName, EClassifier etype, List<EReference> refs): EReference{
-	val newRef = newEReference(newAttrName) [
-		EType = etype;
-	]
-	for (r : refs) {
-		r.EContainingClass.EStructuralFeatures -= r;
-	}
+def mergeReferences(String newAttrName, EClass etype, List<EReference> refs): EReference{
+	val newRef = newEReference(newAttrName, etype) []
+	refs.removeFeaturesFromContainingClass
 	return newRef;
 }
 
-def mergeAttributes(String newAttrName, EClassifier etype, List<EAttribute> attrs): EAttribute{
+def mergeAttributes(String newAttrName, EClassifier etype, List<EAttribute> attrs) : EAttribute {
 	val newAttr = newEAttribute(newAttrName) [
 		EType = etype;
 	]
-	for (a : attrs) {
-		a.EContainingClass.EStructuralFeatures -= a;
-	}
+	attrs.removeFeaturesFromContainingClass
 	return newAttr;
+}
+
+def removeFeaturesFromContainingClass(List<? extends EStructuralFeature> features) {
+	features
+		.forEach[EContainingClass.EStructuralFeatures -= it]
 }
 
 def introduceSubclasses(EAttribute attr,EEnum attr_type, EClass containingclass){

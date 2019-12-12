@@ -13,5 +13,5 @@ use MMrefactorings as std
 example.createClass("Foo")
 
 createEClass ANewClass in myecore {
-	std.addMandatoryAttr("name", ecoreref(EString), it)
+	std.addMandatoryAttr(it, "name", ecoreref(EString))
 }

@@ -7,6 +7,7 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EReference;
@@ -23,26 +24,19 @@ public class MMrefactorings extends AbstractEdelta {
     super(other);
   }
   
-  public EAttribute addMandatoryAttr(final String attrname, final EClassifier etype, final EClass mc) {
+  public EAttribute addMandatoryAttr(final EClass eClass, final String attrname, final EDataType dataType) {
     final Consumer<EAttribute> _function = (EAttribute it) -> {
-      it.setEType(etype);
       it.setLowerBound(1);
+      this.lib.addEAttribute(eClass, it);
     };
-    final EAttribute a = this.lib.newEAttribute(attrname, _function);
-    EList<EStructuralFeature> _eStructuralFeatures = mc.getEStructuralFeatures();
-    _eStructuralFeatures.add(a);
-    return a;
+    return this.lib.newEAttribute(attrname, dataType, _function);
   }
   
-  public EReference mergeReferences(final String newAttrName, final EClassifier etype, final List<EReference> refs) {
+  public EReference mergeReferences(final String newAttrName, final EClass etype, final List<EReference> refs) {
     final Consumer<EReference> _function = (EReference it) -> {
-      it.setEType(etype);
     };
-    final EReference newRef = this.lib.newEReference(newAttrName, _function);
-    for (final EReference r : refs) {
-      EList<EStructuralFeature> _eStructuralFeatures = r.getEContainingClass().getEStructuralFeatures();
-      _eStructuralFeatures.remove(r);
-    }
+    final EReference newRef = this.lib.newEReference(newAttrName, etype, _function);
+    this.removeFeaturesFromContainingClass(refs);
     return newRef;
   }
   
@@ -51,11 +45,16 @@ public class MMrefactorings extends AbstractEdelta {
       it.setEType(etype);
     };
     final EAttribute newAttr = this.lib.newEAttribute(newAttrName, _function);
-    for (final EAttribute a : attrs) {
-      EList<EStructuralFeature> _eStructuralFeatures = a.getEContainingClass().getEStructuralFeatures();
-      _eStructuralFeatures.remove(a);
-    }
+    this.removeFeaturesFromContainingClass(attrs);
     return newAttr;
+  }
+  
+  public void removeFeaturesFromContainingClass(final List<? extends EStructuralFeature> features) {
+    final Consumer<EStructuralFeature> _function = (EStructuralFeature it) -> {
+      EList<EStructuralFeature> _eStructuralFeatures = it.getEContainingClass().getEStructuralFeatures();
+      _eStructuralFeatures.remove(it);
+    };
+    features.forEach(_function);
   }
   
   public void introduceSubclasses(final EAttribute attr, final EEnum attr_type, final EClass containingclass) {
@@ -135,10 +134,5 @@ public class MMrefactorings extends AbstractEdelta {
     f.setEType(extracted_class);
     f.setContainment(true);
     f.setName(_out);
-  }
-  
-  @Override
-  public void performSanityChecks() throws Exception {
-    ensureEPackageIsLoaded("ecore");
   }
 }

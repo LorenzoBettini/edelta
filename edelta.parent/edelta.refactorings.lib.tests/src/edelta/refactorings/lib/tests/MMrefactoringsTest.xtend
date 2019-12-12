@@ -20,7 +20,7 @@ class MMrefactoringsTest extends AbstractTest {
 	@Test
 	def void test_addMandatoryAttr() {
 		val c = createEClass("C1")
-		refactorings.addMandatoryAttr("test", stringDataType, c)
+		refactorings.addMandatoryAttr(c, "test", stringDataType)
 		val attr = c.EStructuralFeatures.filter(EAttribute).head
 		assertThat(attr)
 			.returns("test", [name])
