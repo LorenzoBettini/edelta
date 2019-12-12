@@ -6,8 +6,6 @@ import java.util.Collections;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EDataType;
-import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
@@ -40,10 +38,9 @@ public class ExampleSyntax1 extends AbstractEdelta {
   
   public void _changeEClass_Person_in_PersonList(final EClass it) {
     {
-      EDataType _eAttributeType = getEAttribute("PersonList", "Person", "gender").getEAttributeType();
       this.refactorings.introduceSubclasses(it, 
         getEAttribute("PersonList", "Person", "gender"), 
-        ((EEnum) _eAttributeType));
+        getEEnum("PersonList", "Gender"));
       EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
       EAttribute _mergeAttributes = this.refactorings.mergeAttributes("name", 
         getEAttribute("PersonList", "Person", "firstname").getEAttributeType(), 

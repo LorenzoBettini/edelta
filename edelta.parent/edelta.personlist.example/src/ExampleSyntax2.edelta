@@ -13,13 +13,13 @@ modifyEcore improvePerson epackage PersonList {
 	ecoreref(PersonList.Person) => [
 		refactorings.
 			introduceSubclasses(
+				it,
 				ecoreref(Person.gender),
-				ecoreref(Gender),
-				it
+				ecoreref(Gender)
 			)
 		EStructuralFeatures+=
 			refactorings.mergeAttributes("name",
-				ecoreref(Person.firstname).EType,
+				ecoreref(Person.firstname).EAttributeType,
 				#[ecoreref(Person.firstname), ecoreref(Person.lastname)]
 			)
 	]

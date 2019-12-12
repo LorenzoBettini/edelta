@@ -464,7 +464,6 @@ class Inputs {
 	def personListExample()
 	'''
 		import gssi.refactorings.MMrefactorings
-		import org.eclipse.emf.ecore.EEnum
 		
 		package com.example
 		
@@ -478,7 +477,7 @@ class Inputs {
 				introduceSubclasses(
 					it,
 					ecoreref(Person.gender),
-					ecoreref(Person.gender).EAttributeType as EEnum
+					ecoreref(Gender)
 				);
 			EStructuralFeatures+=
 				refactorings.mergeAttributes("name",
@@ -510,23 +509,25 @@ class Inputs {
 	def personListExampleModifyEcore()
 	'''
 		import gssi.refactorings.MMrefactorings
-
+		
+		package com.example
+		
 		metamodel "PersonList"
 		metamodel "ecore"
-
+		
 		use MMrefactorings as refactorings
-
+		
 		modifyEcore improvePerson epackage PersonList {
 			ecoreref(PersonList.Person) => [
 				refactorings.
 					introduceSubclasses(
+						it,
 						ecoreref(Person.gender),
-						ecoreref(Gender),
-						it
+						ecoreref(Gender)
 					)
 				EStructuralFeatures+=
 					refactorings.mergeAttributes("name",
-						ecoreref(Person.firstname).EType,
+						ecoreref(Person.firstname).EAttributeType,
 						#[ecoreref(Person.firstname), ecoreref(Person.lastname)]
 					)
 			]

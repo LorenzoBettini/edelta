@@ -29,12 +29,12 @@ public class ExampleSyntax2 extends AbstractEdelta {
   
   public void improvePerson(final EPackage it) {
     final Procedure1<EClass> _function = (EClass it_1) -> {
-      this.refactorings.introduceSubclasses(
+      this.refactorings.introduceSubclasses(it_1, 
         getEAttribute("PersonList", "Person", "gender"), 
-        getEEnum("PersonList", "Gender"), it_1);
+        getEEnum("PersonList", "Gender"));
       EList<EStructuralFeature> _eStructuralFeatures = it_1.getEStructuralFeatures();
       EAttribute _mergeAttributes = this.refactorings.mergeAttributes("name", 
-        getEAttribute("PersonList", "Person", "firstname").getEType(), 
+        getEAttribute("PersonList", "Person", "firstname").getEAttributeType(), 
         Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname"))));
       _eStructuralFeatures.add(_mergeAttributes);
     };

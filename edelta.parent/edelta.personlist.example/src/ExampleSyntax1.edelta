@@ -1,5 +1,4 @@
 import gssi.refactorings.MMrefactorings
-import org.eclipse.emf.ecore.EEnum
 
 // IMPORTANT: ecores must be in a source directory
 // otherwise you can't refer to them
@@ -15,7 +14,7 @@ changeEClass PersonList.Person {
 		introduceSubclasses(
 			it,
 			ecoreref(Person.gender),
-			ecoreref(Person.gender).EAttributeType as EEnum
+			ecoreref(Gender)
 		);
 	EStructuralFeatures+=
 		refactorings.mergeAttributes("name",

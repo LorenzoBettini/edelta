@@ -1273,7 +1273,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		rs.
 		checkCompilation(
 			'''
-			package gssi.personexample;
+			package com.example;
 			
 			import edelta.lib.AbstractEdelta;
 			import gssi.refactorings.MMrefactorings;
@@ -1281,8 +1281,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			import org.eclipse.emf.common.util.EList;
 			import org.eclipse.emf.ecore.EAttribute;
 			import org.eclipse.emf.ecore.EClass;
-			import org.eclipse.emf.ecore.EDataType;
-			import org.eclipse.emf.ecore.EEnum;
 			import org.eclipse.emf.ecore.EReference;
 			import org.eclipse.emf.ecore.EStructuralFeature;
 			import org.eclipse.xtext.xbase.lib.CollectionLiterals;
@@ -1315,13 +1313,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public void _changeEClass_Person_in_PersonList(final EClass it) {
 			    {
-			      EDataType _eAttributeType = getEAttribute("PersonList", "Person", "gender").getEAttributeType();
-			      this.refactorings.introduceSubclasses(
+			      this.refactorings.introduceSubclasses(it, 
 			        getEAttribute("PersonList", "Person", "gender"), 
-			        ((EEnum) _eAttributeType), it);
+			        getEEnum("PersonList", "Gender"));
 			      EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
 			      EAttribute _mergeAttributes = this.refactorings.mergeAttributes("name", 
-			        getEAttribute("PersonList", "Person", "firstname").getEType(), 
+			        getEAttribute("PersonList", "Person", "firstname").getEAttributeType(), 
 			        Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname"))));
 			      _eStructuralFeatures.add(_mergeAttributes);
 			    }
@@ -1372,7 +1369,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		rs.
 		checkCompilation(
 			'''
-			package edelta;
+			package com.example;
 			
 			import edelta.lib.AbstractEdelta;
 			import gssi.refactorings.MMrefactorings;
@@ -1403,12 +1400,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public void improvePerson(final EPackage it) {
 			    final Procedure1<EClass> _function = (EClass it_1) -> {
-			      this.refactorings.introduceSubclasses(
+			      this.refactorings.introduceSubclasses(it_1, 
 			        getEAttribute("PersonList", "Person", "gender"), 
-			        getEEnum("PersonList", "Gender"), it_1);
+			        getEEnum("PersonList", "Gender"));
 			      EList<EStructuralFeature> _eStructuralFeatures = it_1.getEStructuralFeatures();
 			      EAttribute _mergeAttributes = this.refactorings.mergeAttributes("name", 
-			        getEAttribute("PersonList", "Person", "firstname").getEType(), 
+			        getEAttribute("PersonList", "Person", "firstname").getEAttributeType(), 
 			        Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname"))));
 			      _eStructuralFeatures.add(_mergeAttributes);
 			    };
