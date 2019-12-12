@@ -1,6 +1,5 @@
 package edelta.ui
 
-import edelta.ui.wizard.EdeltaProjectCreatorCustom
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 
 /**
@@ -8,9 +7,5 @@ import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
  */
 @FinalFieldsConstructor
 class EdeltaUiModule extends AbstractEdeltaUiModule {
-
-	override bindIProjectCreator() {
-		EdeltaProjectCreatorCustom
-	}
 
 }

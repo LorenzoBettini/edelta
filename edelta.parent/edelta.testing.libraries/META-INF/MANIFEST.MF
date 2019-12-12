@@ -6,7 +6,7 @@ Bundle-Version: 0.6.0.qualifier
 Bundle-Vendor: Lorenzo Bettini
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: edelta.lib
-Bundle-ClassPath: lib/assertj-core-3.14.0.jar
+Bundle-ClassPath: lib/assertj-core.jar
 Export-Package: org.assertj.core.annotations,
  org.assertj.core.api,
  org.assertj.core.api.exception,

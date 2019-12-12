@@ -55,7 +55,7 @@
 						</goals>
 						<configuration>
 							<outputDirectory>lib</outputDirectory>
-							<!-- <stripVersion>true</stripVersion> -->
+							<stripVersion>true</stripVersion>
 							<includeScope>runtime</includeScope>
 						</configuration>
 					</execution>

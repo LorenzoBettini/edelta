@@ -63,6 +63,13 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
+	public void testNewEAttributeWithType() {
+		EAttribute e = lib.newEAttribute("test", ESTRING);
+		assertEquals("test", e.getName());
+		assertEquals(ESTRING, e.getEAttributeType());
+	}
+
+	@Test
 	public void testNewEAttributeWithInitializer() {
 		EAttribute e = lib.newEAttribute("test", ee -> {
 			ee.setName("changed");
@@ -94,6 +101,13 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
+	public void testNewEReferenceWithType() {
+		EReference e = lib.newEReference("test", EOBJECT);
+		assertEquals("test", e.getName());
+		assertEquals(EOBJECT, e.getEReferenceType());
+	}
+
+	@Test
 	public void testNewEReferenceWithTypeInitializer() {
 		EReference e = lib.newEReference("test", EOBJECT, ee -> {
 			ee.setName("changed");
@@ -106,6 +120,15 @@ public class EdeltaLibraryTest {
 	public void testNewEDataType() {
 		EDataType e = lib.newEDataType("test");
 		assertEquals("test", e.getName());
+	}
+
+	@Test
+	public void testNewEDataTypeWithType() {
+		EDataType e = lib.newEDataType("test", "java.lang.String");
+		assertEquals("test", e.getName());
+		assertEquals("java.lang.String", e.getInstanceTypeName());
+		assertEquals("java.lang.String", e.getInstanceClassName());
+		assertEquals(String.class, e.getInstanceClass());
 	}
 
 	@Test
@@ -358,6 +381,14 @@ public class EdeltaLibraryTest {
 		assertEquals(EOBJECT, eReference.getEReferenceType());
 		assertSame(eReference,
 				eClass.getEStructuralFeatures().get(0));
+	}
+
+	@Test
+	public void test_addSuperClass() {
+		EClass superClass = ecoreFactory.createEClass();
+		EClass subClass = ecoreFactory.createEClass();
+		lib.addSuperClass(subClass, superClass);
+		assertSame(superClass, subClass.getESuperTypes().get(0));
 	}
 
 	@Test

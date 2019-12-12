@@ -605,12 +605,31 @@
 	</extension>
 	<extension
 		point="org.eclipse.ui.newWizards">
+		<category id="edelta.ui.category" name="Edelta">
+		</category>
 		<wizard
-			category="org.eclipse.xtext.projectwiz"
-			class="edelta.ui.EdeltaExecutableExtensionFactory:edelta.ui.wizard.EdeltaNewProjectWizard"
+			category="edelta.ui.category"
+			class="edelta.ui.EdeltaExecutableExtensionFactory:org.eclipse.xtext.ui.wizard.template.TemplateNewProjectWizard"
 			id="edelta.ui.wizard.EdeltaNewProjectWizard"
 			name="Edelta Project"
-				project="true">
+			icon="icons/new_Edelta_proj.gif"
+			project="true">
 		</wizard>
+	</extension>
+	<extension
+		point="org.eclipse.xtext.ui.projectTemplate">
+		<projectTemplateProvider
+			class="edelta.ui.EdeltaExecutableExtensionFactory:edelta.ui.wizard.EdeltaProjectTemplateProvider"
+			grammarName="edelta.Edelta">
+		</projectTemplateProvider>
+	</extension>
+	<extension
+		point="org.eclipse.ui.perspectiveExtensions">
+		<perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+			<newWizardShortcut id="edelta.ui.wizard.EdeltaNewProjectWizard"/>
+		</perspectiveExtension>
+		<perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+			<newWizardShortcut id="edelta.ui.wizard.EdeltaNewProjectWizard"/>
+		</perspectiveExtension>
 	</extension>
 </plugin>
