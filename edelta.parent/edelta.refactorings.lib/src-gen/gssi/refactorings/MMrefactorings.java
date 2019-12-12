@@ -26,8 +26,10 @@ public class MMrefactorings extends AbstractEdelta {
   }
   
   public EAttribute addMandatoryAttr(final EClass eClass, final String attrname, final EDataType dataType) {
-    final Consumer<EAttribute> _function = (EAttribute it) -> {
-      it.setLowerBound(1);
+    final Consumer<EAttribute> _function = new Consumer<EAttribute>() {
+      public void accept(final EAttribute it) {
+        it.setLowerBound(1);
+      }
     };
     return this.lib.addNewEAttribute(eClass, attrname, dataType, _function);
   }
@@ -43,9 +45,11 @@ public class MMrefactorings extends AbstractEdelta {
   }
   
   public void removeFeaturesFromContainingClass(final List<? extends EStructuralFeature> features) {
-    final Consumer<EStructuralFeature> _function = (EStructuralFeature it) -> {
-      EList<EStructuralFeature> _eStructuralFeatures = it.getEContainingClass().getEStructuralFeatures();
-      _eStructuralFeatures.remove(it);
+    final Consumer<EStructuralFeature> _function = new Consumer<EStructuralFeature>() {
+      public void accept(final EStructuralFeature it) {
+        EList<EStructuralFeature> _eStructuralFeatures = it.getEContainingClass().getEStructuralFeatures();
+        _eStructuralFeatures.remove(it);
+      }
     };
     features.forEach(_function);
   }
@@ -55,8 +59,10 @@ public class MMrefactorings extends AbstractEdelta {
     EList<EEnumLiteral> _eLiterals = enumType.getELiterals();
     for (final EEnumLiteral subc : _eLiterals) {
       {
-        final Consumer<EClass> _function = (EClass it) -> {
-          this.lib.addSuperClass(it, containingclass);
+        final Consumer<EClass> _function = new Consumer<EClass>() {
+          public void accept(final EClass it) {
+            MMrefactorings.this.lib.addSuperClass(it, containingclass);
+          }
         };
         this.lib.addNewEClass(containingclass.getEPackage(), subc.getLiteral(), _function);
         EList<EStructuralFeature> _eStructuralFeatures = containingclass.getEStructuralFeatures();
@@ -76,10 +82,12 @@ public class MMrefactorings extends AbstractEdelta {
       final EAttribute extracted_attr = IterableExtensions.<EAttribute>head(attrs);
       for (final EAttribute attr : attrs) {
         EClass _eContainingClass = attr.getEContainingClass();
-        final Procedure1<EClass> _function = (EClass it) -> {
-          this.lib.addSuperClass(it, superclass);
-          EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
-          _eStructuralFeatures.remove(attr);
+        final Procedure1<EClass> _function = new Procedure1<EClass>() {
+          public void apply(final EClass it) {
+            MMrefactorings.this.lib.addSuperClass(it, superclass);
+            EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
+            _eStructuralFeatures.remove(attr);
+          }
         };
         ObjectExtensions.<EClass>operator_doubleArrow(_eContainingClass, _function);
       }
@@ -96,15 +104,19 @@ public class MMrefactorings extends AbstractEdelta {
    * @param outReferenceName
    */
   public void extractMetaClass(final EClass extractedClass, final EReference f, final String inReferenceName, final String outReferenceName) {
-    final Consumer<EReference> _function = (EReference it) -> {
-      it.setLowerBound(f.getEOpposite().getLowerBound());
-      it.setUpperBound(1);
+    final Consumer<EReference> _function = new Consumer<EReference>() {
+      public void accept(final EReference it) {
+        it.setLowerBound(f.getEOpposite().getLowerBound());
+        it.setUpperBound(1);
+      }
     };
     final EReference ref_in = this.lib.newEReference(inReferenceName, extractedClass, _function);
-    final Consumer<EReference> _function_1 = (EReference it) -> {
-      it.setLowerBound(1);
-      it.setUpperBound(1);
-      it.setEOpposite(ref_in);
+    final Consumer<EReference> _function_1 = new Consumer<EReference>() {
+      public void accept(final EReference it) {
+        it.setLowerBound(1);
+        it.setUpperBound(1);
+        it.setEOpposite(ref_in);
+      }
     };
     final EReference old_ref = this.lib.newEReference(f.getName(), f.getEReferenceType(), _function_1);
     this.lib.addEReference(extractedClass, old_ref);
@@ -118,5 +130,10 @@ public class MMrefactorings extends AbstractEdelta {
     f.setEType(extractedClass);
     f.setContainment(true);
     f.setName(outReferenceName);
+  }
+  
+  @Override
+  public void performSanityChecks() throws Exception {
+    ensureEPackageIsLoaded("ecore");
   }
 }

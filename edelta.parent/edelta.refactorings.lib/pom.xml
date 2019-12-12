@@ -38,6 +38,9 @@
 					<failOnValidationError>true</failOnValidationError>
 					<languages>
 						<language>
+							<setup>org.eclipse.xtext.ecore.EcoreSupport</setup>
+						</language>
+						<language>
 							<setup>edelta.EdeltaStandaloneSetup</setup>
 							<outputConfigurations>
 								<outputConfiguration>
@@ -48,6 +51,11 @@
 					</languages>
 				</configuration>
 				<dependencies>
+					<dependency>
+						<groupId>org.eclipse.xtext</groupId>
+						<artifactId>org.eclipse.xtext.ecore</artifactId>
+						<version>${xtext-version}</version>
+					</dependency>
 					<dependency>
 						<groupId>edelta</groupId>
 						<artifactId>edelta</artifactId>

@@ -9,6 +9,7 @@
   <properties>
     <tycho-version>1.5.1</tycho-version>
     <xtextVersion>2.20.0</xtextVersion>
+    <xtext-version>${xtextVersion}</xtext-version>
     <eclipseVersion>2019-09</eclipseVersion>
     <mwe2Version>2.11.1</mwe2Version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -134,9 +135,9 @@
     <module>edelta.lib.tests</module>
     <module>edelta.mwe2</module>
     <module>edelta</module>
+    <module>edelta.refactorings.lib</module>
     <module>edelta.ide</module>
     <module>edelta.ui</module>
-    <module>edelta.refactorings.lib</module>
     <module>edelta.refactorings.lib.tests</module>
     <module>edelta.target</module>
     <module>edelta.feature</module>
