@@ -257,4 +257,8 @@ public class EdeltaLibrary {
 		return e;
 	}
 
+	public void addSuperClass(EClass subClass, EClass superClass) {
+		subClass.getESuperTypes().add(superClass);
+	}
+
 }

@@ -384,6 +384,14 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
+	public void test_addSuperClass() {
+		EClass superClass = ecoreFactory.createEClass();
+		EClass subClass = ecoreFactory.createEClass();
+		lib.addSuperClass(subClass, superClass);
+		assertSame(superClass, subClass.getESuperTypes().get(0));
+	}
+
+	@Test
 	public void testGetEObjectRepr() {
 		assertEquals("ecore:EClass:eSuperTypes", lib.getEObjectRepr(EcorePackage.eINSTANCE.getEClass_ESuperTypes()));
 		BasicEObjectImpl o = new BasicEObjectImpl() {
