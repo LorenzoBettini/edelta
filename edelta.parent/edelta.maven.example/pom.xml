@@ -20,6 +20,23 @@
 		<xtext-version>${xtextVersion}</xtext-version>
 	</properties>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.eclipse.xtext</groupId>
+				<artifactId>xtext-dev-bom</artifactId>
+				<version>${xtextVersion}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.xtext</groupId>
+				<artifactId>org.eclipse.xtext.xbase.lib</artifactId>
+				<version>${xtextVersion}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>edelta</groupId>
@@ -29,7 +46,6 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -86,6 +102,9 @@
 					<failOnValidationError>true</failOnValidationError>
 					<languages>
 						<language>
+							<setup>org.eclipse.xtext.ecore.EcoreSupport</setup>
+						</language>
+						<language>
 							<setup>edelta.EdeltaStandaloneSetup</setup>
 							<outputConfigurations>
 								<outputConfiguration>
@@ -96,6 +115,16 @@
 					</languages>
 				</configuration>
 				<dependencies>
+					<dependency>
+						<groupId>org.eclipse.emf</groupId>
+						<artifactId>org.eclipse.emf.mwe.core</artifactId>
+						<version>1.5.1</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.xtext</groupId>
+						<artifactId>org.eclipse.xtext.ecore</artifactId>
+						<version>${xtext-version}</version>
+					</dependency>
 					<dependency>
 						<groupId>edelta</groupId>
 						<artifactId>edelta</artifactId>

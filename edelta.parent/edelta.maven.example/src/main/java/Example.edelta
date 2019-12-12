@@ -5,16 +5,15 @@ import org.eclipse.emf.ecore.EcoreFactory
 
 package com.example
 
-//metamodel "myecore"
-//metamodel "ecore"
+metamodel "myecore"
+metamodel "ecore"
 
 def createClass(String name) {
 	newEClass(name) => [
-		it.ESuperTypes += org.eclipse.emf.ecore.EcorePackage.Literals.ECLASS
-		// ecoreref(EClass)
+		it.ESuperTypes += ecoreref(EClass)
 	]
 }
 
 // ... or using Edelta DSL specific syntax
-//createEClass MyNewClass in myecore {}
+createEClass MyNewClass in myecore {}
 
