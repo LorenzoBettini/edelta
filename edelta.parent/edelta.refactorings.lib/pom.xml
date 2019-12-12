@@ -53,11 +53,6 @@
 						<artifactId>edelta</artifactId>
 						<version>${project.version}</version>
 					</dependency>
-					<dependency>
-						<groupId>edelta</groupId>
-						<artifactId>edelta.lib</artifactId>
-						<version>${project.version}</version>
-					</dependency>
 				</dependencies>
 			</plugin>
 		</plugins>
