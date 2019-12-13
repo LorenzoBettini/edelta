@@ -8,7 +8,7 @@
     <version>0.7.0-SNAPSHOT</version>
   </parent>
   <artifactId>edelta.personlist.example</artifactId>
-  <packaging>eclipse-plugin</packaging>
+  <packaging>eclipse-test-plugin</packaging>
 
   <build>
     <plugins>
@@ -26,6 +26,10 @@
       <plugin>
         <groupId>org.eclipse.xtext</groupId>
         <artifactId>xtext-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.eclipse.xtend</groupId>
+        <artifactId>xtend-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
