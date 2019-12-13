@@ -24,6 +24,9 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.4.0</version>
+				<configuration>
+					<skip>${mwe2.skip}</skip>
+				</configuration>
 				<executions>
 					<execution>
 						<id>mwe2GenerateEMFClasses</id>

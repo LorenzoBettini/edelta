@@ -17,6 +17,9 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
 
+    <mwe2.skip>false</mwe2.skip>
+    <xtend.skip>false</xtend.skip>
+
     <!-- Define overridable properties for tycho-surefire-plugin -->
     <platformSystemProperties></platformSystemProperties>
     <moduleProperties></moduleProperties>
@@ -386,6 +389,7 @@
             </execution>
           </executions>
           <configuration>
+            <skipXtend>${xtend.skip}</skipXtend>
             <outputDirectory>${basedir}/xtend-gen</outputDirectory>
             <xtendAsPrimaryDebugSource>true</xtendAsPrimaryDebugSource>
           </configuration>
