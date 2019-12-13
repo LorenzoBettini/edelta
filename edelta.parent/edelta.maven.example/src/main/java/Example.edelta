@@ -1,6 +1,4 @@
-import org.eclipse.emf.ecore.EAttribute
-import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.EDataType
+import gssi.refactorings.MMrefactorings
 
 // IMPORTANT: ecores must be in a source directory
 // otherwise you can't refer to them
@@ -10,21 +8,17 @@ package com.example
 metamodel "myecore"
 metamodel "ecore"
 
+use MMrefactorings as refactorings
+
 def createClass(String name) {
 	newEClass(name) => [
-		it.ESuperTypes += ecoreref(EClass)
+		it.ESuperTypes += ecoreref(MyEClass)
 	]
 }
 
-def addMandatoryAttr(EClass eClass, String attrname, EDataType dataType): EAttribute {
-	return eClass.addNewEAttribute(attrname, dataType) [
-		lowerBound = 1;
-	]
-}
-
-// ... or using Edelta DSL specific syntax
 createEClass MyNewClass in myecore {
-	addMandatoryAttr("ANewAttribute", ecoreref(EString))
+	refactorings.addMandatoryAttr(it, "ANewAttribute", ecoreref(EString))
 	ecoreref(ANewAttribute)
+	EPackage.addEClass(createClass("ANewDerivedEClass"))
 }
 

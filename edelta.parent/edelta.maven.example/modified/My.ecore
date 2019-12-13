@@ -13,4 +13,5 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="ANewAttribute" lowerBound="1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ANewDerivedEClass" eSuperTypes="#//MyEClass"/>
 </ecore:EPackage>

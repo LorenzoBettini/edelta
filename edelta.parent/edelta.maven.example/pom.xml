@@ -45,6 +45,11 @@
       <version>${edelta.version}</version>
     </dependency>
     <dependency>
+      <groupId>edelta</groupId>
+      <artifactId>edelta.refactorings.lib</artifactId>
+      <version>${edelta.version}</version>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -132,6 +137,13 @@
           <dependency>
             <groupId>edelta</groupId>
             <artifactId>edelta</artifactId>
+            <version>${edelta.version}</version>
+          </dependency>
+          <!-- If you use a library in the .edelta file, it must be available
+            also during Edelta compilation with xtext-maven-plugin -->
+          <dependency>
+            <groupId>edelta</groupId>
+            <artifactId>edelta.refactorings.lib</artifactId>
             <version>${edelta.version}</version>
           </dependency>
         </dependencies>
