@@ -9,12 +9,16 @@
   <properties>
     <tycho-version>1.5.1</tycho-version>
     <xtextVersion>2.20.0</xtextVersion>
+    <xtext-version>${xtextVersion}</xtext-version>
     <eclipseVersion>2019-09</eclipseVersion>
     <mwe2Version>2.11.1</mwe2Version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
+
+    <mwe2.skip>false</mwe2.skip>
+    <xtend.skip>false</xtend.skip>
 
     <!-- Define overridable properties for tycho-surefire-plugin -->
     <platformSystemProperties></platformSystemProperties>
@@ -119,26 +123,33 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>org.eclipse.xtext</groupId>
+        <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
+        <version>${xtextVersion}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
   <modules>
+    <module>edelta.target</module>
     <module>edelta.lib</module>
     <module>edelta.testutils</module>
     <module>edelta.testing.libraries</module>
     <module>edelta.lib.tests</module>
     <module>edelta.mwe2</module>
     <module>edelta</module>
+    <module>edelta.refactorings.lib</module>
     <module>edelta.ide</module>
     <module>edelta.ui</module>
-    <module>edelta.refactorings.lib</module>
     <module>edelta.refactorings.lib.tests</module>
-    <module>edelta.target</module>
     <module>edelta.feature</module>
     <module>edelta.repository</module>
     <module>edelta.product.ui.feature</module>
     <module>edelta.tests</module>
     <module>edelta.ui.tests</module>
+    <module>edelta.personlist.example</module>
+    <module>edelta.maven.example</module>
     <module>edelta.product.repository</module>
     <module>edelta.tests.report</module>
   </modules>
@@ -366,6 +377,46 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.eclipse.xtext</groupId>
+          <artifactId>xtext-maven-plugin</artifactId>
+          <version>${xtextVersion}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>generate</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <failOnValidationError>true</failOnValidationError>
+            <languages>
+              <language>
+                <setup>org.eclipse.xtext.ecore.EcoreSupport</setup>
+              </language>
+              <language>
+                <setup>edelta.EdeltaStandaloneSetup</setup>
+                <outputConfigurations>
+                  <outputConfiguration>
+                    <outputDirectory>${basedir}/src-gen</outputDirectory>
+                  </outputConfiguration>
+                </outputConfigurations>
+              </language>
+            </languages>
+          </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>org.eclipse.xtext</groupId>
+              <artifactId>org.eclipse.xtext.ecore</artifactId>
+              <version>${xtext-version}</version>
+            </dependency>
+            <dependency>
+              <groupId>edelta</groupId>
+              <artifactId>edelta</artifactId>
+              <version>${project.version}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+        <plugin>
           <groupId>org.eclipse.xtend</groupId>
           <artifactId>xtend-maven-plugin</artifactId>
           <version>${xtextVersion}</version>
@@ -380,6 +431,7 @@
             </execution>
           </executions>
           <configuration>
+            <skipXtend>${xtend.skip}</skipXtend>
             <outputDirectory>${basedir}/xtend-gen</outputDirectory>
             <xtendAsPrimaryDebugSource>true</xtendAsPrimaryDebugSource>
           </configuration>
