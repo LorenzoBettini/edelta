@@ -131,9 +131,4 @@ public class MMrefactorings extends AbstractEdelta {
     f.setContainment(true);
     f.setName(outReferenceName);
   }
-  
-  @Override
-  public void performSanityChecks() throws Exception {
-    ensureEPackageIsLoaded("ecore");
-  }
 }

@@ -8,8 +8,6 @@ import org.eclipse.emf.ecore.EStructuralFeature
 
 package gssi.refactorings
 
-metamodel "ecore"
-
 def addMandatoryAttr(EClass eClass, String attrname, EDataType dataType): EAttribute {
 	return eClass.addNewEAttribute(attrname, dataType) [
 		lowerBound = 1;
