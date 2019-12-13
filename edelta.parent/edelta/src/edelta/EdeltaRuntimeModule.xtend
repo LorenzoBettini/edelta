@@ -3,20 +3,22 @@
  */
 package edelta
 
+import edelta.compiler.EdeltaGeneratorConfigProvider
 import edelta.compiler.EdeltaXbaseCompiler
 import edelta.interpreter.EdeltaSafeInterpreter
 import edelta.interpreter.IEdeltaInterpreter
 import edelta.resource.EdeltaDerivedStateComputer
+import edelta.resource.EdeltaEObjectAtOffsetHelper
 import edelta.resource.EdeltaLocationInFileProvider
 import edelta.resource.EdeltaResourceDescriptionStrategy
 import edelta.scoping.EdeltaQualifiedNameProvider
 import edelta.services.IEdeltaEcoreModelAssociations
 import edelta.typesystem.EdeltaTypeComputer
 import edelta.validation.EdeltaDiagnosticConverter
-import org.eclipse.xtext.validation.IDiagnosticConverter
-import org.eclipse.xtext.xbase.compiler.XbaseCompiler
-import edelta.resource.EdeltaEObjectAtOffsetHelper
 import edelta.validation.EdeltaLinkingDiagnosticMessageProvider
+import org.eclipse.xtext.validation.IDiagnosticConverter
+import org.eclipse.xtext.xbase.compiler.IGeneratorConfigProvider
+import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -65,5 +67,9 @@ class EdeltaRuntimeModule extends AbstractEdeltaRuntimeModule {
 
 	override bindILinkingDiagnosticMessageProvider() {
 		EdeltaLinkingDiagnosticMessageProvider
+	}
+
+	def Class<? extends IGeneratorConfigProvider> bindIGeneratorConfigProvider() {
+		EdeltaGeneratorConfigProvider
 	}
 }
