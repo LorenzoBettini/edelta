@@ -1,38 +1,25 @@
 package example.example;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
+
+import com.example.Example;
+
+import edelta.lib.AbstractEdelta;
 
 /**
  * Unit test for simple App.
  */
-public class AppTest 
-    extends TestCase
-{
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public AppTest( String testName )
-    {
-        super( testName );
-    }
+public class AppTest {
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( AppTest.class );
-    }
-
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp()
-    {
-        assertTrue( true );
-    }
+	@Test
+	public void testRunApp() throws Exception {
+		// Create an instance of the generated Java class
+		AbstractEdelta edelta = new Example();
+		// Make sure you load all the used Ecores
+		edelta.loadEcoreFile("model/My.ecore");
+		// Execute the actual transformations defined in the DSL
+		edelta.execute();
+		// Save the modified Ecore model into a new path
+		edelta.saveModifiedEcores("modified");
+	}
 }

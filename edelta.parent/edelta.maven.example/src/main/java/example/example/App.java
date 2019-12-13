@@ -1,6 +1,6 @@
 package example.example;
 
-import org.eclipse.emf.ecore.EcorePackage;
+import com.example.Example;
 
 import edelta.lib.AbstractEdelta;
 
@@ -10,10 +10,13 @@ import edelta.lib.AbstractEdelta;
  */
 public class App {
 	public static void main(String[] args) throws Exception {
-		AbstractEdelta edelta = new AbstractEdelta() {
-		};
+		// Create an instance of the generated Java class
+		AbstractEdelta edelta = new Example();
+		// Make sure you load all the used Ecores
+		edelta.loadEcoreFile("model/My.ecore");
+		// Execute the actual transformations defined in the DSL
 		edelta.execute();
-		System.out.println(EcorePackage.Literals.ECLASS);
-		System.out.println("Hello World!");
+		// Save the modified Ecore model into a new path
+		edelta.saveModifiedEcores("modified");
 	}
 }

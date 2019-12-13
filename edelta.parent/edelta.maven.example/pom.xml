@@ -82,7 +82,10 @@
             </goals>
             <configuration>
               <sources>
+                <!-- Where Edelta generates Java files -->
                 <source>src-gen/</source>
+                <!-- Where the .ecore file(s) are placed -->
+                <source>model/</source>
               </sources>
             </configuration>
           </execution>
