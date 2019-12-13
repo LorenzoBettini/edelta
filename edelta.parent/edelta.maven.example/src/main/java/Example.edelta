@@ -20,5 +20,6 @@ createEClass MyNewClass in myecore {
 	refactorings.addMandatoryAttr(it, "ANewAttribute", ecoreref(EString))
 	ecoreref(ANewAttribute)
 	EPackage.addEClass(createClass("ANewDerivedEClass"))
+	ecoreref(ANewDerivedEClass)
 }
 
