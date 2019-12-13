@@ -11,7 +11,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="MyOtherEClass"/>
   <eClassifiers xsi:type="ecore:EClass" name="MyNewClass">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="ANewAttribute" lowerBound="1"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ANewDerivedEClass" eSuperTypes="#//MyEClass"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ANewDerivedEClass" abstract="true" eSuperTypes="#//MyEClass"/>
 </ecore:EPackage>

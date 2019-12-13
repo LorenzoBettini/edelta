@@ -44,9 +44,9 @@ public class Example extends AbstractEdelta {
   public void _createEClass_MyNewClass_in_myecore(final EClass it) {
     {
       this.refactorings.addMandatoryAttr(it, "ANewAttribute", getEDataType("ecore", "EString"));
-      getEAttribute("myecore", "MyNewClass", "ANewAttribute");
+      getEAttribute("myecore", "MyNewClass", "ANewAttribute").setEType(getEDataType("ecore", "EInt"));
       this.lib.addEClass(it.getEPackage(), this.createClass("ANewDerivedEClass"));
-      getEClass("myecore", "ANewDerivedEClass");
+      getEClass("myecore", "ANewDerivedEClass").setAbstract(true);
     }
   }
 }

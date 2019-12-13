@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.junit.Test;
 
 import com.example.Example;
@@ -37,7 +38,9 @@ public class AppTest {
 		EClass myNewClass = (EClass) ePackage.getEClassifier("MyNewClass");
 		EAttribute myNewAttribute = (EAttribute) myNewClass.getEStructuralFeature("ANewAttribute");
 		assertTrue(myNewAttribute.isRequired());
+		assertSame(EcorePackage.Literals.EINT, myNewAttribute.getEAttributeType());
 		EClass aNewDerivedClass = (EClass) ePackage.getEClassifier("ANewDerivedEClass");
 		assertSame(verifier.getEClass("myecore", "MyEClass"), aNewDerivedClass.getESuperTypes().get(0));
+		assertTrue(aNewDerivedClass.isAbstract());
 	}
 }

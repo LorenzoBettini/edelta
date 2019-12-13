@@ -18,8 +18,8 @@ def createClass(String name) {
 
 createEClass MyNewClass in myecore {
 	refactorings.addMandatoryAttr(it, "ANewAttribute", ecoreref(EString))
-	ecoreref(ANewAttribute)
+	ecoreref(ANewAttribute).setEType(ecoreref(EInt))
 	EPackage.addEClass(createClass("ANewDerivedEClass"))
-	ecoreref(ANewDerivedEClass)
+	ecoreref(ANewDerivedEClass).setAbstract(true)
 }
 
