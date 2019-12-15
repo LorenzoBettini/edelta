@@ -1,4 +1,6 @@
-# edelta
+# Edelta
+
+An Xtext DSL for EMF metamodels refactoring and migration
 
 [![Build Status](https://travis-ci.org/LorenzoBettini/edelta.svg?branch=master)](https://travis-ci.org/LorenzoBettini/edelta)
 [![Coverage Status](https://coveralls.io/repos/github/LorenzoBettini/edelta/badge.svg?branch=master)](https://coveralls.io/github/LorenzoBettini/edelta?branch=master)
@@ -10,7 +12,7 @@ Copy the following URL and paste it into your Eclipse "Install New Software" dia
 
 https://dl.bintray.com/lorenzobettini/edelta/updates/
 
-IMPORTANT: Edelta requires Xtext, if this is not already installed, all dependencies will be automatically installed form this update site, which is self-contained.
+IMPORTANT: Edelta requires Xtext, if this is not already installed, all dependencies will be automatically installed from this update site, which is self-contained.
 
 ### Pre-configured Eclipse distributions with Edelta installed, for several architectures.
 
