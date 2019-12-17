@@ -39,16 +39,15 @@ node {
           sh "mutter --replace --sm-disable 2> mutter.err &"
         }
         // Run the maven build
-        // returnStatus: true here will ensure the build stays yellow
-        // when test cases are failing
+        // don't make the build fail in case of test failures...
         sh (script:
           "./mvnw -f edelta.parent/pom.xml -fae ${mavenProfiles} ${mavenArguments}",
-          returnStatus: true
         )
       }
    }
    if (!hasToDeploye) {
       stage('JUnit Results') {
+         // ... JUnit archiver will set the build as UNSTABLE in case of test failures
          junit '**/target/surefire-reports/TEST-*.xml'
          archive '**/target/repository/'
          publishHTML(target: [
