@@ -41,7 +41,7 @@ node {
         // Run the maven build
         // don't make the build fail in case of test failures...
         sh (script:
-          "./mvnw -f edelta.parent/pom.xml -fae ${mavenProfiles} ${mavenArguments}",
+          "./mvnw -f edelta.parent/pom.xml -Dmaven.test.failure.ignore=true -fae ${mavenProfiles} ${mavenArguments}",
         )
       }
    }
