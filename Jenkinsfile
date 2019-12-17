@@ -2,10 +2,6 @@ node {
    def mvnHome
    stage('Preparation') { // for display purposes
       checkout scm
-      // Get the Maven tool.
-      // ** NOTE: This 'M3' Maven tool must be configured
-      // **       in the global configuration.           
-      mvnHome = tool 'M3'
    }
    stage('Build') {
       wrap([$class: 'Xvfb', autoDisplayName: true]) {
@@ -13,7 +9,7 @@ node {
         // returnStatus: true here will ensure the build stays yellow
         // when test cases are failing
         sh (script:
-          "'${mvnHome}/bin/mvn' -f edelta.parent/pom.xml -fae clean verify -Pjacoco",
+          "./mvnw -f edelta.parent/pom.xml -fae clean verify -Pjacoco",
           returnStatus: true
         )
       }
