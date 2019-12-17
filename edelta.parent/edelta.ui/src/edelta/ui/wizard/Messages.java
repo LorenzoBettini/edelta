@@ -7,6 +7,8 @@ public class Messages extends NLS {
 	
 	public static String HelloWorldProject_Label;
 	public static String HelloWorldProject_Description;
+	public static String EdeltaExampleProjectTemplate_Label;
+	public static String EdeltaExampleProjectTemplate_Description;
 	
 	static {
 	// initialize resource bundle
