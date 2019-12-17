@@ -25,3 +25,7 @@ Download a complete Eclipse distribution with Edelta installed; choose the one f
 These are temporary development snapshots, which might be unstable (Note: the snapshots update site always includes the releases update site):
 
 https://dl.bintray.com/lorenzobettini/edelta/snapshots/updates/
+
+### Maven artifacts
+
+Since version 0.7.1, Maven artifacts for Edelta (mainly the compiler and the libraries) are avaialable on Maven Central (the groupId is `io.github.lorenzobettini.edelta`), and can be used, for instance, together with the `xtext-maven-plugin`, to compile `.edelta` files into Java files during a Maven build, both a Maven/Tycho build and a pure Maven build. An example of a pure Maven project using this mechanism can be found here: https://github.com/LorenzoBettini/edelta/tree/master/edelta.parent/edelta.maven.example.
