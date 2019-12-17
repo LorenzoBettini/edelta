@@ -3,6 +3,7 @@ node {
    def mavenArguments = "clean verify"
    def mavenDeploy = false
    def ideTests = false
+   def mavenOnlyProfile = "-P!development"
    if (env.JOB_NAME.endsWith("release-site")) {
      mavenProfiles = "-Prelease-composite"
      mavenDeploy = true
@@ -23,7 +24,7 @@ node {
      // temporary experiment
      stage('Remove SNAPSHOT') {
         sh (script:
-          "./mvnw -f edelta.parent/pom.xml \
+          "./mvnw -f edelta.parent/pom.xml ${mavenOnlyProfile} \
                   versions:set -DgenerateBackupPoms=false -DremoveSnapshot=true \
                   org.eclipse.tycho:tycho-versions-plugin:update-eclipse-metadata",
         )
