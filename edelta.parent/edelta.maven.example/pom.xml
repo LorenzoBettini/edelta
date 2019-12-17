@@ -8,9 +8,6 @@
   <version>0.7.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>example</name>
-  <url>http://maven.apache.org</url>
-
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -150,4 +147,32 @@
       </plugin>
     </plugins>
   </build>
+
+  <!-- In case you want to use SNAPSHOTs
+  <repositories>
+    <repository>
+      <id>maven-snapshots</id>
+      <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+      <layout>default</layout>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>sonatype_snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+  -->
 </project>
