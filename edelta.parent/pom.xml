@@ -212,6 +212,7 @@
         <module>edelta.personlist.example</module>
         <module>edelta.maven.example</module>
         <module>edelta.product.repository</module>
+        <module>edelta.tests.parent</module>
         <module>edelta.tests.report</module>
       </modules>
       <!-- These modules were experiments to compile edelta files
