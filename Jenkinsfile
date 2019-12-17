@@ -1,16 +1,16 @@
 node {
    def mavenProfiles = ""
    def mavenArguments = "clean verify"
-   def mavenDeploy = false
+   def hasToDeploye = false
    def ideTests = false
    def mavenOnlyProfile = "-P!development"
    def isSnapshot = false
    if (env.JOB_NAME.endsWith("release-site")) {
      mavenProfiles = "-Prelease-composite"
-     mavenDeploy = true
+     hasToDeploye = true
    } else if (env.JOB_NAME.endsWith("release")) {
      mavenProfiles = "-Pbuild-ide,release-ide-composite,deploy-ide-composite"
-     mavenDeploy = true
+     hasToDeploye = true
    } else {
      mavenProfiles = "-Pjacoco,build-ide,test-ide"
      ideTests = true
@@ -21,7 +21,7 @@ node {
    stage('Preparation') { // for display purposes
       checkout scm
    }
-   if (!mavenDeploy) {
+   if (!hasToDeploye) {
      // temporary experiment
      if (!isSnapshot) {
        stage('Remove SNAPSHOT') {
@@ -47,7 +47,7 @@ node {
         )
       }
    }
-   if (!mavenDeploy) {
+   if (!hasToDeploye) {
       stage('JUnit Results') {
          junit '**/target/surefire-reports/TEST-*.xml'
          archive '**/target/repository/'
