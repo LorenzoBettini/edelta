@@ -74,7 +74,7 @@
       **/mwe2/**,
       **/Messages.java,
       **/*ProjectTemplateProvider.java,
-      **/HelloWorldProject.java,
+      **/*ProjectTemplate.java,
       **/src-gen/**,
       **/emf-gen/**,
       **/impl/*ImplCustom.java,
