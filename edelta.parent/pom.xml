@@ -248,6 +248,7 @@
                 <!-- Use the following configuration with Java 8 -->
                 <configuration>
                   <additionalparam>-Xdoclint:none</additionalparam>
+                  <failOnError>false</failOnError>
                 </configuration>
               </execution>
             </executions>
