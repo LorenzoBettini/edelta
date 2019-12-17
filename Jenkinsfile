@@ -22,30 +22,18 @@ node {
       checkout scm
    }
    if (!hasToDeploye) {
-     // temporary experiment
-     if (!isSnapshot) {
-       stage('Remove SNAPSHOT') {
-          sh (script:
-            "./mvnw -f edelta.parent/pom.xml ${mavenOnlyProfile} \
-                    versions:set -DgenerateBackupPoms=false -DremoveSnapshot=true \
-                    org.eclipse.tycho:tycho-versions-plugin:update-eclipse-metadata",
-          )
-       }
-     }
-   }
-   stage('Build') {
-      wrap([$class: 'Xvfb', autoDisplayName: true]) {
-        if (ideTests) {
-          sh "mutter --replace --sm-disable 2> mutter.err &"
-        }
-        // Run the maven build
-        // don't make the build fail in case of test failures...
-        sh (script:
-          "./mvnw -f edelta.parent/pom.xml -Dmaven.test.failure.ignore=true -fae ${mavenProfiles} ${mavenArguments}",
-        )
+      stage('Build and Test') {
+         wrap([$class: 'Xvfb', autoDisplayName: true]) {
+           if (ideTests) {
+             sh "mutter --replace --sm-disable 2> mutter.err &"
+           }
+           // Run the maven build
+           // don't make the build fail in case of test failures...
+           sh (script:
+             "./mvnw -f edelta.parent/pom.xml -Dmaven.test.failure.ignore=true -fae ${mavenProfiles} ${mavenArguments}",
+           )
+         }
       }
-   }
-   if (!hasToDeploye) {
       stage('JUnit Results') {
          // ... JUnit archiver will set the build as UNSTABLE in case of test failures
          junit '**/target/surefire-reports/TEST-*.xml'
@@ -74,6 +62,25 @@ node {
           classPattern: '**/edelta/**/classes,**/edelta.lib/**/classes,**/edelta.ui/**/classes',
           exclusionPattern: '**/*Test*.class,**/edelta/edelta/**/*.class,**/antlr/**/*.class,**/serializer/*.class,**/*Abstract*RuntimeModule.class,**/*StandaloneSetup*.class,**/*Abstract*Validator.class,**/*GrammarAccess*.class,**/*Abstract*UiModule.class,**/**ExecutableExtensionFactory.class,**/*Abstract*ProposalProvider.class,**/internal/*.class,**/*NewProjectWizard.class,**/*ProjectCreator.class'])
       }
+   } else {
+      stage('Build and Deploy P2 Artifacts') {
+         sh (script:
+           "./mvnw -f edelta.parent/pom.xml ${mavenProfiles} ${mavenArguments}",
+         )
+      }
+      if (!isSnapshot) {
+         stage('Remove SNAPSHOT') {
+            sh (script:
+              "./mvnw -f edelta.parent/pom.xml ${mavenOnlyProfile} \
+                    versions:set -DgenerateBackupPoms=false -DremoveSnapshot=true \
+                    org.eclipse.tycho:tycho-versions-plugin:update-eclipse-metadata",
+            )
+         }
+      }
+      stage('Build and Deploy Maven Artifacts') {
+         sh (script:
+           "./mvnw -f edelta.parent/pom.xml ${mavenOnlyProfile} -Psonatype-oss-release clean deploy",
+         )
+      }
    }
-
 }
