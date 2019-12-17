@@ -4,6 +4,7 @@ node {
    def mavenDeploy = false
    def ideTests = false
    def mavenOnlyProfile = "-P!development"
+   def isSnapshot = false
    if (env.JOB_NAME.endsWith("release-site")) {
      mavenProfiles = "-Prelease-composite"
      mavenDeploy = true
@@ -22,12 +23,14 @@ node {
    }
    if (!mavenDeploy) {
      // temporary experiment
-     stage('Remove SNAPSHOT') {
-        sh (script:
-          "./mvnw -f edelta.parent/pom.xml ${mavenOnlyProfile} \
-                  versions:set -DgenerateBackupPoms=false -DremoveSnapshot=true \
-                  org.eclipse.tycho:tycho-versions-plugin:update-eclipse-metadata",
-        )
+     if (!isSnapshot) {
+       stage('Remove SNAPSHOT') {
+          sh (script:
+            "./mvnw -f edelta.parent/pom.xml ${mavenOnlyProfile} \
+                    versions:set -DgenerateBackupPoms=false -DremoveSnapshot=true \
+                    org.eclipse.tycho:tycho-versions-plugin:update-eclipse-metadata",
+          )
+       }
      }
    }
    stage('Build') {
