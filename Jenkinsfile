@@ -83,7 +83,7 @@ node {
       }
       stage('Build and Deploy Maven Artifacts') {
          sh (script:
-           "./mvnw -f edelta.parent/pom.xml ${mavenOnlyProfile} -Psonatype-oss-release clean deploy",
+           "./mvnw -f edelta.parent/pom.xml -Dmaven.repo.local='${env.WORKSPACE}'/.repository ${mavenOnlyProfile} -Psonatype-oss-release clean deploy",
          )
       }
    }
