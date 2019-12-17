@@ -6,6 +6,41 @@
   <artifactId>edelta.parent</artifactId>
   <packaging>pom</packaging>
 
+  <name>Edelta</name>
+  <url>https://github.com/LorenzoBettini/edelta</url>
+  <description>An Xtext DSL for EMF metamodels refactoring and migration.</description>
+
+  <licenses>
+    <license>
+      <name>Eclipse Public License</name>
+      <url>http://www.eclipse.org/legal/epl-v10.html</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Lorenzo Bettini</name>
+      <email>lorenzo.bettini@gmail.com</email>
+      <roles>
+        <role>architect</role>
+        <role>developer</role>
+      </roles>
+      <organization>DISIA Dipartimento di Statistica, Informatica, Applicazioni</organization>
+      <organizationUrl>https://www.disia.unifi.it/</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <url>git@github.com:LorenzoBettini/edelta.git</url>
+    <developerConnection>scm:git:https://github.com/LorenzoBettini/edelta.git</developerConnection>
+    <connection>scm:git:git@github.com/LorenzoBettini/edelta.git</connection>
+  </scm>
+
+  <issueManagement>
+    <system>Github</system>
+    <url>https://github.com/LorenzoBettini/edelta/issues</url>
+  </issueManagement>
+
   <properties>
     <tycho-version>1.5.1</tycho-version>
     <xtextVersion>2.20.0</xtextVersion>
