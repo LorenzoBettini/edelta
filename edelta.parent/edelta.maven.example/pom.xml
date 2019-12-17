@@ -3,7 +3,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>edelta</groupId>
+  <groupId>io.github.lorenzobettini.edelta</groupId>
   <artifactId>edelta.maven.example</artifactId>
   <version>0.7.0-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -40,12 +40,12 @@
 
   <dependencies>
     <dependency>
-      <groupId>edelta</groupId>
+      <groupId>io.github.lorenzobettini.edelta</groupId>
       <artifactId>edelta.lib</artifactId>
       <version>${edelta.version}</version>
     </dependency>
     <dependency>
-      <groupId>edelta</groupId>
+      <groupId>io.github.lorenzobettini.edelta</groupId>
       <artifactId>edelta.refactorings.lib</artifactId>
       <version>${edelta.version}</version>
     </dependency>
@@ -135,14 +135,14 @@
             <version>${xtext-version}</version>
           </dependency>
           <dependency>
-            <groupId>edelta</groupId>
+            <groupId>io.github.lorenzobettini.edelta</groupId>
             <artifactId>edelta</artifactId>
             <version>${edelta.version}</version>
           </dependency>
           <!-- If you use a library in the .edelta file, it must be available
             also during Edelta compilation with xtext-maven-plugin -->
           <dependency>
-            <groupId>edelta</groupId>
+            <groupId>io.github.lorenzobettini.edelta</groupId>
             <artifactId>edelta.refactorings.lib</artifactId>
             <version>${edelta.version}</version>
           </dependency>
