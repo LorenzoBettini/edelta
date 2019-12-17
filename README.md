@@ -1,8 +1,10 @@
-# edelta
+# Edelta
+
+An Xtext DSL for EMF metamodels refactoring and migration
 
 [![Build Status](https://travis-ci.org/LorenzoBettini/edelta.svg?branch=master)](https://travis-ci.org/LorenzoBettini/edelta)
 [![Coverage Status](https://coveralls.io/repos/github/LorenzoBettini/edelta/badge.svg?branch=master)](https://coveralls.io/github/LorenzoBettini/edelta?branch=master)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=edelta%3Aedelta.parent&metric=alert_status)](https://sonarcloud.io/dashboard?id=edelta%3Aedelta.parent)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=io.github.lorenzobettini.edelta%3Aedelta.parent&metric=alert_status)](https://sonarcloud.io/dashboard?id=io.github.lorenzobettini.edelta%3Aedelta.parent)
 
 ### Eclipse update site
 
@@ -10,7 +12,7 @@ Copy the following URL and paste it into your Eclipse "Install New Software" dia
 
 https://dl.bintray.com/lorenzobettini/edelta/updates/
 
-IMPORTANT: Edelta requires Xtext, if this is not already installed, all dependencies will be automatically installed form this update site, which is self-contained.
+IMPORTANT: Edelta requires Xtext, if this is not already installed, all dependencies will be automatically installed from this update site, which is self-contained.
 
 ### Pre-configured Eclipse distributions with Edelta installed, for several architectures.
 
@@ -23,3 +25,7 @@ Download a complete Eclipse distribution with Edelta installed; choose the one f
 These are temporary development snapshots, which might be unstable (Note: the snapshots update site always includes the releases update site):
 
 https://dl.bintray.com/lorenzobettini/edelta/snapshots/updates/
+
+### Maven artifacts
+
+Since version 0.7.1, Maven artifacts for Edelta (mainly the compiler and the libraries) are avaialable on Maven Central (the groupId is `io.github.lorenzobettini.edelta`), and can be used, for instance, together with the `xtext-maven-plugin`, to compile `.edelta` files into Java files during a Maven build, both a Maven/Tycho build and a pure Maven build. An example of a pure Maven project using this mechanism can be found here: https://github.com/LorenzoBettini/edelta/tree/master/edelta.parent/edelta.maven.example.

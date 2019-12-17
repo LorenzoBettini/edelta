@@ -20,13 +20,13 @@ import static org.eclipse.core.runtime.IStatus.*
  */
 class EdeltaProjectTemplateProvider implements IProjectTemplateProvider {
 	override getProjectTemplates() {
-		#[new HelloWorldProject]
+		#[new EdeltaExampleProjectTemplate]
 	}
 }
 
 @ProjectTemplate(label="Edelta Example Project", icon="project_template.png", description="<p><b>Edelta Example Project</b></p>
 <p>An Edelta Example Project, with some initial contents: an Ecore file and an Edelta file.</p>")
-final class HelloWorldProject {
+final class EdeltaExampleProjectTemplate {
 	val advanced = check("Advanced:", false)
 	val advancedGroup = group("Properties")
 	val path = text("Package:", "com/example", "The package path to place the files in", advancedGroup)

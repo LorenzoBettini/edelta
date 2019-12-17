@@ -1,0 +1,25 @@
+import gssi.refactorings.MMrefactorings
+
+// IMPORTANT: ecores must be in a source directory
+// otherwise you can't refer to them
+
+package com.example
+
+metamodel "myecore"
+metamodel "ecore"
+
+use MMrefactorings as refactorings
+
+def createClass(String name) {
+	newEClass(name) => [
+		it.ESuperTypes += ecoreref(MyEClass)
+	]
+}
+
+createEClass MyNewClass in myecore {
+	refactorings.addMandatoryAttr(it, "ANewAttribute", ecoreref(EString))
+	ecoreref(ANewAttribute).setEType(ecoreref(EInt))
+	EPackage.addEClass(createClass("ANewDerivedEClass"))
+	ecoreref(ANewDerivedEClass).setAbstract(true)
+}
+

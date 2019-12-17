@@ -1,20 +1,61 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>edelta</groupId>
-  <version>0.7.0-SNAPSHOT</version>
+  <groupId>io.github.lorenzobettini.edelta</groupId>
+  <version>0.7.1-SNAPSHOT</version>
   <artifactId>edelta.parent</artifactId>
   <packaging>pom</packaging>
+
+  <name>Edelta</name>
+  <url>https://github.com/LorenzoBettini/edelta</url>
+  <description>An Xtext DSL for EMF metamodels refactoring and migration.</description>
+
+  <licenses>
+    <license>
+      <name>Eclipse Public License</name>
+      <url>http://www.eclipse.org/legal/epl-v10.html</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Lorenzo Bettini</name>
+      <email>lorenzo.bettini@gmail.com</email>
+      <roles>
+        <role>architect</role>
+        <role>developer</role>
+      </roles>
+      <organization>DISIA Dipartimento di Statistica, Informatica, Applicazioni</organization>
+      <organizationUrl>https://www.disia.unifi.it/</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <url>git@github.com:LorenzoBettini/edelta.git</url>
+    <developerConnection>scm:git:https://github.com/LorenzoBettini/edelta.git</developerConnection>
+    <connection>scm:git:git@github.com/LorenzoBettini/edelta.git</connection>
+  </scm>
+
+  <issueManagement>
+    <system>Github</system>
+    <url>https://github.com/LorenzoBettini/edelta/issues</url>
+  </issueManagement>
 
   <properties>
     <tycho-version>1.5.1</tycho-version>
     <xtextVersion>2.20.0</xtextVersion>
+    <xtext-version>${xtextVersion}</xtext-version>
     <eclipseVersion>2019-09</eclipseVersion>
     <mwe2Version>2.11.1</mwe2Version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
+    <build-helper-version>3.0.0</build-helper-version>
+    <versions-version>2.7</versions-version>
+
+    <mwe2.skip>false</mwe2.skip>
+    <xtend.skip>false</xtend.skip>
 
     <!-- Define overridable properties for tycho-surefire-plugin -->
     <platformSystemProperties></platformSystemProperties>
@@ -33,7 +74,7 @@
       **/mwe2/**,
       **/Messages.java,
       **/*ProjectTemplateProvider.java,
-      **/HelloWorldProject.java,
+      **/*ProjectTemplate.java,
       **/src-gen/**,
       **/emf-gen/**,
       **/impl/*ImplCustom.java,
@@ -119,28 +160,22 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>org.eclipse.xtext</groupId>
+        <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
+        <version>${xtextVersion}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
+  <!-- The modules common to all profiles. These also correspond
+    to the Maven artifacts to be deployed on Maven Central -->
   <modules>
+    <module>edelta.target</module>
     <module>edelta.lib</module>
-    <module>edelta.testutils</module>
-    <module>edelta.testing.libraries</module>
-    <module>edelta.lib.tests</module>
     <module>edelta.mwe2</module>
     <module>edelta</module>
-    <module>edelta.ide</module>
-    <module>edelta.ui</module>
     <module>edelta.refactorings.lib</module>
-    <module>edelta.refactorings.lib.tests</module>
-    <module>edelta.target</module>
-    <module>edelta.feature</module>
-    <module>edelta.repository</module>
-    <module>edelta.product.ui.feature</module>
-    <module>edelta.tests</module>
-    <module>edelta.ui.tests</module>
-    <module>edelta.product.repository</module>
-    <module>edelta.tests.report</module>
   </modules>
 
   <!-- These modules were experiments to compile edelta files
@@ -149,6 +184,95 @@
     edelta.library.compilation -->
 
   <profiles>
+    <profile>
+      <!-- Standard development profile, including Eclipse specific
+        bundles and tests -->
+      <id>development</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+        <!-- Passing the property from an Eclipse m2e launch
+          does not seem to work: the profile must be deactivated
+          explicitly with !development -->
+        <property>
+          <name>!activate-maven-profile</name>
+        </property>
+      </activation>
+      <modules>
+        <module>edelta.testutils</module>
+        <module>edelta.testing.libraries</module>
+        <module>edelta.lib.tests</module>
+        <module>edelta.ide</module>
+        <module>edelta.ui</module>
+        <module>edelta.refactorings.lib.tests</module>
+        <module>edelta.feature</module>
+        <module>edelta.repository</module>
+        <module>edelta.product.ui.feature</module>
+        <module>edelta.tests</module>
+        <module>edelta.ui.tests</module>
+        <module>edelta.personlist.example</module>
+        <module>edelta.maven.example</module>
+        <module>edelta.product.repository</module>
+        <module>edelta.tests.parent</module>
+        <module>edelta.tests.report</module>
+      </modules>
+      <!-- These modules were experiments to compile edelta files
+        through the Eclipse builder:
+        edelta.compilation.feature
+        edelta.library.compilation -->
+    </profile>
+    <profile>
+      <id>sonatype-oss-release</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.6.7</version>
+            <extensions>true</extensions>
+            <configuration>
+              <serverId>ossrh</serverId>
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+              <autoReleaseAfterClose>true</autoReleaseAfterClose>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.1.1</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+                <!-- Use the following configuration with Java 8 -->
+                <configuration>
+                  <additionalparam>-Xdoclint:none</additionalparam>
+                  <failOnError>false</failOnError>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <profile>
       <id>macos</id>
       <activation>
@@ -337,7 +461,7 @@
         <configuration>
           <target>
             <artifact>
-              <groupId>edelta</groupId>
+              <groupId>io.github.lorenzobettini.edelta</groupId>
               <artifactId>edelta.target</artifactId>
               <version>${project.version}</version>
             </artifact>
@@ -366,6 +490,61 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>${build-helper-version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>versions-maven-plugin</artifactId>
+          <version>${versions-version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-versions-plugin</artifactId>
+          <version>${tycho-version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.eclipse.xtext</groupId>
+          <artifactId>xtext-maven-plugin</artifactId>
+          <version>${xtextVersion}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>generate</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <failOnValidationError>true</failOnValidationError>
+            <languages>
+              <language>
+                <setup>org.eclipse.xtext.ecore.EcoreSupport</setup>
+              </language>
+              <language>
+                <setup>edelta.EdeltaStandaloneSetup</setup>
+                <outputConfigurations>
+                  <outputConfiguration>
+                    <outputDirectory>${basedir}/src-gen</outputDirectory>
+                  </outputConfiguration>
+                </outputConfigurations>
+              </language>
+            </languages>
+          </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>org.eclipse.xtext</groupId>
+              <artifactId>org.eclipse.xtext.ecore</artifactId>
+              <version>${xtext-version}</version>
+            </dependency>
+            <dependency>
+              <groupId>io.github.lorenzobettini.edelta</groupId>
+              <artifactId>edelta</artifactId>
+              <version>${project.version}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+        <plugin>
           <groupId>org.eclipse.xtend</groupId>
           <artifactId>xtend-maven-plugin</artifactId>
           <version>${xtextVersion}</version>
@@ -380,6 +559,7 @@
             </execution>
           </executions>
           <configuration>
+            <skipXtend>${xtend.skip}</skipXtend>
             <outputDirectory>${basedir}/xtend-gen</outputDirectory>
             <xtendAsPrimaryDebugSource>true</xtendAsPrimaryDebugSource>
           </configuration>
@@ -578,6 +758,14 @@
     </pluginRepository>
   </pluginRepositories>
 
-  <dependencies>
-  </dependencies>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
 </project>
