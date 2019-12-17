@@ -1,15 +1,34 @@
 node {
-   def mvnHome
+   def mavenProfiles = ""
+   def mavenArguments = "clean verify"
+   def mavenDeploy = false
+   def ideTests = false
+   if (env.JOB_NAME.endsWith("release-site")) {
+     mavenProfiles = "-Prelease-composite"
+     mavenDeploy = true
+   } else if (env.JOB_NAME.endsWith("release")) {
+     mavenProfiles = "-Pbuild-ide,release-ide-composite,deploy-ide-composite"
+     mavenDeploy = true
+   } else {
+     mavenProfiles = "-Pjacoco,build-ide,test-ide"
+     ideTests = true
+   }
+   properties([
+     [$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', numToKeepStr: '30']]
+   ])
    stage('Preparation') { // for display purposes
       checkout scm
    }
    stage('Build') {
       wrap([$class: 'Xvfb', autoDisplayName: true]) {
+        if (ideTests) {
+          sh "mutter --replace --sm-disable 2> mutter.err &"
+        }
         // Run the maven build
         // returnStatus: true here will ensure the build stays yellow
         // when test cases are failing
         sh (script:
-          "./mvnw -f edelta.parent/pom.xml -fae clean verify -Pjacoco",
+          "./mvnw -f edelta.parent/pom.xml -fae ${mavenProfiles} ${mavenArguments}",
           returnStatus: true
         )
       }
