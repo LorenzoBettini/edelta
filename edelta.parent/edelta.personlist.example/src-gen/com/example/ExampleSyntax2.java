@@ -7,7 +7,6 @@ import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -32,11 +31,10 @@ public class ExampleSyntax2 extends AbstractEdelta {
       this.refactorings.introduceSubclasses(it_1, 
         getEAttribute("PersonList", "Person", "gender"), 
         getEEnum("PersonList", "Gender"));
-      EList<EStructuralFeature> _eStructuralFeatures = it_1.getEStructuralFeatures();
-      EAttribute _mergeAttributes = this.refactorings.mergeAttributes("name", 
-        getEAttribute("PersonList", "Person", "firstname").getEAttributeType(), 
-        Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname"))));
-      _eStructuralFeatures.add(_mergeAttributes);
+      this.lib.addEAttribute(it_1, 
+        this.refactorings.mergeAttributes("name", 
+          getEAttribute("PersonList", "Person", "firstname").getEAttributeType(), 
+          Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname")))));
     };
     ObjectExtensions.<EClass>operator_doubleArrow(
       getEClass("PersonList", "Person"), _function);
@@ -48,9 +46,7 @@ public class ExampleSyntax2 extends AbstractEdelta {
       this.refactorings.extractSuperclass(it_1, 
         Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "LivingPlace", "address"), getEAttribute("PersonList", "WorkPlace", "address"))));
     };
-    final EClass placeClass = this.lib.newEClass("Place", _function);
-    EList<EClassifier> _eClassifiers = it.getEClassifiers();
-    _eClassifiers.add(placeClass);
+    this.lib.addNewEClass(it, "Place", _function);
   }
   
   public void introduceWorkingPosition(final EPackage it) {
@@ -64,17 +60,14 @@ public class ExampleSyntax2 extends AbstractEdelta {
       this.refactorings.extractMetaClass(it_1, 
         getEReference("PersonList", "Person", "works"), "position", "works");
     };
-    final EClass workingPositionClass = this.lib.newEClass("WorkingPosition", _function);
-    EList<EClassifier> _eClassifiers = it.getEClassifiers();
-    _eClassifiers.add(workingPositionClass);
+    this.lib.addNewEClass(it, "WorkingPosition", _function);
   }
   
   public void improveList(final EPackage it) {
-    EList<EStructuralFeature> _eStructuralFeatures = getEClass("PersonList", "List").getEStructuralFeatures();
-    EReference _mergeReferences = this.refactorings.mergeReferences("places", 
-      getEClass("PersonList", "Place"), 
-      Collections.<EReference>unmodifiableList(CollectionLiterals.<EReference>newArrayList(getEReference("PersonList", "List", "wplaces"), getEReference("PersonList", "List", "lplaces"))));
-    _eStructuralFeatures.add(_mergeReferences);
+    this.lib.addEReference(getEClass("PersonList", "List"), 
+      this.refactorings.mergeReferences("places", 
+        getEClass("PersonList", "Place"), 
+        Collections.<EReference>unmodifiableList(CollectionLiterals.<EReference>newArrayList(getEReference("PersonList", "List", "wplaces"), getEReference("PersonList", "List", "lplaces")))));
   }
   
   @Override

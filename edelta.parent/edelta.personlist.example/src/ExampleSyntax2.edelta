@@ -17,40 +17,40 @@ modifyEcore improvePerson epackage PersonList {
 				ecoreref(Person.gender),
 				ecoreref(Gender)
 			)
-		EStructuralFeatures+=
+		addEAttribute(
 			refactorings.mergeAttributes("name",
 				ecoreref(Person.firstname).EAttributeType,
 				#[ecoreref(Person.firstname), ecoreref(Person.lastname)]
 			)
+		)
 	]
 }
 
 modifyEcore introducePlace epackage PersonList {
-	val placeClass = newEClass("Place") [
+	addNewEClass("Place") [
 		abstract = true
 		refactorings.extractSuperclass(it,
-			#[ecoreref(LivingPlace.address), ecoreref(WorkPlace.address)]);
+			#[ecoreref(LivingPlace.address), ecoreref(WorkPlace.address)])
 	]
-	EClassifiers += placeClass
 }
 
 modifyEcore introduceWorkingPosition epackage PersonList {
-	val workingPositionClass = newEClass("WorkingPosition") [
+	addNewEClass("WorkingPosition") [
 		EStructuralFeatures += newEAttribute("description") [
 			EType = ecoreref(EString)
 		]
 		refactorings.extractMetaClass(it,
 			ecoreref(Person.works), "position", "works"
-		);
+		)
 	]
-	EClassifiers += workingPositionClass
 }
 
 modifyEcore improveList epackage PersonList {
-	ecoreref(PersonList.List).EStructuralFeatures+=
+	ecoreref(PersonList.List).addEReference(
 		refactorings.mergeReferences("places",
 			ecoreref(Place),
 			#[ecoreref(List.wplaces), ecoreref(List.lplaces)]
-		);
+		)
+	)
 }
 
