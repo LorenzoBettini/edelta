@@ -27,7 +27,7 @@ public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 	private static final Logger LOG = Logger.getLogger(EdeltaSafeInterpreter.class);
 
 	/**
-	 * This exception will always be rethrown by the safe interpreter.
+	 * Subclasses of this exception will always be rethrown by the safe interpreter.
 	 * 
 	 * @author Lorenzo Bettini
 	 *
