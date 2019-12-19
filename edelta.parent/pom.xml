@@ -45,8 +45,9 @@
     <tycho-version>1.5.1</tycho-version>
     <xtextVersion>2.20.0</xtextVersion>
     <xtext-version>${xtextVersion}</xtext-version>
-    <eclipseVersion>2019-09</eclipseVersion>
+    <eclipseVersion>2019-12</eclipseVersion>
     <mwe2Version>2.11.1</mwe2Version>
+    <emf.mwe-version>1.5.1</emf.mwe-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -161,9 +162,19 @@
         <scope>import</scope>
       </dependency>
       <dependency>
+        <groupId>org.eclipse.emf</groupId>
+        <artifactId>org.eclipse.emf.mwe.core</artifactId>
+        <version>${emf.mwe-version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.eclipse.xtext</groupId>
         <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
         <version>${xtextVersion}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.xtext</groupId>
+        <artifactId>org.eclipse.xtext.ecore</artifactId>
+        <version>${xtext-version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -532,11 +543,6 @@
             </languages>
           </configuration>
           <dependencies>
-            <dependency>
-              <groupId>org.eclipse.xtext</groupId>
-              <artifactId>org.eclipse.xtext.ecore</artifactId>
-              <version>${xtext-version}</version>
-            </dependency>
             <dependency>
               <groupId>io.github.lorenzobettini.edelta</groupId>
               <artifactId>edelta</artifactId>
