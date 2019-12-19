@@ -15,7 +15,6 @@
     <edelta.version>${project.version}</edelta.version>
     <xtextVersion>2.20.0</xtextVersion>
     <xtext-version>${xtextVersion}</xtext-version>
-    <emf.mwe-version>1.5.1</emf.mwe-version>
   </properties>
 
   <dependencyManagement>
@@ -121,16 +120,6 @@
           </languages>
         </configuration>
         <dependencies>
-          <dependency>
-            <groupId>org.eclipse.emf</groupId>
-            <artifactId>org.eclipse.emf.mwe.core</artifactId>
-            <version>${emf.mwe-version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.eclipse.xtext</groupId>
-            <artifactId>org.eclipse.xtext.ecore</artifactId>
-            <version>${xtext-version}</version>
-          </dependency>
           <dependency>
             <groupId>io.github.lorenzobettini.edelta</groupId>
             <artifactId>edelta</artifactId>
