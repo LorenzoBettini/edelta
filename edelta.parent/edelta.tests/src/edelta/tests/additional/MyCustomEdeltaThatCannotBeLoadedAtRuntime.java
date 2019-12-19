@@ -7,4 +7,7 @@ import edelta.lib.AbstractEdelta;
  * not be loaded.
  */
 public class MyCustomEdeltaThatCannotBeLoadedAtRuntime extends AbstractEdelta {
+	public void aMethod() {
+		// just for testing
+	}
 }

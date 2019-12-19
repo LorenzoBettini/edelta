@@ -1,9 +1,11 @@
 package edelta.tests;
 
+import org.eclipse.xtext.common.types.util.JavaReflectAccess;
 import org.eclipse.xtext.resource.IDerivedStateComputer;
 
 import edelta.EdeltaRuntimeModule;
 import edelta.tests.additional.EdeltaDerivedStateComputerWithoutInterpreter;
+import edelta.tests.additional.MockJavaReflectAccess;
 
 /**
  * Avoids the derived state computer run the interpreter since the tests in this
@@ -28,6 +30,10 @@ public class EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter extend
 				return EdeltaDerivedStateComputerWithoutInterpreter.class;
 			}
 
+			@SuppressWarnings("unused")
+			public Class<? extends JavaReflectAccess> bindJavaReflectAccess() {
+				return MockJavaReflectAccess.class;
+			}
 		};
 	}
 }
