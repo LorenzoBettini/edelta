@@ -12,11 +12,11 @@ import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import static org.junit.Assert.*
 import static org.assertj.core.api.Assertions.*
+import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
-@InjectWith(EdeltaInjectorProviderCustom)
+@InjectWith(EdeltaInjectorProvider)
 class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 
 	@Inject EdeltaInterpreterHelper interpreterHelper
