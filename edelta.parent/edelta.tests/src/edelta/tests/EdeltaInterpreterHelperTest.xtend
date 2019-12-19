@@ -14,59 +14,10 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
-import org.eclipse.xtext.common.types.access.impl.ClassFinder
-import edelta.lib.AbstractEdelta
-import edelta.EdeltaRuntimeModule
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderForJavaReflectAccess)
 class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
-
-	static class EdeltaInjectorProviderForJavaReflectAccess extends EdeltaInjectorProvider {
-		override protected EdeltaRuntimeModule createRuntimeModule() {
-			return new EdeltaRuntimeModule() {
-				override bindClassLoaderToInstance() {
-					return EdeltaInjectorProvider.getClassLoader();
-				}
-	
-				def Class<? extends JavaReflectAccess> bindJavaReflectAccess() {
-					MockJavaReflectAccess
-				}
-			}
-		}
-	}
-
-	/**
-	 * Fake implementation that, when loaded at runtime by the interpreter, should
-	 * not be loaded.
-	 */
-	static class MyCustomEdeltaThatCannotBeLoadedAtRuntime extends AbstractEdelta {
-		
-	}
-
-	/**
-	 * Fake implementation that, when we try to load MyCustomEdeltaThatCannotBeLoadedAtRuntime
-	 * with forName it returns null.
-	 */
-	static class MockJavaReflectAccess extends JavaReflectAccess {
-		var ClassLoader classLoader
-
-		@Inject
-		override setClassLoader(ClassLoader classLoader) {
-			super.setClassLoader(classLoader)
-			this.classLoader = classLoader
-		}
-
-		override getClassFinder() {
-			return new ClassFinder(classLoader) {
-				override forName(String name) throws ClassNotFoundException {
-					if (name == MyCustomEdeltaThatCannotBeLoadedAtRuntime.name)
-						return null
-					return super.forName(name)
-				}
-			}
-		}
-	}
 
 	@Inject EdeltaInterpreterHelper interpreterHelper
 
@@ -164,7 +115,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 		// https://github.com/LorenzoBettini/edelta/issues/69
 		assertThatThrownBy[
 		'''
-			import edelta.tests.EdeltaInterpreterHelperTest$MyCustomEdeltaThatCannotBeLoadedAtRuntime
+			import edelta.tests..additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 			
 			use MyCustomEdeltaThatCannotBeLoadedAtRuntime as my
 		'''.parse.useAsClauses.head => [
