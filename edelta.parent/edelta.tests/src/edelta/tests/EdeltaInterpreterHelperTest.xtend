@@ -115,7 +115,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 		// https://github.com/LorenzoBettini/edelta/issues/69
 		assertThatThrownBy[
 		'''
-			import edelta.tests..additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
+			import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 			
 			use MyCustomEdeltaThatCannotBeLoadedAtRuntime as my
 		'''.parse.useAsClauses.head => [
