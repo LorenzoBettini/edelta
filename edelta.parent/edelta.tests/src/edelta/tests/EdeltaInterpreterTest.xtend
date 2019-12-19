@@ -15,6 +15,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import static org.assertj.core.api.Assertions.*
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -141,8 +142,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test(expected=IllegalStateException)
 	def void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() {
+		assertThatThrownBy[
 		'''
 			metamodel "foo"
 			
@@ -151,9 +152,9 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			createEClass NewClass in foo {
 				my.createANewEAttribute(it)
 			}
-		'''.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ derivedEClass |
-			// will not get here
-		]
+		'''.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ /* will not get here */ ]
+		].isInstanceOf(IllegalStateException)
+			.hasMessageContaining("Cannot resolve proxy")
 	}
 
 	@Test
