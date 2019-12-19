@@ -15,6 +15,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import static org.assertj.core.api.Assertions.*
+import edelta.interpreter.EdeltaSafeInterpreter
+import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -141,8 +144,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test(expected=IllegalStateException)
 	def void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() {
+		assertThatThrownBy[
 		'''
 			metamodel "foo"
 			
@@ -151,9 +154,31 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			createEClass NewClass in foo {
 				my.createANewEAttribute(it)
 			}
-		'''.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ derivedEClass |
-			// will not get here
-		]
+		'''.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ /* will not get here */ ]
+		].isInstanceOf(IllegalStateException)
+			.hasMessageContaining("Cannot resolve proxy")
+	}
+
+	@Test
+	def void testCreateEClassAndCallOperationFromUseAsButNotFoundAtRuntime() {
+		// this is a simulation of what would happen if a type is resolved
+		// but the interpreter cannot load it with Class.forName
+		// because the ClassLoader cannot find it
+		// https://github.com/LorenzoBettini/edelta/issues/69
+		assertThatThrownBy[
+		'''
+			import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
+
+			metamodel "foo"
+
+			use MyCustomEdeltaThatCannotBeLoadedAtRuntime as my
+
+			createEClass NewClass in foo {
+				my.aMethod()
+			}
+		'''.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ /* will not get here */ ]
+		].isInstanceOf(EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException)
+			.hasMessageContaining('''The type '«MyCustomEdeltaThatCannotBeLoadedAtRuntime.name»' has been resolved but cannot be loaded by the interpreter''')
 	}
 
 	@Test

@@ -3,6 +3,7 @@ package edelta.tests
 import com.google.inject.Inject
 import edelta.edelta.EdeltaFactory
 import edelta.interpreter.EdeltaInterpreterHelper
+import edelta.interpreter.EdeltaSafeInterpreter
 import edelta.tests.additional.MyCustomEdelta
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.EcorePackage
@@ -12,10 +13,12 @@ import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
 
+import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
+import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 
 @RunWith(XtextRunner)
-@InjectWith(EdeltaInjectorProviderCustom)
+@InjectWith(EdeltaInjectorProviderForJavaReflectAccess)
 class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 
 	@Inject EdeltaInterpreterHelper interpreterHelper
@@ -92,5 +95,35 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 		val attr = EcoreFactory.eINSTANCE.createEAttribute
 		interpreterHelper.safeSetEAttributeType(attr, null)
 		assertNull(attr.EType)
+	}
+
+	@Test
+	def void testSafeInstantiateOfUnresolvedUseAsType() {
+		assertThatThrownBy[
+		'''
+			use NonExistent as my
+		'''.parse.useAsClauses.head => [
+				interpreterHelper.safeInstantiate(javaReflectAccess, it).class
+			]
+		].isInstanceOf(IllegalStateException)
+			.hasMessageContaining("Cannot resolve proxy")
+	}
+
+	@Test
+	def void testSafeInstantiateOfValidUseAsButNotFoundAtRuntime() {
+		// this is a simulation of what would happen if a type is resolved
+		// but the interpreter cannot load it with Class.forName
+		// because the ClassLoader cannot find it
+		// https://github.com/LorenzoBettini/edelta/issues/69
+		assertThatThrownBy[
+		'''
+			import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
+			
+			use MyCustomEdeltaThatCannotBeLoadedAtRuntime as my
+		'''.parse.useAsClauses.head => [
+				interpreterHelper.safeInstantiate(javaReflectAccess, it).class
+			]
+		].isInstanceOf(EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException)
+			.hasMessageContaining('''The type '«MyCustomEdeltaThatCannotBeLoadedAtRuntime.name»' has been resolved but cannot be loaded by the interpreter''')
 	}
 }
