@@ -13,6 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import static org.assertj.core.api.Assertions.*
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -92,5 +93,17 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 		val attr = EcoreFactory.eINSTANCE.createEAttribute
 		interpreterHelper.safeSetEAttributeType(attr, null)
 		assertNull(attr.EType)
+	}
+
+	@Test
+	def void testSafeInstantiateOfUnresolvedUseAsType() {
+		assertThatThrownBy[
+		'''
+			use NonExistent as my
+		'''.parse.useAsClauses.head => [
+				interpreterHelper.safeInstantiate(javaReflectAccess, it).class
+			]
+		].isInstanceOf(IllegalStateException)
+			.hasMessageContaining("Cannot resolve proxy")
 	}
 }
