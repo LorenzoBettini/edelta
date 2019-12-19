@@ -3,6 +3,7 @@ package edelta.tests
 import com.google.inject.Inject
 import edelta.edelta.EdeltaFactory
 import edelta.interpreter.EdeltaInterpreterHelper
+import edelta.interpreter.EdeltaSafeInterpreter
 import edelta.tests.additional.MyCustomEdelta
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.EcorePackage
@@ -14,6 +15,7 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
+import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderForJavaReflectAccess)
@@ -121,6 +123,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 		'''.parse.useAsClauses.head => [
 				interpreterHelper.safeInstantiate(javaReflectAccess, it).class
 			]
-		].isInstanceOf(NullPointerException)
+		].isInstanceOf(EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException)
+			.hasMessageContaining('''The type '«MyCustomEdeltaThatCannotBeLoadedAtRuntime.name»' has been resolved but cannot be loaded by the interpreter''')
 	}
 }
