@@ -19,7 +19,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 
 	@Test
 	def void test_addMandatoryAttr() {
-		val c = createEClass("C1")
+		val c = createEClassWithoutPackage("C1")
 		refactorings.addMandatoryAttr(c, "test", stringDataType)
 		val attr = c.EStructuralFeatures.filter(EAttribute).head
 		assertThat(attr)
@@ -30,8 +30,8 @@ class EdeltaRefactoringsTest extends AbstractTest {
 
 	@Test
 	def void test_mergeReferences() {
-		val refType = createEClass("RefType")
-		val c = createEClass("C1") => [
+		val refType = createEClassWithoutPackage("RefType")
+		val c = createEClassWithoutPackage("C1") => [
 			createEReference("ref1") => [
 				EType = refType
 			]
@@ -50,7 +50,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 
 	@Test
 	def void test_mergeAttributes() {
-		val c = createEClass("C1") => [
+		val c = createEClassWithoutPackage("C1") => [
 			createEAttribute("a1") => [
 				EType = stringDataType
 			]
@@ -157,5 +157,34 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			]
 		assertThat(person.EStructuralFeatures)
 			.containsExactly(personWorks)
+	}
+
+	@Test def void test_extractSuperClass() {
+		val p = factory.createEPackage => [
+			createEClass("C1") => [
+				createEAttribute("A1") => [
+					EType = stringDataType
+				]
+			]
+			createEClass("C2") => [
+				createEAttribute("A1") => [
+					EType = stringDataType
+				]
+			]
+		]
+		// we know the duplicates, manually
+		val duplicates = p.EClasses.map[EAttributes].flatten.toList
+		refactorings.extractSuperclass(duplicates)
+		val classifiersNames = p.EClassifiers.map[name]
+		assertThat(classifiersNames)
+			.hasSize(3)
+			.containsExactly("C1", "C2", "A1Element")
+		val classes = p.EClasses
+		assertThat(classes.get(0).EAttributes).isEmpty
+		assertThat(classes.get(1).EAttributes).isEmpty
+		assertThat(classes.get(2).EAttributes).hasSize(1)
+		val extracted = classes.get(2).EAttributes.head
+		assertThat(extracted.name).isEqualTo("A1")
+		assertThat(extracted.EAttributeType).isEqualTo(stringDataType)
 	}
 }

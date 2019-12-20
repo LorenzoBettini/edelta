@@ -6,14 +6,20 @@ import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
+import org.eclipse.xtext.xbase.lib.ListExtensions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
+import org.eclipse.xtext.xbase.lib.StringExtensions;
 
 @SuppressWarnings("all")
 public class EdeltaRefactorings extends AbstractEdelta {
@@ -118,5 +124,60 @@ public class EdeltaRefactorings extends AbstractEdelta {
     f.setEType(extractedClass);
     f.setContainment(true);
     f.setName(outReferenceName);
+  }
+  
+  /**
+   * Given a non empty list of {@link EStructuralFeature}, which are known to
+   * appear in several classes as duplicates, extracts a new common superclass,
+   * with the duplicate feature,
+   * adds the extracted superclass to the classes with the duplicate
+   * feature and removes the duplicate feature from each class.
+   * 
+   * @param duplicates
+   */
+  public void extractSuperclass(final List<? extends EStructuralFeature> duplicates) {
+    final EStructuralFeature feature = IterableExtensions.head(duplicates);
+    final EPackage containingEPackage = feature.getEContainingClass().getEPackage();
+    String _firstUpper = StringExtensions.toFirstUpper(feature.getName());
+    String _plus = (_firstUpper + "Element");
+    final String superClassName = this.ensureEClassifierNameIsUnique(containingEPackage, _plus);
+    final Consumer<EClass> _function = (EClass it) -> {
+      it.setAbstract(true);
+      EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
+      EStructuralFeature _copy = EcoreUtil.<EStructuralFeature>copy(feature);
+      _eStructuralFeatures.add(_copy);
+    };
+    final EClass superclass = this.lib.newEClass(superClassName, _function);
+    EList<EClassifier> _eClassifiers = containingEPackage.getEClassifiers();
+    _eClassifiers.add(superclass);
+    for (final EStructuralFeature duplicate : duplicates) {
+      {
+        final EClass eContainingClass = duplicate.getEContainingClass();
+        EList<EClass> _eSuperTypes = eContainingClass.getESuperTypes();
+        _eSuperTypes.add(superclass);
+        EList<EStructuralFeature> _eStructuralFeatures = eContainingClass.getEStructuralFeatures();
+        _eStructuralFeatures.remove(duplicate);
+      }
+    }
+  }
+  
+  /**
+   * Ensures that the proposed classifier name is unique within the specified
+   * package; if not, it appends an incremental index until the name
+   * is actually unique
+   */
+  public String ensureEClassifierNameIsUnique(final EPackage ePackage, final String proposedName) {
+    String className = proposedName;
+    final Function1<EClassifier, String> _function = (EClassifier it) -> {
+      return it.getName();
+    };
+    final List<String> currentEClassifiersNames = IterableExtensions.<String>sort(ListExtensions.<EClassifier, String>map(ePackage.getEClassifiers(), _function));
+    int counter = 1;
+    while (currentEClassifiersNames.contains(className)) {
+      String _className = className;
+      int _plusPlus = counter++;
+      className = (_className + Integer.valueOf(_plusPlus));
+    }
+    return className;
   }
 }

@@ -3,8 +3,10 @@ import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EEnum
+import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
+import org.eclipse.emf.ecore.util.EcoreUtil
 
 package edelta.refactorings.lib
 
@@ -93,4 +95,53 @@ def extractMetaClass(EClass extractedClass, EReference f, String inReferenceName
 	f.EType = extractedClass;
 	f.containment = true;
 	f.name = outReferenceName;
+}
+
+/**
+ * Given a non empty list of {@link EStructuralFeature}, which are known to
+ * appear in several classes as duplicates, extracts a new common superclass,
+ * with the duplicate feature,
+ * adds the extracted superclass to the classes with the duplicate
+ * feature and removes the duplicate feature from each class.
+ * 
+ * @param duplicates
+ */
+def extractSuperclass(List<? extends EStructuralFeature> duplicates){
+	val feature = duplicates.head;
+	val containingEPackage = feature.EContainingClass.EPackage
+	val superClassName =
+		ensureEClassifierNameIsUnique(containingEPackage,
+			feature.name.toFirstUpper + "Element"
+		)
+
+	val superclass = newEClass(superClassName) [
+		abstract = true;
+		EStructuralFeatures += EcoreUtil.copy(feature)
+	]
+	containingEPackage.EClassifiers += superclass
+
+	for (duplicate : duplicates) {
+		val eContainingClass = duplicate.EContainingClass
+		// set supertype of the EClass of the attribute
+		eContainingClass.ESuperTypes += superclass;
+		// and then remove the attribute from the original EClass
+		eContainingClass.EStructuralFeatures -= duplicate
+	}
+}
+
+/**
+ * Ensures that the proposed classifier name is unique within the specified
+ * package; if not, it appends an incremental index until the name
+ * is actually unique
+ */
+def ensureEClassifierNameIsUnique(EPackage ePackage, String proposedName) {
+	var className = proposedName
+	val currentEClassifiersNames =
+		ePackage.EClassifiers.map[name].sort
+	var counter = 1
+	// make sure the new class is unique by name in the package
+	while (currentEClassifiersNames.contains(className)) {
+		className += (counter++)
+	}
+	return className
 }
