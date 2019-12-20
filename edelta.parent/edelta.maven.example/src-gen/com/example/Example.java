@@ -1,7 +1,7 @@
 package com.example;
 
 import edelta.lib.AbstractEdelta;
-import gssi.refactorings.MMrefactorings;
+import edelta.refactorings.lib.MMrefactorings;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;

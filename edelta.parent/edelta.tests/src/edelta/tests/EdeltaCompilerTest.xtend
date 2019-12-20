@@ -1276,7 +1276,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package com.example;
 			
 			import edelta.lib.AbstractEdelta;
-			import gssi.refactorings.MMrefactorings;
+			import edelta.refactorings.lib.MMrefactorings;
 			import java.util.Collections;
 			import org.eclipse.emf.common.util.EList;
 			import org.eclipse.emf.ecore.EAttribute;
@@ -1372,7 +1372,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package com.example;
 			
 			import edelta.lib.AbstractEdelta;
-			import gssi.refactorings.MMrefactorings;
+			import edelta.refactorings.lib.MMrefactorings;
 			import java.util.Collections;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.common.util.EList;

@@ -2,7 +2,7 @@ package edelta;
 
 import edelta.Example;
 import edelta.lib.AbstractEdelta;
-import gssi.refactorings.MMrefactorings;
+import edelta.refactorings.lib.MMrefactorings;
 import org.eclipse.emf.ecore.EClass;
 
 @SuppressWarnings("all")

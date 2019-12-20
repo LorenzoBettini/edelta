@@ -463,7 +463,7 @@ class Inputs {
 
 	def personListExample()
 	'''
-		import gssi.refactorings.MMrefactorings
+		import edelta.refactorings.lib.MMrefactorings
 		
 		package com.example
 		
@@ -508,7 +508,7 @@ class Inputs {
 
 	def personListExampleModifyEcore()
 	'''
-		import gssi.refactorings.MMrefactorings
+		import edelta.refactorings.lib.MMrefactorings
 		
 		package com.example
 		

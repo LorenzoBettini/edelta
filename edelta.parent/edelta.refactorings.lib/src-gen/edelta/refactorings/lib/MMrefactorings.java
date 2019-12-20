@@ -1,4 +1,4 @@
-package gssi.refactorings;
+package edelta.refactorings.lib;
 
 import edelta.lib.AbstractEdelta;
 import java.util.List;

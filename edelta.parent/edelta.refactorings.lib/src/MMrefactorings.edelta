@@ -6,7 +6,7 @@ import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 
-package gssi.refactorings
+package edelta.refactorings.lib
 
 def addMandatoryAttr(EClass eClass, String attrname, EDataType dataType): EAttribute {
 	return eClass.addNewEAttribute(attrname, dataType) [

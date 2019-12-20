@@ -1,7 +1,7 @@
 package com.example;
 
 import edelta.lib.AbstractEdelta;
-import gssi.refactorings.MMrefactorings;
+import edelta.refactorings.lib.MMrefactorings;
 import java.util.Collections;
 import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;

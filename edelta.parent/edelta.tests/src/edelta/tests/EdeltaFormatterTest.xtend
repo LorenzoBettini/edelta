@@ -19,7 +19,7 @@ class EdeltaFormatterTest extends EdeltaAbstractTest {
 			expectation = '''
 				
 				
-				import gssi.refactorings.MMrefactorings
+				import edelta.refactorings.lib.MMrefactorings
 				
 				// IMPORTANT: ecores must be in source directories
 				// otherwise you can't refer to them
@@ -51,7 +51,7 @@ class EdeltaFormatterTest extends EdeltaAbstractTest {
 			toBeFormatted = '''
 				
 				
-				import gssi.refactorings.MMrefactorings
+				import edelta.refactorings.lib.MMrefactorings
 				
 				// IMPORTANT: ecores must be in source directories
 				// otherwise you can't refer to them

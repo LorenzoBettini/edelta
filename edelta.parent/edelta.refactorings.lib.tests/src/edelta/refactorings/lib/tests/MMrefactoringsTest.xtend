@@ -1,6 +1,6 @@
 package edelta.refactorings.lib.tests
 
-import gssi.refactorings.MMrefactorings
+import edelta.refactorings.lib.MMrefactorings
 import org.junit.Before
 import org.junit.Test
 
