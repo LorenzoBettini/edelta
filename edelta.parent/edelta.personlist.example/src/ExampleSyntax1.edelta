@@ -1,4 +1,4 @@
-import edelta.refactorings.lib.MMrefactorings
+import edelta.refactorings.lib.EdeltaRefactorings
 
 // IMPORTANT: ecores must be in a source directory
 // otherwise you can't refer to them
@@ -7,7 +7,7 @@ package com.example
 metamodel "PersonList"
 metamodel "ecore"
 
-use MMrefactorings as refactorings
+use EdeltaRefactorings as refactorings
 
 changeEClass PersonList.Person {
 	refactorings.

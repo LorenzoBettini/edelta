@@ -16,12 +16,12 @@ import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
-public class MMrefactorings extends AbstractEdelta {
-  public MMrefactorings() {
+public class EdeltaRefactorings extends AbstractEdelta {
+  public EdeltaRefactorings() {
     
   }
   
-  public MMrefactorings(final AbstractEdelta other) {
+  public EdeltaRefactorings(final AbstractEdelta other) {
     super(other);
   }
   

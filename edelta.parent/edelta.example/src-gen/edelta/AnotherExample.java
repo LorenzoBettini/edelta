@@ -2,18 +2,18 @@ package edelta;
 
 import edelta.Example;
 import edelta.lib.AbstractEdelta;
-import edelta.refactorings.lib.MMrefactorings;
+import edelta.refactorings.lib.EdeltaRefactorings;
 import org.eclipse.emf.ecore.EClass;
 
 @SuppressWarnings("all")
 public class AnotherExample extends AbstractEdelta {
   private Example example;
   
-  private MMrefactorings std;
+  private EdeltaRefactorings std;
   
   public AnotherExample() {
     example = new Example(this);
-    std = new MMrefactorings(this);
+    std = new EdeltaRefactorings(this);
   }
   
   public AnotherExample(final AbstractEdelta other) {

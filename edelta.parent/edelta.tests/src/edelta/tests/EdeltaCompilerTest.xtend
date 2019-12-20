@@ -1276,7 +1276,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package com.example;
 			
 			import edelta.lib.AbstractEdelta;
-			import edelta.refactorings.lib.MMrefactorings;
+			import edelta.refactorings.lib.EdeltaRefactorings;
 			import java.util.Collections;
 			import org.eclipse.emf.common.util.EList;
 			import org.eclipse.emf.ecore.EAttribute;
@@ -1287,10 +1287,10 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class Example extends AbstractEdelta {
-			  private MMrefactorings refactorings;
+			  private EdeltaRefactorings refactorings;
 			  
 			  public Example() {
-			    refactorings = new MMrefactorings(this);
+			    refactorings = new EdeltaRefactorings(this);
 			  }
 			  
 			  public Example(final AbstractEdelta other) {
@@ -1372,7 +1372,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package com.example;
 			
 			import edelta.lib.AbstractEdelta;
-			import edelta.refactorings.lib.MMrefactorings;
+			import edelta.refactorings.lib.EdeltaRefactorings;
 			import java.util.Collections;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.common.util.EList;
@@ -1388,10 +1388,10 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class Example extends AbstractEdelta {
-			  private MMrefactorings refactorings;
+			  private EdeltaRefactorings refactorings;
 			  
 			  public Example() {
-			    refactorings = new MMrefactorings(this);
+			    refactorings = new EdeltaRefactorings(this);
 			  }
 			  
 			  public Example(final AbstractEdelta other) {

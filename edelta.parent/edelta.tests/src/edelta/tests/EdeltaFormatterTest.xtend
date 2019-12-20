@@ -19,7 +19,7 @@ class EdeltaFormatterTest extends EdeltaAbstractTest {
 			expectation = '''
 				
 				
-				import edelta.refactorings.lib.MMrefactorings
+				import edelta.refactorings.lib.EdeltaRefactorings
 				
 				// IMPORTANT: ecores must be in source directories
 				// otherwise you can't refer to them
@@ -28,7 +28,7 @@ class EdeltaFormatterTest extends EdeltaAbstractTest {
 				metamodel "myecore"
 				
 				use Example as example 
-				use MMrefactorings as std
+				use EdeltaRefactorings as std
 				
 				def createClass2(String name) {
 					newEClass(name)
@@ -51,7 +51,7 @@ class EdeltaFormatterTest extends EdeltaAbstractTest {
 			toBeFormatted = '''
 				
 				
-				import edelta.refactorings.lib.MMrefactorings
+				import edelta.refactorings.lib.EdeltaRefactorings
 				
 				// IMPORTANT: ecores must be in source directories
 				// otherwise you can't refer to them
@@ -61,7 +61,7 @@ class EdeltaFormatterTest extends EdeltaAbstractTest {
 				metamodel "myecore"
 				
 				use Example as example 
-				use MMrefactorings as std
+				use EdeltaRefactorings as std
 				
 				def createClass2(String name) { 				newEClass(name)
 				}

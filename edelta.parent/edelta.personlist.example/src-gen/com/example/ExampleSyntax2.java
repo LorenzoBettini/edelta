@@ -1,7 +1,7 @@
 package com.example;
 
 import edelta.lib.AbstractEdelta;
-import edelta.refactorings.lib.MMrefactorings;
+import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.Collections;
 import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
@@ -16,10 +16,10 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class ExampleSyntax2 extends AbstractEdelta {
-  private MMrefactorings refactorings;
+  private EdeltaRefactorings refactorings;
   
   public ExampleSyntax2() {
-    refactorings = new MMrefactorings(this);
+    refactorings = new EdeltaRefactorings(this);
   }
   
   public ExampleSyntax2(final AbstractEdelta other) {

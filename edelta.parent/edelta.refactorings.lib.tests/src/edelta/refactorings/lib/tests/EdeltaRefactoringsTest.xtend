@@ -1,6 +1,6 @@
 package edelta.refactorings.lib.tests
 
-import edelta.refactorings.lib.MMrefactorings
+import edelta.refactorings.lib.EdeltaRefactorings
 import org.junit.Before
 import org.junit.Test
 
@@ -9,12 +9,12 @@ import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EClass
 
-class MMrefactoringsTest extends AbstractTest {
-	var MMrefactorings refactorings
+class EdeltaRefactoringsTest extends AbstractTest {
+	var EdeltaRefactorings refactorings
 
 	@Before
 	def void setup() {
-		refactorings = new MMrefactorings
+		refactorings = new EdeltaRefactorings
 	}
 
 	@Test
