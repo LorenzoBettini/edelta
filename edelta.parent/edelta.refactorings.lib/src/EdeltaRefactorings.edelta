@@ -111,21 +111,20 @@ def extractSuperclass(List<? extends EStructuralFeature> duplicates){
 	val containingEPackage = feature.EContainingClass.EPackage
 	val superClassName =
 		ensureEClassifierNameIsUnique(containingEPackage,
-			feature.name.toFirstUpper + "Element"
-		)
+			feature.name.toFirstUpper + "Element")
 
-	val superclass = newEClass(superClassName) [
+	val superclass = containingEPackage.addNewEClass(superClassName) [
 		abstract = true;
-		EStructuralFeatures += EcoreUtil.copy(feature)
+		addEStructuralFeature(EcoreUtil.copy(feature))
 	]
-	containingEPackage.EClassifiers += superclass
 
 	for (duplicate : duplicates) {
-		val eContainingClass = duplicate.EContainingClass
-		// set supertype of the EClass of the attribute
-		eContainingClass.ESuperTypes += superclass;
-		// and then remove the attribute from the original EClass
-		eContainingClass.EStructuralFeatures -= duplicate
+		duplicate.EContainingClass => [
+			// set supertype of the EClass of the attribute
+			addSuperClass(superclass)
+			// and then remove the attribute from the original EClass
+			EStructuralFeatures -= duplicate
+		]
 	}
 }
 

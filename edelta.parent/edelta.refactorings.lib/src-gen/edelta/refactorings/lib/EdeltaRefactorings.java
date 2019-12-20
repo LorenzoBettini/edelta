@@ -143,21 +143,17 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final String superClassName = this.ensureEClassifierNameIsUnique(containingEPackage, _plus);
     final Consumer<EClass> _function = (EClass it) -> {
       it.setAbstract(true);
-      EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
-      EStructuralFeature _copy = EcoreUtil.<EStructuralFeature>copy(feature);
-      _eStructuralFeatures.add(_copy);
+      this.lib.addEStructuralFeature(it, EcoreUtil.<EStructuralFeature>copy(feature));
     };
-    final EClass superclass = this.lib.newEClass(superClassName, _function);
-    EList<EClassifier> _eClassifiers = containingEPackage.getEClassifiers();
-    _eClassifiers.add(superclass);
+    final EClass superclass = this.lib.addNewEClass(containingEPackage, superClassName, _function);
     for (final EStructuralFeature duplicate : duplicates) {
-      {
-        final EClass eContainingClass = duplicate.getEContainingClass();
-        EList<EClass> _eSuperTypes = eContainingClass.getESuperTypes();
-        _eSuperTypes.add(superclass);
-        EList<EStructuralFeature> _eStructuralFeatures = eContainingClass.getEStructuralFeatures();
+      EClass _eContainingClass = duplicate.getEContainingClass();
+      final Procedure1<EClass> _function_1 = (EClass it) -> {
+        this.lib.addSuperClass(it, superclass);
+        EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
         _eStructuralFeatures.remove(duplicate);
-      }
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_eContainingClass, _function_1);
     }
   }
   
