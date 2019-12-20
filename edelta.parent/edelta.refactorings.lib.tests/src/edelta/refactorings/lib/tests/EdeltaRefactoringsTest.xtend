@@ -9,6 +9,7 @@ import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EClass
 import java.util.stream.Collectors
+import edelta.lib.AbstractEdelta
 
 class EdeltaRefactoringsTest extends AbstractTest {
 	var EdeltaRefactorings refactorings
@@ -16,6 +17,16 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Before
 	def void setup() {
 		refactorings = new EdeltaRefactorings
+	}
+
+	@Test
+	def void test_ConstructorArgument() {
+		refactorings = new EdeltaRefactorings(new AbstractEdelta() {})
+		val c = createEClassWithoutPackage("C1")
+		refactorings.addMandatoryAttr(c, "test", stringDataType)
+		val attr = c.EStructuralFeatures.filter(EAttribute).head
+		assertThat(attr)
+			.returns("test", [name])
 	}
 
 	@Test
