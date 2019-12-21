@@ -37,6 +37,7 @@
               <outputConfigurations>
                 <outputConfiguration>
                   <outputDirectory>${basedir}/edelta-lib-src-gen</outputDirectory>
+                  <installDslAsPrimarySource>true</installDslAsPrimarySource>
                 </outputConfiguration>
               </outputConfigurations>
             </language>
