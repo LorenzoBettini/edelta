@@ -18,7 +18,7 @@
         <configuration>
           <filesets combine.children="append">
             <fileset>
-              <directory>${basedir}/src-gen</directory>
+              <directory>${basedir}/edelta-gen</directory>
             </fileset>
           </filesets>
         </configuration>
