@@ -78,6 +78,7 @@
       **/*ProjectTemplate.java,
       **/src-gen/**,
       **/emf-gen/**,
+      **/edelta-gen/**,
       **/impl/*ImplCustom.java,
       **/testutils/**,
       **/*RuntimeModule.java,
