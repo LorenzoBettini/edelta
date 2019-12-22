@@ -116,7 +116,7 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 	}
 
 	def private assertSrcGenFolderFile(String expectedSubDir, String expectedFile) {
-		val expectedSrcGenFolderSubDir = "src-gen/" + expectedSubDir
+		val expectedSrcGenFolderSubDir = "edelta-gen/" + expectedSubDir
 		val srcGenFolder = project.getFolder(expectedSrcGenFolderSubDir)
 		assertTrue(expectedSrcGenFolderSubDir + " does not exist", srcGenFolder.exists)
 		val genfile = srcGenFolder.getFile(expectedFile)
