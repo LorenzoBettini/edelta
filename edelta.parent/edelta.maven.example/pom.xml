@@ -61,7 +61,7 @@
           <configuration>
             <filesets combine.children="append">
               <fileset>
-                <directory>${basedir}/src-gen/</directory>
+                <directory>${basedir}/edelta-gen/</directory>
                 <excludes>
                   <exclude>.gitignore</exclude>
                 </excludes>
@@ -84,7 +84,7 @@
             <configuration>
               <sources>
                 <!-- Where Edelta generates Java files -->
-                <source>src-gen/</source>
+                <source>edelta-gen/</source>
                 <!-- Where the .ecore file(s) are placed -->
                 <source>model/</source>
               </sources>
@@ -113,7 +113,7 @@
               <setup>edelta.EdeltaStandaloneSetup</setup>
               <outputConfigurations>
                 <outputConfiguration>
-                  <outputDirectory>${basedir}/src-gen</outputDirectory>
+                  <outputDirectory>${basedir}/edelta-gen</outputDirectory>
                 </outputConfiguration>
               </outputConfigurations>
             </language>
