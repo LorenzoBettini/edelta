@@ -113,7 +113,7 @@
               <setup>edelta.EdeltaStandaloneSetup</setup>
               <outputConfigurations>
                 <outputConfiguration>
-                  <outputDirectory>${basedir}/src-gen</outputDirectory>
+                  <outputDirectory>${basedir}/edelta-gen</outputDirectory>
                 </outputConfiguration>
               </outputConfigurations>
             </language>
