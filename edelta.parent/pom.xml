@@ -188,7 +188,7 @@
     <module>edelta.mwe2</module>
     <module>edelta</module>
     <module>edelta.refactorings.lib</module>
-    <module>edelta-maven-plugin</module>
+    <module>edelta.maven.plugin</module>
   </modules>
 
   <!-- These modules were experiments to compile edelta files
