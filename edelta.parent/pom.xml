@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.lorenzobettini.edelta</groupId>
   <version>0.8.0-SNAPSHOT</version>
@@ -59,10 +59,10 @@
     <xtend.skip>false</xtend.skip>
 
     <!-- Define overridable properties for tycho-surefire-plugin -->
-    <platformSystemProperties></platformSystemProperties>
-    <moduleProperties></moduleProperties>
-    <systemProperties></systemProperties>
-    <additionalTestArgLine></additionalTestArgLine>
+    <platformSystemProperties/>
+    <moduleProperties/>
+    <systemProperties/>
+    <additionalTestArgLine/>
 
     <jacoco-aggregate-report>edelta.tests.report/target/site/jacoco-aggregate/jacoco.xml</jacoco-aggregate-report>
 
@@ -120,7 +120,7 @@
     <ant-files-path>${project.basedir}/../releng/releasing</ant-files-path>
 
     <!-- pass "-n" to perform a trial run with no changes made -->
-    <dryrun></dryrun>
+    <dryrun/>
 
     <!-- properties for deploying the composite update site and zipped products 
       on Bintray -->
@@ -140,7 +140,7 @@
       .m2/settings.xml -->
 
     <!-- Default values for remote directories -->
-    <bintray.base.path></bintray.base.path>
+    <bintray.base.path/>
     <bintray.releases.path>${bintray.base.path}releases</bintray.releases.path>
     <bintray.composite.path>${bintray.base.path}updates</bintray.composite.path>
     <bintray.zip.path>${bintray.base.path}zipped</bintray.zip.path>
@@ -188,6 +188,7 @@
     <module>edelta.mwe2</module>
     <module>edelta</module>
     <module>edelta.refactorings.lib</module>
+    <module>edelta-maven-plugin</module>
   </modules>
 
   <!-- These modules were experiments to compile edelta files
@@ -611,7 +612,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore></ignore>
+                    <ignore/>
                   </action>
                 </pluginExecution>
                 <pluginExecution>
@@ -633,7 +634,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore></ignore>
+                    <ignore/>
                   </action>
                 </pluginExecution>
                 <pluginExecution>
@@ -652,7 +653,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore></ignore>
+                    <ignore/>
                   </action>
                 </pluginExecution>
                 <pluginExecution>
@@ -674,7 +675,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore></ignore>
+                    <ignore/>
                   </action>
                 </pluginExecution>
               </pluginExecutions>
