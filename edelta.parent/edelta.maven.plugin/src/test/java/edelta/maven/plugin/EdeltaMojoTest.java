@@ -59,4 +59,22 @@ public class EdeltaMojoTest {
 		assertTrue(outputDirectory.exists());
 	}
 
+	@Test
+	public void testProjectWithEcore() throws Exception {
+		File pomPath = new File("target/test-classes/project-with-ecore/");
+		assertNotNull(pomPath);
+		assertTrue(pomPath.exists());
+
+		EdeltaMojo EdeltaMojo = (EdeltaMojo) rule.lookupConfiguredMojo(pomPath, "generate");
+		assertNotNull(EdeltaMojo);
+		EdeltaMojo.execute();
+
+		File outputDirectory = 
+			new File(
+				pomPath.getAbsolutePath(),
+				rule.getVariableValueFromObject(EdeltaMojo, "outputDirectory").toString());
+		assertNotNull(outputDirectory);
+		assertTrue(outputDirectory.exists());
+	}
+
 }
