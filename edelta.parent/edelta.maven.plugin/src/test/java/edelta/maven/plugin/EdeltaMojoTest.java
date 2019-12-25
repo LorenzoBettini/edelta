@@ -22,9 +22,6 @@ public class EdeltaMojoTest {
 		}
 	};
 
-	/**
-	 * @throws Exception if any
-	 */
 	@Test
 	public void testProjectWithoutSources() throws Exception {
 		File pomPath = new File("target/test-classes/project-without-sources/");
@@ -42,6 +39,24 @@ public class EdeltaMojoTest {
 		File xtextTmpDirectory = new File(rule.getVariableValueFromObject(EdeltaMojo, "tmpClassDirectory").toString());
 		assertNotNull(xtextTmpDirectory);
 		assertTrue(xtextTmpDirectory.exists());
+	}
+
+	@Test
+	public void testProjectWithoutEcore() throws Exception {
+		File pomPath = new File("target/test-classes/project-without-ecore/");
+		assertNotNull(pomPath);
+		assertTrue(pomPath.exists());
+
+		EdeltaMojo EdeltaMojo = (EdeltaMojo) rule.lookupConfiguredMojo(pomPath, "generate");
+		assertNotNull(EdeltaMojo);
+		EdeltaMojo.execute();
+
+		File outputDirectory = 
+			new File(
+				pomPath.getAbsolutePath(),
+				rule.getVariableValueFromObject(EdeltaMojo, "outputDirectory").toString());
+		assertNotNull(outputDirectory);
+		assertTrue(outputDirectory.exists());
 	}
 
 }
