@@ -67,6 +67,11 @@
     </dependency>
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
+      <artifactId>xtext-maven-plugin</artifactId>
+      <version>${xtextVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.xtext</groupId>
       <artifactId>org.eclipse.xtext.builder.standalone</artifactId>
       <version>${xtextVersion}</version>
     </dependency>
@@ -87,26 +92,9 @@
       <version>${xtextVersion}</version>
     </dependency>
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <exclusions>
-        <exclusion>
-          <artifactId>jmxtools</artifactId>
-          <groupId>com.sun.jdmk</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>jmxri</artifactId>
-          <groupId>com.sun.jmx</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>jms</artifactId>
-          <groupId>javax.jms</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>mail</artifactId>
-          <groupId>javax.mail</groupId>
-        </exclusion>
-      </exclusions>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>1.7.30</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
