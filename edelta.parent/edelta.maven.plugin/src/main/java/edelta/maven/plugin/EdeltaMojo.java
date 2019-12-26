@@ -189,6 +189,7 @@ public class EdeltaMojo extends AbstractMojo {
 		getLog().info("Encoding: " + (encoding == null ? "not set. Encoding provider will be used." : encoding));
 		getLog().info("Compiler source level: " + compilerSourceLevel);
 		getLog().info("Compiler target level: " + compilerTargetLevel);
+		getLog().info("Output directory: " + outputDirectory);
 		if (getLog().isDebugEnabled()) {
 			getLog().debug("Source dirs: " + IterableExtensions.join(sourceRoots, ", "));
 			getLog().debug("Classpath entries: " + IterableExtensions.join(getClasspathElements(), ", "));

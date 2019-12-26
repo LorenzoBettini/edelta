@@ -77,4 +77,28 @@ public class EdeltaMojoTest {
 		assertTrue(outputDirectory.exists());
 	}
 
+	@Test
+	public void testProjectWithOutputDirectory() throws Exception {
+		File pomPath = new File("target/test-classes/project-with-output-directory/");
+		assertNotNull(pomPath);
+		assertTrue(pomPath.exists());
+
+		EdeltaMojo EdeltaMojo = (EdeltaMojo) rule.lookupConfiguredMojo(pomPath, "generate");
+		assertNotNull(EdeltaMojo);
+		EdeltaMojo.execute();
+
+		File defaultOutputDirectory = 
+			new File(
+				pomPath.getAbsolutePath(),
+				"edelta-gen");
+		assertNotNull(defaultOutputDirectory);
+		assertFalse(defaultOutputDirectory.exists());
+		File outputDirectory = 
+			new File(
+				pomPath.getAbsolutePath(),
+				"alt-gen");
+		assertNotNull(outputDirectory);
+		assertTrue(outputDirectory.exists());
+	}
+
 }
