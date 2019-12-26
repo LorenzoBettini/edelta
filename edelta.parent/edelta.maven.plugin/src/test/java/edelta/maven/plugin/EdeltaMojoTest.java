@@ -22,9 +22,11 @@ public class EdeltaMojoTest {
 		}
 	};
 
+	private static final String TEST_PROJECTS_DIR = "target/test-classes";
+
 	@Test
 	public void testProjectWithoutSources() throws Exception {
-		File pomPath = new File("target/test-classes/project-without-sources/");
+		File pomPath = new File(TEST_PROJECTS_DIR + "/project-without-sources/");
 		assertNotNull(pomPath);
 		assertTrue(pomPath.exists());
 
@@ -43,7 +45,7 @@ public class EdeltaMojoTest {
 
 	@Test
 	public void testProjectWithoutEcore() throws Exception {
-		File pomPath = new File("target/test-classes/project-without-ecore/");
+		File pomPath = new File(TEST_PROJECTS_DIR + "/project-without-ecore/");
 		assertNotNull(pomPath);
 		assertTrue(pomPath.exists());
 
@@ -61,7 +63,7 @@ public class EdeltaMojoTest {
 
 	@Test
 	public void testProjectWithEcore() throws Exception {
-		File pomPath = new File("target/test-classes/project-with-ecore/");
+		File pomPath = new File(TEST_PROJECTS_DIR + "/project-with-ecore/");
 		assertNotNull(pomPath);
 		assertTrue(pomPath.exists());
 
@@ -79,7 +81,7 @@ public class EdeltaMojoTest {
 
 	@Test
 	public void testProjectWithOutputDirectory() throws Exception {
-		File pomPath = new File("target/test-classes/project-with-output-directory/");
+		File pomPath = new File(TEST_PROJECTS_DIR + "/project-with-output-directory/");
 		assertNotNull(pomPath);
 		assertTrue(pomPath.exists());
 
