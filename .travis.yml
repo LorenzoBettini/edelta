@@ -13,12 +13,12 @@ matrix:
       jdk: openjdk8
       services:
       - xvfb
-      env: ADDITIONAL="-Pjacoco,build-ide,test-ide coveralls:report sonar:sonar"
+      env: ADDITIONAL="-Pjacoco,build-ide,test-ide,run-its coveralls:report sonar:sonar"
     # only on PR
     - os: osx
       osx_image: xcode10.1
       jdk: openjdk11
-      env: ADDITIONAL="-Pbuild-ide,test-ide"
+      env: ADDITIONAL="-Pbuild-ide,test-ide,run-its"
       if: type IN (pull_request)
 
 addons:
