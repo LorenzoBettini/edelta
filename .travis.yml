@@ -49,3 +49,4 @@ after_success:
 
 after_failure:
  - find ./edelta.parent/*/target/work/ -name "*.log" -exec cat {} \;
+ - find ./edelta.parent/*/target/it/ -name "*.log" -exec cat {} \;
