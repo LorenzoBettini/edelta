@@ -39,10 +39,16 @@ before_install:
 # - if [ "$TRAVIS_OS_NAME" == "osx" ]; then export JAVA_HOME=$(/usr/libexec/java_home); fi
  - echo $JAVA_HOME
 
+before_script:
+ - find $HOME/.m2/repository -name "*edelta*" -exec rm -rf {} \;
+
 # Build on MacOSX is triggered only for pull requests
 script:
  - export
  - bash -e ./travis_build.sh
+
+after_script:
+ - find $HOME/.m2/repository -name "*edelta*" -exec rm -rf {} \;
 
 after_success:
  - find ./edelta.parent/edelta.ui.tests/target/ -name "*.log"
