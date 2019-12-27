@@ -105,7 +105,7 @@ public class EdeltaMojo extends AbstractMojo {
 	private ArrayList<String> sourceRoots;
 
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		if (skip) {
+		if (Boolean.TRUE.equals(skip)) {
 			getLog().info("skipped.");
 		} else {
 			synchronized (lock) {
@@ -133,7 +133,7 @@ public class EdeltaMojo extends AbstractMojo {
 		configureCompiler(builder.getCompiler());
 		logState();
 		boolean errorDetected = !builder.launch();
-		if (errorDetected && failOnValidationError) {
+		if (errorDetected && Boolean.TRUE.equals(failOnValidationError)) {
 			throw new MojoExecutionException("Execution failed due to a severe validation error.");
 		}
 	}
