@@ -89,6 +89,11 @@
       **/serializer/**,
     </sonar.exclusions>
 
+    <sonar.coverage.exclusions>
+      **/EdeltaMojo.java,
+      **/EdeltaMaven*.java,
+    </sonar.coverage.exclusions>
+
     <!-- see http://sonarqube.15.x6.nabble.com/sonar-issue-ignore-multicriteria-td5021722.html 
       and http://stackoverflow.com/questions/21825469/configure-sonar-sonar-issue-ignore-multicriteria-through-maven 
       for the multicriteria property -->
