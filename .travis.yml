@@ -40,7 +40,7 @@ before_install:
  - echo $JAVA_HOME
 
 before_script:
- - find $HOME/.m2/repository -name "*edelta*" -exec rm -rf {} \;
+ - find $HOME/.m2/repository -name "*edelta*" -exec rm -rf {} \+
 
 # Build on MacOSX is triggered only for pull requests
 script:
@@ -48,7 +48,7 @@ script:
  - bash -e ./travis_build.sh
 
 before_cache:
- - find $HOME/.m2/repository -name "*edelta*" -exec rm -rf {} \;
+ - find $HOME/.m2/repository -name "*edelta*" -exec rm -rf {} \+
 
 after_success:
  - find ./edelta.parent/edelta.ui.tests/target/ -name "*.log"
