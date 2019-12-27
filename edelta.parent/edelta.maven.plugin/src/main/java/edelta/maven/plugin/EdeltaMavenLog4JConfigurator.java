@@ -15,49 +15,57 @@ import org.eclipse.xtext.maven.MavenLog4JConfigurator;
  */
 public class EdeltaMavenLog4JConfigurator extends MavenLog4JConfigurator {
 
+	private final class AppenderSkeletonCustom extends AppenderSkeleton {
+		private final Log log;
+
+		private AppenderSkeletonCustom(Log log) {
+			this.log = log;
+		}
+
+		@Override
+		protected void append(LoggingEvent event) {
+			if (event.getMessage() == null) {
+				return;
+			}
+			Throwable throwable = getThrowable(event);
+			if (throwable != null) {
+				if (Level.DEBUG == event.getLevel()) {
+					log.debug((CharSequence) event.getMessage(), throwable);
+				} else if (Level.INFO == event.getLevel()) {
+					log.info((CharSequence) event.getMessage(), throwable);
+				} else if (Level.WARN == event.getLevel()) {
+					log.warn((CharSequence) event.getMessage(), throwable);
+				} else if (Level.ERROR == event.getLevel()) {
+					log.error((CharSequence) event.getMessage(), throwable);
+				}
+			} else {
+				if (Level.DEBUG == event.getLevel()) {
+					log.debug((CharSequence) event.getMessage());
+				} else if (Level.INFO == event.getLevel()) {
+					log.info((CharSequence) event.getMessage());
+				} else if (Level.WARN == event.getLevel()) {
+					log.warn((CharSequence) event.getMessage());
+				} else if (Level.ERROR == event.getLevel()) {
+					log.error((CharSequence) event.getMessage());
+				}
+			}
+		}
+
+		public void close() {
+			// nothing to do
+		}
+
+		private Throwable getThrowable(LoggingEvent event) {
+			return event.getThrowableInformation() != null ? event.getThrowableInformation().getThrowable() : null;
+		}
+
+		public boolean requiresLayout() {
+			return false;
+		}
+	}
+
 	@Override
 	protected AppenderSkeleton createMojoLogAppender(final Log log) {
-		return new AppenderSkeleton() {
-
-			@Override
-			protected void append(LoggingEvent event) {
-				if (event.getMessage() == null) {
-					return;
-				}
-				Throwable throwable = getThrowable(event);
-				if (throwable != null) {
-					if (Level.DEBUG == event.getLevel()) {
-						log.debug((CharSequence) event.getMessage(), throwable);
-					} else if (Level.INFO == event.getLevel()) {
-						log.info((CharSequence) event.getMessage(), throwable);
-					} else if (Level.WARN == event.getLevel()) {
-						log.warn((CharSequence) event.getMessage(), throwable);
-					} else if (Level.ERROR == event.getLevel()) {
-						log.error((CharSequence) event.getMessage(), throwable);
-					}
-				} else {
-					if (Level.DEBUG == event.getLevel()) {
-						log.debug((CharSequence) event.getMessage());
-					} else if (Level.INFO == event.getLevel()) {
-						log.info((CharSequence) event.getMessage());
-					} else if (Level.WARN == event.getLevel()) {
-						log.warn((CharSequence) event.getMessage());
-					} else if (Level.ERROR == event.getLevel()) {
-						log.error((CharSequence) event.getMessage());
-					}
-				}
-			}
-
-			public void close() {
-			}
-
-			private Throwable getThrowable(LoggingEvent event) {
-				return event.getThrowableInformation() != null ? event.getThrowableInformation().getThrowable() : null;
-			}
-
-			public boolean requiresLayout() {
-				return false;
-			}
-		};
+		return new AppenderSkeletonCustom(log);
 	}
 }
