@@ -24,27 +24,50 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.eclipse.xtext</groupId>
-        <artifactId>xtext-maven-plugin</artifactId>
+        <groupId>io.github.lorenzobettini.edelta</groupId>
+        <artifactId>edelta-maven-plugin</artifactId>
+        <version>${project.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
-          <failOnValidationError>true</failOnValidationError>
-          <languages>
-            <language>
-              <setup>org.eclipse.xtext.ecore.EcoreSupport</setup>
-            </language>
-            <language>
-              <setup>edelta.EdeltaStandaloneSetup</setup>
-              <outputConfigurations>
-                <outputConfiguration>
-                  <outputDirectory>${basedir}/edelta-lib-src-gen</outputDirectory>
-                  <installDslAsPrimarySource>true</installDslAsPrimarySource>
-                </outputConfiguration>
-              </outputConfigurations>
-            </language>
-          </languages>
+          <outputDirectory>edelta-lib-src-gen</outputDirectory>
         </configuration>
       </plugin>
     </plugins>
+    <pluginManagement>
+      <plugins>
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>io.github.lorenzobettini.edelta</groupId>
+                    <artifactId>edelta-maven-plugin</artifactId>
+                    <versionRange>[0.8.0-SNAPSHOT,)</versionRange>
+                    <goals>
+                      <goal>generate</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
 </project>
