@@ -47,7 +47,7 @@ script:
  - export
  - bash -e ./travis_build.sh
 
-after_script:
+before_cache:
  - find $HOME/.m2/repository -name "*edelta*" -exec rm -rf {} \;
 
 after_success:
