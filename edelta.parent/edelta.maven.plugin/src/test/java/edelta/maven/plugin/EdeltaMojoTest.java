@@ -57,6 +57,16 @@ public class EdeltaMojoTest {
 	}
 
 	@Test
+	public void testProjectWithSkip() throws Exception {
+		File pomPath = setupPom("/project-with-skip/");
+		EdeltaMojo edeltaMojo = executeMojo(pomPath);
+
+		File outputDirectory = new File(rule.getVariableValueFromObject(edeltaMojo, "outputDirectory").toString());
+		assertNotNull(outputDirectory);
+		assertFalse(outputDirectory.exists());
+	}
+
+	@Test
 	public void testProjectWithoutSources() throws Exception {
 		File pomPath = setupPom("/project-without-sources/");
 		EdeltaMojo edeltaMojo = executeMojo(pomPath);
@@ -69,8 +79,6 @@ public class EdeltaMojoTest {
 		assertNotNull(xtextTmpDirectory);
 		assertTrue(xtextTmpDirectory.exists());
 	}
-
-
 
 	@Test
 	public void testProjectWithoutEcore() throws Exception {
