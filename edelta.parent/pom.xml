@@ -628,6 +628,8 @@
               <exclude>**/internal/*.class</exclude>
               <exclude>**/*ProjectTemplateProvider.class</exclude>
               <exclude>**/*ProjectTemplate.class</exclude>
+              <exclude>**/EdeltaMaven*.class</exclude>
+              <exclude>**/HelpMojo*.class</exclude>
             </excludes>
           </configuration>
           <executions>
