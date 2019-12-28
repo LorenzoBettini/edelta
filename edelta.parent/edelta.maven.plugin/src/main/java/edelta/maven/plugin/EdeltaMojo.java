@@ -59,7 +59,7 @@ public class EdeltaMojo extends AbstractMojo {
 	/**
 	 * File encoding argument for the generator.
 	 */
-	@Parameter(property = "xtext.encoding", defaultValue = "${project.build.sourceEncoding}")
+	@Parameter(property = "edelta.encoding", defaultValue = "${project.build.sourceEncoding}")
 	protected String encoding;
 
 	/**
