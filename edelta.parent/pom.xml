@@ -559,6 +559,18 @@
           </dependencies>
         </plugin>
         <plugin>
+          <groupId>io.github.lorenzobettini.edelta</groupId>
+          <artifactId>edelta-maven-plugin</artifactId>
+          <version>${project.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>generate</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
           <groupId>org.eclipse.xtend</groupId>
           <artifactId>xtend-maven-plugin</artifactId>
           <version>${xtextVersion}</version>
@@ -593,6 +605,8 @@
             </filesets>
           </configuration>
         </plugin>
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. 
+          It has no influence on the Maven build itself. -->
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
           <artifactId>lifecycle-mapping</artifactId>
@@ -681,6 +695,19 @@
                   </pluginExecutionFilter>
                   <action>
                     <ignore/>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>io.github.lorenzobettini.edelta</groupId>
+                    <artifactId>edelta-maven-plugin</artifactId>
+                    <versionRange>[0.8.0-SNAPSHOT,)</versionRange>
+                    <goals>
+                      <goal>generate</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
                   </action>
                 </pluginExecution>
               </pluginExecutions>

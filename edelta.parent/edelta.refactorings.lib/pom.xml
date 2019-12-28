@@ -23,51 +23,15 @@
           </filesets>
         </configuration>
       </plugin>
+      <!-- Main configuration is in the parent POM -->
       <plugin>
         <groupId>io.github.lorenzobettini.edelta</groupId>
         <artifactId>edelta-maven-plugin</artifactId>
-        <version>${project.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-          </execution>
-        </executions>
         <configuration>
           <outputDirectory>edelta-lib-src-gen</outputDirectory>
         </configuration>
       </plugin>
     </plugins>
-    <pluginManagement>
-      <plugins>
-        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-        <plugin>
-          <groupId>org.eclipse.m2e</groupId>
-          <artifactId>lifecycle-mapping</artifactId>
-          <version>1.0.0</version>
-          <configuration>
-            <lifecycleMappingMetadata>
-              <pluginExecutions>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>io.github.lorenzobettini.edelta</groupId>
-                    <artifactId>edelta-maven-plugin</artifactId>
-                    <versionRange>[0.8.0-SNAPSHOT,)</versionRange>
-                    <goals>
-                      <goal>generate</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore></ignore>
-                  </action>
-                </pluginExecution>
-              </pluginExecutions>
-            </lifecycleMappingMetadata>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
   </build>
 
 </project>
