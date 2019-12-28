@@ -51,6 +51,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <jacoco-version>0.8.5</jacoco-version>
     <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
     <build-helper-version>3.0.0</build-helper-version>
     <versions-version>2.7</versions-version>
@@ -604,6 +605,39 @@
               </fileset>
             </filesets>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco-version}</version>
+          <configuration>
+            <excludes>
+              <!-- EMF model Java classes -->
+              <exclude>**/edelta/edelta/**/*.class</exclude>
+              <!-- Antlr generated Java classes -->
+              <exclude>**/antlr/**/*.class</exclude>
+              <!-- We don't have a custom serializer -->
+              <exclude>**/serializer/*.class</exclude>
+              <!-- generated files -->
+              <exclude>**/*Abstract*RuntimeModule.class</exclude>
+              <exclude>**/*StandaloneSetup*.class</exclude>
+              <exclude>**/*Abstract*Validator.class</exclude>
+              <exclude>**/*GrammarAccess*.class</exclude>
+              <exclude>**/*Abstract*UiModule.class</exclude>
+              <exclude>**/**ExecutableExtensionFactory.class</exclude>
+              <exclude>**/*Abstract*ProposalProvider.class</exclude>
+              <exclude>**/internal/*.class</exclude>
+              <exclude>**/*ProjectTemplateProvider.class</exclude>
+              <exclude>**/*ProjectTemplate.class</exclude>
+            </excludes>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
         <!--This plugin's configuration is used to store Eclipse m2e settings only. 
           It has no influence on the Maven build itself. -->
