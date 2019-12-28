@@ -199,9 +199,23 @@
 
   <profiles>
     <profile>
+      <id>jacoco</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <!-- configured in <pluginManagement> -->
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
       <id>run-its</id>
       <build>
-
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
