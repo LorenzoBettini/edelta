@@ -91,7 +91,6 @@
     </sonar.exclusions>
 
     <sonar.coverage.exclusions>
-      **/EdeltaMojo.java,
       **/EdeltaMaven*.java,
     </sonar.coverage.exclusions>
 
