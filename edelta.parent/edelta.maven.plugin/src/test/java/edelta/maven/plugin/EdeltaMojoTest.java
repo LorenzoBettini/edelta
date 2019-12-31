@@ -4,6 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +16,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.junit.Rule;
@@ -136,11 +141,33 @@ public class EdeltaMojoTest {
 	@Test
 	public void testProjectWithErrorFailOnValidationErrorFalse() throws Exception {
 		File pomPath = setupPom("/project-with-error-no-fail/");
-		EdeltaMojo edeltaMojo = executeMojo(pomPath);
+		EdeltaMojo edeltaMojo = getEdeltaMojo(pomPath);
+
+		Log spiedLog = spyLog(edeltaMojo);
+		edeltaMojo.execute();
 
 		File outputDirectory = 
 			getOutputDirectory(pomPath, edeltaMojo);
 		assertThat(outputDirectory).exists();
+
+		verify(spiedLog)
+			.error(contains("ERROR:The method or field foobar is undefined"));
+	}
+
+	@Test
+	public void testDebugLogging() throws Exception {
+		File pomPath = setupPom("/project-with-error-no-fail/");
+		EdeltaMojo edeltaMojo = getEdeltaMojo(pomPath);
+
+		Log spiedLog = spyLog(edeltaMojo);
+		when(spiedLog.isDebugEnabled()).thenReturn(true);
+		edeltaMojo.execute();
+	}
+
+	private Log spyLog(EdeltaMojo edeltaMojo) {
+		Log spiedLog = spy(edeltaMojo.getLog());
+		edeltaMojo.setLog(spiedLog);
+		return spiedLog;
 	}
 
 	private File getOutputDirectory(File pomPath, EdeltaMojo edeltaMojo) throws IllegalAccessException {
