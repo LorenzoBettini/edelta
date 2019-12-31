@@ -177,6 +177,10 @@ public class EdeltaMojoTest {
 		List<String> sourceRoots = (List<String>) rule.getVariableValueFromObject(edeltaMojo, "sourceRoots");
 		assertThat(sourceRoots).
 			allMatch(s -> s.contains("alt-"));
+		@SuppressWarnings("unchecked")
+		List<String> javaSourceRoots = (List<String>) rule.getVariableValueFromObject(edeltaMojo, "javaSourceRoots");
+		assertThat(javaSourceRoots).
+			allMatch(s -> s.contains("alt-java"));
 	}
 
 	private Log spyLog(EdeltaMojo edeltaMojo) {

@@ -24,6 +24,9 @@
             <sourceRoot>${basedir}/alt-src</sourceRoot>
             <sourceRoot>${basedir}/alt-model-src</sourceRoot>
           </sourceRoots>
+          <javaSourceRoots>
+            <javaSourceRoot>${basedir}/alt-java</javaSourceRoot>
+          </javaSourceRoots>
         </configuration>
       </plugin>
     </plugins>
