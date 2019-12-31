@@ -1,6 +1,6 @@
 package edelta.maven.plugin;
 
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -62,8 +62,7 @@ public class EdeltaMojoTest {
 		EdeltaMojo edeltaMojo = executeMojo(pomPath);
 
 		File outputDirectory = new File(rule.getVariableValueFromObject(edeltaMojo, "outputDirectory").toString());
-		assertNotNull(outputDirectory);
-		assertFalse(outputDirectory.exists());
+		assertThat(outputDirectory).doesNotExist();
 	}
 
 	@Test
@@ -72,12 +71,10 @@ public class EdeltaMojoTest {
 		EdeltaMojo edeltaMojo = executeMojo(pomPath);
 
 		File outputDirectory = new File(rule.getVariableValueFromObject(edeltaMojo, "outputDirectory").toString());
-		assertNotNull(outputDirectory);
-		assertFalse(outputDirectory.exists());
+		assertThat(outputDirectory).doesNotExist();
 
 		File xtextTmpDirectory = new File(rule.getVariableValueFromObject(edeltaMojo, "tmpClassDirectory").toString());
-		assertNotNull(xtextTmpDirectory);
-		assertTrue(xtextTmpDirectory.exists());
+		assertThat(xtextTmpDirectory).exists();
 	}
 
 	@Test
@@ -89,8 +86,8 @@ public class EdeltaMojoTest {
 			new File(
 				pomPath.getAbsolutePath(),
 				rule.getVariableValueFromObject(edeltaMojo, "outputDirectory").toString());
-		assertNotNull(outputDirectory);
-		assertTrue(outputDirectory.exists());
+		assertThat(outputDirectory)
+			.isDirectoryContaining("glob:**com");
 	}
 
 	@Test
@@ -102,8 +99,8 @@ public class EdeltaMojoTest {
 			new File(
 				pomPath.getAbsolutePath(),
 				rule.getVariableValueFromObject(edeltaMojo, "outputDirectory").toString());
-		assertNotNull(outputDirectory);
-		assertTrue(outputDirectory.exists());
+		assertThat(outputDirectory)
+			.isDirectoryContaining("glob:**com");
 	}
 
 	@Test
@@ -115,14 +112,13 @@ public class EdeltaMojoTest {
 			new File(
 				pomPath.getAbsolutePath(),
 				"edelta-gen");
-		assertNotNull(defaultOutputDirectory);
-		assertFalse(defaultOutputDirectory.exists());
+		assertThat(defaultOutputDirectory).doesNotExist();
 		File outputDirectory = 
 			new File(
 				pomPath.getAbsolutePath(),
 				"alt-gen");
-		assertNotNull(outputDirectory);
-		assertTrue(outputDirectory.exists());
+		assertThat(outputDirectory)
+			.isDirectoryContaining("glob:**com");
 	}
 
 }
