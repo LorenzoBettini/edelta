@@ -86,8 +86,7 @@ public class EdeltaMojoTest {
 			new File(
 				pomPath.getAbsolutePath(),
 				rule.getVariableValueFromObject(edeltaMojo, "outputDirectory").toString());
-		assertThat(outputDirectory)
-			.isDirectoryContaining("glob:**com");
+		assertDirectoryContainsGeneratedContents(outputDirectory);
 	}
 
 	@Test
@@ -99,8 +98,7 @@ public class EdeltaMojoTest {
 			new File(
 				pomPath.getAbsolutePath(),
 				rule.getVariableValueFromObject(edeltaMojo, "outputDirectory").toString());
-		assertThat(outputDirectory)
-			.isDirectoryContaining("glob:**com");
+		assertDirectoryContainsGeneratedContents(outputDirectory);
 	}
 
 	@Test
@@ -117,6 +115,10 @@ public class EdeltaMojoTest {
 			new File(
 				pomPath.getAbsolutePath(),
 				"alt-gen");
+		assertDirectoryContainsGeneratedContents(outputDirectory);
+	}
+
+	private void assertDirectoryContainsGeneratedContents(File outputDirectory) {
 		assertThat(outputDirectory)
 			.isDirectoryContaining("glob:**com");
 	}
