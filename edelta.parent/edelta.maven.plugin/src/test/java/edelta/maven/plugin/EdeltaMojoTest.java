@@ -1,6 +1,7 @@
 package edelta.maven.plugin;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -50,9 +51,14 @@ public class EdeltaMojoTest {
 
 	private EdeltaMojo executeMojo(File pomPath)
 			throws Exception, ComponentConfigurationException, MojoExecutionException, MojoFailureException {
+		EdeltaMojo edeltaMojo = getEdeltaMojo(pomPath);
+		edeltaMojo.execute();
+		return edeltaMojo;
+	}
+
+	private EdeltaMojo getEdeltaMojo(File pomPath) throws Exception, ComponentConfigurationException {
 		EdeltaMojo edeltaMojo = (EdeltaMojo) rule.lookupConfiguredMojo(pomPath, "generate");
 		assertNotNull(edeltaMojo);
-		edeltaMojo.execute();
 		return edeltaMojo;
 	}
 
@@ -83,9 +89,7 @@ public class EdeltaMojoTest {
 		EdeltaMojo edeltaMojo = executeMojo(pomPath);
 
 		File outputDirectory = 
-			new File(
-				pomPath.getAbsolutePath(),
-				rule.getVariableValueFromObject(edeltaMojo, "outputDirectory").toString());
+			getOutputDirectory(pomPath, edeltaMojo);
 		assertDirectoryContainsGeneratedContents(outputDirectory);
 	}
 
@@ -95,9 +99,7 @@ public class EdeltaMojoTest {
 		EdeltaMojo edeltaMojo = executeMojo(pomPath);
 
 		File outputDirectory = 
-			new File(
-				pomPath.getAbsolutePath(),
-				rule.getVariableValueFromObject(edeltaMojo, "outputDirectory").toString());
+			getOutputDirectory(pomPath, edeltaMojo);
 		assertDirectoryContainsGeneratedContents(outputDirectory);
 	}
 
@@ -116,6 +118,35 @@ public class EdeltaMojoTest {
 				pomPath.getAbsolutePath(),
 				"alt-gen");
 		assertDirectoryContainsGeneratedContents(outputDirectory);
+	}
+
+	@Test
+	public void testProjectWithError() throws Exception {
+		File pomPath = setupPom("/project-with-error/");
+		EdeltaMojo edeltaMojo = getEdeltaMojo(pomPath);
+
+		assertThatThrownBy(() -> edeltaMojo.execute())
+			.isInstanceOf(MojoExecutionException.class);
+
+		File outputDirectory = 
+			getOutputDirectory(pomPath, edeltaMojo);
+		assertThat(outputDirectory).doesNotExist();
+	}
+
+	@Test
+	public void testProjectWithErrorFailOnValidationErrorFalse() throws Exception {
+		File pomPath = setupPom("/project-with-error-no-fail/");
+		EdeltaMojo edeltaMojo = executeMojo(pomPath);
+
+		File outputDirectory = 
+			getOutputDirectory(pomPath, edeltaMojo);
+		assertThat(outputDirectory).exists();
+	}
+
+	private File getOutputDirectory(File pomPath, EdeltaMojo edeltaMojo) throws IllegalAccessException {
+		return new File(
+			pomPath.getAbsolutePath(),
+			rule.getVariableValueFromObject(edeltaMojo, "outputDirectory").toString());
 	}
 
 	private void assertDirectoryContainsGeneratedContents(File outputDirectory) {
