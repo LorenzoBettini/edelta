@@ -164,6 +164,21 @@ public class EdeltaMojoTest {
 		edeltaMojo.execute();
 	}
 
+	@Test
+	public void testProjectWithSourceRoots() throws Exception {
+		File pomPath = setupPom("/project-with-source-roots/");
+		EdeltaMojo edeltaMojo = executeMojo(pomPath);
+
+		File outputDirectory = 
+			getOutputDirectory(pomPath, edeltaMojo);
+		assertDirectoryContainsGeneratedContents(outputDirectory);
+
+		@SuppressWarnings("unchecked")
+		List<String> sourceRoots = (List<String>) rule.getVariableValueFromObject(edeltaMojo, "sourceRoots");
+		assertThat(sourceRoots).
+			allMatch(s -> s.contains("alt-src"));
+	}
+
 	private Log spyLog(EdeltaMojo edeltaMojo) {
 		Log spiedLog = spy(edeltaMojo.getLog());
 		edeltaMojo.setLog(spiedLog);

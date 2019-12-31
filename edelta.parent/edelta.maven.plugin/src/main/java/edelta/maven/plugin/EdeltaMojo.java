@@ -74,6 +74,23 @@ public class EdeltaMojo extends AbstractMojo {
 	@Parameter(defaultValue = "${project.compileClasspathElements}", readonly = true, required = true)
 	private List<String> classpathElements;
 
+	/**
+	 * Project source roots. List of folders, where the source models are located.<br>
+	 * The default value is a reference to the project's ${project.compileSourceRoots}.<br>
+	 * When adding a new entry the default value will be overwritten not extended.
+	 */
+	@Parameter(defaultValue = "${project.compileSourceRoots}", required = true)
+	private List<String> sourceRoots;
+
+	/**
+	 * Java source roots. List of folders, where the java source files are located.<br>
+	 * The default value is a reference to the project's ${project.compileSourceRoots}.<br>
+	 * When adding a new entry the default value will be overwritten not extended.<br>
+	 * Used when your language needs java.
+	 */
+	@Parameter(defaultValue = "${project.compileSourceRoots}", required = true)
+	private List<String> javaSourceRoots;
+
 	@Parameter(property = "edelta.generator.skip", defaultValue = "false")
 	private Boolean skip;
 
@@ -101,8 +118,6 @@ public class EdeltaMojo extends AbstractMojo {
 	@Parameter
 	private String classPathLookupFilter;
 
-	private ArrayList<String> sourceRoots;
-
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (Boolean.TRUE.equals(skip)) {
 			getLog().info("skipped.");
@@ -123,9 +138,8 @@ public class EdeltaMojo extends AbstractMojo {
 		builder.setEncoding(encoding);
 		builder.setClassPathEntries(getClasspathElements());
 		builder.setClassPathLookUpFilter(classPathLookupFilter);
-		sourceRoots = Lists.newArrayList(project.getCompileSourceRoots());
 		builder.setSourceDirs(sourceRoots);
-		builder.setJavaSourceDirs(sourceRoots);
+		builder.setJavaSourceDirs(javaSourceRoots);
 		builder.setFailOnValidationError(failOnValidationError);
 		builder.setTempDir(createTempDir(tmpClassDirectory).getAbsolutePath());
 		builder.setDebugLog(getLog().isDebugEnabled());
