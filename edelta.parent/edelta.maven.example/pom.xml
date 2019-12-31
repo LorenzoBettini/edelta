@@ -126,6 +126,16 @@
             <goals>
               <goal>generate</goal>
             </goals>
+            <configuration>
+              <!-- specify source roots just to speed up compilation -->
+              <sourceRoots>
+                <sourceRoot>${basedir}/src/main/java</sourceRoot>
+                <sourceRoot>${basedir}/model</sourceRoot>
+              </sourceRoots>
+              <javaSourceRoots>
+                <javaSourceRoot>${basedir}/src/main/java</javaSourceRoot>
+              </javaSourceRoots>
+            </configuration>
           </execution>
         </executions>
         <dependencies>
