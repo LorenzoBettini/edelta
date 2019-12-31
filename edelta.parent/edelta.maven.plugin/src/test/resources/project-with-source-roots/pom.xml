@@ -20,7 +20,10 @@
         <groupId>io.github.lorenzobettini.edelta</groupId>
         <artifactId>edelta-maven-plugin</artifactId>
         <configuration>
-          <sourceRoots>${basedir}/alt-src</sourceRoots>
+          <sourceRoots>
+            <sourceRoot>${basedir}/alt-src</sourceRoot>
+            <sourceRoot>${basedir}/alt-model-src</sourceRoot>
+          </sourceRoots>
         </configuration>
       </plugin>
     </plugins>
