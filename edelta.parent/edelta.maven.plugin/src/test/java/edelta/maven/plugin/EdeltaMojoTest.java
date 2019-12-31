@@ -1,8 +1,13 @@
 package edelta.maven.plugin;
 
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +16,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.junit.Rule;
@@ -50,10 +56,24 @@ public class EdeltaMojoTest {
 
 	private EdeltaMojo executeMojo(File pomPath)
 			throws Exception, ComponentConfigurationException, MojoExecutionException, MojoFailureException {
-		EdeltaMojo edeltaMojo = (EdeltaMojo) rule.lookupConfiguredMojo(pomPath, "generate");
-		assertNotNull(edeltaMojo);
+		EdeltaMojo edeltaMojo = getEdeltaMojo(pomPath);
 		edeltaMojo.execute();
 		return edeltaMojo;
+	}
+
+	private EdeltaMojo getEdeltaMojo(File pomPath) throws Exception, ComponentConfigurationException {
+		EdeltaMojo edeltaMojo = (EdeltaMojo) rule.lookupConfiguredMojo(pomPath, "generate");
+		assertNotNull(edeltaMojo);
+		return edeltaMojo;
+	}
+
+	@Test
+	public void testProjectWithSkip() throws Exception {
+		File pomPath = setupPom("/project-with-skip/");
+		EdeltaMojo edeltaMojo = executeMojo(pomPath);
+
+		File outputDirectory = new File(rule.getVariableValueFromObject(edeltaMojo, "outputDirectory").toString());
+		assertThat(outputDirectory).doesNotExist();
 	}
 
 	@Test
@@ -62,15 +82,11 @@ public class EdeltaMojoTest {
 		EdeltaMojo edeltaMojo = executeMojo(pomPath);
 
 		File outputDirectory = new File(rule.getVariableValueFromObject(edeltaMojo, "outputDirectory").toString());
-		assertNotNull(outputDirectory);
-		assertFalse(outputDirectory.exists());
+		assertThat(outputDirectory).doesNotExist();
 
 		File xtextTmpDirectory = new File(rule.getVariableValueFromObject(edeltaMojo, "tmpClassDirectory").toString());
-		assertNotNull(xtextTmpDirectory);
-		assertTrue(xtextTmpDirectory.exists());
+		assertThat(xtextTmpDirectory).exists();
 	}
-
-
 
 	@Test
 	public void testProjectWithoutEcore() throws Exception {
@@ -78,11 +94,8 @@ public class EdeltaMojoTest {
 		EdeltaMojo edeltaMojo = executeMojo(pomPath);
 
 		File outputDirectory = 
-			new File(
-				pomPath.getAbsolutePath(),
-				rule.getVariableValueFromObject(edeltaMojo, "outputDirectory").toString());
-		assertNotNull(outputDirectory);
-		assertTrue(outputDirectory.exists());
+			getOutputDirectory(pomPath, edeltaMojo);
+		assertDirectoryContainsGeneratedContents(outputDirectory);
 	}
 
 	@Test
@@ -91,11 +104,8 @@ public class EdeltaMojoTest {
 		EdeltaMojo edeltaMojo = executeMojo(pomPath);
 
 		File outputDirectory = 
-			new File(
-				pomPath.getAbsolutePath(),
-				rule.getVariableValueFromObject(edeltaMojo, "outputDirectory").toString());
-		assertNotNull(outputDirectory);
-		assertTrue(outputDirectory.exists());
+			getOutputDirectory(pomPath, edeltaMojo);
+		assertDirectoryContainsGeneratedContents(outputDirectory);
 	}
 
 	@Test
@@ -107,14 +117,68 @@ public class EdeltaMojoTest {
 			new File(
 				pomPath.getAbsolutePath(),
 				"edelta-gen");
-		assertNotNull(defaultOutputDirectory);
-		assertFalse(defaultOutputDirectory.exists());
+		assertThat(defaultOutputDirectory).doesNotExist();
 		File outputDirectory = 
 			new File(
 				pomPath.getAbsolutePath(),
 				"alt-gen");
-		assertNotNull(outputDirectory);
-		assertTrue(outputDirectory.exists());
+		assertDirectoryContainsGeneratedContents(outputDirectory);
+	}
+
+	@Test
+	public void testProjectWithError() throws Exception {
+		File pomPath = setupPom("/project-with-error/");
+		EdeltaMojo edeltaMojo = getEdeltaMojo(pomPath);
+
+		assertThatThrownBy(() -> edeltaMojo.execute())
+			.isInstanceOf(MojoExecutionException.class);
+
+		File outputDirectory = 
+			getOutputDirectory(pomPath, edeltaMojo);
+		assertThat(outputDirectory).doesNotExist();
+	}
+
+	@Test
+	public void testProjectWithErrorFailOnValidationErrorFalse() throws Exception {
+		File pomPath = setupPom("/project-with-error-no-fail/");
+		EdeltaMojo edeltaMojo = getEdeltaMojo(pomPath);
+
+		Log spiedLog = spyLog(edeltaMojo);
+		edeltaMojo.execute();
+
+		File outputDirectory = 
+			getOutputDirectory(pomPath, edeltaMojo);
+		assertThat(outputDirectory).exists();
+
+		verify(spiedLog)
+			.error(contains("ERROR:The method or field foobar is undefined"));
+	}
+
+	@Test
+	public void testDebugLogging() throws Exception {
+		File pomPath = setupPom("/project-with-error-no-fail/");
+		EdeltaMojo edeltaMojo = getEdeltaMojo(pomPath);
+
+		Log spiedLog = spyLog(edeltaMojo);
+		when(spiedLog.isDebugEnabled()).thenReturn(true);
+		edeltaMojo.execute();
+	}
+
+	private Log spyLog(EdeltaMojo edeltaMojo) {
+		Log spiedLog = spy(edeltaMojo.getLog());
+		edeltaMojo.setLog(spiedLog);
+		return spiedLog;
+	}
+
+	private File getOutputDirectory(File pomPath, EdeltaMojo edeltaMojo) throws IllegalAccessException {
+		return new File(
+			pomPath.getAbsolutePath(),
+			rule.getVariableValueFromObject(edeltaMojo, "outputDirectory").toString());
+	}
+
+	private void assertDirectoryContainsGeneratedContents(File outputDirectory) {
+		assertThat(outputDirectory)
+			.isDirectoryContaining("glob:**com");
 	}
 
 }

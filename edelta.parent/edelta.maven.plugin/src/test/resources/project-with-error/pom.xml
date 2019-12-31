@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.github.lorenzobettini.edelta</groupId>
-  <artifactId>edelta-maven-plugin</artifactId>
+  <artifactId>test-project</artifactId>
   <version>0.8.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Test MyMojo</name>
@@ -13,11 +13,8 @@
   <build>
     <plugins>
       <plugin>
-        <artifactId>maven-my-plugin</artifactId>
-        <configuration>
-          <!-- Specify the MyMojo parameter -->
-          <outputDirectory>target/test-harness/project-to-test</outputDirectory>
-        </configuration>
+        <groupId>io.github.lorenzobettini.edelta</groupId>
+        <artifactId>edelta-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

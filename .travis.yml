@@ -40,7 +40,7 @@ before_install:
  - echo $JAVA_HOME
 
 before_script:
- - find $HOME/.m2/repository -name "*edelta*" -exec rm -rf {} \+
+ - find $HOME/.m2/repository -name "*edelta*" -exec rm -rf {} \+ || true
 
 # Build on MacOSX is triggered only for pull requests
 script:

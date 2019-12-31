@@ -2,8 +2,9 @@ package edelta.maven.plugin;
 
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Sets.newLinkedHashSet;
+import static edelta.maven.plugin.EdeltaMavenUtils.createTempDir;
+import static edelta.maven.plugin.EdeltaMavenUtils.emptyStringFilter;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,10 +28,8 @@ import org.eclipse.xtext.ecore.EcoreSupport;
 import org.eclipse.xtext.maven.Language;
 import org.eclipse.xtext.maven.MavenStandaloneBuilderModule;
 import org.eclipse.xtext.maven.OutputConfiguration;
-import org.eclipse.xtext.util.Strings;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -60,7 +59,7 @@ public class EdeltaMojo extends AbstractMojo {
 	/**
 	 * File encoding argument for the generator.
 	 */
-	@Parameter(property = "xtext.encoding", defaultValue = "${project.build.sourceEncoding}")
+	@Parameter(property = "edelta.encoding", defaultValue = "${project.build.sourceEncoding}")
 	protected String encoding;
 
 	/**
@@ -128,7 +127,7 @@ public class EdeltaMojo extends AbstractMojo {
 		builder.setSourceDirs(sourceRoots);
 		builder.setJavaSourceDirs(sourceRoots);
 		builder.setFailOnValidationError(failOnValidationError);
-		builder.setTempDir(createTempDir().getAbsolutePath());
+		builder.setTempDir(createTempDir(tmpClassDirectory).getAbsolutePath());
 		builder.setDebugLog(getLog().isDebugEnabled());
 		configureCompiler(builder.getCompiler());
 		logState();
@@ -158,22 +157,6 @@ public class EdeltaMojo extends AbstractMojo {
 		elements.remove(project.getBuild().getOutputDirectory());
 		elements.remove(project.getBuild().getTestOutputDirectory());
 		return newLinkedHashSet(filter(elements, emptyStringFilter()));
-	}
-
-	private Predicate<String> emptyStringFilter() {
-		return new Predicate<String>() {
-			public boolean apply(String input) {
-				return !Strings.isEmpty(input.trim());
-			}
-		};
-	}
-
-	private File createTempDir() {
-		File tmpDir = new File(tmpClassDirectory);
-		if (!tmpDir.mkdirs() && !tmpDir.exists()) {
-			throw new IllegalArgumentException("Couldn't create directory '" + tmpClassDirectory + "'.");
-		}
-		return tmpDir;
 	}
 
 	private void configureCompiler(IJavaCompiler compiler) {
