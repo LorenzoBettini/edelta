@@ -29,6 +29,13 @@
         <artifactId>edelta-maven-plugin</artifactId>
         <configuration>
           <outputDirectory>edelta-lib-src-gen</outputDirectory>
+          <!-- specify source roots just to speed up compilation -->
+          <sourceRoots>
+            <sourceRoot>${basedir}/src</sourceRoot>
+          </sourceRoots>
+          <javaSourceRoots>
+            <javaSourceRoot>${basedir}/src</javaSourceRoot>
+          </javaSourceRoots>
         </configuration>
       </plugin>
     </plugins>
