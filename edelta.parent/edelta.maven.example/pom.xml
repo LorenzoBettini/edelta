@@ -140,7 +140,7 @@
         </executions>
         <dependencies>
           <!-- If you use a library in the .edelta file, it must be available 
-            also during Edelta compilation with xtext-maven-plugin -->
+            also during Edelta compilation with the edelta-maven-plugin -->
           <dependency>
             <groupId>io.github.lorenzobettini.edelta</groupId>
             <artifactId>edelta.refactorings.lib</artifactId>
