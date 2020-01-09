@@ -10,13 +10,13 @@
   <artifactId>edelta-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
 
-  <prerequisites>
-    <maven>${maven.version}</maven>
-  </prerequisites>
-
   <properties>
     <maven.version>3.6.0</maven.version>
   </properties>
+
+  <prerequisites>
+    <maven>${maven.version}</maven>
+  </prerequisites>
 
   <dependencies>
     <dependency>
@@ -68,25 +68,6 @@
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
       <artifactId>xtext-maven-plugin</artifactId>
-      <version>${xtextVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.xtext</groupId>
-      <artifactId>org.eclipse.xtext.builder.standalone</artifactId>
-      <version>${xtextVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.xtext</groupId>
-      <artifactId>org.eclipse.xtext.xtext.generator</artifactId>
-      <version>${xtextVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.emf</groupId>
-      <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.xtext</groupId>
-      <artifactId>org.eclipse.xtext.xbase</artifactId>
       <version>${xtextVersion}</version>
     </dependency>
     <dependency>
