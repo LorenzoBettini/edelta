@@ -23,25 +23,19 @@
           </filesets>
         </configuration>
       </plugin>
+      <!-- Main configuration is in the parent POM -->
       <plugin>
-        <groupId>org.eclipse.xtext</groupId>
-        <artifactId>xtext-maven-plugin</artifactId>
+        <groupId>io.github.lorenzobettini.edelta</groupId>
+        <artifactId>edelta-maven-plugin</artifactId>
         <configuration>
-          <failOnValidationError>true</failOnValidationError>
-          <languages>
-            <language>
-              <setup>org.eclipse.xtext.ecore.EcoreSupport</setup>
-            </language>
-            <language>
-              <setup>edelta.EdeltaStandaloneSetup</setup>
-              <outputConfigurations>
-                <outputConfiguration>
-                  <outputDirectory>${basedir}/edelta-lib-src-gen</outputDirectory>
-                  <installDslAsPrimarySource>true</installDslAsPrimarySource>
-                </outputConfiguration>
-              </outputConfigurations>
-            </language>
-          </languages>
+          <outputDirectory>edelta-lib-src-gen</outputDirectory>
+          <!-- specify source roots just to speed up compilation -->
+          <sourceRoots>
+            <sourceRoot>${basedir}/src</sourceRoot>
+          </sourceRoots>
+          <javaSourceRoots>
+            <javaSourceRoot>${basedir}/src</javaSourceRoot>
+          </javaSourceRoots>
         </configuration>
       </plugin>
     </plugins>

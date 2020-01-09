@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.lorenzobettini.edelta</groupId>
   <version>0.8.0-SNAPSHOT</version>
@@ -48,9 +48,12 @@
     <eclipseVersion>2019-12</eclipseVersion>
     <mwe2Version>2.11.1</mwe2Version>
     <emf.mwe-version>1.5.1</emf.mwe-version>
+    <assertj-version>3.14.0</assertj-version>
+    <mockito-version>3.2.4</mockito-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <jacoco-version>0.8.5</jacoco-version>
     <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
     <build-helper-version>3.0.0</build-helper-version>
     <versions-version>2.7</versions-version>
@@ -59,10 +62,10 @@
     <xtend.skip>false</xtend.skip>
 
     <!-- Define overridable properties for tycho-surefire-plugin -->
-    <platformSystemProperties></platformSystemProperties>
-    <moduleProperties></moduleProperties>
-    <systemProperties></systemProperties>
-    <additionalTestArgLine></additionalTestArgLine>
+    <platformSystemProperties/>
+    <moduleProperties/>
+    <systemProperties/>
+    <additionalTestArgLine/>
 
     <jacoco-aggregate-report>edelta.tests.report/target/site/jacoco-aggregate/jacoco.xml</jacoco-aggregate-report>
 
@@ -88,6 +91,10 @@
       **/internal/**,
       **/serializer/**,
     </sonar.exclusions>
+
+    <sonar.coverage.exclusions>
+      **/EdeltaMaven*.java,
+    </sonar.coverage.exclusions>
 
     <!-- see http://sonarqube.15.x6.nabble.com/sonar-issue-ignore-multicriteria-td5021722.html 
       and http://stackoverflow.com/questions/21825469/configure-sonar-sonar-issue-ignore-multicriteria-through-maven 
@@ -120,7 +127,7 @@
     <ant-files-path>${project.basedir}/../releng/releasing</ant-files-path>
 
     <!-- pass "-n" to perform a trial run with no changes made -->
-    <dryrun></dryrun>
+    <dryrun/>
 
     <!-- properties for deploying the composite update site and zipped products 
       on Bintray -->
@@ -140,7 +147,7 @@
       .m2/settings.xml -->
 
     <!-- Default values for remote directories -->
-    <bintray.base.path></bintray.base.path>
+    <bintray.base.path/>
     <bintray.releases.path>${bintray.base.path}releases</bintray.releases.path>
     <bintray.composite.path>${bintray.base.path}updates</bintray.composite.path>
     <bintray.zip.path>${bintray.base.path}zipped</bintray.zip.path>
@@ -188,6 +195,7 @@
     <module>edelta.mwe2</module>
     <module>edelta</module>
     <module>edelta.refactorings.lib</module>
+    <module>edelta.maven.plugin</module>
   </modules>
 
   <!-- These modules were experiments to compile edelta files
@@ -553,6 +561,18 @@
           </dependencies>
         </plugin>
         <plugin>
+          <groupId>io.github.lorenzobettini.edelta</groupId>
+          <artifactId>edelta-maven-plugin</artifactId>
+          <version>${project.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>generate</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
           <groupId>org.eclipse.xtend</groupId>
           <artifactId>xtend-maven-plugin</artifactId>
           <version>${xtextVersion}</version>
@@ -588,32 +608,49 @@
           </configuration>
         </plugin>
         <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco-version}</version>
+          <configuration>
+            <excludes>
+              <!-- EMF model Java classes -->
+              <exclude>**/edelta/edelta/**/*.class</exclude>
+              <!-- Antlr generated Java classes -->
+              <exclude>**/antlr/**/*.class</exclude>
+              <!-- We don't have a custom serializer -->
+              <exclude>**/serializer/*.class</exclude>
+              <!-- generated files -->
+              <exclude>**/*Abstract*RuntimeModule.class</exclude>
+              <exclude>**/*StandaloneSetup*.class</exclude>
+              <exclude>**/*Abstract*Validator.class</exclude>
+              <exclude>**/*GrammarAccess*.class</exclude>
+              <exclude>**/*Abstract*UiModule.class</exclude>
+              <exclude>**/**ExecutableExtensionFactory.class</exclude>
+              <exclude>**/*Abstract*ProposalProvider.class</exclude>
+              <exclude>**/internal/*.class</exclude>
+              <exclude>**/*ProjectTemplateProvider.class</exclude>
+              <exclude>**/*ProjectTemplate.class</exclude>
+              <exclude>**/EdeltaMaven*.class</exclude>
+              <exclude>**/HelpMojo*.class</exclude>
+            </excludes>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. 
+          It has no influence on the Maven build itself. -->
+        <plugin>
           <groupId>org.eclipse.m2e</groupId>
           <artifactId>lifecycle-mapping</artifactId>
           <version>1.0.0</version>
           <configuration>
             <lifecycleMappingMetadata>
               <pluginExecutions>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>
-                      org.apache.maven.plugins
-                    </groupId>
-                    <artifactId>
-                      maven-resources-plugin
-                    </artifactId>
-                    <versionRange>
-                      [2.4.3,)
-                    </versionRange>
-                    <goals>
-                      <goal>resources</goal>
-                      <goal>testResources</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore></ignore>
-                  </action>
-                </pluginExecution>
                 <pluginExecution>
                   <pluginExecutionFilter>
                     <groupId>
@@ -633,7 +670,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore></ignore>
+                    <ignore/>
                   </action>
                 </pluginExecution>
                 <pluginExecution>
@@ -652,7 +689,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore></ignore>
+                    <ignore/>
                   </action>
                 </pluginExecution>
                 <pluginExecution>
@@ -671,6 +708,19 @@
                       <goal>build-qualifier-aggregator</goal>
                       <goal>validate-id</goal>
                       <goal>validate-version</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore/>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>io.github.lorenzobettini.edelta</groupId>
+                    <artifactId>edelta-maven-plugin</artifactId>
+                    <versionRange>[0.8.0-SNAPSHOT,)</versionRange>
+                    <goals>
+                      <goal>generate</goal>
                     </goals>
                   </pluginExecutionFilter>
                   <action>
