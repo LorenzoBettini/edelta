@@ -36,7 +36,8 @@ modifyEcore someModifications epackage myecore {
 		// initialize it in a lambda block
 		// where the new class is available through the implicit parameter 'it'
 		addNewEAttribute("myStringAttribute", ecoreref(EString))
-		addNewEReference("myReference", ecoreref(MyEClass)) [
+		// references to Ecore elements can be fully qualified
+		addNewEReference("myReference", ecoreref(myecore.MyEClass)) [
 			// initialization as above
 			// the current element is available through the implicit parameter 'it'
 			// use syntactic sugar for setters
