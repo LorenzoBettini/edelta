@@ -1,0 +1,76 @@
+import org.eclipse.emf.ecore.EcoreFactory
+
+// IMPORTANT: ecores must be in a source directory
+// otherwise you can't refer to them
+
+package com.example
+
+metamodel "myecore"
+metamodel "ecore"
+
+/*
+ * Reusable function to create a new EClass with the
+ * specified name, setting MyEClass as its superclass
+ * @param name
+ */
+def createClass(String name) {
+	newEClass(name) => [
+		ESuperTypes += ecoreref(MyEClass)
+	]
+}
+
+// refer to Ecore elements with "ecoreref()"
+val p = ecoreref(MyEClass).EPackage
+// create new EClasses manually...
+p.EClassifiers += createClass("NewClass") => [
+	EStructuralFeatures += newEAttribute("myStringAttribute") => [
+		// refer to EDataTypes with "ecoreref()"
+		EType = ecoreref(EString)
+	]
+	EStructuralFeatures += newEReference("myReference") => [
+		EType = ecoreref(MyEClass)
+		upperBound = -1;
+		containment = true;
+		lowerBound = 0
+	]
+]
+
+// modify existing Ecore elements manually
+ecoreref(MyENum).ELiterals += EcoreFactory.eINSTANCE.createEEnumLiteral => [
+	name = "AnotherEnumLiteral"
+	value = 3
+]
+
+// ... or using Edelta DSL specific syntax
+createEClass MyNewClass in myecore {}
+
+createEClass MyDerivedNewClass in myecore {
+	// new Ecore elements created in the program can be referred:
+	ESuperTypes += ecoreref(MyNewClass)
+	createEAttribute myNewAttribute type EInt {
+		upperBound = -1;
+	}
+}
+
+// You can fully qualify Ecore references
+ecoreref(MyDerivedNewClass.myNewAttribute)
+
+// You can specify superclasses for created EClasses...
+createEClass MyOtherNewClass in myecore
+	extends MyDerivedNewClass, MyNewClass
+{
+	// ...note that inherited attributes are
+	// immediately available in the program
+	ecoreref(MyOtherNewClass.myNewAttribute)
+}
+
+// You can change an existing EClass, e.g.,
+// changing its name
+changeEClass myecore.MyOtherEClass newName RenamedEClass {
+	
+}
+
+// as usual, renamed EClass are available both with the old name
+ecoreref(MyOtherEClass)
+// and with the new one
+ecoreref(RenamedEClass)
