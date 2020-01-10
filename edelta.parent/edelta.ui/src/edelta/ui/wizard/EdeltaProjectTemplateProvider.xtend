@@ -71,66 +71,81 @@ final class EdeltaExampleProjectTemplate {
 				  <eClassifiers xsi:type="ecore:EClass" name="MyOtherEClass"/>
 				</ecore:EPackage>
 			''')
-			addFile('''src/Example.edelta''', '''
-				import org.eclipse.emf.ecore.EClass
+			addFile('''src/«path»/Example.edelta''', '''
+				import org.eclipse.emf.ecore.EcoreFactory
 				
 				// IMPORTANT: ecores must be in a source directory
 				// otherwise you can't refer to them
 				
 				package «path.value.replaceAll("/", ".")»
 				
+				// import existing metamodels
 				metamodel "myecore"
-				metamodel "ecore"
+				metamodel "ecore" // this one should usually be there
+				
+				// you can define reusable functions...
 				
 				/*
-				 * Reusable function to add standard features to an
-				 * {@link EClass}.
-				 * 
-				 * @param c
+				 * Reusable function to create a new EClass with the
+				 * specified name, setting MyEClass as its superclass
+				 * @param name
 				 */
-				def addStandardFeatures(EClass c) {
-					// use standard EMF API to add manually features
-					c.EStructuralFeatures += newEAttribute("name") => [
-						// refer to Ecore elements with "ecoreref()"
-						EType = ecoreref(EString)
+				def myReusableCreateSubclassOfMyEClass(String name) {
+					newEClass(name) => [
+						// refer to Ecore elements with ecoreref
+						ESuperTypes += ecoreref(MyEClass)
 					]
-					// and supertypes
-					c.ESuperTypes += ecoreref(MyEClass)
 				}
 				
-				// create new EClass with Edelta DSL syntax
-				createEClass NewClass in myecore {
-					// the created EClass is available through the
-					// special implicit parameter 'it' in this block
-					
-					// reuse your functions
-					addStandardFeatures(it)
-					
-					// create new features with Edelta DSL syntax
-					createEAttribute age type EInt {
-						// the created EAttribute is available through the
-						// special implicit parameter 'it' in this block
-						// which can be used as implicit receiver, like 'this'
-						lowerBound = 1
-					}
-					
-					// or manually with EMF API
-					EStructuralFeatures += newEReference("myReference") => [
+				// ...and then modification blocks
+				// look at the "Outline" view, which immediately shows the modified EPackages
+				
+				// specify modifications of an EPackage
+				modifyEcore someModifications epackage myecore {
+					// the currently modified package is available
+					// through the implicit parameter 'it', similar to 'this'	
+				
+					// use the standard Edelta library functions
+					addNewEClass("NewClass") [
+						// initialize it in a lambda block
+						// where the new class is available through the implicit parameter 'it'
+						addNewEAttribute("myStringAttribute", ecoreref(EString))
 						// references to Ecore elements can be fully qualified
-						EType = ecoreref(myecore.MyEClass)
-						upperBound = -1
-						lowerBound = 0
-						containment = true
+						addNewEReference("myReference", ecoreref(myecore.MyEClass)) [
+							// initialization as above
+							// the current element is available through the implicit parameter 'it'
+							// use syntactic sugar for setters
+							upperBound = -1;
+							containment = true;
+							lowerBound = 0
+						]
+					]
+					// you could also modify existing Ecore elements manually
+					ecoreref(MyENum).ELiterals += EcoreFactory.eINSTANCE.createEEnumLiteral => [
+						// => [] is the 'with' operator
+						name = "ANewEnumLiteral"
+						value = 3
+					]
+					// or again with Edelta library functions
+					ecoreref(MyENum).addNewEEnumLiteral("AnotherNewEnumLiteral") [
+						value = 4
 					]
 				}
 				
-				// change existing EClass
-				changeEClass myecore.MyEClass {
-					EStructuralFeatures += newEReference("myOtherReference") => [
-						// new elements are immediately available
-						EType = ecoreref(myecore.NewClass)
-						containment = false
-					]
+				// you can have several modification blocks for the same EPackage
+				modifyEcore otherModifications epackage myecore {
+					// you can call the reusable functions you defined
+					addEClass(myReusableCreateSubclassOfMyEClass("ASubclassOfMyEClass"))
+					// remember you can use the 'with' operator
+					addEClass(myReusableCreateSubclassOfMyEClass("AnotherSubclassOfMyEClass") => [
+						// and refer to new classes you created in previous modification blocks
+						ESuperTypes += ecoreref(NewClass)
+					])
+				
+					// you can rename existing classes
+					ecoreref(MyOtherEClass).name = "RenamedClass"
+					// and the renamed version is immediately available
+					ecoreref(RenamedClass).addNewEAttribute("addedNow", ecoreref(EInt))
 				}
 			''')
 			addFile('''src/«path»/Main.java''', '''
@@ -143,7 +158,7 @@ final class EdeltaExampleProjectTemplate {
 					public static void main(String[] args) throws Exception {
 						// Create an instance of the generated Java class
 						AbstractEdelta edelta = new Example();
-						// Make sure you load all the used Ecores
+						// Make sure you load all the used Ecores (Ecore.ecore is always loaded)
 						edelta.loadEcoreFile("model/My.ecore");
 						// Execute the actual transformations defined in the DSL
 						edelta.execute();
