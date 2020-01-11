@@ -7,17 +7,18 @@
   <eClassifiers xsi:type="ecore:EEnum" name="MyENum">
     <eLiterals name="FirstEnumLiteral"/>
     <eLiterals name="SecondEnumLiteral" value="1"/>
-    <eLiterals name="ANewEnumLiteral" value="3"/>
-    <eLiterals name="AnotherNewEnumLiteral" value="4"/>
+    <eLiterals name="AnotherEnumLiteral" value="3"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RenamedClass">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="addedNow" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="NewClass">
+  <eClassifiers xsi:type="ecore:EClass" name="RenamedEClass"/>
+  <eClassifiers xsi:type="ecore:EClass" name="NewClass" eSuperTypes="#//MyEClass">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="myStringAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="myReference" upperBound="-1"
         eType="#//MyEClass" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ASubclassOfMyEClass" eSuperTypes="#//MyEClass"/>
-  <eClassifiers xsi:type="ecore:EClass" name="AnotherSubclassOfMyEClass" eSuperTypes="#//MyEClass #//NewClass"/>
+  <eClassifiers xsi:type="ecore:EClass" name="MyNewClass"/>
+  <eClassifiers xsi:type="ecore:EClass" name="MyDerivedNewClass" eSuperTypes="#//MyNewClass">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="myNewAttribute" upperBound="-1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MyOtherNewClass" eSuperTypes="#//MyDerivedNewClass #//MyNewClass"/>
 </ecore:EPackage>
