@@ -43,7 +43,6 @@ public abstract class EdeltaAbstractSwtbotTest {
 
 		closeWelcomePage();
 
-		bot.viewByPartName("Problems").show();
 		bot.menu("Window").menu("Show View").menu(PROJECT_EXPLORER).click();
 	}
 
