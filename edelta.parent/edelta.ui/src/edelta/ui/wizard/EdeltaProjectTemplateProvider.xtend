@@ -34,7 +34,7 @@ final class EdeltaExampleProjectTemplate {
 	override protected updateVariables() {
 		path.enabled = advanced.value
 		if (!advanced.value) {
-			path.value = "edelta"
+			path.value = "com/example"
 		}
 	}
 
