@@ -198,11 +198,6 @@
     <module>edelta.maven.plugin</module>
   </modules>
 
-  <!-- These modules were experiments to compile edelta files
-    through the Eclipse builder:
-    edelta.compilation.feature
-    edelta.library.compilation -->
-
   <profiles>
     <profile>
       <!-- Standard development profile, including Eclipse specific
