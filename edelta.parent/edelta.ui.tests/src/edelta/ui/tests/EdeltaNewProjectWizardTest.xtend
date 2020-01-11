@@ -74,6 +74,7 @@ class EdeltaNewProjectWizardTest extends AbstractWorkbenchTest {
 
 	@Test @Flaky
 	def void testEdeltaNewProjectWizard() {
+		println("*** Executing testEdeltaNewProjectWizard...")
 		println("Creating new project wizard...")
 		val wizard = wizardProvider.get
 		wizard.init(PlatformUI.getWorkbench(), new StructuredSelection());
