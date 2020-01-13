@@ -2,7 +2,6 @@ package edelta.ui.tests
 
 import edelta.ui.internal.EdeltaActivator
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper
-import edelta.ui.tests.utils.PDETargetPlatformUtils
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -41,10 +40,6 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	@BeforeClass
 	def static void setUp() {
-		// needed when building with Tycho, otherwise, dependencies
-		// in the MANIFEST of the created project will not be visible
-		PDETargetPlatformUtils.setTargetPlatform();
-
 		closeWelcomePage
 		val injector = EdeltaActivator.getInstance().getInjector(EdeltaActivator.EDELTA_EDELTA);
 		val projectHelper = injector.getInstance(EdeltaPluginProjectHelper)

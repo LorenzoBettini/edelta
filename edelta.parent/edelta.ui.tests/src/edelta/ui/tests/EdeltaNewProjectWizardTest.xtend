@@ -3,7 +3,6 @@ package edelta.ui.tests
 import com.google.inject.Inject
 import com.google.inject.Provider
 import edelta.ui.tests.utils.EdeltaTestableNewProjectWizard
-import edelta.ui.tests.utils.PDETargetPlatformUtils
 import edelta.ui.tests.utils.PluginProjectHelper
 import org.eclipse.jface.viewers.StructuredSelection
 import org.eclipse.jface.wizard.Wizard
@@ -13,7 +12,6 @@ import org.eclipse.xtext.testing.Flaky
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest
-import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -65,11 +63,6 @@ class EdeltaNewProjectWizardTest extends AbstractWorkbenchTest {
 			}
 		};
 		return dialog.open();
-	}
-
-	@BeforeClass
-	def static void beforeClass() {
-		PDETargetPlatformUtils.setTargetPlatform();
 	}
 
 	@Test @Flaky

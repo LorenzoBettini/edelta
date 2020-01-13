@@ -12,7 +12,6 @@
   <packaging>eclipse-test-plugin</packaging>
 
   <properties>
-    <systemProperties>-DbuildingWithTycho=true</systemProperties>
     <uiTestProperties>-Dedelta.interpreter.timeout=5000</uiTestProperties>
   </properties>
 

@@ -3,13 +3,11 @@ package edelta.ui.tests
 import com.google.inject.Inject
 import edelta.ui.internal.EdeltaActivator
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper
-import edelta.ui.tests.utils.PDETargetPlatformUtils
 import org.eclipse.core.runtime.CoreException
 import org.eclipse.xtext.testing.Flaky
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.testing.AbstractOutlineTest
-import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,11 +30,6 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 	override protected createjavaProject(String projectName) throws CoreException {
 		// we use a Plug-in project so that types are resolved (e.g., EClass)
 		edeltaProjectHelper.createEdeltaPluginProject(TEST_PROJECT)
-	}
-
-	@BeforeClass
-	def static void beforeClass() {
-		PDETargetPlatformUtils.setTargetPlatform();
 	}
 
 	@Test
