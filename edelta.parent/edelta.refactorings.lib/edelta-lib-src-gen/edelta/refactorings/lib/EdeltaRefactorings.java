@@ -2,6 +2,8 @@ package edelta.refactorings.lib;
 
 import edelta.lib.AbstractEdelta;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
@@ -20,6 +22,7 @@ import org.eclipse.xtext.xbase.lib.ListExtensions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Pair;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure2;
 import org.eclipse.xtext.xbase.lib.StringExtensions;
 
 @SuppressWarnings("all")
@@ -194,5 +197,46 @@ public class EdeltaRefactorings extends AbstractEdelta {
         _value.setEOpposite(redundant.getKey());
       }
     }
+  }
+  
+  /**
+   * Given a map with key an EClass and value a list of its subclasses,
+   * generates an EEnum (in the EClass' package) representing the inheritance relation
+   * (the name is the name of the key EClass with "Type" suffix),
+   * with an EEnumLiteral for each subclass (the name is the name
+   * of the subclass in uppercase); the subclasses are removed, and the
+   * key EClass is added an EAttribute with the created EEnum as type
+   * (the name is the name of the EEnum, first letter lowercase with "Type"
+   * suffix).
+   * 
+   * For example, give "Base" -> {"Derived1", "Derived2" } as input
+   * it creates the EEnum "BaseType" with literals "DERIVED1", "DERIVED2",
+   * it adds to "Base" the EAttribute "baseType" of type "BaseType".
+   * The EClasses "Derived1" and "Derived2" are removed from the package.
+   */
+  public void classificationByHierarchyToEnum(final Map<EClass, List<EClass>> classificationsByHierarchy) {
+    final BiConsumer<EClass, List<EClass>> _function = (EClass superClass, List<EClass> subClasses) -> {
+      final EPackage ePackage = superClass.getEPackage();
+      String _name = superClass.getName();
+      String _plus = (_name + "Type");
+      final String enumName = this.ensureEClassifierNameIsUnique(ePackage, _plus);
+      final Consumer<EEnum> _function_1 = (EEnum it) -> {
+        final Procedure2<EClass, Integer> _function_2 = (EClass subClass, Integer index) -> {
+          final String enumLiteralName = this.ensureEClassifierNameIsUnique(ePackage, subClass.getName().toUpperCase());
+          EEnumLiteral _addNewEEnumLiteral = this.lib.addNewEEnumLiteral(it, enumLiteralName);
+          final Procedure1<EEnumLiteral> _function_3 = (EEnumLiteral it_1) -> {
+            it_1.setValue(((index).intValue() + 1));
+          };
+          ObjectExtensions.<EEnumLiteral>operator_doubleArrow(_addNewEEnumLiteral, _function_3);
+        };
+        IterableExtensions.<EClass>forEach(subClasses, _function_2);
+      };
+      final EEnum enum_ = this.lib.addNewEEnum(ePackage, enumName, _function_1);
+      String _lowerCase = superClass.getName().toLowerCase();
+      String _plus_1 = (_lowerCase + "Type");
+      this.lib.addNewEAttribute(superClass, _plus_1, enum_);
+      EcoreUtil.removeAll(subClasses);
+    };
+    classificationsByHierarchy.forEach(_function);
   }
 }

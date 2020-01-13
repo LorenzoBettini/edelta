@@ -1,4 +1,5 @@
 import java.util.List
+import java.util.Map
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EDataType
@@ -7,6 +8,7 @@ import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.util.EcoreUtil
+import org.eclipse.xtext.xbase.lib.Pair
 
 package edelta.refactorings.lib
 
@@ -158,4 +160,41 @@ def redundantContainerToEOpposite(Iterable<Pair<EReference, EReference>> redunda
 		redundant.value.EOpposite = redundant.key
 	}
 }
+
+/**
+ * Given a map with key an EClass and value a list of its subclasses,
+ * generates an EEnum (in the EClass' package) representing the inheritance relation
+ * (the name is the name of the key EClass with "Type" suffix),
+ * with an EEnumLiteral for each subclass (the name is the name
+ * of the subclass in uppercase); the subclasses are removed, and the
+ * key EClass is added an EAttribute with the created EEnum as type
+ * (the name is the name of the EEnum, first letter lowercase with "Type"
+ * suffix).
+ * 
+ * For example, give "Base" -> {"Derived1", "Derived2" } as input
+ * it creates the EEnum "BaseType" with literals "DERIVED1", "DERIVED2",
+ * it adds to "Base" the EAttribute "baseType" of type "BaseType".
+ * The EClasses "Derived1" and "Derived2" are removed from the package.
+ */
+def classificationByHierarchyToEnum(Map<EClass, List<EClass>> classificationsByHierarchy) {
+	classificationsByHierarchy
+		.forEach[superClass, subClasses|
+			val ePackage = superClass.EPackage
+			val enumName = ensureEClassifierNameIsUnique
+				(ePackage, superClass.name + "Type")
+			val enum = ePackage.addNewEEnum(enumName) [
+				subClasses.forEach[
+					subClass, index |
+					val enumLiteralName = ensureEClassifierNameIsUnique
+						(ePackage, subClass.name.toUpperCase)
+					addNewEEnumLiteral(enumLiteralName) => [
+						value = index+1
+					]
+				]
+			]
+			superClass.addNewEAttribute(superClass.name.toLowerCase + "Type", enum)
+			EcoreUtil.removeAll(subClasses)
+		]
+}
+
 
