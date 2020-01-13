@@ -171,6 +171,7 @@ public abstract class EdeltaAbstractSwtbotTest {
 		bot.waitUntil(shellCloses(shell), SWTBotPreferences.TIMEOUT);
 		assertProjectCreated(projectName);
 
+		System.out.println("Waiting for build...");
 		waitForBuild();
 	}
 
