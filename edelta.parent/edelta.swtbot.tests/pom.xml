@@ -16,6 +16,7 @@
   <properties>
     <test-work-directory>${project.build.directory}/work/edelta</test-work-directory>
     <additionalTestArgLine>-Dorg.eclipse.swtbot.search.timeout=20000</additionalTestArgLine>
+    <uiTestProperties>-Dedelta.interpreter.timeout=5000</uiTestProperties>
     <!-- Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=397015 -->
     <sonar.sources></sonar.sources>
     <sonar.tests>src</sonar.tests>
@@ -35,78 +36,121 @@
         <test-work-directory>${project.build.directory}/work/edelta.app/Contents/Eclipse/</test-work-directory>
       </properties>
     </profile>
+    <profile>
+      <!-- To run it locally, without using an Edelta Eclipse distribution -->
+      <id>local-swtbot-test</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-surefire-plugin</artifactId>
+            <configuration>
+              <useUIHarness>true</useUIHarness>
+              <useUIThread>false</useUIThread>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>target-platform-configuration</artifactId>
+            <configuration>
+              <dependency-resolution>
+                <extraRequirements>
+                  <requirement>
+                    <type>eclipse-feature</type>
+                    <id>edelta.feature</id>
+                    <versionRange>0.0.0</versionRange>
+                  </requirement>
+                  <requirement>
+                    <type>eclipse-feature</type>
+                    <id>edelta.product.ui.feature</id>
+                    <versionRange>0.0.0</versionRange>
+                  </requirement>
+                </extraRequirements>
+              </dependency-resolution>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <!-- requires a built product, e.g., activate the profile build-ide as well -->
+      <id>test-ide</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <!--This plugin's configuration is used to store Eclipse m2e settings 
+              only. It has no influence on the Maven build itself. -->
+            <plugin>
+              <groupId>org.eclipse.m2e</groupId>
+              <artifactId>lifecycle-mapping</artifactId>
+              <version>1.0.0</version>
+              <configuration>
+                <lifecycleMappingMetadata>
+                  <pluginExecutions>
+                    <pluginExecution>
+                      <pluginExecutionFilter>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <versionRange>[2.8,)</versionRange>
+                        <goals>
+                          <goal>unpack</goal>
+                        </goals>
+                      </pluginExecutionFilter>
+                      <action>
+                        <ignore></ignore>
+                      </action>
+                    </pluginExecution>
+                  </pluginExecutions>
+                </lifecycleMappingMetadata>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+        <plugins>
+          <!-- unpack provisioned product archive before running tests -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>unpack-product</id>
+                <phase>compile</phase>
+                <goals>
+                  <goal>unpack</goal>
+                </goals>
+                <configuration>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>${project.groupId}</groupId>
+                      <artifactId>edelta.product.repository</artifactId>
+                      <version>${project.version}</version>
+                      <type>zip</type>
+                      <classifier>${tycho.env.osgi.os}.${tycho.env.osgi.ws}.${tycho.env.osgi.arch}</classifier>
+                      <!-- this is where tycho surefire expects/creates the installation 
+                        under test by default -->
+                      <outputDirectory>${project.build.directory}/work</outputDirectory>
+                    </artifactItem>
+                  </artifactItems>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-surefire-plugin</artifactId>
+            <configuration>
+              <useUIHarness>true</useUIHarness>
+              <useUIThread>false</useUIThread>
+              <testRuntime>p2Installed</testRuntime>
+              <work>${test-work-directory}</work>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
-  <build>
-    <pluginManagement>
-      <plugins>
-        <!--This plugin's configuration is used to store Eclipse m2e settings 
-          only. It has no influence on the Maven build itself. -->
-        <plugin>
-          <groupId>org.eclipse.m2e</groupId>
-          <artifactId>lifecycle-mapping</artifactId>
-          <version>1.0.0</version>
-          <configuration>
-            <lifecycleMappingMetadata>
-              <pluginExecutions>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <versionRange>[2.8,)</versionRange>
-                    <goals>
-                      <goal>unpack</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore></ignore>
-                  </action>
-                </pluginExecution>
-              </pluginExecutions>
-            </lifecycleMappingMetadata>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-    <plugins>
-      <!-- unpack provisioned product archive before running tests -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>unpack-product</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>unpack</goal>
-            </goals>
-            <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>${project.groupId}</groupId>
-                  <artifactId>edelta.product.repository</artifactId>
-                  <version>${project.version}</version>
-                  <type>zip</type>
-                  <classifier>${tycho.env.osgi.os}.${tycho.env.osgi.ws}.${tycho.env.osgi.arch}</classifier>
-                  <!-- this is where tycho surefire expects/creates the installation 
-                    under test by default -->
-                  <outputDirectory>${project.build.directory}/work</outputDirectory>
-                </artifactItem>
-              </artifactItems>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-surefire-plugin</artifactId>
-        <configuration>
-          <useUIHarness>true</useUIHarness>
-          <useUIThread>false</useUIThread>
-          <testRuntime>p2Installed</testRuntime>
-          <work>${test-work-directory}</work>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>

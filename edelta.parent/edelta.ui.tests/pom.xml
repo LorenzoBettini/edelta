@@ -12,7 +12,7 @@
   <packaging>eclipse-test-plugin</packaging>
 
   <properties>
-    <systemProperties>-DbuildingWithTycho=true</systemProperties>
+    <uiTestProperties>-Dedelta.interpreter.timeout=5000</uiTestProperties>
   </properties>
 
   <profiles>
@@ -30,15 +30,7 @@
             <artifactId>target-platform-configuration</artifactId>
             <configuration>
               <dependency-resolution>
-                <extraRequirements>
-                  <!-- to get the org.eclipse.osgi.compatibility.state plugin 
-                    if the target platform is Luna or later. (backward compatible with kepler 
-                    and previous versions) see https://bugs.eclipse.org/bugs/show_bug.cgi?id=492149 -->
-                  <requirement>
-                    <type>eclipse-feature</type>
-                    <id>org.eclipse.rcp</id>
-                    <versionRange>0.0.0</versionRange>
-                  </requirement>
+                <extraRequirements combine.children="append">
                   <!-- We specify our feature so that we're sure we're using 
                     also all the required software -->
                   <requirement>
@@ -74,15 +66,7 @@
             <artifactId>target-platform-configuration</artifactId>
             <configuration>
               <dependency-resolution>
-                <extraRequirements>
-                  <!-- to get the org.eclipse.osgi.compatibility.state plugin 
-                    if the target platform is Luna or later. (backward compatible with kepler 
-                    and previous versions) see https://bugs.eclipse.org/bugs/show_bug.cgi?id=492149 -->
-                  <requirement>
-                    <type>eclipse-feature</type>
-                    <id>org.eclipse.rcp</id>
-                    <versionRange>0.0.0</versionRange>
-                  </requirement>
+                <extraRequirements combine.children="append">
                   <!-- We specify our feature so that we're sure we're using 
                     also all the required software -->
                   <requirement>
