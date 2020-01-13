@@ -10,6 +10,9 @@ import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EClass
 import java.util.stream.Collectors
 import edelta.lib.AbstractEdelta
+import static org.junit.Assert.assertNull
+import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertSame
 
 class EdeltaRefactoringsTest extends AbstractTest {
 	var EdeltaRefactorings refactorings
@@ -251,5 +254,29 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertThat(extractedA1WithLowerBound.name).isEqualTo("A1")
 		assertThat(extractedA1WithLowerBound.EAttributeType).isEqualTo(stringDataType)
 		assertThat(extractedA1WithLowerBound.lowerBound).isEqualTo(2)
+	}
+
+	@Test def void test_redundantContainerToEOpposite() {
+		val p = factory.createEPackage => [
+			val containedWithRedundant = createEClass("ContainedWithRedundant")
+			val container = createEClass("Container") => [
+				createEReference("containedWithRedundant") => [
+					EType = containedWithRedundant
+					containment = true
+				]
+			]
+			containedWithRedundant.createEReference("redundant") => [
+				EType = container
+				lowerBound = 1
+			]
+		]
+		val redundant = p.EClasses.head.EReferences.head
+		val opposite = p.EClasses.last.EReferences.head
+		assertNull(redundant.EOpposite)
+		assertNull(opposite.EOpposite)
+		refactorings.redundantContainerToEOpposite(#[redundant -> opposite])
+		assertNotNull(redundant.EOpposite)
+		assertSame(redundant.EOpposite, opposite)
+		assertSame(opposite.EOpposite, redundant)
 	}
 }

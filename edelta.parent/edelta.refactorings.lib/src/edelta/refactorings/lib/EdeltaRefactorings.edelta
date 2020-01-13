@@ -144,3 +144,18 @@ def ensureEClassifierNameIsUnique(EPackage ePackage, String proposedName) {
 	}
 	return className
 }
+
+/**
+ * Fix all the passed redundant containers (in the shape of pairs)
+ * by setting the eOpposite property.
+ * 
+ * That is, given the pair r1 -> r2, then r2 is set as the opposite
+ * reference of r1 and viceversa.
+ */
+def redundantContainerToEOpposite(Iterable<Pair<EReference, EReference>> redundantContainers) {
+	for (redundant : redundantContainers) {
+		redundant.key.EOpposite = redundant.value
+		redundant.value.EOpposite = redundant.key
+	}
+}
+

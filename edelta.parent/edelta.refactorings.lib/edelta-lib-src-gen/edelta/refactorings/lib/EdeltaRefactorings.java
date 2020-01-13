@@ -18,6 +18,7 @@ import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.ListExtensions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
+import org.eclipse.xtext.xbase.lib.Pair;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.eclipse.xtext.xbase.lib.StringExtensions;
 
@@ -175,5 +176,23 @@ public class EdeltaRefactorings extends AbstractEdelta {
       className = (_className + Integer.valueOf(_plusPlus));
     }
     return className;
+  }
+  
+  /**
+   * Fix all the passed redundant containers (in the shape of pairs)
+   * by setting the eOpposite property.
+   * 
+   * That is, given the pair r1 -> r2, then r2 is set as the opposite
+   * reference of r1 and viceversa.
+   */
+  public void redundantContainerToEOpposite(final Iterable<Pair<EReference, EReference>> redundantContainers) {
+    for (final Pair<EReference, EReference> redundant : redundantContainers) {
+      {
+        EReference _key = redundant.getKey();
+        _key.setEOpposite(redundant.getValue());
+        EReference _value = redundant.getValue();
+        _value.setEOpposite(redundant.getKey());
+      }
+    }
   }
 }
