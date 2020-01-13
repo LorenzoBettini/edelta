@@ -230,10 +230,6 @@
         <module>edelta.tests.parent</module>
         <module>edelta.tests.report</module>
       </modules>
-      <!-- These modules were experiments to compile edelta files
-        through the Eclipse builder:
-        edelta.compilation.feature
-        edelta.library.compilation -->
     </profile>
     <profile>
       <id>sonatype-oss-release</id>
