@@ -31,7 +31,7 @@
             <artifactId>target-platform-configuration</artifactId>
             <configuration>
               <dependency-resolution>
-                <extraRequirements>
+                <extraRequirements combine.children="append">
                   <!-- We specify our feature so that we're sure we're using 
                     also all the required software -->
                   <requirement>
@@ -67,7 +67,7 @@
             <artifactId>target-platform-configuration</artifactId>
             <configuration>
               <dependency-resolution>
-                <extraRequirements>
+                <extraRequirements combine.children="append">
                   <!-- We specify our feature so that we're sure we're using 
                     also all the required software -->
                   <requirement>
