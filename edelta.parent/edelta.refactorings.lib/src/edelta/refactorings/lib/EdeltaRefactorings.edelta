@@ -197,4 +197,17 @@ def classificationByHierarchyToEnum(Map<EClass, List<EClass>> classificationsByH
 		]
 }
 
+/**
+ * Turns the given EClasses to abstract
+ */
+def concreteBaseMetaclassToAbstract(Iterable<EClass> concreteAbstractMetaclasses) {
+	concreteAbstractMetaclasses.forEach[abstract = true]
+}
+
+/**
+ * Turns the given EClasses to NON abstract
+ */
+def abstractBaseMetaclassToConcrete(Iterable<EClass> abstractConcreteMetaclasses) {
+	abstractConcreteMetaclasses.forEach[abstract = false]
+}
 

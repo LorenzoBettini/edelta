@@ -1,20 +1,23 @@
 package edelta.refactorings.lib.tests
 
+import edelta.lib.AbstractEdelta
 import edelta.refactorings.lib.EdeltaRefactorings
+import java.util.stream.Collectors
+import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EEnum
+import org.eclipse.emf.ecore.EReference
 import org.junit.Before
 import org.junit.Test
 
-import static extension org.assertj.core.api.Assertions.*
-import org.eclipse.emf.ecore.EAttribute
-import org.eclipse.emf.ecore.EReference
-import org.eclipse.emf.ecore.EClass
-import java.util.stream.Collectors
-import edelta.lib.AbstractEdelta
-import static org.junit.Assert.assertNull
-import static org.junit.Assert.assertNotNull
-import static org.junit.Assert.assertSame
 import static org.junit.Assert.assertEquals
-import org.eclipse.emf.ecore.EEnum
+import static org.junit.Assert.assertFalse
+import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertNull
+import static org.junit.Assert.assertSame
+import static org.junit.Assert.assertTrue
+
+import static extension org.assertj.core.api.Assertions.*
 
 class EdeltaRefactoringsTest extends AbstractTest {
 	var EdeltaRefactorings refactorings
@@ -308,5 +311,30 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		val c = p.EClassifiers.head as EClass
 		val attr = findEAttribute(c, "baseType")
 		assertSame(enum, attr.EType)
+	}
+
+	@Test def void test_concreteBaseMetaclassToAbstract() {
+		val p = factory.createEPackage => [
+			val base = createEClass("ConcreteAbstractMetaclass")
+			createEClass("Derived1") => [
+				ESuperTypes += base
+			]
+		]
+		val c = p.EClasses.head
+		assertFalse(c.abstract)
+		refactorings.concreteBaseMetaclassToAbstract(#[c])
+		assertTrue(c.abstract)
+	}
+
+	@Test def void test_abstractBaseMetaclassToConcrete() {
+		val p = factory.createEPackage => [
+			createEClass("AbstractConcreteMetaclass") => [
+				abstract = true
+			]
+		]
+		val c = p.EClasses.head
+		assertTrue(c.abstract)
+		refactorings.abstractBaseMetaclassToConcrete(#[c])
+		assertFalse(c.abstract)
 	}
 }
