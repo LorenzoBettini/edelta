@@ -38,7 +38,8 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 	@Inject extension EdeltaEcoreHelper
 	@Inject IResourceScopeCache cache
 
-	var int interpreterTimeout = 2000;
+	var int interpreterTimeout =
+		Integer.parseInt(System.getProperty("edelta.interpreter.timeout", "2000"));
 
 	var JvmGenericType programInferredJavaType;
 
