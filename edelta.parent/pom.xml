@@ -43,6 +43,7 @@
 
   <properties>
     <tycho-version>1.5.1</tycho-version>
+    <!-- IMPORTANT: update Xtext version also in the BOM -->
     <xtextVersion>2.20.0</xtextVersion>
     <xtext-version>${xtextVersion}</xtext-version>
     <eclipseVersion>2019-12</eclipseVersion>
@@ -164,26 +165,11 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.eclipse.xtext</groupId>
-        <artifactId>xtext-dev-bom</artifactId>
-        <version>${xtextVersion}</version>
+        <groupId>io.github.lorenzobettini.edelta</groupId>
+        <artifactId>edelta.bom</artifactId>
+        <version>${project.version}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.eclipse.emf</groupId>
-        <artifactId>org.eclipse.emf.mwe.core</artifactId>
-        <version>${emf.mwe-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.eclipse.xtext</groupId>
-        <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
-        <version>${xtextVersion}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.eclipse.xtext</groupId>
-        <artifactId>org.eclipse.xtext.ecore</artifactId>
-        <version>${xtext-version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -192,6 +178,9 @@
     to the Maven artifacts to be deployed on Maven Central -->
   <modules>
     <module>edelta.target</module>
+    <!-- The BOM must not be the first module or we lose the pluginManagement
+      configurations that are needed by this parent itself, e.g., coveralls and sonar -->
+    <module>edelta.bom</module>
     <module>edelta.lib</module>
     <module>edelta.mwe2</module>
     <module>edelta</module>
