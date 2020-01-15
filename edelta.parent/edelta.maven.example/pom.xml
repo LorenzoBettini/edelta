@@ -20,16 +20,11 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.eclipse.xtext</groupId>
-        <artifactId>xtext-dev-bom</artifactId>
-        <version>${xtextVersion}</version>
+        <groupId>io.github.lorenzobettini.edelta</groupId>
+        <artifactId>edelta.bom</artifactId>
+        <version>${edelta.version}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.eclipse.xtext</groupId>
-        <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
-        <version>${xtextVersion}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -38,12 +33,10 @@
     <dependency>
       <groupId>io.github.lorenzobettini.edelta</groupId>
       <artifactId>edelta.lib</artifactId>
-      <version>${edelta.version}</version>
     </dependency>
     <dependency>
       <groupId>io.github.lorenzobettini.edelta</groupId>
       <artifactId>edelta.refactorings.lib</artifactId>
-      <version>${edelta.version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -151,31 +144,37 @@
     </plugins>
   </build>
 
-  <!-- In case you want to use SNAPSHOTs
-  <repositories>
-    <repository>
-      <id>maven-snapshots</id>
-      <url>http://oss.sonatype.org/content/repositories/snapshots</url>
-      <layout>default</layout>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>sonatype_snapshots</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
-  -->
+  <profiles>
+    <profile>
+      <id>useSnapshots</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <repositories>
+        <repository>
+          <id>maven-snapshots</id>
+          <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+          <layout>default</layout>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>sonatype_snapshots</id>
+          <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
 </project>
