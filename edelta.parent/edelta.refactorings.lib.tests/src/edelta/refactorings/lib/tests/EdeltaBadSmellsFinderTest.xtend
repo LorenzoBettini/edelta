@@ -187,6 +187,42 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 		assertEquals(expected, actual)
 	}
 
+	@Test def void test_findDeadClassifiers() {
+		val p = factory.createEPackage => [
+			createEClass("Unused1")
+			val used1 = createEClass("Used1")
+			val used2 = createEClass("Used2")
+			createEClass("Unused2") => [
+				createEReference("used1") => [
+					EType = used1
+					containment = true
+				]
+				createEReference("used2") => [
+					EType = used2
+					containment = false
+				]
+			]
+		]
+		val result = finder.findDeadClassifiers(p)
+		assertIterable(result, #[p.EClasses.head])
+	}
+
+	@Test def void test_hasNoReferenceInThisPackage() {
+		val otherPackage = factory.createEPackage
+		val used1 = otherPackage.createEClass("Used1")
+		val p = factory.createEPackage => [
+			createEClass("HasNoReferenceInThisPackage") => [
+				// has a reference to a class in a different package
+				createEReference("used1") => [
+					EType = used1
+					containment = false
+				]
+			]
+		]
+		assertThat(finder.hasNoReferenceInThisPackage(p.EClasses.head))
+			.isTrue
+	}
+
 	def protected <T extends ENamedElement> void assertIterable(Iterable<T> actual, Iterable<? extends T> expected) {
 		assertThat(actual).containsExactlyInAnyOrder(expected)
 	}

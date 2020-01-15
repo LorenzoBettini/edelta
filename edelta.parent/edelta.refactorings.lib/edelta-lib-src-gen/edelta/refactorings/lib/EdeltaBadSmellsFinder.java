@@ -12,9 +12,11 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.Functions.Function2;
@@ -177,5 +179,56 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
       }
     }
     return redundantContainers;
+  }
+  
+  /**
+   * see {@link #isDeadClassifier(EClassifier)}
+   */
+  public List<EClassifier> findDeadClassifiers(final EPackage ePackage) {
+    final Function1<EClassifier, Boolean> _function = (EClassifier it) -> {
+      return Boolean.valueOf(this.isDeadClassifier(it));
+    };
+    return IterableExtensions.<EClassifier>toList(IterableExtensions.<EClassifier>filter(ePackage.getEClassifiers(), _function));
+  }
+  
+  /**
+   * Whether {@link #hasNoReferenceInThisPackage(EClassifier)} and
+   * {@link #isNotReferenced(EClassifier)}
+   */
+  public boolean isDeadClassifier(final EClassifier cl) {
+    if ((this.hasNoReferenceInThisPackage(cl) && this.isNotReferenced(cl))) {
+      final Supplier<String> _function = () -> {
+        String _eObjectRepr = this.lib.getEObjectRepr(cl);
+        return ("Dead classifier: " + _eObjectRepr);
+      };
+      this.logInfo(_function);
+      return true;
+    }
+    return false;
+  }
+  
+  /**
+   * Whether the passed EClassifier does not refer to anything in its
+   * EPackage.
+   */
+  public boolean hasNoReferenceInThisPackage(final EClassifier c) {
+    boolean _xblockexpression = false;
+    {
+      final EPackage thisPackage = c.getEPackage();
+      final Function1<EClassifier, Boolean> _function = (EClassifier it) -> {
+        EPackage _ePackage = it.getEPackage();
+        return Boolean.valueOf((_ePackage == thisPackage));
+      };
+      _xblockexpression = IterableExtensions.isEmpty(IterableExtensions.<EClassifier>filter(Iterables.<EClassifier>filter(EcoreUtil.CrossReferencer.find(CollectionLiterals.<EClassifier>newArrayList(c)).keySet(), EClassifier.class), _function));
+    }
+    return _xblockexpression;
+  }
+  
+  /**
+   * Whether the passed EClassifier is not referenced in its
+   * EPackage.
+   */
+  public boolean isNotReferenced(final EClassifier cl) {
+    return EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()).isEmpty();
   }
 }

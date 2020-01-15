@@ -1,8 +1,11 @@
 import java.util.List
 import java.util.function.BiPredicate
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EStructuralFeature
-import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.util.EcoreUtil
+import org.eclipse.emf.ecore.util.EcoreUtil.CrossReferencer
 
 package edelta.refactorings.lib
 
@@ -132,3 +135,43 @@ def findRedundantContainers(EClass cl) {
 	return redundantContainers
 }
 
+/**
+ * see {@link #isDeadClassifier(EClassifier)}
+ */
+def findDeadClassifiers(EPackage ePackage) {
+	ePackage.EClassifiers
+		.filter[isDeadClassifier]
+		.toList
+}
+
+/**
+ * Whether {@link #hasNoReferenceInThisPackage(EClassifier)} and
+ * {@link #isNotReferenced(EClassifier)}
+ */
+def isDeadClassifier(EClassifier cl) {
+	if(cl.hasNoReferenceInThisPackage && cl.isNotReferenced){
+		logInfo["Dead classifier: " + getEObjectRepr(cl)]
+		return true;
+	}
+}
+
+/**
+ * Whether the passed EClassifier does not refer to anything in its
+ * EPackage.
+ */
+def hasNoReferenceInThisPackage(EClassifier c) {
+	val thisPackage = c.EPackage
+	CrossReferencer.find(newArrayList(c))
+		.keySet
+		.filter(EClassifier)
+		.filter[EPackage === thisPackage]
+		.empty
+}
+
+/**
+ * Whether the passed EClassifier is not referenced in its
+ * EPackage.
+ */
+def isNotReferenced(EClassifier cl) {
+	EcoreUtil.UsageCrossReferencer.find(cl, cl.EPackage).empty
+}
