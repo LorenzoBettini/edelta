@@ -18,7 +18,6 @@
     <tycho-version>1.5.1</tycho-version>
     <eclipseVersion>2019-12</eclipseVersion>
     <mwe2Version>2.11.1</mwe2Version>
-    <emf.mwe-version>1.5.1</emf.mwe-version>
     <assertj-version>3.14.0</assertj-version>
     <mockito-version>3.2.4</mockito-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
