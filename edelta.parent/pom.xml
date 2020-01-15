@@ -177,6 +177,8 @@
     to the Maven artifacts to be deployed on Maven Central -->
   <modules>
     <module>edelta.target</module>
+    <!-- The BOM must not be the first module or we lose the pluginManagement
+      configurations that are needed by this parent itself, e.g., coveralls and sonar -->
     <module>edelta.bom</module>
     <module>edelta.lib</module>
     <module>edelta.mwe2</module>
