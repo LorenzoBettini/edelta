@@ -3,6 +3,7 @@ package edelta.refactorings.lib;
 import com.google.common.collect.Iterables;
 import edelta.lib.AbstractEdelta;
 import edelta.refactorings.lib.EstructuralFeatureEqualityHelper;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.function.Supplier;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
@@ -19,6 +21,7 @@ import org.eclipse.xtext.xbase.lib.Functions.Function2;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.ListExtensions;
 import org.eclipse.xtext.xbase.lib.MapExtensions;
+import org.eclipse.xtext.xbase.lib.Pair;
 
 @SuppressWarnings("all")
 public class EdeltaBadSmellsFinder extends AbstractEdelta {
@@ -115,5 +118,64 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
   
   public Iterable<EClass> allEClasses(final EPackage ePackage) {
     return Iterables.<EClass>filter(ePackage.getEClassifiers(), EClass.class);
+  }
+  
+  /**
+   * Finds all the features corresponding to a redundant container,
+   * that is, a missed opposite reference to the container.
+   * 
+   * The result consists of an iterable of pairs where the key
+   * is the reference corresponding to the redundant container
+   * and the value is the reference that should correspond to the
+   * opposite reference.
+   * 
+   * For example, if "Bank" has a containment feature "clients",
+   * and the "Client" has a non-containment feature "bank", which
+   * is not set as the opposite of "clients", then the detected
+   * redundant container will be the pair "Client:bank" -> "Bank:clients".
+   * 
+   * This form should make the corresponding refactoring trivial to
+   * implement, since all the information are in the pair.
+   */
+  public Iterable<Pair<EReference, EReference>> findRedundantContainers(final EPackage ePackage) {
+    final Function1<EClass, ArrayList<Pair<EReference, EReference>>> _function = (EClass it) -> {
+      return this.findRedundantContainers(it);
+    };
+    return Iterables.<Pair<EReference, EReference>>concat(IterableExtensions.<EClass, ArrayList<Pair<EReference, EReference>>>map(this.allEClasses(ePackage), _function));
+  }
+  
+  /**
+   * see {@link #findRedundantContainers(EPackage)}
+   */
+  public ArrayList<Pair<EReference, EReference>> findRedundantContainers(final EClass cl) {
+    final ArrayList<Pair<EReference, EReference>> redundantContainers = CollectionLiterals.<Pair<EReference, EReference>>newArrayList();
+    final Function1<EReference, Boolean> _function = (EReference it) -> {
+      return Boolean.valueOf(it.isContainment());
+    };
+    final Iterable<EReference> containmentReferences = IterableExtensions.<EReference>filter(cl.getEReferences(), _function);
+    for (final EReference containmentReference : containmentReferences) {
+      {
+        final Function1<EReference, Boolean> _function_1 = (EReference it) -> {
+          return Boolean.valueOf(((((!it.isContainment()) && 
+            it.isRequired()) && 
+            (it.getEOpposite() == null)) && 
+            (it.getEReferenceType() == cl)));
+        };
+        final EReference redundant = IterableExtensions.<EReference>head(IterableExtensions.<EReference>filter(containmentReference.getEReferenceType().getEReferences(), _function_1));
+        if ((redundant != null)) {
+          Pair<EReference, EReference> _mappedTo = Pair.<EReference, EReference>of(redundant, containmentReference);
+          redundantContainers.add(_mappedTo);
+          final Supplier<String> _function_2 = () -> {
+            String _eObjectRepr = this.lib.getEObjectRepr(containmentReference);
+            String _plus = ("Redundant container: " + _eObjectRepr);
+            String _plus_1 = (_plus + " -> ");
+            String _eObjectRepr_1 = this.lib.getEObjectRepr(redundant);
+            return (_plus_1 + _eObjectRepr_1);
+          };
+          this.logInfo(_function_2);
+        }
+      }
+    }
+    return redundantContainers;
   }
 }

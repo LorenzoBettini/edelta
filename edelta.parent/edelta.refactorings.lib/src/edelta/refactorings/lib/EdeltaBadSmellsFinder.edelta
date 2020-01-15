@@ -81,3 +81,54 @@ def allEClasses(EPackage ePackage) {
 	ePackage.EClassifiers.filter(EClass)
 }
 
+/**
+ * Finds all the features corresponding to a redundant container,
+ * that is, a missed opposite reference to the container.
+ * 
+ * The result consists of an iterable of pairs where the key
+ * is the reference corresponding to the redundant container
+ * and the value is the reference that should correspond to the
+ * opposite reference.
+ * 
+ * For example, if "Bank" has a containment feature "clients",
+ * and the "Client" has a non-containment feature "bank", which
+ * is not set as the opposite of "clients", then the detected
+ * redundant container will be the pair "Client:bank" -> "Bank:clients".
+ * 
+ * This form should make the corresponding refactoring trivial to
+ * implement, since all the information are in the pair.
+ */
+def findRedundantContainers(EPackage ePackage) {
+	ePackage.allEClasses
+		.map[findRedundantContainers]
+		.flatten
+}
+
+/**
+ * see {@link #findRedundantContainers(EPackage)}
+ */
+def findRedundantContainers(EClass cl) {
+	val redundantContainers = newArrayList
+	val containmentReferences = cl.EReferences
+		.filter[containment]
+	for (containmentReference : containmentReferences) {
+		val redundant = containmentReference.EReferenceType.EReferences
+			.filter[
+				!containment &&
+				required &&
+				EOpposite === null &&
+				EReferenceType === cl
+			]
+			.head
+		if (redundant !== null){
+			redundantContainers += redundant -> containmentReference
+			logInfo[
+				"Redundant container: "
+					+ getEObjectRepr(containmentReference)
+					+ " -> "
+					+ getEObjectRepr(redundant) 
+			]
+	}}
+	return redundantContainers
+}
+

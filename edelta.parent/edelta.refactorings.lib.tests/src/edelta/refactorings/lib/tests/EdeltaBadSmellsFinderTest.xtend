@@ -8,6 +8,8 @@ import org.junit.Test
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.assertTrue
+import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertEquals
 
 class EdeltaBadSmellsFinderTest extends AbstractTest {
 	var EdeltaBadSmellsFinder finder
@@ -122,6 +124,67 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 		val expected = p.EClasses.map[EStructuralFeatures].flatten
 		val actual = result.values.flatten
 		assertIterable(actual, expected)
+	}
+
+	@Test def void test_findRedundantContainers() {
+		val p = factory.createEPackage => [
+			val containedWithRedundant = createEClass("ContainedWithRedundant")
+			val containedWithOpposite = createEClass("ContainedWithOpposite")
+			val containedWithContained = createEClass("ContainedWithContained")
+			val containedWithOptional = createEClass("ContainedWithOptional")
+			val anotherClass = createEClass("AnotherClass")
+			val containedWithUnrelated = createEClass("Unrelated")
+			val container = createEClass("Container") => [
+				createEReference("containedWithRedundant") => [
+					EType = containedWithRedundant
+					containment = true
+				]
+				createEReference("containedWithUnrelated") => [
+					EType = containedWithUnrelated
+					containment = true
+				]
+				createEReference("containedWithOpposite") => [
+					EType = containedWithOpposite
+					containment = true
+				]
+				createEReference("containedWithOptional") => [
+					EType = containedWithOptional
+					containment = true
+				]
+			]
+			containedWithRedundant.createEReference("redundant") => [
+				EType = container
+				lowerBound = 1
+			]
+			containedWithUnrelated.createEReference("unrelated") => [
+				EType = anotherClass
+				lowerBound = 1
+			]
+			containedWithOpposite.createEReference("correctWithOpposite") => [
+				EType = container
+				lowerBound = 1
+				EOpposite = container.EReferences.last
+			]
+			containedWithContained.createEReference("correctWithContainment") => [
+				EType = container
+				lowerBound = 1
+				// this is correct since it's another contament relation
+				containment = true
+			]
+			containedWithOptional.createEReference("correctNotRequired") => [
+				EType = container
+				// this is correct since it's not required
+			]
+		]
+		val result = finder.findRedundantContainers(p)
+		// we expect the pair
+		// redundant -> containedWithRedundant
+		val expected = p.EClasses.head.EReferences.head -> p.EClasses.last.EReferences.head
+		val actual = result.head
+		assertThat(result).hasSize(1)
+		assertNotNull(expected)
+		assertNotNull(actual)
+		assertEquals(expected, actual)
 	}
 
 	def protected <T extends ENamedElement> void assertIterable(Iterable<T> actual, Iterable<? extends T> expected) {
