@@ -1,3 +1,4 @@
+import edelta.refactorings.lib.helper.EstructuralFeatureEqualityHelper
 import java.util.List
 import java.util.function.BiPredicate
 import org.eclipse.emf.ecore.EClass

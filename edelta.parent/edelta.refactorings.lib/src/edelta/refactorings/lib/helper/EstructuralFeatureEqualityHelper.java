@@ -1,7 +1,7 @@
 /**
  * 
  */
-package edelta.refactorings.lib;
+package edelta.refactorings.lib.helper;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;

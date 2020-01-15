@@ -2,7 +2,7 @@ package edelta.refactorings.lib;
 
 import com.google.common.collect.Iterables;
 import edelta.lib.AbstractEdelta;
-import edelta.refactorings.lib.EstructuralFeatureEqualityHelper;
+import edelta.refactorings.lib.helper.EstructuralFeatureEqualityHelper;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
