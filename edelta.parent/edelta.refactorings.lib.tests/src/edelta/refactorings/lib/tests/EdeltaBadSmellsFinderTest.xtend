@@ -223,6 +223,47 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 			.isTrue
 	}
 
+	@Test def void test_findClassificationByHierarchy() {
+		val p = factory.createEPackage => [
+			val base = createEClass("Base")
+			createEClass("Derived1") => [
+				ESuperTypes += base
+			]
+			createEClass("Derived2") => [
+				ESuperTypes += base
+			]
+			createEClass("Derived2") => [
+				ESuperTypes += base
+				// not in result because has features
+				createEAttribute("anAttribute") => [
+					EType = stringDataType
+				]
+			]
+			val referenced = createEClass("Derived3") => [
+				// not in result because it's referenced
+				ESuperTypes += base
+			]
+			val another = createEClass("Another") => [
+				createEReference("aRef") => [
+					EType = referenced
+				]
+			]
+			createEClass("Derived4") => [
+				ESuperTypes += base
+				ESuperTypes += another
+				// not in result because has several superclasses
+			]
+		]
+		val result = finder.findClassificationByHierarchy(p)
+		assertThat(result)
+			.containsExactlyEntriesOf(newHashMap(
+				p.EClasses.head -> newArrayList(
+					p.EClasses.get(1),
+					p.EClasses.get(2)
+				)
+			))
+	}
+
 	def protected <T extends ENamedElement> void assertIterable(Iterable<T> actual, Iterable<? extends T> expected) {
 		assertThat(actual).containsExactlyInAnyOrder(expected)
 	}

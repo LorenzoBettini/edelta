@@ -176,3 +176,28 @@ def hasNoReferenceInThisPackage(EClassifier c) {
 def isNotReferenced(EClassifier cl) {
 	EcoreUtil.UsageCrossReferencer.find(cl, cl.EPackage).empty
 }
+
+/**
+ * Returns a map where the key is an EClass (superclass)
+ * and the associated value is a list of subclasses that are
+ * considered matching the "classification by hierarchy" bad smell.
+ */
+def findClassificationByHierarchy(EPackage ePackage) {
+	val classification= ePackage.allEClasses
+		.filter[
+			ESuperTypes.size == 1 &&
+			EStructuralFeatures.empty &&
+			isNotReferenced
+		]
+		.groupBy[ESuperTypes.head]
+	classification.entrySet.forEach[
+		logInfo["Classification by hierarchy: "
+			+ getEObjectRepr(key) + " - "
+			+ "subclasses["
+			+ value.map[getEObjectRepr(it)].join(",")
+			+ "]"
+		]
+	]
+	return classification
+}
+

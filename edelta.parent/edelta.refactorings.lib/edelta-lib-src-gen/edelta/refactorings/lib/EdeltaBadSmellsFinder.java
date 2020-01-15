@@ -231,4 +231,38 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
   public boolean isNotReferenced(final EClassifier cl) {
     return EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()).isEmpty();
   }
+  
+  /**
+   * Returns a map where the key is an EClass (superclass)
+   * and the associated value is a list of subclasses that are
+   * considered matching the "classification by hierarchy" bad smell.
+   */
+  public Map<EClass, List<EClass>> findClassificationByHierarchy(final EPackage ePackage) {
+    final Function1<EClass, Boolean> _function = (EClass it) -> {
+      return Boolean.valueOf((((it.getESuperTypes().size() == 1) && 
+        it.getEStructuralFeatures().isEmpty()) && 
+        this.isNotReferenced(it)));
+    };
+    final Function1<EClass, EClass> _function_1 = (EClass it) -> {
+      return IterableExtensions.<EClass>head(it.getESuperTypes());
+    };
+    final Map<EClass, List<EClass>> classification = IterableExtensions.<EClass, EClass>groupBy(IterableExtensions.<EClass>filter(this.allEClasses(ePackage), _function), _function_1);
+    final Consumer<Map.Entry<EClass, List<EClass>>> _function_2 = (Map.Entry<EClass, List<EClass>> it) -> {
+      final Supplier<String> _function_3 = () -> {
+        String _eObjectRepr = this.lib.getEObjectRepr(it.getKey());
+        String _plus = ("Classification by hierarchy: " + _eObjectRepr);
+        String _plus_1 = (_plus + " - ");
+        String _plus_2 = (_plus_1 + "subclasses[");
+        final Function1<EClass, String> _function_4 = (EClass it_1) -> {
+          return this.lib.getEObjectRepr(it_1);
+        };
+        String _join = IterableExtensions.join(ListExtensions.<EClass, String>map(it.getValue(), _function_4), ",");
+        String _plus_3 = (_plus_2 + _join);
+        return (_plus_3 + "]");
+      };
+      this.logInfo(_function_3);
+    };
+    classification.entrySet().forEach(_function_2);
+    return classification;
+  }
 }
