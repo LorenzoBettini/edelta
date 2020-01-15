@@ -76,7 +76,7 @@ node {
          stage('Remove SNAPSHOT') {
             sh (script:
               "./mvnw -f edelta.parent/pom.xml ${mavenOnlyProfile} \
-                    versions:set -DgenerateBackupPoms=false -DremoveSnapshot=true \
+                    versions:set -DartifactId='*' -DgenerateBackupPoms=false -DremoveSnapshot=true \
                     org.eclipse.tycho:tycho-versions-plugin:update-eclipse-metadata",
             )
          }
