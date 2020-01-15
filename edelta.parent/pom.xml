@@ -740,22 +740,7 @@
             <useUIHarness>false</useUIHarness>
           </configuration>
         </plugin>
-        <plugin>
-          <groupId>org.eluder.coveralls</groupId>
-          <artifactId>coveralls-maven-plugin</artifactId>
-          <version>4.3.0</version>
-          <configuration>
-            <jacocoReports>
-              <jacocoReport>${project.basedir}/${jacoco-aggregate-report}</jacocoReport>
-            </jacocoReports>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.sonarsource.scanner.maven</groupId>
-          <artifactId>sonar-maven-plugin</artifactId>
-          <version>3.6.0.1398</version>
-        </plugin>
-      </plugins>
+       </plugins>
     </pluginManagement>
   </build>
   <repositories>
