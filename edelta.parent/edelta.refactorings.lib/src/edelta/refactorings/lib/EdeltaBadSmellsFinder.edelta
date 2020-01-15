@@ -1,0 +1,83 @@
+import java.util.List
+import java.util.function.BiPredicate
+import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EStructuralFeature
+import org.eclipse.emf.ecore.EClass
+
+package edelta.refactorings.lib
+
+/**
+ * Finds all the features that are structurally equal
+ * in the given {@link EPackage}.
+ * 
+ * Note that this takes into consideration the name and type,
+ * but also other properties like lowerBound, unique, etc.
+ * 
+ * For example, given these EClasses
+ * 
+ * <pre>
+ * C1 {
+ *   A1 : EString
+ * } 
+ * 
+ * C2 {
+ *   A1 : EString
+ * }
+ * </pre>
+ * 
+ * It returns the map with this entry
+ * 
+ * <pre>
+ * (A1 : EString) -> [ C1:A1, C2:A1 ]
+ * </pre>
+ * 
+ * @param ePackage
+ */
+def findDuplicateFeatures(EPackage ePackage) {
+	return findDuplicateFeaturesCustom(
+		ePackage,
+		[existing, current|
+			new EstructuralFeatureEqualityHelper().equals(existing, current)
+		]
+	)
+}
+
+/**
+ * Allows you to specify the lambda checking for equality of features.
+ * 
+ * @param ePackage
+ * @param matcher
+ */
+ def findDuplicateFeaturesCustom(EPackage ePackage, BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
+	val allFeatures = ePackage.allEStructuralFeatures
+	val map = <EStructuralFeature, List<EStructuralFeature>>newLinkedHashMap
+	for (f : allFeatures) {
+		val found = map.entrySet.findFirst[matcher.test(it.key, f)]
+		if (found !== null) {
+			found.value += f
+		} else {
+			map.put(f, newArrayList(f))
+		}
+	}
+	// only entries with a mapped list of size > 1 are duplicates
+	val result = map.filter[p1, p2| p2.size > 1]
+	result.entrySet.forEach[
+	 	logInfo[
+			"Duplicate features: " +
+				value.map[getEObjectRepr(it)].join(", ")
+		]
+	]
+	return result
+}
+
+def allEStructuralFeatures(EPackage ePackage) {
+	ePackage.
+		allEClasses.
+		map[EStructuralFeatures].
+		flatten
+}
+
+def allEClasses(EPackage ePackage) {
+	ePackage.EClassifiers.filter(EClass)
+}
+
