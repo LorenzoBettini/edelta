@@ -219,7 +219,7 @@
         <module>edelta.product.ui.feature</module>
         <module>edelta.tests</module>
         <module>edelta.ui.tests</module>
-        <module>edelta.personlist.example</module>
+        <module>edelta.examples</module>
         <module>edelta.maven.example</module>
         <module>edelta.product.repository</module>
         <module>edelta.tests.parent</module>

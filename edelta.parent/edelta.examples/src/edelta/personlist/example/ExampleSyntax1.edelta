@@ -2,7 +2,7 @@ import edelta.refactorings.lib.EdeltaRefactorings
 
 // IMPORTANT: ecores must be in a source directory
 // otherwise you can't refer to them
-package com.example
+package edelta.personlist.example
 
 metamodel "PersonList"
 metamodel "ecore"

@@ -1,6 +1,6 @@
 package edelta.personlist.example.tests
 
-import com.example.ExampleSyntax1
+import edelta.personlist.example.ExampleSyntax1
 import edelta.testutils.EdeltaTestUtils
 import org.junit.Test
 

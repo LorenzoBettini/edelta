@@ -1,4 +1,4 @@
-package com.example;
+package edelta.personlist.example;
 
 import edelta.lib.AbstractEdelta;
 import edelta.refactorings.lib.EdeltaRefactorings;
