@@ -61,4 +61,12 @@ public class EdeltaBadSmellsResolver extends AbstractEdelta {
     this.refactorings.redundantContainerToEOpposite(
       this.finder.findRedundantContainers(ePackage));
   }
+  
+  /**
+   * Applies classificationByHierarchyToEnum to findClassificationByHierarchy
+   */
+  public void resolveClassificationByHierarchy(final EPackage ePackage) {
+    this.refactorings.classificationByHierarchyToEnum(
+      this.finder.findClassificationByHierarchy(ePackage));
+  }
 }

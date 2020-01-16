@@ -2,12 +2,15 @@ package edelta.refactorings.lib.tests
 
 import edelta.lib.AbstractEdelta
 import edelta.refactorings.lib.EdeltaBadSmellsResolver
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EEnum
 import org.junit.Before
 import org.junit.Test
 
 import static org.assertj.core.api.Assertions.*
-import static org.junit.Assert.assertNull
+import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertNull
 import static org.junit.Assert.assertSame
 
 class EdeltaBadSmellsResolverTest extends AbstractTest {
@@ -118,5 +121,30 @@ class EdeltaBadSmellsResolverTest extends AbstractTest {
 		assertNotNull(redundant.EOpposite)
 		assertSame(redundant.EOpposite, opposite)
 		assertSame(opposite.EOpposite, redundant)
+	}
+
+	@Test def void test_resolveClassificationByHierarchy() {
+		val p = factory.createEPackage => [
+			val base = createEClass("Base")
+			createEClass("Derived1") => [
+				ESuperTypes += base
+			]
+			createEClass("Derived2") => [
+				ESuperTypes += base
+			]
+		]
+		resolver.resolveClassificationByHierarchy(p)
+		assertEquals(2, p.EClassifiers.size)
+		val enum = p.EClassifiers.last as EEnum
+		assertEquals("BaseType", enum.name)
+		val eLiterals = enum.ELiterals
+		assertEquals(2, eLiterals.size)
+		assertEquals("DERIVED1", eLiterals.get(0).name)
+		assertEquals("DERIVED2", eLiterals.get(1).name)
+		assertEquals(1, eLiterals.get(0).value)
+		assertEquals(2, eLiterals.get(1).value)
+		val c = p.EClassifiers.head as EClass
+		val attr = findEAttribute(c, "baseType")
+		assertSame(enum, attr.EType)
 	}
 }

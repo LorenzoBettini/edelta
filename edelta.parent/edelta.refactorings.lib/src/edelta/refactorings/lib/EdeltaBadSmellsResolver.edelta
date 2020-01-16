@@ -41,3 +41,12 @@ def resolveRedundantContainers(EPackage ePackage) {
 		finder.findRedundantContainers(ePackage)
 	)
 }
+
+/**
+ * Applies classificationByHierarchyToEnum to findClassificationByHierarchy
+ */
+def resolveClassificationByHierarchy(EPackage ePackage) {
+	refactorings.classificationByHierarchyToEnum(
+		finder.findClassificationByHierarchy(ePackage)
+	)
+}
