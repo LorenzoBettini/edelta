@@ -1,6 +1,6 @@
 package edelta.personlist.example.tests
 
-import edelta.personlist.example.ExampleSyntax2
+import edelta.personlist.example.PersonListExample
 import edelta.testutils.EdeltaTestUtils
 import org.junit.Test
 
@@ -9,16 +9,16 @@ class PersonListSyntax2Test {
 	@Test
 	def void testModifiedEcoreSyntax2() {
 		// Create an instance of the generated Java class
-		val edelta = new ExampleSyntax2();
+		val edelta = new PersonListExample();
 		// Make sure you load all the used Ecores
 		edelta.loadEcoreFile("model/PersonList.ecore");
 		// Execute the actual transformations defined in the DSL
 		edelta.execute();
 		// Save the modified Ecore model into a new path
-		edelta.saveModifiedEcores("modified-syntax2");
+		edelta.saveModifiedEcores("modified");
 
 		EdeltaTestUtils.compareSingleFileContents(
-			"modified-syntax2/PersonList.ecore",
+			"modified/PersonList.ecore",
 			'''
 			<?xml version="1.0" encoding="UTF-8"?>
 			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

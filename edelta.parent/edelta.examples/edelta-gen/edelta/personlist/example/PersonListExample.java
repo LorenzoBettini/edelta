@@ -15,14 +15,14 @@ import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
-public class ExampleSyntax2 extends AbstractEdelta {
+public class PersonListExample extends AbstractEdelta {
   private EdeltaRefactorings refactorings;
   
-  public ExampleSyntax2() {
+  public PersonListExample() {
     refactorings = new EdeltaRefactorings(this);
   }
   
-  public ExampleSyntax2(final AbstractEdelta other) {
+  public PersonListExample(final AbstractEdelta other) {
     super(other);
   }
   
