@@ -50,3 +50,16 @@ def resolveClassificationByHierarchy(EPackage ePackage) {
 		finder.findClassificationByHierarchy(ePackage)
 	)
 }
+
+def resolveConcreteAbstractMetaclass(EPackage ePackage) {
+	refactorings.concreteBaseMetaclassToAbstract(
+		finder.findConcreteAbstractMetaclasses(ePackage)
+	)
+}
+
+def resolveAbstractConcreteMetaclass(EPackage ePackage) {
+	refactorings.abstractBaseMetaclassToConcrete(
+		finder.findAbstractConcreteMetaclasses(ePackage)
+	)
+}
+

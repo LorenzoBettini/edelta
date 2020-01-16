@@ -69,4 +69,14 @@ public class EdeltaBadSmellsResolver extends AbstractEdelta {
     this.refactorings.classificationByHierarchyToEnum(
       this.finder.findClassificationByHierarchy(ePackage));
   }
+  
+  public void resolveConcreteAbstractMetaclass(final EPackage ePackage) {
+    this.refactorings.concreteBaseMetaclassToAbstract(
+      this.finder.findConcreteAbstractMetaclasses(ePackage));
+  }
+  
+  public void resolveAbstractConcreteMetaclass(final EPackage ePackage) {
+    this.refactorings.abstractBaseMetaclassToConcrete(
+      this.finder.findAbstractConcreteMetaclasses(ePackage));
+  }
 }

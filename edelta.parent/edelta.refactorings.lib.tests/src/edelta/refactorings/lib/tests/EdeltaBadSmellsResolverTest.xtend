@@ -12,6 +12,8 @@ import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertNull
 import static org.junit.Assert.assertSame
+import static org.junit.Assert.assertFalse
+import static org.junit.Assert.assertTrue
 
 class EdeltaBadSmellsResolverTest extends AbstractTest {
 	var EdeltaBadSmellsResolver resolver
@@ -146,5 +148,30 @@ class EdeltaBadSmellsResolverTest extends AbstractTest {
 		val c = p.EClassifiers.head as EClass
 		val attr = findEAttribute(c, "baseType")
 		assertSame(enum, attr.EType)
+	}
+
+	@Test def void test_resolveConcreteAbstractMetaclass() {
+		val p = factory.createEPackage => [
+			val base = createEClass("ConcreteAbstractMetaclass")
+			createEClass("Derived1") => [
+				ESuperTypes += base
+			]
+		]
+		val c = p.EClasses.head
+		assertFalse(c.abstract)
+		resolver.resolveConcreteAbstractMetaclass(p)
+		assertTrue(c.abstract)
+	}
+
+	@Test def void test_resolveAbstractConcreteMetaclass() {
+		val p = factory.createEPackage => [
+			createEClass("AbstractConcreteMetaclass") => [
+				abstract = true
+			]
+		]
+		val c = p.EClasses.head
+		assertTrue(c.abstract)
+		resolver.resolveAbstractConcreteMetaclass(p)
+		assertFalse(c.abstract)
 	}
 }
