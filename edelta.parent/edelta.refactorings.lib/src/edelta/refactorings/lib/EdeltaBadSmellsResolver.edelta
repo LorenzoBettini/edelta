@@ -33,3 +33,11 @@ def resolveDeadClassifiers(EPackage ePackage, Predicate<EClassifier> shouldRemov
 	]
 }
 
+/**
+ * Applies redundantContainerToEOpposite to redundant containers
+ */
+def resolveRedundantContainers(EPackage ePackage) {
+	refactorings.redundantContainerToEOpposite(
+		finder.findRedundantContainers(ePackage)
+	)
+}

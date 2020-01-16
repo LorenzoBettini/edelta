@@ -53,4 +53,12 @@ public class EdeltaBadSmellsResolver extends AbstractEdelta {
     };
     deadClassifiers.forEach(_function);
   }
+  
+  /**
+   * Applies redundantContainerToEOpposite to redundant containers
+   */
+  public void resolveRedundantContainers(final EPackage ePackage) {
+    this.refactorings.redundantContainerToEOpposite(
+      this.finder.findRedundantContainers(ePackage));
+  }
 }

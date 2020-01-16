@@ -6,6 +6,9 @@ import org.junit.Before
 import org.junit.Test
 
 import static org.assertj.core.api.Assertions.*
+import static org.junit.Assert.assertNull
+import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertSame
 
 class EdeltaBadSmellsResolverTest extends AbstractTest {
 	var EdeltaBadSmellsResolver resolver
@@ -91,5 +94,29 @@ class EdeltaBadSmellsResolverTest extends AbstractTest {
 		assertThat(p.EClassifiers)
 			.hasSize(4)
 			.noneMatch[name == "Unused2"]
+	}
+
+	@Test def void test_resolveRedundantContainers() {
+		val p = factory.createEPackage => [
+			val containedWithRedundant = createEClass("ContainedWithRedundant")
+			val container = createEClass("Container") => [
+				createEReference("containedWithRedundant") => [
+					EType = containedWithRedundant
+					containment = true
+				]
+			]
+			containedWithRedundant.createEReference("redundant") => [
+				EType = container
+				lowerBound = 1
+			]
+		]
+		val redundant = p.EClasses.head.EReferences.head
+		val opposite = p.EClasses.last.EReferences.head
+		assertNull(redundant.EOpposite)
+		assertNull(opposite.EOpposite)
+		resolver.resolveRedundantContainers(p)
+		assertNotNull(redundant.EOpposite)
+		assertSame(redundant.EOpposite, opposite)
+		assertSame(opposite.EOpposite, redundant)
 	}
 }
