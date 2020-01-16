@@ -303,7 +303,7 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 		assertIterable(result, #[p.EClasses.head])
 	}
 
-	def protected <T extends ENamedElement> void assertIterable(Iterable<T> actual, Iterable<? extends T> expected) {
+	def private <T extends ENamedElement> void assertIterable(Iterable<T> actual, Iterable<? extends T> expected) {
 		assertThat(actual).containsExactlyInAnyOrder(expected)
 	}
 }

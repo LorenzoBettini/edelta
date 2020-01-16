@@ -1,0 +1,19 @@
+import org.eclipse.emf.ecore.EPackage
+
+package edelta.refactorings.lib
+
+use EdeltaRefactorings as refactorings
+use EdeltaBadSmellsFinder as finder
+
+/**
+ * Extracts superclasses in the presence of duplicate features
+ * considering all the classes of the given package.
+ * 
+ * @param ePackage
+ */
+def resolveDuplicatedFeatures(EPackage ePackage) {
+	finder.findDuplicateFeatures(ePackage)
+		.values
+		.forEach[refactorings.extractSuperclass(it)]
+}
+
