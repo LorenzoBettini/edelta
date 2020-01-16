@@ -297,4 +297,25 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
     boolean _isEmpty = IterableExtensions.isEmpty(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()), _function));
     return (!_isEmpty);
   }
+  
+  /**
+   * Finds abstract classes that should be concrete,
+   * since they have no subclasses.
+   */
+  public Iterable<EClass> findAbstractConcreteMetaclasses(final EPackage ePackage) {
+    final Function1<EClass, Boolean> _function = (EClass cl) -> {
+      return Boolean.valueOf((cl.isAbstract() && 
+        (!this.hasSubclasses(cl))));
+    };
+    final Iterable<EClass> classes = IterableExtensions.<EClass>filter(this.allEClasses(ePackage), _function);
+    final Consumer<EClass> _function_1 = (EClass it) -> {
+      final Supplier<String> _function_2 = () -> {
+        String _eObjectRepr = this.lib.getEObjectRepr(it);
+        return ("Abstract concrete class: " + _eObjectRepr);
+      };
+      this.logInfo(_function_2);
+    };
+    classes.forEach(_function_1);
+    return classes;
+  }
 }

@@ -287,6 +287,22 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 		assertIterable(result, #[p.EClasses.head])
 	}
 
+	@Test def void test_findAbstractConcreteMetaclasses() {
+		val p = factory.createEPackage => [
+			createEClass("AbstractConcreteMetaclass") => [
+				abstract = true
+			]
+			val base = createEClass("AbstractMetaclass") => [
+				abstract = true
+			]
+			createEClass("Derived1") => [
+				ESuperTypes += base
+			]
+		]
+		var result = finder.findAbstractConcreteMetaclasses(p)
+		assertIterable(result, #[p.EClasses.head])
+	}
+
 	def protected <T extends ENamedElement> void assertIterable(Iterable<T> actual, Iterable<? extends T> expected) {
 		assertThat(actual).containsExactlyInAnyOrder(expected)
 	}

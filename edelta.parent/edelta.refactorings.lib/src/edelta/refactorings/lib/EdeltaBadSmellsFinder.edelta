@@ -226,3 +226,20 @@ def hasSubclasses(EClass cl) {
 		.empty
 }
 
+/**
+ * Finds abstract classes that should be concrete,
+ * since they have no subclasses.
+ */
+def findAbstractConcreteMetaclasses(EPackage ePackage) {
+	val classes= ePackage.allEClasses
+		.filter[
+			cl |
+			cl.abstract &&
+			!cl.hasSubclasses
+		]
+	classes.forEach[
+		logInfo["Abstract concrete class: " + getEObjectRepr(it)]
+	]
+	return classes;	
+}
+
