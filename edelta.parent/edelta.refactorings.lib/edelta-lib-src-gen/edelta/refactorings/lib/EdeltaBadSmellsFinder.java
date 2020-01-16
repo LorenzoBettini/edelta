@@ -16,6 +16,7 @@ import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
@@ -264,5 +265,36 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
     };
     classification.entrySet().forEach(_function_2);
     return classification;
+  }
+  
+  /**
+   * Finds base classes that should be set as abstract,
+   * since they have subclasses.
+   */
+  public Iterable<EClass> findConcreteAbstractMetaclasses(final EPackage ePackage) {
+    final Function1<EClass, Boolean> _function = (EClass cl) -> {
+      return Boolean.valueOf(((!cl.isAbstract()) && 
+        this.hasSubclasses(cl)));
+    };
+    final Iterable<EClass> classes = IterableExtensions.<EClass>filter(this.allEClasses(ePackage), _function);
+    final Consumer<EClass> _function_1 = (EClass it) -> {
+      final Supplier<String> _function_2 = () -> {
+        String _eObjectRepr = this.lib.getEObjectRepr(it);
+        return ("Concrete abstract class: " + _eObjectRepr);
+      };
+      this.logInfo(_function_2);
+    };
+    classes.forEach(_function_1);
+    return classes;
+  }
+  
+  public boolean hasSubclasses(final EClass cl) {
+    final Function1<EStructuralFeature.Setting, Boolean> _function = (EStructuralFeature.Setting it) -> {
+      EStructuralFeature _eStructuralFeature = it.getEStructuralFeature();
+      EReference _eClass_ESuperTypes = EcorePackage.eINSTANCE.getEClass_ESuperTypes();
+      return Boolean.valueOf((_eStructuralFeature == _eClass_ESuperTypes));
+    };
+    boolean _isEmpty = IterableExtensions.isEmpty(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()), _function));
+    return (!_isEmpty);
   }
 }

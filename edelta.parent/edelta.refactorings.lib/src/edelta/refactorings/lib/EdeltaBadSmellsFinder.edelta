@@ -5,6 +5,7 @@ import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EStructuralFeature
+import org.eclipse.emf.ecore.EcorePackage
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.emf.ecore.util.EcoreUtil.CrossReferencer
 
@@ -199,5 +200,29 @@ def findClassificationByHierarchy(EPackage ePackage) {
 		]
 	]
 	return classification
+}
+
+/**
+ * Finds base classes that should be set as abstract,
+ * since they have subclasses.
+ */
+def findConcreteAbstractMetaclasses(EPackage ePackage) {
+	val classes= ePackage.allEClasses
+		.filter[
+			cl |
+			!cl.abstract &&
+			cl.hasSubclasses
+		]
+	classes.forEach[
+		logInfo["Concrete abstract class: " + getEObjectRepr(it)]
+	]
+	return classes;	
+}
+
+def hasSubclasses(EClass cl) {
+	!EcoreUtil.UsageCrossReferencer
+		.find(cl, cl.EPackage)
+		.filter[EStructuralFeature === EcorePackage.eINSTANCE.EClass_ESuperTypes]
+		.empty
 }
 
