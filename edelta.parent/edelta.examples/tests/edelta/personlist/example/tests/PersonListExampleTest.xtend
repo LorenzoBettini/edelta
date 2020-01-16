@@ -4,7 +4,7 @@ import edelta.personlist.example.PersonListExample
 import edelta.testutils.EdeltaTestUtils
 import org.junit.Test
 
-class PersonListSyntax2Test {
+class PersonListExampleTest {
 
 	@Test
 	def void testModifiedEcoreSyntax2() {

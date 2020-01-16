@@ -1,0 +1,45 @@
+import edelta.refactorings.lib.EdeltaRefactorings
+
+// IMPORTANT: ecores must be in a source directory
+// otherwise you can't refer to them
+
+package com.example
+metamodel "petrinet" 
+metamodel "ecore"
+use EdeltaRefactorings as refactorings
+
+//Petrinet MM0-MM1
+
+changeEClass petrinet.Net newName Petrinet {
+	ecoreref(Petrinet.places).lowerBound=1;
+	ecoreref(Petrinet.transitions).lowerBound=1;
+}
+
+// refactorings.renameClass("Petrinet",ecoreref(Net));
+
+createEClass PTArc in petrinet {
+	// 'it' is the implicit parameter representing the EClass that
+	// has just been created and that can be initialized in this block
+	refactorings.extractMetaClass(it ,ecoreref(Place.dst), 'in', 'out')
+	
+	createEAttribute weight type EInt {
+		lowerBound = 1
+	}
+}
+
+createEClass TPArc in petrinet {
+	refactorings.extractMetaClass(it, ecoreref(Transition.dst), 'in', 'out')
+	
+	createEAttribute weight type EInt {
+		lowerBound = 1
+	}
+}
+
+createEClass Arc in petrinet {
+	abstract = true
+	
+	refactorings.extractSuperclass(it,
+		#[ecoreref(PTArc.weight), ecoreref(TPArc.weight)]);
+}
+
+
