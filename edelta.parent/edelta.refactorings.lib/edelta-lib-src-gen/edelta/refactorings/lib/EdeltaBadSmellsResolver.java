@@ -5,8 +5,11 @@ import edelta.refactorings.lib.EdeltaBadSmellsFinder;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
+import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 
 @SuppressWarnings("all")
 public class EdeltaBadSmellsResolver extends AbstractEdelta {
@@ -34,5 +37,20 @@ public class EdeltaBadSmellsResolver extends AbstractEdelta {
       this.refactorings.extractSuperclass(it);
     };
     this.finder.findDuplicateFeatures(ePackage).values().forEach(_function);
+  }
+  
+  /**
+   * Removes the dead classifiers by first checking the passed
+   * predicate.
+   */
+  public void resolveDeadClassifiers(final EPackage ePackage, final Predicate<EClassifier> shouldRemove) {
+    final List<EClassifier> deadClassifiers = this.finder.findDeadClassifiers(ePackage);
+    final Consumer<EClassifier> _function = (EClassifier cl) -> {
+      boolean _test = shouldRemove.test(cl);
+      if (_test) {
+        EcoreUtil.remove(cl);
+      }
+    };
+    deadClassifiers.forEach(_function);
   }
 }

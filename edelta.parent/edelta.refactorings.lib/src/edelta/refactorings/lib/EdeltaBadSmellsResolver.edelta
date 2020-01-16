@@ -1,4 +1,7 @@
+import java.util.function.Predicate
+import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.util.EcoreUtil
 
 package edelta.refactorings.lib
 
@@ -15,5 +18,18 @@ def resolveDuplicatedFeatures(EPackage ePackage) {
 	finder.findDuplicateFeatures(ePackage)
 		.values
 		.forEach[refactorings.extractSuperclass(it)]
+}
+
+/**
+ * Removes the dead classifiers by first checking the passed
+ * predicate.
+ */
+def resolveDeadClassifiers(EPackage ePackage, Predicate<EClassifier> shouldRemove) {
+	val deadClassifiers = finder.findDeadClassifiers(ePackage)
+	deadClassifiers.forEach[
+		cl |
+		if (shouldRemove.test(cl))
+			EcoreUtil.remove(cl)
+	]
 }
 

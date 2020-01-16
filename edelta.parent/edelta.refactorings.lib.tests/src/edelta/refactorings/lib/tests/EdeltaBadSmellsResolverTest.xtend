@@ -69,4 +69,27 @@ class EdeltaBadSmellsResolverTest extends AbstractTest {
 			.returns(stringDataType, [EAttributeType])
 			.returns(2, [lowerBound])
 	}
+
+@	Test def void test_resolveDeadClassifiers() {
+		val p = factory.createEPackage => [
+			createEClass("Unused1")
+			createEClass("Unused2")
+			val used1 = createEClass("Used1")
+			val used2 = createEClass("Used2")
+			createEClass("Unused3") => [
+				createEReference("used1") => [
+					EType = used1
+					containment = true
+				]
+				createEReference("used2") => [
+					EType = used2
+					containment = false
+				]
+			]
+		]
+		resolver.resolveDeadClassifiers(p, [name == "Unused2"])
+		assertThat(p.EClassifiers)
+			.hasSize(4)
+			.noneMatch[name == "Unused2"]
+	}
 }
