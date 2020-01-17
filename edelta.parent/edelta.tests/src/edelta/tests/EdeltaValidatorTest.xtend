@@ -362,7 +362,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToAttributeofRenamedClassInModifyEcore() {
+	def void testReferenceToRenamedClassInModifyEcore() {
 		'''
 		import org.eclipse.emf.ecore.EClass
 
