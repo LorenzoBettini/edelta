@@ -935,7 +935,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCompilationChangeEClassWithNewNameInModifyEcore() {
+	def void testCompilationRenamedClassInModifyEcore() {
 		'''
 			metamodel "foo"
 			
@@ -945,6 +945,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 					EType = ecoreref(FooDataType)
 				]
 				ecoreref(RenamedClass).abstract = true
+				ecoreref(foo.RenamedClass) => [abstract = true]
 			}
 		'''.checkCompilation(
 			'''
@@ -954,8 +955,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			import java.util.function.Consumer;
 			import org.eclipse.emf.common.util.EList;
 			import org.eclipse.emf.ecore.EAttribute;
+			import org.eclipse.emf.ecore.EClass;
 			import org.eclipse.emf.ecore.EPackage;
 			import org.eclipse.emf.ecore.EStructuralFeature;
+			import org.eclipse.xtext.xbase.lib.ObjectExtensions;
+			import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends AbstractEdelta {
@@ -976,6 +980,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    EAttribute _newEAttribute = this.lib.newEAttribute("anotherAttr", _function);
 			    _eStructuralFeatures.add(_newEAttribute);
 			    getEClass("foo", "RenamedClass").setAbstract(true);
+			    final Procedure1<EClass> _function_1 = (EClass it_1) -> {
+			      it_1.setAbstract(true);
+			    };
+			    ObjectExtensions.<EClass>operator_doubleArrow(
+			      getEClass("foo", "RenamedClass"), _function_1);
 			  }
 			  
 			  @Override
@@ -993,7 +1002,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testExecutionChangeEClassWithNewNameInModifyEcore() {
+	def void testExecutionRenamedClassInModifyEcore() {
 		'''
 			metamodel "foo"
 			
