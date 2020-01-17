@@ -10,18 +10,19 @@ import org.eclipse.xtext.util.IResourceScopeCache;
 
 /**
  * Listens for changes and clears the {@link IResourceScopeCache} of the
- * specified {@link Resource}.
+ * specified {@link Resource} and removes the {@link XtextLinkingDiagnostic} added
+ * by the type system.
  * 
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaInterpreterCacheCleaner extends EContentAdapter {
+public class EdeltaInterpreterCleaner extends EContentAdapter {
 
 	private IResourceScopeCache cache;
 
 	private Resource resource;
 
-	public EdeltaInterpreterCacheCleaner(IResourceScopeCache cache, Resource resource) {
+	public EdeltaInterpreterCleaner(IResourceScopeCache cache, Resource resource) {
 		this.cache = cache;
 		this.resource = resource;
 	}
