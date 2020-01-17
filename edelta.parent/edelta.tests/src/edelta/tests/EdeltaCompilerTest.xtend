@@ -935,6 +935,64 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCompilationChangeEClassWithNewNameInModifyEcore() {
+		'''
+			metamodel "foo"
+			
+			modifyEcore modifyFoo epackage foo {
+				ecoreref(foo.FooClass).name = "RenamedClass"
+				ecoreref(RenamedClass).EStructuralFeatures += newEAttribute("anotherAttr") [
+					EType = ecoreref(FooDataType)
+				]
+				ecoreref(RenamedClass).abstract = true
+			}
+		'''.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import java.util.function.Consumer;
+			import org.eclipse.emf.common.util.EList;
+			import org.eclipse.emf.ecore.EAttribute;
+			import org.eclipse.emf.ecore.EPackage;
+			import org.eclipse.emf.ecore.EStructuralFeature;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  public MyFile0() {
+			    
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  public void modifyFoo(final EPackage it) {
+			    getEClass("foo", "FooClass").setName("RenamedClass");
+			    EList<EStructuralFeature> _eStructuralFeatures = getEClass("foo", "RenamedClass").getEStructuralFeatures();
+			    final Consumer<EAttribute> _function = (EAttribute it_1) -> {
+			      it_1.setEType(getEDataType("foo", "FooDataType"));
+			    };
+			    EAttribute _newEAttribute = this.lib.newEAttribute("anotherAttr", _function);
+			    _eStructuralFeatures.add(_newEAttribute);
+			    getEClass("foo", "RenamedClass").setAbstract(true);
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    modifyFoo(getEPackage("foo"));
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
 	def void testExecutionChangeEClassWithNewNameInModifyEcore() {
 		'''
 			metamodel "foo"
@@ -944,13 +1002,14 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				ecoreref(RenamedClass).EStructuralFeatures += newEAttribute("anotherAttr") [
 					EType = ecoreref(FooDataType)
 				]
+				ecoreref(RenamedClass).abstract = true
 			}
 		'''.checkCompiledCodeExecution(
 			'''
 			<?xml version="1.0" encoding="UTF-8"?>
 			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="foo" nsURI="http://foo" nsPrefix="foo">
-			  <eClassifiers xsi:type="ecore:EClass" name="RenamedClass">
+			  <eClassifiers xsi:type="ecore:EClass" name="RenamedClass" abstract="true">
 			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="anotherAttr" eType="#//FooDataType"/>
 			  </eClassifiers>
 			  <eClassifiers xsi:type="ecore:EClass" name="FooDerivedClass" eSuperTypes="#//RenamedClass"/>
