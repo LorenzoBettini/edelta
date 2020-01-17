@@ -20,13 +20,10 @@ def addWeightAttribute(EClass c) {
 	]
 }
 
-modifyEcore modifyPetrinetLowerbounds epackage petrinet {
-	ecoreref(places).lowerBound = 1
-	ecoreref(transitions).lowerBound = 1
-}
-
-modifyEcore renameNet epackage petrinet {
+modifyEcore modifyNet epackage petrinet {
 	ecoreref(Net).name = "Petrinet"
+	ecoreref(Petrinet.places).lowerBound = 1
+	ecoreref(Petrinet.transitions).lowerBound = 1
 }
 
 modifyEcore introducePTArc epackage petrinet {

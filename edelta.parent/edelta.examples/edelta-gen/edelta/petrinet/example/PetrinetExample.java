@@ -29,13 +29,10 @@ public class PetrinetExample extends AbstractEdelta {
     return this.lib.addNewEAttribute(c, "weight", getEDataType("ecore", "EInt"), _function);
   }
   
-  public void modifyPetrinetLowerbounds(final EPackage it) {
-    getEReference("petrinet", "Net", "places").setLowerBound(1);
-    getEReference("petrinet", "Net", "transitions").setLowerBound(1);
-  }
-  
-  public void renameNet(final EPackage it) {
+  public void modifyNet(final EPackage it) {
     getEClass("petrinet", "Net").setName("Petrinet");
+    getEReference("petrinet", "Petrinet", "places").setLowerBound(1);
+    getEReference("petrinet", "Petrinet", "transitions").setLowerBound(1);
   }
   
   public void introducePTArc(final EPackage it) {
@@ -71,8 +68,7 @@ public class PetrinetExample extends AbstractEdelta {
   
   @Override
   protected void doExecute() throws Exception {
-    modifyPetrinetLowerbounds(getEPackage("petrinet"));
-    renameNet(getEPackage("petrinet"));
+    modifyNet(getEPackage("petrinet"));
     introducePTArc(getEPackage("petrinet"));
     introduceTPArc(getEPackage("petrinet"));
     introduceAbstractArc(getEPackage("petrinet"));
