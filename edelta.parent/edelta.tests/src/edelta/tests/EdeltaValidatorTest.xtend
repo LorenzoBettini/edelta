@@ -10,6 +10,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static edelta.edelta.EdeltaPackage.Literals.*
+import org.eclipse.xtext.diagnostics.Diagnostic
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -377,6 +378,22 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 			ecoreref(foo.RenamedClass).abstract = true
 		}
 		'''.parseWithTestEcore.assertNoErrors
+	}
+
+	@Test
+	def void testReferenceToUnknownEPackageInModifyEcore() {
+		'''
+		import org.eclipse.emf.ecore.EClass
+
+
+		modifyEcore aTest epackage foo {
+			
+		}
+		'''.parseWithTestEcore.assertError(
+			EdeltaPackage.eINSTANCE.edeltaModifyEcoreOperation,
+			Diagnostic.LINKING_DIAGNOSTIC,
+			"foo cannot be resolved."
+		)
 	}
 
 	@Test

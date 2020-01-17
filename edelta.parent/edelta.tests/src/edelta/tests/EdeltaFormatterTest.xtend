@@ -82,4 +82,71 @@ class EdeltaFormatterTest extends EdeltaAbstractTest {
 			'''
 		]
 	}
+
+	@Test
+	def void testFormatting2() {
+		assertFormatted[
+			expectation = '''
+				
+				
+				import edelta.refactorings.lib.EdeltaRefactorings
+				
+				// IMPORTANT: ecores must be in source directories
+				// otherwise you can't refer to them
+				metamodel "ecore"
+				metamodel "myexample"
+				metamodel "myecore"
+				
+				use Example as example 
+				use EdeltaRefactorings as std
+				
+				def createClass2(String name) {
+					newEClass(name)
+				}
+				
+				def createClass3() {
+					val a = newEAttribute(attrname) [
+						lowerBound = 1
+					]
+				}
+				
+				modifyEcore aModification epackage myecore {
+					std.addMandatoryAttr("name", ecoreref(EString), it)
+				}
+				
+				
+			'''
+			toBeFormatted = '''
+				
+				
+				import edelta.refactorings.lib.EdeltaRefactorings
+				
+				// IMPORTANT: ecores must be in source directories
+				// otherwise you can't refer to them
+				
+				metamodel "ecore"
+				metamodel "myexample"
+				metamodel "myecore"
+				
+				use Example as example 
+				use EdeltaRefactorings as std
+				
+				def createClass2(String name) { 				newEClass(name)
+				}
+				
+				def createClass3() {
+					val a= newEAttribute(attrname)[
+							lowerBound=1
+						]
+				}
+				
+				modifyEcore aModification epackage myecore {
+					std . addMandatoryAttr( "name" , 
+					ecoreref(EString), it)
+				}
+				
+				
+			'''
+		]
+	}
 }
