@@ -35,7 +35,7 @@ public class EdeltaLinkingDiagnosticMessageProvider extends UnresolvedAnnotation
 		return super.getUnresolvedProxyMessage(context);
 	}
 
-	protected DiagnosticMessage filterErrorMessage(ILinkingDiagnosticContext context, Supplier<XExpression> receiverSupplier) {
+	private DiagnosticMessage filterErrorMessage(ILinkingDiagnosticContext context, Supplier<XExpression> receiverSupplier) {
 		XExpression receiver = receiverSupplier.get();
 		if (receiver instanceof EdeltaEcoreReferenceExpression) {
 			return null;
