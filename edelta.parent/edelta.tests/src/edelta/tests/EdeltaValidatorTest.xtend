@@ -370,6 +370,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 
 		modifyEcore aTest epackage foo {
 			ecoreref(foo.FooClass).name = "RenamedClass"
+			ecoreref(foo.RenamedClass) => [abstract = true]
 			ecoreref(foo.RenamedClass).setAbstract(true)
 			ecoreref(foo.RenamedClass).abstract = true
 		}

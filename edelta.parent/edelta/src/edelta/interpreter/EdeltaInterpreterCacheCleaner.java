@@ -1,8 +1,11 @@
 package edelta.interpreter;
 
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.emf.ecore.util.EContentAdapter;
+import org.eclipse.xtext.linking.impl.XtextLinkingDiagnostic;
 import org.eclipse.xtext.util.IResourceScopeCache;
 
 /**
@@ -27,5 +30,11 @@ public class EdeltaInterpreterCacheCleaner extends EContentAdapter {
 	public void notifyChanged(Notification notification) {
 		super.notifyChanged(notification);
 		cache.clear(resource);
+		clearXtextLinkingIssues(resource.getErrors());
+		clearXtextLinkingIssues(resource.getWarnings());
+	}
+
+	private void clearXtextLinkingIssues(final EList<Diagnostic> issues) {
+		issues.removeIf(d -> d instanceof XtextLinkingDiagnostic);
 	}
 }
