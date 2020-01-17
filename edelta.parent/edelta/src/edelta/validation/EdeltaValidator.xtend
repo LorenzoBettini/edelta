@@ -4,26 +4,16 @@
 package edelta.validation
 
 import com.google.inject.Inject
-import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaUseAs
 import edelta.lib.AbstractEdelta
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.common.types.JvmTypeReference
-import org.eclipse.xtext.diagnostics.Diagnostic
 import org.eclipse.xtext.validation.Check
-import org.eclipse.xtext.xbase.XAbstractFeatureCall
-import org.eclipse.xtext.xbase.XExpression
-import org.eclipse.xtext.xbase.XMemberFeatureCall
-import org.eclipse.xtext.xbase.XbasePackage
-import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
-import org.eclipse.xtext.xbase.typesystem.internal.FeatureLinkHelper
 import org.eclipse.xtext.xbase.typesystem.references.StandardTypeReferenceOwner
 import org.eclipse.xtext.xbase.typesystem.util.CommonTypeComputationServices
 
 import static edelta.edelta.EdeltaPackage.Literals.*
-import org.eclipse.xtext.xbase.XAssignment
-import java.util.function.Supplier
 
 /**
  * This class contains custom validation rules. 
@@ -37,8 +27,6 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	public static val INTERPRETER_TIMEOUT = PREFIX + "InterpreterTimeout";
 
 	@Inject CommonTypeComputationServices services
-	@Inject extension IBatchTypeResolver
-	@Inject extension FeatureLinkHelper
 
 	@Check
 	def void checkValidUseAs(EdeltaUseAs useAs) {
@@ -61,47 +49,6 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 					)
 				}
 			}
-		}
-	}
-
-	/**
-	 * This explicit check is required since we disabled the
-	 * default checks in {@link EdeltaLinkingDiagnosticMessageProvider}
-	 */
-	@Check
-	def void checkXMemberFeatureCall(XMemberFeatureCall e) {
-		checkXAbstractFeatureCallResolved([e.memberCallTarget], e)
-	}
-
-	/**
-	 * This explicit check is required since we disabled the
-	 * default checks in {@link EdeltaLinkingDiagnosticMessageProvider}
-	 */
-	@Check
-	def void checkXAssignment(XAssignment e) {
-		checkXAbstractFeatureCallResolved([e.assignable], e)
-	}
-
-	private def void checkXAbstractFeatureCallResolved(
-		Supplier<XExpression> receiverSupplier,
-		XAbstractFeatureCall e
-	) {
-		val feature = e.feature
-		if (!(feature.eIsProxy))
-			return // nothing to check
-		val receiver = receiverSupplier.get
-		if (receiver instanceof EdeltaEcoreReferenceExpression) {
-			val types = e.resolveTypes
-			val receiverType = types.getActualType(receiver)
-			val args = e.syntacticArguments
-				.map[types.getActualType(it)]
-				.join(", ", [humanReadableName])
-			var msg = '''The method or field «e.concreteSyntaxFeatureName»(«args») is undefined for the type «receiverType.humanReadableName»'''
-			error(
-				msg,
-				XbasePackage.Literals.XABSTRACT_FEATURE_CALL__FEATURE,
-				Diagnostic.LINKING_DIAGNOSTIC
-			)
 		}
 	}
 
