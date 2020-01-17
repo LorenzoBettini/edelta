@@ -4,11 +4,13 @@ import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;
 import org.apache.log4j.spi.LoggingEvent;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.eclipse.xtext.maven.MavenLog4JConfigurator;
 
 /**
  * Customization to avoid passing a null {@link Throwable},
- * which generates a {@link NullPointerException} with log4j.
+ * which generates a {@link NullPointerException} with some loggers,
+ * like {@link SystemStreamLog}, being used with Maven Testing Harness.
  * 
  * @author Lorenzo Bettini
  *
