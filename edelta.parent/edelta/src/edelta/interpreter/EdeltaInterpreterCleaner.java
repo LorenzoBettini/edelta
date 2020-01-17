@@ -10,8 +10,11 @@ import org.eclipse.xtext.util.IResourceScopeCache;
 
 /**
  * Listens for changes and clears the {@link IResourceScopeCache} of the
- * specified {@link Resource} and removes the {@link XtextLinkingDiagnostic} added
- * by the type system.
+ * specified {@link Resource} and removes the {@link XtextLinkingDiagnostic}
+ * added by the type system.
+ * 
+ * Scoping and type computation will be performed on the next access, taking now
+ * into consideration the new information collected during interpretation.
  * 
  * @author Lorenzo Bettini
  *
