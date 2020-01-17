@@ -267,7 +267,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		}
 		'''.parseWithTestEcore
 		prog.assertErrorsAsStrings
-			("The method or field nonExistant(String) is undefined for the type EClass")
+			("The method nonExistant(String) is undefined for the type EClass")
 	}
 
 	@Test
@@ -327,8 +327,8 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		'''.parseWithTestEcore
 		prog.assertErrorsAsStrings
 		('''
-		The method or field nonExistant(String) is undefined for the type EClass
-		The method or field sugarSet(String) is undefined for the type EClass
+		The method nonExistant(String) is undefined for the type EClass
+		The method sugarSet(String) is undefined for the type EClass
 		''')
 	}
 

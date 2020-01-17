@@ -16,7 +16,6 @@ import edelta.scoping.EdeltaQualifiedNameProvider
 import edelta.services.IEdeltaEcoreModelAssociations
 import edelta.typesystem.EdeltaTypeComputer
 import edelta.validation.EdeltaDiagnosticConverter
-import edelta.validation.EdeltaLinkingDiagnosticMessageProvider
 import org.eclipse.xtext.generator.IContextualOutputConfigurationProvider
 import org.eclipse.xtext.generator.IOutputConfigurationProvider
 import org.eclipse.xtext.validation.IDiagnosticConverter
@@ -66,10 +65,6 @@ class EdeltaRuntimeModule extends AbstractEdeltaRuntimeModule {
 
 	def Class<? extends IDiagnosticConverter> bindIDiagnosticConverter() {
 		return EdeltaDiagnosticConverter
-	}
-
-	override bindILinkingDiagnosticMessageProvider() {
-		EdeltaLinkingDiagnosticMessageProvider
 	}
 
 	def Class<? extends IGeneratorConfigProvider> bindIGeneratorConfigProvider() {
