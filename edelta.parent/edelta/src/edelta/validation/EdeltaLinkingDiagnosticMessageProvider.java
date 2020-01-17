@@ -2,6 +2,7 @@ package edelta.validation;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.diagnostics.DiagnosticMessage;
+import org.eclipse.xtext.xbase.XAssignment;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.XMemberFeatureCall;
 import org.eclipse.xtext.xbase.annotations.validation.UnresolvedAnnotationTypeAwareMessageProvider;
@@ -26,6 +27,12 @@ public class EdeltaLinkingDiagnosticMessageProvider extends UnresolvedAnnotation
 			XMemberFeatureCall featureCall = (XMemberFeatureCall) contextObject;
 			XExpression receiver = featureCall.getMemberCallTarget();
 			if (receiver instanceof EdeltaEcoreReferenceExpression) {
+				return null;
+			}
+		} else if (contextObject instanceof XAssignment) {
+			XAssignment assignment = (XAssignment) contextObject;
+			XExpression assignable = assignment.getAssignable();
+			if (assignable instanceof EdeltaEcoreReferenceExpression) {
 				return null;
 			}
 		}
