@@ -84,7 +84,11 @@ class EdeltaInterpreterCleanerTest {
 		// change the package contents
 		ePackage.EClassifiers.get(0).name = "Modified"
 		// make sure the XtextLinkingDiagnostics are removed
-		assertThat(resource.errors).hasSize(1)
-		assertThat(resource.warnings).hasSize(1)
+		assertThat(resource.errors)
+			.hasSize(1)
+			.allMatch[!(it instanceof XtextLinkingDiagnostic)]
+		assertThat(resource.warnings)
+			.hasSize(1)
+			.allMatch[!(it instanceof XtextLinkingDiagnostic)]
 	}
 }
