@@ -12,6 +12,8 @@ import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.common.types.JvmTypeReference
 import org.eclipse.xtext.diagnostics.Diagnostic
 import org.eclipse.xtext.validation.Check
+import org.eclipse.xtext.xbase.XAbstractFeatureCall
+import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.XMemberFeatureCall
 import org.eclipse.xtext.xbase.XbasePackage
 import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
@@ -20,6 +22,7 @@ import org.eclipse.xtext.xbase.typesystem.references.StandardTypeReferenceOwner
 import org.eclipse.xtext.xbase.typesystem.util.CommonTypeComputationServices
 
 import static edelta.edelta.EdeltaPackage.Literals.*
+import org.eclipse.xtext.xbase.XAssignment
 
 /**
  * This class contains custom validation rules. 
@@ -70,6 +73,23 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 		if (!(feature.eIsProxy))
 			return // nothing to check
 		val receiver = e.memberCallTarget
+		checkXAbstractFeatureCallResolved(receiver, e)
+	}
+
+	/**
+	 * This explicit check is required since we disabled the
+	 * default checks in {@link EdeltaLinkingDiagnosticMessageProvider}
+	 */
+	@Check
+	def void checkXAssignment(XAssignment e) {
+		val feature = e.feature
+		if (!(feature.eIsProxy))
+			return // nothing to check
+		val receiver = e.assignable
+		checkXAbstractFeatureCallResolved(receiver, e)
+	}
+
+	private def void checkXAbstractFeatureCallResolved(XExpression receiver, XAbstractFeatureCall e) {
 		if (receiver instanceof EdeltaEcoreReferenceExpression) {
 			val types = e.resolveTypes
 			val receiverType = types.getActualType(receiver)

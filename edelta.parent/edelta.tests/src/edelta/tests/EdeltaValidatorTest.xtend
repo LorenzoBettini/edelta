@@ -322,10 +322,14 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		modifyEcore aTest epackage foo {
 			ecoreref(foo.FooClass).name = "RenamedClass"
 			ecoreref(RenamedClass).nonExistant("an arg")
+			ecoreref(RenamedClass).sugarSet = "an arg"
 		}
 		'''.parseWithTestEcore
 		prog.assertErrorsAsStrings
-			("The method or field nonExistant(String) is undefined for the type EClass")
+		('''
+		The method or field nonExistant(String) is undefined for the type EClass
+		The method or field sugarSet(String) is undefined for the type EClass
+		''')
 	}
 
 	@Test
