@@ -1,5 +1,7 @@
 package edelta.validation;
 
+import java.util.function.Supplier;
+
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.diagnostics.DiagnosticMessage;
 import org.eclipse.xtext.xbase.XAssignment;
@@ -25,17 +27,20 @@ public class EdeltaLinkingDiagnosticMessageProvider extends UnresolvedAnnotation
 		EObject contextObject = context.getContext();
 		if (contextObject instanceof XMemberFeatureCall) {
 			XMemberFeatureCall featureCall = (XMemberFeatureCall) contextObject;
-			XExpression receiver = featureCall.getMemberCallTarget();
-			if (receiver instanceof EdeltaEcoreReferenceExpression) {
-				return null;
-			}
+			return filterErrorMessage(context, featureCall::getMemberCallTarget);
 		} else if (contextObject instanceof XAssignment) {
 			XAssignment assignment = (XAssignment) contextObject;
-			XExpression assignable = assignment.getAssignable();
-			if (assignable instanceof EdeltaEcoreReferenceExpression) {
-				return null;
-			}
+			return filterErrorMessage(context, assignment::getAssignable);
 		}
 		return super.getUnresolvedProxyMessage(context);
+	}
+
+	protected DiagnosticMessage filterErrorMessage(ILinkingDiagnosticContext context, Supplier<XExpression> receiverSupplier) {
+		XExpression receiver = receiverSupplier.get();
+		if (receiver instanceof EdeltaEcoreReferenceExpression) {
+			return null;
+		} else {
+			return super.getUnresolvedProxyMessage(context);
+		}
 	}
 }
