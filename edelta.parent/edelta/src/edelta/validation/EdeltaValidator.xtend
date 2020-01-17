@@ -23,6 +23,7 @@ import org.eclipse.xtext.xbase.typesystem.util.CommonTypeComputationServices
 
 import static edelta.edelta.EdeltaPackage.Literals.*
 import org.eclipse.xtext.xbase.XAssignment
+import java.util.function.Supplier
 
 /**
  * This class contains custom validation rules. 
@@ -69,11 +70,7 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	 */
 	@Check
 	def void checkXMemberFeatureCall(XMemberFeatureCall e) {
-		val feature = e.feature
-		if (!(feature.eIsProxy))
-			return // nothing to check
-		val receiver = e.memberCallTarget
-		checkXAbstractFeatureCallResolved(receiver, e)
+		checkXAbstractFeatureCallResolved([e.memberCallTarget], e)
 	}
 
 	/**
@@ -82,14 +79,17 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	 */
 	@Check
 	def void checkXAssignment(XAssignment e) {
+		checkXAbstractFeatureCallResolved([e.assignable], e)
+	}
+
+	private def void checkXAbstractFeatureCallResolved(
+		Supplier<XExpression> receiverSupplier,
+		XAbstractFeatureCall e
+	) {
 		val feature = e.feature
 		if (!(feature.eIsProxy))
 			return // nothing to check
-		val receiver = e.assignable
-		checkXAbstractFeatureCallResolved(receiver, e)
-	}
-
-	private def void checkXAbstractFeatureCallResolved(XExpression receiver, XAbstractFeatureCall e) {
+		val receiver = receiverSupplier.get
 		if (receiver instanceof EdeltaEcoreReferenceExpression) {
 			val types = e.resolveTypes
 			val receiverType = types.getActualType(receiver)
