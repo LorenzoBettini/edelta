@@ -24,7 +24,6 @@
     <genClasses ecoreClass="Edelta.ecore#//EdeltaEcoreReference">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaEcoreReference/enamedelement"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaEcoreReference/originalEnamedelement"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Edelta.ecore#//EdeltaEcoreReference/methodToCallForEcoreReference"/>
     </genClasses>
     <genClasses ecoreClass="Edelta.ecore#//EdeltaMain"/>
     <genClasses ecoreClass="Edelta.ecore#//EdeltaModifyEcoreOperation">
