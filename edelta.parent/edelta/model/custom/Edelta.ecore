@@ -31,6 +31,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="originalEnamedelement"
         eType="ecore:EClass ../../../org.eclipse.emf.ecore/model/Ecore.ecore#//ENamedElement"
         transient="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="information" eType="#//EdeltaEcoreReferenceInformation"
+        containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EdeltaMain" eSuperTypes="../../../org.eclipse.xtext.xbase/model/Xbase.ecore#//XBlockExpression"/>
   <eClassifiers xsi:type="ecore:EClass" name="EdeltaModifyEcoreOperation">
@@ -76,5 +78,11 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="ecore:EClass ../../../org.eclipse.xtext.common.types/model/JavaVMTypes.ecore#//JvmTypeReference"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType ../../../org.eclipse.emf.ecore/model/Ecore.ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EdeltaEcoreReferenceInformation">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="ePackageName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="eClassifierName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="eNamedElementName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
 </ecore:EPackage>
