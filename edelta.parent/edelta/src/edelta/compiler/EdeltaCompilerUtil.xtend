@@ -9,11 +9,8 @@ import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.util.EdeltaEcoreReferenceInformationHelper
 import edelta.util.EdeltaModelUtil
 import java.util.List
-import org.eclipse.emf.ecore.EClassifier
-import org.eclipse.emf.ecore.EEnumLiteral
 import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EPackage
-import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.xbase.XExpression
 
 /**
@@ -94,24 +91,12 @@ class EdeltaCompilerUtil {
 		"createList(this::" + e.methodName + ")"
 	}
 
-	def String getEPackageNameOrNull(EClassifier eClassifier) {
-		eClassifier?.EPackage.getEPackageNameOrNull
-	}
-
 	def String getEPackageNameOrNull(EPackage e) {
 		e?.name
 	}
 
-	def String getEClassNameOrNull(EStructuralFeature eFeature) {
-		eFeature.EContainingClass?.name
-	}
-
 	def String getNameOrNull(ENamedElement e) {
 		e?.name
-	}
-
-	def String getEEnumNameOrNull(EEnumLiteral literal) {
-		literal.EEnum?.name
 	}
 
 	def getStringForEcoreReferenceExpression(EdeltaEcoreReferenceExpression e) {
