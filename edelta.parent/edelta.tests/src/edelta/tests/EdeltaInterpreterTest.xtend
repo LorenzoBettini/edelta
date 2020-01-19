@@ -577,10 +577,12 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		CharSequence input, boolean doValidate, (EPackage)=>void testExecutor
 	) {
 		val program = input.parseWithTestEcore
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(interpreter, program, doValidate, testExecutor)
+		// validation after interpretation, since the interpreter
+		// can make new elements available during validation
 		if (doValidate) {
 			program.assertNoErrors
 		}
-		assertAfterInterpretationOfEdeltaModifyEcoreOperation(interpreter, program, doValidate, testExecutor)
 	}
 
 }

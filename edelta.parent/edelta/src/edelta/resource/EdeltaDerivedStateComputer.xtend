@@ -33,6 +33,7 @@ import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader.GenericUnloader
 import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator
+import edelta.edelta.EdeltaModifyEcoreOperation
 
 @Singleton
 class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEcoreModelAssociations {
@@ -172,9 +173,9 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 				toList
 			runInterpreter(manipulationEClassExpressions, opToEClassMap, programJvmType, packages)
 			for (o : program.modifyEcoreOperations) {
-				interpreter.run(
+				runInterpreter(
 					o,
-					nameToCopiedEPackageMap.get(o.epackage.name),
+					nameToCopiedEPackageMap,
 					programJvmType,
 					packages
 				)
@@ -194,6 +195,18 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 				packages
 			)
 		}
+	}
+
+	protected def void runInterpreter(EdeltaModifyEcoreOperation o,
+		Map<String, EPackage> nameToCopiedEPackageMap,
+		JvmGenericType programJvmType, List<EPackage> packages
+	) {
+		interpreter.run(
+			o,
+			nameToCopiedEPackageMap.get(o.epackage.name),
+			programJvmType,
+			packages
+		)
 	}
 
 	protected def void recordEcoreReferenceOriginalENamedElement(Resource resource) {

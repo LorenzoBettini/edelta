@@ -12,6 +12,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.common.types.JvmGenericType;
 
 import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression;
+import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.resource.EdeltaDerivedStateComputer;
 
 /**
@@ -28,6 +29,12 @@ public class EdeltaDerivedStateComputerWithoutInterpreter extends EdeltaDerivedS
 	protected void runInterpreter(List<? extends EdeltaEcoreBaseEClassManipulationWithBlockExpression> expressions,
 			Map<EdeltaEcoreBaseEClassManipulationWithBlockExpression, EClass> opToEClassMap,
 			JvmGenericType jvmGenericType, List<EPackage> packages) {
+		// No interpreter is run
+	}
+
+	@Override
+	protected void runInterpreter(EdeltaModifyEcoreOperation o, Map<String, EPackage> nameToCopiedEPackageMap,
+			JvmGenericType programJvmType, List<EPackage> packages) {
 		// No interpreter is run
 	}
 

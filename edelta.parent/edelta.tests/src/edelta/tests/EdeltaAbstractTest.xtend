@@ -205,7 +205,8 @@ abstract class EdeltaAbstractTest {
 			// mimic the behavior of derived state computer that runs the interpreter
 			// on a copied EPackage, not on the original one
 			val packages = program.getCopiedEPackages.toList
-			val epackage = packages.head
+			val packageName = it.epackage.name
+			val epackage = packages.findFirst[name == packageName]
 			val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
 			val result = interpreter.run(it, epackage, inferredJavaClass, packages)
 			// result can be null due to a timeout
