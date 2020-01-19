@@ -2,7 +2,6 @@ package edelta.swtbot.tests;
 
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.cleanWorkspace;
-import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.reallyWaitForAutoBuild;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.root;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.waitForBuild;
 import static org.junit.Assert.assertEquals;
@@ -43,7 +42,6 @@ public abstract class EdeltaAbstractSwtbotTest {
 
 		closeWelcomePage();
 
-		bot.viewByPartName("Problems").show();
 		bot.menu("Window").menu("Show View").menu(PROJECT_EXPLORER).click();
 	}
 
@@ -173,7 +171,8 @@ public abstract class EdeltaAbstractSwtbotTest {
 		bot.waitUntil(shellCloses(shell), SWTBotPreferences.TIMEOUT);
 		assertProjectCreated(projectName);
 
-		reallyWaitForAutoBuild();
+		System.out.println("Waiting for build...");
+		waitForBuild();
 	}
 
 	protected void assertProjectCreated(String projectName) {

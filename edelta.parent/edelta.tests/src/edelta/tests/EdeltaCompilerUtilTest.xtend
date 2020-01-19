@@ -2,9 +2,6 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.compiler.EdeltaCompilerUtil
-import org.eclipse.emf.ecore.EClassifier
-import org.eclipse.emf.ecore.EEnumLiteral
-import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
@@ -263,69 +260,6 @@ createList(this::_createEAttribute_attr_in_createEClass_MyDerivedNewClass_in_foo
 				assertEquals(head.createEClassExpression.epackage.EPackageNameOrNull)
 			assertNull(get(1).createEClassExpression.epackage.EPackageNameOrNull)
 			assertNull(last.createEClassExpression.epackage.EPackageNameOrNull)
-		]
-	}
-
-	@Test
-	def void testEClassifierEPackageNameOrNull() {
-		'''
-			metamodel "foo"
-			
-			ecoreref(FooClass)
-		'''.parseWithTestEcore.
-		main.expressions => [
-			"foo".
-				assertEquals(
-					(head.edeltaEcoreReferenceExpression.
-						reference.enamedelement as EClassifier
-					).EPackageNameOrNull
-				)
-			assertNull(
-				(null as EClassifier).EPackageNameOrNull
-			)
-		]
-	}
-
-	@Test
-	def void testEClassNameOrNull() {
-		'''
-			metamodel "foo"
-			
-			ecoreref(myAttribute)
-			ecoreref(nonExistantAttribute)
-		'''.parseWithTestEcore.
-		main.expressions => [
-			"FooClass".
-				assertEquals(
-					(head.edeltaEcoreReferenceExpression.
-						reference.enamedelement as EStructuralFeature
-					).EClassNameOrNull
-				)
-			assertNull(
-				(last.edeltaEcoreReferenceExpression.
-					reference.enamedelement as EStructuralFeature
-				).EClassNameOrNull
-			)
-		]
-	}
-
-	@Test
-	def void testEEnumNameOrNull() {
-		'''
-			metamodel "foo"
-			
-			ecoreref(FooEnumLiteral)
-		'''.parseWithTestEcore.
-		main.expressions => [
-			"FooEnum".
-				assertEquals(
-					(head.edeltaEcoreReferenceExpression.
-						reference.enamedelement as EEnumLiteral
-					).EEnumNameOrNull
-				)
-			assertNull(
-				(EcoreFactory.eINSTANCE.createEEnumLiteral).EEnumNameOrNull
-			)
 		]
 	}
 

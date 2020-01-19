@@ -1,0 +1,245 @@
+import edelta.refactorings.lib.helper.EstructuralFeatureEqualityHelper
+import java.util.List
+import java.util.function.BiPredicate
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EClassifier
+import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EStructuralFeature
+import org.eclipse.emf.ecore.EcorePackage
+import org.eclipse.emf.ecore.util.EcoreUtil
+import org.eclipse.emf.ecore.util.EcoreUtil.CrossReferencer
+
+package edelta.refactorings.lib
+
+/**
+ * Finds all the features that are structurally equal
+ * in the given {@link EPackage}.
+ * 
+ * Note that this takes into consideration the name and type,
+ * but also other properties like lowerBound, unique, etc.
+ * 
+ * For example, given these EClasses
+ * 
+ * <pre>
+ * C1 {
+ *   A1 : EString
+ * } 
+ * 
+ * C2 {
+ *   A1 : EString
+ * }
+ * </pre>
+ * 
+ * It returns the map with this entry
+ * 
+ * <pre>
+ * (A1 : EString) -> [ C1:A1, C2:A1 ]
+ * </pre>
+ * 
+ * @param ePackage
+ */
+def findDuplicateFeatures(EPackage ePackage) {
+	return findDuplicateFeaturesCustom(
+		ePackage,
+		[existing, current|
+			new EstructuralFeatureEqualityHelper().equals(existing, current)
+		]
+	)
+}
+
+/**
+ * Allows you to specify the lambda checking for equality of features.
+ * 
+ * @param ePackage
+ * @param matcher
+ */
+ def findDuplicateFeaturesCustom(EPackage ePackage, BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
+	val allFeatures = ePackage.allEStructuralFeatures
+	val map = <EStructuralFeature, List<EStructuralFeature>>newLinkedHashMap
+	for (f : allFeatures) {
+		val found = map.entrySet.findFirst[matcher.test(it.key, f)]
+		if (found !== null) {
+			found.value += f
+		} else {
+			map.put(f, newArrayList(f))
+		}
+	}
+	// only entries with a mapped list of size > 1 are duplicates
+	val result = map.filter[p1, p2| p2.size > 1]
+	result.entrySet.forEach[
+	 	logInfo[
+			"Duplicate features: " +
+				value.map[getEObjectRepr(it)].join(", ")
+		]
+	]
+	return result
+}
+
+def allEStructuralFeatures(EPackage ePackage) {
+	ePackage.
+		allEClasses.
+		map[EStructuralFeatures].
+		flatten
+}
+
+def allEClasses(EPackage ePackage) {
+	ePackage.EClassifiers.filter(EClass)
+}
+
+/**
+ * Finds all the features corresponding to a redundant container,
+ * that is, a missed opposite reference to the container.
+ * 
+ * The result consists of an iterable of pairs where the key
+ * is the reference corresponding to the redundant container
+ * and the value is the reference that should correspond to the
+ * opposite reference.
+ * 
+ * For example, if "Bank" has a containment feature "clients",
+ * and the "Client" has a non-containment feature "bank", which
+ * is not set as the opposite of "clients", then the detected
+ * redundant container will be the pair "Client:bank" -> "Bank:clients".
+ * 
+ * This form should make the corresponding refactoring trivial to
+ * implement, since all the information are in the pair.
+ */
+def findRedundantContainers(EPackage ePackage) {
+	ePackage.allEClasses
+		.map[findRedundantContainers]
+		.flatten
+}
+
+/**
+ * see {@link #findRedundantContainers(EPackage)}
+ */
+def findRedundantContainers(EClass cl) {
+	val redundantContainers = newArrayList
+	val containmentReferences = cl.EReferences
+		.filter[containment]
+	for (containmentReference : containmentReferences) {
+		val redundant = containmentReference.EReferenceType.EReferences
+			.filter[
+				!containment &&
+				required &&
+				EOpposite === null &&
+				EReferenceType === cl
+			]
+			.head
+		if (redundant !== null){
+			redundantContainers += redundant -> containmentReference
+			logInfo[
+				"Redundant container: "
+					+ getEObjectRepr(containmentReference)
+					+ " -> "
+					+ getEObjectRepr(redundant) 
+			]
+	}}
+	return redundantContainers
+}
+
+/**
+ * see {@link #isDeadClassifier(EClassifier)}
+ */
+def findDeadClassifiers(EPackage ePackage) {
+	ePackage.EClassifiers
+		.filter[isDeadClassifier]
+		.toList
+}
+
+/**
+ * Whether {@link #hasNoReferenceInThisPackage(EClassifier)} and
+ * {@link #isNotReferenced(EClassifier)}
+ */
+def isDeadClassifier(EClassifier cl) {
+	if(cl.hasNoReferenceInThisPackage && cl.isNotReferenced){
+		logInfo["Dead classifier: " + getEObjectRepr(cl)]
+		return true;
+	}
+}
+
+/**
+ * Whether the passed EClassifier does not refer to anything in its
+ * EPackage.
+ */
+def hasNoReferenceInThisPackage(EClassifier c) {
+	val thisPackage = c.EPackage
+	CrossReferencer.find(newArrayList(c))
+		.keySet
+		.filter(EClassifier)
+		.filter[EPackage === thisPackage]
+		.empty
+}
+
+/**
+ * Whether the passed EClassifier is not referenced in its
+ * EPackage.
+ */
+def isNotReferenced(EClassifier cl) {
+	EcoreUtil.UsageCrossReferencer.find(cl, cl.EPackage).empty
+}
+
+/**
+ * Returns a map where the key is an EClass (superclass)
+ * and the associated value is a list of subclasses that are
+ * considered matching the "classification by hierarchy" bad smell.
+ */
+def findClassificationByHierarchy(EPackage ePackage) {
+	val classification= ePackage.allEClasses
+		.filter[
+			ESuperTypes.size == 1 &&
+			EStructuralFeatures.empty &&
+			isNotReferenced
+		]
+		.groupBy[ESuperTypes.head]
+	classification.entrySet.forEach[
+		logInfo["Classification by hierarchy: "
+			+ getEObjectRepr(key) + " - "
+			+ "subclasses["
+			+ value.map[getEObjectRepr(it)].join(",")
+			+ "]"
+		]
+	]
+	return classification
+}
+
+/**
+ * Finds base classes that should be set as abstract,
+ * since they have subclasses.
+ */
+def findConcreteAbstractMetaclasses(EPackage ePackage) {
+	val classes= ePackage.allEClasses
+		.filter[
+			cl |
+			!cl.abstract &&
+			cl.hasSubclasses
+		]
+	classes.forEach[
+		logInfo["Concrete abstract class: " + getEObjectRepr(it)]
+	]
+	return classes;	
+}
+
+def hasSubclasses(EClass cl) {
+	!EcoreUtil.UsageCrossReferencer
+		.find(cl, cl.EPackage)
+		.filter[EStructuralFeature === EcorePackage.eINSTANCE.EClass_ESuperTypes]
+		.empty
+}
+
+/**
+ * Finds abstract classes that should be concrete,
+ * since they have no subclasses.
+ */
+def findAbstractConcreteMetaclasses(EPackage ePackage) {
+	val classes= ePackage.allEClasses
+		.filter[
+			cl |
+			cl.abstract &&
+			!cl.hasSubclasses
+		]
+	classes.forEach[
+		logInfo["Abstract concrete class: " + getEObjectRepr(it)]
+	]
+	return classes;	
+}
+

@@ -38,7 +38,8 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 	@Inject extension EdeltaEcoreHelper
 	@Inject IResourceScopeCache cache
 
-	var int interpreterTimeout = 2000;
+	var int interpreterTimeout =
+		Integer.parseInt(System.getProperty("edelta.interpreter.timeout", "2000"));
 
 	var JvmGenericType programInferredJavaType;
 
@@ -55,7 +56,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 	) {
 		this.programInferredJavaType = programInferredJavaType
 		edelta = new EdeltaInterpreterEdeltaImpl(packages)
-		val cacheCleaner = new EdeltaInterpreterCacheCleaner(cache, e.eResource)
+		val cacheCleaner = new EdeltaInterpreterCleaner(cache, e.eResource)
 		// clear the cache before when the interpreter modifies
 		// the EPackage of the interpreted expression
 		// since new types might be available after the interpretation
@@ -99,7 +100,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 	) {
 		this.programInferredJavaType = programInferredJavaType
 		edelta = new EdeltaInterpreterEdeltaImpl(packages)
-		val cacheCleaner = new EdeltaInterpreterCacheCleaner(cache, op.eResource)
+		val cacheCleaner = new EdeltaInterpreterCleaner(cache, op.eResource)
 		// clear the cache before when the interpreter modifies
 		// the EPackage of the modifyEcore expression
 		// since new types might be available after the interpretation

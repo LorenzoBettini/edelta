@@ -935,7 +935,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testExecutionChangeEClassWithNewNameInModifyEcore() {
+	def void testCompilationRenamedClassInModifyEcore() {
 		'''
 			metamodel "foo"
 			
@@ -944,13 +944,81 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				ecoreref(RenamedClass).EStructuralFeatures += newEAttribute("anotherAttr") [
 					EType = ecoreref(FooDataType)
 				]
+				ecoreref(RenamedClass).abstract = true
+				ecoreref(foo.RenamedClass) => [abstract = true]
+			}
+		'''.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import java.util.function.Consumer;
+			import org.eclipse.emf.common.util.EList;
+			import org.eclipse.emf.ecore.EAttribute;
+			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.emf.ecore.EPackage;
+			import org.eclipse.emf.ecore.EStructuralFeature;
+			import org.eclipse.xtext.xbase.lib.ObjectExtensions;
+			import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  public MyFile0() {
+			    
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  public void modifyFoo(final EPackage it) {
+			    getEClass("foo", "FooClass").setName("RenamedClass");
+			    EList<EStructuralFeature> _eStructuralFeatures = getEClass("foo", "RenamedClass").getEStructuralFeatures();
+			    final Consumer<EAttribute> _function = (EAttribute it_1) -> {
+			      it_1.setEType(getEDataType("foo", "FooDataType"));
+			    };
+			    EAttribute _newEAttribute = this.lib.newEAttribute("anotherAttr", _function);
+			    _eStructuralFeatures.add(_newEAttribute);
+			    getEClass("foo", "RenamedClass").setAbstract(true);
+			    final Procedure1<EClass> _function_1 = (EClass it_1) -> {
+			      it_1.setAbstract(true);
+			    };
+			    ObjectExtensions.<EClass>operator_doubleArrow(
+			      getEClass("foo", "RenamedClass"), _function_1);
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    modifyFoo(getEPackage("foo"));
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
+	def void testExecutionRenamedClassInModifyEcore() {
+		'''
+			metamodel "foo"
+			
+			modifyEcore modifyFoo epackage foo {
+				ecoreref(foo.FooClass).name = "RenamedClass"
+				ecoreref(RenamedClass).EStructuralFeatures += newEAttribute("anotherAttr") [
+					EType = ecoreref(FooDataType)
+				]
+				ecoreref(RenamedClass).abstract = true
 			}
 		'''.checkCompiledCodeExecution(
 			'''
 			<?xml version="1.0" encoding="UTF-8"?>
 			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="foo" nsURI="http://foo" nsPrefix="foo">
-			  <eClassifiers xsi:type="ecore:EClass" name="RenamedClass">
+			  <eClassifiers xsi:type="ecore:EClass" name="RenamedClass" abstract="true">
 			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="anotherAttr" eType="#//FooDataType"/>
 			  </eClassifiers>
 			  <eClassifiers xsi:type="ecore:EClass" name="FooDerivedClass" eSuperTypes="#//RenamedClass"/>
@@ -1265,6 +1333,54 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCompilationEcorerefWhenAttributeRemovedFromOriginalContainer() {
+		'''
+			metamodel "foo"
+			
+			modifyEcore modifyFoo epackage foo {
+				ecoreref(foo.FooClass).name = "Renamed"
+				ecoreref(foo.Renamed).EStructuralFeatures.remove(ecoreref(foo.Renamed.myAttribute))
+			}
+		'''.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import org.eclipse.emf.common.util.EList;
+			import org.eclipse.emf.ecore.EPackage;
+			import org.eclipse.emf.ecore.EStructuralFeature;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  public MyFile0() {
+			    
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  public void modifyFoo(final EPackage it) {
+			    getEClass("foo", "FooClass").setName("Renamed");
+			    EList<EStructuralFeature> _eStructuralFeatures = getEClass("foo", "Renamed").getEStructuralFeatures();
+			    _eStructuralFeatures.remove(getEAttribute("foo", "Renamed", "myAttribute"));
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    modifyFoo(getEPackage("foo"));
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
 	def void testCompilationOfPersonListExample() {
 		val rs = createResourceSetWithEcore(
 			PERSON_LIST_ECORE, PERSON_LIST_ECORE_PATH,
@@ -1276,7 +1392,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package com.example;
 			
 			import edelta.lib.AbstractEdelta;
-			import gssi.refactorings.MMrefactorings;
+			import edelta.refactorings.lib.EdeltaRefactorings;
 			import java.util.Collections;
 			import org.eclipse.emf.common.util.EList;
 			import org.eclipse.emf.ecore.EAttribute;
@@ -1287,10 +1403,10 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class Example extends AbstractEdelta {
-			  private MMrefactorings refactorings;
+			  private EdeltaRefactorings refactorings;
 			  
 			  public Example() {
-			    refactorings = new MMrefactorings(this);
+			    refactorings = new EdeltaRefactorings(this);
 			  }
 			  
 			  public Example(final AbstractEdelta other) {
@@ -1372,7 +1488,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package com.example;
 			
 			import edelta.lib.AbstractEdelta;
-			import gssi.refactorings.MMrefactorings;
+			import edelta.refactorings.lib.EdeltaRefactorings;
 			import java.util.Collections;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.common.util.EList;
@@ -1388,10 +1504,10 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class Example extends AbstractEdelta {
-			  private MMrefactorings refactorings;
+			  private EdeltaRefactorings refactorings;
 			  
 			  public Example() {
-			    refactorings = new MMrefactorings(this);
+			    refactorings = new EdeltaRefactorings(this);
 			  }
 			  
 			  public Example(final AbstractEdelta other) {

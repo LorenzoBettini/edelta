@@ -1,0 +1,56 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>io.github.lorenzobettini.edelta</groupId>
+    <artifactId>edelta.parent</artifactId>
+    <version>0.9.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>edelta.examples</artifactId>
+  <packaging>eclipse-test-plugin</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets combine.children="append">
+            <fileset>
+              <directory>${basedir}/edelta-gen</directory>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+      <!-- Main configuration is in the parent POM -->
+      <plugin>
+        <groupId>io.github.lorenzobettini.edelta</groupId>
+        <artifactId>edelta-maven-plugin</artifactId>
+        <configuration>
+          <!-- specify source roots just to speed up compilation -->
+          <sourceRoots>
+            <sourceRoot>${basedir}/src</sourceRoot>
+            <sourceRoot>${basedir}/model</sourceRoot>
+          </sourceRoots>
+          <javaSourceRoots>
+            <javaSourceRoot>${basedir}/src</javaSourceRoot>
+          </javaSourceRoots>
+        </configuration>
+        <dependencies>
+          <!-- If you use a library in the .edelta file, it must be available 
+            also during Edelta compilation with the edelta-maven-plugin -->
+          <dependency>
+            <groupId>io.github.lorenzobettini.edelta</groupId>
+            <artifactId>edelta.refactorings.lib</artifactId>
+            <version>${project.version}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.eclipse.xtend</groupId>
+        <artifactId>xtend-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>

@@ -5,7 +5,7 @@
 
   <groupId>io.github.lorenzobettini.edelta</groupId>
   <artifactId>edelta.maven.example</artifactId>
-  <version>0.8.0-SNAPSHOT</version>
+  <version>0.9.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <properties>
@@ -20,16 +20,11 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.eclipse.xtext</groupId>
-        <artifactId>xtext-dev-bom</artifactId>
-        <version>${xtextVersion}</version>
+        <groupId>io.github.lorenzobettini.edelta</groupId>
+        <artifactId>edelta.bom</artifactId>
+        <version>${edelta.version}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.eclipse.xtext</groupId>
-        <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
-        <version>${xtextVersion}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -38,12 +33,10 @@
     <dependency>
       <groupId>io.github.lorenzobettini.edelta</groupId>
       <artifactId>edelta.lib</artifactId>
-      <version>${edelta.version}</version>
     </dependency>
     <dependency>
       <groupId>io.github.lorenzobettini.edelta</groupId>
       <artifactId>edelta.refactorings.lib</artifactId>
-      <version>${edelta.version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -61,12 +54,37 @@
           <configuration>
             <filesets combine.children="append">
               <fileset>
-                <directory>${basedir}/src-gen/</directory>
+                <directory>${basedir}/edelta-gen/</directory>
                 <excludes>
                   <exclude>.gitignore</exclude>
                 </excludes>
               </fileset>
             </filesets>
+          </configuration>
+        </plugin>
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>io.github.lorenzobettini.edelta</groupId>
+                    <artifactId>edelta-maven-plugin</artifactId>
+                    <versionRange>[0.8.0-SNAPSHOT,)</versionRange>
+                    <goals>
+                      <goal>generate</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
           </configuration>
         </plugin>
       </plugins>
@@ -84,7 +102,7 @@
             <configuration>
               <sources>
                 <!-- Where Edelta generates Java files -->
-                <source>src-gen/</source>
+                <source>edelta-gen/</source>
                 <!-- Where the .ecore file(s) are placed -->
                 <source>model/</source>
               </sources>
@@ -93,75 +111,70 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.eclipse.xtext</groupId>
-        <artifactId>xtext-maven-plugin</artifactId>
-        <version>${xtextVersion}</version>
+        <groupId>io.github.lorenzobettini.edelta</groupId>
+        <artifactId>edelta-maven-plugin</artifactId>
+        <version>${edelta.version}</version>
         <executions>
           <execution>
             <goals>
               <goal>generate</goal>
             </goals>
+            <configuration>
+              <!-- specify source roots just to speed up compilation -->
+              <sourceRoots>
+                <sourceRoot>${basedir}/src/main/java</sourceRoot>
+                <sourceRoot>${basedir}/model</sourceRoot>
+              </sourceRoots>
+              <javaSourceRoots>
+                <javaSourceRoot>${basedir}/src/main/java</javaSourceRoot>
+              </javaSourceRoots>
+            </configuration>
           </execution>
         </executions>
-        <configuration>
-          <failOnValidationError>true</failOnValidationError>
-          <languages>
-            <language>
-              <setup>org.eclipse.xtext.ecore.EcoreSupport</setup>
-            </language>
-            <language>
-              <setup>edelta.EdeltaStandaloneSetup</setup>
-              <outputConfigurations>
-                <outputConfiguration>
-                  <outputDirectory>${basedir}/src-gen</outputDirectory>
-                </outputConfiguration>
-              </outputConfigurations>
-            </language>
-          </languages>
-        </configuration>
         <dependencies>
-          <dependency>
-            <groupId>io.github.lorenzobettini.edelta</groupId>
-            <artifactId>edelta</artifactId>
-            <version>${edelta.version}</version>
-          </dependency>
-          <!-- If you use a library in the .edelta file, it must be available
-            also during Edelta compilation with xtext-maven-plugin -->
+          <!-- If you use a library in the .edelta file, it must be available 
+            also during Edelta compilation with the edelta-maven-plugin -->
           <dependency>
             <groupId>io.github.lorenzobettini.edelta</groupId>
             <artifactId>edelta.refactorings.lib</artifactId>
-            <version>${edelta.version}</version>
+            <version>${project.version}</version>
           </dependency>
         </dependencies>
       </plugin>
     </plugins>
   </build>
 
-  <!-- In case you want to use SNAPSHOTs
-  <repositories>
-    <repository>
-      <id>maven-snapshots</id>
-      <url>http://oss.sonatype.org/content/repositories/snapshots</url>
-      <layout>default</layout>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>sonatype_snapshots</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
-  -->
+  <profiles>
+    <profile>
+      <id>useSnapshots</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <repositories>
+        <repository>
+          <id>maven-snapshots</id>
+          <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+          <layout>default</layout>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>sonatype_snapshots</id>
+          <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
 </project>

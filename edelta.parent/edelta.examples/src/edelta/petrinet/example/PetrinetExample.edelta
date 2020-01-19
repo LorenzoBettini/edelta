@@ -1,0 +1,49 @@
+import edelta.refactorings.lib.EdeltaRefactorings
+import org.eclipse.emf.ecore.EClass
+
+// IMPORTANT: ecores must be in a source directory
+// otherwise you can't refer to them
+package edelta.petrinet.example
+
+metamodel "petrinet" 
+metamodel "ecore"
+
+use EdeltaRefactorings as refactorings
+
+//Petrinet MM0-MM1
+
+def addWeightAttribute(EClass c) {
+	c.addNewEAttribute("weight", ecoreref(EInt)) [
+		lowerBound = 1
+	]
+}
+
+modifyEcore modifyNet epackage petrinet {
+	ecoreref(Net).name = "Petrinet"
+	ecoreref(Petrinet.places).lowerBound = 1
+	ecoreref(Petrinet.transitions).lowerBound = 1
+}
+
+modifyEcore introducePTArc epackage petrinet {
+	addNewEClass("PTArc") [
+		refactorings.extractMetaClass(it, ecoreref(Place.dst), 'in', 'out')
+		addWeightAttribute
+	]
+}
+
+modifyEcore introduceTPArc epackage petrinet {
+	addNewEClass("TPArc") [
+		refactorings.extractMetaClass(it, ecoreref(Transition.dst), 'in', 'out')
+		addWeightAttribute
+	]
+}
+
+modifyEcore introduceAbstractArc epackage petrinet {
+	addNewEClass("Arc") [
+		abstract = true
+		refactorings.extractSuperclass(
+			it,
+			#[ecoreref(PTArc.weight), ecoreref(TPArc.weight)]
+		);
+	]
+}

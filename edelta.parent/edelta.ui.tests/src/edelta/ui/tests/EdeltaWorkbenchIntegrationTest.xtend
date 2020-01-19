@@ -2,14 +2,12 @@ package edelta.ui.tests
 
 import com.google.inject.Inject
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper
-import edelta.ui.tests.utils.PDETargetPlatformUtils
 import edelta.ui.tests.utils.PluginProjectHelper
 import org.eclipse.core.resources.IProject
-import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -26,11 +24,6 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 	@Inject EdeltaPluginProjectHelper edeltaProjectHelper
 
 	val TEST_PROJECT = "mytestproject"
-
-	@BeforeClass
-	def static void beforeClass() {
-		PDETargetPlatformUtils.setTargetPlatform();
-	}
 
 	@Before
 	override void setUp() {
@@ -116,7 +109,7 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 	}
 
 	def private assertSrcGenFolderFile(String expectedSubDir, String expectedFile) {
-		val expectedSrcGenFolderSubDir = "src-gen/" + expectedSubDir
+		val expectedSrcGenFolderSubDir = "edelta-gen/" + expectedSubDir
 		val srcGenFolder = project.getFolder(expectedSrcGenFolderSubDir)
 		assertTrue(expectedSrcGenFolderSubDir + " does not exist", srcGenFolder.exists)
 		val genfile = srcGenFolder.getFile(expectedFile)

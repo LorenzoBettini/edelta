@@ -93,7 +93,7 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 			for (o : program.modifyEcoreOperations) {
 				members += o.toMethod(o.name, Void.TYPE.typeRef) [
 					documentation = o.documentation
-					parameters += o.epackage.toParameter("it", EPackage.typeRef)
+					parameters += o.toParameter("it", EPackage.typeRef)
 					body = o.body
 				]
 			}

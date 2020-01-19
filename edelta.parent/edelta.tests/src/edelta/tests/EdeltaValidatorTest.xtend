@@ -10,6 +10,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static edelta.edelta.EdeltaPackage.Literals.*
+import org.eclipse.xtext.diagnostics.Diagnostic
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -267,7 +268,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		}
 		'''.parseWithTestEcore
 		prog.assertErrorsAsStrings
-			("The method or field nonExistant(String) is undefined for the type EClass")
+			("The method nonExistant(String) is undefined for the type EClass")
 	}
 
 	@Test
@@ -322,10 +323,16 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		modifyEcore aTest epackage foo {
 			ecoreref(foo.FooClass).name = "RenamedClass"
 			ecoreref(RenamedClass).nonExistant("an arg")
+			ecoreref(RenamedClass).sugarSet = "an arg"
+			"a string".sugarSet = "an arg"
 		}
 		'''.parseWithTestEcore
 		prog.assertErrorsAsStrings
-			("The method or field nonExistant(String) is undefined for the type EClass")
+		('''
+		The method nonExistant(String) is undefined for the type EClass
+		The method sugarSet(String) is undefined for the type EClass
+		The method sugarSet(String) is undefined for the type String
+		''')
 	}
 
 	@Test
@@ -351,10 +358,42 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 
 		modifyEcore aTest epackage foo {
 			ecoreref(foo.FooClass).name = "RenamedClass"
-			ecoreref(RenamedClass).getEStructuralFeatures += newEAttribute("added")
+			ecoreref(RenamedClass).EStructuralFeatures += newEAttribute("added")
 			ecoreref(RenamedClass.added)
 		}
 		'''.parseWithTestEcore.assertNoErrors
+	}
+
+	@Test
+	def void testReferenceToRenamedClassInModifyEcore() {
+		'''
+		import org.eclipse.emf.ecore.EClass
+
+		metamodel "foo"
+
+		modifyEcore aTest epackage foo {
+			ecoreref(foo.FooClass).name = "RenamedClass"
+			ecoreref(foo.RenamedClass) => [abstract = true]
+			ecoreref(foo.RenamedClass).setAbstract(true)
+			ecoreref(foo.RenamedClass).abstract = true
+		}
+		'''.parseWithTestEcore.assertNoErrors
+	}
+
+	@Test
+	def void testReferenceToUnknownEPackageInModifyEcore() {
+		'''
+		import org.eclipse.emf.ecore.EClass
+
+
+		modifyEcore aTest epackage foo {
+			
+		}
+		'''.parseWithTestEcore.assertError(
+			EdeltaPackage.eINSTANCE.edeltaModifyEcoreOperation,
+			Diagnostic.LINKING_DIAGNOSTIC,
+			"foo cannot be resolved."
+		)
 	}
 
 	@Test

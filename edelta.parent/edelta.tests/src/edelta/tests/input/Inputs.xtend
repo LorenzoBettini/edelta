@@ -463,14 +463,14 @@ class Inputs {
 
 	def personListExample()
 	'''
-		import gssi.refactorings.MMrefactorings
+		import edelta.refactorings.lib.EdeltaRefactorings
 		
 		package com.example
 		
 		metamodel "PersonList"
 		metamodel "ecore"
 		
-		use MMrefactorings as refactorings
+		use EdeltaRefactorings as refactorings
 		
 		changeEClass PersonList.Person {
 			refactorings.
@@ -508,14 +508,14 @@ class Inputs {
 
 	def personListExampleModifyEcore()
 	'''
-		import gssi.refactorings.MMrefactorings
+		import edelta.refactorings.lib.EdeltaRefactorings
 		
 		package com.example
 		
 		metamodel "PersonList"
 		metamodel "ecore"
 		
-		use MMrefactorings as refactorings
+		use EdeltaRefactorings as refactorings
 		
 		modifyEcore improvePerson epackage PersonList {
 			ecoreref(PersonList.Person) => [
