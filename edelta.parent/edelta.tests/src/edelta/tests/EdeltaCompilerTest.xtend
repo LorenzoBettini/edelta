@@ -1363,7 +1363,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public void modifyFoo(final EPackage it) {
 			    getEClass("foo", "FooClass").setName("Renamed");
 			    EList<EStructuralFeature> _eStructuralFeatures = getEClass("foo", "Renamed").getEStructuralFeatures();
-			    _eStructuralFeatures.remove(getEAttribute("", "", "myAttribute"));
+			    _eStructuralFeatures.remove(getEAttribute("foo", "Renamed", "myAttribute"));
 			  }
 			  
 			  @Override

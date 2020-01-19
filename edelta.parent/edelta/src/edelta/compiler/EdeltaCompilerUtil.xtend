@@ -6,15 +6,15 @@ import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
+import edelta.util.EdeltaEcoreReferenceInformationHelper
 import edelta.util.EdeltaModelUtil
+import java.util.List
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EEnumLiteral
 import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.xbase.XExpression
-import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
-import java.util.List
 
 /**
  * Utilities for Edelta compiler
@@ -23,7 +23,7 @@ import java.util.List
  */
 class EdeltaCompilerUtil {
 
-	@Inject extension IBatchTypeResolver
+	@Inject extension EdeltaEcoreReferenceInformationHelper
 	@Inject extension EdeltaModelUtil
 
 	def dispatch String methodName(XExpression e) {
@@ -134,28 +134,12 @@ class EdeltaCompilerUtil {
 	}
 
 	def void buildMethodToCallForEcoreReference(EdeltaEcoreReference e, (String, List<Object>)=>void acceptor) {
-		val type = e.resolveTypes.getActualType(e)
-		// in case there's the original referred ENamedElement we use that one
-		// since the interpreter could have changed the container of the ENamedElement
-		val enamedelement = e.originalEnamedelement ?: e.enamedelement
-		if (enamedelement instanceof EClassifier) {
-			acceptor.apply(
-				'''get«type.simpleName»''',
-				#[enamedelement.EPackageNameOrNull, enamedelement.name])
-		} else if (enamedelement instanceof EPackage) {
-			acceptor.apply(
-				'''get«type.simpleName»''',
-				#[enamedelement.EPackageNameOrNull])
-		} else if (enamedelement instanceof EEnumLiteral) {
-			acceptor.apply(
-				'''get«type.simpleName»''',
-				#[enamedelement.EEnum.EPackageNameOrNull, enamedelement.EEnumNameOrNull, enamedelement.name])
-		} else {
-			// unresolved proxies are of type EAttribute so we cast it to EStructuralFeature
-			val f = enamedelement as EStructuralFeature
-			acceptor.apply(
-				'''get«type.simpleName»''',
-				#[f.EContainingClass.EPackageNameOrNull, f.EClassNameOrNull, f.name])
-		}
+		val info = e.getOrComputeInformation
+		acceptor.apply(
+			"get" + info.type,
+			<Object>newArrayList(info.EPackageName, info.EClassifierName, info.ENamedElementName)
+				.filterNull
+				.toList
+		)
 	}
 }
