@@ -3,7 +3,6 @@ package edelta.petrinet.example;
 import edelta.lib.AbstractEdelta;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.Collections;
-import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -54,8 +53,8 @@ public class PetrinetExample extends AbstractEdelta {
   public void introduceAbstractArc(final EPackage it) {
     final Consumer<EClass> _function = (EClass it_1) -> {
       it_1.setAbstract(true);
-      final List<EAttribute> attributes = Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("petrinet", "Arc", "weight"), getEAttribute("", "", "weight")));
-      this.refactorings.extractSuperclass(it_1, attributes);
+      this.refactorings.extractSuperclass(it_1, 
+        Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("petrinet", "PTArc", "weight"), getEAttribute("petrinet", "TPArc", "weight"))));
     };
     this.lib.addNewEClass(it, "Arc", _function);
   }
