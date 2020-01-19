@@ -1,4 +1,4 @@
-package com.example;
+package edelta.petrinet.example;
 
 import edelta.lib.AbstractEdelta;
 import edelta.refactorings.lib.EdeltaRefactorings;
@@ -8,14 +8,14 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 
 @SuppressWarnings("all")
-public class Example extends AbstractEdelta {
+public class OldPetrinetExample extends AbstractEdelta {
   private EdeltaRefactorings refactorings;
   
-  public Example() {
+  public OldPetrinetExample() {
     refactorings = new EdeltaRefactorings(this);
   }
   
-  public Example(final AbstractEdelta other) {
+  public OldPetrinetExample(final AbstractEdelta other) {
     super(other);
   }
   
