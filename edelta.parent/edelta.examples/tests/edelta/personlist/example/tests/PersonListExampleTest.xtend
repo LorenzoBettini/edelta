@@ -7,7 +7,7 @@ import org.junit.Test
 class PersonListExampleTest {
 
 	@Test
-	def void testModifiedEcoreSyntax2() {
+	def void testPersonList() {
 		// Create an instance of the generated Java class
 		val edelta = new PersonListExample();
 		// Make sure you load all the used Ecores
