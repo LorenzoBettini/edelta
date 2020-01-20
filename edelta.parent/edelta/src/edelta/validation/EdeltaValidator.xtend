@@ -73,10 +73,8 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 		for (entry : map.asMap.entrySet) {
 			val duplicates = entry.value
 			if (duplicates.size > 1) {
-				val originalSources = duplicates.map[primarySourceElement]
-				val sources = originalSources.iterator
 				for (d : duplicates) {
-					val source = sources.next
+					val source = d.primarySourceElement
 					error(
 						"Duplicate definition '" + d.simpleName + "'",
 						source,
