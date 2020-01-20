@@ -350,6 +350,20 @@ class Inputs {
 		'''
 	}
 
+	def useAsCustomEdeltaCreatingEClass() {
+		'''
+			import edelta.tests.additional.MyCustomEdelta
+			
+			metamodel "foo"
+			
+			use MyCustomEdelta as my
+			
+			modifyEcore aTest epackage foo {
+				my.createANewEClass
+			}
+		'''
+	}
+
 	def createEClassStealingAttribute() {
 		'''
 			metamodel "foo"

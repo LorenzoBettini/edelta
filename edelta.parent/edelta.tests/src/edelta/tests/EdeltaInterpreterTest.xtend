@@ -275,6 +275,14 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test(expected=NullPointerException)
+	def void testEClassCreatedFromUseAs() {
+		useAsCustomEdeltaCreatingEClass
+		.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
+			
+		]
+	}
+
 	@Test
 	def void testRenameClassAndAddAttribute() {
 		'''
