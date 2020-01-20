@@ -119,7 +119,7 @@
     <!-- Tests should include assertions
       In this test we do not always need assertions, and we also use custom methods for
       asserting a few things -->
-    <sonar.issue.ignore.multicriteria.e13.ruleKey>squid:S2699</sonar.issue.ignore.multicriteria.e13.ruleKey>
+    <sonar.issue.ignore.multicriteria.e13.ruleKey>java:S2699</sonar.issue.ignore.multicriteria.e13.ruleKey>
     <sonar.issue.ignore.multicriteria.e13.resourceKey>**/EdeltaTest.java</sonar.issue.ignore.multicriteria.e13.resourceKey>
 
     <!-- Unnecessary imports should be removed
