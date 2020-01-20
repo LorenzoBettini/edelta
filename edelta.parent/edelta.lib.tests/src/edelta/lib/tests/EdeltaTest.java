@@ -93,12 +93,6 @@ public class EdeltaTest {
 		}
 	}
 
-	{
-		new EdeltaEcoreUtil() {
-			// just to have code coverage of protected constructor
-		};
-	}
-
 	protected TestableEdelta edelta;
 
 	@Before
