@@ -174,7 +174,7 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 		  doExecute() : void
 		  mypackage
 		    A
-		      foo
+		      foo : MyDataType
 		    «allOtherContents»
 		'''
 		)
