@@ -105,7 +105,7 @@
 
     <!-- AbstractEdelta has methods declaring to throw generic Exception 
       but we can't predict a dedicated exception -->
-    <sonar.issue.ignore.multicriteria.e11.ruleKey>squid:S00112</sonar.issue.ignore.multicriteria.e11.ruleKey>
+    <sonar.issue.ignore.multicriteria.e11.ruleKey>java:S112</sonar.issue.ignore.multicriteria.e11.ruleKey>
     <sonar.issue.ignore.multicriteria.e11.resourceKey>**/AbstractEdelta.java</sonar.issue.ignore.multicriteria.e11.resourceKey>
 
     <!-- since we use a framework, it's normal to have a deep inheritance -->
