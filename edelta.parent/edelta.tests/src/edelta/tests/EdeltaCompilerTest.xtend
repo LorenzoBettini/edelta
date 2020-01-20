@@ -749,7 +749,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  }
 			  
 			  public void aTest(final EPackage it) {
-			    this.my.createANewEClass();
+			    this.my.createANewEAttribute(
+			      this.my.createANewEClass());
 			  }
 			  
 			  @Override
@@ -824,7 +825,9 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  <eClassifiers xsi:type="ecore:EClass" name="FooClass"/>
 			  <eClassifiers xsi:type="ecore:EClass" name="FooDerivedClass" eSuperTypes="#//FooClass"/>
 			  <eClassifiers xsi:type="ecore:EDataType" name="FooDataType" instanceClassName="java.lang.String"/>
-			  <eClassifiers xsi:type="ecore:EClass" name="ANewClass"/>
+			  <eClassifiers xsi:type="ecore:EClass" name="ANewClass">
+			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="aNewAttr" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+			  </eClassifiers>
 			</ecore:EPackage>
 			''',
 			true

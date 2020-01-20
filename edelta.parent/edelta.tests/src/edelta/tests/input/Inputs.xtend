@@ -335,7 +335,8 @@ class Inputs {
 			use MyCustomEdelta as my
 			
 			modifyEcore aTest epackage foo {
-				my.createANewEClass
+				my.createANewEAttribute(
+					my.createANewEClass)
 			}
 		'''
 	}
