@@ -75,7 +75,16 @@ public abstract class AbstractEdelta {
 	 * @param other
 	 */
 	public AbstractEdelta(AbstractEdelta other) {
-		packageManager = other.packageManager;
+		this(other.packageManager);
+	}
+
+	/**
+	 * Uses the passed {@link EdeltaEPackageManager}.
+	 * 
+	 * @param packageManager
+	 */
+	public AbstractEdelta(EdeltaEPackageManager packageManager) {
+		this.packageManager = packageManager;
 	}
 
 	/**

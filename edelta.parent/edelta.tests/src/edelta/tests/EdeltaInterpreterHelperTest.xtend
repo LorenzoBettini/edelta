@@ -16,6 +16,8 @@ import org.junit.runner.RunWith
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
+import edelta.lib.AbstractEdelta
+import org.junit.Before
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderForJavaReflectAccess)
@@ -25,12 +27,21 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 
 	@Inject JavaReflectAccess javaReflectAccess;
 
+	var AbstractEdelta other
+
 	static class InstantiateExceptionClass {
 
 		new() {
 			throw new InstantiationException
 		}
 
+	}
+
+	@Before
+	def void setup() {
+		other = new AbstractEdelta() {
+			
+		}
 	}
 
 	@Test
@@ -42,7 +53,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 		'''.parse.useAsClauses.head => [
 			assertEquals(
 				MyCustomEdelta,
-				interpreterHelper.safeInstantiate(javaReflectAccess, it).class
+				interpreterHelper.safeInstantiate(javaReflectAccess, it, other).class
 			)
 		]
 	}
@@ -54,7 +65,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 		'''.parse.useAsClauses.head => [
 			assertEquals(
 				Object,
-				interpreterHelper.safeInstantiate(javaReflectAccess, it).class
+				interpreterHelper.safeInstantiate(javaReflectAccess, it, other).class
 			)
 		]
 	}
@@ -67,7 +78,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 		'''.parse.useAsClauses.head => [
 			assertEquals(
 				Object,
-				interpreterHelper.safeInstantiate(javaReflectAccess, it).class
+				interpreterHelper.safeInstantiate(javaReflectAccess, it, other).class
 			)
 		]
 	}
@@ -103,7 +114,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 		'''
 			use NonExistent as my
 		'''.parse.useAsClauses.head => [
-				interpreterHelper.safeInstantiate(javaReflectAccess, it).class
+				interpreterHelper.safeInstantiate(javaReflectAccess, it, other).class
 			]
 		].isInstanceOf(IllegalStateException)
 			.hasMessageContaining("Cannot resolve proxy")
@@ -121,7 +132,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 			
 			use MyCustomEdeltaThatCannotBeLoadedAtRuntime as my
 		'''.parse.useAsClauses.head => [
-				interpreterHelper.safeInstantiate(javaReflectAccess, it).class
+				interpreterHelper.safeInstantiate(javaReflectAccess, it, other).class
 			]
 		].isInstanceOf(EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException)
 			.hasMessageContaining('''The type '«MyCustomEdeltaThatCannotBeLoadedAtRuntime.name»' has been resolved but cannot be loaded by the interpreter''')

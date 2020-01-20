@@ -3,6 +3,8 @@
  */
 package edelta.interpreter;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.ENamedElement;
@@ -15,6 +17,7 @@ import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaUseAs;
 
 import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException;
+import edelta.lib.AbstractEdelta;
 
 /**
  * Helper class for the EdeltaInterpreter.
@@ -27,7 +30,7 @@ public class EdeltaInterpreterHelper {
 
 	private static Object defaultInstance = new Object();
 
-	public Object safeInstantiate(JavaReflectAccess javaReflectAccess, EdeltaUseAs useAs) {
+	public Object safeInstantiate(JavaReflectAccess javaReflectAccess, EdeltaUseAs useAs, AbstractEdelta other) {
 		JvmTypeReference typeRef = useAs.getType();
 		if (typeRef == null) {
 			return defaultInstance;
@@ -52,8 +55,10 @@ public class EdeltaInterpreterHelper {
 			};
 		}
 		try {
-			return javaType.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			return javaType.getConstructor(AbstractEdelta.class)
+						.newInstance(other);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
 			return defaultInstance;
 		}
 	}
