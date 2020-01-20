@@ -405,4 +405,48 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	def void testValidLibMethodsInModifyEcore() {
 		modifyEcoreUsingLibMethods.parseWithTestEcore.assertNoErrors
 	}
+
+	@Test
+	def void testDuplicateDeclarations() {
+		val input = '''
+		import java.util.List
+		import org.eclipse.emf.ecore.EPackage
+		
+		metamodel "foo"
+
+		def myFun(List<Integer> l) {}
+		def myFun(List<String> l) {}
+		def anotherFun(List<String> l) {} // OK, different params
+		def anotherDuplicate(EPackage p) {} // conflicts with modifyEcore
+
+		modifyEcore aTest epackage foo {}
+		modifyEcore aTest epackage foo {}
+		modifyEcore anotherDuplicate epackage foo {} // implicit Java method param: EPackage
+		modifyEcore anotherFun epackage foo {} // OK, different params
+		'''
+		input.parseWithTestEcore => [
+			assertError(
+				EdeltaPackage.eINSTANCE.edeltaOperation,
+				EdeltaValidator.DUPLICATE_DECLARATION,
+				input.indexOf("anotherDuplicate"), "anotherDuplicate".length,
+				"Duplicate definition 'anotherDuplicate'"
+			)
+			assertError(
+				EdeltaPackage.eINSTANCE.edeltaModifyEcoreOperation,
+				EdeltaValidator.DUPLICATE_DECLARATION,
+				input.lastIndexOf("anotherDuplicate"), "anotherDuplicate".length,
+				"Duplicate definition 'anotherDuplicate'"
+			)
+			assertErrorsAsStrings(
+				'''
+				Duplicate definition 'aTest'
+				Duplicate definition 'aTest'
+				Duplicate definition 'anotherDuplicate'
+				Duplicate definition 'anotherDuplicate'
+				Duplicate definition 'myFun'
+				Duplicate definition 'myFun'
+				'''
+			)
+		]
+	}
 }

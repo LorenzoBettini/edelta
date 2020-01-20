@@ -4,14 +4,18 @@
 package edelta.validation
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaProgram
 import edelta.edelta.EdeltaUseAs
 import edelta.lib.AbstractEdelta
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.common.types.JvmTypeReference
 import org.eclipse.xtext.validation.Check
+import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
+import org.eclipse.xtext.xbase.typesystem.^override.OverrideHelper
 import org.eclipse.xtext.xbase.typesystem.references.StandardTypeReferenceOwner
 import org.eclipse.xtext.xbase.typesystem.util.CommonTypeComputationServices
+import org.eclipse.xtext.xbase.typesystem.util.Multimaps2
 
 import static edelta.edelta.EdeltaPackage.Literals.*
 
@@ -25,8 +29,11 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	public static val PREFIX = "edelta.";
 	public static val TYPE_MISMATCH = PREFIX + "TypeMismatch";
 	public static val INTERPRETER_TIMEOUT = PREFIX + "InterpreterTimeout";
+	public static val DUPLICATE_DECLARATION = PREFIX + "DuplicateDeclaration";
 
 	@Inject CommonTypeComputationServices services
+	@Inject OverrideHelper overrideHelper
+	@Inject extension IJvmModelAssociations
 
 	@Check
 	def void checkValidUseAs(EdeltaUseAs useAs) {
@@ -51,6 +58,34 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 			}
 		}
 	}
+
+	@Check
+	def void checkDuplicateDeclarations(EdeltaProgram p) {
+		val javaClass = p.jvmElements.filter(JvmGenericType).head
+		val methods = overrideHelper.getResolvedFeatures(javaClass).declaredOperations
+
+		val map = Multimaps2.newLinkedHashListMultimap
+
+		for (d : methods) {
+			map.put(d.resolvedErasureSignature, d.getDeclaration)
+		}
+
+		for (entry : map.asMap.entrySet) {
+			val duplicates = entry.value
+			if (duplicates.size > 1) {
+				for (d : duplicates) {
+					val source = d.primarySourceElement
+					error(
+						"Duplicate definition '" + d.simpleName + "'",
+						source,
+						source.eClass.getEStructuralFeature("name"),
+						DUPLICATE_DECLARATION
+					)
+				}
+			}
+		}
+	}
+
 
 	def isConformant(EObject context, Class<?> expected, JvmTypeReference actual) {
 		val actualType = actual.toLightweightTypeReference(context)
