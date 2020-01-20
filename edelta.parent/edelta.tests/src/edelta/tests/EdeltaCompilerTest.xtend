@@ -728,12 +728,13 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testUseAs() {
-		useAs.checkCompilation(
+		useAsCustomEdeltaCreatingEClass.checkCompilation(
 			'''
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
 			import edelta.tests.additional.MyCustomEdelta;
+			import org.eclipse.emf.ecore.EPackage;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends AbstractEdelta {
@@ -747,6 +748,10 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    super(other);
 			  }
 			  
+			  public void aTest(final EPackage it) {
+			    this.my.createANewEClass();
+			  }
+			  
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
@@ -754,7 +759,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  @Override
 			  protected void doExecute() throws Exception {
-			    this.my.myMethod();
+			    aTest(getEPackage("foo"));
 			  }
 			}
 			'''
@@ -811,7 +816,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	def void testUseAsExecution() {
 		// the new created EClass is created by calling a method
 		// of a custom Edelta implementation that is used in the program
-		useAs2.checkCompiledCodeExecution(
+		useAsCustomEdeltaCreatingEClass.checkCompiledCodeExecution(
 			'''
 			<?xml version="1.0" encoding="UTF-8"?>
 			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
