@@ -11,11 +11,13 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
+import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class PersonListExample extends AbstractEdelta {
+  @Extension
   private EdeltaRefactorings refactorings;
   
   public PersonListExample() {
@@ -57,8 +59,7 @@ public class PersonListExample extends AbstractEdelta {
       };
       EAttribute _newEAttribute = this.lib.newEAttribute("description", _function_1);
       _eStructuralFeatures.add(_newEAttribute);
-      this.refactorings.extractMetaClass(it_1, 
-        getEReference("PersonList", "Person", "works"), "position", "works");
+      this.refactorings.extractMetaClass(it_1, getEReference("PersonList", "Person", "works"), "position", "works");
     };
     this.lib.addNewEClass(it, "WorkingPosition", _function);
   }

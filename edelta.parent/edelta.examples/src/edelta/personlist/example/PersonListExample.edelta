@@ -7,16 +7,16 @@ package edelta.personlist.example
 metamodel "PersonList"
 metamodel "ecore"
 
-use EdeltaRefactorings as refactorings
+use EdeltaRefactorings as extension refactorings
 
 modifyEcore improvePerson epackage PersonList {
 	ecoreref(PersonList.Person) => [
-		refactorings.
-			introduceSubclasses(
-				it,
-				ecoreref(Person.gender),
-				ecoreref(Gender)
-			)
+		// since 'refactorings' is an 'extension'
+		// we use its method as an extension method
+		introduceSubclasses(
+			ecoreref(Person.gender),
+			ecoreref(Gender)
+		)
 		addEAttribute(
 			refactorings.mergeAttributes("name",
 				ecoreref(Person.firstname).EAttributeType,
@@ -39,9 +39,7 @@ modifyEcore introduceWorkingPosition epackage PersonList {
 		EStructuralFeatures += newEAttribute("description") [
 			EType = ecoreref(EString)
 		]
-		refactorings.extractMetaClass(it,
-			ecoreref(Person.works), "position", "works"
-		)
+		extractMetaClass(ecoreref(Person.works), "position", "works")
 	]
 }
 
