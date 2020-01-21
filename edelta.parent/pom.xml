@@ -42,7 +42,7 @@
   </issueManagement>
 
   <properties>
-    <tycho-version>1.5.1</tycho-version>
+    <tycho-version>1.6.0</tycho-version>
     <!-- IMPORTANT: update Xtext version also in the BOM -->
     <xtextVersion>2.20.0</xtextVersion>
     <xtext-version>${xtextVersion}</xtext-version>
