@@ -466,105 +466,60 @@ class Inputs {
 		'''
 	}
 
-	def personListExample()
-	'''
-		import edelta.refactorings.lib.EdeltaRefactorings
-		
-		package com.example
-		
-		metamodel "PersonList"
-		metamodel "ecore"
-		
-		use EdeltaRefactorings as refactorings
-		
-		changeEClass PersonList.Person {
-			refactorings.
-				introduceSubclasses(
-					it,
-					ecoreref(Person.gender),
-					ecoreref(Gender)
-				);
-			EStructuralFeatures+=
-				refactorings.mergeAttributes("name",
-					ecoreref(Person.firstname).EAttributeType,
-					#[ecoreref(Person.firstname),ecoreref(Person.lastname)]
-				);
-		}
-		
-		createEClass Place in PersonList {
-			abstract = true
-			refactorings.extractSuperclass(it,
-				#[ecoreref(LivingPlace.address), ecoreref(WorkPlace.address)]);
-		}
-		
-		createEClass WorkingPosition in PersonList {
-			createEAttribute description type EString {}
-			refactorings.extractMetaClass(it,ecoreref(Person.works),"position","works");
-		}
-		
-		changeEClass PersonList.List {
-			EStructuralFeatures+=
-				refactorings.mergeReferences("places",
-					ecoreref(Place),
-					#[ecoreref(List.wplaces),ecoreref(List.lplaces)]
-				);
-		}
-	'''
-
 	def personListExampleModifyEcore()
 	'''
 		import edelta.refactorings.lib.EdeltaRefactorings
 		
-		package com.example
+		// IMPORTANT: ecores must be in a source directory
+		// otherwise you can't refer to them
+		package edelta.personlist.example
 		
 		metamodel "PersonList"
 		metamodel "ecore"
 		
-		use EdeltaRefactorings as refactorings
+		use EdeltaRefactorings as extension refactorings
 		
 		modifyEcore improvePerson epackage PersonList {
 			ecoreref(PersonList.Person) => [
-				refactorings.
-					introduceSubclasses(
-						it,
-						ecoreref(Person.gender),
-						ecoreref(Gender)
-					)
-				EStructuralFeatures+=
+				// since 'refactorings' is an 'extension'
+				// we use its method as an extension method
+				introduceSubclasses(
+					ecoreref(Person.gender),
+					ecoreref(Gender)
+				)
+				addEAttribute(
 					refactorings.mergeAttributes("name",
 						ecoreref(Person.firstname).EAttributeType,
 						#[ecoreref(Person.firstname), ecoreref(Person.lastname)]
 					)
+				)
 			]
 		}
 		
 		modifyEcore introducePlace epackage PersonList {
-			val placeClass = newEClass("Place") [
+			addNewEClass("Place") [
 				abstract = true
-				refactorings.extractSuperclass(it,
-					#[ecoreref(LivingPlace.address), ecoreref(WorkPlace.address)]);
+				extractIntoSuperclass(#[ecoreref(LivingPlace.address), ecoreref(WorkPlace.address)])
 			]
-			EClassifiers += placeClass
 		}
 		
 		modifyEcore introduceWorkingPosition epackage PersonList {
-			val workingPositionClass = newEClass("WorkingPosition") [
+			addNewEClass("WorkingPosition") [
 				EStructuralFeatures += newEAttribute("description") [
 					EType = ecoreref(EString)
 				]
-				refactorings.extractMetaClass(it,
-					ecoreref(Person.works), "position", "works"
-				);
+				extractMetaClass(ecoreref(Person.works), "position", "works")
 			]
-			EClassifiers += workingPositionClass
 		}
 		
 		modifyEcore improveList epackage PersonList {
-			ecoreref(PersonList.List).EStructuralFeatures+=
+			ecoreref(PersonList.List).addEReference(
 				refactorings.mergeReferences("places",
 					ecoreref(Place),
 					#[ecoreref(List.wplaces), ecoreref(List.lplaces)]
-				);
+				)
+			)
 		}
+		
 	'''
 }

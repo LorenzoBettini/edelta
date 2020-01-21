@@ -29,8 +29,7 @@ modifyEcore improvePerson epackage PersonList {
 modifyEcore introducePlace epackage PersonList {
 	addNewEClass("Place") [
 		abstract = true
-		refactorings.extractSuperclass(it,
-			#[ecoreref(LivingPlace.address), ecoreref(WorkPlace.address)])
+		extractIntoSuperclass(#[ecoreref(LivingPlace.address), ecoreref(WorkPlace.address)])
 	]
 }
 

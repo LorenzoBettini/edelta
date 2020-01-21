@@ -53,7 +53,7 @@ public class PetrinetExample extends AbstractEdelta {
   public void introduceAbstractArc(final EPackage it) {
     final Consumer<EClass> _function = (EClass it_1) -> {
       it_1.setAbstract(true);
-      this.refactorings.extractSuperclass(it_1, 
+      this.refactorings.extractIntoSuperclass(it_1, 
         Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("petrinet", "PTArc", "weight"), getEAttribute("petrinet", "TPArc", "weight"))));
     };
     this.lib.addNewEClass(it, "Arc", _function);

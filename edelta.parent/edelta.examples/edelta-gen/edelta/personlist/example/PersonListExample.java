@@ -45,8 +45,7 @@ public class PersonListExample extends AbstractEdelta {
   public void introducePlace(final EPackage it) {
     final Consumer<EClass> _function = (EClass it_1) -> {
       it_1.setAbstract(true);
-      this.refactorings.extractSuperclass(it_1, 
-        Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "LivingPlace", "address"), getEAttribute("PersonList", "WorkPlace", "address"))));
+      this.refactorings.extractIntoSuperclass(it_1, Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "LivingPlace", "address"), getEAttribute("PersonList", "WorkPlace", "address"))));
     };
     this.lib.addNewEClass(it, "Place", _function);
   }
