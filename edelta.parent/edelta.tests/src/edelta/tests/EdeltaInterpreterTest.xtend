@@ -289,6 +289,17 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testEClassCreatedFromUseAsAsExtension() {
+		useAsCustomEdeltaAsExtensionCreatingEClass
+		.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
+			val eClass = ePackage.EClassifiers.last as EClass
+			assertEquals("ANewClass", eClass.name)
+			assertEquals("aNewAttr",
+				(eClass.EStructuralFeatures.head as EAttribute).name
+			)
+		]
+	}
+	@Test
 	def void testRenameClassAndAddAttribute() {
 		'''
 			import org.eclipse.emf.ecore.EClass

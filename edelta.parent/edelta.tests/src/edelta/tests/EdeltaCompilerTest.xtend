@@ -768,6 +768,48 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testUseAsExtension() {
+		useAsCustomEdeltaAsExtensionCreatingEClass.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import edelta.tests.additional.MyCustomEdelta;
+			import org.eclipse.emf.ecore.EPackage;
+			import org.eclipse.xtext.xbase.lib.Extension;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  @Extension
+			  private MyCustomEdelta my;
+			  
+			  public MyFile0() {
+			    my = new MyCustomEdelta(this);
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  public void aTest(final EPackage it) {
+			    this.my.createANewEAttribute(this.my.createANewEClass());
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    aTest(getEPackage("foo"));
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
 	def void testInvalidUseAs() {
 		'''
 			import edelta.tests.additional.MyCustomEdelta
@@ -815,7 +857,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testUseAsExecution() {
-		// the new created EClass is created by calling a method
+		// the new created EClass and EAttribute are created by calling a method
 		// of a custom Edelta implementation that is used in the program
 		useAsCustomEdeltaCreatingEClass.checkCompiledCodeExecution(
 			'''
@@ -834,6 +876,26 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		)
 	}
 
+	@Test
+	def void testUseAsExtensionExecution() {
+		// the new created EClass and EAttribute are created by calling a method
+		// of a custom Edelta implementation that is used in the program
+		useAsCustomEdeltaAsExtensionCreatingEClass.checkCompiledCodeExecution(
+			'''
+			<?xml version="1.0" encoding="UTF-8"?>
+			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="foo" nsURI="http://foo" nsPrefix="foo">
+			  <eClassifiers xsi:type="ecore:EClass" name="FooClass"/>
+			  <eClassifiers xsi:type="ecore:EClass" name="FooDerivedClass" eSuperTypes="#//FooClass"/>
+			  <eClassifiers xsi:type="ecore:EDataType" name="FooDataType" instanceClassName="java.lang.String"/>
+			  <eClassifiers xsi:type="ecore:EClass" name="ANewClass">
+			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="aNewAttr" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+			  </eClassifiers>
+			</ecore:EPackage>
+			''',
+			true
+		)
+	}
 	@Test
 	def void testReferenceToChangedEClassRenamed() {
 		referenceToChangedEClassWithANewName.checkCompilation(
