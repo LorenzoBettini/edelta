@@ -43,20 +43,6 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCreateEClass() {
-		'''
-			metamodel "foo"
-			
-			createEClass NewClass in foo {
-				abstract = true
-			}
-		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
-			assertEquals("NewClass", derivedEClass.name)
-			assertEquals(true, derivedEClass.abstract)
-		]
-	}
-
-	@Test
 	def void testCreateEClassAndCallLibMethod() {
 		createEClassAndAddEAttributeUsingLibMethod.
 		assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
@@ -65,26 +51,6 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			val attr = derivedEClass.EStructuralFeatures.head
 			assertEquals("newTestAttr", attr.name)
 			assertEquals("FooDataType", attr.EType.name)
-		]
-	}
-
-	@Test
-	def void testCreateEClassAndCallOperation() {
-		'''
-			import org.eclipse.emf.ecore.EClass
-			
-			metamodel "foo"
-			
-			def op(EClass c) : void {
-				c.abstract = true
-			}
-			
-			createEClass NewClass in foo {
-				op(it)
-			}
-		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
-			assertEquals("NewClass", derivedEClass.name)
-			assertEquals(true, derivedEClass.abstract)
 		]
 	}
 
@@ -117,32 +83,13 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				throw new MyCustomException
 			}
 			
-			createEClass NewClass in foo {
-				op(it)
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass") [
+					op(it)
+				}
 			}
-		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
+		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation [
 			// never gets here
-		]
-	}
-
-	@Test
-	def void testCreateEClassAndCallOperationFromUseAs() {
-		'''
-			import edelta.tests.additional.MyCustomEdelta
-			
-			metamodel "foo"
-			
-			use MyCustomEdelta as my
-			
-			createEClass NewClass in foo {
-				my.createANewEAttribute(it)
-			}
-		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
-			assertEquals("NewClass", derivedEClass.name)
-			assertEquals(1, derivedEClass.EStructuralFeatures.size)
-			val attr = derivedEClass.EStructuralFeatures.head
-			assertEquals("aNewAttr", attr.name)
-			assertEquals("EString", attr.EType.name)
 		]
 	}
 
@@ -153,10 +100,10 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			
 			use NonExistant as my
 			
-			createEClass NewClass in foo {
-				my.createANewEAttribute(it)
+			modifyEcore aTest epackage foo {
+				my.createANewEAttribute(addNewEClass("NewClass"))
 			}
-		'''.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ /* will not get here */ ]
+		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ /* will not get here */ ]
 		].isInstanceOf(IllegalStateException)
 			.hasMessageContaining("Cannot resolve proxy")
 	}
@@ -358,56 +305,20 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testTimeoutInCancelIndicator() {
-		// in this test we really need the timeout
-		interpreter.interpreterTimeout = 2000;
-		val input = '''
-			import org.eclipse.emf.ecore.EClass
-
-			metamodel "foo"
-			
-			def op(EClass c) : void {
-				var i = 10;
-				while (i >= 0) {
-					Thread.sleep(1000);
-					i++
-				}
-				// this will never be executed
-				c.abstract = true
-			}
-			
-			createEClass NewClass in foo {
-				op(it)
-			}
-		'''
-		input.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
-			assertEquals("NewClass", derivedEClass.name)
-			assertEquals(false, derivedEClass.abstract)
-			derivedEClass.assertWarning(
-				EdeltaPackage.eINSTANCE.edeltaEcoreCreateEClassExpression,
-				EdeltaValidator.INTERPRETER_TIMEOUT,
-				input.lastIndexOf("{"), 11,
-				"Timeout interpreting initialization block"
-			)
-		]
-	}
-
-	@Test
 	def void testNullBody() {
 		val input = '''
 			import org.eclipse.emf.ecore.EClass
 
 			metamodel "foo"
 
-			createEClass NewClass1 in foo
-			
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass1")
+			}
 			// here the body is null, but the interpreter
 			// avoids NPE
-			createEClass NewClass in 
+			modifyEcore aTest2 epackage foo
 		'''
-		input.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ derivedEClass |
-			assertEquals("NewClass1", derivedEClass.name)
-		]
+		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ ]
 	}
 
 	@Test(expected=IllegalArgumentException)
@@ -417,12 +328,11 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			
 			metamodel "foo"
 			
-			createEClass First in foo
-			eclass First
+			modifyEcore aTest epackage foo {
+				eclass First
+			}
 		'''
-		input.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ derivedEClass |
-			assertEquals("First", derivedEClass.name)
-		]
+		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ ]
 	}
 
 	@Test
@@ -432,12 +342,15 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 			metamodel "foo"
 
-			createEClass NewClass1 in foo {
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass1")
 				ecoreref(nonexist) // this won't break the interpreter
 			}
 		'''
-		input.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ derivedEClass |
-			assertEquals("NewClass1", derivedEClass.name)
+		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ derivedEPackage |
+			derivedEPackage.EClassifiers.last as EClass => [
+				assertEquals("NewClass1", name)
+			]
 		]
 	}
 
@@ -448,17 +361,20 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 			metamodel "foo"
 
-			createEClass NewClass1 in foo {
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass1")
 				ecoreref(nonexist.bang) // this won't break the interpreter
 			}
 		'''
-		input.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ derivedEClass |
-			assertEquals("NewClass1", derivedEClass.name)
+		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ derivedEPackage |
+			derivedEPackage.EClassifiers.last as EClass => [
+				assertEquals("NewClass1", name)
+			]
 		]
 	}
 
 	@Test
-	def void testEcoreModifyOperation() {
+	def void testModifyOperationCreateEClass() {
 		val input = '''
 			package test
 			
@@ -554,7 +470,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testEcoreModifyTimeoutInCancelIndicator() {
+	def void testTimeoutInCancelIndicator() {
 		// in this test we really need the timeout
 		interpreter.interpreterTimeout = 2000;
 		val input = '''
