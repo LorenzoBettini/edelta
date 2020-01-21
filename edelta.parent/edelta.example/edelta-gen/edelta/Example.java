@@ -1,20 +1,32 @@
 package edelta;
 
+import edelta.ExampleReusableFunctions;
 import edelta.lib.AbstractEdelta;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.xtext.xbase.lib.Extension;
+import org.eclipse.xtext.xbase.lib.ObjectExtensions;
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class Example extends AbstractEdelta {
+  @Extension
+  private ExampleReusableFunctions myfunctions;
+  
   public Example() {
-    
+    myfunctions = new ExampleReusableFunctions(this);
   }
   
   public Example(final AbstractEdelta other) {
     super(other);
   }
   
-  public EClass createClass(final String name) {
-    return this.lib.newEClass(name);
+  public void SomeChanges(final EPackage it) {
+    EClass _createANewClassInMyEcore = this.myfunctions.createANewClassInMyEcore("ANewClass");
+    final Procedure1<EClass> _function = (EClass it_1) -> {
+      it_1.setAbstract(false);
+    };
+    ObjectExtensions.<EClass>operator_doubleArrow(_createANewClassInMyEcore, _function);
   }
   
   @Override
@@ -26,9 +38,6 @@ public class Example extends AbstractEdelta {
   
   @Override
   protected void doExecute() throws Exception {
-    getEClass("myexample", "MyExampleEClass");
-    getEClass("myecore", "MyEClass");
-    getEClass("ecore", "EAnnotation");
-    getEPackage("myexample").getEClassifiers();
+    SomeChanges(getEPackage("myecore"));
   }
 }
