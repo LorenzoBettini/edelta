@@ -41,44 +41,22 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testDirectEcoreReference() {
-		parse('''
-			ecoreref foo
-		''').
-		lastExpression.
-		edeltaEcoreReferenceExpression => [
+		getEcoreReferenceExpression("foo") => [
 			assertNotNull(reference.edeltaEcoreDirectReference.enamedelement)
 		]
 	}
 
 	@Test
 	def void testDirectEcoreReferenceIncomplete() {
-		parse('''
-			ecoreref 
-		''').
-		lastExpression.
-		edeltaEcoreReferenceExpression => [
-			assertNull(reference)
-		]
-	}
-
-	@Test
-	def void testDirectEcoreReferenceIncomplete2() {
-		parse('''
-			ecoreref (
-		''').
-		lastExpression.
-		edeltaEcoreReferenceExpression => [
+		getEcoreReferenceExpression("") => [
 			assertNull(reference.edeltaEcoreDirectReference.enamedelement)
 		]
 	}
 
 	@Test
 	def void testQualifiedEcoreReference() {
-		parse('''
-			ecoreref foo.bar
-		''').
-		lastExpression.
-		edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference => [
+		getEcoreReferenceExpression("foo.bar")
+		.reference.edeltaEcoreQualifiedReference => [
 			assertEquals("foo", qualification.textualRepresentation)
 			assertEquals("bar", textualReferenceRepresentation)
 			assertEquals("foo.bar", textualRepresentation)
@@ -87,24 +65,8 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testQualifiedEcoreReference2() {
-		parse('''
-			ecoreref foo.bar.baz
-		''').
-		lastExpression.
-		edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference => [
-			assertEquals("foo.bar", qualification.textualRepresentation)
-			assertEquals("baz", textualReferenceRepresentation)
-			assertEquals("foo.bar.baz", textualRepresentation)
-		]
-	}
-
-	@Test
-	def void testQualifiedEcoreReference3() {
-		parse('''
-			ecoreref (foo.bar.baz)
-		''').
-		lastExpression.
-		edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference => [
+		getEcoreReferenceExpression("foo.bar.baz")
+		.reference.edeltaEcoreQualifiedReference => [
 			assertEquals("foo.bar", qualification.textualRepresentation)
 			assertEquals("baz", textualReferenceRepresentation)
 			assertEquals("foo.bar.baz", textualRepresentation)
@@ -113,24 +75,8 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testQualifiedEcoreReferenceIncomplete() {
-		parse('''
-			ecoreref foo.
-		''').
-		lastExpression.
-		edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference => [
-			assertEquals("foo", qualification.textualRepresentation)
-			assertNull(enamedelement)
-			assertEquals("foo.", textualRepresentation)
-		]
-	}
-
-	@Test
-	def void testQualifiedEcoreReferenceIncomplete2() {
-		parse('''
-			ecoreref (foo.
-		''').
-		lastExpression.
-		edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference => [
+		getEcoreReferenceExpression("foo.")
+		.reference.edeltaEcoreQualifiedReference => [
 			assertEquals("foo", qualification.textualRepresentation)
 			assertNull(enamedelement)
 			assertEquals("foo.", textualRepresentation)
@@ -175,6 +121,24 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 			assertNotNull(type)
 			assertNotNull(name)
 		]
+	}
+
+	def private getEcoreReferenceExpression(CharSequence ecoreRefArg) {
+		textForEcoreRef(ecoreRefArg)
+			.parse
+			.lastModifyEcoreOperation
+			.body
+			.block
+			.expressions
+			.last
+			.edeltaEcoreReferenceExpression
+	}
+
+	def private textForEcoreRef(CharSequence ecoreRefArg) {
+		'''
+		modifyEcore aTest epackage foo {
+			ecoreref(«ecoreRefArg»
+		'''
 	}
 
 	def private getTextualRepresentation(EObject o) {
