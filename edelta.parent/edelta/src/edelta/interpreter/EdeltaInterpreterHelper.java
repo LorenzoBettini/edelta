@@ -47,11 +47,7 @@ public class EdeltaInterpreterHelper {
 							+ "please make sure to add the corresponding Maven module as a dependency in the "
 							+ "'xtext-maven-plugin' configuration.", typeRef.getIdentifier())) {
 
-				/**
-				 * 
-				 */
 				private static final long serialVersionUID = 1L;
-
 			};
 		}
 		try {
