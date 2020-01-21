@@ -301,6 +301,18 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testEClassCreatedFromStatefuleUseAs() {
+		useAsCustomStatefulEdeltaCreatingEClass
+		.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
+			val eClass = ePackage.EClassifiers.last as EClass
+			assertEquals("ANewClass1", eClass.name)
+			assertEquals("aNewAttr1",
+				(eClass.EStructuralFeatures.head as EAttribute).name
+			)
+		]
+	}
+
+	@Test
 	def void testRenameClassAndAddAttribute() {
 		'''
 			import org.eclipse.emf.ecore.EClass
