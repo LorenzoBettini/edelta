@@ -207,7 +207,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 	override protected featureCallField(JvmField jvmField, Object receiver) {
 		val useAs = jvmField.sourceElements.filter(EdeltaUseAs).head
 		if (useAs !== null) {
-			return safeInstantiate(javaReflectAccess, useAs)
+			return safeInstantiate(javaReflectAccess, useAs, edelta)
 		}
 		return super.featureCallField(jvmField, receiver)
 	}

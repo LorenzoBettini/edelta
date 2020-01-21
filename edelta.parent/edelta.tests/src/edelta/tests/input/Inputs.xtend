@@ -326,7 +326,7 @@ class Inputs {
 		'''
 	}
 
-	def useAs() {
+	def useAsCustomEdeltaCreatingEClass() {
 		'''
 			import edelta.tests.additional.MyCustomEdelta
 			
@@ -334,19 +334,9 @@ class Inputs {
 			
 			use MyCustomEdelta as my
 			
-			my.myMethod()
-		'''
-	}
-
-	def useAs2() {
-		'''
-			import edelta.tests.additional.MyCustomEdelta
-			
-			metamodel "foo"
-			
-			use MyCustomEdelta as my
-			
-			my.createANewEClass()
+			modifyEcore aTest epackage foo {
+				my.createANewEClass
+			}
 		'''
 	}
 

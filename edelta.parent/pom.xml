@@ -105,7 +105,7 @@
 
     <!-- AbstractEdelta has methods declaring to throw generic Exception 
       but we can't predict a dedicated exception -->
-    <sonar.issue.ignore.multicriteria.e11.ruleKey>squid:S00112</sonar.issue.ignore.multicriteria.e11.ruleKey>
+    <sonar.issue.ignore.multicriteria.e11.ruleKey>java:S112</sonar.issue.ignore.multicriteria.e11.ruleKey>
     <sonar.issue.ignore.multicriteria.e11.resourceKey>**/AbstractEdelta.java</sonar.issue.ignore.multicriteria.e11.resourceKey>
 
     <!-- since we use a framework, it's normal to have a deep inheritance -->
@@ -119,7 +119,7 @@
     <!-- Tests should include assertions
       In this test we do not always need assertions, and we also use custom methods for
       asserting a few things -->
-    <sonar.issue.ignore.multicriteria.e13.ruleKey>squid:S2699</sonar.issue.ignore.multicriteria.e13.ruleKey>
+    <sonar.issue.ignore.multicriteria.e13.ruleKey>java:S2699</sonar.issue.ignore.multicriteria.e13.ruleKey>
     <sonar.issue.ignore.multicriteria.e13.resourceKey>**/EdeltaTest.java</sonar.issue.ignore.multicriteria.e13.resourceKey>
 
     <!-- Unnecessary imports should be removed

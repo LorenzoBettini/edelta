@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.eclipse.emf.ecore.EPackage;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaEPackageManager;
 
 /**
  * Used by the {@link EdeltaInterpreter} to return {@link EPackage} instances.
@@ -17,18 +18,19 @@ import edelta.lib.AbstractEdelta;
  */
 public class EdeltaInterpreterEdeltaImpl extends AbstractEdelta {
 
-	private Map<String, EPackage> packageMap;
-
 	public EdeltaInterpreterEdeltaImpl(List<EPackage> ePackages) {
-		packageMap = ePackages.stream().collect(
-				Collectors.toMap(
-						EPackage::getName,
-						Function.identity(),
-						(existingValue, newValue) -> existingValue));
+		super(new EdeltaEPackageManager() {
+			private Map<String, EPackage> packageMap = ePackages.stream().collect(
+					Collectors.toMap(
+							EPackage::getName,
+							Function.identity(),
+							(existingValue, newValue) -> existingValue));
+
+			@Override
+			public EPackage getEPackage(String packageName) {
+				return packageMap.get(packageName);
+			}
+		});
 	}
 
-	@Override
-	public EPackage getEPackage(String packageName) {
-		return packageMap.get(packageName);
-	}
 }
