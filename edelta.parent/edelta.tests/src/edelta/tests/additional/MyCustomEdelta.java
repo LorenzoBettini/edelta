@@ -26,8 +26,8 @@ public class MyCustomEdelta extends AbstractEdelta {
 		return getEStructuralFeature("foo", "FooClass", "myAttribute");
 	}
 
-	public void createANewEClass() {
-		createEClass("foo", "ANewClass", null);
+	public EClass createANewEClass() {
+		return createEClass("foo", "ANewClass", null);
 	}
 
 	public void createANewEAttribute(EClass c) {

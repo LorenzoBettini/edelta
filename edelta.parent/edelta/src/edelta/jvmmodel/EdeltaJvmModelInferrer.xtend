@@ -66,7 +66,10 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 		acceptor.accept(program.toClass(className)) [
 			superTypes += AbstractEdelta.typeRef
 			for (u : program.useAsClauses) {
-				members += u.toField(u.name, u.type)
+				members += u.toField(u.name, u.type) [
+					if (u.isExtension)
+						annotations += annotationRef(Extension)
+				]
 			}
 			members += program.toConstructor[
 				body = '''

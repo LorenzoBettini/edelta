@@ -19,6 +19,7 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
+import org.eclipse.emf.ecore.EAttribute
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -279,8 +280,23 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	def void testEClassCreatedFromUseAs() {
 		useAsCustomEdeltaCreatingEClass
 		.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
-			assertEquals("ANewClass",
-				(ePackage.EClassifiers.last as EClass).name)
+			val eClass = ePackage.EClassifiers.last as EClass
+			assertEquals("ANewClass", eClass.name)
+			assertEquals("aNewAttr",
+				(eClass.EStructuralFeatures.head as EAttribute).name
+			)
+		]
+	}
+
+	@Test
+	def void testEClassCreatedFromUseAsAsExtension() {
+		useAsCustomEdeltaAsExtensionCreatingEClass
+		.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
+			val eClass = ePackage.EClassifiers.last as EClass
+			assertEquals("ANewClass", eClass.name)
+			assertEquals("aNewAttr",
+				(eClass.EStructuralFeatures.head as EAttribute).name
+			)
 		]
 	}
 

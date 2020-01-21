@@ -1,12 +1,10 @@
-import edelta.refactorings.lib.EdeltaRefactorings
-
 // IMPORTANT: ecores must be in source directories
 // otherwise you can't refer to them
 
 metamodel "ecore"
-metamodel "myexample"
 metamodel "myecore"
 
-use Example as example
-use EdeltaRefactorings as std
+def createANewClassInMyEcore(String name) {
+	ecoreref(myecore).addNewEClass(name)
+}
 

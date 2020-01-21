@@ -32,7 +32,7 @@ XImportDeclaration returns xtype::XImportDeclaration:
 ;
 
 EdeltaUseAs:
-	{EdeltaUseAs} 'use' type=JvmTypeReference 'as' name=ValidID
+	{EdeltaUseAs} 'use' type=JvmTypeReference 'as' extension?='extension'? name=ValidID
 ;
 
 EdeltaModifyEcoreOperation:

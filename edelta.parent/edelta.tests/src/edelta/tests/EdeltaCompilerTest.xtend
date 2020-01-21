@@ -749,7 +749,50 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  }
 			  
 			  public void aTest(final EPackage it) {
-			    this.my.createANewEClass();
+			    this.my.createANewEAttribute(
+			      this.my.createANewEClass());
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    aTest(getEPackage("foo"));
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
+	def void testUseAsExtension() {
+		useAsCustomEdeltaAsExtensionCreatingEClass.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import edelta.tests.additional.MyCustomEdelta;
+			import org.eclipse.emf.ecore.EPackage;
+			import org.eclipse.xtext.xbase.lib.Extension;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  @Extension
+			  private MyCustomEdelta my;
+			  
+			  public MyFile0() {
+			    my = new MyCustomEdelta(this);
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  public void aTest(final EPackage it) {
+			    this.my.createANewEAttribute(this.my.createANewEClass());
 			  }
 			  
 			  @Override
@@ -814,7 +857,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testUseAsExecution() {
-		// the new created EClass is created by calling a method
+		// the new created EClass and EAttribute are created by calling a method
 		// of a custom Edelta implementation that is used in the program
 		useAsCustomEdeltaCreatingEClass.checkCompiledCodeExecution(
 			'''
@@ -824,7 +867,30 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  <eClassifiers xsi:type="ecore:EClass" name="FooClass"/>
 			  <eClassifiers xsi:type="ecore:EClass" name="FooDerivedClass" eSuperTypes="#//FooClass"/>
 			  <eClassifiers xsi:type="ecore:EDataType" name="FooDataType" instanceClassName="java.lang.String"/>
-			  <eClassifiers xsi:type="ecore:EClass" name="ANewClass"/>
+			  <eClassifiers xsi:type="ecore:EClass" name="ANewClass">
+			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="aNewAttr" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+			  </eClassifiers>
+			</ecore:EPackage>
+			''',
+			true
+		)
+	}
+
+	@Test
+	def void testUseAsExtensionExecution() {
+		// the new created EClass and EAttribute are created by calling a method
+		// of a custom Edelta implementation that is used in the program
+		useAsCustomEdeltaAsExtensionCreatingEClass.checkCompiledCodeExecution(
+			'''
+			<?xml version="1.0" encoding="UTF-8"?>
+			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="foo" nsURI="http://foo" nsPrefix="foo">
+			  <eClassifiers xsi:type="ecore:EClass" name="FooClass"/>
+			  <eClassifiers xsi:type="ecore:EClass" name="FooDerivedClass" eSuperTypes="#//FooClass"/>
+			  <eClassifiers xsi:type="ecore:EDataType" name="FooDataType" instanceClassName="java.lang.String"/>
+			  <eClassifiers xsi:type="ecore:EClass" name="ANewClass">
+			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="aNewAttr" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+			  </eClassifiers>
 			</ecore:EPackage>
 			''',
 			true
@@ -1386,102 +1452,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCompilationOfPersonListExample() {
-		val rs = createResourceSetWithEcore(
-			PERSON_LIST_ECORE, PERSON_LIST_ECORE_PATH,
-			personListExample
-		)
-		rs.
-		checkCompilation(
-			'''
-			package com.example;
-			
-			import edelta.lib.AbstractEdelta;
-			import edelta.refactorings.lib.EdeltaRefactorings;
-			import java.util.Collections;
-			import org.eclipse.emf.common.util.EList;
-			import org.eclipse.emf.ecore.EAttribute;
-			import org.eclipse.emf.ecore.EClass;
-			import org.eclipse.emf.ecore.EReference;
-			import org.eclipse.emf.ecore.EStructuralFeature;
-			import org.eclipse.xtext.xbase.lib.CollectionLiterals;
-			
-			@SuppressWarnings("all")
-			public class Example extends AbstractEdelta {
-			  private EdeltaRefactorings refactorings;
-			  
-			  public Example() {
-			    refactorings = new EdeltaRefactorings(this);
-			  }
-			  
-			  public Example(final AbstractEdelta other) {
-			    super(other);
-			  }
-			  
-			  @Override
-			  public void performSanityChecks() throws Exception {
-			    ensureEPackageIsLoaded("PersonList");
-			    ensureEPackageIsLoaded("ecore");
-			  }
-			  
-			  @Override
-			  protected void doExecute() throws Exception {
-			    changeEClass("PersonList", "Person", createList(this::_changeEClass_Person_in_PersonList));
-			    createEClass("PersonList", "Place", createList(this::_createEClass_Place_in_PersonList));
-			    createEClass("PersonList", "WorkingPosition", createList(this::_createEClass_WorkingPosition_in_PersonList));
-			    changeEClass("PersonList", "List", createList(this::_changeEClass_List_in_PersonList));
-			  }
-			  
-			  public void _changeEClass_Person_in_PersonList(final EClass it) {
-			    {
-			      this.refactorings.introduceSubclasses(it, 
-			        getEAttribute("PersonList", "Person", "gender"), 
-			        getEEnum("PersonList", "Gender"));
-			      EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
-			      EAttribute _mergeAttributes = this.refactorings.mergeAttributes("name", 
-			        getEAttribute("PersonList", "Person", "firstname").getEAttributeType(), 
-			        Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname"))));
-			      _eStructuralFeatures.add(_mergeAttributes);
-			    }
-			  }
-			  
-			  public void _createEClass_Place_in_PersonList(final EClass it) {
-			    {
-			      it.setAbstract(true);
-			      this.refactorings.extractSuperclass(it, 
-			        Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "LivingPlace", "address"), getEAttribute("PersonList", "WorkPlace", "address"))));
-			    }
-			  }
-			  
-			  public void _createEClass_WorkingPosition_in_PersonList(final EClass it) {
-			    {
-			      createEAttribute(it, "description", 
-			        createList(
-			          a -> a.setEType(getEDataType("ecore", "EString")),
-			          this::_createEAttribute_description_in_createEClass_WorkingPosition_in_PersonList
-			        )
-			      );
-			      this.refactorings.extractMetaClass(it, getEReference("PersonList", "Person", "works"), "position", "works");
-			    }
-			  }
-			  
-			  public void _createEAttribute_description_in_createEClass_WorkingPosition_in_PersonList(final EAttribute it) {
-			  }
-			  
-			  public void _changeEClass_List_in_PersonList(final EClass it) {
-			    EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
-			    EReference _mergeReferences = this.refactorings.mergeReferences("places", 
-			      getEClass("PersonList", "Place"), 
-			      Collections.<EReference>unmodifiableList(CollectionLiterals.<EReference>newArrayList(getEReference("PersonList", "List", "wplaces"), getEReference("PersonList", "List", "lplaces"))));
-			    _eStructuralFeatures.add(_mergeReferences);
-			  }
-			}
-			''',
-			true
-		)
-	}
-
-	@Test
 	def void testCompilationOfPersonListExampleModifyEcore() {
 		val rs = createResourceSetWithEcore(
 			PERSON_LIST_ECORE, PERSON_LIST_ECORE_PATH,
@@ -1490,7 +1460,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		rs.
 		checkCompilation(
 			'''
-			package com.example;
+			package edelta.personlist.example;
 			
 			import edelta.lib.AbstractEdelta;
 			import edelta.refactorings.lib.EdeltaRefactorings;
@@ -1499,16 +1469,17 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			import org.eclipse.emf.common.util.EList;
 			import org.eclipse.emf.ecore.EAttribute;
 			import org.eclipse.emf.ecore.EClass;
-			import org.eclipse.emf.ecore.EClassifier;
 			import org.eclipse.emf.ecore.EPackage;
 			import org.eclipse.emf.ecore.EReference;
 			import org.eclipse.emf.ecore.EStructuralFeature;
 			import org.eclipse.xtext.xbase.lib.CollectionLiterals;
+			import org.eclipse.xtext.xbase.lib.Extension;
 			import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 			import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 			
 			@SuppressWarnings("all")
 			public class Example extends AbstractEdelta {
+			  @Extension
 			  private EdeltaRefactorings refactorings;
 			  
 			  public Example() {
@@ -1524,11 +1495,10 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			      this.refactorings.introduceSubclasses(it_1, 
 			        getEAttribute("PersonList", "Person", "gender"), 
 			        getEEnum("PersonList", "Gender"));
-			      EList<EStructuralFeature> _eStructuralFeatures = it_1.getEStructuralFeatures();
-			      EAttribute _mergeAttributes = this.refactorings.mergeAttributes("name", 
-			        getEAttribute("PersonList", "Person", "firstname").getEAttributeType(), 
-			        Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname"))));
-			      _eStructuralFeatures.add(_mergeAttributes);
+			      this.lib.addEAttribute(it_1, 
+			        this.refactorings.mergeAttributes("name", 
+			          getEAttribute("PersonList", "Person", "firstname").getEAttributeType(), 
+			          Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname")))));
 			    };
 			    ObjectExtensions.<EClass>operator_doubleArrow(
 			      getEClass("PersonList", "Person"), _function);
@@ -1537,12 +1507,9 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public void introducePlace(final EPackage it) {
 			    final Consumer<EClass> _function = (EClass it_1) -> {
 			      it_1.setAbstract(true);
-			      this.refactorings.extractSuperclass(it_1, 
-			        Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "LivingPlace", "address"), getEAttribute("PersonList", "WorkPlace", "address"))));
+			      this.refactorings.extractIntoSuperclass(it_1, Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "LivingPlace", "address"), getEAttribute("PersonList", "WorkPlace", "address"))));
 			    };
-			    final EClass placeClass = this.lib.newEClass("Place", _function);
-			    EList<EClassifier> _eClassifiers = it.getEClassifiers();
-			    _eClassifiers.add(placeClass);
+			    this.lib.addNewEClass(it, "Place", _function);
 			  }
 			  
 			  public void introduceWorkingPosition(final EPackage it) {
@@ -1553,20 +1520,16 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			      };
 			      EAttribute _newEAttribute = this.lib.newEAttribute("description", _function_1);
 			      _eStructuralFeatures.add(_newEAttribute);
-			      this.refactorings.extractMetaClass(it_1, 
-			        getEReference("PersonList", "Person", "works"), "position", "works");
+			      this.refactorings.extractMetaClass(it_1, getEReference("PersonList", "Person", "works"), "position", "works");
 			    };
-			    final EClass workingPositionClass = this.lib.newEClass("WorkingPosition", _function);
-			    EList<EClassifier> _eClassifiers = it.getEClassifiers();
-			    _eClassifiers.add(workingPositionClass);
+			    this.lib.addNewEClass(it, "WorkingPosition", _function);
 			  }
 			  
 			  public void improveList(final EPackage it) {
-			    EList<EStructuralFeature> _eStructuralFeatures = getEClass("PersonList", "List").getEStructuralFeatures();
-			    EReference _mergeReferences = this.refactorings.mergeReferences("places", 
-			      getEClass("PersonList", "Place"), 
-			      Collections.<EReference>unmodifiableList(CollectionLiterals.<EReference>newArrayList(getEReference("PersonList", "List", "wplaces"), getEReference("PersonList", "List", "lplaces"))));
-			    _eStructuralFeatures.add(_mergeReferences);
+			    this.lib.addEReference(getEClass("PersonList", "List"), 
+			      this.refactorings.mergeReferences("places", 
+			        getEClass("PersonList", "Place"), 
+			        Collections.<EReference>unmodifiableList(CollectionLiterals.<EReference>newArrayList(getEReference("PersonList", "List", "wplaces"), getEReference("PersonList", "List", "lplaces")))));
 			  }
 			  
 			  @Override

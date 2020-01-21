@@ -4,11 +4,13 @@ import edelta.lib.AbstractEdelta;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class Example extends AbstractEdelta {
+  @Extension
   private EdeltaRefactorings refactorings;
   
   public Example() {

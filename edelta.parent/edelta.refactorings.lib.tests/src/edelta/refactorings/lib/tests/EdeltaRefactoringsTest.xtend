@@ -115,7 +115,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	def void test_extractSuperclass() {
+	def void test_extractIntoSuperclass() {
 		val p = factory.createEPackage
 		val superClass = p.createEClass("SuperClass")
 		val c1 = p.createEClass("C1")
@@ -126,7 +126,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertThat(c1.EStructuralFeatures).isNotEmpty
 		assertThat(c2.EStructuralFeatures).isNotEmpty
 
-		refactorings.extractSuperclass(superClass, #[attr1, attr2])
+		refactorings.extractIntoSuperclass(superClass, #[attr1, attr2])
 
 		assertThat(c1.EStructuralFeatures).isEmpty
 		assertThat(c2.EStructuralFeatures).isEmpty

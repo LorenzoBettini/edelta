@@ -80,7 +80,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @param the attributes that are expected to be the same; the first element will be
    * pulled up in the superclass
    */
-  public boolean extractSuperclass(final EClass superclass, final List<EAttribute> attrs) {
+  public boolean extractIntoSuperclass(final EClass superclass, final List<EAttribute> attrs) {
     boolean _xblockexpression = false;
     {
       final EAttribute extracted_attr = IterableExtensions.<EAttribute>head(attrs);

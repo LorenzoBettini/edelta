@@ -58,6 +58,7 @@
     <genClasses ecoreClass="Edelta.ecore#//EdeltaEcoreDirectReference"/>
     <genClasses ecoreClass="Edelta.ecore#//EdeltaUseAs">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Edelta.ecore#//EdeltaUseAs/type"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Edelta.ecore#//EdeltaUseAs/extension"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Edelta.ecore#//EdeltaUseAs/name"/>
     </genClasses>
     <genClasses ecoreClass="Edelta.ecore#//EdeltaEcoreReferenceInformation">

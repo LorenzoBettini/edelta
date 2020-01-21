@@ -48,7 +48,7 @@ def introduceSubclasses(EClass containingclass, EAttribute attr, EEnum enumType)
  * @param the attributes that are expected to be the same; the first element will be
  * pulled up in the superclass
  */
-def extractSuperclass(EClass superclass, List<EAttribute> attrs){
+def extractIntoSuperclass(EClass superclass, List<EAttribute> attrs){
 	val extracted_attr = attrs.head;
 	// print(extracted_attr.name);
 	// already created from outside in the right package
