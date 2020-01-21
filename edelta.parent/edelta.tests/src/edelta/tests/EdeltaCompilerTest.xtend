@@ -896,6 +896,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			true
 		)
 	}
+
 	@Test
 	def void testReferenceToChangedEClassRenamed() {
 		referenceToChangedEClassWithANewName.checkCompilation(

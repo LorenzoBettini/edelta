@@ -299,6 +299,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			)
 		]
 	}
+
 	@Test
 	def void testRenameClassAndAddAttribute() {
 		'''
