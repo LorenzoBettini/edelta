@@ -6,12 +6,14 @@ import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
 import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
+import edelta.edelta.EdeltaModifyEcoreOperation
 import edelta.edelta.EdeltaOperation
 import edelta.edelta.EdeltaPackage
 import edelta.edelta.EdeltaUseAs
 import edelta.util.EdeltaEcoreHelper
 import edelta.validation.EdeltaValidator
 import java.util.List
+import java.util.Map
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
@@ -21,14 +23,13 @@ import org.eclipse.xtext.common.types.JvmOperation
 import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.naming.QualifiedName
 import org.eclipse.xtext.util.CancelIndicator
+import org.eclipse.xtext.util.IResourceScopeCache
 import org.eclipse.xtext.util.Wrapper
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
-import edelta.edelta.EdeltaModifyEcoreOperation
-import org.eclipse.xtext.util.IResourceScopeCache
 
 class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
@@ -47,6 +48,8 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
 	var EdeltaInterpreterEdeltaImpl edelta
 
+	var Map<EdeltaUseAs, Object> useAsFields;
+
 	override void setInterpreterTimeout(int interpreterTimeout) {
 		this.interpreterTimeout = interpreterTimeout
 	}
@@ -56,6 +59,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 	) {
 		this.programInferredJavaType = programInferredJavaType
 		edelta = new EdeltaInterpreterEdeltaImpl(packages)
+		useAsFields = newHashMap
 		val cacheCleaner = new EdeltaInterpreterCleaner(cache, e.eResource)
 		// clear the cache before when the interpreter modifies
 		// the EPackage of the interpreted expression
@@ -100,6 +104,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 	) {
 		this.programInferredJavaType = programInferredJavaType
 		edelta = new EdeltaInterpreterEdeltaImpl(packages)
+		useAsFields = newHashMap
 		val cacheCleaner = new EdeltaInterpreterCleaner(cache, op.eResource)
 		// clear the cache before when the interpreter modifies
 		// the EPackage of the modifyEcore expression
@@ -207,7 +212,8 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 	override protected featureCallField(JvmField jvmField, Object receiver) {
 		val useAs = jvmField.sourceElements.filter(EdeltaUseAs).head
 		if (useAs !== null) {
-			return safeInstantiate(javaReflectAccess, useAs, edelta)
+			return useAsFields.computeIfAbsent(useAs)
+				[safeInstantiate(javaReflectAccess, useAs, edelta)]
 		}
 		return super.featureCallField(jvmField, receiver)
 	}

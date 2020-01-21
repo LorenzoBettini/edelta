@@ -898,6 +898,27 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testStatefulUseAsExecution() {
+		// the new created EClass and EAttribute are created by calling a method
+		// of a custom Edelta implementation that is used in the program
+		useAsCustomStatefulEdeltaCreatingEClass.checkCompiledCodeExecution(
+			'''
+			<?xml version="1.0" encoding="UTF-8"?>
+			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="foo" nsURI="http://foo" nsPrefix="foo">
+			  <eClassifiers xsi:type="ecore:EClass" name="FooClass"/>
+			  <eClassifiers xsi:type="ecore:EClass" name="FooDerivedClass" eSuperTypes="#//FooClass"/>
+			  <eClassifiers xsi:type="ecore:EDataType" name="FooDataType" instanceClassName="java.lang.String"/>
+			  <eClassifiers xsi:type="ecore:EClass" name="ANewClass1">
+			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="aNewAttr2" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+			  </eClassifiers>
+			</ecore:EPackage>
+			''',
+			true
+		)
+	}
+
+	@Test
 	def void testReferenceToChangedEClassRenamed() {
 		referenceToChangedEClassWithANewName.checkCompilation(
 			'''
