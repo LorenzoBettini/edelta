@@ -247,6 +247,24 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ ]
 	}
 
+	@Test
+	def void testNullEcoreRefNamedElement() {
+		val input = '''
+			import org.eclipse.emf.ecore.EClass
+
+			metamodel "foo"
+
+			modifyEcore aTest epackage foo {
+				addNewEClass("ANewClass1")
+				ecoreref(
+			}
+		'''
+		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ePackage |
+			val eClass = ePackage.lastEClass
+			assertEquals("ANewClass1", eClass.name)
+		]
+	}
+
 	@Test(expected=IllegalArgumentException)
 	def void testOperationWithErrorsDueToWrongParsing() {
 		val input = '''
