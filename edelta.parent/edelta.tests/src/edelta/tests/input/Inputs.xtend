@@ -81,52 +81,6 @@ class Inputs {
 		'''
 	}
 
-	def createEClassAndReferenceToExistingEDataType() {
-		'''
-			metamodel "foo"
-			
-			createEClass NewClass in foo {}
-			ecoreref(FooDataType)
-		'''
-	}
-
-	def createEClassAndReferenceToExistingEDataTypeFullyQualified() {
-		'''
-			metamodel "foo"
-			
-			createEClass NewClass in foo {}
-			ecoreref(foo.FooDataType)
-		'''
-	}
-
-	def referenceToCreatedEClassWithTheSameNameAsAnExistingEClass() {
-		'''
-			metamodel "foo"
-			
-			createEClass FooClass in foo {}
-			ecoreref(FooClass)
-		'''
-	}
-
-	def referenceToChangedEClassWithTheSameNameAsAnExistingEClass() {
-		'''
-			metamodel "foo"
-			
-			changeEClass foo.FooClass {}
-			ecoreref(FooClass)
-		'''
-	}
-
-	def referenceToChangedEClassCopiedAttribute() {
-		'''
-			metamodel "foo"
-			
-			changeEClass foo.FooClass {
-				val attr = ecoreref(FooClass.myAttribute)
-			}
-		'''
-	}
-
 	def referenceToCreatedEAttributeSimple() {
 		'''
 			metamodel "foo"

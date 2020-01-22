@@ -4,7 +4,6 @@ import com.google.inject.Inject
 import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaPackage
-import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EObject
@@ -149,37 +148,35 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	def void testScopeForReferenceToCreatedEClassWithTheSameNameAsAnExistingEClass() {
 		// our created EClass with the same name as an existing one must be
 		// the one that is actually linked
-		val prog = referenceToCreatedEClassWithTheSameNameAsAnExistingEClass.
-			parseWithTestEcore
-		val expressions = prog.main.expressions
-		val eclassExp = expressions.last as EdeltaEcoreReferenceExpression
+		val prog = '''
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				addNewEClass("FooClass")
+				ecoreref(FooClass)
+			}
+		'''.parseWithTestEcore
+		val eclassExp = prog
+			.lastModifyEcoreOperation.body.blockLastExpression as EdeltaEcoreReferenceExpression
 		assertSame(
-			// the one created by the derived state computer
-			prog.derivedStateLastEClass,
+			// the one copied
+			prog.copiedEPackages.head.firstEClass,
 			eclassExp.reference.enamedelement
 		)
 	}
 
 	@Test
 	def void testScopeForReferenceToCopiedEPackageEClassifierAfterCreatingEClass() {
-		val prog = createEClassAndReferenceToExistingEDataType.
+		val prog = '''
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				ecoreref(FooDataType)
+			}
+		'''.
 			parseWithTestEcore
-		val expressions = prog.main.expressions
-		val eclassExp = expressions.last as EdeltaEcoreReferenceExpression
-		val dataType = eclassExp.reference.enamedelement as EDataType
-		// must be a reference to the copied EPackage's datatype
-		assertSame(
-			prog.copiedEPackages.head.EClassifiers.filter(EDataType).head,
-			dataType
-		)
-	}
-
-	@Test
-	def void testScopeForFullyQualifiedReferenceToCopiedEPackageEClassifierAfterCreatingEClass() {
-		val prog = createEClassAndReferenceToExistingEDataTypeFullyQualified.
-			parseWithTestEcore
-		val expressions = prog.main.expressions
-		val eclassExp = expressions.last as EdeltaEcoreReferenceExpression
+		val eclassExp = prog
+			.lastModifyEcoreOperation.body.blockLastExpression as EdeltaEcoreReferenceExpression
 		val dataType = eclassExp.reference.enamedelement as EDataType
 		// must be a reference to the copied EPackage's datatype
 		assertSame(
@@ -278,39 +275,6 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			FooClass
 			''')
 		// created EClass are not in the scope for changeEClass
-	}
-
-	@Test
-	def void testScopeForReferenceToChangedEClassWithTheSameNameAsAnExistingEClass() {
-		// our changed EClass with the same name as an existing one must be
-		// the one that is actually linked
-		val prog = referenceToChangedEClassWithTheSameNameAsAnExistingEClass.
-			parseWithTestEcore
-		val expressions = prog.main.expressions
-		val eclassExp = expressions.last.edeltaEcoreReferenceExpression
-		assertSame(
-			// the one created by the derived state computer
-			prog.derivedStateLastEClass,
-			eclassExp.reference.enamedelement
-		)
-	}
-
-	@Test
-	def void testScopeForReferenceToChangedEClassCopiedAttribute() {
-		// our changed EClass referred attribute must be the one
-		// of the copy, not the original one
-		val prog = referenceToChangedEClassCopiedAttribute.
-			parseWithTestEcore
-		val expressions = prog.main.expressions
-		val changeEClass = expressions.last.changeEClassExpression
-		val referredAttr = changeEClass.body.expressions.
-			last.variableDeclaration.right.edeltaEcoreReferenceExpression.
-			reference.enamedelement as EAttribute
-		assertSame(
-			// the one created by the derived state computer
-			prog.derivedStateLastEClass.EStructuralFeatures.head,
-			referredAttr
-		)
 	}
 
 	@Test
