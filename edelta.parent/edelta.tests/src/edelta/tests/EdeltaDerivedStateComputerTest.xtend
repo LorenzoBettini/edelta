@@ -1,15 +1,16 @@
 package edelta.tests
 
 import com.google.inject.Inject
-import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaProgram
+import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException
 import edelta.resource.EdeltaDerivedStateComputer.EdeltaDerivedStateAdapter
 import edelta.tests.additional.TestableEdeltaDerivedStateComputer
 import org.eclipse.emf.common.notify.impl.AdapterImpl
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EStructuralFeature
+import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.resource.DerivedStateAwareResource
@@ -21,9 +22,9 @@ import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.junit.runner.RunWith
 
+import static org.assertj.core.api.Assertions.assertThat
+
 import static extension org.junit.Assert.*
-import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException
-import org.eclipse.emf.ecore.EcoreFactory
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
@@ -54,67 +55,21 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testDerivedStateForCreatedEClass() {
+	def void testCopiedEPackages() {
 		val program = '''
 		package test
 		
 		metamodel "foo"
+		metamodel "bar"
 		
-		createEClass First in foo
+		modifyEcore aTest1 epackage foo {}
+		modifyEcore aTest2 epackage bar {}
 		'''.
-		parseWithTestEcore
-		val derivedEClass = program.getDerivedStateLastEClass
-		assertEquals("First", derivedEClass.name)
-		assertEquals("foo", derivedEClass.EPackage.name)
-	}
-
-	@Test
-	def void testDerivedStateForCreatedEClassWithSuperTypes() {
-		val program = createEClassWithSuperTypes.
-			parseWithTestEcore
-		val derivedEClass = program.getDerivedStateLastEClass
-		// inherited from FooClass
-		assertNamedElements(derivedEClass.EAllStructuralFeatures,
-			'''
-			myAttribute
-			myReference
-			'''
-		)
-	}
-
-	@Test
-	def void testDerivedStateForTwoCreatedEClass() {
-		val program = '''
-		package test
-		
-		metamodel "foo"
-		
-		createEClass First in foo
-		createEClass Second in foo
-		'''.
-		parseWithTestEcore
-		val derivedEClass = program.getDerivedStateLastEClass
-		assertEquals("Second", derivedEClass.name)
-		assertEquals("foo", derivedEClass.EPackage.name)
-	}
-
-	@Test
-	def void testDerivedAndCopiedEPackages() {
-		val program = '''
-		package test
-		
-		metamodel "foo"
-		
-		createEClass First in foo
-		createEClass Second in foo
-		'''.
-		parseWithTestEcore
-		var packages = program.eResource.derivedEPackages
-		assertEquals(1, packages.size)
-		assertEquals("foo", packages.head.name)
-		packages = program.eResource.copiedEPackages
-		assertEquals(1, packages.size)
-		assertEquals("foo", packages.head.name)
+		parseWithTestEcores
+		val packages = program.eResource.copiedEPackages
+		assertThat(packages)
+			.extracting([name])
+			.containsExactlyInAnyOrder("foo", "bar")
 	}
 
 	@Test
@@ -124,7 +79,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		
 		metamodel "foo"
 		
-		createEClass First in foo
+		modifyEcore aTest1 epackage foo {}
 		'''.
 		parseWithTestEcore
 		val resource = program.eResource as DerivedStateAwareResource
@@ -135,16 +90,17 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testDerivedStateForCreatedEClassWithMissingReferredPackage() {
+	def void testDerivedStateEcoreModifyWithMissingReferredPackage() {
 		val program = '''
 		package test
 		
-		createEClass First in foo
+		modifyEcore aTest1 epackage foo {}
 		'''.
 		parseWithTestEcore
-		val derivedEClass = program.getDerivedStateLastEClass
-		assertEquals("First", derivedEClass.name)
-		assertNull(derivedEClass.EPackage.name)
+		val packages = program.eResource.copiedEPackages
+		assertThat(packages)
+			.hasSize(1)
+			.allMatch[p | p.eIsProxy]
 	}
 
 	@Test
@@ -163,44 +119,48 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testDerivedStateIsCorrectlyDiscarted() {
+	def void testDerivedStateIsCorrectlyDiscarded() {
 		val program = '''
 		package test
 		
 		metamodel "foo"
 		
-		createEClass First in foo
+		modifyEcore aTest1 epackage foo {
+			addNewEClass("First")
+		}
 		'''.
 		parseWithTestEcore
 		val resource = program.eResource as DerivedStateAwareResource
-		assertEquals("First", program.getDerivedStateLastEClass.name)
+		assertEquals("First", program.lastCopiedEPackageLastEClass.name)
 		// discard derived state
-		program.main.expressions.clear
+		program.modifyEcoreOperations.clear
 		resource.discardDerivedState
 		// only program must be there and the inferred Jvm Type
 		assertEquals("test.__synthetic0", (resource.contents.last as JvmGenericType).identifier)
 	}
 
 	@Test
-	def void testDerivedStateIsCorrectlyDiscartedAndUnloaded() {
+	def void testDerivedStateIsCorrectlyDiscardedAndUnloaded() {
 		val program = '''
 		package test
 		
 		metamodel "foo"
 		
-		createEClass First in foo {}
-		ecoreref(First)
+		modifyEcore aTest1 epackage foo {
+			addNewEClass("First")
+			ecoreref(First)
+		}
 		'''.
 		parseWithTestEcore
 		val resource = program.eResource as DerivedStateAwareResource
-		val derivedStateEClass = program.getDerivedStateLastEClass
-		val eclassRef = program.main.expressions.last.
+		val derivedStateEClass = program.lastCopiedEPackageLastEClass
+		val eclassRef = program.lastModifyEcoreOperation.body.block.expressions.last.
 			edeltaEcoreReferenceExpression.reference.enamedelement
 		assertSame(derivedStateEClass, eclassRef)
 		assertEquals("First", derivedStateEClass.name)
 		assertFalse("should be resolved now", eclassRef.eIsProxy)
 		// discard derived state
-		program.main.expressions.remove(0)
+		program.modifyEcoreOperations.remove(0)
 		resource.discardDerivedState
 		// the reference to the EClass is still there
 		assertSame(derivedStateEClass, eclassRef)
@@ -215,16 +175,17 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		
 		metamodel "foo"
 		
-		createEClass First in foo
-		eclass First
+		modifyEcore aTest1 epackage foo {
+			addNewEClass("First")
+		}
 		'''.
 		parseWithTestEcore
 		val resource = program.eResource as DerivedStateAwareResource
-		val derivedToSourceMap = resource.derivedToSourceMap
+		// val derivedToSourceMap = resource.derivedToSourceMap
 		val nameToEPackageMap = resource.nameToEPackageMap
 		val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
 		assertFalse(resource.eAdapters.empty)
-		assertFalse(derivedToSourceMap.empty)
+		// assertFalse(derivedToSourceMap.empty)
 		assertFalse(nameToEPackageMap.empty)
 		assertFalse(nameToCopiedEPackageMap.empty)
 		// explicitly add an adapter to the EPackage
@@ -236,7 +197,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		unloadDerivedPackages(nameToEPackageMap)
 		unloadDerivedPackages(nameToCopiedEPackageMap)
 		// maps are not empty yet
-		assertFalse(derivedToSourceMap.empty)
+		// assertFalse(derivedToSourceMap.empty)
 		assertFalse(nameToEPackageMap.empty)
 		assertFalse(nameToCopiedEPackageMap.empty)
 		assertFalse(resource.eAdapters.empty)
@@ -252,48 +213,30 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		
 		metamodel "foo"
 		
-		createEClass First in foo {
-			createEAttribute myAttr type FooDataType {}
+		modifyEcore aTest1 epackage foo {
+			addNewEClass("First")
 		}
 		'''.
 		parseWithTestEcore
 		val resource = program.eResource as DerivedStateAwareResource
-		val derivedToSourceMap = resource.derivedToSourceMap
+		// val derivedToSourceMap = resource.derivedToSourceMap
 		val nameToEPackageMap = resource.nameToEPackageMap
 		val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
-		val opToEClassMap = resource.opToEClassMap
+		// val opToEClassMap = resource.opToEClassMap
 		assertFalse(resource.eAdapters.empty)
-		assertFalse(derivedToSourceMap.empty)
+		// assertFalse(derivedToSourceMap.empty)
 		assertFalse(nameToEPackageMap.empty)
 		assertFalse(nameToCopiedEPackageMap.empty)
-		assertFalse(opToEClassMap.empty)
+		// assertFalse(opToEClassMap.empty)
 		// discard derived state
-		program.main.expressions.remove(0)
+		program.modifyEcoreOperations.clear
 		resource.discardDerivedState
 		// maps are empty now
-		assertTrue(derivedToSourceMap.empty)
+		// assertTrue(derivedToSourceMap.empty)
 		assertTrue(nameToEPackageMap.empty)
 		assertTrue(nameToCopiedEPackageMap.empty)
-		assertTrue(opToEClassMap.empty)
+		// assertTrue(opToEClassMap.empty)
 		assertFalse(resource.eAdapters.empty)
-	}
-
-	@Test
-	def void testDerivedStateForCreatedEAttribute() {
-		val program = '''
-		package test
-		
-		metamodel "foo"
-		
-		createEClass First in foo {
-			createEAttribute newAttribute
-		}
-		'''.
-		parseWithTestEcore
-		val derivedEClass = program.getDerivedStateLastEClass
-		val derivedEAttribute = derivedEClass.EStructuralFeatures.head as EAttribute
-		assertEquals("newAttribute", derivedEAttribute.name)
-		assertEquals("First", derivedEAttribute.EContainingClass.name)
 	}
 
 	@Test
@@ -311,117 +254,19 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testSourceElementOfCreateEClass() {
+	def void testCopiedEPackageWithRenamedEClass() {
 		val program = '''
 		package test
 		
 		metamodel "foo"
 		
-		createEClass First in foo
-		'''.
-		parseWithTestEcore
-		val e = program.lastExpression
-		val derived = program.getDerivedStateLastEClass
-		assertSame(e, derived.getPrimarySourceElement)
-	}
-
-	@Test
-	def void testSourceElementOfCreateEAttribute() {
-		val program = '''
-		package test
-		
-		metamodel "foo"
-		
-		createEClass First in foo {
-			createEAttribute newAttribute
+		modifyEcore aTest epackage foo {
+			ecoreref(foo.FooClass).name = "Renamed"
 		}
 		'''.
 		parseWithTestEcore
-		val e = (program.lastExpression as EdeltaEcoreCreateEClassExpression).
-			body.expressions.last
-		val derivedEClass = program.getDerivedStateLastEClass
-		val derivedEAttribute = derivedEClass.EStructuralFeatures.head
-		assertSame(e, derivedEAttribute.getPrimarySourceElement)
-	}
-
-	@Test
-	def void testDerivedEPackagesWithChangeEClass() {
-		val program = '''
-		package test
-		
-		metamodel "foo"
-		
-		changeEClass foo.First {}
-		changeEClass foo.Second {}
-		'''.
-		parseWithTestEcore
-		val derivedEPackages = program.eResource.derivedEPackages
-		assertEquals(1, derivedEPackages.size)
-		assertEquals("foo", derivedEPackages.head.name)
-	}
-
-	@Test
-	def void testDerivedEClassesWithChangeEClass() {
-		val program = '''
-		package test
-		
-		metamodel "foo"
-		
-		changeEClass foo.FooClass {}
-		'''.
-		parseWithTestEcore
-		val derivedEClass = program.getDerivedStateLastEClass
-		assertEquals("FooClass", derivedEClass.name)
-	}
-
-	@Test
-	def void testDerivedEClassesWithChangeEClassNoOriginalReference() {
-		val program = '''
-		package test
-		
-		metamodel "foo"
-		
-		changeEClass foo. {}
-		'''.
-		parseWithTestEcore
-		val derivedEPackages = program.eResource.derivedEPackages
-		assertEquals(0, derivedEPackages.size)
-		// no EPackage is added to the derived state, since
-		// we don't refer to any existing class
-	}
-
-	@Test
-	def void testDerivedEClassesWithChangeEClassWithNewName() {
-		val program = '''
-		package test
-		
-		metamodel "foo"
-		
-		changeEClass foo.FooClass newName Renamed {}
-		'''.
-		parseWithTestEcore
-		val derivedEClass = program.getDerivedStateLastEClass
+		val derivedEClass = program.lastCopiedEPackageFirstEClass
 		assertEquals("Renamed", derivedEClass.name)
-		val derivedEPackages = program.eResource.derivedEPackages
-		assertEquals(1, derivedEPackages.head.EClassifiers.size)
-	}
-
-	@Test
-	def void testDerivedStateForCreatedEAttributeInChangeEClass() {
-		val program = '''
-		package test
-		
-		metamodel "foo"
-		
-		changeEClass foo.FooClass {
-			createEAttribute newAttribute
-		}
-		'''.
-		parseWithTestEcore
-		val derivedEClass = program.getDerivedStateLastEClass
-		val derivedEAttribute = derivedEClass.EStructuralFeatures.last as EAttribute
-		assertEquals("newAttribute", derivedEAttribute.name)
-		assertEquals("FooClass", derivedEAttribute.EContainingClass.name)
 	}
 
 	@Test
@@ -431,76 +276,18 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		
 		metamodel "foo"
 		
-		changeEClass foo.FooClass newName Renamed {
-			createEAttribute newAttribute
+		modifyEcore aTest epackage foo {
+			ecoreref(foo.FooClass) => [
+				name = "Renamed"
+				addNewEAttribute("newAttribute", ecoreref(FooDataType))
+			]
 		}
 		'''.
 		parseWithTestEcore
-		val derivedEClass = program.getDerivedStateLastEClass
+		val derivedEClass = program.lastCopiedEPackageFirstEClass
 		val derivedEAttribute = derivedEClass.EStructuralFeatures.last as EAttribute
 		assertEquals("newAttribute", derivedEAttribute.name)
 		assertEquals("Renamed", derivedEAttribute.EContainingClass.name)
-	}
-
-	@Test
-	def void testInterpretedCreateEClassAndCallOperationFromUseAs() {
-		val program = '''
-			import edelta.tests.additional.MyCustomEdelta
-			
-			metamodel "foo"
-			
-			use MyCustomEdelta as my
-			
-			createEClass NewClass in foo {
-				my.createANewEAttribute(it)
-			}
-		'''.
-		parseWithTestEcore
-		// the interpreter acts on copied epackages
-		var eclass = program.getLastCopiedEPackageFirstEClass("NewClass")
-		assertEquals("NewClass", eclass.name)
-		assertEquals(1, eclass.EStructuralFeatures.size)
-		val attr = eclass.EStructuralFeatures.head
-		assertEquals("aNewAttr", attr.name)
-		assertEquals("EString", attr.EType.name)
-		// Note that the derived state EClass is not modified:
-		eclass = program.derivedStateLastEClass
-		assertEquals("NewClass", eclass.name)
-		assertEquals(0, eclass.EStructuralFeatures.size)
-	}
-
-	@Test
-	def void testInterpretedChangeEClassAndRenameEAttribute() {
-		val program = '''
-			metamodel "foo"
-			
-			changeEClass foo.FooClass {
-				val attr = ecoreref(FooClass.myAttribute)
-				attr.name = "renamed"
-			}
-		'''.
-		parseWithTestEcore
-		// the interpreter acts on the copied EPackage
-		val attr = program.copiedEPackages.
-			head.getEClassiferByName("FooClass").
-			getEAttributeByName("renamed")
-		assertNotNull("renamed", attr.name)
-		// the derivedEClass' EAttribute is not changed
-		val derivedEClass = program.getDerivedStateLastEClass
-		assertEquals("FooClass", derivedEClass.name)
-		val origAttr = derivedEClass.EStructuralFeatures.head
-		assertEquals("myAttribute", origAttr.name)
-		program.assertNoErrors
-		// check that the reference is not dangling
-		// that is, the attribute is still contained in the original class
-		// at this point of the program
-		// otherwise in the editor we then get an unresolved error.
-		val ecoreref = getEcoreRefInManipulationExpressionBlock(program)
-		val eClass = ecoreref.qualification.enamedelement as EClass
-		val eAttr = ecoreref.enamedelement as EAttribute
-		// This holds since changeEClass creates a deep copy
-		// so the original attribute is not changed
-		assertEClassContainsFeature(eClass, eAttr, true)
 	}
 
 	@Test

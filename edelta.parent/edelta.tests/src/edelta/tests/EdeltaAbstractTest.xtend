@@ -246,6 +246,11 @@ abstract class EdeltaAbstractTest {
 		copiedEPackage.EClassifiers.last as EClass
 	}
 
+	def protected getLastCopiedEPackageFirstEClass(EObject context) {
+		val copiedEPackage = getLastCopiedEPackage(context)
+		copiedEPackage.EClassifiers.head as EClass
+	}
+
 	def protected getLastCopiedEPackageFirstEClass(EObject context, String nameToSearch) {
 		val p = getLastCopiedEPackage(context)
 		p.EClassifiers.findFirst[name == nameToSearch] as EClass
