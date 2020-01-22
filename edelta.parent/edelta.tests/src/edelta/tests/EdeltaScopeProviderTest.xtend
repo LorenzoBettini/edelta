@@ -232,22 +232,20 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testScopeForReferenceToCreatedEAttributeChangingNameInBody() {
-		referenceToCreatedEAttributeRenamed.parseWithTestEcore.lastExpression.
-			edeltaEcoreReferenceExpression.reference.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+		referenceToCreatedEAttributeRenamed.parseWithTestEcore
+			.lastModifyEcoreOperation.body.block.expressions
+			.last
+			.edeltaEcoreReferenceExpression.reference
+			.assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
-			NewClass
-			newAttribute
-			newAttribute2
-			NewClass
 			FooClass
 			FooDataType
 			FooEnum
-			changed
-			newAttribute2
+			NewClass
 			myAttribute
 			myReference
 			FooEnumLiteral
+			changed
 			FooClass
 			FooDataType
 			FooEnum
@@ -256,9 +254,8 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			FooEnumLiteral
 			foo
 			''')
-		// changed is the one created in the program, and whose
+		// "changed" is the one created in the program (with name "newAttribute", and whose
 		// name is changed in the body
-		// we also have copied EPackages, that's why elements appear twice
 	}
 
 	@Test

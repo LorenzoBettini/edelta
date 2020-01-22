@@ -211,28 +211,16 @@ class Inputs {
 		'''
 			metamodel "foo"
 			
-			createEClass NewClass in foo {
-				createEAttribute newAttribute type FooDataType {
-					name = "changed"
-				}
-				createEAttribute newAttribute2 type FooDataType {}
+			modifyEcore creation epackage foo {
+				addNewEClass("NewClass") [
+					addNewEAttribute("newAttribute", ecoreref(FooDataType))
+				]
 			}
-			ecoreref(newAttribute)
-			ecoreref(changed)
-		'''
-	}
-
-	def referenceToCreatedEAttributeRenamedInChangedEClass() {
-		'''
-			metamodel "foo"
 			
-			changeEClass foo.FooClass {
-				createEAttribute newAttribute type FooDataType {
-					name = "changed"
-				}
+			modifyEcore changeAndAccess epackage foo {
+				ecoreref(newAttribute).name = "changed"
+				ecoreref(changed)
 			}
-			ecoreref(newAttribute)
-			ecoreref(changed)
 		'''
 	}
 
@@ -240,23 +228,16 @@ class Inputs {
 		'''
 			metamodel "foo"
 			
-			createEClass NewClass in foo {
-				name = "changed"
+			modifyEcore creation epackage foo {
+				addNewEClass("NewClass")
 			}
-			ecoreref(NewClass)
-			ecoreref(changed)
-		'''
-	}
-
-	def referenceToChangedEClassRenamed() {
-		'''
-			metamodel "foo"
-			
-			changeEClass foo.FooClass {
-				name = "changed"
+			modifyEcore renaming epackage foo {
+				ecoreref(NewClass).name = "changed"
 			}
-			ecoreref(FooClass)
-			ecoreref(changed)
+			modifyEcore accessing epackage foo {
+				ecoreref(NewClass) // this doesn't exist anymore
+				ecoreref(changed)
+			}
 		'''
 	}
 
