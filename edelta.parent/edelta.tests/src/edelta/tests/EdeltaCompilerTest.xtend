@@ -631,58 +631,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToChangedEClassRenamed() {
-		referenceToChangedEClassWithANewName.checkCompilation(
-			'''
-			package edelta;
-			
-			import edelta.lib.AbstractEdelta;
-			import org.eclipse.emf.ecore.EAttribute;
-			import org.eclipse.emf.ecore.EClass;
-			
-			@SuppressWarnings("all")
-			public class MyFile0 extends AbstractEdelta {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
-			    super(other);
-			  }
-			  
-			  @Override
-			  public void performSanityChecks() throws Exception {
-			    ensureEPackageIsLoaded("foo");
-			  }
-			  
-			  @Override
-			  protected void doExecute() throws Exception {
-			    changeEClass("foo", "FooClass", 
-			      createList(
-			        c -> c.setName("RenamedClass"),
-			        this::_changeEClass_FooClass_in_foo
-			      )
-			    );
-			    getEClass("foo", "RenamedClass");
-			  }
-			  
-			  public void _changeEClass_FooClass_in_foo(final EClass it) {
-			    createEAttribute(it, "anotherAttr", 
-			      createList(
-			        a -> a.setEType(getEDataType("foo", "FooDataType")),
-			        this::_createEAttribute_anotherAttr_in_changeEClass_FooClass_in_foo
-			      )
-			    );
-			  }
-			  
-			  public void _createEAttribute_anotherAttr_in_changeEClass_FooClass_in_foo(final EAttribute it) {
-			  }
-			}
-			'''
-		)
-	}
-
-	@Test
 	def void testModifyEcore() {
 		'''
 			metamodel "foo"
@@ -823,24 +771,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="foo" nsURI="http://foo" nsPrefix="foo">
 			  <eClassifiers xsi:type="ecore:EClass" name="RenamedClass" abstract="true">
-			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="anotherAttr" eType="#//FooDataType"/>
-			  </eClassifiers>
-			  <eClassifiers xsi:type="ecore:EClass" name="FooDerivedClass" eSuperTypes="#//RenamedClass"/>
-			  <eClassifiers xsi:type="ecore:EDataType" name="FooDataType" instanceClassName="java.lang.String"/>
-			</ecore:EPackage>
-			''',
-			true
-		)
-	}
-
-	@Test
-	def void testExecutionChangeEClassWithNewName() {
-		referenceToChangedEClassWithANewName.checkCompiledCodeExecution(
-			'''
-			<?xml version="1.0" encoding="UTF-8"?>
-			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="foo" nsURI="http://foo" nsPrefix="foo">
-			  <eClassifiers xsi:type="ecore:EClass" name="RenamedClass">
 			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="anotherAttr" eType="#//FooDataType"/>
 			  </eClassifiers>
 			  <eClassifiers xsi:type="ecore:EClass" name="FooDerivedClass" eSuperTypes="#//RenamedClass"/>

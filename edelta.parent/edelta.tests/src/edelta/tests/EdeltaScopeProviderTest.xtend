@@ -308,53 +308,6 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForReferenceToChangedEClassWithNewName() {
-		// our changed EClass with the new name must be
-		// the one that is actually linked
-		val prog = referenceToChangedEClassWithANewName.
-			parseWithTestEcore
-		val expressions = prog.main.expressions
-		val eclassExp = expressions.last.edeltaEcoreReferenceExpression
-		assertSame(
-			// the one created by the derived state computer
-			prog.derivedStateLastEClass,
-			eclassExp.reference.enamedelement
-		)
-	}
-
-	@Test
-	def void testScopeForReferenceToChangedEClassWithNewName2() {
-		referenceToChangedEClassWithANewName.
-			parseWithTestEcore.lastExpression.
-			edeltaEcoreReferenceExpression.reference.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
-			'''
-			RenamedClass
-			myAttribute
-			myReference
-			anotherAttr
-			RenamedClass
-			FooDataType
-			FooEnum
-			myAttribute
-			myReference
-			anotherAttr
-			FooEnumLiteral
-			FooClass
-			FooDataType
-			FooEnum
-			myAttribute
-			myReference
-			FooEnumLiteral
-			foo
-			''')
-			// RenamedClass and FooClass (the original referred) are both returned
-			// by the scope provider
-			// anotherAttr is created in the changeEClass expression
-			// we also have copied EPackages, that's why elements appear twice
-	}
-
-	@Test
 	def void testScopeForReferenceToChangedEClassCopiedAttribute() {
 		// our changed EClass referred attribute must be the one
 		// of the copy, not the original one
