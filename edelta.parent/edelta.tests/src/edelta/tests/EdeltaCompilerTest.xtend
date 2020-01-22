@@ -221,41 +221,26 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testProgramWithMainExpression() {
-		programWithMainExpression.checkCompilation(
-			'''
-			package foo;
-			
-			import edelta.lib.AbstractEdelta;
-			import org.eclipse.emf.ecore.EClass;
-			import org.eclipse.xtext.xbase.lib.InputOutput;
-			
-			@SuppressWarnings("all")
-			public class MyFile0 extends AbstractEdelta {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
-			    super(other);
-			  }
-			  
-			  public EClass bar(final String s) {
-			    return this.lib.newEClass(s);
-			  }
-			  
-			  @Override
-			  protected void doExecute() throws Exception {
-			    InputOutput.<EClass>println(this.bar("foo"));
-			  }
-			}
-			'''
-		)
-	}
-
-	@Test
 	def void testCompilationOfEcoreReferenceExpression() {
-		ecoreReferenceExpressions.checkCompilation(
+		'''
+		package foo;
+		
+		metamodel "foo"
+		
+		modifyEcore aTest epackage foo {
+			ecoreref(foo)
+			println(ecoreref(foo))
+			ecoreref(FooClass)
+			println(ecoreref(FooClass))
+			ecoreref(myAttribute)
+			println(ecoreref(myAttribute))
+			ecoreref(FooEnum)
+			println(ecoreref(FooEnum))
+			ecoreref(FooEnumLiteral)
+			println(ecoreref(FooEnumLiteral))
+			val ref = ecoreref(myReference)
+		}
+		'''.checkCompilation(
 			'''
 			package foo;
 			
@@ -278,13 +263,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    super(other);
 			  }
 			  
-			  @Override
-			  public void performSanityChecks() throws Exception {
-			    ensureEPackageIsLoaded("foo");
-			  }
-			  
-			  @Override
-			  protected void doExecute() throws Exception {
+			  public void aTest(final EPackage it) {
 			    getEPackage("foo");
 			    InputOutput.<EPackage>println(getEPackage("foo"));
 			    getEClass("foo", "FooClass");
@@ -297,6 +276,16 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    InputOutput.<EEnumLiteral>println(getEEnumLiteral("foo", "FooEnum", "FooEnumLiteral"));
 			    final EReference ref = getEReference("foo", "FooClass", "myReference");
 			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    aTest(getEPackage("foo"));
+			  }
 			}
 			'''
 		)
@@ -304,13 +293,20 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testCompilationOfEclassExpressionWithNonExistantEClass() {
-		"println(ecoreref(Foo))".checkCompilation(
+		'''
+		package foo;
+		
+		metamodel "foo"
+		
+		modifyEcore aTest epackage foo {
+			ecoreref(NonExistent)
+		}
+		'''.checkCompilation(
 			'''
-			package edelta;
+			package foo;
 			
 			import edelta.lib.AbstractEdelta;
-			import org.eclipse.emf.ecore.ENamedElement;
-			import org.eclipse.xtext.xbase.lib.InputOutput;
+			import org.eclipse.emf.ecore.EPackage;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends AbstractEdelta {
@@ -322,147 +318,22 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    super(other);
 			  }
 			  
+			  public void aTest(final EPackage it) {
+			    getENamedElement("", "", "");
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
 			  @Override
 			  protected void doExecute() throws Exception {
-			    InputOutput.<ENamedElement>println(getENamedElement("", "", ""));
+			    aTest(getEPackage("foo"));
 			  }
 			}
 			''',
 			false
-		)
-	}
-
-	@Test
-	def void testCreateEClass() {
-		createEClass.checkCompilation(
-			'''
-			package edelta;
-			
-			import edelta.lib.AbstractEdelta;
-			import org.eclipse.emf.common.util.EList;
-			import org.eclipse.emf.ecore.EClass;
-			
-			@SuppressWarnings("all")
-			public class MyFile0 extends AbstractEdelta {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
-			    super(other);
-			  }
-			  
-			  @Override
-			  public void performSanityChecks() throws Exception {
-			    ensureEPackageIsLoaded("foo");
-			  }
-			  
-			  @Override
-			  protected void doExecute() throws Exception {
-			    createEClass("foo", "MyNewClass", createList(this::_createEClass_MyNewClass_in_foo));
-			    createEClass("foo", "MyDerivedNewClass", createList(this::_createEClass_MyDerivedNewClass_in_foo));
-			  }
-			  
-			  public void _createEClass_MyNewClass_in_foo(final EClass it) {
-			  }
-			  
-			  public void _createEClass_MyDerivedNewClass_in_foo(final EClass it) {
-			    EList<EClass> _eSuperTypes = it.getESuperTypes();
-			    _eSuperTypes.add(getEClass("foo", "MyNewClass"));
-			  }
-			}
-			'''
-		)
-	}
-
-	@Test
-	def void testCreateEClassWithSuperTypes() {
-		createEClassWithSuperTypes.checkCompilation(
-			'''
-			package edelta;
-			
-			import edelta.lib.AbstractEdelta;
-			import org.eclipse.emf.ecore.EClass;
-			
-			@SuppressWarnings("all")
-			public class MyFile0 extends AbstractEdelta {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
-			    super(other);
-			  }
-			  
-			  @Override
-			  public void performSanityChecks() throws Exception {
-			    ensureEPackageIsLoaded("foo");
-			  }
-			  
-			  @Override
-			  protected void doExecute() throws Exception {
-			    createEClass("foo", "MyNewClass", 
-			      createList(
-			        c -> {
-			          c.getESuperTypes().add(getEClass("foo", "FooClass"));
-			        },
-			        this::_createEClass_MyNewClass_in_foo
-			      )
-			    );
-			  }
-			  
-			  public void _createEClass_MyNewClass_in_foo(final EClass it) {
-			  }
-			}
-			'''
-		)
-	}
-
-	@Test
-	def void testCreateEClassWithSuperTypes2() {
-		createEClassWithSuperTypes2.checkCompilation(
-			'''
-			package edelta;
-			
-			import edelta.lib.AbstractEdelta;
-			import org.eclipse.emf.ecore.EClass;
-			
-			@SuppressWarnings("all")
-			public class MyFile0 extends AbstractEdelta {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
-			    super(other);
-			  }
-			  
-			  @Override
-			  public void performSanityChecks() throws Exception {
-			    ensureEPackageIsLoaded("foo");
-			  }
-			  
-			  @Override
-			  protected void doExecute() throws Exception {
-			    createEClass("foo", "BaseClass", createList(this::_createEClass_BaseClass_in_foo));
-			    createEClass("foo", "MyNewClass", 
-			      createList(
-			        c -> {
-			          c.getESuperTypes().add(getEClass("foo", "FooClass"));
-			          c.getESuperTypes().add(getEClass("foo", "BaseClass"));
-			        },
-			        this::_createEClass_MyNewClass_in_foo
-			      )
-			    );
-			  }
-			  
-			  public void _createEClass_BaseClass_in_foo(final EClass it) {
-			  }
-			  
-			  public void _createEClass_MyNewClass_in_foo(final EClass it) {
-			  }
-			}
-			'''
 		)
 	}
 
@@ -705,24 +576,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  }
 			}
 			'''
-		)
-	}
-
-	@Test
-	def void testExecutionCreateEClassWithSuperTypes2() {
-		createEClassWithSuperTypes2.checkCompiledCodeExecution(
-			'''
-			<?xml version="1.0" encoding="UTF-8"?>
-			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="foo" nsURI="http://foo" nsPrefix="foo">
-			  <eClassifiers xsi:type="ecore:EClass" name="FooClass"/>
-			  <eClassifiers xsi:type="ecore:EClass" name="FooDerivedClass" eSuperTypes="#//FooClass"/>
-			  <eClassifiers xsi:type="ecore:EDataType" name="FooDataType" instanceClassName="java.lang.String"/>
-			  <eClassifiers xsi:type="ecore:EClass" name="BaseClass"/>
-			  <eClassifiers xsi:type="ecore:EClass" name="MyNewClass" eSuperTypes="#//FooClass #//BaseClass"/>
-			</ecore:EPackage>
-			''',
-			true
 		)
 	}
 
