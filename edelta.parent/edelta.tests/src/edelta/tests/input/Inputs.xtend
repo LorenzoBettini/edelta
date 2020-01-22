@@ -128,8 +128,12 @@ class Inputs {
 		'''
 			metamodel "foo"
 			
-			createEClass NewClass in foo {}
-			ecoreref(NewClass)
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass")
+			}
+			modifyEcore anotherTest epackage foo {
+				ecoreref(NewClass)
+			}
 		'''
 	}
 

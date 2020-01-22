@@ -42,11 +42,10 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			getProgramENamedElements.
 			assertNamedElements(
 				'''
-				NewClass
-				NewClass
 				FooClass
 				FooDataType
 				FooEnum
+				NewClass
 				myAttribute
 				myReference
 				FooEnumLiteral
@@ -60,7 +59,6 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				'''
 			)
 		// NewClass is the one created in the program
-		// we also have copied EPackages, that's why the classes appear twice
 		]
 	}
 
@@ -70,7 +68,6 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			getProgramENamedElementsWithoutCopiedEPackages.
 			assertNamedElements(
 				'''
-				NewClass
 				FooClass
 				FooDataType
 				FooEnum
@@ -80,7 +77,8 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				foo
 				'''
 			)
-		// NewClass is the one created in the program
+			// NewClass is the one created in the program
+			// but it's in the copied EPackages, not used here
 		]
 	}
 
@@ -104,18 +102,16 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			getENamedElements(getEPackageByName("foo"), it).
 			assertNamedElements(
 				'''
-				NewClass
-				NewClass
 				FooClass
 				FooDataType
 				FooEnum
+				NewClass
 				FooClass
 				FooDataType
 				FooEnum
 				'''
 			)
 		// NewClass is the one created in the program
-		// we also have copied EPackages, that's why the classes appear twice
 		]
 	}
 
@@ -128,10 +124,10 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				FooClass
 				FooDataType
 				FooEnum
-				NewClass
 				'''
 			)
-		// NewClass is the one created in the program
+			// NewClass is the one created in the program
+			// but it's in the copied EPackages, not used here
 		]
 	}
 

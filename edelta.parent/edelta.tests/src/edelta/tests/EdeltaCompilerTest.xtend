@@ -344,7 +344,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
-			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.emf.ecore.EPackage;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends AbstractEdelta {
@@ -356,6 +356,14 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    super(other);
 			  }
 			  
+			  public void aTest(final EPackage it) {
+			    this.lib.addNewEClass(it, "NewClass");
+			  }
+			  
+			  public void anotherTest(final EPackage it) {
+			    getEClass("foo", "NewClass");
+			  }
+			  
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
@@ -363,11 +371,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  @Override
 			  protected void doExecute() throws Exception {
-			    createEClass("foo", "NewClass", createList(this::_createEClass_NewClass_in_foo));
-			    getEClass("foo", "NewClass");
-			  }
-			  
-			  public void _createEClass_NewClass_in_foo(final EClass it) {
+			    aTest(getEPackage("foo"));
+			    anotherTest(getEPackage("foo"));
 			  }
 			}
 			'''
