@@ -109,7 +109,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	@Test def void testUnqualifiedEcoreReference() {
 		newBuilder.append('''
 			metamodel "mypackage"
-			modifyEcore aTest package mypackage { 
+			modifyEcore aTest epackage mypackage { 
 				ecoreref(''').
 			assertText('''
 				MyBaseClass
@@ -129,7 +129,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	@Test def void testQualifiedEcoreReference() {
 		newBuilder.append('''
 			metamodel "mypackage"
-			modifyEcore aTest package mypackage { 
+			modifyEcore aTest epackage mypackage { 
 				ecoreref(MyClass.''').
 			assertText('myAttribute', 'myReference')
 	}
