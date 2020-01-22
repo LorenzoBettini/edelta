@@ -148,11 +148,13 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testDerivedStateForCreatedEClassWithMissingPackage() {
+	def void testDerivedStateForModifyEcoreWithMissingPackage() {
 		val program = '''
-		package test
-		
-		createEClass First in 
+			package test
+
+			metamodel "foo"
+
+			modifyEcore aTest
 		'''.
 		parseWithTestEcore
 		val resource = program.eResource as DerivedStateAwareResource
