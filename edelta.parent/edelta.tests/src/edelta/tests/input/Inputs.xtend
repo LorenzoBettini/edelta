@@ -289,56 +289,9 @@ class Inputs {
 		'''
 			metamodel "foo"
 			
-			changeEClass foo.FooClass {
-				val attr = ecoreref(FooClass.myAttribute)
-				EStructuralFeatures -= attr
+			modifyEcore aTest epackage foo {
+				ecoreref(FooClass).EStructuralFeatures -= ecoreref(FooClass.myAttribute)
 			}
-		'''
-	}
-
-	def createEClassAndAddEAttributeUsingLibMethodAndReference() {
-		'''
-			metamodel "foo"
-			
-			createEClass NewClass in foo {
-				EStructuralFeatures += newEAttribute("newTestAttr") [
-					EType = ecoreref(FooDataType)
-				]
-			}
-			
-			ecoreref(newTestAttr)
-		'''
-	}
-
-	def createEClassUsingLibMethods() {
-		'''
-		import org.eclipse.emf.ecore.EClass
-
-		metamodel "foo"
-
-		createEClass ANewClass in foo {
-			addNewEAttribute("ANewAttribute", ecoreref(FooDataType)) [
-				lowerBound = 1
-			]
-			addNewEReference("ANewReference", ecoreref(FooClass)) [
-				lowerBound = 1
-			]
-			// the containing EPackage
-			getEPackage => [
-				addNewEEnum("ANewEnum") [
-					addNewEEnumLiteral("ANewEnumLiteral") [
-						value = 10
-					]
-				]
-				addNewEDataType("ANewDataType", "java.lang.String")
-			]
-			ecoreref(ANewClass)
-			ecoreref(ANewClass.ANewAttribute)
-			ecoreref(ANewClass.ANewReference)
-			ecoreref(ANewEnum)
-			ecoreref(ANewEnum.ANewEnumLiteral)
-			ecoreref(ANewDataType)
-		}
 		'''
 	}
 

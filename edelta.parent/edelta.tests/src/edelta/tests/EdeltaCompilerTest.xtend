@@ -835,8 +835,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			import edelta.lib.AbstractEdelta;
 			import org.eclipse.emf.common.util.EList;
-			import org.eclipse.emf.ecore.EAttribute;
-			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.emf.ecore.EPackage;
 			import org.eclipse.emf.ecore.EStructuralFeature;
 			
 			@SuppressWarnings("all")
@@ -849,6 +848,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    super(other);
 			  }
 			  
+			  public void aTest(final EPackage it) {
+			    EList<EStructuralFeature> _eStructuralFeatures = getEClass("foo", "FooClass").getEStructuralFeatures();
+			    _eStructuralFeatures.remove(getEAttribute("foo", "FooClass", "myAttribute"));
+			  }
+			  
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
@@ -856,15 +860,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  @Override
 			  protected void doExecute() throws Exception {
-			    changeEClass("foo", "FooClass", createList(this::_changeEClass_FooClass_in_foo));
-			  }
-			  
-			  public void _changeEClass_FooClass_in_foo(final EClass it) {
-			    {
-			      final EAttribute attr = getEAttribute("foo", "FooClass", "myAttribute");
-			      EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
-			      _eStructuralFeatures.remove(attr);
-			    }
+			    aTest(getEPackage("foo"));
 			  }
 			}
 			'''
@@ -872,127 +868,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			// it must be getEAttribute("foo", "FooClass", "myAttribute")
 			// since we use the originalENamedElement
 			// (the interpeter removes the myAttribute from FooClass)
-		)
-	}
-
-	@Test
-	def void testCompilationAfterInterpretationCreateEClassAddingAttributeUsingLibMethod() {
-		createEClassAndAddEAttributeUsingLibMethodAndReference.
-		checkCompilation(
-			'''
-			package edelta;
-			
-			import edelta.lib.AbstractEdelta;
-			import java.util.function.Consumer;
-			import org.eclipse.emf.common.util.EList;
-			import org.eclipse.emf.ecore.EAttribute;
-			import org.eclipse.emf.ecore.EClass;
-			import org.eclipse.emf.ecore.EStructuralFeature;
-			
-			@SuppressWarnings("all")
-			public class MyFile0 extends AbstractEdelta {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
-			    super(other);
-			  }
-			  
-			  @Override
-			  public void performSanityChecks() throws Exception {
-			    ensureEPackageIsLoaded("foo");
-			  }
-			  
-			  @Override
-			  protected void doExecute() throws Exception {
-			    createEClass("foo", "NewClass", createList(this::_createEClass_NewClass_in_foo));
-			    getEAttribute("foo", "NewClass", "newTestAttr");
-			  }
-			  
-			  public void _createEClass_NewClass_in_foo(final EClass it) {
-			    EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
-			    final Consumer<EAttribute> _function = (EAttribute it_1) -> {
-			      it_1.setEType(getEDataType("foo", "FooDataType"));
-			    };
-			    EAttribute _newEAttribute = this.lib.newEAttribute("newTestAttr", _function);
-			    _eStructuralFeatures.add(_newEAttribute);
-			  }
-			}
-			'''
-		)
-	}
-
-	@Test
-	def void testCompilationOfCreateEClassCallingLibMethods() {
-		createEClassUsingLibMethods.
-		checkCompilation(
-			'''
-			package edelta;
-			
-			import edelta.lib.AbstractEdelta;
-			import java.util.function.Consumer;
-			import org.eclipse.emf.ecore.EAttribute;
-			import org.eclipse.emf.ecore.EClass;
-			import org.eclipse.emf.ecore.EEnum;
-			import org.eclipse.emf.ecore.EEnumLiteral;
-			import org.eclipse.emf.ecore.EPackage;
-			import org.eclipse.emf.ecore.EReference;
-			import org.eclipse.xtext.xbase.lib.ObjectExtensions;
-			import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
-			
-			@SuppressWarnings("all")
-			public class MyFile0 extends AbstractEdelta {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
-			    super(other);
-			  }
-			  
-			  @Override
-			  public void performSanityChecks() throws Exception {
-			    ensureEPackageIsLoaded("foo");
-			  }
-			  
-			  @Override
-			  protected void doExecute() throws Exception {
-			    createEClass("foo", "ANewClass", createList(this::_createEClass_ANewClass_in_foo));
-			  }
-			  
-			  public void _createEClass_ANewClass_in_foo(final EClass it) {
-			    {
-			      final Consumer<EAttribute> _function = (EAttribute it_1) -> {
-			        it_1.setLowerBound(1);
-			      };
-			      this.lib.addNewEAttribute(it, "ANewAttribute", getEDataType("foo", "FooDataType"), _function);
-			      final Consumer<EReference> _function_1 = (EReference it_1) -> {
-			        it_1.setLowerBound(1);
-			      };
-			      this.lib.addNewEReference(it, "ANewReference", getEClass("foo", "FooClass"), _function_1);
-			      EPackage _ePackage = it.getEPackage();
-			      final Procedure1<EPackage> _function_2 = (EPackage it_1) -> {
-			        final Consumer<EEnum> _function_3 = (EEnum it_2) -> {
-			          final Consumer<EEnumLiteral> _function_4 = (EEnumLiteral it_3) -> {
-			            it_3.setValue(10);
-			          };
-			          this.lib.addNewEEnumLiteral(it_2, "ANewEnumLiteral", _function_4);
-			        };
-			        this.lib.addNewEEnum(it_1, "ANewEnum", _function_3);
-			        this.lib.addNewEDataType(it_1, "ANewDataType", "java.lang.String");
-			      };
-			      ObjectExtensions.<EPackage>operator_doubleArrow(_ePackage, _function_2);
-			      getEClass("foo", "ANewClass");
-			      getEAttribute("foo", "ANewClass", "ANewAttribute");
-			      getEReference("foo", "ANewClass", "ANewReference");
-			      getEEnum("foo", "ANewEnum");
-			      getEEnumLiteral("foo", "ANewEnum", "ANewEnumLiteral");
-			      getEDataType("foo", "ANewDataType");
-			    }
-			  }
-			}
-			'''
 		)
 	}
 

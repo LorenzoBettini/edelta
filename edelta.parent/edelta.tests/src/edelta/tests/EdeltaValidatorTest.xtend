@@ -382,11 +382,6 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testValidLibMethodsInCreateEClass() {
-		createEClassUsingLibMethods.parseWithTestEcore.assertNoErrors
-	}
-
-	@Test
 	def void testValidLibMethodsInModifyEcore() {
 		modifyEcoreUsingLibMethods.parseWithTestEcore.assertNoErrors
 	}
