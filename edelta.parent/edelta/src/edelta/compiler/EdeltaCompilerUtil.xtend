@@ -101,7 +101,7 @@ class EdeltaCompilerUtil {
 
 	def getStringForEcoreReferenceExpression(EdeltaEcoreReferenceExpression e) {
 		val reference = e.reference
-		if (reference === null)
+		if (reference === null || reference.enamedelement === null)
 			return "null"
 		getStringForEcoreReference(reference)
 	}
