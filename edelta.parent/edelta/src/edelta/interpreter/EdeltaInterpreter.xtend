@@ -177,20 +177,22 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 			return doEvaluate(expression.reference, context, indicator)
 		} else if (expression instanceof EdeltaEcoreReference) {
 			val elementWrapper = new Wrapper
-			buildMethodToCallForEcoreReference(expression) [
-				methodName, args |
-				val op = findJvmOperation(methodName)
-				// it could be null due to an unresolved reference
-				// the returned op would be getENamedElement
-				// which does not exist in AbstractEdelta
-				if (op !== null) {
-					val ref = super.invokeOperation(
-						op, edelta,
-						args, context, indicator
-					)
-					elementWrapper.set(ref)
-				}
-			]
+			if (expression.enamedelement !== null) {
+				buildMethodToCallForEcoreReference(expression) [
+					methodName, args |
+					val op = findJvmOperation(methodName)
+					// it could be null due to an unresolved reference
+					// the returned op would be getENamedElement
+					// which does not exist in AbstractEdelta
+					if (op !== null) {
+						val ref = super.invokeOperation(
+							op, edelta,
+							args, context, indicator
+						)
+						elementWrapper.set(ref)
+					}
+				]
+			}
 			return elementWrapper.get
 		} else if (expression instanceof EdeltaEcoreCreateEAttributeExpression) {
 			val eclass = context.getValue(IT_QUALIFIED_NAME) as EClass
