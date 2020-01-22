@@ -9,7 +9,7 @@ import edelta.interpreter.IEdeltaInterpreter
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 import edelta.tests.additional.MyCustomException
 import edelta.validation.EdeltaValidator
-import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
@@ -19,7 +19,6 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
-import org.eclipse.emf.ecore.EAttribute
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -44,8 +43,19 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testCreateEClassAndCallLibMethod() {
-		createEClassAndAddEAttributeUsingLibMethod.
-		assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
+		'''
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass") [
+					EStructuralFeatures += newEAttribute("newTestAttr") [
+						EType = ecoreref(FooDataType)
+					]
+				]
+			}
+		'''
+		.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
+			val derivedEClass = ePackage.lastEClass
 			assertEquals("NewClass", derivedEClass.name)
 			assertEquals(1, derivedEClass.EStructuralFeatures.size)
 			val attr = derivedEClass.EStructuralFeatures.head
@@ -59,11 +69,14 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		'''
 			metamodel "foo"
 			
-			createEClass NewClass in foo {
-				// call method from superclass AbstractEdelta
-				EStructuralFeatures += ^createEAttribute(it, "aNewAttr", null)
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass") [
+					// call method from superclass AbstractEdelta
+					EStructuralFeatures += ^createEAttribute(it, "aNewAttr", null)
+				]
 			}
-		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
+		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
+			val derivedEClass = ePackage.lastEClass
 			assertEquals("NewClass", derivedEClass.name)
 			assertEquals(1, derivedEClass.EStructuralFeatures.size)
 			val attr = derivedEClass.EStructuralFeatures.head
@@ -93,6 +106,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
 	def void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() {
 		assertThatThrownBy[
 		'''
@@ -101,7 +115,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			use NonExistant as my
 			
 			modifyEcore aTest epackage foo {
-				my.createANewEAttribute(addNewEClass("NewClass"))
+				val c = addNewEClass("NewClass")
+				my.createANewEAttribute(c)
 			}
 		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ /* will not get here */ ]
 		].isInstanceOf(IllegalStateException)
@@ -121,11 +136,11 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			metamodel "foo"
 
 			use MyCustomEdeltaThatCannotBeLoadedAtRuntime as my
-
-			createEClass NewClass in foo {
+			
+			modifyEcore aTest epackage foo {
 				my.aMethod()
 			}
-		'''.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ /* will not get here */ ]
+		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ /* will not get here */ ]
 		].isInstanceOf(EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException)
 			.hasMessageContaining('''The type '«MyCustomEdeltaThatCannotBeLoadedAtRuntime.name»' has been resolved but cannot be loaded by the interpreter''')
 	}
@@ -135,66 +150,20 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		'''
 			metamodel "foo"
 			
-			createEClass NewClass in foo {
-				createEAttribute newTestAttr type FooDataType {
-					lowerBound = -1
-				}
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass") [
+					addNewEAttribute("newTestAttr", ecoreref(FooDataType)) [
+						lowerBound = -1
+					]
+				]
 			}
-		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
+		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
+			val derivedEClass = ePackage.lastEClass
 			assertEquals("NewClass", derivedEClass.name)
 			assertEquals(1, derivedEClass.EStructuralFeatures.size)
 			val attr = derivedEClass.EStructuralFeatures.head
 			assertEquals("newTestAttr", attr.name)
 			assertEquals(-1, attr.lowerBound)
-			assertEquals("FooDataType", attr.EType.name)
-		]
-	}
-
-	@Test
-	def void testCreateEClassAndCreateEAttributeAndCallOperationFromUseAs() {
-		'''
-			import edelta.tests.additional.MyCustomEdelta
-			
-			metamodel "foo"
-			
-			use MyCustomEdelta as my
-			
-			createEClass NewClass in foo {
-				createEAttribute newTestAttr type FooDataType {
-					my.setAttributeBounds(it, 1, -1)
-				}
-			}
-		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
-			assertEquals("NewClass", derivedEClass.name)
-			assertEquals(1, derivedEClass.EStructuralFeatures.size)
-			val attr = derivedEClass.EStructuralFeatures.head
-			assertEquals("newTestAttr", attr.name)
-			assertEquals(1, attr.lowerBound)
-			assertEquals(-1, attr.upperBound)
-			assertEquals("FooDataType", attr.EType.name)
-		]
-	}
-
-	@Test
-	def void testChangeEClassAndCreateEAttributeAndCallOperationFromUseAs() {
-		'''
-			import edelta.tests.additional.MyCustomEdelta
-			
-			metamodel "foo"
-			
-			use MyCustomEdelta as my
-			
-			changeEClass foo.FooClass {
-				createEAttribute newTestAttr type FooDataType {
-					my.setAttributeBounds(it, 1, -1)
-				}
-			}
-		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
-			assertEquals("FooClass", derivedEClass.name)
-			val attr = derivedEClass.EStructuralFeatures.last
-			assertEquals("newTestAttr", attr.name)
-			assertEquals(1, attr.lowerBound)
-			assertEquals(-1, attr.upperBound)
 			assertEquals("FooDataType", attr.EType.name)
 		]
 	}
@@ -208,12 +177,14 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			
 			use MyCustomEdelta as my
 			
-			changeEClass foo.FooClass newName Renamed {
-				createEAttribute newTestAttr type FooDataType {
+			modifyEcore aTest epackage foo {
+				ecoreref(foo.FooClass).name = "Renamed"
+				ecoreref(Renamed).addNewEAttribute("newTestAttr", ecoreref(FooDataType)) [
 					my.setAttributeBounds(it, 1, -1)
-				}
+				]
 			}
-		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
+		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
+			val derivedEClass = ePackage.firstEClass
 			assertEquals("Renamed", derivedEClass.name)
 			val attr = derivedEClass.EStructuralFeatures.last
 			assertEquals("newTestAttr", attr.name)
@@ -227,7 +198,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	def void testEClassCreatedFromUseAs() {
 		useAsCustomEdeltaCreatingEClass
 		.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
-			val eClass = ePackage.EClassifiers.last as EClass
+			val eClass = ePackage.lastEClass
 			assertEquals("ANewClass", eClass.name)
 			assertEquals("aNewAttr",
 				(eClass.EStructuralFeatures.head as EAttribute).name
@@ -239,7 +210,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	def void testEClassCreatedFromUseAsAsExtension() {
 		useAsCustomEdeltaAsExtensionCreatingEClass
 		.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
-			val eClass = ePackage.EClassifiers.last as EClass
+			val eClass = ePackage.lastEClass
 			assertEquals("ANewClass", eClass.name)
 			assertEquals("aNewAttr",
 				(eClass.EStructuralFeatures.head as EAttribute).name
@@ -251,56 +222,11 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	def void testEClassCreatedFromStatefuleUseAs() {
 		useAsCustomStatefulEdeltaCreatingEClass
 		.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
-			val eClass = ePackage.EClassifiers.last as EClass
+			val eClass = ePackage.lastEClass
 			assertEquals("ANewClass1", eClass.name)
 			assertEquals("aNewAttr2",
 				(eClass.EStructuralFeatures.head as EAttribute).name
 			)
-		]
-	}
-
-	@Test
-	def void testRenameClassAndAddAttribute() {
-		'''
-			import org.eclipse.emf.ecore.EClass
-			
-			metamodel "foo"
-			
-			def op(EClass c) : void {
-				c.abstract = true
-			}
-			
-			changeEClass foo.FooClass {
-				name = "RenamedClass"
-				ecoreref(RenamedClass).ESuperTypes += newEClass("Base")
-				op(ecoreref(RenamedClass))
-				ecoreref(RenamedClass).getEStructuralFeatures += newEAttribute("added")
-			}
-		'''.
-		assertAfterInterpretationOfEdeltaManipulationExpression(false) [
-			assertEquals("RenamedClass", name)
-			assertEquals("Base", ESuperTypes.last.name)
-			assertTrue(isAbstract)
-			assertEquals("added", EStructuralFeatures.last.name)
-		]
-	}
-
-	@Test
-	def void testRenameClassAndAddAttribute2() {
-		'''
-			import org.eclipse.emf.ecore.EClass
-			
-			metamodel "foo"
-			
-			changeEClass foo.FooClass {
-				name = "RenamedClass"
-				ecoreref(RenamedClass).getEStructuralFeatures += newEAttribute("added")
-				ecoreref(RenamedClass.added)
-			}
-		'''.
-		assertAfterInterpretationOfEdeltaManipulationExpression(false) [
-			assertEquals("RenamedClass", name)
-			assertEquals("added", EStructuralFeatures.last.name)
 		]
 	}
 
@@ -329,6 +255,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			metamodel "foo"
 			
 			modifyEcore aTest epackage foo {
+				addNewEClass("First")
 				eclass First
 			}
 		'''
@@ -348,7 +275,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			}
 		'''
 		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ derivedEPackage |
-			derivedEPackage.EClassifiers.last as EClass => [
+			derivedEPackage.lastEClass => [
 				assertEquals("NewClass1", name)
 			]
 		]
@@ -367,7 +294,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			}
 		'''
 		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ derivedEPackage |
-			derivedEPackage.EClassifiers.last as EClass => [
+			derivedEPackage.lastEClass => [
 				assertEquals("NewClass1", name)
 			]
 		]
@@ -387,7 +314,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			}
 		'''
 		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation [ derivedEPackage |
-			derivedEPackage.EClassifiers.last as EClass => [
+			derivedEPackage.lastEClass => [
 				assertEquals("ANewClass", name)
 				assertEquals("Base", ESuperTypes.last.name)
 			]
@@ -412,7 +339,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				]
 			}
 		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation [ derivedEPackage |
-			derivedEPackage.EClassifiers.last as EClass => [
+			derivedEPackage.lastEClass => [
 				assertEquals("ANewClass", name)
 				assertEquals("Base", ESuperTypes.last.name)
 				assertTrue(isAbstract)
@@ -439,7 +366,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			}
 		'''.
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(true) [ derivedEPackage |
-			derivedEPackage.EClassifiers.head as EClass => [
+			derivedEPackage.firstEClass => [
 				assertEquals("RenamedClass", name)
 				assertEquals("Base", ESuperTypes.last.name)
 				assertTrue(isAbstract)
@@ -462,7 +389,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			}
 		'''.
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(true) [ derivedEPackage |
-			derivedEPackage.EClassifiers.head as EClass => [
+			derivedEPackage.firstEClass => [
 				assertEquals("RenamedClass", name)
 				assertEquals("added", EStructuralFeatures.last.name)
 			]
@@ -494,7 +421,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			}
 		'''
 		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation [ derivedEPackage |
-			derivedEPackage.EClassifiers.last as EClass => [
+			derivedEPackage.lastEClass => [
 				assertEquals("ANewClass", name)
 				assertEquals(false, abstract)
 				val initialIndex = input.lastIndexOf("{")
@@ -506,18 +433,6 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				)
 			]
 		]
-	}
-
-	def protected assertAfterInterpretationOfEdeltaManipulationExpression(CharSequence input, (EClass)=>void testExecutor) {
-		assertAfterInterpretationOfEdeltaManipulationExpression(input, true, testExecutor)
-	}
-
-	def protected assertAfterInterpretationOfEdeltaManipulationExpression(CharSequence input, boolean doValidate, (EClass)=>void testExecutor) {
-		val program = input.parseWithTestEcore
-		if (doValidate) {
-			program.assertNoErrors
-		}
-		assertAfterInterpretationOfEdeltaManipulationExpression(interpreter, program, doValidate, testExecutor)
 	}
 
 	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
