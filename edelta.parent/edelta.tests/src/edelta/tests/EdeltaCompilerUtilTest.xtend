@@ -8,7 +8,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
-import edelta.edelta.EdeltaEcoreReferenceExpression
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -72,13 +71,4 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 		]
 	}
 
-	def private ecoreReferenceExpression(CharSequence ecoreRefString) {
-		'''
-			metamodel "foo"
-			
-			modifyEcore aTest epackage foo {
-				«ecoreRefString»
-			}
-		'''.parseWithTestEcore.lastModifyEcoreOperation.body.block.expressions.last as EdeltaEcoreReferenceExpression
-	}
 }

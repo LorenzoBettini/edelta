@@ -146,18 +146,6 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForReferenceToEClass() {
-		val prog = referenceToEClass.
-			parseWithTestEcore
-		val expressions = prog.main.expressions
-		val eclassExp = expressions.last as EdeltaEcoreReferenceExpression
-		assertSame(
-			prog.getEClassifierByName("foo", "FooClass"),
-			eclassExp.reference.enamedelement
-		)
-	}
-
-	@Test
 	def void testScopeForReferenceToCreatedEClassWithTheSameNameAsAnExistingEClass() {
 		// our created EClass with the same name as an existing one must be
 		// the one that is actually linked

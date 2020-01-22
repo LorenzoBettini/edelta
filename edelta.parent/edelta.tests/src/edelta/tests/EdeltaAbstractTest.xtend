@@ -317,4 +317,15 @@ abstract class EdeltaAbstractTest {
 		ePackage.EClassifiers.head as EClass
 	}
 
+	def protected ecoreReferenceExpression(CharSequence ecoreRefString) {
+		'''
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				«ecoreRefString»
+			}
+		'''.parseWithTestEcore
+			.lastModifyEcoreOperation.body
+			.blockLastExpression as EdeltaEcoreReferenceExpression
+	}
 }
