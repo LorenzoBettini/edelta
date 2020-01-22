@@ -364,17 +364,6 @@ createList(this::_createEAttribute_attr_in_createEClass_MyDerivedNewClass_in_foo
 	}
 
 	@Test
-	def void testGetStringForEcoreReferenceExpressionEClassWhenCreateEClassStealingAttribute() {
-		createEClassStealingAttribute.parseWithTestEcore.
-		lastExpression.
-			createEClassExpression.body.expressions.head.variableDeclaration.right.
-			edeltaEcoreReferenceExpression => [
-			'getEAttribute("foo", "FooClass", "myAttribute")'.
-				assertEquals(stringForEcoreReferenceExpression)
-		]
-	}
-
-	@Test
 	def void testGetStringForEcoreReferenceExpressionEClassWhenChangeEClassRemovingAttribute() {
 		changeEClassRemovingAttribute.parseWithTestEcore.
 		lastExpression.

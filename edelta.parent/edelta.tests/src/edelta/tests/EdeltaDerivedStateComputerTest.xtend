@@ -2,6 +2,7 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.edelta.EdeltaEcoreQualifiedReference
+import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException
 import edelta.resource.EdeltaDerivedStateComputer.EdeltaDerivedStateAdapter
@@ -10,7 +11,6 @@ import org.eclipse.emf.common.notify.impl.AdapterImpl
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EStructuralFeature
-import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.resource.DerivedStateAwareResource
@@ -24,6 +24,7 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.assertThat
 
+import static extension org.eclipse.xtext.EcoreUtil2.*
 import static extension org.junit.Assert.*
 
 @RunWith(XtextRunner)
@@ -321,12 +322,13 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		val program = '''
 			metamodel "foo"
 			
-			createEClass NewClass in foo {
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass")
 				ecoreref(FooClass).EPackage.EClassifiers.remove(ecoreref(FooClass))
 			}
 		'''.
 		parseWithTestEcore
-		val derivedEClass = program.getDerivedStateLastEClass
+		val derivedEClass = program.getLastCopiedEPackageLastEClass
 		assertEquals("NewClass", derivedEClass.name)
 		program.validate
 		program.assertNoErrors
@@ -336,60 +338,6 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		program.getEPackageByName("foo").
 			EClassifiers.findFirst[name == "FooClass"].
 			assertNotNull
-	}
-
-	@Test
-	def void testInterpretedRemovedEClassDoesNotTouchTheOriginalEcore_Qualified() {
-		val program = '''
-			metamodel "foo"
-			
-			createEClass NewClass in foo {
-				ecoreref(foo.FooClass).EPackage.EClassifiers.remove(ecoreref(foo.FooClass))
-			}
-		'''.
-		parseWithTestEcore
-		val derivedEClass = program.getDerivedStateLastEClass
-		assertEquals("NewClass", derivedEClass.name)
-		program.validate
-		program.assertNoErrors
-		program.copiedEPackages.head.
-			EClassifiers.findFirst[name == "FooClass"].
-			assertNull
-		program.getEPackageByName("foo").
-			EClassifiers.findFirst[name == "FooClass"].
-			assertNotNull
-	}
-
-	@Test
-	def void testGetEClassWithTheSameName() {
-		val program = '''
-			metamodel "foo"
-			
-			changeEClass foo.FooClass {
-			}
-		'''.
-		parseWithTestEcore
-		val original = program.lastExpression.changeEClassExpression.original
-		val copies = program.copiedEPackages.toList
-		assertNotNull(copies.getEClassWithTheSameName(original))
-		val fake = EcoreFactory.eINSTANCE.createEClass => [name="fake"]
-		assertNull(copies.getEClassWithTheSameName(fake))
-		copies.clear
-		assertNull(copies.getEClassWithTheSameName(original))
-	}
-
-	@Test
-	def void testGetEClassWithTheSameNameNotFound() {
-		// make sure there's no NPE
-		val program = '''
-			metamodel "foo"
-			
-			changeEClass foo.NonExistant {
-			}
-		'''.
-		parseWithTestEcore
-		val original = program.lastExpression.changeEClassExpression.original
-		assertNotNull(original)
 	}
 
 	@Test
@@ -397,8 +345,9 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		val program = '''
 			metamodel "foo"
 			
-			createEClass NewClass in foo {
-				ecoreref(foo.FooClass).EPackage.EClassifiers.remove(ecoreref(foo.FooClass))
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass")
+				ecoreref(FooClass).EPackage.EClassifiers.remove(ecoreref(FooClass))
 			}
 		'''.
 		parseWithTestEcore
@@ -410,66 +359,6 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testDerivedAndCopiedEPackagesForModifyEcore() {
-		val program = '''
-		package test
-		
-		metamodel "foo"
-		
-		modifyEcore aTest epackage foo {}
-		'''.
-		parseWithTestEcore
-		var packages = program.eResource.derivedEPackages
-		assertEquals(1, packages.size)
-		assertEquals("foo", packages.head.name)
-		packages = program.eResource.copiedEPackages
-		assertEquals(1, packages.size)
-		assertEquals("foo", packages.head.name)
-	}
-
-	@Test
-	def void testDerivedStateForModifyEcoreCreatedEClass() {
-		val program = '''
-		package test
-		
-		metamodel "foo"
-		
-		modifyEcore aModificationTest epackage foo {
-			EClassifiers += newEClass("ANewClass") [
-				ESuperTypes += newEClass("Base")
-			]
-		}
-		'''.
-		parseWithTestEcore
-		val lastEClass = program.lastCopiedEPackageLastEClass
-		assertEquals("ANewClass", lastEClass.name)
-		assertEquals("foo", lastEClass.EPackage.name)
-	}
-
-	@Test
-	def void testInterpretedRemovedEClassInModifyEcoreDoesNotTouchTheOriginalEcore() {
-		val program = '''
-			metamodel "foo"
-			
-			modifyEcore aModificationTest epackage foo {
-				EClassifiers += newEClass("ANewClass")
-				ecoreref(FooClass).EPackage.EClassifiers.remove(ecoreref(FooClass))
-			}
-		'''.
-		parseWithTestEcore
-		val lastEClass = program.lastCopiedEPackageLastEClass
-		assertEquals("ANewClass", lastEClass.name)
-		program.validate
-		program.assertNoErrors
-		program.copiedEPackages.head.
-			EClassifiers.findFirst[name == "FooClass"].
-			assertNull
-		program.getEPackageByName("foo").
-			EClassifiers.findFirst[name == "FooClass"].
-			assertNotNull
-	}
-
-	@Test
 	def void testPersonListExampleModifyEcore() {
 		val prog = parseWithLoadedEcore(PERSON_LIST_ECORE_PATH,
 			personListExampleModifyEcore
@@ -477,10 +366,9 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		prog.assertNoErrors
 	}
 
-	protected def EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {
-		program.lastExpression.getManipulationEClassExpression.body.expressions.head.
-			variableDeclaration.right.
-			edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference
+	private def EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {
+		program.lastModifyEcoreOperation.body.getAllContentsOfType(EdeltaEcoreReferenceExpression)
+			.last.reference.edeltaEcoreQualifiedReference
 	}
 
 	def private assertEClassContainsFeature(EClass c, EStructuralFeature f, boolean expected) {

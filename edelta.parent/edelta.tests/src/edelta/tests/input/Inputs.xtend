@@ -374,9 +374,10 @@ class Inputs {
 		'''
 			metamodel "foo"
 			
-			createEClass NewClass in foo {
-				val attr = ecoreref(FooClass.myAttribute)
-				EStructuralFeatures += attr
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass") [
+					addEAttribute(ecoreref(FooClass.myAttribute))
+				]
 			}
 		'''
 	}

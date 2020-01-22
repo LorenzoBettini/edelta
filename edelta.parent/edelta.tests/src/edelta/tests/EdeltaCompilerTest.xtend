@@ -1140,16 +1140,15 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCompilationAfterInterpretationCreateEClassStealingAttribute() {
+	def void testCompilationAfterInterpretationOfCreatedEClassStealingAttribute() {
 		createEClassStealingAttribute.checkCompilation(
 			'''
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
-			import org.eclipse.emf.common.util.EList;
-			import org.eclipse.emf.ecore.EAttribute;
+			import java.util.function.Consumer;
 			import org.eclipse.emf.ecore.EClass;
-			import org.eclipse.emf.ecore.EStructuralFeature;
+			import org.eclipse.emf.ecore.EPackage;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends AbstractEdelta {
@@ -1161,6 +1160,13 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    super(other);
 			  }
 			  
+			  public void aTest(final EPackage it) {
+			    final Consumer<EClass> _function = (EClass it_1) -> {
+			      this.lib.addEAttribute(it_1, getEAttribute("foo", "FooClass", "myAttribute"));
+			    };
+			    this.lib.addNewEClass(it, "NewClass", _function);
+			  }
+			  
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
@@ -1168,22 +1174,14 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  @Override
 			  protected void doExecute() throws Exception {
-			    createEClass("foo", "NewClass", createList(this::_createEClass_NewClass_in_foo));
-			  }
-			  
-			  public void _createEClass_NewClass_in_foo(final EClass it) {
-			    {
-			      final EAttribute attr = getEAttribute("foo", "FooClass", "myAttribute");
-			      EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
-			      _eStructuralFeatures.add(attr);
-			    }
+			    aTest(getEPackage("foo"));
 			  }
 			}
 			'''
 			// Note:
 			// it must be getEAttribute("foo", "FooClass", "myAttribute")
 			// since we use the originalENamedElement
-			// (the interpeter changed the container of myAttribute to NewClass)
+			// (the interpreter changed the container of myAttribute to NewClass)
 		)
 	}
 
