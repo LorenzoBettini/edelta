@@ -1,8 +1,5 @@
 package edelta.typesystem
 
-import edelta.edelta.EdeltaEcoreChangeEClassExpression
-import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
-import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import org.eclipse.emf.ecore.EAttribute
@@ -21,34 +18,10 @@ class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 
 	override void computeTypes(XExpression e, ITypeComputationState state) {
 		switch (e) {
-			EdeltaEcoreCreateEClassExpression: _computeTypes(e, state)
-			EdeltaEcoreChangeEClassExpression: _computeTypes(e, state)
-			EdeltaEcoreCreateEAttributeExpression: _computeTypes(e, state)
 			EdeltaEcoreReferenceExpression: _computeTypes(e, state)
 			EdeltaEcoreReference: _computeTypes(e, state)
 			default: super.computeTypes(e, state)
 		}
-	}
-
-	def void _computeTypes(EdeltaEcoreCreateEClassExpression e, ITypeComputationState state) {
-		for (ecoreRefSuperType : e.ecoreReferenceSuperTypes) {
-			state.
-				withExpectation(getRawTypeForName(EClass, state)).
-				computeTypes(ecoreRefSuperType)
-		}
-		state.acceptActualType(getRawTypeForName(EClass, state))
-	}
-
-	def void _computeTypes(EdeltaEcoreChangeEClassExpression e, ITypeComputationState state) {
-		state.acceptActualType(getRawTypeForName(EClass, state))
-	}
-
-	def void _computeTypes(EdeltaEcoreCreateEAttributeExpression e, ITypeComputationState state) {
-		val etypeRef = e.ecoreReferenceDataType
-		state.
-			withExpectation(getRawTypeForName(EDataType, state)).
-			computeTypes(etypeRef)
-		state.acceptActualType(getRawTypeForName(EAttribute, state))
 	}
 
 	def void _computeTypes(EdeltaEcoreReferenceExpression e, ITypeComputationState state) {

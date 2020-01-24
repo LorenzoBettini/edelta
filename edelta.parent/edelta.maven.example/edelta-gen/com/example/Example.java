@@ -2,8 +2,10 @@ package com.example;
 
 import edelta.lib.AbstractEdelta;
 import edelta.refactorings.lib.EdeltaRefactorings;
+import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
@@ -30,6 +32,16 @@ public class Example extends AbstractEdelta {
     return ObjectExtensions.<EClass>operator_doubleArrow(_newEClass, _function);
   }
   
+  public void aModification(final EPackage it) {
+    final Consumer<EClass> _function = (EClass it_1) -> {
+      this.refactorings.addMandatoryAttr(it_1, "ANewAttribute", getEDataType("ecore", "EString"));
+      getEAttribute("myecore", "MyNewClass", "ANewAttribute").setEType(getEDataType("ecore", "EInt"));
+    };
+    this.lib.addNewEClass(it, "MyNewClass", _function);
+    this.lib.addEClass(it, this.createClass("ANewDerivedEClass"));
+    getEClass("myecore", "ANewDerivedEClass").setAbstract(true);
+  }
+  
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("myecore");
@@ -38,15 +50,6 @@ public class Example extends AbstractEdelta {
   
   @Override
   protected void doExecute() throws Exception {
-    createEClass("myecore", "MyNewClass", createList(this::_createEClass_MyNewClass_in_myecore));
-  }
-  
-  public void _createEClass_MyNewClass_in_myecore(final EClass it) {
-    {
-      this.refactorings.addMandatoryAttr(it, "ANewAttribute", getEDataType("ecore", "EString"));
-      getEAttribute("myecore", "MyNewClass", "ANewAttribute").setEType(getEDataType("ecore", "EInt"));
-      this.lib.addEClass(it.getEPackage(), this.createClass("ANewDerivedEClass"));
-      getEClass("myecore", "ANewDerivedEClass").setAbstract(true);
-    }
+    aModification(getEPackage("myecore"));
   }
 }

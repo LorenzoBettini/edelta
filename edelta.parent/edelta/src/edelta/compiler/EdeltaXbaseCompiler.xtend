@@ -1,9 +1,6 @@
 package edelta.compiler
 
 import com.google.inject.Inject
-import edelta.edelta.EdeltaEcoreChangeEClassExpression
-import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
-import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
@@ -15,21 +12,6 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 
 	override protected doInternalToJavaStatement(XExpression obj, ITreeAppendable appendable, boolean isReferenced) {
 		switch (obj) {
-			EdeltaEcoreCreateEClassExpression: {
-				compileAsStatementIfNotReferenced(appendable, isReferenced) [
-					compileEdeltaCreateEClassExpression(obj, appendable)
-				]
-			}
-			EdeltaEcoreChangeEClassExpression: {
-				compileAsStatementIfNotReferenced(appendable, isReferenced) [
-					compileEdeltaChangeEClassExpression(obj, appendable)
-				]
-			}
-			EdeltaEcoreCreateEAttributeExpression: {
-				compileAsStatementIfNotReferenced(appendable, isReferenced) [
-					compileEdeltaCreateEAttributeExpression(obj, appendable)
-				]
-			}
 			EdeltaEcoreReferenceExpression: {
 				compileAsStatementIfNotReferenced(appendable, isReferenced) [
 					compileEdeltaEcoreReferenceExpression(obj, appendable)
@@ -52,40 +34,6 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 
 	private def void compileEdeltaEcoreReferenceExpression(EdeltaEcoreReferenceExpression obj, ITreeAppendable appendable) {
 		appendable.append(obj.stringForEcoreReferenceExpression)
-	}
-
-	private def void compileEdeltaCreateEClassExpression(EdeltaEcoreCreateEClassExpression obj, ITreeAppendable appendable) {
-		appendable.append(
-			'createEClass("' +
-			getEPackageNameOrNull(obj.epackage) +
-			'", "' +
-			obj.name +
-			'", ' +
-			obj.consumerArguments +
-			')'
-		)
-	}
-
-	private def void compileEdeltaChangeEClassExpression(EdeltaEcoreChangeEClassExpression obj, ITreeAppendable appendable) {
-		appendable.append(
-			'changeEClass("' +
-			getEPackageNameOrNull(obj.epackage) +
-			'", "' +
-			obj.original.nameOrNull +
-			'", ' +
-			obj.consumerArguments +
-			')'
-		)
-	}
-
-	private def void compileEdeltaCreateEAttributeExpression(EdeltaEcoreCreateEAttributeExpression obj, ITreeAppendable appendable) {
-		appendable.append(
-			'createEAttribute(it, "' +
-			obj.name +
-			'", ' +
-			obj.consumerArguments +
-			')'
-		)
 	}
 
 	private def void compileAsStatementIfNotReferenced(ITreeAppendable appendable, boolean isReferenced,

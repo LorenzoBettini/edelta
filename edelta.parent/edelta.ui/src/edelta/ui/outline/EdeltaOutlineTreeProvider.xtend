@@ -4,13 +4,12 @@
 package edelta.ui.outline
 
 import com.google.inject.Inject
-import edelta.edelta.EdeltaMain
+import edelta.edelta.EdeltaModifyEcoreOperation
 import edelta.edelta.EdeltaOperation
 import edelta.edelta.EdeltaProgram
 import edelta.services.IEdeltaEcoreModelAssociations
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider
-import edelta.edelta.EdeltaModifyEcoreOperation
 
 /**
  * Customization of the default outline structure.
@@ -28,7 +27,6 @@ class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		for (o : p.modifyEcoreOperations) {
 			createNode(parentNode, o)
 		}
-		createNode(parentNode, p.main)
 		for (derived : p.eResource.copiedEPackages) {
 			// the cool thing is that we don't need to provide
 			// customization in the label provider for EPackage and EClass
@@ -45,7 +43,4 @@ class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		true
 	}
 
-	def _isLeaf(EdeltaMain m) {
-		true
-	}
 }

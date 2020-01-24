@@ -2,20 +2,15 @@ package edelta.interpreter
 
 import com.google.inject.Inject
 import edelta.compiler.EdeltaCompilerUtil
-import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
-import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaModifyEcoreOperation
 import edelta.edelta.EdeltaOperation
 import edelta.edelta.EdeltaPackage
 import edelta.edelta.EdeltaUseAs
-import edelta.util.EdeltaEcoreHelper
 import edelta.validation.EdeltaValidator
 import java.util.List
 import java.util.Map
-import org.eclipse.emf.ecore.EAttribute
-import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.common.types.JvmField
 import org.eclipse.xtext.common.types.JvmGenericType
@@ -36,7 +31,6 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 	@Inject extension IJvmModelAssociations
 	@Inject extension EdeltaInterpreterHelper
 	@Inject extension EdeltaCompilerUtil
-	@Inject extension EdeltaEcoreHelper
 	@Inject IResourceScopeCache cache
 
 	var int interpreterTimeout =
@@ -52,51 +46,6 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
 	override void setInterpreterTimeout(int interpreterTimeout) {
 		this.interpreterTimeout = interpreterTimeout
-	}
-
-	override run(EdeltaEcoreBaseEClassManipulationWithBlockExpression e, EClass c,
-		JvmGenericType programInferredJavaType, List<EPackage> packages
-	) {
-		this.programInferredJavaType = programInferredJavaType
-		edelta = new EdeltaInterpreterEdeltaImpl(packages)
-		useAsFields = newHashMap
-		val cacheCleaner = new EdeltaInterpreterCleaner(cache, e.eResource)
-		// clear the cache before when the interpreter modifies
-		// the EPackage of the interpreted expression
-		// since new types might be available after the interpretation
-		// and existing types might have been modified or renamed
-		// this makes sure that scoping and the type computer
-		// is performed again
-		val p = c.EPackage
-		p.eAdapters += cacheCleaner
-		try {
-			val result = evaluate(
-				e,
-				createContext() => [
-					newValue(IT_QUALIFIED_NAME, c)
-					// 'this' and the name of the inferred class are mapped
-					// to an instance of AbstractEdelta, so that all reflective
-					// accesses, e.g., the inherited field 'lib', work out of the box
-					// calls to operations defined in the sources are intercepted
-					// in our custom invokeOperation and in that case we interpret the
-					// original source's XBlockExpression
-					newValue(QualifiedName.create("this"), edelta)
-					newValue(QualifiedName.create(programInferredJavaType.simpleName), edelta)
-				],
-				new CancelIndicator() {
-					long stopAt = System.currentTimeMillis() + interpreterTimeout;
-					override boolean isCanceled() {
-						return System.currentTimeMillis() > stopAt;
-					}
-				}
-			)
-			if (result === null) {
-				addWarning(e)
-			}
-			return result
-		} finally {
-			p.eAdapters.remove(cacheCleaner)
-		}
 	}
 
 	override run(EdeltaModifyEcoreOperation op, EPackage p,
@@ -143,19 +92,6 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 		}
 	}
 
-	def private addWarning(EdeltaEcoreBaseEClassManipulationWithBlockExpression e) {
-		e.eResource.getWarnings().add(
-			new EObjectDiagnosticImpl(
-				Severity.WARNING,
-				EdeltaValidator.INTERPRETER_TIMEOUT,
-				"Timeout interpreting initialization block ("+interpreterTimeout+"ms).",
-				e,
-				EdeltaPackage.eINSTANCE.edeltaEcoreBaseManipulationWithBlockExpression_Body,
-				-1,
-				#[])
-		)
-	}
-
 	def private addWarning(EdeltaModifyEcoreOperation op) {
 		op.eResource.getWarnings().add(
 			new EObjectDiagnosticImpl(
@@ -171,9 +107,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 	override protected doEvaluate(XExpression expression, IEvaluationContext context, CancelIndicator indicator) {
 		if (expression === null)
 			return null
-		if (expression instanceof EdeltaEcoreBaseEClassManipulationWithBlockExpression) {
-			return doEvaluate(expression.body, context, indicator)
-		} else if (expression instanceof EdeltaEcoreReferenceExpression) {
+		if (expression instanceof EdeltaEcoreReferenceExpression) {
 			return doEvaluate(expression.reference, context, indicator)
 		} else if (expression instanceof EdeltaEcoreReference) {
 			val elementWrapper = new Wrapper
@@ -194,14 +128,6 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 				]
 			}
 			return elementWrapper.get
-		} else if (expression instanceof EdeltaEcoreCreateEAttributeExpression) {
-			val eclass = context.getValue(IT_QUALIFIED_NAME) as EClass
-			val attr = eclass.EStructuralFeatures.filter(EAttribute).
-				getByName(expression.name)
-			safeSetEAttributeType(attr, expression.ecoreReferenceDataType)
-			val newContext = context.fork
-			newContext.newValue(IT_QUALIFIED_NAME, attr)
-			return internalEvaluate(expression.body, newContext, indicator)
 		}
 		return super.doEvaluate(expression, context, indicator)
 	}

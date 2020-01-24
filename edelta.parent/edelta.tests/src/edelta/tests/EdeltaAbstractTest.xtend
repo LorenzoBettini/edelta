@@ -2,10 +2,6 @@ package edelta.tests
 
 import com.google.inject.Inject
 import com.google.inject.Provider
-import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
-import edelta.edelta.EdeltaEcoreChangeEClassExpression
-import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
-import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreDirectReference
 import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
@@ -208,28 +204,8 @@ abstract class EdeltaAbstractTest {
 			findFirst[name == classifiername]
 	}
 
-	def protected lastExpression(EdeltaProgram p) {
-		p.main.expressions.last
-	}
-
 	def protected lastModifyEcoreOperation(EdeltaProgram p) {
 		p.modifyEcoreOperations.last
-	}
-
-	def protected getCreateEClassExpression(XExpression e) {
-		e as EdeltaEcoreCreateEClassExpression
-	}
-
-	def protected getChangeEClassExpression(XExpression e) {
-		e as EdeltaEcoreChangeEClassExpression
-	}
-
-	def protected getManipulationEClassExpression(XExpression e) {
-		e as EdeltaEcoreBaseEClassManipulationWithBlockExpression
-	}
-
-	def protected getCreateEAttributExpression(XExpression e) {
-		e as EdeltaEcoreCreateEAttributeExpression
 	}
 
 	def protected getDerivedStateLastEClass(EObject context) {
