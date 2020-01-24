@@ -151,7 +151,7 @@ public class EdeltaMojoTest {
 		assertThat(outputDirectory).exists();
 
 		verify(spiedLog)
-			.error(contains("ERROR:The method or field foobar is undefined"));
+			.error(contains("ERROR:extraneous input 'foobar' expecting EOF"));
 	}
 
 	@Test
