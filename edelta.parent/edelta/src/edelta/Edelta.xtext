@@ -10,9 +10,7 @@ import "http://www.Edelta.edelta"
 
 EdeltaProgram:
 	{EdeltaProgram}
-	// semantic predicate required to avoid ambiguities with ';' of
-	// the other optional parts
-	=>importSection=XImportSection?
+	importSection=XImportSection?
 	('package' name=QualifiedName ';'?)?
 	('metamodel' metamodels+=[ecore::EPackage|STRING])*
 	(useAsClauses+=EdeltaUseAs)*
