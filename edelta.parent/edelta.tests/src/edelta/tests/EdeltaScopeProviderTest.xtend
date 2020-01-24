@@ -27,10 +27,13 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	def void testSuperScope() {
 		// just check that nothing wrong happens when we call super.getScope
 		'''
-		metamodel "foo"
-		
-		this.
-		'''.parse.lastExpression.getScope(EdeltaPackage.eINSTANCE.edeltaProgram_Main)
+		modifyEcore aTest epackage foo {
+			this.
+		}
+		'''.parse
+			.lastModifyEcoreOperation
+			.body
+			.blockLastExpression.getScope(EdeltaPackage.eINSTANCE.edeltaModifyEcoreOperation_Body)
 	}
 
 	@Test
