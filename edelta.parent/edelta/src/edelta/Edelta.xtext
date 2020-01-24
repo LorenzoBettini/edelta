@@ -20,16 +20,6 @@ EdeltaProgram:
 	modifyEcoreOperations+=EdeltaModifyEcoreOperation*
 ;
 
-// we need to add a semantic predicate here as well, for the same
-// reason as above
-@Override 
-XImportDeclaration returns xtype::XImportDeclaration:
-	(=>'import' (
-		(static?='static' extension?='extension'? importedType=[types::JvmDeclaredType|QualifiedNameInStaticImport] (wildcard?='*' | memberName=ValidID)) 
-		| importedType=[types::JvmDeclaredType|QualifiedName] 
-		| importedNamespace=QualifiedNameWithWildcard) ';'?)
-;
-
 EdeltaUseAs:
 	{EdeltaUseAs} 'use' type=JvmTypeReference 'as' extension?='extension'? name=ValidID
 ;
