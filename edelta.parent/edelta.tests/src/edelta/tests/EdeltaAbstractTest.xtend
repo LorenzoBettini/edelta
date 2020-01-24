@@ -318,14 +318,25 @@ abstract class EdeltaAbstractTest {
 	}
 
 	def protected ecoreReferenceExpression(CharSequence ecoreRefString) {
+		ecoreRefString
+			.parseInsideModifyEcoreWithTestMetamodelFoo
+			.lastEcoreReferenceExpression
+	}
+
+	def protected parseInsideModifyEcoreWithTestMetamodelFoo(CharSequence body) {
+		body
+			.inputInsideModifyEcoreWithTestMetamodelFoo
+			.parseWithTestEcore
+	}
+
+	def protected inputInsideModifyEcoreWithTestMetamodelFoo(CharSequence body) {
 		'''
 			metamodel "foo"
 			
 			modifyEcore aTest epackage foo {
-				«ecoreRefString»
+				«body»
 			}
-		'''.parseWithTestEcore
-			.lastEcoreReferenceExpression
+		'''
 	}
 
 	def protected lastEcoreReferenceExpression(EdeltaProgram p) {
