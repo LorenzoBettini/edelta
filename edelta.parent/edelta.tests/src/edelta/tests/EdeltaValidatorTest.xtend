@@ -42,64 +42,6 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCreateEClassWithSuperTypesNotEClass() {
-		'''
-			metamodel "foo"
-			
-			createEClass MyNewClass in foo
-				extends FooDataType, FooClass, FooEnum {}
-		'''.parseWithTestEcore.assertErrorsAsStrings(
-			'''
-			Type mismatch: cannot convert from EDataType to EClass
-			Type mismatch: cannot convert from EDataType to EClass
-			Type mismatch: cannot convert from EEnum to EClass
-			Type mismatch: cannot convert from EEnum to EClass
-			'''
-		)
-		// mismatch errors are duplicate due to the interpreter
-	}
-
-	@Test
-	def void testCreateEClassWithSuperTypesNotEClassWithNullRef() {
-		'''
-			metamodel "foo"
-			
-			createEClass MyNewClass in foo
-				extends FooDataType, , FooEnum {}
-		'''.parseWithTestEcore.assertErrorsAsStrings(
-			'''
-			Type mismatch: cannot convert from EDataType to EClass
-			Type mismatch: cannot convert from EDataType to EClass
-			Type mismatch: cannot convert from EEnum to EClass
-			Type mismatch: cannot convert from EEnum to EClass
-			extraneous input ',' expecting RULE_ID
-			'''
-		)
-		// mismatch errors are duplicate due to the interpreter
-	}
-
-	@Test
-	def void testCreateEClassWithSuperTypesNotEClassWithUnresolvedRef() {
-		'''
-			metamodel "foo"
-			
-			createEClass MyNewClass in foo
-				extends FooDataType, AAA, FooEnum {}
-		'''.parseWithTestEcore.assertErrorsAsStrings(
-			'''
-			AAA cannot be resolved.
-			Type mismatch: cannot convert from EDataType to EClass
-			Type mismatch: cannot convert from EDataType to EClass
-			Type mismatch: cannot convert from EEnum to EClass
-			Type mismatch: cannot convert from EEnum to EClass
-			'''
-		)
-		// type mismatch error has not been reported on AAA
-		// since it can't be resolved
-		// mismatch errors are duplicate due to the interpreter
-	}
-
-	@Test
 	def void testValidUseAs() {
 		'''
 		import edelta.tests.additional.MyCustomEdelta;
@@ -146,40 +88,13 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testChangeEClassCannotReferToCreatedEClass() {
-		val input = '''
-		metamodel "foo"
-		
-		createEClass NewClass in foo {}
-		
-		changeEClass foo.NewClass {} // ERROR
-		changeEClass foo.FooClass {} // OK
-		'''
-		input.parseWithTestEcore.assertErrorsAsStrings(
-			"NewClass cannot be resolved."
-		)
-	}
-
-	@Test
-	def void testCreateEClassCanReferToRenamedEClass() {
-		val input = '''
-		metamodel "foo"
-		
-		createEClass NewClass in foo extends Renamed {}
-		
-		changeEClass foo.FooClass newName Renamed {}
-		'''
-		input.parseWithTestEcore.assertNoIssues
-	}
-
-	@Test
 	def void testTimeoutInCancelIndicator() {
 		val input = '''
-			import org.eclipse.emf.ecore.EClass
+			import org.eclipse.emf.ecore.EPackage
 
 			metamodel "foo"
 			
-			def op(EClass c) : void {
+			def op(EPackage c) : void {
 				var i = 10;
 				while (i >= 0) {
 					Thread.sleep(1000);
@@ -189,12 +104,12 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 				c.abstract = true
 			}
 			
-			createEClass NewClass in foo {
+			modifyEcore aTest epackage foo {
 				op(it)
 			}
 		'''
 		input.parseWithTestEcore.assertWarning(
-			EdeltaPackage.eINSTANCE.edeltaEcoreCreateEClassExpression,
+			EdeltaPackage.eINSTANCE.edeltaModifyEcoreOperation,
 			EdeltaValidator.INTERPRETER_TIMEOUT,
 			input.lastIndexOf("{"), 11,
 			"Timeout interpreting initialization block"
@@ -206,8 +121,10 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		'''
 		metamodel "foo"
 		
-		ecoreref(NonExistant)
-		ecoreref(FooClass)
+		modifyEcore aTest epackage foo {
+			ecoreref(NonExistant)
+			ecoreref(FooClass)
+		}
 		'''.parseWithTestEcore.assertErrorsAsStrings("NonExistant cannot be resolved.")
 	}
 
@@ -216,52 +133,8 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		'''
 		metamodel "foo"
 		
-		createEClass NewClass in foo {
+		modifyEcore aTest epackage foo {
 			ecoreref(foo.FooClass).EPackage.EClassifiers.remove(ecoreref(foo.FooClass))
-		}
-		'''.parseWithTestEcore.assertNoErrors
-	}
-
-	@Test
-	def void testCallMethodOnRenanedEClass() {
-		val prog =
-		'''
-		metamodel "foo"
-
-		changeEClass foo.FooClass {
-			name = "RenamedClass"
-			ecoreref(RenamedClass).getEAllStructuralFeatures
-		}
-		'''.parseWithTestEcore
-		prog.assertNoErrors
-	}
-
-	@Test
-	def void testCallNonExistingMethodOnRenanedEClass() {
-		val prog =
-		'''
-		metamodel "foo"
-
-		changeEClass foo.FooClass {
-			name = "RenamedClass"
-			ecoreref(RenamedClass).nonExistant("an arg")
-		}
-		'''.parseWithTestEcore
-		prog.assertErrorsAsStrings
-			("The method nonExistant(String) is undefined for the type EClass")
-	}
-
-	@Test
-	def void testReferenceToAddedAttributeofRenamedClass() {
-		'''
-		import org.eclipse.emf.ecore.EClass
-
-		metamodel "foo"
-
-		changeEClass foo.FooClass {
-			name = "RenamedClass"
-			ecoreref(RenamedClass).getEStructuralFeatures += newEAttribute("added")
-			ecoreref(RenamedClass.added)
 		}
 		'''.parseWithTestEcore.assertNoErrors
 	}
@@ -364,7 +237,6 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	def void testReferenceToUnknownEPackageInModifyEcore() {
 		'''
 		import org.eclipse.emf.ecore.EClass
-
 
 		modifyEcore aTest epackage foo {
 			
