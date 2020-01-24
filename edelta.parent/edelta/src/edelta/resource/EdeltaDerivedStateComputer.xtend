@@ -11,12 +11,9 @@ import edelta.interpreter.internal.EdeltaInterpreterConfigurator
 import edelta.lib.EdeltaEcoreUtil
 import edelta.scoping.EdeltaOriginalENamedElementRecorder
 import edelta.services.IEdeltaEcoreModelAssociations
-import edelta.util.EdeltaEcoreHelper
-import java.util.Collection
 import java.util.List
 import java.util.Map
 import org.eclipse.emf.common.notify.impl.AdapterImpl
-import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.util.EcoreUtil
@@ -33,8 +30,6 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	@Inject
 	@Named(Constants.LANGUAGE_NAME)
 	var String languageName;
-
-	@Inject extension EdeltaEcoreHelper
 
 	@Inject GenericUnloader unloader
 
@@ -173,12 +168,4 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		}
 	}
 
-	def protected getEClassWithTheSameName(Collection<EPackage> packages, EClass original) {
-		val epackage = original.EPackage
-		if (epackage !== null) {
-			return packages.getByName(epackage.name)?.
-				EClassifiers?.filter(EClass)?.getByName(original.name)
-		}
-		return null
-	}
 }
