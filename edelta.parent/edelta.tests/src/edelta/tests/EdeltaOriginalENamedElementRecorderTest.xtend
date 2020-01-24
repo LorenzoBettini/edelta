@@ -19,9 +19,6 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 	@Test def void testNull() {
 		'''
 			metamodel "foo"
-			
-			createEClass NewClass in foo {}
-			ecoreref(FooClass)
 		'''.parseWithTestEcore => [
 			recordOriginalENamedElement(null)
 		]
@@ -30,9 +27,6 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 	@Test def void testNullENamedElement() {
 		'''
 			metamodel "foo"
-			
-			createEClass NewClass in foo {}
-			ecoreref(FooClass)
 		'''.parseWithTestEcore => [
 			val ref = EdeltaFactory.eINSTANCE.createEdeltaEcoreDirectReference
 			ref.recordOriginalENamedElement
@@ -41,26 +35,20 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 	}
 
 	@Test def void testUnresolvedENamedElement() {
-		'''
-			metamodel "foo"
-			
-			createEClass NewClass in foo {}
-			ecoreref(NonExistant)
-		'''.parseWithTestEcore => [
-			val ref = lastExpression.edeltaEcoreReferenceExpression.reference
-			ref.recordOriginalENamedElement
-			assertNull(ref.originalEnamedelement)
-		]
+		val ref = "ecoreref(NonExistant)".ecoreReferenceExpression.reference
+		ref.recordOriginalENamedElement
+		assertNull(ref.originalEnamedelement)
 	}
 
 	@Test def void testEClassifierDirectReference() {
 		'''
 			metamodel "foo"
 			
-			createEClass NewClass in foo {}
-			ecoreref(FooClass)
+			modifyEcore aTest epackage foo {
+				ecoreref(FooClass)
+			}
 		'''.parseWithTestEcore => [
-			val ref = lastExpression.edeltaEcoreReferenceExpression.reference
+			val ref = lastEcoreReferenceExpression.reference
 			ref.recordOriginalENamedElement
 			val original = metamodels.last.getEClassiferByName("FooClass")
 			assertSame(original, ref.originalEnamedelement)
@@ -71,11 +59,11 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		'''
 			metamodel "foo"
 			
-			createEClass NewClass in foo {}
-			ecoreref(foo.FooClass)
+			modifyEcore aTest epackage foo {
+				ecoreref(foo.FooClass)
+			}
 		'''.parseWithTestEcore => [
-			val ref = lastExpression.
-				edeltaEcoreReferenceExpression.reference.
+			val ref = lastEcoreReferenceExpression.reference.
 				getEdeltaEcoreQualifiedReference
 			ref.recordOriginalENamedElement
 			val original = metamodels.last.getEClassiferByName("FooClass")
@@ -89,26 +77,14 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		'''
 			metamodel "foo"
 			
-			createEClass NewClass in foo {}
-			ecoreref(NewClass)
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass")
+				ecoreref(NewClass)
+			}
 		'''.parseWithTestEcore => [
-			val ref = lastExpression.edeltaEcoreReferenceExpression.reference
+			val ref = lastEcoreReferenceExpression.reference
 			ref.recordOriginalENamedElement
 			val original = derivedStateLastEClass
-			assertSame(original, ref.originalEnamedelement)
-		]
-	}
-
-	@Test def void testChangedEClassifierDirectReference() {
-		'''
-			metamodel "foo"
-			
-			changeEClass foo.FooClass {}
-			ecoreref(FooClass)
-		'''.parseWithTestEcore => [
-			val ref = lastExpression.edeltaEcoreReferenceExpression.reference
-			ref.recordOriginalENamedElement
-			val original = metamodels.last.getEClassiferByName("FooClass")
 			assertSame(original, ref.originalEnamedelement)
 		]
 	}
@@ -117,11 +93,12 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		'''
 			metamodel "foo"
 			
-			createEClass NewClass in foo {}
-			ecoreref(foo.NewClass)
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass")
+				ecoreref(foo.NewClass)
+			}
 		'''.parseWithTestEcore => [
-			val ref = lastExpression.
-				edeltaEcoreReferenceExpression.reference.
+			val ref = lastEcoreReferenceExpression.reference.
 				getEdeltaEcoreQualifiedReference
 			ref.recordOriginalENamedElement
 			val original = derivedStateLastEClass
@@ -137,10 +114,11 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		'''
 			metamodel "foo"
 			
-			createEClass NewClass in foo {}
-			ecoreref(myAttribute)
+			modifyEcore aTest epackage foo {
+				ecoreref(myAttribute)
+			}
 		'''.parseWithTestEcore => [
-			val ref = lastExpression.edeltaEcoreReferenceExpression.reference
+			val ref = lastEcoreReferenceExpression.reference
 			ref.recordOriginalENamedElement
 			val original = metamodels.last.
 				getEClassiferByName("FooClass").
@@ -153,11 +131,11 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		'''
 			metamodel "foo"
 			
-			createEClass NewClass in foo {}
-			ecoreref(FooClass.myAttribute)
+			modifyEcore aTest epackage foo {
+				ecoreref(FooClass.myAttribute)
+			}
 		'''.parseWithTestEcore => [
-			val ref = lastExpression.
-				edeltaEcoreReferenceExpression.reference.
+			val ref = lastEcoreReferenceExpression.reference.
 				getEdeltaEcoreQualifiedReference
 			ref.recordOriginalENamedElement
 			val originalEClass = metamodels.last.getEClassiferByName("FooClass")
@@ -172,11 +150,11 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		'''
 			metamodel "foo"
 			
-			createEClass NewClass in foo {}
-			ecoreref(foo.FooClass.myAttribute)
+			modifyEcore aTest epackage foo {
+				ecoreref(foo.FooClass.myAttribute)
+			}
 		'''.parseWithTestEcore => [
-			val ref = lastExpression.
-				edeltaEcoreReferenceExpression.reference.
+			val ref = lastEcoreReferenceExpression.reference.
 				getEdeltaEcoreQualifiedReference
 			ref.recordOriginalENamedElement
 			val originalPackage = metamodels.last
@@ -196,10 +174,11 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		'''
 			metamodel "foo"
 			
-			createEClass NewClass in foo {}
-			ecoreref(FooEnumLiteral)
+			modifyEcore aTest epackage foo {
+				ecoreref(FooEnumLiteral)
+			}
 		'''.parseWithTestEcore => [
-			val ref = lastExpression.edeltaEcoreReferenceExpression.reference
+			val ref = lastEcoreReferenceExpression.reference
 			ref.recordOriginalENamedElement
 			val original = metamodels.last.
 				getEClassiferByName("FooEnum").
@@ -208,21 +187,4 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testCreatedEAttributeDirectReference() {
-		'''
-			metamodel "foo"
-			
-			createEClass NewClass in foo {
-				createEAttribute newAttribute type FooDataType {
-				}
-			}
-			ecoreref(newAttribute)
-		'''.parseWithTestEcore => [
-			val ref = lastExpression.edeltaEcoreReferenceExpression.reference
-			ref.recordOriginalENamedElement
-			val original = derivedStateLastEClass.
-				getEAttributeByName("newAttribute")
-			assertSame(original, ref.originalEnamedelement)
-		]
-	}
 }
