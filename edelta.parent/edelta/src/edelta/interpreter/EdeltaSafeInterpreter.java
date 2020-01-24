@@ -7,12 +7,10 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import org.apache.log4j.Logger;
-import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.common.types.JvmGenericType;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationResult;
 
-import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 
 /**
@@ -43,12 +41,6 @@ public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 			super(message);
 		}
 
-	}
-
-	@Override
-	public IEvaluationResult run(EdeltaEcoreBaseEClassManipulationWithBlockExpression exp, EClass eClass,
-			JvmGenericType jvmGenericType, List<EPackage> packages) {
-		return runSafe(() -> super.run(exp, eClass, jvmGenericType, packages));
 	}
 
 	@Override
