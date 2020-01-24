@@ -72,10 +72,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testScopeForEnamedElementInEcoreReferenceExpression() {
-		'''
-		metamodel "foo"
-		ecoreref 
-		'''.parseWithTestEcore.lastExpression.
+		"ecoreref".ecoreReferenceExpression.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
 			FooClass
@@ -84,64 +81,43 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			myAttribute
 			myReference
 			FooEnumLiteral
-			foo
-			''')
-	}
-
-	@Test
-	def void testScopeForEnamedElementInEcoreReferenceExpressionWithTwoMetamodels() {
-		'''
-		metamodel "foo"
-		metamodel "bar"
-		ecoreref 
-		'''.parseWithTestEcores.lastExpression.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
-			'''
 			FooClass
 			FooDataType
 			FooEnum
 			myAttribute
 			myReference
 			FooEnumLiteral
-			BarClass
-			BarDataType
-			myAttribute
-			myReference
 			foo
-			bar
 			''')
+			// duplicates because of copied EPackage
 	}
 
 	@Test
 	def void testScopeForEnamedElementInEcoreReferenceExpressionQualifiedPackage() {
-		'''
-		metamodel "foo"
-		metamodel "bar"
-		ecoreref foo.
-		'''.parseWithTestEcores.
-			lastExpression.
-			edeltaEcoreReferenceExpression.reference.
+		"ecoreref(foo.".ecoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
 			FooClass
 			FooDataType
 			FooEnum
+			FooClass
+			FooDataType
+			FooEnum
 			''')
+			// duplicate EClassifiers because of copied EPackage
 	}
 
 	@Test
 	def void testScopeForEnamedElementInEcoreReferenceExpressionQualifiedEClass() {
-		'''
-		metamodel "foo"
-		metamodel "bar"
-		ecoreref foo.FooClass.
-		'''.parseWithTestEcore.lastExpression.
-			edeltaEcoreReferenceExpression.reference.
+		"ecoreref(foo.FooClass.".ecoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
 			myAttribute
 			myReference
+			myAttribute
+			myReference
 			''')
+			// duplicate features because of copied EPackage
 	}
 
 	@Test
@@ -187,22 +163,19 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testScopeForReferenceToCreatedEAttribute() {
-		referenceToCreatedEAttributeSimple.parseWithTestEcore.lastExpression.
-			edeltaEcoreReferenceExpression.reference.
+		referenceToCreatedEAttributeSimple.parseWithTestEcore
+			.lastEcoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
-			NewClass
-			newAttribute
-			newAttribute2
-			NewClass
 			FooClass
 			FooDataType
 			FooEnum
-			newAttribute
-			newAttribute2
+			NewClass
 			myAttribute
 			myReference
 			FooEnumLiteral
+			newAttribute
+			newAttribute2
 			FooClass
 			FooDataType
 			FooEnum
@@ -211,16 +184,14 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			FooEnumLiteral
 			foo
 			''')
-		// newAttributes is the one created in the program
+		// newAttributes are the ones created in the program
 		// we also have copied EPackages, that's why elements appear twice
 	}
 
 	@Test
 	def void testScopeForReferenceToCreatedEAttributeChangingNameInBody() {
 		referenceToCreatedEAttributeRenamed.parseWithTestEcore
-			.lastModifyEcoreOperation.body.block.expressions
-			.last
-			.edeltaEcoreReferenceExpression.reference
+			.lastEcoreReferenceExpression.reference
 			.assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
 			FooClass
@@ -241,164 +212,6 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			''')
 		// "changed" is the one created in the program (with name "newAttribute", and whose
 		// name is changed in the body
-	}
-
-	@Test
-	def void testScopeForReferenceToEPackageInChangeEClass() {
-		'''
-			metamodel "foo"
-			
-			createEClass NewClass in foo {}
-			changeEClass foo.Test {}
-		'''
-		.parseWithTestEcore.lastExpression.
-			changeEClassExpression.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreBaseEClassManipulationWithBlockExpression_Epackage,
-			'''
-			foo
-			''')
-	}
-
-	@Test
-	def void testScopeForReferenceToEClassInChangeEClass() {
-		'''
-			metamodel "foo"
-			metamodel "bar"
-			
-			createEClass NewClass in foo {}
-			changeEClass foo.Test {}
-		'''
-		.parseWithTestEcore.lastExpression.
-			changeEClassExpression.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreChangeEClassExpression_Original,
-			'''
-			FooClass
-			''')
-		// created EClass are not in the scope for changeEClass
-	}
-
-	@Test
-	def void testScopeForReferenceToCopiedEClassAfterCreatingEClass() {
-		val prog = '''
-			metamodel "foo"
-			
-			createEClass NewClass in foo {
-				val c = ecoreref(FooClass)
-			}
-		'''.
-		parseWithTestEcore
-		val expressions = prog.main.expressions
-		val changeEClass = expressions.last.createEClassExpression
-		val referred = changeEClass.body.expressions.
-			last.variableDeclaration.right.edeltaEcoreReferenceExpression.
-			reference.enamedelement as EClass
-		assertSame(
-			// the one copied by the derived state computer
-			prog.copiedEPackages.head.getEClassiferByName("FooClass"),
-			referred
-		)
-	}
-
-	@Test
-	def void testScopeForEnamedElementInEcoreReferenceExpressionReferringToRenamedEClass() {
-		'''
-		metamodel "foo"
-		metamodel "bar"
-		changeEClass foo.FooClass newName RenamedClass {}
-		ecoreref(foo.RenamedClass.
-		'''.parseWithTestEcore.lastExpression.
-			edeltaEcoreReferenceExpression.reference.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
-			'''
-			myAttribute
-			myReference
-			myAttribute
-			myReference
-			''')
-		// we renamed FooClass, but its attributes are still visible through
-		// the renamed class
-		// they're duplicate since we also have the ones of the copied EPackages
-		// Note that they appear twice and not 3 times, because we only select
-		// those in RenamedClass, not also the ones in FooClass.
-		// foo in foo.RenamedClass refers to the derived state EPackage
-		// and edelta.util.EdeltaEcoreHelper.getEPackageENamedElementsInternal(EPackage, EObject, boolean)
-		// does not consider the passed EPackage as the program imported metamodel
-		// so it does not risk using the passed EPackage and the retrieved derived state
-		// epackage twice for retrieving EClassifiers.
-	}
-
-	@Test
-	def void testScopeForEnamedElementInEcoreReferenceExpressionReferringToRenamedEClassInsideChangeEClass() {
-		'''
-		metamodel "foo"
-		metamodel "bar"
-		changeEClass foo.FooClass newName RenamedClass {
-			ecoreref(RenamedClass.
-		}
-		'''.parseWithTestEcore.lastExpression.
-			changeEClassExpression.body.expressions.last.
-			edeltaEcoreReferenceExpression.reference.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
-			'''
-			myAttribute
-			myReference
-			myAttribute
-			myReference
-			''')
-		// we renamed FooClass, but its attributes are still visible through
-		// the renamed class
-		// they're duplicate since we also have the ones of the copied EPackages
-		// Note that they appear twice and not 3 times, because we only select
-		// those in RenamedClass, not also the ones in FooClass.
-		// foo in foo.RenamedClass refers to the derived state EPackage
-		// and edelta.util.EdeltaEcoreHelper.getEPackageENamedElementsInternal(EPackage, EObject, boolean)
-		// does not consider the passed EPackage as the program imported metamodel
-		// so it does not risk using the passed EPackage and the retrieved derived state
-		// epackage twice for retrieving EClassifiers.
-	}
-
-	@Test
-	def void testScopeForEnamedElementInEcoreReferenceExpressionReferringToRenamedEClassInsideChangeEClass2() {
-		'''
-		metamodel "foo"
-		metamodel "bar"
-		changeEClass foo.FooClass {
-			name = "RenamedClass"
-			ecoreref(RenamedClass.
-		}
-		'''.parseWithTestEcore.lastExpression.
-			changeEClassExpression.body.expressions.last.
-			edeltaEcoreReferenceExpression.reference.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
-			'''
-			myAttribute
-			myReference
-			''')
-		// we renamed FooClass, but its attributes are still visible through
-		// the renamed class
-	}
-
-	@Test
-	def void testScopeForFeaturesOfRenamedEClass() {
-		'''
-		metamodel "foo"
-		metamodel "bar"
-		changeEClass foo.FooClass {
-			name = "RenamedClass"
-			ecoreref(RenamedClass).EStructuralFeatures +=
-				newEAttribute("addedAttribute")
-			ecoreref(RenamedClass.)
-		}
-		'''.parseWithTestEcore.lastExpression.
-			changeEClassExpression.body.expressions.last.
-			edeltaEcoreReferenceExpression.reference.
-			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
-			'''
-			myAttribute
-			myReference
-			addedAttribute
-			''')
-		// we renamed FooClass, and added an attribute to the renamed class
 	}
 
 	@Test

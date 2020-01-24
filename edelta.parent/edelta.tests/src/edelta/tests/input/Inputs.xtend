@@ -85,11 +85,13 @@ class Inputs {
 		'''
 			metamodel "foo"
 			
-			createEClass NewClass in foo {
-				createEAttribute newAttribute type FooDataType {}
-				createEAttribute newAttribute2 type FooDataType {}
+			modifyEcore creation epackage foo {
+				addNewEClass("NewClass") [
+					addNewEAttribute("newAttribute", ecoreref(FooDataType))
+					addNewEAttribute("newAttribute2", ecoreref(FooDataType))
+				]
+				ecoreref(newAttribute)
 			}
-			ecoreref(newAttribute)
 		'''
 	}
 

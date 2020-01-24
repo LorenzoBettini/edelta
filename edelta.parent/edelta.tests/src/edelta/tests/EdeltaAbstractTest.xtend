@@ -325,7 +325,11 @@ abstract class EdeltaAbstractTest {
 				«ecoreRefString»
 			}
 		'''.parseWithTestEcore
-			.lastModifyEcoreOperation.body
+			.lastEcoreReferenceExpression
+	}
+
+	def protected lastEcoreReferenceExpression(EdeltaProgram p) {
+		p.lastModifyEcoreOperation.body
 			.blockLastExpression as EdeltaEcoreReferenceExpression
 	}
 }
