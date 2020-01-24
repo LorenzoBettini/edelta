@@ -5,7 +5,6 @@ import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.util.EdeltaEcoreReferenceInformationHelper
 import java.util.List
-import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EPackage
 
 /**
@@ -18,10 +17,6 @@ class EdeltaCompilerUtil {
 	@Inject extension EdeltaEcoreReferenceInformationHelper
 
 	def String getEPackageNameOrNull(EPackage e) {
-		e?.name
-	}
-
-	def String getNameOrNull(ENamedElement e) {
 		e?.name
 	}
 

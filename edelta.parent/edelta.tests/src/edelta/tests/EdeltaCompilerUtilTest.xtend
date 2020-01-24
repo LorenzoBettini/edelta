@@ -8,12 +8,23 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
+import org.eclipse.emf.ecore.EcoreFactory
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
 class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 
 	@Inject extension EdeltaCompilerUtil
+
+	@Test
+	def void testGetEPackageNameOrNull() {
+		val factory = EcoreFactory.eINSTANCE
+		null.EPackageNameOrNull.assertNull
+		val p = factory.createEPackage => [
+			name = "test"
+		]
+		"test".assertEquals(p.EPackageNameOrNull)
+	}
 
 	@Test
 	def void testGetStringForEcoreReferenceExpressionEClass() {
