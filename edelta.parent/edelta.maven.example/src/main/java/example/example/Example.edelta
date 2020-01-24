@@ -2,7 +2,6 @@ import edelta.refactorings.lib.EdeltaRefactorings
 
 // IMPORTANT: ecores must be in a source directory
 // otherwise you can't refer to them
-
 package com.example
 
 metamodel "myecore"
@@ -16,12 +15,14 @@ def createClass(String name) {
 	]
 }
 
-createEClass MyNewClass in myecore {
-	// using 'extension'
-	addMandatoryAttr("ANewAttribute", ecoreref(EString))
-	// corresponds to refactorings.addMandatoryAttr(it, "ANewAttribute", ecoreref(EString))
-	ecoreref(ANewAttribute).setEType(ecoreref(EInt))
-	EPackage.addEClass(createClass("ANewDerivedEClass"))
-	ecoreref(ANewDerivedEClass).setAbstract(true)
+modifyEcore aModification epackage myecore {
+	addNewEClass("MyNewClass") [
+		// using 'extension' from EdeltaRefactorings
+		addMandatoryAttr("ANewAttribute", ecoreref(EString))
+		// corresponds to refactorings.addMandatoryAttr(it, "ANewAttribute", ecoreref(EString))
+		ecoreref(ANewAttribute).EType = ecoreref(EInt)
+	]
+	addEClass(createClass("ANewDerivedEClass"))
+	ecoreref(ANewDerivedEClass).abstract = true
 }
 
