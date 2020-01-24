@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
 class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
+
 	@Inject EdeltaEcoreReferenceInformationHelper informationHelper
 
 	@Test
@@ -149,8 +150,7 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 	}
 
 	def private lastEcoreRef(EdeltaProgram p) {
-		p.lastModifyEcoreOperation.body
-			.blockLastExpression.edeltaEcoreReferenceExpression
+		p.lastEcoreReferenceExpression
 			.reference
 	}
 } 
