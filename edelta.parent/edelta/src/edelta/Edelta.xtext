@@ -18,7 +18,6 @@ EdeltaProgram:
 	(useAsClauses+=EdeltaUseAs)*
 	operations+=EdeltaOperation*
 	modifyEcoreOperations+=EdeltaModifyEcoreOperation*
-	main=EdeltaMain
 ;
 
 // we need to add a semantic predicate here as well, for the same
@@ -47,59 +46,6 @@ EdeltaOperation:
 		'(' (params+=FullJvmFormalParameter (',' params+=FullJvmFormalParameter)*)? ')'
 		(':' type=JvmTypeReference)?
 		body=XBlockExpression;
-
-EdeltaMain returns xbase::XBlockExpression:
-	{EdeltaMain}
-	(expressions+=MainBlockExpression ';'?)*
-;
-
-MainBlockExpression returns xbase::XExpression:
-	EdeltaEcoreClassifierManipulationExpression |
-	XExpressionOrVarDeclaration
-;
-
-EdeltaEcoreClassifierManipulationExpression returns xbase::XExpression:
-	{EdeltaEcoreCreateEClassExpression}
-	'createEClass' name=ValidID
-	'in' epackage=[ecore::EPackage]
-	(
-		'extends' ecoreReferenceSuperTypes+=EdeltaEcoreReference (',' ecoreReferenceSuperTypes+=EdeltaEcoreReference)*
-	)?
-	body=EdeltaEcoreManipulationBlockExpression
-	|
-	{EdeltaEcoreChangeEClassExpression}
-	'changeEClass'
-	epackage=[ecore::EPackage] '.'
-	original=[ecore::EClass]
-	('newName' name=ValidID)?
-	body=EdeltaEcoreManipulationBlockExpression
-;
-
-EdeltaEcoreManipulationBlockExpression returns xbase::XBlockExpression:
-	{EdeltaEcoreManipulationBlockExpression}
-	'{'
-		(expressions+=EdeltaEcoreManipulationExpression ';'?)*
-	'}'
-;
-
-EdeltaEcoreManipulationExpression returns xbase::XExpression:
-	EdeltaEcoreFeatureManipulationExpression |
-	XExpressionOrVarDeclaration
-;
-
-EdeltaEcoreFeatureManipulationExpression returns xbase::XExpression:
-	{EdeltaEcoreCreateEAttributeExpression}
-	'createEAttribute' name=ValidID
-	'type' ecoreReferenceDataType=EdeltaEcoreReference
-	body=EdeltaEcoreManipualtionStandardBlockExpression 
-;
-
-// we force the rule type to be XBlockExpression
-EdeltaEcoreManipualtionStandardBlockExpression returns xbase::XBlockExpression:
-	{xbase::XBlockExpression}
-	'{'
-		(expressions+=XExpressionOrVarDeclaration ';'?)*
-	'}';
 
 // redefine Xbase primary expression with our special expressions
 @Override 
