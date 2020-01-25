@@ -41,44 +41,22 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testDirectEcoreReference() {
-		parse('''
-			ecoreref foo
-		''').
-		lastExpression.
-		edeltaEcoreReferenceExpression => [
+		getEcoreReferenceExpression("foo") => [
 			assertNotNull(reference.edeltaEcoreDirectReference.enamedelement)
 		]
 	}
 
 	@Test
 	def void testDirectEcoreReferenceIncomplete() {
-		parse('''
-			ecoreref 
-		''').
-		lastExpression.
-		edeltaEcoreReferenceExpression => [
-			assertNull(reference)
-		]
-	}
-
-	@Test
-	def void testDirectEcoreReferenceIncomplete2() {
-		parse('''
-			ecoreref (
-		''').
-		lastExpression.
-		edeltaEcoreReferenceExpression => [
+		getEcoreReferenceExpression("") => [
 			assertNull(reference.edeltaEcoreDirectReference.enamedelement)
 		]
 	}
 
 	@Test
 	def void testQualifiedEcoreReference() {
-		parse('''
-			ecoreref foo.bar
-		''').
-		lastExpression.
-		edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference => [
+		getEcoreReferenceExpression("foo.bar")
+		.reference.edeltaEcoreQualifiedReference => [
 			assertEquals("foo", qualification.textualRepresentation)
 			assertEquals("bar", textualReferenceRepresentation)
 			assertEquals("foo.bar", textualRepresentation)
@@ -87,24 +65,8 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testQualifiedEcoreReference2() {
-		parse('''
-			ecoreref foo.bar.baz
-		''').
-		lastExpression.
-		edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference => [
-			assertEquals("foo.bar", qualification.textualRepresentation)
-			assertEquals("baz", textualReferenceRepresentation)
-			assertEquals("foo.bar.baz", textualRepresentation)
-		]
-	}
-
-	@Test
-	def void testQualifiedEcoreReference3() {
-		parse('''
-			ecoreref (foo.bar.baz)
-		''').
-		lastExpression.
-		edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference => [
+		getEcoreReferenceExpression("foo.bar.baz")
+		.reference.edeltaEcoreQualifiedReference => [
 			assertEquals("foo.bar", qualification.textualRepresentation)
 			assertEquals("baz", textualReferenceRepresentation)
 			assertEquals("foo.bar.baz", textualRepresentation)
@@ -113,24 +75,8 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testQualifiedEcoreReferenceIncomplete() {
-		parse('''
-			ecoreref foo.
-		''').
-		lastExpression.
-		edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference => [
-			assertEquals("foo", qualification.textualRepresentation)
-			assertNull(enamedelement)
-			assertEquals("foo.", textualRepresentation)
-		]
-	}
-
-	@Test
-	def void testQualifiedEcoreReferenceIncomplete2() {
-		parse('''
-			ecoreref (foo.
-		''').
-		lastExpression.
-		edeltaEcoreReferenceExpression.reference.edeltaEcoreQualifiedReference => [
+		getEcoreReferenceExpression("foo.")
+		.reference.edeltaEcoreQualifiedReference => [
 			assertEquals("foo", qualification.textualRepresentation)
 			assertNull(enamedelement)
 			assertEquals("foo.", textualRepresentation)
@@ -177,54 +123,22 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test
-	def void testChangeEClass() {
-		'''
-		changeEClass foo.Bar
-		'''.parse.lastExpression.changeEClassExpression => [
-			assertNotNull(original)
-			assertNull(name)
-		]
+	def private getEcoreReferenceExpression(CharSequence ecoreRefArg) {
+		textForEcoreRef(ecoreRefArg)
+			.parse
+			.lastModifyEcoreOperation
+			.body
+			.block
+			.expressions
+			.last
+			.edeltaEcoreReferenceExpression
 	}
 
-	@Test
-	def void testChangeEClassWithNoEPackage() {
+	def private textForEcoreRef(CharSequence ecoreRefArg) {
 		'''
-		changeEClass .Bar
-		'''.parse.lastExpression.changeEClassExpression => [
-			assertNotNull(epackage) // the epackage is still present as proxy
-			assertNull(original) // the EClass reference is instead null
-		]
-	}
-
-	@Test
-	def void testChangeEClassWithNewName() {
+		modifyEcore aTest epackage foo {
+			ecoreref(«ecoreRefArg»
 		'''
-		changeEClass foo.Bar newName bar
-		'''.parse.lastExpression.changeEClassExpression => [
-			assertNotNull(original)
-			assertNotNull(name)
-		]
-	}
-
-	@Test
-	def void testChangeEClassWithNewNameButNoOriginal() {
-		'''
-		changeEClass newName bar
-		'''.parse.lastExpression.changeEClassExpression => [
-			assertNull(original)
-			assertNull(name) // not recognized as newName
-		]
-	}
-
-	@Test
-	def void testChangeEClassWithNoOriginal() {
-		'''
-		changeEClass 
-		'''.parse.lastExpression.changeEClassExpression => [
-			assertNull(epackage)
-			assertNull(original)
-		]
 	}
 
 	def private getTextualRepresentation(EObject o) {

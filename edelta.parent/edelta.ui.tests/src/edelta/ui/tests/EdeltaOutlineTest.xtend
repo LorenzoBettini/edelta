@@ -55,131 +55,6 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 		)
 	}
 
-	@Test
-	def void testOutlineWithOperationAndMain() {
-		'''
-		def createClass(String name) {
-			newEClass(name)
-		}
-		
-		println("")
-		'''.assertAllLabels(
-		'''
-		test
-		  createClass(String) : EClass
-		  doExecute() : void
-		'''
-		)
-	}
-
-	@Test
-	def void testOutlineWithCreateEClass() {
-		// wait for build so that ecores are indexed
-		// and then found by the test programs
-		waitForBuild
-
-		'''
-		metamodel "mypackage"
-		
-		createEClass A in mypackage {
-			createEAttribute attr type EString {
-			}
-		}
-		'''.assertAllLabels(
-		'''
-		test
-		  doExecute() : void
-		  mypackage
-		    A
-		      attr
-		    «allOtherContents»
-		'''
-		)
-	}
-
-	@Test
-	def void testOutlineWithCreateEClassAndInterpretedNewAttribute() {
-		// wait for build so that ecores are indexed
-		// and then found by the test programs
-		waitForBuild
-
-		'''
-		import org.eclipse.emf.ecore.EClass
-		
-		metamodel "mypackage"
-		// don't rely on ecore, since the input files are not saved
-		// during the test, thus external libraries are not seen
-		// metamodel "ecore"
-		
-		def myNewAttribute(EClass c, String name) {
-			c.EStructuralFeatures += newEAttribute(name) => [
-				EType = ecoreref(MyDataType)
-			]
-		}
-		
-		createEClass A in mypackage {
-			myNewAttribute(it, "foo")
-		}
-		'''.assertAllLabels(
-		'''
-		test
-		  myNewAttribute(EClass, String) : boolean
-		  doExecute() : void
-		  mypackage
-		    A
-		      foo : MyDataType
-		    «allOtherContents»
-		'''
-		)
-	}
-
-	@Test
-	def void testOutlineWithCreateEClassAndInterpretedNewAttributeWithUseAs() {
-		createFile(
-			TEST_PROJECT + "/src/Refactorings.edelta",
-			'''
-			import org.eclipse.emf.ecore.EClass
-			
-			package com.example
-			
-			metamodel "mypackage"
-			
-			def myNewAttribute(EClass c, String name) {
-				c.EStructuralFeatures += newEAttribute(name) => [
-					EType = ecoreref(MyDataType)
-				]
-			}
-			'''
-		)
-		// wait for build so that ecores are indexed
-		// and then found by the test programs
-		waitForBuild
-
-		'''
-		package com.example
-		
-		metamodel "mypackage"
-		// don't rely on ecore, since the input files are not saved
-		// during the test, thus external libraries are not seen
-		// metamodel "ecore"
-		
-		use Refactorings as my
-		
-		createEClass A in mypackage {
-			my.myNewAttribute(it, "foo")
-		}
-		'''.assertAllLabels(
-		'''
-		com.example
-		  doExecute() : void
-		  mypackage
-		    A
-		      foo : MyDataType
-		    «allOtherContents»
-		'''
-		)
-	}
-
 	@Test @Flaky
 	def void testOutlineWithCreateEClassInModifyEcore() {
 		println("*** Executing testOutlineWithCreateEClassInModifyEcore...")
@@ -209,6 +84,55 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 		'''
 		test
 		  myNewAttribute(EClass, String) : boolean
+		  aModification(EPackage) : void
+		  mypackage
+		    «allOtherContents»
+		    A
+		      foo : MyDataType
+		'''
+		)
+	}
+
+	@Test @Flaky
+	def void testOutlineWithCreateEClassInModifyEcoreAndInterpretedNewAttributeWithUseAs() {
+		println("*** Executing testOutlineWithCreateEClassInModifyEcoreAndInterpretedNewAttributeWithUseAs...")
+		createFile(
+			TEST_PROJECT + "/src/Refactorings.edelta",
+			'''
+			import org.eclipse.emf.ecore.EClass
+			
+			package com.example
+			
+			metamodel "mypackage"
+			
+			def myNewAttribute(EClass c, String name) {
+				c.EStructuralFeatures += newEAttribute(name) => [
+					EType = ecoreref(MyDataType)
+				]
+			}
+			'''
+		)
+		// wait for build so that ecores are indexed
+		// and then found by the test programs
+		waitForBuild
+
+		'''
+		package com.example
+
+		metamodel "mypackage"
+		// don't rely on ecore, since the input files are not saved
+		// during the test, thus external libraries are not seen
+		// metamodel "ecore"
+		
+		use Refactorings as my
+		
+		modifyEcore aModification epackage mypackage {
+			EClassifiers += newEClass("A")
+			my.myNewAttribute(ecoreref(A), "foo")
+		}
+		'''.assertAllLabels(
+		'''
+		com.example
 		  aModification(EPackage) : void
 		  mypackage
 		    «allOtherContents»

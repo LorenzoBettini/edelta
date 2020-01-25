@@ -25,21 +25,13 @@ class EdeltaEcoreHelper {
 
 	def Iterable<? extends ENamedElement> getProgramENamedElements(EObject context) {
 		cache.get("getProgramENamedElements", context.eResource) [
-			getProgramENamedElementsInternal(context, true)
+			getProgramENamedElementsInternal(context)
 		]
 	}
 
-	def Iterable<? extends ENamedElement> getProgramENamedElementsWithoutCopiedEPackages(EObject context) {
-		cache.get("getProgramENamedElementsWithoutCopiedEPackages", context.eResource) [
-			getProgramENamedElementsInternal(context, false)
-		]
-	}
-
-	def private Iterable<? extends ENamedElement> getProgramENamedElementsInternal(EObject context,
-			boolean includeCopiedEPackages
-	) {
+	def private Iterable<? extends ENamedElement> getProgramENamedElementsInternal(EObject context) {
 		val prog = getProgram(context)
-		val epackages = getProgramEPackages(context, includeCopiedEPackages)
+		val epackages = getProgramEPackages(context)
 		(
 			epackages.map[getAllENamedElements].flatten
 		+
@@ -47,7 +39,7 @@ class EdeltaEcoreHelper {
 		).toList
 	}
 
-	def private Iterable<? extends EPackage> getProgramEPackages(EObject context, boolean includeCopiedEPackages) {
+	def private Iterable<? extends EPackage> getProgramEPackages(EObject context) {
 		val prog = getProgram(context)
 		// we also must explicitly consider the derived EPackages
 		// created by our derived state computer, containing EClasses
@@ -57,13 +49,7 @@ class EdeltaEcoreHelper {
 		(
 			prog.eResource.derivedEPackages
 		+
-			{ 
-				if (includeCopiedEPackages) {
-					prog.eResource.copiedEPackages
-				} else {
-					emptyList
-				}
-			}
+			prog.eResource.copiedEPackages
 		+
 			prog.metamodels
 		)

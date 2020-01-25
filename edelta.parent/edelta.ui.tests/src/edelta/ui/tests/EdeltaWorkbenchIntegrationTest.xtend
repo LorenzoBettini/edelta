@@ -39,7 +39,9 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 			
 			metamodel "mypackage"
 			
-			ecoreref(MyClass)
+			modifyEcore aTest epackage mypackage {
+				ecoreref(MyClass)
+			}
 			'''
 		)
 		// we need to wait for build twice when we run all the UI tests
@@ -58,7 +60,9 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 			
 			metamodel "mypackage"
 			
-			ecoreref(Foo)
+			modifyEcore aTest epackage mypackage {
+				ecoreref(Foo)
+			}
 			'''
 		)
 		// we need to wait for build twice when we run all the UI tests
@@ -77,8 +81,8 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 			
 			metamodel "mypackage"
 			
-			createEClass NewClass in mypackage {
-				
+			modifyEcore aTest epackage mypackage {
+				addNewEClass("NewClass")
 			}
 			'''
 		)
@@ -94,8 +98,8 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 			
 			metamodel "mypackage"
 			
-			createEClass NewClass in mypackage {
-				
+			modifyEcore aTest epackage mypackage {
+				addNewEClass("NewClass")
 			}
 			'''
 		)

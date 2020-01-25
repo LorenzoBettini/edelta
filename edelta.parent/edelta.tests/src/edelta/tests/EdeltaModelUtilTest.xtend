@@ -20,31 +20,10 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 		'''
 			metamodel "foo"
 			
-			createEClass First in foo
+			modifyEcore aTest epackage foo {}
 		'''.parseWithTestEcore => [
-			assertSame(it, getProgram(lastExpression))
+			assertSame(it, getProgram(lastModifyEcoreOperation))
 		]
 	}
 
-	@Test
-	def void testGetChangeEClass() {
-		'''
-			metamodel "foo"
-			
-			changeEClass foo.First
-		'''.parseWithTestEcore => [
-			assertSame(lastExpression, getChangeEClass(lastExpression))
-		]
-	}
-
-	@Test
-	def void testGetEClassManipulation() {
-		'''
-			metamodel "foo"
-			
-			changeEClass foo.First
-		'''.parseWithTestEcore => [
-			assertSame(lastExpression, getEClassManipulation(lastExpression))
-		]
-	}
 }

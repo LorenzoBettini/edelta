@@ -5,18 +5,12 @@ package edelta.jvmmodel
 
 import com.google.inject.Inject
 import edelta.compiler.EdeltaCompilerUtil
-import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
-import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
 import edelta.edelta.EdeltaProgram
 import edelta.lib.AbstractEdelta
-import org.eclipse.emf.ecore.EAttribute
-import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.common.types.JvmDeclaredType
 import org.eclipse.xtext.common.types.JvmVisibility
 import org.eclipse.xtext.naming.IQualifiedNameProvider
-import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
@@ -113,29 +107,7 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 					'''
 				]
 			}
-			val main = program.main
-			// main could be null in an incomplete program, e.g. "metamodel "
-			if (main !== null && !main.expressions.empty) {
-				members += program.main.toMethod("doExecute", Void.TYPE.typeRef) [
-					visibility = JvmVisibility.PROTECTED
-					annotations += Override.annotationRef
-					exceptions += Exception.typeRef
-					body = program.main
-				]
-				main.expressions.
-					filter(EdeltaEcoreBaseEClassManipulationWithBlockExpression).
-					filter[body !== null].
-					forEach[
-						e |
-						members += e.toMethodForConsumer(EClass, e.body)
-						e.body.expressions.
-							filter(EdeltaEcoreCreateEAttributeExpression).
-							forEach[
-								ea |
-								members += ea.toMethodForConsumer(EAttribute, ea.body)
-							]
-					]
-			} else if (!program.modifyEcoreOperations.empty) {
+			if (!program.modifyEcoreOperations.empty) {
 				members += program.toMethod("doExecute", Void.TYPE.typeRef) [
 					visibility = JvmVisibility.PROTECTED
 					annotations += Override.annotationRef
@@ -150,11 +122,4 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 		]
 	}
 
-	def private toMethodForConsumer(XExpression e, Class<? extends ENamedElement> typeForParameter,
-			XExpression bodyForExpression) {
-		e.toMethod(e.methodName, Void.TYPE.typeRef) [
-			parameters += e.toParameter("it", typeRef(typeForParameter))
-			body = bodyForExpression
-		]
-	}
 }

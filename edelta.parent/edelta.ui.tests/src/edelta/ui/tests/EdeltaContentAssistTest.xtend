@@ -107,7 +107,10 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test def void testUnqualifiedEcoreReference() {
-		newBuilder.append('metamodel "mypackage" ecoreref(').
+		newBuilder.append('''
+			metamodel "mypackage"
+			modifyEcore aTest epackage mypackage { 
+				ecoreref(''').
 			assertText('''
 				MyBaseClass
 				MyClass
@@ -124,7 +127,10 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test def void testQualifiedEcoreReference() {
-		newBuilder.append('metamodel "mypackage" ecoreref(MyClass.').
+		newBuilder.append('''
+			metamodel "mypackage"
+			modifyEcore aTest epackage mypackage { 
+				ecoreref(MyClass.''').
 			assertText('myAttribute', 'myReference')
 	}
 
@@ -132,10 +138,9 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		newBuilder.append('''
 			metamodel "mypackage"
 			
-			createEClass AAA in mypackage
-			
-			ecoreref(
-			''').
+			modifyEcore aTest epackage mypackage {
+				addNewEClass("AAA")
+				ecoreref(''').
 			assertProposal('AAA')
 	}
 
@@ -143,10 +148,9 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		newBuilder.append('''
 			metamodel "mypackage"
 			
-			changeEClass mypackage.MyClass newName Renamed {}
-			
-			ecoreref(
-			''').
+			modifyEcore aTest epackage mypackage {
+				ecoreref(MyClass).name = "Renamed"
+				ecoreref(''').
 			assertProposal('Renamed')
 	}
 
@@ -167,24 +171,10 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 				]
 			}
 			
-			createEClass A in mypackage {
-				myNewAttribute(it, "foo")
-			}
-			
-			ecoreref(
-			''').
+			modifyEcore aTest epackage mypackage {
+				myNewAttribute(addNewEClass("A"), "foo")
+				ecoreref(''').
 			assertProposal('foo')
-	}
-
-	@Test def void testEClassifierAfterCreatingAnEClassInModifyEcore() {
-		newBuilder.append('''
-			metamodel "mypackage"
-			
-			modifyEcore aModification epackage mypackage {
-				EClassifiers += newEClass("AAA") []
-				ecoreref(
-				''').
-			assertProposal('AAA')
 	}
 
 	def private fromLinesOfStringsToStringArray(CharSequence strings) {

@@ -5,17 +5,12 @@ package edelta.interpreter;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.emf.ecore.EAttribute;
-import org.eclipse.emf.ecore.EClassifier;
-import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.xtext.common.types.JvmTypeReference;
 import org.eclipse.xtext.common.types.util.JavaReflectAccess;
 
 import com.google.inject.Singleton;
 
-import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaUseAs;
-
 import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException;
 import edelta.lib.AbstractEdelta;
 
@@ -59,14 +54,4 @@ public class EdeltaInterpreterHelper {
 		}
 	}
 
-	public void safeSetEAttributeType(EAttribute attr, EdeltaEcoreReference ecoreRef) {
-		if (ecoreRef == null) {
-			return;
-		}
-		ENamedElement ref = ecoreRef.getEnamedelement();
-		if (ref instanceof EClassifier) {
-			EClassifier type = (EClassifier) ref;
-			attr.setEType(type);
-		}
-	}
 }

@@ -41,9 +41,9 @@ class EdeltaResourceDescriptionStrategyTest extends EdeltaAbstractTest {
 			metamodel "ecore"
 			metamodel "foo"
 			
-			createEClass NewClass in foo {}
+			modifyEcore aTest epackage foo {}
 		'''.assertExportedEPackages("")
-		// our derived state packages must not be exported
+		// our copied packages must not be exported
 	}
 
 	def private assertExportedEPackages(CharSequence input, CharSequence expected) {

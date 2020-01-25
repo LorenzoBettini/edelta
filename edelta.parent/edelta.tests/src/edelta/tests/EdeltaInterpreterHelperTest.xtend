@@ -1,23 +1,20 @@
 package edelta.tests
 
 import com.google.inject.Inject
-import edelta.edelta.EdeltaFactory
 import edelta.interpreter.EdeltaInterpreterHelper
 import edelta.interpreter.EdeltaSafeInterpreter
+import edelta.lib.AbstractEdelta
 import edelta.tests.additional.MyCustomEdelta
-import org.eclipse.emf.ecore.EcoreFactory
-import org.eclipse.emf.ecore.EcorePackage
+import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 import org.eclipse.xtext.common.types.util.JavaReflectAccess
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
-import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
-import edelta.lib.AbstractEdelta
-import org.junit.Before
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderForJavaReflectAccess)
@@ -81,31 +78,6 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 				interpreterHelper.safeInstantiate(javaReflectAccess, it, other).class
 			)
 		]
-	}
-
-	@Test
-	def void testSafeSetEAttributeType() {
-		val attr = EcoreFactory.eINSTANCE.createEAttribute
-		interpreterHelper.safeSetEAttributeType(attr,
-			EdeltaFactory.eINSTANCE.createEdeltaEcoreDirectReference => [
-				// something that is not an EClassifier
-				enamedelement = EcoreFactory.eINSTANCE.createEReference
-			]
-		)
-		assertNull(attr.EType)
-		interpreterHelper.safeSetEAttributeType(attr,
-			EdeltaFactory.eINSTANCE.createEdeltaEcoreDirectReference => [
-				enamedelement = EcorePackage.eINSTANCE.EString
-			]
-		)
-		assertEquals(EcorePackage.eINSTANCE.EString, attr.EType)
-	}
-
-	@Test
-	def void testSafeSetEAttributeTypeWithNullType() {
-		val attr = EcoreFactory.eINSTANCE.createEAttribute
-		interpreterHelper.safeSetEAttributeType(attr, null)
-		assertNull(attr.EType)
 	}
 
 	@Test
