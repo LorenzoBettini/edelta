@@ -15,7 +15,6 @@ import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
-import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationResult
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -102,7 +101,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			modifyEcore aTest epackage foo {
 				addNewEClass("NewClass") [
 					op(it)
-				}
+				]
 			}
 		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation [
 			// never gets here
@@ -478,24 +477,18 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		IEdeltaInterpreter interpreter, EdeltaProgram program,
 		boolean doValidate, (EPackage)=>void testExecutor
 	) {
-		program.lastModifyEcoreOperation => [
-			// mimic the behavior of derived state computer that runs the interpreter
-			// on a copied EPackage, not on the original one
-			val packages = program.getCopiedEPackages.toList
-			val packageName = it.epackage.name
-			val epackage = packages.findFirst[name == packageName]
-			val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
-			val result = interpreter.run(it, epackage, inferredJavaClass, packages)
-			// result can be null due to a timeout
-			if (result?.exception !== null)
-				throw result.exception
-			testExecutor.apply(epackage)
-			if (result !== null)
-				assertTrue(
-					"not expected result of type " + result.class.name,
-					result instanceof DefaultEvaluationResult
-				)
-		]
+		val it = program.lastModifyEcoreOperation
+		// mimic the behavior of derived state computer that runs the interpreter
+		// on a copied EPackage, not on the original one
+		val packages = (program.copiedEPackages).toList
+		val nameToCopiedEPackagesMap = copiedEPackages.toMap[name]
+		val packageName = it.epackage.name
+		val epackage = packages.findFirst[name == packageName]
+		val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
+		interpreter.run(program.modifyEcoreOperations,
+			nameToCopiedEPackagesMap, inferredJavaClass, packages
+		)
+		testExecutor.apply(epackage)
 	}
 
 }
