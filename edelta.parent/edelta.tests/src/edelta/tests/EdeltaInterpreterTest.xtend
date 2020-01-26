@@ -3,6 +3,7 @@ package edelta.tests
 import com.google.inject.Inject
 import com.google.inject.Injector
 import edelta.edelta.EdeltaPackage
+import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreter
 import edelta.interpreter.EdeltaSafeInterpreter
 import edelta.interpreter.IEdeltaInterpreter
@@ -11,8 +12,10 @@ import edelta.tests.additional.MyCustomException
 import edelta.validation.EdeltaValidator
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EPackage
+import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationResult
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -469,6 +472,30 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		if (doValidate) {
 			program.assertNoErrors
 		}
+	}
+
+	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+		IEdeltaInterpreter interpreter, EdeltaProgram program,
+		boolean doValidate, (EPackage)=>void testExecutor
+	) {
+		program.lastModifyEcoreOperation => [
+			// mimic the behavior of derived state computer that runs the interpreter
+			// on a copied EPackage, not on the original one
+			val packages = program.getCopiedEPackages.toList
+			val packageName = it.epackage.name
+			val epackage = packages.findFirst[name == packageName]
+			val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
+			val result = interpreter.run(it, epackage, inferredJavaClass, packages)
+			// result can be null due to a timeout
+			if (result?.exception !== null)
+				throw result.exception
+			testExecutor.apply(epackage)
+			if (result !== null)
+				assertTrue(
+					"not expected result of type " + result.class.name,
+					result instanceof DefaultEvaluationResult
+				)
+		]
 	}
 
 }

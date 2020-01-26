@@ -7,7 +7,6 @@ import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaModifyEcoreOperation
 import edelta.edelta.EdeltaProgram
-import edelta.interpreter.IEdeltaInterpreter
 import edelta.resource.EdeltaDerivedStateEPackage
 import edelta.tests.input.Inputs
 import java.nio.file.Paths
@@ -22,7 +21,6 @@ import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.xmi.XMIResource
-import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.resource.XtextResourceSet
 import org.eclipse.xtext.testing.InjectWith
@@ -32,7 +30,6 @@ import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
-import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationResult
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.junit.runner.RunWith
 
@@ -47,7 +44,7 @@ abstract class EdeltaAbstractTest {
 
 	@Inject protected extension ParseHelper<EdeltaProgram>
 	@Inject protected extension ValidationTestHelper
-	@Inject extension IJvmModelAssociations
+	@Inject protected extension IJvmModelAssociations
 
 	protected extension Inputs = new Inputs
 
@@ -168,30 +165,6 @@ abstract class EdeltaAbstractTest {
 		expected.assertEqualsStrings(
 			elements.map[name].join("\n") + "\n"
 		)
-	}
-
-	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
-		IEdeltaInterpreter interpreter, EdeltaProgram program,
-		boolean doValidate, (EPackage)=>void testExecutor
-	) {
-		program.lastModifyEcoreOperation => [
-			// mimic the behavior of derived state computer that runs the interpreter
-			// on a copied EPackage, not on the original one
-			val packages = program.getCopiedEPackages.toList
-			val packageName = it.epackage.name
-			val epackage = packages.findFirst[name == packageName]
-			val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
-			val result = interpreter.run(it, epackage, inferredJavaClass, packages)
-			// result can be null due to a timeout
-			if (result?.exception !== null)
-				throw result.exception
-			testExecutor.apply(epackage)
-			if (result !== null)
-				assertTrue(
-					"not expected result of type " + result.class.name,
-					result instanceof DefaultEvaluationResult
-				)
-		]
 	}
 
 	def protected getEPackageByName(EdeltaProgram context, String packagename) {
