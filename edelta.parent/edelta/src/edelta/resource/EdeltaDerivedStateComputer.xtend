@@ -84,10 +84,13 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		val program = resource.contents.head as EdeltaProgram
 		val programJvmType = program.jvmElements.filter(JvmGenericType).head
 		if (!preIndexingPhase) {
+			val modifyEcoreOperations = program.modifyEcoreOperations.filter[epackage !== null]
+			if (modifyEcoreOperations.empty)
+				return
+
 			val nameToEPackageMap = resource.nameToEPackageMap
 			val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
 
-			val modifyEcoreOperations = program.modifyEcoreOperations.filter[epackage !== null]
 			for (epackage : modifyEcoreOperations.map[epackage]) {
 				// make sure packages under modification are copied
 				getOrAddDerivedStateEPackage(epackage, nameToEPackageMap, nameToCopiedEPackageMap)
