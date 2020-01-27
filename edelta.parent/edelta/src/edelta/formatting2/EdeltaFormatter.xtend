@@ -30,7 +30,9 @@ class EdeltaFormatter extends XbaseWithAnnotationsFormatter {
 		for (EdeltaOperation edeltaOperation : edeltaProgram.getOperations()) {
 			edeltaOperation.format;
 		}
-		edeltaProgram.getMain.format;
+		for (o : edeltaProgram.modifyEcoreOperations) {
+			o.format
+		}
 	}
 
 }

@@ -2,9 +2,7 @@ package edelta.tests.additional
 
 import com.google.inject.Singleton
 import edelta.resource.EdeltaDerivedStateComputer
-import java.util.Collection
 import java.util.Map
-import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
 
@@ -25,31 +23,15 @@ class TestableEdeltaDerivedStateComputer extends EdeltaDerivedStateComputer {
 		super.unloadDerivedPackages(nameToEPackageMap)
 	}
 
-	override derivedToSourceMap(Resource resource) {
-		super.derivedToSourceMap(resource)
-	}
-
-	override nameToEPackageMap(Resource resource) {
-		super.nameToEPackageMap(resource)
-	}
-
 	override nameToCopiedEPackageMap(Resource resource) {
 		super.nameToCopiedEPackageMap(resource)
 	}
 
-	override opToEClassMap(Resource resource) {
-		super.opToEClassMap(resource)
-	}
-
-	override protected getOrAddDerivedStateEPackage(EPackage referredEPackage, Map<String, EPackage> nameToEPackageMap,
+	override protected getOrAddDerivedStateEPackage(EPackage originalEPackage,
 		Map<String, EPackage> nameToCopiedEPackageMap) {
-		val result = super.getOrAddDerivedStateEPackage(referredEPackage, nameToEPackageMap, nameToCopiedEPackageMap)
-		referredEPackage.eAdapters += new EdeltaEContentAdapter
+		val result = super.getOrAddDerivedStateEPackage(originalEPackage, nameToCopiedEPackageMap)
+		originalEPackage.eAdapters += new EdeltaEContentAdapter
 		return result
 	}
 
-	override getEClassWithTheSameName(Collection<EPackage> packages, EClass original) {
-		super.getEClassWithTheSameName(packages, original)
-	}
-	
 }

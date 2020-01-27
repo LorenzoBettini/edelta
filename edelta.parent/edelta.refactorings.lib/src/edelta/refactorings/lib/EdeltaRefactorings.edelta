@@ -1,0 +1,213 @@
+import java.util.List
+import java.util.Map
+import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EDataType
+import org.eclipse.emf.ecore.EEnum
+import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EReference
+import org.eclipse.emf.ecore.EStructuralFeature
+import org.eclipse.emf.ecore.util.EcoreUtil
+import org.eclipse.xtext.xbase.lib.Pair
+
+package edelta.refactorings.lib
+
+def addMandatoryAttr(EClass eClass, String attrname, EDataType dataType): EAttribute {
+	return eClass.addNewEAttribute(attrname, dataType) [
+		lowerBound = 1;
+	]
+}
+
+def mergeReferences(String newReferenceName, EClass newReferenceType, List<EReference> refs): EReference {
+	refs.removeFeaturesFromContainingClass
+	return newEReference(newReferenceName, newReferenceType)
+}
+
+def mergeAttributes(String newAttrName, EDataType newAttributeType, List<EAttribute> attrs) : EAttribute {
+	attrs.removeFeaturesFromContainingClass
+	return newEAttribute(newAttrName, newAttributeType)
+}
+
+def removeFeaturesFromContainingClass(List<? extends EStructuralFeature> features) {
+	features
+		.forEach[EContainingClass.EStructuralFeatures -= it]
+}
+
+def introduceSubclasses(EClass containingclass, EAttribute attr, EEnum enumType) {
+	containingclass.abstract = true;
+	for (subc : enumType.ELiterals) {
+		containingclass.EPackage.addNewEClass(subc.literal) [
+			addSuperClass(containingclass)
+		];
+		containingclass.EStructuralFeatures -= attr;
+	}
+}
+
+/**
+ * @param superclass where to pull up a single instance of the passed attributes
+ * @param the attributes that are expected to be the same; the first element will be
+ * pulled up in the superclass
+ */
+def extractIntoSuperclass(EClass superclass, List<EAttribute> attrs){
+	val extracted_attr = attrs.head;
+	// print(extracted_attr.name);
+	// already created from outside in the right package
+	// extracted_attr.EContainingClass.EPackage.EClassifiers+=superclass;
+	for (attr : attrs) {
+		attr.EContainingClass => [
+			// set supertype of the EClass of the attribute
+			addSuperClass(superclass)
+			// and then remove the attribute from the original EClass
+			EStructuralFeatures -= attr
+		]
+	}
+
+	superclass.EStructuralFeatures += extracted_attr;
+}
+
+/**
+ * @param extractedClass the created EClass created representing the extracted metaclass
+ * @param f 
+ * @param inReferenceName
+ * @param outReferenceName
+ */
+def extractMetaClass(EClass extractedClass, EReference f, String inReferenceName, String outReferenceName) : void {
+	val ref_in = newEReference(inReferenceName, extractedClass) [
+		lowerBound = f.EOpposite.lowerBound;
+		upperBound = 1;
+		// f.EOpposite.upperBound;
+	];
+
+	val old_ref = newEReference(f.name, f.EReferenceType) [
+		lowerBound = 1;
+		upperBound = 1;
+		EOpposite = ref_in;
+	];
+
+	extractedClass.addEReference(old_ref);
+	ref_in.EOpposite = old_ref;
+	f.EOpposite.lowerBound = 1;
+	f.EOpposite.upperBound = 1;
+
+	extractedClass.addEReference(f.EOpposite);
+
+	// already created from outside in the right package
+	// f.EContainingClass.EPackage.EClassifiers+=extracted_class;
+	f.EReferenceType.addEReference(ref_in);
+	f.EType = extractedClass;
+	f.containment = true;
+	f.name = outReferenceName;
+}
+
+/**
+ * Given a non empty list of {@link EStructuralFeature}, which are known to
+ * appear in several classes as duplicates, extracts a new common superclass,
+ * with the duplicate feature,
+ * adds the extracted superclass to the classes with the duplicate
+ * feature and removes the duplicate feature from each class.
+ * 
+ * @param duplicates
+ */
+def extractSuperclass(List<? extends EStructuralFeature> duplicates){
+	val feature = duplicates.head;
+	val containingEPackage = feature.EContainingClass.EPackage
+	val superClassName =
+		ensureEClassifierNameIsUnique(containingEPackage,
+			feature.name.toFirstUpper + "Element")
+
+	val superclass = containingEPackage.addNewEClass(superClassName) [
+		abstract = true;
+		addEStructuralFeature(EcoreUtil.copy(feature))
+	]
+
+	for (duplicate : duplicates) {
+		duplicate.EContainingClass => [
+			// set supertype of the EClass of the attribute
+			addSuperClass(superclass)
+			// and then remove the attribute from the original EClass
+			EStructuralFeatures -= duplicate
+		]
+	}
+}
+
+/**
+ * Ensures that the proposed classifier name is unique within the specified
+ * package; if not, it appends an incremental index until the name
+ * is actually unique
+ */
+def ensureEClassifierNameIsUnique(EPackage ePackage, String proposedName) {
+	var className = proposedName
+	val currentEClassifiersNames =
+		ePackage.EClassifiers.map[name].sort
+	var counter = 1
+	// make sure the new class is unique by name in the package
+	while (currentEClassifiersNames.contains(className)) {
+		className += (counter++)
+	}
+	return className
+}
+
+/**
+ * Fix all the passed redundant containers (in the shape of pairs)
+ * by setting the eOpposite property.
+ * 
+ * That is, given the pair r1 -> r2, then r2 is set as the opposite
+ * reference of r1 and viceversa.
+ */
+def redundantContainerToEOpposite(Iterable<Pair<EReference, EReference>> redundantContainers) {
+	for (redundant : redundantContainers) {
+		redundant.key.EOpposite = redundant.value
+		redundant.value.EOpposite = redundant.key
+	}
+}
+
+/**
+ * Given a map with key an EClass and value a list of its subclasses,
+ * generates an EEnum (in the EClass' package) representing the inheritance relation
+ * (the name is the name of the key EClass with "Type" suffix),
+ * with an EEnumLiteral for each subclass (the name is the name
+ * of the subclass in uppercase); the subclasses are removed, and the
+ * key EClass is added an EAttribute with the created EEnum as type
+ * (the name is the name of the EEnum, first letter lowercase with "Type"
+ * suffix).
+ * 
+ * For example, give "Base" -> {"Derived1", "Derived2" } as input
+ * it creates the EEnum "BaseType" with literals "DERIVED1", "DERIVED2",
+ * it adds to "Base" the EAttribute "baseType" of type "BaseType".
+ * The EClasses "Derived1" and "Derived2" are removed from the package.
+ */
+def classificationByHierarchyToEnum(Map<EClass, List<EClass>> classificationsByHierarchy) {
+	classificationsByHierarchy
+		.forEach[superClass, subClasses|
+			val ePackage = superClass.EPackage
+			val enumName = ensureEClassifierNameIsUnique
+				(ePackage, superClass.name + "Type")
+			val enum = ePackage.addNewEEnum(enumName) [
+				subClasses.forEach[
+					subClass, index |
+					val enumLiteralName = ensureEClassifierNameIsUnique
+						(ePackage, subClass.name.toUpperCase)
+					addNewEEnumLiteral(enumLiteralName) => [
+						value = index+1
+					]
+				]
+			]
+			superClass.addNewEAttribute(superClass.name.toLowerCase + "Type", enum)
+			EcoreUtil.removeAll(subClasses)
+		]
+}
+
+/**
+ * Turns the given EClasses to abstract
+ */
+def concreteBaseMetaclassToAbstract(Iterable<EClass> concreteAbstractMetaclasses) {
+	concreteAbstractMetaclasses.forEach[abstract = true]
+}
+
+/**
+ * Turns the given EClasses to NON abstract
+ */
+def abstractBaseMetaclassToConcrete(Iterable<EClass> abstractConcreteMetaclasses) {
+	abstractConcreteMetaclasses.forEach[abstract = false]
+}
+

@@ -3,18 +3,16 @@
  */
 package edelta.interpreter;
 
-import org.eclipse.emf.ecore.EAttribute;
-import org.eclipse.emf.ecore.EClassifier;
-import org.eclipse.emf.ecore.ENamedElement;
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.xtext.common.types.JvmTypeReference;
 import org.eclipse.xtext.common.types.util.JavaReflectAccess;
 
 import com.google.inject.Singleton;
 
-import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaUseAs;
-
 import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException;
+import edelta.lib.AbstractEdelta;
 
 /**
  * Helper class for the EdeltaInterpreter.
@@ -27,7 +25,7 @@ public class EdeltaInterpreterHelper {
 
 	private static Object defaultInstance = new Object();
 
-	public Object safeInstantiate(JavaReflectAccess javaReflectAccess, EdeltaUseAs useAs) {
+	public Object safeInstantiate(JavaReflectAccess javaReflectAccess, EdeltaUseAs useAs, AbstractEdelta other) {
 		JvmTypeReference typeRef = useAs.getType();
 		if (typeRef == null) {
 			return defaultInstance;
@@ -44,28 +42,16 @@ public class EdeltaInterpreterHelper {
 							+ "please make sure to add the corresponding Maven module as a dependency in the "
 							+ "'xtext-maven-plugin' configuration.", typeRef.getIdentifier())) {
 
-				/**
-				 * 
-				 */
 				private static final long serialVersionUID = 1L;
-
 			};
 		}
 		try {
-			return javaType.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			return javaType.getConstructor(AbstractEdelta.class)
+						.newInstance(other);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
 			return defaultInstance;
 		}
 	}
 
-	public void safeSetEAttributeType(EAttribute attr, EdeltaEcoreReference ecoreRef) {
-		if (ecoreRef == null) {
-			return;
-		}
-		ENamedElement ref = ecoreRef.getEnamedelement();
-		if (ref instanceof EClassifier) {
-			EClassifier type = (EClassifier) ref;
-			attr.setEType(type);
-		}
-	}
 }

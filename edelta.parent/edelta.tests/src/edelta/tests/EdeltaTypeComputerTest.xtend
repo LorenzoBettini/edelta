@@ -25,37 +25,37 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testTypeOfReferenceToEPackage() {
-		referenceToEPackage.assertType(EPackage)
+		"ecoreref(foo)".assertType(EPackage)
 	}
 
 	@Test
 	def void testTypeOfReferenceToEClass() {
-		referenceToEClass.assertType(EClass)
+		"ecoreref(FooClass)".assertType(EClass)
 	}
 
 	@Test
 	def void testTypeOfReferenceToEDataType() {
-		referenceToEDataType.assertType(EDataType)
+		"ecoreref(FooDataType)".assertType(EDataType)
 	}
 
 	@Test
 	def void testTypeOfReferenceToEEnum() {
-		referenceToEEnum.assertType(EEnum)
+		"ecoreref(FooEnum)".assertType(EEnum)
 	}
 
 	@Test
 	def void testTypeOfReferenceToEAttribute() {
-		referenceToEAttribute.assertType(EAttribute)
+		"ecoreref(myAttribute)".assertType(EAttribute)
 	}
 
 	@Test
 	def void testTypeOfReferenceToEReference() {
-		referenceToEReference.assertType(EReference)
+		"ecoreref(myReference)".assertType(EReference)
 	}
 
 	@Test
 	def void testTypeOfReferenceToEEnumLiteral() {
-		referenceToEEnumLiteral.assertType(EEnumLiteral)
+		"ecoreref(FooEnumLiteral)".assertType(EEnumLiteral)
 	}
 
 	@Test
@@ -72,8 +72,6 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	@Test
 	def void testTypeOfReferenceToUnresolvedQualifiedENamedElementWithExpectations() {
 		'''
-			metamodel "foo"
-			
 			val org.eclipse.emf.ecore.EClass c = ecoreref(FooClass.NonExistant)
 		'''.
 			assertTypeOfRightExpression(EClass)
@@ -96,56 +94,43 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testTypeOfCreateEClassExpression() {
-		"createEClass Test in foo".assertType(EClass)
-	}
-
-	@Test
-	def void testTypeOfCreateEAttributeExpression() {
-		"createEClass Test in foo {
-			createEAttribute myAttribute
-		}".assertTypeOfCreateEClassBody(EAttribute)
-	}
-
-	@Test
-	def void testTypeOfCreateEAttributeExpressionType() {
+	def void testTypeForRenamedEClassInModifyEcore() {
+		val prog =
 		'''
 		metamodel "foo"
-		
-		createEClass Test in foo {
-			createEAttribute myAttribute type FooDataType {}
+
+		modifyEcore aTest epackage foo {
+			ecoreref(foo.FooClass).name = "RenamedClass"
+			ecoreref(RenamedClass)
 		}
-		'''.assertTypeOfCreateEAttributeType(EDataType)
+		'''.parseWithTestEcore
+		val ecoreref = prog.lastModifyEcoreOperation.body.blockLastExpression.
+			edeltaEcoreReferenceExpression
+		assertEquals(EClass.canonicalName,
+			ecoreref.resolveTypes.getActualType(ecoreref).identifier
+		)
 	}
 
-
 	@Test
-	def void testTypeOfUnresolvedEcoreRefSuperTypeIsStillEClass() {
+	def void testTypeForRenamedQualifiedEClassInModifyEcore() {
+		val prog =
 		'''
-			metamodel "foo"
-			
-			createEClass MyNewClass in foo
-				extends AAA {}
-		'''.assertTypeOfCreateEClassSuperType(EClass)
-	}
+		metamodel "foo"
 
-	@Test
-	def void testTypeOfNullEcoreRefSuperTypeIsStillEClass() {
-		'''
-			metamodel "foo"
-			
-			createEClass MyNewClass in foo
-				extends {}
-		'''.assertTypeOfCreateEClassSuperType(EClass)
-	}
-
-	@Test
-	def void testTypeOfChangeEClassExpression() {
-		"changeEClass foo.Test {}".assertType(EClass)
+		modifyEcore aTest epackage foo {
+			ecoreref(foo.FooClass).name = "RenamedClass"
+			ecoreref(foo.RenamedClass)
+		}
+		'''.parseWithTestEcore
+		val ecoreref = prog.lastModifyEcoreOperation.body.blockLastExpression.
+			edeltaEcoreReferenceExpression
+		assertEquals(EClass.canonicalName,
+			ecoreref.resolveTypes.getActualType(ecoreref).identifier
+		)
 	}
 
 	def private assertType(CharSequence input, Class<?> expected) {
-		input.parseWithTestEcore.lastExpression => [
+		input.ecoreReferenceExpression => [
 			expected.canonicalName.assertEquals(
 				resolveTypes.getActualType(it).identifier
 			)
@@ -153,46 +138,23 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	}
 
 	def private assertPrimitiveVoid(CharSequence input) {
-		input.parseWithTestEcore.lastExpression => [
+		input.ecoreReferenceExpression => [
 			"void".assertEquals(
 				resolveTypes.getActualType(it).identifier
 			)
 		]
 	}
 
-	def private assertTypeOfCreateEClassBody(CharSequence input, Class<?> expected) {
-		input.parseWithTestEcore.lastExpression => [
-			expected.canonicalName.assertEquals(
-				resolveTypes.getActualType(
-					createEClassExpression.body.expressions.last
-				).identifier
-			)
-		]
-	}
-
-	def private assertTypeOfCreateEClassSuperType(CharSequence input, Class<?> expected) {
-		input.parseWithTestEcore.lastExpression => [
-			expected.canonicalName.assertEquals(
-				resolveTypes.getActualType(
-					createEClassExpression.ecoreReferenceSuperTypes.last
-				).identifier
-			)
-		]
-	}
-
-	def private assertTypeOfCreateEAttributeType(CharSequence input, Class<?> expected) {
-		input.parseWithTestEcore.lastExpression.createEClassExpression.
-			body.expressions.last => [
-			expected.canonicalName.assertEquals(
-				resolveTypes.getActualType(
-					createEAttributExpression.ecoreReferenceDataType
-				).identifier
-			)
-		]
-	}
-
 	def private assertTypeOfRightExpression(CharSequence input, Class<?> expected) {
-		input.parseWithTestEcore.lastExpression => [
+		'''
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				«input»
+			}
+		'''
+		.parseWithTestEcore
+		.lastModifyEcoreOperation.body.blockLastExpression => [
 			expected.canonicalName.assertEquals(
 				resolveTypes.getActualType(
 					variableDeclaration.right

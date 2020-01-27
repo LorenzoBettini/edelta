@@ -2,16 +2,11 @@ package edelta.tests
 
 import com.google.inject.Inject
 import com.google.inject.Provider
-import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression
-import edelta.edelta.EdeltaEcoreChangeEClassExpression
-import edelta.edelta.EdeltaEcoreCreateEAttributeExpression
-import edelta.edelta.EdeltaEcoreCreateEClassExpression
 import edelta.edelta.EdeltaEcoreDirectReference
 import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
+import edelta.edelta.EdeltaModifyEcoreOperation
 import edelta.edelta.EdeltaProgram
-import edelta.interpreter.IEdeltaInterpreter
-import edelta.resource.EdeltaDerivedStateEPackage
 import edelta.tests.input.Inputs
 import java.nio.file.Paths
 import org.eclipse.emf.common.util.URI
@@ -25,16 +20,15 @@ import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.xmi.XMIResource
-import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.resource.XtextResourceSet
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.testing.util.ParseHelper
 import org.eclipse.xtext.testing.validation.ValidationTestHelper
+import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
-import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationResult
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.junit.runner.RunWith
 
@@ -49,7 +43,7 @@ abstract class EdeltaAbstractTest {
 
 	@Inject protected extension ParseHelper<EdeltaProgram>
 	@Inject protected extension ValidationTestHelper
-	@Inject extension IJvmModelAssociations
+	@Inject protected extension IJvmModelAssociations
 
 	protected extension Inputs = new Inputs
 
@@ -172,27 +166,6 @@ abstract class EdeltaAbstractTest {
 		)
 	}
 
-	def protected assertAfterInterpretationOfEdeltaManipulationExpression(IEdeltaInterpreter interpreter, EdeltaProgram program, boolean doValidate, (EClass)=>void testExecutor) {
-		program.lastExpression.getManipulationEClassExpression => [
-			// mimic the behavior of derived state computer that runs the interpreter
-			// on a copied EPackage, not on the original one
-			val packages = program.getCopiedEPackages.toList
-			val eclass = packages.head.EClassifiers.head as EClass
-			val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
-			val result = interpreter.run(it, eclass, inferredJavaClass, packages)
-			// result can be null due to a timeout
-			if (result?.exception !== null)
-				throw result.exception
-			testExecutor.apply(eclass)
-			if (result !== null)
-				assertTrue(
-					"not expected result of type " + result.class.name,
-					result instanceof DefaultEvaluationResult
-				)
-		]
-	}
-
-
 	def protected getEPackageByName(EdeltaProgram context, String packagename) {
 		context.eResource.resourceSet.resources.filter(XMIResource).
 			map[contents.head as EPackage].findFirst[name == packagename]
@@ -203,42 +176,23 @@ abstract class EdeltaAbstractTest {
 			findFirst[name == classifiername]
 	}
 
-	def protected lastExpression(EdeltaProgram p) {
-		p.main.expressions.last
+	def protected lastModifyEcoreOperation(EdeltaProgram p) {
+		p.modifyEcoreOperations.last
 	}
 
-	def protected getCreateEClassExpression(XExpression e) {
-		e as EdeltaEcoreCreateEClassExpression
+	def protected getLastCopiedEPackageLastEClass(EObject context) {
+		val copiedEPackage = getLastCopiedEPackage(context)
+		copiedEPackage.EClassifiers.last as EClass
 	}
 
-	def protected getChangeEClassExpression(XExpression e) {
-		e as EdeltaEcoreChangeEClassExpression
+	def protected getLastCopiedEPackageFirstEClass(EObject context) {
+		val copiedEPackage = getLastCopiedEPackage(context)
+		copiedEPackage.EClassifiers.head as EClass
 	}
 
-	def protected getManipulationEClassExpression(XExpression e) {
-		e as EdeltaEcoreBaseEClassManipulationWithBlockExpression
-	}
-
-	def protected getCreateEAttributExpression(XExpression e) {
-		e as EdeltaEcoreCreateEAttributeExpression
-	}
-
-	def protected getDerivedStateLastEClass(EObject context) {
-		val derivedEPackage = getDerivedStateLastEPackage(context)
-		derivedEPackage.EClassifiers.last as EClass
-	}
-
-	protected def EdeltaDerivedStateEPackage getDerivedStateLastEPackage(EObject context) {
-		context.eResource.contents.last as EdeltaDerivedStateEPackage
-	}
-
-	def protected getCopiedEClass(EObject context, String nameToSearch) {
+	def protected getLastCopiedEPackageFirstEClass(EObject context, String nameToSearch) {
 		val p = getLastCopiedEPackage(context)
-		getCopiedEClasses(p).findFirst[name == nameToSearch]
-	}
-
-	protected def getCopiedEClasses(EPackage p) {
-		p.EClassifiers.filter(EClass)
+		p.EClassifiers.findFirst[name == nameToSearch] as EClass
 	}
 
 	def protected getLastCopiedEPackage(EObject context) {
@@ -246,7 +200,7 @@ abstract class EdeltaAbstractTest {
 	}
 
 	def protected getCopiedEPackages(EObject context) {
-		context.eResource.contents.filter(EPackage).filter[!(it instanceof EdeltaDerivedStateEPackage)]
+		context.eResource.contents.filter(EPackage)
 	}
 
 	def protected getEClassiferByName(EPackage p, String nameToSearch) {
@@ -278,7 +232,54 @@ abstract class EdeltaAbstractTest {
 		e as EdeltaEcoreQualifiedReference
 	}
 
+	def protected getBlockLastExpression(XExpression e) {
+		(e as XBlockExpression).expressions.last
+	}
+
+	def protected getBlock(XExpression e) {
+		e as XBlockExpression
+	}
+
 	def protected getVariableDeclaration(XExpression e) {
 		e as XVariableDeclaration
+	}
+
+	def protected getModifyEcoreOperation(XExpression e) {
+		e as EdeltaModifyEcoreOperation
+	}
+
+	protected def EClass getLastEClass(EPackage ePackage) {
+		ePackage.EClassifiers.last as EClass
+	}
+
+	protected def EClass getFirstEClass(EPackage ePackage) {
+		ePackage.EClassifiers.head as EClass
+	}
+
+	def protected ecoreReferenceExpression(CharSequence ecoreRefString) {
+		ecoreRefString
+			.parseInsideModifyEcoreWithTestMetamodelFoo
+			.lastEcoreReferenceExpression
+	}
+
+	def protected parseInsideModifyEcoreWithTestMetamodelFoo(CharSequence body) {
+		body
+			.inputInsideModifyEcoreWithTestMetamodelFoo
+			.parseWithTestEcore
+	}
+
+	def protected inputInsideModifyEcoreWithTestMetamodelFoo(CharSequence body) {
+		'''
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				«body»
+			}
+		'''
+	}
+
+	def protected lastEcoreReferenceExpression(EdeltaProgram p) {
+		p.lastModifyEcoreOperation.body
+			.blockLastExpression as EdeltaEcoreReferenceExpression
 	}
 }

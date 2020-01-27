@@ -10,28 +10,23 @@ import "http://www.Edelta.edelta"
 
 EdeltaProgram:
 	{EdeltaProgram}
-	// semantic predicate required to avoid ambiguities with ';' of
-	// the other optional parts
-	=>importSection=XImportSection?
+	importSection=XImportSection?
 	('package' name=QualifiedName ';'?)?
 	('metamodel' metamodels+=[ecore::EPackage|STRING])*
 	(useAsClauses+=EdeltaUseAs)*
 	operations+=EdeltaOperation*
-	main=EdeltaMain
-;
-
-// we need to add a semantic predicate here as well, for the same
-// reason as above
-@Override 
-XImportDeclaration returns xtype::XImportDeclaration:
-	(=>'import' (
-		(static?='static' extension?='extension'? importedType=[types::JvmDeclaredType|QualifiedNameInStaticImport] (wildcard?='*' | memberName=ValidID)) 
-		| importedType=[types::JvmDeclaredType|QualifiedName] 
-		| importedNamespace=QualifiedNameWithWildcard) ';'?)
+	modifyEcoreOperations+=EdeltaModifyEcoreOperation*
 ;
 
 EdeltaUseAs:
-	{EdeltaUseAs} 'use' type=JvmTypeReference 'as' name=ValidID
+	{EdeltaUseAs} 'use' type=JvmTypeReference 'as' extension?='extension'? name=ValidID
+;
+
+EdeltaModifyEcoreOperation:
+	{EdeltaModifyEcoreOperation}
+	'modifyEcore' name=ValidID
+	'epackage' epackage=[ecore::EPackage]
+	body=XBlockExpression
 ;
 
 EdeltaOperation:
@@ -39,59 +34,6 @@ EdeltaOperation:
 		'(' (params+=FullJvmFormalParameter (',' params+=FullJvmFormalParameter)*)? ')'
 		(':' type=JvmTypeReference)?
 		body=XBlockExpression;
-
-EdeltaMain returns xbase::XBlockExpression:
-	{EdeltaMain}
-	(expressions+=MainBlockExpression ';'?)*
-;
-
-MainBlockExpression returns xbase::XExpression:
-	EdeltaEcoreClassifierManipulationExpression |
-	XExpressionOrVarDeclaration
-;
-
-EdeltaEcoreClassifierManipulationExpression returns xbase::XExpression:
-	{EdeltaEcoreCreateEClassExpression}
-	'createEClass' name=ValidID
-	'in' epackage=[ecore::EPackage]
-	(
-		'extends' ecoreReferenceSuperTypes+=EdeltaEcoreReference (',' ecoreReferenceSuperTypes+=EdeltaEcoreReference)*
-	)?
-	body=EdeltaEcoreManipulationBlockExpression
-	|
-	{EdeltaEcoreChangeEClassExpression}
-	'changeEClass'
-	epackage=[ecore::EPackage] '.'
-	original=[ecore::EClass]
-	('newName' name=ValidID)?
-	body=EdeltaEcoreManipulationBlockExpression
-;
-
-EdeltaEcoreManipulationBlockExpression returns xbase::XBlockExpression:
-	{EdeltaEcoreManipulationBlockExpression}
-	'{'
-		(expressions+=EdeltaEcoreManipulationExpression ';'?)*
-	'}'
-;
-
-EdeltaEcoreManipulationExpression returns xbase::XExpression:
-	EdeltaEcoreFeatureManipulationExpression |
-	XExpressionOrVarDeclaration
-;
-
-EdeltaEcoreFeatureManipulationExpression returns xbase::XExpression:
-	{EdeltaEcoreCreateEAttributeExpression}
-	'createEAttribute' name=ValidID
-	'type' ecoreReferenceDataType=EdeltaEcoreReference
-	body=EdeltaEcoreManipualtionStandardBlockExpression 
-;
-
-// we force the rule type to be XBlockExpression
-EdeltaEcoreManipualtionStandardBlockExpression returns xbase::XBlockExpression:
-	{xbase::XBlockExpression}
-	'{'
-		(expressions+=XExpressionOrVarDeclaration ';'?)*
-	'}';
 
 // redefine Xbase primary expression with our special expressions
 @Override 

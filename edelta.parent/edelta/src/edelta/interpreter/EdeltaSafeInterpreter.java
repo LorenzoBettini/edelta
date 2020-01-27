@@ -4,14 +4,13 @@
 package edelta.interpreter;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.common.types.JvmGenericType;
-import org.eclipse.xtext.xbase.interpreter.IEvaluationResult;
 
-import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression;
+import edelta.edelta.EdeltaModifyEcoreOperation;
 
 /**
  * An interpreter that swallows all {@link RuntimeException}s except for
@@ -44,26 +43,18 @@ public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 	}
 
 	@Override
-	public IEvaluationResult run(EdeltaEcoreBaseEClassManipulationWithBlockExpression exp, EClass eClass,
-			JvmGenericType jvmGenericType, List<EPackage> packages) {
+	public void run(Iterable<EdeltaModifyEcoreOperation> ops,
+			Map<String, EPackage> nameToCopiedEPackageMap,
+			JvmGenericType jvmGenericType, List<EPackage> ePackages) {
 		try {
-			IEvaluationResult result = super.run(exp, eClass, jvmGenericType, packages);
-			if (result != null) {
-				Throwable exception = result.getException();
-				if (exception != null) {
-					if (exception instanceof EdeltaInterpreterRuntimeException) {
-						throw (EdeltaInterpreterRuntimeException) exception;
-					}
-					LOG.warn("result of interpreting", exception);
-				}
-			}
-			return result;
+			super.run(ops, nameToCopiedEPackageMap, jvmGenericType, ePackages);
 		} catch (EdeltaInterpreterRuntimeException e) {
 			throw e;
 		} catch (RuntimeException e) {
 			LOG.debug("while interpreting", e);
+		} catch (Exception e) {
+			LOG.warn("result of interpreting", e);
 		}
-		return null;
 	}
 
 }

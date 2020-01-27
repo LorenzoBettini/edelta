@@ -28,10 +28,13 @@ class EdeltaSafeInterpreterTest extends EdeltaInterpreterTest {
 			
 			metamodel "foo"
 			
-			createEClass First in foo
-			eclass First
+			modifyEcore aTest epackage foo {
+				addNewEClass("First")
+				eclass First
+			}
 		'''
-		input.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ derivedEClass |
+		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ ePackage |
+			val derivedEClass = ePackage.lastEClass
 			assertEquals("First", derivedEClass.name)
 		]
 	}
@@ -43,10 +46,12 @@ class EdeltaSafeInterpreterTest extends EdeltaInterpreterTest {
 			
 			use NonExistant as my
 			
-			createEClass NewClass in foo {
-				my.createANewEAttribute(it)
+			modifyEcore aTest epackage foo {
+				val c = addNewEClass("NewClass")
+				my.createANewEAttribute(c)
 			}
-		'''.assertAfterInterpretationOfEdeltaManipulationExpression(false) [ derivedEClass |
+		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ ePackage |
+			val derivedEClass = ePackage.lastEClass
 			assertEquals("NewClass", derivedEClass.name)
 		]
 	}
@@ -63,11 +68,16 @@ class EdeltaSafeInterpreterTest extends EdeltaInterpreterTest {
 				throw new EdeltaInterpreterRuntimeException("test")
 			}
 			
-			createEClass NewClass in foo {
-				op(it)
+			modifyEcore aTest epackage foo {
+				op(addNewEClass("NewClass"))
 			}
-		'''.assertAfterInterpretationOfEdeltaManipulationExpression [ derivedEClass |
+		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation [
 			// never gets here
 		]
+	}
+
+	@Test // remove expected exception which the safe interpreter swallows
+	override void testCreateEClassAndCallOperationThatThrows() {
+		super.testCreateEClassAndCallOperationThatThrows
 	}
 }

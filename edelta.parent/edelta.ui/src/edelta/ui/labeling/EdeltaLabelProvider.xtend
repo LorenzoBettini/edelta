@@ -4,14 +4,14 @@
 package edelta.ui.labeling
 
 import com.google.inject.Inject
-import edelta.edelta.EdeltaMain
+import edelta.edelta.EdeltaModifyEcoreOperation
 import edelta.edelta.EdeltaOperation
+import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider
 import org.eclipse.xtext.common.types.JvmOperation
 import org.eclipse.xtext.xbase.annotations.ui.labeling.XbaseWithAnnotationsLabelProvider
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
-import org.eclipse.emf.ecore.ENamedElement
 
 /**
  * Provides labels for EObjects.
@@ -38,18 +38,18 @@ class EdeltaLabelProvider extends XbaseWithAnnotationsLabelProvider {
 		imageDescriptor(m.inferredJavaMethod)
 	}
 
-	def text(EdeltaMain m) {
+	def text(EdeltaModifyEcoreOperation m) {
 		text(m.inferredJavaMethod)
+	}
+
+	def image(EdeltaModifyEcoreOperation m) {
+		imageDescriptor(m.inferredJavaMethod)
 	}
 
 	def text(ENamedElement e) {
 		// delegate to the default Ecore edit label provider
 		// for Ecore model elements.
 		delegate.getText(e)
-	}
-
-	def image(EdeltaMain m) {
-		imageDescriptor(m.inferredJavaMethod)
 	}
 
 	private def inferredJavaMethod(EObject e) {

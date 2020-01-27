@@ -6,12 +6,11 @@ package edelta.tests.additional;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.common.types.JvmGenericType;
 
-import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression;
+import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.resource.EdeltaDerivedStateComputer;
 
 /**
@@ -25,9 +24,9 @@ import edelta.resource.EdeltaDerivedStateComputer;
 public class EdeltaDerivedStateComputerWithoutInterpreter extends EdeltaDerivedStateComputer {
 
 	@Override
-	protected void runInterpreter(List<? extends EdeltaEcoreBaseEClassManipulationWithBlockExpression> expressions,
-			Map<EdeltaEcoreBaseEClassManipulationWithBlockExpression, EClass> opToEClassMap,
-			JvmGenericType jvmGenericType, List<EPackage> packages) {
+	protected void runInterpreter(Iterable<EdeltaModifyEcoreOperation> ops,
+			Map<String, EPackage> nameToCopiedEPackageMap, JvmGenericType programJvmType,
+			List<EPackage> packages) {
 		// No interpreter is run
 	}
 

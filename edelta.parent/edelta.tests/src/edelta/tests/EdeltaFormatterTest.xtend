@@ -19,7 +19,7 @@ class EdeltaFormatterTest extends EdeltaAbstractTest {
 			expectation = '''
 				
 				
-				import gssi.refactorings.MMrefactorings
+				import edelta.refactorings.lib.EdeltaRefactorings
 				
 				// IMPORTANT: ecores must be in source directories
 				// otherwise you can't refer to them
@@ -28,7 +28,7 @@ class EdeltaFormatterTest extends EdeltaAbstractTest {
 				metamodel "myecore"
 				
 				use Example as example 
-				use MMrefactorings as std
+				use EdeltaRefactorings as std
 				
 				def createClass2(String name) {
 					newEClass(name)
@@ -40,9 +40,7 @@ class EdeltaFormatterTest extends EdeltaAbstractTest {
 					]
 				}
 				
-				example.createClass("Foo")
-				
-				createEClass ANewClass in myecore {
+				modifyEcore aModification epackage myecore {
 					std.addMandatoryAttr("name", ecoreref(EString), it)
 				}
 				
@@ -51,7 +49,7 @@ class EdeltaFormatterTest extends EdeltaAbstractTest {
 			toBeFormatted = '''
 				
 				
-				import gssi.refactorings.MMrefactorings
+				import edelta.refactorings.lib.EdeltaRefactorings
 				
 				// IMPORTANT: ecores must be in source directories
 				// otherwise you can't refer to them
@@ -61,7 +59,7 @@ class EdeltaFormatterTest extends EdeltaAbstractTest {
 				metamodel "myecore"
 				
 				use Example as example 
-				use MMrefactorings as std
+				use EdeltaRefactorings as std
 				
 				def createClass2(String name) { 				newEClass(name)
 				}
@@ -72,10 +70,9 @@ class EdeltaFormatterTest extends EdeltaAbstractTest {
 						]
 				}
 				
-				example.createClass("Foo")
-				
-				createEClass ANewClass in myecore {
-					std.addMandatoryAttr("name", ecoreref(EString), it)
+				modifyEcore aModification epackage myecore {
+					std . addMandatoryAttr( "name" , 
+					ecoreref(EString), it)
 				}
 				
 				

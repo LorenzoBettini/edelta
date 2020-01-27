@@ -18,7 +18,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
  */
 public class EdeltaEcoreUtil {
 
-	protected EdeltaEcoreUtil() {
+	private EdeltaEcoreUtil() {
 		// empty constructor never to be called
 	}
 

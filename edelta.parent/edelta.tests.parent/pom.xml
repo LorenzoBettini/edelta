@@ -5,14 +5,12 @@
   <parent>
     <groupId>io.github.lorenzobettini.edelta</groupId>
     <artifactId>edelta.parent</artifactId>
-    <version>0.8.0-SNAPSHOT</version>
+    <version>0.9.0-SNAPSHOT</version>
   </parent>
   <artifactId>edelta.tests.parent</artifactId>
   <packaging>pom</packaging>
 
   <properties>
-    <jacoco-version>0.8.3</jacoco-version>
-    <os-jvm-flags />
     <!-- Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=397015 -->
     <sonar.sources></sonar.sources>
     <sonar.tests>src,xtend-gen</sonar.tests>
@@ -30,38 +28,10 @@
       </properties>
       <build>
         <plugins>
+          <!-- configured in <pluginManagement> -->
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>${jacoco-version}</version>
-            <configuration>
-              <excludes>
-                <!-- EMF model Java classes -->
-                <exclude>**/edelta/edelta/**/*.class</exclude>
-                <!-- Antlr generated Java classes -->
-                <exclude>**/antlr/**/*.class</exclude>
-                <!-- We don't have a custom serializer -->
-                <exclude>**/serializer/*.class</exclude>
-                <!-- generated files -->
-                <exclude>**/*Abstract*RuntimeModule.class</exclude>
-                <exclude>**/*StandaloneSetup*.class</exclude>
-                <exclude>**/*Abstract*Validator.class</exclude>
-                <exclude>**/*GrammarAccess*.class</exclude>
-                <exclude>**/*Abstract*UiModule.class</exclude>
-                <exclude>**/**ExecutableExtensionFactory.class</exclude>
-                <exclude>**/*Abstract*ProposalProvider.class</exclude>
-                <exclude>**/internal/*.class</exclude>
-                <exclude>**/*ProjectTemplateProvider.class</exclude>
-                <exclude>**/*ProjectTemplate.class</exclude>
-              </excludes>
-            </configuration>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>prepare-agent</goal>
-                </goals>
-              </execution>
-            </executions>
           </plugin>
         </plugins>
       </build>

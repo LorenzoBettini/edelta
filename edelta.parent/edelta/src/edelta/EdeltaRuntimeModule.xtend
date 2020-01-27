@@ -4,6 +4,7 @@
 package edelta
 
 import edelta.compiler.EdeltaGeneratorConfigProvider
+import edelta.compiler.EdeltaOutputConfigurationProvider
 import edelta.compiler.EdeltaXbaseCompiler
 import edelta.interpreter.EdeltaSafeInterpreter
 import edelta.interpreter.IEdeltaInterpreter
@@ -15,7 +16,8 @@ import edelta.scoping.EdeltaQualifiedNameProvider
 import edelta.services.IEdeltaEcoreModelAssociations
 import edelta.typesystem.EdeltaTypeComputer
 import edelta.validation.EdeltaDiagnosticConverter
-import edelta.validation.EdeltaLinkingDiagnosticMessageProvider
+import org.eclipse.xtext.generator.IContextualOutputConfigurationProvider
+import org.eclipse.xtext.generator.IOutputConfigurationProvider
 import org.eclipse.xtext.validation.IDiagnosticConverter
 import org.eclipse.xtext.xbase.compiler.IGeneratorConfigProvider
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
@@ -65,11 +67,16 @@ class EdeltaRuntimeModule extends AbstractEdeltaRuntimeModule {
 		return EdeltaDiagnosticConverter
 	}
 
-	override bindILinkingDiagnosticMessageProvider() {
-		EdeltaLinkingDiagnosticMessageProvider
-	}
-
 	def Class<? extends IGeneratorConfigProvider> bindIGeneratorConfigProvider() {
 		EdeltaGeneratorConfigProvider
 	}
+
+	def Class<? extends IOutputConfigurationProvider> bindIOutputConfigurationProvider() {
+		return EdeltaOutputConfigurationProvider
+	}
+
+	def Class<? extends IContextualOutputConfigurationProvider> bindIContextualOutputConfigurationProvider() {
+		return EdeltaOutputConfigurationProvider
+	}
+
 }

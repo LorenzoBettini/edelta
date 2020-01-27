@@ -4,13 +4,12 @@
 package edelta.interpreter;
 
 import java.util.List;
+import java.util.Map;
 
-import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.common.types.JvmGenericType;
-import org.eclipse.xtext.xbase.interpreter.IEvaluationResult;
 
-import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression;
+import edelta.edelta.EdeltaModifyEcoreOperation;
 
 /**
  * @author Lorenzo Bettini
@@ -18,7 +17,8 @@ import edelta.edelta.EdeltaEcoreBaseEClassManipulationWithBlockExpression;
  */
 public interface IEdeltaInterpreter {
 
-	IEvaluationResult run(EdeltaEcoreBaseEClassManipulationWithBlockExpression exp, EClass eClass,
+	void run(Iterable<EdeltaModifyEcoreOperation> ops,
+			Map<String, EPackage> nameToCopiedEPackageMap,
 			JvmGenericType jvmGenericType, List<EPackage> ePackages);
 
 	void setInterpreterTimeout(int interpreterTimeout);

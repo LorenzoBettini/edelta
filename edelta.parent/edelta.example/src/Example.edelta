@@ -5,20 +5,10 @@ metamodel "ecore"
 metamodel "myexample"
 metamodel "myecore"
 
-def createClass(String name) {
-	newEClass(name)
+use ExampleReusableFunctions as extension myfunctions
+
+modifyEcore SomeChanges epackage myecore {
+	"ANewClass".createANewClassInMyEcore() => [
+		abstract = false
+	]
 }
-
-ecoreref(MyExampleEClass) // from myexample ecore in model project
-ecoreref(MyEClass) // from myecore ecore in this project
-ecoreref(EAnnotation) // from EMF ecore
-
-ecoreref(myexample).EClassifiers
-
-//changeEClass myecore.MyEClass {
-//	
-//}
-
-//createEClass Foo in myecore {
-//	
-//}

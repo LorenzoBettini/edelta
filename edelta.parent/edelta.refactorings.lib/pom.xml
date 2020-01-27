@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.github.lorenzobettini.edelta</groupId>
     <artifactId>edelta.parent</artifactId>
-    <version>0.8.0-SNAPSHOT</version>
+    <version>0.9.0-SNAPSHOT</version>
   </parent>
   <artifactId>edelta.refactorings.lib</artifactId>
   <packaging>eclipse-plugin</packaging>
@@ -18,14 +18,25 @@
         <configuration>
           <filesets combine.children="append">
             <fileset>
-              <directory>${basedir}/src-gen</directory>
+              <directory>${basedir}/edelta-lib-src-gen</directory>
             </fileset>
           </filesets>
         </configuration>
       </plugin>
+      <!-- Main configuration is in the parent POM -->
       <plugin>
-        <groupId>org.eclipse.xtext</groupId>
-        <artifactId>xtext-maven-plugin</artifactId>
+        <groupId>io.github.lorenzobettini.edelta</groupId>
+        <artifactId>edelta-maven-plugin</artifactId>
+        <configuration>
+          <outputDirectory>edelta-lib-src-gen</outputDirectory>
+          <!-- specify source roots just to speed up compilation -->
+          <sourceRoots>
+            <sourceRoot>${basedir}/src</sourceRoot>
+          </sourceRoots>
+          <javaSourceRoots>
+            <javaSourceRoot>${basedir}/src</javaSourceRoot>
+          </javaSourceRoots>
+        </configuration>
       </plugin>
     </plugins>
   </build>

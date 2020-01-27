@@ -1,4 +1,4 @@
-import gssi.refactorings.MMrefactorings
+import edelta.refactorings.lib.EdeltaRefactorings
 
 // IMPORTANT: ecores must be in source directories
 // otherwise you can't refer to them
@@ -8,10 +8,5 @@ metamodel "myexample"
 metamodel "myecore"
 
 use Example as example
-use MMrefactorings as std
+use EdeltaRefactorings as std
 
-example.createClass("Foo")
-
-createEClass ANewClass in myecore {
-	std.addMandatoryAttr(it, "name", ecoreref(EString))
-}

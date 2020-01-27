@@ -6,9 +6,10 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcorePackage;
 
 import edelta.lib.AbstractEdelta;
+import edelta.tests.input.Inputs;
 
 /**
- * This is references in inputs for "use ... as ..." expressions
+ * This is used in {@link Inputs} for "use ... as ..." expressions
  * 
  * @author Lorenzo Bettini
  *
@@ -26,8 +27,8 @@ public class MyCustomEdelta extends AbstractEdelta {
 		return getEStructuralFeature("foo", "FooClass", "myAttribute");
 	}
 
-	public void createANewEClass() {
-		createEClass("foo", "ANewClass", null);
+	public EClass createANewEClass() {
+		return createEClass("foo", "ANewClass", null);
 	}
 
 	public void createANewEAttribute(EClass c) {

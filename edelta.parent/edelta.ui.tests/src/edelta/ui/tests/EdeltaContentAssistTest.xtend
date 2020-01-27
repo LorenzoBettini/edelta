@@ -2,7 +2,6 @@ package edelta.ui.tests
 
 import edelta.ui.internal.EdeltaActivator
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper
-import edelta.ui.tests.utils.PDETargetPlatformUtils
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -41,10 +40,6 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	@BeforeClass
 	def static void setUp() {
-		// needed when building with Tycho, otherwise, dependencies
-		// in the MANIFEST of the created project will not be visible
-		PDETargetPlatformUtils.setTargetPlatform();
-
 		closeWelcomePage
 		val injector = EdeltaActivator.getInstance().getInjector(EdeltaActivator.EDELTA_EDELTA);
 		val projectHelper = injector.getInstance(EdeltaPluginProjectHelper)
@@ -112,7 +107,10 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test def void testUnqualifiedEcoreReference() {
-		newBuilder.append('metamodel "mypackage" ecoreref(').
+		newBuilder.append('''
+			metamodel "mypackage"
+			modifyEcore aTest epackage mypackage { 
+				ecoreref(''').
 			assertText('''
 				MyBaseClass
 				MyClass
@@ -129,7 +127,10 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test def void testQualifiedEcoreReference() {
-		newBuilder.append('metamodel "mypackage" ecoreref(MyClass.').
+		newBuilder.append('''
+			metamodel "mypackage"
+			modifyEcore aTest epackage mypackage { 
+				ecoreref(MyClass.''').
 			assertText('myAttribute', 'myReference')
 	}
 
@@ -137,10 +138,9 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		newBuilder.append('''
 			metamodel "mypackage"
 			
-			createEClass AAA in mypackage
-			
-			ecoreref(
-			''').
+			modifyEcore aTest epackage mypackage {
+				addNewEClass("AAA")
+				ecoreref(''').
 			assertProposal('AAA')
 	}
 
@@ -148,10 +148,9 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		newBuilder.append('''
 			metamodel "mypackage"
 			
-			changeEClass mypackage.MyClass newName Renamed {}
-			
-			ecoreref(
-			''').
+			modifyEcore aTest epackage mypackage {
+				ecoreref(MyClass).name = "Renamed"
+				ecoreref(''').
 			assertProposal('Renamed')
 	}
 
@@ -172,12 +171,9 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 				]
 			}
 			
-			createEClass A in mypackage {
-				myNewAttribute(it, "foo")
-			}
-			
-			ecoreref(
-			''').
+			modifyEcore aTest epackage mypackage {
+				myNewAttribute(addNewEClass("A"), "foo")
+				ecoreref(''').
 			assertProposal('foo')
 	}
 

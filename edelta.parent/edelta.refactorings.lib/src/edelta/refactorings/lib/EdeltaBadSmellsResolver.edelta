@@ -1,0 +1,65 @@
+import java.util.function.Predicate
+import org.eclipse.emf.ecore.EClassifier
+import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.util.EcoreUtil
+
+package edelta.refactorings.lib
+
+use EdeltaRefactorings as refactorings
+use EdeltaBadSmellsFinder as finder
+
+/**
+ * Extracts superclasses in the presence of duplicate features
+ * considering all the classes of the given package.
+ * 
+ * @param ePackage
+ */
+def resolveDuplicatedFeatures(EPackage ePackage) {
+	finder.findDuplicateFeatures(ePackage)
+		.values
+		.forEach[refactorings.extractSuperclass(it)]
+}
+
+/**
+ * Removes the dead classifiers by first checking the passed
+ * predicate.
+ */
+def resolveDeadClassifiers(EPackage ePackage, Predicate<EClassifier> shouldRemove) {
+	val deadClassifiers = finder.findDeadClassifiers(ePackage)
+	deadClassifiers.forEach[
+		cl |
+		if (shouldRemove.test(cl))
+			EcoreUtil.remove(cl)
+	]
+}
+
+/**
+ * Applies redundantContainerToEOpposite to redundant containers
+ */
+def resolveRedundantContainers(EPackage ePackage) {
+	refactorings.redundantContainerToEOpposite(
+		finder.findRedundantContainers(ePackage)
+	)
+}
+
+/**
+ * Applies classificationByHierarchyToEnum to findClassificationByHierarchy
+ */
+def resolveClassificationByHierarchy(EPackage ePackage) {
+	refactorings.classificationByHierarchyToEnum(
+		finder.findClassificationByHierarchy(ePackage)
+	)
+}
+
+def resolveConcreteAbstractMetaclass(EPackage ePackage) {
+	refactorings.concreteBaseMetaclassToAbstract(
+		finder.findConcreteAbstractMetaclasses(ePackage)
+	)
+}
+
+def resolveAbstractConcreteMetaclass(EPackage ePackage) {
+	refactorings.abstractBaseMetaclassToConcrete(
+		finder.findAbstractConcreteMetaclasses(ePackage)
+	)
+}
+

@@ -18,24 +18,24 @@ abstract class AbstractTest {
 	protected var eClassReference = EcorePackage.eINSTANCE.EClass
 
 	def protected createEClass(EPackage epackage, String name) {
-		val c = createEClass(name)
+		val c = createEClassWithoutPackage(name)
 		epackage.EClassifiers += c
 		return c
 	}
 
-	protected def EClass createEClass(String name) {
+	protected def EClass createEClassWithoutPackage(String name) {
 		factory.createEClass => [
 			it.name = name
 		]
 	}
 
 	def protected createEEnum(EPackage epackage, String name) {
-		val e = createEEnum(name)
+		val e = createEEnumWithoutPackage(name)
 		epackage.EClassifiers += e
 		return e
 	}
 
-	protected def EEnum createEEnum(String name) {
+	protected def EEnum createEEnumWithoutPackage(String name) {
 		factory.createEEnum => [
 			it.name = name
 		]

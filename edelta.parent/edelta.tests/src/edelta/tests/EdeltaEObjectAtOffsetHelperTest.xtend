@@ -20,25 +20,7 @@ class EdeltaEObjectAtOffsetHelperTest extends EdeltaAbstractTest {
 	@Inject extension EObjectAtOffsetHelper
 
 	@Test def void testWithoutManipulationExpressions() {
-		'''
-		metamodel "foo"
-		
-		ecoreref(FooClass)
-		'''.resolveAtOffset[
-			it, linked |
-			metamodels.head.getEClassifier("FooClass").
-				assertSame(linked)
-		]
-	}
-
-	@Test def void testWithManipulationExpressions() {
-		'''
-		metamodel "foo"
-		
-		createEClass NewClass in foo {}
-		
-		ecoreref(FooClass)
-		'''.resolveAtOffset[
+		"ecoreref(FooClass)".resolveAtOffset[
 			it, linked |
 			metamodels.head.getEClassifier("FooClass").
 				assertSame(linked)
@@ -46,24 +28,19 @@ class EdeltaEObjectAtOffsetHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test def void testUnresolved() {
-		'''
-		metamodel "foo"
-		
-		ecoreref(NonExistant)
-		'''.resolveAtOffset[
+		"ecoreref(NonExistant)".resolveAtOffset[
 			it, linked |
 			linked.eIsProxy.assertTrue
 		]
 	}
 
 	@Test def void testNonEcoreReference() {
-		'''
-		metamodel "foo"
-		
-		val String s = null
-		'''.resolveAtOffset("Str")[
+		"val String s = null".resolveAtOffset("Str")[
 			it, linked |
-			lastExpression.variableDeclaration.
+			lastModifyEcoreOperation
+				.body
+				.blockLastExpression
+				.variableDeclaration.
 				type.type.eIsProxy.assertFalse
 		]
 	}
@@ -72,7 +49,8 @@ class EdeltaEObjectAtOffsetHelperTest extends EdeltaAbstractTest {
 		resolveAtOffset(input, "ecoreref(", tester)
 	}
 
-	def private resolveAtOffset(CharSequence input, String stringRegion, (EdeltaProgram, EObject)=>void tester) {
+	def private resolveAtOffset(CharSequence body, String stringRegion, (EdeltaProgram, EObject)=>void tester) {
+		val input = body.inputInsideModifyEcoreWithTestMetamodelFoo
 		val prog = input.parseWithTestEcore
 		val offset = input.toString.lastIndexOf(stringRegion) + stringRegion.length + 1
 		val crossRefNode = (prog.

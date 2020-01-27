@@ -2,14 +2,12 @@ package edelta.ui.tests
 
 import com.google.inject.Inject
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper
-import edelta.ui.tests.utils.PDETargetPlatformUtils
 import edelta.ui.tests.utils.PluginProjectHelper
 import org.eclipse.core.resources.IProject
-import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -27,11 +25,6 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 
 	val TEST_PROJECT = "mytestproject"
 
-	@BeforeClass
-	def static void beforeClass() {
-		PDETargetPlatformUtils.setTargetPlatform();
-	}
-
 	@Before
 	override void setUp() {
 		super.setUp
@@ -46,7 +39,9 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 			
 			metamodel "mypackage"
 			
-			ecoreref(MyClass)
+			modifyEcore aTest epackage mypackage {
+				ecoreref(MyClass)
+			}
 			'''
 		)
 		// we need to wait for build twice when we run all the UI tests
@@ -65,7 +60,9 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 			
 			metamodel "mypackage"
 			
-			ecoreref(Foo)
+			modifyEcore aTest epackage mypackage {
+				ecoreref(Foo)
+			}
 			'''
 		)
 		// we need to wait for build twice when we run all the UI tests
@@ -84,8 +81,8 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 			
 			metamodel "mypackage"
 			
-			createEClass NewClass in mypackage {
-				
+			modifyEcore aTest epackage mypackage {
+				addNewEClass("NewClass")
 			}
 			'''
 		)
@@ -101,8 +98,8 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 			
 			metamodel "mypackage"
 			
-			createEClass NewClass in mypackage {
-				
+			modifyEcore aTest epackage mypackage {
+				addNewEClass("NewClass")
 			}
 			'''
 		)
@@ -116,7 +113,7 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 	}
 
 	def private assertSrcGenFolderFile(String expectedSubDir, String expectedFile) {
-		val expectedSrcGenFolderSubDir = "src-gen/" + expectedSubDir
+		val expectedSrcGenFolderSubDir = "edelta-gen/" + expectedSubDir
 		val srcGenFolder = project.getFolder(expectedSrcGenFolderSubDir)
 		assertTrue(expectedSrcGenFolderSubDir + " does not exist", srcGenFolder.exists)
 		val genfile = srcGenFolder.getFile(expectedFile)
