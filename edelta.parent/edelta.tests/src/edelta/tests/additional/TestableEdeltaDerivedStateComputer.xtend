@@ -23,18 +23,14 @@ class TestableEdeltaDerivedStateComputer extends EdeltaDerivedStateComputer {
 		super.unloadDerivedPackages(nameToEPackageMap)
 	}
 
-	override nameToEPackageMap(Resource resource) {
-		super.nameToEPackageMap(resource)
-	}
-
 	override nameToCopiedEPackageMap(Resource resource) {
 		super.nameToCopiedEPackageMap(resource)
 	}
 
-	override protected getOrAddDerivedStateEPackage(EPackage referredEPackage, Map<String, EPackage> nameToEPackageMap,
+	override protected getOrAddDerivedStateEPackage(EPackage originalEPackage,
 		Map<String, EPackage> nameToCopiedEPackageMap) {
-		val result = super.getOrAddDerivedStateEPackage(referredEPackage, nameToEPackageMap, nameToCopiedEPackageMap)
-		referredEPackage.eAdapters += new EdeltaEContentAdapter
+		val result = super.getOrAddDerivedStateEPackage(originalEPackage, nameToCopiedEPackageMap)
+		originalEPackage.eAdapters += new EdeltaEContentAdapter
 		return result
 	}
 

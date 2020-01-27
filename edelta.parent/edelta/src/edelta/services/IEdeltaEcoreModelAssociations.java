@@ -21,8 +21,6 @@ import org.eclipse.xtext.resource.IDerivedStateComputer;
  */
 public interface IEdeltaEcoreModelAssociations {
 
-	Collection<EPackage> derivedEPackages(Resource resource);
-
 	Collection<EPackage> copiedEPackages(Resource resource);
 
 	EObject getPrimarySourceElement(EObject jvmElement);

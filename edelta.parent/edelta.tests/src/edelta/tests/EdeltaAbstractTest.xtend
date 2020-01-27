@@ -7,7 +7,6 @@ import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaModifyEcoreOperation
 import edelta.edelta.EdeltaProgram
-import edelta.resource.EdeltaDerivedStateEPackage
 import edelta.tests.input.Inputs
 import java.nio.file.Paths
 import org.eclipse.emf.common.util.URI
@@ -181,15 +180,6 @@ abstract class EdeltaAbstractTest {
 		p.modifyEcoreOperations.last
 	}
 
-	def protected getDerivedStateLastEClass(EObject context) {
-		val derivedEPackage = getDerivedStateLastEPackage(context)
-		derivedEPackage.EClassifiers.last as EClass
-	}
-
-	protected def EdeltaDerivedStateEPackage getDerivedStateLastEPackage(EObject context) {
-		context.eResource.contents.last as EdeltaDerivedStateEPackage
-	}
-
 	def protected getLastCopiedEPackageLastEClass(EObject context) {
 		val copiedEPackage = getLastCopiedEPackage(context)
 		copiedEPackage.EClassifiers.last as EClass
@@ -210,7 +200,7 @@ abstract class EdeltaAbstractTest {
 	}
 
 	def protected getCopiedEPackages(EObject context) {
-		context.eResource.contents.filter(EPackage).filter[!(it instanceof EdeltaDerivedStateEPackage)]
+		context.eResource.contents.filter(EPackage)
 	}
 
 	def protected getEClassiferByName(EPackage p, String nameToSearch) {
