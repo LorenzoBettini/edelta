@@ -46,14 +46,8 @@ public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 	public void run(Iterable<EdeltaModifyEcoreOperation> ops,
 			Map<String, EPackage> nameToCopiedEPackageMap,
 			JvmGenericType jvmGenericType, List<EPackage> ePackages) {
-		runSafe(
-			() -> super.run(ops, nameToCopiedEPackageMap, jvmGenericType, ePackages)
-		);
-	}
-
-	private void runSafe(Runnable code) {
 		try {
-			code.run();
+			super.run(ops, nameToCopiedEPackageMap, jvmGenericType, ePackages);
 		} catch (EdeltaInterpreterRuntimeException e) {
 			throw e;
 		} catch (RuntimeException e) {
@@ -62,4 +56,5 @@ public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 			LOG.warn("result of interpreting", e);
 		}
 	}
+
 }
