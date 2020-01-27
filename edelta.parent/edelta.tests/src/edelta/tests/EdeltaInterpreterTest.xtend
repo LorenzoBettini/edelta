@@ -479,15 +479,15 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	) {
 		val it = program.lastModifyEcoreOperation
 		// mimic the behavior of derived state computer that runs the interpreter
-		// on a copied EPackage, not on the original one
-		val packages = (program.copiedEPackages).toList
+		// on copied EPackages, not on the original ones
+		val packages = (program.copiedEPackages + program.metamodels).toList
 		val nameToCopiedEPackagesMap = copiedEPackages.toMap[name]
-		val packageName = it.epackage.name
-		val epackage = packages.findFirst[name == packageName]
 		val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
 		interpreter.run(program.modifyEcoreOperations,
 			nameToCopiedEPackagesMap, inferredJavaClass, packages
 		)
+		val packageName = it.epackage.name
+		val epackage = nameToCopiedEPackagesMap.get(packageName)
 		testExecutor.apply(epackage)
 	}
 
