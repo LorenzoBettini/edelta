@@ -40,7 +40,6 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	@Inject EdeltaOriginalENamedElementRecorder originalENamedElementRecorder
 
 	static class EdeltaDerivedStateAdapter extends AdapterImpl {
-		var Map<String, EPackage> nameToEPackageMap = newHashMap()
 		var Map<String, EPackage> nameToCopiedEPackageMap = newHashMap()
 
 		override boolean isAdapterForType(Object type) {
@@ -63,16 +62,8 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		return new EdeltaDerivedStateAdapter
 	}
 
-	def protected nameToEPackageMap(Resource resource) {
-		getOrInstallAdapter(resource).nameToEPackageMap
-	}
-
 	def protected nameToCopiedEPackageMap(Resource resource) {
 		getOrInstallAdapter(resource).nameToCopiedEPackageMap
-	}
-
-	override derivedEPackages(Resource resource) {
-		nameToEPackageMap(resource).values
 	}
 
 	override copiedEPackages(Resource resource) {
@@ -88,17 +79,14 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 			if (modifyEcoreOperations.empty)
 				return
 
-			val nameToEPackageMap = resource.nameToEPackageMap
 			val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
 
 			for (epackage : modifyEcoreOperations.map[epackage]) {
 				// make sure packages under modification are copied
-				getOrAddDerivedStateEPackage(epackage, nameToEPackageMap, nameToCopiedEPackageMap)
+				getOrAddDerivedStateEPackage(epackage, nameToCopiedEPackageMap)
 			}
-			// we must add only the copied and the created EPackages
-			val copies = nameToCopiedEPackageMap.values
-			resource.contents += copies
-			resource.contents += nameToEPackageMap.values
+			// we must add the copied EPackages to the resource
+			resource.contents += nameToCopiedEPackageMap.values
 			// record original ecore references before running the interpreter
 			recordEcoreReferenceOriginalENamedElement(resource)
 			// configure and run the interpreter
@@ -133,30 +121,22 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		}
 	}
 
-	def protected getOrAddDerivedStateEPackage(EPackage referredEPackage, Map<String, EPackage> nameToEPackageMap,
+	def protected getOrAddDerivedStateEPackage(EPackage originalEPackage,
 			Map<String, EPackage> nameToCopiedEPackageMap
 	) {
-		val referredEPackageName = referredEPackage.name
-		var derivedEPackage = nameToEPackageMap.get(referredEPackageName)
+		val referredEPackageName = originalEPackage.name
 		var copiedEPackage = nameToCopiedEPackageMap.get(referredEPackageName)
-		if (derivedEPackage === null) {
-			derivedEPackage = new EdeltaDerivedStateEPackage => [
-				name = referredEPackageName
-			]
-			nameToEPackageMap.put(referredEPackageName, derivedEPackage)
-			copiedEPackage = EdeltaEcoreUtil.copyENamedElement(referredEPackage)
+		if (copiedEPackage === null) {
+			copiedEPackage = EdeltaEcoreUtil.copyENamedElement(originalEPackage)
 			nameToCopiedEPackageMap.put(referredEPackageName, copiedEPackage)
 		}
-		return derivedEPackage -> copiedEPackage
+		return copiedEPackage
 	}
 
 	override discardDerivedState(DerivedStateAwareResource resource) {
-		val nameToEPackageMap = resource.nameToEPackageMap
 		val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
-		unloadDerivedPackages(nameToEPackageMap)
 		unloadDerivedPackages(nameToCopiedEPackageMap)
 		super.discardDerivedState(resource)
-		nameToEPackageMap.clear
 		nameToCopiedEPackageMap.clear
 	}
 

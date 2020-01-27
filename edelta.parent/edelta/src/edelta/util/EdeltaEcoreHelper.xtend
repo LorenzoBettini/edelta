@@ -41,14 +41,9 @@ class EdeltaEcoreHelper {
 
 	def private Iterable<? extends EPackage> getProgramEPackages(EObject context) {
 		val prog = getProgram(context)
-		// we also must explicitly consider the derived EPackages
-		// created by our derived state computer, containing EClasses
-		// created in the program
-		// and also copied elements for interpreting without
+		// we also must explicitly consider the copied elements for interpreting without
 		// breaking the original EMF package registries classes
 		(
-			prog.eResource.derivedEPackages
-		+
 			prog.eResource.copiedEPackages
 		+
 			prog.metamodels
@@ -113,24 +108,14 @@ class EdeltaEcoreHelper {
 	def private getEPackageENamedElementsInternal(EPackage ePackage, EObject context, boolean includeCopiedEPackages) {
 		val ePackageName = ePackage.name
 		val imported = getProgram(context).metamodels.getByName(ePackageName)
-		val derived = context.eResource.derivedEPackages.getByName(ePackageName)
-		if (derived !== null) {
-			if (includeCopiedEPackages) {
+		if (includeCopiedEPackages) {
+			val copiedEPackage = context.eResource.copiedEPackages.getByName(ePackageName)
+			if (copiedEPackage !== null) 
 				// there'll also be copied epackages
-				val copiedEClassifiers = context.eResource.
-					copiedEPackages.getByName(ePackageName).
-					getEClassifiers
 				return (
-					derived.getEClassifiers +
-					copiedEClassifiers +
+					copiedEPackage.getEClassifiers +
 					imported.getEClassifiers
 				).toList
-			} else {
-				return (
-					imported.getEClassifiers +
-					derived.getEClassifiers
-				).toList
-			}
 		}
 		return imported.getEClassifiers
 	}
