@@ -75,4 +75,9 @@ class EdeltaSafeInterpreterTest extends EdeltaInterpreterTest {
 			// never gets here
 		]
 	}
+
+	@Test // remove expected exception which the safe interpreter swallows
+	override void testCreateEClassAndCallOperationThatThrows() {
+		super.testCreateEClassAndCallOperationThatThrows
+	}
 }

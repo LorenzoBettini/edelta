@@ -24,8 +24,9 @@ import edelta.resource.EdeltaDerivedStateComputer;
 public class EdeltaDerivedStateComputerWithoutInterpreter extends EdeltaDerivedStateComputer {
 
 	@Override
-	protected void runInterpreter(EdeltaModifyEcoreOperation o, Map<String, EPackage> nameToCopiedEPackageMap,
-			JvmGenericType programJvmType, List<EPackage> packages) {
+	protected void runInterpreter(Iterable<EdeltaModifyEcoreOperation> ops,
+			Map<String, EPackage> nameToCopiedEPackageMap, JvmGenericType programJvmType,
+			List<EPackage> packages) {
 		// No interpreter is run
 	}
 

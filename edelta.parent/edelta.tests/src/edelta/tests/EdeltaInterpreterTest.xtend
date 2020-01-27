@@ -3,6 +3,7 @@ package edelta.tests
 import com.google.inject.Inject
 import com.google.inject.Injector
 import edelta.edelta.EdeltaPackage
+import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreter
 import edelta.interpreter.EdeltaSafeInterpreter
 import edelta.interpreter.IEdeltaInterpreter
@@ -11,6 +12,7 @@ import edelta.tests.additional.MyCustomException
 import edelta.validation.EdeltaValidator
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EPackage
+import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Before
@@ -99,7 +101,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			modifyEcore aTest epackage foo {
 				addNewEClass("NewClass") [
 					op(it)
-				}
+				]
 			}
 		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation [
 			// never gets here
@@ -223,8 +225,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		useAsCustomStatefulEdeltaCreatingEClass
 		.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
 			val eClass = ePackage.lastEClass
-			assertEquals("ANewClass1", eClass.name)
-			assertEquals("aNewAttr2",
+			assertEquals("ANewClass3", eClass.name)
+			assertEquals("aNewAttr4",
 				(eClass.EStructuralFeatures.head as EAttribute).name
 			)
 		]
@@ -469,6 +471,24 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		if (doValidate) {
 			program.assertNoErrors
 		}
+	}
+
+	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+		IEdeltaInterpreter interpreter, EdeltaProgram program,
+		boolean doValidate, (EPackage)=>void testExecutor
+	) {
+		val it = program.lastModifyEcoreOperation
+		// mimic the behavior of derived state computer that runs the interpreter
+		// on copied EPackages, not on the original ones
+		val packages = (program.copiedEPackages + program.metamodels).toList
+		val nameToCopiedEPackagesMap = copiedEPackages.toMap[name]
+		val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
+		interpreter.run(program.modifyEcoreOperations,
+			nameToCopiedEPackagesMap, inferredJavaClass, packages
+		)
+		val packageName = it.epackage.name
+		val epackage = nameToCopiedEPackagesMap.get(packageName)
+		testExecutor.apply(epackage)
 	}
 
 }

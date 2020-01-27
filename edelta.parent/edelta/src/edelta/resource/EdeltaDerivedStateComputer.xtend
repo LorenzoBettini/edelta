@@ -84,10 +84,13 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		val program = resource.contents.head as EdeltaProgram
 		val programJvmType = program.jvmElements.filter(JvmGenericType).head
 		if (!preIndexingPhase) {
+			val modifyEcoreOperations = program.modifyEcoreOperations.filter[epackage !== null]
+			if (modifyEcoreOperations.empty)
+				return
+
 			val nameToEPackageMap = resource.nameToEPackageMap
 			val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
 
-			val modifyEcoreOperations = program.modifyEcoreOperations.filter[epackage !== null]
 			for (epackage : modifyEcoreOperations.map[epackage]) {
 				// make sure packages under modification are copied
 				getOrAddDerivedStateEPackage(epackage, nameToEPackageMap, nameToCopiedEPackageMap)
@@ -101,24 +104,22 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 			// configure and run the interpreter
 			interpreterConfigurator.configureInterpreter(interpreter, resource)
 			val packages = (nameToCopiedEPackageMap.values + program.metamodels).toList
-			for (o : modifyEcoreOperations) {
-				runInterpreter(
-					o,
-					nameToCopiedEPackageMap,
-					programJvmType,
-					packages
-				)
-			}
+			runInterpreter(
+				modifyEcoreOperations,
+				nameToCopiedEPackageMap,
+				programJvmType,
+				packages
+			)
 		}
 	}
 
-	protected def void runInterpreter(EdeltaModifyEcoreOperation o,
+	protected def void runInterpreter(Iterable<EdeltaModifyEcoreOperation> ops,
 		Map<String, EPackage> nameToCopiedEPackageMap,
 		JvmGenericType programJvmType, List<EPackage> packages
 	) {
 		interpreter.run(
-			o,
-			nameToCopiedEPackageMap.get(o.epackage.name),
+			ops,
+			nameToCopiedEPackageMap,
 			programJvmType,
 			packages
 		)
