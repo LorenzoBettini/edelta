@@ -47,7 +47,7 @@
     <xtextVersion>2.20.0</xtextVersion>
     <xtext-version>${xtextVersion}</xtext-version>
 
-    <!-- Override EMF version to use EMF 2.20 TODO: remove once Xtext 2.21 
+    <!-- Override EMF version to use EMF 2.20 until Xtext 2.21 
       is released -->
     <emf.mwe-version>1.5.1</emf.mwe-version>
     <emf.common-version>2.17.0</emf.common-version>
@@ -93,7 +93,7 @@
         <artifactId>edelta.refactorings.lib</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <!-- Override EMF version to use EMF 2.20 TODO: remove once Xtext 2.21 
+      <!-- Override EMF version to use EMF 2.20 until Xtext 2.21 
         is released -->
       <dependency>
         <groupId>org.eclipse.emf</groupId>
