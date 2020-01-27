@@ -84,8 +84,7 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		'''.parseWithTestEcore => [
 			val ref = lastEcoreReferenceExpression.reference
 			ref.recordOriginalENamedElement
-			val original = derivedStateLastEClass
-			assertSame(original, ref.originalEnamedelement)
+			assertNull(ref.originalEnamedelement)
 		]
 	}
 
@@ -101,8 +100,7 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 			val ref = lastEcoreReferenceExpression.reference.
 				getEdeltaEcoreQualifiedReference
 			ref.recordOriginalENamedElement
-			val original = derivedStateLastEClass
-			assertSame(original, ref.originalEnamedelement)
+			assertNull(ref.originalEnamedelement)
 			// note that the package actually links to the original EPackage
 			// not to the derived EPackage, but that's not a problem
 			val originalPackage = metamodels.last
