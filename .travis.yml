@@ -45,7 +45,7 @@ before_script:
 # Build on MacOSX is triggered only for pull requests
 script:
  - export
- - bash -e ./travis_build.sh
+ - ./mvnw -f edelta.parent/pom.xml clean install $ADDITIONAL
 
 before_cache:
  - find $HOME/.m2/repository -name "*edelta*" -exec rm -rf {} \+
