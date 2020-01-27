@@ -624,6 +624,9 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  <eClassifiers xsi:type="ecore:EClass" name="ANewClass1">
 			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="aNewAttr2" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
 			  </eClassifiers>
+			  <eClassifiers xsi:type="ecore:EClass" name="ANewClass3">
+			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="aNewAttr4" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+			  </eClassifiers>
 			</ecore:EPackage>
 			''',
 			true

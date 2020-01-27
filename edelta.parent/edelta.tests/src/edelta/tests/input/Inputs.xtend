@@ -170,6 +170,10 @@ class Inputs {
 				my.createANewEAttribute(
 					my.createANewEClass)
 			}
+			modifyEcore anotherTest epackage foo {
+				my.createANewEAttribute(
+					my.createANewEClass)
+			}
 		'''
 	}
 

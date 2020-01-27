@@ -225,8 +225,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		useAsCustomStatefulEdeltaCreatingEClass
 		.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
 			val eClass = ePackage.lastEClass
-			assertEquals("ANewClass1", eClass.name)
-			assertEquals("aNewAttr2",
+			assertEquals("ANewClass3", eClass.name)
+			assertEquals("aNewAttr4",
 				(eClass.EStructuralFeatures.head as EAttribute).name
 			)
 		]
