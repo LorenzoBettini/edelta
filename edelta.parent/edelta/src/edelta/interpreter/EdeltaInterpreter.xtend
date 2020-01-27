@@ -26,6 +26,11 @@ import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 
+/**
+ * Interprets the modifyEcore operations of an EdeltaProgram.
+ * 
+ * @author Lorenzo Bettini
+ */
 class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
 	@Inject extension IJvmModelAssociations
