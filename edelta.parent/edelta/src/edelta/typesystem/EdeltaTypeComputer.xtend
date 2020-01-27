@@ -38,7 +38,7 @@ class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 	def void _computeTypes(EdeltaEcoreReference e, ITypeComputationState state) {
 		val enamedelement = e.enamedelement;
 		val type = switch (enamedelement) {
-			case enamedelement === null || enamedelement.eIsProxy: {
+			case enamedelement.eIsProxy: {
 				// if it's unresolved, but there's a type expectation, then
 				// we assign to this reference the expected type: this way
 				// we will only get an error due to unresolved reference
