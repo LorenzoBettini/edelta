@@ -14,12 +14,12 @@ matrix:
       services:
       - xvfb
       env: ADDITIONAL="-Pjacoco,build-ide,test-ide,run-its coveralls:report sonar:sonar"
-    # only on PR
+    # only on PR, or after merging a PR
     - os: osx
       osx_image: xcode10.1
       jdk: openjdk11
       env: ADDITIONAL="-Pbuild-ide,test-ide,run-its"
-      if: type IN (pull_request)
+      if: type IN (pull_request) OR commit_message =~ /^Merge pull request/
 
 addons:
   sonarcloud:
