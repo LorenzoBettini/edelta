@@ -409,6 +409,25 @@
         <module>edelta.swtbot.tests</module>
       </modules>
     </profile>
+    <profile>
+      <id>jacoco</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <!-- tycho.testArgLine is where jacoco stores the agent path -->
+        <additionalTestArgLine>${tycho.testArgLine}</additionalTestArgLine>
+      </properties>
+      <build>
+        <plugins>
+          <!-- configured in <pluginManagement> -->
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
   <build>
