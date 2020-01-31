@@ -528,6 +528,8 @@
           <version>${tycho-version}</version>
         </plugin>
         <plugin>
+          <!-- We don't use it, since we have edelta-maven-plugin, we leave it here
+            just for historical reasons ;) -->
           <groupId>org.eclipse.xtext</groupId>
           <artifactId>xtext-maven-plugin</artifactId>
           <version>${xtextVersion}</version>
