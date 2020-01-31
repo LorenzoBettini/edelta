@@ -419,6 +419,17 @@
         <additionalTestArgLine>${tycho.testArgLine}</additionalTestArgLine>
       </properties>
       <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.eclipse.xtend</groupId>
+              <artifactId>xtend-maven-plugin</artifactId>
+              <configuration>
+                <xtendAsPrimaryDebugSource>true</xtendAsPrimaryDebugSource>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
         <plugins>
           <!-- configured in <pluginManagement> -->
           <plugin>
@@ -613,7 +624,6 @@
           <configuration>
             <skipXtend>${xtend.skip}</skipXtend>
             <outputDirectory>${basedir}/xtend-gen</outputDirectory>
-            <xtendAsPrimaryDebugSource>true</xtendAsPrimaryDebugSource>
           </configuration>
         </plugin>
         <plugin>
