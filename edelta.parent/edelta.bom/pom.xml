@@ -46,6 +46,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <xtextVersion>2.20.0</xtextVersion>
     <xtext-version>${xtextVersion}</xtext-version>
+    <versions-version>2.7</versions-version>
 
     <!-- Override EMF version to use EMF 2.20 until Xtext 2.21 
       is released -->
@@ -83,6 +84,11 @@
         <version>${xtext-version}</version>
       </dependency>
       <!-- Edelta Maven artifacts -->
+      <dependency>
+        <groupId>io.github.lorenzobettini.edelta</groupId>
+        <artifactId>edelta</artifactId>
+        <version>${project.version}</version>
+      </dependency>
       <dependency>
         <groupId>io.github.lorenzobettini.edelta</groupId>
         <artifactId>edelta.lib</artifactId>
@@ -127,6 +133,35 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <!-- These plugins must be configured here because the edelta.parent needs them,
+        and since this POM is edelta.parent's POM we must put them here -->
+      <plugins>
+        <plugin>
+          <groupId>org.eluder.coveralls</groupId>
+          <artifactId>coveralls-maven-plugin</artifactId>
+          <version>4.3.0</version>
+          <configuration>
+            <jacocoReports>
+              <jacocoReport>${project.basedir}/${jacoco-aggregate-report}</jacocoReport>
+            </jacocoReports>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+          <version>3.6.0.1398</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>versions-maven-plugin</artifactId>
+          <version>${versions-version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 
   <distributionManagement>
     <snapshotRepository>
