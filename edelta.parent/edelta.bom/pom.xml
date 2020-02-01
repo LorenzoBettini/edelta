@@ -86,6 +86,11 @@
       <!-- Edelta Maven artifacts -->
       <dependency>
         <groupId>io.github.lorenzobettini.edelta</groupId>
+        <artifactId>edelta</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.lorenzobettini.edelta</groupId>
         <artifactId>edelta.lib</artifactId>
         <version>${project.version}</version>
       </dependency>
