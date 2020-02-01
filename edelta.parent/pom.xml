@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>io.github.lorenzobettini.edelta</groupId>
-  <version>0.9.0-SNAPSHOT</version>
+  <parent>
+    <groupId>io.github.lorenzobettini.edelta</groupId>
+    <artifactId>edelta.bom</artifactId>
+    <version>0.9.0-SNAPSHOT</version>
+    <relativePath>edelta.bom</relativePath>
+  </parent>
   <artifactId>edelta.parent</artifactId>
   <packaging>pom</packaging>
 
@@ -10,45 +14,10 @@
   <url>https://github.com/LorenzoBettini/edelta</url>
   <description>An Xtext DSL for EMF metamodels refactoring and migration.</description>
 
-  <licenses>
-    <license>
-      <name>Eclipse Public License</name>
-      <url>http://www.eclipse.org/legal/epl-v10.html</url>
-    </license>
-  </licenses>
-
-  <developers>
-    <developer>
-      <name>Lorenzo Bettini</name>
-      <email>lorenzo.bettini@gmail.com</email>
-      <roles>
-        <role>architect</role>
-        <role>developer</role>
-      </roles>
-      <organization>DISIA Dipartimento di Statistica, Informatica, Applicazioni</organization>
-      <organizationUrl>https://www.disia.unifi.it/</organizationUrl>
-    </developer>
-  </developers>
-
-  <scm>
-    <url>git@github.com:LorenzoBettini/edelta.git</url>
-    <developerConnection>scm:git:https://github.com/LorenzoBettini/edelta.git</developerConnection>
-    <connection>scm:git:git@github.com/LorenzoBettini/edelta.git</connection>
-  </scm>
-
-  <issueManagement>
-    <system>Github</system>
-    <url>https://github.com/LorenzoBettini/edelta/issues</url>
-  </issueManagement>
-
   <properties>
     <tycho-version>1.6.0</tycho-version>
-    <!-- IMPORTANT: update Xtext version also in the BOM -->
-    <xtextVersion>2.20.0</xtextVersion>
-    <xtext-version>${xtextVersion}</xtext-version>
     <eclipseVersion>2019-12</eclipseVersion>
     <mwe2Version>2.11.1</mwe2Version>
-    <emf.mwe-version>1.5.1</emf.mwe-version>
     <assertj-version>3.14.0</assertj-version>
     <mockito-version>3.2.4</mockito-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -57,7 +26,6 @@
     <jacoco-version>0.8.5</jacoco-version>
     <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
     <build-helper-version>3.0.0</build-helper-version>
-    <versions-version>2.7</versions-version>
 
     <mwe2.skip>false</mwe2.skip>
     <xtend.skip>false</xtend.skip>
@@ -167,25 +135,11 @@
     <remote.dir>lbettini@frs.sourceforge.net:/home/frs/project/edelta</remote.dir>
   </properties>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>io.github.lorenzobettini.edelta</groupId>
-        <artifactId>edelta.bom</artifactId>
-        <version>${project.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <!-- The modules common to all profiles. These also correspond
     to the Maven artifacts to be deployed on Maven Central -->
   <modules>
-    <module>edelta.target</module>
-    <!-- The BOM must not be the first module or we lose the pluginManagement
-      configurations that are needed by this parent itself, e.g., coveralls and sonar -->
     <module>edelta.bom</module>
+    <module>edelta.target</module>
     <module>edelta.lib</module>
     <module>edelta.mwe2</module>
     <module>edelta</module>
@@ -409,6 +363,36 @@
         <module>edelta.swtbot.tests</module>
       </modules>
     </profile>
+    <profile>
+      <id>jacoco</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <!-- tycho.testArgLine is where jacoco stores the agent path -->
+        <additionalTestArgLine>${tycho.testArgLine}</additionalTestArgLine>
+      </properties>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.eclipse.xtend</groupId>
+              <artifactId>xtend-maven-plugin</artifactId>
+              <configuration>
+                <xtendAsPrimaryDebugSource>true</xtendAsPrimaryDebugSource>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+        <plugins>
+          <!-- configured in <pluginManagement> -->
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
   <build>
@@ -518,11 +502,6 @@
           <version>${build-helper-version}</version>
         </plugin>
         <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>versions-maven-plugin</artifactId>
-          <version>${versions-version}</version>
-        </plugin>
-        <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-versions-plugin</artifactId>
           <version>${tycho-version}</version>
@@ -594,7 +573,6 @@
           <configuration>
             <skipXtend>${xtend.skip}</skipXtend>
             <outputDirectory>${basedir}/xtend-gen</outputDirectory>
-            <xtendAsPrimaryDebugSource>true</xtendAsPrimaryDebugSource>
           </configuration>
         </plugin>
         <plugin>
@@ -756,22 +734,7 @@
             <useUIHarness>false</useUIHarness>
           </configuration>
         </plugin>
-        <plugin>
-          <groupId>org.eluder.coveralls</groupId>
-          <artifactId>coveralls-maven-plugin</artifactId>
-          <version>4.3.0</version>
-          <configuration>
-            <jacocoReports>
-              <jacocoReport>${project.basedir}/${jacoco-aggregate-report}</jacocoReport>
-            </jacocoReports>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.sonarsource.scanner.maven</groupId>
-          <artifactId>sonar-maven-plugin</artifactId>
-          <version>3.6.0.1398</version>
-        </plugin>
-      </plugins>
+       </plugins>
     </pluginManagement>
   </build>
   <repositories>
@@ -821,14 +784,4 @@
     </pluginRepository>
   </pluginRepositories>
 
-  <distributionManagement>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-  </distributionManagement>
 </project>

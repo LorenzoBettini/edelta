@@ -16,26 +16,4 @@
     <sonar.tests>src,xtend-gen</sonar.tests>
   </properties>
 
-  <profiles>
-    <profile>
-      <id>jacoco</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <properties>
-        <!-- tycho.testArgLine is where jacoco stores the agent path -->
-        <additionalTestArgLine>${tycho.testArgLine}</additionalTestArgLine>
-      </properties>
-      <build>
-        <plugins>
-          <!-- configured in <pluginManagement> -->
-          <plugin>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
-
 </project>
