@@ -26,7 +26,6 @@
     <jacoco-version>0.8.5</jacoco-version>
     <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
     <build-helper-version>3.0.0</build-helper-version>
-    <versions-version>2.7</versions-version>
 
     <mwe2.skip>false</mwe2.skip>
     <xtend.skip>false</xtend.skip>
@@ -501,11 +500,6 @@
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
           <version>${build-helper-version}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>versions-maven-plugin</artifactId>
-          <version>${versions-version}</version>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
