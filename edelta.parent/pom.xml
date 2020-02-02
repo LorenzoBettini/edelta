@@ -526,26 +526,6 @@
             </lifecycleMappingMetadata>
           </configuration>
         </plugin>
-        <plugin>
-          <!-- Can be removed after first generator execution https://bugs.eclipse.org/bugs/show_bug.cgi?id=480097 -->
-          <groupId>org.eclipse.tycho</groupId>
-          <artifactId>tycho-compiler-plugin</artifactId>
-          <version>${tycho-version}</version>
-          <configuration>
-            <compilerArgument>-err:-forbidden</compilerArgument>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.eclipse.tycho</groupId>
-          <artifactId>tycho-surefire-plugin</artifactId>
-          <version>${tycho-version}</version>
-          <configuration>
-            <!-- THE FOLLOWING LINE MUST NOT BE BROKEN BY AUTOFORMATTING -->
-            <argLine>${additionalTestArgLine} ${platformSystemProperties} ${systemProperties} ${moduleProperties} ${uiTestProperties}</argLine>
-            <failIfNoTests>false</failIfNoTests>
-            <useUIHarness>false</useUIHarness>
-          </configuration>
-        </plugin>
        </plugins>
     </pluginManagement>
   </build>
