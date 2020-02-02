@@ -6,6 +6,7 @@
     <groupId>io.github.lorenzobettini.xtextutils</groupId>
     <artifactId>xtext-tycho-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <relativePath></relativePath>
   </parent>
   <groupId>io.github.lorenzobettini.edelta</groupId>
   <artifactId>edelta.bom</artifactId>
