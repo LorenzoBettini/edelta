@@ -511,69 +511,6 @@
               <pluginExecutions>
                 <pluginExecution>
                   <pluginExecutionFilter>
-                    <groupId>
-                      org.codehaus.mojo
-                    </groupId>
-                    <artifactId>
-                      build-helper-maven-plugin
-                    </artifactId>
-                    <versionRange>
-                      [1.9.1,)
-                    </versionRange>
-                    <goals>
-                      <goal>add-resource</goal>
-                      <goal>add-source</goal>
-                      <goal>add-test-resource</goal>
-                      <goal>add-test-source</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore/>
-                  </action>
-                </pluginExecution>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>
-                      org.eclipse.tycho
-                    </groupId>
-                    <artifactId>
-                      tycho-compiler-plugin
-                    </artifactId>
-                    <versionRange>
-                      [0.23.1,)
-                    </versionRange>
-                    <goals>
-                      <goal>compile</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore/>
-                  </action>
-                </pluginExecution>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>
-                      org.eclipse.tycho
-                    </groupId>
-                    <artifactId>
-                      tycho-packaging-plugin
-                    </artifactId>
-                    <versionRange>
-                      [0.23.1,)
-                    </versionRange>
-                    <goals>
-                      <goal>build-qualifier</goal>
-                      <goal>build-qualifier-aggregator</goal>
-                      <goal>validate-id</goal>
-                      <goal>validate-version</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore/>
-                  </action>
-                </pluginExecution>
-                <pluginExecution>
-                  <pluginExecutionFilter>
                     <groupId>io.github.lorenzobettini.edelta</groupId>
                     <artifactId>edelta-maven-plugin</artifactId>
                     <versionRange>[0.8.0-SNAPSHOT,)</versionRange>
