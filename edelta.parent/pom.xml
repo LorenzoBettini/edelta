@@ -358,10 +358,6 @@
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
-      <properties>
-        <!-- tycho.testArgLine is where jacoco stores the agent path -->
-        <additionalTestArguments>${tycho.testArgLine}</additionalTestArguments>
-      </properties>
       <build>
         <pluginManagement>
           <plugins>
@@ -374,13 +370,6 @@
             </plugin>
           </plugins>
         </pluginManagement>
-        <plugins>
-          <!-- configured in <pluginManagement> -->
-          <plugin>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-          </plugin>
-        </plugins>
       </build>
     </profile>
   </profiles>
