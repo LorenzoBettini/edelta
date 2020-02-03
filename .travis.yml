@@ -45,8 +45,10 @@ before_script:
 # Build on MacOSX is triggered only for pull requests and merge of pull requests
 script:
  - export
- - ./mvnw -f edelta.parent/pom.xml -N -Dtycho.mode=maven help:active-profiles
  - ./mvnw -f edelta.parent/pom.xml -U clean verify $ADDITIONAL
+
+# to show active profiles
+# ./mvnw -f edelta.parent/pom.xml -N -Dtycho.mode=maven help:active-profiles
 
 before_cache:
  - find $HOME/.m2/repository -name "*edelta*" -exec rm -rf {} \+
