@@ -46,7 +46,6 @@ before_script:
 script:
  - export
  - ./mvnw -f edelta.parent/pom.xml -N -Dtycho.mode=maven help:active-profiles
- - ./mvnw -f edelta.parent/edelta.ui.tests/pom.xml -N -Dtycho.mode=maven help:active-profiles
  - ./mvnw -f edelta.parent/pom.xml -U clean verify $ADDITIONAL
 
 before_cache:
