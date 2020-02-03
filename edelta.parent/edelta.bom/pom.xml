@@ -169,6 +169,8 @@
     </pluginManagement>
   </build>
 
+  <!-- TODO remove after xtext-tycho-parent is released
+    (or define a snapshot profile as done in edelta.maven.example -->
   <repositories>
     <repository>
       <id>maven-snapshots</id>
