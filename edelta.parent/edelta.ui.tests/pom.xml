@@ -18,6 +18,11 @@
   <profiles>
     <profile>
       <id>macos</id>
+      <activation>
+        <os>
+          <family>mac</family>
+        </os>
+      </activation>
       <build>
         <plugins>
           <plugin>
