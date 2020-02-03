@@ -15,6 +15,33 @@
     <systemProperties>-Dedelta.interpreter.timeout=5000</systemProperties>
   </properties>
 
+  <profiles>
+    <profile>
+      <id>macos</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>target-platform-configuration</artifactId>
+            <configuration>
+              <dependency-resolution>
+                <extraRequirements combine.children="append">
+                  <!-- See https://github.com/LorenzoBettini/jbase/issues/3 
+                    https://www.eclipse.org/forums/index.php/t/1073366/ -->
+                  <requirement>
+                    <type>eclipse-feature</type>
+                    <id>org.eclipse.jdt</id>
+                    <versionRange>0.0.0</versionRange>
+                  </requirement>
+                </extraRequirements>
+              </dependency-resolution>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
   <build>
     <plugins>
       <plugin>
