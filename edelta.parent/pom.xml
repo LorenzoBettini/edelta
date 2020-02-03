@@ -27,13 +27,6 @@
     <mwe2.skip>false</mwe2.skip>
     <xtend.skip>false</xtend.skip>
 
-    <!-- Define overridable properties for tycho-surefire-plugin -->
-    <platformSystemProperties/>
-    <moduleProperties/>
-    <systemProperties/>
-    <additionalTestArgLine/>
-    <uiTestProperties/>
-
     <jacoco-aggregate-report>edelta.tests.report/target/site/jacoco-aggregate/jacoco.xml</jacoco-aggregate-report>
 
     <sonar.coverage.jacoco.xmlReportPaths>
@@ -367,7 +360,7 @@
       </activation>
       <properties>
         <!-- tycho.testArgLine is where jacoco stores the agent path -->
-        <additionalTestArgLine>${tycho.testArgLine}</additionalTestArgLine>
+        <additionalTestArguments>${tycho.testArgLine}</additionalTestArguments>
       </properties>
       <build>
         <pluginManagement>

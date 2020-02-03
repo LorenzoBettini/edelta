@@ -12,7 +12,7 @@
   <packaging>eclipse-test-plugin</packaging>
 
   <properties>
-    <uiTestProperties>-Dedelta.interpreter.timeout=5000</uiTestProperties>
+    <systemProperties>-Dedelta.interpreter.timeout=5000</systemProperties>
   </properties>
 
   <profiles>
