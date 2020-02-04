@@ -47,12 +47,15 @@ script:
  - export
  - ./mvnw -f edelta.parent/pom.xml -U clean verify $ADDITIONAL
 
+# to show active profiles
+# ./mvnw -f edelta.parent/pom.xml -N -Dtycho.mode=maven help:active-profiles
+
 before_cache:
  - find $HOME/.m2/repository -name "*edelta*" -exec rm -rf {} \+
 
 after_success:
  - find ./edelta.parent/edelta.ui.tests/target/ -name "*.log"
 
-after_failure:
+#after_failure:
 # - find ./edelta.parent/*/target/work/ -name "*.log" -exec cat {} \;
- - find ./edelta.parent/*/target/it/ -name "*.log" -exec cat {} \;
+# - find ./edelta.parent/*/target/it/ -name "*.log" -exec cat {} \;
