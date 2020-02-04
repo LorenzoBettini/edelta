@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.github.lorenzobettini.xtextutils</groupId>
     <artifactId>xtext-tycho-parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <relativePath></relativePath>
   </parent>
   <groupId>io.github.lorenzobettini.edelta</groupId>
@@ -163,33 +163,39 @@
     </pluginManagement>
   </build>
 
-  <!-- TODO remove after xtext-tycho-parent is released
-    (or define a snapshot profile as done in edelta.maven.example -->
-  <repositories>
-    <repository>
-      <id>maven-snapshots</id>
-      <url>http://oss.sonatype.org/content/repositories/snapshots</url>
-      <layout>default</layout>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>sonatype_snapshots</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
+  <profiles>
+    <profile>
+      <id>useSnapshots</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <repositories>
+        <repository>
+          <id>maven-snapshots</id>
+          <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+          <layout>default</layout>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>sonatype_snapshots</id>
+          <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
 
   <distributionManagement>
     <snapshotRepository>
