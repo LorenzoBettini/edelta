@@ -52,7 +52,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <xtextVersion>2.20.0</xtextVersion>
     <xtext-version>${xtextVersion}</xtext-version>
-    <versions-version>2.7</versions-version>
 
     <!-- Override EMF version to use EMF 2.20 until Xtext 2.21 
       is released -->
@@ -159,11 +158,6 @@
           <groupId>org.sonarsource.scanner.maven</groupId>
           <artifactId>sonar-maven-plugin</artifactId>
           <version>3.6.0.1398</version>
-        </plugin>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>versions-maven-plugin</artifactId>
-          <version>${versions-version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
