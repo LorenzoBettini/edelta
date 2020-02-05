@@ -12,12 +12,12 @@
   <packaging>eclipse-test-plugin</packaging>
 
   <properties>
-    <uiTestProperties>-Dedelta.interpreter.timeout=5000</uiTestProperties>
+    <systemProperties>-Dedelta.interpreter.timeout=5000</systemProperties>
   </properties>
 
   <profiles>
     <profile>
-      <id>testing-on-mac</id>
+      <id>macos</id>
       <activation>
         <os>
           <family>mac</family>
@@ -31,14 +31,8 @@
             <configuration>
               <dependency-resolution>
                 <extraRequirements combine.children="append">
-                  <!-- We specify our feature so that we're sure we're using 
-                    also all the required software -->
-                  <requirement>
-                    <type>eclipse-feature</type>
-                    <id>edelta.feature</id>
-                    <versionRange>0.0.0</versionRange>
-                  </requirement>
-                  <!-- See https://github.com/LorenzoBettini/jbase/issues/3 
+                  <!-- This allows us to take the fragment org.eclipse.jdt.launching.macosx
+                    See https://github.com/LorenzoBettini/jbase/issues/3 
                     https://www.eclipse.org/forums/index.php/t/1073366/ -->
                   <requirement>
                     <type>eclipse-feature</type>
@@ -52,39 +46,28 @@
         </plugins>
       </build>
     </profile>
-    <profile>
-      <id>testing-NOT-on-mac</id>
-      <activation>
-        <os>
-          <family>!mac</family>
-        </os>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.eclipse.tycho</groupId>
-            <artifactId>target-platform-configuration</artifactId>
-            <configuration>
-              <dependency-resolution>
-                <extraRequirements combine.children="append">
-                  <!-- We specify our feature so that we're sure we're using 
-                    also all the required software -->
-                  <requirement>
-                    <type>eclipse-feature</type>
-                    <id>edelta.feature</id>
-                    <versionRange>0.0.0</versionRange>
-                  </requirement>
-                </extraRequirements>
-              </dependency-resolution>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
   </profiles>
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <configuration>
+          <dependency-resolution>
+            <extraRequirements
+              combine.children="append">
+              <!-- We specify our feature so that we're sure we're using 
+                also all the required software -->
+              <requirement>
+                <type>eclipse-feature</type>
+                <id>edelta.feature</id>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
+            </extraRequirements>
+          </dependency-resolution>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.eclipse.xtend</groupId>
         <artifactId>xtend-maven-plugin</artifactId>

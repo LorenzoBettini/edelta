@@ -16,4 +16,29 @@
     <sonar.tests>src,xtend-gen</sonar.tests>
   </properties>
 
+  <profiles>
+    <profile>
+      <!-- We enable jacoco-maven-plugin, already configured in the parent,
+        and run tests with JaCoCo, by setting additionalTestArguments,
+        passed to tycho-surefire (as configured in the parent) -->
+      <id>jacoco</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <!-- tycho.testArgLine is where jacoco stores the agent path -->
+        <additionalTestArguments>${tycho.testArgLine}</additionalTestArguments>
+      </properties>
+      <build>
+        <plugins>
+          <!-- configured in <pluginManagement> -->
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 </project>
