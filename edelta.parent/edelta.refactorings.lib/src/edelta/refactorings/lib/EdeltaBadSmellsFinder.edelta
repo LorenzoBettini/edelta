@@ -125,7 +125,7 @@ def findDuplicateFeaturesInSubclasses(EPackage ePackage) {
 		val directSubclasses = c.directSubclasses
 		val numOfSubclasses = directSubclasses.size
 		if (numOfSubclasses > 1) {
-			val duplicates =
+			val candidates =
 				findDuplicateFeaturesInCollection(
 					directSubclasses.map[EStructuralFeatures].flatten.toList,
 					[existing, current|
@@ -133,16 +133,16 @@ def findDuplicateFeaturesInSubclasses(EPackage ePackage) {
 					]
 				)
 			// only entries with a mapped list of size = num of subclasses are duplicates
-			val filtered = duplicates.filter[p1, p2| p2.size == numOfSubclasses]
-			if (!filtered.empty) {
-				map.put(c, filtered)
-			}
-			duplicates.entrySet.forEach[
-			 	logInfo[
-					"In subclasses of " + getEObjectRepr(c) + ", duplicate features: " +
-						value.map[getEObjectRepr(it)].join(", ")
+			val duplicates = candidates.filter[p1, p2| p2.size == numOfSubclasses]
+			if (!duplicates.empty) {
+				map.put(c, duplicates)
+				duplicates.entrySet.forEach[
+				 	logInfo[
+						"In subclasses of " + getEObjectRepr(c) + ", duplicate features: " +
+							value.map[getEObjectRepr(it)].join(", ")
+					]
 				]
-			]
+			}
 		}
 	}
 	return map
