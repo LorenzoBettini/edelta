@@ -10,12 +10,6 @@
   <artifactId>edelta.tests.parent</artifactId>
   <packaging>pom</packaging>
 
-  <properties>
-    <!-- Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=397015 -->
-    <sonar.sources></sonar.sources>
-    <sonar.tests>src,xtend-gen</sonar.tests>
-  </properties>
-
   <profiles>
     <profile>
       <!-- We enable jacoco-maven-plugin, already configured in the parent,
