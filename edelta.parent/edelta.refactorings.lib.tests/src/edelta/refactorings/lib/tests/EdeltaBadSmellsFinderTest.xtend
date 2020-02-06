@@ -361,17 +361,24 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 					EType = stringDataType
 				]
 			]
-			val superclassWithoutSuplicatesInSubclasses = createEClass("SuperClassWithoutDuplicatesInSubclasses")
+			val superclassWithoutSuplicatesInAllSubclasses = createEClass("SuperClassWithoutDuplicatesInAllSubclasses")
 			createEClass("D1") => [
-				ESuperTypes += superclassWithoutSuplicatesInSubclasses
+				ESuperTypes += superclassWithoutSuplicatesInAllSubclasses
 				createEAttribute("A1") => [
-					EType = intDataType
+					EType = stringDataType
 				]
 			]
 			createEClass("D2") => [
-				ESuperTypes += superclassWithoutSuplicatesInSubclasses
+				ESuperTypes += superclassWithoutSuplicatesInAllSubclasses
 				createEAttribute("A1") => [
 					EType = stringDataType
+				]
+			]
+			createEClass("D3") => [
+				ESuperTypes += superclassWithoutSuplicatesInAllSubclasses
+				createEAttribute("A1") => [
+					EType = intDataType // all subclasses must have the duplicate
+					// this is not a duplicate
 				]
 			]
 		]
@@ -379,6 +386,8 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 		val expected = p.EClasses.take(3).map[EStructuralFeatures].flatten
 		val actual = result.get(p.EClasses.head).values.flatten
 		assertIterable(actual, expected)
+		val notMatched = p.EClasses.get(3) // SuperClassWithoutDuplicatesInAllSubclasses
+		assertThat(result.get(notMatched)).isNull
 	}
 
 	def private <T extends ENamedElement> void assertIterable(Iterable<T> actual, Iterable<? extends T> expected) {

@@ -123,7 +123,8 @@ def findDuplicateFeaturesInSubclasses(EPackage ePackage) {
 	val map = newLinkedHashMap
 	for (c : ePackage.allEClasses) {
 		val directSubclasses = c.directSubclasses
-		if (directSubclasses.size > 1) {
+		val numOfSubclasses = directSubclasses.size
+		if (numOfSubclasses > 1) {
 			val duplicates =
 				findDuplicateFeaturesInCollection(
 					directSubclasses.map[EStructuralFeatures].flatten.toList,
@@ -131,8 +132,10 @@ def findDuplicateFeaturesInSubclasses(EPackage ePackage) {
 						new EstructuralFeatureEqualityHelper().equals(existing, current)
 					]
 				)
-			if (!duplicates.empty) {
-				map.put(c, duplicates)
+			// only entries with a mapped list of size = num of subclasses are duplicates
+			val filtered = duplicates.filter[p1, p2| p2.size == numOfSubclasses]
+			if (!filtered.empty) {
+				map.put(c, filtered)
 			}
 			duplicates.entrySet.forEach[
 			 	logInfo[

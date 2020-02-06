@@ -163,9 +163,8 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
     for (final EClass c : _allEClasses) {
       {
         final Iterable<EClass> directSubclasses = this.directSubclasses(c);
-        int _size = IterableExtensions.size(directSubclasses);
-        boolean _greaterThan = (_size > 1);
-        if (_greaterThan) {
+        final int numOfSubclasses = IterableExtensions.size(directSubclasses);
+        if ((numOfSubclasses > 1)) {
           final Function1<EClass, EList<EStructuralFeature>> _function = (EClass it) -> {
             return it.getEStructuralFeatures();
           };
@@ -174,25 +173,30 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
           };
           final Map<EStructuralFeature, List<EStructuralFeature>> duplicates = this.findDuplicateFeaturesInCollection(
             IterableExtensions.<EStructuralFeature>toList(Iterables.<EStructuralFeature>concat(IterableExtensions.<EClass, EList<EStructuralFeature>>map(directSubclasses, _function))), _function_1);
-          boolean _isEmpty = duplicates.isEmpty();
+          final Function2<EStructuralFeature, List<EStructuralFeature>, Boolean> _function_2 = (EStructuralFeature p1, List<EStructuralFeature> p2) -> {
+            int _size = p2.size();
+            return Boolean.valueOf((_size == numOfSubclasses));
+          };
+          final Map<EStructuralFeature, List<EStructuralFeature>> filtered = MapExtensions.<EStructuralFeature, List<EStructuralFeature>>filter(duplicates, _function_2);
+          boolean _isEmpty = filtered.isEmpty();
           boolean _not = (!_isEmpty);
           if (_not) {
-            map.put(c, duplicates);
+            map.put(c, filtered);
           }
-          final Consumer<Map.Entry<EStructuralFeature, List<EStructuralFeature>>> _function_2 = (Map.Entry<EStructuralFeature, List<EStructuralFeature>> it) -> {
-            final Supplier<String> _function_3 = () -> {
+          final Consumer<Map.Entry<EStructuralFeature, List<EStructuralFeature>>> _function_3 = (Map.Entry<EStructuralFeature, List<EStructuralFeature>> it) -> {
+            final Supplier<String> _function_4 = () -> {
               String _eObjectRepr = this.lib.getEObjectRepr(c);
               String _plus = ("In subclasses of " + _eObjectRepr);
               String _plus_1 = (_plus + ", duplicate features: ");
-              final Function1<EStructuralFeature, String> _function_4 = (EStructuralFeature it_1) -> {
+              final Function1<EStructuralFeature, String> _function_5 = (EStructuralFeature it_1) -> {
                 return this.lib.getEObjectRepr(it_1);
               };
-              String _join = IterableExtensions.join(ListExtensions.<EStructuralFeature, String>map(it.getValue(), _function_4), ", ");
+              String _join = IterableExtensions.join(ListExtensions.<EStructuralFeature, String>map(it.getValue(), _function_5), ", ");
               return (_plus_1 + _join);
             };
-            this.logInfo(_function_3);
+            this.logInfo(_function_4);
           };
-          duplicates.entrySet().forEach(_function_2);
+          duplicates.entrySet().forEach(_function_3);
         }
       }
     }
