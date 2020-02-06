@@ -8,6 +8,7 @@ import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.EcorePackage
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.emf.ecore.util.EcoreUtil.CrossReferencer
+import java.util.Collection
 
 package edelta.refactorings.lib
 
@@ -54,9 +55,51 @@ def findDuplicateFeatures(EPackage ePackage) {
  * @param matcher
  */
  def findDuplicateFeaturesCustom(EPackage ePackage, BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
-	val allFeatures = ePackage.allEStructuralFeatures
+	val allFeatures = ePackage.allEStructuralFeatures.toList
+	val result = findDuplicateFeaturesInCollection(allFeatures, matcher)
+	result.entrySet.forEach[
+	 	logInfo[
+			"Duplicate features: " +
+				value.map[getEObjectRepr(it)].join(", ")
+		]
+	]
+	return result
+}
+
+/**
+ * Finds all the features that are structurally equal
+ * in the given collection.
+ * 
+ * Note that this takes into consideration the name and type,
+ * but also other properties like lowerBound, unique, etc.
+ * 
+ * For example, given these EClasses
+ * 
+ * <pre>
+ * C1 {
+ *   A1 : EString
+ * } 
+ * 
+ * C2 {
+ *   A1 : EString
+ * }
+ * </pre>
+ * 
+ * And the collection of features [ C1:A1, C2:A1 ]
+ * it returns the map with this entry
+ * 
+ * <pre>
+ * (A1 : EString) -> [ C1:A1, C2:A1 ]
+ * </pre>
+ * 
+ * It allows you to specify the lambda checking for equality of features.
+ * 
+ * @param features
+ * @param matcher
+ */
+def findDuplicateFeaturesInCollection(Collection<EStructuralFeature> features, BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
 	val map = <EStructuralFeature, List<EStructuralFeature>>newLinkedHashMap
-	for (f : allFeatures) {
+	for (f : features) {
 		val found = map.entrySet.findFirst[matcher.test(it.key, f)]
 		if (found !== null) {
 			found.value += f
@@ -65,14 +108,41 @@ def findDuplicateFeatures(EPackage ePackage) {
 		}
 	}
 	// only entries with a mapped list of size > 1 are duplicates
-	val result = map.filter[p1, p2| p2.size > 1]
-	result.entrySet.forEach[
-	 	logInfo[
-			"Duplicate features: " +
-				value.map[getEObjectRepr(it)].join(", ")
-		]
-	]
-	return result
+	return map.filter[p1, p2| p2.size > 1]
+}
+
+/**
+ * If a class has more than one subclass, it finds duplicate features in all
+ * of its subclasses.
+ * 
+ * Returns a map where the key is the class with more than one subclasses
+ * with duplicate features; the value is another map as returned by
+ * {@link #findDuplicateFeaturesInCollection(Collection, BiPredicate)}
+ */
+def findDuplicateFeaturesInSubclasses(EPackage ePackage) {
+	val map = newLinkedHashMap
+	for (c : ePackage.allEClasses) {
+		val directSubclasses = c.directSubclasses
+		if (directSubclasses.size > 1) {
+			val duplicates =
+				findDuplicateFeaturesInCollection(
+					directSubclasses.map[EStructuralFeatures].flatten.toList,
+					[existing, current|
+						new EstructuralFeatureEqualityHelper().equals(existing, current)
+					]
+				)
+			if (!duplicates.empty) {
+				map.put(c, duplicates)
+			}
+			duplicates.entrySet.forEach[
+			 	logInfo[
+					"In subclasses of " + getEObjectRepr(c) + ", duplicate features: " +
+						value.map[getEObjectRepr(it)].join(", ")
+				]
+			]
+		}
+	}
+	return map
 }
 
 def allEStructuralFeatures(EPackage ePackage) {
@@ -224,6 +294,13 @@ def hasSubclasses(EClass cl) {
 		.find(cl, cl.EPackage)
 		.filter[EStructuralFeature === EcorePackage.eINSTANCE.EClass_ESuperTypes]
 		.empty
+}
+
+def directSubclasses(EClass cl) {
+	EcoreUtil.UsageCrossReferencer
+		.find(cl, cl.EPackage)
+		.filter[EStructuralFeature === EcorePackage.eINSTANCE.EClass_ESuperTypes]
+		.map[EObject as EClass]
 }
 
 /**

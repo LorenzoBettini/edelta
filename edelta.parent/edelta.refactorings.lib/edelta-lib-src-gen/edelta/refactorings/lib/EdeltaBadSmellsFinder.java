@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import edelta.lib.AbstractEdelta;
 import edelta.refactorings.lib.helper.EstructuralFeatureEqualityHelper;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.function.Supplier;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -77,9 +79,56 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
    * @param matcher
    */
   public Map<EStructuralFeature, List<EStructuralFeature>> findDuplicateFeaturesCustom(final EPackage ePackage, final BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
-    final Iterable<EStructuralFeature> allFeatures = this.allEStructuralFeatures(ePackage);
+    final List<EStructuralFeature> allFeatures = IterableExtensions.<EStructuralFeature>toList(this.allEStructuralFeatures(ePackage));
+    final Map<EStructuralFeature, List<EStructuralFeature>> result = this.findDuplicateFeaturesInCollection(allFeatures, matcher);
+    final Consumer<Map.Entry<EStructuralFeature, List<EStructuralFeature>>> _function = (Map.Entry<EStructuralFeature, List<EStructuralFeature>> it) -> {
+      final Supplier<String> _function_1 = () -> {
+        final Function1<EStructuralFeature, String> _function_2 = (EStructuralFeature it_1) -> {
+          return this.lib.getEObjectRepr(it_1);
+        };
+        String _join = IterableExtensions.join(ListExtensions.<EStructuralFeature, String>map(it.getValue(), _function_2), ", ");
+        return ("Duplicate features: " + _join);
+      };
+      this.logInfo(_function_1);
+    };
+    result.entrySet().forEach(_function);
+    return result;
+  }
+  
+  /**
+   * Finds all the features that are structurally equal
+   * in the given collection.
+   * 
+   * Note that this takes into consideration the name and type,
+   * but also other properties like lowerBound, unique, etc.
+   * 
+   * For example, given these EClasses
+   * 
+   * <pre>
+   * C1 {
+   *   A1 : EString
+   * }
+   * 
+   * C2 {
+   *   A1 : EString
+   * }
+   * </pre>
+   * 
+   * And the collection of features [ C1:A1, C2:A1 ]
+   * it returns the map with this entry
+   * 
+   * <pre>
+   * (A1 : EString) -> [ C1:A1, C2:A1 ]
+   * </pre>
+   * 
+   * It allows you to specify the lambda checking for equality of features.
+   * 
+   * @param features
+   * @param matcher
+   */
+  public Map<EStructuralFeature, List<EStructuralFeature>> findDuplicateFeaturesInCollection(final Collection<EStructuralFeature> features, final BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
     final LinkedHashMap<EStructuralFeature, List<EStructuralFeature>> map = CollectionLiterals.<EStructuralFeature, List<EStructuralFeature>>newLinkedHashMap();
-    for (final EStructuralFeature f : allFeatures) {
+    for (final EStructuralFeature f : features) {
       {
         final Function1<Map.Entry<EStructuralFeature, List<EStructuralFeature>>, Boolean> _function = (Map.Entry<EStructuralFeature, List<EStructuralFeature>> it) -> {
           return Boolean.valueOf(matcher.test(it.getKey(), f));
@@ -97,19 +146,57 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
       int _size = p2.size();
       return Boolean.valueOf((_size > 1));
     };
-    final Map<EStructuralFeature, List<EStructuralFeature>> result = MapExtensions.<EStructuralFeature, List<EStructuralFeature>>filter(map, _function);
-    final Consumer<Map.Entry<EStructuralFeature, List<EStructuralFeature>>> _function_1 = (Map.Entry<EStructuralFeature, List<EStructuralFeature>> it) -> {
-      final Supplier<String> _function_2 = () -> {
-        final Function1<EStructuralFeature, String> _function_3 = (EStructuralFeature it_1) -> {
-          return this.lib.getEObjectRepr(it_1);
-        };
-        String _join = IterableExtensions.join(ListExtensions.<EStructuralFeature, String>map(it.getValue(), _function_3), ", ");
-        return ("Duplicate features: " + _join);
-      };
-      this.logInfo(_function_2);
-    };
-    result.entrySet().forEach(_function_1);
-    return result;
+    return MapExtensions.<EStructuralFeature, List<EStructuralFeature>>filter(map, _function);
+  }
+  
+  /**
+   * If a class has more than one subclass, it finds duplicate features in all
+   * of its subclasses.
+   * 
+   * Returns a map where the key is the class with more than one subclasses
+   * with duplicate features; the value is another map as returned by
+   * {@link #findDuplicateFeaturesInCollection(Collection, BiPredicate)}
+   */
+  public LinkedHashMap<EClass, Map<EStructuralFeature, List<EStructuralFeature>>> findDuplicateFeaturesInSubclasses(final EPackage ePackage) {
+    final LinkedHashMap<EClass, Map<EStructuralFeature, List<EStructuralFeature>>> map = CollectionLiterals.<EClass, Map<EStructuralFeature, List<EStructuralFeature>>>newLinkedHashMap();
+    Iterable<EClass> _allEClasses = this.allEClasses(ePackage);
+    for (final EClass c : _allEClasses) {
+      {
+        final Iterable<EClass> directSubclasses = this.directSubclasses(c);
+        int _size = IterableExtensions.size(directSubclasses);
+        boolean _greaterThan = (_size > 1);
+        if (_greaterThan) {
+          final Function1<EClass, EList<EStructuralFeature>> _function = (EClass it) -> {
+            return it.getEStructuralFeatures();
+          };
+          final BiPredicate<EStructuralFeature, EStructuralFeature> _function_1 = (EStructuralFeature existing, EStructuralFeature current) -> {
+            return new EstructuralFeatureEqualityHelper().equals(existing, current);
+          };
+          final Map<EStructuralFeature, List<EStructuralFeature>> duplicates = this.findDuplicateFeaturesInCollection(
+            IterableExtensions.<EStructuralFeature>toList(Iterables.<EStructuralFeature>concat(IterableExtensions.<EClass, EList<EStructuralFeature>>map(directSubclasses, _function))), _function_1);
+          boolean _isEmpty = duplicates.isEmpty();
+          boolean _not = (!_isEmpty);
+          if (_not) {
+            map.put(c, duplicates);
+          }
+          final Consumer<Map.Entry<EStructuralFeature, List<EStructuralFeature>>> _function_2 = (Map.Entry<EStructuralFeature, List<EStructuralFeature>> it) -> {
+            final Supplier<String> _function_3 = () -> {
+              String _eObjectRepr = this.lib.getEObjectRepr(c);
+              String _plus = ("In subclasses of " + _eObjectRepr);
+              String _plus_1 = (_plus + ", duplicate features: ");
+              final Function1<EStructuralFeature, String> _function_4 = (EStructuralFeature it_1) -> {
+                return this.lib.getEObjectRepr(it_1);
+              };
+              String _join = IterableExtensions.join(ListExtensions.<EStructuralFeature, String>map(it.getValue(), _function_4), ", ");
+              return (_plus_1 + _join);
+            };
+            this.logInfo(_function_3);
+          };
+          duplicates.entrySet().forEach(_function_2);
+        }
+      }
+    }
+    return map;
   }
   
   public Iterable<EStructuralFeature> allEStructuralFeatures(final EPackage ePackage) {
@@ -296,6 +383,19 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
     };
     boolean _isEmpty = IterableExtensions.isEmpty(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()), _function));
     return (!_isEmpty);
+  }
+  
+  public Iterable<EClass> directSubclasses(final EClass cl) {
+    final Function1<EStructuralFeature.Setting, Boolean> _function = (EStructuralFeature.Setting it) -> {
+      EStructuralFeature _eStructuralFeature = it.getEStructuralFeature();
+      EReference _eClass_ESuperTypes = EcorePackage.eINSTANCE.getEClass_ESuperTypes();
+      return Boolean.valueOf((_eStructuralFeature == _eClass_ESuperTypes));
+    };
+    final Function1<EStructuralFeature.Setting, EClass> _function_1 = (EStructuralFeature.Setting it) -> {
+      EObject _eObject = it.getEObject();
+      return ((EClass) _eObject);
+    };
+    return IterableExtensions.<EStructuralFeature.Setting, EClass>map(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()), _function), _function_1);
   }
   
   /**

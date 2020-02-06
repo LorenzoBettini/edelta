@@ -323,6 +323,64 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 		assertIterable(result, #[p.EClasses.last])
 	}
 
+	@Test def void test_directSubclasses() {
+		val p = factory.createEPackage => [
+			val superclass = createEClass("ASuperclass")
+			val subclass1 = createEClass("ASubclass1") => [
+				ESuperTypes += superclass
+			]
+			createEClass("ASubclass1Subclass") => [
+				ESuperTypes += subclass1
+			]
+			createEClass("ASubclass2") => [
+				ESuperTypes += superclass
+			]
+		]
+		assertThat(finder.directSubclasses(p.EClasses.head)) // ASuperclass
+			.extracting([name])
+			.containsExactlyInAnyOrder("ASubclass1", "ASubclass2")
+		assertThat(finder.directSubclasses(p.EClasses.get(1))) // ASubclass1
+			.extracting([name])
+			.containsExactlyInAnyOrder("ASubclass1Subclass")
+		assertThat(finder.directSubclasses(p.EClasses.get(2))) // ASubclass1Subclass
+			.isEmpty
+	}
+
+	@Test def void test_findDuplicateFeaturesInSubclasses() {
+		val p = factory.createEPackage => [
+			val superclassWithSuplicatesInSubclasses = createEClass("SuperClassWithDuplicatesInSubclasses")
+			createEClass("C1") => [
+				ESuperTypes += superclassWithSuplicatesInSubclasses
+				createEAttribute("A1") => [
+					EType = stringDataType
+				]
+			]
+			createEClass("C2") => [
+				ESuperTypes += superclassWithSuplicatesInSubclasses
+				createEAttribute("A1") => [
+					EType = stringDataType
+				]
+			]
+			val superclassWithoutSuplicatesInSubclasses = createEClass("SuperClassWithoutDuplicatesInSubclasses")
+			createEClass("D1") => [
+				ESuperTypes += superclassWithoutSuplicatesInSubclasses
+				createEAttribute("A1") => [
+					EType = intDataType
+				]
+			]
+			createEClass("D2") => [
+				ESuperTypes += superclassWithoutSuplicatesInSubclasses
+				createEAttribute("A1") => [
+					EType = stringDataType
+				]
+			]
+		]
+		val result = finder.findDuplicateFeaturesInSubclasses(p)
+		val expected = p.EClasses.take(3).map[EStructuralFeatures].flatten
+		val actual = result.get(p.EClasses.head).values.flatten
+		assertIterable(actual, expected)
+	}
+
 	def private <T extends ENamedElement> void assertIterable(Iterable<T> actual, Iterable<? extends T> expected) {
 		assertThat(actual).containsExactlyInAnyOrder(expected)
 	}
