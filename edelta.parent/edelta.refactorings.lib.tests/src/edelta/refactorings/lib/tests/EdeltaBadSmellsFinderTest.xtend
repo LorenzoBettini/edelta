@@ -303,6 +303,26 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 		assertIterable(result, #[p.EClasses.head])
 	}
 
+	@Test def void test_findAbstractSubclassesOfConcreteSuperclass() {
+		val p = factory.createEPackage => [
+			val abstractSuperclass = createEClass("AbstractSuperclass") => [
+				abstract = true
+			]
+			val concreteSuperclass1 = createEClass("ConcreteSuperclass1")
+			val concreteSuperclass2 = createEClass("ConcreteSuperclass2")
+			createEClass("WithoutSmell") => [
+				abstract = true
+				ESuperTypes += #[concreteSuperclass1, abstractSuperclass]
+			]
+			createEClass("WithSmell") => [
+				abstract = true
+				ESuperTypes += #[concreteSuperclass1, concreteSuperclass2]
+			]
+		]
+		var result = finder.findAbstractSubclassesOfConcreteSuperclass(p)
+		assertIterable(result, #[p.EClasses.last])
+	}
+
 	def private <T extends ENamedElement> void assertIterable(Iterable<T> actual, Iterable<? extends T> expected) {
 		assertThat(actual).containsExactlyInAnyOrder(expected)
 	}
