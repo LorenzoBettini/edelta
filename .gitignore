@@ -5,13 +5,16 @@ bin/
 logs.zip
 *.orig
 *.java._trace
+*.xtendbin
 *.smap
 *.log
 
 # src-gen is excluded on a per project basis
 #src-gen/
 
-xtend-gen/
+# xtend-gen is excluded on a per project basis
+# xtend-gen/
+
 emf-gen/
 
 # for Maven builds
