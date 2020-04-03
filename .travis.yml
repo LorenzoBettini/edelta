@@ -24,8 +24,6 @@ matrix:
 addons:
   sonarcloud:
     organization: "lorenzobettini-github"
-    token:
-      secure: ${SONAR_TOKEN}
 
 cache:
   directories:
