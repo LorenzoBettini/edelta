@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Predicate;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.ThrowableAssert;
 import org.assertj.core.api.iterable.ThrowingExtractor;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
@@ -40,9 +41,7 @@ import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 @RunWith(XtextRunner.class)
@@ -52,9 +51,6 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   @Inject
   @Extension
   private TestableEdeltaDerivedStateComputer _testableEdeltaDerivedStateComputer;
-  
-  @Rule
-  public final ExpectedException thrown = ExpectedException.none();
   
   @Test
   public void testGetOrInstallAdapterWithNotXtextResource() {
@@ -424,10 +420,11 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     _builder.append("}");
     _builder.newLine();
     final EdeltaProgram program = this.parseWithTestEcore(_builder);
-    this.thrown.expect(EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException.class);
-    this.thrown.expectMessage("Unexpected notification");
-    EClassifier _head = IterableExtensions.<EClassifier>head(IterableExtensions.<EPackage>head(program.getMetamodels()).getEClassifiers());
-    _head.setName("bar");
+    final ThrowableAssert.ThrowingCallable _function = () -> {
+      EClassifier _head = IterableExtensions.<EClassifier>head(IterableExtensions.<EPackage>head(program.getMetamodels()).getEClassifiers());
+      _head.setName("bar");
+    };
+    Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException.class).hasMessageContaining("Unexpected notification");
   }
   
   @Test
