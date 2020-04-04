@@ -50,7 +50,6 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <xtextVersion>2.20.0</xtextVersion>
     <xtext-version>${xtextVersion}</xtext-version>
 
     <!-- Override EMF version to use EMF 2.20 until Xtext 2.21 
