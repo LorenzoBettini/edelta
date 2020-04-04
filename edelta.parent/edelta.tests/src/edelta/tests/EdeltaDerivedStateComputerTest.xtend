@@ -17,12 +17,11 @@ import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.ExpectedException
 import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.assertThat
+import static org.assertj.core.api.Assertions.assertThatThrownBy
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
 import static extension org.junit.Assert.*
@@ -32,9 +31,6 @@ import static extension org.junit.Assert.*
 class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 
 	@Inject extension TestableEdeltaDerivedStateComputer
-
-	@Rule
-	val public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	def void testGetOrInstallAdapterWithNotXtextResource() {
@@ -342,10 +338,9 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		'''.
 		parseWithTestEcore
 
-		thrown.expect(EdeltaInterpreterRuntimeException);
-		thrown.expectMessage("Unexpected notification");
-
-		program.metamodels.head.EClassifiers.head.name = "bar"
+		assertThatThrownBy[program.metamodels.head.EClassifiers.head.name = "bar"]
+			.isInstanceOf(EdeltaInterpreterRuntimeException)
+			.hasMessageContaining("Unexpected notification")
 	}
 
 	@Test
