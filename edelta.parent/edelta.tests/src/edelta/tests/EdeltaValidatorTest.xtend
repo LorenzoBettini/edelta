@@ -4,13 +4,13 @@ package edelta.tests
 import edelta.edelta.EdeltaPackage
 import edelta.lib.AbstractEdelta
 import edelta.validation.EdeltaValidator
+import org.eclipse.xtext.diagnostics.Diagnostic
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static edelta.edelta.EdeltaPackage.Literals.*
-import org.eclipse.xtext.diagnostics.Diagnostic
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -108,10 +108,12 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 				op(it)
 			}
 		'''
+		val lastOpenCurlyBracket = input.lastIndexOf("{")
+		val lastClosedCurlyBracket = input.lastIndexOf("}")
 		input.parseWithTestEcore.assertWarning(
 			EdeltaPackage.eINSTANCE.edeltaModifyEcoreOperation,
 			EdeltaValidator.INTERPRETER_TIMEOUT,
-			input.lastIndexOf("{"), 11,
+			lastOpenCurlyBracket, lastClosedCurlyBracket - lastOpenCurlyBracket + 1,
 			"Timeout interpreting initialization block"
 		)
 	}
