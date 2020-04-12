@@ -127,10 +127,11 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test def void testQualifiedEcoreReference() {
-		newBuilder.append('''
-			metamodel "mypackage"
-			modifyEcore aTest epackage mypackage { 
-				ecoreref(MyClass.''').
+		// don't use Xtend ''' ''' strings since the content assist test
+		// seems to have problems with \r in Windows...
+		newBuilder.append("metamodel \"mypackage\"
+				modifyEcore aTest epackage mypackage {
+					ecoreref(MyClass.").
 			assertText('myAttribute', 'myReference')
 	}
 

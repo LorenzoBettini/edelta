@@ -186,15 +186,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   @Test
   public void testQualifiedEcoreReference() {
     try {
-      ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
-      StringConcatenation _builder = new StringConcatenation();
-      _builder.append("metamodel \"mypackage\"");
-      _builder.newLine();
-      _builder.append("modifyEcore aTest epackage mypackage { ");
-      _builder.newLine();
-      _builder.append("\t");
-      _builder.append("ecoreref(MyClass.");
-      _newBuilder.append(_builder.toString()).assertText("myAttribute", "myReference");
+      this.newBuilder().append("metamodel \"mypackage\"\n\t\t\t\tmodifyEcore aTest epackage mypackage {\n\t\t\t\t\tecoreref(MyClass.").assertText("myAttribute", "myReference");
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
