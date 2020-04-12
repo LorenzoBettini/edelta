@@ -165,10 +165,11 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     _builder.append("}");
     _builder.newLine();
     final String input = _builder.toString();
+    final int lastOpenCurlyBracket = input.lastIndexOf("{");
+    final int lastClosedCurlyBracket = input.lastIndexOf("}");
     this._validationTestHelper.assertWarning(this.parseWithTestEcore(input), 
       EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation(), 
-      EdeltaValidator.INTERPRETER_TIMEOUT, 
-      input.lastIndexOf("{"), 11, 
+      EdeltaValidator.INTERPRETER_TIMEOUT, lastOpenCurlyBracket, ((lastClosedCurlyBracket - lastOpenCurlyBracket) + 1), 
       "Timeout interpreting initialization block");
   }
   
