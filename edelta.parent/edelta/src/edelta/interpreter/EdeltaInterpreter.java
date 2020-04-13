@@ -24,7 +24,6 @@ import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationResult;
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter;
-import org.eclipse.xtext.xbase.lib.Exceptions;
 
 import com.google.inject.Inject;
 
@@ -76,6 +75,24 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 		}
 	}
 
+	/**
+	 * Wraps a {@link Throwable} found in the result of interpretation
+	 */
+	public static class EdeltaInterpreterWrapperException extends RuntimeException {
+
+		private static final long serialVersionUID = 1L;
+		private final Exception exception;
+
+		public EdeltaInterpreterWrapperException(Exception exception) {
+			super(exception);
+			this.exception = exception;
+		}
+
+		public Exception getException() {
+			return exception;
+		}
+	}
+
 	@Override
 	public void setInterpreterTimeout(final int interpreterTimeout) {
 		this.interpreterTimeout = interpreterTimeout;
@@ -118,7 +135,8 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 				} else {
 					Throwable resultException = result.getException();
 					if (resultException != null) {
-						throw Exceptions.sneakyThrow(resultException);
+						throw new EdeltaInterpreterWrapperException
+							((Exception) resultException);
 					}
 				}
 			} finally {

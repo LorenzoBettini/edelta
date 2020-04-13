@@ -124,41 +124,44 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, _function);
   }
   
-  @Test(expected = MyCustomException.class)
+  @Test
   public void testCreateEClassAndCallOperationThatThrows() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("import org.eclipse.emf.ecore.EClass");
-    _builder.newLine();
-    _builder.append("import edelta.tests.additional.MyCustomException");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("def op(EClass c) : void {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("throw new MyCustomException");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("addNewEClass(\"NewClass\") [");
-    _builder.newLine();
-    _builder.append("\t\t");
-    _builder.append("op(it)");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("]");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
+    final ThrowableAssert.ThrowingCallable _function = () -> {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("import org.eclipse.emf.ecore.EClass");
+      _builder.newLine();
+      _builder.append("import edelta.tests.additional.MyCustomException");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("def op(EClass c) : void {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("throw new MyCustomException");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("addNewEClass(\"NewClass\") [");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("op(it)");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("]");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      final Procedure1<EPackage> _function_1 = (EPackage it) -> {
+      };
+      this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, _function_1);
     };
-    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, _function);
+    Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaInterpreter.EdeltaInterpreterWrapperException.class).hasCauseExactlyInstanceOf(MyCustomException.class);
   }
   
   @Test
