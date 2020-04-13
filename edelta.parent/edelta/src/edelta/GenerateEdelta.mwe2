@@ -44,6 +44,9 @@ Workflow {
 				generateStub = true
 				generateXtendStub = true
 			}
+			scopeProvider = {
+				generateXtendStub = false
+			}
 			projectWizard = {
 				generate = true
 			}
