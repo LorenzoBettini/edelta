@@ -1,9 +1,11 @@
 package edelta.interpreter;
 
+import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MODIFY_ECORE_OPERATION__BODY;
 import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashMap;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
@@ -24,7 +26,6 @@ import org.eclipse.xtext.xbase.interpreter.IEvaluationResult;
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 
-import com.google.common.base.Objects;
 import com.google.inject.Inject;
 
 import edelta.compiler.EdeltaCompilerUtil;
@@ -32,7 +33,6 @@ import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
-import edelta.edelta.EdeltaPackage;
 import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
 import edelta.validation.EdeltaValidator;
@@ -55,7 +55,8 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 	@Inject
 	private IResourceScopeCache cache;
 
-	private int interpreterTimeout = Integer.parseInt(System.getProperty("edelta.interpreter.timeout", "2000"));
+	private int interpreterTimeout =
+		Integer.parseInt(System.getProperty("edelta.interpreter.timeout", "2000"));
 
 	private JvmGenericType programInferredJavaType;
 
@@ -65,6 +66,16 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 
 	private Map<EdeltaUseAs, Object> useAsFields;
 
+	class EdeltaInterpreterCancelIndicator implements CancelIndicator {
+		long stopAt = System.currentTimeMillis() +
+				interpreterTimeout;
+
+		@Override
+		public boolean isCanceled() {
+			return System.currentTimeMillis() > stopAt;
+		}
+	}
+
 	@Override
 	public void setInterpreterTimeout(final int interpreterTimeout) {
 		this.interpreterTimeout = interpreterTimeout;
@@ -73,21 +84,14 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 	@Override
 	public void run(final Iterable<EdeltaModifyEcoreOperation> ops, final Map<String, EPackage> nameToCopiedEPackageMap,
 			final JvmGenericType jvmGenericType, final List<EPackage> ePackages) {
-		class EdeltaInterpreterCancelIndicator implements CancelIndicator {
-			long stopAt = System.currentTimeMillis() + EdeltaInterpreter.this.interpreterTimeout;
-
-			@Override
-			public boolean isCanceled() {
-				return System.currentTimeMillis() > stopAt;
-			}
-		}
-
 		programInferredJavaType = jvmGenericType;
 		edelta = new EdeltaInterpreterEdeltaImpl(ePackages);
 		useAsFields = newHashMap();
 		for (final EdeltaModifyEcoreOperation op : ops) {
-			final EPackage ePackage = nameToCopiedEPackageMap.get(op.getEpackage().getName());
-			final EdeltaInterpreterCleaner cacheCleaner = new EdeltaInterpreterCleaner(this.cache, op.eResource());
+			final EPackage ePackage = nameToCopiedEPackageMap.
+					get(op.getEpackage().getName());
+			final EdeltaInterpreterCleaner cacheCleaner =
+					new EdeltaInterpreterCleaner(cache, op.eResource());
 			// clear the cache as soon as the interpreter modifies
 			// the EPackage of the modifyEcore expression
 			// since new types might be available after the interpretation
@@ -96,7 +100,7 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 			// is performed again
 			ePackage.eAdapters().add(cacheCleaner);
 			try {
-				IEvaluationContext context = this.createContext();
+				IEvaluationContext context = createContext();
 				context.newValue(IT_QUALIFIED_NAME, ePackage);
 				// 'this' and the name of the inferred class are mapped
 				// to an instance of AbstractEdelta, so that all reflective
@@ -105,14 +109,15 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 				// in our custom invokeOperation and in that case we interpret the
 				// original source's XBlockExpression
 				context.newValue(QualifiedName.create("this"), edelta);
-				context.newValue(QualifiedName.create(programInferredJavaType.getSimpleName()), this.edelta);
+				context.newValue(QualifiedName.create(
+						programInferredJavaType.getSimpleName()), edelta);
 				final IEvaluationResult result = evaluate(op.getBody(), context,
 						new EdeltaInterpreterCancelIndicator());
 				if (result == null) {
 					addWarning(op);
 				} else {
 					Throwable resultException = result.getException();
-					if ((resultException != null)) {
+					if (resultException != null) {
 						throw Exceptions.sneakyThrow(resultException);
 					}
 				}
@@ -127,9 +132,9 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 			new EObjectDiagnosticImpl(Severity.WARNING,
 				EdeltaValidator.INTERPRETER_TIMEOUT,
 				"Timeout interpreting initialization block (" +
-						Integer.valueOf(this.interpreterTimeout) + "ms).",
+						Integer.valueOf(interpreterTimeout) + "ms).",
 				op,
-				EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation_Body(),
+				EDELTA_MODIFY_ECORE_OPERATION__BODY,
 				-1,
 				new String[] {}));
 	}
@@ -137,7 +142,7 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 	@Override
 	protected Object doEvaluate(final XExpression expression, final IEvaluationContext context,
 			final CancelIndicator indicator) {
-		if ((expression == null)) {
+		if (expression == null) {
 			return null;
 		}
 		if (expression instanceof EdeltaEcoreReferenceExpression) {
@@ -191,7 +196,7 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 			final List<Object> argumentValues, final IEvaluationContext parentContext,
 			final CancelIndicator indicator) {
 		final JvmDeclaredType declaringType = operation.getDeclaringType();
-		if (Objects.equal(declaringType, programInferredJavaType)) {
+		if (Objects.equals(declaringType, programInferredJavaType)) {
 			final EdeltaOperation originalOperation =
 				edeltaJvmModelHelper.findEdeltaOperation(operation);
 			final IEvaluationContext context = parentContext.fork();
@@ -204,6 +209,7 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 			}
 			return internalEvaluate(originalOperation.getBody(), context, indicator);
 		}
-		return super.invokeOperation(operation, receiver, argumentValues, parentContext, indicator);
+		return super.invokeOperation(
+			operation, receiver, argumentValues, parentContext, indicator);
 	}
 }
