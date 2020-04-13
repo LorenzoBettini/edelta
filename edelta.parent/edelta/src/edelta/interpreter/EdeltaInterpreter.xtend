@@ -5,9 +5,9 @@ import edelta.compiler.EdeltaCompilerUtil
 import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaModifyEcoreOperation
-import edelta.edelta.EdeltaOperation
 import edelta.edelta.EdeltaPackage
 import edelta.edelta.EdeltaUseAs
+import edelta.jvmmodel.EdeltaJvmModelHelper
 import edelta.validation.EdeltaValidator
 import java.util.List
 import java.util.Map
@@ -24,7 +24,6 @@ import org.eclipse.xtext.validation.EObjectDiagnosticImpl
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
-import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 
 /**
  * Interprets the modifyEcore operations of an EdeltaProgram.
@@ -33,7 +32,7 @@ import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
  */
 class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 
-	@Inject extension IJvmModelAssociations
+	@Inject extension EdeltaJvmModelHelper
 	@Inject extension EdeltaInterpreterHelper
 	@Inject extension EdeltaCompilerUtil
 	@Inject IResourceScopeCache cache
@@ -122,7 +121,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 			if (expression.enamedelement !== null) {
 				buildMethodToCallForEcoreReference(expression) [
 					methodName, args |
-					val op = findJvmOperation(methodName)
+					val op = programInferredJavaType.findJvmOperation(methodName)
 					// it could be null due to an unresolved reference
 					// the returned op would be getENamedElement
 					// which does not exist in AbstractEdelta
@@ -140,13 +139,8 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 		return super.doEvaluate(expression, context, indicator)
 	}
 
-	def private findJvmOperation(String methodName) {
-		programInferredJavaType.allFeatures.filter(JvmOperation).
-				findFirst[simpleName == methodName]
-	}
-
 	override protected featureCallField(JvmField jvmField, Object receiver) {
-		val useAs = jvmField.sourceElements.filter(EdeltaUseAs).head
+		val useAs = jvmField.findEdeltaUseAs
 		if (useAs !== null) {
 			return useAsFields.computeIfAbsent(useAs)
 				[safeInstantiate(javaReflectAccess, useAs, edelta)]
@@ -158,7 +152,7 @@ class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 			IEvaluationContext parentContext, CancelIndicator indicator) {
 		val declaringType = operation.declaringType
 		if (declaringType == programInferredJavaType) {
-			val originalOperation = operation.sourceElements.head as EdeltaOperation
+			val originalOperation = operation.findEdeltaOperation
 			val context = parentContext.fork
 			var index = 0
 			for (param : operation.parameters) {
