@@ -117,6 +117,38 @@ public class EdeltaSafeInterpreterTest extends EdeltaInterpreterTest {
   @Test
   @Override
   public void testCreateEClassAndCallOperationThatThrows() {
-    super.testCreateEClassAndCallOperationThatThrows();
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EClass");
+    _builder.newLine();
+    _builder.append("import edelta.tests.additional.MyCustomException");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("def op(EClass c) : void {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("throw new MyCustomException");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\") [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("op(it)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final Procedure1<EPackage> _function = (EPackage it) -> {
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, _function);
   }
 }

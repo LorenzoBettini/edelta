@@ -78,6 +78,23 @@ class EdeltaSafeInterpreterTest extends EdeltaInterpreterTest {
 
 	@Test // remove expected exception which the safe interpreter swallows
 	override void testCreateEClassAndCallOperationThatThrows() {
-		super.testCreateEClassAndCallOperationThatThrows
+		'''
+			import org.eclipse.emf.ecore.EClass
+			import edelta.tests.additional.MyCustomException
+			
+			metamodel "foo"
+			
+			def op(EClass c) : void {
+				throw new MyCustomException
+			}
+			
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass") [
+					op(it)
+				]
+			}
+		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation [
+			// never gets here
+		]
 	}
 }

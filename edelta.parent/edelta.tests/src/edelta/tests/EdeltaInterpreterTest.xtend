@@ -21,6 +21,7 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
+import edelta.interpreter.EdeltaInterpreter.EdeltaInterpreterWrapperException
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -86,26 +87,28 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test(expected=MyCustomException)
+	@Test
 	def void testCreateEClassAndCallOperationThatThrows() {
-		'''
-			import org.eclipse.emf.ecore.EClass
-			import edelta.tests.additional.MyCustomException
-			
-			metamodel "foo"
-			
-			def op(EClass c) : void {
-				throw new MyCustomException
-			}
-			
-			modifyEcore aTest epackage foo {
-				addNewEClass("NewClass") [
-					op(it)
-				]
-			}
-		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation [
-			// never gets here
-		]
+		assertThatThrownBy['''
+				import org.eclipse.emf.ecore.EClass
+				import edelta.tests.additional.MyCustomException
+				
+				metamodel "foo"
+				
+				def op(EClass c) : void {
+					throw new MyCustomException
+				}
+				
+				modifyEcore aTest epackage foo {
+					addNewEClass("NewClass") [
+						op(it)
+					]
+				}
+			'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation [
+				// never gets here
+			]
+		].isInstanceOf(EdeltaInterpreterWrapperException)
+			.hasCauseExactlyInstanceOf(MyCustomException)
 	}
 
 	@Test
