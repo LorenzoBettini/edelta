@@ -1,6 +1,5 @@
 package edelta.tests;
 
-import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import edelta.edelta.EdeltaModifyEcoreOperation;
@@ -15,12 +14,10 @@ import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime;
 import edelta.tests.additional.MyCustomException;
 import edelta.util.EdeltaCopiedEPackagesMap;
 import edelta.validation.EdeltaValidator;
-import java.util.List;
 import java.util.Map;
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
@@ -715,15 +712,12 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   
   private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final IEdeltaInterpreter interpreter, final EdeltaProgram program, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
     final EdeltaModifyEcoreOperation it = this.lastModifyEcoreOperation(program);
-    Iterable<EPackage> _copiedEPackages = this.getCopiedEPackages(program);
-    EList<EPackage> _metamodels = program.getMetamodels();
-    final List<EPackage> packages = IterableExtensions.<EPackage>toList(Iterables.<EPackage>concat(_copiedEPackages, _metamodels));
     final Function1<EPackage, String> _function = (EPackage it_1) -> {
       return it_1.getName();
     };
     Map<String, EPackage> _map = IterableExtensions.<String, EPackage>toMap(this.getCopiedEPackages(it), _function);
     final EdeltaCopiedEPackagesMap copiedEPackagesMap = new EdeltaCopiedEPackagesMap(_map);
-    interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap, packages);
+    interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap);
     final String packageName = it.getEpackage().getName();
     final EPackage epackage = copiedEPackagesMap.get(packageName);
     testExecutor.apply(epackage);

@@ -3,9 +3,6 @@
  */
 package edelta.tests.additional;
 
-import java.util.List;
-
-import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 
 import edelta.edelta.EdeltaProgram;
@@ -23,8 +20,7 @@ import edelta.util.EdeltaCopiedEPackagesMap;
 public class EdeltaDerivedStateComputerWithoutInterpreter extends EdeltaDerivedStateComputer {
 
 	@Override
-	protected void runInterpreter(EdeltaProgram program, EdeltaCopiedEPackagesMap copiedEPackagesMap,
-			List<EPackage> packages) {
+	protected void runInterpreter(EdeltaProgram program, EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		// No interpreter is run
 	}
 

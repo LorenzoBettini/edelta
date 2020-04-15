@@ -3,10 +3,7 @@
  */
 package edelta.interpreter;
 
-import java.util.List;
-
 import org.apache.log4j.Logger;
-import org.eclipse.emf.ecore.EPackage;
 
 import edelta.edelta.EdeltaProgram;
 import edelta.util.EdeltaCopiedEPackagesMap;
@@ -44,11 +41,10 @@ public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 	@Override
 	@SuppressWarnings("all") // avoid warning for nested try block
 	public void evaluateModifyEcoreOperations(EdeltaProgram program,
-			EdeltaCopiedEPackagesMap copiedEPackagesMap,
-			List<EPackage> ePackages) {
+			EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		try {
 			try {
-				super.evaluateModifyEcoreOperations(program, copiedEPackagesMap, ePackages);
+				super.evaluateModifyEcoreOperations(program, copiedEPackagesMap);
 			} catch (EdeltaInterpreterWrapperException e) {
 				throw e.getException();
 			}

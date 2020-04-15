@@ -11,7 +11,6 @@ import edelta.lib.EdeltaEcoreUtil
 import edelta.scoping.EdeltaOriginalENamedElementRecorder
 import edelta.services.IEdeltaEcoreModelAssociations
 import edelta.util.EdeltaCopiedEPackagesMap
-import java.util.List
 import java.util.Map
 import org.eclipse.emf.common.notify.impl.AdapterImpl
 import org.eclipse.emf.ecore.EPackage
@@ -89,23 +88,19 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 			recordEcoreReferenceOriginalENamedElement(resource)
 			// configure and run the interpreter
 			interpreterConfigurator.configureInterpreter(interpreter, resource)
-			val packages = (copiedEPackagesMap.values + program.metamodels).toList
 			runInterpreter(
 				program,
-				copiedEPackagesMap,
-				packages
+				copiedEPackagesMap
 			)
 		}
 	}
 
 	protected def void runInterpreter(EdeltaProgram program,
-		EdeltaCopiedEPackagesMap copiedEPackagesMap,
-		List<EPackage> packages
+		EdeltaCopiedEPackagesMap copiedEPackagesMap
 	) {
 		interpreter.evaluateModifyEcoreOperations(
 			program,
-			copiedEPackagesMap,
-			packages
+			copiedEPackagesMap
 		)
 	}
 

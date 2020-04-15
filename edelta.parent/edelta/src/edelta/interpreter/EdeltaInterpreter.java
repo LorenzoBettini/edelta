@@ -25,6 +25,8 @@ import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationResult;
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import edelta.compiler.EdeltaCompilerUtil;
@@ -101,10 +103,12 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 	}
 
 	@Override
-	public void evaluateModifyEcoreOperations(final EdeltaProgram program, final EdeltaCopiedEPackagesMap copiedEPackagesMap,
-			final List<EPackage> ePackages) {
+	public void evaluateModifyEcoreOperations(final EdeltaProgram program, final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		programInferredJavaType = edeltaJvmModelHelper.findJvmGenericType(program);
-		edelta = new EdeltaInterpreterEdeltaImpl(ePackages);
+		edelta = new EdeltaInterpreterEdeltaImpl
+			(Lists.newArrayList(
+				Iterables.concat(copiedEPackagesMap.values(),
+						program.getMetamodels())));
 		useAsFields = newHashMap();
 		for (final EdeltaModifyEcoreOperation op : program.getModifyEcoreOperations()) {
 			final EPackage ePackage = copiedEPackagesMap.

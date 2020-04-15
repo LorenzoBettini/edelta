@@ -3,10 +3,6 @@
  */
 package edelta.interpreter;
 
-import java.util.List;
-
-import org.eclipse.emf.ecore.EPackage;
-
 import edelta.edelta.EdeltaProgram;
 import edelta.util.EdeltaCopiedEPackagesMap;
 
@@ -17,8 +13,7 @@ import edelta.util.EdeltaCopiedEPackagesMap;
 public interface IEdeltaInterpreter {
 
 	void evaluateModifyEcoreOperations(EdeltaProgram program,
-			EdeltaCopiedEPackagesMap copiedEPackagesMap,
-			List<EPackage> ePackages);
+			EdeltaCopiedEPackagesMap copiedEPackagesMap);
 
 	void setInterpreterTimeout(int interpreterTimeout);
 
