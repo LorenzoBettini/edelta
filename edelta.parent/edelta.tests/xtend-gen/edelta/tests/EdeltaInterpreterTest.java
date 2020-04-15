@@ -26,7 +26,6 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtend2.lib.StringConcatenation;
-import org.eclipse.xtext.common.types.JvmGenericType;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
@@ -724,8 +723,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     };
     Map<String, EPackage> _map = IterableExtensions.<String, EPackage>toMap(this.getCopiedEPackages(it), _function);
     final EdeltaCopiedEPackagesMap copiedEPackagesMap = new EdeltaCopiedEPackagesMap(_map);
-    final JvmGenericType inferredJavaClass = IterableExtensions.<JvmGenericType>head(Iterables.<JvmGenericType>filter(this._iJvmModelAssociations.getJvmElements(program), JvmGenericType.class));
-    interpreter.evaluateModifyEcoreOperations(program.getModifyEcoreOperations(), copiedEPackagesMap, inferredJavaClass, packages);
+    interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap, packages);
     final String packageName = it.getEpackage().getName();
     final EPackage epackage = copiedEPackagesMap.get(packageName);
     testExecutor.apply(epackage);

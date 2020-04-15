@@ -6,9 +6,8 @@ package edelta.interpreter;
 import java.util.List;
 
 import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.xtext.common.types.JvmGenericType;
 
-import edelta.edelta.EdeltaModifyEcoreOperation;
+import edelta.edelta.EdeltaProgram;
 import edelta.util.EdeltaCopiedEPackagesMap;
 
 /**
@@ -17,9 +16,9 @@ import edelta.util.EdeltaCopiedEPackagesMap;
  */
 public interface IEdeltaInterpreter {
 
-	void evaluateModifyEcoreOperations(Iterable<EdeltaModifyEcoreOperation> ops,
+	void evaluateModifyEcoreOperations(EdeltaProgram program,
 			EdeltaCopiedEPackagesMap copiedEPackagesMap,
-			JvmGenericType jvmGenericType, List<EPackage> ePackages);
+			List<EPackage> ePackages);
 
 	void setInterpreterTimeout(int interpreterTimeout);
 

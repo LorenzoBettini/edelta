@@ -7,9 +7,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.xtext.common.types.JvmGenericType;
 
-import edelta.edelta.EdeltaModifyEcoreOperation;
+import edelta.edelta.EdeltaProgram;
 import edelta.util.EdeltaCopiedEPackagesMap;
 
 /**
@@ -44,12 +43,12 @@ public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 
 	@Override
 	@SuppressWarnings("all") // avoid warning for nested try block
-	public void evaluateModifyEcoreOperations(Iterable<EdeltaModifyEcoreOperation> ops,
+	public void evaluateModifyEcoreOperations(EdeltaProgram program,
 			EdeltaCopiedEPackagesMap copiedEPackagesMap,
-			JvmGenericType jvmGenericType, List<EPackage> ePackages) {
+			List<EPackage> ePackages) {
 		try {
 			try {
-				super.evaluateModifyEcoreOperations(ops, copiedEPackagesMap, jvmGenericType, ePackages);
+				super.evaluateModifyEcoreOperations(program, copiedEPackagesMap, ePackages);
 			} catch (EdeltaInterpreterWrapperException e) {
 				throw e.getException();
 			}

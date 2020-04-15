@@ -5,14 +5,15 @@ import com.google.inject.Injector
 import edelta.edelta.EdeltaPackage
 import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreter
+import edelta.interpreter.EdeltaInterpreter.EdeltaInterpreterWrapperException
 import edelta.interpreter.EdeltaSafeInterpreter
 import edelta.interpreter.IEdeltaInterpreter
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 import edelta.tests.additional.MyCustomException
+import edelta.util.EdeltaCopiedEPackagesMap
 import edelta.validation.EdeltaValidator
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EPackage
-import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Before
@@ -21,8 +22,6 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
-import edelta.interpreter.EdeltaInterpreter.EdeltaInterpreterWrapperException
-import edelta.util.EdeltaCopiedEPackagesMap
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -487,9 +486,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		val packages = (program.copiedEPackages + program.metamodels).toList
 		val copiedEPackagesMap =
 			new EdeltaCopiedEPackagesMap(copiedEPackages.toMap[name])
-		val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
-		interpreter.evaluateModifyEcoreOperations(program.modifyEcoreOperations,
-			copiedEPackagesMap, inferredJavaClass, packages
+		interpreter.evaluateModifyEcoreOperations(program,
+			copiedEPackagesMap, packages
 		)
 		val packageName = it.epackage.name
 		val epackage = copiedEPackagesMap.get(packageName)

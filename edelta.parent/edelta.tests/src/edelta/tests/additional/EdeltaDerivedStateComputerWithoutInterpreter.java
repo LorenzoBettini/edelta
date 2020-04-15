@@ -7,9 +7,8 @@ import java.util.List;
 
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.xtext.common.types.JvmGenericType;
 
-import edelta.edelta.EdeltaModifyEcoreOperation;
+import edelta.edelta.EdeltaProgram;
 import edelta.resource.EdeltaDerivedStateComputer;
 import edelta.util.EdeltaCopiedEPackagesMap;
 
@@ -24,8 +23,7 @@ import edelta.util.EdeltaCopiedEPackagesMap;
 public class EdeltaDerivedStateComputerWithoutInterpreter extends EdeltaDerivedStateComputer {
 
 	@Override
-	protected void runInterpreter(Iterable<EdeltaModifyEcoreOperation> ops,
-			EdeltaCopiedEPackagesMap copiedEPackagesMap, JvmGenericType programJvmType,
+	protected void runInterpreter(EdeltaProgram program, EdeltaCopiedEPackagesMap copiedEPackagesMap,
 			List<EPackage> packages) {
 		// No interpreter is run
 	}

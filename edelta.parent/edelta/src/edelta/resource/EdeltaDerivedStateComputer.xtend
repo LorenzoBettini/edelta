@@ -4,13 +4,13 @@ import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.google.inject.name.Named
 import edelta.edelta.EdeltaEcoreReferenceExpression
-import edelta.edelta.EdeltaModifyEcoreOperation
 import edelta.edelta.EdeltaProgram
 import edelta.interpreter.IEdeltaInterpreter
 import edelta.interpreter.internal.EdeltaInterpreterConfigurator
 import edelta.lib.EdeltaEcoreUtil
 import edelta.scoping.EdeltaOriginalENamedElementRecorder
 import edelta.services.IEdeltaEcoreModelAssociations
+import edelta.util.EdeltaCopiedEPackagesMap
 import java.util.List
 import java.util.Map
 import org.eclipse.emf.common.notify.impl.AdapterImpl
@@ -18,12 +18,10 @@ import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.Constants
-import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader.GenericUnloader
 import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator
-import edelta.util.EdeltaCopiedEPackagesMap
 
 @Singleton
 class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEcoreModelAssociations {
@@ -74,7 +72,6 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	override installDerivedState(DerivedStateAwareResource resource, boolean preIndexingPhase) {
 		super.installDerivedState(resource, preIndexingPhase)
 		val program = resource.contents.head as EdeltaProgram
-		val programJvmType = program.jvmElements.filter(JvmGenericType).head
 		if (!preIndexingPhase) {
 			val modifyEcoreOperations = program.modifyEcoreOperations.filter[epackage !== null]
 			if (modifyEcoreOperations.empty)
@@ -94,22 +91,20 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 			interpreterConfigurator.configureInterpreter(interpreter, resource)
 			val packages = (copiedEPackagesMap.values + program.metamodels).toList
 			runInterpreter(
-				modifyEcoreOperations,
+				program,
 				copiedEPackagesMap,
-				programJvmType,
 				packages
 			)
 		}
 	}
 
-	protected def void runInterpreter(Iterable<EdeltaModifyEcoreOperation> ops,
+	protected def void runInterpreter(EdeltaProgram program,
 		EdeltaCopiedEPackagesMap copiedEPackagesMap,
-		JvmGenericType programJvmType, List<EPackage> packages
+		List<EPackage> packages
 	) {
 		interpreter.evaluateModifyEcoreOperations(
-			ops,
+			program,
 			copiedEPackagesMap,
-			programJvmType,
 			packages
 		)
 	}

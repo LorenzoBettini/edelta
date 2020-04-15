@@ -32,6 +32,7 @@ import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
+import edelta.edelta.EdeltaProgram;
 import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
 import edelta.util.EdeltaCopiedEPackagesMap;
@@ -100,12 +101,12 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 	}
 
 	@Override
-	public void evaluateModifyEcoreOperations(final Iterable<EdeltaModifyEcoreOperation> ops, final EdeltaCopiedEPackagesMap copiedEPackagesMap,
-			final JvmGenericType jvmGenericType, final List<EPackage> ePackages) {
-		programInferredJavaType = jvmGenericType;
+	public void evaluateModifyEcoreOperations(final EdeltaProgram program, final EdeltaCopiedEPackagesMap copiedEPackagesMap,
+			final List<EPackage> ePackages) {
+		programInferredJavaType = edeltaJvmModelHelper.findJvmGenericType(program);
 		edelta = new EdeltaInterpreterEdeltaImpl(ePackages);
 		useAsFields = newHashMap();
-		for (final EdeltaModifyEcoreOperation op : ops) {
+		for (final EdeltaModifyEcoreOperation op : program.getModifyEcoreOperations()) {
 			final EPackage ePackage = copiedEPackagesMap.
 					get(op.getEpackage().getName());
 			final EdeltaInterpreterCleaner cacheCleaner =
