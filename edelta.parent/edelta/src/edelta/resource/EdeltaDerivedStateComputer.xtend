@@ -23,6 +23,7 @@ import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader.GenericUnloader
 import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator
+import edelta.util.EdeltaCopiedEPackagesMap
 
 @Singleton
 class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEcoreModelAssociations {
@@ -40,7 +41,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	@Inject EdeltaOriginalENamedElementRecorder originalENamedElementRecorder
 
 	static class EdeltaDerivedStateAdapter extends AdapterImpl {
-		var Map<String, EPackage> nameToCopiedEPackageMap = newHashMap()
+		var EdeltaCopiedEPackagesMap nameToCopiedEPackageMap = new EdeltaCopiedEPackagesMap
 
 		override boolean isAdapterForType(Object type) {
 			return EdeltaDerivedStateAdapter === type;
