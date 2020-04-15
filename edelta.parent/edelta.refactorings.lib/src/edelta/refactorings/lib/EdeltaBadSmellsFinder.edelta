@@ -9,6 +9,7 @@ import org.eclipse.emf.ecore.EcorePackage
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.emf.ecore.util.EcoreUtil.CrossReferencer
 import java.util.Collection
+import java.util.Map
 
 package edelta.refactorings.lib
 
@@ -256,7 +257,8 @@ def isNotReferenced(EClassifier cl) {
  * and the associated value is a list of subclasses that are
  * considered matching the "classification by hierarchy" bad smell.
  */
-def findClassificationByHierarchy(EPackage ePackage) {
+def findClassificationByHierarchy(EPackage ePackage)
+		: Map<EClass, List<EClass>> {
 	val classification= ePackage.allEClasses
 		.filter[
 			ESuperTypes.size == 1 &&
@@ -264,6 +266,8 @@ def findClassificationByHierarchy(EPackage ePackage) {
 			isNotReferenced
 		]
 		.groupBy[ESuperTypes.head]
+		.filter[base, subclasses|subclasses.size > 1]
+		// only if there are at least 2 subclasses
 	classification.entrySet.forEach[
 		logInfo["Classification by hierarchy: "
 			+ getEObjectRepr(key) + " - "

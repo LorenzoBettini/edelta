@@ -232,14 +232,14 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 			createEClass("Derived2") => [
 				ESuperTypes += base
 			]
-			createEClass("Derived2") => [
+			createEClass("DerivedOK") => [
 				ESuperTypes += base
 				// not in result because has features
 				createEAttribute("anAttribute") => [
 					EType = stringDataType
 				]
 			]
-			val referenced = createEClass("Derived3") => [
+			val referenced = createEClass("DerivedOK2") => [
 				// not in result because it's referenced
 				ESuperTypes += base
 			]
@@ -248,7 +248,7 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 					EType = referenced
 				]
 			]
-			createEClass("Derived4") => [
+			createEClass("DerivedOK3") => [
 				ESuperTypes += base
 				ESuperTypes += another
 				// not in result because has several superclasses
@@ -262,6 +262,18 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 					p.EClasses.get(2)
 				)
 			))
+	}
+
+	@Test def void test_findClassificationByHierarchy_withOneSubclass() {
+		val p = factory.createEPackage => [
+			val base = createEClass("Base")
+			createEClass("Derived1") => [
+				ESuperTypes += base
+			]
+		]
+		val result = finder.findClassificationByHierarchy(p)
+		assertThat(result)
+			.isEmpty
 	}
 
 	@Test def void test_findConcreteAbstractMetaclasses() {

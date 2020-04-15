@@ -338,23 +338,27 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
     final Function1<EClass, EClass> _function_1 = (EClass it) -> {
       return IterableExtensions.<EClass>head(it.getESuperTypes());
     };
-    final Map<EClass, List<EClass>> classification = IterableExtensions.<EClass, EClass>groupBy(IterableExtensions.<EClass>filter(this.allEClasses(ePackage), _function), _function_1);
-    final Consumer<Map.Entry<EClass, List<EClass>>> _function_2 = (Map.Entry<EClass, List<EClass>> it) -> {
-      final Supplier<String> _function_3 = () -> {
+    final Function2<EClass, List<EClass>, Boolean> _function_2 = (EClass base, List<EClass> subclasses) -> {
+      int _size = subclasses.size();
+      return Boolean.valueOf((_size > 1));
+    };
+    final Map<EClass, List<EClass>> classification = MapExtensions.<EClass, List<EClass>>filter(IterableExtensions.<EClass, EClass>groupBy(IterableExtensions.<EClass>filter(this.allEClasses(ePackage), _function), _function_1), _function_2);
+    final Consumer<Map.Entry<EClass, List<EClass>>> _function_3 = (Map.Entry<EClass, List<EClass>> it) -> {
+      final Supplier<String> _function_4 = () -> {
         String _eObjectRepr = this.lib.getEObjectRepr(it.getKey());
         String _plus = ("Classification by hierarchy: " + _eObjectRepr);
         String _plus_1 = (_plus + " - ");
         String _plus_2 = (_plus_1 + "subclasses[");
-        final Function1<EClass, String> _function_4 = (EClass it_1) -> {
+        final Function1<EClass, String> _function_5 = (EClass it_1) -> {
           return this.lib.getEObjectRepr(it_1);
         };
-        String _join = IterableExtensions.join(ListExtensions.<EClass, String>map(it.getValue(), _function_4), ",");
+        String _join = IterableExtensions.join(ListExtensions.<EClass, String>map(it.getValue(), _function_5), ",");
         String _plus_3 = (_plus_2 + _join);
         return (_plus_3 + "]");
       };
-      this.logInfo(_function_3);
+      this.logInfo(_function_4);
     };
-    classification.entrySet().forEach(_function_2);
+    classification.entrySet().forEach(_function_3);
     return classification;
   }
   

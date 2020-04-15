@@ -359,7 +359,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
         _eSuperTypes.add(base);
       };
       ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_2);
-      EClass _createEClass_2 = this.createEClass(it, "Derived2");
+      EClass _createEClass_2 = this.createEClass(it, "DerivedOK");
       final Procedure1<EClass> _function_3 = (EClass it_1) -> {
         EList<EClass> _eSuperTypes = it_1.getESuperTypes();
         _eSuperTypes.add(base);
@@ -370,7 +370,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
         ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_4);
       };
       ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_2, _function_3);
-      EClass _createEClass_3 = this.createEClass(it, "Derived3");
+      EClass _createEClass_3 = this.createEClass(it, "DerivedOK2");
       final Procedure1<EClass> _function_4 = (EClass it_1) -> {
         EList<EClass> _eSuperTypes = it_1.getESuperTypes();
         _eSuperTypes.add(base);
@@ -385,7 +385,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
         ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_6);
       };
       final EClass another = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_4, _function_5);
-      EClass _createEClass_5 = this.createEClass(it, "Derived4");
+      EClass _createEClass_5 = this.createEClass(it, "DerivedOK3");
       final Procedure1<EClass> _function_6 = (EClass it_1) -> {
         EList<EClass> _eSuperTypes = it_1.getESuperTypes();
         _eSuperTypes.add(base);
@@ -403,6 +403,23 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
     Pair<EClass, ArrayList<EClass>> _mappedTo = Pair.<EClass, ArrayList<EClass>>of(_head, _newArrayList);
     Assertions.<EClass, List<EClass>>assertThat(result).containsExactlyEntriesOf(
       CollectionLiterals.<EClass, ArrayList<EClass>>newHashMap(_mappedTo));
+  }
+  
+  @Test
+  public void test_findClassificationByHierarchy_withOneSubclass() {
+    EPackage _createEPackage = this.factory.createEPackage();
+    final Procedure1<EPackage> _function = (EPackage it) -> {
+      final EClass base = this.createEClass(it, "Base");
+      EClass _createEClass = this.createEClass(it, "Derived1");
+      final Procedure1<EClass> _function_1 = (EClass it_1) -> {
+        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
+        _eSuperTypes.add(base);
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
+    };
+    final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
+    final Map<EClass, List<EClass>> result = this.finder.findClassificationByHierarchy(p);
+    Assertions.<EClass, List<EClass>>assertThat(result).isEmpty();
   }
   
   @Test
