@@ -179,7 +179,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		parseWithTestEcore
 		val resource = program.eResource as DerivedStateAwareResource
 		// val derivedToSourceMap = resource.derivedToSourceMap
-		val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
+		val nameToCopiedEPackageMap = resource.copiedEPackagesMap
 		assertFalse(resource.eAdapters.empty)
 		// assertFalse(derivedToSourceMap.empty)
 		assertFalse(nameToCopiedEPackageMap.empty)
@@ -210,7 +210,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		parseWithTestEcore
 		val resource = program.eResource as DerivedStateAwareResource
 		// val derivedToSourceMap = resource.derivedToSourceMap
-		val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
+		val nameToCopiedEPackageMap = resource.copiedEPackagesMap
 		// val opToEClassMap = resource.opToEClassMap
 		assertFalse(resource.eAdapters.empty)
 		// assertFalse(derivedToSourceMap.empty)
