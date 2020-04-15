@@ -13,6 +13,7 @@ import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime;
 import edelta.tests.additional.MyCustomException;
+import edelta.util.EdeltaCopiedEPackagesMap;
 import edelta.validation.EdeltaValidator;
 import java.util.List;
 import java.util.Map;
@@ -721,11 +722,12 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     final Function1<EPackage, String> _function = (EPackage it_1) -> {
       return it_1.getName();
     };
-    final Map<String, EPackage> nameToCopiedEPackagesMap = IterableExtensions.<String, EPackage>toMap(this.getCopiedEPackages(it), _function);
+    Map<String, EPackage> _map = IterableExtensions.<String, EPackage>toMap(this.getCopiedEPackages(it), _function);
+    final EdeltaCopiedEPackagesMap copiedEPackagesMap = new EdeltaCopiedEPackagesMap(_map);
     final JvmGenericType inferredJavaClass = IterableExtensions.<JvmGenericType>head(Iterables.<JvmGenericType>filter(this._iJvmModelAssociations.getJvmElements(program), JvmGenericType.class));
-    interpreter.run(program.getModifyEcoreOperations(), nameToCopiedEPackagesMap, inferredJavaClass, packages);
+    interpreter.run(program.getModifyEcoreOperations(), copiedEPackagesMap, inferredJavaClass, packages);
     final String packageName = it.getEpackage().getName();
-    final EPackage epackage = nameToCopiedEPackagesMap.get(packageName);
+    final EPackage epackage = copiedEPackagesMap.get(packageName);
     testExecutor.apply(epackage);
   }
 }

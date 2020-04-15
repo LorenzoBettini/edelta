@@ -22,6 +22,7 @@ import org.junit.runner.RunWith
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
 import edelta.interpreter.EdeltaInterpreter.EdeltaInterpreterWrapperException
+import edelta.util.EdeltaCopiedEPackagesMap
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -484,13 +485,14 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		// mimic the behavior of derived state computer that runs the interpreter
 		// on copied EPackages, not on the original ones
 		val packages = (program.copiedEPackages + program.metamodels).toList
-		val nameToCopiedEPackagesMap = copiedEPackages.toMap[name]
+		val copiedEPackagesMap =
+			new EdeltaCopiedEPackagesMap(copiedEPackages.toMap[name])
 		val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
 		interpreter.run(program.modifyEcoreOperations,
-			nameToCopiedEPackagesMap, inferredJavaClass, packages
+			copiedEPackagesMap, inferredJavaClass, packages
 		)
 		val packageName = it.epackage.name
-		val epackage = nameToCopiedEPackagesMap.get(packageName)
+		val epackage = copiedEPackagesMap.get(packageName)
 		testExecutor.apply(epackage)
 	}
 

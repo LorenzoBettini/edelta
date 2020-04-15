@@ -103,12 +103,12 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	}
 
 	protected def void runInterpreter(Iterable<EdeltaModifyEcoreOperation> ops,
-		Map<String, EPackage> nameToCopiedEPackageMap,
+		EdeltaCopiedEPackagesMap copiedEPackagesMap,
 		JvmGenericType programJvmType, List<EPackage> packages
 	) {
 		interpreter.run(
 			ops,
-			nameToCopiedEPackageMap,
+			copiedEPackagesMap,
 			programJvmType,
 			packages
 		)

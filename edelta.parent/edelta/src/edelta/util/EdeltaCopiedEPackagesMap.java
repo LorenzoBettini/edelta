@@ -1,6 +1,7 @@
 package edelta.util;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.emf.ecore.EPackage;
 
@@ -13,5 +14,12 @@ import org.eclipse.emf.ecore.EPackage;
 public class EdeltaCopiedEPackagesMap extends HashMap<String, EPackage> {
 
 	private static final long serialVersionUID = 1L;
+
+	public EdeltaCopiedEPackagesMap(Map<? extends String, ? extends EPackage> m) {
+		super(m);
+	}
+
+	public EdeltaCopiedEPackagesMap() {
+	}
 
 }

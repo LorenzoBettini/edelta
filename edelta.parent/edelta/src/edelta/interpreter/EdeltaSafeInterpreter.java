@@ -4,13 +4,13 @@
 package edelta.interpreter;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.common.types.JvmGenericType;
 
 import edelta.edelta.EdeltaModifyEcoreOperation;
+import edelta.util.EdeltaCopiedEPackagesMap;
 
 /**
  * An interpreter that swallows all {@link RuntimeException}s except for
@@ -45,11 +45,11 @@ public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 	@Override
 	@SuppressWarnings("all") // avoid warning for nested try block
 	public void run(Iterable<EdeltaModifyEcoreOperation> ops,
-			Map<String, EPackage> nameToCopiedEPackageMap,
+			EdeltaCopiedEPackagesMap copiedEPackagesMap,
 			JvmGenericType jvmGenericType, List<EPackage> ePackages) {
 		try {
 			try {
-				super.run(ops, nameToCopiedEPackageMap, jvmGenericType, ePackages);
+				super.run(ops, copiedEPackagesMap, jvmGenericType, ePackages);
 			} catch (EdeltaInterpreterWrapperException e) {
 				throw e.getException();
 			}
