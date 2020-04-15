@@ -7,9 +7,14 @@ import org.eclipse.xtext.common.types.JvmField
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.common.types.JvmOperation
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
+import edelta.edelta.EdeltaProgram
 
 class EdeltaJvmModelHelper {
 	@Inject extension IJvmModelAssociations
+
+	def findJvmGenericType(EdeltaProgram program) {
+		program.jvmElements.filter(JvmGenericType).head
+	}
 
 	def findJvmOperation(JvmGenericType jvmGenericType, String methodName) {
 		jvmGenericType.allFeatures.filter(JvmOperation).
