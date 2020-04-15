@@ -44,12 +44,12 @@ public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 
 	@Override
 	@SuppressWarnings("all") // avoid warning for nested try block
-	public void run(Iterable<EdeltaModifyEcoreOperation> ops,
+	public void evaluateModifyEcoreOperations(Iterable<EdeltaModifyEcoreOperation> ops,
 			EdeltaCopiedEPackagesMap copiedEPackagesMap,
 			JvmGenericType jvmGenericType, List<EPackage> ePackages) {
 		try {
 			try {
-				super.run(ops, copiedEPackagesMap, jvmGenericType, ePackages);
+				super.evaluateModifyEcoreOperations(ops, copiedEPackagesMap, jvmGenericType, ePackages);
 			} catch (EdeltaInterpreterWrapperException e) {
 				throw e.getException();
 			}

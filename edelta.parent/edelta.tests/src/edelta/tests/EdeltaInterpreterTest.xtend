@@ -488,7 +488,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		val copiedEPackagesMap =
 			new EdeltaCopiedEPackagesMap(copiedEPackages.toMap[name])
 		val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
-		interpreter.run(program.modifyEcoreOperations,
+		interpreter.evaluateModifyEcoreOperations(program.modifyEcoreOperations,
 			copiedEPackagesMap, inferredJavaClass, packages
 		)
 		val packageName = it.epackage.name

@@ -17,7 +17,7 @@ import edelta.util.EdeltaCopiedEPackagesMap;
  */
 public interface IEdeltaInterpreter {
 
-	void run(Iterable<EdeltaModifyEcoreOperation> ops,
+	void evaluateModifyEcoreOperations(Iterable<EdeltaModifyEcoreOperation> ops,
 			EdeltaCopiedEPackagesMap copiedEPackagesMap,
 			JvmGenericType jvmGenericType, List<EPackage> ePackages);
 

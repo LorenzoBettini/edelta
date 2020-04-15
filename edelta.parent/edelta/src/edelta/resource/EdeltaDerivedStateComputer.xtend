@@ -106,7 +106,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		EdeltaCopiedEPackagesMap copiedEPackagesMap,
 		JvmGenericType programJvmType, List<EPackage> packages
 	) {
-		interpreter.run(
+		interpreter.evaluateModifyEcoreOperations(
 			ops,
 			copiedEPackagesMap,
 			programJvmType,

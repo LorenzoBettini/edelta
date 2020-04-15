@@ -100,7 +100,7 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 	}
 
 	@Override
-	public void run(final Iterable<EdeltaModifyEcoreOperation> ops, final EdeltaCopiedEPackagesMap copiedEPackagesMap,
+	public void evaluateModifyEcoreOperations(final Iterable<EdeltaModifyEcoreOperation> ops, final EdeltaCopiedEPackagesMap copiedEPackagesMap,
 			final JvmGenericType jvmGenericType, final List<EPackage> ePackages) {
 		programInferredJavaType = jvmGenericType;
 		edelta = new EdeltaInterpreterEdeltaImpl(ePackages);

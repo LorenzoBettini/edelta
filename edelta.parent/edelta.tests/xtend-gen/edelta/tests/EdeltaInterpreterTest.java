@@ -725,7 +725,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     Map<String, EPackage> _map = IterableExtensions.<String, EPackage>toMap(this.getCopiedEPackages(it), _function);
     final EdeltaCopiedEPackagesMap copiedEPackagesMap = new EdeltaCopiedEPackagesMap(_map);
     final JvmGenericType inferredJavaClass = IterableExtensions.<JvmGenericType>head(Iterables.<JvmGenericType>filter(this._iJvmModelAssociations.getJvmElements(program), JvmGenericType.class));
-    interpreter.run(program.getModifyEcoreOperations(), copiedEPackagesMap, inferredJavaClass, packages);
+    interpreter.evaluateModifyEcoreOperations(program.getModifyEcoreOperations(), copiedEPackagesMap, inferredJavaClass, packages);
     final String packageName = it.getEpackage().getName();
     final EPackage epackage = copiedEPackagesMap.get(packageName);
     testExecutor.apply(epackage);
