@@ -37,6 +37,7 @@ import edelta.edelta.EdeltaOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
+import edelta.lib.AbstractEdelta;
 import edelta.util.EdeltaCopiedEPackagesMap;
 import edelta.validation.EdeltaValidator;
 
@@ -65,7 +66,10 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 
 	private static final QualifiedName IT_QUALIFIED_NAME = QualifiedName.create("it");
 
-	private EdeltaInterpreterEdeltaImpl edelta;
+	/**
+	 * Represents the "this" during the interpretation.
+	 */
+	private AbstractEdelta thisObject;
 
 	private Map<EdeltaUseAs, Object> useAsFields;
 
@@ -105,7 +109,7 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 	@Override
 	public void evaluateModifyEcoreOperations(final EdeltaProgram program, final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		programInferredJavaType = edeltaJvmModelHelper.findJvmGenericType(program);
-		edelta = new EdeltaInterpreterEdeltaImpl
+		thisObject = new EdeltaInterpreterEdeltaImpl
 			(Lists.newArrayList(
 				Iterables.concat(copiedEPackagesMap.values(),
 						program.getMetamodels())));
@@ -137,9 +141,9 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 			// calls to operations defined in the sources are intercepted
 			// in our custom invokeOperation and in that case we interpret the
 			// original source's XBlockExpression
-			context.newValue(QualifiedName.create("this"), edelta);
+			context.newValue(QualifiedName.create("this"), thisObject);
 			context.newValue(QualifiedName.create(
-					programInferredJavaType.getSimpleName()), edelta);
+					programInferredJavaType.getSimpleName()), thisObject);
 			final IEvaluationResult result = evaluate(op.getBody(), context,
 					new EdeltaInterpreterCancelIndicator());
 			if (result == null) {
@@ -201,7 +205,7 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 					// which does not exist in AbstractEdelta
 					if (op != null) {
 						final Object ref = super.invokeOperation
-							(op, edelta, args, context, indicator);
+							(op, thisObject, args, context, indicator);
 						elementWrapper.set(ref);
 					}
 				});
@@ -215,7 +219,7 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 		if (useAs != null) {
 			return useAsFields.computeIfAbsent(useAs,
 				it -> edeltaInterpreterHelper.safeInstantiate(
-					getJavaReflectAccess(), useAs, edelta));
+					getJavaReflectAccess(), useAs, thisObject));
 		}
 		return super.featureCallField(jvmField, receiver);
 	}
