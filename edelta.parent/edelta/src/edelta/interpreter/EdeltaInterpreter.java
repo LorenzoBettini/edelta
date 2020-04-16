@@ -111,43 +111,48 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 						program.getMetamodels())));
 		useAsFields = newHashMap();
 		for (final EdeltaModifyEcoreOperation op : program.getModifyEcoreOperations()) {
-			final EPackage ePackage = copiedEPackagesMap.
-					get(op.getEpackage().getName());
-			final EdeltaInterpreterCleaner cacheCleaner =
-					new EdeltaInterpreterCleaner(cache, op.eResource());
-			// clear the cache as soon as the interpreter modifies
-			// the EPackage of the modifyEcore expression
-			// since new types might be available after the interpretation
-			// and existing types might have been modified or renamed
-			// this makes sure that scoping and the type computer
-			// is performed again
-			ePackage.eAdapters().add(cacheCleaner);
-			try {
-				IEvaluationContext context = createContext();
-				context.newValue(IT_QUALIFIED_NAME, ePackage);
-				// 'this' and the name of the inferred class are mapped
-				// to an instance of AbstractEdelta, so that all reflective
-				// accesses, e.g., the inherited field 'lib', work out of the box
-				// calls to operations defined in the sources are intercepted
-				// in our custom invokeOperation and in that case we interpret the
-				// original source's XBlockExpression
-				context.newValue(QualifiedName.create("this"), edelta);
-				context.newValue(QualifiedName.create(
-						programInferredJavaType.getSimpleName()), edelta);
-				final IEvaluationResult result = evaluate(op.getBody(), context,
-						new EdeltaInterpreterCancelIndicator());
-				if (result == null) {
-					addTimeoutWarning(op);
-				} else {
-					Throwable resultException = result.getException();
-					if (resultException != null) {
-						throw new EdeltaInterpreterWrapperException
-							((Exception) resultException);
-					}
+			evaluateModifyEcoreOperation(op, copiedEPackagesMap);
+		}
+	}
+
+	private void evaluateModifyEcoreOperation(final EdeltaModifyEcoreOperation op,
+			final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
+		final EPackage ePackage = copiedEPackagesMap.
+				get(op.getEpackage().getName());
+		final EdeltaInterpreterCleaner cacheCleaner =
+				new EdeltaInterpreterCleaner(cache, op.eResource());
+		// clear the cache as soon as the interpreter modifies
+		// the EPackage of the modifyEcore expression
+		// since new types might be available after the interpretation
+		// and existing types might have been modified or renamed
+		// this makes sure that scoping and the type computer
+		// is performed again
+		ePackage.eAdapters().add(cacheCleaner);
+		try {
+			IEvaluationContext context = createContext();
+			context.newValue(IT_QUALIFIED_NAME, ePackage);
+			// 'this' and the name of the inferred class are mapped
+			// to an instance of AbstractEdelta, so that all reflective
+			// accesses, e.g., the inherited field 'lib', work out of the box
+			// calls to operations defined in the sources are intercepted
+			// in our custom invokeOperation and in that case we interpret the
+			// original source's XBlockExpression
+			context.newValue(QualifiedName.create("this"), edelta);
+			context.newValue(QualifiedName.create(
+					programInferredJavaType.getSimpleName()), edelta);
+			final IEvaluationResult result = evaluate(op.getBody(), context,
+					new EdeltaInterpreterCancelIndicator());
+			if (result == null) {
+				addTimeoutWarning(op);
+			} else {
+				Throwable resultException = result.getException();
+				if (resultException != null) {
+					throw new EdeltaInterpreterWrapperException
+						((Exception) resultException);
 				}
-			} finally {
-				ePackage.eAdapters().remove(cacheCleaner);
 			}
+		} finally {
+			ePackage.eAdapters().remove(cacheCleaner);
 		}
 	}
 
