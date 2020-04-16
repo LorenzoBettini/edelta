@@ -137,7 +137,7 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 				final IEvaluationResult result = evaluate(op.getBody(), context,
 						new EdeltaInterpreterCancelIndicator());
 				if (result == null) {
-					addWarning(op);
+					addTimeoutWarning(op);
 				} else {
 					Throwable resultException = result.getException();
 					if (resultException != null) {
@@ -151,7 +151,7 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 		}
 	}
 
-	private boolean addWarning(final EdeltaModifyEcoreOperation op) {
+	private boolean addTimeoutWarning(final EdeltaModifyEcoreOperation op) {
 		return op.eResource().getWarnings().add(
 			new EObjectDiagnosticImpl(Severity.WARNING,
 				EdeltaValidator.INTERPRETER_TIMEOUT,
