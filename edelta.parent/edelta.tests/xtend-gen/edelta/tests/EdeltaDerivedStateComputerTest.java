@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import edelta.edelta.EdeltaEcoreQualifiedReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
-import edelta.interpreter.EdeltaSafeInterpreter;
+import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.resource.EdeltaDerivedStateComputer;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderTestableDerivedStateComputer;
@@ -424,7 +424,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
       EClassifier _head = IterableExtensions.<EClassifier>head(IterableExtensions.<EPackage>head(program.getMetamodels()).getEClassifiers());
       _head.setName("bar");
     };
-    Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException.class).hasMessageContaining("Unexpected notification");
+    Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaInterpreterRuntimeException.class).hasMessageContaining("Unexpected notification");
   }
   
   @Test

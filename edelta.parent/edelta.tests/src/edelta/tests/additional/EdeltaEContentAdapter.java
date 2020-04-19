@@ -6,7 +6,7 @@ package edelta.tests.additional;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.util.EContentAdapter;
 
-import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException;
+import edelta.interpreter.EdeltaInterpreterRuntimeException;
 
 /**
  * Used in tests to make sure that the original imported Ecore models are not

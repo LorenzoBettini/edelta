@@ -4,7 +4,7 @@ import com.google.inject.Inject
 import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaProgram
-import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException
+import edelta.interpreter.EdeltaInterpreterRuntimeException
 import edelta.resource.EdeltaDerivedStateComputer.EdeltaDerivedStateAdapter
 import edelta.tests.additional.TestableEdeltaDerivedStateComputer
 import org.eclipse.emf.common.notify.impl.AdapterImpl

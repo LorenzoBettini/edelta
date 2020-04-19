@@ -149,14 +149,17 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 			if (result == null) {
 				addTimeoutWarning(op);
 			} else {
-				Throwable resultException = result.getException();
-				if (resultException != null) {
-					throw new EdeltaInterpreterWrapperException
-						((Exception) resultException);
-				}
+				handleResultException(result.getException());
 			}
 		} finally {
 			ePackage.eAdapters().remove(cacheCleaner);
+		}
+	}
+
+	private void handleResultException(Throwable resultException) {
+		if (resultException != null) {
+			throw new EdeltaInterpreterWrapperException
+				((Exception) resultException);
 		}
 	}
 

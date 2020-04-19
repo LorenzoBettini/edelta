@@ -11,7 +11,6 @@ import org.eclipse.xtext.common.types.util.JavaReflectAccess;
 import com.google.inject.Singleton;
 
 import edelta.edelta.EdeltaUseAs;
-import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException;
 import edelta.lib.AbstractEdelta;
 
 /**

@@ -2,6 +2,7 @@ package edelta.tests;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.interpreter.EdeltaSafeInterpreter;
 import edelta.interpreter.IEdeltaInterpreter;
 import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
@@ -83,12 +84,12 @@ public class EdeltaSafeInterpreterTest extends EdeltaInterpreterTest {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, false, _function);
   }
   
-  @Test(expected = EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException.class)
+  @Test(expected = EdeltaInterpreterRuntimeException.class)
   public void testEdeltaInterpreterRuntimeExceptionIsThrown() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import org.eclipse.emf.ecore.EClass");
     _builder.newLine();
-    _builder.append("import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException");
+    _builder.append("import edelta.interpreter.EdeltaInterpreterRuntimeException");
     _builder.newLine();
     _builder.newLine();
     _builder.append("metamodel \"foo\"");

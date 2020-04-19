@@ -19,25 +19,6 @@ public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 
 	private static final Logger LOG = Logger.getLogger(EdeltaSafeInterpreter.class);
 
-	/**
-	 * Subclasses of this exception will always be rethrown by the safe interpreter.
-	 * 
-	 * @author Lorenzo Bettini
-	 *
-	 */
-	public static class EdeltaInterpreterRuntimeException extends RuntimeException {
-
-		private static final long serialVersionUID = 1L;
-
-		/**
-		 * @param message
-		 */
-		public EdeltaInterpreterRuntimeException(String message) {
-			super(message);
-		}
-
-	}
-
 	@Override
 	@SuppressWarnings("all") // avoid warning for nested try block
 	public void evaluateModifyEcoreOperations(EdeltaProgram program,

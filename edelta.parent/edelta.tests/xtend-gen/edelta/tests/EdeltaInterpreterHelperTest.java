@@ -3,7 +3,7 @@ package edelta.tests;
 import com.google.inject.Inject;
 import edelta.edelta.EdeltaUseAs;
 import edelta.interpreter.EdeltaInterpreterHelper;
-import edelta.interpreter.EdeltaSafeInterpreter;
+import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.lib.AbstractEdelta;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderForJavaReflectAccess;
@@ -142,7 +142,7 @@ public class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
       };
       ObjectExtensions.<EdeltaUseAs>operator_doubleArrow(_head, _function_1);
     };
-    AbstractThrowableAssert<?, ? extends Throwable> _isInstanceOf = Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException.class);
+    AbstractThrowableAssert<?, ? extends Throwable> _isInstanceOf = Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaInterpreterRuntimeException.class);
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("The type \'");
     String _name = MyCustomEdeltaThatCannotBeLoadedAtRuntime.class.getName();

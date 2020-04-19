@@ -6,7 +6,7 @@ import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaPackage;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreter;
-import edelta.interpreter.EdeltaSafeInterpreter;
+import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.interpreter.IEdeltaInterpreter;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
@@ -212,7 +212,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       };
       this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, false, _function_1);
     };
-    AbstractThrowableAssert<?, ? extends Throwable> _isInstanceOf = Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException.class);
+    AbstractThrowableAssert<?, ? extends Throwable> _isInstanceOf = Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaInterpreterRuntimeException.class);
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("The type \'");
     String _name = MyCustomEdeltaThatCannotBeLoadedAtRuntime.class.getName();

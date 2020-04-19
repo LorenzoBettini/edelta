@@ -2,7 +2,7 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.interpreter.EdeltaInterpreterHelper
-import edelta.interpreter.EdeltaSafeInterpreter
+import edelta.interpreter.EdeltaInterpreterRuntimeException
 import edelta.lib.AbstractEdelta
 import edelta.tests.additional.MyCustomEdelta
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
@@ -106,7 +106,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 		'''.parse.useAsClauses.head => [
 				interpreterHelper.safeInstantiate(javaReflectAccess, it, other).class
 			]
-		].isInstanceOf(EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException)
+		].isInstanceOf(EdeltaInterpreterRuntimeException)
 			.hasMessageContaining('''The type '«MyCustomEdeltaThatCannotBeLoadedAtRuntime.name»' has been resolved but cannot be loaded by the interpreter''')
 	}
 }

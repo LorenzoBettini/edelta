@@ -6,7 +6,7 @@ import edelta.edelta.EdeltaPackage
 import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreter
 import edelta.interpreter.EdeltaInterpreter.EdeltaInterpreterWrapperException
-import edelta.interpreter.EdeltaSafeInterpreter
+import edelta.interpreter.EdeltaInterpreterRuntimeException
 import edelta.interpreter.IEdeltaInterpreter
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 import edelta.tests.additional.MyCustomException
@@ -146,7 +146,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				my.aMethod()
 			}
 		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ /* will not get here */ ]
-		].isInstanceOf(EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException)
+		].isInstanceOf(EdeltaInterpreterRuntimeException)
 			.hasMessageContaining('''The type '«MyCustomEdeltaThatCannotBeLoadedAtRuntime.name»' has been resolved but cannot be loaded by the interpreter''')
 	}
 
