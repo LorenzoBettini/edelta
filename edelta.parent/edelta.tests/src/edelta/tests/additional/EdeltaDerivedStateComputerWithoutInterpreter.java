@@ -3,15 +3,11 @@
  */
 package edelta.tests.additional;
 
-import java.util.List;
-import java.util.Map;
-
-import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.xtext.common.types.JvmGenericType;
 
-import edelta.edelta.EdeltaModifyEcoreOperation;
+import edelta.edelta.EdeltaProgram;
 import edelta.resource.EdeltaDerivedStateComputer;
+import edelta.util.EdeltaCopiedEPackagesMap;
 
 /**
  * Avoids the derived state computer run the interpreter since the tests in this
@@ -24,9 +20,7 @@ import edelta.resource.EdeltaDerivedStateComputer;
 public class EdeltaDerivedStateComputerWithoutInterpreter extends EdeltaDerivedStateComputer {
 
 	@Override
-	protected void runInterpreter(Iterable<EdeltaModifyEcoreOperation> ops,
-			Map<String, EPackage> nameToCopiedEPackageMap, JvmGenericType programJvmType,
-			List<EPackage> packages) {
+	protected void runInterpreter(EdeltaProgram program, EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		// No interpreter is run
 	}
 

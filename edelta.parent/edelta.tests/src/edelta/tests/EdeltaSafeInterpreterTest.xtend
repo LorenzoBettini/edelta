@@ -2,6 +2,7 @@ package edelta.tests
 
 import com.google.inject.Inject
 import com.google.inject.Injector
+import edelta.interpreter.EdeltaInterpreterRuntimeException
 import edelta.interpreter.EdeltaSafeInterpreter
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
@@ -9,7 +10,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -60,7 +60,7 @@ class EdeltaSafeInterpreterTest extends EdeltaInterpreterTest {
 	def void testEdeltaInterpreterRuntimeExceptionIsThrown() {
 		'''
 			import org.eclipse.emf.ecore.EClass
-			import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException
+			import edelta.interpreter.EdeltaInterpreterRuntimeException
 			
 			metamodel "foo"
 			

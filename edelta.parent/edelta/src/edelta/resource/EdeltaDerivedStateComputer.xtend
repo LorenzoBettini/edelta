@@ -4,21 +4,19 @@ import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.google.inject.name.Named
 import edelta.edelta.EdeltaEcoreReferenceExpression
-import edelta.edelta.EdeltaModifyEcoreOperation
 import edelta.edelta.EdeltaProgram
 import edelta.interpreter.IEdeltaInterpreter
 import edelta.interpreter.internal.EdeltaInterpreterConfigurator
 import edelta.lib.EdeltaEcoreUtil
 import edelta.scoping.EdeltaOriginalENamedElementRecorder
 import edelta.services.IEdeltaEcoreModelAssociations
-import java.util.List
+import edelta.util.EdeltaCopiedEPackagesMap
 import java.util.Map
 import org.eclipse.emf.common.notify.impl.AdapterImpl
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.Constants
-import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader.GenericUnloader
 import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
@@ -40,7 +38,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	@Inject EdeltaOriginalENamedElementRecorder originalENamedElementRecorder
 
 	static class EdeltaDerivedStateAdapter extends AdapterImpl {
-		var Map<String, EPackage> nameToCopiedEPackageMap = newHashMap()
+		var EdeltaCopiedEPackagesMap copiedEPackagesMap = new EdeltaCopiedEPackagesMap
 
 		override boolean isAdapterForType(Object type) {
 			return EdeltaDerivedStateAdapter === type;
@@ -62,54 +60,43 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		return new EdeltaDerivedStateAdapter
 	}
 
-	def protected nameToCopiedEPackageMap(Resource resource) {
-		getOrInstallAdapter(resource).nameToCopiedEPackageMap
-	}
-
-	override copiedEPackages(Resource resource) {
-		nameToCopiedEPackageMap(resource).values
+	override getCopiedEPackagesMap(Resource resource) {
+		getOrInstallAdapter(resource).copiedEPackagesMap
 	}
 
 	override installDerivedState(DerivedStateAwareResource resource, boolean preIndexingPhase) {
 		super.installDerivedState(resource, preIndexingPhase)
 		val program = resource.contents.head as EdeltaProgram
-		val programJvmType = program.jvmElements.filter(JvmGenericType).head
 		if (!preIndexingPhase) {
 			val modifyEcoreOperations = program.modifyEcoreOperations.filter[epackage !== null]
 			if (modifyEcoreOperations.empty)
 				return
 
-			val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
+			val copiedEPackagesMap = resource.copiedEPackagesMap
 
 			for (epackage : modifyEcoreOperations.map[epackage]) {
 				// make sure packages under modification are copied
-				getOrAddDerivedStateEPackage(epackage, nameToCopiedEPackageMap)
+				getOrAddDerivedStateEPackage(epackage, copiedEPackagesMap)
 			}
 			// we must add the copied EPackages to the resource
-			resource.contents += nameToCopiedEPackageMap.values
+			resource.contents += copiedEPackagesMap.values
 			// record original ecore references before running the interpreter
 			recordEcoreReferenceOriginalENamedElement(resource)
 			// configure and run the interpreter
 			interpreterConfigurator.configureInterpreter(interpreter, resource)
-			val packages = (nameToCopiedEPackageMap.values + program.metamodels).toList
 			runInterpreter(
-				modifyEcoreOperations,
-				nameToCopiedEPackageMap,
-				programJvmType,
-				packages
+				program,
+				copiedEPackagesMap
 			)
 		}
 	}
 
-	protected def void runInterpreter(Iterable<EdeltaModifyEcoreOperation> ops,
-		Map<String, EPackage> nameToCopiedEPackageMap,
-		JvmGenericType programJvmType, List<EPackage> packages
+	protected def void runInterpreter(EdeltaProgram program,
+		EdeltaCopiedEPackagesMap copiedEPackagesMap
 	) {
-		interpreter.run(
-			ops,
-			nameToCopiedEPackageMap,
-			programJvmType,
-			packages
+		interpreter.evaluateModifyEcoreOperations(
+			program,
+			copiedEPackagesMap
 		)
 	}
 
@@ -134,7 +121,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	}
 
 	override discardDerivedState(DerivedStateAwareResource resource) {
-		val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
+		val nameToCopiedEPackageMap = resource.copiedEPackagesMap
 		unloadDerivedPackages(nameToCopiedEPackageMap)
 		super.discardDerivedState(resource)
 		nameToCopiedEPackageMap.clear

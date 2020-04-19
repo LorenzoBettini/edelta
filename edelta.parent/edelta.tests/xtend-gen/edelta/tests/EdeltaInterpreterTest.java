@@ -1,31 +1,28 @@
 package edelta.tests;
 
-import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaPackage;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreter;
-import edelta.interpreter.EdeltaSafeInterpreter;
+import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.interpreter.IEdeltaInterpreter;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime;
 import edelta.tests.additional.MyCustomException;
+import edelta.util.EdeltaCopiedEPackagesMap;
 import edelta.validation.EdeltaValidator;
-import java.util.List;
 import java.util.Map;
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtend2.lib.StringConcatenation;
-import org.eclipse.xtext.common.types.JvmGenericType;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
@@ -215,7 +212,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       };
       this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, false, _function_1);
     };
-    AbstractThrowableAssert<?, ? extends Throwable> _isInstanceOf = Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException.class);
+    AbstractThrowableAssert<?, ? extends Throwable> _isInstanceOf = Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaInterpreterRuntimeException.class);
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("The type \'");
     String _name = MyCustomEdeltaThatCannotBeLoadedAtRuntime.class.getName();
@@ -715,17 +712,14 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   
   private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final IEdeltaInterpreter interpreter, final EdeltaProgram program, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
     final EdeltaModifyEcoreOperation it = this.lastModifyEcoreOperation(program);
-    Iterable<EPackage> _copiedEPackages = this.getCopiedEPackages(program);
-    EList<EPackage> _metamodels = program.getMetamodels();
-    final List<EPackage> packages = IterableExtensions.<EPackage>toList(Iterables.<EPackage>concat(_copiedEPackages, _metamodels));
     final Function1<EPackage, String> _function = (EPackage it_1) -> {
       return it_1.getName();
     };
-    final Map<String, EPackage> nameToCopiedEPackagesMap = IterableExtensions.<String, EPackage>toMap(this.getCopiedEPackages(it), _function);
-    final JvmGenericType inferredJavaClass = IterableExtensions.<JvmGenericType>head(Iterables.<JvmGenericType>filter(this._iJvmModelAssociations.getJvmElements(program), JvmGenericType.class));
-    interpreter.run(program.getModifyEcoreOperations(), nameToCopiedEPackagesMap, inferredJavaClass, packages);
+    Map<String, EPackage> _map = IterableExtensions.<String, EPackage>toMap(this.getCopiedEPackages(it), _function);
+    final EdeltaCopiedEPackagesMap copiedEPackagesMap = new EdeltaCopiedEPackagesMap(_map);
+    interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap);
     final String packageName = it.getEpackage().getName();
-    final EPackage epackage = nameToCopiedEPackagesMap.get(packageName);
+    final EPackage epackage = copiedEPackagesMap.get(packageName);
     testExecutor.apply(epackage);
   }
 }

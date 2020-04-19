@@ -5,13 +5,13 @@ import com.google.inject.Inject;
 import edelta.edelta.EdeltaEcoreQualifiedReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
-import edelta.interpreter.EdeltaSafeInterpreter;
+import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.resource.EdeltaDerivedStateComputer;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderTestableDerivedStateComputer;
 import edelta.tests.additional.TestableEdeltaDerivedStateComputer;
+import edelta.util.EdeltaCopiedEPackagesMap;
 import java.util.Collection;
-import java.util.Map;
 import java.util.function.Predicate;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
@@ -89,7 +89,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     _builder.append("modifyEcore aTest2 epackage bar {}");
     _builder.newLine();
     final EdeltaProgram program = this.parseWithTestEcores(_builder);
-    final Collection<EPackage> packages = this._testableEdeltaDerivedStateComputer.copiedEPackages(program.eResource());
+    final Collection<EPackage> packages = this._testableEdeltaDerivedStateComputer.getCopiedEPackagesMap(program.eResource()).values();
     final ThrowingExtractor<EPackage, String, Exception> _function = (EPackage it) -> {
       return it.getName();
     };
@@ -125,7 +125,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     _builder.append("modifyEcore aTest1 epackage foo {}");
     _builder.newLine();
     final EdeltaProgram program = this.parseWithTestEcore(_builder);
-    final Collection<EPackage> packages = this._testableEdeltaDerivedStateComputer.copiedEPackages(program.eResource());
+    final Collection<EPackage> packages = this._testableEdeltaDerivedStateComputer.getCopiedEPackagesMap(program.eResource()).values();
     final Predicate<EPackage> _function = (EPackage p) -> {
       return p.eIsProxy();
     };
@@ -228,7 +228,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     final EdeltaProgram program = this.parseWithTestEcore(_builder);
     Resource _eResource = program.eResource();
     final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
-    final Map<String, EPackage> nameToCopiedEPackageMap = this._testableEdeltaDerivedStateComputer.nameToCopiedEPackageMap(resource);
+    final EdeltaCopiedEPackagesMap nameToCopiedEPackageMap = this._testableEdeltaDerivedStateComputer.getCopiedEPackagesMap(resource);
     Assert.assertFalse(resource.eAdapters().isEmpty());
     Assert.assertFalse(nameToCopiedEPackageMap.isEmpty());
     EList<Adapter> _eAdapters = IterableExtensions.<EPackage>head(nameToCopiedEPackageMap.values()).eAdapters();
@@ -267,7 +267,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     final EdeltaProgram program = this.parseWithTestEcore(_builder);
     Resource _eResource = program.eResource();
     final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
-    final Map<String, EPackage> nameToCopiedEPackageMap = this._testableEdeltaDerivedStateComputer.nameToCopiedEPackageMap(resource);
+    final EdeltaCopiedEPackagesMap nameToCopiedEPackageMap = this._testableEdeltaDerivedStateComputer.getCopiedEPackagesMap(resource);
     Assert.assertFalse(resource.eAdapters().isEmpty());
     Assert.assertFalse(nameToCopiedEPackageMap.isEmpty());
     program.getModifyEcoreOperations().clear();
@@ -424,7 +424,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
       EClassifier _head = IterableExtensions.<EClassifier>head(IterableExtensions.<EPackage>head(program.getMetamodels()).getEClassifiers());
       _head.setName("bar");
     };
-    Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException.class).hasMessageContaining("Unexpected notification");
+    Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaInterpreterRuntimeException.class).hasMessageContaining("Unexpected notification");
   }
   
   @Test

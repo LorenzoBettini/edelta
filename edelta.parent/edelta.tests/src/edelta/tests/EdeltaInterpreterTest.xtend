@@ -5,14 +5,15 @@ import com.google.inject.Injector
 import edelta.edelta.EdeltaPackage
 import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreter
-import edelta.interpreter.EdeltaSafeInterpreter
+import edelta.interpreter.EdeltaInterpreter.EdeltaInterpreterWrapperException
+import edelta.interpreter.EdeltaInterpreterRuntimeException
 import edelta.interpreter.IEdeltaInterpreter
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 import edelta.tests.additional.MyCustomException
+import edelta.util.EdeltaCopiedEPackagesMap
 import edelta.validation.EdeltaValidator
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EPackage
-import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Before
@@ -21,7 +22,6 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
-import edelta.interpreter.EdeltaInterpreter.EdeltaInterpreterWrapperException
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -146,7 +146,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				my.aMethod()
 			}
 		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ /* will not get here */ ]
-		].isInstanceOf(EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException)
+		].isInstanceOf(EdeltaInterpreterRuntimeException)
 			.hasMessageContaining('''The type '«MyCustomEdeltaThatCannotBeLoadedAtRuntime.name»' has been resolved but cannot be loaded by the interpreter''')
 	}
 
@@ -483,14 +483,11 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		val it = program.lastModifyEcoreOperation
 		// mimic the behavior of derived state computer that runs the interpreter
 		// on copied EPackages, not on the original ones
-		val packages = (program.copiedEPackages + program.metamodels).toList
-		val nameToCopiedEPackagesMap = copiedEPackages.toMap[name]
-		val inferredJavaClass = program.jvmElements.filter(JvmGenericType).head
-		interpreter.run(program.modifyEcoreOperations,
-			nameToCopiedEPackagesMap, inferredJavaClass, packages
-		)
+		val copiedEPackagesMap =
+			new EdeltaCopiedEPackagesMap(copiedEPackages.toMap[name])
+		interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap)
 		val packageName = it.epackage.name
-		val epackage = nameToCopiedEPackagesMap.get(packageName)
+		val epackage = copiedEPackagesMap.get(packageName)
 		testExecutor.apply(epackage)
 	}
 

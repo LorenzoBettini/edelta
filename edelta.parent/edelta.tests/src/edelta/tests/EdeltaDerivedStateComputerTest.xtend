@@ -4,7 +4,7 @@ import com.google.inject.Inject
 import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaProgram
-import edelta.interpreter.EdeltaSafeInterpreter.EdeltaInterpreterRuntimeException
+import edelta.interpreter.EdeltaInterpreterRuntimeException
 import edelta.resource.EdeltaDerivedStateComputer.EdeltaDerivedStateAdapter
 import edelta.tests.additional.TestableEdeltaDerivedStateComputer
 import org.eclipse.emf.common.notify.impl.AdapterImpl
@@ -63,7 +63,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		modifyEcore aTest2 epackage bar {}
 		'''.
 		parseWithTestEcores
-		val packages = program.eResource.copiedEPackages
+		val packages = program.eResource.copiedEPackagesMap.values
 		assertThat(packages)
 			.extracting([name])
 			.containsExactlyInAnyOrder("foo", "bar")
@@ -94,7 +94,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		modifyEcore aTest1 epackage foo {}
 		'''.
 		parseWithTestEcore
-		val packages = program.eResource.copiedEPackages
+		val packages = program.eResource.copiedEPackagesMap.values
 		assertThat(packages)
 			.hasSize(1)
 			.allMatch[p | p.eIsProxy]
@@ -179,7 +179,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		parseWithTestEcore
 		val resource = program.eResource as DerivedStateAwareResource
 		// val derivedToSourceMap = resource.derivedToSourceMap
-		val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
+		val nameToCopiedEPackageMap = resource.copiedEPackagesMap
 		assertFalse(resource.eAdapters.empty)
 		// assertFalse(derivedToSourceMap.empty)
 		assertFalse(nameToCopiedEPackageMap.empty)
@@ -210,7 +210,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		parseWithTestEcore
 		val resource = program.eResource as DerivedStateAwareResource
 		// val derivedToSourceMap = resource.derivedToSourceMap
-		val nameToCopiedEPackageMap = resource.nameToCopiedEPackageMap
+		val nameToCopiedEPackageMap = resource.copiedEPackagesMap
 		// val opToEClassMap = resource.opToEClassMap
 		assertFalse(resource.eAdapters.empty)
 		// assertFalse(derivedToSourceMap.empty)
