@@ -60,12 +60,8 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		return new EdeltaDerivedStateAdapter
 	}
 
-	def protected copiedEPackagesMap(Resource resource) {
+	override getCopiedEPackagesMap(Resource resource) {
 		getOrInstallAdapter(resource).copiedEPackagesMap
-	}
-
-	override copiedEPackages(Resource resource) {
-		copiedEPackagesMap(resource).values
 	}
 
 	override installDerivedState(DerivedStateAwareResource resource, boolean preIndexingPhase) {

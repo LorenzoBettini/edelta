@@ -63,7 +63,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		modifyEcore aTest2 epackage bar {}
 		'''.
 		parseWithTestEcores
-		val packages = program.eResource.copiedEPackages
+		val packages = program.eResource.copiedEPackagesMap.values
 		assertThat(packages)
 			.extracting([name])
 			.containsExactlyInAnyOrder("foo", "bar")
@@ -94,7 +94,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		modifyEcore aTest1 epackage foo {}
 		'''.
 		parseWithTestEcore
-		val packages = program.eResource.copiedEPackages
+		val packages = program.eResource.copiedEPackagesMap.values
 		assertThat(packages)
 			.hasSize(1)
 			.allMatch[p | p.eIsProxy]

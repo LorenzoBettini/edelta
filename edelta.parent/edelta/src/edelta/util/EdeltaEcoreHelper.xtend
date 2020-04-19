@@ -44,7 +44,7 @@ class EdeltaEcoreHelper {
 		// we also must explicitly consider the copied elements for interpreting without
 		// breaking the original EMF package registries classes
 		(
-			prog.eResource.copiedEPackages
+			prog.eResource.copiedEPackagesMap.values
 		+
 			prog.metamodels
 		)
@@ -109,7 +109,7 @@ class EdeltaEcoreHelper {
 		val ePackageName = ePackage.name
 		val imported = getProgram(context).metamodels.getByName(ePackageName)
 		if (includeCopiedEPackages) {
-			val copiedEPackage = context.eResource.copiedEPackages.getByName(ePackageName)
+			val copiedEPackage = context.eResource.copiedEPackagesMap.get(ePackageName)
 			if (copiedEPackage !== null) 
 				// there'll also be copied epackages
 				return (

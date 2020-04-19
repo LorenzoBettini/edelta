@@ -27,7 +27,7 @@ class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		for (o : p.modifyEcoreOperations) {
 			createNode(parentNode, o)
 		}
-		for (derived : p.eResource.copiedEPackages) {
+		for (derived : p.eResource.copiedEPackagesMap.values) {
 			// the cool thing is that we don't need to provide
 			// customization in the label provider for EPackage and EClass
 			// since Xtext defaults to the .edit plugin :)

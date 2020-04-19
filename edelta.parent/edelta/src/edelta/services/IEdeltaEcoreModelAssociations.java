@@ -3,12 +3,11 @@
  */
 package edelta.services;
 
-import java.util.Collection;
-
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.resource.IDerivedStateComputer;
+
+import edelta.util.EdeltaCopiedEPackagesMap;
 
 /**
  * Facade to mappings between source elements, i.e. the EObjects parsed from the
@@ -21,7 +20,7 @@ import org.eclipse.xtext.resource.IDerivedStateComputer;
  */
 public interface IEdeltaEcoreModelAssociations {
 
-	Collection<EPackage> copiedEPackages(Resource resource);
+	EdeltaCopiedEPackagesMap getCopiedEPackagesMap(Resource resource);
 
 	EObject getPrimarySourceElement(EObject jvmElement);
 }
