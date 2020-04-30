@@ -37,6 +37,23 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testProgramENamedElementsWithSubPackages() {
+		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage.
+			getProgramENamedElements.
+			assertNamedElements(
+				'''
+				MainFooClass
+				MainFooDataType
+				MainFooEnum
+				myAttribute
+				myReference
+				FooEnumLiteral
+				mainpackage
+				'''
+			)
+	}
+
+	@Test
 	def void testProgramWithCreatedEClassENamedElements() {
 		referenceToCreatedEClass.parseWithTestEcore => [
 			getProgramENamedElements.
