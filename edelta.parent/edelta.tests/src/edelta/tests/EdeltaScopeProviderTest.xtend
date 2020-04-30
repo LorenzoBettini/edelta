@@ -75,19 +75,29 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testScopeForEnamedElementWithSubPackageInProgram() {
+		// MyClass with myClassAttribute
+		// is present in the package and in subpackages
+		// so it appears several times
 		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
 			MainFooClass
 			MainFooDataType
 			MainFooEnum
+			MyClass
 			myAttribute
 			myReference
 			FooEnumLiteral
+			myClassAttribute
 			mainsubpackage
 			MainSubPackageFooClass
+			MyClass
 			mySubPackageAttribute
 			mySubPackageReference
+			myClassAttribute
+			subsubpackage
+			MyClass
+			myClassAttribute
 			mainpackage
 			''')
 	}

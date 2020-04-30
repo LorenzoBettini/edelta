@@ -322,36 +322,87 @@ public abstract class EdeltaAbstractTest {
       };
       EEnum _doubleArrow_2 = ObjectExtensions.<EEnum>operator_doubleArrow(_createEEnum, _function_3);
       _eClassifiers_2.add(_doubleArrow_2);
+      EList<EClassifier> _eClassifiers_3 = mainPackage.getEClassifiers();
+      EClass _createEClass_1 = EcoreFactory.eINSTANCE.createEClass();
+      final Procedure1<EClass> _function_4 = (EClass it) -> {
+        it.setName("MyClass");
+        EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
+        EAttribute _createEAttribute = EcoreFactory.eINSTANCE.createEAttribute();
+        final Procedure1<EAttribute> _function_5 = (EAttribute it_1) -> {
+          it_1.setName("myClassAttribute");
+        };
+        EAttribute _doubleArrow_3 = ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_5);
+        _eStructuralFeatures.add(_doubleArrow_3);
+      };
+      EClass _doubleArrow_3 = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_4);
+      _eClassifiers_3.add(_doubleArrow_3);
       EList<EPackage> _eSubpackages = mainPackage.getESubpackages();
       EPackage _createEPackage_1 = EcoreFactory.eINSTANCE.createEPackage();
-      final Procedure1<EPackage> _function_4 = (EPackage it) -> {
+      final Procedure1<EPackage> _function_5 = (EPackage it) -> {
         it.setName("mainsubpackage");
         it.setNsPrefix("mainsubpackage");
         it.setNsURI("http://mainsubpackage");
-        EList<EClassifier> _eClassifiers_3 = it.getEClassifiers();
-        EClass _createEClass_1 = EcoreFactory.eINSTANCE.createEClass();
-        final Procedure1<EClass> _function_5 = (EClass it_1) -> {
+        EList<EClassifier> _eClassifiers_4 = it.getEClassifiers();
+        EClass _createEClass_2 = EcoreFactory.eINSTANCE.createEClass();
+        final Procedure1<EClass> _function_6 = (EClass it_1) -> {
           it_1.setName("MainSubPackageFooClass");
           EList<EStructuralFeature> _eStructuralFeatures = it_1.getEStructuralFeatures();
           EAttribute _createEAttribute = EcoreFactory.eINSTANCE.createEAttribute();
-          final Procedure1<EAttribute> _function_6 = (EAttribute it_2) -> {
+          final Procedure1<EAttribute> _function_7 = (EAttribute it_2) -> {
             it_2.setName("mySubPackageAttribute");
           };
-          EAttribute _doubleArrow_3 = ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_6);
-          _eStructuralFeatures.add(_doubleArrow_3);
+          EAttribute _doubleArrow_4 = ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_7);
+          _eStructuralFeatures.add(_doubleArrow_4);
           EList<EStructuralFeature> _eStructuralFeatures_1 = it_1.getEStructuralFeatures();
           EReference _createEReference = EcoreFactory.eINSTANCE.createEReference();
-          final Procedure1<EReference> _function_7 = (EReference it_2) -> {
+          final Procedure1<EReference> _function_8 = (EReference it_2) -> {
             it_2.setName("mySubPackageReference");
           };
-          EReference _doubleArrow_4 = ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_7);
-          _eStructuralFeatures_1.add(_doubleArrow_4);
+          EReference _doubleArrow_5 = ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_8);
+          _eStructuralFeatures_1.add(_doubleArrow_5);
         };
-        EClass _doubleArrow_3 = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_5);
-        _eClassifiers_3.add(_doubleArrow_3);
+        EClass _doubleArrow_4 = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_2, _function_6);
+        _eClassifiers_4.add(_doubleArrow_4);
+        EList<EClassifier> _eClassifiers_5 = it.getEClassifiers();
+        EClass _createEClass_3 = EcoreFactory.eINSTANCE.createEClass();
+        final Procedure1<EClass> _function_7 = (EClass it_1) -> {
+          it_1.setName("MyClass");
+          EList<EStructuralFeature> _eStructuralFeatures = it_1.getEStructuralFeatures();
+          EAttribute _createEAttribute = EcoreFactory.eINSTANCE.createEAttribute();
+          final Procedure1<EAttribute> _function_8 = (EAttribute it_2) -> {
+            it_2.setName("myClassAttribute");
+          };
+          EAttribute _doubleArrow_5 = ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_8);
+          _eStructuralFeatures.add(_doubleArrow_5);
+        };
+        EClass _doubleArrow_5 = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_3, _function_7);
+        _eClassifiers_5.add(_doubleArrow_5);
+        EList<EPackage> _eSubpackages_1 = it.getESubpackages();
+        EPackage _createEPackage_2 = EcoreFactory.eINSTANCE.createEPackage();
+        final Procedure1<EPackage> _function_8 = (EPackage it_1) -> {
+          it_1.setName("subsubpackage");
+          it_1.setNsPrefix("subsubpackage");
+          it_1.setNsURI("http://subsubpackage");
+          EList<EClassifier> _eClassifiers_6 = it_1.getEClassifiers();
+          EClass _createEClass_4 = EcoreFactory.eINSTANCE.createEClass();
+          final Procedure1<EClass> _function_9 = (EClass it_2) -> {
+            it_2.setName("MyClass");
+            EList<EStructuralFeature> _eStructuralFeatures = it_2.getEStructuralFeatures();
+            EAttribute _createEAttribute = EcoreFactory.eINSTANCE.createEAttribute();
+            final Procedure1<EAttribute> _function_10 = (EAttribute it_3) -> {
+              it_3.setName("myClassAttribute");
+            };
+            EAttribute _doubleArrow_6 = ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_10);
+            _eStructuralFeatures.add(_doubleArrow_6);
+          };
+          EClass _doubleArrow_6 = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_4, _function_9);
+          _eClassifiers_6.add(_doubleArrow_6);
+        };
+        EPackage _doubleArrow_6 = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage_2, _function_8);
+        _eSubpackages_1.add(_doubleArrow_6);
       };
-      EPackage _doubleArrow_3 = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage_1, _function_4);
-      _eSubpackages.add(_doubleArrow_3);
+      EPackage _doubleArrow_4 = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage_1, _function_5);
+      _eSubpackages.add(_doubleArrow_4);
       _xblockexpression = mainPackage;
     }
     return _xblockexpression;

@@ -186,6 +186,12 @@ abstract class EdeltaAbstractTest {
 				name = "FooEnumLiteral"
 			]
 		]
+		mainPackage.EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
+			name = "MyClass" // this is present also in subpackages with the same name
+			EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
+				name = "myClassAttribute"
+			]
+		]
 		mainPackage.ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
 			name = "mainsubpackage"
 			nsPrefix = "mainsubpackage"
@@ -197,6 +203,23 @@ abstract class EdeltaAbstractTest {
 				]
 				EStructuralFeatures += EcoreFactory.eINSTANCE.createEReference => [
 					name = "mySubPackageReference"
+				]
+			]
+			EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
+				name = "MyClass" // this is present also in subpackages with the same name
+				EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
+					name = "myClassAttribute"
+				]
+			]
+			ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
+				name = "subsubpackage"
+				nsPrefix = "subsubpackage"
+				nsURI = "http://subsubpackage"
+				EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
+					name = "MyClass" // this is present also in subpackages with the same name
+					EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
+						name = "myClassAttribute"
+					]
 				]
 			]
 		]

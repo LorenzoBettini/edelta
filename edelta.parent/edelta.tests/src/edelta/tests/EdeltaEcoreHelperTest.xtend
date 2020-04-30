@@ -38,6 +38,9 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testProgramENamedElementsWithSubPackages() {
+		// MyClass with myClassAttribute
+		// is present in the package and in subpackages
+		// so it appears several times
 		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage.
 			getProgramENamedElements.
 			assertNamedElements(
@@ -45,13 +48,20 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				MainFooClass
 				MainFooDataType
 				MainFooEnum
+				MyClass
 				myAttribute
 				myReference
 				FooEnumLiteral
+				myClassAttribute
 				mainsubpackage
 				MainSubPackageFooClass
+				MyClass
 				mySubPackageAttribute
 				mySubPackageReference
+				myClassAttribute
+				subsubpackage
+				MyClass
+				myClassAttribute
 				mainpackage
 				'''
 			)
