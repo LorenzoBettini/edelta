@@ -84,6 +84,10 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			myAttribute
 			myReference
 			FooEnumLiteral
+			mainsubpackage
+			MainSubPackageFooClass
+			mySubPackageAttribute
+			mySubPackageReference
 			mainpackage
 			''')
 	}

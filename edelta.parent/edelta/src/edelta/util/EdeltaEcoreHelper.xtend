@@ -31,7 +31,7 @@ class EdeltaEcoreHelper {
 
 	def private Iterable<? extends ENamedElement> getProgramENamedElementsInternal(EObject context) {
 		val prog = getProgram(context)
-		val epackages = getProgramEPackages(context)
+		val epackages = getProgramTopLevelEPackages(context)
 		(
 			epackages.map[getAllENamedElements].flatten
 		+
@@ -39,7 +39,7 @@ class EdeltaEcoreHelper {
 		).toList
 	}
 
-	def private Iterable<? extends EPackage> getProgramEPackages(EObject context) {
+	def private Iterable<? extends EPackage> getProgramTopLevelEPackages(EObject context) {
 		val prog = getProgram(context)
 		// we also must explicitly consider the copied elements for interpreting without
 		// breaking the original EMF package registries classes
@@ -50,6 +50,10 @@ class EdeltaEcoreHelper {
 		)
 	}
 
+	/**
+	 * Returns all ENamedElements of the passed EPackage, recursively,
+	 * including subpackages and getAllENamedElements on each subpackage
+	 */
 	def private Iterable<ENamedElement> getAllENamedElements(EPackage e) {
 		val classifiers = e.EClassifiers
 		val inner = classifiers.map[
@@ -63,7 +67,8 @@ class EdeltaEcoreHelper {
 				default: <ENamedElement>emptyList
 			}
 		].flatten
-		classifiers + inner
+		classifiers + inner + e.ESubpackages +
+			e.ESubpackages.map[getAllENamedElements].flatten
 	}
 
 	def getAllEClasses(EPackage e) {

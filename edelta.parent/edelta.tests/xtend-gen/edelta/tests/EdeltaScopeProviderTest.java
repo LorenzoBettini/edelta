@@ -117,6 +117,14 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("FooEnumLiteral");
     _builder.newLine();
+    _builder.append("mainsubpackage");
+    _builder.newLine();
+    _builder.append("MainSubPackageFooClass");
+    _builder.newLine();
+    _builder.append("mySubPackageAttribute");
+    _builder.newLine();
+    _builder.append("mySubPackageReference");
+    _builder.newLine();
     _builder.append("mainpackage");
     _builder.newLine();
     this.assertScope(_parseWithTestEcoreWithSubPackage, _edeltaEcoreReference_Enamedelement, _builder);
