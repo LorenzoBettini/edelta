@@ -312,7 +312,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testCreateEClass() throws IOException {
+	public void testCreateEClass() {
 		loadTestEcore(MY_ECORE);
 		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
 		assertNull(ePackage.getEClassifier("NewClass"));
@@ -321,7 +321,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testCreateEClassLaterInitialization() throws IOException {
+	public void testCreateEClassLaterInitialization() {
 		loadTestEcore(MY_ECORE);
 		// refers to an EClass that is created later
 		EClass newClass1 = edelta.createEClass(MYPACKAGE, "NewClass1",
@@ -339,7 +339,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testChangeEClass() throws IOException {
+	public void testChangeEClass() {
 		loadTestEcore(MY_ECORE);
 		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
 		assertNotNull(ePackage.getEClassifier(MY_CLASS));
@@ -348,7 +348,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testChangeEClassLaterInitialization() throws IOException {
+	public void testChangeEClassLaterInitialization() {
 		loadTestEcore(MY_ECORE);
 		// refers to an EClass that is created later
 		EClass cl1 = edelta.changeEClass(MYPACKAGE, MY_CLASS,
@@ -366,7 +366,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testCreateEAttribute() throws IOException {
+	public void testCreateEAttribute() {
 		loadTestEcore(MY_ECORE);
 		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
 		EClass eClass = (EClass) ePackage.getEClassifier(MY_CLASS);
@@ -376,7 +376,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testCreateEAttributeLaterInitialization() throws IOException {
+	public void testCreateEAttributeLaterInitialization() {
 		loadTestEcore(MY_ECORE);
 		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
 		EClass eClass = (EClass) ePackage.getEClassifier(MY_CLASS);
@@ -396,7 +396,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testRemoveEClassifier() throws IOException {
+	public void testRemoveEClassifier() {
 		loadTestEcore(MY_ECORE);
 		// check that the superclass is set
 		assertSame(
@@ -409,7 +409,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testRenameEClassifier() throws IOException {
+	public void testRenameEClassifier() {
 		loadTestEcore(MY_ECORE);
 		// check that the superclass is set
 		assertSame(
@@ -438,7 +438,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testCopyEClassifier() throws IOException {
+	public void testCopyEClassifier() {
 		loadTestEcore(MY_ECORE);
 		// modify the ecore model by copying MyBaseClass
 		EClass original = edelta.getEClass(MYPACKAGE, "MyDerivedClass");
@@ -459,7 +459,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testCopyEClassifierDoesNotResolveProxies() throws IOException {
+	public void testCopyEClassifierDoesNotResolveProxies() {
 		// We use EGenericType for playing with references and proxies, since using
 		// EClass.superTypes for that does not seem to be easy...
 		loadTestEcore(TEST_ECORE_FOR_REFERENCES);
@@ -486,7 +486,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testCopyEClassifierForEOppositeReferenceDoesNotWork() throws IOException {
+	public void testCopyEClassifierForEOppositeReferenceDoesNotWork() {
 		loadTestEcore(TEST_ECORE_FOR_REFERENCES);
 		EPackage original = edelta.getEPackage(TEST_PACKAGE_FOR_REFERENCES);
 		EClass person = getEClassByName(original.getEClassifiers(), "Person");
@@ -510,7 +510,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testCopyEClassifierForEOppositeReferenceWorksWhenEPackageIsCopied() throws IOException {
+	public void testCopyEClassifierForEOppositeReferenceWorksWhenEPackageIsCopied() {
 		loadTestEcore(TEST_ECORE_FOR_REFERENCES);
 		EPackage original = edelta.getEPackage(TEST_PACKAGE_FOR_REFERENCES);
 		EClass person = getEClassByName(original.getEClassifiers(), "Person");
@@ -522,8 +522,8 @@ public class EdeltaTest {
 		// and that is good for us!
 		EPackage another = EdeltaEcoreUtil.copyENamedElement(original);
 		another.setName(TEST_PACKAGE_FOR_REFERENCES);
-		person = (EClass) getEClassByName(another.getEClassifiers(), "Person");
-		workplace = (EClass) getEClassByName(another.getEClassifiers(), "WorkPlace");
+		person = getEClassByName(another.getEClassifiers(), "Person");
+		workplace = getEClassByName(another.getEClassifiers(), "WorkPlace");
 		works = getEReferenceByName(person.getEStructuralFeatures(), "works");
 		persons = getEReferenceByName(workplace.getEStructuralFeatures(), "persons");
 		assertSame(works.getEOpposite(), persons);
