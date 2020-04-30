@@ -101,6 +101,28 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testScopeForEnamedElementWithSubPackageInProgram() {
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(this._inputs.referenceToMetamodelWithSubPackage());
+    EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("MainFooClass");
+    _builder.newLine();
+    _builder.append("MainFooDataType");
+    _builder.newLine();
+    _builder.append("MainFooEnum");
+    _builder.newLine();
+    _builder.append("myAttribute");
+    _builder.newLine();
+    _builder.append("myReference");
+    _builder.newLine();
+    _builder.append("FooEnumLiteral");
+    _builder.newLine();
+    _builder.append("mainpackage");
+    _builder.newLine();
+    this.assertScope(_parseWithTestEcoreWithSubPackage, _edeltaEcoreReference_Enamedelement, _builder);
+  }
+  
+  @Test
   public void testScopeForEnamedElementInEcoreReferenceExpression() {
     EdeltaEcoreReferenceExpression _ecoreReferenceExpression = this.ecoreReferenceExpression("ecoreref");
     EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();

@@ -74,6 +74,21 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testScopeForEnamedElementWithSubPackageInProgram() {
+		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			MainFooClass
+			MainFooDataType
+			MainFooEnum
+			myAttribute
+			myReference
+			FooEnumLiteral
+			mainpackage
+			''')
+	}
+
+	@Test
 	def void testScopeForEnamedElementInEcoreReferenceExpression() {
 		"ecoreref".ecoreReferenceExpression.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
