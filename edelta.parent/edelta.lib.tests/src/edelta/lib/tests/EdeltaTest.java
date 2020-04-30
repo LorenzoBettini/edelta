@@ -494,7 +494,7 @@ public class EdeltaTest {
 		EReference works = getEReferenceByName(person.getEStructuralFeatures(), "works");
 		EReference persons = getEReferenceByName(workplace.getEStructuralFeatures(), "persons");
 		assertSame(works.getEOpposite(), persons);
-		// perform copy and EOpposite referes to the original opposite
+		// perform copy and EOpposite refers to the original opposite
 		// and that is bad for us!
 		EPackage another = EcoreFactory.eINSTANCE.createEPackage();
 		another.setName(TEST_PACKAGE_FOR_REFERENCES);
@@ -518,8 +518,8 @@ public class EdeltaTest {
 		EReference works = getEReferenceByName(person.getEStructuralFeatures(), "works");
 		EReference persons = getEReferenceByName(workplace.getEStructuralFeatures(), "persons");
 		assertSame(works.getEOpposite(), persons);
-		// perform copy and EOpposite referes to the original opposite
-		// and that is bad for us!
+		// perform copy and EOpposite refers to the copied opposite
+		// and that is good for us!
 		EPackage another = EdeltaEcoreUtil.copyENamedElement(original);
 		another.setName(TEST_PACKAGE_FOR_REFERENCES);
 		person = (EClass) getEClassByName(another.getEClassifiers(), "Person");
