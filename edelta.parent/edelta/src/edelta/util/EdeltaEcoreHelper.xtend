@@ -148,6 +148,10 @@ class EdeltaEcoreHelper {
 		findEPackageByNameInRootEPackagesRecursive(roots, p, newHashSet)
 	}
 
+	/**
+	 * Also handles possible loops in the super package relation,
+	 * simply returning the package in case it has already been visited.
+	 */
 	def private EPackage findEPackageByNameInRootEPackagesRecursive(
 		Iterable<EPackage> roots, EPackage p, Set<EPackage> seen
 	) {

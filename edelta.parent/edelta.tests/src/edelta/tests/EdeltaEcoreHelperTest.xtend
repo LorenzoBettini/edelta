@@ -173,6 +173,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				mainpackage
 				'''
 			)
+			// it simply returns the first package of the loop
 		]
 	}
 
