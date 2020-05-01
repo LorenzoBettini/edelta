@@ -5,6 +5,7 @@ import edelta.edelta.EdeltaProgram;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderCustom;
 import edelta.util.EdeltaEcoreHelper;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
@@ -204,6 +205,29 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
         IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>head(this.getEPackageByName(it, "mainpackage").getESubpackages()).getESubpackages()), it);
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("MyClass");
+      _builder.newLine();
+      this.assertNamedElements(_eNamedElements, _builder);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
+  }
+  
+  @Test
+  public void testEPackageENamedElementsWithLoopInSubPackages() {
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(this._inputs.referenceToMetamodelWithSubPackage());
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      final EPackage mainpackage = this.getEPackageByName(it, "mainpackage");
+      final EPackage subsubpackage = IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>head(mainpackage.getESubpackages()).getESubpackages());
+      EList<EPackage> _eSubpackages = subsubpackage.getESubpackages();
+      _eSubpackages.add(mainpackage);
+      Iterable<? extends ENamedElement> _eNamedElements = this._edeltaEcoreHelper.getENamedElements(subsubpackage, it);
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("MyClass");
+      _builder.newLine();
+      _builder.append("mainpackage");
+      _builder.newLine();
+      _builder.append("MyClass");
+      _builder.newLine();
+      _builder.append("mainpackage");
       _builder.newLine();
       this.assertNamedElements(_eNamedElements, _builder);
     };

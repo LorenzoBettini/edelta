@@ -4,9 +4,9 @@ import com.google.inject.Inject
 import edelta.util.EdeltaEcoreHelper
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
+import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.Assert
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -150,6 +150,27 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			assertNamedElements(
 				'''
 				MyClass
+				'''
+			)
+		]
+	}
+
+	@Test
+	def void testEPackageENamedElementsWithLoopInSubPackages() {
+		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
+			val mainpackage = getEPackageByName("mainpackage")
+			val subsubpackage = mainpackage
+								.ESubpackages.head
+								.ESubpackages.head
+			// simulate the loop in the package relation
+			subsubpackage.ESubpackages += mainpackage
+			getENamedElements(subsubpackage, it).
+			assertNamedElements(
+				'''
+				MyClass
+				mainpackage
+				MyClass
+				mainpackage
 				'''
 			)
 		]

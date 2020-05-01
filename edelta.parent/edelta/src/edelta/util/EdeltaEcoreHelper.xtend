@@ -9,6 +9,7 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.util.IResourceScopeCache
 import java.util.List
+import java.util.Set
 
 /**
  * Helper methods for accessing Ecore elements.
@@ -144,10 +145,20 @@ class EdeltaEcoreHelper {
 	 * in the given EPackages, possibly by inspecting the super package relation.
 	 */
 	def EPackage findEPackageByNameInRootEPackages(Iterable<EPackage> roots, EPackage p) {
+		findEPackageByNameInRootEPackagesRecursive(roots, p, newHashSet)
+	}
+
+	def private EPackage findEPackageByNameInRootEPackagesRecursive(
+		Iterable<EPackage> roots, EPackage p, Set<EPackage> seen
+	) {
 		if (p.ESuperPackage === null) {
 			return roots.getByName(p.name)
 		} else {
-			val foundSuperPackage = findEPackageByNameInRootEPackages(roots, p.ESuperPackage)
+			if (seen.contains(p))
+				return p // avoid loop
+			seen.add(p)
+			val foundSuperPackage =
+				findEPackageByNameInRootEPackagesRecursive(roots, p.ESuperPackage, seen)
 			// it might not be found (e.g., in copied EPackages)
 			if (foundSuperPackage === null)
 				return null
