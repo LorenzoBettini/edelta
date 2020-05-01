@@ -143,6 +143,172 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testScopeForEnamedElementInEcoreReferenceExpressionWithSubPackages() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaEcoreReference _reference = this.lastEcoreReferenceExpression(this.parseWithTestEcoreWithSubPackage(_builder)).getReference();
+    EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("MainFooClass");
+    _builder_1.newLine();
+    _builder_1.append("MainFooDataType");
+    _builder_1.newLine();
+    _builder_1.append("MainFooEnum");
+    _builder_1.newLine();
+    _builder_1.append("MyClass");
+    _builder_1.newLine();
+    _builder_1.append("myAttribute");
+    _builder_1.newLine();
+    _builder_1.append("myReference");
+    _builder_1.newLine();
+    _builder_1.append("FooEnumLiteral");
+    _builder_1.newLine();
+    _builder_1.append("myClassAttribute");
+    _builder_1.newLine();
+    _builder_1.append("mainsubpackage");
+    _builder_1.newLine();
+    _builder_1.append("MainSubPackageFooClass");
+    _builder_1.newLine();
+    _builder_1.append("MyClass");
+    _builder_1.newLine();
+    _builder_1.append("mySubPackageAttribute");
+    _builder_1.newLine();
+    _builder_1.append("mySubPackageReference");
+    _builder_1.newLine();
+    _builder_1.append("myClassAttribute");
+    _builder_1.newLine();
+    _builder_1.append("subsubpackage");
+    _builder_1.newLine();
+    _builder_1.append("MyClass");
+    _builder_1.newLine();
+    _builder_1.append("MainFooClass");
+    _builder_1.newLine();
+    _builder_1.append("MainFooDataType");
+    _builder_1.newLine();
+    _builder_1.append("MainFooEnum");
+    _builder_1.newLine();
+    _builder_1.append("MyClass");
+    _builder_1.newLine();
+    _builder_1.append("myAttribute");
+    _builder_1.newLine();
+    _builder_1.append("myReference");
+    _builder_1.newLine();
+    _builder_1.append("FooEnumLiteral");
+    _builder_1.newLine();
+    _builder_1.append("myClassAttribute");
+    _builder_1.newLine();
+    _builder_1.append("mainsubpackage");
+    _builder_1.newLine();
+    _builder_1.append("MainSubPackageFooClass");
+    _builder_1.newLine();
+    _builder_1.append("MyClass");
+    _builder_1.newLine();
+    _builder_1.append("mySubPackageAttribute");
+    _builder_1.newLine();
+    _builder_1.append("mySubPackageReference");
+    _builder_1.newLine();
+    _builder_1.append("myClassAttribute");
+    _builder_1.newLine();
+    _builder_1.append("subsubpackage");
+    _builder_1.newLine();
+    _builder_1.append("MyClass");
+    _builder_1.newLine();
+    _builder_1.append("mainpackage");
+    _builder_1.newLine();
+    this.assertScope(_reference, _edeltaEcoreReference_Enamedelement, _builder_1);
+  }
+  
+  @Test
+  public void testScopeForSubPackageInEcoreReferenceExpressionWithSubPackages() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(mainsubpackage.");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaEcoreReference _reference = this.lastEcoreReferenceExpression(this.parseWithTestEcoreWithSubPackage(_builder)).getReference();
+    EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("MainSubPackageFooClass");
+    _builder_1.newLine();
+    _builder_1.append("MyClass");
+    _builder_1.newLine();
+    _builder_1.append("subsubpackage");
+    _builder_1.newLine();
+    _builder_1.append("MainSubPackageFooClass");
+    _builder_1.newLine();
+    _builder_1.append("MyClass");
+    _builder_1.newLine();
+    _builder_1.append("subsubpackage");
+    _builder_1.newLine();
+    this.assertScope(_reference, _edeltaEcoreReference_Enamedelement, _builder_1);
+  }
+  
+  @Test
+  public void testScopeForSubPackageEClassInEcoreReferenceExpressionWithSubPackages() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(mainsubpackage.MainSubPackageFooClass.");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaEcoreReference _reference = this.lastEcoreReferenceExpression(this.parseWithTestEcoreWithSubPackage(_builder)).getReference();
+    EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("mySubPackageAttribute");
+    _builder_1.newLine();
+    _builder_1.append("mySubPackageReference");
+    _builder_1.newLine();
+    _builder_1.append("mySubPackageAttribute");
+    _builder_1.newLine();
+    _builder_1.append("mySubPackageReference");
+    _builder_1.newLine();
+    this.assertScope(_reference, _edeltaEcoreReference_Enamedelement, _builder_1);
+  }
+  
+  @Test
+  public void testScopeForSubSubPackageInEcoreReferenceExpressionWithSubPackages() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(mainsubpackage.subsubpackage.");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaEcoreReference _reference = this.lastEcoreReferenceExpression(this.parseWithTestEcoreWithSubPackage(_builder)).getReference();
+    EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("MyClass");
+    _builder_1.newLine();
+    _builder_1.append("MyClass");
+    _builder_1.newLine();
+    this.assertScope(_reference, _edeltaEcoreReference_Enamedelement, _builder_1);
+  }
+  
+  @Test
   public void testScopeForEnamedElementInEcoreReferenceExpression() {
     EdeltaEcoreReferenceExpression _ecoreReferenceExpression = this.ecoreReferenceExpression("ecoreref");
     EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
