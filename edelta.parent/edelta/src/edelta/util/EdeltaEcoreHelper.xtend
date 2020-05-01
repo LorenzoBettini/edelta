@@ -8,6 +8,7 @@ import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.util.IResourceScopeCache
+import java.util.List
 
 /**
  * Helper methods for accessing Ecore elements.
@@ -110,22 +111,47 @@ class EdeltaEcoreHelper {
 		}
 	}
 
-	def private getEPackageENamedElementsInternal(EPackage ePackage, EObject context, boolean includeCopiedEPackages) {
-		val ePackageName = ePackage.name
-		val imported = getProgram(context).metamodels.getByName(ePackageName)
+	def private List<? extends ENamedElement> getEPackageENamedElementsInternal(EPackage ePackage, EObject context, boolean includeCopiedEPackages) {
+		val imported =
+			getProgram(context).metamodels.findEPackageByNameInRootEPackages(ePackage)
 		if (includeCopiedEPackages) {
-			val copiedEPackage = context.eResource.copiedEPackagesMap.get(ePackageName)
+			val copiedEPackage =
+				context.eResource.copiedEPackagesMap.values
+					.findEPackageByNameInRootEPackages(ePackage)
 			if (copiedEPackage !== null) 
 				// there'll also be copied epackages
 				return (
-					copiedEPackage.getEClassifiers +
-					imported.getEClassifiers
+					copiedEPackage.getEPackageENamedElementsInternal +
+					imported.getEPackageENamedElementsInternal
 				).toList
 		}
-		return imported.getEClassifiers
+		return imported.getEPackageENamedElementsInternal
+	}
+
+	def private List<? extends ENamedElement> getEPackageENamedElementsInternal(EPackage ePackage) {
+		return (
+			ePackage.getEClassifiers +
+			ePackage.getESubpackages
+		).toList
 	}
 
 	def <T extends ENamedElement> getByName(Iterable<T> namedElements, String nameToSearch) {
 		return namedElements.findFirst[name == nameToSearch]
+	}
+
+	/**
+	 * Try to retrieve an EPackage with the same name of the passed EPackage
+	 * in the given EPackages, possibly by inspecting the super package relation.
+	 */
+	def EPackage findEPackageByNameInRootEPackages(Iterable<EPackage> roots, EPackage p) {
+		if (p.ESuperPackage === null) {
+			return roots.getByName(p.name)
+		} else {
+			val foundSuperPackage = findEPackageByNameInRootEPackages(roots, p.ESuperPackage)
+			// it might not be found (e.g., in copied EPackages)
+			if (foundSuperPackage === null)
+				return null
+			return foundSuperPackage.ESubpackages.getByName(p.name)
+		}
 	}
 }
