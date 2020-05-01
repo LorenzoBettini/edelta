@@ -217,9 +217,6 @@ abstract class EdeltaAbstractTest {
 				nsURI = "http://subsubpackage"
 				EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
 					name = "MyClass" // this is present also in subpackages with the same name
-					EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
-						name = "myClassAttribute"
-					]
 				]
 			]
 		]

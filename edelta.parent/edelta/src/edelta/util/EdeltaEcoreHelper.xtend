@@ -90,18 +90,18 @@ class EdeltaEcoreHelper {
 	) {
 		switch (e) {
 			EPackage:
-				cache.get("getEPackageENamedElements" + includeCopiedEPackages -> e.name, context.eResource) [
+				cache.get("getEPackageENamedElements" + includeCopiedEPackages -> e, context.eResource) [
 					return getEPackageENamedElementsInternal(e, context, includeCopiedEPackages)
 				]
 			EClass:
-				cache.get("getEClassENamedElements" + includeCopiedEPackages -> e.name, context.eResource) [
+				cache.get("getEClassENamedElements" + includeCopiedEPackages -> e, context.eResource) [
 					e.EPackage.getENamedElementsInternal(context, includeCopiedEPackages).
 						filter(EClass).
 						filter[name == e.name].
 						map[EAllStructuralFeatures].flatten
 				]
 			EEnum:
-				cache.get("getEEnumENamedElements" + includeCopiedEPackages -> e.name, context.eResource) [
+				cache.get("getEEnumENamedElements" + includeCopiedEPackages -> e, context.eResource) [
 					e.EPackage.getENamedElementsInternal(context, includeCopiedEPackages).
 						filter(EEnum).
 						filter[name == e.name].

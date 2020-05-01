@@ -95,8 +95,6 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("MyClass");
     _builder.newLine();
-    _builder.append("myClassAttribute");
-    _builder.newLine();
     _builder.append("mainpackage");
     _builder.newLine();
     this.assertNamedElements(_programENamedElements, _builder);
@@ -230,6 +228,25 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
       _builder.append("mainpackage");
       _builder.newLine();
       this.assertNamedElements(_eNamedElements, _builder);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
+  }
+  
+  @Test
+  public void testENamedElementsWithWithTheSameNameInSubPackages() {
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(this._inputs.referenceToMetamodelWithSubPackage());
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      final EPackage mainpackage = this.getEPackageByName(it, "mainpackage");
+      final EPackage subsubpackage = IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>head(mainpackage.getESubpackages()).getESubpackages());
+      Iterable<? extends ENamedElement> _eNamedElements = this._edeltaEcoreHelper.getENamedElements(this.getEClassiferByName(subsubpackage, "MyClass"), it);
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.newLine();
+      this.assertNamedElements(_eNamedElements, _builder);
+      Iterable<? extends ENamedElement> _eNamedElements_1 = this._edeltaEcoreHelper.getENamedElements(this.getEClassiferByName(mainpackage, "MyClass"), it);
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("myClassAttribute");
+      _builder_1.newLine();
+      this.assertNamedElements(_eNamedElements_1, _builder_1);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
   }

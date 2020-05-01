@@ -61,7 +61,6 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				myClassAttribute
 				subsubpackage
 				MyClass
-				myClassAttribute
 				mainpackage
 				'''
 			)
@@ -174,6 +173,28 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				'''
 			)
 			// it simply returns the first package of the loop
+		]
+	}
+
+	@Test
+	def void testENamedElementsWithWithTheSameNameInSubPackages() {
+		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
+			val mainpackage = getEPackageByName("mainpackage")
+			val subsubpackage = mainpackage
+								.ESubpackages.head
+								.ESubpackages.head
+			// both packages have a class with the same name but with different
+			// structure
+			getENamedElements(subsubpackage.getEClassiferByName("MyClass"), it).
+				assertNamedElements(
+				'''
+
+				''')
+			getENamedElements(mainpackage.getEClassiferByName("MyClass"), it).
+				assertNamedElements(
+				'''
+				myClassAttribute
+				''')
 		]
 	}
 

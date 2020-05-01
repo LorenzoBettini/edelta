@@ -97,7 +97,6 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			myClassAttribute
 			subsubpackage
 			MyClass
-			myClassAttribute
 			mainpackage
 			''')
 	}

@@ -387,13 +387,6 @@ public abstract class EdeltaAbstractTest {
           EClass _createEClass_4 = EcoreFactory.eINSTANCE.createEClass();
           final Procedure1<EClass> _function_9 = (EClass it_2) -> {
             it_2.setName("MyClass");
-            EList<EStructuralFeature> _eStructuralFeatures = it_2.getEStructuralFeatures();
-            EAttribute _createEAttribute = EcoreFactory.eINSTANCE.createEAttribute();
-            final Procedure1<EAttribute> _function_10 = (EAttribute it_3) -> {
-              it_3.setName("myClassAttribute");
-            };
-            EAttribute _doubleArrow_6 = ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_10);
-            _eStructuralFeatures.add(_doubleArrow_6);
           };
           EClass _doubleArrow_6 = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_4, _function_9);
           _eClassifiers_6.add(_doubleArrow_6);
