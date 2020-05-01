@@ -310,7 +310,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   
   @Test
   public void testScopeForEnamedElementInEcoreReferenceExpression() {
-    EdeltaEcoreReference _reference = this.ecoreReferenceExpression("ecoreref").getReference();
+    EdeltaEcoreReference _reference = this.ecoreReferenceExpression("ecoreref(").getReference();
     EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("FooClass");

@@ -216,7 +216,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testScopeForEnamedElementInEcoreReferenceExpression() {
-		"ecoreref".ecoreReferenceExpression.reference.
+		"ecoreref(".ecoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
 			FooClass
