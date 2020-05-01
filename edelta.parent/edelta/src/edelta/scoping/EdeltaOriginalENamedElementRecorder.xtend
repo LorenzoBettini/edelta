@@ -38,15 +38,11 @@ class EdeltaOriginalENamedElementRecorder {
 
 	def private ENamedElement retrieveOriginalElement(ENamedElement e, EObject context) {
 		switch (e) {
-			EPackage: getProgramEPackage(e, context)
+			EPackage: getEPackages(context).findEPackageByNameInRootEPackages(e)
 			EClassifier: e.EPackage.getENamedElementByName(context, e.name)
 			EStructuralFeature: e.EContainingClass.getENamedElementByName(context, e.name)
 			EEnumLiteral: e.EEnum.getENamedElementByName(context, e.name)
 		}
-	}
-
-	def private getProgramEPackage(EPackage e, EObject context) {
-		getEPackages(context).getByName(e.name)
 	}
 
 	def private getEPackages(EObject context) {

@@ -89,6 +89,77 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
   }
   
   @Test
+  public void testSubPackageDirectReference() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(mainsubpackage)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      final EdeltaEcoreReference ref = this.lastEcoreReferenceExpression(it).getReference();
+      this._edeltaOriginalENamedElementRecorder.recordOriginalENamedElement(ref);
+      final EPackage original = IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>last(it.getMetamodels()).getESubpackages());
+      Assert.assertSame(original, ref.getOriginalEnamedelement());
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
+  }
+  
+  @Test
+  public void testSubPackageEClassDirectReference() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(MainSubPackageFooClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      final EdeltaEcoreReference ref = this.lastEcoreReferenceExpression(it).getReference();
+      this._edeltaOriginalENamedElementRecorder.recordOriginalENamedElement(ref);
+      final EClassifier original = this.getEClassiferByName(IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>last(it.getMetamodels()).getESubpackages()), "MainSubPackageFooClass");
+      Assert.assertNotNull(original);
+      Assert.assertSame(original, ref.getOriginalEnamedelement());
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
+  }
+  
+  @Test
+  public void testSubSubPackageEClassQualifiedReference() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(subsubpackage.MyClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      final EdeltaEcoreReference ref = this.lastEcoreReferenceExpression(it).getReference();
+      this._edeltaOriginalENamedElementRecorder.recordOriginalENamedElement(ref);
+      final EClassifier original = this.getEClassiferByName(IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>last(it.getMetamodels()).getESubpackages()).getESubpackages()), "MyClass");
+      Assert.assertNotNull(original);
+      Assert.assertSame(original, ref.getOriginalEnamedelement());
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
+  }
+  
+  @Test
   public void testEClassifierQualifiedReference() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
