@@ -4,6 +4,7 @@
 package edelta.scoping;
 
 import static edelta.edelta.EdeltaPackage.Literals.*;
+import static edelta.util.EdeltaModelUtil.*;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
@@ -16,7 +17,6 @@ import com.google.inject.Inject;
 
 import edelta.edelta.EdeltaEcoreQualifiedReference;
 import edelta.util.EdeltaEcoreHelper;
-import edelta.util.EdeltaModelUtil;
 
 /**
  * This class contains custom scoping description.
@@ -28,9 +28,6 @@ import edelta.util.EdeltaModelUtil;
 public class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 	@Inject
 	private IResourceScopeCache cache;
-
-	@Inject
-	private EdeltaModelUtil edeltaModelUtil;
 
 	@Inject
 	private EdeltaEcoreHelper edeltaEcoreHelper;
@@ -45,7 +42,7 @@ public class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 			}
 			return Scopes.scopeFor(edeltaEcoreHelper.getProgramENamedElements(context));
 		} else if (reference == EDELTA_MODIFY_ECORE_OPERATION__EPACKAGE) {
-			return Scopes.scopeFor(edeltaModelUtil.getProgram(context).getMetamodels());
+			return Scopes.scopeFor(getProgram(context).getMetamodels());
 		} else if (reference == EDELTA_PROGRAM__METAMODELS) {
 			return cache.get("scopeMetamodels", context.eResource(),
 				() -> new FilteringScope(delegateGetScope(context, reference),

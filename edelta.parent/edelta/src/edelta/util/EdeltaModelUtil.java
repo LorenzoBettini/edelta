@@ -1,8 +1,9 @@
 package edelta.util;
 
-import edelta.edelta.EdeltaProgram;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.EcoreUtil2;
+
+import edelta.edelta.EdeltaProgram;
 
 /**
  * Some utilities for navigating an Edelta AST model and Ecore model.
@@ -10,7 +11,11 @@ import org.eclipse.xtext.EcoreUtil2;
  * @author Lorenzo Bettini
  */
 public class EdeltaModelUtil {
-	public EdeltaProgram getProgram(final EObject context) {
+
+	private EdeltaModelUtil() {
+	}
+
+	public static EdeltaProgram getProgram(final EObject context) {
 		return EcoreUtil2.getContainerOfType(context, EdeltaProgram.class);
 	}
 }

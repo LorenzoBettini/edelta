@@ -4,7 +4,6 @@ import com.google.inject.Inject
 import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaEcoreReference
 import edelta.util.EdeltaEcoreHelper
-import edelta.util.EdeltaModelUtil
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EEnumLiteral
 import org.eclipse.emf.ecore.ENamedElement
@@ -12,6 +11,8 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.util.IResourceScopeCache
+
+import static edelta.util.EdeltaModelUtil.*
 
 /**
  * Records the original referred ENamedElement in an EdeltaEcoreReference expression,
@@ -22,7 +23,6 @@ import org.eclipse.xtext.util.IResourceScopeCache
 class EdeltaOriginalENamedElementRecorder {
 
 	@Inject extension EdeltaEcoreHelper
-	@Inject extension EdeltaModelUtil
 
 	@Inject IResourceScopeCache cache
 
