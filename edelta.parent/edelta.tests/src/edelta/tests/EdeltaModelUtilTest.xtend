@@ -1,5 +1,6 @@
 package edelta.tests
 
+import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
@@ -23,4 +24,33 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testHasCycleInSuperPackageWithNoCycle() {
+		val ecoreFactory = EcoreFactory.eINSTANCE
+		val ePackage = ecoreFactory.createEPackage() => [
+			ESubpackages += ecoreFactory.createEPackage() => [
+				ESubpackages += ecoreFactory.createEPackage()
+			]
+		]
+		assertFalse(hasCycleInSuperPackage(
+			ePackage.ESubpackages.head.ESubpackages.head
+		))
+	}
+
+	@Test
+	def void testHasCycleInSuperPackageWithCycle() {
+		val ecoreFactory = EcoreFactory.eINSTANCE
+		val ePackage = ecoreFactory.createEPackage() => [
+			ESubpackages += ecoreFactory.createEPackage() => [
+				ESubpackages += ecoreFactory.createEPackage()
+			]
+		]
+		
+		val subSubPackage = ePackage.ESubpackages.head.ESubpackages.head
+		// force the cycle
+		subSubPackage.ESubpackages += ePackage
+		assertTrue(hasCycleInSuperPackage(
+			subSubPackage
+		))
+	}
 }
