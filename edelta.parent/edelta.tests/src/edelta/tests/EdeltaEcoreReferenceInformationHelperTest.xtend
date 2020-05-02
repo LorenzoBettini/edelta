@@ -14,6 +14,7 @@ import org.junit.runner.RunWith
 import static org.assertj.core.api.Assertions.assertThat
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
+import org.eclipse.emf.ecore.EPackage
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -43,6 +44,64 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 			assertThat(info)
 				.returns("EPackage", [type])
 				.returns("foo", [EPackageName])
+				.returns(null, [EClassifierName])
+				.returns(null, [ENamedElementName])
+		]
+	}
+
+	@Test
+	def void testReferenceToSubPackage() {
+		'''
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			ecoreref(mainsubpackage)
+		}
+		'''.parseWithTestEcoreWithSubPackage.lastEcoreRef => [
+			val info = informationHelper.getOrComputeInformation(it)
+			assertThat(info)
+				.returns("EPackage", [type])
+				.returns("mainpackage.mainsubpackage", [EPackageName])
+				.returns(null, [EClassifierName])
+				.returns(null, [ENamedElementName])
+		]
+	}
+
+	@Test
+	def void testReferenceToEStructuralFeatureWithSubPackage() {
+		'''
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			ecoreref(mySubPackageAttribute)
+		}
+		'''.parseWithTestEcoreWithSubPackage.lastEcoreRef => [
+			val info = informationHelper.getOrComputeInformation(it)
+			assertThat(info)
+				.returns("EAttribute", [type])
+				.returns("mainpackage.mainsubpackage", [EPackageName])
+				.returns("MainSubPackageFooClass", [EClassifierName])
+				.returns("mySubPackageAttribute", [ENamedElementName])
+		]
+	}
+
+	@Test
+	def void testReferenceToSubPackageWithCycle() {
+		'''
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			ecoreref(subsubpackage)
+		}
+		'''.parseWithTestEcoreWithSubPackage.lastEcoreRef => [
+			// create cycle in sub package relation
+			val subpackage = enamedelement as EPackage
+			subpackage.ESubpackages += subpackage.ESuperPackage
+			val info = informationHelper.getOrComputeInformation(it)
+			assertThat(info)
+				.returns("EPackage", [type])
+				// due to the cycle the parent relation is not visited
+				.returns("subsubpackage", [EPackageName])
 				.returns(null, [EClassifierName])
 				.returns(null, [ENamedElementName])
 		]

@@ -9,9 +9,11 @@ import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter
 import edelta.util.EdeltaEcoreReferenceInformationHelper;
 import java.util.function.Function;
 import org.assertj.core.api.Assertions;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
@@ -65,6 +67,110 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
         return it_1.getENamedElementName();
       };
       Assertions.<EdeltaEcoreReferenceInformation>assertThat(info).<String>returns("EPackage", _function_1).<String>returns("foo", _function_2).<String>returns(null, _function_3).<String>returns(null, _function_4);
+    };
+    ObjectExtensions.<EdeltaEcoreReference>operator_doubleArrow(_lastEcoreRef, _function);
+  }
+  
+  @Test
+  public void testReferenceToSubPackage() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(mainsubpackage)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaEcoreReference _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcoreWithSubPackage(_builder));
+    final Procedure1<EdeltaEcoreReference> _function = (EdeltaEcoreReference it) -> {
+      final EdeltaEcoreReferenceInformation info = this.informationHelper.getOrComputeInformation(it);
+      final Function<EdeltaEcoreReferenceInformation, String> _function_1 = (EdeltaEcoreReferenceInformation it_1) -> {
+        return it_1.getType();
+      };
+      final Function<EdeltaEcoreReferenceInformation, String> _function_2 = (EdeltaEcoreReferenceInformation it_1) -> {
+        return it_1.getEPackageName();
+      };
+      final Function<EdeltaEcoreReferenceInformation, String> _function_3 = (EdeltaEcoreReferenceInformation it_1) -> {
+        return it_1.getEClassifierName();
+      };
+      final Function<EdeltaEcoreReferenceInformation, String> _function_4 = (EdeltaEcoreReferenceInformation it_1) -> {
+        return it_1.getENamedElementName();
+      };
+      Assertions.<EdeltaEcoreReferenceInformation>assertThat(info).<String>returns("EPackage", _function_1).<String>returns("mainpackage.mainsubpackage", _function_2).<String>returns(null, _function_3).<String>returns(null, _function_4);
+    };
+    ObjectExtensions.<EdeltaEcoreReference>operator_doubleArrow(_lastEcoreRef, _function);
+  }
+  
+  @Test
+  public void testReferenceToEStructuralFeatureWithSubPackage() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(mySubPackageAttribute)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaEcoreReference _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcoreWithSubPackage(_builder));
+    final Procedure1<EdeltaEcoreReference> _function = (EdeltaEcoreReference it) -> {
+      final EdeltaEcoreReferenceInformation info = this.informationHelper.getOrComputeInformation(it);
+      final Function<EdeltaEcoreReferenceInformation, String> _function_1 = (EdeltaEcoreReferenceInformation it_1) -> {
+        return it_1.getType();
+      };
+      final Function<EdeltaEcoreReferenceInformation, String> _function_2 = (EdeltaEcoreReferenceInformation it_1) -> {
+        return it_1.getEPackageName();
+      };
+      final Function<EdeltaEcoreReferenceInformation, String> _function_3 = (EdeltaEcoreReferenceInformation it_1) -> {
+        return it_1.getEClassifierName();
+      };
+      final Function<EdeltaEcoreReferenceInformation, String> _function_4 = (EdeltaEcoreReferenceInformation it_1) -> {
+        return it_1.getENamedElementName();
+      };
+      Assertions.<EdeltaEcoreReferenceInformation>assertThat(info).<String>returns("EAttribute", _function_1).<String>returns("mainpackage.mainsubpackage", _function_2).<String>returns("MainSubPackageFooClass", _function_3).<String>returns("mySubPackageAttribute", _function_4);
+    };
+    ObjectExtensions.<EdeltaEcoreReference>operator_doubleArrow(_lastEcoreRef, _function);
+  }
+  
+  @Test
+  public void testReferenceToSubPackageWithCycle() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(subsubpackage)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaEcoreReference _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcoreWithSubPackage(_builder));
+    final Procedure1<EdeltaEcoreReference> _function = (EdeltaEcoreReference it) -> {
+      ENamedElement _enamedelement = it.getEnamedelement();
+      final EPackage subpackage = ((EPackage) _enamedelement);
+      EList<EPackage> _eSubpackages = subpackage.getESubpackages();
+      EPackage _eSuperPackage = subpackage.getESuperPackage();
+      _eSubpackages.add(_eSuperPackage);
+      final EdeltaEcoreReferenceInformation info = this.informationHelper.getOrComputeInformation(it);
+      final Function<EdeltaEcoreReferenceInformation, String> _function_1 = (EdeltaEcoreReferenceInformation it_1) -> {
+        return it_1.getType();
+      };
+      final Function<EdeltaEcoreReferenceInformation, String> _function_2 = (EdeltaEcoreReferenceInformation it_1) -> {
+        return it_1.getEPackageName();
+      };
+      final Function<EdeltaEcoreReferenceInformation, String> _function_3 = (EdeltaEcoreReferenceInformation it_1) -> {
+        return it_1.getEClassifierName();
+      };
+      final Function<EdeltaEcoreReferenceInformation, String> _function_4 = (EdeltaEcoreReferenceInformation it_1) -> {
+        return it_1.getENamedElementName();
+      };
+      Assertions.<EdeltaEcoreReferenceInformation>assertThat(info).<String>returns("EPackage", _function_1).<String>returns("subsubpackage", _function_2).<String>returns(null, _function_3).<String>returns(null, _function_4);
     };
     ObjectExtensions.<EdeltaEcoreReference>operator_doubleArrow(_lastEcoreRef, _function);
   }

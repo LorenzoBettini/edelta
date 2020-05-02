@@ -155,7 +155,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testEPackageENamedElementsWithLoopInSubPackages() {
+	def void testEPackageENamedElementsWithCycleInSubPackages() {
 		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
 			val mainpackage = getEPackageByName("mainpackage")
 			val subsubpackage = mainpackage

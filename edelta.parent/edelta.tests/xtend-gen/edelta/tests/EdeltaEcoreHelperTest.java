@@ -210,7 +210,7 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testEPackageENamedElementsWithLoopInSubPackages() {
+  public void testEPackageENamedElementsWithCycleInSubPackages() {
     EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(this._inputs.referenceToMetamodelWithSubPackage());
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       final EPackage mainpackage = this.getEPackageByName(it, "mainpackage");
