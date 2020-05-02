@@ -2,14 +2,13 @@ package edelta.util
 
 import com.google.inject.Inject
 import edelta.services.IEdeltaEcoreModelAssociations
+import java.util.List
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.util.IResourceScopeCache
-import java.util.List
-import java.util.Set
 
 import static edelta.util.EdeltaModelUtil.*
 
@@ -144,26 +143,17 @@ class EdeltaEcoreHelper {
 	/**
 	 * Try to retrieve an EPackage with the same name of the passed EPackage
 	 * in the given EPackages, possibly by inspecting the super package relation.
+	 * In case of loop in the super package relation, simply returns the passed
+	 * EPackage.
 	 */
 	def EPackage findEPackageByNameInRootEPackages(Iterable<EPackage> roots, EPackage p) {
-		findEPackageByNameInRootEPackagesRecursive(roots, p, newHashSet)
-	}
-
-	/**
-	 * Also handles possible loops in the super package relation,
-	 * simply returning the package in case it has already been visited.
-	 */
-	def private EPackage findEPackageByNameInRootEPackagesRecursive(
-		Iterable<EPackage> roots, EPackage p, Set<EPackage> seen
-	) {
+		if (hasCycleInSuperPackage(p))
+			return p
 		if (p.ESuperPackage === null) {
 			return roots.getByName(p.name)
 		} else {
-			if (seen.contains(p))
-				return p // avoid loop
-			seen.add(p)
 			val foundSuperPackage =
-				findEPackageByNameInRootEPackagesRecursive(roots, p.ESuperPackage, seen)
+				findEPackageByNameInRootEPackages(roots, p.ESuperPackage)
 			// it might not be found (e.g., in copied EPackages)
 			if (foundSuperPackage === null)
 				return null
