@@ -11,6 +11,8 @@ import org.eclipse.xtext.util.IResourceScopeCache
 import java.util.List
 import java.util.Set
 
+import static edelta.util.EdeltaModelUtil.*
+
 /**
  * Helper methods for accessing Ecore elements.
  * 
@@ -22,7 +24,6 @@ import java.util.Set
 class EdeltaEcoreHelper {
 
 	@Inject IResourceScopeCache cache
-	@Inject extension EdeltaModelUtil
 	@Inject extension IEdeltaEcoreModelAssociations
 
 	def Iterable<? extends ENamedElement> getProgramENamedElements(EObject context) {

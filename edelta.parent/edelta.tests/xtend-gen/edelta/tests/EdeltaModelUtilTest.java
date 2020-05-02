@@ -1,6 +1,5 @@
 package edelta.tests;
 
-import com.google.inject.Inject;
 import edelta.edelta.EdeltaProgram;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderCustom;
@@ -8,7 +7,6 @@ import edelta.util.EdeltaModelUtil;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
-import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Assert;
@@ -19,10 +17,6 @@ import org.junit.runner.RunWith;
 @InjectWith(EdeltaInjectorProviderCustom.class)
 @SuppressWarnings("all")
 public class EdeltaModelUtilTest extends EdeltaAbstractTest {
-  @Inject
-  @Extension
-  private EdeltaModelUtil _edeltaModelUtil;
-  
   @Test
   public void testGetProgram() {
     StringConcatenation _builder = new StringConcatenation();
@@ -33,7 +27,7 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
     _builder.newLine();
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      Assert.assertSame(it, this._edeltaModelUtil.getProgram(this.lastModifyEcoreOperation(it)));
+      Assert.assertSame(it, EdeltaModelUtil.getProgram(this.lastModifyEcoreOperation(it)));
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
