@@ -2260,6 +2260,123 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testExecutionOfComplexOperationsWithSubPackages() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EcoreFactory");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore modifyFoo epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("name = \"anewsubpackage\"");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("nsPrefix = \"anewsubpackage\"");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("nsURI = \"http://anewsubpackage\"");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("name = \"anestedsubpackage\"");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("nsPrefix = \"anestedsubpackage\"");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("nsURI = \"http://anestedsubpackage\"");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("addNewEClass(\"ANestedSubPackageClass\")");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(anewsubpackage).addNewEClass(\"NewClass\") [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("EStructuralFeatures +=");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("newEReference(\"newTestRef\", ecoreref(ANestedSubPackageClass))");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass).name = \"RenamedClass\"");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(RenamedClass).getEStructuralFeatures +=");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("newEAttribute(\"added\", ecoreref(FooDataType))");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+    _builder_1.newLine();
+    _builder_1.append("<ecore:EPackage xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.append("xmlns:ecore=\"http://www.eclipse.org/emf/2002/Ecore\" name=\"foo\" nsURI=\"http://foo\" nsPrefix=\"foo\">");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"FooClass\"/>");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"FooDerivedClass\" eSuperTypes=\"#//FooClass\"/>");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("<eClassifiers xsi:type=\"ecore:EDataType\" name=\"FooDataType\" instanceClassName=\"java.lang.String\"/>");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("<eSubpackages name=\"anewsubpackage\" nsURI=\"http://anewsubpackage\" nsPrefix=\"anewsubpackage\">");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"RenamedClass\">");
+    _builder_1.newLine();
+    _builder_1.append("      ");
+    _builder_1.append("<eStructuralFeatures xsi:type=\"ecore:EReference\" name=\"newTestRef\" eType=\"#//anewsubpackage/anestedsubpackage/ANestedSubPackageClass\"/>");
+    _builder_1.newLine();
+    _builder_1.append("      ");
+    _builder_1.append("<eStructuralFeatures xsi:type=\"ecore:EAttribute\" name=\"added\" eType=\"#//FooDataType\"/>");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.append("</eClassifiers>");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.append("<eSubpackages name=\"anestedsubpackage\" nsURI=\"http://anestedsubpackage\" nsPrefix=\"anestedsubpackage\">");
+    _builder_1.newLine();
+    _builder_1.append("      ");
+    _builder_1.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"ANestedSubPackageClass\"/>");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.append("</eSubpackages>");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("</eSubpackages>");
+    _builder_1.newLine();
+    _builder_1.append("</ecore:EPackage>");
+    _builder_1.newLine();
+    this.checkCompiledCodeExecution(_builder, _builder_1, 
+      true);
+  }
+  
+  @Test
   public void testCompilationOfPersonListExampleModifyEcore() {
     final ResourceSet rs = this.createResourceSetWithEcore(
       EdeltaAbstractTest.PERSON_LIST_ECORE, EdeltaAbstractTest.PERSON_LIST_ECORE_PATH, 
