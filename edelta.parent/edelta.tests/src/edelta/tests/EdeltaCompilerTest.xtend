@@ -991,6 +991,88 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCompilationOfComplexOperationsWithSubPackages() {
+		'''
+			import org.eclipse.emf.ecore.EcoreFactory
+			
+			metamodel "foo"
+			
+			modifyEcore modifyFoo epackage foo {
+				ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
+					name = "anewsubpackage"
+				]
+				ecoreref(anewsubpackage).addNewEClass("NewClass") [
+					EStructuralFeatures += newEAttribute("newTestAttr") [
+						EType = ecoreref(FooDataType)
+					]
+				]
+				ecoreref(NewClass).name = "RenamedClass"
+				ecoreref(RenamedClass).getEStructuralFeatures +=
+					newEAttribute("added", ecoreref(FooDataType))
+			}
+		'''.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import java.util.function.Consumer;
+			import org.eclipse.emf.common.util.EList;
+			import org.eclipse.emf.ecore.EAttribute;
+			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.emf.ecore.EPackage;
+			import org.eclipse.emf.ecore.EStructuralFeature;
+			import org.eclipse.emf.ecore.EcoreFactory;
+			import org.eclipse.xtext.xbase.lib.ObjectExtensions;
+			import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  public MyFile0() {
+			    
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  public void modifyFoo(final EPackage it) {
+			    EList<EPackage> _eSubpackages = it.getESubpackages();
+			    EPackage _createEPackage = EcoreFactory.eINSTANCE.createEPackage();
+			    final Procedure1<EPackage> _function = (EPackage it_1) -> {
+			      it_1.setName("anewsubpackage");
+			    };
+			    EPackage _doubleArrow = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
+			    _eSubpackages.add(_doubleArrow);
+			    final Consumer<EClass> _function_1 = (EClass it_1) -> {
+			      EList<EStructuralFeature> _eStructuralFeatures = it_1.getEStructuralFeatures();
+			      final Consumer<EAttribute> _function_2 = (EAttribute it_2) -> {
+			        it_2.setEType(getEDataType("foo", "FooDataType"));
+			      };
+			      EAttribute _newEAttribute = this.lib.newEAttribute("newTestAttr", _function_2);
+			      _eStructuralFeatures.add(_newEAttribute);
+			    };
+			    this.lib.addNewEClass(getEPackage("foo.anewsubpackage"), "NewClass", _function_1);
+			    getEClass("foo.anewsubpackage", "NewClass").setName("RenamedClass");
+			    EList<EStructuralFeature> _eStructuralFeatures = getEClass("foo.anewsubpackage", "RenamedClass").getEStructuralFeatures();
+			    EAttribute _newEAttribute = this.lib.newEAttribute("added", getEDataType("foo", "FooDataType"));
+			    _eStructuralFeatures.add(_newEAttribute);
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    modifyFoo(getEPackage("foo"));
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
 	def void testCompilationOfPersonListExampleModifyEcore() {
 		val rs = createResourceSetWithEcore(
 			PERSON_LIST_ECORE, PERSON_LIST_ECORE_PATH,
