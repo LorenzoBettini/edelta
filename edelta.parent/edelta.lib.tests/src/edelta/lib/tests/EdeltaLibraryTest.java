@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.emf.ecore.EcorePackage.Literals.*;
 
 import org.eclipse.emf.ecore.EAttribute;
@@ -384,11 +385,21 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
-	public void test_addSuperClass() {
+	public void test_addESuperType() {
 		EClass superClass = ecoreFactory.createEClass();
 		EClass subClass = ecoreFactory.createEClass();
-		lib.addSuperClass(subClass, superClass);
-		assertSame(superClass, subClass.getESuperTypes().get(0));
+		lib.addESuperType(subClass, superClass);
+		assertThat(subClass.getESuperTypes()).containsExactly(superClass);
+	}
+
+	@Test
+	public void test_removeESuperType() {
+		EClass superClass = ecoreFactory.createEClass();
+		EClass subClass = ecoreFactory.createEClass();
+		subClass.getESuperTypes().add(superClass);
+		assertThat(subClass.getESuperTypes()).containsExactly(superClass);
+		lib.removeESuperType(subClass, superClass);
+		assertThat(subClass.getESuperTypes()).isEmpty();
 	}
 
 	@Test
