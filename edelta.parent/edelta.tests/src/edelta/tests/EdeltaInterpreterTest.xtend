@@ -458,6 +458,56 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testCreateEClassInSubPackage() {
+		'''
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ecoreref(mainsubpackage).addNewEClass("NewClass") [
+					EStructuralFeatures += newEAttribute("newTestAttr") [
+						EType = ecoreref(MainFooDataType)
+					]
+				]
+			}
+		'''
+		.parseWithTestEcoreWithSubPackage
+		.assertAfterInterpretationOfEdeltaModifyEcoreOperation(true)[ePackage |
+			val derivedEClass =
+				ePackage.ESubpackages.head.lastEClass
+			assertEquals("NewClass", derivedEClass.name)
+			assertEquals(1, derivedEClass.EStructuralFeatures.size)
+			val attr = derivedEClass.EStructuralFeatures.head
+			assertEquals("newTestAttr", attr.name)
+			assertEquals("MainFooDataType", attr.EType.name)
+		]
+	}
+
+	@Test
+	def void testCreateEClassInSubSubPackage() {
+		'''
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ecoreref(subsubpackage).addNewEClass("NewClass") [
+					EStructuralFeatures += newEAttribute("newTestAttr") [
+						EType = ecoreref(MainFooDataType)
+					]
+				]
+			}
+		'''
+		.parseWithTestEcoreWithSubPackage
+		.assertAfterInterpretationOfEdeltaModifyEcoreOperation(true)[ePackage |
+			val derivedEClass =
+				ePackage.ESubpackages.head.ESubpackages.head.lastEClass
+			assertEquals("NewClass", derivedEClass.name)
+			assertEquals(1, derivedEClass.EStructuralFeatures.size)
+			val attr = derivedEClass.EStructuralFeatures.head
+			assertEquals("newTestAttr", attr.name)
+			assertEquals("MainFooDataType", attr.EType.name)
+		]
+	}
+
 	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) {
