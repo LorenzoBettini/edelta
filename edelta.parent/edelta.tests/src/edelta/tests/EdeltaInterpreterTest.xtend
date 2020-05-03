@@ -224,7 +224,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testEClassCreatedFromStatefuleUseAs() {
+	def void testEClassCreatedFromStatefulUseAs() {
 		useAsCustomStatefulEdeltaCreatingEClass
 		.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
 			val eClass = ePackage.lastEClass
@@ -468,6 +468,12 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		CharSequence input, boolean doValidate, (EPackage)=>void testExecutor
 	) {
 		val program = input.parseWithTestEcore
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor)
+	}
+
+	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+		EdeltaProgram program, boolean doValidate, (EPackage)=>void testExecutor
+	) {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(interpreter, program, doValidate, testExecutor)
 		// validation after interpretation, since the interpreter
 		// can make new elements available during validation
