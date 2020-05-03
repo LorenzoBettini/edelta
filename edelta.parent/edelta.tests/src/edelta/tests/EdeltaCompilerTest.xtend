@@ -1000,11 +1000,14 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			modifyEcore modifyFoo epackage foo {
 				ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
 					name = "anewsubpackage"
+					ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
+						name = "anestedsubpackage"
+						addNewEClass("ANestedSubPackageClass")
+					]
 				]
 				ecoreref(anewsubpackage).addNewEClass("NewClass") [
-					EStructuralFeatures += newEAttribute("newTestAttr") [
-						EType = ecoreref(FooDataType)
-					]
+					EStructuralFeatures +=
+						newEReference("newTestRef", ecoreref(ANestedSubPackageClass))
 				]
 				ecoreref(NewClass).name = "RenamedClass"
 				ecoreref(RenamedClass).getEStructuralFeatures +=
@@ -1020,6 +1023,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			import org.eclipse.emf.ecore.EAttribute;
 			import org.eclipse.emf.ecore.EClass;
 			import org.eclipse.emf.ecore.EPackage;
+			import org.eclipse.emf.ecore.EReference;
 			import org.eclipse.emf.ecore.EStructuralFeature;
 			import org.eclipse.emf.ecore.EcoreFactory;
 			import org.eclipse.xtext.xbase.lib.ObjectExtensions;
@@ -1040,16 +1044,21 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    EPackage _createEPackage = EcoreFactory.eINSTANCE.createEPackage();
 			    final Procedure1<EPackage> _function = (EPackage it_1) -> {
 			      it_1.setName("anewsubpackage");
+			      EList<EPackage> _eSubpackages_1 = it_1.getESubpackages();
+			      EPackage _createEPackage_1 = EcoreFactory.eINSTANCE.createEPackage();
+			      final Procedure1<EPackage> _function_1 = (EPackage it_2) -> {
+			        it_2.setName("anestedsubpackage");
+			        this.lib.addNewEClass(it_2, "ANestedSubPackageClass");
+			      };
+			      EPackage _doubleArrow = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage_1, _function_1);
+			      _eSubpackages_1.add(_doubleArrow);
 			    };
 			    EPackage _doubleArrow = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
 			    _eSubpackages.add(_doubleArrow);
 			    final Consumer<EClass> _function_1 = (EClass it_1) -> {
 			      EList<EStructuralFeature> _eStructuralFeatures = it_1.getEStructuralFeatures();
-			      final Consumer<EAttribute> _function_2 = (EAttribute it_2) -> {
-			        it_2.setEType(getEDataType("foo", "FooDataType"));
-			      };
-			      EAttribute _newEAttribute = this.lib.newEAttribute("newTestAttr", _function_2);
-			      _eStructuralFeatures.add(_newEAttribute);
+			      EReference _newEReference = this.lib.newEReference("newTestRef", getEClass("foo.anewsubpackage.anestedsubpackage", "ANestedSubPackageClass"));
+			      _eStructuralFeatures.add(_newEReference);
 			    };
 			    this.lib.addNewEClass(getEPackage("foo.anewsubpackage"), "NewClass", _function_1);
 			    getEClass("foo.anewsubpackage", "NewClass").setName("RenamedClass");
