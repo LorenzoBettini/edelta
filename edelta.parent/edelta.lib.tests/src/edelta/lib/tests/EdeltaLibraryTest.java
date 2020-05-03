@@ -384,10 +384,10 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
-	public void test_addSuperClass() {
+	public void test_addESuperType() {
 		EClass superClass = ecoreFactory.createEClass();
 		EClass subClass = ecoreFactory.createEClass();
-		lib.addSuperClass(subClass, superClass);
+		lib.addESuperType(subClass, superClass);
 		assertSame(superClass, subClass.getESuperTypes().get(0));
 	}
 

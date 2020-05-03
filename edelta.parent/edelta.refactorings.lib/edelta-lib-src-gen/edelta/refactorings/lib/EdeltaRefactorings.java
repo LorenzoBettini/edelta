@@ -66,7 +66,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     for (final EEnumLiteral subc : _eLiterals) {
       {
         final Consumer<EClass> _function = (EClass it) -> {
-          this.lib.addSuperClass(it, containingclass);
+          this.lib.addESuperType(it, containingclass);
         };
         this.lib.addNewEClass(containingclass.getEPackage(), subc.getLiteral(), _function);
         EList<EStructuralFeature> _eStructuralFeatures = containingclass.getEStructuralFeatures();
@@ -87,7 +87,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
       for (final EAttribute attr : attrs) {
         EClass _eContainingClass = attr.getEContainingClass();
         final Procedure1<EClass> _function = (EClass it) -> {
-          this.lib.addSuperClass(it, superclass);
+          this.lib.addESuperType(it, superclass);
           EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
           _eStructuralFeatures.remove(attr);
         };
@@ -153,7 +153,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     for (final EStructuralFeature duplicate : duplicates) {
       EClass _eContainingClass = duplicate.getEContainingClass();
       final Procedure1<EClass> _function_1 = (EClass it) -> {
-        this.lib.addSuperClass(it, superclass);
+        this.lib.addESuperType(it, superclass);
         EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
         _eStructuralFeatures.remove(duplicate);
       };
