@@ -508,6 +508,38 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testCreateEClassInNewSubPackage() {
+		'''
+			import org.eclipse.emf.ecore.EcoreFactory
+			
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
+					name = "anewsubpackage"
+				]
+				ecoreref(anewsubpackage).addNewEClass("NewClass") [
+					EStructuralFeatures += newEAttribute("newTestAttr") [
+						EType = ecoreref(MainFooDataType)
+					]
+				]
+			}
+		'''
+		.parseWithTestEcoreWithSubPackage
+		.assertAfterInterpretationOfEdeltaModifyEcoreOperation(true)[ePackage |
+			val newSubPackage = ePackage.ESubpackages.last
+			assertEquals("anewsubpackage", newSubPackage.name)
+			val derivedEClass =
+				ePackage.ESubpackages.last.lastEClass
+			assertEquals("NewClass", derivedEClass.name)
+			assertEquals(1, derivedEClass.EStructuralFeatures.size)
+			val attr = derivedEClass.EStructuralFeatures.head
+			assertEquals("newTestAttr", attr.name)
+			assertEquals("MainFooDataType", attr.EType.name)
+		]
+	}
+
 	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) {
