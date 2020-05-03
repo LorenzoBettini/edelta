@@ -323,7 +323,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testEClassCreatedFromStatefuleUseAs() {
+  public void testEClassCreatedFromStatefulUseAs() {
     final Procedure1<EPackage> _function = (EPackage ePackage) -> {
       final EClass eClass = this.getLastEClass(ePackage);
       Assert.assertEquals("ANewClass3", eClass.getName());
@@ -704,6 +704,10 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   
   protected void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
     final EdeltaProgram program = this.parseWithTestEcore(input);
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor);
+  }
+  
+  protected void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaProgram program, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this.interpreter, program, doValidate, testExecutor);
     if (doValidate) {
       this._validationTestHelper.assertNoErrors(program);
