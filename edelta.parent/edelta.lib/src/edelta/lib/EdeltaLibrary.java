@@ -261,4 +261,8 @@ public class EdeltaLibrary {
 		subClass.getESuperTypes().add(superClass);
 	}
 
+	public void removeESuperType(EClass subClass, EClass superClass) {
+		subClass.getESuperTypes().remove(superClass);
+	}
+
 }
