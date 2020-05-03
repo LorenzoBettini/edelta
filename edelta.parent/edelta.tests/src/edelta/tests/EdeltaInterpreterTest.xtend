@@ -540,6 +540,44 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testComplexInterpretationWithRenamingAndSubPackages() {
+		'''
+			import org.eclipse.emf.ecore.EcoreFactory
+			
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
+					name = "anewsubpackage"
+				]
+				ecoreref(anewsubpackage).addNewEClass("NewClass") [
+					EStructuralFeatures += newEAttribute("newTestAttr") [
+						EType = ecoreref(MainFooDataType)
+					]
+				]
+				ecoreref(NewClass).name = "RenamedClass"
+				ecoreref(RenamedClass).getEStructuralFeatures +=
+					newEAttribute("added", ecoreref(MainFooDataType))
+			}
+		'''
+		.parseWithTestEcoreWithSubPackage
+		.assertAfterInterpretationOfEdeltaModifyEcoreOperation(true)[ePackage |
+			val newSubPackage = ePackage.ESubpackages.last
+			assertEquals("anewsubpackage", newSubPackage.name)
+			val derivedEClass =
+				ePackage.ESubpackages.last.lastEClass
+			assertEquals("RenamedClass", derivedEClass.name)
+			assertEquals(2, derivedEClass.EStructuralFeatures.size)
+			val attr1 = derivedEClass.EStructuralFeatures.head
+			assertEquals("newTestAttr", attr1.name)
+			assertEquals("MainFooDataType", attr1.EType.name)
+			val attr2 = derivedEClass.EStructuralFeatures.last
+			assertEquals("added", attr2.name)
+			assertEquals("MainFooDataType", attr2.EType.name)
+		]
+	}
+
 	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) {

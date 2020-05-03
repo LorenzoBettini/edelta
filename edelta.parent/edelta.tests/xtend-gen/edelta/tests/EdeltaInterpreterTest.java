@@ -820,6 +820,68 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this.parseWithTestEcoreWithSubPackage(_builder), true, _function);
   }
   
+  @Test
+  public void testComplexInterpretationWithRenamingAndSubPackages() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EcoreFactory");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("name = \"anewsubpackage\"");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(anewsubpackage).addNewEClass(\"NewClass\") [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("EStructuralFeatures += newEAttribute(\"newTestAttr\") [");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("EType = ecoreref(MainFooDataType)");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass).name = \"RenamedClass\"");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(RenamedClass).getEStructuralFeatures +=");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("newEAttribute(\"added\", ecoreref(MainFooDataType))");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final Procedure1<EPackage> _function = (EPackage ePackage) -> {
+      final EPackage newSubPackage = IterableExtensions.<EPackage>last(ePackage.getESubpackages());
+      Assert.assertEquals("anewsubpackage", newSubPackage.getName());
+      final EClass derivedEClass = this.getLastEClass(IterableExtensions.<EPackage>last(ePackage.getESubpackages()));
+      Assert.assertEquals("RenamedClass", derivedEClass.getName());
+      Assert.assertEquals(2, derivedEClass.getEStructuralFeatures().size());
+      final EStructuralFeature attr1 = IterableExtensions.<EStructuralFeature>head(derivedEClass.getEStructuralFeatures());
+      Assert.assertEquals("newTestAttr", attr1.getName());
+      Assert.assertEquals("MainFooDataType", attr1.getEType().getName());
+      final EStructuralFeature attr2 = IterableExtensions.<EStructuralFeature>last(derivedEClass.getEStructuralFeatures());
+      Assert.assertEquals("added", attr2.getName());
+      Assert.assertEquals("MainFooDataType", attr2.getEType().getName());
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this.parseWithTestEcoreWithSubPackage(_builder), true, _function);
+  }
+  
   protected void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final Procedure1<? super EPackage> testExecutor) {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, true, testExecutor);
   }
