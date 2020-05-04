@@ -578,6 +578,23 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testInterpreterOnSubPackageIsNotExecuted() {
+		'''
+			metamodel "mainpackage.mainsubpackage"
+			
+			modifyEcore aTest epackage mainsubpackage {
+				// this should not be executed
+				throw new MyCustomException
+			}
+		'''
+		.parseWithTestEcoreWithSubPackage
+		.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false)[ePackage |
+			// nothing to check as long as no exception is thrown
+			// (meaning that the interpreter is not executed on that modifyEcore op)
+		]
+	}
+
 	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) {

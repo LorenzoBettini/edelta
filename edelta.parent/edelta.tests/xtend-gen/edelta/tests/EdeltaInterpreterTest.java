@@ -882,6 +882,27 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this.parseWithTestEcoreWithSubPackage(_builder), true, _function);
   }
   
+  @Test
+  public void testInterpreterOnSubPackageIsNotExecuted() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage.mainsubpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainsubpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// this should not be executed");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("throw new MyCustomException");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final Procedure1<EPackage> _function = (EPackage ePackage) -> {
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this.parseWithTestEcoreWithSubPackage(_builder), false, _function);
+  }
+  
   protected void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final Procedure1<? super EPackage> testExecutor) {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, true, testExecutor);
   }

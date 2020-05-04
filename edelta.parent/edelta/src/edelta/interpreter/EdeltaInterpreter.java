@@ -114,7 +114,9 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 				Iterables.concat(copiedEPackagesMap.values(),
 						program.getMetamodels())));
 		useAsFields = newHashMap();
-		for (final EdeltaModifyEcoreOperation op : program.getModifyEcoreOperations()) {
+		List<EdeltaModifyEcoreOperation> filteredOperations =
+			edeltaInterpreterHelper.filterOperations(program.getModifyEcoreOperations());
+		for (final EdeltaModifyEcoreOperation op : filteredOperations) {
 			evaluateModifyEcoreOperation(op, copiedEPackagesMap);
 		}
 	}

@@ -97,6 +97,26 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testInvalidDirectSubPackageAreNotCopied() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("package test");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"mainpackage.mainsubpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainsubpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final EdeltaProgram program = this.parseWithTestEcoreWithSubPackage(_builder);
+    final Collection<EPackage> packages = this._testableEdeltaDerivedStateComputer.getCopiedEPackagesMap(program.eResource()).values();
+    Assertions.<EPackage>assertThat(packages).isEmpty();
+  }
+  
+  @Test
   public void testInstallDerivedStateDuringPreIndexingPhase() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
