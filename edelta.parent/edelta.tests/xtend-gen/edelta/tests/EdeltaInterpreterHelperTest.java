@@ -1,6 +1,8 @@
 package edelta.tests;
 
 import com.google.inject.Inject;
+import edelta.edelta.EdeltaModifyEcoreOperation;
+import edelta.edelta.EdeltaProgram;
 import edelta.edelta.EdeltaUseAs;
 import edelta.interpreter.EdeltaInterpreterHelper;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
@@ -149,5 +151,42 @@ public class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
     _builder.append(_name);
     _builder.append("\' has been resolved but cannot be loaded by the interpreter");
     _isInstanceOf.hasMessageContaining(_builder.toString());
+  }
+  
+  @Test
+  public void testFilterOperationsWithNullEPackage() {
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("modifyEcore first epackage {}");
+      _builder.newLine();
+      _builder.append("modifyEcore second epackage foo {}");
+      _builder.newLine();
+      EdeltaProgram _parse = this._parseHelper.parse(_builder);
+      final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+        Assertions.<EdeltaModifyEcoreOperation>assertThat(this.interpreterHelper.filterOperations(it.getModifyEcoreOperations())).containsExactly(IterableExtensions.<EdeltaModifyEcoreOperation>last(it.getModifyEcoreOperations()));
+      };
+      ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parse, _function);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
+  public void testFilterOperationsWithSubPackage() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage.mainsubpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainsubpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      Assertions.<EdeltaModifyEcoreOperation>assertThat(this.interpreterHelper.filterOperations(it.getModifyEcoreOperations())).isEmpty();
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
   }
 }
