@@ -993,15 +993,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	@Test
 	def void testCompilationOfComplexOperationsWithSubPackages() {
 		'''
-			import org.eclipse.emf.ecore.EcoreFactory
-			
 			metamodel "foo"
 			
 			modifyEcore modifyFoo epackage foo {
-				ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
-					name = "anewsubpackage"
-					ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
-						name = "anestedsubpackage"
+				addNewESubpackage("anewsubpackage", "aprefix", "aURI") [
+					addNewESubpackage("anestedsubpackage", "aprefix2", "aURI2") [
 						addNewEClass("ANestedSubPackageClass")
 					]
 				]
@@ -1025,9 +1021,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			import org.eclipse.emf.ecore.EPackage;
 			import org.eclipse.emf.ecore.EReference;
 			import org.eclipse.emf.ecore.EStructuralFeature;
-			import org.eclipse.emf.ecore.EcoreFactory;
-			import org.eclipse.xtext.xbase.lib.ObjectExtensions;
-			import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends AbstractEdelta {
@@ -1040,21 +1033,13 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  }
 			  
 			  public void modifyFoo(final EPackage it) {
-			    EList<EPackage> _eSubpackages = it.getESubpackages();
-			    EPackage _createEPackage = EcoreFactory.eINSTANCE.createEPackage();
-			    final Procedure1<EPackage> _function = (EPackage it_1) -> {
-			      it_1.setName("anewsubpackage");
-			      EList<EPackage> _eSubpackages_1 = it_1.getESubpackages();
-			      EPackage _createEPackage_1 = EcoreFactory.eINSTANCE.createEPackage();
-			      final Procedure1<EPackage> _function_1 = (EPackage it_2) -> {
-			        it_2.setName("anestedsubpackage");
+			    final Consumer<EPackage> _function = (EPackage it_1) -> {
+			      final Consumer<EPackage> _function_1 = (EPackage it_2) -> {
 			        this.lib.addNewEClass(it_2, "ANestedSubPackageClass");
 			      };
-			      EPackage _doubleArrow = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage_1, _function_1);
-			      _eSubpackages_1.add(_doubleArrow);
+			      this.lib.addNewESubpackage(it_1, "anestedsubpackage", "aprefix2", "aURI2", _function_1);
 			    };
-			    EPackage _doubleArrow = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-			    _eSubpackages.add(_doubleArrow);
+			    this.lib.addNewESubpackage(it, "anewsubpackage", "aprefix", "aURI", _function);
 			    final Consumer<EClass> _function_1 = (EClass it_1) -> {
 			      EList<EStructuralFeature> _eStructuralFeatures = it_1.getEStructuralFeatures();
 			      EReference _newEReference = this.lib.newEReference("newTestRef", getEClass("foo.anewsubpackage.anestedsubpackage", "ANestedSubPackageClass"));
@@ -1084,19 +1069,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	@Test
 	def void testExecutionOfComplexOperationsWithSubPackages() {
 		'''
-			import org.eclipse.emf.ecore.EcoreFactory
-			
 			metamodel "foo"
 			
 			modifyEcore modifyFoo epackage foo {
-				ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
-					name = "anewsubpackage"
-					nsPrefix = "anewsubpackage"
-					nsURI = "http://anewsubpackage"
-					ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
-						name = "anestedsubpackage"
-						nsPrefix = "anestedsubpackage"
-						nsURI = "http://anestedsubpackage"
+				addNewESubpackage("anewsubpackage", "anewsubpackage", "http://anewsubpackage") [
+					addNewESubpackage("anestedsubpackage", "anestedsubpackage", "http://anestedsubpackage") [
 						addNewEClass("ANestedSubPackageClass")
 					]
 				]
