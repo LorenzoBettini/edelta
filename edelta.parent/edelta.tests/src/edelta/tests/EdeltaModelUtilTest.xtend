@@ -7,6 +7,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static edelta.util.EdeltaModelUtil.*
+import static org.assertj.core.api.Assertions.assertThat
 import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
@@ -53,4 +54,21 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 			subSubPackage
 		))
 	}
+
+	@Test
+	def void testFindRootSuperPackage() {
+		val ecoreFactory = EcoreFactory.eINSTANCE
+		val rootPackage = ecoreFactory.createEPackage() => [
+			ESubpackages += ecoreFactory.createEPackage() => [
+				ESubpackages += ecoreFactory.createEPackage()
+			]
+		]
+		assertThat(findRootSuperPackage(rootPackage.ESubpackages.head.ESubpackages.head))
+			.isSameAs(rootPackage)
+		assertThat(findRootSuperPackage(rootPackage.ESubpackages.head))
+			.isSameAs(rootPackage)
+		assertThat(findRootSuperPackage(rootPackage))
+			.isNull
+	}
+
 }

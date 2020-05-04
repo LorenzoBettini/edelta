@@ -4,6 +4,7 @@ import edelta.edelta.EdeltaProgram;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderCustom;
 import edelta.util.EdeltaModelUtil;
+import org.assertj.core.api.Assertions;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EcoreFactory;
@@ -78,5 +79,26 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
     _eSubpackages.add(ePackage);
     Assert.assertTrue(
       EdeltaModelUtil.hasCycleInSuperPackage(subSubPackage));
+  }
+  
+  @Test
+  public void testFindRootSuperPackage() {
+    final EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
+    EPackage _createEPackage = ecoreFactory.createEPackage();
+    final Procedure1<EPackage> _function = (EPackage it) -> {
+      EList<EPackage> _eSubpackages = it.getESubpackages();
+      EPackage _createEPackage_1 = ecoreFactory.createEPackage();
+      final Procedure1<EPackage> _function_1 = (EPackage it_1) -> {
+        EList<EPackage> _eSubpackages_1 = it_1.getESubpackages();
+        EPackage _createEPackage_2 = ecoreFactory.createEPackage();
+        _eSubpackages_1.add(_createEPackage_2);
+      };
+      EPackage _doubleArrow = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage_1, _function_1);
+      _eSubpackages.add(_doubleArrow);
+    };
+    final EPackage rootPackage = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
+    Assertions.<EPackage>assertThat(EdeltaModelUtil.findRootSuperPackage(IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>head(rootPackage.getESubpackages()).getESubpackages()))).isSameAs(rootPackage);
+    Assertions.<EPackage>assertThat(EdeltaModelUtil.findRootSuperPackage(IterableExtensions.<EPackage>head(rootPackage.getESubpackages()))).isSameAs(rootPackage);
+    Assertions.<EPackage>assertThat(EdeltaModelUtil.findRootSuperPackage(rootPackage)).isNull();
   }
 }
