@@ -265,4 +265,19 @@ public class EdeltaLibrary {
 		subClass.getESuperTypes().remove(superClass);
 	}
 
+	public EPackage addNewESubpackage(EPackage superPackage, String name, String nsPrefix, String nsURI) {
+		return addNewESubpackage(superPackage, name, nsPrefix, nsURI, null);
+	}
+
+	public EPackage addNewESubpackage(EPackage superPackage, String name, String nsPrefix, String nsURI,
+			Consumer<EPackage> initializer) {
+		EPackage newSubpackage = ecoreFactory.createEPackage();
+		newSubpackage.setName(name);
+		newSubpackage.setNsPrefix(nsPrefix);
+		newSubpackage.setNsURI(nsURI);
+		superPackage.getESubpackages().add(newSubpackage);
+		safeRunInitializer(initializer, newSubpackage);
+		return newSubpackage;
+	}
+
 }
