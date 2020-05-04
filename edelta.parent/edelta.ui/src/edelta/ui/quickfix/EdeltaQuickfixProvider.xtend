@@ -3,6 +3,10 @@
  */
 package edelta.ui.quickfix
 
+import edelta.validation.EdeltaValidator
+import org.eclipse.xtext.ui.editor.quickfix.Fix
+import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor
+import org.eclipse.xtext.validation.Issue
 import org.eclipse.xtext.xbase.annotations.ui.quickfix.XbaseWithAnnotationsQuickfixProvider
 
 /**
@@ -12,13 +16,14 @@ import org.eclipse.xtext.xbase.annotations.ui.quickfix.XbaseWithAnnotationsQuick
  */
 class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider {
 
-//	@Fix(EdeltaValidator.INVALID_NAME)
-//	def capitalizeName(Issue issue, IssueResolutionAcceptor acceptor) {
-//		acceptor.accept(issue, 'Capitalize name', 'Capitalize the name.', 'upcase.png') [
-//			context |
-//			val xtextDocument = context.xtextDocument
-//			val firstLetter = xtextDocument.get(issue.offset, 1)
-//			xtextDocument.replace(issue.offset, 1, firstLetter.toUpperCase)
-//		]
-//	}
+	@Fix(EdeltaValidator.INVALID_SUBPACKAGE_IMPORT)
+	def capitalizeName(Issue issue, IssueResolutionAcceptor acceptor) {
+		val rootPackageName = issue.data.get(0)
+		acceptor.accept(issue, 'Import root EPackage', "Import root EPackage '" + rootPackageName + "'", 'EPackage.gif') [
+			context |
+			val xtextDocument = context.xtextDocument
+			xtextDocument
+				.replace(issue.offset, issue.length, '"' + rootPackageName + '"')
+		]
+	}
 }

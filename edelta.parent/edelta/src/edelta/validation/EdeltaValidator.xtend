@@ -4,6 +4,7 @@
 package edelta.validation
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaModifyEcoreOperation
 import edelta.edelta.EdeltaProgram
 import edelta.edelta.EdeltaUseAs
 import edelta.lib.AbstractEdelta
@@ -19,7 +20,6 @@ import org.eclipse.xtext.xbase.typesystem.util.Multimaps2
 
 import static edelta.edelta.EdeltaPackage.Literals.*
 import static edelta.util.EdeltaModelUtil.*
-import edelta.edelta.EdeltaModifyEcoreOperation
 
 /**
  * This class contains custom validation rules. 
@@ -67,13 +67,15 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	def void checkProgram(EdeltaProgram p) {
 		var metamodelIndex = 0
 		for (metamodel : p.metamodels) {
-			if (findRootSuperPackage(metamodel) !== null) {
+			val rootPackage = findRootSuperPackage(metamodel)
+			if (rootPackage !== null) {
 				error(
 					"Invalid subpackage import '" + metamodel.name + "'",
 					p,
 					EDELTA_PROGRAM__METAMODELS,
 					metamodelIndex,
-					INVALID_SUBPACKAGE_IMPORT
+					INVALID_SUBPACKAGE_IMPORT,
+					rootPackage.name // the fix for the import
 				)
 			}
 			metamodelIndex++
