@@ -419,12 +419,12 @@ public class EdeltaLibraryTest {
 	public void test_addNewESubpackageWithInitializer() {
 		EPackage superPackage = ecoreFactory.createEPackage();
 		EPackage subPackage =
-				lib.addNewESubpackage(superPackage, "newSubpackage", "prefix", "nsURI",
-						(EPackage p) -> p.setName("changed"));
+			lib.addNewESubpackage(superPackage, "newSubpackage", "prefix", "nsURI",
+				(EPackage p) -> p.setName("changed"));
 		assertThat(subPackage)
-		.returns("changed", EPackage::getName)
-		.returns("prefix", EPackage::getNsPrefix)
-		.returns("nsURI", EPackage::getNsURI);
+			.returns("changed", EPackage::getName)
+			.returns("prefix", EPackage::getNsPrefix)
+			.returns("nsURI", EPackage::getNsURI);
 		assertThat(superPackage.getESubpackages()).containsOnly(subPackage);
 		assertThat(subPackage.getESuperPackage()).isSameAs(superPackage);
 	}
