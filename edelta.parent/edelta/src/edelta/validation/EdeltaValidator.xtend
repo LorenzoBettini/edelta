@@ -18,6 +18,7 @@ import org.eclipse.xtext.xbase.typesystem.util.CommonTypeComputationServices
 import org.eclipse.xtext.xbase.typesystem.util.Multimaps2
 
 import static edelta.edelta.EdeltaPackage.Literals.*
+import static edelta.util.EdeltaModelUtil.*
 
 /**
  * This class contains custom validation rules. 
@@ -30,6 +31,7 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	public static val TYPE_MISMATCH = PREFIX + "TypeMismatch";
 	public static val INTERPRETER_TIMEOUT = PREFIX + "InterpreterTimeout";
 	public static val DUPLICATE_DECLARATION = PREFIX + "DuplicateDeclaration";
+	public static val INVALID_SUBPACKAGE_IMPORT = PREFIX + "InvalidSubPackageImport";
 
 	@Inject CommonTypeComputationServices services
 	@Inject OverrideHelper overrideHelper
@@ -61,6 +63,20 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 
 	@Check
 	def void checkDuplicateDeclarations(EdeltaProgram p) {
+		var metamodelIndex = 0
+		for (metamodel : p.metamodels) {
+			if (findRootSuperPackage(metamodel) !== null) {
+				error(
+					"Invalid subpackage import '" + metamodel.name + "'",
+					p,
+					EDELTA_PROGRAM__METAMODELS,
+					metamodelIndex,
+					INVALID_SUBPACKAGE_IMPORT
+				)
+			}
+			metamodelIndex++
+		}
+
 		val javaClass = p.jvmElements.filter(JvmGenericType).head
 		val methods = overrideHelper.getResolvedFeatures(javaClass).declaredOperations
 
