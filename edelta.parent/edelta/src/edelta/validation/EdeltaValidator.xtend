@@ -19,6 +19,7 @@ import org.eclipse.xtext.xbase.typesystem.util.Multimaps2
 
 import static edelta.edelta.EdeltaPackage.Literals.*
 import static edelta.util.EdeltaModelUtil.*
+import edelta.edelta.EdeltaModifyEcoreOperation
 
 /**
  * This class contains custom validation rules. 
@@ -32,6 +33,7 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	public static val INTERPRETER_TIMEOUT = PREFIX + "InterpreterTimeout";
 	public static val DUPLICATE_DECLARATION = PREFIX + "DuplicateDeclaration";
 	public static val INVALID_SUBPACKAGE_IMPORT = PREFIX + "InvalidSubPackageImport";
+	public static val INVALID_SUBPACKAGE_MODIFICATION = PREFIX + "InvalidSubPackageModification";
 
 	@Inject CommonTypeComputationServices services
 	@Inject OverrideHelper overrideHelper
@@ -62,7 +64,7 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	}
 
 	@Check
-	def void checkDuplicateDeclarations(EdeltaProgram p) {
+	def void checkProgram(EdeltaProgram p) {
 		var metamodelIndex = 0
 		for (metamodel : p.metamodels) {
 			if (findRootSuperPackage(metamodel) !== null) {
@@ -102,6 +104,17 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 		}
 	}
 
+	@Check
+	def void checkModifyEcore(EdeltaModifyEcoreOperation op) {
+		if (findRootSuperPackage(op.epackage) !== null) {
+			error(
+				"Invalid direct subpackage modification '" + op.epackage.name + "'",
+				op,
+				EDELTA_MODIFY_ECORE_OPERATION__EPACKAGE,
+				INVALID_SUBPACKAGE_MODIFICATION
+			)
+		}
+	}
 
 	def isConformant(EObject context, Class<?> expected, JvmTypeReference actual) {
 		val actualType = actual.toLightweightTypeReference(context)

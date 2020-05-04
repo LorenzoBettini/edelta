@@ -463,4 +463,27 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
       EdeltaValidator.INVALID_SUBPACKAGE_IMPORT, start, _plus, 
       "Invalid subpackage import \'mainsubpackage\'");
   }
+  
+  @Test
+  public void testInvalidModifyEcoreOfSubPackage() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage.mainsubpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainsubpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    final int start = input.lastIndexOf("mainsubpackage");
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
+    EClass _edeltaModifyEcoreOperation = EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation();
+    int _indexOf = input.indexOf(" {");
+    int _minus = (_indexOf - start);
+    this._validationTestHelper.assertError(_parseWithTestEcoreWithSubPackage, _edeltaModifyEcoreOperation, 
+      EdeltaValidator.INVALID_SUBPACKAGE_MODIFICATION, start, _minus, 
+      "Invalid direct subpackage modification \'mainsubpackage\'");
+  }
 }
