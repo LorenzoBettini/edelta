@@ -10,12 +10,9 @@ package edelta.ui.tests;
 
 import edelta.ui.tests.EdeltaUiInjectorProvider;
 import edelta.validation.EdeltaValidator;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
-import org.eclipse.xtext.ui.XtextProjectHelper;
 import org.eclipse.xtext.ui.testing.AbstractQuickfixTest;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil;
@@ -35,14 +32,6 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
   public void setup() {
     try {
       JavaProjectSetupUtil.createJavaProject(this.getProjectName());
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
-  }
-  
-  @Test
-  public void fixSubPackageImport() {
-    try {
       String _projectName = this.getProjectName();
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
@@ -105,25 +94,40 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
       _builder.newLine();
       _builder.append("</ecore:EPackage>");
       _builder.newLine();
-      final IFile ecoreFile = IResourcesSetupUtil.createFile(_projectName, 
+      IResourcesSetupUtil.createFile(_projectName, 
         "src/MySubPackages", "ecore", _builder.toString());
-      final IProject project = ecoreFile.getProject();
-      boolean _hasNature = project.hasNature(XtextProjectHelper.NATURE_ID);
-      boolean _not = (!_hasNature);
-      if (_not) {
-        IResourcesSetupUtil.addNature(project, XtextProjectHelper.NATURE_ID);
-      }
-      StringConcatenation _builder_1 = new StringConcatenation();
-      _builder_1.append("metamodel \"mainpackage.subpackage\"");
-      _builder_1.newLine();
-      StringConcatenation _builder_2 = new StringConcatenation();
-      _builder_2.append("metamodel \"mainpackage\"");
-      _builder_2.newLine();
-      AbstractQuickfixTest.Quickfix _quickfix = new AbstractQuickfixTest.Quickfix("Import root EPackage", 
-        "Import root EPackage \'mainpackage\'", _builder_2.toString());
-      this.testQuickfixesOn(_builder_1, EdeltaValidator.INVALID_SUBPACKAGE_IMPORT, _quickfix);
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
+  }
+  
+  @Test
+  public void fixSubPackageImport() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage.subpackage\"");
+    _builder.newLine();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("metamodel \"mainpackage\"");
+    _builder_1.newLine();
+    AbstractQuickfixTest.Quickfix _quickfix = new AbstractQuickfixTest.Quickfix("Import root EPackage", 
+      "Import root EPackage \'mainpackage\'", _builder_1.toString());
+    this.testQuickfixesOn(_builder, EdeltaValidator.INVALID_SUBPACKAGE_IMPORT, _quickfix);
+  }
+  
+  @Test
+  public void fixSubPackageImportWithSeveralImports() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.append("metamodel \"mainpackage.subpackage.subsubpackage\"");
+    _builder.newLine();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("metamodel \"foo\"");
+    _builder_1.newLine();
+    _builder_1.append("metamodel \"mainpackage\"");
+    _builder_1.newLine();
+    AbstractQuickfixTest.Quickfix _quickfix = new AbstractQuickfixTest.Quickfix("Import root EPackage", 
+      "Import root EPackage \'mainpackage\'", _builder_1.toString());
+    this.testQuickfixesOn(_builder, EdeltaValidator.INVALID_SUBPACKAGE_IMPORT, _quickfix);
   }
 }

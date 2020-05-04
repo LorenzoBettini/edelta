@@ -11,14 +11,12 @@ package edelta.ui.tests
 import edelta.validation.EdeltaValidator
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
-import org.eclipse.xtext.ui.XtextProjectHelper
 import org.eclipse.xtext.ui.testing.AbstractQuickfixTest
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import static extension org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.addNature
 import static extension org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil.createJavaProject
 
 /**
@@ -33,10 +31,8 @@ class EdeltaQuickfixTest extends AbstractQuickfixTest {
 		 * Xbase-based languages require java project
 		 */
 		projectName.createJavaProject
-	}
 
-	@Test def fixSubPackageImport() {
-		val ecoreFile = IResourcesSetupUtil
+		IResourcesSetupUtil
 			.createFile(
 				projectName,
 				"src/MySubPackages", "ecore",
@@ -64,16 +60,30 @@ class EdeltaQuickfixTest extends AbstractQuickfixTest {
 				</ecore:EPackage>
 				'''
 			)
-		val project = ecoreFile.project
-		if(!project.hasNature(XtextProjectHelper.NATURE_ID)) {
-			project.addNature(XtextProjectHelper.NATURE_ID)
-		}
+	}
+
+	@Test def fixSubPackageImport() {
 		'''
 			metamodel "mainpackage.subpackage"
 		'''.testQuickfixesOn
 		(EdeltaValidator.INVALID_SUBPACKAGE_IMPORT,
 			new Quickfix("Import root EPackage",
-			"Import root EPackage 'mainpackage'", '''
+			"Import root EPackage 'mainpackage'",
+		'''
+			metamodel "mainpackage"
+		'''))
+	}
+
+	@Test def fixSubPackageImportWithSeveralImports() {
+		'''
+			metamodel "foo"
+			metamodel "mainpackage.subpackage.subsubpackage"
+		'''.testQuickfixesOn
+		(EdeltaValidator.INVALID_SUBPACKAGE_IMPORT,
+			new Quickfix("Import root EPackage",
+			"Import root EPackage 'mainpackage'",
+		'''
+			metamodel "foo"
 			metamodel "mainpackage"
 		'''))
 	}
