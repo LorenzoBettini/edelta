@@ -696,9 +696,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			modifyEcore modifyFoo epackage foo {
 				ecoreref(foo.FooClass).name = "RenamedClass"
-				ecoreref(RenamedClass).EStructuralFeatures += newEAttribute("anotherAttr") [
-					EType = ecoreref(FooDataType)
-				]
+				ecoreref(RenamedClass).EStructuralFeatures +=
+					newEAttribute("anotherAttr", ecoreref(FooDataType))
 				ecoreref(RenamedClass).abstract = true
 				ecoreref(foo.RenamedClass) => [abstract = true]
 			}
@@ -707,7 +706,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
-			import java.util.function.Consumer;
 			import org.eclipse.emf.common.util.EList;
 			import org.eclipse.emf.ecore.EAttribute;
 			import org.eclipse.emf.ecore.EClass;
@@ -729,17 +727,14 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public void modifyFoo(final EPackage it) {
 			    getEClass("foo", "FooClass").setName("RenamedClass");
 			    EList<EStructuralFeature> _eStructuralFeatures = getEClass("foo", "RenamedClass").getEStructuralFeatures();
-			    final Consumer<EAttribute> _function = (EAttribute it_1) -> {
-			      it_1.setEType(getEDataType("foo", "FooDataType"));
-			    };
-			    EAttribute _newEAttribute = this.lib.newEAttribute("anotherAttr", _function);
+			    EAttribute _newEAttribute = this.lib.newEAttribute("anotherAttr", getEDataType("foo", "FooDataType"));
 			    _eStructuralFeatures.add(_newEAttribute);
 			    getEClass("foo", "RenamedClass").setAbstract(true);
-			    final Procedure1<EClass> _function_1 = (EClass it_1) -> {
+			    final Procedure1<EClass> _function = (EClass it_1) -> {
 			      it_1.setAbstract(true);
 			    };
 			    ObjectExtensions.<EClass>operator_doubleArrow(
-			      getEClass("foo", "RenamedClass"), _function_1);
+			      getEClass("foo", "RenamedClass"), _function);
 			  }
 			  
 			  @Override
@@ -763,9 +758,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			modifyEcore modifyFoo epackage foo {
 				ecoreref(foo.FooClass).name = "RenamedClass"
-				ecoreref(RenamedClass).EStructuralFeatures += newEAttribute("anotherAttr") [
-					EType = ecoreref(FooDataType)
-				]
+				ecoreref(RenamedClass).EStructuralFeatures +=
+					newEAttribute("anotherAttr", ecoreref(FooDataType))
 				ecoreref(RenamedClass).abstract = true
 			}
 		'''.checkCompiledCodeExecution(
@@ -1123,12 +1117,10 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			import edelta.refactorings.lib.EdeltaRefactorings;
 			import java.util.Collections;
 			import java.util.function.Consumer;
-			import org.eclipse.emf.common.util.EList;
 			import org.eclipse.emf.ecore.EAttribute;
 			import org.eclipse.emf.ecore.EClass;
 			import org.eclipse.emf.ecore.EPackage;
 			import org.eclipse.emf.ecore.EReference;
-			import org.eclipse.emf.ecore.EStructuralFeature;
 			import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 			import org.eclipse.xtext.xbase.lib.Extension;
 			import org.eclipse.xtext.xbase.lib.ObjectExtensions;
@@ -1171,12 +1163,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public void introduceWorkingPosition(final EPackage it) {
 			    final Consumer<EClass> _function = (EClass it_1) -> {
-			      EList<EStructuralFeature> _eStructuralFeatures = it_1.getEStructuralFeatures();
-			      final Consumer<EAttribute> _function_1 = (EAttribute it_2) -> {
-			        it_2.setEType(getEDataType("ecore", "EString"));
-			      };
-			      EAttribute _newEAttribute = this.lib.newEAttribute("description", _function_1);
-			      _eStructuralFeatures.add(_newEAttribute);
+			      this.lib.addNewEAttribute(it_1, "description", getEDataType("ecore", "EString"));
 			      this.refactorings.extractMetaClass(it_1, getEReference("PersonList", "Person", "works"), "position", "works");
 			    };
 			    this.lib.addNewEClass(it, "WorkingPosition", _function);

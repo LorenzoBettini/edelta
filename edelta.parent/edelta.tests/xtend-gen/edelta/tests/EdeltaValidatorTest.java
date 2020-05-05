@@ -297,7 +297,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     _builder.append("ecoreref(RenamedClass).EStructuralFeatures.add(");
     _builder.newLine();
     _builder.append("\t\t");
-    _builder.append("newEAttribute(\"addedAttribute\"))");
+    _builder.append("newEAttribute(\"addedAttribute\", ecoreref(FooDataType)))");
     _builder.newLine();
     _builder.append("\t");
     _builder.append("ecoreref(RenamedClass.addedAttribute)");
@@ -322,7 +322,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     _builder.append("ecoreref(foo.FooClass).name = \"RenamedClass\"");
     _builder.newLine();
     _builder.append("\t");
-    _builder.append("ecoreref(RenamedClass).EStructuralFeatures += newEAttribute(\"added\")");
+    _builder.append("ecoreref(RenamedClass).EStructuralFeatures += newEAttribute(\"added\", ecoreref(FooDataType))");
     _builder.newLine();
     _builder.append("\t");
     _builder.append("ecoreref(RenamedClass.added)");

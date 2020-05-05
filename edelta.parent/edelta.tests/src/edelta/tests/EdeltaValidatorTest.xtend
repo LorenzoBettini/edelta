@@ -198,7 +198,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		modifyEcore aTest epackage foo {
 			ecoreref(foo.FooClass).name = "RenamedClass"
 			ecoreref(RenamedClass).EStructuralFeatures.add(
-				newEAttribute("addedAttribute"))
+				newEAttribute("addedAttribute", ecoreref(FooDataType)))
 			ecoreref(RenamedClass.addedAttribute)
 		}
 		'''.parseWithTestEcore.assertNoErrors
@@ -213,7 +213,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 
 		modifyEcore aTest epackage foo {
 			ecoreref(foo.FooClass).name = "RenamedClass"
-			ecoreref(RenamedClass).EStructuralFeatures += newEAttribute("added")
+			ecoreref(RenamedClass).EStructuralFeatures += newEAttribute("added", ecoreref(FooDataType))
 			ecoreref(RenamedClass.added)
 		}
 		'''.parseWithTestEcore.assertNoErrors

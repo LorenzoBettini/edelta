@@ -344,13 +344,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
       _builder.append("def myNewAttribute(EClass c, String name) {");
       _builder.newLine();
       _builder.append("\t");
-      _builder.append("c.EStructuralFeatures += newEAttribute(name) => [");
-      _builder.newLine();
-      _builder.append("\t\t");
-      _builder.append("EType = ecoreref(MyDataType)");
-      _builder.newLine();
-      _builder.append("\t");
-      _builder.append("]");
+      _builder.append("c.EStructuralFeatures += newEAttribute(name, ecoreref(MyDataType))");
       _builder.newLine();
       _builder.append("}");
       _builder.newLine();

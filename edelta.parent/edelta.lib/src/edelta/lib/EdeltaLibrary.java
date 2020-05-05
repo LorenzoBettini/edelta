@@ -45,17 +45,6 @@ public class EdeltaLibrary {
 		return c;
 	}
 
-	public EAttribute newEAttribute(String name) {
-		return newEAttribute(name, null, null);
-	}
-
-	public EAttribute newEAttribute(String name, Consumer<EAttribute> initializer) {
-		EAttribute e = ecoreFactory.createEAttribute();
-		e.setName(name);
-		safeRunInitializer(initializer, e);
-		return e;
-	}
-
 	public EAttribute newEAttribute(String name, EDataType dataType) {
 		return newEAttribute(name, dataType, null);
 	}

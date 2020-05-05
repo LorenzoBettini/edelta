@@ -620,7 +620,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     _builder.append("ecoreref(RenamedClass).EStructuralFeatures +=");
     _builder.newLine();
     _builder.append("\t\t");
-    _builder.append("newEAttribute(\"addedAttribute\")");
+    _builder.append("newEAttribute(\"addedAttribute\", ecoreref(FooDataType))");
     _builder.newLine();
     _builder.append("\t");
     _builder.append("ecoreref(RenamedClass.)");

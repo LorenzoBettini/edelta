@@ -446,7 +446,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		modifyEcore aTest epackage foo {
 			ecoreref(foo.FooClass).name = "RenamedClass"
 			ecoreref(RenamedClass).EStructuralFeatures +=
-				newEAttribute("addedAttribute")
+				newEAttribute("addedAttribute", ecoreref(FooDataType))
 			ecoreref(RenamedClass.)
 		}
 		'''.parseWithTestEcore.lastModifyEcoreOperation.body.blockLastExpression.
