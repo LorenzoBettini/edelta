@@ -78,6 +78,19 @@ public abstract class EdeltaAbstractTest {
   
   protected static String PERSON_LIST_ECORE_PATH = ("src/edelta/tests/input/models/" + EdeltaAbstractTest.PERSON_LIST_ECORE);
   
+  protected EdeltaProgram parse2WithTestEcore(final CharSequence first, final CharSequence second) {
+    try {
+      EdeltaProgram _xblockexpression = null;
+      {
+        final EdeltaProgram program1 = this._parseHelper.parse(first, this.resourceSetWithTestEcore());
+        _xblockexpression = this._parseHelper.parse(second, program1.eResource().getResourceSet());
+      }
+      return _xblockexpression;
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
   protected EdeltaProgram parseWithTestEcore(final CharSequence input) {
     try {
       return this._parseHelper.parse(input, this.resourceSetWithTestEcore());

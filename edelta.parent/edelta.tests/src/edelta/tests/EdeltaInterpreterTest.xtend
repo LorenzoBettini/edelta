@@ -567,6 +567,49 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testModifyEcoreAndCallOperationFromExternalUseAs() {
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+		'''
+			import org.eclipse.emf.ecore.EClass
+
+			package test1
+			
+			def op2(EClass c) : void {
+				c.abstract = true
+			}
+		''',
+		'''
+			import org.eclipse.emf.ecore.EClass
+			import test1.__synthetic0
+			
+			package test2
+			
+			metamodel "foo"
+			
+			use test1.__synthetic0 as my
+			
+			def op(EClass c) : void {
+				var __synthetic0 a = null
+				// println(my)
+				c.abstract = true
+			}
+			
+			modifyEcore aModificationTest epackage foo {
+				EClassifiers += newEClass("ANewClass") [
+					ESuperTypes += newEClass("Base")
+					op(it)
+				]
+			}
+		''', true) [ derivedEPackage |
+			derivedEPackage.lastEClass => [
+				assertEquals("ANewClass", name)
+				assertEquals("Base", ESuperTypes.last.name)
+				assertTrue(isAbstract)
+			]
+		]
+	}
+
 	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) {
@@ -577,6 +620,13 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		CharSequence input, boolean doValidate, (EPackage)=>void testExecutor
 	) {
 		val program = input.parseWithTestEcore
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor)
+	}
+
+	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+		CharSequence first, CharSequence second, boolean doValidate, (EPackage)=>void testExecutor
+	) {
+		val program = parse2WithTestEcore(first, second)
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor)
 	}
 

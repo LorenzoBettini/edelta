@@ -51,6 +51,11 @@ abstract class EdeltaAbstractTest {
 	protected static String PERSON_LIST_ECORE = "PersonList.ecore"
 	protected static String PERSON_LIST_ECORE_PATH = "src/edelta/tests/input/models/" + PERSON_LIST_ECORE
 
+	def protected parse2WithTestEcore(CharSequence first, CharSequence second) {
+		val program1 = first.parse(resourceSetWithTestEcore)
+		second.parse(program1.eResource.resourceSet)
+	}
+
 	def protected parseWithTestEcore(CharSequence input) {
 		input.parse(resourceSetWithTestEcore)
 	}
