@@ -82,9 +82,6 @@ public class EdeltaTest {
 			super.runInitializers();
 		}
 
-		public void fooConsumer(EClass e) {
-			
-		}
 	}
 
 	protected TestableEdelta edelta;
