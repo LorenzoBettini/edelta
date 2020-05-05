@@ -1,11 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2018 itemis AG (http://www.itemis.eu) and others.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License 2.0 which is available at
- * http://www.eclipse.org/legal/epl-2.0.
- *
- * SPDX-License-Identifier: EPL-2.0
- *******************************************************************************/
 package edelta.ui.tests
 
 import edelta.validation.EdeltaValidator
@@ -19,9 +11,6 @@ import org.junit.runner.RunWith
 
 import static extension org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil.createJavaProject
 
-/**
- * @author miklossy - Initial contribution and API
- */
 @RunWith(XtextRunner)
 @InjectWith(EdeltaUiInjectorProvider)
 class EdeltaQuickfixTest extends AbstractQuickfixTest {

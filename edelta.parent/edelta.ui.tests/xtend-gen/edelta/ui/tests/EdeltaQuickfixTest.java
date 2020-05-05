@@ -1,11 +1,3 @@
-/**
- * Copyright (c) 2018 itemis AG (http://www.itemis.eu) and others.
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License 2.0 which is available at
- * http://www.eclipse.org/legal/epl-2.0.
- * 
- * SPDX-License-Identifier: EPL-2.0
- */
 package edelta.ui.tests;
 
 import edelta.ui.tests.EdeltaUiInjectorProvider;
@@ -21,9 +13,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-/**
- * @author miklossy - Initial contribution and API
- */
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
 @SuppressWarnings("all")
