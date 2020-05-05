@@ -82,19 +82,6 @@ public class EdeltaTest {
 			super.runInitializers();
 		}
 
-		@Override
-		public <E> List<E> createList(E e) {
-			return super.createList(e);
-		}
-
-		@Override
-		public <E> List<E> createList(E e1, E e2) {
-			return super.createList(e1, e2);
-		}
-
-		public void fooConsumer(EClass e) {
-			
-		}
 	}
 
 	protected TestableEdelta edelta;
@@ -318,90 +305,6 @@ public class EdeltaTest {
 					"testSaveModifiedEcoresAfterRemovingBaseClass"+"/"+
 						MY_ECORE,
 				MODIFIED+"/"+MY_ECORE);
-	}
-
-	@Test
-	public void testCreateEClass() {
-		loadTestEcore(MY_ECORE);
-		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
-		assertNull(ePackage.getEClassifier("NewClass"));
-		EClass createEClass = edelta.createEClass(MYPACKAGE, "NewClass", null);
-		assertSame(createEClass, ePackage.getEClassifier("NewClass"));
-	}
-
-	@Test
-	public void testCreateEClassLaterInitialization() {
-		loadTestEcore(MY_ECORE);
-		// refers to an EClass that is created later
-		EClass newClass1 = edelta.createEClass(MYPACKAGE, "NewClass1",
-			edelta.createList(
-				c -> c.getESuperTypes().add(edelta.getEClass(MYPACKAGE, "NewClass2")),
-				c -> c.getESuperTypes().add(edelta.getEClass(MYPACKAGE, "NewClass3"))
-			)
-		);
-		EClass newClass2 = edelta.createEClass(MYPACKAGE, "NewClass2",
-			edelta.createList(edelta::fooConsumer));
-		EClass newClass3 = edelta.createEClass(MYPACKAGE, "NewClass3", null);
-		edelta.runInitializers();
-		assertSame(newClass2, newClass1.getESuperTypes().get(0));
-		assertSame(newClass3, newClass1.getESuperTypes().get(1));
-	}
-
-	@Test
-	public void testChangeEClass() {
-		loadTestEcore(MY_ECORE);
-		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
-		assertNotNull(ePackage.getEClassifier(MY_CLASS));
-		EClass cl = edelta.changeEClass(MYPACKAGE, MY_CLASS, null);
-		assertSame(cl, ePackage.getEClassifier(MY_CLASS));
-	}
-
-	@Test
-	public void testChangeEClassLaterInitialization() {
-		loadTestEcore(MY_ECORE);
-		// refers to an EClass that is created later
-		EClass cl1 = edelta.changeEClass(MYPACKAGE, MY_CLASS,
-			edelta.createList(
-				c -> c.getESuperTypes().add(edelta.getEClass(MYPACKAGE, "NewClass2")),
-				c -> c.getESuperTypes().add(edelta.getEClass(MYPACKAGE, "NewClass3"))
-			)
-		);
-		EClass newClass2 = edelta.createEClass(MYPACKAGE, "NewClass2",
-			edelta.createList(edelta::fooConsumer));
-		EClass newClass3 = edelta.createEClass(MYPACKAGE, "NewClass3", null);
-		edelta.runInitializers();
-		assertSame(newClass2, cl1.getESuperTypes().get(0));
-		assertSame(newClass3, cl1.getESuperTypes().get(1));
-	}
-
-	@Test
-	public void testCreateEAttribute() {
-		loadTestEcore(MY_ECORE);
-		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
-		EClass eClass = (EClass) ePackage.getEClassifier(MY_CLASS);
-		assertNull(eClass.getEStructuralFeature("newAttribute"));
-		EAttribute createEAttribute = edelta.createEAttribute(eClass, "newAttribute", null);
-		assertSame(createEAttribute, eClass.getEStructuralFeature("newAttribute"));
-	}
-
-	@Test
-	public void testCreateEAttributeLaterInitialization() {
-		loadTestEcore(MY_ECORE);
-		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
-		EClass eClass = (EClass) ePackage.getEClassifier(MY_CLASS);
-		EAttribute createEAttribute1 = edelta.createEAttribute(eClass, "newAttribute",
-			edelta.createList(
-				a -> a.setName("newAttribute1"),
-				a -> edelta.getEAttribute(MYPACKAGE, MY_CLASS, "newAttribute2").setName("changed")
-			)
-		);
-		EAttribute createEAttribute2 = edelta.createEAttribute(eClass, "newAttribute2", null);
-		edelta.runInitializers();
-		// make sure the initializers have been called
-		// the second attribute must have a different name, changed
-		assertSame(createEAttribute2, edelta.getEAttribute(MYPACKAGE, MY_CLASS, "changed"));
-		// the same for the first attribute
-		assertSame(createEAttribute1, edelta.getEAttribute(MYPACKAGE, MY_CLASS, "newAttribute1"));
 	}
 
 	@Test

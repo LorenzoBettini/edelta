@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edelta.lib;
 
 import java.io.File;
@@ -11,7 +8,6 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.apache.log4j.Level;
@@ -27,8 +23,6 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.xbase.lib.Extension;
-
-import com.google.common.collect.ImmutableList;
 
 import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
@@ -286,43 +280,6 @@ public abstract class AbstractEdelta {
 			return null;
 		}
 		return eenum.getEEnumLiteral(enumLiteralName);
-	}
-
-	public EClass createEClass(String packageName, String name, final List<Consumer<EClass>> initializers) {
-		final EClass newEClass = lib.newEClass(name);
-		getEPackage(packageName).getEClassifiers().add(newEClass);
-		if (initializers != null)
-			initializers.forEach(i -> safeAddInitializer(eClassifierInitializers, newEClass, i));
-		return newEClass;
-	}
-
-	public EClass changeEClass(String packageName, String name, final List<Consumer<EClass>> initializers) {
-		final EClass changedEClass = getEClass(packageName, name);
-		if (initializers != null)
-			initializers.forEach(i -> safeAddInitializer(eClassifierInitializers, changedEClass, i));
-		return changedEClass;
-	}
-
-	protected <E> List<E> createList(E e) {
-		return ImmutableList.of(e);
-	}
-
-	protected <E> List<E> createList(E e1, E e2) {
-		return ImmutableList.of(e1, e2);
-	}
-
-	private <T> void safeAddInitializer(List<Runnable> list, final T element, final Consumer<T> initializer) {
-		list.add(
-			() -> initializer.accept(element)
-		);
-	}
-
-	public EAttribute createEAttribute(EClass eClass, String attributeName, final List<Consumer<EAttribute>> initializers) {
-		EAttribute newAttribute = lib.newEAttribute(attributeName);
-		eClass.getEStructuralFeatures().add(newAttribute);
-		if (initializers != null)
-			initializers.forEach(i -> safeAddInitializer(eStructuralFeaturesInitializers, newAttribute, i));
-		return newAttribute;
 	}
 
 	public void removeEClassifier(String packageName, String name) {

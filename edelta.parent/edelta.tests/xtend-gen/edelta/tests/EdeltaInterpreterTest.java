@@ -90,38 +90,6 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testCreateEClassAndCallJvmOperationFromSuperclass() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("addNewEClass(\"NewClass\") [");
-    _builder.newLine();
-    _builder.append("\t\t");
-    _builder.append("// call method from superclass AbstractEdelta");
-    _builder.newLine();
-    _builder.append("\t\t");
-    _builder.append("EStructuralFeatures += ^createEAttribute(it, \"aNewAttr\", null)");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("]");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final Procedure1<EPackage> _function = (EPackage ePackage) -> {
-      final EClass derivedEClass = this.getLastEClass(ePackage);
-      Assert.assertEquals("NewClass", derivedEClass.getName());
-      Assert.assertEquals(1, derivedEClass.getEStructuralFeatures().size());
-      final EStructuralFeature attr = IterableExtensions.<EStructuralFeature>head(derivedEClass.getEStructuralFeatures());
-      Assert.assertEquals("aNewAttr", attr.getName());
-    };
-    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, _function);
-  }
-  
-  @Test
   public void testCreateEClassAndCallOperationThatThrows() {
     final ThrowableAssert.ThrowingCallable _function = () -> {
       StringConcatenation _builder = new StringConcatenation();

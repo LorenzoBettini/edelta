@@ -68,26 +68,6 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCreateEClassAndCallJvmOperationFromSuperclass() {
-		'''
-			metamodel "foo"
-			
-			modifyEcore aTest epackage foo {
-				addNewEClass("NewClass") [
-					// call method from superclass AbstractEdelta
-					EStructuralFeatures += ^createEAttribute(it, "aNewAttr", null)
-				]
-			}
-		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
-			val derivedEClass = ePackage.lastEClass
-			assertEquals("NewClass", derivedEClass.name)
-			assertEquals(1, derivedEClass.EStructuralFeatures.size)
-			val attr = derivedEClass.EStructuralFeatures.head
-			assertEquals("aNewAttr", attr.name)
-		]
-	}
-
-	@Test
 	def void testCreateEClassAndCallOperationThatThrows() {
 		assertThatThrownBy['''
 				import org.eclipse.emf.ecore.EClass
