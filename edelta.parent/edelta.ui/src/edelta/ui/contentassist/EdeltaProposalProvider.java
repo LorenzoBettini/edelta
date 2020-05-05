@@ -29,12 +29,11 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 			((CrossReference) assignment.getTerminal()),
 			context,
 			acceptor,
-			(IEObjectDescription desc) -> {
-				// EPackage are not loaded at this point, so we cannot rely
-				// on super package relation.
-				// Instead we rely on the fact that subpackages have segments
-				return desc.getQualifiedName().getSegmentCount() == 1;
-			}
+			// EPackage are not loaded at this point, so we cannot rely
+			// on super package relation.
+			// Instead we rely on the fact that subpackages have segments
+			(IEObjectDescription desc) ->
+				desc.getQualifiedName().getSegmentCount() == 1
 		);
 	}
 }
