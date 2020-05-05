@@ -5,8 +5,8 @@ import com.google.inject.Singleton
 import com.google.inject.name.Named
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaProgram
-import edelta.interpreter.IEdeltaInterpreter
-import edelta.interpreter.internal.EdeltaInterpreterConfigurator
+import edelta.interpreter.EdeltaInterpreterFactory
+import edelta.interpreter.EdeltaInterpreterHelper
 import edelta.lib.EdeltaEcoreUtil
 import edelta.scoping.EdeltaOriginalENamedElementRecorder
 import edelta.services.IEdeltaEcoreModelAssociations
@@ -21,7 +21,6 @@ import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader.GenericUnloader
 import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator
-import edelta.interpreter.EdeltaInterpreterHelper
 
 @Singleton
 class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEcoreModelAssociations {
@@ -32,11 +31,9 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 
 	@Inject GenericUnloader unloader
 
-	@Inject IEdeltaInterpreter interpreter
+	@Inject EdeltaInterpreterFactory interpreterFactory
 
 	@Inject EdeltaInterpreterHelper interpreterHelper
-
-	@Inject EdeltaInterpreterConfigurator interpreterConfigurator
 
 	@Inject EdeltaOriginalENamedElementRecorder originalENamedElementRecorder
 
@@ -86,8 +83,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 			resource.contents += copiedEPackagesMap.values
 			// record original ecore references before running the interpreter
 			recordEcoreReferenceOriginalENamedElement(resource)
-			// configure and run the interpreter
-			interpreterConfigurator.configureInterpreter(interpreter, resource)
+			// run the interpreter
 			runInterpreter(
 				program,
 				copiedEPackagesMap
@@ -98,7 +94,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	protected def void runInterpreter(EdeltaProgram program,
 		EdeltaCopiedEPackagesMap copiedEPackagesMap
 	) {
-		interpreter.evaluateModifyEcoreOperations(
+		interpreterFactory.create(program.eResource).evaluateModifyEcoreOperations(
 			program,
 			copiedEPackagesMap
 		)
