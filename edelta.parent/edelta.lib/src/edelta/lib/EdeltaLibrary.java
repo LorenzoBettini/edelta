@@ -57,17 +57,6 @@ public class EdeltaLibrary {
 		return e;
 	}
 
-	public EReference newEReference(String name) {
-		return newEReference(name, null, null);
-	}
-
-	public EReference newEReference(String name, Consumer<EReference> initializer) {
-		EReference e = ecoreFactory.createEReference();
-		e.setName(name);
-		safeRunInitializer(initializer, e);
-		return e;
-	}
-
 	public EReference newEReference(String name, EClass referenceType) {
 		return newEReference(name, referenceType, null);
 	}

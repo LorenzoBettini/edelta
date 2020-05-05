@@ -75,27 +75,13 @@ public class EdeltaLibraryTest {
 
 	@Test
 	public void testNewEReference() {
-		EReference e = lib.newEReference("test");
-		assertEquals("test", e.getName());
-	}
-
-	@Test
-	public void testNewEReferenceWithInitializer() {
-		EReference e = lib.newEReference("test", ee -> {
-			ee.setName("changed");
-		});
-		assertEquals("changed", e.getName());
-	}
-
-	@Test
-	public void testNewEReferenceWithType() {
 		EReference e = lib.newEReference("test", EOBJECT);
 		assertEquals("test", e.getName());
 		assertEquals(EOBJECT, e.getEReferenceType());
 	}
 
 	@Test
-	public void testNewEReferenceWithTypeInitializer() {
+	public void testNewEReferenceWithInitializer() {
 		EReference e = lib.newEReference("test", EOBJECT, ee -> {
 			ee.setName("changed");
 		});
