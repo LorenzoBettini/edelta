@@ -375,36 +375,6 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testCreateEAttribute() {
-		loadTestEcore(MY_ECORE);
-		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
-		EClass eClass = (EClass) ePackage.getEClassifier(MY_CLASS);
-		assertNull(eClass.getEStructuralFeature("newAttribute"));
-		EAttribute createEAttribute = edelta.createEAttribute(eClass, "newAttribute", null);
-		assertSame(createEAttribute, eClass.getEStructuralFeature("newAttribute"));
-	}
-
-	@Test
-	public void testCreateEAttributeLaterInitialization() {
-		loadTestEcore(MY_ECORE);
-		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
-		EClass eClass = (EClass) ePackage.getEClassifier(MY_CLASS);
-		EAttribute createEAttribute1 = edelta.createEAttribute(eClass, "newAttribute",
-			edelta.createList(
-				a -> a.setName("newAttribute1"),
-				a -> edelta.getEAttribute(MYPACKAGE, MY_CLASS, "newAttribute2").setName("changed")
-			)
-		);
-		EAttribute createEAttribute2 = edelta.createEAttribute(eClass, "newAttribute2", null);
-		edelta.runInitializers();
-		// make sure the initializers have been called
-		// the second attribute must have a different name, changed
-		assertSame(createEAttribute2, edelta.getEAttribute(MYPACKAGE, MY_CLASS, "changed"));
-		// the same for the first attribute
-		assertSame(createEAttribute1, edelta.getEAttribute(MYPACKAGE, MY_CLASS, "newAttribute1"));
-	}
-
-	@Test
 	public void testRemoveEClassifier() {
 		loadTestEcore(MY_ECORE);
 		// check that the superclass is set

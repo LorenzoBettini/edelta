@@ -1,6 +1,5 @@
 package edelta.tests.additional;
 
-import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EcorePackage;
 
@@ -30,8 +29,8 @@ public class MyCustomStatefulEdelta extends AbstractEdelta {
 	}
 
 	public void createANewEAttribute(EClass c) {
-		EAttribute a = createEAttribute(c, "aNewAttr" + (++counter), null);
-		a.setEType(EcorePackage.eINSTANCE.getEString());
+		lib.addNewEAttribute(c, "aNewAttr" + (++counter),
+				EcorePackage.eINSTANCE.getEString());
 	}
 
 }

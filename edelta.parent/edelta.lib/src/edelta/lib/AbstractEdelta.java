@@ -317,14 +317,6 @@ public abstract class AbstractEdelta {
 		);
 	}
 
-	public EAttribute createEAttribute(EClass eClass, String attributeName, final List<Consumer<EAttribute>> initializers) {
-		EAttribute newAttribute = lib.newEAttribute(attributeName);
-		eClass.getEStructuralFeatures().add(newAttribute);
-		if (initializers != null)
-			initializers.forEach(i -> safeAddInitializer(eStructuralFeaturesInitializers, newAttribute, i));
-		return newAttribute;
-	}
-
 	public void removeEClassifier(String packageName, String name) {
 		EdeltaEcoreUtil.removeEClassifier(getEClassifier(packageName, name));
 	}

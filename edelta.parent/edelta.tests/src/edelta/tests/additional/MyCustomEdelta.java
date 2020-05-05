@@ -32,8 +32,7 @@ public class MyCustomEdelta extends AbstractEdelta {
 	}
 
 	public void createANewEAttribute(EClass c) {
-		EAttribute a = createEAttribute(c, "aNewAttr", null);
-		a.setEType(EcorePackage.eINSTANCE.getEString());
+		lib.addNewEAttribute(c, "aNewAttr", EcorePackage.eINSTANCE.getEString());
 	}
 
 	public void setAttributeBounds(EAttribute a, int low, int upper) {
