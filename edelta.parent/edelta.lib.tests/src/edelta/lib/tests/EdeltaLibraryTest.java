@@ -91,12 +91,6 @@ public class EdeltaLibraryTest {
 
 	@Test
 	public void testNewEDataType() {
-		EDataType e = lib.newEDataType("test");
-		assertEquals("test", e.getName());
-	}
-
-	@Test
-	public void testNewEDataTypeWithType() {
 		EDataType e = lib.newEDataType("test", "java.lang.String");
 		assertEquals("test", e.getName());
 		assertEquals("java.lang.String", e.getInstanceTypeName());
@@ -106,14 +100,6 @@ public class EdeltaLibraryTest {
 
 	@Test
 	public void testNewEDataTypeWithInitializer() {
-		EDataType e = lib.newEDataType("test", ee -> {
-			ee.setName("changed");
-		});
-		assertEquals("changed", e.getName());
-	}
-
-	@Test
-	public void testNewEDataTypeWithTypeInitializer() {
 		EDataType e = lib.newEDataType("test", "java.lang.String", ee -> {
 			ee.setName("changed");
 		});
