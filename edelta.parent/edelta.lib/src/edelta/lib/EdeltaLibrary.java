@@ -45,17 +45,6 @@ public class EdeltaLibrary {
 		return c;
 	}
 
-	public EAttribute newEAttribute(String name) {
-		return newEAttribute(name, null, null);
-	}
-
-	public EAttribute newEAttribute(String name, Consumer<EAttribute> initializer) {
-		EAttribute e = ecoreFactory.createEAttribute();
-		e.setName(name);
-		safeRunInitializer(initializer, e);
-		return e;
-	}
-
 	public EAttribute newEAttribute(String name, EDataType dataType) {
 		return newEAttribute(name, dataType, null);
 	}
@@ -68,17 +57,6 @@ public class EdeltaLibrary {
 		return e;
 	}
 
-	public EReference newEReference(String name) {
-		return newEReference(name, null, null);
-	}
-
-	public EReference newEReference(String name, Consumer<EReference> initializer) {
-		EReference e = ecoreFactory.createEReference();
-		e.setName(name);
-		safeRunInitializer(initializer, e);
-		return e;
-	}
-
 	public EReference newEReference(String name, EClass referenceType) {
 		return newEReference(name, referenceType, null);
 	}
@@ -87,17 +65,6 @@ public class EdeltaLibrary {
 		EReference e = ecoreFactory.createEReference();
 		e.setName(name);
 		e.setEType(referenceType);
-		safeRunInitializer(initializer, e);
-		return e;
-	}
-
-	public EDataType newEDataType(String name) {
-		return newEDataType(name, null, null);
-	}
-
-	public EDataType newEDataType(String name, Consumer<EDataType> initializer) {
-		EDataType e = ecoreFactory.createEDataType();
-		e.setName(name);
 		safeRunInitializer(initializer, e);
 		return e;
 	}

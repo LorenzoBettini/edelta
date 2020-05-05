@@ -210,9 +210,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			// metamodel "ecore"
 			
 			def myNewAttribute(EClass c, String name) {
-				c.EStructuralFeatures += newEAttribute(name) => [
-					EType = ecoreref(MyDataType)
-				]
+				c.EStructuralFeatures += newEAttribute(name, ecoreref(MyDataType))
 			}
 			
 			modifyEcore aTest epackage mypackage {

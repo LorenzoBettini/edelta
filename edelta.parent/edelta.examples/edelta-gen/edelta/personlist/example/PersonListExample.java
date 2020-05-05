@@ -4,12 +4,10 @@ import edelta.lib.AbstractEdelta;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.Collections;
 import java.util.function.Consumer;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
-import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
@@ -52,12 +50,7 @@ public class PersonListExample extends AbstractEdelta {
   
   public void introduceWorkingPosition(final EPackage it) {
     final Consumer<EClass> _function = (EClass it_1) -> {
-      EList<EStructuralFeature> _eStructuralFeatures = it_1.getEStructuralFeatures();
-      final Consumer<EAttribute> _function_1 = (EAttribute it_2) -> {
-        it_2.setEType(getEDataType("ecore", "EString"));
-      };
-      EAttribute _newEAttribute = this.lib.newEAttribute("description", _function_1);
-      _eStructuralFeatures.add(_newEAttribute);
+      this.lib.addNewEAttribute(it_1, "description", getEDataType("ecore", "EString"));
       this.refactorings.extractMetaClass(it_1, getEReference("PersonList", "Person", "works"), "position", "works");
     };
     this.lib.addNewEClass(it, "WorkingPosition", _function);

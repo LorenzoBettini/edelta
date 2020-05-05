@@ -59,12 +59,6 @@ public class EdeltaLibraryTest {
 
 	@Test
 	public void testNewEAttribute() {
-		EAttribute e = lib.newEAttribute("test");
-		assertEquals("test", e.getName());
-	}
-
-	@Test
-	public void testNewEAttributeWithType() {
 		EAttribute e = lib.newEAttribute("test", ESTRING);
 		assertEquals("test", e.getName());
 		assertEquals(ESTRING, e.getEAttributeType());
@@ -72,14 +66,6 @@ public class EdeltaLibraryTest {
 
 	@Test
 	public void testNewEAttributeWithInitializer() {
-		EAttribute e = lib.newEAttribute("test", ee -> {
-			ee.setName("changed");
-		});
-		assertEquals("changed", e.getName());
-	}
-
-	@Test
-	public void testNewEAttributeWithTypeAndInitialize() {
 		EAttribute e = lib.newEAttribute("test", ESTRING, ee -> {
 			ee.setName("changed");
 		});
@@ -89,27 +75,13 @@ public class EdeltaLibraryTest {
 
 	@Test
 	public void testNewEReference() {
-		EReference e = lib.newEReference("test");
-		assertEquals("test", e.getName());
-	}
-
-	@Test
-	public void testNewEReferenceWithInitializer() {
-		EReference e = lib.newEReference("test", ee -> {
-			ee.setName("changed");
-		});
-		assertEquals("changed", e.getName());
-	}
-
-	@Test
-	public void testNewEReferenceWithType() {
 		EReference e = lib.newEReference("test", EOBJECT);
 		assertEquals("test", e.getName());
 		assertEquals(EOBJECT, e.getEReferenceType());
 	}
 
 	@Test
-	public void testNewEReferenceWithTypeInitializer() {
+	public void testNewEReferenceWithInitializer() {
 		EReference e = lib.newEReference("test", EOBJECT, ee -> {
 			ee.setName("changed");
 		});
@@ -119,12 +91,6 @@ public class EdeltaLibraryTest {
 
 	@Test
 	public void testNewEDataType() {
-		EDataType e = lib.newEDataType("test");
-		assertEquals("test", e.getName());
-	}
-
-	@Test
-	public void testNewEDataTypeWithType() {
 		EDataType e = lib.newEDataType("test", "java.lang.String");
 		assertEquals("test", e.getName());
 		assertEquals("java.lang.String", e.getInstanceTypeName());
@@ -134,14 +100,6 @@ public class EdeltaLibraryTest {
 
 	@Test
 	public void testNewEDataTypeWithInitializer() {
-		EDataType e = lib.newEDataType("test", ee -> {
-			ee.setName("changed");
-		});
-		assertEquals("changed", e.getName());
-	}
-
-	@Test
-	public void testNewEDataTypeWithTypeInitializer() {
 		EDataType e = lib.newEDataType("test", "java.lang.String", ee -> {
 			ee.setName("changed");
 		});

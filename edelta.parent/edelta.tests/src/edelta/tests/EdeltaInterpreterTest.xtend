@@ -51,9 +51,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			
 			modifyEcore aTest epackage foo {
 				addNewEClass("NewClass") [
-					EStructuralFeatures += newEAttribute("newTestAttr") [
-						EType = ecoreref(FooDataType)
-					]
+					EStructuralFeatures += newEAttribute("newTestAttr", ecoreref(FooDataType))
 				]
 			}
 		'''
@@ -365,7 +363,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				ecoreref(foo.FooClass).name = "RenamedClass"
 				ecoreref(RenamedClass).ESuperTypes += newEClass("Base")
 				op(ecoreref(RenamedClass))
-				ecoreref(RenamedClass).getEStructuralFeatures += newEAttribute("added")
+				ecoreref(RenamedClass).getEStructuralFeatures +=
+					newEAttribute("added", ecoreref(FooDataType))
 			}
 		'''.
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(true) [ derivedEPackage |
@@ -387,7 +386,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			
 			modifyEcore aTest epackage foo {
 				ecoreref(foo.FooClass).name = "RenamedClass"
-				ecoreref(RenamedClass).getEStructuralFeatures += newEAttribute("added")
+				ecoreref(RenamedClass).getEStructuralFeatures +=
+					newEAttribute("added", ecoreref(FooDataType))
 				ecoreref(RenamedClass.added)
 			}
 		'''.
@@ -445,9 +445,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			
 			modifyEcore aTest epackage mainpackage {
 				ecoreref(mainsubpackage).addNewEClass("NewClass") [
-					EStructuralFeatures += newEAttribute("newTestAttr") [
-						EType = ecoreref(MainFooDataType)
-					]
+					EStructuralFeatures += newEAttribute("newTestAttr", ecoreref(MainFooDataType))
 				]
 			}
 		'''
@@ -470,9 +468,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			
 			modifyEcore aTest epackage mainpackage {
 				ecoreref(subsubpackage).addNewEClass("NewClass") [
-					EStructuralFeatures += newEAttribute("newTestAttr") [
-						EType = ecoreref(MainFooDataType)
-					]
+					EStructuralFeatures += newEAttribute("newTestAttr", ecoreref(MainFooDataType))
 				]
 			}
 		'''
@@ -500,9 +496,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 					name = "anewsubpackage"
 				]
 				ecoreref(anewsubpackage).addNewEClass("NewClass") [
-					EStructuralFeatures += newEAttribute("newTestAttr") [
-						EType = ecoreref(MainFooDataType)
-					]
+					EStructuralFeatures += newEAttribute("newTestAttr", ecoreref(MainFooDataType))
 				]
 			}
 		'''
@@ -532,9 +526,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 					name = "anewsubpackage"
 				]
 				ecoreref(anewsubpackage).addNewEClass("NewClass") [
-					EStructuralFeatures += newEAttribute("newTestAttr") [
-						EType = ecoreref(MainFooDataType)
-					]
+					EStructuralFeatures += newEAttribute("newTestAttr", ecoreref(MainFooDataType))
 				]
 				ecoreref(NewClass).name = "RenamedClass"
 				ecoreref(RenamedClass).getEStructuralFeatures +=
