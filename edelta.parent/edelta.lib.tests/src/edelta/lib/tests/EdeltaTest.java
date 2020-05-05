@@ -82,16 +82,6 @@ public class EdeltaTest {
 			super.runInitializers();
 		}
 
-		@Override
-		public <E> List<E> createList(E e) {
-			return super.createList(e);
-		}
-
-		@Override
-		public <E> List<E> createList(E e1, E e2) {
-			return super.createList(e1, e2);
-		}
-
 		public void fooConsumer(EClass e) {
 			
 		}

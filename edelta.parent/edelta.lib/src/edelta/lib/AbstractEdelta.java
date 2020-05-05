@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edelta.lib;
 
 import java.io.File;
@@ -26,8 +23,6 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.xbase.lib.Extension;
-
-import com.google.common.collect.ImmutableList;
 
 import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
@@ -285,14 +280,6 @@ public abstract class AbstractEdelta {
 			return null;
 		}
 		return eenum.getEEnumLiteral(enumLiteralName);
-	}
-
-	protected <E> List<E> createList(E e) {
-		return ImmutableList.of(e);
-	}
-
-	protected <E> List<E> createList(E e1, E e2) {
-		return ImmutableList.of(e1, e2);
 	}
 
 	public void removeEClassifier(String packageName, String name) {
