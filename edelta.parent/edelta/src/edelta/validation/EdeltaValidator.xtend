@@ -4,6 +4,7 @@
 package edelta.validation
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaModifyEcoreOperation
 import edelta.edelta.EdeltaProgram
 import edelta.edelta.EdeltaUseAs
 import edelta.lib.AbstractEdelta
@@ -18,6 +19,7 @@ import org.eclipse.xtext.xbase.typesystem.util.CommonTypeComputationServices
 import org.eclipse.xtext.xbase.typesystem.util.Multimaps2
 
 import static edelta.edelta.EdeltaPackage.Literals.*
+import static edelta.util.EdeltaModelUtil.*
 
 /**
  * This class contains custom validation rules. 
@@ -30,6 +32,8 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	public static val TYPE_MISMATCH = PREFIX + "TypeMismatch";
 	public static val INTERPRETER_TIMEOUT = PREFIX + "InterpreterTimeout";
 	public static val DUPLICATE_DECLARATION = PREFIX + "DuplicateDeclaration";
+	public static val INVALID_SUBPACKAGE_IMPORT = PREFIX + "InvalidSubPackageImport";
+	public static val INVALID_SUBPACKAGE_MODIFICATION = PREFIX + "InvalidSubPackageModification";
 
 	@Inject CommonTypeComputationServices services
 	@Inject OverrideHelper overrideHelper
@@ -60,7 +64,23 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	}
 
 	@Check
-	def void checkDuplicateDeclarations(EdeltaProgram p) {
+	def void checkProgram(EdeltaProgram p) {
+		var metamodelIndex = 0
+		for (metamodel : p.metamodels) {
+			val rootPackage = findRootSuperPackage(metamodel)
+			if (rootPackage !== null) {
+				error(
+					"Invalid subpackage import '" + metamodel.name + "'",
+					p,
+					EDELTA_PROGRAM__METAMODELS,
+					metamodelIndex,
+					INVALID_SUBPACKAGE_IMPORT,
+					rootPackage.name // the fix for the import
+				)
+			}
+			metamodelIndex++
+		}
+
 		val javaClass = p.jvmElements.filter(JvmGenericType).head
 		val methods = overrideHelper.getResolvedFeatures(javaClass).declaredOperations
 
@@ -86,6 +106,17 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 		}
 	}
 
+	@Check
+	def void checkModifyEcore(EdeltaModifyEcoreOperation op) {
+		if (findRootSuperPackage(op.epackage) !== null) {
+			error(
+				"Invalid direct subpackage modification '" + op.epackage.name + "'",
+				op,
+				EDELTA_MODIFY_ECORE_OPERATION__EPACKAGE,
+				INVALID_SUBPACKAGE_MODIFICATION
+			)
+		}
+	}
 
 	def isConformant(EObject context, Class<?> expected, JvmTypeReference actual) {
 		val actualType = actual.toLightweightTypeReference(context)

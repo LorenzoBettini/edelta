@@ -14,6 +14,12 @@ class Inputs {
 		'''
 	}
 
+	def referenceToMetamodelWithSubPackage() {
+		'''
+			metamodel "mainpackage"
+		'''
+	}
+
 	def useImportedJavaTypes() {
 		'''
 		import java.util.List

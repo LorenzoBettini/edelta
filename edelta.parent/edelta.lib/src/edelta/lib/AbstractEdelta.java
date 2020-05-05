@@ -196,7 +196,31 @@ public abstract class AbstractEdelta {
 		}
 	}
 
+	/**
+	 * Retrieves an {@link EPackage} given its fully qualified name, that is, for
+	 * subpackages, the string is expected to contain the names of the full EPackage
+	 * hierarchy separated by dots. For example,
+	 * "rootpackage.subpackage.subsubpackage".
+	 * 
+	 * @param packageName
+	 * @return the found {@link EPackage} or null
+	 */
 	public EPackage getEPackage(String packageName) {
+		String[] packageNames = packageName.split("\\.");
+		EPackage currentPackage = getEPackageFromPackageManager(packageNames[0]);
+		int packageNameIndex = 1;
+		while (currentPackage != null && packageNameIndex < packageNames.length) {
+			String currentPackageName = packageNames[packageNameIndex];
+			currentPackage = currentPackage.getESubpackages().stream()
+					.filter(p -> currentPackageName.equals(p.getName()))
+					.findFirst()
+					.orElse(null);
+			packageNameIndex++;
+		}
+		return currentPackage;
+	}
+
+	private EPackage getEPackageFromPackageManager(String packageName) {
 		return packageManager.getEPackage(packageName);
 	}
 

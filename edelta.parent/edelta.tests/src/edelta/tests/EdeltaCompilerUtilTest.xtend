@@ -82,4 +82,19 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testGetStringForEcoreReferenceExpressionEAttributeInSubPackage() {
+		'''
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			ecoreref(mySubPackageAttribute)
+		}
+		'''.parseWithTestEcoreWithSubPackage
+			.lastEcoreReferenceExpression => [
+			'getEAttribute("mainpackage.mainsubpackage", "MainSubPackageFooClass", "mySubPackageAttribute")'.
+				assertEquals(stringForEcoreReferenceExpression)
+		]
+	}
+
 }

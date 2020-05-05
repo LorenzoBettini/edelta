@@ -74,6 +74,147 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testScopeForEnamedElementWithSubPackageInProgram() {
+		// MyClass with myClassAttribute
+		// is present in the package and in subpackages
+		// so it appears several times
+		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage.
+			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			MainFooClass
+			MainFooDataType
+			MainFooEnum
+			MyClass
+			myAttribute
+			myReference
+			FooEnumLiteral
+			myClassAttribute
+			mainsubpackage
+			MainSubPackageFooClass
+			MyClass
+			mySubPackageAttribute
+			mySubPackageReference
+			myClassAttribute
+			subsubpackage
+			MyClass
+			mainpackage
+			''')
+	}
+
+	@Test
+	def void testScopeForEnamedElementInEcoreReferenceExpressionWithSubPackages() {
+		'''
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ecoreref(
+			}
+		'''.parseWithTestEcoreWithSubPackage
+			.lastEcoreReferenceExpression
+			.reference
+			.assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			MainFooClass
+			MainFooDataType
+			MainFooEnum
+			MyClass
+			myAttribute
+			myReference
+			FooEnumLiteral
+			myClassAttribute
+			mainsubpackage
+			MainSubPackageFooClass
+			MyClass
+			mySubPackageAttribute
+			mySubPackageReference
+			myClassAttribute
+			subsubpackage
+			MyClass
+			MainFooClass
+			MainFooDataType
+			MainFooEnum
+			MyClass
+			myAttribute
+			myReference
+			FooEnumLiteral
+			myClassAttribute
+			mainsubpackage
+			MainSubPackageFooClass
+			MyClass
+			mySubPackageAttribute
+			mySubPackageReference
+			myClassAttribute
+			subsubpackage
+			MyClass
+			mainpackage
+			''')
+			// duplicates because of copied EPackage
+	}
+
+	@Test
+	def void testScopeForSubPackageInEcoreReferenceExpressionWithSubPackages() {
+		'''
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ecoreref(mainsubpackage.
+			}
+		'''.parseWithTestEcoreWithSubPackage
+			.lastEcoreReferenceExpression
+			.reference
+			.assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			MainSubPackageFooClass
+			MyClass
+			subsubpackage
+			MainSubPackageFooClass
+			MyClass
+			subsubpackage
+			''')
+			// duplicates because of copied EPackage
+	}
+
+	@Test
+	def void testScopeForSubPackageEClassInEcoreReferenceExpressionWithSubPackages() {
+		'''
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ecoreref(mainsubpackage.MainSubPackageFooClass.
+			}
+		'''.parseWithTestEcoreWithSubPackage
+			.lastEcoreReferenceExpression
+			.reference
+			.assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			mySubPackageAttribute
+			mySubPackageReference
+			mySubPackageAttribute
+			mySubPackageReference
+			''')
+			// duplicates because of copied EPackage
+	}
+
+	@Test
+	def void testScopeForSubSubPackageInEcoreReferenceExpressionWithSubPackages() {
+		'''
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ecoreref(mainsubpackage.subsubpackage.
+			}
+		'''.parseWithTestEcoreWithSubPackage
+			.lastEcoreReferenceExpression
+			.reference
+			.assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
+			'''
+			MyClass
+			MyClass
+			''')
+			// duplicates because of copied EPackage
+	}
+
+	@Test
 	def void testScopeForEnamedElementInEcoreReferenceExpression() {
 		"ecoreref(".ecoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,

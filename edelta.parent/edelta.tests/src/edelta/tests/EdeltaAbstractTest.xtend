@@ -59,6 +59,10 @@ abstract class EdeltaAbstractTest {
 		input.parse(resourceSetWithTestEcores)
 	}
 
+	def protected parseWithTestEcoreWithSubPackage(CharSequence input) {
+		input.parse(resourceSetWithTestEcoreWithSubPackage)
+	}
+
 	def protected parseWithLoadedEcore(String path, CharSequence input) {
 		val resourceSet = resourceSetProvider.get
 		// Loads the Ecore package to ensure it is available during loading.
@@ -79,8 +83,17 @@ abstract class EdeltaAbstractTest {
 		addEPackageForTests(resourceSet)
 	}
 
+	def protected resourceSetWithTestEcoreWithSubPackage() {
+		val resourceSet = resourceSetProvider.get
+		addEPackageWithSubPackageForTests(resourceSet)
+	}
+
 	def protected addEPackageForTests(ResourceSet resourceSet) {
 		resourceSet.createTestResource("foo", EPackageForTests)
+	}
+
+	def protected addEPackageWithSubPackageForTests(ResourceSet resourceSet) {
+		resourceSet.createTestResource("mainpackage", EPackageWithSubPackageForTests)
 	}
 
 	def protected resourceSetWithTestEcores() {
@@ -99,7 +112,7 @@ abstract class EdeltaAbstractTest {
 	}
 
 	def protected EPackageForTests() {
-		// if you add something to this ecore, which is created on the fly,
+		// IMPORTANT: if you add something to this ecore, which is created on the fly,
 		// and you have a test for the generated Java code, then you must also
 		// update testecores/foo.ecore accordingly
 		val fooPackage = EcoreFactory.eINSTANCE.createEPackage => [
@@ -147,6 +160,67 @@ abstract class EdeltaAbstractTest {
 			name = "BarDataType"
 		]
 		fooPackage
+	}
+
+	def protected EPackageWithSubPackageForTests() {
+		val mainPackage = EcoreFactory.eINSTANCE.createEPackage => [
+			name = "mainpackage"
+			nsPrefix = "mainpackage"
+			nsURI = "http://mainpackage"
+		]
+		mainPackage.EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
+			name = "MainFooClass"
+			EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
+				name = "myAttribute"
+			]
+			EStructuralFeatures += EcoreFactory.eINSTANCE.createEReference => [
+				name = "myReference"
+			]
+		]
+		mainPackage.EClassifiers += EcoreFactory.eINSTANCE.createEDataType => [
+			name = "MainFooDataType"
+		]
+		mainPackage.EClassifiers += EcoreFactory.eINSTANCE.createEEnum => [
+			name = "MainFooEnum"
+			ELiterals += EcoreFactory.eINSTANCE.createEEnumLiteral => [
+				name = "FooEnumLiteral"
+			]
+		]
+		mainPackage.EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
+			name = "MyClass" // this is present also in subpackages with the same name
+			EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
+				name = "myClassAttribute"
+			]
+		]
+		mainPackage.ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
+			name = "mainsubpackage"
+			nsPrefix = "mainsubpackage"
+			nsURI = "http://mainsubpackage"
+			EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
+				name = "MainSubPackageFooClass"
+				EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
+					name = "mySubPackageAttribute"
+				]
+				EStructuralFeatures += EcoreFactory.eINSTANCE.createEReference => [
+					name = "mySubPackageReference"
+				]
+			]
+			EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
+				name = "MyClass" // this is present also in subpackages with the same name
+				EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
+					name = "myClassAttribute"
+				]
+			]
+			ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
+				name = "subsubpackage"
+				nsPrefix = "subsubpackage"
+				nsURI = "http://subsubpackage"
+				EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
+					name = "MyClass" // this is present also in subpackages with the same name
+				]
+			]
+		]
+		mainPackage
 	}
 
 	def protected assertErrorsAsStrings(EObject o, CharSequence expected) {

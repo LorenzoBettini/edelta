@@ -113,4 +113,24 @@ public class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
     };
     ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_ecoreReferenceExpression, _function);
   }
+  
+  @Test
+  public void testGetStringForEcoreReferenceExpressionEAttributeInSubPackage() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(mySubPackageAttribute)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaEcoreReferenceExpression _lastEcoreReferenceExpression = this.lastEcoreReferenceExpression(this.parseWithTestEcoreWithSubPackage(_builder));
+    final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
+      Assert.assertEquals("getEAttribute(\"mainpackage.mainsubpackage\", \"MainSubPackageFooClass\", \"mySubPackageAttribute\")", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
+    };
+    ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_lastEcoreReferenceExpression, _function);
+  }
 }

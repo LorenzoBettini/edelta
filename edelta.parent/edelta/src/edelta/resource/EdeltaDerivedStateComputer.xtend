@@ -21,6 +21,7 @@ import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader.GenericUnloader
 import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator
+import edelta.interpreter.EdeltaInterpreterHelper
 
 @Singleton
 class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEcoreModelAssociations {
@@ -32,6 +33,8 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	@Inject GenericUnloader unloader
 
 	@Inject IEdeltaInterpreter interpreter
+
+	@Inject EdeltaInterpreterHelper interpreterHelper
 
 	@Inject EdeltaInterpreterConfigurator interpreterConfigurator
 
@@ -68,7 +71,8 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 		super.installDerivedState(resource, preIndexingPhase)
 		val program = resource.contents.head as EdeltaProgram
 		if (!preIndexingPhase) {
-			val modifyEcoreOperations = program.modifyEcoreOperations.filter[epackage !== null]
+			val modifyEcoreOperations = 
+				interpreterHelper.filterOperations(program.modifyEcoreOperations)
 			if (modifyEcoreOperations.empty)
 				return
 

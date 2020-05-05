@@ -54,6 +54,10 @@ public class EdeltaTest {
 	private static final String EXPECTATIONS = "expectations";
 	private static final String MY2_ECORE = "My2.ecore";
 	private static final String MY_ECORE = "My.ecore";
+	private static final String MY_SUBPACKAGES_ECORE = "MySubPackages.ecore";
+	private static final String MY_MAINPACKAGE = "mainpackage";
+	private static final String MY_SUBPACKAGE = "subpackage";
+	private static final String MY_SUBSUBPACKAGE = "subsubpackage";
 	private static final String TEST_ECORE_FOR_REFERENCES = "TestEcoreForReferences.ecore";
 	private static final String TEST_PACKAGE_FOR_REFERENCES = "testecoreforreferences";
 	private static final String TESTECORES = "testecores/";
@@ -130,6 +134,11 @@ public class EdeltaTest {
 	@Test
 	public void testGetEPackage() {
 		tryToRetrieveSomeEPackages();
+	}
+
+	@Test
+	public void testGetEPackageWithEmptyString() {
+		assertNull(edelta.getEPackage(""));
 	}
 
 	@Test
@@ -510,7 +519,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testCopyEClassifierForEOppositeReferenceWorksWhenEPackageIsCopied() {
+	public void testCopyENamedElementEOppositeReferenceWorks() {
 		loadTestEcore(TEST_ECORE_FOR_REFERENCES);
 		EPackage original = edelta.getEPackage(TEST_PACKAGE_FOR_REFERENCES);
 		EClass person = getEClassByName(original.getEClassifiers(), "Person");
@@ -527,6 +536,24 @@ public class EdeltaTest {
 		works = getEReferenceByName(person.getEStructuralFeatures(), "works");
 		persons = getEReferenceByName(workplace.getEStructuralFeatures(), "persons");
 		assertSame(works.getEOpposite(), persons);
+	}
+
+	@Test
+	public void testCopyENamedElementWithSubPackages() {
+		loadTestEcore(MY_SUBPACKAGES_ECORE);
+		EPackage originalPackage = edelta.getEPackage(MY_MAINPACKAGE);
+		EPackage originalSubPackage = originalPackage.getESubpackages().get(0);
+		EClass originalmyclass = getEClassByName(originalPackage.getEClassifiers(), "MyClass");
+		// perform copy and EOpposite refers to the copied opposite
+		// and that is good for us!
+		EPackage copied = EdeltaEcoreUtil.copyENamedElement(originalPackage);
+		EClass copiedmyclass = getEClassByName(copied.getEClassifiers(), "MyClass");
+		EPackage copiedSubPackage = copied.getESubpackages().get(0);
+		assertNotNull(copiedmyclass);
+		assertNotSame(copiedmyclass, originalmyclass);
+		assertNotNull(copiedSubPackage);
+		assertNotSame(copiedSubPackage, originalSubPackage);
+		assertSame(copied, copiedSubPackage.getESuperPackage());
 	}
 
 	@Test
@@ -581,6 +608,28 @@ public class EdeltaTest {
 		assertFalse(debugSupplierCalled.get());
 	}
 
+	@Test
+	public void testGetSubPackage() {
+		loadTestEcore(MY_SUBPACKAGES_ECORE);
+		assertNull(edelta.getEPackage(MY_SUBPACKAGE));
+		assertNotNull(
+			edelta.getEPackage(MY_MAINPACKAGE + "." + MY_SUBPACKAGE));
+		assertNotNull(
+			edelta.getEPackage(MY_MAINPACKAGE + "." + MY_SUBPACKAGE + "." + MY_SUBSUBPACKAGE));
+	}
+
+	@Test
+	public void testGetSubPackageEAttribute() {
+		loadTestEcore(MY_SUBPACKAGES_ECORE);
+		EAttribute eAttribute = edelta.getEAttribute(
+			MY_MAINPACKAGE + "." + MY_SUBPACKAGE + "." + MY_SUBSUBPACKAGE,
+			MY_CLASS,
+			"myAttribute");
+		assertNotNull(eAttribute);
+		assertEquals(MY_SUBSUBPACKAGE,
+			((EClass) eAttribute.eContainer()).getEPackage().getName());
+	}
+
 	private void wipeModifiedDirectoryContents() {
 		cleanDirectory(MODIFIED);
 	}
@@ -623,6 +672,6 @@ public class EdeltaTest {
 		return namedElements.
 				stream().
 				filter(e -> e.getName().contentEquals(nameToSearch)).
-				findFirst().get();
+				findFirst().orElse(null);
 	}
 }

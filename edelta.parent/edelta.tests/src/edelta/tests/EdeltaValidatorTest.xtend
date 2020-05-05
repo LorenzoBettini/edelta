@@ -304,4 +304,42 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		referenceToCreatedEClassRenamed
 		.parseWithTestEcore.assertNoErrors
 	}
+
+	@Test
+	def void testInvalidSubPackageImportedMetamodel() {
+		val input =
+		'''
+		metamodel "mainpackage.mainsubpackage"
+		'''
+		val start = input.indexOf('"')
+		input
+		.parseWithTestEcoreWithSubPackage
+		.assertError(
+			EdeltaPackage.eINSTANCE.edeltaProgram,
+			EdeltaValidator.INVALID_SUBPACKAGE_IMPORT,
+			start, input.lastIndexOf('"') - start + 1,
+			"Invalid subpackage import 'mainsubpackage'"
+		)
+	}
+
+	@Test
+	def void testInvalidModifyEcoreOfSubPackage() {
+		val input =
+		'''
+		metamodel "mainpackage.mainsubpackage"
+		
+		modifyEcore aTest epackage mainsubpackage {
+			
+		}
+		'''
+		val start = input.lastIndexOf('mainsubpackage')
+		input
+		.parseWithTestEcoreWithSubPackage
+		.assertError(
+			EdeltaPackage.eINSTANCE.edeltaModifyEcoreOperation,
+			EdeltaValidator.INVALID_SUBPACKAGE_MODIFICATION,
+			start, input.indexOf(' {') - start,
+			"Invalid direct subpackage modification 'mainsubpackage'"
+		)
+	}
 }

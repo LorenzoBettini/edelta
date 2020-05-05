@@ -70,6 +70,22 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testInvalidDirectSubPackageAreNotCopied() {
+		val program = '''
+		package test
+		
+		metamodel "mainpackage.mainsubpackage"
+		
+		modifyEcore aTest epackage mainsubpackage {
+			
+		}
+		'''.
+		parseWithTestEcoreWithSubPackage
+		val packages = program.eResource.copiedEPackagesMap.values
+		assertThat(packages).isEmpty
+	}
+
+	@Test
 	def void testInstallDerivedStateDuringPreIndexingPhase() {
 		val program = '''
 		package test

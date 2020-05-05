@@ -109,4 +109,29 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 		].isInstanceOf(EdeltaInterpreterRuntimeException)
 			.hasMessageContaining('''The type '«MyCustomEdeltaThatCannotBeLoadedAtRuntime.name»' has been resolved but cannot be loaded by the interpreter''')
 	}
+
+	@Test
+	def void testFilterOperationsWithNullEPackage() {
+		'''
+		modifyEcore first epackage {}
+		modifyEcore second epackage foo {}
+		'''.parse => [
+			assertThat(interpreterHelper.filterOperations(modifyEcoreOperations))
+				.containsExactly(modifyEcoreOperations.last)
+		]
+	}
+
+	@Test
+	def void testFilterOperationsWithSubPackage() {
+		'''
+		metamodel "mainpackage.mainsubpackage"
+
+		modifyEcore aTest epackage mainsubpackage {
+			
+		}
+		'''.parseWithTestEcoreWithSubPackage => [
+			assertThat(interpreterHelper.filterOperations(modifyEcoreOperations))
+				.isEmpty
+		]
+	}
 }

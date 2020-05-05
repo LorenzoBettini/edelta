@@ -458,6 +458,143 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testCreateEClassInSubPackage() {
+		'''
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ecoreref(mainsubpackage).addNewEClass("NewClass") [
+					EStructuralFeatures += newEAttribute("newTestAttr") [
+						EType = ecoreref(MainFooDataType)
+					]
+				]
+			}
+		'''
+		.parseWithTestEcoreWithSubPackage
+		.assertAfterInterpretationOfEdeltaModifyEcoreOperation(true)[ePackage |
+			val derivedEClass =
+				ePackage.ESubpackages.head.lastEClass
+			assertEquals("NewClass", derivedEClass.name)
+			assertEquals(1, derivedEClass.EStructuralFeatures.size)
+			val attr = derivedEClass.EStructuralFeatures.head
+			assertEquals("newTestAttr", attr.name)
+			assertEquals("MainFooDataType", attr.EType.name)
+		]
+	}
+
+	@Test
+	def void testCreateEClassInSubSubPackage() {
+		'''
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ecoreref(subsubpackage).addNewEClass("NewClass") [
+					EStructuralFeatures += newEAttribute("newTestAttr") [
+						EType = ecoreref(MainFooDataType)
+					]
+				]
+			}
+		'''
+		.parseWithTestEcoreWithSubPackage
+		.assertAfterInterpretationOfEdeltaModifyEcoreOperation(true)[ePackage |
+			val derivedEClass =
+				ePackage.ESubpackages.head.ESubpackages.head.lastEClass
+			assertEquals("NewClass", derivedEClass.name)
+			assertEquals(1, derivedEClass.EStructuralFeatures.size)
+			val attr = derivedEClass.EStructuralFeatures.head
+			assertEquals("newTestAttr", attr.name)
+			assertEquals("MainFooDataType", attr.EType.name)
+		]
+	}
+
+	@Test
+	def void testCreateEClassInNewSubPackage() {
+		'''
+			import org.eclipse.emf.ecore.EcoreFactory
+			
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
+					name = "anewsubpackage"
+				]
+				ecoreref(anewsubpackage).addNewEClass("NewClass") [
+					EStructuralFeatures += newEAttribute("newTestAttr") [
+						EType = ecoreref(MainFooDataType)
+					]
+				]
+			}
+		'''
+		.parseWithTestEcoreWithSubPackage
+		.assertAfterInterpretationOfEdeltaModifyEcoreOperation(true)[ePackage |
+			val newSubPackage = ePackage.ESubpackages.last
+			assertEquals("anewsubpackage", newSubPackage.name)
+			val derivedEClass =
+				ePackage.ESubpackages.last.lastEClass
+			assertEquals("NewClass", derivedEClass.name)
+			assertEquals(1, derivedEClass.EStructuralFeatures.size)
+			val attr = derivedEClass.EStructuralFeatures.head
+			assertEquals("newTestAttr", attr.name)
+			assertEquals("MainFooDataType", attr.EType.name)
+		]
+	}
+
+	@Test
+	def void testComplexInterpretationWithRenamingAndSubPackages() {
+		'''
+			import org.eclipse.emf.ecore.EcoreFactory
+			
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
+					name = "anewsubpackage"
+				]
+				ecoreref(anewsubpackage).addNewEClass("NewClass") [
+					EStructuralFeatures += newEAttribute("newTestAttr") [
+						EType = ecoreref(MainFooDataType)
+					]
+				]
+				ecoreref(NewClass).name = "RenamedClass"
+				ecoreref(RenamedClass).getEStructuralFeatures +=
+					newEAttribute("added", ecoreref(MainFooDataType))
+			}
+		'''
+		.parseWithTestEcoreWithSubPackage
+		.assertAfterInterpretationOfEdeltaModifyEcoreOperation(true)[ePackage |
+			val newSubPackage = ePackage.ESubpackages.last
+			assertEquals("anewsubpackage", newSubPackage.name)
+			val derivedEClass =
+				ePackage.ESubpackages.last.lastEClass
+			assertEquals("RenamedClass", derivedEClass.name)
+			assertEquals(2, derivedEClass.EStructuralFeatures.size)
+			val attr1 = derivedEClass.EStructuralFeatures.head
+			assertEquals("newTestAttr", attr1.name)
+			assertEquals("MainFooDataType", attr1.EType.name)
+			val attr2 = derivedEClass.EStructuralFeatures.last
+			assertEquals("added", attr2.name)
+			assertEquals("MainFooDataType", attr2.EType.name)
+		]
+	}
+
+	@Test
+	def void testInterpreterOnSubPackageIsNotExecuted() {
+		'''
+			metamodel "mainpackage.mainsubpackage"
+			
+			modifyEcore aTest epackage mainsubpackage {
+				// this should not be executed
+				throw new MyCustomException
+			}
+		'''
+		.parseWithTestEcoreWithSubPackage
+		.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false)[ePackage |
+			// nothing to check as long as no exception is thrown
+			// (meaning that the interpreter is not executed on that modifyEcore op)
+		]
+	}
+
 	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) {

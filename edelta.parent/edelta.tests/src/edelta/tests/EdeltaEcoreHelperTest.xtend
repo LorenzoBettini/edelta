@@ -4,9 +4,9 @@ import com.google.inject.Inject
 import edelta.util.EdeltaEcoreHelper
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
+import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.Assert
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -32,6 +32,36 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				myReference
 				foo
 				bar
+				'''
+			)
+	}
+
+	@Test
+	def void testProgramENamedElementsWithSubPackages() {
+		// MyClass with myClassAttribute
+		// is present in the package and in subpackages
+		// so it appears several times
+		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage.
+			getProgramENamedElements.
+			assertNamedElements(
+				'''
+				MainFooClass
+				MainFooDataType
+				MainFooEnum
+				MyClass
+				myAttribute
+				myReference
+				FooEnumLiteral
+				myClassAttribute
+				mainsubpackage
+				MainSubPackageFooClass
+				MyClass
+				mySubPackageAttribute
+				mySubPackageReference
+				myClassAttribute
+				subsubpackage
+				MyClass
+				mainpackage
 				'''
 			)
 	}
@@ -73,6 +103,98 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				FooEnum
 				'''
 			)
+		]
+	}
+
+	@Test
+	def void testEPackageENamedElementsWithSubPackages() {
+		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
+			getENamedElements(getEPackageByName("mainpackage"), it).
+			assertNamedElements(
+				'''
+				MainFooClass
+				MainFooDataType
+				MainFooEnum
+				MyClass
+				mainsubpackage
+				'''
+			)
+		]
+	}
+
+	@Test
+	def void testSubPackageEPackageENamedElementsWithSubPackages() {
+		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
+			getENamedElements(
+				getEPackageByName("mainpackage").ESubpackages.head, it
+			).
+			assertNamedElements(
+				'''
+				MainSubPackageFooClass
+				MyClass
+				subsubpackage
+				'''
+			)
+		]
+	}
+
+	@Test
+	def void testSubSubPackageEPackageENamedElementsWithSubPackages() {
+		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
+			getENamedElements(
+				getEPackageByName("mainpackage")
+					.ESubpackages.head
+					.ESubpackages.head, it
+			).
+			assertNamedElements(
+				'''
+				MyClass
+				'''
+			)
+		]
+	}
+
+	@Test
+	def void testEPackageENamedElementsWithCycleInSubPackages() {
+		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
+			val mainpackage = getEPackageByName("mainpackage")
+			val subsubpackage = mainpackage
+								.ESubpackages.head
+								.ESubpackages.head
+			// simulate the loop in the package relation
+			subsubpackage.ESubpackages += mainpackage
+			getENamedElements(subsubpackage, it).
+			assertNamedElements(
+				'''
+				MyClass
+				mainpackage
+				MyClass
+				mainpackage
+				'''
+			)
+			// it simply returns the first package of the loop
+		]
+	}
+
+	@Test
+	def void testENamedElementsWithWithTheSameNameInSubPackages() {
+		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
+			val mainpackage = getEPackageByName("mainpackage")
+			val subsubpackage = mainpackage
+								.ESubpackages.head
+								.ESubpackages.head
+			// both packages have a class with the same name but with different
+			// structure
+			getENamedElements(subsubpackage.getEClassiferByName("MyClass"), it).
+				assertNamedElements(
+				'''
+
+				''')
+			getENamedElements(mainpackage.getEClassiferByName("MyClass"), it).
+				assertNamedElements(
+				'''
+				myClassAttribute
+				''')
 		]
 	}
 

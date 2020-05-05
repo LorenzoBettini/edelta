@@ -55,6 +55,56 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test def void testSubPackageDirectReference() {
+		'''
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ecoreref(mainsubpackage)
+			}
+		'''.parseWithTestEcoreWithSubPackage => [
+			val ref = lastEcoreReferenceExpression.reference
+			ref.recordOriginalENamedElement
+			val original = metamodels.last.ESubpackages.head
+			assertSame(original, ref.originalEnamedelement)
+		]
+	}
+
+	@Test def void testSubPackageEClassDirectReference() {
+		'''
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ecoreref(MainSubPackageFooClass)
+			}
+		'''.parseWithTestEcoreWithSubPackage => [
+			val ref = lastEcoreReferenceExpression.reference
+			ref.recordOriginalENamedElement
+			val original = metamodels.last.ESubpackages.head
+				.getEClassiferByName("MainSubPackageFooClass")
+			assertNotNull(original)
+			assertSame(original, ref.originalEnamedelement)
+		]
+	}
+
+	@Test def void testSubSubPackageEClassQualifiedReference() {
+		'''
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ecoreref(subsubpackage.MyClass)
+			}
+		'''.parseWithTestEcoreWithSubPackage => [
+			val ref = lastEcoreReferenceExpression.reference
+			ref.recordOriginalENamedElement
+			val original = metamodels.last.ESubpackages.head
+				.ESubpackages.head
+				.getEClassiferByName("MyClass")
+			assertNotNull(original)
+			assertSame(original, ref.originalEnamedelement)
+		]
+	}
+
 	@Test def void testEClassifierQualifiedReference() {
 		'''
 			metamodel "foo"

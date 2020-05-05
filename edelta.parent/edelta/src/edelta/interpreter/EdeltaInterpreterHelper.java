@@ -3,13 +3,18 @@
  */
 package edelta.interpreter;
 
+import static edelta.util.EdeltaModelUtil.findRootSuperPackage;
+import static java.util.stream.Collectors.toList;
+
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import org.eclipse.xtext.common.types.JvmTypeReference;
 import org.eclipse.xtext.common.types.util.JavaReflectAccess;
 
 import com.google.inject.Singleton;
 
+import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaUseAs;
 import edelta.lib.AbstractEdelta;
 
@@ -53,4 +58,10 @@ public class EdeltaInterpreterHelper {
 		}
 	}
 
+	public List<EdeltaModifyEcoreOperation> filterOperations(List<EdeltaModifyEcoreOperation> ops) {
+		return ops.stream()
+				.filter(op -> op.getEpackage() != null &&
+					findRootSuperPackage(op.getEpackage()) == null)
+				.collect(toList());
+	}
 }

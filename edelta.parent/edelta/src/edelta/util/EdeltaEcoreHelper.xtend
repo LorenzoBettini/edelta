@@ -2,6 +2,7 @@ package edelta.util
 
 import com.google.inject.Inject
 import edelta.services.IEdeltaEcoreModelAssociations
+import java.util.List
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.ENamedElement
@@ -32,7 +33,7 @@ class EdeltaEcoreHelper {
 
 	def private Iterable<? extends ENamedElement> getProgramENamedElementsInternal(EObject context) {
 		val prog = getProgram(context)
-		val epackages = getProgramEPackages(context)
+		val epackages = getProgramTopLevelEPackages(context)
 		(
 			epackages.map[getAllENamedElements].flatten
 		+
@@ -40,7 +41,7 @@ class EdeltaEcoreHelper {
 		).toList
 	}
 
-	def private Iterable<? extends EPackage> getProgramEPackages(EObject context) {
+	def private Iterable<? extends EPackage> getProgramTopLevelEPackages(EObject context) {
 		val prog = getProgram(context)
 		// we also must explicitly consider the copied elements for interpreting without
 		// breaking the original EMF package registries classes
@@ -51,6 +52,10 @@ class EdeltaEcoreHelper {
 		)
 	}
 
+	/**
+	 * Returns all ENamedElements of the passed EPackage, recursively,
+	 * including subpackages and getAllENamedElements on each subpackage
+	 */
 	def private Iterable<ENamedElement> getAllENamedElements(EPackage e) {
 		val classifiers = e.EClassifiers
 		val inner = classifiers.map[
@@ -64,7 +69,8 @@ class EdeltaEcoreHelper {
 				default: <ENamedElement>emptyList
 			}
 		].flatten
-		classifiers + inner
+		classifiers + inner + e.ESubpackages +
+			e.ESubpackages.map[getAllENamedElements].flatten
 	}
 
 	def getAllEClasses(EPackage e) {
@@ -84,18 +90,18 @@ class EdeltaEcoreHelper {
 	) {
 		switch (e) {
 			EPackage:
-				cache.get("getEPackageENamedElements" + includeCopiedEPackages -> e.name, context.eResource) [
+				cache.get("getEPackageENamedElements" + includeCopiedEPackages -> e, context.eResource) [
 					return getEPackageENamedElementsInternal(e, context, includeCopiedEPackages)
 				]
 			EClass:
-				cache.get("getEClassENamedElements" + includeCopiedEPackages -> e.name, context.eResource) [
+				cache.get("getEClassENamedElements" + includeCopiedEPackages -> e, context.eResource) [
 					e.EPackage.getENamedElementsInternal(context, includeCopiedEPackages).
 						filter(EClass).
 						filter[name == e.name].
 						map[EAllStructuralFeatures].flatten
 				]
 			EEnum:
-				cache.get("getEEnumENamedElements" + includeCopiedEPackages -> e.name, context.eResource) [
+				cache.get("getEEnumENamedElements" + includeCopiedEPackages -> e, context.eResource) [
 					e.EPackage.getENamedElementsInternal(context, includeCopiedEPackages).
 						filter(EEnum).
 						filter[name == e.name].
@@ -106,22 +112,52 @@ class EdeltaEcoreHelper {
 		}
 	}
 
-	def private getEPackageENamedElementsInternal(EPackage ePackage, EObject context, boolean includeCopiedEPackages) {
-		val ePackageName = ePackage.name
-		val imported = getProgram(context).metamodels.getByName(ePackageName)
+	def private List<? extends ENamedElement> getEPackageENamedElementsInternal(EPackage ePackage, EObject context, boolean includeCopiedEPackages) {
+		val imported =
+			getProgram(context).metamodels.findEPackageByNameInRootEPackages(ePackage)
 		if (includeCopiedEPackages) {
-			val copiedEPackage = context.eResource.copiedEPackagesMap.get(ePackageName)
+			val copiedEPackage =
+				context.eResource.copiedEPackagesMap.values
+					.findEPackageByNameInRootEPackages(ePackage)
 			if (copiedEPackage !== null) 
 				// there'll also be copied epackages
 				return (
-					copiedEPackage.getEClassifiers +
-					imported.getEClassifiers
+					copiedEPackage.getEPackageENamedElementsInternal +
+					imported.getEPackageENamedElementsInternal
 				).toList
 		}
-		return imported.getEClassifiers
+		return imported.getEPackageENamedElementsInternal
+	}
+
+	def private List<? extends ENamedElement> getEPackageENamedElementsInternal(EPackage ePackage) {
+		return (
+			ePackage.getEClassifiers +
+			ePackage.getESubpackages
+		).toList
 	}
 
 	def <T extends ENamedElement> getByName(Iterable<T> namedElements, String nameToSearch) {
 		return namedElements.findFirst[name == nameToSearch]
+	}
+
+	/**
+	 * Try to retrieve an EPackage with the same name of the passed EPackage
+	 * in the given EPackages, possibly by inspecting the super package relation.
+	 * In case of loop in the super package relation, simply returns the passed
+	 * EPackage.
+	 */
+	def EPackage findEPackageByNameInRootEPackages(Iterable<EPackage> roots, EPackage p) {
+		if (hasCycleInSuperPackage(p))
+			return p
+		if (p.ESuperPackage === null) {
+			return roots.getByName(p.name)
+		} else {
+			val foundSuperPackage =
+				findEPackageByNameInRootEPackages(roots, p.ESuperPackage)
+			// it might not be found (e.g., in copied EPackages)
+			if (foundSuperPackage === null)
+				return null
+			return foundSuperPackage.ESubpackages.getByName(p.name)
+		}
 	}
 }

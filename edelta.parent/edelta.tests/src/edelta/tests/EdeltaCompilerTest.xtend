@@ -991,6 +991,124 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCompilationOfComplexOperationsWithSubPackages() {
+		'''
+			metamodel "foo"
+			
+			modifyEcore modifyFoo epackage foo {
+				addNewESubpackage("anewsubpackage", "aprefix", "aURI") [
+					addNewESubpackage("anestedsubpackage", "aprefix2", "aURI2") [
+						addNewEClass("ANestedSubPackageClass")
+					]
+				]
+				ecoreref(anewsubpackage).addNewEClass("NewClass") [
+					EStructuralFeatures +=
+						newEReference("newTestRef", ecoreref(ANestedSubPackageClass))
+				]
+				ecoreref(NewClass).name = "RenamedClass"
+				ecoreref(RenamedClass).getEStructuralFeatures +=
+					newEAttribute("added", ecoreref(FooDataType))
+			}
+		'''.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import java.util.function.Consumer;
+			import org.eclipse.emf.common.util.EList;
+			import org.eclipse.emf.ecore.EAttribute;
+			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.emf.ecore.EPackage;
+			import org.eclipse.emf.ecore.EReference;
+			import org.eclipse.emf.ecore.EStructuralFeature;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  public MyFile0() {
+			    
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  public void modifyFoo(final EPackage it) {
+			    final Consumer<EPackage> _function = (EPackage it_1) -> {
+			      final Consumer<EPackage> _function_1 = (EPackage it_2) -> {
+			        this.lib.addNewEClass(it_2, "ANestedSubPackageClass");
+			      };
+			      this.lib.addNewESubpackage(it_1, "anestedsubpackage", "aprefix2", "aURI2", _function_1);
+			    };
+			    this.lib.addNewESubpackage(it, "anewsubpackage", "aprefix", "aURI", _function);
+			    final Consumer<EClass> _function_1 = (EClass it_1) -> {
+			      EList<EStructuralFeature> _eStructuralFeatures = it_1.getEStructuralFeatures();
+			      EReference _newEReference = this.lib.newEReference("newTestRef", getEClass("foo.anewsubpackage.anestedsubpackage", "ANestedSubPackageClass"));
+			      _eStructuralFeatures.add(_newEReference);
+			    };
+			    this.lib.addNewEClass(getEPackage("foo.anewsubpackage"), "NewClass", _function_1);
+			    getEClass("foo.anewsubpackage", "NewClass").setName("RenamedClass");
+			    EList<EStructuralFeature> _eStructuralFeatures = getEClass("foo.anewsubpackage", "RenamedClass").getEStructuralFeatures();
+			    EAttribute _newEAttribute = this.lib.newEAttribute("added", getEDataType("foo", "FooDataType"));
+			    _eStructuralFeatures.add(_newEAttribute);
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    modifyFoo(getEPackage("foo"));
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
+	def void testExecutionOfComplexOperationsWithSubPackages() {
+		'''
+			metamodel "foo"
+			
+			modifyEcore modifyFoo epackage foo {
+				addNewESubpackage("anewsubpackage", "anewsubpackage", "http://anewsubpackage") [
+					addNewESubpackage("anestedsubpackage", "anestedsubpackage", "http://anestedsubpackage") [
+						addNewEClass("ANestedSubPackageClass")
+					]
+				]
+				ecoreref(anewsubpackage).addNewEClass("NewClass") [
+					EStructuralFeatures +=
+						newEReference("newTestRef", ecoreref(ANestedSubPackageClass))
+				]
+				ecoreref(NewClass).name = "RenamedClass"
+				ecoreref(RenamedClass).getEStructuralFeatures +=
+					newEAttribute("added", ecoreref(FooDataType))
+			}
+		'''.checkCompiledCodeExecution(
+			'''
+			<?xml version="1.0" encoding="UTF-8"?>
+			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="foo" nsURI="http://foo" nsPrefix="foo">
+			  <eClassifiers xsi:type="ecore:EClass" name="FooClass"/>
+			  <eClassifiers xsi:type="ecore:EClass" name="FooDerivedClass" eSuperTypes="#//FooClass"/>
+			  <eClassifiers xsi:type="ecore:EDataType" name="FooDataType" instanceClassName="java.lang.String"/>
+			  <eSubpackages name="anewsubpackage" nsURI="http://anewsubpackage" nsPrefix="anewsubpackage">
+			    <eClassifiers xsi:type="ecore:EClass" name="RenamedClass">
+			      <eStructuralFeatures xsi:type="ecore:EReference" name="newTestRef" eType="#//anewsubpackage/anestedsubpackage/ANestedSubPackageClass"/>
+			      <eStructuralFeatures xsi:type="ecore:EAttribute" name="added" eType="#//FooDataType"/>
+			    </eClassifiers>
+			    <eSubpackages name="anestedsubpackage" nsURI="http://anestedsubpackage" nsPrefix="anestedsubpackage">
+			      <eClassifiers xsi:type="ecore:EClass" name="ANestedSubPackageClass"/>
+			    </eSubpackages>
+			  </eSubpackages>
+			</ecore:EPackage>
+			''',
+			true
+		)
+	}
+
+	@Test
 	def void testCompilationOfPersonListExampleModifyEcore() {
 		val rs = createResourceSetWithEcore(
 			PERSON_LIST_ECORE, PERSON_LIST_ECORE_PATH,

@@ -9,6 +9,9 @@ import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
+import org.eclipse.xtext.naming.IQualifiedNameProvider
+
+import static edelta.util.EdeltaModelUtil.*
 
 /**
  * Utilities for an ecore reference information
@@ -17,6 +20,7 @@ import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
  */
 class EdeltaEcoreReferenceInformationHelper {
 	@Inject extension IBatchTypeResolver
+	@Inject extension IQualifiedNameProvider
 
 	def getOrComputeInformation(EdeltaEcoreReference e) {
 		if (e.information !== null)
@@ -55,6 +59,14 @@ class EdeltaEcoreReferenceInformationHelper {
 
 	def private EPackageOrNull(EClassifier e) {
 		e?.EPackage
+	}
+
+	def private nameOrEmpty(EPackage e) {
+		if (e === null)
+			return ""
+		if (hasCycleInSuperPackage(e))
+			return e.name
+		return e.fullyQualifiedName.toString
 	}
 
 	def private nameOrEmpty(ENamedElement e) {

@@ -6,6 +6,7 @@ import edelta.lib.AbstractEdelta;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderCustom;
 import edelta.validation.EdeltaValidator;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.diagnostics.Diagnostic;
 import org.eclipse.xtext.testing.InjectWith;
@@ -444,5 +445,45 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   @Test
   public void testReferenceToCreatedEClassRenamed() {
     this._validationTestHelper.assertNoErrors(this.parseWithTestEcore(this._inputs.referenceToCreatedEClassRenamed()));
+  }
+  
+  @Test
+  public void testInvalidSubPackageImportedMetamodel() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage.mainsubpackage\"");
+    _builder.newLine();
+    final String input = _builder.toString();
+    final int start = input.indexOf("\"");
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
+    EClass _edeltaProgram = EdeltaPackage.eINSTANCE.getEdeltaProgram();
+    int _lastIndexOf = input.lastIndexOf("\"");
+    int _minus = (_lastIndexOf - start);
+    int _plus = (_minus + 1);
+    this._validationTestHelper.assertError(_parseWithTestEcoreWithSubPackage, _edeltaProgram, 
+      EdeltaValidator.INVALID_SUBPACKAGE_IMPORT, start, _plus, 
+      "Invalid subpackage import \'mainsubpackage\'");
+  }
+  
+  @Test
+  public void testInvalidModifyEcoreOfSubPackage() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage.mainsubpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainsubpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    final int start = input.lastIndexOf("mainsubpackage");
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
+    EClass _edeltaModifyEcoreOperation = EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation();
+    int _indexOf = input.indexOf(" {");
+    int _minus = (_indexOf - start);
+    this._validationTestHelper.assertError(_parseWithTestEcoreWithSubPackage, _edeltaModifyEcoreOperation, 
+      EdeltaValidator.INVALID_SUBPACKAGE_MODIFICATION, start, _minus, 
+      "Invalid direct subpackage modification \'mainsubpackage\'");
   }
 }

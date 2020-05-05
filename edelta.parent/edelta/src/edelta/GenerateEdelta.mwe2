@@ -50,6 +50,9 @@ Workflow {
 			projectWizard = {
 				generate = true
 			}
+			contentAssist = {
+				generateXtendStub = false
+			}
 		}
 	}
 }
