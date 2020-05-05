@@ -36,7 +36,7 @@ public class EdeltaInterpreterConfigurator {
 	@Inject
 	private ClassLoader parentClassLoader;
 
-	public void configureInterpreter(IEdeltaInterpreter interpreter2, Resource resource) {
+	public void configureInterpreter(IEdeltaInterpreter interpreter, Resource resource) {
 		ResourceSet set = resource.getResourceSet();
 		if (set instanceof XtextResourceSet) {
 			Object context = ((XtextResourceSet) set).getClasspathURIContext();
@@ -87,7 +87,7 @@ public class EdeltaInterpreterConfigurator {
 					URLClassLoader cl = new URLClassLoader(
 							urls.toArray(new URL[urls.size()]),
 							parentClassLoader);
-					interpreter2.setClassLoader(cl);
+					interpreter.setClassLoader(cl);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
