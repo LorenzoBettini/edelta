@@ -209,10 +209,6 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
       _builder_1.newLine();
       _builder_1.append("\"mainpackage\"");
       _builder_1.newLine();
-      _builder_1.append("\"mainpackage.subpackage\"");
-      _builder_1.newLine();
-      _builder_1.append("\"mainpackage.subpackage.subsubpackage\"");
-      _builder_1.newLine();
       _builder_1.append("\"mypackage\"");
       _builder_1.newLine();
       _builder_1.append("\"namespace\"");

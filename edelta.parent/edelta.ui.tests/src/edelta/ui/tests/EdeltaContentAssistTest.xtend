@@ -129,6 +129,9 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			'''
 		)
 		waitForBuild // required to index the new ecore file
+		// mainpackage.subpackage and mainpackage.subpackage.subsubpackage
+		// must not be proposed, since they are subpackages,
+		// which cannot be directly imported
 		newBuilder.append('metamodel ')
 			.assertText(
 				'''
@@ -136,8 +139,6 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 				"data"
 				"ecore"
 				"mainpackage"
-				"mainpackage.subpackage"
-				"mainpackage.subpackage.subsubpackage"
 				"mypackage"
 				"namespace"
 				"type"
