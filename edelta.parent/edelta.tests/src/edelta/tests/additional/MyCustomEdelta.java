@@ -28,7 +28,7 @@ public class MyCustomEdelta extends AbstractEdelta {
 	}
 
 	public EClass createANewEClass() {
-		return createEClass("foo", "ANewClass", null);
+		return lib.addNewEClass(getEPackage("foo"), "ANewClass");
 	}
 
 	public void createANewEAttribute(EClass c) {

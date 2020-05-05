@@ -25,7 +25,7 @@ public class MyCustomStatefulEdelta extends AbstractEdelta {
 	}
 
 	public EClass createANewEClass() {
-		return createEClass("foo", "ANewClass" + (++counter), null);
+		return lib.addNewEClass(getEPackage("foo"), "ANewClass" + (++counter));
 	}
 
 	public void createANewEAttribute(EClass c) {

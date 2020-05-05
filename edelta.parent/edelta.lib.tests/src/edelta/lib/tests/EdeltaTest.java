@@ -321,33 +321,6 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testCreateEClass() {
-		loadTestEcore(MY_ECORE);
-		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
-		assertNull(ePackage.getEClassifier("NewClass"));
-		EClass createEClass = edelta.createEClass(MYPACKAGE, "NewClass", null);
-		assertSame(createEClass, ePackage.getEClassifier("NewClass"));
-	}
-
-	@Test
-	public void testCreateEClassLaterInitialization() {
-		loadTestEcore(MY_ECORE);
-		// refers to an EClass that is created later
-		EClass newClass1 = edelta.createEClass(MYPACKAGE, "NewClass1",
-			edelta.createList(
-				c -> c.getESuperTypes().add(edelta.getEClass(MYPACKAGE, "NewClass2")),
-				c -> c.getESuperTypes().add(edelta.getEClass(MYPACKAGE, "NewClass3"))
-			)
-		);
-		EClass newClass2 = edelta.createEClass(MYPACKAGE, "NewClass2",
-			edelta.createList(edelta::fooConsumer));
-		EClass newClass3 = edelta.createEClass(MYPACKAGE, "NewClass3", null);
-		edelta.runInitializers();
-		assertSame(newClass2, newClass1.getESuperTypes().get(0));
-		assertSame(newClass3, newClass1.getESuperTypes().get(1));
-	}
-
-	@Test
 	public void testRemoveEClassifier() {
 		loadTestEcore(MY_ECORE);
 		// check that the superclass is set
