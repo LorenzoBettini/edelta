@@ -7,7 +7,6 @@ import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreterFactory
 import edelta.interpreter.EdeltaInterpreterHelper
-import edelta.interpreter.IEdeltaInterpreter
 import edelta.lib.EdeltaEcoreUtil
 import edelta.scoping.EdeltaOriginalENamedElementRecorder
 import edelta.services.IEdeltaEcoreModelAssociations
@@ -33,8 +32,6 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	@Inject GenericUnloader unloader
 
 	@Inject EdeltaInterpreterFactory interpreterFactory
-
-	var IEdeltaInterpreter interpreter
 
 	@Inject EdeltaInterpreterHelper interpreterHelper
 
@@ -86,8 +83,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 			resource.contents += copiedEPackagesMap.values
 			// record original ecore references before running the interpreter
 			recordEcoreReferenceOriginalENamedElement(resource)
-			// configure and run the interpreter
-			interpreter = interpreterFactory.create(resource)
+			// run the interpreter
 			runInterpreter(
 				program,
 				copiedEPackagesMap
@@ -98,7 +94,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	protected def void runInterpreter(EdeltaProgram program,
 		EdeltaCopiedEPackagesMap copiedEPackagesMap
 	) {
-		interpreter.evaluateModifyEcoreOperations(
+		interpreterFactory.create(program.eResource).evaluateModifyEcoreOperations(
 			program,
 			copiedEPackagesMap
 		)
