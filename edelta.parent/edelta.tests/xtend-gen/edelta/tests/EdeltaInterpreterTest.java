@@ -6,6 +6,7 @@ import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaPackage;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreter;
+import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.interpreter.IEdeltaInterpreter;
 import edelta.tests.EdeltaAbstractTest;
@@ -25,6 +26,7 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
+import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
@@ -51,6 +53,17 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   public void setupInterpreter() {
     this.interpreter = this.createInterpreter();
     this.interpreter.setInterpreterTimeout(1200000);
+  }
+  
+  @Test
+  public void sanityTestCheck() {
+    try {
+      final EdeltaInterpreterFactory interpreterFactory = this.injector.<EdeltaInterpreterFactory>getInstance(EdeltaInterpreterFactory.class);
+      final IEdeltaInterpreter anotherInterprter = interpreterFactory.create(this._parseHelper.parse("").eResource());
+      Assertions.assertThat(anotherInterprter.getClass()).isSameAs(this.interpreter.getClass());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
@@ -857,6 +870,13 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.newLine();
     _builder.append("def op(EClass c) : void {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("c.op2");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    _builder.append("def op2(EClass c) : void {");
     _builder.newLine();
     _builder.append("\t");
     _builder.append("c.abstract = true");

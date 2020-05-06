@@ -5,7 +5,7 @@ import com.google.inject.Injector;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.interpreter.EdeltaSafeInterpreter;
 import edelta.interpreter.IEdeltaInterpreter;
-import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
+import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutSafeInterpreter;
 import edelta.tests.EdeltaInterpreterTest;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
@@ -18,7 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(XtextRunner.class)
-@InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter.class)
+@InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutSafeInterpreter.class)
 @SuppressWarnings("all")
 public class EdeltaSafeInterpreterTest extends EdeltaInterpreterTest {
   @Inject

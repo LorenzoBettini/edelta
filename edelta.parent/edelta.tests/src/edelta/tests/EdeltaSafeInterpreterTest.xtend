@@ -12,7 +12,7 @@ import org.junit.runner.RunWith
 import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
-@InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
+@InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutSafeInterpreter)
 class EdeltaSafeInterpreterTest extends EdeltaInterpreterTest {
 
 	@Inject Injector injector

@@ -22,6 +22,7 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
+import edelta.interpreter.EdeltaInterpreterFactory
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -42,6 +43,16 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		// actually we set it to several minutes
 		// this also makes it easier to debug tests
 		interpreter.interpreterTimeout = 1200000;
+	}
+
+	@Test
+	def void sanityTestCheck() {
+		// make sure we use the same interpreter implementation
+		// in fact the interpreter can create another interpreter using the factory
+		val interpreterFactory = injector.getInstance(EdeltaInterpreterFactory)
+		val anotherInterprter = interpreterFactory.create("".parse.eResource)
+		assertThat(anotherInterprter.class)
+			.isSameAs(interpreter.class)
 	}
 
 	@Test
@@ -576,6 +587,9 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			package test1
 			
 			def op(EClass c) : void {
+				c.op2
+			}
+			def op2(EClass c) : void {
 				c.abstract = true
 			}
 		''',
