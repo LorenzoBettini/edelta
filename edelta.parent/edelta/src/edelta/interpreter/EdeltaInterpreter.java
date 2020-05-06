@@ -1,6 +1,7 @@
 package edelta.interpreter;
 
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MODIFY_ECORE_OPERATION__BODY;
+import static edelta.util.EdeltaModelUtil.getProgram;
 import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashMap;
 
 import java.util.List;
@@ -238,10 +239,11 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 	protected Object invokeOperation(final JvmOperation operation, final Object receiver,
 			final List<Object> argumentValues, final IEvaluationContext parentContext,
 			final CancelIndicator indicator) {
-		final EdeltaOperation originalOperation =
+		final EdeltaOperation edeltaOperation =
 				edeltaJvmModelHelper.findEdeltaOperation(operation);
-		if (originalOperation != null) {
-			if (originalOperation.eContainer() == currentProgram) {
+		if (edeltaOperation != null) {
+			EdeltaProgram containingProgram = getProgram(edeltaOperation);
+			if (containingProgram == currentProgram) {
 				final IEvaluationContext context = parentContext.fork();
 				int index = 0;
 				List<JvmFormalParameter> params = operation.getParameters();
@@ -250,13 +252,14 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 							QualifiedName.create(param.getName()),
 							argumentValues.get(index++));
 				}
-				return internalEvaluate(originalOperation.getBody(), context, indicator);
-			} else if (receiver instanceof EdeltaProgram) {
-				EdeltaProgram otherProgram = (EdeltaProgram) receiver;
+				return internalEvaluate(edeltaOperation.getBody(), context, indicator);
+			} else {
+				// create a new interpreter since the edelta operation is in
+				// another edelta source file.
 				IEdeltaInterpreter newInterpreter =
-						edeltaInterpreterFactory.create(otherProgram.eResource());
+						edeltaInterpreterFactory.create(containingProgram.eResource());
 				return newInterpreter
-					.evaluateEdeltaOperation(thisObject, otherProgram, originalOperation, argumentValues, indicator);
+					.evaluateEdeltaOperation(thisObject, containingProgram, edeltaOperation, argumentValues, indicator);
 			}
 		}
 		return super.invokeOperation(
