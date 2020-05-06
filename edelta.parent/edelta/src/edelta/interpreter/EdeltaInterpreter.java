@@ -226,7 +226,7 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 		final EdeltaUseAs useAs = edeltaJvmModelHelper.findEdeltaUseAs(jvmField);
 		if (useAs != null) {
 			EdeltaProgram useAsTypeProgram = edeltaJvmModelHelper.findEdeltaProgram(useAs.getType());
-			if (useAsTypeProgram != null && useAsTypeProgram != currentProgram)
+			if (useAsTypeProgram != null)
 				return useAsTypeProgram;
 			return useAsFields.computeIfAbsent(useAs,
 				it -> edeltaInterpreterHelper.safeInstantiate(
