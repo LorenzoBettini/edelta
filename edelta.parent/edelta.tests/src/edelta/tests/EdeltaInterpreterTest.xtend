@@ -575,7 +575,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 			package test1
 			
-			def op2(EClass c) : void {
+			def op(EClass c) : void {
 				c.abstract = true
 			}
 		''',
@@ -589,22 +589,11 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			
 			use test1.__synthetic0 as my
 			
-			def op(EClass c) : void {
-				var __synthetic0 a = null
-				// println(my)
-				c.abstract = true
-			}
-			
 			modifyEcore aModificationTest epackage foo {
-				EClassifiers += newEClass("ANewClass") [
-					ESuperTypes += newEClass("Base")
-					op(it)
-				]
+				my.op(ecoreref(FooClass))
 			}
 		''', true) [ derivedEPackage |
-			derivedEPackage.lastEClass => [
-				assertEquals("ANewClass", name)
-				assertEquals("Base", ESuperTypes.last.name)
+			derivedEPackage.firstEClass => [
 				assertTrue(isAbstract)
 			]
 		]
