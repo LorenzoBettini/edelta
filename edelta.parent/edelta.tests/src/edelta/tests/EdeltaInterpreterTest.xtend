@@ -614,6 +614,41 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testModifyEcoreAndCallOperationFromExternalUseAsExtension() {
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+		#['''
+			import org.eclipse.emf.ecore.EClass
+
+			package test1
+			
+			def op(EClass c) : void {
+				c.op2
+			}
+			def op2(EClass c) : void {
+				c.abstract = true
+			}
+		''',
+		'''
+			import org.eclipse.emf.ecore.EClass
+			import test1.__synthetic0
+			
+			package test2
+			
+			metamodel "foo"
+			
+			use test1.__synthetic0 as extension my
+			
+			modifyEcore aModificationTest epackage foo {
+				ecoreref(FooClass).op
+			}
+		'''], true) [ derivedEPackage |
+			derivedEPackage.firstEClass => [
+				assertTrue(isAbstract)
+			]
+		]
+	}
+
 	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) {
