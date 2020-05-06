@@ -15,6 +15,8 @@ import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime;
 import edelta.tests.additional.MyCustomException;
 import edelta.util.EdeltaCopiedEPackagesMap;
 import edelta.validation.EdeltaValidator;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.Assertions;
@@ -26,6 +28,7 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
+import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
@@ -912,7 +915,8 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       };
       ObjectExtensions.<EClass>operator_doubleArrow(_firstEClass, _function_1);
     };
-    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, _builder_1, true, _function);
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+      Collections.<CharSequence>unmodifiableList(CollectionLiterals.<CharSequence>newArrayList(_builder, _builder_1)), true, _function);
   }
   
   protected void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final Procedure1<? super EPackage> testExecutor) {
@@ -924,8 +928,8 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor);
   }
   
-  protected void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence first, final CharSequence second, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
-    final EdeltaProgram program = this.parse2WithTestEcore(first, second);
+  protected void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final List<CharSequence> inputs, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
+    final EdeltaProgram program = this.parseSeveralWithTestEcore(inputs);
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor);
   }
   

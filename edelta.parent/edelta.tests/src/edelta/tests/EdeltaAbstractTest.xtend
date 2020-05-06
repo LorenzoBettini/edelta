@@ -33,6 +33,7 @@ import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
+import java.util.List
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -51,9 +52,16 @@ abstract class EdeltaAbstractTest {
 	protected static String PERSON_LIST_ECORE = "PersonList.ecore"
 	protected static String PERSON_LIST_ECORE_PATH = "src/edelta/tests/input/models/" + PERSON_LIST_ECORE
 
-	def protected parse2WithTestEcore(CharSequence first, CharSequence second) {
-		val program1 = first.parse(resourceSetWithTestEcore)
-		second.parse(program1.eResource.resourceSet)
+	/**
+	 * Parse several input sources and returns the parsed program corresponding
+	 * to the last input source.
+	 */
+	def protected parseSeveralWithTestEcore(List<CharSequence> inputs) {
+		val rs = resourceSetWithTestEcore
+		var EdeltaProgram program
+		for (input : inputs)
+			program = input.parse(rs)
+		return program
 	}
 
 	def protected parseWithTestEcore(CharSequence input) {

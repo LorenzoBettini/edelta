@@ -12,6 +12,7 @@ import edelta.edelta.EdeltaProgram;
 import edelta.tests.EdeltaInjectorProvider;
 import edelta.tests.input.Inputs;
 import java.nio.file.Paths;
+import java.util.List;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
@@ -78,14 +79,18 @@ public abstract class EdeltaAbstractTest {
   
   protected static String PERSON_LIST_ECORE_PATH = ("src/edelta/tests/input/models/" + EdeltaAbstractTest.PERSON_LIST_ECORE);
   
-  protected EdeltaProgram parse2WithTestEcore(final CharSequence first, final CharSequence second) {
+  /**
+   * Parse several input sources and returns the parsed program corresponding
+   * to the last input source.
+   */
+  protected EdeltaProgram parseSeveralWithTestEcore(final List<CharSequence> inputs) {
     try {
-      EdeltaProgram _xblockexpression = null;
-      {
-        final EdeltaProgram program1 = this._parseHelper.parse(first, this.resourceSetWithTestEcore());
-        _xblockexpression = this._parseHelper.parse(second, program1.eResource().getResourceSet());
+      final ResourceSet rs = this.resourceSetWithTestEcore();
+      EdeltaProgram program = null;
+      for (final CharSequence input : inputs) {
+        program = this._parseHelper.parse(input, rs);
       }
-      return _xblockexpression;
+      return program;
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }

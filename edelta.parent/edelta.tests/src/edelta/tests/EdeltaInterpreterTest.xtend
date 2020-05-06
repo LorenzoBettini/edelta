@@ -23,6 +23,7 @@ import org.junit.runner.RunWith
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
 import edelta.interpreter.EdeltaInterpreterFactory
+import java.util.List
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -581,7 +582,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	@Test
 	def void testModifyEcoreAndCallOperationFromExternalUseAs() {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
-		'''
+		#['''
 			import org.eclipse.emf.ecore.EClass
 
 			package test1
@@ -606,7 +607,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			modifyEcore aModificationTest epackage foo {
 				my.op(ecoreref(FooClass))
 			}
-		''', true) [ derivedEPackage |
+		'''], true) [ derivedEPackage |
 			derivedEPackage.firstEClass => [
 				assertTrue(isAbstract)
 			]
@@ -627,9 +628,9 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
-		CharSequence first, CharSequence second, boolean doValidate, (EPackage)=>void testExecutor
+		List<CharSequence> inputs, boolean doValidate, (EPackage)=>void testExecutor
 	) {
-		val program = parse2WithTestEcore(first, second)
+		val program = parseSeveralWithTestEcore(inputs)
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor)
 	}
 
