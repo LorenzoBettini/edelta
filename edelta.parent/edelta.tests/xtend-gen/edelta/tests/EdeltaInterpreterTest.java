@@ -975,6 +975,74 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       Collections.<CharSequence>unmodifiableList(CollectionLiterals.<CharSequence>newArrayList(_builder, _builder_1)), true, _function);
   }
   
+  @Test
+  public void testModifyEcoreAndCallOperationFromExternalUseAsWithSeveralFiles() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EClass");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("package test1");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("def op2(EClass c) : void {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("c.abstract = true");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("import org.eclipse.emf.ecore.EClass");
+    _builder_1.newLine();
+    _builder_1.append("import test1.__synthetic0");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("package test2");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("use test1.__synthetic0 as extension my");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("def op(EClass c) : void {");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("c.op2");
+    _builder_1.newLine();
+    _builder_1.append("}");
+    _builder_1.newLine();
+    StringConcatenation _builder_2 = new StringConcatenation();
+    _builder_2.append("import org.eclipse.emf.ecore.EClass");
+    _builder_2.newLine();
+    _builder_2.append("import test2.__synthetic1");
+    _builder_2.newLine();
+    _builder_2.newLine();
+    _builder_2.append("package test3");
+    _builder_2.newLine();
+    _builder_2.newLine();
+    _builder_2.append("metamodel \"foo\"");
+    _builder_2.newLine();
+    _builder_2.newLine();
+    _builder_2.append("use test2.__synthetic1 as extension my");
+    _builder_2.newLine();
+    _builder_2.newLine();
+    _builder_2.append("modifyEcore aModificationTest epackage foo {");
+    _builder_2.newLine();
+    _builder_2.append("\t");
+    _builder_2.append("ecoreref(FooClass).op");
+    _builder_2.newLine();
+    _builder_2.append("}");
+    _builder_2.newLine();
+    final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
+      EClass _firstEClass = this.getFirstEClass(derivedEPackage);
+      final Procedure1<EClass> _function_1 = (EClass it) -> {
+        Assert.assertTrue(it.isAbstract());
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_firstEClass, _function_1);
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+      Collections.<CharSequence>unmodifiableList(CollectionLiterals.<CharSequence>newArrayList(_builder, _builder_1, _builder_2)), true, _function);
+  }
+  
   protected void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final Procedure1<? super EPackage> testExecutor) {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, true, testExecutor);
   }
