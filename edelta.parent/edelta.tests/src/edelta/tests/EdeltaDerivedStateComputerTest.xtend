@@ -2,9 +2,11 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.edelta.EdeltaEcoreQualifiedReference
+import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreterRuntimeException
+import edelta.resource.EdeltaDerivedStateHelper
 import edelta.tests.additional.TestableEdeltaDerivedStateComputer
 import org.eclipse.emf.common.notify.impl.AdapterImpl
 import org.eclipse.emf.ecore.EAttribute
@@ -22,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
 import static extension org.junit.Assert.*
-import edelta.resource.EdeltaDerivedStateHelper
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
@@ -356,5 +357,9 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		assertEquals(expected,
 			c.EStructuralFeatures.contains(f)
 		)
+	}
+
+	def private getOriginalEnamedelement(EdeltaEcoreReference ref) {
+		ref.ecoreReferenceState.originalEnamedelement
 	}
 }

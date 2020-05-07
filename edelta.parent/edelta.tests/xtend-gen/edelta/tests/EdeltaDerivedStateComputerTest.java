@@ -3,6 +3,7 @@ package edelta.tests;
 import com.google.common.base.Objects;
 import com.google.inject.Inject;
 import edelta.edelta.EdeltaEcoreQualifiedReference;
+import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
@@ -364,9 +365,9 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     ENamedElement _enamedelement_1 = ecoreref.getEnamedelement();
     EAttribute eAttr = ((EAttribute) _enamedelement_1);
     this.assertEClassContainsFeature(eClass, eAttr, false);
-    ENamedElement _originalEnamedelement = ecoreref.getQualification().getOriginalEnamedelement();
+    ENamedElement _originalEnamedelement = this.getOriginalEnamedelement(ecoreref.getQualification());
     eClass = ((EClass) _originalEnamedelement);
-    ENamedElement _originalEnamedelement_1 = ecoreref.getOriginalEnamedelement();
+    ENamedElement _originalEnamedelement_1 = this.getOriginalEnamedelement(ecoreref);
     eAttr = ((EAttribute) _originalEnamedelement_1);
     this.assertEClassContainsFeature(eClass, eAttr, true);
   }
@@ -442,5 +443,9 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   private void assertEClassContainsFeature(final EClass c, final EStructuralFeature f, final boolean expected) {
     Assert.assertEquals(Boolean.valueOf(expected), 
       Boolean.valueOf(c.getEStructuralFeatures().contains(f)));
+  }
+  
+  private ENamedElement getOriginalEnamedelement(final EdeltaEcoreReference ref) {
+    return this._edeltaDerivedStateHelper.getEcoreReferenceState(ref).getOriginalEnamedelement();
   }
 }

@@ -6,11 +6,13 @@ import edelta.edelta.EdeltaEcoreQualifiedReference;
 import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaFactory;
 import edelta.edelta.EdeltaProgram;
+import edelta.resource.EdeltaDerivedStateHelper;
 import edelta.scoping.EdeltaOriginalENamedElementRecorder;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EEnumLiteral;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtend2.lib.StringConcatenation;
@@ -31,6 +33,10 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
   @Inject
   @Extension
   private EdeltaOriginalENamedElementRecorder _edeltaOriginalENamedElementRecorder;
+  
+  @Inject
+  @Extension
+  private EdeltaDerivedStateHelper _edeltaDerivedStateHelper;
   
   @Test
   public void testNull() {
@@ -53,7 +59,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       final EdeltaEcoreDirectReference ref = EdeltaFactory.eINSTANCE.createEdeltaEcoreDirectReference();
       this._edeltaOriginalENamedElementRecorder.recordOriginalENamedElement(ref);
-      Assert.assertNull(ref.getOriginalEnamedelement());
+      Assert.assertNull(this.getOriginalEnamedelement(ref));
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
@@ -62,7 +68,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
   public void testUnresolvedENamedElement() {
     final EdeltaEcoreReference ref = this.ecoreReferenceExpression("ecoreref(NonExistant)").getReference();
     this._edeltaOriginalENamedElementRecorder.recordOriginalENamedElement(ref);
-    Assert.assertNull(ref.getOriginalEnamedelement());
+    Assert.assertNull(this.getOriginalEnamedelement(ref));
   }
   
   @Test
@@ -83,7 +89,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
       final EdeltaEcoreReference ref = this.lastEcoreReferenceExpression(it).getReference();
       this._edeltaOriginalENamedElementRecorder.recordOriginalENamedElement(ref);
       final EClassifier original = this.getEClassiferByName(IterableExtensions.<EPackage>last(it.getMetamodels()), "FooClass");
-      Assert.assertSame(original, ref.getOriginalEnamedelement());
+      Assert.assertSame(original, this.getOriginalEnamedelement(ref));
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
@@ -106,7 +112,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
       final EdeltaEcoreReference ref = this.lastEcoreReferenceExpression(it).getReference();
       this._edeltaOriginalENamedElementRecorder.recordOriginalENamedElement(ref);
       final EPackage original = IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>last(it.getMetamodels()).getESubpackages());
-      Assert.assertSame(original, ref.getOriginalEnamedelement());
+      Assert.assertSame(original, this.getOriginalEnamedelement(ref));
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
   }
@@ -130,7 +136,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
       this._edeltaOriginalENamedElementRecorder.recordOriginalENamedElement(ref);
       final EClassifier original = this.getEClassiferByName(IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>last(it.getMetamodels()).getESubpackages()), "MainSubPackageFooClass");
       Assert.assertNotNull(original);
-      Assert.assertSame(original, ref.getOriginalEnamedelement());
+      Assert.assertSame(original, this.getOriginalEnamedelement(ref));
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
   }
@@ -154,7 +160,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
       this._edeltaOriginalENamedElementRecorder.recordOriginalENamedElement(ref);
       final EClassifier original = this.getEClassiferByName(IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>last(it.getMetamodels()).getESubpackages()).getESubpackages()), "MyClass");
       Assert.assertNotNull(original);
-      Assert.assertSame(original, ref.getOriginalEnamedelement());
+      Assert.assertSame(original, this.getOriginalEnamedelement(ref));
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
   }
@@ -177,9 +183,9 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
       final EdeltaEcoreQualifiedReference ref = this.getEdeltaEcoreQualifiedReference(this.lastEcoreReferenceExpression(it).getReference());
       this._edeltaOriginalENamedElementRecorder.recordOriginalENamedElement(ref);
       final EClassifier original = this.getEClassiferByName(IterableExtensions.<EPackage>last(it.getMetamodels()), "FooClass");
-      Assert.assertSame(original, ref.getOriginalEnamedelement());
+      Assert.assertSame(original, this.getOriginalEnamedelement(ref));
       final EPackage originalPackage = IterableExtensions.<EPackage>last(it.getMetamodels());
-      Assert.assertSame(originalPackage, ref.getQualification().getOriginalEnamedelement());
+      Assert.assertSame(originalPackage, this.getOriginalEnamedelement(ref.getQualification()));
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
@@ -204,7 +210,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       final EdeltaEcoreReference ref = this.lastEcoreReferenceExpression(it).getReference();
       this._edeltaOriginalENamedElementRecorder.recordOriginalENamedElement(ref);
-      Assert.assertNull(ref.getOriginalEnamedelement());
+      Assert.assertNull(this.getOriginalEnamedelement(ref));
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
@@ -229,9 +235,9 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       final EdeltaEcoreQualifiedReference ref = this.getEdeltaEcoreQualifiedReference(this.lastEcoreReferenceExpression(it).getReference());
       this._edeltaOriginalENamedElementRecorder.recordOriginalENamedElement(ref);
-      Assert.assertNull(ref.getOriginalEnamedelement());
+      Assert.assertNull(this.getOriginalEnamedelement(ref));
       final EPackage originalPackage = IterableExtensions.<EPackage>last(it.getMetamodels());
-      Assert.assertSame(originalPackage, ref.getQualification().getOriginalEnamedelement());
+      Assert.assertSame(originalPackage, this.getOriginalEnamedelement(ref.getQualification()));
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
@@ -254,7 +260,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
       final EdeltaEcoreReference ref = this.lastEcoreReferenceExpression(it).getReference();
       this._edeltaOriginalENamedElementRecorder.recordOriginalENamedElement(ref);
       final EStructuralFeature original = this.getEStructuralFeatureByName(this.getEClassiferByName(IterableExtensions.<EPackage>last(it.getMetamodels()), "FooClass"), "myAttribute");
-      Assert.assertSame(original, ref.getOriginalEnamedelement());
+      Assert.assertSame(original, this.getOriginalEnamedelement(ref));
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
@@ -277,9 +283,9 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
       final EdeltaEcoreQualifiedReference ref = this.getEdeltaEcoreQualifiedReference(this.lastEcoreReferenceExpression(it).getReference());
       this._edeltaOriginalENamedElementRecorder.recordOriginalENamedElement(ref);
       final EClassifier originalEClass = this.getEClassiferByName(IterableExtensions.<EPackage>last(it.getMetamodels()), "FooClass");
-      Assert.assertSame(originalEClass, ref.getQualification().getOriginalEnamedelement());
+      Assert.assertSame(originalEClass, this.getOriginalEnamedelement(ref.getQualification()));
       final EStructuralFeature original = this.getEStructuralFeatureByName(originalEClass, "myAttribute");
-      Assert.assertSame(original, ref.getOriginalEnamedelement());
+      Assert.assertSame(original, this.getOriginalEnamedelement(ref));
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
@@ -303,11 +309,11 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
       this._edeltaOriginalENamedElementRecorder.recordOriginalENamedElement(ref);
       final EPackage originalPackage = IterableExtensions.<EPackage>last(it.getMetamodels());
       Assert.assertSame(originalPackage, 
-        this.getEdeltaEcoreQualifiedReference(ref.getQualification()).getQualification().getOriginalEnamedelement());
+        this.getOriginalEnamedelement(this.getEdeltaEcoreQualifiedReference(ref.getQualification()).getQualification()));
       final EClassifier originalEClass = this.getEClassiferByName(originalPackage, "FooClass");
-      Assert.assertSame(originalEClass, ref.getQualification().getOriginalEnamedelement());
+      Assert.assertSame(originalEClass, this.getOriginalEnamedelement(ref.getQualification()));
       final EStructuralFeature original = this.getEStructuralFeatureByName(originalEClass, "myAttribute");
-      Assert.assertSame(original, ref.getOriginalEnamedelement());
+      Assert.assertSame(original, this.getOriginalEnamedelement(ref));
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
@@ -330,8 +336,12 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
       final EdeltaEcoreReference ref = this.lastEcoreReferenceExpression(it).getReference();
       this._edeltaOriginalENamedElementRecorder.recordOriginalENamedElement(ref);
       final EEnumLiteral original = this.getEEnumLiteralByName(this.getEClassiferByName(IterableExtensions.<EPackage>last(it.getMetamodels()), "FooEnum"), "FooEnumLiteral");
-      Assert.assertSame(original, ref.getOriginalEnamedelement());
+      Assert.assertSame(original, this.getOriginalEnamedelement(ref));
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  private ENamedElement getOriginalEnamedelement(final EdeltaEcoreReference ref) {
+    return this._edeltaDerivedStateHelper.getEcoreReferenceState(ref).getOriginalEnamedelement();
   }
 }
