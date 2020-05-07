@@ -11,6 +11,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import edelta.util.EdeltaCopiedEPackagesMap;
+
 /**
  * Provides access (and possibly install) to the {@link EdeltaDerivedState}.
  * 
@@ -39,5 +41,9 @@ public class EdeltaDerivedStateHelper {
 			}
 		}
 		return new EdeltaDerivedState();
+	}
+
+	public EdeltaCopiedEPackagesMap getCopiedEPackagesMap(final Resource resource) {
+		return getOrInstallAdapter(resource).getCopiedEPackagesMap();
 	}
 }
