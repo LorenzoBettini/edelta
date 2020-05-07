@@ -8,7 +8,6 @@ import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreter;
 import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
-import edelta.interpreter.IEdeltaInterpreter;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime;
@@ -43,12 +42,12 @@ import org.junit.runner.RunWith;
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter.class)
 @SuppressWarnings("all")
 public class EdeltaInterpreterTest extends EdeltaAbstractTest {
-  protected IEdeltaInterpreter interpreter;
+  protected EdeltaInterpreter interpreter;
   
   @Inject
   private Injector injector;
   
-  public IEdeltaInterpreter createInterpreter() {
+  public EdeltaInterpreter createInterpreter() {
     return this.injector.<EdeltaInterpreter>getInstance(EdeltaInterpreter.class);
   }
   
@@ -62,7 +61,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   public void sanityTestCheck() {
     try {
       final EdeltaInterpreterFactory interpreterFactory = this.injector.<EdeltaInterpreterFactory>getInstance(EdeltaInterpreterFactory.class);
-      final IEdeltaInterpreter anotherInterprter = interpreterFactory.create(this._parseHelper.parse("").eResource());
+      final EdeltaInterpreter anotherInterprter = interpreterFactory.create(this._parseHelper.parse("").eResource());
       Assertions.assertThat(anotherInterprter.getClass()).isSameAs(this.interpreter.getClass());
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
@@ -1064,7 +1063,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     }
   }
   
-  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final IEdeltaInterpreter interpreter, final EdeltaProgram program, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
+  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaInterpreter interpreter, final EdeltaProgram program, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
     final EdeltaModifyEcoreOperation it = this.lastModifyEcoreOperation(program);
     final Function1<EPackage, String> _function = (EPackage it_1) -> {
       return it_1.getName();

@@ -7,7 +7,6 @@ import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreter
 import edelta.interpreter.EdeltaInterpreter.EdeltaInterpreterWrapperException
 import edelta.interpreter.EdeltaInterpreterRuntimeException
-import edelta.interpreter.IEdeltaInterpreter
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 import edelta.tests.additional.MyCustomException
 import edelta.util.EdeltaCopiedEPackagesMap
@@ -29,11 +28,11 @@ import java.util.List
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
 class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
-	protected IEdeltaInterpreter interpreter
+	protected EdeltaInterpreter interpreter
 
 	@Inject Injector injector
 
-	def IEdeltaInterpreter createInterpreter() {
+	def EdeltaInterpreter createInterpreter() {
 		injector.getInstance(EdeltaInterpreter)
 	}
 
@@ -726,7 +725,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
-		IEdeltaInterpreter interpreter, EdeltaProgram program,
+		EdeltaInterpreter interpreter, EdeltaProgram program,
 		boolean doValidate, (EPackage)=>void testExecutor
 	) {
 		val it = program.lastModifyEcoreOperation

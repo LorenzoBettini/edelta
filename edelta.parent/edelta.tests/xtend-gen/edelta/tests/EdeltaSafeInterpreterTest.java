@@ -2,9 +2,9 @@ package edelta.tests;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import edelta.interpreter.EdeltaInterpreter;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.interpreter.EdeltaSafeInterpreter;
-import edelta.interpreter.IEdeltaInterpreter;
 import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutSafeInterpreter;
 import edelta.tests.EdeltaInterpreterTest;
 import org.eclipse.emf.ecore.EClass;
@@ -25,7 +25,7 @@ public class EdeltaSafeInterpreterTest extends EdeltaInterpreterTest {
   private Injector injector;
   
   @Override
-  public IEdeltaInterpreter createInterpreter() {
+  public EdeltaInterpreter createInterpreter() {
     return this.injector.<EdeltaSafeInterpreter>getInstance(EdeltaSafeInterpreter.class);
   }
   

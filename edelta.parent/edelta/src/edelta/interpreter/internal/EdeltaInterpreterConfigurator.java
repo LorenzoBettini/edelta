@@ -22,7 +22,7 @@ import org.eclipse.xtext.resource.XtextResourceSet;
 
 import com.google.inject.Inject;
 
-import edelta.interpreter.IEdeltaInterpreter;
+import edelta.interpreter.EdeltaInterpreter;
 
 /**
  * Sets the classloader of the interpreter so that if finds classes in
@@ -36,7 +36,7 @@ public class EdeltaInterpreterConfigurator {
 	@Inject
 	private ClassLoader parentClassLoader;
 
-	public void configureInterpreter(IEdeltaInterpreter interpreter, Resource resource) {
+	public void configureInterpreter(EdeltaInterpreter interpreter, Resource resource) {
 		ResourceSet set = resource.getResourceSet();
 		if (set instanceof XtextResourceSet) {
 			Object context = ((XtextResourceSet) set).getClasspathURIContext();

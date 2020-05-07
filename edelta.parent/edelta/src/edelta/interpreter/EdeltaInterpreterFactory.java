@@ -20,13 +20,13 @@ import edelta.interpreter.internal.EdeltaInterpreterConfigurator;
 public class EdeltaInterpreterFactory {
 
 	@Inject
-	private Provider<IEdeltaInterpreter> provider;
+	private Provider<EdeltaInterpreter> provider;
 
 	@Inject
 	private EdeltaInterpreterConfigurator configurator;
 
-	public IEdeltaInterpreter create(Resource resource) {
-		IEdeltaInterpreter interpreter = provider.get();
+	public EdeltaInterpreter create(Resource resource) {
+		EdeltaInterpreter interpreter = provider.get();
 		configurator.configureInterpreter(interpreter, resource);
 		return interpreter;
 	}
