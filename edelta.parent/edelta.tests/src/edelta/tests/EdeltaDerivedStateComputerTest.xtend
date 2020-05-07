@@ -5,16 +5,13 @@ import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreterRuntimeException
-import edelta.resource.EdeltaDerivedStateComputer.EdeltaDerivedStateAdapter
 import edelta.tests.additional.TestableEdeltaDerivedStateComputer
 import org.eclipse.emf.common.notify.impl.AdapterImpl
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EStructuralFeature
-import org.eclipse.emf.ecore.resource.impl.ResourceImpl
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.resource.DerivedStateAwareResource
-import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
@@ -31,25 +28,6 @@ import static extension org.junit.Assert.*
 class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 
 	@Inject extension TestableEdeltaDerivedStateComputer
-
-	@Test
-	def void testGetOrInstallAdapterWithNotXtextResource() {
-		assertNotNull(getOrInstallAdapter(new ResourceImpl))
-	}
-
-	@Test
-	def void testGetOrInstallAdapterWithXtextResourceOfADifferentLanguage() {
-		val res = new XtextResource
-		res.languageName = "foo"
-		assertNotNull(getOrInstallAdapter(res))
-	}
-
-	@Test
-	def void testIsAdapterFor() {
-		val adapter = getOrInstallAdapter(new ResourceImpl)
-		assertTrue(adapter.isAdapterForType(EdeltaDerivedStateAdapter))
-		assertFalse(adapter.isAdapterForType(String))
-	}
 
 	@Test
 	def void testCopiedEPackages() {

@@ -6,7 +6,6 @@ import edelta.edelta.EdeltaEcoreQualifiedReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
-import edelta.resource.EdeltaDerivedStateComputer;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderTestableDerivedStateComputer;
 import edelta.tests.additional.TestableEdeltaDerivedStateComputer;
@@ -27,12 +26,10 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.common.types.JvmGenericType;
 import org.eclipse.xtext.resource.DerivedStateAwareResource;
-import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.xbase.XExpression;
@@ -51,27 +48,6 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   @Inject
   @Extension
   private TestableEdeltaDerivedStateComputer _testableEdeltaDerivedStateComputer;
-  
-  @Test
-  public void testGetOrInstallAdapterWithNotXtextResource() {
-    ResourceImpl _resourceImpl = new ResourceImpl();
-    Assert.assertNotNull(this._testableEdeltaDerivedStateComputer.getOrInstallAdapter(_resourceImpl));
-  }
-  
-  @Test
-  public void testGetOrInstallAdapterWithXtextResourceOfADifferentLanguage() {
-    final XtextResource res = new XtextResource();
-    res.setLanguageName("foo");
-    Assert.assertNotNull(this._testableEdeltaDerivedStateComputer.getOrInstallAdapter(res));
-  }
-  
-  @Test
-  public void testIsAdapterFor() {
-    ResourceImpl _resourceImpl = new ResourceImpl();
-    final EdeltaDerivedStateComputer.EdeltaDerivedStateAdapter adapter = this._testableEdeltaDerivedStateComputer.getOrInstallAdapter(_resourceImpl);
-    Assert.assertTrue(adapter.isAdapterForType(EdeltaDerivedStateComputer.EdeltaDerivedStateAdapter.class));
-    Assert.assertFalse(adapter.isAdapterForType(String.class));
-  }
   
   @Test
   public void testCopiedEPackages() {

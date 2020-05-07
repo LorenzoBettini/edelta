@@ -1,7 +1,6 @@
 package edelta.tests.additional;
 
 import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.emf.ecore.resource.Resource;
 
 import com.google.inject.Singleton;
 
@@ -17,11 +16,6 @@ import edelta.util.EdeltaCopiedEPackagesMap;
  */
 @Singleton
 public class TestableEdeltaDerivedStateComputer extends EdeltaDerivedStateComputer {
-	@Override
-	public EdeltaDerivedStateComputer.EdeltaDerivedStateAdapter getOrInstallAdapter(final Resource resource) {
-		return super.getOrInstallAdapter(resource);
-	}
-
 	@Override
 	public void unloadDerivedPackages(final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		super.unloadDerivedPackages(copiedEPackagesMap);

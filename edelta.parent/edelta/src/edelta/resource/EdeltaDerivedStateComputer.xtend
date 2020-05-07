@@ -2,7 +2,6 @@ package edelta.resource
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
-import com.google.inject.name.Named
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreterFactory
@@ -11,22 +10,16 @@ import edelta.lib.EdeltaEcoreUtil
 import edelta.scoping.EdeltaOriginalENamedElementRecorder
 import edelta.services.IEdeltaEcoreModelAssociations
 import edelta.util.EdeltaCopiedEPackagesMap
-import org.eclipse.emf.common.notify.impl.AdapterImpl
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.emf.ecore.util.EcoreUtil
-import org.eclipse.xtext.Constants
 import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader.GenericUnloader
 import org.eclipse.xtext.resource.DerivedStateAwareResource
-import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator
 
 @Singleton
 class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEcoreModelAssociations {
 
-	@Inject
-	@Named(Constants.LANGUAGE_NAME)
-	var String languageName;
+	@Inject EdeltaDerivedState derivedState
 
 	@Inject GenericUnloader unloader
 
@@ -36,31 +29,8 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 
 	@Inject EdeltaOriginalENamedElementRecorder originalENamedElementRecorder
 
-	static class EdeltaDerivedStateAdapter extends AdapterImpl {
-		var EdeltaCopiedEPackagesMap copiedEPackagesMap = new EdeltaCopiedEPackagesMap
-
-		override boolean isAdapterForType(Object type) {
-			return EdeltaDerivedStateAdapter === type;
-		}
-	}
-
-	def protected EdeltaDerivedStateAdapter getOrInstallAdapter(Resource resource) {
-		if (resource instanceof XtextResource) {
-			val resourceLanguageName = resource.getLanguageName();
-			if (resourceLanguageName == languageName) {
-				var adapter = EcoreUtil.getAdapter(resource.eAdapters(), EdeltaDerivedStateAdapter) as EdeltaDerivedStateAdapter
-				if (adapter === null) {
-					adapter = new EdeltaDerivedStateAdapter();
-					resource.eAdapters().add(adapter);
-				}
-				return adapter
-			}
-		}
-		return new EdeltaDerivedStateAdapter
-	}
-
 	override getCopiedEPackagesMap(Resource resource) {
-		getOrInstallAdapter(resource).copiedEPackagesMap
+		derivedState.getOrInstallAdapter(resource).copiedEPackagesMap
 	}
 
 	override installDerivedState(DerivedStateAwareResource resource, boolean preIndexingPhase) {
