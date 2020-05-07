@@ -2,8 +2,8 @@ package edelta.resource
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
-import edelta.services.IEdeltaEcoreModelAssociations
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.eclipse.xtext.xbase.jvmmodel.JvmLocationInFileProvider
 
 /**
@@ -15,7 +15,7 @@ import org.eclipse.xtext.xbase.jvmmodel.JvmLocationInFileProvider
 @Singleton
 class EdeltaLocationInFileProvider extends JvmLocationInFileProvider {
 
-	@Inject extension IEdeltaEcoreModelAssociations
+	@Inject extension IJvmModelAssociations
 
 	override protected convertToSource(EObject element) {
 		return element.getPrimarySourceElement ?:

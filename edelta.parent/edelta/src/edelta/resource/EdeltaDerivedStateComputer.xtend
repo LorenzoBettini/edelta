@@ -8,7 +8,6 @@ import edelta.interpreter.EdeltaInterpreterFactory
 import edelta.interpreter.EdeltaInterpreterHelper
 import edelta.lib.EdeltaEcoreUtil
 import edelta.scoping.EdeltaOriginalENamedElementRecorder
-import edelta.services.IEdeltaEcoreModelAssociations
 import edelta.util.EdeltaCopiedEPackagesMap
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
@@ -17,7 +16,7 @@ import org.eclipse.xtext.resource.DerivedStateAwareResource
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator
 
 @Singleton
-class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEcoreModelAssociations {
+class EdeltaDerivedStateComputer extends JvmModelAssociator {
 
 	@Inject EdeltaDerivedStateHelper derivedState
 

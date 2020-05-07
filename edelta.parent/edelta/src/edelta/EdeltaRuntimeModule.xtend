@@ -13,7 +13,6 @@ import edelta.resource.EdeltaEObjectAtOffsetHelper
 import edelta.resource.EdeltaLocationInFileProvider
 import edelta.resource.EdeltaResourceDescriptionStrategy
 import edelta.scoping.EdeltaQualifiedNameProvider
-import edelta.services.IEdeltaEcoreModelAssociations
 import edelta.typesystem.EdeltaTypeComputer
 import edelta.validation.EdeltaDiagnosticConverter
 import org.eclipse.xtext.generator.IContextualOutputConfigurationProvider
@@ -53,10 +52,6 @@ class EdeltaRuntimeModule extends AbstractEdeltaRuntimeModule {
 
 	def Class<? extends XbaseCompiler> bindXbaseCompiler() {
 		EdeltaXbaseCompiler
-	}
-
-	def Class<? extends IEdeltaEcoreModelAssociations> bindIEdeltaEcoreModelAssociations() {
-		EdeltaDerivedStateComputer
 	}
 
 	def Class<? extends EdeltaInterpreter> bindEdeltaInterpreter() {
