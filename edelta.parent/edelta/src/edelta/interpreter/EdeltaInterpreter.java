@@ -3,6 +3,7 @@ package edelta.interpreter;
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MODIFY_ECORE_OPERATION__BODY;
 import static edelta.util.EdeltaModelUtil.getProgram;
 import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashMap;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.forEach;
 
 import java.util.List;
 import java.util.Map;
@@ -269,12 +270,12 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 
 	private void configureContextForParameterArguments(final IEvaluationContext context, List<JvmFormalParameter> params,
 			final List<Object> argumentValues) {
-		int index = 0;
-		for (final JvmFormalParameter param : params) {
-			context.newValue(
+		forEach(params,
+			(param, index) ->
+				context.newValue(
 					QualifiedName.create(param.getName()),
-					argumentValues.get(index++));
-		}
+					argumentValues.get(index))
+		);
 	}
 
 	@Override
