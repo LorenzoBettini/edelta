@@ -276,7 +276,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		);
 	}
 
-	public Object evaluateEdeltaOperation(AbstractEdelta other, EdeltaProgram program, EdeltaOperation edeltaOperation,
+	protected Object evaluateEdeltaOperation(AbstractEdelta other,
+			EdeltaProgram program, EdeltaOperation edeltaOperation,
 			List<Object> argumentValues, CancelIndicator indicator) {
 		this.currentProgram = program;
 		this.thisObject = new AbstractEdelta(other) {
