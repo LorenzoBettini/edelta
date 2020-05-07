@@ -1,0 +1,15 @@
+import org.eclipse.emf.ecore.EClass
+
+package com.example
+
+// IMPORTANT: ecores must be in source directories
+// otherwise you can't refer to them
+
+metamodel "ecore"
+
+def createClassWithSubClass(String name, EClass superClass) {
+	newEClass(name) [
+		addESuperType(superClass)
+	]
+}
+

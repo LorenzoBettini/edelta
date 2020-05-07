@@ -8,12 +8,17 @@ import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.common.types.JvmOperation
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import edelta.edelta.EdeltaProgram
+import org.eclipse.xtext.common.types.JvmTypeReference
 
 class EdeltaJvmModelHelper {
 	@Inject extension IJvmModelAssociations
 
 	def findJvmGenericType(EdeltaProgram program) {
 		program.jvmElements.filter(JvmGenericType).head
+	}
+
+	def findEdeltaProgram(JvmTypeReference typeRef) {
+		typeRef.type.sourceElements.filter(EdeltaProgram).head
 	}
 
 	def findJvmOperation(JvmGenericType jvmGenericType, String methodName) {

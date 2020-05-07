@@ -21,6 +21,7 @@ import org.junit.runner.RunWith
 import static edelta.testutils.EdeltaTestUtils.*
 
 import static extension org.junit.Assert.*
+import java.util.List
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
@@ -1103,6 +1104,98 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCompilationOfSeveralFilesWithUseAs() {
+		#[
+		'''
+			import org.eclipse.emf.ecore.EClass
+			import org.eclipse.emf.ecore.EcorePackage
+
+			package test1
+			
+			def enrichWithReference(EClass c, String prefix) : void {
+				c.addNewEReference(prefix + "Ref",
+					EcorePackage.eINSTANCE.EObject)
+			}
+		''',
+		'''
+			import org.eclipse.emf.ecore.EClass
+			import org.eclipse.emf.ecore.EcorePackage
+			import test1.MyFile0
+
+			package test2
+			
+			use test1.MyFile0 as extension my
+
+			def enrichWithAttribute(EClass c, String prefix) : void {
+				c.addNewEAttribute(prefix + "Attr",
+					EcorePackage.eINSTANCE.EString)
+				c.enrichWithReference(prefix)
+			}
+		''',
+		'''
+			import org.eclipse.emf.ecore.EClass
+			import test2.MyFile1
+			
+			package test3
+			
+			metamodel "foo"
+			
+			use test2.MyFile1 as extension my
+			
+			modifyEcore aModificationTest epackage foo {
+				ecoreref(FooClass)
+					.enrichWithAttribute("prefix")
+				// attribute and reference are added by the calls
+				// to external operations!
+				ecoreref(prefixAttr).changeable = true
+				ecoreref(prefixRef).containment = true
+			}
+		'''].checkCompilationOfSeveralFiles(
+			#[
+				"test3.MyFile2" ->
+				'''
+				package test3;
+				
+				import edelta.lib.AbstractEdelta;
+				import org.eclipse.emf.ecore.EPackage;
+				import org.eclipse.xtext.xbase.lib.Extension;
+				import test2.MyFile1;
+				
+				@SuppressWarnings("all")
+				public class MyFile2 extends AbstractEdelta {
+				  @Extension
+				  private MyFile1 my;
+				  
+				  public MyFile2() {
+				    my = new MyFile1(this);
+				  }
+				  
+				  public MyFile2(final AbstractEdelta other) {
+				    super(other);
+				  }
+				  
+				  public void aModificationTest(final EPackage it) {
+				    this.my.enrichWithAttribute(getEClass("foo", "FooClass"), "prefix");
+				    getEAttribute("foo", "FooClass", "prefixAttr").setChangeable(true);
+				    getEReference("foo", "FooClass", "prefixRef").setContainment(true);
+				  }
+				  
+				  @Override
+				  public void performSanityChecks() throws Exception {
+				    ensureEPackageIsLoaded("foo");
+				  }
+				  
+				  @Override
+				  protected void doExecute() throws Exception {
+				    aModificationTest(getEPackage("foo"));
+				  }
+				}
+				'''
+			]
+		)
+	}
+
+	@Test
 	def void testCompilationOfPersonListExampleModifyEcore() {
 		val rs = createResourceSetWithEcore(
 			PERSON_LIST_ECORE, PERSON_LIST_ECORE_PATH,
@@ -1204,7 +1297,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		val rs = createResourceSet(input)
 		checkCompilation(rs, expectedGeneratedJava, checkValidationErrors)
 	}
-	
+
 	private def void checkCompilation(ResourceSet rs, CharSequence expectedGeneratedJava, boolean checkValidationErrors) {
 		rs.compile [
 			if (checkValidationErrors) {
@@ -1216,6 +1309,18 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			if (checkValidationErrors) {
 				assertGeneratedJavaCodeCompiles
 			}
+		]
+	}
+
+	private def void checkCompilationOfSeveralFiles(List<? extends CharSequence> inputs,
+		List<Pair<String, CharSequence>> expectations) {
+		createResourceSet(inputs).compile [
+			assertNoValidationErrors
+			for (expectation : expectations) {
+				expectation.value.toString.assertEquals
+					(getGeneratedCode(expectation.key))
+			}
+			assertGeneratedJavaCodeCompiles
 		]
 	}
 

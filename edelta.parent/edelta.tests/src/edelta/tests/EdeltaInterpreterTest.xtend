@@ -22,6 +22,8 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
+import edelta.interpreter.EdeltaInterpreterFactory
+import java.util.List
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -42,6 +44,16 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		// actually we set it to several minutes
 		// this also makes it easier to debug tests
 		interpreter.interpreterTimeout = 1200000;
+	}
+
+	@Test
+	def void sanityTestCheck() {
+		// make sure we use the same interpreter implementation
+		// in fact the interpreter can create another interpreter using the factory
+		val interpreterFactory = injector.getInstance(EdeltaInterpreterFactory)
+		val anotherInterprter = interpreterFactory.create("".parse.eResource)
+		assertThat(anotherInterprter.class)
+			.isSameAs(interpreter.class)
 	}
 
 	@Test
@@ -567,6 +579,121 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testModifyEcoreAndCallOperationFromExternalUseAs() {
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+		#['''
+			import org.eclipse.emf.ecore.EClass
+
+			package test1
+			
+			def op(EClass c) : void {
+				c.op2
+			}
+			def op2(EClass c) : void {
+				c.abstract = true
+			}
+		''',
+		'''
+			import org.eclipse.emf.ecore.EClass
+			import test1.__synthetic0
+			
+			package test2
+			
+			metamodel "foo"
+			
+			use test1.__synthetic0 as my
+			
+			modifyEcore aModificationTest epackage foo {
+				my.op(ecoreref(FooClass))
+			}
+		'''], true) [ derivedEPackage |
+			derivedEPackage.firstEClass => [
+				assertTrue(isAbstract)
+			]
+		]
+	}
+
+	@Test
+	def void testModifyEcoreAndCallOperationFromExternalUseAsExtension() {
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+		#['''
+			import org.eclipse.emf.ecore.EClass
+
+			package test1
+			
+			def op(EClass c) : void {
+				c.op2
+			}
+			def op2(EClass c) : void {
+				c.abstract = true
+			}
+		''',
+		'''
+			import org.eclipse.emf.ecore.EClass
+			import test1.__synthetic0
+			
+			package test2
+			
+			metamodel "foo"
+			
+			use test1.__synthetic0 as extension my
+			
+			modifyEcore aModificationTest epackage foo {
+				ecoreref(FooClass).op
+			}
+		'''], true) [ derivedEPackage |
+			derivedEPackage.firstEClass => [
+				assertTrue(isAbstract)
+			]
+		]
+	}
+
+	@Test
+	def void testModifyEcoreAndCallOperationFromExternalUseAsWithSeveralFiles() {
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+		#[
+		'''
+			import org.eclipse.emf.ecore.EClass
+
+			package test1
+			
+			def op2(EClass c) : void {
+				c.abstract = true
+			}
+		''',
+		'''
+			import org.eclipse.emf.ecore.EClass
+			import test1.__synthetic0
+
+			package test2
+			
+			use test1.__synthetic0 as extension my
+
+			def op(EClass c) : void {
+				c.op2
+			}
+		''',
+		'''
+			import org.eclipse.emf.ecore.EClass
+			import test2.__synthetic1
+			
+			package test3
+			
+			metamodel "foo"
+			
+			use test2.__synthetic1 as extension my
+			
+			modifyEcore aModificationTest epackage foo {
+				ecoreref(FooClass).op
+			}
+		'''], true) [ derivedEPackage |
+			derivedEPackage.firstEClass => [
+				assertTrue(isAbstract)
+			]
+		]
+	}
+
 	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) {
@@ -577,6 +704,13 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		CharSequence input, boolean doValidate, (EPackage)=>void testExecutor
 	) {
 		val program = input.parseWithTestEcore
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor)
+	}
+
+	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+		List<CharSequence> inputs, boolean doValidate, (EPackage)=>void testExecutor
+	) {
+		val program = parseSeveralWithTestEcore(inputs)
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor)
 	}
 

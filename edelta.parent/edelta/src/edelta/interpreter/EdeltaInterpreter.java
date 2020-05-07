@@ -1,18 +1,17 @@
 package edelta.interpreter;
 
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MODIFY_ECORE_OPERATION__BODY;
+import static edelta.util.EdeltaModelUtil.getProgram;
 import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashMap;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.forEach;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.xtext.common.types.JvmDeclaredType;
 import org.eclipse.xtext.common.types.JvmField;
 import org.eclipse.xtext.common.types.JvmFormalParameter;
-import org.eclipse.xtext.common.types.JvmGenericType;
 import org.eclipse.xtext.common.types.JvmOperation;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.naming.QualifiedName;
@@ -48,6 +47,9 @@ import edelta.validation.EdeltaValidator;
  */
 public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
 	@Inject
+	private EdeltaInterpreterFactory edeltaInterpreterFactory;
+
+	@Inject
 	private EdeltaJvmModelHelper edeltaJvmModelHelper;
 
 	@Inject
@@ -62,8 +64,6 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 	private int interpreterTimeout =
 		Integer.parseInt(System.getProperty("edelta.interpreter.timeout", "2000"));
 
-	private JvmGenericType programInferredJavaType;
-
 	private static final QualifiedName IT_QUALIFIED_NAME = QualifiedName.create("it");
 
 	/**
@@ -72,6 +72,8 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 	private AbstractEdelta thisObject;
 
 	private Map<EdeltaUseAs, Object> useAsFields;
+
+	private EdeltaProgram currentProgram;
 
 	class EdeltaInterpreterCancelIndicator implements CancelIndicator {
 		long stopAt = System.currentTimeMillis() +
@@ -108,7 +110,7 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 
 	@Override
 	public void evaluateModifyEcoreOperations(final EdeltaProgram program, final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
-		programInferredJavaType = edeltaJvmModelHelper.findJvmGenericType(program);
+		this.currentProgram = program;
 		thisObject = new EdeltaInterpreterEdeltaImpl
 			(Lists.newArrayList(
 				Iterables.concat(copiedEPackagesMap.values(),
@@ -137,15 +139,7 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 		try {
 			IEvaluationContext context = createContext();
 			context.newValue(IT_QUALIFIED_NAME, ePackage);
-			// 'this' and the name of the inferred class are mapped
-			// to an instance of AbstractEdelta, so that all reflective
-			// accesses, e.g., the inherited field 'lib', work out of the box
-			// calls to operations defined in the sources are intercepted
-			// in our custom invokeOperation and in that case we interpret the
-			// original source's XBlockExpression
-			context.newValue(QualifiedName.create("this"), thisObject);
-			context.newValue(QualifiedName.create(
-					programInferredJavaType.getSimpleName()), thisObject);
+			configureContextForJavaThis(context);
 			final IEvaluationResult result = evaluate(op.getBody(), context,
 					new EdeltaInterpreterCancelIndicator());
 			if (result == null) {
@@ -156,6 +150,19 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 		} finally {
 			ePackage.eAdapters().remove(cacheCleaner);
 		}
+	}
+
+	private void configureContextForJavaThis(IEvaluationContext context) {
+		// 'this' and the name of the inferred class are mapped
+		// to an instance of AbstractEdelta, so that all reflective
+		// accesses, e.g., the inherited field 'lib', work out of the box
+		// calls to operations defined in the sources are intercepted
+		// in our custom invokeOperation and in that case we interpret the
+		// original source's XBlockExpression
+		context.newValue(QualifiedName.create("this"), thisObject);
+		context.newValue(QualifiedName.create(
+				edeltaJvmModelHelper.findJvmGenericType(currentProgram).getSimpleName()),
+				thisObject);
 	}
 
 	private void handleResultException(Throwable resultException) {
@@ -203,7 +210,8 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 				ecoreReference,
 				(methodName, args) -> {
 					final JvmOperation op = edeltaJvmModelHelper
-						.findJvmOperation(programInferredJavaType,
+						.findJvmOperation(
+							edeltaJvmModelHelper.findJvmGenericType(currentProgram),
 							methodName);
 					// it could be null due to an unresolved reference
 					// the returned op would be 'getENamedElement'
@@ -222,6 +230,11 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 	protected Object featureCallField(final JvmField jvmField, final Object receiver) {
 		final EdeltaUseAs useAs = edeltaJvmModelHelper.findEdeltaUseAs(jvmField);
 		if (useAs != null) {
+			EdeltaProgram useAsTypeProgram = edeltaJvmModelHelper.findEdeltaProgram(useAs.getType());
+			// it refers to an external edelta program
+			if (useAsTypeProgram != null)
+				return useAsTypeProgram;
+			// it refers to a Java implementation
 			return useAsFields.computeIfAbsent(useAs,
 				it -> edeltaInterpreterHelper.safeInstantiate(
 					getJavaReflectAccess(), useAs, thisObject));
@@ -233,21 +246,51 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 	protected Object invokeOperation(final JvmOperation operation, final Object receiver,
 			final List<Object> argumentValues, final IEvaluationContext parentContext,
 			final CancelIndicator indicator) {
-		final JvmDeclaredType declaringType = operation.getDeclaringType();
-		if (Objects.equals(declaringType, programInferredJavaType)) {
-			final EdeltaOperation originalOperation =
+		final EdeltaOperation edeltaOperation =
 				edeltaJvmModelHelper.findEdeltaOperation(operation);
-			final IEvaluationContext context = parentContext.fork();
-			int index = 0;
-			List<JvmFormalParameter> params = operation.getParameters();
-			for (final JvmFormalParameter param : params) {
-				context.newValue(
-					QualifiedName.create(param.getName()),
-					argumentValues.get(index++));
+		if (edeltaOperation != null) {
+			EdeltaProgram containingProgram = getProgram(edeltaOperation);
+			if (containingProgram == currentProgram) {
+				final IEvaluationContext context = parentContext.fork();
+				configureContextForParameterArguments(context,
+						operation.getParameters(), argumentValues);
+				return internalEvaluate(edeltaOperation.getBody(), context, indicator);
+			} else {
+				// create a new interpreter since the edelta operation is in
+				// another edelta source file.
+				IEdeltaInterpreter newInterpreter =
+						edeltaInterpreterFactory.create(containingProgram.eResource());
+				return newInterpreter
+					.evaluateEdeltaOperation(thisObject, containingProgram, edeltaOperation, argumentValues, indicator);
 			}
-			return internalEvaluate(originalOperation.getBody(), context, indicator);
 		}
 		return super.invokeOperation(
 			operation, receiver, argumentValues, parentContext, indicator);
 	}
+
+	private void configureContextForParameterArguments(final IEvaluationContext context, List<JvmFormalParameter> params,
+			final List<Object> argumentValues) {
+		forEach(params,
+			(param, index) ->
+				context.newValue(
+					QualifiedName.create(param.getName()),
+					argumentValues.get(index))
+		);
+	}
+
+	@Override
+	public Object evaluateEdeltaOperation(AbstractEdelta other, EdeltaProgram program, EdeltaOperation edeltaOperation,
+			List<Object> argumentValues, CancelIndicator indicator) {
+		this.currentProgram = program;
+		this.thisObject = new AbstractEdelta(other) {
+		};
+		IEvaluationContext context = createContext();
+		configureContextForJavaThis(context);
+		configureContextForParameterArguments(context,
+				edeltaOperation.getParams(), argumentValues);
+		final IEvaluationResult result = evaluate(edeltaOperation.getBody(), context,
+				indicator);
+		return result.getResult();
+	}
+
 }

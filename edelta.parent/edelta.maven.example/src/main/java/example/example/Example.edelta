@@ -8,11 +8,10 @@ metamodel "myecore"
 metamodel "ecore"
 
 use EdeltaRefactorings as extension refactorings
+use ExampleReusableFunctions as extension myfunctions
 
-def createClass(String name) {
-	newEClass(name) => [
-		it.ESuperTypes += ecoreref(MyEClass)
-	]
+def createSubClassOfMyEClass(String name) {
+	createClassWithSubClass(name ,ecoreref(MyEClass))
 }
 
 modifyEcore aModification epackage myecore {
@@ -22,7 +21,7 @@ modifyEcore aModification epackage myecore {
 		// corresponds to refactorings.addMandatoryAttr(it, "ANewAttribute", ecoreref(EString))
 		ecoreref(ANewAttribute).EType = ecoreref(EInt)
 	]
-	addEClass(createClass("ANewDerivedEClass"))
+	addEClass(createSubClassOfMyEClass("ANewDerivedEClass"))
 	ecoreref(ANewDerivedEClass).abstract = true
 }
 

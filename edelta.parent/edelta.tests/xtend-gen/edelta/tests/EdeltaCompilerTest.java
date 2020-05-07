@@ -7,6 +7,8 @@ import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderTestableDerivedStateComputer;
 import edelta.testutils.EdeltaTestUtils;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.diagnostics.Severity;
@@ -2300,6 +2302,188 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testCompilationOfSeveralFilesWithUseAs() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EClass");
+    _builder.newLine();
+    _builder.append("import org.eclipse.emf.ecore.EcorePackage");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("package test1");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("def enrichWithReference(EClass c, String prefix) : void {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("c.addNewEReference(prefix + \"Ref\",");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("EcorePackage.eINSTANCE.EObject)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("import org.eclipse.emf.ecore.EClass");
+    _builder_1.newLine();
+    _builder_1.append("import org.eclipse.emf.ecore.EcorePackage");
+    _builder_1.newLine();
+    _builder_1.append("import test1.MyFile0");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("package test2");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("use test1.MyFile0 as extension my");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("def enrichWithAttribute(EClass c, String prefix) : void {");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("c.addNewEAttribute(prefix + \"Attr\",");
+    _builder_1.newLine();
+    _builder_1.append("\t\t");
+    _builder_1.append("EcorePackage.eINSTANCE.EString)");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("c.enrichWithReference(prefix)");
+    _builder_1.newLine();
+    _builder_1.append("}");
+    _builder_1.newLine();
+    StringConcatenation _builder_2 = new StringConcatenation();
+    _builder_2.append("import org.eclipse.emf.ecore.EClass");
+    _builder_2.newLine();
+    _builder_2.append("import test2.MyFile1");
+    _builder_2.newLine();
+    _builder_2.newLine();
+    _builder_2.append("package test3");
+    _builder_2.newLine();
+    _builder_2.newLine();
+    _builder_2.append("metamodel \"foo\"");
+    _builder_2.newLine();
+    _builder_2.newLine();
+    _builder_2.append("use test2.MyFile1 as extension my");
+    _builder_2.newLine();
+    _builder_2.newLine();
+    _builder_2.append("modifyEcore aModificationTest epackage foo {");
+    _builder_2.newLine();
+    _builder_2.append("\t");
+    _builder_2.append("ecoreref(FooClass)");
+    _builder_2.newLine();
+    _builder_2.append("\t\t");
+    _builder_2.append(".enrichWithAttribute(\"prefix\")");
+    _builder_2.newLine();
+    _builder_2.append("\t");
+    _builder_2.append("// attribute and reference are added by the calls");
+    _builder_2.newLine();
+    _builder_2.append("\t");
+    _builder_2.append("// to external operations!");
+    _builder_2.newLine();
+    _builder_2.append("\t");
+    _builder_2.append("ecoreref(prefixAttr).changeable = true");
+    _builder_2.newLine();
+    _builder_2.append("\t");
+    _builder_2.append("ecoreref(prefixRef).containment = true");
+    _builder_2.newLine();
+    _builder_2.append("}");
+    _builder_2.newLine();
+    StringConcatenation _builder_3 = new StringConcatenation();
+    _builder_3.append("package test3;");
+    _builder_3.newLine();
+    _builder_3.newLine();
+    _builder_3.append("import edelta.lib.AbstractEdelta;");
+    _builder_3.newLine();
+    _builder_3.append("import org.eclipse.emf.ecore.EPackage;");
+    _builder_3.newLine();
+    _builder_3.append("import org.eclipse.xtext.xbase.lib.Extension;");
+    _builder_3.newLine();
+    _builder_3.append("import test2.MyFile1;");
+    _builder_3.newLine();
+    _builder_3.newLine();
+    _builder_3.append("@SuppressWarnings(\"all\")");
+    _builder_3.newLine();
+    _builder_3.append("public class MyFile2 extends AbstractEdelta {");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("@Extension");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("private MyFile1 my;");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("public MyFile2() {");
+    _builder_3.newLine();
+    _builder_3.append("    ");
+    _builder_3.append("my = new MyFile1(this);");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("}");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("public MyFile2(final AbstractEdelta other) {");
+    _builder_3.newLine();
+    _builder_3.append("    ");
+    _builder_3.append("super(other);");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("}");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("public void aModificationTest(final EPackage it) {");
+    _builder_3.newLine();
+    _builder_3.append("    ");
+    _builder_3.append("this.my.enrichWithAttribute(getEClass(\"foo\", \"FooClass\"), \"prefix\");");
+    _builder_3.newLine();
+    _builder_3.append("    ");
+    _builder_3.append("getEAttribute(\"foo\", \"FooClass\", \"prefixAttr\").setChangeable(true);");
+    _builder_3.newLine();
+    _builder_3.append("    ");
+    _builder_3.append("getEReference(\"foo\", \"FooClass\", \"prefixRef\").setContainment(true);");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("}");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("@Override");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("public void performSanityChecks() throws Exception {");
+    _builder_3.newLine();
+    _builder_3.append("    ");
+    _builder_3.append("ensureEPackageIsLoaded(\"foo\");");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("}");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("@Override");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("protected void doExecute() throws Exception {");
+    _builder_3.newLine();
+    _builder_3.append("    ");
+    _builder_3.append("aModificationTest(getEPackage(\"foo\"));");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("}");
+    _builder_3.newLine();
+    _builder_3.append("}");
+    _builder_3.newLine();
+    Pair<String, CharSequence> _mappedTo = Pair.<String, CharSequence>of("test3.MyFile2", _builder_3.toString());
+    this.checkCompilationOfSeveralFiles(Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList(_builder.toString(), _builder_1.toString(), _builder_2.toString())), 
+      Collections.<Pair<String, CharSequence>>unmodifiableList(CollectionLiterals.<Pair<String, CharSequence>>newArrayList(_mappedTo)));
+  }
+  
+  @Test
   public void testCompilationOfPersonListExampleModifyEcore() {
     final ResourceSet rs = this.createResourceSetWithEcore(
       EdeltaAbstractTest.PERSON_LIST_ECORE, EdeltaAbstractTest.PERSON_LIST_ECORE_PATH, 
@@ -2540,6 +2724,17 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
       }
     };
     this.compilationTestHelper.compile(rs, _function);
+  }
+  
+  private void checkCompilationOfSeveralFiles(final List<? extends CharSequence> inputs, final List<Pair<String, CharSequence>> expectations) {
+    final IAcceptor<CompilationTestHelper.Result> _function = (CompilationTestHelper.Result it) -> {
+      this.assertNoValidationErrors(it);
+      for (final Pair<String, CharSequence> expectation : expectations) {
+        Assert.assertEquals(expectation.getValue().toString(), it.getGeneratedCode(expectation.getKey()));
+      }
+      this.assertGeneratedJavaCodeCompiles(it);
+    };
+    this.compilationTestHelper.compile(this.createResourceSet(((CharSequence[])Conversions.unwrapArray(inputs, CharSequence.class))), _function);
   }
   
   private void assertNoValidationErrors(final CompilationTestHelper.Result it) {
