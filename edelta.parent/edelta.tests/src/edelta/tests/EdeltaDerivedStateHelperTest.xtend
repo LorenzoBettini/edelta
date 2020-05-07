@@ -1,8 +1,7 @@
 package edelta.tests
 
 import com.google.inject.Inject
-import edelta.resource.EdeltaDerivedState
-import edelta.resource.EdeltaDerivedState.EdeltaDerivedStateAdapter
+import edelta.resource.EdeltaDerivedStateHelper
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.testing.InjectWith
@@ -11,12 +10,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import edelta.resource.EdeltaDerivedState
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
-class EdeltaDerivedStateTest extends EdeltaAbstractTest {
+class EdeltaDerivedStateHelperTest extends EdeltaAbstractTest {
 
-	@Inject extension EdeltaDerivedState
+	@Inject extension EdeltaDerivedStateHelper
 
 	@Test
 	def void testGetOrInstallAdapterWithNotXtextResource() {
@@ -33,7 +33,7 @@ class EdeltaDerivedStateTest extends EdeltaAbstractTest {
 	@Test
 	def void testIsAdapterFor() {
 		val adapter = getOrInstallAdapter(new ResourceImpl)
-		assertTrue(adapter.isAdapterForType(EdeltaDerivedStateAdapter))
+		assertTrue(adapter.isAdapterForType(EdeltaDerivedState))
 		assertFalse(adapter.isAdapterForType(String))
 	}
 

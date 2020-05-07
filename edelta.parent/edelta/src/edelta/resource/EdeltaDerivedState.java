@@ -1,57 +1,25 @@
 package edelta.resource;
 
-import java.util.Objects;
-
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
-import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.xtext.Constants;
 import org.eclipse.xtext.resource.XtextResource;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 import edelta.util.EdeltaCopiedEPackagesMap;
 
 /**
+ * Additional derived state installable in an {@link XtextResource}.
+ * 
  * @author Lorenzo Bettini
  *
  */
-@Singleton
-public class EdeltaDerivedState {
+public class EdeltaDerivedState extends AdapterImpl {
+	private EdeltaCopiedEPackagesMap copiedEPackagesMap = new EdeltaCopiedEPackagesMap();
 
-	@Inject
-	@Named(Constants.LANGUAGE_NAME)
-	private String languageName;
-
-	public static class EdeltaDerivedStateAdapter extends AdapterImpl {
-		private EdeltaCopiedEPackagesMap copiedEPackagesMap = new EdeltaCopiedEPackagesMap();
-
-		@Override
-		public boolean isAdapterForType(final Object type) {
-			return EdeltaDerivedStateAdapter.class == type;
-		}
-
-		public EdeltaCopiedEPackagesMap getCopiedEPackagesMap() {
-			return copiedEPackagesMap;
-		}
+	@Override
+	public boolean isAdapterForType(final Object type) {
+		return EdeltaDerivedState.class == type;
 	}
 
-	public EdeltaDerivedStateAdapter getOrInstallAdapter(final Resource resource) {
-		if (resource instanceof XtextResource) {
-			final String resourceLanguageName = ((XtextResource) resource).getLanguageName();
-			if (Objects.equals(resourceLanguageName, this.languageName)) {
-				EdeltaDerivedStateAdapter adapter = 
-					(EdeltaDerivedStateAdapter) EcoreUtil.getAdapter
-						(resource.eAdapters(), EdeltaDerivedStateAdapter.class);
-				if (adapter == null) {
-					adapter = new EdeltaDerivedStateAdapter();
-					resource.eAdapters().add(adapter);
-				}
-				return adapter;
-			}
-		}
-		return new EdeltaDerivedStateAdapter();
+	public EdeltaCopiedEPackagesMap getCopiedEPackagesMap() {
+		return copiedEPackagesMap;
 	}
 }

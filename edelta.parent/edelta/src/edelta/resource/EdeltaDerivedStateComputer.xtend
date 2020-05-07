@@ -19,7 +19,7 @@ import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator
 @Singleton
 class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEcoreModelAssociations {
 
-	@Inject EdeltaDerivedState derivedState
+	@Inject EdeltaDerivedStateHelper derivedState
 
 	@Inject GenericUnloader unloader
 
@@ -30,7 +30,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	@Inject EdeltaOriginalENamedElementRecorder originalENamedElementRecorder
 
 	override getCopiedEPackagesMap(Resource resource) {
-		derivedState.getOrInstallAdapter(resource).copiedEPackagesMap
+		derivedState.getOrInstallAdapter(resource).getCopiedEPackagesMap
 	}
 
 	override installDerivedState(DerivedStateAwareResource resource, boolean preIndexingPhase) {

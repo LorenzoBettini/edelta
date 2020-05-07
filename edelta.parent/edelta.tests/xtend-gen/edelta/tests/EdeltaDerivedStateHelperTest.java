@@ -2,6 +2,7 @@ package edelta.tests;
 
 import com.google.inject.Inject;
 import edelta.resource.EdeltaDerivedState;
+import edelta.resource.EdeltaDerivedStateHelper;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProvider;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
@@ -16,29 +17,29 @@ import org.junit.runner.RunWith;
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaInjectorProvider.class)
 @SuppressWarnings("all")
-public class EdeltaDerivedStateTest extends EdeltaAbstractTest {
+public class EdeltaDerivedStateHelperTest extends EdeltaAbstractTest {
   @Inject
   @Extension
-  private EdeltaDerivedState _edeltaDerivedState;
+  private EdeltaDerivedStateHelper _edeltaDerivedStateHelper;
   
   @Test
   public void testGetOrInstallAdapterWithNotXtextResource() {
     ResourceImpl _resourceImpl = new ResourceImpl();
-    Assert.assertNotNull(this._edeltaDerivedState.getOrInstallAdapter(_resourceImpl));
+    Assert.assertNotNull(this._edeltaDerivedStateHelper.getOrInstallAdapter(_resourceImpl));
   }
   
   @Test
   public void testGetOrInstallAdapterWithXtextResourceOfADifferentLanguage() {
     final XtextResource res = new XtextResource();
     res.setLanguageName("foo");
-    Assert.assertNotNull(this._edeltaDerivedState.getOrInstallAdapter(res));
+    Assert.assertNotNull(this._edeltaDerivedStateHelper.getOrInstallAdapter(res));
   }
   
   @Test
   public void testIsAdapterFor() {
     ResourceImpl _resourceImpl = new ResourceImpl();
-    final EdeltaDerivedState.EdeltaDerivedStateAdapter adapter = this._edeltaDerivedState.getOrInstallAdapter(_resourceImpl);
-    Assert.assertTrue(adapter.isAdapterForType(EdeltaDerivedState.EdeltaDerivedStateAdapter.class));
+    final EdeltaDerivedState adapter = this._edeltaDerivedStateHelper.getOrInstallAdapter(_resourceImpl);
+    Assert.assertTrue(adapter.isAdapterForType(EdeltaDerivedState.class));
     Assert.assertFalse(adapter.isAdapterForType(String.class));
   }
 }
