@@ -22,12 +22,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
 import static extension org.junit.Assert.*
+import edelta.resource.EdeltaDerivedStateHelper
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
 class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 
 	@Inject extension TestableEdeltaDerivedStateComputer
+	@Inject extension EdeltaDerivedStateHelper
 
 	@Test
 	def void testCopiedEPackages() {

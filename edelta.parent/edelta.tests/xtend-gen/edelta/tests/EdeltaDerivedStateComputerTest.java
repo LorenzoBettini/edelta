@@ -6,6 +6,7 @@ import edelta.edelta.EdeltaEcoreQualifiedReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
+import edelta.resource.EdeltaDerivedStateHelper;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderTestableDerivedStateComputer;
 import edelta.tests.additional.TestableEdeltaDerivedStateComputer;
@@ -49,6 +50,10 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   @Extension
   private TestableEdeltaDerivedStateComputer _testableEdeltaDerivedStateComputer;
   
+  @Inject
+  @Extension
+  private EdeltaDerivedStateHelper _edeltaDerivedStateHelper;
+  
   @Test
   public void testCopiedEPackages() {
     StringConcatenation _builder = new StringConcatenation();
@@ -65,7 +70,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     _builder.append("modifyEcore aTest2 epackage bar {}");
     _builder.newLine();
     final EdeltaProgram program = this.parseWithTestEcores(_builder);
-    final Collection<EPackage> packages = this._testableEdeltaDerivedStateComputer.getCopiedEPackagesMap(program.eResource()).values();
+    final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
     final ThrowingExtractor<EPackage, String, Exception> _function = (EPackage it) -> {
       return it.getName();
     };
@@ -88,7 +93,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     _builder.append("}");
     _builder.newLine();
     final EdeltaProgram program = this.parseWithTestEcoreWithSubPackage(_builder);
-    final Collection<EPackage> packages = this._testableEdeltaDerivedStateComputer.getCopiedEPackagesMap(program.eResource()).values();
+    final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
     Assertions.<EPackage>assertThat(packages).isEmpty();
   }
   
@@ -121,7 +126,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     _builder.append("modifyEcore aTest1 epackage foo {}");
     _builder.newLine();
     final EdeltaProgram program = this.parseWithTestEcore(_builder);
-    final Collection<EPackage> packages = this._testableEdeltaDerivedStateComputer.getCopiedEPackagesMap(program.eResource()).values();
+    final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
     final Predicate<EPackage> _function = (EPackage p) -> {
       return p.eIsProxy();
     };
@@ -224,7 +229,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     final EdeltaProgram program = this.parseWithTestEcore(_builder);
     Resource _eResource = program.eResource();
     final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
-    final EdeltaCopiedEPackagesMap nameToCopiedEPackageMap = this._testableEdeltaDerivedStateComputer.getCopiedEPackagesMap(resource);
+    final EdeltaCopiedEPackagesMap nameToCopiedEPackageMap = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(resource);
     Assert.assertFalse(resource.eAdapters().isEmpty());
     Assert.assertFalse(nameToCopiedEPackageMap.isEmpty());
     EList<Adapter> _eAdapters = IterableExtensions.<EPackage>head(nameToCopiedEPackageMap.values()).eAdapters();
@@ -263,7 +268,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     final EdeltaProgram program = this.parseWithTestEcore(_builder);
     Resource _eResource = program.eResource();
     final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
-    final EdeltaCopiedEPackagesMap nameToCopiedEPackageMap = this._testableEdeltaDerivedStateComputer.getCopiedEPackagesMap(resource);
+    final EdeltaCopiedEPackagesMap nameToCopiedEPackageMap = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(resource);
     Assert.assertFalse(resource.eAdapters().isEmpty());
     Assert.assertFalse(nameToCopiedEPackageMap.isEmpty());
     program.getModifyEcoreOperations().clear();

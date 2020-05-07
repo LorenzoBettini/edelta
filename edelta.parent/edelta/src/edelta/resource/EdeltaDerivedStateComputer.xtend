@@ -29,7 +29,7 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 
 	@Inject EdeltaOriginalENamedElementRecorder originalENamedElementRecorder
 
-	override getCopiedEPackagesMap(Resource resource) {
+	def private getCopiedEPackagesMap(Resource resource) {
 		derivedState.getCopiedEPackagesMap(resource)
 	}
 
