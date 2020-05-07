@@ -4,6 +4,7 @@ import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.xtext.resource.XtextResource;
 
 import edelta.util.EdeltaCopiedEPackagesMap;
+import edelta.util.EdeltaEcoreReferenceStateMap;
 
 /**
  * Additional derived state installable in an {@link XtextResource}.
@@ -13,6 +14,7 @@ import edelta.util.EdeltaCopiedEPackagesMap;
  */
 public class EdeltaDerivedState extends AdapterImpl {
 	private EdeltaCopiedEPackagesMap copiedEPackagesMap = new EdeltaCopiedEPackagesMap();
+	private EdeltaEcoreReferenceStateMap ecoreReferenceStateMap = new EdeltaEcoreReferenceStateMap();
 
 	@Override
 	public boolean isAdapterForType(final Object type) {
@@ -21,5 +23,9 @@ public class EdeltaDerivedState extends AdapterImpl {
 
 	public EdeltaCopiedEPackagesMap getCopiedEPackagesMap() {
 		return copiedEPackagesMap;
+	}
+
+	public EdeltaEcoreReferenceStateMap getEcoreReferenceStateMap() {
+		return ecoreReferenceStateMap;
 	}
 }

@@ -1,7 +1,10 @@
 package edelta.tests
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaFactory
+import edelta.resource.EdeltaDerivedState
 import edelta.resource.EdeltaDerivedStateHelper
+import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.testing.InjectWith
@@ -10,13 +13,14 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import edelta.resource.EdeltaDerivedState
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
 class EdeltaDerivedStateHelperTest extends EdeltaAbstractTest {
 
 	@Inject extension EdeltaDerivedStateHelper
+	val edeltaFactory = EdeltaFactory.eINSTANCE
+	val ecoreFactory = EcoreFactory.eINSTANCE
 
 	@Test
 	def void testGetOrInstallAdapterWithNotXtextResource() {
@@ -37,4 +41,14 @@ class EdeltaDerivedStateHelperTest extends EdeltaAbstractTest {
 		assertFalse(adapter.isAdapterForType(String))
 	}
 
+	@Test
+	def void testGetEdeltaEcoreReferenceState() {
+		val res = "".parse.eResource
+		val ref = edeltaFactory.createEdeltaEcoreReference
+		res.contents += ref
+		assertNull(ref.ecoreReferenceState.originalEnamedelement)
+		val el = ecoreFactory.createEAttribute
+		ref.ecoreReferenceState.originalEnamedelement = el
+		assertSame(el, ref.ecoreReferenceState.originalEnamedelement)
+	}
 }

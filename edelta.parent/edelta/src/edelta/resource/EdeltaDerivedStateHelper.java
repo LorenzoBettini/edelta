@@ -11,7 +11,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import edelta.edelta.EdeltaEcoreReference;
 import edelta.util.EdeltaCopiedEPackagesMap;
+import edelta.util.EdeltaEcoreReferenceState;
 
 /**
  * Provides access (and possibly install) to the {@link EdeltaDerivedState}.
@@ -46,4 +48,12 @@ public class EdeltaDerivedStateHelper {
 	public EdeltaCopiedEPackagesMap getCopiedEPackagesMap(final Resource resource) {
 		return getOrInstallAdapter(resource).getCopiedEPackagesMap();
 	}
+
+	public EdeltaEcoreReferenceState getEcoreReferenceState(EdeltaEcoreReference edeltaEcoreReference) {
+		return getOrInstallAdapter(edeltaEcoreReference.eResource())
+				.getEcoreReferenceStateMap()
+				.computeIfAbsent(edeltaEcoreReference,
+						e -> new EdeltaEcoreReferenceState());
+	}
+
 }
