@@ -6,8 +6,8 @@ package edelta
 import edelta.compiler.EdeltaGeneratorConfigProvider
 import edelta.compiler.EdeltaOutputConfigurationProvider
 import edelta.compiler.EdeltaXbaseCompiler
+import edelta.interpreter.EdeltaInterpreter
 import edelta.interpreter.EdeltaSafeInterpreter
-import edelta.interpreter.IEdeltaInterpreter
 import edelta.resource.EdeltaDerivedStateComputer
 import edelta.resource.EdeltaEObjectAtOffsetHelper
 import edelta.resource.EdeltaLocationInFileProvider
@@ -59,7 +59,7 @@ class EdeltaRuntimeModule extends AbstractEdeltaRuntimeModule {
 		EdeltaDerivedStateComputer
 	}
 
-	def Class<? extends IEdeltaInterpreter> bindIEdeltaInterpreter() {
+	def Class<? extends EdeltaInterpreter> bindEdeltaInterpreter() {
 		EdeltaSafeInterpreter
 	}
 

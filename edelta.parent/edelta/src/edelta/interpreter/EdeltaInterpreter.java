@@ -45,7 +45,7 @@ import edelta.validation.EdeltaValidator;
  * 
  * @author Lorenzo Bettini
  */
-public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterpreter {
+public class EdeltaInterpreter extends XbaseInterpreter {
 	@Inject
 	private EdeltaInterpreterFactory edeltaInterpreterFactory;
 
@@ -103,12 +103,10 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 		}
 	}
 
-	@Override
 	public void setInterpreterTimeout(final int interpreterTimeout) {
 		this.interpreterTimeout = interpreterTimeout;
 	}
 
-	@Override
 	public void evaluateModifyEcoreOperations(final EdeltaProgram program, final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		this.currentProgram = program;
 		thisObject = new EdeltaInterpreterEdeltaImpl
@@ -258,7 +256,7 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 			} else {
 				// create a new interpreter since the edelta operation is in
 				// another edelta source file.
-				IEdeltaInterpreter newInterpreter =
+				EdeltaInterpreter newInterpreter =
 						edeltaInterpreterFactory.create(containingProgram.eResource());
 				return newInterpreter
 					.evaluateEdeltaOperation(thisObject, containingProgram, edeltaOperation, argumentValues, indicator);
@@ -278,8 +276,8 @@ public class EdeltaInterpreter extends XbaseInterpreter implements IEdeltaInterp
 		);
 	}
 
-	@Override
-	public Object evaluateEdeltaOperation(AbstractEdelta other, EdeltaProgram program, EdeltaOperation edeltaOperation,
+	protected Object evaluateEdeltaOperation(AbstractEdelta other,
+			EdeltaProgram program, EdeltaOperation edeltaOperation,
 			List<Object> argumentValues, CancelIndicator indicator) {
 		this.currentProgram = program;
 		this.thisObject = new AbstractEdelta(other) {
