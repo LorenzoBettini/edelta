@@ -11,7 +11,6 @@ import edelta.lib.EdeltaEcoreUtil
 import edelta.scoping.EdeltaOriginalENamedElementRecorder
 import edelta.services.IEdeltaEcoreModelAssociations
 import edelta.util.EdeltaCopiedEPackagesMap
-import java.util.Map
 import org.eclipse.emf.common.notify.impl.AdapterImpl
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
@@ -109,29 +108,29 @@ class EdeltaDerivedStateComputer extends JvmModelAssociator implements IEdeltaEc
 	}
 
 	def protected getOrAddDerivedStateEPackage(EPackage originalEPackage,
-			Map<String, EPackage> nameToCopiedEPackageMap
+			EdeltaCopiedEPackagesMap copiedEPackagesMap
 	) {
 		val referredEPackageName = originalEPackage.name
-		var copiedEPackage = nameToCopiedEPackageMap.get(referredEPackageName)
+		var copiedEPackage = copiedEPackagesMap.get(referredEPackageName)
 		if (copiedEPackage === null) {
 			copiedEPackage = EdeltaEcoreUtil.copyENamedElement(originalEPackage)
-			nameToCopiedEPackageMap.put(referredEPackageName, copiedEPackage)
+			copiedEPackagesMap.put(referredEPackageName, copiedEPackage)
 		}
 		return copiedEPackage
 	}
 
 	override discardDerivedState(DerivedStateAwareResource resource) {
-		val nameToCopiedEPackageMap = resource.copiedEPackagesMap
-		unloadDerivedPackages(nameToCopiedEPackageMap)
+		val copiedEPackagesMap = resource.copiedEPackagesMap
+		unloadDerivedPackages(copiedEPackagesMap)
 		super.discardDerivedState(resource)
-		nameToCopiedEPackageMap.clear
+		copiedEPackagesMap.clear
 	}
 
 	/**
 	 * Unload (turn them into proxies) all derived Ecore elements
 	 */
-	protected def void unloadDerivedPackages(Map<String, EPackage> nameToEPackageMap) {
-		for (p : nameToEPackageMap.values) {
+	protected def void unloadDerivedPackages(EdeltaCopiedEPackagesMap copiedEPackagesMap) {
+		for (p : copiedEPackagesMap.values) {
 			unloader.unloadRoot(p)
 		}
 	}
