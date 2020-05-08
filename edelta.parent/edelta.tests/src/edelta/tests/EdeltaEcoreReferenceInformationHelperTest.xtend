@@ -1,20 +1,16 @@
 package edelta.tests
 
 import com.google.inject.Inject
-import edelta.edelta.EdeltaEcoreReference
-import edelta.edelta.EdeltaEcoreReferenceInformation
 import edelta.edelta.EdeltaProgram
 import edelta.util.EdeltaEcoreReferenceInformationHelper
 import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.assertThat
-import static org.mockito.Mockito.mock
-import static org.mockito.Mockito.when
-import org.eclipse.emf.ecore.EPackage
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -24,11 +20,19 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testWhenAlreadySetThenReturnsTheStoredInformation() {
-		val ref = mock(EdeltaEcoreReference)
-		val info = mock(EdeltaEcoreReferenceInformation)
-		when(ref.information).thenReturn(info)
-		assertThat(informationHelper.getOrComputeInformation(ref))
-			.isSameAs(info)
+		'''
+		metamodel "foo"
+		
+		modifyEcore aTest epackage foo {
+			ecoreref(foo)
+		}
+		'''.parseWithTestEcore.lastEcoreRef => [
+			val info1 = informationHelper.getOrComputeInformation(it)
+			val info2 = informationHelper.getOrComputeInformation(it)
+			assertThat(info1).isNotNull
+			assertThat(info2).isNotNull
+			assertThat(info1).isSameAs(info2)
+		]
 	}
 
 	@Test
