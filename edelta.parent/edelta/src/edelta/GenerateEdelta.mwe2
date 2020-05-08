@@ -8,7 +8,7 @@ var rootPath = ".."
 Workflow {
 	
 	component = XtextGenerator {
-		configuration = mwe2.CustomGeneratorModule {
+		configuration = {
 			project = StandardProjectConfig {
 				baseName = "edelta"
 				rootPath = rootPath
