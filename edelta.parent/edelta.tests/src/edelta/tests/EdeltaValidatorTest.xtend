@@ -11,6 +11,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static edelta.edelta.EdeltaPackage.Literals.*
+import org.eclipse.xtext.xbase.validation.IssueCodes
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -342,4 +343,30 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 			"Invalid direct subpackage modification 'mainsubpackage'"
 		)
 	}
+
+	@Test
+	def void testTypeMismatchOfEcoreRefExp() {
+		val input = '''
+		import org.eclipse.emf.ecore.EClass
+		import org.eclipse.emf.ecore.EPackage
+		
+		metamodel "foo"
+
+		modifyEcore aTest epackage foo {
+			ecoreref(foo.FooClass).name = "RenamedClass"
+			val EClass c = ecoreref(RenamedClass) // OK after interpretation
+			val EPackage p = ecoreref(RenamedClass) // ERROR also after interpretation
+		}
+		'''
+		input.parseWithTestEcore => [
+			assertError(
+				EDELTA_ECORE_REFERENCE_EXPRESSION,
+				IssueCodes.INCOMPATIBLE_TYPES,
+				input.lastIndexOf("ecoreref(RenamedClass)"), "ecoreref(RenamedClass)".length,
+				"Type mismatch: cannot convert from EClass to EPackage"
+			)
+			assertErrorsAsStrings("Type mismatch: cannot convert from EClass to EPackage")
+		]
+	}
+
 }

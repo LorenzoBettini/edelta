@@ -99,7 +99,7 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 		}
 		'''.parseWithTestEcoreWithSubPackage.lastEcoreRef => [
 			// create cycle in sub package relation
-			val subpackage = enamedelement as EPackage
+			val subpackage = reference.enamedelement as EPackage
 			subpackage.ESubpackages += subpackage.ESuperPackage
 			val info = informationHelper.getOrComputeInformation(it)
 			assertThat(info)
@@ -199,7 +199,7 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 				.returns("FooClass", [EClassifierName])
 				.returns("myAttribute", [ENamedElementName])
 			// change the underlying model
-			val attr = it.enamedelement as EAttribute
+			val attr = it.reference.enamedelement as EAttribute
 			attr.name = "renamed"
 			attr.EContainingClass.name = "Renamed"
 			// but the information stored hasn't changed
@@ -214,6 +214,5 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 
 	def private lastEcoreRef(EdeltaProgram p) {
 		p.lastEcoreReferenceExpression
-			.reference
 	}
 } 

@@ -1,7 +1,7 @@
 package edelta.util
 
 import com.google.inject.Inject
-import edelta.edelta.EdeltaEcoreReference
+import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.resource.EdeltaDerivedStateHelper
 import edelta.util.EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation
 import org.eclipse.emf.ecore.EClassifier
@@ -24,14 +24,15 @@ class EdeltaEcoreReferenceInformationHelper {
 	@Inject extension IQualifiedNameProvider
 	@Inject extension EdeltaDerivedStateHelper
 
-	def getOrComputeInformation(EdeltaEcoreReference e) {
+	def getOrComputeInformation(EdeltaEcoreReferenceExpression exp) {
+		val e = exp.reference
 		val ecoreReferenceState = e.getEcoreReferenceState
 		var info = ecoreReferenceState.information
 		if (info !== null)
 			return info
 		info = new EdeltaEcoreReferenceStateInformation
 		ecoreReferenceState.information = info
-		val type = e.resolveTypes.getActualType(e)
+		val type = exp.resolveTypes.getActualType(exp)
 		info.type = type.simpleName
 
 		val element = e.enamedelement

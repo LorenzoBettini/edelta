@@ -250,7 +250,25 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 			modifyEcore aTest epackage foo {
 				addNewEClass("ANewClass1")
-				ecoreref(
+				ecoreref( // EdeltaEcoreReference.enamedelement is null
+			}
+		'''
+		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ePackage |
+			val eClass = ePackage.lastEClass
+			assertEquals("ANewClass1", eClass.name)
+		]
+	}
+
+	@Test
+	def void testNullEcoreRef() {
+		val input = '''
+			import org.eclipse.emf.ecore.EClass
+
+			metamodel "foo"
+
+			modifyEcore aTest epackage foo {
+				addNewEClass("ANewClass1")
+				ecoreref // EdeltaEcoreReference is null
 			}
 		'''
 		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ePackage |
