@@ -29,6 +29,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import edelta.compiler.EdeltaCompilerUtil;
+import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
@@ -184,9 +185,6 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	@Override
 	protected Object doEvaluate(final XExpression expression, final IEvaluationContext context,
 			final CancelIndicator indicator) {
-		if (expression == null) {
-			return null;
-		}
 		if (expression instanceof EdeltaEcoreReferenceExpression) {
 			return evaluateEcoreReferenceExpression(
 				((EdeltaEcoreReferenceExpression) expression),
@@ -198,7 +196,10 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	private Object evaluateEcoreReferenceExpression(EdeltaEcoreReferenceExpression ecoreReferenceExpression, final IEvaluationContext context,
 			final CancelIndicator indicator) {
 		final Wrapper<Object> elementWrapper = new Wrapper<>();
-		ENamedElement enamedElement = ecoreReferenceExpression.getReference().getEnamedelement();
+		final EdeltaEcoreReference reference = ecoreReferenceExpression.getReference();
+		if (reference == null)
+			return null;
+		ENamedElement enamedElement = reference.getEnamedelement();
 		if (enamedElement != null) {
 			edeltaCompilerUtil.buildMethodToCallForEcoreReference(
 				ecoreReferenceExpression,
