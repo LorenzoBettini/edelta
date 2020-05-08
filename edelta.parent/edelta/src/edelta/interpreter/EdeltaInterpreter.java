@@ -189,11 +189,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			return null;
 		}
 		if (expression instanceof EdeltaEcoreReferenceExpression) {
-			return doEvaluate(
+			return evaluateEcoreReference(
 				((EdeltaEcoreReferenceExpression) expression).getReference(),
-				context, indicator);
-		} else if (expression instanceof EdeltaEcoreReference) {
-			return evaluateEcoreReference((EdeltaEcoreReference) expression,
 				context, indicator);
 		}
 		return super.doEvaluate(expression, context, indicator);

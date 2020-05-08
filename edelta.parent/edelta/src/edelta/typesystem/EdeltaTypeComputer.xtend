@@ -1,6 +1,5 @@
 package edelta.typesystem
 
-import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
@@ -19,7 +18,6 @@ class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 	override void computeTypes(XExpression e, ITypeComputationState state) {
 		switch (e) {
 			EdeltaEcoreReferenceExpression: _computeTypes(e, state)
-			EdeltaEcoreReference: _computeTypes(e, state)
 			default: super.computeTypes(e, state)
 		}
 	}
@@ -31,12 +29,6 @@ class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 			return
 		}
 		// reuse the same expectations for the reference
-		val result = state.computeTypes(e.reference)
-		state.acceptActualType(result.actualExpressionType)
-	}
-
-	def void _computeTypes(EdeltaEcoreReference e, ITypeComputationState state) {
-		val enamedelement = e.enamedelement;
 		val type = switch (enamedelement) {
 			case enamedelement.eIsProxy: {
 				// if it's unresolved, but there's a type expectation, then
