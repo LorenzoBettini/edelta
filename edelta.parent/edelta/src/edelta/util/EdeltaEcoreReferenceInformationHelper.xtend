@@ -1,7 +1,6 @@
 package edelta.util
 
 import com.google.inject.Inject
-import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaFactory
 import org.eclipse.emf.ecore.EClassifier
@@ -9,7 +8,6 @@ import org.eclipse.emf.ecore.EEnumLiteral
 import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EStructuralFeature
-import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
 
@@ -24,10 +22,10 @@ class EdeltaEcoreReferenceInformationHelper {
 	@Inject extension IBatchTypeResolver
 	@Inject extension IQualifiedNameProvider
 
-	def getOrComputeInformation(EdeltaEcoreReference e) {
+	def getOrComputeInformation(EdeltaEcoreReferenceExpression exp) {
+		val e = exp.reference
 		if (e.information !== null)
 			return e.information
-		val exp = EcoreUtil2.getContainerOfType(e, EdeltaEcoreReferenceExpression)
 		val type = exp.resolveTypes.getActualType(exp)
 		val info = EdeltaFactory.eINSTANCE.createEdeltaEcoreReferenceInformation
 		info.type = type.simpleName

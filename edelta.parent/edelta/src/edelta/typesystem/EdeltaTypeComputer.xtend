@@ -58,4 +58,5 @@ class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 		}
 		state.acceptActualType(getRawTypeForName(type, state))
 	}
+
 }
