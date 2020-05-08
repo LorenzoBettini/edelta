@@ -2,6 +2,7 @@ package edelta.tests;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import edelta.edelta.EdeltaFactory;
 import edelta.interpreter.EdeltaInterpreterCleaner;
 import edelta.tests.EdeltaInjectorProvider;
 import java.util.function.Predicate;
@@ -10,6 +11,7 @@ import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -18,6 +20,7 @@ import org.eclipse.xtext.linking.impl.XtextLinkingDiagnostic;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.util.IResourceScopeCache;
+import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Before;
@@ -37,6 +40,8 @@ public class EdeltaInterpreterCleanerTest {
   }
   
   private static final EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
+  
+  private static final EdeltaFactory edeltaFactory = EdeltaFactory.eINSTANCE;
   
   @Inject
   private IResourceScopeCache cache;
@@ -106,5 +111,26 @@ public class EdeltaInterpreterCleanerTest {
       return (!(it instanceof XtextLinkingDiagnostic));
     };
     Assertions.<Resource.Diagnostic>assertThat(this.resource.getWarnings()).hasSize(1).allMatch(_function_1);
+  }
+  
+  @Test
+  public void testClearEcoreReferenceExpressionDiagnosticWhenEPackageChanges() {
+    final EObjectDiagnosticImpl ecoreRefExpDiagnosticError = this.createEObjectDiagnosticMock(EdeltaInterpreterCleanerTest.edeltaFactory.createEdeltaEcoreReferenceExpression());
+    final EObjectDiagnosticImpl nonEcoreRefExpDiagnosticError = this.createEObjectDiagnosticMock(EdeltaInterpreterCleanerTest.ecoreFactory.createEClass());
+    final Resource.Diagnostic nonEObjectDiagnostic = Mockito.<Resource.Diagnostic>mock(Resource.Diagnostic.class);
+    this.resource.getErrors().add(nonEObjectDiagnostic);
+    this.resource.getErrors().add(ecoreRefExpDiagnosticError);
+    this.resource.getErrors().add(nonEcoreRefExpDiagnosticError);
+    EClassifier _get = this.ePackage.getEClassifiers().get(0);
+    _get.setName("Modified");
+    Assertions.<Resource.Diagnostic>assertThat(this.resource.getErrors()).containsExactlyInAnyOrder(nonEObjectDiagnostic, nonEcoreRefExpDiagnosticError);
+  }
+  
+  public EObjectDiagnosticImpl createEObjectDiagnosticMock(final EObject problematicObject) {
+    EObjectDiagnosticImpl _mock = Mockito.<EObjectDiagnosticImpl>mock(EObjectDiagnosticImpl.class);
+    final Procedure1<EObjectDiagnosticImpl> _function = (EObjectDiagnosticImpl it) -> {
+      Mockito.<EObject>when(it.getProblematicObject()).thenReturn(problematicObject);
+    };
+    return ObjectExtensions.<EObjectDiagnosticImpl>operator_doubleArrow(_mock, _function);
   }
 }
