@@ -40,13 +40,6 @@
          unpack="false"/>
 
    <plugin
-         id="edelta.mwe2"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="edelta.refactorings.lib"
          download-size="0"
          install-size="0"

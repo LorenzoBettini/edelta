@@ -131,7 +131,6 @@
     <module>edelta.bom</module>
     <module>edelta.target</module>
     <module>edelta.lib</module>
-    <module>edelta.mwe2</module>
     <module>edelta</module>
     <module>edelta.refactorings.lib</module>
     <module>edelta.maven.plugin</module>
