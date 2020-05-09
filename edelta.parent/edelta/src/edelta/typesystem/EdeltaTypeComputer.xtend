@@ -28,7 +28,6 @@ class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 			state.acceptActualType(getPrimitiveVoid(state))
 			return
 		}
-		// reuse the same expectations for the reference
 		val type = switch (enamedelement) {
 			case enamedelement.eIsProxy: {
 				// if it's unresolved, but there's a type expectation, then
