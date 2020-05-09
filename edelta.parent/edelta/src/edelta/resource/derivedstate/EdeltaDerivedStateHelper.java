@@ -1,4 +1,4 @@
-package edelta.resource;
+package edelta.resource.derivedstate;
 
 import java.util.Objects;
 
@@ -12,8 +12,6 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import edelta.edelta.EdeltaEcoreReference;
-import edelta.util.EdeltaCopiedEPackagesMap;
-import edelta.util.EdeltaEcoreReferenceState;
 
 /**
  * Provides access (and possibly install) to the {@link EdeltaDerivedState}.

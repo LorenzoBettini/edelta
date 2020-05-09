@@ -1,4 +1,4 @@
-package edelta.util;
+package edelta.resource.derivedstate;
 
 import org.eclipse.emf.ecore.ENamedElement;
 

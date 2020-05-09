@@ -1,10 +1,7 @@
-package edelta.resource;
+package edelta.resource.derivedstate;
 
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.xtext.resource.XtextResource;
-
-import edelta.util.EdeltaCopiedEPackagesMap;
-import edelta.util.EdeltaEcoreReferenceStateMap;
 
 /**
  * Additional derived state installable in an {@link XtextResource}.

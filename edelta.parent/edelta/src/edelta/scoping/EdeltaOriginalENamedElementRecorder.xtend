@@ -3,6 +3,7 @@ package edelta.scoping
 import com.google.inject.Inject
 import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaEcoreReference
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.util.EdeltaEcoreHelper
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EEnumLiteral
@@ -13,7 +14,6 @@ import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.util.IResourceScopeCache
 
 import static edelta.util.EdeltaModelUtil.*
-import edelta.resource.EdeltaDerivedStateHelper
 
 /**
  * Records the original referred ENamedElement in an EdeltaEcoreReference expression,

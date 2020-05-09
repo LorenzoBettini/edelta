@@ -2,8 +2,8 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.edelta.EdeltaFactory
-import edelta.resource.EdeltaDerivedState
-import edelta.resource.EdeltaDerivedStateHelper
+import edelta.resource.derivedstate.EdeltaDerivedState
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl
 import org.eclipse.xtext.resource.XtextResource

@@ -7,7 +7,7 @@ import com.google.inject.Inject
 import edelta.edelta.EdeltaModifyEcoreOperation
 import edelta.edelta.EdeltaOperation
 import edelta.edelta.EdeltaProgram
-import edelta.resource.EdeltaDerivedStateHelper
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider
 

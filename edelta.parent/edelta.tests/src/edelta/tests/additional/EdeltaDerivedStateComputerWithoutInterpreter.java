@@ -7,7 +7,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 
 import edelta.edelta.EdeltaProgram;
 import edelta.resource.EdeltaDerivedStateComputer;
-import edelta.util.EdeltaCopiedEPackagesMap;
+import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 
 /**
  * Avoids the derived state computer run the interpreter since the tests in this
