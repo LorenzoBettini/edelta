@@ -9,9 +9,10 @@ import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputationState
 class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 
 	override void computeTypes(XExpression e, ITypeComputationState state) {
-		switch (e) {
-			EdeltaEcoreReferenceExpression: _computeTypes(e, state)
-			default: super.computeTypes(e, state)
+		if (e instanceof EdeltaEcoreReferenceExpression) {
+			_computeTypes(e, state)
+		} else {
+			super.computeTypes(e, state)
 		}
 	}
 
