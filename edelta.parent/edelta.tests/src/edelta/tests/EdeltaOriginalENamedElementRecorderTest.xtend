@@ -1,7 +1,9 @@
 package edelta.tests
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaFactory
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.scoping.EdeltaOriginalENamedElementRecorder
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
@@ -9,8 +11,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import edelta.resource.EdeltaDerivedStateHelper
-import edelta.edelta.EdeltaEcoreReference
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)

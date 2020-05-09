@@ -1,4 +1,4 @@
-package edelta.util;
+package edelta.resource.derivedstate;
 
 import java.util.HashMap;
 

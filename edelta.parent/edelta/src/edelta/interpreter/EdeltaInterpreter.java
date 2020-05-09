@@ -37,7 +37,7 @@ import edelta.edelta.EdeltaProgram;
 import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
 import edelta.lib.AbstractEdelta;
-import edelta.util.EdeltaCopiedEPackagesMap;
+import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.validation.EdeltaValidator;
 
 /**

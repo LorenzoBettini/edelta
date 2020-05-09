@@ -5,7 +5,7 @@ import org.eclipse.emf.ecore.EPackage;
 import com.google.inject.Singleton;
 
 import edelta.resource.EdeltaDerivedStateComputer;
-import edelta.util.EdeltaCopiedEPackagesMap;
+import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 
 /**
  * Some protected methods are made public so that we can call them in the tests

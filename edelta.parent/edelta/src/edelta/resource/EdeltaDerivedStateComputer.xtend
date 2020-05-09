@@ -7,8 +7,9 @@ import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreterFactory
 import edelta.interpreter.EdeltaInterpreterHelper
 import edelta.lib.EdeltaEcoreUtil
+import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.scoping.EdeltaOriginalENamedElementRecorder
-import edelta.util.EdeltaCopiedEPackagesMap
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader.GenericUnloader

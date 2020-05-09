@@ -6,7 +6,7 @@ package edelta.interpreter;
 import org.apache.log4j.Logger;
 
 import edelta.edelta.EdeltaProgram;
-import edelta.util.EdeltaCopiedEPackagesMap;
+import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 
 /**
  * An interpreter that swallows all {@link RuntimeException}s except for

@@ -6,7 +6,7 @@ import edelta.edelta.EdeltaEcoreQualifiedReference;
 import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaFactory;
 import edelta.edelta.EdeltaProgram;
-import edelta.resource.EdeltaDerivedStateHelper;
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.scoping.EdeltaOriginalENamedElementRecorder;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;

@@ -2,8 +2,8 @@ package edelta.util
 
 import com.google.inject.Inject
 import edelta.edelta.EdeltaEcoreReferenceExpression
-import edelta.resource.EdeltaDerivedStateHelper
-import edelta.util.EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper
+import edelta.resource.derivedstate.EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EEnumLiteral
 import org.eclipse.emf.ecore.ENamedElement

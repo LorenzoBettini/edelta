@@ -6,7 +6,7 @@ import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreterRuntimeException
-import edelta.resource.EdeltaDerivedStateHelper
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.tests.additional.TestableEdeltaDerivedStateComputer
 import org.eclipse.emf.common.notify.impl.AdapterImpl
 import org.eclipse.emf.ecore.EAttribute

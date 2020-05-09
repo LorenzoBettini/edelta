@@ -1,7 +1,7 @@
 package edelta.util
 
 import com.google.inject.Inject
-import edelta.resource.EdeltaDerivedStateHelper
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import java.util.List
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EEnum

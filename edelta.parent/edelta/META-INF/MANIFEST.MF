@@ -25,17 +25,18 @@ Export-Package: edelta,
  edelta.edelta,
  edelta.edelta.impl,
  edelta.edelta.util,
+ edelta.formatting2,
  edelta.interpreter,
  edelta.jvmmodel,
  edelta.parser.antlr,
  edelta.parser.antlr.internal,
  edelta.resource,
+ edelta.resource.derivedstate,
  edelta.scoping,
  edelta.serializer,
  edelta.services,
  edelta.typesystem,
  edelta.util,
- edelta.validation,
- edelta.formatting2
+ edelta.validation
 Import-Package: org.apache.log4j
 Automatic-Module-Name: edelta
