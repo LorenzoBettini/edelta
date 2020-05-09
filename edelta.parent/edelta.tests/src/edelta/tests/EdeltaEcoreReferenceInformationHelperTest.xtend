@@ -1,11 +1,12 @@
 package edelta.tests
 
 import com.google.inject.Inject
-import edelta.edelta.EdeltaEcoreReference
+import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaEcoreReferenceInformation
 import edelta.edelta.EdeltaProgram
 import edelta.util.EdeltaEcoreReferenceInformationHelper
 import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
@@ -14,7 +15,7 @@ import org.junit.runner.RunWith
 import static org.assertj.core.api.Assertions.assertThat
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
-import org.eclipse.emf.ecore.EPackage
+import edelta.edelta.EdeltaEcoreReference
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -24,10 +25,12 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testWhenAlreadySetThenReturnsTheStoredInformation() {
+		val e = mock(EdeltaEcoreReferenceExpression)
 		val ref = mock(EdeltaEcoreReference)
 		val info = mock(EdeltaEcoreReferenceInformation)
+		when(e.reference).thenReturn(ref)
 		when(ref.information).thenReturn(info)
-		assertThat(informationHelper.getOrComputeInformation(ref))
+		assertThat(informationHelper.getOrComputeInformation(e))
 			.isSameAs(info)
 	}
 
@@ -95,7 +98,7 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 		}
 		'''.parseWithTestEcoreWithSubPackage.lastEcoreRef => [
 			// create cycle in sub package relation
-			val subpackage = enamedelement as EPackage
+			val subpackage = reference.enamedelement as EPackage
 			subpackage.ESubpackages += subpackage.ESuperPackage
 			val info = informationHelper.getOrComputeInformation(it)
 			assertThat(info)
@@ -195,7 +198,7 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 				.returns("FooClass", [EClassifierName])
 				.returns("myAttribute", [ENamedElementName])
 			// change the underlying model
-			val attr = it.enamedelement as EAttribute
+			val attr = it.reference.enamedelement as EAttribute
 			attr.name = "renamed"
 			attr.EContainingClass.name = "Renamed"
 			// but the information stored hasn't changed
@@ -210,6 +213,5 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 
 	def private lastEcoreRef(EdeltaProgram p) {
 		p.lastEcoreReferenceExpression
-			.reference
 	}
 } 

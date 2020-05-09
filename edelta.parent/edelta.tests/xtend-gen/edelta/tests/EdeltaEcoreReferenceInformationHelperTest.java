@@ -2,6 +2,7 @@ package edelta.tests;
 
 import com.google.inject.Inject;
 import edelta.edelta.EdeltaEcoreReference;
+import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaEcoreReferenceInformation;
 import edelta.edelta.EdeltaProgram;
 import edelta.tests.EdeltaAbstractTest;
@@ -32,10 +33,12 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
   
   @Test
   public void testWhenAlreadySetThenReturnsTheStoredInformation() {
+    final EdeltaEcoreReferenceExpression e = Mockito.<EdeltaEcoreReferenceExpression>mock(EdeltaEcoreReferenceExpression.class);
     final EdeltaEcoreReference ref = Mockito.<EdeltaEcoreReference>mock(EdeltaEcoreReference.class);
     final EdeltaEcoreReferenceInformation info = Mockito.<EdeltaEcoreReferenceInformation>mock(EdeltaEcoreReferenceInformation.class);
+    Mockito.<EdeltaEcoreReference>when(e.getReference()).thenReturn(ref);
     Mockito.<EdeltaEcoreReferenceInformation>when(ref.getInformation()).thenReturn(info);
-    Assertions.<EdeltaEcoreReferenceInformation>assertThat(this.informationHelper.getOrComputeInformation(ref)).isSameAs(info);
+    Assertions.<EdeltaEcoreReferenceInformation>assertThat(this.informationHelper.getOrComputeInformation(e)).isSameAs(info);
   }
   
   @Test
@@ -51,8 +54,8 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    EdeltaEcoreReference _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcore(_builder));
-    final Procedure1<EdeltaEcoreReference> _function = (EdeltaEcoreReference it) -> {
+    EdeltaEcoreReferenceExpression _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcore(_builder));
+    final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
       final EdeltaEcoreReferenceInformation info = this.informationHelper.getOrComputeInformation(it);
       final Function<EdeltaEcoreReferenceInformation, String> _function_1 = (EdeltaEcoreReferenceInformation it_1) -> {
         return it_1.getType();
@@ -68,7 +71,7 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
       };
       Assertions.<EdeltaEcoreReferenceInformation>assertThat(info).<String>returns("EPackage", _function_1).<String>returns("foo", _function_2).<String>returns(null, _function_3).<String>returns(null, _function_4);
     };
-    ObjectExtensions.<EdeltaEcoreReference>operator_doubleArrow(_lastEcoreRef, _function);
+    ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_lastEcoreRef, _function);
   }
   
   @Test
@@ -84,8 +87,8 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    EdeltaEcoreReference _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcoreWithSubPackage(_builder));
-    final Procedure1<EdeltaEcoreReference> _function = (EdeltaEcoreReference it) -> {
+    EdeltaEcoreReferenceExpression _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcoreWithSubPackage(_builder));
+    final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
       final EdeltaEcoreReferenceInformation info = this.informationHelper.getOrComputeInformation(it);
       final Function<EdeltaEcoreReferenceInformation, String> _function_1 = (EdeltaEcoreReferenceInformation it_1) -> {
         return it_1.getType();
@@ -101,7 +104,7 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
       };
       Assertions.<EdeltaEcoreReferenceInformation>assertThat(info).<String>returns("EPackage", _function_1).<String>returns("mainpackage.mainsubpackage", _function_2).<String>returns(null, _function_3).<String>returns(null, _function_4);
     };
-    ObjectExtensions.<EdeltaEcoreReference>operator_doubleArrow(_lastEcoreRef, _function);
+    ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_lastEcoreRef, _function);
   }
   
   @Test
@@ -117,8 +120,8 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    EdeltaEcoreReference _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcoreWithSubPackage(_builder));
-    final Procedure1<EdeltaEcoreReference> _function = (EdeltaEcoreReference it) -> {
+    EdeltaEcoreReferenceExpression _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcoreWithSubPackage(_builder));
+    final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
       final EdeltaEcoreReferenceInformation info = this.informationHelper.getOrComputeInformation(it);
       final Function<EdeltaEcoreReferenceInformation, String> _function_1 = (EdeltaEcoreReferenceInformation it_1) -> {
         return it_1.getType();
@@ -134,7 +137,7 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
       };
       Assertions.<EdeltaEcoreReferenceInformation>assertThat(info).<String>returns("EAttribute", _function_1).<String>returns("mainpackage.mainsubpackage", _function_2).<String>returns("MainSubPackageFooClass", _function_3).<String>returns("mySubPackageAttribute", _function_4);
     };
-    ObjectExtensions.<EdeltaEcoreReference>operator_doubleArrow(_lastEcoreRef, _function);
+    ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_lastEcoreRef, _function);
   }
   
   @Test
@@ -150,9 +153,9 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    EdeltaEcoreReference _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcoreWithSubPackage(_builder));
-    final Procedure1<EdeltaEcoreReference> _function = (EdeltaEcoreReference it) -> {
-      ENamedElement _enamedelement = it.getEnamedelement();
+    EdeltaEcoreReferenceExpression _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcoreWithSubPackage(_builder));
+    final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
+      ENamedElement _enamedelement = it.getReference().getEnamedelement();
       final EPackage subpackage = ((EPackage) _enamedelement);
       EList<EPackage> _eSubpackages = subpackage.getESubpackages();
       EPackage _eSuperPackage = subpackage.getESuperPackage();
@@ -172,7 +175,7 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
       };
       Assertions.<EdeltaEcoreReferenceInformation>assertThat(info).<String>returns("EPackage", _function_1).<String>returns("subsubpackage", _function_2).<String>returns(null, _function_3).<String>returns(null, _function_4);
     };
-    ObjectExtensions.<EdeltaEcoreReference>operator_doubleArrow(_lastEcoreRef, _function);
+    ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_lastEcoreRef, _function);
   }
   
   @Test
@@ -188,8 +191,8 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    EdeltaEcoreReference _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcore(_builder));
-    final Procedure1<EdeltaEcoreReference> _function = (EdeltaEcoreReference it) -> {
+    EdeltaEcoreReferenceExpression _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcore(_builder));
+    final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
       final EdeltaEcoreReferenceInformation info = this.informationHelper.getOrComputeInformation(it);
       final Function<EdeltaEcoreReferenceInformation, String> _function_1 = (EdeltaEcoreReferenceInformation it_1) -> {
         return it_1.getType();
@@ -205,7 +208,7 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
       };
       Assertions.<EdeltaEcoreReferenceInformation>assertThat(info).<String>returns("EClass", _function_1).<String>returns("foo", _function_2).<String>returns("FooClass", _function_3).<String>returns(null, _function_4);
     };
-    ObjectExtensions.<EdeltaEcoreReference>operator_doubleArrow(_lastEcoreRef, _function);
+    ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_lastEcoreRef, _function);
   }
   
   @Test
@@ -221,8 +224,8 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    EdeltaEcoreReference _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcore(_builder));
-    final Procedure1<EdeltaEcoreReference> _function = (EdeltaEcoreReference it) -> {
+    EdeltaEcoreReferenceExpression _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcore(_builder));
+    final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
       final EdeltaEcoreReferenceInformation info = this.informationHelper.getOrComputeInformation(it);
       final Function<EdeltaEcoreReferenceInformation, String> _function_1 = (EdeltaEcoreReferenceInformation it_1) -> {
         return it_1.getType();
@@ -238,7 +241,7 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
       };
       Assertions.<EdeltaEcoreReferenceInformation>assertThat(info).<String>returns("EEnumLiteral", _function_1).<String>returns("foo", _function_2).<String>returns("FooEnum", _function_3).<String>returns("FooEnumLiteral", _function_4);
     };
-    ObjectExtensions.<EdeltaEcoreReference>operator_doubleArrow(_lastEcoreRef, _function);
+    ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_lastEcoreRef, _function);
   }
   
   @Test
@@ -254,8 +257,8 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    EdeltaEcoreReference _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcore(_builder));
-    final Procedure1<EdeltaEcoreReference> _function = (EdeltaEcoreReference it) -> {
+    EdeltaEcoreReferenceExpression _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcore(_builder));
+    final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
       final EdeltaEcoreReferenceInformation info = this.informationHelper.getOrComputeInformation(it);
       final Function<EdeltaEcoreReferenceInformation, String> _function_1 = (EdeltaEcoreReferenceInformation it_1) -> {
         return it_1.getType();
@@ -271,7 +274,7 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
       };
       Assertions.<EdeltaEcoreReferenceInformation>assertThat(info).<String>returns("EReference", _function_1).<String>returns("foo", _function_2).<String>returns("FooClass", _function_3).<String>returns("myReference", _function_4);
     };
-    ObjectExtensions.<EdeltaEcoreReference>operator_doubleArrow(_lastEcoreRef, _function);
+    ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_lastEcoreRef, _function);
   }
   
   @Test
@@ -287,8 +290,8 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    EdeltaEcoreReference _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcore(_builder));
-    final Procedure1<EdeltaEcoreReference> _function = (EdeltaEcoreReference it) -> {
+    EdeltaEcoreReferenceExpression _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcore(_builder));
+    final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
       final EdeltaEcoreReferenceInformation info = this.informationHelper.getOrComputeInformation(it);
       final Function<EdeltaEcoreReferenceInformation, String> _function_1 = (EdeltaEcoreReferenceInformation it_1) -> {
         return it_1.getType();
@@ -304,7 +307,7 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
       };
       Assertions.<EdeltaEcoreReferenceInformation>assertThat(info).<String>returns("ENamedElement", _function_1).<String>returns("", _function_2).<String>returns("", _function_3).<String>returns("", _function_4);
     };
-    ObjectExtensions.<EdeltaEcoreReference>operator_doubleArrow(_lastEcoreRef, _function);
+    ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_lastEcoreRef, _function);
   }
   
   @Test
@@ -320,8 +323,8 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    EdeltaEcoreReference _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcore(_builder));
-    final Procedure1<EdeltaEcoreReference> _function = (EdeltaEcoreReference it) -> {
+    EdeltaEcoreReferenceExpression _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcore(_builder));
+    final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
       EdeltaEcoreReferenceInformation info = this.informationHelper.getOrComputeInformation(it);
       final Function<EdeltaEcoreReferenceInformation, String> _function_1 = (EdeltaEcoreReferenceInformation it_1) -> {
         return it_1.getType();
@@ -336,7 +339,7 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
         return it_1.getENamedElementName();
       };
       Assertions.<EdeltaEcoreReferenceInformation>assertThat(info).<String>returns("EAttribute", _function_1).<String>returns("foo", _function_2).<String>returns("FooClass", _function_3).<String>returns("myAttribute", _function_4);
-      ENamedElement _enamedelement = it.getEnamedelement();
+      ENamedElement _enamedelement = it.getReference().getEnamedelement();
       final EAttribute attr = ((EAttribute) _enamedelement);
       attr.setName("renamed");
       EClass _eContainingClass = attr.getEContainingClass();
@@ -356,10 +359,10 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
       };
       Assertions.<EdeltaEcoreReferenceInformation>assertThat(info).<String>returns("EAttribute", _function_5).<String>returns("foo", _function_6).<String>returns("FooClass", _function_7).<String>returns("myAttribute", _function_8);
     };
-    ObjectExtensions.<EdeltaEcoreReference>operator_doubleArrow(_lastEcoreRef, _function);
+    ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_lastEcoreRef, _function);
   }
   
-  private EdeltaEcoreReference lastEcoreRef(final EdeltaProgram p) {
-    return this.lastEcoreReferenceExpression(p).getReference();
+  private EdeltaEcoreReferenceExpression lastEcoreRef(final EdeltaProgram p) {
+    return this.lastEcoreReferenceExpression(p);
   }
 }

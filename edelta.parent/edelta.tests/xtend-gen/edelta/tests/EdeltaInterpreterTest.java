@@ -354,7 +354,34 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder.append("addNewEClass(\"ANewClass1\")");
     _builder.newLine();
     _builder.append("\t");
-    _builder.append("ecoreref(");
+    _builder.append("ecoreref( // EdeltaEcoreReference.enamedelement is null");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    final Procedure1<EPackage> _function = (EPackage ePackage) -> {
+      final EClass eClass = this.getLastEClass(ePackage);
+      Assert.assertEquals("ANewClass1", eClass.getName());
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, false, _function);
+  }
+  
+  @Test
+  public void testNullEcoreRef() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EClass");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"ANewClass1\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref // EdeltaEcoreReference is null");
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();

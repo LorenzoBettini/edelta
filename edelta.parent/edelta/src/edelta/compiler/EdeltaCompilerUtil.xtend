@@ -1,7 +1,6 @@
 package edelta.compiler
 
 import com.google.inject.Inject
-import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.util.EdeltaEcoreReferenceInformationHelper
 import java.util.List
@@ -24,10 +23,6 @@ class EdeltaCompilerUtil {
 		val reference = e.reference
 		if (reference === null || reference.enamedelement === null)
 			return "null"
-		getStringForEcoreReference(reference)
-	}
-
-	def getStringForEcoreReference(EdeltaEcoreReference e) {
 		val builder = new StringBuilder
 		buildMethodToCallForEcoreReference(e) [
 			name, args |
@@ -39,7 +34,7 @@ class EdeltaCompilerUtil {
 		builder.toString
 	}
 
-	def void buildMethodToCallForEcoreReference(EdeltaEcoreReference e, (String, List<Object>)=>void acceptor) {
+	def void buildMethodToCallForEcoreReference(EdeltaEcoreReferenceExpression e, (String, List<Object>)=>void acceptor) {
 		val info = e.getOrComputeInformation
 		acceptor.apply(
 			"get" + info.type,

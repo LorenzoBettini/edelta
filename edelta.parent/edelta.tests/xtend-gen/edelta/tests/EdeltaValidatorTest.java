@@ -14,6 +14,7 @@ import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
+import org.eclipse.xtext.xbase.validation.IssueCodes;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -485,5 +486,42 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     this._validationTestHelper.assertError(_parseWithTestEcoreWithSubPackage, _edeltaModifyEcoreOperation, 
       EdeltaValidator.INVALID_SUBPACKAGE_MODIFICATION, start, _minus, 
       "Invalid direct subpackage modification \'mainsubpackage\'");
+  }
+  
+  @Test
+  public void testTypeMismatchOfEcoreRefExp() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EClass");
+    _builder.newLine();
+    _builder.append("import org.eclipse.emf.ecore.EPackage");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(foo.FooClass).name = \"RenamedClass\"");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("val EClass c = ecoreref(RenamedClass) // OK after interpretation");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("val EPackage p = ecoreref(RenamedClass) // ERROR also after interpretation");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION, 
+        IssueCodes.INCOMPATIBLE_TYPES, 
+        input.lastIndexOf("ecoreref(RenamedClass)"), "ecoreref(RenamedClass)".length(), 
+        "Type mismatch: cannot convert from EClass to EPackage");
+      this.assertErrorsAsStrings(it, "Type mismatch: cannot convert from EClass to EPackage");
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
 }

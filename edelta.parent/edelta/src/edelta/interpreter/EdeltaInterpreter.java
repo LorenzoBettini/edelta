@@ -185,27 +185,24 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	@Override
 	protected Object doEvaluate(final XExpression expression, final IEvaluationContext context,
 			final CancelIndicator indicator) {
-		if (expression == null) {
-			return null;
-		}
 		if (expression instanceof EdeltaEcoreReferenceExpression) {
-			return doEvaluate(
-				((EdeltaEcoreReferenceExpression) expression).getReference(),
-				context, indicator);
-		} else if (expression instanceof EdeltaEcoreReference) {
-			return evaluateEcoreReference((EdeltaEcoreReference) expression,
+			return evaluateEcoreReferenceExpression(
+				((EdeltaEcoreReferenceExpression) expression),
 				context, indicator);
 		}
 		return super.doEvaluate(expression, context, indicator);
 	}
 
-	private Object evaluateEcoreReference(EdeltaEcoreReference ecoreReference, final IEvaluationContext context,
+	private Object evaluateEcoreReferenceExpression(EdeltaEcoreReferenceExpression ecoreReferenceExpression, final IEvaluationContext context,
 			final CancelIndicator indicator) {
 		final Wrapper<Object> elementWrapper = new Wrapper<>();
-		ENamedElement enamedElement = ecoreReference.getEnamedelement();
+		final EdeltaEcoreReference reference = ecoreReferenceExpression.getReference();
+		if (reference == null)
+			return null;
+		ENamedElement enamedElement = reference.getEnamedelement();
 		if (enamedElement != null) {
 			edeltaCompilerUtil.buildMethodToCallForEcoreReference(
-				ecoreReference,
+				ecoreReferenceExpression,
 				(methodName, args) -> {
 					final JvmOperation op = edeltaJvmModelHelper
 						.findJvmOperation(
