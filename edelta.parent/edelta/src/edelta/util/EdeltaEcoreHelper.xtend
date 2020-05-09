@@ -1,7 +1,7 @@
 package edelta.util
 
 import com.google.inject.Inject
-import edelta.services.IEdeltaEcoreModelAssociations
+import edelta.resource.EdeltaDerivedStateHelper
 import java.util.List
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EEnum
@@ -23,7 +23,7 @@ import static edelta.util.EdeltaModelUtil.*
 class EdeltaEcoreHelper {
 
 	@Inject IResourceScopeCache cache
-	@Inject extension IEdeltaEcoreModelAssociations
+	@Inject extension EdeltaDerivedStateHelper
 
 	def Iterable<? extends ENamedElement> getProgramENamedElements(EObject context) {
 		cache.get("getProgramENamedElements", context.eResource) [

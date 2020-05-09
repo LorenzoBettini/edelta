@@ -9,12 +9,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import edelta.resource.EdeltaDerivedStateHelper
+import edelta.edelta.EdeltaEcoreReference
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
 class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 
 	@Inject extension EdeltaOriginalENamedElementRecorder
+	@Inject extension EdeltaDerivedStateHelper
 
 	@Test def void testNull() {
 		'''
@@ -235,4 +238,7 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		]
 	}
 
+	def private getOriginalEnamedelement(EdeltaEcoreReference ref) {
+		ref.ecoreReferenceState.originalEnamedelement
+	}
 }

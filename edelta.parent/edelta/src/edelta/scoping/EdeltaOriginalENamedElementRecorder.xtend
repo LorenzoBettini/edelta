@@ -13,6 +13,7 @@ import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.util.IResourceScopeCache
 
 import static edelta.util.EdeltaModelUtil.*
+import edelta.resource.EdeltaDerivedStateHelper
 
 /**
  * Records the original referred ENamedElement in an EdeltaEcoreReference expression,
@@ -23,14 +24,17 @@ import static edelta.util.EdeltaModelUtil.*
 class EdeltaOriginalENamedElementRecorder {
 
 	@Inject extension EdeltaEcoreHelper
-
+	@Inject extension EdeltaDerivedStateHelper
 	@Inject IResourceScopeCache cache
 
 	def void recordOriginalENamedElement(EdeltaEcoreReference edeltaEcoreReference) {
 		if (edeltaEcoreReference === null)
 			return
 		val enamedElement = edeltaEcoreReference.enamedelement
-		edeltaEcoreReference.originalEnamedelement = retrieveOriginalElement(enamedElement, edeltaEcoreReference)
+		edeltaEcoreReference
+			.ecoreReferenceState
+			.originalEnamedelement = 
+				retrieveOriginalElement(enamedElement, edeltaEcoreReference)
 		if (edeltaEcoreReference instanceof EdeltaEcoreQualifiedReference) {
 			recordOriginalENamedElement(edeltaEcoreReference.qualification)
 		}

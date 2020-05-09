@@ -7,7 +7,7 @@ import com.google.inject.Inject
 import edelta.edelta.EdeltaModifyEcoreOperation
 import edelta.edelta.EdeltaOperation
 import edelta.edelta.EdeltaProgram
-import edelta.services.IEdeltaEcoreModelAssociations
+import edelta.resource.EdeltaDerivedStateHelper
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider
 
@@ -18,7 +18,7 @@ import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider
  */
 class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 
-	@Inject extension IEdeltaEcoreModelAssociations
+	@Inject extension EdeltaDerivedStateHelper
 
 	def protected void _createChildren(IOutlineNode parentNode, EdeltaProgram p) {
 		for (o : p.operations) {
@@ -27,11 +27,11 @@ class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		for (o : p.modifyEcoreOperations) {
 			createNode(parentNode, o)
 		}
-		for (derived : p.eResource.copiedEPackagesMap.values) {
+		for (copiedEPackage : p.eResource.copiedEPackagesMap.values) {
 			// the cool thing is that we don't need to provide
 			// customization in the label provider for EPackage and EClass
 			// since Xtext defaults to the .edit plugin :)
-			createNode(parentNode, derived)
+			createNode(parentNode, copiedEPackage)
 		}
 	}
 
