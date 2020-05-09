@@ -35,15 +35,11 @@ public class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 		if (reference != null) {
 			enamedelement = reference.getEnamedelement();
 		}
-		if (enamedelement == null) {
-			state.acceptActualType(getPrimitiveVoid(state));
-			return;
-		}
-		if (enamedelement.eIsProxy()) {
+		if (enamedelement == null || enamedelement.eIsProxy()) {
 			// if it's unresolved, but there's a type expectation, then
 			// we assign to this reference the expected type: this way
 			// we will only get an error due to unresolved reference
-			// and not an addition type mismatch error, which would be uperfluous
+			// and not an addition type mismatch error, which would be superfluous
 			final ITypeExpectation expectation =
 				findFirst(state.getExpectations(), it -> it.getExpectedType() != null);
 			if (expectation != null) {
@@ -55,6 +51,9 @@ public class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 					return;
 				}
 			}
+			// even if it's not resolved or not specified, in case of no expectations
+			// for sure we can say that in the end it will be an ENamedElement,
+			// i.e., the supertype of all Ecore elements.
 			state.acceptActualType(getRawTypeForName(ENamedElement.class, state));
 		} else {
 			state.acceptActualType(getRawTypeForName(

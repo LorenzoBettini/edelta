@@ -93,12 +93,12 @@ public class EdeltaTypeComputerTest extends EdeltaAbstractTest {
   
   @Test
   public void testTypeOfReferenceToNullNamedElement() {
-    this.assertPrimitiveVoid("ecoreref");
+    this.assertENamedElement("ecoreref");
   }
   
   @Test
   public void testTypeOfReferenceToNullNamedElement2() {
-    this.assertPrimitiveVoid("ecoreref()");
+    this.assertENamedElement("ecoreref()");
   }
   
   @Test
@@ -154,10 +154,10 @@ public class EdeltaTypeComputerTest extends EdeltaAbstractTest {
     return ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_ecoreReferenceExpression, _function);
   }
   
-  private EdeltaEcoreReferenceExpression assertPrimitiveVoid(final CharSequence input) {
+  private EdeltaEcoreReferenceExpression assertENamedElement(final CharSequence input) {
     EdeltaEcoreReferenceExpression _ecoreReferenceExpression = this.ecoreReferenceExpression(input);
     final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
-      Assert.assertEquals("void", 
+      Assert.assertEquals(ENamedElement.class.getCanonicalName(), 
         this._iBatchTypeResolver.resolveTypes(it).getActualType(it).getIdentifier());
     };
     return ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_ecoreReferenceExpression, _function);
