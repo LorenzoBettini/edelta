@@ -37,8 +37,8 @@ public class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 		}
 		if (enamedelement == null || enamedelement.eIsProxy()) {
 			// if it's unresolved, but there's a type expectation, then
-			// we assign to this reference the expected type: this way
-			// we will only get an error due to unresolved reference
+			// we assign to this reference the expected type, if the expected type is
+			// an ENamedElement: this way we will only get an error due to unresolved reference
 			// and not an addition type mismatch error, which would be superfluous
 			final ITypeExpectation expectation =
 				findFirst(state.getExpectations(), it -> it.getExpectedType() != null);
