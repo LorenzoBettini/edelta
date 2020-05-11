@@ -444,6 +444,11 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testReferenceToEClassRenamed() {
+    this._validationTestHelper.assertNoErrors(this.parseWithTestEcore(this._inputs.referenceToEClassRenamed()));
+  }
+  
+  @Test
   public void testReferenceToCreatedEClassRenamed() {
     this._validationTestHelper.assertNoErrors(this.parseWithTestEcore(this._inputs.referenceToCreatedEClassRenamed()));
   }

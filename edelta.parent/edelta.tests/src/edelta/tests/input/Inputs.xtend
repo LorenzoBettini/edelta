@@ -118,6 +118,17 @@ class Inputs {
 		'''
 	}
 
+	def referenceToEClassRenamed() {
+		'''
+			metamodel "foo"
+			
+			modifyEcore renaming epackage foo {
+				ecoreref(FooClass).name = "Renamed"
+				ecoreref(FooClass).abstract // this doesn't exist anymore
+			}
+		'''
+	}
+
 	def referenceToCreatedEClassRenamed() {
 		'''
 			metamodel "foo"
