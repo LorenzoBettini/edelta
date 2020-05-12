@@ -24,19 +24,19 @@ class EdeltaCompilerUtil {
 		if (reference === null || reference.enamedelement === null)
 			return "null"
 		val builder = new StringBuilder
-		buildMethodToCallForEcoreReference(e) [
+		return buildMethodToCallForEcoreReference(e) [
 			name, args |
 			builder.append(name)
 			builder.append("(")
 			builder.append(args.map['''"«it»"'''].join(", "))
 			builder.append(")")
+			builder.toString
 		]
-		builder.toString
 	}
 
-	def void buildMethodToCallForEcoreReference(EdeltaEcoreReferenceExpression e, (String, List<Object>)=>void acceptor) {
+	def <T> T buildMethodToCallForEcoreReference(EdeltaEcoreReferenceExpression e, (String, List<Object>)=>T function) {
 		val info = e.getOrComputeInformation
-		acceptor.apply(
+		return function.apply(
 			"get" + info.type,
 			<Object>newArrayList(info.EPackageName, info.EClassifierName, info.ENamedElementName)
 				.filterNull
