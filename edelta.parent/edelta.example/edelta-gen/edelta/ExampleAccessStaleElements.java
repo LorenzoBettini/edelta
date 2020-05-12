@@ -31,10 +31,18 @@ public class ExampleAccessStaleElements extends AbstractEdelta {
   public void accessing(final EPackage it) {
   }
   
+  public void renaming2(final EPackage it) {
+    getEAttribute("mainpackage.subpackage.subsubpackage", "MyClass", "myAttribute").setName("Renamed");
+  }
+  
+  public void accessing2(final EPackage it) {
+  }
+  
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("ecore");
     ensureEPackageIsLoaded("myecore");
+    ensureEPackageIsLoaded("mainpackage");
   }
   
   @Override
@@ -43,5 +51,7 @@ public class ExampleAccessStaleElements extends AbstractEdelta {
     renaming(getEPackage("myecore"));
     remove(getEPackage("myecore"));
     accessing(getEPackage("myecore"));
+    renaming2(getEPackage("mainpackage"));
+    accessing2(getEPackage("mainpackage"));
   }
 }

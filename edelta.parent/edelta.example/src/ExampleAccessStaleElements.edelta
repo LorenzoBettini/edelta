@@ -3,6 +3,7 @@
 
 metamodel "ecore"
 metamodel "myecore"
+metamodel "mainpackage"
 
 modifyEcore creation epackage myecore {
 	addNewEClass("NewClass")
@@ -23,4 +24,16 @@ modifyEcore accessing epackage myecore {
 	// uncomment the following accesses to see errors
 	// and use the quickfix for using the renamed element
 //	ecoreref(NewClass) // this has been renamed
+}
+
+// examples of accessing renamed elements with qualified names
+
+modifyEcore renaming2 epackage mainpackage {
+	ecoreref(subsubpackage.MyClass.myAttribute).name = "Renamed"
+}
+
+modifyEcore accessing2 epackage mainpackage {
+	// uncomment the following accesses to see errors
+	// and use the quickfix for using the renamed element
+//	ecoreref(subsubpackage.MyClass.myAttribute)
 }
