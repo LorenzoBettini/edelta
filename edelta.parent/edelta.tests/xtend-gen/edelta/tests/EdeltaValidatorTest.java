@@ -460,6 +460,59 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testReferenceToEClassRemovedInLoop() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore creation epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass1\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("for (var i = 0; i < 3; i++)");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("EClassifiers -= ecoreref(NewClass1) // the second time it doesn\'t exist anymore");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass2\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("for (var i = 0; i < 3; i++)");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("EClassifiers -= ecoreref(NewClass2) // the second time it doesn\'t exist anymore");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
+        EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT, 
+        input.lastIndexOf("NewClass1"), 
+        "NewClass1".length(), 
+        "The element is not available anymore in this context: \'NewClass1\'");
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
+        EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT, 
+        input.lastIndexOf("NewClass2"), 
+        "NewClass2".length(), 
+        "The element is not available anymore in this context: \'NewClass2\'");
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("The element is not available anymore in this context: \'NewClass1\'");
+      _builder_1.newLine();
+      _builder_1.append("The element is not available anymore in this context: \'NewClass2\'");
+      _builder_1.newLine();
+      this.assertErrorsAsStrings(it, _builder_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
   public void testReferenceToCreatedEClassRemoved() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");

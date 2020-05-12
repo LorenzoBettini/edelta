@@ -4,6 +4,8 @@ import static edelta.edelta.EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRES
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MODIFY_ECORE_OPERATION__BODY;
 import static edelta.util.EdeltaModelUtil.getProgram;
 import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashMap;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.exists;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.filter;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.forEach;
 
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.xtext.common.types.JvmField;
 import org.eclipse.xtext.common.types.JvmFormalParameter;
 import org.eclipse.xtext.common.types.JvmOperation;
@@ -252,7 +255,14 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	private void addStaleAccessError(EdeltaEcoreReferenceExpression ecoreReferenceExpression,
 			String errorMessage) {
-		ecoreReferenceExpression.eResource().getErrors().add(
+		List<Diagnostic> errors = ecoreReferenceExpression.eResource().getErrors();
+		// Avoid adding the same errors several times on the same expression.
+		// This can happen if we're interpreting a loop, removing the same element
+		if (exists(
+				filter(errors, EdeltaInterpreterDiagnostic.class),
+				error -> error.getProblematicObject() == ecoreReferenceExpression))
+			return;
+		errors.add(
 			new EdeltaInterpreterDiagnostic(Severity.ERROR,
 				EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT,
 				errorMessage,
