@@ -18,7 +18,9 @@ modifyEcore remove epackage myecore {
 
 modifyEcore accessing epackage myecore {
 	// uncomment the following accesses to see errors
-
-//	ecoreref(NewClass) // this has been renamed
 //	ecoreref(MyEClass) // this doesn't exist anymore
+
+	// uncomment the following accesses to see errors
+	// and use the quickfix for using the renamed element
+//	ecoreref(NewClass) // this has been renamed
 }
