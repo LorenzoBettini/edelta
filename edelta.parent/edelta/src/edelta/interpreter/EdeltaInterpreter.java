@@ -198,26 +198,25 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		if (reference == null)
 			return null;
 		ENamedElement enamedElement = reference.getEnamedelement();
-		if (enamedElement != null) {
-			return edeltaCompilerUtil.buildMethodToCallForEcoreReference(
-				ecoreReferenceExpression,
-				(methodName, args) -> {
-					Object result = null;
-					final JvmOperation op = edeltaJvmModelHelper
-						.findJvmOperation(
-							edeltaJvmModelHelper.findJvmGenericType(currentProgram),
-							methodName);
-					// it could be null due to an unresolved reference
-					// the returned op would be 'getENamedElement'
-					// which does not exist in AbstractEdelta
-					if (op != null) {
-						result = super.invokeOperation
-							(op, thisObject, args, context, indicator);
-					}
-					return result;
-				});
-		}
-		return null;
+		if (enamedElement == null)
+			return null;
+		return edeltaCompilerUtil.buildMethodToCallForEcoreReference(
+			ecoreReferenceExpression,
+			(methodName, args) -> {
+				Object result = null;
+				final JvmOperation op = edeltaJvmModelHelper
+					.findJvmOperation(
+						edeltaJvmModelHelper.findJvmGenericType(currentProgram),
+						methodName);
+				// it could be null due to an unresolved reference
+				// the returned op would be 'getENamedElement'
+				// which does not exist in AbstractEdelta
+				if (op != null) {
+					result = super.invokeOperation
+						(op, thisObject, args, context, indicator);
+				}
+				return result;
+			});
 	}
 
 	@Override
