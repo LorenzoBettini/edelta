@@ -122,7 +122,7 @@ class Inputs {
 		'''
 			metamodel "foo"
 			
-			modifyEcore renaming epackage foo {
+			modifyEcore aTest epackage foo {
 				EClassifiers -= ecoreref(FooClass)
 				ecoreref(FooClass).abstract // this doesn't exist anymore
 			}

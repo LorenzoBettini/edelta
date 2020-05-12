@@ -316,6 +316,33 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testReferenceToCreatedEClassRemoved() {
+		val input = '''
+			metamodel "foo"
+			
+			modifyEcore creation epackage foo {
+				addNewEClass("NewClass")
+			}
+			modifyEcore removed epackage foo {
+				EClassifiers -= ecoreref(NewClass)
+			}
+			modifyEcore accessing epackage foo {
+				ecoreref(NewClass) // this doesn't exist anymore
+			}
+		'''
+		input.parseWithTestEcore =>[
+			assertError(
+				EdeltaPackage.eINSTANCE.edeltaEcoreReferenceExpression,
+				EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT,
+				input.lastIndexOf("NewClass"),
+				"NewClass".length,
+				"The element is not available anymore in this context: 'NewClass'"
+			)
+			assertErrorsAsStrings("The element is not available anymore in this context: 'NewClass'")
+		]
+	}
+
+	@Test
 	def void testReferenceToEClassRenamed() {
 		referenceToEClassRenamed
 		.parseWithTestEcore.assertNoErrors
