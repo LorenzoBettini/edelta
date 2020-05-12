@@ -311,6 +311,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 				"FooClass".length,
 				"The element is not available anymore in this context: 'FooClass'"
 			)
+			assertErrorsAsStrings("The element is not available anymore in this context: 'FooClass'")
 		]
 	}
 

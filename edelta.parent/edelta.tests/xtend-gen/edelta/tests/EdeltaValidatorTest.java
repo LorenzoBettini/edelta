@@ -454,6 +454,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
         input.lastIndexOf("FooClass"), 
         "FooClass".length(), 
         "The element is not available anymore in this context: \'FooClass\'");
+      this.assertErrorsAsStrings(it, "The element is not available anymore in this context: \'FooClass\'");
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
