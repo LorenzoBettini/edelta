@@ -9,11 +9,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.ecore.ENamedElement;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.common.types.JvmField;
 import org.eclipse.xtext.common.types.JvmFormalParameter;
 import org.eclipse.xtext.common.types.JvmOperation;
 import org.eclipse.xtext.diagnostics.Severity;
+import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.IResourceScopeCache;
@@ -37,6 +39,7 @@ import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
 import edelta.lib.AbstractEdelta;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
+import edelta.util.EdeltaModelUtil;
 import edelta.validation.EdeltaValidator;
 
 /**
@@ -59,6 +62,9 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	@Inject
 	private IResourceScopeCache cache;
+
+	@Inject
+	private IQualifiedNameProvider qualifiedNameProvider;
 
 	private int interpreterTimeout =
 		Integer.parseInt(System.getProperty("edelta.interpreter.timeout", "2000"));
@@ -221,6 +227,17 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 						addStaleAccessError(
 							ecoreReferenceExpression, "The element is not available anymore in this context: '" +
 								enamedElement.getName() + "'");
+					} else {
+						String currentQualifiedName = qualifiedNameProvider
+							.getFullyQualifiedName((EObject) result).toString();
+						String originalReferenceText =
+							EdeltaModelUtil.getEcoreReferenceText(reference);
+						if (!currentQualifiedName.endsWith(originalReferenceText))
+							addStaleAccessError(
+								ecoreReferenceExpression,
+								String.format(
+									"The element '%s' is now available as '%s'",
+									originalReferenceText, currentQualifiedName));
 					}
 				}
 				return result;

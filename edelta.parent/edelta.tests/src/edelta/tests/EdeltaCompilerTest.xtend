@@ -385,7 +385,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		// the name of the created EClass is changed
 		// in the initialization block and the interpreter is executed
 		// thus, we can access them both, but both with the new name.
-		// TODO: https://github.com/LorenzoBettini/edelta/issues/113
+		// However, a validation error is issued
+		// see: https://github.com/LorenzoBettini/edelta/issues/113
 		referenceToCreatedEClassRenamed.checkCompilation(
 			'''
 			package edelta;
@@ -428,7 +429,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    accessing(getEPackage("foo"));
 			  }
 			}
-			'''
+			''',
+			false
 		)
 	}
 

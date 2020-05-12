@@ -502,12 +502,34 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   
   @Test
   public void testReferenceToEClassRenamed() {
-    this._validationTestHelper.assertNoErrors(this.parseWithTestEcore(this._inputs.referenceToEClassRenamed()));
+    final String input = this._inputs.referenceToEClassRenamed().toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
+        EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT, 
+        input.lastIndexOf("FooClass"), 
+        "FooClass".length(), 
+        "The element \'FooClass\' is now available as \'foo.Renamed\'");
+      this.assertErrorsAsStrings(it, "The element \'FooClass\' is now available as \'foo.Renamed\'");
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
   
   @Test
   public void testReferenceToCreatedEClassRenamed() {
-    this._validationTestHelper.assertNoErrors(this.parseWithTestEcore(this._inputs.referenceToCreatedEClassRenamed()));
+    final String input = this._inputs.referenceToCreatedEClassRenamed().toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
+        EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT, 
+        input.lastIndexOf("NewClass"), 
+        "NewClass".length(), 
+        "The element \'NewClass\' is now available as \'foo.changed\'");
+      this.assertErrorsAsStrings(it, "The element \'NewClass\' is now available as \'foo.changed\'");
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
   
   @Test

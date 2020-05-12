@@ -344,14 +344,34 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testReferenceToEClassRenamed() {
-		referenceToEClassRenamed
-		.parseWithTestEcore.assertNoErrors
+		val input = referenceToEClassRenamed.toString
+		input
+		.parseWithTestEcore => [
+			assertError(
+				EdeltaPackage.eINSTANCE.edeltaEcoreReferenceExpression,
+				EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT,
+				input.lastIndexOf("FooClass"),
+				"FooClass".length,
+				"The element 'FooClass' is now available as 'foo.Renamed'"
+			)
+			assertErrorsAsStrings("The element 'FooClass' is now available as 'foo.Renamed'")
+		]
 	}
 
 	@Test
 	def void testReferenceToCreatedEClassRenamed() {
-		referenceToCreatedEClassRenamed
-		.parseWithTestEcore.assertNoErrors
+		val input = referenceToCreatedEClassRenamed.toString
+		input
+		.parseWithTestEcore => [
+			assertError(
+				EdeltaPackage.eINSTANCE.edeltaEcoreReferenceExpression,
+				EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT,
+				input.lastIndexOf("NewClass"),
+				"NewClass".length,
+				"The element 'NewClass' is now available as 'foo.changed'"
+			)
+			assertErrorsAsStrings("The element 'NewClass' is now available as 'foo.changed'")
+		]
 	}
 
 	@Test
