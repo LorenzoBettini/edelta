@@ -17,7 +17,6 @@ import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.IResourceScopeCache;
-import org.eclipse.xtext.util.Wrapper;
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
@@ -195,30 +194,29 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	private Object evaluateEcoreReferenceExpression(EdeltaEcoreReferenceExpression ecoreReferenceExpression, final IEvaluationContext context,
 			final CancelIndicator indicator) {
-		final Wrapper<Object> elementWrapper = new Wrapper<>();
 		final EdeltaEcoreReference reference = ecoreReferenceExpression.getReference();
 		if (reference == null)
 			return null;
 		ENamedElement enamedElement = reference.getEnamedelement();
-		if (enamedElement != null) {
-			edeltaCompilerUtil.buildMethodToCallForEcoreReference(
-				ecoreReferenceExpression,
-				(methodName, args) -> {
-					final JvmOperation op = edeltaJvmModelHelper
-						.findJvmOperation(
-							edeltaJvmModelHelper.findJvmGenericType(currentProgram),
-							methodName);
-					// it could be null due to an unresolved reference
-					// the returned op would be 'getENamedElement'
-					// which does not exist in AbstractEdelta
-					if (op != null) {
-						final Object ref = super.invokeOperation
-							(op, thisObject, args, context, indicator);
-						elementWrapper.set(ref);
-					}
-				});
-		}
-		return elementWrapper.get();
+		if (enamedElement == null)
+			return null;
+		return edeltaCompilerUtil.buildMethodToCallForEcoreReference(
+			ecoreReferenceExpression,
+			(methodName, args) -> {
+				Object result = null;
+				final JvmOperation op = edeltaJvmModelHelper
+					.findJvmOperation(
+						edeltaJvmModelHelper.findJvmGenericType(currentProgram),
+						methodName);
+				// it could be null due to an unresolved reference
+				// the returned op would be 'getENamedElement'
+				// which does not exist in AbstractEdelta
+				if (op != null) {
+					result = super.invokeOperation
+						(op, thisObject, args, context, indicator);
+				}
+				return result;
+			});
 	}
 
 	@Override
