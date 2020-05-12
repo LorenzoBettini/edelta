@@ -1,0 +1,15 @@
+// IMPORTANT: ecores must be in source directories
+// otherwise you can't refer to them
+
+metamodel "ecore"
+
+// uncomment the following to see the error on
+// the attempt to import directly a subpackage
+// then use the quickfix to import the corresponding root package
+
+//metamodel "mainpackage.subpackage"
+
+// uncomment the following to see the error on the
+// attempt to modify directly a subpackage
+
+//modifyEcore SomeChanges epackage subpackage { }
