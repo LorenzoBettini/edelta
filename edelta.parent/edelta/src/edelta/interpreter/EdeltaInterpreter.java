@@ -218,19 +218,25 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 					result = super.invokeOperation
 						(op, thisObject, args, context, indicator);
 					if (result == null) {
-						ecoreReferenceExpression.eResource().getErrors().add(
-							new EdeltaInterpreterDiagnostic(Severity.ERROR,
-								EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT,
-								"The element is not available anymore in this context: '" +
-										enamedElement.getName() + "'",
-								ecoreReferenceExpression,
-								EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE,
-								-1,
-								new String[] {}));
+						addStaleAccessError(
+							ecoreReferenceExpression, "The element is not available anymore in this context: '" +
+								enamedElement.getName() + "'");
 					}
 				}
 				return result;
 			});
+	}
+
+	private void addStaleAccessError(EdeltaEcoreReferenceExpression ecoreReferenceExpression,
+			String errorMessage) {
+		ecoreReferenceExpression.eResource().getErrors().add(
+			new EdeltaInterpreterDiagnostic(Severity.ERROR,
+				EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT,
+				errorMessage,
+				ecoreReferenceExpression,
+				EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE,
+				-1,
+				new String[] {}));
 	}
 
 	@Override
