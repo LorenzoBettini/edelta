@@ -17,7 +17,7 @@ import org.eclipse.xtext.xbase.annotations.ui.quickfix.XbaseWithAnnotationsQuick
 class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider {
 
 	@Fix(EdeltaValidator.INVALID_SUBPACKAGE_IMPORT)
-	def capitalizeName(Issue issue, IssueResolutionAcceptor acceptor) {
+	def importRootPackage(Issue issue, IssueResolutionAcceptor acceptor) {
 		val rootPackageName = issue.data.get(0)
 		acceptor.accept(issue, 'Import root EPackage', "Import root EPackage '" + rootPackageName + "'", 'EPackage.gif') [
 			context |
