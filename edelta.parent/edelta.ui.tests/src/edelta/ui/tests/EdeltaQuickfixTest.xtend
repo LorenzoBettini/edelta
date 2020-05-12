@@ -1,5 +1,7 @@
 package edelta.ui.tests
 
+import com.google.inject.Inject
+import edelta.ui.tests.utils.EdeltaPluginProjectHelper
 import edelta.validation.EdeltaValidator
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
@@ -9,17 +11,25 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import static extension org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil.createJavaProject
-
 @RunWith(XtextRunner)
 @InjectWith(EdeltaUiInjectorProvider)
 class EdeltaQuickfixTest extends AbstractQuickfixTest {
 
+	@Inject EdeltaPluginProjectHelper projectHelper
+
+	override protected getFileName() {
+		/*
+		 * Better to put Edelta file in a source folder
+		 */
+		"src/" + super.getFileName()
+	}
+
 	@Before def void setup() {
 		/*
-		 * Xbase-based languages require java project
+		 * Edelta requires a plug-in project to run the interpreter
+		 * with edelta.lib as dependency
 		 */
-		projectName.createJavaProject
+		projectHelper.createEdeltaPluginProject(projectName)
 
 		IResourcesSetupUtil
 			.createFile(
@@ -74,6 +84,34 @@ class EdeltaQuickfixTest extends AbstractQuickfixTest {
 		'''
 			metamodel "foo"
 			metamodel "mainpackage"
+		'''))
+	}
+
+	@Test def fixAccessToRenamedElement() {
+		'''
+			metamodel "mainpackage"
+			
+			modifyEcore renaming epackage mainpackage {
+				ecoreref(subsubpackage.MyClass.myAttribute).name = "Renamed"
+			}
+			
+			modifyEcore access epackage mainpackage {
+				ecoreref(subsubpackage.MyClass.myAttribute)
+			}
+		'''.testQuickfixesOn
+		(EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT,
+			new Quickfix("Use renamed element",
+			"Use renamed element 'mainpackage.subpackage.subsubpackage.MyClass.Renamed'",
+		'''
+			metamodel "mainpackage"
+			
+			modifyEcore renaming epackage mainpackage {
+				ecoreref(subsubpackage.MyClass.myAttribute).name = "Renamed"
+			}
+			
+			modifyEcore access epackage mainpackage {
+				ecoreref(mainpackage.subpackage.subsubpackage.MyClass.Renamed)
+			}
 		'''))
 	}
 

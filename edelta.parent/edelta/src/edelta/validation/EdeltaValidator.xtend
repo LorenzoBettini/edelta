@@ -31,6 +31,8 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	public static val PREFIX = "edelta.";
 	public static val TYPE_MISMATCH = PREFIX + "TypeMismatch";
 	public static val INTERPRETER_TIMEOUT = PREFIX + "InterpreterTimeout";
+	public static val INTERPRETER_ACCESS_REMOVED_ELEMENT = PREFIX + "InterpreterAccessRemovedElement";
+	public static val INTERPRETER_ACCESS_RENAMED_ELEMENT = PREFIX + "InterpreterAccessRenamedElement";
 	public static val DUPLICATE_DECLARATION = PREFIX + "DuplicateDeclaration";
 	public static val INVALID_SUBPACKAGE_IMPORT = PREFIX + "InvalidSubPackageImport";
 	public static val INVALID_SUBPACKAGE_MODIFICATION = PREFIX + "InvalidSubPackageModification";

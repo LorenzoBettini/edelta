@@ -46,6 +46,8 @@ public class EdeltaInterpreterCleaner extends EContentAdapter {
 	}
 
 	private boolean isToBeRemoved(Diagnostic d) {
+		if (d instanceof EdeltaInterpreterDiagnostic)
+			return false;
 		if (d instanceof XtextLinkingDiagnostic)
 			return true;
 		if (d instanceof EObjectDiagnosticImpl) {

@@ -71,4 +71,30 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 			.isNull
 	}
 
+	@Test
+	def void testGetEcoreReferenceText() {
+		'''
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				ecoreref(FooClass)
+				ecoreref(foo.FooClass)
+				ecoreref(NonExistingClass)
+				ecoreref()
+			}
+		'''
+		.parseWithTestEcore
+		.lastModifyEcoreOperation.body.block
+		.expressions => [
+			assertEquals("FooClass",
+				getEcoreReferenceText(get(0).edeltaEcoreReference))
+			assertEquals("foo.FooClass",
+				getEcoreReferenceText(get(1).edeltaEcoreReference))
+			assertEquals("NonExistingClass",
+				getEcoreReferenceText(get(2).edeltaEcoreReference))
+			assertEquals("",
+				getEcoreReferenceText(get(3).edeltaEcoreReference))
+		]
+	}
+
 }

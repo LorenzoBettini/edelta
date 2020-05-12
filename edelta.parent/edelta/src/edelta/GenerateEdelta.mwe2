@@ -51,6 +51,9 @@ Workflow {
 			contentAssist = {
 				generateXtendStub = false
 			}
+			quickFixProvider = {
+				generateXtendStub = false
+			}
 		}
 	}
 }

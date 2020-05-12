@@ -1,0 +1,39 @@
+// IMPORTANT: ecores must be in source directories
+// otherwise you can't refer to them
+
+metamodel "ecore"
+metamodel "myecore"
+metamodel "mainpackage"
+
+modifyEcore creation epackage myecore {
+	addNewEClass("NewClass")
+}
+
+modifyEcore renaming epackage myecore {
+	ecoreref(NewClass).name = "Renamed"
+}
+
+modifyEcore remove epackage myecore {
+	EClassifiers -= ecoreref(MyEClass)
+}
+
+modifyEcore accessing epackage myecore {
+	// uncomment the following accesses to see errors
+//	ecoreref(MyEClass) // this doesn't exist anymore
+
+	// uncomment the following accesses to see errors
+	// and use the quickfix for using the renamed element
+//	ecoreref(NewClass) // this has been renamed
+}
+
+// examples of accessing renamed elements with qualified names
+
+modifyEcore renaming2 epackage mainpackage {
+	ecoreref(subsubpackage.MyClass.myAttribute).name = "Renamed"
+}
+
+modifyEcore accessing2 epackage mainpackage {
+	// uncomment the following accesses to see errors
+	// and use the quickfix for using the renamed element
+//	ecoreref(subsubpackage.MyClass.myAttribute)
+}

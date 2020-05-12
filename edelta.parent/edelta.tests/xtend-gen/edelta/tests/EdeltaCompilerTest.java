@@ -857,7 +857,8 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    this.checkCompilation(_referenceToCreatedEClassRenamed, _builder);
+    this.checkCompilation(_referenceToCreatedEClassRenamed, _builder, 
+      false);
   }
   
   @Test

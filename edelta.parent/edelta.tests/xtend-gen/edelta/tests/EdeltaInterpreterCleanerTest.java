@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import edelta.edelta.EdeltaFactory;
 import edelta.interpreter.EdeltaInterpreterCleaner;
+import edelta.interpreter.EdeltaInterpreterDiagnostic;
 import edelta.tests.EdeltaInjectorProvider;
 import java.util.function.Predicate;
 import org.assertj.core.api.Assertions;
@@ -124,6 +125,16 @@ public class EdeltaInterpreterCleanerTest {
     EClassifier _get = this.ePackage.getEClassifiers().get(0);
     _get.setName("Modified");
     Assertions.<Resource.Diagnostic>assertThat(this.resource.getErrors()).containsExactlyInAnyOrder(nonEObjectDiagnostic, nonEcoreRefExpDiagnosticError);
+  }
+  
+  @Test
+  public void testDoesNotClearEdeltaInterpreterDiagnosticWhenEPackageChanges() {
+    this.resource.getErrors().add(Mockito.<EdeltaInterpreterDiagnostic>mock(EdeltaInterpreterDiagnostic.class));
+    this.resource.getWarnings().add(Mockito.<EdeltaInterpreterDiagnostic>mock(EdeltaInterpreterDiagnostic.class));
+    EClassifier _get = this.ePackage.getEClassifiers().get(0);
+    _get.setName("Modified");
+    Assertions.<Resource.Diagnostic>assertThat(this.resource.getErrors()).hasSize(1);
+    Assertions.<Resource.Diagnostic>assertThat(this.resource.getWarnings()).hasSize(1);
   }
   
   public EObjectDiagnosticImpl createEObjectDiagnosticMock(final EObject problematicObject) {

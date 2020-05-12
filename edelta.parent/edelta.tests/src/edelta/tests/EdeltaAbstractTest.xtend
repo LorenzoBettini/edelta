@@ -311,6 +311,10 @@ abstract class EdeltaAbstractTest {
 		e as EdeltaEcoreReferenceExpression
 	}
 
+	def protected getEdeltaEcoreReference(XExpression e) {
+		e.getEdeltaEcoreReferenceExpression.reference
+	}
+
 	def protected getEdeltaEcoreDirectReference(EObject e) {
 		e as EdeltaEcoreDirectReference
 	}

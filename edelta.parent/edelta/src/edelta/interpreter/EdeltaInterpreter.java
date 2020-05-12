@@ -1,19 +1,24 @@
 package edelta.interpreter;
 
+import static edelta.edelta.EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE;
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MODIFY_ECORE_OPERATION__BODY;
 import static edelta.util.EdeltaModelUtil.getProgram;
 import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashMap;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.exists;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.filter;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.forEach;
 
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.emf.ecore.ENamedElement;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.xtext.common.types.JvmField;
 import org.eclipse.xtext.common.types.JvmFormalParameter;
 import org.eclipse.xtext.common.types.JvmOperation;
 import org.eclipse.xtext.diagnostics.Severity;
+import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.IResourceScopeCache;
@@ -28,7 +33,6 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import edelta.compiler.EdeltaCompilerUtil;
-import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
@@ -37,6 +41,7 @@ import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
 import edelta.lib.AbstractEdelta;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
+import edelta.util.EdeltaModelUtil;
 import edelta.validation.EdeltaValidator;
 
 /**
@@ -59,6 +64,9 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	@Inject
 	private IResourceScopeCache cache;
+
+	@Inject
+	private IQualifiedNameProvider qualifiedNameProvider;
 
 	private int interpreterTimeout =
 		Integer.parseInt(System.getProperty("edelta.interpreter.timeout", "2000"));
@@ -145,6 +153,9 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				handleResultException(result.getException());
 			}
 		} finally {
+			// this will also trigger the last event caught by our adapter
+			// implying a final clearing, which is required to avoid
+			// duplicate errors
 			ePackage.eAdapters().remove(cacheCleaner);
 		}
 	}
@@ -194,11 +205,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	private Object evaluateEcoreReferenceExpression(EdeltaEcoreReferenceExpression ecoreReferenceExpression, final IEvaluationContext context,
 			final CancelIndicator indicator) {
-		final EdeltaEcoreReference reference = ecoreReferenceExpression.getReference();
-		if (reference == null)
-			return null;
-		ENamedElement enamedElement = reference.getEnamedelement();
-		if (enamedElement == null)
+		if (ecoreReferenceExpression.getReference() == null ||
+			ecoreReferenceExpression.getReference().getEnamedelement() == null)
 			return null;
 		return edeltaCompilerUtil.buildMethodToCallForEcoreReference(
 			ecoreReferenceExpression,
@@ -214,9 +222,58 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				if (op != null) {
 					result = super.invokeOperation
 						(op, thisObject, args, context, indicator);
+					checkStaleAccess(result, ecoreReferenceExpression);
 				}
 				return result;
 			});
+	}
+
+	private void checkStaleAccess(Object result, EdeltaEcoreReferenceExpression ecoreReferenceExpression) {
+		if (result == null) {
+			addStaleAccessError(
+				ecoreReferenceExpression,
+				"The element is not available anymore in this context: '" +
+					ecoreReferenceExpression.getReference()
+					.getEnamedelement().getName() + "'",
+					EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT,
+					new String[] {});
+		} else {
+			// the effective qualified name of the EObject
+			String currentQualifiedName = qualifiedNameProvider
+				.getFullyQualifiedName((EObject) result).toString();
+			// the reference string in the Edelta program,
+			// which is different in case the EObject has been renamed
+			String originalReferenceText =
+				EdeltaModelUtil.getEcoreReferenceText
+					(ecoreReferenceExpression.getReference());
+			if (!currentQualifiedName.endsWith(originalReferenceText))
+				addStaleAccessError(
+					ecoreReferenceExpression,
+					String.format(
+						"The element '%s' is now available as '%s'",
+						originalReferenceText, currentQualifiedName),
+					EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT,
+					new String[] {currentQualifiedName});
+		}
+	}
+
+	private void addStaleAccessError(EdeltaEcoreReferenceExpression ecoreReferenceExpression,
+			String errorMessage, String errorCode, String[] errorData) {
+		List<Diagnostic> errors = ecoreReferenceExpression.eResource().getErrors();
+		// Avoid adding the same errors several times on the same expression.
+		// This can happen if we're interpreting a loop, removing the same element
+		if (exists(
+				filter(errors, EdeltaInterpreterDiagnostic.class),
+				error -> error.getProblematicObject() == ecoreReferenceExpression))
+			return;
+		errors.add(
+			new EdeltaInterpreterDiagnostic(Severity.ERROR,
+				errorCode,
+				errorMessage,
+				ecoreReferenceExpression,
+				EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE,
+				-1,
+				errorData));
 	}
 
 	@Override
