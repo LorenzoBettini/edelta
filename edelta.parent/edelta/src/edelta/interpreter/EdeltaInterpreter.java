@@ -1,6 +1,7 @@
 package edelta.interpreter;
 
-import static edelta.edelta.EdeltaPackage.Literals.*;
+import static edelta.edelta.EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE;
+import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MODIFY_ECORE_OPERATION__BODY;
 import static edelta.util.EdeltaModelUtil.getProgram;
 import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashMap;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.forEach;
@@ -8,7 +9,6 @@ import static org.eclipse.xtext.xbase.lib.IterableExtensions.forEach;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.common.types.JvmField;
@@ -30,7 +30,6 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import edelta.compiler.EdeltaCompilerUtil;
-import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
@@ -203,11 +202,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	private Object evaluateEcoreReferenceExpression(EdeltaEcoreReferenceExpression ecoreReferenceExpression, final IEvaluationContext context,
 			final CancelIndicator indicator) {
-		final EdeltaEcoreReference reference = ecoreReferenceExpression.getReference();
-		if (reference == null)
-			return null;
-		ENamedElement enamedElement = reference.getEnamedelement();
-		if (enamedElement == null)
+		if (ecoreReferenceExpression.getReference() == null ||
+			ecoreReferenceExpression.getReference().getEnamedelement() == null)
 			return null;
 		return edeltaCompilerUtil.buildMethodToCallForEcoreReference(
 			ecoreReferenceExpression,
@@ -223,25 +219,35 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				if (op != null) {
 					result = super.invokeOperation
 						(op, thisObject, args, context, indicator);
-					if (result == null) {
-						addStaleAccessError(
-							ecoreReferenceExpression, "The element is not available anymore in this context: '" +
-								enamedElement.getName() + "'");
-					} else {
-						String currentQualifiedName = qualifiedNameProvider
-							.getFullyQualifiedName((EObject) result).toString();
-						String originalReferenceText =
-							EdeltaModelUtil.getEcoreReferenceText(reference);
-						if (!currentQualifiedName.endsWith(originalReferenceText))
-							addStaleAccessError(
-								ecoreReferenceExpression,
-								String.format(
-									"The element '%s' is now available as '%s'",
-									originalReferenceText, currentQualifiedName));
-					}
+					checkStaleAccess(result, ecoreReferenceExpression);
 				}
 				return result;
 			});
+	}
+
+	private void checkStaleAccess(Object result, EdeltaEcoreReferenceExpression ecoreReferenceExpression) {
+		if (result == null) {
+			addStaleAccessError(
+				ecoreReferenceExpression,
+				"The element is not available anymore in this context: '" +
+					ecoreReferenceExpression.getReference()
+					.getEnamedelement().getName() + "'");
+		} else {
+			// the effective qualified name of the EObject
+			String currentQualifiedName = qualifiedNameProvider
+				.getFullyQualifiedName((EObject) result).toString();
+			// the reference string in the Edelta program,
+			// which is different in case the EObject has been renamed
+			String originalReferenceText =
+				EdeltaModelUtil.getEcoreReferenceText
+					(ecoreReferenceExpression.getReference());
+			if (!currentQualifiedName.endsWith(originalReferenceText))
+				addStaleAccessError(
+					ecoreReferenceExpression,
+					String.format(
+						"The element '%s' is now available as '%s'",
+						originalReferenceText, currentQualifiedName));
+		}
 	}
 
 	private void addStaleAccessError(EdeltaEcoreReferenceExpression ecoreReferenceExpression,
