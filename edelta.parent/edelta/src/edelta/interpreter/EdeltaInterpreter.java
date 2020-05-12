@@ -145,6 +145,9 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				handleResultException(result.getException());
 			}
 		} finally {
+			// this will also trigger the last event caught by our adapter
+			// implying a final clearing, which is required to avoid
+			// duplicate errors
 			ePackage.eAdapters().remove(cacheCleaner);
 		}
 	}
