@@ -11,6 +11,7 @@ import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
+import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
@@ -100,5 +101,41 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
     Assertions.<EPackage>assertThat(EdeltaModelUtil.findRootSuperPackage(IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>head(rootPackage.getESubpackages()).getESubpackages()))).isSameAs(rootPackage);
     Assertions.<EPackage>assertThat(EdeltaModelUtil.findRootSuperPackage(IterableExtensions.<EPackage>head(rootPackage.getESubpackages()))).isSameAs(rootPackage);
     Assertions.<EPackage>assertThat(EdeltaModelUtil.findRootSuperPackage(rootPackage)).isNull();
+  }
+  
+  @Test
+  public void testGetEcoreReferenceText() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(FooClass)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(foo.FooClass)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NonExistingClass)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref()");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EList<XExpression> _expressions = this.getBlock(this.lastModifyEcoreOperation(this.parseWithTestEcore(_builder)).getBody()).getExpressions();
+    final Procedure1<EList<XExpression>> _function = (EList<XExpression> it) -> {
+      Assert.assertEquals("FooClass", 
+        EdeltaModelUtil.getEcoreReferenceText(this.getEdeltaEcoreReference(it.get(0))));
+      Assert.assertEquals("foo.FooClass", 
+        EdeltaModelUtil.getEcoreReferenceText(this.getEdeltaEcoreReference(it.get(1))));
+      Assert.assertEquals("NonExistingClass", 
+        EdeltaModelUtil.getEcoreReferenceText(this.getEdeltaEcoreReference(it.get(2))));
+      Assert.assertEquals("", 
+        EdeltaModelUtil.getEcoreReferenceText(this.getEdeltaEcoreReference(it.get(3))));
+    };
+    ObjectExtensions.<EList<XExpression>>operator_doubleArrow(_expressions, _function);
   }
 }

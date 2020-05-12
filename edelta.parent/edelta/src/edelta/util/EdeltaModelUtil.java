@@ -1,12 +1,16 @@
 package edelta.util;
 
+import static org.eclipse.xtext.EcoreUtil2.getContainerOfType;
+import static org.eclipse.xtext.nodemodel.util.NodeModelUtils.findActualNodeFor;
+import static org.eclipse.xtext.nodemodel.util.NodeModelUtils.getTokenText;
+
 import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.xtext.EcoreUtil2;
 
+import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaProgram;
 
 /**
@@ -20,7 +24,11 @@ public class EdeltaModelUtil {
 	}
 
 	public static EdeltaProgram getProgram(final EObject context) {
-		return EcoreUtil2.getContainerOfType(context, EdeltaProgram.class);
+		return getContainerOfType(context, EdeltaProgram.class);
+	}
+
+	public static String getEcoreReferenceText(EdeltaEcoreReference ref) {
+		return getTokenText(findActualNodeFor(ref));
 	}
 
 	public static boolean hasCycleInSuperPackage(EPackage ePackage) {

@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import edelta.edelta.EdeltaEcoreDirectReference;
 import edelta.edelta.EdeltaEcoreQualifiedReference;
+import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaProgram;
@@ -544,6 +545,10 @@ public abstract class EdeltaAbstractTest {
   
   protected EdeltaEcoreReferenceExpression getEdeltaEcoreReferenceExpression(final XExpression e) {
     return ((EdeltaEcoreReferenceExpression) e);
+  }
+  
+  protected EdeltaEcoreReference getEdeltaEcoreReference(final XExpression e) {
+    return this.getEdeltaEcoreReferenceExpression(e).getReference();
   }
   
   protected EdeltaEcoreDirectReference getEdeltaEcoreDirectReference(final EObject e) {
