@@ -306,7 +306,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		input.parseWithTestEcore =>[
 			assertError(
 				EdeltaPackage.eINSTANCE.edeltaEcoreReferenceExpression,
-				EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT,
+				EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT,
 				input.lastIndexOf("FooClass"),
 				"FooClass".length,
 				"The element is not available anymore in this context: 'FooClass'"
@@ -332,14 +332,14 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		input.parseWithTestEcore =>[
 			assertError(
 				EdeltaPackage.eINSTANCE.edeltaEcoreReferenceExpression,
-				EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT,
+				EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT,
 				input.lastIndexOf("NewClass1"),
 				"NewClass1".length,
 				"The element is not available anymore in this context: 'NewClass1'"
 			)
 			assertError(
 				EdeltaPackage.eINSTANCE.edeltaEcoreReferenceExpression,
-				EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT,
+				EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT,
 				input.lastIndexOf("NewClass2"),
 				"NewClass2".length,
 				"The element is not available anymore in this context: 'NewClass2'"
@@ -372,7 +372,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		input.parseWithTestEcore =>[
 			assertError(
 				EdeltaPackage.eINSTANCE.edeltaEcoreReferenceExpression,
-				EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT,
+				EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT,
 				input.lastIndexOf("NewClass"),
 				"NewClass".length,
 				"The element is not available anymore in this context: 'NewClass'"
@@ -388,7 +388,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		.parseWithTestEcore => [
 			assertError(
 				EdeltaPackage.eINSTANCE.edeltaEcoreReferenceExpression,
-				EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT,
+				EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT,
 				input.lastIndexOf("FooClass"),
 				"FooClass".length,
 				"The element 'FooClass' is now available as 'foo.Renamed'"
@@ -404,7 +404,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		.parseWithTestEcore => [
 			assertError(
 				EdeltaPackage.eINSTANCE.edeltaEcoreReferenceExpression,
-				EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT,
+				EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT,
 				input.lastIndexOf("NewClass"),
 				"NewClass".length,
 				"The element 'NewClass' is now available as 'foo.changed'"

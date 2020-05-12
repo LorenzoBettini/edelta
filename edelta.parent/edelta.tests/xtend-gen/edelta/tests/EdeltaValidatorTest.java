@@ -450,7 +450,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this._validationTestHelper.assertError(it, 
         EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
-        EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT, 
+        EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT, 
         input.lastIndexOf("FooClass"), 
         "FooClass".length(), 
         "The element is not available anymore in this context: \'FooClass\'");
@@ -492,13 +492,13 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this._validationTestHelper.assertError(it, 
         EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
-        EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT, 
+        EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT, 
         input.lastIndexOf("NewClass1"), 
         "NewClass1".length(), 
         "The element is not available anymore in this context: \'NewClass1\'");
       this._validationTestHelper.assertError(it, 
         EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
-        EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT, 
+        EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT, 
         input.lastIndexOf("NewClass2"), 
         "NewClass2".length(), 
         "The element is not available anymore in this context: \'NewClass2\'");
@@ -544,7 +544,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this._validationTestHelper.assertError(it, 
         EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
-        EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT, 
+        EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT, 
         input.lastIndexOf("NewClass"), 
         "NewClass".length(), 
         "The element is not available anymore in this context: \'NewClass\'");
@@ -560,7 +560,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this._validationTestHelper.assertError(it, 
         EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
-        EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT, 
+        EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT, 
         input.lastIndexOf("FooClass"), 
         "FooClass".length(), 
         "The element \'FooClass\' is now available as \'foo.Renamed\'");
@@ -576,7 +576,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this._validationTestHelper.assertError(it, 
         EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
-        EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT, 
+        EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT, 
         input.lastIndexOf("NewClass"), 
         "NewClass".length(), 
         "The element \'NewClass\' is now available as \'foo.changed\'");
