@@ -118,6 +118,17 @@ class Inputs {
 		'''
 	}
 
+	def referenceToEClassRemoved() {
+		'''
+			metamodel "foo"
+			
+			modifyEcore renaming epackage foo {
+				EClassifiers -= ecoreref(FooClass)
+				ecoreref(FooClass).abstract // this doesn't exist anymore
+			}
+		'''
+	}
+
 	def referenceToEClassRenamed() {
 		'''
 			metamodel "foo"

@@ -301,6 +301,12 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testReferenceToEClassRemoved() {
+		referenceToEClassRemoved
+		.parseWithTestEcore.assertNoErrors
+	}
+
+	@Test
 	def void testReferenceToEClassRenamed() {
 		referenceToEClassRenamed
 		.parseWithTestEcore.assertNoErrors
