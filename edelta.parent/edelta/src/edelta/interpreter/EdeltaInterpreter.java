@@ -1,6 +1,6 @@
 package edelta.interpreter;
 
-import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MODIFY_ECORE_OPERATION__BODY;
+import static edelta.edelta.EdeltaPackage.Literals.*;
 import static edelta.util.EdeltaModelUtil.getProgram;
 import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashMap;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.forEach;
@@ -214,6 +214,17 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				if (op != null) {
 					result = super.invokeOperation
 						(op, thisObject, args, context, indicator);
+					if (result == null) {
+						ecoreReferenceExpression.eResource().getErrors().add(
+							new EdeltaInterpreterDiagnostic(Severity.ERROR,
+								EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT,
+								"The element is not available anymore in this context: '" +
+										enamedElement.getName() + "'",
+								ecoreReferenceExpression,
+								EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE,
+								-1,
+								new String[] {}));
+					}
 				}
 				return result;
 			});

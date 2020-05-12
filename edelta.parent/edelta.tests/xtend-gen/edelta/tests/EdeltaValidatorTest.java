@@ -445,7 +445,17 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   
   @Test
   public void testReferenceToEClassRemoved() {
-    this._validationTestHelper.assertNoErrors(this.parseWithTestEcore(this._inputs.referenceToEClassRemoved()));
+    final String input = this._inputs.referenceToEClassRemoved().toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
+        EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT, 
+        input.lastIndexOf("FooClass"), 
+        "FooClass".length(), 
+        "The element is not available anymore in this context: \'FooClass\'");
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
   
   @Test

@@ -21,6 +21,7 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.assertThat
 import static org.mockito.Mockito.*
+import edelta.interpreter.EdeltaInterpreterDiagnostic
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -112,6 +113,20 @@ class EdeltaInterpreterCleanerTest {
 		// make sure only EObjectDiagnosticImpl with EdeltaEcoreReferenceExpression are removed
 		assertThat(resource.errors)
 			.containsExactlyInAnyOrder(nonEObjectDiagnostic, nonEcoreRefExpDiagnosticError)
+	}
+
+	@Test
+	def void testDoesNotClearEdeltaInterpreterDiagnosticWhenEPackageChanges() {
+		// fill the resource with errors and warnings
+		resource.errors.add(mock(EdeltaInterpreterDiagnostic))
+		resource.warnings.add(mock(EdeltaInterpreterDiagnostic))
+		// change the package contents
+		ePackage.EClassifiers.get(0).name = "Modified"
+		// make sure the XtextLinkingDiagnostics are removed
+		assertThat(resource.errors)
+			.hasSize(1)
+		assertThat(resource.warnings)
+			.hasSize(1)
 	}
 
 	def createEObjectDiagnosticMock(EObject problematicObject) {

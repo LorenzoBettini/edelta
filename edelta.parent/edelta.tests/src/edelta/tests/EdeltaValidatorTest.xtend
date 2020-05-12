@@ -302,8 +302,16 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testReferenceToEClassRemoved() {
-		referenceToEClassRemoved
-		.parseWithTestEcore.assertNoErrors
+		val input = referenceToEClassRemoved.toString
+		input.parseWithTestEcore =>[
+			assertError(
+				EdeltaPackage.eINSTANCE.edeltaEcoreReferenceExpression,
+				EdeltaValidator.INTERPRETER_ACCESS_STALE_ELEMENT,
+				input.lastIndexOf("FooClass"),
+				"FooClass".length,
+				"The element is not available anymore in this context: 'FooClass'"
+			)
+		]
 	}
 
 	@Test
