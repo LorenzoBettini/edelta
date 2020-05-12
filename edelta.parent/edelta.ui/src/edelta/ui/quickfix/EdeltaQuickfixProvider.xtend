@@ -26,4 +26,15 @@ class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider {
 				.replace(issue.offset, issue.length, '"' + rootPackageName + '"')
 		]
 	}
+
+	@Fix(EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT)
+	def useRenamedElement(Issue issue, IssueResolutionAcceptor acceptor) {
+		val renamed = issue.data.get(0)
+		acceptor.accept(issue, 'Use renamed element', "Use renamed element '" + renamed + "'", 'EObject.gif') [
+			context |
+			val xtextDocument = context.xtextDocument
+			xtextDocument
+				.replace(issue.offset, issue.length, renamed)
+		]
+	}
 }

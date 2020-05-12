@@ -235,7 +235,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				"The element is not available anymore in this context: '" +
 					ecoreReferenceExpression.getReference()
 					.getEnamedelement().getName() + "'",
-					EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT);
+					EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT,
+					new String[] {});
 		} else {
 			// the effective qualified name of the EObject
 			String currentQualifiedName = qualifiedNameProvider
@@ -251,12 +252,13 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 					String.format(
 						"The element '%s' is now available as '%s'",
 						originalReferenceText, currentQualifiedName),
-					EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT);
+					EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT,
+					new String[] {currentQualifiedName});
 		}
 	}
 
 	private void addStaleAccessError(EdeltaEcoreReferenceExpression ecoreReferenceExpression,
-			String errorMessage, String errorCode) {
+			String errorMessage, String errorCode, String[] errorData) {
 		List<Diagnostic> errors = ecoreReferenceExpression.eResource().getErrors();
 		// Avoid adding the same errors several times on the same expression.
 		// This can happen if we're interpreting a loop, removing the same element
@@ -271,7 +273,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				ecoreReferenceExpression,
 				EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE,
 				-1,
-				new String[] {}));
+				errorData));
 	}
 
 	@Override
