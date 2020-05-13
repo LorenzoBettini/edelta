@@ -51,6 +51,11 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 			enamedElementXExpressionMap.put(
 				(ENamedElement) notification.getNotifier(),
 				currentExpression);
+		} else if (notification.getEventType() == Notification.ADD &&
+				notification.getNewValue() instanceof ENamedElement) {
+			enamedElementXExpressionMap.put(
+				(ENamedElement) notification.getNewValue(),
+				currentExpression);
 		}
 		cache.clear(resource);
 		clearIssues(resource.getErrors());

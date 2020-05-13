@@ -16,7 +16,6 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.xtext.common.types.JvmField;
 import org.eclipse.xtext.common.types.JvmFormalParameter;
-import org.eclipse.xtext.common.types.JvmIdentifiableElement;
 import org.eclipse.xtext.common.types.JvmOperation;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
@@ -24,7 +23,8 @@ import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.IResourceScopeCache;
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
-import org.eclipse.xtext.xbase.XAbstractFeatureCall;
+import org.eclipse.xtext.xbase.XAssignment;
+import org.eclipse.xtext.xbase.XBinaryOperation;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationResult;
@@ -200,12 +200,15 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				new String[] {}));
 	}
 
-	@Override
-	protected Object assignValueTo(JvmIdentifiableElement feature, XAbstractFeatureCall assignment, Object value,
-			IEvaluationContext context, CancelIndicator indicator) {
-		if (listener != null)
-			listener.setCurrentExpression(assignment);
-		return super.assignValueTo(feature, assignment, value, context, indicator);
+	private void updateListenerCurrentExpression(XExpression expression) {
+		if (listener != null && shouldTrackExpression(expression)) {
+			listener.setCurrentExpression(expression);
+		}
+	}
+
+	private boolean shouldTrackExpression(XExpression expression) {
+		return expression instanceof XAssignment ||
+				expression instanceof XBinaryOperation;
 	}
 
 	@Override
@@ -216,6 +219,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				((EdeltaEcoreReferenceExpression) expression),
 				context, indicator);
 		}
+		updateListenerCurrentExpression(expression);
 		return super.doEvaluate(expression, context, indicator);
 	}
 

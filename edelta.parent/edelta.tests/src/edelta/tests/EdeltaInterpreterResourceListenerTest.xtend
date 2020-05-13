@@ -6,6 +6,7 @@ import edelta.edelta.EdeltaFactory
 import edelta.interpreter.EdeltaInterpreterDiagnostic
 import edelta.interpreter.EdeltaInterpreterResourceListener
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap
+import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
@@ -17,13 +18,13 @@ import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.util.IResourceScopeCache
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl
+import org.eclipse.xtext.xbase.XExpression
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.assertThat
 import static org.mockito.Mockito.*
-import org.eclipse.xtext.xbase.XExpression
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -160,6 +161,34 @@ class EdeltaInterpreterResourceListenerTest {
 			.hasEntrySatisfying(element) [
 				assertThat(it).isSameAs(currentExpression)
 			]
+	}
+
+	@Test
+	def void testENamedElementXExpressionMapIsUpdatedWithCurrentExpressionWhenAnElementIsAdded() {
+		val currentExpression = mock(XExpression)
+		listener.setCurrentExpression(currentExpression)
+		val element = ecoreFactory.createEClass
+		assertThat(enamedElementXExpressionMap).isEmpty
+		// element is added to an existing collection
+		ePackage.EClassifiers += element
+		assertThat(enamedElementXExpressionMap)
+			.hasEntrySatisfying(element) [
+				assertThat(it).isSameAs(currentExpression)
+			]
+	}
+
+	@Test
+	def void testENamedElementXExpressionMapIsNotUpdatedWhenNotENamedElementIsAdded() {
+		val currentExpression = mock(XExpression)
+		listener.setCurrentExpression(currentExpression)
+		assertThat(enamedElementXExpressionMap).isEmpty
+		val element = ePackage.EClassifiers.get(0) as EClass
+		// add supertype
+		element.ESuperTypes += ecoreFactory.createEClass
+		// this will trigger an ADD event with a EGenericType,
+		// which is not an ENamedElement
+		assertThat(enamedElementXExpressionMap)
+			.doesNotContainKey(element)
 	}
 
 	@Test
