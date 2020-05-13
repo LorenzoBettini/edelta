@@ -737,6 +737,50 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test def void testElementExpressionMapForCreatedEClassRenamed() {
+		'''
+			import org.eclipse.emf.ecore.EcoreFactory
+			
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass")
+				ecoreref(NewClass).name = "Renamed"
+			}
+		'''.parseWithTestEcore => [
+			val map = interpretProgram
+			val createClass = map.get("foo").getEClassifier("Renamed")
+			val exp = derivedStateHelper
+				.getEnamedElementXExpressionMap(eResource)
+				.get(createClass)
+			assertNotNull(exp)
+			assertEquals("setName", exp.featureCall.feature.simpleName)
+		]
+	}
+
+	@Test def void testElementExpressionMapForCreatedEClassRenamedInInitializer() {
+		'''
+			import org.eclipse.emf.ecore.EcoreFactory
+			
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass") [
+					name = "Renamed"
+					abstract = true
+				]
+			}
+		'''.parseWithTestEcore => [
+			val map = interpretProgram
+			val createClass = map.get("foo").getEClassifier("Renamed")
+			val exp = derivedStateHelper
+				.getEnamedElementXExpressionMap(eResource)
+				.get(createClass)
+			assertNotNull(exp)
+			assertEquals("setName", exp.featureCall.feature.simpleName)
+		]
+	}
+
 	@Test def void testElementExpressionMapForCreatedEClassWithEMFAPI() {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
