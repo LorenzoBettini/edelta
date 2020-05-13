@@ -4,6 +4,7 @@ import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
+import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.linking.BrokenConstructorCallAwareEObjectAtOffsetHelper;
 
 import com.google.inject.Inject;
@@ -24,12 +25,16 @@ public class EdeltaEObjectAtOffsetHelper extends BrokenConstructorCallAwareEObje
 	protected EObject resolveCrossReferencedElement(final INode node) {
 		final EObject referenceOwner = NodeModelUtils.findActualSemanticObjectFor(node);
 		if (referenceOwner instanceof EdeltaEcoreReference) {
-			final ENamedElement original = this.edeltaDerivedStateHelper
-					.getEcoreReferenceState((EdeltaEcoreReference) referenceOwner)
+			final EdeltaEcoreReference ecoreReference = (EdeltaEcoreReference) referenceOwner;
+			final ENamedElement original = edeltaDerivedStateHelper
+					.getEcoreReferenceState(ecoreReference)
 					.getOriginalEnamedelement();
-			if (original != null) {
+			if (original != null)
 				return original;
-			}
+			XExpression expression = edeltaDerivedStateHelper.getEnamedElementXExpressionMap(ecoreReference.eResource())
+				.get(ecoreReference.getEnamedelement());
+			if (expression != null)
+				return expression;
 		}
 		return super.resolveCrossReferencedElement(node);
 	}

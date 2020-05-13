@@ -1,0 +1,19 @@
+// IMPORTANT: ecores must be in source directories
+// otherwise you can't refer to them
+
+metamodel "ecore"
+metamodel "myecore"
+metamodel "mainpackage"
+
+modifyEcore creation epackage myecore {
+	addNewEClass("NewClass")
+}
+
+modifyEcore renaming epackage myecore {
+	ecoreref(NewClass).abstract = true
+	ecoreref(myecore.NewClass).name = "Renamed"
+}
+
+modifyEcore remove epackage myecore {
+	EClassifiers -= ecoreref(MyEClass)
+}
