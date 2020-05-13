@@ -3,6 +3,9 @@ package edelta.tests
 import com.google.inject.Inject
 import com.google.inject.Provider
 import edelta.edelta.EdeltaFactory
+import edelta.interpreter.EdeltaInterpreterDiagnostic
+import edelta.interpreter.EdeltaInterpreterResourceListener
+import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
@@ -20,8 +23,7 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.assertThat
 import static org.mockito.Mockito.*
-import edelta.interpreter.EdeltaInterpreterDiagnostic
-import edelta.interpreter.EdeltaInterpreterResourceListener
+import org.eclipse.xtext.xbase.XExpression
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -40,6 +42,7 @@ class EdeltaInterpreterResourceListenerTest {
 	var EdeltaInterpreterResourceListener listener
 	var EPackage ePackage
 	var Resource resource
+	var EdeltaENamedElementXExpressionMap enamedElementXExpressionMap
 	var Provider<String> stringProvider
 
 	@Before
@@ -50,7 +53,8 @@ class EdeltaInterpreterResourceListenerTest {
 			]
 		]
 		resource = new ResourceImpl
-		listener = new EdeltaInterpreterResourceListener(cache, resource)
+		enamedElementXExpressionMap = new EdeltaENamedElementXExpressionMap
+		listener = new EdeltaInterpreterResourceListener(cache, resource, enamedElementXExpressionMap)
 		stringProvider = spy(new SpiedProvider)
 		ePackage.eAdapters += listener
 	}
@@ -127,6 +131,45 @@ class EdeltaInterpreterResourceListenerTest {
 			.hasSize(1)
 		assertThat(resource.warnings)
 			.hasSize(1)
+	}
+
+	@Test
+	def void testENamedElementXExpressionMapIsUpdatedWithCurrentExpressionWhenNameIsChanged() {
+		val currentExpression = mock(XExpression)
+		listener.setCurrentExpression(currentExpression)
+		val element = ePackage.EClassifiers.get(0)
+		assertThat(enamedElementXExpressionMap).isEmpty
+		// change the name
+		element.name = "Modified"
+		assertThat(enamedElementXExpressionMap)
+			.hasEntrySatisfying(element) [
+				assertThat(it).isSameAs(currentExpression)
+			]
+	}
+
+	@Test
+	def void testENamedElementXExpressionMapIsNotUpdatedIfEntryAlreadyPresent() {
+		val alreadyMappedExpression = mock(XExpression)
+		val anotherExpression = mock(XExpression)
+		val element = ePackage.EClassifiers.get(0)
+		enamedElementXExpressionMap.put(element, alreadyMappedExpression)
+		listener.setCurrentExpression(anotherExpression)
+		// change the name
+		element.name = "Modified"
+		assertThat(enamedElementXExpressionMap)
+			.hasEntrySatisfying(element) [
+				assertThat(it).isSameAs(alreadyMappedExpression)
+			]
+	}
+
+	@Test
+	def void testENamedElementXExpressionMapIsNotUpdatedWithCurrentExpressionWhenAnotherFeatureIsChanged() {
+		val currentExpression = mock(XExpression)
+		listener.setCurrentExpression(currentExpression)
+		assertThat(enamedElementXExpressionMap).isEmpty
+		// change the something different than the name
+		ePackage.EClassifiers.get(0).instanceClassName = "foo"
+		assertThat(enamedElementXExpressionMap).isEmpty
 	}
 
 	def createEObjectDiagnosticMock(EObject problematicObject) {

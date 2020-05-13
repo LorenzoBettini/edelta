@@ -54,4 +54,8 @@ public class EdeltaDerivedStateHelper {
 						e -> new EdeltaEcoreReferenceState());
 	}
 
+	public EdeltaENamedElementXExpressionMap getEnamedElementXExpressionMap(Resource resource) {
+		return getOrInstallAdapter(resource).getEnamedElementXExpressionMap();
+	}
+
 }

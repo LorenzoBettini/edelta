@@ -1,15 +1,20 @@
 package edelta.interpreter;
 
+import static org.eclipse.emf.ecore.EcorePackage.Literals.ENAMED_ELEMENT__NAME;
+
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.emf.ecore.util.EContentAdapter;
 import org.eclipse.xtext.linking.impl.XtextLinkingDiagnostic;
 import org.eclipse.xtext.util.IResourceScopeCache;
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
+import org.eclipse.xtext.xbase.XExpression;
 
 import edelta.edelta.EdeltaEcoreReferenceExpression;
+import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 
 /**
  * Listens for changes on a {@link Resource} and performs tasks accordingly.
@@ -28,17 +33,32 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 
 	private Resource resource;
 
-	public EdeltaInterpreterResourceListener(IResourceScopeCache cache, Resource resource) {
+	private EdeltaENamedElementXExpressionMap enamedElementXExpressionMap;
+
+	private XExpression currentExpression;
+
+	public EdeltaInterpreterResourceListener(IResourceScopeCache cache, Resource resource,
+			EdeltaENamedElementXExpressionMap enamedElementXExpressionMap) {
 		this.cache = cache;
 		this.resource = resource;
+		this.enamedElementXExpressionMap = enamedElementXExpressionMap;
 	}
 
 	@Override
 	public void notifyChanged(Notification notification) {
 		super.notifyChanged(notification);
+		if (notification.getFeature() == ENAMED_ELEMENT__NAME) {
+			enamedElementXExpressionMap.putIfAbsent(
+				(ENamedElement) notification.getNotifier(),
+				currentExpression);
+		}
 		cache.clear(resource);
 		clearIssues(resource.getErrors());
 		clearIssues(resource.getWarnings());
+	}
+
+	public void setCurrentExpression(XExpression currentExpression) {
+		this.currentExpression = currentExpression;
 	}
 
 	private void clearIssues(final EList<Diagnostic> issues) {

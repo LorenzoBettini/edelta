@@ -5,13 +5,16 @@ import com.google.inject.Provider;
 import edelta.edelta.EdeltaFactory;
 import edelta.interpreter.EdeltaInterpreterDiagnostic;
 import edelta.interpreter.EdeltaInterpreterResourceListener;
+import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 import edelta.tests.EdeltaInjectorProvider;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EcoreFactory;
@@ -22,6 +25,7 @@ import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.util.IResourceScopeCache;
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
+import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Before;
@@ -53,6 +57,8 @@ public class EdeltaInterpreterResourceListenerTest {
   
   private Resource resource;
   
+  private EdeltaENamedElementXExpressionMap enamedElementXExpressionMap;
+  
   private Provider<String> stringProvider;
   
   @Before
@@ -71,7 +77,9 @@ public class EdeltaInterpreterResourceListenerTest {
     this.ePackage = _doubleArrow;
     ResourceImpl _resourceImpl = new ResourceImpl();
     this.resource = _resourceImpl;
-    EdeltaInterpreterResourceListener _edeltaInterpreterResourceListener = new EdeltaInterpreterResourceListener(this.cache, this.resource);
+    EdeltaENamedElementXExpressionMap _edeltaENamedElementXExpressionMap = new EdeltaENamedElementXExpressionMap();
+    this.enamedElementXExpressionMap = _edeltaENamedElementXExpressionMap;
+    EdeltaInterpreterResourceListener _edeltaInterpreterResourceListener = new EdeltaInterpreterResourceListener(this.cache, this.resource, this.enamedElementXExpressionMap);
     this.listener = _edeltaInterpreterResourceListener;
     EdeltaInterpreterResourceListenerTest.SpiedProvider _spiedProvider = new EdeltaInterpreterResourceListenerTest.SpiedProvider();
     this.stringProvider = Mockito.<Provider<String>>spy(_spiedProvider);
@@ -135,6 +143,43 @@ public class EdeltaInterpreterResourceListenerTest {
     _get.setName("Modified");
     Assertions.<Resource.Diagnostic>assertThat(this.resource.getErrors()).hasSize(1);
     Assertions.<Resource.Diagnostic>assertThat(this.resource.getWarnings()).hasSize(1);
+  }
+  
+  @Test
+  public void testENamedElementXExpressionMapIsUpdatedWithCurrentExpressionWhenNameIsChanged() {
+    final XExpression currentExpression = Mockito.<XExpression>mock(XExpression.class);
+    this.listener.setCurrentExpression(currentExpression);
+    final EClassifier element = this.ePackage.getEClassifiers().get(0);
+    Assertions.<ENamedElement, XExpression>assertThat(this.enamedElementXExpressionMap).isEmpty();
+    element.setName("Modified");
+    final Consumer<XExpression> _function = (XExpression it) -> {
+      Assertions.<XExpression>assertThat(it).isSameAs(currentExpression);
+    };
+    Assertions.<ENamedElement, XExpression>assertThat(this.enamedElementXExpressionMap).hasEntrySatisfying(element, _function);
+  }
+  
+  @Test
+  public void testENamedElementXExpressionMapIsNotUpdatedIfEntryAlreadyPresent() {
+    final XExpression alreadyMappedExpression = Mockito.<XExpression>mock(XExpression.class);
+    final XExpression anotherExpression = Mockito.<XExpression>mock(XExpression.class);
+    final EClassifier element = this.ePackage.getEClassifiers().get(0);
+    this.enamedElementXExpressionMap.put(element, alreadyMappedExpression);
+    this.listener.setCurrentExpression(anotherExpression);
+    element.setName("Modified");
+    final Consumer<XExpression> _function = (XExpression it) -> {
+      Assertions.<XExpression>assertThat(it).isSameAs(alreadyMappedExpression);
+    };
+    Assertions.<ENamedElement, XExpression>assertThat(this.enamedElementXExpressionMap).hasEntrySatisfying(element, _function);
+  }
+  
+  @Test
+  public void testENamedElementXExpressionMapIsNotUpdatedWithCurrentExpressionWhenAnotherFeatureIsChanged() {
+    final XExpression currentExpression = Mockito.<XExpression>mock(XExpression.class);
+    this.listener.setCurrentExpression(currentExpression);
+    Assertions.<ENamedElement, XExpression>assertThat(this.enamedElementXExpressionMap).isEmpty();
+    EClassifier _get = this.ePackage.getEClassifiers().get(0);
+    _get.setInstanceClassName("foo");
+    Assertions.<ENamedElement, XExpression>assertThat(this.enamedElementXExpressionMap).isEmpty();
   }
   
   public EObjectDiagnosticImpl createEObjectDiagnosticMock(final EObject problematicObject) {

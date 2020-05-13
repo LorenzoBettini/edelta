@@ -41,6 +41,7 @@ import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
 import edelta.lib.AbstractEdelta;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.util.EdeltaModelUtil;
 import edelta.validation.EdeltaValidator;
 
@@ -67,6 +68,9 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	@Inject
 	private IQualifiedNameProvider qualifiedNameProvider;
+
+	@Inject
+	private EdeltaDerivedStateHelper derivedStateHelper;
 
 	private int interpreterTimeout =
 		Integer.parseInt(System.getProperty("edelta.interpreter.timeout", "2000"));
@@ -133,7 +137,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		final EPackage ePackage = copiedEPackagesMap.
 				get(op.getEpackage().getName());
 		final EdeltaInterpreterResourceListener listener =
-				new EdeltaInterpreterResourceListener(cache, op.eResource());
+			new EdeltaInterpreterResourceListener(cache, op.eResource(),
+				derivedStateHelper.getEnamedElementXExpressionMap(op.eResource()));
 		// The listener clears the cache as soon as the interpreter modifies
 		// the EPackage of the modifyEcore expression
 		// since new types might be available after the interpretation
