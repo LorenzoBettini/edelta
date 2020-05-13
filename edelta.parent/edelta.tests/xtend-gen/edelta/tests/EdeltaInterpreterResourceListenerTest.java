@@ -159,15 +159,15 @@ public class EdeltaInterpreterResourceListenerTest {
   }
   
   @Test
-  public void testENamedElementXExpressionMapIsNotUpdatedIfEntryAlreadyPresent() {
+  public void testENamedElementXExpressionMapUpdatedIfEntryAlreadyPresent() {
     final XExpression alreadyMappedExpression = Mockito.<XExpression>mock(XExpression.class);
-    final XExpression anotherExpression = Mockito.<XExpression>mock(XExpression.class);
+    final XExpression currentExpression = Mockito.<XExpression>mock(XExpression.class);
     final EClassifier element = this.ePackage.getEClassifiers().get(0);
     this.enamedElementXExpressionMap.put(element, alreadyMappedExpression);
-    this.listener.setCurrentExpression(anotherExpression);
+    this.listener.setCurrentExpression(currentExpression);
     element.setName("Modified");
     final Consumer<XExpression> _function = (XExpression it) -> {
-      Assertions.<XExpression>assertThat(it).isSameAs(alreadyMappedExpression);
+      Assertions.<XExpression>assertThat(it).isSameAs(currentExpression);
     };
     Assertions.<ENamedElement, XExpression>assertThat(this.enamedElementXExpressionMap).hasEntrySatisfying(element, _function);
   }

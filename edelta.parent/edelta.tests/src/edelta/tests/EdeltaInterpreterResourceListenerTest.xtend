@@ -148,17 +148,17 @@ class EdeltaInterpreterResourceListenerTest {
 	}
 
 	@Test
-	def void testENamedElementXExpressionMapIsNotUpdatedIfEntryAlreadyPresent() {
+	def void testENamedElementXExpressionMapUpdatedIfEntryAlreadyPresent() {
 		val alreadyMappedExpression = mock(XExpression)
-		val anotherExpression = mock(XExpression)
+		val currentExpression = mock(XExpression)
 		val element = ePackage.EClassifiers.get(0)
 		enamedElementXExpressionMap.put(element, alreadyMappedExpression)
-		listener.setCurrentExpression(anotherExpression)
+		listener.setCurrentExpression(currentExpression)
 		// change the name
 		element.name = "Modified"
 		assertThat(enamedElementXExpressionMap)
 			.hasEntrySatisfying(element) [
-				assertThat(it).isSameAs(alreadyMappedExpression)
+				assertThat(it).isSameAs(currentExpression)
 			]
 	}
 

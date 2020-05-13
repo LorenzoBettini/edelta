@@ -48,7 +48,7 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 	public void notifyChanged(Notification notification) {
 		super.notifyChanged(notification);
 		if (notification.getFeature() == ENAMED_ELEMENT__NAME) {
-			enamedElementXExpressionMap.putIfAbsent(
+			enamedElementXExpressionMap.put(
 				(ENamedElement) notification.getNotifier(),
 				currentExpression);
 		}
