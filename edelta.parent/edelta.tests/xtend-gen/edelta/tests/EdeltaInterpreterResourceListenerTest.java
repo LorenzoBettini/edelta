@@ -3,8 +3,8 @@ package edelta.tests;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import edelta.edelta.EdeltaFactory;
-import edelta.interpreter.EdeltaInterpreterCleaner;
 import edelta.interpreter.EdeltaInterpreterDiagnostic;
+import edelta.interpreter.EdeltaInterpreterResourceListener;
 import edelta.tests.EdeltaInjectorProvider;
 import java.util.function.Predicate;
 import org.assertj.core.api.Assertions;
@@ -32,7 +32,7 @@ import org.mockito.Mockito;
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaInjectorProvider.class)
 @SuppressWarnings("all")
-public class EdeltaInterpreterCleanerTest {
+public class EdeltaInterpreterResourceListenerTest {
   public static class SpiedProvider implements Provider<String> {
     @Override
     public String get() {
@@ -47,7 +47,7 @@ public class EdeltaInterpreterCleanerTest {
   @Inject
   private IResourceScopeCache cache;
   
-  private EdeltaInterpreterCleaner cleaner;
+  private EdeltaInterpreterResourceListener listener;
   
   private EPackage ePackage;
   
@@ -57,10 +57,10 @@ public class EdeltaInterpreterCleanerTest {
   
   @Before
   public void setup() {
-    EPackage _createEPackage = EdeltaInterpreterCleanerTest.ecoreFactory.createEPackage();
+    EPackage _createEPackage = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEPackage();
     final Procedure1<EPackage> _function = (EPackage it) -> {
       EList<EClassifier> _eClassifiers = it.getEClassifiers();
-      EClass _createEClass = EdeltaInterpreterCleanerTest.ecoreFactory.createEClass();
+      EClass _createEClass = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEClass();
       final Procedure1<EClass> _function_1 = (EClass it_1) -> {
         it_1.setName("AClass");
       };
@@ -71,12 +71,12 @@ public class EdeltaInterpreterCleanerTest {
     this.ePackage = _doubleArrow;
     ResourceImpl _resourceImpl = new ResourceImpl();
     this.resource = _resourceImpl;
-    EdeltaInterpreterCleaner _edeltaInterpreterCleaner = new EdeltaInterpreterCleaner(this.cache, this.resource);
-    this.cleaner = _edeltaInterpreterCleaner;
-    EdeltaInterpreterCleanerTest.SpiedProvider _spiedProvider = new EdeltaInterpreterCleanerTest.SpiedProvider();
+    EdeltaInterpreterResourceListener _edeltaInterpreterResourceListener = new EdeltaInterpreterResourceListener(this.cache, this.resource);
+    this.listener = _edeltaInterpreterResourceListener;
+    EdeltaInterpreterResourceListenerTest.SpiedProvider _spiedProvider = new EdeltaInterpreterResourceListenerTest.SpiedProvider();
     this.stringProvider = Mockito.<Provider<String>>spy(_spiedProvider);
     EList<Adapter> _eAdapters = this.ePackage.eAdapters();
-    _eAdapters.add(this.cleaner);
+    _eAdapters.add(this.listener);
   }
   
   @Test
@@ -116,8 +116,8 @@ public class EdeltaInterpreterCleanerTest {
   
   @Test
   public void testClearEcoreReferenceExpressionDiagnosticWhenEPackageChanges() {
-    final EObjectDiagnosticImpl ecoreRefExpDiagnosticError = this.createEObjectDiagnosticMock(EdeltaInterpreterCleanerTest.edeltaFactory.createEdeltaEcoreReferenceExpression());
-    final EObjectDiagnosticImpl nonEcoreRefExpDiagnosticError = this.createEObjectDiagnosticMock(EdeltaInterpreterCleanerTest.ecoreFactory.createEClass());
+    final EObjectDiagnosticImpl ecoreRefExpDiagnosticError = this.createEObjectDiagnosticMock(EdeltaInterpreterResourceListenerTest.edeltaFactory.createEdeltaEcoreReferenceExpression());
+    final EObjectDiagnosticImpl nonEcoreRefExpDiagnosticError = this.createEObjectDiagnosticMock(EdeltaInterpreterResourceListenerTest.ecoreFactory.createEClass());
     final Resource.Diagnostic nonEObjectDiagnostic = Mockito.<Resource.Diagnostic>mock(Resource.Diagnostic.class);
     this.resource.getErrors().add(nonEObjectDiagnostic);
     this.resource.getErrors().add(ecoreRefExpDiagnosticError);

@@ -12,23 +12,23 @@ import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 
 /**
- * Listens for changes and clears the {@link IResourceScopeCache} of the
- * specified {@link Resource} and removes issues added by the type system
- * properly.
+ * Listens for changes on a {@link Resource} and performs tasks accordingly.
  * 
+ * For example, it clears the {@link IResourceScopeCache} of the specified
+ * {@link Resource} and removes issues added by the type system properly.
  * Scoping and type computation will be performed on the next access, taking now
  * into consideration the new information collected during interpretation.
  * 
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaInterpreterCleaner extends EContentAdapter {
+public class EdeltaInterpreterResourceListener extends EContentAdapter {
 
 	private IResourceScopeCache cache;
 
 	private Resource resource;
 
-	public EdeltaInterpreterCleaner(IResourceScopeCache cache, Resource resource) {
+	public EdeltaInterpreterResourceListener(IResourceScopeCache cache, Resource resource) {
 		this.cache = cache;
 		this.resource = resource;
 	}

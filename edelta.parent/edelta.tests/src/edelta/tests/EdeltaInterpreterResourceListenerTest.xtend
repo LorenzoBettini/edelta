@@ -3,7 +3,6 @@ package edelta.tests
 import com.google.inject.Inject
 import com.google.inject.Provider
 import edelta.edelta.EdeltaFactory
-import edelta.interpreter.EdeltaInterpreterCleaner
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
@@ -22,10 +21,11 @@ import org.junit.runner.RunWith
 import static org.assertj.core.api.Assertions.assertThat
 import static org.mockito.Mockito.*
 import edelta.interpreter.EdeltaInterpreterDiagnostic
+import edelta.interpreter.EdeltaInterpreterResourceListener
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
-class EdeltaInterpreterCleanerTest {
+class EdeltaInterpreterResourceListenerTest {
 
 	static class SpiedProvider implements Provider<String> {
 		override get() {
@@ -37,7 +37,7 @@ class EdeltaInterpreterCleanerTest {
 	static val edeltaFactory = EdeltaFactory.eINSTANCE
 
 	@Inject IResourceScopeCache cache
-	var EdeltaInterpreterCleaner cleaner
+	var EdeltaInterpreterResourceListener listener
 	var EPackage ePackage
 	var Resource resource
 	var Provider<String> stringProvider
@@ -50,9 +50,9 @@ class EdeltaInterpreterCleanerTest {
 			]
 		]
 		resource = new ResourceImpl
-		cleaner = new EdeltaInterpreterCleaner(cache, resource)
+		listener = new EdeltaInterpreterResourceListener(cache, resource)
 		stringProvider = spy(new SpiedProvider)
-		ePackage.eAdapters += cleaner
+		ePackage.eAdapters += listener
 	}
 
 	@Test

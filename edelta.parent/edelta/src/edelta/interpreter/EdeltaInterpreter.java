@@ -132,15 +132,15 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		final EPackage ePackage = copiedEPackagesMap.
 				get(op.getEpackage().getName());
-		final EdeltaInterpreterCleaner cacheCleaner =
-				new EdeltaInterpreterCleaner(cache, op.eResource());
-		// clear the cache as soon as the interpreter modifies
+		final EdeltaInterpreterResourceListener listener =
+				new EdeltaInterpreterResourceListener(cache, op.eResource());
+		// The listener clears the cache as soon as the interpreter modifies
 		// the EPackage of the modifyEcore expression
 		// since new types might be available after the interpretation
 		// and existing types might have been modified or renamed
 		// this makes sure that scoping and the type computer
 		// is performed again
-		ePackage.eAdapters().add(cacheCleaner);
+		ePackage.eAdapters().add(listener);
 		try {
 			IEvaluationContext context = createContext();
 			context.newValue(IT_QUALIFIED_NAME, ePackage);
@@ -156,7 +156,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			// this will also trigger the last event caught by our adapter
 			// implying a final clearing, which is required to avoid
 			// duplicate errors
-			ePackage.eAdapters().remove(cacheCleaner);
+			ePackage.eAdapters().remove(listener);
 		}
 	}
 
