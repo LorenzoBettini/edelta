@@ -23,8 +23,7 @@ import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.IResourceScopeCache;
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
-import org.eclipse.xtext.xbase.XAssignment;
-import org.eclipse.xtext.xbase.XBinaryOperation;
+import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationResult;
@@ -207,8 +206,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	}
 
 	private boolean shouldTrackExpression(XExpression expression) {
-		return expression instanceof XAssignment ||
-				expression instanceof XBinaryOperation;
+		return expression.eContainer() instanceof XBlockExpression;
 	}
 
 	@Override

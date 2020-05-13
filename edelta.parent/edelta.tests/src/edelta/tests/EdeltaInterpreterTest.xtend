@@ -714,6 +714,29 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test def void testElementExpressionMapForCreatedEClassWithEdeltaAPI() {
+		'''
+			import org.eclipse.emf.ecore.EcoreFactory
+			
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass")
+			}
+			modifyEcore anotherTest epackage foo {
+				ecoreref(NewClass)
+			}
+		'''.parseWithTestEcore => [
+			val map = interpretProgram
+			val createClass = map.get("foo").getEClassifier("NewClass")
+			val exp = derivedStateHelper
+				.getEnamedElementXExpressionMap(eResource)
+				.get(createClass)
+			assertNotNull(exp)
+			assertEquals("addNewEClass", exp.featureCall.feature.simpleName)
+		]
+	}
+
 	@Test def void testElementExpressionMapForCreatedEClassWithEMFAPI() {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
@@ -780,6 +803,26 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				.get(createClass)
 			assertNotNull(exp)
 			assertEquals("operator_add", exp.featureCall.feature.simpleName)
+		]
+	}
+
+	@Test def void testElementExpressionMapForCreatedEClassWithMethodCall() {
+		'''
+			import org.eclipse.emf.ecore.EcoreFactory
+			
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				getEClassifiers().add(EcoreFactory.eINSTANCE.createEClass)
+			}
+		'''.parseWithTestEcore => [
+			val map = interpretProgram
+			val createClass = map.get("foo").lastEClass
+			val exp = derivedStateHelper
+				.getEnamedElementXExpressionMap(eResource)
+				.get(createClass)
+			assertNotNull(exp)
+			assertEquals("add", exp.featureCall.feature.simpleName)
 		]
 	}
 
