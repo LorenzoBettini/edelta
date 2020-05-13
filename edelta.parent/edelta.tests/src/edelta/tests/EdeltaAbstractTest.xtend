@@ -34,6 +34,8 @@ import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
 import java.util.List
+import org.eclipse.xtext.xbase.featurecalls.IdentifiableSimpleNameProvider
+import org.eclipse.xtext.xbase.XAbstractFeatureCall
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -45,6 +47,7 @@ abstract class EdeltaAbstractTest {
 	@Inject protected extension ParseHelper<EdeltaProgram>
 	@Inject protected extension ValidationTestHelper
 	@Inject protected extension IJvmModelAssociations
+	@Inject protected extension IdentifiableSimpleNameProvider
 
 	protected extension Inputs = new Inputs
 
@@ -372,5 +375,9 @@ abstract class EdeltaAbstractTest {
 	def protected lastEcoreReferenceExpression(EdeltaProgram p) {
 		p.lastModifyEcoreOperation.body
 			.blockLastExpression as EdeltaEcoreReferenceExpression
+	}
+
+	def protected getFeatureCall(XExpression e) {
+		e as XAbstractFeatureCall
 	}
 }

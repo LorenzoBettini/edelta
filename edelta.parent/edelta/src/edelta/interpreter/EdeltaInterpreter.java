@@ -16,6 +16,7 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.xtext.common.types.JvmField;
 import org.eclipse.xtext.common.types.JvmFormalParameter;
+import org.eclipse.xtext.common.types.JvmIdentifiableElement;
 import org.eclipse.xtext.common.types.JvmOperation;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
@@ -23,6 +24,7 @@ import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.IResourceScopeCache;
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
+import org.eclipse.xtext.xbase.XAbstractFeatureCall;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationResult;
@@ -86,6 +88,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	private EdeltaProgram currentProgram;
 
+	private EdeltaInterpreterResourceListener listener;
+
 	class EdeltaInterpreterCancelIndicator implements CancelIndicator {
 		long stopAt = System.currentTimeMillis() +
 				interpreterTimeout;
@@ -136,9 +140,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		final EPackage ePackage = copiedEPackagesMap.
 				get(op.getEpackage().getName());
-		final EdeltaInterpreterResourceListener listener =
-			new EdeltaInterpreterResourceListener(cache, op.eResource(),
-				derivedStateHelper.getEnamedElementXExpressionMap(op.eResource()));
+		listener = new EdeltaInterpreterResourceListener(cache, op.eResource(),
+			derivedStateHelper.getEnamedElementXExpressionMap(op.eResource()));
 		// The listener clears the cache as soon as the interpreter modifies
 		// the EPackage of the modifyEcore expression
 		// since new types might be available after the interpretation
@@ -195,6 +198,14 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				EDELTA_MODIFY_ECORE_OPERATION__BODY,
 				-1,
 				new String[] {}));
+	}
+
+	@Override
+	protected Object assignValueTo(JvmIdentifiableElement feature, XAbstractFeatureCall assignment, Object value,
+			IEvaluationContext context, CancelIndicator indicator) {
+		if (listener != null)
+			listener.setCurrentExpression(assignment);
+		return super.assignValueTo(feature, assignment, value, context, indicator);
 	}
 
 	@Override

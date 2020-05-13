@@ -23,6 +23,7 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -31,6 +32,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	protected EdeltaInterpreter interpreter
 
 	@Inject Injector injector
+
+	@Inject EdeltaDerivedStateHelper derivedStateHelper
 
 	def EdeltaInterpreter createInterpreter() {
 		injector.getInstance(EdeltaInterpreter)
@@ -711,6 +714,30 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test def void testElementExpressionMapForCreatedEClass() {
+		'''
+			import org.eclipse.emf.ecore.EcoreFactory
+			
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				EClassifiers += EcoreFactory.eINSTANCE.createEClass
+				EClassifiers.last.name = "NewClass"
+			}
+			modifyEcore anotherTest epackage foo {
+				ecoreref(NewClass)
+			}
+		'''.parseWithTestEcore => [
+			val map = interpretProgram
+			val createClass = map.get("foo").getEClassifier("NewClass")
+			val exp = derivedStateHelper
+				.getEnamedElementXExpressionMap(eResource)
+				.get(createClass)
+			assertNotNull(exp)
+			assertEquals("setName", exp.featureCall.feature.simpleName)
+		]
+	}
+
 	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) {
@@ -755,6 +782,15 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		val packageName = it.epackage.name
 		val epackage = copiedEPackagesMap.get(packageName)
 		testExecutor.apply(epackage)
+	}
+
+	def private interpretProgram(EdeltaProgram program) {
+		// mimic the behavior of derived state computer that runs the interpreter
+		// on copied EPackages, not on the original ones
+		val copiedEPackagesMap =
+			new EdeltaCopiedEPackagesMap(program.copiedEPackages.toMap[name])
+		interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap)
+		return copiedEPackagesMap
 	}
 
 }

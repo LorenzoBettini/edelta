@@ -39,9 +39,11 @@ import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.testing.util.ParseHelper;
 import org.eclipse.xtext.testing.validation.ValidationTestHelper;
 import org.eclipse.xtext.validation.Issue;
+import org.eclipse.xtext.xbase.XAbstractFeatureCall;
 import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.XVariableDeclaration;
+import org.eclipse.xtext.xbase.featurecalls.IdentifiableSimpleNameProvider;
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Extension;
@@ -70,6 +72,10 @@ public abstract class EdeltaAbstractTest {
   @Inject
   @Extension
   protected IJvmModelAssociations _iJvmModelAssociations;
+  
+  @Inject
+  @Extension
+  protected IdentifiableSimpleNameProvider _identifiableSimpleNameProvider;
   
   @Extension
   protected Inputs _inputs = new Inputs();
@@ -611,5 +617,9 @@ public abstract class EdeltaAbstractTest {
   protected EdeltaEcoreReferenceExpression lastEcoreReferenceExpression(final EdeltaProgram p) {
     XExpression _blockLastExpression = this.getBlockLastExpression(this.lastModifyEcoreOperation(p).getBody());
     return ((EdeltaEcoreReferenceExpression) _blockLastExpression);
+  }
+  
+  protected XAbstractFeatureCall getFeatureCall(final XExpression e) {
+    return ((XAbstractFeatureCall) e);
   }
 }
