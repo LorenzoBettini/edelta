@@ -2,6 +2,7 @@ package edelta.tests
 
 import com.google.inject.Inject
 import com.google.inject.Injector
+import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaPackage
 import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreter
@@ -9,6 +10,7 @@ import edelta.interpreter.EdeltaInterpreter.EdeltaInterpreterWrapperException
 import edelta.interpreter.EdeltaInterpreterFactory
 import edelta.interpreter.EdeltaInterpreterRuntimeException
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 import edelta.tests.additional.MyCustomException
 import edelta.validation.EdeltaValidator
@@ -23,7 +25,7 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
-import edelta.resource.derivedstate.EdeltaDerivedStateHelper
+import org.eclipse.emf.ecore.ENamedElement
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -748,13 +750,11 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			}
 		'''.parseWithTestEcore => [
 			interpretProgram
-			val ecoreRefExp = allEcoreReferenceExpressions.last
-			val exp = derivedStateHelper
-				.getEcoreReferenceExpressionState(ecoreRefExp)
-				.getEnamedElementXExpressionMap
-				.get(ecoreRefExp.reference.enamedelement)
-			assertNotNull(exp)
-			assertEquals("addNewEClass", exp.featureCall.feature.simpleName)
+			allEcoreReferenceExpressions.last => [
+				// ecoreref(NewClass) -> addNewEClass
+				assertEcoreRefExpElementMapsToXExpression
+					(reference.enamedelement, "addNewEClass")
+			]
 		]
 	}
 
@@ -774,26 +774,18 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			val ecoreRefs = allEcoreReferenceExpressions
 			ecoreRefs.head => [
 				// ecoreref(NewClass) -> addNewEClass
-				val exp = derivedStateHelper
-					.getEcoreReferenceExpressionState(it)
-					.getEnamedElementXExpressionMap
-					.get(it.reference.enamedelement)
-				assertNotNull(exp)
-				assertEquals("addNewEClass", exp.featureCall.feature.simpleName)
+				assertEcoreRefExpElementMapsToXExpression
+					(reference.enamedelement, "addNewEClass")
 			]
 			ecoreRefs.last => [
 				// ecoreref(Renamed) -> name = "Renamed"
-				val exp = derivedStateHelper
-					.getEcoreReferenceExpressionState(it)
-					.getEnamedElementXExpressionMap
-					.get(it.reference.enamedelement)
-				assertNotNull(exp)
-				assertEquals("setName", exp.featureCall.feature.simpleName)
+				assertEcoreRefExpElementMapsToXExpression
+					(reference.enamedelement, "setName")
 			]
 		]
 	}
 
-	@Test def void testElementExpressionMapForCreatedEClassRenamedInInitializer() {
+	@Test def void testEcoreRefExpForCreatedEClassRenamedInInitializer() {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
 			
@@ -801,18 +793,25 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			
 			modifyEcore aTest epackage foo {
 				addNewEClass("NewClass") [
+					ecoreref(NewClass)
 					name = "Renamed"
 					abstract = true
 				]
+				ecoreref(Renamed)
 			}
 		'''.parseWithTestEcore => [
-			val map = interpretProgram
-			val createClass = map.get("foo").getEClassifier("Renamed")
-			val exp = derivedStateHelper
-				.getEnamedElementXExpressionMap(eResource)
-				.get(createClass)
-			assertNotNull(exp)
-			assertEquals("setName", exp.featureCall.feature.simpleName)
+			interpretProgram
+			val ecoreRefs = allEcoreReferenceExpressions
+			ecoreRefs.head => [
+				// ecoreref(NewClass) -> addNewEClass
+				assertEcoreRefExpElementMapsToXExpression
+					(reference.enamedelement, "addNewEClass")
+			]
+			ecoreRefs.last => [
+				// ecoreref(Renamed) -> name = "Renamed"
+				assertEcoreRefExpElementMapsToXExpression
+					(reference.enamedelement, "setName")
+			]
 		]
 	}
 
@@ -958,6 +957,19 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			new EdeltaCopiedEPackagesMap(program.copiedEPackages.toMap[name])
 		interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap)
 		return copiedEPackagesMap
+	}
+
+	private def void assertEcoreRefExpElementMapsToXExpression(
+		EdeltaEcoreReferenceExpression it,
+		ENamedElement element,
+		String expectedFeatureCallSimpleName
+	) {
+		val exp = derivedStateHelper
+			.getEcoreReferenceExpressionState(it)
+			.getEnamedElementXExpressionMap
+			.get(element)
+		assertNotNull(exp)
+		assertEquals(expectedFeatureCallSimpleName, exp.featureCall.feature.simpleName)
 	}
 
 }

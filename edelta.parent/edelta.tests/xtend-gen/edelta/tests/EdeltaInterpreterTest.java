@@ -25,6 +25,7 @@ import org.assertj.core.api.ThrowableAssert;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtend2.lib.StringConcatenation;
@@ -1129,10 +1130,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this.interpretProgram(it);
-      final EdeltaEcoreReferenceExpression ecoreRefExp = IterableExtensions.<EdeltaEcoreReferenceExpression>last(this.getAllEcoreReferenceExpressions(it));
-      final XExpression exp = this.derivedStateHelper.getEcoreReferenceExpressionState(ecoreRefExp).getEnamedElementXExpressionMap().get(ecoreRefExp.getReference().getEnamedelement());
-      Assert.assertNotNull(exp);
-      Assert.assertEquals("addNewEClass", this.getFeatureCall(exp).getFeature().getSimpleName());
+      EdeltaEcoreReferenceExpression _last = IterableExtensions.<EdeltaEcoreReferenceExpression>last(this.getAllEcoreReferenceExpressions(it));
+      final Procedure1<EdeltaEcoreReferenceExpression> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
+        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "addNewEClass");
+      };
+      ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_last, _function_1);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
@@ -1165,16 +1167,12 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       final List<EdeltaEcoreReferenceExpression> ecoreRefs = this.getAllEcoreReferenceExpressions(it);
       EdeltaEcoreReferenceExpression _head = IterableExtensions.<EdeltaEcoreReferenceExpression>head(ecoreRefs);
       final Procedure1<EdeltaEcoreReferenceExpression> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
-        final XExpression exp = this.derivedStateHelper.getEcoreReferenceExpressionState(it_1).getEnamedElementXExpressionMap().get(it_1.getReference().getEnamedelement());
-        Assert.assertNotNull(exp);
-        Assert.assertEquals("addNewEClass", this.getFeatureCall(exp).getFeature().getSimpleName());
+        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "addNewEClass");
       };
       ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_head, _function_1);
       EdeltaEcoreReferenceExpression _last = IterableExtensions.<EdeltaEcoreReferenceExpression>last(ecoreRefs);
       final Procedure1<EdeltaEcoreReferenceExpression> _function_2 = (EdeltaEcoreReferenceExpression it_1) -> {
-        final XExpression exp = this.derivedStateHelper.getEcoreReferenceExpressionState(it_1).getEnamedElementXExpressionMap().get(it_1.getReference().getEnamedelement());
-        Assert.assertNotNull(exp);
-        Assert.assertEquals("setName", this.getFeatureCall(exp).getFeature().getSimpleName());
+        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "setName");
       };
       ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_last, _function_2);
     };
@@ -1182,7 +1180,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testElementExpressionMapForCreatedEClassRenamedInInitializer() {
+  public void testEcoreRefExpForCreatedEClassRenamedInInitializer() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import org.eclipse.emf.ecore.EcoreFactory");
     _builder.newLine();
@@ -1196,6 +1194,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder.append("addNewEClass(\"NewClass\") [");
     _builder.newLine();
     _builder.append("\t\t");
+    _builder.append("ecoreref(NewClass)");
+    _builder.newLine();
+    _builder.append("\t\t");
     _builder.append("name = \"Renamed\"");
     _builder.newLine();
     _builder.append("\t\t");
@@ -1204,15 +1205,25 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder.append("\t");
     _builder.append("]");
     _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(Renamed)");
+    _builder.newLine();
     _builder.append("}");
     _builder.newLine();
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      final EdeltaCopiedEPackagesMap map = this.interpretProgram(it);
-      final EClassifier createClass = map.get("foo").getEClassifier("Renamed");
-      final XExpression exp = this.derivedStateHelper.getEnamedElementXExpressionMap(it.eResource()).get(createClass);
-      Assert.assertNotNull(exp);
-      Assert.assertEquals("setName", this.getFeatureCall(exp).getFeature().getSimpleName());
+      this.interpretProgram(it);
+      final List<EdeltaEcoreReferenceExpression> ecoreRefs = this.getAllEcoreReferenceExpressions(it);
+      EdeltaEcoreReferenceExpression _head = IterableExtensions.<EdeltaEcoreReferenceExpression>head(ecoreRefs);
+      final Procedure1<EdeltaEcoreReferenceExpression> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
+        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "addNewEClass");
+      };
+      ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_head, _function_1);
+      EdeltaEcoreReferenceExpression _last = IterableExtensions.<EdeltaEcoreReferenceExpression>last(ecoreRefs);
+      final Procedure1<EdeltaEcoreReferenceExpression> _function_2 = (EdeltaEcoreReferenceExpression it_1) -> {
+        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "setName");
+      };
+      ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_last, _function_2);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
@@ -1390,5 +1401,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     final EdeltaCopiedEPackagesMap copiedEPackagesMap = new EdeltaCopiedEPackagesMap(_map);
     this.interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap);
     return copiedEPackagesMap;
+  }
+  
+  private void assertEcoreRefExpElementMapsToXExpression(final EdeltaEcoreReferenceExpression it, final ENamedElement element, final String expectedFeatureCallSimpleName) {
+    final XExpression exp = this.derivedStateHelper.getEcoreReferenceExpressionState(it).getEnamedElementXExpressionMap().get(element);
+    Assert.assertNotNull(exp);
+    Assert.assertEquals(expectedFeatureCallSimpleName, this.getFeatureCall(exp).getFeature().getSimpleName());
   }
 }
