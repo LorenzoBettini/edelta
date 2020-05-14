@@ -3,6 +3,7 @@ package edelta.interpreter;
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE;
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MODIFY_ECORE_OPERATION__BODY;
 import static edelta.util.EdeltaModelUtil.getProgram;
+import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
 import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashMap;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.exists;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.filter;
@@ -10,7 +11,9 @@ import static org.eclipse.xtext.xbase.lib.IterableExtensions.forEach;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
@@ -34,6 +37,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import edelta.compiler.EdeltaCompilerUtil;
+import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
@@ -43,6 +47,7 @@ import edelta.jvmmodel.EdeltaJvmModelHelper;
 import edelta.lib.AbstractEdelta;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
+import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 import edelta.util.EdeltaModelUtil;
 import edelta.validation.EdeltaValidator;
 
@@ -240,10 +245,30 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				if (op != null) {
 					result = super.invokeOperation
 						(op, thisObject, args, context, indicator);
+					postProcess(result, ecoreReferenceExpression);
 					checkStaleAccess(result, ecoreReferenceExpression);
 				}
 				return result;
 			});
+	}
+
+	private void postProcess(Object result, EdeltaEcoreReferenceExpression exp) {
+		if (result != null) {
+			// takes a snapshot of the mapping EEnamedElement -> XExpression
+			// and associates it to this EdeltaEcoreReferenceExpression
+			List<ENamedElement> enamedElements =
+				getAllContentsOfType(exp, EdeltaEcoreReference.class)
+					.stream().map(EdeltaEcoreReference::getEnamedelement)
+					.collect(Collectors.toList());
+			EdeltaENamedElementXExpressionMap expMap = derivedStateHelper
+				.getEcoreReferenceExpressionState(exp)
+				.getEnamedElementXExpressionMap();
+			EdeltaENamedElementXExpressionMap elMap = derivedStateHelper
+				.getEnamedElementXExpressionMap(exp.eResource());
+			elMap.entrySet().stream()
+				.filter(entry -> enamedElements.contains(entry.getKey()))
+				.forEach(entry -> expMap.put(entry.getKey(), entry.getValue()));
+		}
 	}
 
 	private void checkStaleAccess(Object result, EdeltaEcoreReferenceExpression ecoreReferenceExpression) {

@@ -12,6 +12,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import edelta.edelta.EdeltaEcoreReference;
+import edelta.edelta.EdeltaEcoreReferenceExpression;
 
 /**
  * Provides access (and possibly install) to the {@link EdeltaDerivedState}.
@@ -52,6 +53,14 @@ public class EdeltaDerivedStateHelper {
 				.getEcoreReferenceStateMap()
 				.computeIfAbsent(edeltaEcoreReference,
 						e -> new EdeltaEcoreReferenceState());
+	}
+
+	public EdeltaEcoreReferenceExpressionState getEcoreReferenceExpressionState(
+			EdeltaEcoreReferenceExpression edeltaEcoreReferenceExpression) {
+		return getOrInstallAdapter(edeltaEcoreReferenceExpression.eResource())
+				.getEcoreReferenceExpressionStateMap()
+				.computeIfAbsent(edeltaEcoreReferenceExpression,
+						e -> new EdeltaEcoreReferenceExpressionState());
 	}
 
 	public EdeltaENamedElementXExpressionMap getEnamedElementXExpressionMap(Resource resource) {

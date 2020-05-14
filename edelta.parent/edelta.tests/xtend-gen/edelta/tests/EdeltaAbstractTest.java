@@ -32,6 +32,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.xtend2.lib.StringConcatenation;
+import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.resource.XtextResourceSet;
 import org.eclipse.xtext.testing.InjectWith;
@@ -617,6 +618,10 @@ public abstract class EdeltaAbstractTest {
   protected EdeltaEcoreReferenceExpression lastEcoreReferenceExpression(final EdeltaProgram p) {
     XExpression _blockLastExpression = this.getBlockLastExpression(this.lastModifyEcoreOperation(p).getBody());
     return ((EdeltaEcoreReferenceExpression) _blockLastExpression);
+  }
+  
+  protected List<EdeltaEcoreReferenceExpression> getAllEcoreReferenceExpressions(final EdeltaProgram p) {
+    return EcoreUtil2.<EdeltaEcoreReferenceExpression>getAllContentsOfType(p, EdeltaEcoreReferenceExpression.class);
   }
   
   protected XAbstractFeatureCall getFeatureCall(final XExpression e) {

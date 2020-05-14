@@ -36,6 +36,7 @@ import static extension org.junit.Assert.*
 import java.util.List
 import org.eclipse.xtext.xbase.featurecalls.IdentifiableSimpleNameProvider
 import org.eclipse.xtext.xbase.XAbstractFeatureCall
+import org.eclipse.xtext.EcoreUtil2
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -375,6 +376,10 @@ abstract class EdeltaAbstractTest {
 	def protected lastEcoreReferenceExpression(EdeltaProgram p) {
 		p.lastModifyEcoreOperation.body
 			.blockLastExpression as EdeltaEcoreReferenceExpression
+	}
+
+	def protected getAllEcoreReferenceExpressions(EdeltaProgram p) {
+		EcoreUtil2.getAllContentsOfType(p, EdeltaEcoreReferenceExpression)
 	}
 
 	def protected getFeatureCall(XExpression e) {

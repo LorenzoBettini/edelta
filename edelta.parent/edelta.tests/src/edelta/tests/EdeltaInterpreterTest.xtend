@@ -714,7 +714,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testElementExpressionMapForCreatedEClassWithEdeltaAPI() {
+	@Test def void testElementExpressionForCreatedEClassWithEdeltaAPI() {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
 			
@@ -722,9 +722,6 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			
 			modifyEcore aTest epackage foo {
 				addNewEClass("NewClass")
-			}
-			modifyEcore anotherTest epackage foo {
-				ecoreref(NewClass)
 			}
 		'''.parseWithTestEcore => [
 			val map = interpretProgram
@@ -737,7 +734,31 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testElementExpressionMapForCreatedEClassRenamed() {
+	@Test def void testEcoreRefExpExpressionForCreatedEClassWithEdeltaAPI() {
+		'''
+			import org.eclipse.emf.ecore.EcoreFactory
+			
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass")
+			}
+			modifyEcore anotherTest epackage foo {
+				ecoreref(NewClass)
+			}
+		'''.parseWithTestEcore => [
+			interpretProgram
+			val ecoreRefExp = allEcoreReferenceExpressions.last
+			val exp = derivedStateHelper
+				.getEcoreReferenceExpressionState(ecoreRefExp)
+				.getEnamedElementXExpressionMap
+				.get(ecoreRefExp.reference.enamedelement)
+			assertNotNull(exp)
+			assertEquals("addNewEClass", exp.featureCall.feature.simpleName)
+		]
+	}
+
+	@Test def void testEcoreRefExpForCreatedEClassRenamed() {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
 			
@@ -746,15 +767,29 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			modifyEcore aTest epackage foo {
 				addNewEClass("NewClass")
 				ecoreref(NewClass).name = "Renamed"
+				ecoreref(Renamed)
 			}
 		'''.parseWithTestEcore => [
-			val map = interpretProgram
-			val createClass = map.get("foo").getEClassifier("Renamed")
-			val exp = derivedStateHelper
-				.getEnamedElementXExpressionMap(eResource)
-				.get(createClass)
-			assertNotNull(exp)
-			assertEquals("setName", exp.featureCall.feature.simpleName)
+			interpretProgram
+			val ecoreRefs = allEcoreReferenceExpressions
+			ecoreRefs.head => [
+				// ecoreref(NewClass) -> addNewEClass
+				val exp = derivedStateHelper
+					.getEcoreReferenceExpressionState(it)
+					.getEnamedElementXExpressionMap
+					.get(it.reference.enamedelement)
+				assertNotNull(exp)
+				assertEquals("addNewEClass", exp.featureCall.feature.simpleName)
+			]
+			ecoreRefs.last => [
+				// ecoreref(Renamed) -> name = "Renamed"
+				val exp = derivedStateHelper
+					.getEcoreReferenceExpressionState(it)
+					.getEnamedElementXExpressionMap
+					.get(it.reference.enamedelement)
+				assertNotNull(exp)
+				assertEquals("setName", exp.featureCall.feature.simpleName)
+			]
 		]
 	}
 
