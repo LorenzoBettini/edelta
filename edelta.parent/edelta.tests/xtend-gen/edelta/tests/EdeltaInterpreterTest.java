@@ -1180,6 +1180,36 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testEcoreRefExpForExistingEClass() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EcoreFactory");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(FooClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      final List<EdeltaEcoreReferenceExpression> ecoreRefs = this.getAllEcoreReferenceExpressions(it);
+      EdeltaEcoreReferenceExpression _head = IterableExtensions.<EdeltaEcoreReferenceExpression>head(ecoreRefs);
+      final Procedure1<EdeltaEcoreReferenceExpression> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
+        final XExpression exp = this.derivedStateHelper.getEcoreReferenceExpressionState(it_1).getEnamedElementXExpressionMap().get(it_1.getReference().getEnamedelement());
+        Assert.assertNull(exp);
+      };
+      ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_head, _function_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
   public void testEcoreRefExpForCreatedEClassRenamedInInitializer() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import org.eclipse.emf.ecore.EcoreFactory");

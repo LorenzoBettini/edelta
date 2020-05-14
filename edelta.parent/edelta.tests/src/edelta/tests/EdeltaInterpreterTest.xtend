@@ -785,6 +785,28 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test def void testEcoreRefExpForExistingEClass() {
+		'''
+			import org.eclipse.emf.ecore.EcoreFactory
+			
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				ecoreref(FooClass)
+			}
+		'''.parseWithTestEcore => [
+			interpretProgram
+			val ecoreRefs = allEcoreReferenceExpressions
+			ecoreRefs.head => [
+				val exp = derivedStateHelper
+					.getEcoreReferenceExpressionState(it)
+					.getEnamedElementXExpressionMap
+					.get(reference.enamedelement)
+				assertNull(exp)
+			]
+		]
+	}
+
 	@Test def void testEcoreRefExpForCreatedEClassRenamedInInitializer() {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
