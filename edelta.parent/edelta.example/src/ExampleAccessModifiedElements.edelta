@@ -6,12 +6,20 @@ metamodel "myecore"
 metamodel "mainpackage"
 
 modifyEcore creation epackage myecore {
-	addNewEClass("NewClass")
-}
-
-modifyEcore renaming epackage myecore {
-	ecoreref(NewClass).abstract = true
-	ecoreref(myecore.NewClass).name = "Renamed"
+	       addNewEClass("NewClass")
+}                      //   ^
+                       //   |
+modifyEcore renaming   //   |
+epackage myecore {     //   |
+	ecoreref(NewClass) // --+
+	ecoreref(NewClass).name = "Renamed"
+	ecoreref(Renamed)         //   ^------+
+	addNewESubpackage("mysubpackage",//   |
+		"mysubpackage",              //   |
+		"http://mysubpackage") [     //   |
+		addEClass(ecoreref(Renamed)) // --+
+	]                 //     ^
+	ecoreref(Renamed) // ----+
 }
 
 modifyEcore remove epackage myecore {
