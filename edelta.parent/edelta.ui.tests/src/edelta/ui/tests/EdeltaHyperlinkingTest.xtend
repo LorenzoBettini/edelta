@@ -2,8 +2,10 @@ package edelta.ui.tests
 
 import com.google.inject.Inject
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper
+import org.eclipse.core.resources.IFile
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.ui.editor.XtextEditor
 import org.eclipse.xtext.ui.editor.hyperlinking.XtextHyperlink
 import org.eclipse.xtext.ui.testing.AbstractHyperlinkingTest
 import org.eclipse.xtext.xbase.XAbstractFeatureCall
@@ -16,6 +18,8 @@ import org.junit.runner.RunWith
 class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 
 	@Inject EdeltaPluginProjectHelper projectHelper
+
+	XtextEditor xtextEditor
 
 	override protected getFileName() {
 		/*
@@ -32,52 +36,58 @@ class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 		projectHelper.createEdeltaPluginProject(projectName)
 	}
 
+	override protected openInEditor(IFile dslFile) {
+		this.xtextEditor = super.openInEditor(dslFile)
+		return xtextEditor
+	}
+
 	/**
 	 * If we link to an XExpression its qualified name is null,
 	 * and this leads to a NPE
 	 */
 	override protected _target(XtextHyperlink hyperlink) {
-		val resourceSet = resourceSetProvider.get(project)
+		// don't use resourceSetProvider, because Java types would not be resolved
+		// resourceSetProvider.get(project)
+		val document = xtextEditor.internalSourceViewer.xtextDocument
+		val resource = document.readOnly[it]
+		val resourceSet = resource.resourceSet
 		val eObject = resourceSet.getEObject(hyperlink.URI, true)
 		switch (eObject) {
-			XAbstractFeatureCall: eObject.toString
+			XAbstractFeatureCall: eObject.feature.simpleName
 			default: eObject.fullyQualifiedName.toString
 		}
 	}
 
 	@Test def hyperlinkOnExistingEClass() {
 		'''
-		metamodel "mypackage"
-
-		modifyEcore aTest epackage mypackage {
-			ecoreref(«c»MyClass«c»)
-		}
-		'''
-		.hasHyperlinkTo("mypackage.MyClass")
+			metamodel "mypackage"
+			
+			modifyEcore aTest epackage mypackage {
+				ecoreref(«c»MyClass«c»)
+			}
+		'''.hasHyperlinkTo("mypackage.MyClass")
 	}
 
 	@Test def hyperlinkOnCreatedEClass() {
 		'''
-		metamodel "mypackage"
-
-		modifyEcore aTest epackage mypackage {
-			addNewEClass("NewClass")
-			ecoreref(«c»NewClass«c»)
-		}
-		'''
-		.hasHyperlinkTo("addNewEClass(<XStringLiteralImpl>)")
+			metamodel "mypackage"
+			
+			modifyEcore aTest epackage mypackage {
+				addNewEClass("NewClass")
+				ecoreref(«c»NewClass«c»)
+			}
+		'''.hasHyperlinkTo("addNewEClass")
 	}
 
 	@Test def hyperlinkOnRenamedEClass() {
 		'''
-		metamodel "mypackage"
-
-		modifyEcore aTest epackage mypackage {
-			ecoreref(MyClass).name = "Renamed"
-			ecoreref(«c»Renamed«c»)
-		}
-		'''
-		.hasHyperlinkTo("<EdeltaEcoreReferenceExpressionImpl>.name = <XStringLiteralImpl>")
+			metamodel "mypackage"
+			
+			modifyEcore aTest epackage mypackage {
+				ecoreref(MyClass).name = "Renamed"
+				ecoreref(«c»Renamed«c»)
+			}
+		'''.hasHyperlinkTo("setName")
 	}
 
 }
