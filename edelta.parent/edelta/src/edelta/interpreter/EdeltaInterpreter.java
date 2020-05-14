@@ -9,6 +9,7 @@ import static org.eclipse.xtext.xbase.lib.IterableExtensions.exists;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.filter;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.forEach;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.xtext.common.types.JvmField;
 import org.eclipse.xtext.common.types.JvmFormalParameter;
@@ -128,15 +130,45 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	public void evaluateModifyEcoreOperations(final EdeltaProgram program, final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		this.currentProgram = program;
+		final Collection<EPackage> copiedEPackages = copiedEPackagesMap.values();
 		thisObject = new EdeltaInterpreterEdeltaImpl
 			(Lists.newArrayList(
-				Iterables.concat(copiedEPackagesMap.values(),
+				Iterables.concat(copiedEPackages,
 						program.getMetamodels())));
 		useAsFields = newHashMap();
 		List<EdeltaModifyEcoreOperation> filteredOperations =
 			edeltaInterpreterHelper.filterOperations(program.getModifyEcoreOperations());
-		for (final EdeltaModifyEcoreOperation op : filteredOperations) {
-			evaluateModifyEcoreOperation(op, copiedEPackagesMap);
+		final Resource eResource = program.eResource();
+		listener = new EdeltaInterpreterResourceListener(cache, eResource,
+				derivedStateHelper.getEnamedElementXExpressionMap(eResource));
+		try {
+			addResourceListener(copiedEPackages);
+			for (final EdeltaModifyEcoreOperation op : filteredOperations) {
+				evaluateModifyEcoreOperation(op, copiedEPackagesMap);
+			}
+		} finally {
+			removeResourceListener(copiedEPackages);
+		}
+	}
+
+	private void removeResourceListener(final Collection<EPackage> copiedEPackages) {
+		// this will also trigger the last event caught by our adapter
+		// implying a final clearing, which is required to avoid
+		// duplicate errors
+		for (EPackage ePackage : copiedEPackages) {
+			ePackage.eAdapters().remove(listener);
+		}
+	}
+
+	private void addResourceListener(final Collection<EPackage> copiedEPackages) {
+		// The listener clears the cache as soon as the interpreter modifies
+		// the EPackage of the modifyEcore expression
+		// since new types might be available after the interpretation
+		// and existing types might have been modified or renamed
+		// this makes sure that scoping and the type computer
+		// is performed again
+		for (EPackage ePackage : copiedEPackages) {
+			ePackage.eAdapters().add(listener);
 		}
 	}
 
@@ -144,31 +176,15 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		final EPackage ePackage = copiedEPackagesMap.
 				get(op.getEpackage().getName());
-		listener = new EdeltaInterpreterResourceListener(cache, op.eResource(),
-			derivedStateHelper.getEnamedElementXExpressionMap(op.eResource()));
-		// The listener clears the cache as soon as the interpreter modifies
-		// the EPackage of the modifyEcore expression
-		// since new types might be available after the interpretation
-		// and existing types might have been modified or renamed
-		// this makes sure that scoping and the type computer
-		// is performed again
-		ePackage.eAdapters().add(listener);
-		try {
-			IEvaluationContext context = createContext();
-			context.newValue(IT_QUALIFIED_NAME, ePackage);
-			configureContextForJavaThis(context);
-			final IEvaluationResult result = evaluate(op.getBody(), context,
-					new EdeltaInterpreterCancelIndicator());
-			if (result == null) {
-				addTimeoutWarning(op);
-			} else {
-				handleResultException(result.getException());
-			}
-		} finally {
-			// this will also trigger the last event caught by our adapter
-			// implying a final clearing, which is required to avoid
-			// duplicate errors
-			ePackage.eAdapters().remove(listener);
+		IEvaluationContext context = createContext();
+		context.newValue(IT_QUALIFIED_NAME, ePackage);
+		configureContextForJavaThis(context);
+		final IEvaluationResult result = evaluate(op.getBody(), context,
+				new EdeltaInterpreterCancelIndicator());
+		if (result == null) {
+			addTimeoutWarning(op);
+		} else {
+			handleResultException(result.getException());
 		}
 	}
 
