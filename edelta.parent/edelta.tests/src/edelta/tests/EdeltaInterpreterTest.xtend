@@ -785,6 +785,44 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test def void testEcoreRefExpForCreatedSubPackage() {
+		'''
+			import org.eclipse.emf.ecore.EcoreFactory
+			
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass")
+				ecoreref(NewClass) // 0
+				addNewESubpackage("subpackage", "subpackage", "subpackage") [
+					addEClass(ecoreref(NewClass)) // 1
+				]
+				ecoreref(NewClass) // 2
+				ecoreref(subpackage) // 3
+			}
+		'''.parseWithTestEcore => [
+			interpretProgram
+			allEcoreReferenceExpressions => [
+				get(0) => [
+					assertEcoreRefExpElementMapsToXExpression
+						(reference.enamedelement, "addNewEClass")
+				]
+				get(1) => [
+					assertEcoreRefExpElementMapsToXExpression
+						(reference.enamedelement, "addNewEClass")
+				]
+				get(2) => [
+					assertEcoreRefExpElementMapsToXExpression
+						(reference.enamedelement, "addEClass")
+				]
+				get(3) => [
+					assertEcoreRefExpElementMapsToXExpression
+						(reference.enamedelement, "addNewESubpackage")
+				]
+			]
+		]
+	}
+
 	@Test def void testEcoreRefExpForExistingEClass() {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
