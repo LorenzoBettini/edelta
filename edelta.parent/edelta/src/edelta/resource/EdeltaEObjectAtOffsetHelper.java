@@ -2,6 +2,7 @@ package edelta.resource;
 
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.xbase.XExpression;
@@ -10,6 +11,7 @@ import org.eclipse.xtext.xbase.linking.BrokenConstructorCallAwareEObjectAtOffset
 import com.google.inject.Inject;
 
 import edelta.edelta.EdeltaEcoreReference;
+import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 
 /**
@@ -31,7 +33,10 @@ public class EdeltaEObjectAtOffsetHelper extends BrokenConstructorCallAwareEObje
 					.getOriginalEnamedelement();
 			if (original != null)
 				return original;
-			XExpression expression = edeltaDerivedStateHelper.getEnamedElementXExpressionMap(ecoreReference.eResource())
+			XExpression expression = edeltaDerivedStateHelper
+				.getEcoreReferenceExpressionState(
+						EcoreUtil2.getContainerOfType(ecoreReference, EdeltaEcoreReferenceExpression.class))
+				.getEnamedElementXExpressionMap()
 				.get(ecoreReference.getEnamedelement());
 			if (expression != null)
 				return expression;
