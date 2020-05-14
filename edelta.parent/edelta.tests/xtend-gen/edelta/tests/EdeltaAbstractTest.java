@@ -44,7 +44,6 @@ import org.eclipse.xtext.xbase.XAbstractFeatureCall;
 import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.XVariableDeclaration;
-import org.eclipse.xtext.xbase.featurecalls.IdentifiableSimpleNameProvider;
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Extension;
@@ -73,10 +72,6 @@ public abstract class EdeltaAbstractTest {
   @Inject
   @Extension
   protected IJvmModelAssociations _iJvmModelAssociations;
-  
-  @Inject
-  @Extension
-  protected IdentifiableSimpleNameProvider _identifiableSimpleNameProvider;
   
   @Extension
   protected Inputs _inputs = new Inputs();
