@@ -758,6 +758,59 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test def void testEcoreRefExpExpressionForCreatedEClassWithOperation() {
+		'''
+			import org.eclipse.emf.ecore.EPackage
+			
+			metamodel "foo"
+			
+			def create(EPackage it) {
+				addNewEClass("NewClass")
+			}
+			modifyEcore anotherTest epackage foo {
+				create(it)
+				ecoreref(NewClass)
+			}
+		'''.parseWithTestEcore => [
+			interpretProgram
+			allEcoreReferenceExpressions.last => [
+				// ecoreref(NewClass) -> addNewEClass
+				assertEcoreRefExpElementMapsToXExpression
+					(reference.enamedelement, "addNewEClass")
+			]
+		]
+	}
+
+	@Test def void testEcoreRefExpExpressionForCreatedEClassWithOperationInAnotherFile() {
+		parseSeveralWithTestEcore(
+		#[
+		'''
+			import org.eclipse.emf.ecore.EPackage
+			
+			def create(EPackage it) {
+				addNewEClass("NewClass")
+			}
+		''',
+		'''
+			metamodel "foo"
+			
+			use edelta.__synthetic0 as extension my
+			
+			modifyEcore anotherTest epackage foo {
+				create(it)
+				ecoreref(NewClass)
+			}
+		'''
+		]) => [
+			interpretProgram
+			allEcoreReferenceExpressions.last => [
+				// ecoreref(NewClass) -> create
+				assertEcoreRefExpElementMapsToXExpression
+					(reference.enamedelement, "create")
+			]
+		]
+	}
+
 	@Test def void testEcoreRefExpForCreatedEClassRenamed() {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
