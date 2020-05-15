@@ -96,6 +96,43 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
   }
   
   @Test
+  public void hyperlinkOnQualifiedPart() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mypackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mypackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(");
+    _builder.append(this.c, "\t");
+    _builder.append("mypackage");
+    _builder.append(this.c, "\t");
+    _builder.append(".MyClass)");
+    _builder.newLineIfNotEmpty();
+    _builder.append("}");
+    _builder.newLine();
+    this.hasHyperlinkTo(_builder, "mypackage");
+  }
+  
+  @Test
+  public void hyperlinkOnEPackage() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mypackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage ");
+    _builder.append(this.c);
+    _builder.append("mypackage");
+    _builder.append(this.c);
+    _builder.append(" {");
+    _builder.newLineIfNotEmpty();
+    _builder.append("}");
+    _builder.newLine();
+    this.hasHyperlinkTo(_builder, "mypackage");
+  }
+  
+  @Test
   public void hyperlinkOnCreatedEClass() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mypackage\"");

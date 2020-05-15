@@ -68,6 +68,25 @@ class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 		'''.hasHyperlinkTo("mypackage.MyClass")
 	}
 
+	@Test def hyperlinkOnQualifiedPart() {
+		'''
+			metamodel "mypackage"
+			
+			modifyEcore aTest epackage mypackage {
+				ecoreref(«c»mypackage«c».MyClass)
+			}
+		'''.hasHyperlinkTo("mypackage")
+	}
+
+	@Test def hyperlinkOnEPackage() {
+		'''
+			metamodel "mypackage"
+			
+			modifyEcore aTest epackage «c»mypackage«c» {
+			}
+		'''.hasHyperlinkTo("mypackage")
+	}
+
 	@Test def hyperlinkOnCreatedEClass() {
 		'''
 			metamodel "mypackage"
