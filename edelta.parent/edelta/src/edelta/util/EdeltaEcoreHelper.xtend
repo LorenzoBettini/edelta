@@ -114,7 +114,8 @@ class EdeltaEcoreHelper {
 
 	def private List<? extends ENamedElement> getEPackageENamedElementsInternal(EPackage ePackage, EObject context, boolean includeCopiedEPackages) {
 		val imported =
-			getProgram(context).metamodels.findEPackageByNameInRootEPackages(ePackage)
+			getProgram(context).metamodels
+			.findEPackageByNameInRootEPackages(ePackage)
 		if (includeCopiedEPackages) {
 			val copiedEPackage =
 				context.eResource.copiedEPackagesMap.values
@@ -130,6 +131,10 @@ class EdeltaEcoreHelper {
 	}
 
 	def private List<? extends ENamedElement> getEPackageENamedElementsInternal(EPackage ePackage) {
+		// could be null if we searched for a new subpackage
+		// in the imported metamodels
+		if (ePackage === null)
+			return emptyList
 		return (
 			ePackage.getEClassifiers +
 			ePackage.getESubpackages
