@@ -476,4 +476,18 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testInvalidAmbiguousEcoreref() {
+		val input =
+		'''
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			ecoreref(MyClass)
+		}
+		'''
+		input
+		.parseWithTestEcoreWithSubPackage
+		.assertNoErrors
+	}
 }

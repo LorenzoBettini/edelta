@@ -661,4 +661,21 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
+  
+  @Test
+  public void testInvalidAmbiguousEcoreref() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(MyClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    this._validationTestHelper.assertNoErrors(this.parseWithTestEcoreWithSubPackage(input));
+  }
 }
