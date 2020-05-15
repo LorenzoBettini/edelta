@@ -1,44 +1,69 @@
 package edelta.interpreter;
 
+import static org.eclipse.emf.ecore.EcorePackage.Literals.ENAMED_ELEMENT__NAME;
+
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.emf.ecore.util.EContentAdapter;
 import org.eclipse.xtext.linking.impl.XtextLinkingDiagnostic;
 import org.eclipse.xtext.util.IResourceScopeCache;
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
+import org.eclipse.xtext.xbase.XExpression;
 
 import edelta.edelta.EdeltaEcoreReferenceExpression;
+import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 
 /**
- * Listens for changes and clears the {@link IResourceScopeCache} of the
- * specified {@link Resource} and removes issues added by the type system
- * properly.
+ * Listens for changes on a {@link Resource} and performs tasks accordingly.
  * 
+ * For example, it clears the {@link IResourceScopeCache} of the specified
+ * {@link Resource} and removes issues added by the type system properly.
  * Scoping and type computation will be performed on the next access, taking now
  * into consideration the new information collected during interpretation.
  * 
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaInterpreterCleaner extends EContentAdapter {
+public class EdeltaInterpreterResourceListener extends EContentAdapter {
 
 	private IResourceScopeCache cache;
 
 	private Resource resource;
 
-	public EdeltaInterpreterCleaner(IResourceScopeCache cache, Resource resource) {
+	private EdeltaENamedElementXExpressionMap enamedElementXExpressionMap;
+
+	private XExpression currentExpression;
+
+	public EdeltaInterpreterResourceListener(IResourceScopeCache cache, Resource resource,
+			EdeltaENamedElementXExpressionMap enamedElementXExpressionMap) {
 		this.cache = cache;
 		this.resource = resource;
+		this.enamedElementXExpressionMap = enamedElementXExpressionMap;
 	}
 
 	@Override
 	public void notifyChanged(Notification notification) {
 		super.notifyChanged(notification);
+		if (notification.getFeature() == ENAMED_ELEMENT__NAME) {
+			enamedElementXExpressionMap.put(
+				(ENamedElement) notification.getNotifier(),
+				currentExpression);
+		} else if (notification.getEventType() == Notification.ADD &&
+				notification.getNewValue() instanceof ENamedElement) {
+			enamedElementXExpressionMap.put(
+				(ENamedElement) notification.getNewValue(),
+				currentExpression);
+		}
 		cache.clear(resource);
 		clearIssues(resource.getErrors());
 		clearIssues(resource.getWarnings());
+	}
+
+	public void setCurrentExpression(XExpression currentExpression) {
+		this.currentExpression = currentExpression;
 	}
 
 	private void clearIssues(final EList<Diagnostic> issues) {

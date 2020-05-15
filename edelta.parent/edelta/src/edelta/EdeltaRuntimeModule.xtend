@@ -9,7 +9,6 @@ import edelta.compiler.EdeltaXbaseCompiler
 import edelta.interpreter.EdeltaInterpreter
 import edelta.interpreter.EdeltaSafeInterpreter
 import edelta.resource.EdeltaDerivedStateComputer
-import edelta.resource.EdeltaEObjectAtOffsetHelper
 import edelta.resource.EdeltaLocationInFileProvider
 import edelta.resource.EdeltaResourceDescriptionStrategy
 import edelta.scoping.EdeltaQualifiedNameProvider
@@ -44,10 +43,6 @@ class EdeltaRuntimeModule extends AbstractEdeltaRuntimeModule {
 
 	override bindIDefaultResourceDescriptionStrategy() {
 		EdeltaResourceDescriptionStrategy
-	}
-
-	override bindEObjectAtOffsetHelper() {
-		EdeltaEObjectAtOffsetHelper
 	}
 
 	def Class<? extends XbaseCompiler> bindXbaseCompiler() {

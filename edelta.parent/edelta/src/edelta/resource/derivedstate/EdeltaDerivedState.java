@@ -12,6 +12,8 @@ import org.eclipse.xtext.resource.XtextResource;
 public class EdeltaDerivedState extends AdapterImpl {
 	private EdeltaCopiedEPackagesMap copiedEPackagesMap = new EdeltaCopiedEPackagesMap();
 	private EdeltaEcoreReferenceStateMap ecoreReferenceStateMap = new EdeltaEcoreReferenceStateMap();
+	private EdeltaEcoreReferenceExpressionStateMap ecoreReferenceExpressionStateMap = new EdeltaEcoreReferenceExpressionStateMap();
+	private EdeltaENamedElementXExpressionMap enamedElementXExpressionMap = new EdeltaENamedElementXExpressionMap();
 
 	@Override
 	public boolean isAdapterForType(final Object type) {
@@ -24,5 +26,13 @@ public class EdeltaDerivedState extends AdapterImpl {
 
 	public EdeltaEcoreReferenceStateMap getEcoreReferenceStateMap() {
 		return ecoreReferenceStateMap;
+	}
+
+	public EdeltaEcoreReferenceExpressionStateMap getEcoreReferenceExpressionStateMap() {
+		return ecoreReferenceExpressionStateMap;
+	}
+
+	public EdeltaENamedElementXExpressionMap getEnamedElementXExpressionMap() {
+		return enamedElementXExpressionMap;
 	}
 }

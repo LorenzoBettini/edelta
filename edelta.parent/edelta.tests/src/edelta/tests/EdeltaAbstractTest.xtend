@@ -9,6 +9,7 @@ import edelta.edelta.EdeltaModifyEcoreOperation
 import edelta.edelta.EdeltaProgram
 import edelta.tests.input.Inputs
 import java.nio.file.Paths
+import java.util.List
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
@@ -20,12 +21,14 @@ import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.xmi.XMIResource
+import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.resource.XtextResourceSet
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.testing.util.ParseHelper
 import org.eclipse.xtext.testing.validation.ValidationTestHelper
+import org.eclipse.xtext.xbase.XAbstractFeatureCall
 import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
@@ -33,7 +36,6 @@ import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
-import java.util.List
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -372,5 +374,13 @@ abstract class EdeltaAbstractTest {
 	def protected lastEcoreReferenceExpression(EdeltaProgram p) {
 		p.lastModifyEcoreOperation.body
 			.blockLastExpression as EdeltaEcoreReferenceExpression
+	}
+
+	def protected getAllEcoreReferenceExpressions(EdeltaProgram p) {
+		EcoreUtil2.getAllContentsOfType(p, EdeltaEcoreReferenceExpression)
+	}
+
+	def protected getFeatureCall(XExpression e) {
+		e as XAbstractFeatureCall
 	}
 }

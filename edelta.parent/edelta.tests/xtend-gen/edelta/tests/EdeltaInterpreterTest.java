@@ -2,6 +2,7 @@ package edelta.tests;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaPackage;
 import edelta.edelta.EdeltaProgram;
@@ -9,6 +10,7 @@ import edelta.interpreter.EdeltaInterpreter;
 import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime;
@@ -22,11 +24,14 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
+import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
@@ -46,6 +51,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   
   @Inject
   private Injector injector;
+  
+  @Inject
+  private EdeltaDerivedStateHelper derivedStateHelper;
   
   public EdeltaInterpreter createInterpreter() {
     return this.injector.<EdeltaInterpreter>getInstance(EdeltaInterpreter.class);
@@ -1069,6 +1077,464 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       Collections.<CharSequence>unmodifiableList(CollectionLiterals.<CharSequence>newArrayList(_builder, _builder_1, _builder_2)), true, _function);
   }
   
+  @Test
+  public void testElementExpressionForCreatedEClassWithEdeltaAPI() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EcoreFactory");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\")");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      final EdeltaCopiedEPackagesMap map = this.interpretProgram(it);
+      final EClassifier createClass = map.get("foo").getEClassifier("NewClass");
+      final XExpression exp = this.derivedStateHelper.getEnamedElementXExpressionMap(it.eResource()).get(createClass);
+      Assert.assertNotNull(exp);
+      Assert.assertEquals("addNewEClass", this.getFeatureCall(exp).getFeature().getSimpleName());
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testEcoreRefExpExpressionForCreatedEClassWithEdeltaAPI() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EcoreFactory");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\")");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    _builder.append("modifyEcore anotherTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      EdeltaEcoreReferenceExpression _last = IterableExtensions.<EdeltaEcoreReferenceExpression>last(this.getAllEcoreReferenceExpressions(it));
+      final Procedure1<EdeltaEcoreReferenceExpression> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
+        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "addNewEClass");
+      };
+      ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_last, _function_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testEcoreRefExpExpressionForCreatedEClassWithOperation() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EPackage");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("def create(EPackage it) {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\")");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    _builder.append("modifyEcore anotherTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("create(it)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      EdeltaEcoreReferenceExpression _last = IterableExtensions.<EdeltaEcoreReferenceExpression>last(this.getAllEcoreReferenceExpressions(it));
+      final Procedure1<EdeltaEcoreReferenceExpression> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
+        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "addNewEClass");
+      };
+      ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_last, _function_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testEcoreRefExpExpressionForCreatedEClassWithOperationInAnotherFile() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EPackage");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("def create(EPackage it) {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\")");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("metamodel \"foo\"");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("use edelta.__synthetic0 as extension my");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("modifyEcore anotherTest epackage foo {");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("create(it)");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("ecoreref(NewClass)");
+    _builder_1.newLine();
+    _builder_1.append("}");
+    _builder_1.newLine();
+    EdeltaProgram _parseSeveralWithTestEcore = this.parseSeveralWithTestEcore(
+      Collections.<CharSequence>unmodifiableList(CollectionLiterals.<CharSequence>newArrayList(_builder, _builder_1)));
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      EdeltaEcoreReferenceExpression _last = IterableExtensions.<EdeltaEcoreReferenceExpression>last(this.getAllEcoreReferenceExpressions(it));
+      final Procedure1<EdeltaEcoreReferenceExpression> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
+        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "create");
+      };
+      ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_last, _function_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseSeveralWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testEcoreRefExpForCreatedEClassRenamed() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EcoreFactory");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass).name = \"Renamed\"");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(Renamed)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      final List<EdeltaEcoreReferenceExpression> ecoreRefs = this.getAllEcoreReferenceExpressions(it);
+      EdeltaEcoreReferenceExpression _head = IterableExtensions.<EdeltaEcoreReferenceExpression>head(ecoreRefs);
+      final Procedure1<EdeltaEcoreReferenceExpression> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
+        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "addNewEClass");
+      };
+      ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_head, _function_1);
+      EdeltaEcoreReferenceExpression _last = IterableExtensions.<EdeltaEcoreReferenceExpression>last(ecoreRefs);
+      final Procedure1<EdeltaEcoreReferenceExpression> _function_2 = (EdeltaEcoreReferenceExpression it_1) -> {
+        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "setName");
+      };
+      ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_last, _function_2);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testEcoreRefExpForCreatedSubPackage() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EcoreFactory");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass) // 0");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewESubpackage(\"subpackage\", \"subpackage\", \"subpackage\") [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("addEClass(ecoreref(NewClass)) // 1");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass) // 2");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(subpackage) // 3");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      List<EdeltaEcoreReferenceExpression> _allEcoreReferenceExpressions = this.getAllEcoreReferenceExpressions(it);
+      final Procedure1<List<EdeltaEcoreReferenceExpression>> _function_1 = (List<EdeltaEcoreReferenceExpression> it_1) -> {
+        EdeltaEcoreReferenceExpression _get = it_1.get(0);
+        final Procedure1<EdeltaEcoreReferenceExpression> _function_2 = (EdeltaEcoreReferenceExpression it_2) -> {
+          this.assertEcoreRefExpElementMapsToXExpression(it_2, it_2.getReference().getEnamedelement(), "addNewEClass");
+        };
+        ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_get, _function_2);
+        EdeltaEcoreReferenceExpression _get_1 = it_1.get(1);
+        final Procedure1<EdeltaEcoreReferenceExpression> _function_3 = (EdeltaEcoreReferenceExpression it_2) -> {
+          this.assertEcoreRefExpElementMapsToXExpression(it_2, it_2.getReference().getEnamedelement(), "addNewEClass");
+        };
+        ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_get_1, _function_3);
+        EdeltaEcoreReferenceExpression _get_2 = it_1.get(2);
+        final Procedure1<EdeltaEcoreReferenceExpression> _function_4 = (EdeltaEcoreReferenceExpression it_2) -> {
+          this.assertEcoreRefExpElementMapsToXExpression(it_2, it_2.getReference().getEnamedelement(), "addEClass");
+        };
+        ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_get_2, _function_4);
+        EdeltaEcoreReferenceExpression _get_3 = it_1.get(3);
+        final Procedure1<EdeltaEcoreReferenceExpression> _function_5 = (EdeltaEcoreReferenceExpression it_2) -> {
+          this.assertEcoreRefExpElementMapsToXExpression(it_2, it_2.getReference().getEnamedelement(), "addNewESubpackage");
+        };
+        ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_get_3, _function_5);
+      };
+      ObjectExtensions.<List<EdeltaEcoreReferenceExpression>>operator_doubleArrow(_allEcoreReferenceExpressions, _function_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testEcoreRefExpForExistingEClass() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EcoreFactory");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(FooClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      final List<EdeltaEcoreReferenceExpression> ecoreRefs = this.getAllEcoreReferenceExpressions(it);
+      EdeltaEcoreReferenceExpression _head = IterableExtensions.<EdeltaEcoreReferenceExpression>head(ecoreRefs);
+      final Procedure1<EdeltaEcoreReferenceExpression> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
+        final XExpression exp = this.derivedStateHelper.getEcoreReferenceExpressionState(it_1).getEnamedElementXExpressionMap().get(it_1.getReference().getEnamedelement());
+        Assert.assertNull(exp);
+      };
+      ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_head, _function_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testEcoreRefExpForCreatedEClassRenamedInInitializer() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EcoreFactory");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\") [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("ecoreref(NewClass)");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("name = \"Renamed\"");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("abstract = true");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(Renamed)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      final List<EdeltaEcoreReferenceExpression> ecoreRefs = this.getAllEcoreReferenceExpressions(it);
+      EdeltaEcoreReferenceExpression _head = IterableExtensions.<EdeltaEcoreReferenceExpression>head(ecoreRefs);
+      final Procedure1<EdeltaEcoreReferenceExpression> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
+        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "addNewEClass");
+      };
+      ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_head, _function_1);
+      EdeltaEcoreReferenceExpression _last = IterableExtensions.<EdeltaEcoreReferenceExpression>last(ecoreRefs);
+      final Procedure1<EdeltaEcoreReferenceExpression> _function_2 = (EdeltaEcoreReferenceExpression it_1) -> {
+        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "setName");
+      };
+      ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_last, _function_2);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testElementExpressionMapForCreatedEClassWithEMFAPI() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EcoreFactory");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("EClassifiers += EcoreFactory.eINSTANCE.createEClass");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("EClassifiers.last.name = \"NewClass\"");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    _builder.append("modifyEcore anotherTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      final EdeltaCopiedEPackagesMap map = this.interpretProgram(it);
+      final EClassifier createClass = map.get("foo").getEClassifier("NewClass");
+      final XExpression exp = this.derivedStateHelper.getEnamedElementXExpressionMap(it.eResource()).get(createClass);
+      Assert.assertNotNull(exp);
+      Assert.assertEquals("setName", this.getFeatureCall(exp).getFeature().getSimpleName());
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testElementExpressionMapForCreatedEClassWithDoubleArrow() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EcoreFactory");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("EClassifiers += EcoreFactory.eINSTANCE.createEClass => [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("name = \"NewClass\"");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    _builder.append("modifyEcore anotherTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      final EdeltaCopiedEPackagesMap map = this.interpretProgram(it);
+      final EClassifier createClass = map.get("foo").getEClassifier("NewClass");
+      final XExpression exp = this.derivedStateHelper.getEnamedElementXExpressionMap(it.eResource()).get(createClass);
+      Assert.assertNotNull(exp);
+      Assert.assertEquals("setName", this.getFeatureCall(exp).getFeature().getSimpleName());
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testElementExpressionMapForCreatedEClassWithoutName() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EcoreFactory");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("EClassifiers += EcoreFactory.eINSTANCE.createEClass");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      final EdeltaCopiedEPackagesMap map = this.interpretProgram(it);
+      final EClass createClass = this.getLastEClass(map.get("foo"));
+      final XExpression exp = this.derivedStateHelper.getEnamedElementXExpressionMap(it.eResource()).get(createClass);
+      Assert.assertNotNull(exp);
+      Assert.assertEquals("operator_add", this.getFeatureCall(exp).getFeature().getSimpleName());
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testElementExpressionMapForCreatedEClassWithMethodCall() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EcoreFactory");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("getEClassifiers().add(EcoreFactory.eINSTANCE.createEClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      final EdeltaCopiedEPackagesMap map = this.interpretProgram(it);
+      final EClass createClass = this.getLastEClass(map.get("foo"));
+      final XExpression exp = this.derivedStateHelper.getEnamedElementXExpressionMap(it.eResource()).get(createClass);
+      Assert.assertNotNull(exp);
+      Assert.assertEquals("add", this.getFeatureCall(exp).getFeature().getSimpleName());
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
   protected void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final Procedure1<? super EPackage> testExecutor) {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, true, testExecutor);
   }
@@ -1101,5 +1567,21 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     final String packageName = it.getEpackage().getName();
     final EPackage epackage = copiedEPackagesMap.get(packageName);
     testExecutor.apply(epackage);
+  }
+  
+  private EdeltaCopiedEPackagesMap interpretProgram(final EdeltaProgram program) {
+    final Function1<EPackage, String> _function = (EPackage it) -> {
+      return it.getName();
+    };
+    Map<String, EPackage> _map = IterableExtensions.<String, EPackage>toMap(this.getCopiedEPackages(program), _function);
+    final EdeltaCopiedEPackagesMap copiedEPackagesMap = new EdeltaCopiedEPackagesMap(_map);
+    this.interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap);
+    return copiedEPackagesMap;
+  }
+  
+  private void assertEcoreRefExpElementMapsToXExpression(final EdeltaEcoreReferenceExpression it, final ENamedElement element, final String expectedFeatureCallSimpleName) {
+    final XExpression exp = this.derivedStateHelper.getEcoreReferenceExpressionState(it).getEnamedElementXExpressionMap().get(element);
+    Assert.assertNotNull(exp);
+    Assert.assertEquals(expectedFeatureCallSimpleName, this.getFeatureCall(exp).getFeature().getSimpleName());
   }
 }

@@ -3,7 +3,10 @@ package edelta.tests
 import com.google.inject.Inject
 import com.google.inject.Provider
 import edelta.edelta.EdeltaFactory
-import edelta.interpreter.EdeltaInterpreterCleaner
+import edelta.interpreter.EdeltaInterpreterDiagnostic
+import edelta.interpreter.EdeltaInterpreterResourceListener
+import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap
+import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
@@ -15,17 +18,17 @@ import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.util.IResourceScopeCache
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl
+import org.eclipse.xtext.xbase.XExpression
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.assertThat
 import static org.mockito.Mockito.*
-import edelta.interpreter.EdeltaInterpreterDiagnostic
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
-class EdeltaInterpreterCleanerTest {
+class EdeltaInterpreterResourceListenerTest {
 
 	static class SpiedProvider implements Provider<String> {
 		override get() {
@@ -37,9 +40,10 @@ class EdeltaInterpreterCleanerTest {
 	static val edeltaFactory = EdeltaFactory.eINSTANCE
 
 	@Inject IResourceScopeCache cache
-	var EdeltaInterpreterCleaner cleaner
+	var EdeltaInterpreterResourceListener listener
 	var EPackage ePackage
 	var Resource resource
+	var EdeltaENamedElementXExpressionMap enamedElementXExpressionMap
 	var Provider<String> stringProvider
 
 	@Before
@@ -50,9 +54,10 @@ class EdeltaInterpreterCleanerTest {
 			]
 		]
 		resource = new ResourceImpl
-		cleaner = new EdeltaInterpreterCleaner(cache, resource)
+		enamedElementXExpressionMap = new EdeltaENamedElementXExpressionMap
+		listener = new EdeltaInterpreterResourceListener(cache, resource, enamedElementXExpressionMap)
 		stringProvider = spy(new SpiedProvider)
-		ePackage.eAdapters += cleaner
+		ePackage.eAdapters += listener
 	}
 
 	@Test
@@ -127,6 +132,73 @@ class EdeltaInterpreterCleanerTest {
 			.hasSize(1)
 		assertThat(resource.warnings)
 			.hasSize(1)
+	}
+
+	@Test
+	def void testENamedElementXExpressionMapIsUpdatedWithCurrentExpressionWhenNameIsChanged() {
+		val currentExpression = mock(XExpression)
+		listener.setCurrentExpression(currentExpression)
+		val element = ePackage.EClassifiers.get(0)
+		assertThat(enamedElementXExpressionMap).isEmpty
+		// change the name
+		element.name = "Modified"
+		assertThat(enamedElementXExpressionMap)
+			.hasEntrySatisfying(element) [
+				assertThat(it).isSameAs(currentExpression)
+			]
+	}
+
+	@Test
+	def void testENamedElementXExpressionMapUpdatedIfEntryAlreadyPresent() {
+		val alreadyMappedExpression = mock(XExpression)
+		val currentExpression = mock(XExpression)
+		val element = ePackage.EClassifiers.get(0)
+		enamedElementXExpressionMap.put(element, alreadyMappedExpression)
+		listener.setCurrentExpression(currentExpression)
+		// change the name
+		element.name = "Modified"
+		assertThat(enamedElementXExpressionMap)
+			.hasEntrySatisfying(element) [
+				assertThat(it).isSameAs(currentExpression)
+			]
+	}
+
+	@Test
+	def void testENamedElementXExpressionMapIsUpdatedWithCurrentExpressionWhenAnElementIsAdded() {
+		val currentExpression = mock(XExpression)
+		listener.setCurrentExpression(currentExpression)
+		val element = ecoreFactory.createEClass
+		assertThat(enamedElementXExpressionMap).isEmpty
+		// element is added to an existing collection
+		ePackage.EClassifiers += element
+		assertThat(enamedElementXExpressionMap)
+			.hasEntrySatisfying(element) [
+				assertThat(it).isSameAs(currentExpression)
+			]
+	}
+
+	@Test
+	def void testENamedElementXExpressionMapIsNotUpdatedWhenNotENamedElementIsAdded() {
+		val currentExpression = mock(XExpression)
+		listener.setCurrentExpression(currentExpression)
+		assertThat(enamedElementXExpressionMap).isEmpty
+		val element = ePackage.EClassifiers.get(0) as EClass
+		// add supertype
+		element.ESuperTypes += ecoreFactory.createEClass
+		// this will trigger an ADD event with a EGenericType,
+		// which is not an ENamedElement
+		assertThat(enamedElementXExpressionMap)
+			.doesNotContainKey(element)
+	}
+
+	@Test
+	def void testENamedElementXExpressionMapIsNotUpdatedWithCurrentExpressionWhenAnotherFeatureIsChanged() {
+		val currentExpression = mock(XExpression)
+		listener.setCurrentExpression(currentExpression)
+		assertThat(enamedElementXExpressionMap).isEmpty
+		// change the something different than the name
+		ePackage.EClassifiers.get(0).instanceClassName = "foo"
+		assertThat(enamedElementXExpressionMap).isEmpty
 	}
 
 	def createEObjectDiagnosticMock(EObject problematicObject) {

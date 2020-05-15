@@ -3,16 +3,21 @@ package edelta.interpreter;
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE;
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MODIFY_ECORE_OPERATION__BODY;
 import static edelta.util.EdeltaModelUtil.getProgram;
+import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
 import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashMap;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.exists;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.filter;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.forEach;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.xtext.common.types.JvmField;
 import org.eclipse.xtext.common.types.JvmFormalParameter;
@@ -23,6 +28,7 @@ import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.IResourceScopeCache;
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
+import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationResult;
@@ -33,6 +39,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import edelta.compiler.EdeltaCompilerUtil;
+import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
@@ -41,6 +48,8 @@ import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
 import edelta.lib.AbstractEdelta;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
+import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 import edelta.util.EdeltaModelUtil;
 import edelta.validation.EdeltaValidator;
 
@@ -68,6 +77,9 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	@Inject
 	private IQualifiedNameProvider qualifiedNameProvider;
 
+	@Inject
+	private EdeltaDerivedStateHelper derivedStateHelper;
+
 	private int interpreterTimeout =
 		Integer.parseInt(System.getProperty("edelta.interpreter.timeout", "2000"));
 
@@ -81,6 +93,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	private Map<EdeltaUseAs, Object> useAsFields;
 
 	private EdeltaProgram currentProgram;
+
+	private EdeltaInterpreterResourceListener listener;
 
 	class EdeltaInterpreterCancelIndicator implements CancelIndicator {
 		long stopAt = System.currentTimeMillis() +
@@ -116,15 +130,45 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	public void evaluateModifyEcoreOperations(final EdeltaProgram program, final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		this.currentProgram = program;
+		final Collection<EPackage> copiedEPackages = copiedEPackagesMap.values();
 		thisObject = new EdeltaInterpreterEdeltaImpl
 			(Lists.newArrayList(
-				Iterables.concat(copiedEPackagesMap.values(),
+				Iterables.concat(copiedEPackages,
 						program.getMetamodels())));
 		useAsFields = newHashMap();
 		List<EdeltaModifyEcoreOperation> filteredOperations =
 			edeltaInterpreterHelper.filterOperations(program.getModifyEcoreOperations());
-		for (final EdeltaModifyEcoreOperation op : filteredOperations) {
-			evaluateModifyEcoreOperation(op, copiedEPackagesMap);
+		final Resource eResource = program.eResource();
+		listener = new EdeltaInterpreterResourceListener(cache, eResource,
+				derivedStateHelper.getEnamedElementXExpressionMap(eResource));
+		try {
+			addResourceListener(copiedEPackages);
+			for (final EdeltaModifyEcoreOperation op : filteredOperations) {
+				evaluateModifyEcoreOperation(op, copiedEPackagesMap);
+			}
+		} finally {
+			removeResourceListener(copiedEPackages);
+		}
+	}
+
+	private void removeResourceListener(final Collection<EPackage> copiedEPackages) {
+		// this will also trigger the last event caught by our adapter
+		// implying a final clearing, which is required to avoid
+		// duplicate errors
+		for (EPackage ePackage : copiedEPackages) {
+			ePackage.eAdapters().remove(listener);
+		}
+	}
+
+	private void addResourceListener(final Collection<EPackage> copiedEPackages) {
+		// The listener clears the cache as soon as the interpreter modifies
+		// the EPackage of the modifyEcore expression
+		// since new types might be available after the interpretation
+		// and existing types might have been modified or renamed
+		// this makes sure that scoping and the type computer
+		// is performed again
+		for (EPackage ePackage : copiedEPackages) {
+			ePackage.eAdapters().add(listener);
 		}
 	}
 
@@ -132,31 +176,15 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		final EPackage ePackage = copiedEPackagesMap.
 				get(op.getEpackage().getName());
-		final EdeltaInterpreterCleaner cacheCleaner =
-				new EdeltaInterpreterCleaner(cache, op.eResource());
-		// clear the cache as soon as the interpreter modifies
-		// the EPackage of the modifyEcore expression
-		// since new types might be available after the interpretation
-		// and existing types might have been modified or renamed
-		// this makes sure that scoping and the type computer
-		// is performed again
-		ePackage.eAdapters().add(cacheCleaner);
-		try {
-			IEvaluationContext context = createContext();
-			context.newValue(IT_QUALIFIED_NAME, ePackage);
-			configureContextForJavaThis(context);
-			final IEvaluationResult result = evaluate(op.getBody(), context,
-					new EdeltaInterpreterCancelIndicator());
-			if (result == null) {
-				addTimeoutWarning(op);
-			} else {
-				handleResultException(result.getException());
-			}
-		} finally {
-			// this will also trigger the last event caught by our adapter
-			// implying a final clearing, which is required to avoid
-			// duplicate errors
-			ePackage.eAdapters().remove(cacheCleaner);
+		IEvaluationContext context = createContext();
+		context.newValue(IT_QUALIFIED_NAME, ePackage);
+		configureContextForJavaThis(context);
+		final IEvaluationResult result = evaluate(op.getBody(), context,
+				new EdeltaInterpreterCancelIndicator());
+		if (result == null) {
+			addTimeoutWarning(op);
+		} else {
+			handleResultException(result.getException());
 		}
 	}
 
@@ -192,6 +220,16 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				new String[] {}));
 	}
 
+	private void updateListenerCurrentExpression(XExpression expression) {
+		if (listener != null && shouldTrackExpression(expression)) {
+			listener.setCurrentExpression(expression);
+		}
+	}
+
+	private boolean shouldTrackExpression(XExpression expression) {
+		return expression.eContainer() instanceof XBlockExpression;
+	}
+
 	@Override
 	protected Object doEvaluate(final XExpression expression, final IEvaluationContext context,
 			final CancelIndicator indicator) {
@@ -200,6 +238,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				((EdeltaEcoreReferenceExpression) expression),
 				context, indicator);
 		}
+		updateListenerCurrentExpression(expression);
 		return super.doEvaluate(expression, context, indicator);
 	}
 
@@ -222,10 +261,30 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				if (op != null) {
 					result = super.invokeOperation
 						(op, thisObject, args, context, indicator);
+					postProcess(result, ecoreReferenceExpression);
 					checkStaleAccess(result, ecoreReferenceExpression);
 				}
 				return result;
 			});
+	}
+
+	private void postProcess(Object result, EdeltaEcoreReferenceExpression exp) {
+		if (result != null) {
+			// takes a snapshot of the mapping EEnamedElement -> XExpression
+			// and associates it to this EdeltaEcoreReferenceExpression
+			List<ENamedElement> enamedElements =
+				getAllContentsOfType(exp, EdeltaEcoreReference.class)
+					.stream().map(EdeltaEcoreReference::getEnamedelement)
+					.collect(Collectors.toList());
+			EdeltaENamedElementXExpressionMap expMap = derivedStateHelper
+				.getEcoreReferenceExpressionState(exp)
+				.getEnamedElementXExpressionMap();
+			EdeltaENamedElementXExpressionMap elMap = derivedStateHelper
+				.getEnamedElementXExpressionMap(exp.eResource());
+			elMap.entrySet().stream()
+				.filter(entry -> enamedElements.contains(entry.getKey()))
+				.forEach(entry -> expMap.put(entry.getKey(), entry.getValue()));
+		}
 	}
 
 	private void checkStaleAccess(Object result, EdeltaEcoreReferenceExpression ecoreReferenceExpression) {
