@@ -1,0 +1,17 @@
+// IMPORTANT: ecores must be in source directories
+// otherwise you can't refer to them
+
+metamodel "ecore"
+metamodel "mainpackage"
+
+modifyEcore SomeChanges epackage mainpackage {
+	ecoreref(subpackage).addNewEClass("AddedToSubPackage") [
+		addNewEReference("refToMainPackageClass",
+			ecoreref(mainpackage.MyClass)
+		)
+	]
+	// uncomment the following to see an ambiguity error
+	// use the quickfix to use a fully qualified reference
+//	ecoreref(MyClass)
+//	ecoreref(myAttribute)
+}
