@@ -115,4 +115,45 @@ class EdeltaQuickfixTest extends AbstractQuickfixTest {
 		'''))
 	}
 
+	@Test def fixAmbiguousEcoreRef() {
+		'''
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ecoreref(MyClass)
+			}
+		'''.testQuickfixesOn
+		(EdeltaValidator.AMBIGUOUS_REFERENCE,
+			new Quickfix(
+			"Fix ambiguity with 'mainpackage.MyClass'",
+			"Fix ambiguity with 'mainpackage.MyClass'",
+			'''
+				metamodel "mainpackage"
+				
+				modifyEcore aTest epackage mainpackage {
+					ecoreref(mainpackage.MyClass)
+				}
+			'''),
+			new Quickfix(
+			"Fix ambiguity with 'mainpackage.subpackage.MyClass'",
+			"Fix ambiguity with 'mainpackage.subpackage.MyClass'",
+			'''
+				metamodel "mainpackage"
+				
+				modifyEcore aTest epackage mainpackage {
+					ecoreref(mainpackage.subpackage.MyClass)
+				}
+			'''),
+			new Quickfix(
+			"Fix ambiguity with 'mainpackage.subpackage.subsubpackage.MyClass'",
+			"Fix ambiguity with 'mainpackage.subpackage.subsubpackage.MyClass'",
+			'''
+				metamodel "mainpackage"
+				
+				modifyEcore aTest epackage mainpackage {
+					ecoreref(mainpackage.subpackage.subsubpackage.MyClass)
+				}
+			'''))
+	}
+
 }

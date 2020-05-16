@@ -49,4 +49,22 @@ public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider
 					renamed)
 		);
 	}
+
+	@Fix(EdeltaValidator.AMBIGUOUS_REFERENCE)
+	public void fixEcoreRefAmbiguity(final Issue issue, final IssueResolutionAcceptor acceptor) {
+		final String[] alternatives = issue.getData();
+		for (String alternative : alternatives) {
+			acceptor.accept(
+				issue,
+				"Fix ambiguity with \'" + alternative + "\'",
+				"Fix ambiguity with \'" + alternative + "\'",
+				"EObject.gif",
+				context -> 
+					context.getXtextDocument().replace(
+						issue.getOffset(),
+						issue.getLength(),
+						alternative)
+			);
+		}
+	}
 }
