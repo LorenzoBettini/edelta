@@ -39,6 +39,7 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	public static val INTERPRETER_ACCESS_REMOVED_ELEMENT = PREFIX + "InterpreterAccessRemovedElement";
 	public static val INTERPRETER_ACCESS_RENAMED_ELEMENT = PREFIX + "InterpreterAccessRenamedElement";
 	public static val DUPLICATE_DECLARATION = PREFIX + "DuplicateDeclaration";
+	public static val DUPLICATE_METAMODEL_IMPORT = PREFIX + "DuplicateMetamodelImport";
 	public static val INVALID_SUBPACKAGE_IMPORT = PREFIX + "InvalidSubPackageImport";
 	public static val INVALID_SUBPACKAGE_MODIFICATION = PREFIX + "InvalidSubPackageModification";
 	public static val AMBIGUOUS_REFERENCE = PREFIX + "AmbiguousReference";
@@ -77,6 +78,7 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	@Check
 	def void checkProgram(EdeltaProgram p) {
 		var metamodelIndex = 0
+		val metamodelImportSet = newHashSet
 		for (metamodel : p.metamodels) {
 			val rootPackage = findRootSuperPackage(metamodel)
 			if (rootPackage !== null) {
@@ -89,6 +91,18 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 					rootPackage.name // the fix for the import
 				)
 			}
+			val metamodelImport = getMetamodelImportText(p, metamodelIndex)
+			if (metamodelImportSet.contains(metamodelImport)) {
+				error(
+					"Duplicate metamodel import " + metamodelImport,
+					p,
+					EDELTA_PROGRAM__METAMODELS,
+					metamodelIndex,
+					DUPLICATE_METAMODEL_IMPORT,
+					"" + metamodelIndex // the fix for the import
+				)
+			}
+			metamodelImportSet.add(metamodelImport)
 			metamodelIndex++
 		}
 

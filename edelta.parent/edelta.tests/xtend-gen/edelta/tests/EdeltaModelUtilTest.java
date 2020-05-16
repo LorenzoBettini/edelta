@@ -9,6 +9,7 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.xtend2.lib.StringConcatenation;
+import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.xbase.XExpression;
@@ -137,5 +138,30 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
         EdeltaModelUtil.getEcoreReferenceText(this.getEdeltaEcoreReference(it.get(3))));
     };
     ObjectExtensions.<EList<XExpression>>operator_doubleArrow(_expressions, _function);
+  }
+  
+  @Test
+  public void testGetMetamodelImportText() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.append("metamodel \"bar\"");
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      Assert.assertEquals("\"foo\"", 
+        EdeltaModelUtil.getMetamodelImportText(it, 0));
+      Assert.assertEquals("\"bar\"", 
+        EdeltaModelUtil.getMetamodelImportText(it, 1));
+      final INode node = EdeltaModelUtil.getMetamodelImportNodes(it).get(1);
+      Assert.assertEquals(input.indexOf("\"bar\""), node.getOffset());
+      Assert.assertEquals("\"bar\"".length(), node.getLength());
+      Assert.assertEquals(input.indexOf("metamodel", 2), 
+        node.getPreviousSibling().getPreviousSibling().getOffset());
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
 }

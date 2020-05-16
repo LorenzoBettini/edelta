@@ -444,6 +444,36 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testDuplicateMetamodelImport() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.append("metamodel \"bar\"");
+    _builder.newLine();
+    _builder.append("metamodel \"nonexistent\"");
+    _builder.newLine();
+    _builder.append("metamodel \"nonexistent\" // also check unresolved imports");
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcores = this.parseWithTestEcores(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.eINSTANCE.getEdeltaProgram(), 
+        EdeltaValidator.DUPLICATE_METAMODEL_IMPORT, 
+        input.lastIndexOf("\"nonexistent\""), "\"nonexistent\"".length(), 
+        "Duplicate metamodel import \"nonexistent\"");
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.eINSTANCE.getEdeltaProgram(), 
+        EdeltaValidator.DUPLICATE_METAMODEL_IMPORT, 
+        input.lastIndexOf("\"foo\""), "\"foo\"".length(), 
+        "Duplicate metamodel import \"foo\"");
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcores, _function);
+  }
+  
+  @Test
   public void testReferenceToEClassRemoved() {
     final String input = this._inputs.referenceToEClassRemoved().toString();
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);

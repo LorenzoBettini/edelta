@@ -3,11 +3,16 @@
  */
 package edelta.ui.quickfix;
 
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtext.nodemodel.INode;
+import org.eclipse.xtext.ui.editor.model.edit.IModificationContext;
 import org.eclipse.xtext.ui.editor.quickfix.Fix;
 import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor;
 import org.eclipse.xtext.validation.Issue;
 import org.eclipse.xtext.xbase.annotations.ui.quickfix.XbaseWithAnnotationsQuickfixProvider;
 
+import edelta.edelta.EdeltaProgram;
+import edelta.util.EdeltaModelUtil;
 import edelta.validation.EdeltaValidator;
 
 /**
@@ -67,4 +72,26 @@ public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider
 			);
 		}
 	}
+
+	@Fix(EdeltaValidator.DUPLICATE_METAMODEL_IMPORT)
+	public void removeDuplicateMetamodelImport(final Issue issue, final IssueResolutionAcceptor acceptor) {
+		final int importToRemove = Integer.parseInt(issue.getData()[0]);
+		acceptor.accept(
+			issue,
+			"Remove duplicate metamodel import",
+			"Remove duplicate metamodel import",
+			"EPackage.gif",
+			(EObject element, IModificationContext context) -> {
+				INode node = EdeltaModelUtil.getMetamodelImportNodes
+					((EdeltaProgram) element).get(importToRemove);
+				// the node corresponding to the keyword 'metamodel'
+				INode metamodelNode = node.getPreviousSibling().getPreviousSibling();
+				int offset = metamodelNode.getOffset();
+				int length = node.getEndOffset() - offset  + 1;
+				// also remove newline
+				context.getXtextDocument().replace(offset, length, "");
+			}
+		);
+	}
+
 }

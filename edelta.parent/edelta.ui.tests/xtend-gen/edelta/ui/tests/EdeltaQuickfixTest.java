@@ -232,4 +232,27 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
       "Fix ambiguity with \'mainpackage.subpackage.subsubpackage.MyClass\'", _builder_3.toString());
     this.testQuickfixesOn(_builder, EdeltaValidator.AMBIGUOUS_REFERENCE, _quickfix, _quickfix_1, _quickfix_2);
   }
+  
+  @Test
+  public void fixRemoveDuplicateImport() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"bar\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"bar\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("metamodel \"bar\"");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("metamodel \"foo\"");
+    _builder_1.newLine();
+    AbstractQuickfixTest.Quickfix _quickfix = new AbstractQuickfixTest.Quickfix("Remove duplicate metamodel import", 
+      "Remove duplicate metamodel import", _builder_1.toString());
+    this.testQuickfixesOn(_builder, EdeltaValidator.DUPLICATE_METAMODEL_IMPORT, _quickfix);
+  }
 }

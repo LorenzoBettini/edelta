@@ -156,4 +156,23 @@ class EdeltaQuickfixTest extends AbstractQuickfixTest {
 			'''))
 	}
 
+	@Test def fixRemoveDuplicateImport() {
+		'''
+			metamodel "bar"
+
+			metamodel "bar"
+
+			metamodel "foo"
+		'''.testQuickfixesOn
+		(EdeltaValidator.DUPLICATE_METAMODEL_IMPORT,
+			new Quickfix("Remove duplicate metamodel import",
+			"Remove duplicate metamodel import",
+		'''
+			metamodel "bar"
+			
+			
+			metamodel "foo"
+		'''))
+	}
+
 }
