@@ -174,4 +174,62 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
       "Use renamed element \'mainpackage.subpackage.subsubpackage.MyClass.Renamed\'", _builder_1.toString());
     this.testQuickfixesOn(_builder, EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT, _quickfix);
   }
+  
+  @Test
+  public void fixAmbiguousEcoreRef() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(MyClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("metamodel \"mainpackage\"");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("modifyEcore aTest epackage mainpackage {");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("ecoreref(mainpackage.MyClass)");
+    _builder_1.newLine();
+    _builder_1.append("}");
+    _builder_1.newLine();
+    AbstractQuickfixTest.Quickfix _quickfix = new AbstractQuickfixTest.Quickfix(
+      "Fix ambiguity with \'mainpackage.MyClass\'", 
+      "Fix ambiguity with \'mainpackage.MyClass\'", _builder_1.toString());
+    StringConcatenation _builder_2 = new StringConcatenation();
+    _builder_2.append("metamodel \"mainpackage\"");
+    _builder_2.newLine();
+    _builder_2.newLine();
+    _builder_2.append("modifyEcore aTest epackage mainpackage {");
+    _builder_2.newLine();
+    _builder_2.append("\t");
+    _builder_2.append("ecoreref(mainpackage.subpackage.MyClass)");
+    _builder_2.newLine();
+    _builder_2.append("}");
+    _builder_2.newLine();
+    AbstractQuickfixTest.Quickfix _quickfix_1 = new AbstractQuickfixTest.Quickfix(
+      "Fix ambiguity with \'mainpackage.subpackage.MyClass\'", 
+      "Fix ambiguity with \'mainpackage.subpackage.MyClass\'", _builder_2.toString());
+    StringConcatenation _builder_3 = new StringConcatenation();
+    _builder_3.append("metamodel \"mainpackage\"");
+    _builder_3.newLine();
+    _builder_3.newLine();
+    _builder_3.append("modifyEcore aTest epackage mainpackage {");
+    _builder_3.newLine();
+    _builder_3.append("\t");
+    _builder_3.append("ecoreref(mainpackage.subpackage.subsubpackage.MyClass)");
+    _builder_3.newLine();
+    _builder_3.append("}");
+    _builder_3.newLine();
+    AbstractQuickfixTest.Quickfix _quickfix_2 = new AbstractQuickfixTest.Quickfix(
+      "Fix ambiguity with \'mainpackage.subpackage.subsubpackage.MyClass\'", 
+      "Fix ambiguity with \'mainpackage.subpackage.subsubpackage.MyClass\'", _builder_3.toString());
+    this.testQuickfixesOn(_builder, EdeltaValidator.AMBIGUOUS_REFERENCE, _quickfix, _quickfix_1, _quickfix_2);
+  }
 }
