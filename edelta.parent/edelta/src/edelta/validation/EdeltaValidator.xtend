@@ -11,6 +11,7 @@ import edelta.lib.AbstractEdelta
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.common.types.JvmTypeReference
+import org.eclipse.xtext.util.IResourceScopeCache
 import org.eclipse.xtext.validation.Check
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.eclipse.xtext.xbase.typesystem.^override.OverrideHelper
@@ -20,6 +21,10 @@ import org.eclipse.xtext.xbase.typesystem.util.Multimaps2
 
 import static edelta.edelta.EdeltaPackage.Literals.*
 import static edelta.util.EdeltaModelUtil.*
+import edelta.edelta.EdeltaEcoreReferenceExpression
+import edelta.util.EdeltaEcoreHelper
+import org.eclipse.xtext.naming.IQualifiedNameProvider
+import edelta.util.EdeltaModelUtil
 
 /**
  * This class contains custom validation rules. 
@@ -36,10 +41,14 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	public static val DUPLICATE_DECLARATION = PREFIX + "DuplicateDeclaration";
 	public static val INVALID_SUBPACKAGE_IMPORT = PREFIX + "InvalidSubPackageImport";
 	public static val INVALID_SUBPACKAGE_MODIFICATION = PREFIX + "InvalidSubPackageModification";
+	public static val AMBIGUOUS_REFERENCE = PREFIX + "AmbiguousReference";
 
 	@Inject CommonTypeComputationServices services
 	@Inject OverrideHelper overrideHelper
 	@Inject extension IJvmModelAssociations
+	@Inject extension EdeltaEcoreHelper
+	@Inject extension IQualifiedNameProvider
+	@Inject IResourceScopeCache cache
 
 	@Check
 	def void checkValidUseAs(EdeltaUseAs useAs) {
@@ -116,6 +125,30 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 				op,
 				EDELTA_MODIFY_ECORE_OPERATION__EPACKAGE,
 				INVALID_SUBPACKAGE_MODIFICATION
+			)
+		}
+	}
+
+	@Check
+	def void checkEcoreReferenceExpression(EdeltaEcoreReferenceExpression e) {
+		val fqnames = cache.get("fqnamesOfEnamedElements", e.eResource) [
+			getProgramENamedElements(e)
+				.map[fullyQualifiedName]
+				.filterNull
+				.map[toString]
+				.toSet
+		]
+		val refText = EdeltaModelUtil.getEcoreReferenceText(e.reference)
+		// qualification '.' is the boundary for searching for matches
+		val toSearch = "." + refText
+		val matches = fqnames.filter[endsWith(toSearch)]
+		if (matches.size > 1) {
+			error(
+				"Ambiguous reference '" + refText + "':\n" +
+					matches.map["  " + it].join("\n"),
+				e,
+				EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE,
+				AMBIGUOUS_REFERENCE
 			)
 		}
 	}

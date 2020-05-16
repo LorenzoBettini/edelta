@@ -488,6 +488,56 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		'''
 		input
 		.parseWithTestEcoreWithSubPackage
+		.assertErrorsAsStrings(
+			'''
+			Ambiguous reference 'MyClass':
+			  mainpackage.MyClass
+			  mainpackage.mainsubpackage.MyClass
+			  mainpackage.mainsubpackage.subsubpackage.MyClass
+			'''
+		)
+	}
+
+	@Test
+	def void testInvalidAmbiguousEcorerefWithCreatedElements() {
+		val input =
+		'''
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			addNewEClass("created") [
+				addNewEAttribute("created", null)
+			]
+			ecoreref(created)
+		}
+		'''
+		input
+		.parseWithTestEcoreWithSubPackage
+		.assertErrorsAsStrings(
+			'''
+			Ambiguous reference 'created':
+			  mainpackage.created
+			  mainpackage.created.created
+			'''
+		)
+	}
+
+	@Test
+	def void testNonAmbiguousEcoreref() {
+		val input =
+		'''
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			addNewEClass("WorkPlace")
+			addNewEClass("LivingPlace")
+			addNewEClass("Place")
+			ecoreref(Place) // NON ambiguous
+		}
+		'''
+		input
+		.parseWithTestEcoreWithSubPackage
 		.assertNoErrors
 	}
+
 }

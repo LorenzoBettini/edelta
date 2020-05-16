@@ -676,6 +676,81 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     _builder.append("}");
     _builder.newLine();
     final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("Ambiguous reference \'MyClass\':");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("mainpackage.MyClass");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("mainpackage.mainsubpackage.MyClass");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("mainpackage.mainsubpackage.subsubpackage.MyClass");
+    _builder_1.newLine();
+    this.assertErrorsAsStrings(_parseWithTestEcoreWithSubPackage, _builder_1);
+  }
+  
+  @Test
+  public void testInvalidAmbiguousEcorerefWithCreatedElements() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"created\") [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("addNewEAttribute(\"created\", null)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(created)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("Ambiguous reference \'created\':");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("mainpackage.created");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("mainpackage.created.created");
+    _builder_1.newLine();
+    this.assertErrorsAsStrings(_parseWithTestEcoreWithSubPackage, _builder_1);
+  }
+  
+  @Test
+  public void testNonAmbiguousEcoreref() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"WorkPlace\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"LivingPlace\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"Place\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(Place) // NON ambiguous");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
     this._validationTestHelper.assertNoErrors(this.parseWithTestEcoreWithSubPackage(input));
   }
 }
