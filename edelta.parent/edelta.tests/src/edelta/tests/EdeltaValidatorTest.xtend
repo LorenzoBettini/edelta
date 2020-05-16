@@ -523,6 +523,25 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testNonAmbiguousEcorerefWithQualification() {
+		val input =
+		'''
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			addNewEClass("created") [
+				addNewEAttribute("created", null)
+			]
+			ecoreref(created.created) // NON ambiguous
+			ecoreref(mainpackage.created) // NON ambiguous
+		}
+		'''
+		input
+		.parseWithTestEcoreWithSubPackage
+		.assertNoErrors
+	}
+
+	@Test
 	def void testNonAmbiguousEcoreref() {
 		val input =
 		'''

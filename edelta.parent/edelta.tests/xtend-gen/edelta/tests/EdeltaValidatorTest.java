@@ -729,6 +729,35 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testNonAmbiguousEcorerefWithQualification() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"created\") [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("addNewEAttribute(\"created\", null)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(created.created) // NON ambiguous");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(mainpackage.created) // NON ambiguous");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    this._validationTestHelper.assertNoErrors(this.parseWithTestEcoreWithSubPackage(input));
+  }
+  
+  @Test
   public void testNonAmbiguousEcoreref() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mainpackage\"");
