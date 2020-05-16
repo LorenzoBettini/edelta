@@ -99,15 +99,21 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testGetMetamodelImportText() {
-		'''
+		val input = '''
 			metamodel "foo"
 			metamodel "bar"
+			metamodel "foo"
 		'''
-		.parseWithTestEcore => [
+		input.parseWithTestEcore => [
 			assertEquals('"foo"',
 				getMetamodelImportText(it, 0))
 			assertEquals('"bar"',
 				getMetamodelImportText(it, 1))
+			val node = getMetamodelImportNodes(it).get(1) // metamodel "bar"
+			assertEquals(input.indexOf('"bar"'), node.offset)
+			assertEquals('"bar"'.length, node.length)
+			assertEquals(input.indexOf("metamodel", 2),
+				node.previousSibling.previousSibling.offset) // the second metamodel
 		]
 	}
 
