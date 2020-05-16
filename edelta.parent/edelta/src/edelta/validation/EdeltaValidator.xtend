@@ -148,7 +148,8 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 					matches.map["  " + it].join("\n"),
 				e,
 				EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE,
-				AMBIGUOUS_REFERENCE
+				AMBIGUOUS_REFERENCE,
+				matches.toList
 			)
 		}
 	}
