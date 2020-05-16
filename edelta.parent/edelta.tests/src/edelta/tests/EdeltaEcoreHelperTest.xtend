@@ -123,6 +123,28 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testEPackageENamedElementsWithNewSubPackages() {
+		'''
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				addNewESubpackage("anewsubpackage", "aprefix", "aURI") [
+					addNewEClass("AddedInSubpackage")
+				]
+			}
+		'''.parseWithTestEcore => [
+			getENamedElements(
+				copiedEPackages.head.ESubpackages.head, it
+			).
+			assertNamedElements(
+				'''
+				AddedInSubpackage
+				'''
+			)
+		]
+	}
+
+	@Test
 	def void testSubPackageEPackageENamedElementsWithSubPackages() {
 		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
 			getENamedElements(
