@@ -138,4 +138,21 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
     };
     ObjectExtensions.<EList<XExpression>>operator_doubleArrow(_expressions, _function);
   }
+  
+  @Test
+  public void testGetMetamodelImportText() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.append("metamodel \"bar\"");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      Assert.assertEquals("\"foo\"", 
+        EdeltaModelUtil.getMetamodelImportText(it, 0));
+      Assert.assertEquals("\"bar\"", 
+        EdeltaModelUtil.getMetamodelImportText(it, 1));
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
 }

@@ -1,8 +1,8 @@
 package edelta.util;
 
+import static edelta.edelta.EdeltaPackage.Literals.EDELTA_PROGRAM__METAMODELS;
 import static org.eclipse.xtext.EcoreUtil2.getContainerOfType;
-import static org.eclipse.xtext.nodemodel.util.NodeModelUtils.findActualNodeFor;
-import static org.eclipse.xtext.nodemodel.util.NodeModelUtils.getTokenText;
+import static org.eclipse.xtext.nodemodel.util.NodeModelUtils.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,6 +29,11 @@ public class EdeltaModelUtil {
 
 	public static String getEcoreReferenceText(EdeltaEcoreReference ref) {
 		return getTokenText(findActualNodeFor(ref));
+	}
+
+	public static String getMetamodelImportText(EdeltaProgram p, int index) {
+		return getTokenText(
+			findNodesForFeature(p, EDELTA_PROGRAM__METAMODELS).get(index));
 	}
 
 	public static boolean hasCycleInSuperPackage(EPackage ePackage) {

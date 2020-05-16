@@ -97,4 +97,18 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testGetMetamodelImportText() {
+		'''
+			metamodel "foo"
+			metamodel "bar"
+		'''
+		.parseWithTestEcore => [
+			assertEquals('"foo"',
+				getMetamodelImportText(it, 0))
+			assertEquals('"bar"',
+				getMetamodelImportText(it, 1))
+		]
+	}
+
 }

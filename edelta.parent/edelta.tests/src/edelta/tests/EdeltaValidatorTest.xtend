@@ -301,6 +301,31 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testDuplicateMetamodelImport() {
+		val input = '''
+		metamodel "foo"
+		metamodel "bar"
+		metamodel "nonexistent"
+		metamodel "nonexistent" // also check unresolved imports
+		metamodel "foo"
+		'''
+		input.parseWithTestEcores => [
+			assertError(
+				EdeltaPackage.eINSTANCE.edeltaProgram,
+				EdeltaValidator.DUPLICATE_METAMODEL_IMPORT,
+				input.lastIndexOf('"nonexistent"'), '"nonexistent"'.length,
+				'Duplicate metamodel import "nonexistent"'
+			)
+			assertError(
+				EdeltaPackage.eINSTANCE.edeltaProgram,
+				EdeltaValidator.DUPLICATE_METAMODEL_IMPORT,
+				input.lastIndexOf('"foo"'), '"foo"'.length,
+				'Duplicate metamodel import "foo"'
+			)
+		]
+	}
+
+	@Test
 	def void testReferenceToEClassRemoved() {
 		val input = referenceToEClassRemoved.toString
 		input.parseWithTestEcore =>[
