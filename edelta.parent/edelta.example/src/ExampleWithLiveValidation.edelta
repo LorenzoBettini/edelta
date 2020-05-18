@@ -1,0 +1,25 @@
+// IMPORTANT: ecores must be in source directories
+// otherwise you can't refer to them
+
+metamodel "ecore"
+metamodel "myecoreforvalidation"
+
+modifyEcore SomeChanges epackage myecoreforvalidation {
+	// uncomment to see a live warning
+//	addNewEClass("startingWithLowerCase")
+
+	// comment it out and see a warning in the SomeLiveChecks
+	ecoreref(myOtherEClass) => [
+		name = name.toFirstUpper
+	]
+}
+
+modifyEcore SomeLiveChecks epackage myecoreforvalidation {
+	EClassifiers.forEach[
+		eClass |
+		if (Character.isLowerCase(eClass.name.charAt(0))) {
+			showWarning(eClass, "EClass name should start with a capital: "
+				+ eClass.name)
+		}
+	]
+}
