@@ -9,6 +9,7 @@ import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreter;
 import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
+import edelta.interpreter.EdeltaInterpreterWrapperException;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.tests.EdeltaAbstractTest;
@@ -139,7 +140,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       };
       this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, _function_1);
     };
-    Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaInterpreter.EdeltaInterpreterWrapperException.class).hasCauseExactlyInstanceOf(MyCustomException.class);
+    Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaInterpreterWrapperException.class).hasCauseExactlyInstanceOf(MyCustomException.class);
   }
   
   @Test
