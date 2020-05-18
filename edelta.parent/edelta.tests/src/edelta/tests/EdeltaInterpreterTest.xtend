@@ -6,9 +6,9 @@ import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaPackage
 import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreter
-import edelta.interpreter.EdeltaInterpreter.EdeltaInterpreterWrapperException
 import edelta.interpreter.EdeltaInterpreterFactory
 import edelta.interpreter.EdeltaInterpreterRuntimeException
+import edelta.interpreter.EdeltaInterpreterWrapperException
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
@@ -16,6 +16,7 @@ import edelta.tests.additional.MyCustomException
 import edelta.validation.EdeltaValidator
 import java.util.List
 import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
@@ -25,25 +26,19 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
-import org.eclipse.emf.ecore.ENamedElement
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
 class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
-	protected EdeltaInterpreter interpreter
+	@Inject EdeltaInterpreter interpreter
 
 	@Inject Injector injector
 
 	@Inject EdeltaDerivedStateHelper derivedStateHelper
 
-	def EdeltaInterpreter createInterpreter() {
-		injector.getInstance(EdeltaInterpreter)
-	}
-
 	@Before
 	def void setupInterpreter() {
-		interpreter = createInterpreter
 		// for standard tests we disable the timeout
 		// actually we set it to several minutes
 		// this also makes it easier to debug tests
@@ -1017,30 +1012,149 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+	@Test
+	def void testReferenceToEClassRemoved() {
+		val input = referenceToEClassRemoved.toString
+		input.parseWithTestEcore =>[
+			assertThatThrownBy[interpretProgram]
+				.isInstanceOf(EdeltaInterpreterWrapperException)
+			assertError(
+				EdeltaPackage.eINSTANCE.edeltaEcoreReferenceExpression,
+				EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT,
+				input.lastIndexOf("FooClass"),
+				"FooClass".length,
+				"The element is not available anymore in this context: 'FooClass'"
+			)
+			assertErrorsAsStrings("The element is not available anymore in this context: 'FooClass'")
+		]
+	}
+
+	@Test
+	def void testReferenceToEClassRemovedInLoop() {
+		val input = '''
+			metamodel "foo"
+			
+			modifyEcore creation epackage foo {
+				addNewEClass("NewClass1")
+				for (var i = 0; i < 3; i++)
+					EClassifiers -= ecoreref(NewClass1) // the second time it doesn't exist anymore
+				addNewEClass("NewClass2")
+				for (var i = 0; i < 3; i++)
+					EClassifiers -= ecoreref(NewClass2) // the second time it doesn't exist anymore
+			}
+		'''
+		input.parseWithTestEcore =>[
+			interpretProgram
+			assertError(
+				EdeltaPackage.eINSTANCE.edeltaEcoreReferenceExpression,
+				EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT,
+				input.lastIndexOf("NewClass1"),
+				"NewClass1".length,
+				"The element is not available anymore in this context: 'NewClass1'"
+			)
+			assertError(
+				EdeltaPackage.eINSTANCE.edeltaEcoreReferenceExpression,
+				EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT,
+				input.lastIndexOf("NewClass2"),
+				"NewClass2".length,
+				"The element is not available anymore in this context: 'NewClass2'"
+			)
+			// the error must appear only once per ecoreref expression
+			assertErrorsAsStrings(
+				'''
+				The element is not available anymore in this context: 'NewClass1'
+				The element is not available anymore in this context: 'NewClass2'
+				'''
+			)
+		]
+	}
+
+	@Test
+	def void testReferenceToCreatedEClassRemoved() {
+		val input = '''
+			metamodel "foo"
+			
+			modifyEcore creation epackage foo {
+				addNewEClass("NewClass")
+			}
+			modifyEcore removed epackage foo {
+				EClassifiers -= ecoreref(NewClass)
+			}
+			modifyEcore accessing epackage foo {
+				ecoreref(NewClass) // this doesn't exist anymore
+			}
+		'''
+		input.parseWithTestEcore =>[
+			interpretProgram
+			assertError(
+				EdeltaPackage.eINSTANCE.edeltaEcoreReferenceExpression,
+				EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT,
+				input.lastIndexOf("NewClass"),
+				"NewClass".length,
+				"The element is not available anymore in this context: 'NewClass'"
+			)
+			assertErrorsAsStrings("The element is not available anymore in this context: 'NewClass'")
+		]
+	}
+
+	@Test
+	def void testReferenceToEClassRenamed() {
+		val input = referenceToEClassRenamed.toString
+		input
+		.parseWithTestEcore => [
+			interpretProgram
+			assertError(
+				EdeltaPackage.eINSTANCE.edeltaEcoreReferenceExpression,
+				EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT,
+				input.lastIndexOf("FooClass"),
+				"FooClass".length,
+				"The element 'FooClass' is now available as 'foo.Renamed'"
+			)
+			assertErrorsAsStrings("The element 'FooClass' is now available as 'foo.Renamed'")
+		]
+	}
+
+	@Test
+	def void testReferenceToCreatedEClassRenamed() {
+		val input = referenceToCreatedEClassRenamed.toString
+		input
+		.parseWithTestEcore => [
+			interpretProgram
+			assertError(
+				EdeltaPackage.eINSTANCE.edeltaEcoreReferenceExpression,
+				EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT,
+				input.lastIndexOf("NewClass"),
+				"NewClass".length,
+				"The element 'NewClass' is now available as 'foo.changed'"
+			)
+			assertErrorsAsStrings("The element 'NewClass' is now available as 'foo.changed'")
+		]
+	}
+
+	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, true, testExecutor)
 	}
 
-	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, boolean doValidate, (EPackage)=>void testExecutor
 	) {
 		val program = input.parseWithTestEcore
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor)
 	}
 
-	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		List<CharSequence> inputs, boolean doValidate, (EPackage)=>void testExecutor
 	) {
 		val program = parseSeveralWithTestEcore(inputs)
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor)
 	}
 
-	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		EdeltaProgram program, boolean doValidate, (EPackage)=>void testExecutor
 	) {
-		assertAfterInterpretationOfEdeltaModifyEcoreOperation(interpreter, program, doValidate, testExecutor)
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(interpreter, program, testExecutor)
 		// validation after interpretation, since the interpreter
 		// can make new elements available during validation
 		if (doValidate) {
@@ -1050,7 +1164,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		EdeltaInterpreter interpreter, EdeltaProgram program,
-		boolean doValidate, (EPackage)=>void testExecutor
+		(EPackage)=>void testExecutor
 	) {
 		val it = program.lastModifyEcoreOperation
 		// mimic the behavior of derived state computer that runs the interpreter

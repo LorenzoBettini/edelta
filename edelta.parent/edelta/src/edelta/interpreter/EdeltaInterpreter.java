@@ -106,24 +106,6 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		}
 	}
 
-	/**
-	 * Wraps a {@link Throwable} found in the result of interpretation
-	 */
-	public static class EdeltaInterpreterWrapperException extends RuntimeException {
-
-		private static final long serialVersionUID = 1L;
-		private final Exception exception;
-
-		public EdeltaInterpreterWrapperException(Exception exception) {
-			super(exception);
-			this.exception = exception;
-		}
-
-		public Exception getException() {
-			return exception;
-		}
-	}
-
 	public void setInterpreterTimeout(final int interpreterTimeout) {
 		this.interpreterTimeout = interpreterTimeout;
 	}
@@ -220,16 +202,6 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				new String[] {}));
 	}
 
-	private void updateListenerCurrentExpression(XExpression expression) {
-		if (listener != null && shouldTrackExpression(expression)) {
-			listener.setCurrentExpression(expression);
-		}
-	}
-
-	private boolean shouldTrackExpression(XExpression expression) {
-		return expression.eContainer() instanceof XBlockExpression;
-	}
-
 	@Override
 	protected Object doEvaluate(final XExpression expression, final IEvaluationContext context,
 			final CancelIndicator indicator) {
@@ -240,6 +212,16 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		}
 		updateListenerCurrentExpression(expression);
 		return super.doEvaluate(expression, context, indicator);
+	}
+
+	private void updateListenerCurrentExpression(XExpression expression) {
+		if (listener != null && shouldTrackExpression(expression)) {
+			listener.setCurrentExpression(expression);
+		}
+	}
+
+	private boolean shouldTrackExpression(XExpression expression) {
+		return expression.eContainer() instanceof XBlockExpression;
 	}
 
 	private Object evaluateEcoreReferenceExpression(EdeltaEcoreReferenceExpression ecoreReferenceExpression, final IEvaluationContext context,

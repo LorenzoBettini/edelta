@@ -9,6 +9,7 @@ import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreter;
 import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
+import edelta.interpreter.EdeltaInterpreterWrapperException;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.tests.EdeltaAbstractTest;
@@ -47,7 +48,8 @@ import org.junit.runner.RunWith;
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter.class)
 @SuppressWarnings("all")
 public class EdeltaInterpreterTest extends EdeltaAbstractTest {
-  protected EdeltaInterpreter interpreter;
+  @Inject
+  private EdeltaInterpreter interpreter;
   
   @Inject
   private Injector injector;
@@ -55,13 +57,8 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   @Inject
   private EdeltaDerivedStateHelper derivedStateHelper;
   
-  public EdeltaInterpreter createInterpreter() {
-    return this.injector.<EdeltaInterpreter>getInstance(EdeltaInterpreter.class);
-  }
-  
   @Before
   public void setupInterpreter() {
-    this.interpreter = this.createInterpreter();
     this.interpreter.setInterpreterTimeout(1200000);
   }
   
@@ -143,7 +140,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       };
       this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, _function_1);
     };
-    Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaInterpreter.EdeltaInterpreterWrapperException.class).hasCauseExactlyInstanceOf(MyCustomException.class);
+    Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaInterpreterWrapperException.class).hasCauseExactlyInstanceOf(MyCustomException.class);
   }
   
   @Test
@@ -1535,28 +1532,178 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
   
-  protected void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final Procedure1<? super EPackage> testExecutor) {
+  @Test
+  public void testReferenceToEClassRemoved() {
+    final String input = this._inputs.referenceToEClassRemoved().toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      final ThrowableAssert.ThrowingCallable _function_1 = () -> {
+        this.interpretProgram(it);
+      };
+      Assertions.assertThatThrownBy(_function_1).isInstanceOf(EdeltaInterpreterWrapperException.class);
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
+        EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT, 
+        input.lastIndexOf("FooClass"), 
+        "FooClass".length(), 
+        "The element is not available anymore in this context: \'FooClass\'");
+      this.assertErrorsAsStrings(it, "The element is not available anymore in this context: \'FooClass\'");
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testReferenceToEClassRemovedInLoop() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore creation epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass1\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("for (var i = 0; i < 3; i++)");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("EClassifiers -= ecoreref(NewClass1) // the second time it doesn\'t exist anymore");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass2\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("for (var i = 0; i < 3; i++)");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("EClassifiers -= ecoreref(NewClass2) // the second time it doesn\'t exist anymore");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
+        EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT, 
+        input.lastIndexOf("NewClass1"), 
+        "NewClass1".length(), 
+        "The element is not available anymore in this context: \'NewClass1\'");
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
+        EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT, 
+        input.lastIndexOf("NewClass2"), 
+        "NewClass2".length(), 
+        "The element is not available anymore in this context: \'NewClass2\'");
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("The element is not available anymore in this context: \'NewClass1\'");
+      _builder_1.newLine();
+      _builder_1.append("The element is not available anymore in this context: \'NewClass2\'");
+      _builder_1.newLine();
+      this.assertErrorsAsStrings(it, _builder_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testReferenceToCreatedEClassRemoved() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore creation epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\")");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    _builder.append("modifyEcore removed epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("EClassifiers -= ecoreref(NewClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    _builder.append("modifyEcore accessing epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass) // this doesn\'t exist anymore");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
+        EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT, 
+        input.lastIndexOf("NewClass"), 
+        "NewClass".length(), 
+        "The element is not available anymore in this context: \'NewClass\'");
+      this.assertErrorsAsStrings(it, "The element is not available anymore in this context: \'NewClass\'");
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testReferenceToEClassRenamed() {
+    final String input = this._inputs.referenceToEClassRenamed().toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
+        EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT, 
+        input.lastIndexOf("FooClass"), 
+        "FooClass".length(), 
+        "The element \'FooClass\' is now available as \'foo.Renamed\'");
+      this.assertErrorsAsStrings(it, "The element \'FooClass\' is now available as \'foo.Renamed\'");
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testReferenceToCreatedEClassRenamed() {
+    final String input = this._inputs.referenceToCreatedEClassRenamed().toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
+        EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT, 
+        input.lastIndexOf("NewClass"), 
+        "NewClass".length(), 
+        "The element \'NewClass\' is now available as \'foo.changed\'");
+      this.assertErrorsAsStrings(it, "The element \'NewClass\' is now available as \'foo.changed\'");
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final Procedure1<? super EPackage> testExecutor) {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, true, testExecutor);
   }
   
-  protected void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
+  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
     final EdeltaProgram program = this.parseWithTestEcore(input);
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor);
   }
   
-  protected void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final List<CharSequence> inputs, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
+  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final List<CharSequence> inputs, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
     final EdeltaProgram program = this.parseSeveralWithTestEcore(inputs);
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor);
   }
   
-  protected void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaProgram program, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
-    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this.interpreter, program, doValidate, testExecutor);
+  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaProgram program, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this.interpreter, program, testExecutor);
     if (doValidate) {
       this._validationTestHelper.assertNoErrors(program);
     }
   }
   
-  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaInterpreter interpreter, final EdeltaProgram program, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
+  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaInterpreter interpreter, final EdeltaProgram program, final Procedure1<? super EPackage> testExecutor) {
     final EdeltaModifyEcoreOperation it = this.lastModifyEcoreOperation(program);
     final Function1<EPackage, String> _function = (EPackage it_1) -> {
       return it_1.getName();
