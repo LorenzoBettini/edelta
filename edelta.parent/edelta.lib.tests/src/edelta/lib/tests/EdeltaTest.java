@@ -519,10 +519,8 @@ public class EdeltaTest {
 		edelta = Mockito.spy(edelta);
 		edelta.showError("an error");
 		edelta.showWarning("a warning");
-		edelta.showInfo("an info");
 		verify(edelta).logError(ArgumentMatchers.any());
 		verify(edelta).logWarn(ArgumentMatchers.any());
-		verify(edelta).logInfo(ArgumentMatchers.any());
 	}
 
 	@Test

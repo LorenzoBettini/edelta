@@ -198,10 +198,6 @@ public abstract class AbstractEdelta {
 		logWarn(() -> message);
 	}
 
-	public void showInfo(String message) {
-		logInfo(() -> message);
-	}
-
 	/**
 	 * Retrieves an {@link EPackage} given its fully qualified name, that is, for
 	 * subpackages, the string is expected to contain the names of the full EPackage
