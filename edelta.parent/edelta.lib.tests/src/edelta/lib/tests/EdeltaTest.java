@@ -67,7 +67,7 @@ public class EdeltaTest {
 	private static final String TEST_PACKAGE_FOR_REFERENCES = "testecoreforreferences";
 	private static final String TESTECORES = "testecores/";
 
-	protected static class TestableEdelta extends AbstractEdelta {
+	public static class TestableEdelta extends AbstractEdelta {
 
 		public TestableEdelta() {
 			super();
