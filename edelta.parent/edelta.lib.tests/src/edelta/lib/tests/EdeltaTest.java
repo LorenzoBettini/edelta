@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.util.List;
@@ -34,6 +35,8 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.util.Wrapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaEcoreUtil;
@@ -62,7 +65,7 @@ public class EdeltaTest {
 	private static final String TEST_PACKAGE_FOR_REFERENCES = "testecoreforreferences";
 	private static final String TESTECORES = "testecores/";
 
-	protected static final class TestableEdelta extends AbstractEdelta {
+	protected static class TestableEdelta extends AbstractEdelta {
 
 		public TestableEdelta() {
 			super();
@@ -509,6 +512,17 @@ public class EdeltaTest {
 		assertTrue(warnSupplierCalled.get());
 		assertTrue(infoSupplierCalled.get());
 		assertFalse(debugSupplierCalled.get());
+	}
+
+	@Test
+	public void testShowMethods() {
+		edelta = Mockito.spy(edelta);
+		edelta.showError("an error");
+		edelta.showWarning("a warning");
+		edelta.showInfo("an info");
+		verify(edelta).logError(ArgumentMatchers.any());
+		verify(edelta).logWarn(ArgumentMatchers.any());
+		verify(edelta).logInfo(ArgumentMatchers.any());
 	}
 
 	@Test
