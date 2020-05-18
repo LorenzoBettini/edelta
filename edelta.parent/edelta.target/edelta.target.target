@@ -20,10 +20,6 @@
 <repository location="https://download.eclipse.org/releases/2020-03"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.mockito" version="0.0.0"/>
-<repository location="https://download.eclipse.org/tools/orbit/downloads/2020-03"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.emf.mwe2.launcher.feature.group" version="0.0.0"/>
 <repository location="https://download.eclipse.org/modeling/emft/mwe/updates/releases/2.11.2/"/>
 </location>
