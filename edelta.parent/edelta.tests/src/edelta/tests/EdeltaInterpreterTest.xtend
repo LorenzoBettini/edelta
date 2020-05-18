@@ -1035,7 +1035,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		EdeltaProgram program, boolean doValidate, (EPackage)=>void testExecutor
 	) {
-		assertAfterInterpretationOfEdeltaModifyEcoreOperation(interpreter, program, doValidate, testExecutor)
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(interpreter, program, testExecutor)
 		// validation after interpretation, since the interpreter
 		// can make new elements available during validation
 		if (doValidate) {
@@ -1045,7 +1045,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		EdeltaInterpreter interpreter, EdeltaProgram program,
-		boolean doValidate, (EPackage)=>void testExecutor
+		(EPackage)=>void testExecutor
 	) {
 		val it = program.lastModifyEcoreOperation
 		// mimic the behavior of derived state computer that runs the interpreter

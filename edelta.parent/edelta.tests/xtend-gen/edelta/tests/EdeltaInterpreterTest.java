@@ -1546,13 +1546,13 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaProgram program, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
-    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this.interpreter, program, doValidate, testExecutor);
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this.interpreter, program, testExecutor);
     if (doValidate) {
       this._validationTestHelper.assertNoErrors(program);
     }
   }
   
-  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaInterpreter interpreter, final EdeltaProgram program, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
+  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaInterpreter interpreter, final EdeltaProgram program, final Procedure1<? super EPackage> testExecutor) {
     final EdeltaModifyEcoreOperation it = this.lastModifyEcoreOperation(program);
     final Function1<EPackage, String> _function = (EPackage it_1) -> {
       return it_1.getName();
