@@ -8,10 +8,19 @@ import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 @SuppressWarnings("all")
 public class EdeltaInterpreterEdeltaImplTest {
+  private EdeltaInterpreterEdeltaImpl edelta;
+  
+  @Before
+  public void setup() {
+    EdeltaInterpreterEdeltaImpl _edeltaInterpreterEdeltaImpl = new EdeltaInterpreterEdeltaImpl(Collections.<EPackage>unmodifiableList(CollectionLiterals.<EPackage>newArrayList()));
+    this.edelta = _edeltaInterpreterEdeltaImpl;
+  }
+  
   @Test
   public void testFirstEPackageHasPrecedence() {
     EPackage _createEPackage = EcoreFactory.eINSTANCE.createEPackage();
@@ -24,7 +33,8 @@ public class EdeltaInterpreterEdeltaImplTest {
       it.setName("Test");
     };
     final EPackage p2 = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage_1, _function_1);
-    final EdeltaInterpreterEdeltaImpl e = new EdeltaInterpreterEdeltaImpl(Collections.<EPackage>unmodifiableList(CollectionLiterals.<EPackage>newArrayList(p1, p2)));
-    Assert.assertSame(p1, e.getEPackage("Test"));
+    EdeltaInterpreterEdeltaImpl _edeltaInterpreterEdeltaImpl = new EdeltaInterpreterEdeltaImpl(Collections.<EPackage>unmodifiableList(CollectionLiterals.<EPackage>newArrayList(p1, p2)));
+    this.edelta = _edeltaInterpreterEdeltaImpl;
+    Assert.assertSame(p1, this.edelta.getEPackage("Test"));
   }
 }
