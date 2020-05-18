@@ -26,6 +26,7 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
+import org.eclipse.xtext.xbase.XbasePackage
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -1128,6 +1129,97 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				"The element 'NewClass' is now available as 'foo.changed'"
 			)
 			assertErrorsAsStrings("The element 'NewClass' is now available as 'foo.changed'")
+		]
+	}
+
+	@Test
+	def void testShowErrorOnExistingEClass() {
+		val input = '''
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				val found = EClassifiers.findFirst[
+					name == "FooClass"
+				]
+				if (found !== null)
+					showError(
+						found,
+						"Found class FooClass")
+			}
+		'''.toString
+		input
+		.parseWithTestEcore => [
+			interpretProgram
+			assertError(
+				XbasePackage.eINSTANCE.XIfExpression,
+				EdeltaValidator.LIVE_VALIDATION_ERROR,
+				"Found class FooClass"
+			)
+			assertErrorsAsStrings("Found class FooClass")
+		]
+	}
+
+	@Test
+	def void testShowErrorOnCreatedEClass() {
+		val input = '''
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass")
+				val found = EClassifiers.findFirst[
+					name == "NewClass"
+				]
+				if (found !== null)
+					showError(
+						found,
+						"Found class " + found.name)
+			}
+		'''.toString
+		input
+		.parseWithTestEcore => [
+			interpretProgram
+			assertError(
+				XbasePackage.eINSTANCE.XFeatureCall,
+				EdeltaValidator.LIVE_VALIDATION_ERROR,
+				"Found class NewClass"
+			)
+			assertErrorsAsStrings("Found class NewClass")
+		]
+	}
+
+	@Test
+	def void testShowErrorOnCreatedEClassGeneratedByOperation() {
+		val input = '''
+			import org.eclipse.emf.ecore.EPackage
+
+			metamodel "foo"
+			
+			def myCheck(EPackage it) {
+				val found = EClassifiers.findFirst[
+					name == "NewClass"
+				]
+				if (found !== null)
+					showError(
+						found,
+						"Found class " + found.name)
+			}
+			
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass")
+				myCheck()
+			}
+		'''.toString
+		input
+		.parseWithTestEcore => [
+			interpretProgram
+			assertError(
+				XbasePackage.eINSTANCE.XFeatureCall,
+				EdeltaValidator.LIVE_VALIDATION_ERROR,
+				input.lastIndexOf('addNewEClass("NewClass")'),
+				'addNewEClass("NewClass")'.length,
+				"Found class NewClass"
+			)
+			assertErrorsAsStrings("Found class NewClass")
 		]
 	}
 
