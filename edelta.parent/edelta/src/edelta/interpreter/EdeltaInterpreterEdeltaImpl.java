@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
@@ -45,7 +45,7 @@ public class EdeltaInterpreterEdeltaImpl extends AbstractEdelta {
 	}
 
 	@Override
-	public void showError(EObject problematicObject, String message) {
+	public void showError(ENamedElement problematicObject, String message) {
 		if (currentExpression == null)
 			super.showError(problematicObject, message);
 		else {
@@ -61,7 +61,7 @@ public class EdeltaInterpreterEdeltaImpl extends AbstractEdelta {
 	}
 
 	@Override
-	public void showWarning(EObject problematicObject, String message) {
+	public void showWarning(ENamedElement problematicObject, String message) {
 		if (currentExpression == null)
 			super.showWarning(problematicObject, message);
 		else {

@@ -18,7 +18,7 @@ import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
-import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -191,11 +191,11 @@ public abstract class AbstractEdelta {
 		}
 	}
 
-	public void showError(EObject problematicObject, String message) {
+	public void showError(ENamedElement problematicObject, String message) {
 		logError(() -> lib.getEObjectRepr(problematicObject) + ": " + message);
 	}
 
-	public void showWarning(EObject problematicObject, String message) {
+	public void showWarning(ENamedElement problematicObject, String message) {
 		logWarn(() -> lib.getEObjectRepr(problematicObject) + ": " + message);
 	}
 
