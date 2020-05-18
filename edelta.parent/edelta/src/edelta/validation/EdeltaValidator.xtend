@@ -43,6 +43,8 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	public static val INVALID_SUBPACKAGE_IMPORT = PREFIX + "InvalidSubPackageImport";
 	public static val INVALID_SUBPACKAGE_MODIFICATION = PREFIX + "InvalidSubPackageModification";
 	public static val AMBIGUOUS_REFERENCE = PREFIX + "AmbiguousReference";
+	public static val LIVE_VALIDATION_ERROR = PREFIX + "LiveValidationError";
+	public static val LIVE_VALIDATION_WARNING = PREFIX + "LiveValidationWarning";
 
 	@Inject CommonTypeComputationServices services
 	@Inject OverrideHelper overrideHelper
