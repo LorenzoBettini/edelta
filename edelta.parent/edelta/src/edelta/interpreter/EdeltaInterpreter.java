@@ -116,7 +116,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		thisObject = new EdeltaInterpreterEdeltaImpl
 			(Lists.newArrayList(
 				Iterables.concat(copiedEPackages,
-						program.getMetamodels())));
+						program.getMetamodels())),
+			derivedStateHelper);
 		useAsFields = newHashMap();
 		List<EdeltaModifyEcoreOperation> filteredOperations =
 			edeltaInterpreterHelper.filterOperations(program.getModifyEcoreOperations());

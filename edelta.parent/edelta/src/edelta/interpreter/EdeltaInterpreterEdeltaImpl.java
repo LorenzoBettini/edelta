@@ -13,6 +13,7 @@ import org.eclipse.xtext.xbase.XExpression;
 
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaEPackageManager;
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.validation.EdeltaValidator;
 
 /**
@@ -24,8 +25,10 @@ import edelta.validation.EdeltaValidator;
 public class EdeltaInterpreterEdeltaImpl extends AbstractEdelta {
 
 	private XExpression currentExpression;
+	private EdeltaDerivedStateHelper derivedStateHelper;
 
-	public EdeltaInterpreterEdeltaImpl(List<EPackage> ePackages) {
+	public EdeltaInterpreterEdeltaImpl(List<EPackage> ePackages,
+			EdeltaDerivedStateHelper derivedStateHelper) {
 		super(new EdeltaEPackageManager() {
 			private Map<String, EPackage> packageMap = ePackages.stream().collect(
 					Collectors.toMap(
@@ -38,6 +41,7 @@ public class EdeltaInterpreterEdeltaImpl extends AbstractEdelta {
 				return packageMap.get(packageName);
 			}
 		});
+		this.derivedStateHelper = derivedStateHelper;
 	}
 
 	public void setCurrentExpression(XExpression currentExpression) {
@@ -49,11 +53,15 @@ public class EdeltaInterpreterEdeltaImpl extends AbstractEdelta {
 		if (currentExpression == null)
 			super.showError(problematicObject, message);
 		else {
+			XExpression correspondingExpression = derivedStateHelper
+				.getEnamedElementXExpressionMap(currentExpression.eResource())
+				.get(problematicObject);
 			currentExpression.eResource().getErrors().add(
 				new EObjectDiagnosticImpl(Severity.ERROR,
 					EdeltaValidator.LIVE_VALIDATION_ERROR,
 					message,
-					currentExpression,
+					correspondingExpression != null ?
+							correspondingExpression : currentExpression,
 					null,
 					-1,
 					new String[] {}));
@@ -65,11 +73,15 @@ public class EdeltaInterpreterEdeltaImpl extends AbstractEdelta {
 		if (currentExpression == null)
 			super.showWarning(problematicObject, message);
 		else {
+			XExpression correspondingExpression = derivedStateHelper
+				.getEnamedElementXExpressionMap(currentExpression.eResource())
+				.get(problematicObject);
 			currentExpression.eResource().getWarnings().add(
 				new EObjectDiagnosticImpl(Severity.WARNING,
 					EdeltaValidator.LIVE_VALIDATION_WARNING,
 					message,
-					currentExpression,
+					correspondingExpression != null ?
+							correspondingExpression : currentExpression,
 					null,
 					-1,
 					new String[] {}));
