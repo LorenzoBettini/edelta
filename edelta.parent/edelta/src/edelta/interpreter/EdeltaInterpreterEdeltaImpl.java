@@ -5,8 +5,10 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
 import org.eclipse.xtext.xbase.XExpression;
@@ -53,18 +55,7 @@ public class EdeltaInterpreterEdeltaImpl extends AbstractEdelta {
 		if (currentExpression == null)
 			super.showError(problematicObject, message);
 		else {
-			XExpression correspondingExpression = derivedStateHelper
-				.getEnamedElementXExpressionMap(currentExpression.eResource())
-				.get(problematicObject);
-			currentExpression.eResource().getErrors().add(
-				new EObjectDiagnosticImpl(Severity.ERROR,
-					EdeltaValidator.LIVE_VALIDATION_ERROR,
-					message,
-					correspondingExpression != null ?
-							correspondingExpression : currentExpression,
-					null,
-					-1,
-					new String[] {}));
+			addDiagnostic(problematicObject, message, Severity.ERROR);
 		}
 	}
 
@@ -73,18 +64,28 @@ public class EdeltaInterpreterEdeltaImpl extends AbstractEdelta {
 		if (currentExpression == null)
 			super.showWarning(problematicObject, message);
 		else {
-			XExpression correspondingExpression = derivedStateHelper
-				.getEnamedElementXExpressionMap(currentExpression.eResource())
-				.get(problematicObject);
-			currentExpression.eResource().getWarnings().add(
-				new EObjectDiagnosticImpl(Severity.WARNING,
-					EdeltaValidator.LIVE_VALIDATION_WARNING,
-					message,
-					correspondingExpression != null ?
-							correspondingExpression : currentExpression,
-					null,
-					-1,
-					new String[] {}));
+			addDiagnostic(problematicObject, message, Severity.WARNING);
 		}
+	}
+
+	private void addDiagnostic(ENamedElement problematicObject, String message, Severity severity) {
+		XExpression correspondingExpression = derivedStateHelper
+			.getEnamedElementXExpressionMap(currentExpression.eResource())
+			.get(problematicObject);
+		final EList<Diagnostic> issues = 
+			severity == Severity.WARNING ?
+				currentExpression.eResource().getWarnings() :
+				currentExpression.eResource().getErrors();
+		issues.add(
+			new EObjectDiagnosticImpl(severity,
+				severity == Severity.WARNING ?
+					EdeltaValidator.LIVE_VALIDATION_WARNING :
+					EdeltaValidator.LIVE_VALIDATION_ERROR,
+				message,
+				correspondingExpression != null ?
+						correspondingExpression : currentExpression,
+				null,
+				-1,
+				new String[] {}));
 	}
 }
