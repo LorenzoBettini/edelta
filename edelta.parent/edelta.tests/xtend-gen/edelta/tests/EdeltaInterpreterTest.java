@@ -47,7 +47,8 @@ import org.junit.runner.RunWith;
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter.class)
 @SuppressWarnings("all")
 public class EdeltaInterpreterTest extends EdeltaAbstractTest {
-  protected EdeltaInterpreter interpreter;
+  @Inject
+  private EdeltaInterpreter interpreter;
   
   @Inject
   private Injector injector;
@@ -55,13 +56,8 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   @Inject
   private EdeltaDerivedStateHelper derivedStateHelper;
   
-  public EdeltaInterpreter createInterpreter() {
-    return this.injector.<EdeltaInterpreter>getInstance(EdeltaInterpreter.class);
-  }
-  
   @Before
   public void setupInterpreter() {
-    this.interpreter = this.createInterpreter();
     this.interpreter.setInterpreterTimeout(1200000);
   }
   
@@ -1535,21 +1531,21 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
   
-  protected void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final Procedure1<? super EPackage> testExecutor) {
+  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final Procedure1<? super EPackage> testExecutor) {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, true, testExecutor);
   }
   
-  protected void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
+  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
     final EdeltaProgram program = this.parseWithTestEcore(input);
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor);
   }
   
-  protected void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final List<CharSequence> inputs, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
+  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final List<CharSequence> inputs, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
     final EdeltaProgram program = this.parseSeveralWithTestEcore(inputs);
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor);
   }
   
-  protected void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaProgram program, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
+  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaProgram program, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this.interpreter, program, doValidate, testExecutor);
     if (doValidate) {
       this._validationTestHelper.assertNoErrors(program);

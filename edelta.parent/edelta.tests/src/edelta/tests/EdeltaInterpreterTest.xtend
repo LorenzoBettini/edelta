@@ -31,19 +31,14 @@ import org.eclipse.emf.ecore.ENamedElement
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
 class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
-	protected EdeltaInterpreter interpreter
+	@Inject EdeltaInterpreter interpreter
 
 	@Inject Injector injector
 
 	@Inject EdeltaDerivedStateHelper derivedStateHelper
 
-	def EdeltaInterpreter createInterpreter() {
-		injector.getInstance(EdeltaInterpreter)
-	}
-
 	@Before
 	def void setupInterpreter() {
-		interpreter = createInterpreter
 		// for standard tests we disable the timeout
 		// actually we set it to several minutes
 		// this also makes it easier to debug tests
@@ -1017,27 +1012,27 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, true, testExecutor)
 	}
 
-	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, boolean doValidate, (EPackage)=>void testExecutor
 	) {
 		val program = input.parseWithTestEcore
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor)
 	}
 
-	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		List<CharSequence> inputs, boolean doValidate, (EPackage)=>void testExecutor
 	) {
 		val program = parseSeveralWithTestEcore(inputs)
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor)
 	}
 
-	def protected assertAfterInterpretationOfEdeltaModifyEcoreOperation(
+	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		EdeltaProgram program, boolean doValidate, (EPackage)=>void testExecutor
 	) {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(interpreter, program, doValidate, testExecutor)
