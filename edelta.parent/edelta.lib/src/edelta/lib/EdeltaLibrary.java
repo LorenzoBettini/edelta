@@ -110,6 +110,8 @@ public class EdeltaLibrary {
 	 * @return
 	 */
 	public String getEObjectRepr(EObject e) {
+		if (e == null)
+			return "";
 		String info = e.toString();
 		if (e instanceof ENamedElement) {
 			info = ((ENamedElement) e).getName();

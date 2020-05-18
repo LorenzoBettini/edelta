@@ -403,5 +403,7 @@ public class EdeltaLibraryTest {
 		};
 		assertEquals("test",
 				lib.getEObjectRepr(o));
+		assertEquals("",
+				lib.getEObjectRepr(null));
 	}
 }
