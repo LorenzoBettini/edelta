@@ -648,7 +648,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testTimeoutInCancelIndicator() {
+  public void testTimeoutWarning() {
     this.interpreter.setInterpreterTimeout(2000);
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import org.eclipse.emf.ecore.EClass");

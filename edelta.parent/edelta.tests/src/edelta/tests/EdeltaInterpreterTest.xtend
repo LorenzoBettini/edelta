@@ -429,7 +429,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testTimeoutInCancelIndicator() {
+	def void testTimeoutWarning() {
 		// in this test we really need the timeout
 		interpreter.interpreterTimeout = 2000;
 		val input = '''
