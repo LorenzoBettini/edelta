@@ -473,10 +473,10 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	def void testTimeoutWarningWithSeveralFiles() {
 		// in this test we really need the timeout
 		interpreter.interpreterTimeout = 2000;
-		val lib = '''
+		val lib1 = '''
 			import org.eclipse.emf.ecore.EClass
 
-			def op(EClass c) : void {
+			def op1(EClass c) : void {
 				var i = 10;
 				while (i >= 0) {
 					Thread.sleep(1000);
@@ -486,20 +486,32 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				c.abstract = true
 			}
 		'''
+		val lib2 = '''
+			import org.eclipse.emf.ecore.EClass
+
+			import edelta.__synthetic0
+
+			use __synthetic0 as extension mylib1
+
+			def op(EClass c) : void {
+				op1(c)
+			}
+		'''
 		val input = '''
 			import org.eclipse.emf.ecore.EClass
-			import edelta.__synthetic0
+			import edelta.__synthetic1
 			
 			metamodel "foo"
 			
-			use __synthetic0 as extension mylib
+			use __synthetic1 as extension mylib
 			
 			modifyEcore aModificationTest epackage foo {
 				EClassifiers += newEClass("ANewClass")
 				op(EClassifiers.last as EClass)
 			}
 		'''
-		assertAfterInterpretationOfEdeltaModifyEcoreOperation(#[lib, input], true)
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation
+		(#[lib1, lib2, input], true)
 		[ derivedEPackage |
 			derivedEPackage.lastEClass => [
 				assertEquals("ANewClass", name)

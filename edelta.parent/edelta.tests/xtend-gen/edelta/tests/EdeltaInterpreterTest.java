@@ -719,7 +719,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder.append("import org.eclipse.emf.ecore.EClass");
     _builder.newLine();
     _builder.newLine();
-    _builder.append("def op(EClass c) : void {");
+    _builder.append("def op1(EClass c) : void {");
     _builder.newLine();
     _builder.append("\t");
     _builder.append("var i = 10;");
@@ -744,30 +744,48 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    final String lib = _builder.toString();
+    final String lib1 = _builder.toString();
     StringConcatenation _builder_1 = new StringConcatenation();
     _builder_1.append("import org.eclipse.emf.ecore.EClass");
+    _builder_1.newLine();
     _builder_1.newLine();
     _builder_1.append("import edelta.__synthetic0");
     _builder_1.newLine();
     _builder_1.newLine();
-    _builder_1.append("metamodel \"foo\"");
+    _builder_1.append("use __synthetic0 as extension mylib1");
     _builder_1.newLine();
     _builder_1.newLine();
-    _builder_1.append("use __synthetic0 as extension mylib");
-    _builder_1.newLine();
-    _builder_1.newLine();
-    _builder_1.append("modifyEcore aModificationTest epackage foo {");
+    _builder_1.append("def op(EClass c) : void {");
     _builder_1.newLine();
     _builder_1.append("\t");
-    _builder_1.append("EClassifiers += newEClass(\"ANewClass\")");
-    _builder_1.newLine();
-    _builder_1.append("\t");
-    _builder_1.append("op(EClassifiers.last as EClass)");
+    _builder_1.append("op1(c)");
     _builder_1.newLine();
     _builder_1.append("}");
     _builder_1.newLine();
-    final String input = _builder_1.toString();
+    final String lib2 = _builder_1.toString();
+    StringConcatenation _builder_2 = new StringConcatenation();
+    _builder_2.append("import org.eclipse.emf.ecore.EClass");
+    _builder_2.newLine();
+    _builder_2.append("import edelta.__synthetic1");
+    _builder_2.newLine();
+    _builder_2.newLine();
+    _builder_2.append("metamodel \"foo\"");
+    _builder_2.newLine();
+    _builder_2.newLine();
+    _builder_2.append("use __synthetic1 as extension mylib");
+    _builder_2.newLine();
+    _builder_2.newLine();
+    _builder_2.append("modifyEcore aModificationTest epackage foo {");
+    _builder_2.newLine();
+    _builder_2.append("\t");
+    _builder_2.append("EClassifiers += newEClass(\"ANewClass\")");
+    _builder_2.newLine();
+    _builder_2.append("\t");
+    _builder_2.append("op(EClassifiers.last as EClass)");
+    _builder_2.newLine();
+    _builder_2.append("}");
+    _builder_2.newLine();
+    final String input = _builder_2.toString();
     final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
       EClass _lastEClass = this.getLastEClass(derivedEPackage);
       final Procedure1<EClass> _function_1 = (EClass it) -> {
@@ -782,7 +800,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       };
       ObjectExtensions.<EClass>operator_doubleArrow(_lastEClass, _function_1);
     };
-    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(Collections.<CharSequence>unmodifiableList(CollectionLiterals.<CharSequence>newArrayList(lib, input)), true, _function);
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(Collections.<CharSequence>unmodifiableList(CollectionLiterals.<CharSequence>newArrayList(lib1, lib2, input)), true, _function);
   }
   
   @Test
