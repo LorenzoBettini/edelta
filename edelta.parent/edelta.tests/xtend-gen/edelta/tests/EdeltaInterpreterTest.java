@@ -33,6 +33,7 @@ import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.xbase.XExpression;
+import org.eclipse.xtext.xbase.XbasePackage;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
@@ -699,18 +700,89 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       final Procedure1<EClass> _function_1 = (EClass it) -> {
         Assert.assertEquals("ANewClass", it.getName());
         Assert.assertEquals(Boolean.valueOf(false), Boolean.valueOf(it.isAbstract()));
-        final int initialIndex = input.lastIndexOf("{");
-        EClass _edeltaModifyEcoreOperation = EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation();
-        int _lastIndexOf = input.lastIndexOf("}");
-        int _minus = (_lastIndexOf - initialIndex);
-        int _plus = (_minus + 1);
-        this._validationTestHelper.assertWarning(it, _edeltaModifyEcoreOperation, 
-          EdeltaValidator.INTERPRETER_TIMEOUT, initialIndex, _plus, 
-          "Timeout interpreting initialization block");
+        final String offendingString = "Thread.sleep(1000)";
+        final int initialIndex = input.lastIndexOf(offendingString);
+        this._validationTestHelper.assertWarning(it, 
+          XbasePackage.eINSTANCE.getXMemberFeatureCall(), 
+          EdeltaValidator.INTERPRETER_TIMEOUT, initialIndex, offendingString.length(), 
+          "Timeout while interpreting");
       };
       ObjectExtensions.<EClass>operator_doubleArrow(_lastEClass, _function_1);
     };
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, _function);
+  }
+  
+  @Test
+  public void testTimeoutWarningWithSeveralFiles() {
+    this.interpreter.setInterpreterTimeout(2000);
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EClass");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("def op(EClass c) : void {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("var i = 10;");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("while (i >= 0) {");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("Thread.sleep(1000);");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("i++");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("}");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// this will never be executed");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("c.abstract = true");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String lib = _builder.toString();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("import org.eclipse.emf.ecore.EClass");
+    _builder_1.newLine();
+    _builder_1.append("import edelta.__synthetic0");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("metamodel \"foo\"");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("use __synthetic0 as extension mylib");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("modifyEcore aModificationTest epackage foo {");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("EClassifiers += newEClass(\"ANewClass\")");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("op(EClassifiers.last as EClass)");
+    _builder_1.newLine();
+    _builder_1.append("}");
+    _builder_1.newLine();
+    final String input = _builder_1.toString();
+    final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
+      EClass _lastEClass = this.getLastEClass(derivedEPackage);
+      final Procedure1<EClass> _function_1 = (EClass it) -> {
+        Assert.assertEquals("ANewClass", it.getName());
+        Assert.assertEquals(Boolean.valueOf(false), Boolean.valueOf(it.isAbstract()));
+        final String offendingString = "op(EClassifiers.last as EClass)";
+        final int initialIndex = input.lastIndexOf(offendingString);
+        this._validationTestHelper.assertWarning(it, 
+          XbasePackage.eINSTANCE.getXFeatureCall(), 
+          EdeltaValidator.INTERPRETER_TIMEOUT, initialIndex, offendingString.length(), 
+          "Timeout while interpreting");
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_lastEClass, _function_1);
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(Collections.<CharSequence>unmodifiableList(CollectionLiterals.<CharSequence>newArrayList(lib, input)), true, _function);
   }
   
   @Test
