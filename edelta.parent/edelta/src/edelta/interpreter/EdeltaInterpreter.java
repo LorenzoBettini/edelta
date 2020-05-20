@@ -174,7 +174,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			@Override
 			public void run() {
 				try {
-					interpreterThread.join(interpreterTimeout + 2000);
+					interpreterThread.join(interpreterTimeout + 2000L);
 					if (Boolean.FALSE.equals(finished.get()))
 						interpreterThread.interrupt();
 				} catch (InterruptedException e) {
