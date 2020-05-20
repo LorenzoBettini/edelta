@@ -175,11 +175,10 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			public void run() {
 				try {
 					interpreterThread.join(interpreterTimeout + 2000);
-					if (!finished.get())
+					if (Boolean.FALSE.equals(finished.get()))
 						interpreterThread.interrupt();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Thread.currentThread().interrupt();
 				}
 			}
 		};
@@ -187,6 +186,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		final IEvaluationResult result = evaluate(op.getBody(), context,
 				new EdeltaInterpreterCancelIndicator());
 		finished.set(true);
+		guard.interrupt();
 		if (result == null) {
 			addTimeoutWarning(op.eResource());
 		} else {
