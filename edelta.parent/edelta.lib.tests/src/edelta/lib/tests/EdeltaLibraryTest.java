@@ -389,7 +389,8 @@ public class EdeltaLibraryTest {
 
 	@Test
 	public void testGetEObjectRepr() {
-		assertEquals("ecore:EClass:eSuperTypes", lib.getEObjectRepr(EcorePackage.eINSTANCE.getEClass_ESuperTypes()));
+		assertEquals("ecore.EClass.eSuperTypes",
+			lib.getEObjectRepr(EcorePackage.eINSTANCE.getEClass_ESuperTypes()));
 		BasicEObjectImpl o = new BasicEObjectImpl() {
 			@Override
 			public String toString() {

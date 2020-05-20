@@ -104,7 +104,20 @@ public class EdeltaLibrary {
 	}
 
 	/**
-	 * Returns a String representation based on the containment relation.
+	 * Returns a String representation (fully qualified) based on the containment
+	 * relation.
+	 * 
+	 * For example
+	 * 
+	 * <pre>
+	 * getEObjectRepr(EcorePackage.eINSTANCE.getEClass_ESuperTypes())
+	 * </pre>
+	 * 
+	 * will return
+	 * 
+	 * <pre>
+	 * "ecore.EClass.eSuperTypes"
+	 * </pre>
 	 * 
 	 * @param e
 	 * @return
@@ -116,7 +129,9 @@ public class EdeltaLibrary {
 		if (e instanceof ENamedElement) {
 			info = ((ENamedElement) e).getName();
 		}
-		return e.eContainer() != null ? getEObjectRepr(e.eContainer()) + ":" + info : info;
+		return e.eContainer() != null ?
+			getEObjectRepr(e.eContainer()) + "." + info :
+			info;
 	}
 
 	public void addEStructuralFeature(EClass eClass, EStructuralFeature eStructuralFeature) {
