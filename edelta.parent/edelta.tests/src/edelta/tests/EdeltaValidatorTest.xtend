@@ -89,37 +89,6 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testTimeoutInCancelIndicator() {
-		val input = '''
-			import org.eclipse.emf.ecore.EPackage
-
-			metamodel "foo"
-			
-			def op(EPackage c) : void {
-				var i = 10;
-				while (i >= 0) {
-					Thread.sleep(1000);
-					i++
-				}
-				// this will never be executed
-				c.abstract = true
-			}
-			
-			modifyEcore aTest epackage foo {
-				op(it)
-			}
-		'''
-		val lastOpenCurlyBracket = input.lastIndexOf("{")
-		val lastClosedCurlyBracket = input.lastIndexOf("}")
-		input.parseWithTestEcore.assertWarning(
-			EdeltaPackage.eINSTANCE.edeltaModifyEcoreOperation,
-			EdeltaValidator.INTERPRETER_TIMEOUT,
-			lastOpenCurlyBracket, lastClosedCurlyBracket - lastOpenCurlyBracket + 1,
-			"Timeout interpreting initialization block"
-		)
-	}
-
-	@Test
 	def void testUnresolvedEcoreReference() {
 		'''
 		metamodel "foo"

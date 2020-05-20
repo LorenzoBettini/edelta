@@ -125,57 +125,6 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testTimeoutInCancelIndicator() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("import org.eclipse.emf.ecore.EPackage");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("def op(EPackage c) : void {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("var i = 10;");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("while (i >= 0) {");
-    _builder.newLine();
-    _builder.append("\t\t");
-    _builder.append("Thread.sleep(1000);");
-    _builder.newLine();
-    _builder.append("\t\t");
-    _builder.append("i++");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("}");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("// this will never be executed");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("c.abstract = true");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("op(it)");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final String input = _builder.toString();
-    final int lastOpenCurlyBracket = input.lastIndexOf("{");
-    final int lastClosedCurlyBracket = input.lastIndexOf("}");
-    this._validationTestHelper.assertWarning(this.parseWithTestEcore(input), 
-      EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation(), 
-      EdeltaValidator.INTERPRETER_TIMEOUT, lastOpenCurlyBracket, ((lastClosedCurlyBracket - lastOpenCurlyBracket) + 1), 
-      "Timeout interpreting initialization block");
-  }
-  
-  @Test
   public void testUnresolvedEcoreReference() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");

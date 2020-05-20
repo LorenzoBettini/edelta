@@ -26,6 +26,7 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
+import org.eclipse.xtext.xbase.XbasePackage
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -429,7 +430,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testTimeoutInCancelIndicator() {
+	def void testTimeoutWarning() {
 		// in this test we really need the timeout
 		interpreter.interpreterTimeout = 2000;
 		val input = '''
@@ -456,12 +457,72 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			derivedEPackage.lastEClass => [
 				assertEquals("ANewClass", name)
 				assertEquals(false, abstract)
-				val initialIndex = input.lastIndexOf("{")
+				val offendingString = "Thread.sleep(1000)"
+				val initialIndex = input.lastIndexOf(offendingString)
 				assertWarning(
-					EdeltaPackage.eINSTANCE.edeltaModifyEcoreOperation,
+					XbasePackage.eINSTANCE.XMemberFeatureCall,
 					EdeltaValidator.INTERPRETER_TIMEOUT,
-					initialIndex, input.lastIndexOf("}") - initialIndex + 1,
-					"Timeout interpreting initialization block"
+					initialIndex, offendingString.length,
+					"Timeout while interpreting"
+				)
+			]
+		]
+	}
+
+	@Test
+	def void testTimeoutWarningWithSeveralFiles() {
+		// in this test we really need the timeout
+		interpreter.interpreterTimeout = 2000;
+		val lib1 = '''
+			import org.eclipse.emf.ecore.EClass
+
+			def op1(EClass c) : void {
+				var i = 10;
+				while (i >= 0) {
+					Thread.sleep(1000);
+					i++
+				}
+				// this will never be executed
+				c.abstract = true
+			}
+		'''
+		val lib2 = '''
+			import org.eclipse.emf.ecore.EClass
+
+			import edelta.__synthetic0
+
+			use __synthetic0 as extension mylib1
+
+			def op(EClass c) : void {
+				op1(c)
+			}
+		'''
+		val input = '''
+			import org.eclipse.emf.ecore.EClass
+			import edelta.__synthetic1
+			
+			metamodel "foo"
+			
+			use __synthetic1 as extension mylib
+			
+			modifyEcore aModificationTest epackage foo {
+				EClassifiers += newEClass("ANewClass")
+				op(EClassifiers.last as EClass)
+			}
+		'''
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation
+		(#[lib1, lib2, input], true)
+		[ derivedEPackage |
+			derivedEPackage.lastEClass => [
+				assertEquals("ANewClass", name)
+				assertEquals(false, abstract)
+				val offendingString = "op(EClassifiers.last as EClass)"
+				val initialIndex = input.lastIndexOf(offendingString)
+				assertWarning(
+					XbasePackage.eINSTANCE.XFeatureCall,
+					EdeltaValidator.INTERPRETER_TIMEOUT,
+					initialIndex, offendingString.length,
+					"Timeout while interpreting"
 				)
 			]
 		]

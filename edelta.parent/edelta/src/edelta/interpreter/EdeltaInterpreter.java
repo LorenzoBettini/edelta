@@ -1,7 +1,6 @@
 package edelta.interpreter;
 
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE;
-import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MODIFY_ECORE_OPERATION__BODY;
 import static edelta.util.EdeltaModelUtil.getProgram;
 import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
 import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashMap;
@@ -32,6 +31,7 @@ import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationResult;
+import org.eclipse.xtext.xbase.interpreter.impl.InterpreterCanceledException;
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter;
 
 import com.google.common.collect.Iterables;
@@ -95,6 +95,12 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	private EdeltaProgram currentProgram;
 
 	private EdeltaInterpreterResourceListener listener;
+
+	/**
+	 * The current {@link XExpression} being interpreted that is worthwhile to keep
+	 * track of.
+	 */
+	private XExpression currentExpression;
 
 	class EdeltaInterpreterCancelIndicator implements CancelIndicator {
 		long stopAt = System.currentTimeMillis() +
@@ -164,7 +170,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		final IEvaluationResult result = evaluate(op.getBody(), context,
 				new EdeltaInterpreterCancelIndicator());
 		if (result == null) {
-			addTimeoutWarning(op);
+			addTimeoutWarning(op.eResource());
 		} else {
 			handleResultException(result.getException());
 		}
@@ -190,14 +196,14 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		}
 	}
 
-	private boolean addTimeoutWarning(final EdeltaModifyEcoreOperation op) {
-		return op.eResource().getWarnings().add(
+	private boolean addTimeoutWarning(final Resource resource) {
+		return resource.getWarnings().add(
 			new EObjectDiagnosticImpl(Severity.WARNING,
 				EdeltaValidator.INTERPRETER_TIMEOUT,
-				"Timeout interpreting initialization block (" +
+				"Timeout while interpreting (" +
 						Integer.valueOf(interpreterTimeout) + "ms).",
-				op,
-				EDELTA_MODIFY_ECORE_OPERATION__BODY,
+				currentExpression,
+				null,
 				-1,
 				new String[] {}));
 	}
@@ -217,6 +223,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	private void updateListenerCurrentExpression(XExpression expression) {
 		if (listener != null && shouldTrackExpression(expression)) {
 			listener.setCurrentExpression(expression);
+			this.currentExpression = expression;
 		}
 	}
 
@@ -381,6 +388,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				edeltaOperation.getParams(), argumentValues);
 		final IEvaluationResult result = evaluate(edeltaOperation.getBody(), context,
 				indicator);
+		if (result == null)
+			throw new InterpreterCanceledException();
 		return result.getResult();
 	}
 
