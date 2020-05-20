@@ -26,7 +26,6 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.IResourceScopeCache;
-import org.eclipse.xtext.util.Wrapper;
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
 import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
@@ -168,15 +167,13 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		IEvaluationContext context = createContext();
 		context.newValue(IT_QUALIFIED_NAME, ePackage);
 		configureContextForJavaThis(context);
-		Wrapper<Boolean> finished = Wrapper.wrap(false);
 		Thread interpreterThread = Thread.currentThread();
 		Thread guard = new Thread() {
 			@Override
 			public void run() {
 				try {
 					interpreterThread.join(interpreterTimeout + 2000L);
-					if (Boolean.FALSE.equals(finished.get()))
-						interpreterThread.interrupt();
+					interpreterThread.interrupt();
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}
@@ -185,7 +182,6 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		guard.start();
 		final IEvaluationResult result = evaluate(op.getBody(), context,
 				new EdeltaInterpreterCancelIndicator());
-		finished.set(true);
 		guard.interrupt();
 		if (result == null) {
 			addTimeoutWarning(op.eResource());
