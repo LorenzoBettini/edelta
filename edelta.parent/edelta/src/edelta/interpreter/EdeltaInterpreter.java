@@ -26,6 +26,7 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.IResourceScopeCache;
+import org.eclipse.xtext.util.Wrapper;
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
 import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
@@ -167,12 +168,29 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		IEvaluationContext context = createContext();
 		context.newValue(IT_QUALIFIED_NAME, ePackage);
 		configureContextForJavaThis(context);
+		Wrapper<Boolean> finished = Wrapper.wrap(false);
+		Thread interpreterThread = Thread.currentThread();
+		Thread guard = new Thread() {
+			@Override
+			public void run() {
+				try {
+					interpreterThread.join(interpreterTimeout + 2000);
+					if (!finished.get())
+						interpreterThread.interrupt();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		};
+		guard.start();
 		final IEvaluationResult result = evaluate(op.getBody(), context,
 				new EdeltaInterpreterCancelIndicator());
+		finished.set(true);
 		if (result == null) {
 			addTimeoutWarning(op.eResource());
 		} else {
-			handleResultException(result.getException());
+			handleResultException(result.getException(), op.eResource());
 		}
 	}
 
@@ -189,8 +207,10 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				thisObject);
 	}
 
-	private void handleResultException(Throwable resultException) {
-		if (resultException != null) {
+	private void handleResultException(Throwable resultException, Resource resource) {
+		if (resultException instanceof InterruptedException) {
+			addTimeoutWarning(resource);
+		} else if (resultException != null) {
 			throw new EdeltaInterpreterWrapperException
 				((Exception) resultException);
 		}

@@ -469,7 +469,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	// @Test currently it does not terminate
+	@Test
 	def void testTimeoutWarningWhenCallingJavaCode() {
 		// in this test we really need the timeout
 		interpreter.interpreterTimeout = 2000;
@@ -490,10 +490,10 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			derivedEPackage.lastEClass => [
 				assertEquals("ANewClass", name)
 				assertEquals(false, abstract)
-				val offendingString = "Thread.sleep(1000)"
+				val offendingString = "op(EClassifiers.last as EClass)"
 				val initialIndex = input.lastIndexOf(offendingString)
 				assertWarning(
-					XbasePackage.eINSTANCE.XMemberFeatureCall,
+					XbasePackage.eINSTANCE.XFeatureCall,
 					EdeltaValidator.INTERPRETER_TIMEOUT,
 					initialIndex, offendingString.length,
 					"Timeout while interpreting"

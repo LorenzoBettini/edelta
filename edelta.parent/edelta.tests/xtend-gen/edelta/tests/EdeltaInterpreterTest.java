@@ -712,6 +712,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, _function);
   }
   
+  @Test
   public void testTimeoutWarningWhenCallingJavaCode() {
     this.interpreter.setInterpreterTimeout(2000);
     StringConcatenation _builder = new StringConcatenation();
@@ -742,10 +743,10 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       final Procedure1<EClass> _function_1 = (EClass it) -> {
         Assert.assertEquals("ANewClass", it.getName());
         Assert.assertEquals(Boolean.valueOf(false), Boolean.valueOf(it.isAbstract()));
-        final String offendingString = "Thread.sleep(1000)";
+        final String offendingString = "op(EClassifiers.last as EClass)";
         final int initialIndex = input.lastIndexOf(offendingString);
         this._validationTestHelper.assertWarning(it, 
-          XbasePackage.eINSTANCE.getXMemberFeatureCall(), 
+          XbasePackage.eINSTANCE.getXFeatureCall(), 
           EdeltaValidator.INTERPRETER_TIMEOUT, initialIndex, offendingString.length(), 
           "Timeout while interpreting");
       };
