@@ -168,11 +168,14 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		context.newValue(IT_QUALIFIED_NAME, ePackage);
 		configureContextForJavaThis(context);
 		Thread interpreterThread = Thread.currentThread();
+		// the following thread checks timeout when interpreting
+		// external Java code
+		// see https://github.com/LorenzoBettini/edelta/issues/179
 		Thread timeoutGuardThread = new Thread() {
 			@Override
 			public void run() {
 				try {
-					interpreterThread.join(interpreterTimeout + 2000L);
+					interpreterThread.join(interpreterTimeout);
 					interpreterThread.interrupt();
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
@@ -406,7 +409,9 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				edeltaOperation.getParams(), argumentValues);
 		final IEvaluationResult result = evaluate(edeltaOperation.getBody(), context,
 				indicator);
-		if (result == null)
+		if (result == null ||
+				// our timeoutGuardThread interrupted us
+				result.getException() instanceof InterruptedException)
 			throw new InterpreterCanceledException();
 		return result.getResult();
 	}
