@@ -1,10 +1,11 @@
 package edelta;
 
 import edelta.lib.AbstractEdelta;
-import java.util.function.Consumer;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.eclipse.xtext.xbase.lib.StringExtensions;
@@ -19,7 +20,7 @@ public class ExampleWithLiveValidation extends AbstractEdelta {
     super(other);
   }
   
-  public void SomeChanges(final EPackage it) {
+  public void someChanges(final EPackage it) {
     final Procedure1<EClass> _function = (EClass it_1) -> {
       it_1.setName(StringExtensions.toFirstUpper(it_1.getName()));
     };
@@ -27,16 +28,29 @@ public class ExampleWithLiveValidation extends AbstractEdelta {
       getEClass("myecoreforvalidation", "myOtherEClass"), _function);
   }
   
-  public void SomeLiveChecks(final EPackage it) {
-    final Consumer<EClassifier> _function = (EClassifier eClass) -> {
-      boolean _isLowerCase = Character.isLowerCase(eClass.getName().charAt(0));
-      if (_isLowerCase) {
-        String _name = eClass.getName();
-        String _plus = ("EClass name should start with a capital: " + _name);
-        this.showWarning(eClass, _plus);
+  public void someLiveChecks(final EPackage it) {
+    EList<EClassifier> _eClassifiers = it.getEClassifiers();
+    for (final EClassifier eClassifier : _eClassifiers) {
+      {
+        boolean _isLowerCase = Character.isLowerCase(eClassifier.getName().charAt(0));
+        if (_isLowerCase) {
+          String _name = eClassifier.getName();
+          String _plus = ("EClassifier\'s name should start with a capital: " + _name);
+          this.showWarning(eClassifier, _plus);
+        }
+        if ((eClassifier instanceof EClass)) {
+          EList<EStructuralFeature> _eStructuralFeatures = ((EClass)eClassifier).getEStructuralFeatures();
+          for (final EStructuralFeature feature : _eStructuralFeatures) {
+            boolean _isUpperCase = Character.isUpperCase(feature.getName().charAt(0));
+            if (_isUpperCase) {
+              String _name_1 = feature.getName();
+              String _plus_1 = ("EStructuralFeature\'s name should start with a lowercase: " + _name_1);
+              this.showWarning(feature, _plus_1);
+            }
+          }
+        }
       }
-    };
-    it.getEClassifiers().forEach(_function);
+    }
   }
   
   @Override
@@ -47,7 +61,7 @@ public class ExampleWithLiveValidation extends AbstractEdelta {
   
   @Override
   protected void doExecute() throws Exception {
-    SomeChanges(getEPackage("myecoreforvalidation"));
-    SomeLiveChecks(getEPackage("myecoreforvalidation"));
+    someChanges(getEPackage("myecoreforvalidation"));
+    someLiveChecks(getEPackage("myecoreforvalidation"));
   }
 }
