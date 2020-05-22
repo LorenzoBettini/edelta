@@ -565,6 +565,10 @@ public abstract class EdeltaAbstractTest {
     return IterableExtensions.<XExpression>last(((XBlockExpression) e).getExpressions());
   }
   
+  protected XExpression getBlockFirstExpression(final XExpression e) {
+    return IterableExtensions.<XExpression>head(((XBlockExpression) e).getExpressions());
+  }
+  
   protected XBlockExpression getBlock(final XExpression e) {
     return ((XBlockExpression) e);
   }

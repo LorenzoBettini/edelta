@@ -1,0 +1,38 @@
+import org.eclipse.emf.ecore.EClass
+
+// IMPORTANT: ecores must be in source directories
+// otherwise you can't refer to them
+
+metamodel "ecore"
+metamodel "myecoreforvalidation"
+
+modifyEcore someChanges epackage myecoreforvalidation {
+	// uncomment to see a live warning
+//	addNewEClass("startingWithLowerCase")
+//	addNewEEnum("anEnum")
+
+	// comment it out and see a warning in someLiveChecks
+	ecoreref(myOtherEClass) => [
+		name = name.toFirstUpper
+	]
+	// uncomment to see a live warning
+//	ecoreref(MyEClass).addNewEAttribute("AnAttribute", ecoreref(EString))
+}
+
+modifyEcore someLiveChecks epackage myecoreforvalidation {
+	for (eClassifier : EClassifiers) {
+		if (Character.isLowerCase(eClassifier.name.charAt(0))) {
+			showWarning(eClassifier, "EClassifier's name should start with a capital: "
+				+ eClassifier.name)
+		}
+		if (eClassifier instanceof EClass) {
+			for (feature : eClassifier.EStructuralFeatures) {
+				if (Character.isUpperCase(feature.name.charAt(0))) {
+					showWarning(feature,
+						"EStructuralFeature's name should start with a lowercase: "
+						+ feature.name)
+				}
+			}
+		}
+	}
+}

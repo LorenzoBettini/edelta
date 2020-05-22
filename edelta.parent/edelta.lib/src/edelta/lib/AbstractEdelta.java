@@ -18,6 +18,7 @@ import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -58,6 +59,8 @@ public abstract class AbstractEdelta {
 	 */
 	@Extension
 	protected EdeltaLibrary lib = new EdeltaLibrary();
+
+	private Logger logger = Logger.getLogger(getClass());
 
 	public AbstractEdelta() {
 		packageManager = new EdeltaEPackageManager();
@@ -164,7 +167,11 @@ public abstract class AbstractEdelta {
 	}
 
 	public Logger getLogger() {
-		return Logger.getLogger(getClass());
+		return logger;
+	}
+
+	public void setLogger(Logger logger) {
+		this.logger = logger;
 	}
 
 	public void logError(Supplier<String> messageSupplier) {
@@ -184,10 +191,17 @@ public abstract class AbstractEdelta {
 	}
 
 	private void internalLog(Level level, Supplier<String> messageSupplier) {
-		Logger logger = getLogger();
 		if (logger.isEnabledFor(level)) {
 			logger.log(level, messageSupplier.get());
 		}
+	}
+
+	public void showError(ENamedElement problematicObject, String message) {
+		logError(() -> lib.getEObjectRepr(problematicObject) + ": " + message);
+	}
+
+	public void showWarning(ENamedElement problematicObject, String message) {
+		logWarn(() -> lib.getEObjectRepr(problematicObject) + ": " + message);
 	}
 
 	/**

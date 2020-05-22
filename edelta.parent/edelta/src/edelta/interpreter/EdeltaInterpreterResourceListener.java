@@ -2,8 +2,9 @@ package edelta.interpreter;
 
 import static org.eclipse.emf.ecore.EcorePackage.Literals.ENAMED_ELEMENT__NAME;
 
+import java.util.List;
+
 import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
@@ -66,7 +67,7 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 		this.currentExpression = currentExpression;
 	}
 
-	private void clearIssues(final EList<Diagnostic> issues) {
+	private void clearIssues(final List<Diagnostic> issues) {
 		issues.removeIf(this::isToBeRemoved);
 	}
 
