@@ -12,11 +12,15 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.WrappedException;
 import org.eclipse.emf.ecore.EAttribute;
@@ -62,7 +66,7 @@ public class EdeltaTest {
 	private static final String TEST_PACKAGE_FOR_REFERENCES = "testecoreforreferences";
 	private static final String TESTECORES = "testecores/";
 
-	protected static final class TestableEdelta extends AbstractEdelta {
+	public static class TestableEdelta extends AbstractEdelta {
 
 		public TestableEdelta() {
 			super();
@@ -509,6 +513,18 @@ public class EdeltaTest {
 		assertTrue(warnSupplierCalled.get());
 		assertTrue(infoSupplierCalled.get());
 		assertFalse(debugSupplierCalled.get());
+	}
+
+	@Test
+	public void testShowMethods() {
+		Logger logger = spy(edelta.getLogger());
+		edelta.setLogger(logger);
+		EPackage problematicObject = EcoreFactory.eINSTANCE.createEPackage();
+		problematicObject.setName("anEPackage");
+		edelta.showError(problematicObject, "an error");
+		edelta.showWarning(problematicObject, "a warning");
+		verify(logger).log(Level.ERROR, "anEPackage: an error");
+		verify(logger).log(Level.WARN, "anEPackage: a warning");
 	}
 
 	@Test

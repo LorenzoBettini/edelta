@@ -46,7 +46,6 @@ import edelta.edelta.EdeltaOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
-import edelta.lib.AbstractEdelta;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
@@ -88,7 +87,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	/**
 	 * Represents the "this" during the interpretation.
 	 */
-	private AbstractEdelta thisObject;
+	private EdeltaInterpreterEdeltaImpl thisObject;
 
 	private Map<EdeltaUseAs, Object> useAsFields;
 
@@ -122,7 +121,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		thisObject = new EdeltaInterpreterEdeltaImpl
 			(Lists.newArrayList(
 				Iterables.concat(copiedEPackages,
-						program.getMetamodels())));
+						program.getMetamodels())),
+			derivedStateHelper);
 		useAsFields = newHashMap();
 		List<EdeltaModifyEcoreOperation> filteredOperations =
 			edeltaInterpreterHelper.filterOperations(program.getModifyEcoreOperations());
@@ -223,6 +223,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	private void updateListenerCurrentExpression(XExpression expression) {
 		if (listener != null && shouldTrackExpression(expression)) {
 			listener.setCurrentExpression(expression);
+			thisObject.setCurrentExpression(expression);
 			this.currentExpression = expression;
 		}
 	}
@@ -376,12 +377,11 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		);
 	}
 
-	protected Object evaluateEdeltaOperation(AbstractEdelta other,
+	protected Object evaluateEdeltaOperation(EdeltaInterpreterEdeltaImpl thisObject,
 			EdeltaProgram program, EdeltaOperation edeltaOperation,
 			List<Object> argumentValues, CancelIndicator indicator) {
 		this.currentProgram = program;
-		this.thisObject = new AbstractEdelta(other) {
-		};
+		this.thisObject = thisObject;
 		IEvaluationContext context = createContext();
 		configureContextForJavaThis(context);
 		configureContextForParameterArguments(context,

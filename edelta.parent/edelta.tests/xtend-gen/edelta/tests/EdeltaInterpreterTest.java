@@ -1772,6 +1772,157 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
   
+  @Test
+  public void testShowErrorOnExistingEClass() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("val found = EClassifiers.findFirst[");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("name == \"FooClass\"");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("if (found !== null)");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("showError(");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("found,");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("\"Found class FooClass\")");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      this._validationTestHelper.assertError(it, 
+        XbasePackage.eINSTANCE.getXIfExpression(), 
+        EdeltaValidator.LIVE_VALIDATION_ERROR, 
+        "Found class FooClass");
+      this.assertErrorsAsStrings(it, "Found class FooClass");
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testShowErrorOnCreatedEClass() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("val found = EClassifiers.findFirst[");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("name == \"NewClass\"");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("if (found !== null)");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("showError(");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("found,");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("\"Found class \" + found.name)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      this._validationTestHelper.assertError(it, 
+        XbasePackage.eINSTANCE.getXFeatureCall(), 
+        EdeltaValidator.LIVE_VALIDATION_ERROR, 
+        "Found class NewClass");
+      this.assertErrorsAsStrings(it, "Found class NewClass");
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testShowErrorOnCreatedEClassGeneratedByOperation() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EPackage");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("def myCheck(EPackage it) {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("val found = EClassifiers.findFirst[");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("name == \"NewClass\"");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("if (found !== null)");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("showError(");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("found,");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("\"Found class \" + found.name)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("myCheck()");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      this._validationTestHelper.assertError(it, 
+        XbasePackage.eINSTANCE.getXFeatureCall(), 
+        EdeltaValidator.LIVE_VALIDATION_ERROR, 
+        input.lastIndexOf("addNewEClass(\"NewClass\")"), 
+        "addNewEClass(\"NewClass\")".length(), 
+        "Found class NewClass");
+      this.assertErrorsAsStrings(it, "Found class NewClass");
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
   private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final Procedure1<? super EPackage> testExecutor) {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, true, testExecutor);
   }

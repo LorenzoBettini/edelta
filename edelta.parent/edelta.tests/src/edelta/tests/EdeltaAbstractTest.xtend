@@ -329,6 +329,10 @@ abstract class EdeltaAbstractTest {
 		(e as XBlockExpression).expressions.last
 	}
 
+	def protected getBlockFirstExpression(XExpression e) {
+		(e as XBlockExpression).expressions.head
+	}
+
 	def protected getBlock(XExpression e) {
 		e as XBlockExpression
 	}

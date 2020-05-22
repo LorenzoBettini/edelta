@@ -1,0 +1,28 @@
+import edelta.refactorings.lib.EdeltaBadSmellsChecker
+
+// IMPORTANT: ecores must be in source directories
+// otherwise you can't refer to them
+
+metamodel "ecore"
+metamodel "myecoreforvalidation"
+
+use EdeltaBadSmellsChecker as checker
+
+modifyEcore someChanges epackage myecoreforvalidation {
+	// comment it out, and see the warning in "checks" below
+	ecoreref(myecoreforvalidation.MyEClass.astring).lowerBound = 1
+
+	ecoreref(MyEClass) => [
+		// comment it out, and see the warnings
+		addNewEAttribute("afield", ecoreref(EString)) [
+			lowerBound = 1
+		]
+	]
+	ecoreref(myOtherEClass) => [
+		addNewEAttribute("afield", ecoreref(EString))
+	]
+}
+
+modifyEcore checks epackage myecoreforvalidation {
+	checker.checkDuplicateFeatures(it)
+}
