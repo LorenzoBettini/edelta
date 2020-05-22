@@ -60,6 +60,8 @@ public abstract class AbstractEdelta {
 	@Extension
 	protected EdeltaLibrary lib = new EdeltaLibrary();
 
+	private Logger logger = Logger.getLogger(getClass());
+
 	public AbstractEdelta() {
 		packageManager = new EdeltaEPackageManager();
 	}
@@ -165,7 +167,11 @@ public abstract class AbstractEdelta {
 	}
 
 	public Logger getLogger() {
-		return Logger.getLogger(getClass());
+		return logger;
+	}
+
+	public void setLogger(Logger logger) {
+		this.logger = logger;
 	}
 
 	public void logError(Supplier<String> messageSupplier) {
@@ -185,7 +191,6 @@ public abstract class AbstractEdelta {
 	}
 
 	private void internalLog(Level level, Supplier<String> messageSupplier) {
-		Logger logger = getLogger();
 		if (logger.isEnabledFor(level)) {
 			logger.log(level, messageSupplier.get());
 		}

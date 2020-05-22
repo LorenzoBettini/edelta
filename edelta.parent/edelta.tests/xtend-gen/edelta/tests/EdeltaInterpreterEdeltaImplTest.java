@@ -33,19 +33,14 @@ import org.mockito.Mockito;
 public class EdeltaInterpreterEdeltaImplTest extends EdeltaAbstractTest {
   private EdeltaInterpreterEdeltaImpl edelta;
   
-  private Logger logger;
-  
   @Inject
   private EdeltaDerivedStateHelper derivedStateHelper;
   
   @Before
   public void setup() {
-    this.edelta = new EdeltaInterpreterEdeltaImpl(Collections.<EPackage>unmodifiableList(CollectionLiterals.<EPackage>newArrayList()), this.derivedStateHelper) {
-      @Override
-      public Logger getLogger() {
-        return EdeltaInterpreterEdeltaImplTest.this.logger = Mockito.<Logger>spy(super.getLogger());
-      }
-    };
+    EdeltaInterpreterEdeltaImpl _edeltaInterpreterEdeltaImpl = new EdeltaInterpreterEdeltaImpl(Collections.<EPackage>unmodifiableList(CollectionLiterals.<EPackage>newArrayList()), this.derivedStateHelper);
+    this.edelta = _edeltaInterpreterEdeltaImpl;
+    this.edelta.setLogger(Mockito.<Logger>spy(this.edelta.getLogger()));
   }
   
   @Test
@@ -68,7 +63,7 @@ public class EdeltaInterpreterEdeltaImplTest extends EdeltaAbstractTest {
   @Test
   public void testShowErrorWithNullCurrentExpression() {
     this.edelta.showError(null, "an error");
-    Mockito.<Logger>verify(this.logger).log(Level.ERROR, ": an error");
+    Mockito.<Logger>verify(this.edelta.getLogger()).log(Level.ERROR, ": an error");
   }
   
   @Test
@@ -138,7 +133,7 @@ public class EdeltaInterpreterEdeltaImplTest extends EdeltaAbstractTest {
   @Test
   public void testShowWarningWithNullCurrentExpression() {
     this.edelta.showWarning(null, "an error");
-    Mockito.<Logger>verify(this.logger).log(Level.WARN, ": an error");
+    Mockito.<Logger>verify(this.edelta.getLogger()).log(Level.WARN, ": an error");
   }
   
   @Test

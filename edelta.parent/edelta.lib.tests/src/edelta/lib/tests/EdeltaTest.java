@@ -12,15 +12,15 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.WrappedException;
 import org.eclipse.emf.ecore.EAttribute;
@@ -38,7 +38,6 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.util.Wrapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaEcoreUtil;
@@ -518,17 +517,14 @@ public class EdeltaTest {
 
 	@Test
 	public void testShowMethods() {
-		edelta = spy(edelta);
+		Logger logger = spy(edelta.getLogger());
+		edelta.setLogger(logger);
 		EPackage problematicObject = EcoreFactory.eINSTANCE.createEPackage();
 		problematicObject.setName("anEPackage");
 		edelta.showError(problematicObject, "an error");
 		edelta.showWarning(problematicObject, "a warning");
-		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Supplier<String>> captor = forClass(Supplier.class);
-		verify(edelta).logError(captor.capture());
-		assertEquals("anEPackage: an error", captor.getValue().get());
-		verify(edelta).logWarn(captor.capture());
-		assertEquals("anEPackage: a warning", captor.getValue().get());
+		verify(logger).log(Level.ERROR, "anEPackage: an error");
+		verify(logger).log(Level.WARN, "anEPackage: a warning");
 	}
 
 	@Test

@@ -5,7 +5,6 @@ import edelta.interpreter.EdeltaInterpreterEdeltaImpl
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.validation.EdeltaValidator
 import org.apache.log4j.Level
-import org.apache.log4j.Logger
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
@@ -22,17 +21,12 @@ import static org.mockito.Mockito.*
 class EdeltaInterpreterEdeltaImplTest extends EdeltaAbstractTest {
 	var EdeltaInterpreterEdeltaImpl edelta
 
-	var Logger logger
-
 	@Inject EdeltaDerivedStateHelper derivedStateHelper
 
 	@Before
 	def void setup() {
-		edelta = new EdeltaInterpreterEdeltaImpl(#[], derivedStateHelper) {
-			override getLogger() {
-				logger = spy(super.getLogger)
-			}
-		}
+		edelta = new EdeltaInterpreterEdeltaImpl(#[], derivedStateHelper)
+		edelta.logger = spy(edelta.logger)
 	}
 
 	@Test def void testFirstEPackageHasPrecedence() {
@@ -44,7 +38,7 @@ class EdeltaInterpreterEdeltaImplTest extends EdeltaAbstractTest {
 
 	@Test def void testShowErrorWithNullCurrentExpression() {
 		edelta.showError(null, "an error")
-		verify(logger).log(Level.ERROR, ": an error")
+		verify(edelta.logger).log(Level.ERROR, ": an error")
 	}
 
 	@Test def void testShowErrorWithCurrentExpression() {
@@ -103,7 +97,7 @@ class EdeltaInterpreterEdeltaImplTest extends EdeltaAbstractTest {
 
 	@Test def void testShowWarningWithNullCurrentExpression() {
 		edelta.showWarning(null, "an error")
-		verify(logger).log(Level.WARN, ": an error")
+		verify(edelta.logger).log(Level.WARN, ": an error")
 	}
 
 	@Test def void testShowWarningWithCurrentExpression() {
