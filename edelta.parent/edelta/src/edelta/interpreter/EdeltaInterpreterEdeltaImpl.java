@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
@@ -72,7 +71,7 @@ public class EdeltaInterpreterEdeltaImpl extends AbstractEdelta {
 		XExpression correspondingExpression = derivedStateHelper
 			.getEnamedElementXExpressionMap(currentExpression.eResource())
 			.get(problematicObject);
-		final EList<Diagnostic> issues = 
+		final List<Diagnostic> issues = 
 			severity == Severity.WARNING ?
 				currentExpression.eResource().getWarnings() :
 				currentExpression.eResource().getErrors();
