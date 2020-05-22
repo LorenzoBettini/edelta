@@ -33,6 +33,9 @@ public class EdeltaBadSmellsChecker extends AbstractEdelta {
     final Consumer<Map.Entry<EStructuralFeature, List<EStructuralFeature>>> _function = (Map.Entry<EStructuralFeature, List<EStructuralFeature>> entry) -> {
       final List<EStructuralFeature> duplicates = entry.getValue();
       final Consumer<EStructuralFeature> _function_1 = (EStructuralFeature currentDuplicate) -> {
+        String _eObjectRepr = this.lib.getEObjectRepr(currentDuplicate);
+        String _plus = (_eObjectRepr + 
+          ", duplicate features: ");
         final Function1<EStructuralFeature, Boolean> _function_2 = (EStructuralFeature it) -> {
           return Boolean.valueOf((it != currentDuplicate));
         };
@@ -40,8 +43,8 @@ public class EdeltaBadSmellsChecker extends AbstractEdelta {
           return this.lib.getEObjectRepr(it);
         };
         String _join = IterableExtensions.join(IterableExtensions.<EStructuralFeature, String>map(IterableExtensions.<EStructuralFeature>filter(duplicates, _function_2), _function_3), ", ");
-        String _plus = ("Duplicate features: " + _join);
-        this.showWarning(currentDuplicate, _plus);
+        String _plus_1 = (_plus + _join);
+        this.showWarning(currentDuplicate, _plus_1);
       };
       duplicates.forEach(_function_1);
     };

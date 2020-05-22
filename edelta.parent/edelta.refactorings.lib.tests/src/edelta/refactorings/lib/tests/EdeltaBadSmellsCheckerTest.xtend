@@ -65,9 +65,9 @@ class EdeltaBadSmellsCheckerTest extends AbstractTest {
 		]
 		checker.checkDuplicateFeatures(p)
 		assertEquals('''
-			WARN: pack.C1.A1: Duplicate features: pack.C2.A1, pack.C3.A1
-			WARN: pack.C2.A1: Duplicate features: pack.C1.A1, pack.C3.A1
-			WARN: pack.C3.A1: Duplicate features: pack.C1.A1, pack.C2.A1
+			WARN: pack.C1.A1: pack.C1.A1, duplicate features: pack.C2.A1, pack.C3.A1
+			WARN: pack.C2.A1: pack.C2.A1, duplicate features: pack.C1.A1, pack.C3.A1
+			WARN: pack.C3.A1: pack.C3.A1, duplicate features: pack.C1.A1, pack.C2.A1
 		'''.toString,
 			appender.result
 		)

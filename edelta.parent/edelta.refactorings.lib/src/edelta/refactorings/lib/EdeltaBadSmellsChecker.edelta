@@ -14,11 +14,13 @@ use EdeltaBadSmellsFinder as finder
 def checkDuplicateFeatures(EPackage ePackage) {
 	finder
 		.findDuplicateFeatures(ePackage)
-		.entrySet.forEach[entry|
+		.entrySet // key: a duplicate feature, value: all duplicates
+		.forEach[entry|
 			val duplicates = entry.value
 			duplicates.forEach[currentDuplicate|
 				showWarning(currentDuplicate,
-					"Duplicate features: " +
+					getEObjectRepr(currentDuplicate) +
+					", duplicate features: " +
 					duplicates
 						.filter[it !== currentDuplicate]
 						.map[getEObjectRepr(it)].join(", ")

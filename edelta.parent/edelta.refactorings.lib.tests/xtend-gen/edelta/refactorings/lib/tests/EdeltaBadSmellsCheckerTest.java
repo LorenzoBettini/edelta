@@ -102,11 +102,11 @@ public class EdeltaBadSmellsCheckerTest extends AbstractTest {
     final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
     this.checker.checkDuplicateFeatures(p);
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("WARN: pack.C1.A1: Duplicate features: pack.C2.A1, pack.C3.A1");
+    _builder.append("WARN: pack.C1.A1: pack.C1.A1, duplicate features: pack.C2.A1, pack.C3.A1");
     _builder.newLine();
-    _builder.append("WARN: pack.C2.A1: Duplicate features: pack.C1.A1, pack.C3.A1");
+    _builder.append("WARN: pack.C2.A1: pack.C2.A1, duplicate features: pack.C1.A1, pack.C3.A1");
     _builder.newLine();
-    _builder.append("WARN: pack.C3.A1: Duplicate features: pack.C1.A1, pack.C2.A1");
+    _builder.append("WARN: pack.C3.A1: pack.C3.A1, duplicate features: pack.C1.A1, pack.C2.A1");
     _builder.newLine();
     Assert.assertEquals(_builder.toString(), 
       this.appender.getResult());
