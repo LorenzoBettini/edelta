@@ -1,0 +1,29 @@
+import org.eclipse.emf.ecore.EPackage
+
+package edelta.refactorings.lib
+
+use EdeltaBadSmellsFinder as finder
+
+/**
+ * Shows warnings in case duplicate features are found;
+ * for each feature that has duplicates shows a warning and the
+ * list of duplicates.
+ * 
+ * @param ePackage
+ */
+def checkDuplicateFeatures(EPackage ePackage) {
+	finder
+		.findDuplicateFeatures(ePackage)
+		.entrySet.forEach[entry|
+			val duplicates = entry.value
+			duplicates.forEach[currentDuplicate|
+				showWarning(currentDuplicate,
+					"Duplicate features: " +
+					duplicates
+						.filter[it !== currentDuplicate]
+						.map[getEObjectRepr(it)].join(", ")
+				)
+			]
+		]
+}
+
