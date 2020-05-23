@@ -79,6 +79,9 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	@Inject
 	private EdeltaDerivedStateHelper derivedStateHelper;
 
+	@Inject
+	private EdeltaInterpreterDiagnosticHelper diagnosticHelper;
+
 	private int interpreterTimeout =
 		Integer.parseInt(System.getProperty("edelta.interpreter.timeout", "2000"));
 
@@ -122,7 +125,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			(Lists.newArrayList(
 				Iterables.concat(copiedEPackages,
 						program.getMetamodels())),
-			derivedStateHelper);
+			diagnosticHelper);
 		useAsFields = newHashMap();
 		List<EdeltaModifyEcoreOperation> filteredOperations =
 			edeltaInterpreterHelper.filterOperations(program.getModifyEcoreOperations());
@@ -223,7 +226,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	private void updateListenerCurrentExpression(XExpression expression) {
 		if (listener != null && shouldTrackExpression(expression)) {
 			listener.setCurrentExpression(expression);
-			thisObject.setCurrentExpression(expression);
+			diagnosticHelper.setCurrentExpression(expression);
 			this.currentExpression = expression;
 		}
 	}
