@@ -407,4 +407,17 @@ public class EdeltaLibraryTest {
 		assertEquals("",
 				lib.getEObjectRepr(null));
 	}
+
+	@Test
+	public void testGetEObjectReprWithCycle() {
+		EPackage p1 = ecoreFactory.createEPackage();
+		p1.setName("p1");
+		EPackage p2 = ecoreFactory.createEPackage();
+		p2.setName("p2");
+		// create the cycle
+		p1.getESubpackages().add(p2);
+		p2.getESubpackages().add(p1);
+		assertEquals("p1.p2.p1",
+				lib.getEObjectRepr(p1));
+	}
 }
