@@ -26,7 +26,6 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.IResourceScopeCache;
-import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
 import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
@@ -79,6 +78,9 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	@Inject
 	private EdeltaDerivedStateHelper derivedStateHelper;
 
+	@Inject
+	private EdeltaInterpreterDiagnosticHelper diagnosticHelper;
+
 	private int interpreterTimeout =
 		Integer.parseInt(System.getProperty("edelta.interpreter.timeout", "2000"));
 
@@ -94,12 +96,6 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	private EdeltaProgram currentProgram;
 
 	private EdeltaInterpreterResourceListener listener;
-
-	/**
-	 * The current {@link XExpression} being interpreted that is worthwhile to keep
-	 * track of.
-	 */
-	private XExpression currentExpression;
 
 	class EdeltaInterpreterCancelIndicator implements CancelIndicator {
 		long stopAt = System.currentTimeMillis() +
@@ -122,7 +118,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			(Lists.newArrayList(
 				Iterables.concat(copiedEPackages,
 						program.getMetamodels())),
-			derivedStateHelper);
+			diagnosticHelper);
 		useAsFields = newHashMap();
 		List<EdeltaModifyEcoreOperation> filteredOperations =
 			edeltaInterpreterHelper.filterOperations(program.getModifyEcoreOperations());
@@ -170,7 +166,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		final IEvaluationResult result = evaluate(op.getBody(), context,
 				new EdeltaInterpreterCancelIndicator());
 		if (result == null) {
-			addTimeoutWarning(op.eResource());
+			addTimeoutWarning();
 		} else {
 			handleResultException(result.getException());
 		}
@@ -196,16 +192,10 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		}
 	}
 
-	private boolean addTimeoutWarning(final Resource resource) {
-		return resource.getWarnings().add(
-			new EObjectDiagnosticImpl(Severity.WARNING,
-				EdeltaValidator.INTERPRETER_TIMEOUT,
-				"Timeout while interpreting (" +
-						Integer.valueOf(interpreterTimeout) + "ms).",
-				currentExpression,
-				null,
-				-1,
-				new String[] {}));
+	private void addTimeoutWarning() {
+		diagnosticHelper.addWarning(null, EdeltaValidator.INTERPRETER_TIMEOUT,
+			"Timeout while interpreting (" +
+					Integer.valueOf(interpreterTimeout) + "ms).");
 	}
 
 	@Override
@@ -223,8 +213,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	private void updateListenerCurrentExpression(XExpression expression) {
 		if (listener != null && shouldTrackExpression(expression)) {
 			listener.setCurrentExpression(expression);
-			thisObject.setCurrentExpression(expression);
-			this.currentExpression = expression;
+			diagnosticHelper.setCurrentExpression(expression);
 		}
 	}
 
