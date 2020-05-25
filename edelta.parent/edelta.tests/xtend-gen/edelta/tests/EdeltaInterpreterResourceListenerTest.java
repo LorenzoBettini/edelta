@@ -4,9 +4,12 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import edelta.edelta.EdeltaFactory;
 import edelta.interpreter.EdeltaInterpreterDiagnostic;
+import edelta.interpreter.EdeltaInterpreterDiagnosticHelper;
 import edelta.interpreter.EdeltaInterpreterResourceListener;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
+import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProvider;
+import edelta.validation.EdeltaValidator;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import org.assertj.core.api.Assertions;
@@ -19,13 +22,17 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.xtext.linking.impl.XtextLinkingDiagnostic;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.util.IResourceScopeCache;
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
+import org.eclipse.xtext.validation.Issue;
+import org.eclipse.xtext.xbase.XAssignment;
 import org.eclipse.xtext.xbase.XExpression;
+import org.eclipse.xtext.xbase.XbaseFactory;
+import org.eclipse.xtext.xbase.XbasePackage;
+import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Before;
@@ -36,7 +43,7 @@ import org.mockito.Mockito;
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaInjectorProvider.class)
 @SuppressWarnings("all")
-public class EdeltaInterpreterResourceListenerTest {
+public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
   public static class SpiedProvider implements Provider<String> {
     @Override
     public String get() {
@@ -51,6 +58,9 @@ public class EdeltaInterpreterResourceListenerTest {
   @Inject
   private IResourceScopeCache cache;
   
+  @Inject
+  private EdeltaInterpreterDiagnosticHelper diagnosticHelper;
+  
   private EdeltaInterpreterResourceListener listener;
   
   private EPackage ePackage;
@@ -63,28 +73,33 @@ public class EdeltaInterpreterResourceListenerTest {
   
   @Before
   public void setup() {
-    EPackage _createEPackage = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
-      EList<EClassifier> _eClassifiers = it.getEClassifiers();
-      EClass _createEClass = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEClass();
-      final Procedure1<EClass> _function_1 = (EClass it_1) -> {
-        it_1.setName("AClass");
+    try {
+      EPackage _createEPackage = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEPackage();
+      final Procedure1<EPackage> _function = (EPackage it) -> {
+        it.setName("aPackage");
+        EList<EClassifier> _eClassifiers = it.getEClassifiers();
+        EClass _createEClass = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEClass();
+        final Procedure1<EClass> _function_1 = (EClass it_1) -> {
+          it_1.setName("AClass");
+        };
+        EClass _doubleArrow = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
+        _eClassifiers.add(_doubleArrow);
       };
-      EClass _doubleArrow = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
-      _eClassifiers.add(_doubleArrow);
-    };
-    EPackage _doubleArrow = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-    this.ePackage = _doubleArrow;
-    ResourceImpl _resourceImpl = new ResourceImpl();
-    this.resource = _resourceImpl;
-    EdeltaENamedElementXExpressionMap _edeltaENamedElementXExpressionMap = new EdeltaENamedElementXExpressionMap();
-    this.enamedElementXExpressionMap = _edeltaENamedElementXExpressionMap;
-    EdeltaInterpreterResourceListener _edeltaInterpreterResourceListener = new EdeltaInterpreterResourceListener(this.cache, this.resource, this.enamedElementXExpressionMap);
-    this.listener = _edeltaInterpreterResourceListener;
-    EdeltaInterpreterResourceListenerTest.SpiedProvider _spiedProvider = new EdeltaInterpreterResourceListenerTest.SpiedProvider();
-    this.stringProvider = Mockito.<Provider<String>>spy(_spiedProvider);
-    EList<Adapter> _eAdapters = this.ePackage.eAdapters();
-    _eAdapters.add(this.listener);
+      EPackage _doubleArrow = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
+      this.ePackage = _doubleArrow;
+      this.resource = this._parseHelper.parse("").eResource();
+      EdeltaENamedElementXExpressionMap _edeltaENamedElementXExpressionMap = new EdeltaENamedElementXExpressionMap();
+      this.enamedElementXExpressionMap = _edeltaENamedElementXExpressionMap;
+      EdeltaInterpreterResourceListener _edeltaInterpreterResourceListener = new EdeltaInterpreterResourceListener(
+        this.cache, this.resource, this.enamedElementXExpressionMap, this.diagnosticHelper);
+      this.listener = _edeltaInterpreterResourceListener;
+      EdeltaInterpreterResourceListenerTest.SpiedProvider _spiedProvider = new EdeltaInterpreterResourceListenerTest.SpiedProvider();
+      this.stringProvider = Mockito.<Provider<String>>spy(_spiedProvider);
+      EList<Adapter> _eAdapters = this.ePackage.eAdapters();
+      _eAdapters.add(this.listener);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
@@ -207,6 +222,28 @@ public class EdeltaInterpreterResourceListenerTest {
     EClassifier _get = this.ePackage.getEClassifiers().get(0);
     _get.setInstanceClassName("foo");
     Assertions.<ENamedElement, XExpression>assertThat(this.enamedElementXExpressionMap).isEmpty();
+  }
+  
+  @Test
+  public void testEPackageCycleWhenAddingSubpackage() {
+    final XAssignment currentExpression = XbaseFactory.eINSTANCE.createXAssignment();
+    EList<EObject> _contents = this.resource.getContents();
+    _contents.add(currentExpression);
+    this.diagnosticHelper.setCurrentExpression(currentExpression);
+    EPackage _createEPackage = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEPackage();
+    final Procedure1<EPackage> _function = (EPackage it) -> {
+      it.setName("subpackage");
+    };
+    final EPackage subpackage = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
+    EList<EPackage> _eSubpackages = this.ePackage.getESubpackages();
+    _eSubpackages.add(subpackage);
+    EList<EPackage> _eSubpackages_1 = subpackage.getESubpackages();
+    _eSubpackages_1.add(this.ePackage);
+    this._validationTestHelper.assertError(this.resource, 
+      XbasePackage.eINSTANCE.getXAssignment(), 
+      EdeltaValidator.EPACKAGE_CYCLE, 
+      "Cycle in superpackage/subpackage: aPackage.subpackage.aPackage");
+    Assertions.<Issue>assertThat(this._validationTestHelper.validate(this.resource)).hasSize(1);
   }
   
   public EObjectDiagnosticImpl createEObjectDiagnosticMock(final EObject problematicObject) {

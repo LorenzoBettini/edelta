@@ -124,7 +124,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			edeltaInterpreterHelper.filterOperations(program.getModifyEcoreOperations());
 		final Resource eResource = program.eResource();
 		listener = new EdeltaInterpreterResourceListener(cache, eResource,
-				derivedStateHelper.getEnamedElementXExpressionMap(eResource));
+				derivedStateHelper.getEnamedElementXExpressionMap(eResource),
+				diagnosticHelper);
 		try {
 			addResourceListener(copiedEPackages);
 			for (final EdeltaModifyEcoreOperation op : filteredOperations) {

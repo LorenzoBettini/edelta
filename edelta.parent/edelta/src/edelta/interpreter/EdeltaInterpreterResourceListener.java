@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.ENamedElement;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.emf.ecore.util.EContentAdapter;
@@ -15,7 +16,10 @@ import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
 import org.eclipse.xtext.xbase.XExpression;
 
 import edelta.edelta.EdeltaEcoreReferenceExpression;
+import edelta.lib.EdeltaLibrary;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
+import edelta.util.EdeltaModelUtil;
+import edelta.validation.EdeltaValidator;
 
 /**
  * Listens for changes on a {@link Resource} and performs tasks accordingly.
@@ -38,11 +42,17 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 
 	private XExpression currentExpression;
 
+	private EdeltaInterpreterDiagnosticHelper diagnosticHelper;
+
+	private EdeltaLibrary lib = new EdeltaLibrary();
+
 	public EdeltaInterpreterResourceListener(IResourceScopeCache cache, Resource resource,
-			EdeltaENamedElementXExpressionMap enamedElementXExpressionMap) {
+			EdeltaENamedElementXExpressionMap enamedElementXExpressionMap,
+			EdeltaInterpreterDiagnosticHelper diagnosticHelper) {
 		this.cache = cache;
 		this.resource = resource;
 		this.enamedElementXExpressionMap = enamedElementXExpressionMap;
+		this.diagnosticHelper = diagnosticHelper;
 	}
 
 	@Override
@@ -52,11 +62,22 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 			enamedElementXExpressionMap.put(
 				(ENamedElement) notification.getNotifier(),
 				currentExpression);
-		} else if (notification.getEventType() == Notification.ADD &&
-				notification.getNewValue() instanceof ENamedElement) {
-			enamedElementXExpressionMap.put(
-				(ENamedElement) notification.getNewValue(),
-				currentExpression);
+		} else {
+			final Object newValue = notification.getNewValue();
+			if (notification.getEventType() == Notification.ADD &&
+					newValue instanceof ENamedElement) {
+				enamedElementXExpressionMap.put(
+					(ENamedElement) newValue,
+					currentExpression);
+				if (newValue instanceof EPackage) {
+					EPackage subPackage = (EPackage) newValue;
+					if (EdeltaModelUtil.hasCycleInSuperPackage(subPackage)) {
+						diagnosticHelper.addError(subPackage, EdeltaValidator.EPACKAGE_CYCLE,
+							"Cycle in superpackage/subpackage: " +
+								lib.getEObjectRepr(subPackage));
+					}
+				}
+			}
 		}
 		cache.clear(resource);
 		clearIssues(resource.getErrors());
