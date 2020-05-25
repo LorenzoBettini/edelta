@@ -199,8 +199,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		}
 	}
 
-	private boolean addTimeoutWarning(final Resource resource) {
-		return resource.getWarnings().add(
+	private void addTimeoutWarning(final Resource resource) {
+		resource.getWarnings().add(
 			new EObjectDiagnosticImpl(Severity.WARNING,
 				EdeltaValidator.INTERPRETER_TIMEOUT,
 				"Timeout while interpreting (" +
