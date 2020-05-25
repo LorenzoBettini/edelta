@@ -3,6 +3,7 @@ package edelta.interpreter;
 import java.util.List;
 
 import org.eclipse.emf.ecore.ENamedElement;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
@@ -29,18 +30,21 @@ public class EdeltaInterpreterDiagnosticHelper {
 		this.currentExpression = currentExpression;
 	}
 
-	public void addError(ENamedElement problematicObject, String problemCode, String message) {
+	public void addError(EObject problematicObject, String problemCode, String message) {
 		addDiagnostic(problematicObject, problemCode, message, Severity.ERROR);
 	}
 
-	public void addWarning(ENamedElement problematicObject, String problemCode, String message) {
+	public void addWarning(EObject problematicObject, String problemCode, String message) {
 		addDiagnostic(problematicObject, problemCode, message, Severity.WARNING);
 	}
 
-	private void addDiagnostic(ENamedElement problematicObject, String problemCode, String message, Severity severity) {
-		XExpression correspondingExpression = derivedStateHelper
-			.getEnamedElementXExpressionMap(currentExpression.eResource())
-			.get(problematicObject);
+	private void addDiagnostic(EObject problematicObject, String problemCode, String message, Severity severity) {
+		XExpression correspondingExpression = null;
+		if (problematicObject instanceof ENamedElement) {
+			correspondingExpression = derivedStateHelper
+				.getEnamedElementXExpressionMap(currentExpression.eResource())
+				.get(problematicObject);
+		}
 		final List<Diagnostic> issues = 
 			severity == Severity.WARNING ?
 				currentExpression.eResource().getWarnings() :
