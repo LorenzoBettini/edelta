@@ -417,6 +417,8 @@ public class EdeltaLibraryTest {
 		// create the cycle
 		p1.getESubpackages().add(p2);
 		p2.getESubpackages().add(p1);
+		assertThat(p1.getESubpackages()).contains(p2);
+		assertThat(p2.getESubpackages()).contains(p1);
 		assertEquals("p1.p2.p1",
 				lib.getEObjectRepr(p1));
 	}
