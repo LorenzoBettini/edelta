@@ -26,7 +26,6 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.IResourceScopeCache;
-import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
 import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
@@ -98,12 +97,6 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	private EdeltaInterpreterResourceListener listener;
 
-	/**
-	 * The current {@link XExpression} being interpreted that is worthwhile to keep
-	 * track of.
-	 */
-	private XExpression currentExpression;
-
 	class EdeltaInterpreterCancelIndicator implements CancelIndicator {
 		long stopAt = System.currentTimeMillis() +
 				interpreterTimeout;
@@ -173,7 +166,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		final IEvaluationResult result = evaluate(op.getBody(), context,
 				new EdeltaInterpreterCancelIndicator());
 		if (result == null) {
-			addTimeoutWarning(op.eResource());
+			addTimeoutWarning();
 		} else {
 			handleResultException(result.getException());
 		}
@@ -199,16 +192,10 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		}
 	}
 
-	private void addTimeoutWarning(final Resource resource) {
-		resource.getWarnings().add(
-			new EObjectDiagnosticImpl(Severity.WARNING,
-				EdeltaValidator.INTERPRETER_TIMEOUT,
-				"Timeout while interpreting (" +
-						Integer.valueOf(interpreterTimeout) + "ms).",
-				currentExpression,
-				null,
-				-1,
-				new String[] {}));
+	private void addTimeoutWarning() {
+		diagnosticHelper.addWarning(null, EdeltaValidator.INTERPRETER_TIMEOUT,
+			"Timeout while interpreting (" +
+					Integer.valueOf(interpreterTimeout) + "ms).");
 	}
 
 	@Override
@@ -227,7 +214,6 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		if (listener != null && shouldTrackExpression(expression)) {
 			listener.setCurrentExpression(expression);
 			diagnosticHelper.setCurrentExpression(expression);
-			this.currentExpression = expression;
 		}
 	}
 
