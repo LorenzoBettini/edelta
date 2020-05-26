@@ -1283,6 +1283,52 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testIntroducedCycles() {
+		val input = '''
+			import org.eclipse.emf.ecore.EPackage
+
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				addNewEClass("C1")
+				addNewEClass("C2") [ ESuperTypes += ecoreref(C1) ]
+				addNewEClass("C3") [ ESuperTypes += ecoreref(C2) ]
+				// cycle!
+				ecoreref(C1).ESuperTypes += ecoreref(C3)
+				addNewESubpackage("subpackage", "", "")
+				// cycle
+				ecoreref(subpackage).ESubpackages += it
+				// the listener broke the cycle
+				ecoreref(foo.subpackage) // valid
+				ecoreref(subpackage.foo) // NOT valid
+			}
+		'''.toString
+		input
+		.parseWithTestEcore => [
+			interpretProgram
+			assertError(
+				XbasePackage.eINSTANCE.XBinaryOperation,
+				EdeltaValidator.ECLASS_CYCLE,
+				input.lastIndexOf('ecoreref(C1).ESuperTypes += ecoreref(C3)'),
+				'ecoreref(C1).ESuperTypes += ecoreref(C3)'.length,
+				"Cycle in inheritance hierarchy: foo.C3"
+			)
+			assertError(
+				XbasePackage.eINSTANCE.XBinaryOperation,
+				EdeltaValidator.EPACKAGE_CYCLE,
+				input.lastIndexOf('ecoreref(subpackage).ESubpackages += it'),
+				'ecoreref(subpackage).ESubpackages += it'.length,
+				"Cycle in superpackage/subpackage: foo.subpackage.foo"
+			)
+			assertErrorsAsStrings('''
+			Cycle in inheritance hierarchy: foo.C3
+			Cycle in superpackage/subpackage: foo.subpackage.foo
+			foo cannot be resolved.
+			''')
+		]
+	}
+
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) {

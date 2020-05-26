@@ -4,21 +4,24 @@ import com.google.inject.Inject
 import com.google.inject.Provider
 import edelta.edelta.EdeltaFactory
 import edelta.interpreter.EdeltaInterpreterDiagnostic
+import edelta.interpreter.EdeltaInterpreterDiagnosticHelper
 import edelta.interpreter.EdeltaInterpreterResourceListener
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap
+import edelta.validation.EdeltaValidator
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic
-import org.eclipse.emf.ecore.resource.impl.ResourceImpl
 import org.eclipse.xtext.linking.impl.XtextLinkingDiagnostic
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.util.IResourceScopeCache
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl
 import org.eclipse.xtext.xbase.XExpression
+import org.eclipse.xtext.xbase.XbaseFactory
+import org.eclipse.xtext.xbase.XbasePackage
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,7 +31,7 @@ import static org.mockito.Mockito.*
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
-class EdeltaInterpreterResourceListenerTest {
+class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 
 	static class SpiedProvider implements Provider<String> {
 		override get() {
@@ -40,6 +43,7 @@ class EdeltaInterpreterResourceListenerTest {
 	static val edeltaFactory = EdeltaFactory.eINSTANCE
 
 	@Inject IResourceScopeCache cache
+	@Inject EdeltaInterpreterDiagnosticHelper diagnosticHelper
 	var EdeltaInterpreterResourceListener listener
 	var EPackage ePackage
 	var Resource resource
@@ -49,13 +53,16 @@ class EdeltaInterpreterResourceListenerTest {
 	@Before
 	def void setup() {
 		ePackage = ecoreFactory.createEPackage => [
+			name = "aPackage"
 			EClassifiers += ecoreFactory.createEClass => [
 				name = "AClass"
 			]
 		]
-		resource = new ResourceImpl
+		resource = "".parse.eResource
 		enamedElementXExpressionMap = new EdeltaENamedElementXExpressionMap
-		listener = new EdeltaInterpreterResourceListener(cache, resource, enamedElementXExpressionMap)
+		listener = new EdeltaInterpreterResourceListener(
+			cache, resource, enamedElementXExpressionMap, diagnosticHelper
+		)
 		stringProvider = spy(new SpiedProvider)
 		ePackage.eAdapters += listener
 	}
@@ -199,6 +206,57 @@ class EdeltaInterpreterResourceListenerTest {
 		// change the something different than the name
 		ePackage.EClassifiers.get(0).instanceClassName = "foo"
 		assertThat(enamedElementXExpressionMap).isEmpty
+	}
+
+	@Test
+	def void testEPackageCycleWhenAddingSubpackage() {
+		val currentExpression = XbaseFactory.eINSTANCE.createXAssignment
+		resource.contents += currentExpression
+		diagnosticHelper.setCurrentExpression(currentExpression)
+		val subpackage = ecoreFactory.createEPackage => [
+			name = "subpackage"
+		]
+		ePackage.ESubpackages += subpackage
+		subpackage.ESubpackages += ePackage
+		resource.assertError(
+			XbasePackage.eINSTANCE.XAssignment,
+			EdeltaValidator.EPACKAGE_CYCLE,
+			"Cycle in superpackage/subpackage: aPackage.subpackage.aPackage"
+		)
+		assertThat(resource.validate).hasSize(1)
+		// check that the listener broke the cycle in the model
+		assertThat(subpackage.ESubpackages).isEmpty
+		assertThat(ePackage.ESubpackages).containsOnly(subpackage)
+	}
+
+	@Test
+	def void testEClassCycleWhenAddingSuperType() {
+		val currentExpression = XbaseFactory.eINSTANCE.createXAssignment
+		resource.contents += currentExpression
+		diagnosticHelper.setCurrentExpression(currentExpression)
+		val c1 = ecoreFactory.createEClass => [
+			name = "c1"
+			ePackage.EClassifiers += it
+		]
+		val c2 = ecoreFactory.createEClass => [
+			name = "c2"
+			ePackage.EClassifiers += it
+		]
+		val c3 = ecoreFactory.createEClass => [
+			name = "c3"
+			ePackage.EClassifiers += it
+		]
+		c3.ESuperTypes += c2
+		resource.assertNoIssues
+		c2.ESuperTypes += c1
+		resource.assertNoIssues
+		c1.ESuperTypes += c3
+		resource.assertError(
+			XbasePackage.eINSTANCE.XAssignment,
+			EdeltaValidator.ECLASS_CYCLE,
+			"Cycle in inheritance hierarchy: aPackage.c3"
+		)
+		assertThat(resource.validate).hasSize(1)
 	}
 
 	def createEObjectDiagnosticMock(EObject problematicObject) {

@@ -6,6 +6,7 @@ import edelta.tests.EdeltaInjectorProviderCustom;
 import edelta.util.EdeltaModelUtil;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.xtend2.lib.StringConcatenation;
@@ -163,5 +164,30 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
         node.getPreviousSibling().getPreviousSibling().getOffset());
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testHasCycleInHierarchy() {
+    final EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
+    final EClass c1 = ecoreFactory.createEClass();
+    Assertions.assertThat(EdeltaModelUtil.hasCycleInHierarchy(c1)).isFalse();
+    final EClass c2 = ecoreFactory.createEClass();
+    EList<EClass> _eSuperTypes = c2.getESuperTypes();
+    _eSuperTypes.add(c1);
+    Assertions.assertThat(EdeltaModelUtil.hasCycleInHierarchy(c2)).isFalse();
+    final EClass c3 = ecoreFactory.createEClass();
+    EList<EClass> _eSuperTypes_1 = c3.getESuperTypes();
+    _eSuperTypes_1.add(c2);
+    Assertions.assertThat(EdeltaModelUtil.hasCycleInHierarchy(c3)).isFalse();
+    final EClass c4 = ecoreFactory.createEClass();
+    EList<EClass> _eSuperTypes_2 = c3.getESuperTypes();
+    _eSuperTypes_2.add(c4);
+    Assertions.assertThat(EdeltaModelUtil.hasCycleInHierarchy(c3)).isFalse();
+    EList<EClass> _eSuperTypes_3 = c1.getESuperTypes();
+    _eSuperTypes_3.add(c3);
+    Assertions.assertThat(EdeltaModelUtil.hasCycleInHierarchy(c4)).isFalse();
+    Assertions.assertThat(EdeltaModelUtil.hasCycleInHierarchy(c3)).isTrue();
+    Assertions.assertThat(EdeltaModelUtil.hasCycleInHierarchy(c2)).isTrue();
+    Assertions.assertThat(EdeltaModelUtil.hasCycleInHierarchy(c1)).isTrue();
   }
 }
