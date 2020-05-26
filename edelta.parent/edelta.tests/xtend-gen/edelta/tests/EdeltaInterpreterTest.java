@@ -1966,6 +1966,80 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
   
+  @Test
+  public void testIntroducedCycles() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EPackage");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"C1\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"C2\") [ ESuperTypes += ecoreref(C1) ]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"C3\") [ ESuperTypes += ecoreref(C2) ]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// cycle!");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(C1).ESuperTypes += ecoreref(C3)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewESubpackage(\"subpackage\", \"\", \"\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// cycle");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(subpackage).ESubpackages += it");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// the listener broke the cycle");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(foo.subpackage) // valid");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(subpackage.foo) // NOT valid");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      this._validationTestHelper.assertError(it, 
+        XbasePackage.eINSTANCE.getXBinaryOperation(), 
+        EdeltaValidator.ECLASS_CYCLE, 
+        input.lastIndexOf("ecoreref(C1).ESuperTypes += ecoreref(C3)"), 
+        "ecoreref(C1).ESuperTypes += ecoreref(C3)".length(), 
+        "Cycle in inheritance hierarchy: foo.C3");
+      this._validationTestHelper.assertError(it, 
+        XbasePackage.eINSTANCE.getXBinaryOperation(), 
+        EdeltaValidator.EPACKAGE_CYCLE, 
+        input.lastIndexOf("ecoreref(subpackage).ESubpackages += it"), 
+        "ecoreref(subpackage).ESubpackages += it".length(), 
+        "Cycle in superpackage/subpackage: foo.subpackage.foo");
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("Cycle in inheritance hierarchy: foo.C3");
+      _builder_1.newLine();
+      _builder_1.append("Cycle in superpackage/subpackage: foo.subpackage.foo");
+      _builder_1.newLine();
+      _builder_1.append("foo cannot be resolved.");
+      _builder_1.newLine();
+      this.assertErrorsAsStrings(it, _builder_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
   private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final Procedure1<? super EPackage> testExecutor) {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, true, testExecutor);
   }

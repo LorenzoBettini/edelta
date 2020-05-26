@@ -3,6 +3,8 @@
  */
 package edelta.lib;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import org.eclipse.emf.ecore.EAttribute;
@@ -105,7 +107,7 @@ public class EdeltaLibrary {
 
 	/**
 	 * Returns a String representation (fully qualified) based on the containment
-	 * relation.
+	 * relation (it handles cycles safely).
 	 * 
 	 * For example
 	 * 
@@ -123,15 +125,23 @@ public class EdeltaLibrary {
 	 * @return
 	 */
 	public String getEObjectRepr(EObject e) {
-		if (e == null)
-			return "";
-		String info = e.toString();
-		if (e instanceof ENamedElement) {
-			info = ((ENamedElement) e).getName();
+		Set<EObject> seen = new HashSet<>();
+		StringBuilder builder = new StringBuilder();
+		EObject current = e;
+		while (current != null) {
+			if (builder.length() > 0)
+				builder.insert(0, ".");
+			if (current instanceof ENamedElement) {
+				builder.insert(0, ((ENamedElement) current).getName());
+			} else {
+				builder.insert(0, current.toString());
+			}
+			if (seen.contains(current))
+				break;
+			seen.add(current);
+			current = current.eContainer();
 		}
-		return e.eContainer() != null ?
-			getEObjectRepr(e.eContainer()) + "." + info :
-			info;
+		return builder.toString();
 	}
 
 	public void addEStructuralFeature(EClass eClass, EStructuralFeature eStructuralFeature) {

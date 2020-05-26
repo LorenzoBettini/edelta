@@ -117,4 +117,25 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testHasCycleInHierarchy() {
+		val ecoreFactory = EcoreFactory.eINSTANCE
+		val c1 = ecoreFactory.createEClass
+		assertThat(hasCycleInHierarchy(c1)).isFalse
+		val c2 = ecoreFactory.createEClass
+		c2.ESuperTypes += c1
+		assertThat(hasCycleInHierarchy(c2)).isFalse
+		val c3 = ecoreFactory.createEClass
+		c3.ESuperTypes += c2
+		assertThat(hasCycleInHierarchy(c3)).isFalse
+		val c4 = ecoreFactory.createEClass
+		c3.ESuperTypes += c4
+		assertThat(hasCycleInHierarchy(c3)).isFalse
+		// cycle
+		c1.ESuperTypes += c3
+		assertThat(hasCycleInHierarchy(c4)).isFalse
+		assertThat(hasCycleInHierarchy(c3)).isTrue
+		assertThat(hasCycleInHierarchy(c2)).isTrue
+		assertThat(hasCycleInHierarchy(c1)).isTrue
+	}
 }

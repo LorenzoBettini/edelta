@@ -3,7 +3,9 @@ package edelta.tests;
 import com.google.inject.Inject;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProvider;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
@@ -44,6 +46,26 @@ public class EdeltaQualifiedNameProviderTest extends EdeltaAbstractTest {
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
+  }
+  
+  @Test
+  public void testEPackageWithCycle() {
+    EPackage _createEPackage = EcoreFactory.eINSTANCE.createEPackage();
+    final Procedure1<EPackage> _function = (EPackage it) -> {
+      it.setName("p1");
+    };
+    final EPackage p1 = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
+    EPackage _createEPackage_1 = EcoreFactory.eINSTANCE.createEPackage();
+    final Procedure1<EPackage> _function_1 = (EPackage it) -> {
+      it.setName("p2");
+    };
+    final EPackage p2 = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage_1, _function_1);
+    EList<EPackage> _eSubpackages = p1.getESubpackages();
+    _eSubpackages.add(p2);
+    Assert.assertEquals("p1.p2", this._iQualifiedNameProvider.getFullyQualifiedName(p2).toString());
+    EList<EPackage> _eSubpackages_1 = p2.getESubpackages();
+    _eSubpackages_1.add(p1);
+    Assert.assertEquals("p2", this._iQualifiedNameProvider.getFullyQualifiedName(p2).toString());
   }
   
   @Test
