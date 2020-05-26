@@ -125,22 +125,23 @@ public class EdeltaLibrary {
 	 * @return
 	 */
 	public String getEObjectRepr(EObject e) {
-		return getEObjectReprInternal(e, new HashSet<>());
-	}
-
-	private String getEObjectReprInternal(EObject e, Set<EObject> seen) {
-		if (e == null)
-			return "";
-		String info = e.toString();
-		if (e instanceof ENamedElement) {
-			info = ((ENamedElement) e).getName();
+		Set<EObject> seen = new HashSet<>();
+		StringBuilder builder = new StringBuilder();
+		EObject current = e;
+		while (current != null) {
+			if (builder.length() > 0)
+				builder.insert(0, ".");
+			if (current instanceof ENamedElement) {
+				builder.insert(0, ((ENamedElement) current).getName());
+			} else {
+				builder.insert(0, current.toString());
+			}
+			if (seen.contains(current))
+				break;
+			seen.add(current);
+			current = current.eContainer();
 		}
-		if (seen.contains(e))
-			return info;
-		seen.add(e);
-		return e.eContainer() != null ?
-			getEObjectReprInternal(e.eContainer(), seen) + "." + info :
-			info;
+		return builder.toString();
 	}
 
 	public void addEStructuralFeature(EClass eClass, EStructuralFeature eStructuralFeature) {
