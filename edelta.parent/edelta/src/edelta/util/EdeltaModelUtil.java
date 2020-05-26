@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.nodemodel.INode;
@@ -70,5 +71,20 @@ public class EdeltaModelUtil {
 			superPackage = superPackage.getESuperPackage();
 		}
 		return superPackage;
+	}
+
+	public static boolean hasCycleInHierarchy(EClass type) {
+		return hasCycleInHierarchy(type, new HashSet<>());
+	}
+
+	private static boolean hasCycleInHierarchy(EClass type, Set<EClass> processedSuperTypes) {
+		processedSuperTypes.add(type);
+		for (EClass superType : type.getESuperTypes()) {
+			if (processedSuperTypes.contains(superType) ||
+					hasCycleInHierarchy(superType, processedSuperTypes)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
