@@ -226,6 +226,36 @@ class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 		assertThat(resource.validate).hasSize(1)
 	}
 
+	@Test
+	def void testEClassCycleWhenAddingSuperType() {
+		val currentExpression = XbaseFactory.eINSTANCE.createXAssignment
+		resource.contents += currentExpression
+		diagnosticHelper.setCurrentExpression(currentExpression)
+		val c1 = ecoreFactory.createEClass => [
+			name = "c1"
+			ePackage.EClassifiers += it
+		]
+		val c2 = ecoreFactory.createEClass => [
+			name = "c2"
+			ePackage.EClassifiers += it
+		]
+		val c3 = ecoreFactory.createEClass => [
+			name = "c3"
+			ePackage.EClassifiers += it
+		]
+		c3.ESuperTypes += c2
+		resource.assertNoIssues
+		c2.ESuperTypes += c1
+		resource.assertNoIssues
+		c1.ESuperTypes += c3
+		resource.assertError(
+			XbasePackage.eINSTANCE.XAssignment,
+			EdeltaValidator.ECLASS_CYCLE,
+			"Cycle in inheritance hierarchy: aPackage.c3"
+		)
+		assertThat(resource.validate).hasSize(1)
+	}
+
 	def createEObjectDiagnosticMock(EObject problematicObject) {
 		mock(EObjectDiagnosticImpl) => [
 			when(getProblematicObject).thenReturn(problematicObject)

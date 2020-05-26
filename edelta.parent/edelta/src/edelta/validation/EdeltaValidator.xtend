@@ -46,6 +46,7 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	public static val LIVE_VALIDATION_ERROR = PREFIX + "LiveValidationError";
 	public static val LIVE_VALIDATION_WARNING = PREFIX + "LiveValidationWarning";
 	public static val EPACKAGE_CYCLE = PREFIX + "EPackageCycle";
+	public static val ECLASS_CYCLE = PREFIX + "EClassCycle";
 
 	@Inject CommonTypeComputationServices services
 	@Inject OverrideHelper overrideHelper

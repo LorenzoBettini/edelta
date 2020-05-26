@@ -5,6 +5,7 @@ import static org.eclipse.emf.ecore.EcorePackage.Literals.*;
 import java.util.List;
 
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -58,7 +59,8 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 	@Override
 	public void notifyChanged(Notification notification) {
 		super.notifyChanged(notification);
-		if (notification.getFeature() == ENAMED_ELEMENT__NAME) {
+		final Object feature = notification.getFeature();
+		if (feature == ENAMED_ELEMENT__NAME) {
 			enamedElementXExpressionMap.put(
 				(ENamedElement) notification.getNotifier(),
 				currentExpression);
@@ -69,19 +71,30 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 				enamedElementXExpressionMap.put(
 					(ENamedElement) newValue,
 					currentExpression);
-				if (notification.getFeature() == EPACKAGE__ESUBPACKAGES) {
-					EPackage subPackage = (EPackage) newValue;
-					if (EdeltaModelUtil.hasCycleInSuperPackage(subPackage)) {
-						diagnosticHelper.addError(subPackage, EdeltaValidator.EPACKAGE_CYCLE,
-							"Cycle in superpackage/subpackage: " +
-								lib.getEObjectRepr(subPackage));
-					}
-				}
+				checkCycles(feature, newValue);
 			}
 		}
 		cache.clear(resource);
 		clearIssues(resource.getErrors());
 		clearIssues(resource.getWarnings());
+	}
+
+	private void checkCycles(final Object feature, final Object newValue) {
+		if (feature == EPACKAGE__ESUBPACKAGES) {
+			EPackage subPackage = (EPackage) newValue;
+			if (EdeltaModelUtil.hasCycleInSuperPackage(subPackage)) {
+				diagnosticHelper.addError(subPackage, EdeltaValidator.EPACKAGE_CYCLE,
+					"Cycle in superpackage/subpackage: " +
+						lib.getEObjectRepr(subPackage));
+			}
+		} else if (feature == ECLASS__ESUPER_TYPES) {
+			EClass eClass = (EClass) newValue;
+			if (EdeltaModelUtil.hasCycleInHierarchy(eClass)) {
+				diagnosticHelper.addError(eClass, EdeltaValidator.ECLASS_CYCLE,
+					"Cycle in inheritance hierarchy: " +
+						lib.getEObjectRepr(eClass));
+			}
+		}
 	}
 
 	public void setCurrentExpression(XExpression currentExpression) {

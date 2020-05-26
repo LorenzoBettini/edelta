@@ -246,6 +246,48 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
     Assertions.<Issue>assertThat(this._validationTestHelper.validate(this.resource)).hasSize(1);
   }
   
+  @Test
+  public void testEClassCycleWhenAddingSuperType() {
+    final XAssignment currentExpression = XbaseFactory.eINSTANCE.createXAssignment();
+    EList<EObject> _contents = this.resource.getContents();
+    _contents.add(currentExpression);
+    this.diagnosticHelper.setCurrentExpression(currentExpression);
+    EClass _createEClass = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEClass();
+    final Procedure1<EClass> _function = (EClass it) -> {
+      it.setName("c1");
+      EList<EClassifier> _eClassifiers = this.ePackage.getEClassifiers();
+      _eClassifiers.add(it);
+    };
+    final EClass c1 = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function);
+    EClass _createEClass_1 = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEClass();
+    final Procedure1<EClass> _function_1 = (EClass it) -> {
+      it.setName("c2");
+      EList<EClassifier> _eClassifiers = this.ePackage.getEClassifiers();
+      _eClassifiers.add(it);
+    };
+    final EClass c2 = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_1);
+    EClass _createEClass_2 = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEClass();
+    final Procedure1<EClass> _function_2 = (EClass it) -> {
+      it.setName("c3");
+      EList<EClassifier> _eClassifiers = this.ePackage.getEClassifiers();
+      _eClassifiers.add(it);
+    };
+    final EClass c3 = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_2, _function_2);
+    EList<EClass> _eSuperTypes = c3.getESuperTypes();
+    _eSuperTypes.add(c2);
+    this._validationTestHelper.assertNoIssues(this.resource);
+    EList<EClass> _eSuperTypes_1 = c2.getESuperTypes();
+    _eSuperTypes_1.add(c1);
+    this._validationTestHelper.assertNoIssues(this.resource);
+    EList<EClass> _eSuperTypes_2 = c1.getESuperTypes();
+    _eSuperTypes_2.add(c3);
+    this._validationTestHelper.assertError(this.resource, 
+      XbasePackage.eINSTANCE.getXAssignment(), 
+      EdeltaValidator.ECLASS_CYCLE, 
+      "Cycle in inheritance hierarchy: aPackage.c3");
+    Assertions.<Issue>assertThat(this._validationTestHelper.validate(this.resource)).hasSize(1);
+  }
+  
   public EObjectDiagnosticImpl createEObjectDiagnosticMock(final EObject problematicObject) {
     EObjectDiagnosticImpl _mock = Mockito.<EObjectDiagnosticImpl>mock(EObjectDiagnosticImpl.class);
     final Procedure1<EObjectDiagnosticImpl> _function = (EObjectDiagnosticImpl it) -> {
