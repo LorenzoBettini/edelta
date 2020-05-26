@@ -27,6 +27,16 @@ class EdeltaQualifiedNameProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testEPackageWithCycle() {
+		val p1 = EcoreFactory.eINSTANCE.createEPackage => [ name = "p1" ]
+		val p2 = EcoreFactory.eINSTANCE.createEPackage => [ name = "p2" ]
+		p1.ESubpackages += p2
+		assertEquals("p1.p2", p2.fullyQualifiedName.toString)
+		p2.ESubpackages += p1
+		assertEquals("p2", p2.fullyQualifiedName.toString)
+	}
+
+	@Test
 	def void testAnyOtherElement() {
 		val c = EcoreFactory.eINSTANCE.createEClass => [
 			name = "foo"
