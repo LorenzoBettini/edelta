@@ -1,6 +1,6 @@
 package edelta.interpreter;
 
-import static org.eclipse.emf.ecore.EcorePackage.Literals.ENAMED_ELEMENT__NAME;
+import static org.eclipse.emf.ecore.EcorePackage.Literals.*;
 
 import java.util.List;
 
@@ -69,7 +69,7 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 				enamedElementXExpressionMap.put(
 					(ENamedElement) newValue,
 					currentExpression);
-				if (newValue instanceof EPackage) {
+				if (notification.getFeature() == EPACKAGE__ESUBPACKAGES) {
 					EPackage subPackage = (EPackage) newValue;
 					if (EdeltaModelUtil.hasCycleInSuperPackage(subPackage)) {
 						diagnosticHelper.addError(subPackage, EdeltaValidator.EPACKAGE_CYCLE,
