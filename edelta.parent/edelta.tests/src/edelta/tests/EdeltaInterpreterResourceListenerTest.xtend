@@ -224,6 +224,9 @@ class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 			"Cycle in superpackage/subpackage: aPackage.subpackage.aPackage"
 		)
 		assertThat(resource.validate).hasSize(1)
+		// check that the listener broke the cycle in the model
+		assertThat(subpackage.ESubpackages).isEmpty
+		assertThat(ePackage.ESubpackages).containsOnly(subpackage)
 	}
 
 	@Test

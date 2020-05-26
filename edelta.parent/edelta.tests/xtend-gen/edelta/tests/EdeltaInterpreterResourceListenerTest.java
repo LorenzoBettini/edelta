@@ -244,6 +244,8 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
       EdeltaValidator.EPACKAGE_CYCLE, 
       "Cycle in superpackage/subpackage: aPackage.subpackage.aPackage");
     Assertions.<Issue>assertThat(this._validationTestHelper.validate(this.resource)).hasSize(1);
+    Assertions.<EPackage>assertThat(subpackage.getESubpackages()).isEmpty();
+    Assertions.<EPackage>assertThat(this.ePackage.getESubpackages()).containsOnly(subpackage);
   }
   
   @Test

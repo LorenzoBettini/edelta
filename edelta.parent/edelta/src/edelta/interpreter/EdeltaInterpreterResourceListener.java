@@ -86,6 +86,11 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 				diagnosticHelper.addError(subPackage, EdeltaValidator.EPACKAGE_CYCLE,
 					"Cycle in superpackage/subpackage: " +
 						lib.getEObjectRepr(subPackage));
+				// break the cycle to avoid problems due to
+				// loop in containment (in other Xtext components, e.g., scoping)
+				subPackage.getESuperPackage()
+					.getESubpackages()
+					.remove(subPackage);
 			}
 		} else if (feature == ECLASS__ESUPER_TYPES) {
 			EClass eClass = (EClass) newValue;
