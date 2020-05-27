@@ -4,7 +4,7 @@ Bundle-Name: Edelta Testing Libraries
 Bundle-SymbolicName: edelta.testing.libraries
 Bundle-Version: 0.9.0.qualifier
 Bundle-Vendor: Lorenzo Bettini
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Automatic-Module-Name: edelta.lib
 Bundle-ClassPath: lib/assertj-core.jar,
  lib/byte-buddy-agent.jar,
