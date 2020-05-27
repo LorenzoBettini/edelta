@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.function.Predicate;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
-import org.assertj.core.api.iterable.ThrowingExtractor;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.common.util.EList;
@@ -72,10 +71,10 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     _builder.newLine();
     final EdeltaProgram program = this.parseWithTestEcores(_builder);
     final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
-    final ThrowingExtractor<EPackage, String, Exception> _function = (EPackage it) -> {
+    final Function1<EPackage, String> _function = (EPackage it) -> {
       return it.getName();
     };
-    Assertions.<EPackage>assertThat(packages).<String, Exception>extracting(_function).containsExactlyInAnyOrder("foo", "bar");
+    Assertions.<String>assertThat(IterableExtensions.<EPackage, String>map(packages, _function)).containsExactlyInAnyOrder("foo", "bar");
   }
   
   @Test
