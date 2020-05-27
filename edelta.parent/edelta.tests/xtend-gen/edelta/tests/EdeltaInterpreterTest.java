@@ -713,6 +713,49 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testTimeoutWarningWhenCallingJavaCode() {
+    this.interpreter.setInterpreterTimeout(2000);
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EClass");
+    _builder.newLine();
+    _builder.append("import edelta.tests.additional.MyCustomEdeltaWithTimeout");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("use MyCustomEdeltaWithTimeout as extension mylib");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aModificationTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("EClassifiers += newEClass(\"ANewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("op(EClassifiers.last as EClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
+      EClass _lastEClass = this.getLastEClass(derivedEPackage);
+      final Procedure1<EClass> _function_1 = (EClass it) -> {
+        Assert.assertEquals("ANewClass", it.getName());
+        Assert.assertEquals(Boolean.valueOf(false), Boolean.valueOf(it.isAbstract()));
+        final String offendingString = "op(EClassifiers.last as EClass)";
+        final int initialIndex = input.lastIndexOf(offendingString);
+        this._validationTestHelper.assertWarning(it, 
+          XbasePackage.eINSTANCE.getXFeatureCall(), 
+          EdeltaValidator.INTERPRETER_TIMEOUT, initialIndex, offendingString.length(), 
+          "Timeout while interpreting");
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_lastEClass, _function_1);
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, _function);
+  }
+  
+  @Test
   public void testTimeoutWarningWithSeveralFiles() {
     this.interpreter.setInterpreterTimeout(2000);
     StringConcatenation _builder = new StringConcatenation();

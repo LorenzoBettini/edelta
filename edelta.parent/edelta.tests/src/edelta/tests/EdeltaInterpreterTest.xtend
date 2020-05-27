@@ -470,6 +470,39 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testTimeoutWarningWhenCallingJavaCode() {
+		// in this test we really need the timeout
+		interpreter.interpreterTimeout = 2000;
+		val input = '''
+			import org.eclipse.emf.ecore.EClass
+			import edelta.tests.additional.MyCustomEdeltaWithTimeout
+
+			metamodel "foo"
+
+			use MyCustomEdeltaWithTimeout as extension mylib
+			
+			modifyEcore aModificationTest epackage foo {
+				EClassifiers += newEClass("ANewClass")
+				op(EClassifiers.last as EClass)
+			}
+		'''
+		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation [ derivedEPackage |
+			derivedEPackage.lastEClass => [
+				assertEquals("ANewClass", name)
+				assertEquals(false, abstract)
+				val offendingString = "op(EClassifiers.last as EClass)"
+				val initialIndex = input.lastIndexOf(offendingString)
+				assertWarning(
+					XbasePackage.eINSTANCE.XFeatureCall,
+					EdeltaValidator.INTERPRETER_TIMEOUT,
+					initialIndex, offendingString.length,
+					"Timeout while interpreting"
+				)
+			]
+		]
+	}
+
+	@Test
 	def void testTimeoutWarningWithSeveralFiles() {
 		// in this test we really need the timeout
 		interpreter.interpreterTimeout = 2000;

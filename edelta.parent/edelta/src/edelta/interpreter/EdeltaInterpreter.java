@@ -164,9 +164,27 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		IEvaluationContext context = createContext();
 		context.newValue(IT_QUALIFIED_NAME, ePackage);
 		configureContextForJavaThis(context);
+		Thread interpreterThread = Thread.currentThread();
+		// the following thread checks timeout when interpreting
+		// external Java code
+		// see https://github.com/LorenzoBettini/edelta/issues/179
+		Thread timeoutGuardThread = new Thread() {
+			@Override
+			public void run() {
+				try {
+					interpreterThread.join(interpreterTimeout);
+					interpreterThread.interrupt();
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+			}
+		};
+		timeoutGuardThread.start();
 		final IEvaluationResult result = evaluate(op.getBody(), context,
 				new EdeltaInterpreterCancelIndicator());
+		timeoutGuardThread.interrupt();
 		if (result == null) {
+			// our cancel indicator reached timeout
 			addTimeoutWarning();
 		} else {
 			handleResultException(result.getException());
@@ -187,7 +205,10 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	}
 
 	private void handleResultException(Throwable resultException) {
-		if (resultException != null) {
+		if (resultException instanceof InterruptedException) {
+			// our timeoutGuardThread interrupted us
+			addTimeoutWarning();
+		} else if (resultException != null) {
 			throw new EdeltaInterpreterWrapperException
 				((Exception) resultException);
 		}
@@ -378,7 +399,9 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				edeltaOperation.getParams(), argumentValues);
 		final IEvaluationResult result = evaluate(edeltaOperation.getBody(), context,
 				indicator);
-		if (result == null)
+		if (result == null ||
+				// our timeoutGuardThread interrupted us
+				result.getException() instanceof InterruptedException)
 			throw new InterpreterCanceledException();
 		return result.getResult();
 	}
