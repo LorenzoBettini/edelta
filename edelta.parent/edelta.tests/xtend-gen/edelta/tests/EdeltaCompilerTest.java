@@ -2811,7 +2811,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
           this.assertGeneratedJavaCodeCompiles(it);
         }
         final Class<?> genClass = it.getCompiledClass();
-        final Object edeltaObj = genClass.newInstance();
+        final Object edeltaObj = genClass.getDeclaredConstructor().newInstance();
         this._reflectExtensions.invoke(edeltaObj, "loadEcoreFile", new Object[] { "testecores/foo.ecore" });
         this._reflectExtensions.invoke(edeltaObj, "execute");
         this._reflectExtensions.invoke(edeltaObj, "saveModifiedEcores", new Object[] { EdeltaCompilerTest.MODIFIED });

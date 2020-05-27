@@ -1379,7 +1379,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				assertGeneratedJavaCodeCompiles
 			}
 			val genClass = compiledClass
-			val edeltaObj = genClass.newInstance
+			val edeltaObj = genClass.getDeclaredConstructor().newInstance()
 			// load ecore files
 			edeltaObj.invoke("loadEcoreFile", #["testecores/foo.ecore"])
 			edeltaObj.invoke("execute")
