@@ -20,6 +20,7 @@ public class MyCustomEdeltaWithTimeout extends AbstractEdelta {
 		super(other);
 	}
 
+	@SuppressWarnings("all")
 	public void op(EClass c) throws InterruptedException {
 		int i = 10;
 		while (i >= 0) {
