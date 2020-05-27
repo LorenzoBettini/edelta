@@ -348,11 +348,9 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 				ESuperTypes += superclass
 			]
 		]
-		assertThat(finder.directSubclasses(p.EClasses.head)) // ASuperclass
-			.extracting([name])
+		assertThat(finder.directSubclasses(p.EClasses.head).map[name]) // ASuperclass
 			.containsExactlyInAnyOrder("ASubclass1", "ASubclass2")
-		assertThat(finder.directSubclasses(p.EClasses.get(1))) // ASubclass1
-			.extracting([name])
+		assertThat(finder.directSubclasses(p.EClasses.get(1)).map[name]) // ASubclass1
 			.containsExactlyInAnyOrder("ASubclass1Subclass")
 		assertThat(finder.directSubclasses(p.EClasses.get(2))) // ASubclass1Subclass
 			.isEmpty
