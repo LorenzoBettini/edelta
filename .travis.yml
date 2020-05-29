@@ -10,7 +10,7 @@ matrix:
     # always build this environment
     - os: linux
       dist: xenial
-      jdk: openjdk8
+      jdk: openjdk11
       services:
       - xvfb
       env: ADDITIONAL="-Pjacoco,build-ide,test-ide,run-its coveralls:report sonar:sonar"

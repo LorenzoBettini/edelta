@@ -45,8 +45,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		'''.
 		parseWithTestEcores
 		val packages = program.eResource.copiedEPackagesMap.values
-		assertThat(packages)
-			.extracting([name])
+		assertThat(packages.map[name])
 			.containsExactlyInAnyOrder("foo", "bar")
 	}
 

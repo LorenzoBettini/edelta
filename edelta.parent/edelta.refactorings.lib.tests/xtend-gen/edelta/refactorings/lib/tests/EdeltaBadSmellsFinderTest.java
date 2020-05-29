@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.iterable.ThrowingExtractor;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -545,14 +544,14 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
       ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_2, _function_3);
     };
     final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-    final ThrowingExtractor<EClass, String, Exception> _function_1 = (EClass it) -> {
+    final Function1<EClass, String> _function_1 = (EClass it) -> {
       return it.getName();
     };
-    Assertions.<EClass>assertThat(this.finder.directSubclasses(IterableExtensions.<EClass>head(this.EClasses(p)))).<String, Exception>extracting(_function_1).containsExactlyInAnyOrder("ASubclass1", "ASubclass2");
-    final ThrowingExtractor<EClass, String, Exception> _function_2 = (EClass it) -> {
+    Assertions.<String>assertThat(IterableExtensions.<EClass, String>map(this.finder.directSubclasses(IterableExtensions.<EClass>head(this.EClasses(p))), _function_1)).containsExactlyInAnyOrder("ASubclass1", "ASubclass2");
+    final Function1<EClass, String> _function_2 = (EClass it) -> {
       return it.getName();
     };
-    Assertions.<EClass>assertThat(this.finder.directSubclasses(((EClass[])Conversions.unwrapArray(this.EClasses(p), EClass.class))[1])).<String, Exception>extracting(_function_2).containsExactlyInAnyOrder("ASubclass1Subclass");
+    Assertions.<String>assertThat(IterableExtensions.<EClass, String>map(this.finder.directSubclasses(((EClass[])Conversions.unwrapArray(this.EClasses(p), EClass.class))[1]), _function_2)).containsExactlyInAnyOrder("ASubclass1Subclass");
     Assertions.<EClass>assertThat(this.finder.directSubclasses(((EClass[])Conversions.unwrapArray(this.EClasses(p), EClass.class))[2])).isEmpty();
   }
   

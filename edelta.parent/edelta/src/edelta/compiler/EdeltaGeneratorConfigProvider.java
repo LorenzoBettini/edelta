@@ -20,7 +20,7 @@ public class EdeltaGeneratorConfigProvider extends GeneratorConfigProvider {
 	@Override
 	public GeneratorConfig get(EObject context) {
 		final GeneratorConfig generatorConfig = super.get(context);
-		generatorConfig.setJavaSourceVersion(JavaVersion.JAVA8);
+		generatorConfig.setJavaSourceVersion(JavaVersion.JAVA11);
 		return generatorConfig;
 	}
 }

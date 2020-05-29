@@ -4,6 +4,6 @@ Bundle-Name: Edelta Model Example Project
 Bundle-SymbolicName: edelta.model.example; singleton:=true
 Bundle-Version: 0.9.0.qualifier
 Require-Bundle: org.eclipse.emf.ecore
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: Lorenzo Bettini
 Automatic-Module-Name: edelta.model.example

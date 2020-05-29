@@ -4,7 +4,7 @@ Bundle-Name: Edelta Library Tests
 Bundle-SymbolicName: edelta.lib.tests
 Bundle-Version: 0.9.0.qualifier
 Bundle-Vendor: Lorenzo Bettini
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: edelta.lib,
  org.junit;bundle-version="4.12.0",
  edelta.testutils,
