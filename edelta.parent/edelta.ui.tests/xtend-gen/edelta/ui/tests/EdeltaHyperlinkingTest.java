@@ -54,7 +54,7 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
   protected String _target(final XtextHyperlink hyperlink) {
     String _xblockexpression = null;
     {
-      final IXtextDocument document = this._xtextDocumentUtil.getXtextDocument(this.xtextEditor.getInternalSourceViewer());
+      final IXtextDocument document = this.xtextDocumentUtil.getXtextDocument(this.xtextEditor.getInternalSourceViewer());
       final IUnitOfWork<XtextResource, XtextResource> _function = (XtextResource it) -> {
         return it;
       };
@@ -68,7 +68,7 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
         _switchResult = ((XAbstractFeatureCall)eObject).getFeature().getSimpleName();
       }
       if (!_matched) {
-        _switchResult = this._iQualifiedNameProvider.getFullyQualifiedName(eObject).toString();
+        _switchResult = this.qualifiedNameProvider.getFullyQualifiedName(eObject).toString();
       }
       _xblockexpression = _switchResult;
     }
