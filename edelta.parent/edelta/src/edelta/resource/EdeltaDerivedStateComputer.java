@@ -1,10 +1,9 @@
 package edelta.resource;
 
-import java.util.List;
+import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
 
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader;
 import org.eclipse.xtext.resource.DerivedStateAwareResource;
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator;
@@ -13,7 +12,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import edelta.edelta.EdeltaEcoreReferenceExpression;
-import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreterHelper;
@@ -48,22 +46,22 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 		super.installDerivedState(resource, preIndexingPhase);
 		final EdeltaProgram program = (EdeltaProgram) resource.getContents().get(0);
 		if ((!preIndexingPhase)) {
-			final List<EdeltaModifyEcoreOperation> modifyEcoreOperations = interpreterHelper
+			final var modifyEcoreOperations = interpreterHelper
 					.filterOperations(program.getModifyEcoreOperations());
 			if (modifyEcoreOperations.isEmpty()) {
 				return;
 			}
-			final EdeltaCopiedEPackagesMap copiedEPackagesMap = this.getCopiedEPackagesMap(resource);
-			for (EdeltaModifyEcoreOperation op : modifyEcoreOperations) {
+			final var copiedEPackagesMap = this.getCopiedEPackagesMap(resource);
+			for (var op : modifyEcoreOperations) {
 				// make sure packages under modification are copied
-				this.getOrAddDerivedStateEPackage(op.getEpackage(), copiedEPackagesMap);
+				getOrAddDerivedStateEPackage(op.getEpackage(), copiedEPackagesMap);
 			}
 			// we must add the copied EPackages to the resource
 			resource.getContents().addAll(copiedEPackagesMap.values());
 			// record original ecore references before running the interpreter
-			this.recordEcoreReferenceOriginalENamedElement(resource);
+			recordEcoreReferenceOriginalENamedElement(resource);
 			// run the interpreter
-			this.runInterpreter(program, copiedEPackagesMap);
+			runInterpreter(program, copiedEPackagesMap);
 		}
 	}
 
@@ -72,10 +70,10 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 	}
 
 	protected void recordEcoreReferenceOriginalENamedElement(final Resource resource) {
-		final Iterable<EdeltaEcoreReferenceExpression> references =
-			EcoreUtil2.getAllContentsOfType(resource.getContents().get(0),
+		final var references =
+			getAllContentsOfType(resource.getContents().get(0),
 				EdeltaEcoreReferenceExpression.class);
-		for (EdeltaEcoreReferenceExpression r : references) {
+		for (var r : references) {
 			originalENamedElementRecorder.recordOriginalENamedElement(r.getReference());
 		}
 	}
@@ -88,8 +86,8 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 
 	@Override
 	public void discardDerivedState(final DerivedStateAwareResource resource) {
-		final EdeltaCopiedEPackagesMap copiedEPackagesMap = this.getCopiedEPackagesMap(resource);
-		this.unloadDerivedPackages(copiedEPackagesMap);
+		final var copiedEPackagesMap = this.getCopiedEPackagesMap(resource);
+		unloadDerivedPackages(copiedEPackagesMap);
 		super.discardDerivedState(resource);
 		copiedEPackagesMap.clear();
 	}
@@ -98,7 +96,7 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 	 * Unload (turn them into proxies) all derived Ecore elements
 	 */
 	protected void unloadDerivedPackages(final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
-		for (final EPackage p : copiedEPackagesMap.values()) {
+		for (final var p : copiedEPackagesMap.values()) {
 			this.unloader.unloadRoot(p);
 		}
 	}
