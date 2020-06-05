@@ -48,13 +48,13 @@ class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 	override protected _target(XtextHyperlink hyperlink) {
 		// don't use resourceSetProvider, because Java types would not be resolved
 		// resourceSetProvider.get(project)
-		val document = xtextEditor.internalSourceViewer.xtextDocument
+		val document = xtextDocumentUtil.getXtextDocument(xtextEditor.internalSourceViewer)
 		val resource = document.readOnly[it]
 		val resourceSet = resource.resourceSet
 		val eObject = resourceSet.getEObject(hyperlink.URI, true)
 		switch (eObject) {
 			XAbstractFeatureCall: eObject.feature.simpleName
-			default: eObject.fullyQualifiedName.toString
+			default: qualifiedNameProvider.getFullyQualifiedName(eObject).toString
 		}
 	}
 
