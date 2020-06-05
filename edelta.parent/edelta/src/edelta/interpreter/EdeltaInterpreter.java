@@ -2,6 +2,7 @@ package edelta.interpreter;
 
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE;
 import static edelta.util.EdeltaModelUtil.getProgram;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
 import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashMap;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.exists;
@@ -11,13 +12,9 @@ import static org.eclipse.xtext.xbase.lib.IterableExtensions.forEach;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.xtext.common.types.JvmField;
 import org.eclipse.xtext.common.types.JvmFormalParameter;
 import org.eclipse.xtext.common.types.JvmOperation;
@@ -29,7 +26,6 @@ import org.eclipse.xtext.util.IResourceScopeCache;
 import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
-import org.eclipse.xtext.xbase.interpreter.IEvaluationResult;
 import org.eclipse.xtext.xbase.interpreter.impl.InterpreterCanceledException;
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter;
 
@@ -47,7 +43,6 @@ import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
-import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 import edelta.util.EdeltaModelUtil;
 import edelta.validation.EdeltaValidator;
 
@@ -113,22 +108,22 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	public void evaluateModifyEcoreOperations(final EdeltaProgram program, final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		this.currentProgram = program;
-		final Collection<EPackage> copiedEPackages = copiedEPackagesMap.values();
+		final var copiedEPackages = copiedEPackagesMap.values();
 		thisObject = new EdeltaInterpreterEdeltaImpl
 			(Lists.newArrayList(
 				Iterables.concat(copiedEPackages,
 						program.getMetamodels())),
 			diagnosticHelper);
 		useAsFields = newHashMap();
-		List<EdeltaModifyEcoreOperation> filteredOperations =
+		var filteredOperations =
 			edeltaInterpreterHelper.filterOperations(program.getModifyEcoreOperations());
-		final Resource eResource = program.eResource();
+		final var eResource = program.eResource();
 		listener = new EdeltaInterpreterResourceListener(cache, eResource,
 				derivedStateHelper.getEnamedElementXExpressionMap(eResource),
 				diagnosticHelper);
 		try {
 			addResourceListener(copiedEPackages);
-			for (final EdeltaModifyEcoreOperation op : filteredOperations) {
+			for (final var op : filteredOperations) {
 				evaluateModifyEcoreOperation(op, copiedEPackagesMap);
 			}
 		} finally {
@@ -140,7 +135,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		// this will also trigger the last event caught by our adapter
 		// implying a final clearing, which is required to avoid
 		// duplicate errors
-		for (EPackage ePackage : copiedEPackages) {
+		for (var ePackage : copiedEPackages) {
 			ePackage.eAdapters().remove(listener);
 		}
 	}
@@ -152,23 +147,22 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		// and existing types might have been modified or renamed
 		// this makes sure that scoping and the type computer
 		// is performed again
-		for (EPackage ePackage : copiedEPackages) {
+		for (var ePackage : copiedEPackages) {
 			ePackage.eAdapters().add(listener);
 		}
 	}
 
 	private void evaluateModifyEcoreOperation(final EdeltaModifyEcoreOperation op,
 			final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
-		final EPackage ePackage = copiedEPackagesMap.
-				get(op.getEpackage().getName());
-		IEvaluationContext context = createContext();
+		final var ePackage = copiedEPackagesMap.get(op.getEpackage().getName());
+		var context = createContext();
 		context.newValue(IT_QUALIFIED_NAME, ePackage);
 		configureContextForJavaThis(context);
-		Thread interpreterThread = Thread.currentThread();
+		var interpreterThread = Thread.currentThread();
 		// the following thread checks timeout when interpreting
 		// external Java code
 		// see https://github.com/LorenzoBettini/edelta/issues/179
-		Thread timeoutGuardThread = new Thread() {
+		var timeoutGuardThread = new Thread() {
 			@Override
 			public void run() {
 				try {
@@ -180,7 +174,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			}
 		};
 		timeoutGuardThread.start();
-		final IEvaluationResult result = evaluate(op.getBody(), context,
+		final var result = evaluate(op.getBody(), context,
 				new EdeltaInterpreterCancelIndicator());
 		timeoutGuardThread.interrupt();
 		if (result == null) {
@@ -273,14 +267,14 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		if (result != null) {
 			// takes a snapshot of the mapping EEnamedElement -> XExpression
 			// and associates it to this EdeltaEcoreReferenceExpression
-			List<ENamedElement> enamedElements =
+			var enamedElements =
 				getAllContentsOfType(exp, EdeltaEcoreReference.class)
 					.stream().map(EdeltaEcoreReference::getEnamedelement)
-					.collect(Collectors.toList());
-			EdeltaENamedElementXExpressionMap expMap = derivedStateHelper
+					.collect(toList());
+			var expMap = derivedStateHelper
 				.getEcoreReferenceExpressionState(exp)
 				.getEnamedElementXExpressionMap();
-			EdeltaENamedElementXExpressionMap elMap = derivedStateHelper
+			var elMap = derivedStateHelper
 				.getEnamedElementXExpressionMap(exp.eResource());
 			elMap.entrySet().stream()
 				.filter(entry -> enamedElements.contains(entry.getKey()))
@@ -319,7 +313,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	private void addStaleAccessError(EdeltaEcoreReferenceExpression ecoreReferenceExpression,
 			String errorMessage, String errorCode, String[] errorData) {
-		List<Diagnostic> errors = ecoreReferenceExpression.eResource().getErrors();
+		var errors = ecoreReferenceExpression.eResource().getErrors();
 		// Avoid adding the same errors several times on the same expression.
 		// This can happen if we're interpreting a loop, removing the same element
 		if (exists(
@@ -356,19 +350,19 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	protected Object invokeOperation(final JvmOperation operation, final Object receiver,
 			final List<Object> argumentValues, final IEvaluationContext parentContext,
 			final CancelIndicator indicator) {
-		final EdeltaOperation edeltaOperation =
+		final var edeltaOperation =
 				edeltaJvmModelHelper.findEdeltaOperation(operation);
 		if (edeltaOperation != null) {
-			EdeltaProgram containingProgram = getProgram(edeltaOperation);
+			var containingProgram = getProgram(edeltaOperation);
 			if (containingProgram == currentProgram) {
-				final IEvaluationContext context = parentContext.fork();
+				final var context = parentContext.fork();
 				configureContextForParameterArguments(context,
 						operation.getParameters(), argumentValues);
 				return internalEvaluate(edeltaOperation.getBody(), context, indicator);
 			} else {
 				// create a new interpreter since the edelta operation is in
 				// another edelta source file.
-				EdeltaInterpreter newInterpreter =
+				var newInterpreter =
 						edeltaInterpreterFactory.create(containingProgram.eResource());
 				return newInterpreter
 					.evaluateEdeltaOperation(thisObject, containingProgram, edeltaOperation, argumentValues, indicator);
@@ -393,11 +387,11 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			List<Object> argumentValues, CancelIndicator indicator) {
 		this.currentProgram = program;
 		this.thisObject = thisObject;
-		IEvaluationContext context = createContext();
+		var context = createContext();
 		configureContextForJavaThis(context);
 		configureContextForParameterArguments(context,
 				edeltaOperation.getParams(), argumentValues);
-		final IEvaluationResult result = evaluate(edeltaOperation.getBody(), context,
+		final var result = evaluate(edeltaOperation.getBody(), context,
 				indicator);
 		if (result == null ||
 				// our timeoutGuardThread interrupted us
