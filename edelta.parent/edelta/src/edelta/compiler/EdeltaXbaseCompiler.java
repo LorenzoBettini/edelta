@@ -16,10 +16,12 @@ public class EdeltaXbaseCompiler extends XbaseCompiler {
 	protected void doInternalToJavaStatement(final XExpression obj, final ITreeAppendable appendable,
 			final boolean isReferenced) {
 		if (obj instanceof EdeltaEcoreReferenceExpression) {
-			compileAsStatementIfNotReferenced(appendable, isReferenced,
-				() -> 
+			if (!isReferenced) {
+				appendable.newLine();
 				compileEdeltaEcoreReferenceExpression(
-					(EdeltaEcoreReferenceExpression) obj, appendable));
+					(EdeltaEcoreReferenceExpression) obj, appendable);
+				appendable.append(";");
+			}
 		} else {
 			super.doInternalToJavaStatement(obj, appendable, isReferenced);
 		}
@@ -38,14 +40,5 @@ public class EdeltaXbaseCompiler extends XbaseCompiler {
 	private void compileEdeltaEcoreReferenceExpression(final EdeltaEcoreReferenceExpression obj,
 			final ITreeAppendable appendable) {
 		appendable.append(edeltaCompilerUtil.getStringForEcoreReferenceExpression(obj));
-	}
-
-	private void compileAsStatementIfNotReferenced(final ITreeAppendable appendable, final boolean isReferenced,
-			final Runnable compileLambda) {
-		if (!isReferenced) {
-			appendable.newLine();
-			compileLambda.run();
-			appendable.append(";");
-		}
 	}
 }
