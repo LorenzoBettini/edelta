@@ -12,9 +12,7 @@ import org.eclipse.emf.ecore.EPackage;
 
 import com.google.inject.Inject;
 
-import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
-import edelta.resource.derivedstate.EdeltaEcoreReferenceState;
 import edelta.util.EdeltaEcoreReferenceInformationHelper;
 
 /**
@@ -24,7 +22,7 @@ import edelta.util.EdeltaEcoreReferenceInformationHelper;
  */
 public class EdeltaCompilerUtil {
 	@Inject
-	private EdeltaEcoreReferenceInformationHelper edeltaEcoreReferenceInformationHelper;
+	private EdeltaEcoreReferenceInformationHelper ecoreReferenceInformationHelper;
 
 	public String getEPackageNameOrNull(final EPackage e) {
 		if (e != null) {
@@ -34,13 +32,13 @@ public class EdeltaCompilerUtil {
 	}
 
 	public String getStringForEcoreReferenceExpression(final EdeltaEcoreReferenceExpression e) {
-		final EdeltaEcoreReference reference = e.getReference();
+		final var reference = e.getReference();
 		if (reference == null || reference.getEnamedelement() == null) {
 			return "null";
 		}
 		return buildMethodToCallForEcoreReference(e,
 			(name, args) -> {
-				final StringBuilder builder = new StringBuilder();
+				final var builder = new StringBuilder();
 				builder.append(name);
 				builder.append("(");
 				builder.append(args.stream()
@@ -53,8 +51,8 @@ public class EdeltaCompilerUtil {
 
 	public <T extends Object> T buildMethodToCallForEcoreReference(final EdeltaEcoreReferenceExpression e,
 			final BiFunction<String, List<Object>, T> function) {
-		final EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation info =
-			edeltaEcoreReferenceInformationHelper.getOrComputeInformation(e);
+		final var info =
+			ecoreReferenceInformationHelper.getOrComputeInformation(e);
 		return function.apply(
 			"get" + info.getType(),
 			toList(filterNull(newArrayList(
