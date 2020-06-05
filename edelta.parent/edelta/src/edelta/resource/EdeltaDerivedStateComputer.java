@@ -1,12 +1,10 @@
 package edelta.resource;
 
-import static com.google.common.collect.Iterables.filter;
-import static org.eclipse.xtext.xbase.lib.IteratorExtensions.toIterable;
-
 import java.util.List;
 
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader;
 import org.eclipse.xtext.resource.DerivedStateAwareResource;
 import org.eclipse.xtext.xbase.jvmmodel.JvmModelAssociator;
@@ -75,7 +73,7 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 
 	protected void recordEcoreReferenceOriginalENamedElement(final Resource resource) {
 		final Iterable<EdeltaEcoreReferenceExpression> references =
-			filter(toIterable(resource.getAllContents()),
+			EcoreUtil2.getAllContentsOfType(resource.getContents().get(0),
 				EdeltaEcoreReferenceExpression.class);
 		for (EdeltaEcoreReferenceExpression r : references) {
 			originalENamedElementRecorder.recordOriginalENamedElement(r.getReference());
