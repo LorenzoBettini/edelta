@@ -59,7 +59,7 @@ public class EdeltaCompilerUtil {
 				info.getEPackageName(),
 				info.getEClassifierName(),
 				info.getENamedElementName())
-			.filter(Objects::nonNull)
+			.takeWhile(Objects::nonNull)
 			.collect(toList())
 		);
 	}
