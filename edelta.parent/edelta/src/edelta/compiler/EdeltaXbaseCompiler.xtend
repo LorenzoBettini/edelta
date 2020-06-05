@@ -11,24 +11,20 @@ class EdeltaXbaseCompiler extends XbaseCompiler {
 	@Inject extension EdeltaCompilerUtil
 
 	override protected doInternalToJavaStatement(XExpression obj, ITreeAppendable appendable, boolean isReferenced) {
-		switch (obj) {
-			EdeltaEcoreReferenceExpression: {
-				compileAsStatementIfNotReferenced(appendable, isReferenced) [
-					compileEdeltaEcoreReferenceExpression(obj, appendable)
-				]
-			}
-			default:
-				super.doInternalToJavaStatement(obj, appendable, isReferenced)
+		if (obj instanceof EdeltaEcoreReferenceExpression) {
+			compileAsStatementIfNotReferenced(appendable, isReferenced) [
+				compileEdeltaEcoreReferenceExpression(obj, appendable)
+			]
+		} else {
+			super.doInternalToJavaStatement(obj, appendable, isReferenced)
 		}
 	}
 
 	override protected internalToConvertedExpression(XExpression obj, ITreeAppendable appendable) {
-		switch (obj) {
-			EdeltaEcoreReferenceExpression: {
-				compileEdeltaEcoreReferenceExpression(obj, appendable)
-			}
-			default:
-				super.internalToConvertedExpression(obj, appendable)
+		if (obj instanceof EdeltaEcoreReferenceExpression) {
+			compileEdeltaEcoreReferenceExpression(obj, appendable)
+		} else {
+			super.internalToConvertedExpression(obj, appendable)
 		}
 	}
 
