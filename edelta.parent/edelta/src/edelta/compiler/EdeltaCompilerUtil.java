@@ -1,12 +1,12 @@
 package edelta.compiler;
 
-import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newArrayList;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.filterNull;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.toList;
+import static java.util.stream.Collectors.toList;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EPackage;
 
@@ -55,7 +55,12 @@ public class EdeltaCompilerUtil {
 			ecoreReferenceInformationHelper.getOrComputeInformation(e);
 		return function.apply(
 			"get" + info.getType(),
-			toList(filterNull(newArrayList(
-				info.getEPackageName(), info.getEClassifierName(), info.getENamedElementName()))));
+			Stream.of(
+				info.getEPackageName(),
+				info.getEClassifierName(),
+				info.getENamedElementName())
+			.filter(Objects::nonNull)
+			.collect(toList())
+		);
 	}
 }
