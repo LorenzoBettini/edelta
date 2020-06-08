@@ -1210,7 +1210,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testReferencesAcrossEPackages() {
+  public void testRenameReferencesAcrossEPackages() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
     _builder.newLine();
@@ -1234,6 +1234,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("\t");
     _builder.append("// renames Person.works to renamedWorks");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// using the already renamed feature (was persons)");
     _builder.newLine();
     _builder.append("\t");
     _builder.append("ecoreref(renamedPersons).EOpposite.name = \"renamedWorks\"");

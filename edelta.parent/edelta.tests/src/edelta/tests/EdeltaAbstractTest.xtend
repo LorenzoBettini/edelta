@@ -18,6 +18,7 @@ import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.xmi.XMIResource
@@ -36,7 +37,6 @@ import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
-import org.eclipse.emf.ecore.EReference
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -110,11 +110,15 @@ abstract class EdeltaAbstractTest {
 
 	def protected resourceSetWithTestEcoresWithReferences() {
 		val resourceSet = resourceSetProvider.get
+		addEPackagesWithReferencesForTests(resourceSet)
+		resourceSet
+	}
+
+	protected def void addEPackagesWithReferencesForTests(ResourceSet resourceSet) {
 		val packages = EPackagesWithReferencesForTest
 		for (p : packages) {
 			resourceSet.createTestResource(p.name, p)
 		}
-		resourceSet
 	}
 
 	def protected addEPackageForTests(ResourceSet resourceSet) {

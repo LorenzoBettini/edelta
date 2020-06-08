@@ -173,13 +173,17 @@ public abstract class EdeltaAbstractTest {
     XtextResourceSet _xblockexpression = null;
     {
       final XtextResourceSet resourceSet = this.resourceSetProvider.get();
-      final List<EPackage> packages = this.EPackagesWithReferencesForTest();
-      for (final EPackage p : packages) {
-        this.createTestResource(resourceSet, p.getName(), p);
-      }
+      this.addEPackagesWithReferencesForTests(resourceSet);
       _xblockexpression = resourceSet;
     }
     return _xblockexpression;
+  }
+  
+  protected void addEPackagesWithReferencesForTests(final ResourceSet resourceSet) {
+    final List<EPackage> packages = this.EPackagesWithReferencesForTest();
+    for (final EPackage p : packages) {
+      this.createTestResource(resourceSet, p.getName(), p);
+    }
   }
   
   protected ResourceSet addEPackageForTests(final ResourceSet resourceSet) {

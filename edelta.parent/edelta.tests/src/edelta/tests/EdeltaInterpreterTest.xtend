@@ -806,7 +806,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testReferencesAcrossEPackages() {
+	@Test def void testRenameReferencesAcrossEPackages() {
 		'''
 			package test
 
@@ -819,6 +819,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			}
 			modifyEcore aTest2 epackage testecoreforreferences2 {
 				// renames Person.works to renamedWorks
+				// using the already renamed feature (was persons)
 				ecoreref(renamedPersons).EOpposite.name = "renamedWorks"
 			}
 		'''.parseWithTestEcoresWithReferences => [
