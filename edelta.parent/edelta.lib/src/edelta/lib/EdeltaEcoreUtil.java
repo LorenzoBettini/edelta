@@ -3,9 +3,13 @@
  */
 package edelta.lib;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
 
@@ -34,4 +38,11 @@ public class EdeltaEcoreUtil {
 		return (T) result;
 	}
 
+	public static Collection<EPackage> copyEPackages(EPackage... epackages) {
+		// we must not resolve proxies, that's why we don't simply call EcoreUtil.copy
+		Copier copier = new Copier(false);
+		Collection<EPackage> copies = copier.copyAll(Arrays.asList(epackages));
+		copier.copyReferences();
+		return copies;
+	}
 }

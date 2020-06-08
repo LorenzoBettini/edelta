@@ -16,6 +16,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,6 +36,10 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.impl.BasicEObjectImpl;
 import org.eclipse.emf.ecore.impl.EGenericTypeImpl;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.util.Wrapper;
 import org.junit.Before;
@@ -64,6 +70,10 @@ public class EdeltaTest {
 	private static final String MY_SUBSUBPACKAGE = "subsubpackage";
 	private static final String TEST_ECORE_FOR_REFERENCES = "TestEcoreForReferences.ecore";
 	private static final String TEST_PACKAGE_FOR_REFERENCES = "testecoreforreferences";
+	private static final String TEST_ECORE_FOR_REFERENCES1 = "TestEcoreForReferences1.ecore";
+	private static final String TEST_PACKAGE_FOR_REFERENCES1 = "testecoreforreferences1";
+	private static final String TEST_ECORE_FOR_REFERENCES2 = "TestEcoreForReferences2.ecore";
+	private static final String TEST_PACKAGE_FOR_REFERENCES2 = "testecoreforreferences2";
 	private static final String TESTECORES = "testecores/";
 
 	public static class TestableEdelta extends AbstractEdelta {
@@ -443,6 +453,44 @@ public class EdeltaTest {
 		works = getEReferenceByName(person.getEStructuralFeatures(), "works");
 		persons = getEReferenceByName(workplace.getEStructuralFeatures(), "persons");
 		assertSame(works.getEOpposite(), persons);
+	}
+
+	@Test
+	public void testCopyENamedElementEOppositeReferenceWorksAcrossEPackages() {
+		loadTestEcore(TEST_ECORE_FOR_REFERENCES1);
+		loadTestEcore(TEST_ECORE_FOR_REFERENCES2);
+		EPackage original1 = edelta.getEPackage(TEST_PACKAGE_FOR_REFERENCES1);
+		EPackage original2 = edelta.getEPackage(TEST_PACKAGE_FOR_REFERENCES2);
+		EClass person = getEClassByName(original1.getEClassifiers(), "Person");
+		EClass workplace = getEClassByName(original2.getEClassifiers(), "WorkPlace");
+		EReference works = getEReferenceByName(person.getEStructuralFeatures(), "works");
+		EReference persons = getEReferenceByName(workplace.getEStructuralFeatures(), "persons");
+		assertSame(works.getEOpposite(), persons);
+		assertSame(persons.getEOpposite(), works);
+		// perform copy and EOpposite refers to the copied opposite
+		// and that is good for us!
+		Collection<EPackage> copyEPackages = EdeltaEcoreUtil.copyEPackages(original1, original2);
+		Iterator<EPackage> iterator = copyEPackages.iterator();
+		EPackage copied1 = iterator.next();
+		EPackage copied2 = iterator.next();
+		// everything must be in a resource set, and the resources
+		// for the copied EPackages must have the same URIs of the
+		// original resources for the references to be resolved
+		Resource resource1 = new ResourceImpl();
+		resource1.setURI(original1.eResource().getURI());
+		resource1.getContents().add(copied1);
+		Resource resource2 = new ResourceImpl();
+		resource2.setURI(original2.eResource().getURI());
+		resource2.getContents().add(copied2);
+		final ResourceSet resourceSet = new ResourceSetImpl();
+		resourceSet.getResources().add(resource1);
+		resourceSet.getResources().add(resource2);
+		person = getEClassByName(copied1.getEClassifiers(), "Person");
+		workplace = getEClassByName(copied2.getEClassifiers(), "WorkPlace");
+		works = getEReferenceByName(person.getEStructuralFeatures(), "works");
+		persons = getEReferenceByName(workplace.getEStructuralFeatures(), "persons");
+		assertSame(works.getEOpposite(), persons);
+		assertSame(persons.getEOpposite(), works);
 	}
 
 	@Test
