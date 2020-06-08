@@ -83,6 +83,34 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCopiedEPackagesWithReferences() {
+		val program = '''
+		package test
+		
+		metamodel "testecoreforreferences1"
+		metamodel "testecoreforreferences2"
+		
+		modifyEcore aTest1 epackage testecoreforreferences1 {}
+		modifyEcore aTest2 epackage testecoreforreferences2 {}
+		'''.
+		parseWithTestEcoresWithReferences
+		val packages = program.eResource.copiedEPackagesMap.values
+		assertThat(packages).hasSize(2)
+		val testecoreforreferences1 = packages.getByName("testecoreforreferences1")
+		val testecoreforreferences2 = packages.getByName("testecoreforreferences2")
+		val person = testecoreforreferences1.getEClassByName("Person")
+		val workplace = testecoreforreferences2.getEClassByName("WorkPlace")
+		assertSame(
+			person.getEReferenceByName("works").EOpposite,
+			workplace.getEReferenceByName("person")
+		)
+		assertSame(
+			person.getEReferenceByName("works"),
+			workplace.getEReferenceByName("person").EOpposite
+		)
+	}
+
+	@Test
 	def void testInvalidDirectSubPackageAreNotCopied() {
 		val program = '''
 		package test

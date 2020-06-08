@@ -36,6 +36,7 @@ import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
+import org.eclipse.emf.ecore.EReference
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -78,6 +79,10 @@ abstract class EdeltaAbstractTest {
 		input.parse(resourceSetWithTestEcoreWithSubPackage)
 	}
 
+	def protected parseWithTestEcoresWithReferences(CharSequence input) {
+		input.parse(resourceSetWithTestEcoresWithReferences)
+	}
+
 	def protected parseWithLoadedEcore(String path, CharSequence input) {
 		val resourceSet = resourceSetProvider.get
 		// Loads the Ecore package to ensure it is available during loading.
@@ -101,6 +106,15 @@ abstract class EdeltaAbstractTest {
 	def protected resourceSetWithTestEcoreWithSubPackage() {
 		val resourceSet = resourceSetProvider.get
 		addEPackageWithSubPackageForTests(resourceSet)
+	}
+
+	def protected resourceSetWithTestEcoresWithReferences() {
+		val resourceSet = resourceSetProvider.get
+		val packages = EPackagesWithReferencesForTest
+		for (p : packages) {
+			resourceSet.createTestResource(p.name, p)
+		}
+		resourceSet
 	}
 
 	def protected addEPackageForTests(ResourceSet resourceSet) {
@@ -175,6 +189,44 @@ abstract class EdeltaAbstractTest {
 			name = "BarDataType"
 		]
 		fooPackage
+	}
+
+	def protected EPackagesWithReferencesForTest() {
+		val p1 = EcoreFactory.eINSTANCE.createEPackage => [
+			name = "testecoreforreferences1"
+			nsPrefix = "testecoreforreferences1"
+			nsURI = "http://my.testecoreforreferences1.org"
+		]
+		p1.EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
+			name = "Person"
+			EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
+				name = "name"
+			]
+			EStructuralFeatures += EcoreFactory.eINSTANCE.createEReference => [
+				name = "works"
+				containment = false
+			]
+		]
+		val p2 = EcoreFactory.eINSTANCE.createEPackage => [
+			name = "testecoreforreferences2"
+			nsPrefix = "testecoreforreferences2"
+			nsURI = "http://my.testecoreforreferences2.org"
+		]
+		p2.EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
+			name = "WorkPlace"
+			EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
+				name = "address"
+			]
+			EStructuralFeatures += EcoreFactory.eINSTANCE.createEReference => [
+				name = "person"
+				containment = false
+			]
+		]
+		val works = p1.getEClassByName("Person").getEReferenceByName("works")
+		val person = p2.getEClassByName("WorkPlace").getEReferenceByName("person")
+		works.EOpposite = person
+		person.EOpposite = works
+		#[p1, p2]
 	}
 
 	def protected EPackageWithSubPackageForTests() {
@@ -265,6 +317,10 @@ abstract class EdeltaAbstractTest {
 			findFirst[name == classifiername]
 	}
 
+	def protected <T extends ENamedElement> getByName(Iterable<T> namedElements, String nameToSearch) {
+		return namedElements.findFirst[name == nameToSearch]
+	}
+
 	def protected lastModifyEcoreOperation(EdeltaProgram p) {
 		p.modifyEcoreOperations.last
 	}
@@ -296,8 +352,16 @@ abstract class EdeltaAbstractTest {
 		p.EClassifiers.findFirst[name == nameToSearch]
 	}
 
+	def protected getEClassByName(EPackage p, String nameToSearch) {
+		p.EClassifiers.filter(EClass).findFirst[name == nameToSearch]
+	}
+
 	def protected getEStructuralFeatureByName(EClassifier e, String nameToSearch) {
 		(e as EClass).EStructuralFeatures.findFirst[name == nameToSearch]
+	}
+
+	def protected getEReferenceByName(EClassifier e, String nameToSearch) {
+		(e as EClass).EStructuralFeatures.filter(EReference).findFirst[name == nameToSearch]
 	}
 
 	def protected getEAttributeByName(EClassifier e, String nameToSearch) {
