@@ -367,8 +367,9 @@ public abstract class EdeltaAbstractTest {
         EList<EStructuralFeature> _eStructuralFeatures_1 = it.getEStructuralFeatures();
         EReference _createEReference = EcoreFactory.eINSTANCE.createEReference();
         final Procedure1<EReference> _function_5 = (EReference it_1) -> {
-          it_1.setName("person");
+          it_1.setName("persons");
           it_1.setContainment(false);
+          it_1.setUpperBound((-1));
         };
         EReference _doubleArrow_2 = ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_5);
         _eStructuralFeatures_1.add(_doubleArrow_2);
@@ -376,9 +377,9 @@ public abstract class EdeltaAbstractTest {
       EClass _doubleArrow_1 = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_3);
       _eClassifiers_1.add(_doubleArrow_1);
       final EReference works = this.getEReferenceByName(this.getEClassByName(p1, "Person"), "works");
-      final EReference person = this.getEReferenceByName(this.getEClassByName(p2, "WorkPlace"), "person");
-      works.setEOpposite(person);
-      person.setEOpposite(works);
+      final EReference persons = this.getEReferenceByName(this.getEClassByName(p2, "WorkPlace"), "persons");
+      works.setEOpposite(persons);
+      persons.setEOpposite(works);
       _xblockexpression = Collections.<EPackage>unmodifiableList(CollectionLiterals.<EPackage>newArrayList(p1, p2));
     }
     return _xblockexpression;

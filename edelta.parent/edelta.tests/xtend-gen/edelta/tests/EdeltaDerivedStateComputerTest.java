@@ -143,10 +143,10 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     final EClass workplace = this.getEClassByName(testecoreforreferences2, "WorkPlace");
     Assert.assertSame(
       this.getEReferenceByName(person, "works").getEOpposite(), 
-      this.getEReferenceByName(workplace, "person"));
+      this.getEReferenceByName(workplace, "persons"));
     Assert.assertSame(
       this.getEReferenceByName(person, "works"), 
-      this.getEReferenceByName(workplace, "person").getEOpposite());
+      this.getEReferenceByName(workplace, "persons").getEOpposite());
   }
   
   @Test

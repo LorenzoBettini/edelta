@@ -102,11 +102,11 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		val workplace = testecoreforreferences2.getEClassByName("WorkPlace")
 		assertSame(
 			person.getEReferenceByName("works").EOpposite,
-			workplace.getEReferenceByName("person")
+			workplace.getEReferenceByName("persons")
 		)
 		assertSame(
 			person.getEReferenceByName("works"),
-			workplace.getEReferenceByName("person").EOpposite
+			workplace.getEReferenceByName("persons").EOpposite
 		)
 	}
 

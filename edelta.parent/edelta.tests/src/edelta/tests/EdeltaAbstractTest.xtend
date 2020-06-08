@@ -218,14 +218,15 @@ abstract class EdeltaAbstractTest {
 				name = "address"
 			]
 			EStructuralFeatures += EcoreFactory.eINSTANCE.createEReference => [
-				name = "person"
+				name = "persons"
 				containment = false
+				upperBound = -1
 			]
 		]
 		val works = p1.getEClassByName("Person").getEReferenceByName("works")
-		val person = p2.getEClassByName("WorkPlace").getEReferenceByName("person")
-		works.EOpposite = person
-		person.EOpposite = works
+		val persons = p2.getEClassByName("WorkPlace").getEReferenceByName("persons")
+		works.EOpposite = persons
+		persons.EOpposite = works
 		#[p1, p2]
 	}
 
