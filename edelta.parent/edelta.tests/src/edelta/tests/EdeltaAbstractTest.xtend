@@ -117,7 +117,7 @@ abstract class EdeltaAbstractTest {
 	}
 
 	def protected addEPackageForTests2(ResourceSet resourceSet) {
-		resourceSet.createTestResource("bar.", EPackageForTests2)
+		resourceSet.createTestResource("bar", EPackageForTests2)
 	}
 
 	def protected createTestResource(ResourceSet resourceSet, String ecoreName, EPackage epackage) {
