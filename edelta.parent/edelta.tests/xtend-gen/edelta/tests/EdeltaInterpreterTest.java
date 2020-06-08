@@ -1,5 +1,6 @@
 package edelta.tests;
 
+import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
@@ -28,6 +29,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.testing.InjectWith;
@@ -1205,6 +1207,56 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     };
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(
       Collections.<CharSequence>unmodifiableList(CollectionLiterals.<CharSequence>newArrayList(_builder, _builder_1, _builder_2)), true, _function);
+  }
+  
+  @Test
+  public void testReferencesAcrossEPackages() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("package test");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"testecoreforreferences1\"");
+    _builder.newLine();
+    _builder.append("metamodel \"testecoreforreferences2\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest1 epackage testecoreforreferences1 {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// renames WorkPlace.persons to renamedPersons");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(Person.works).EOpposite.name = \"renamedPersons\"");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    _builder.append("modifyEcore aTest2 epackage testecoreforreferences2 {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// renames Person.works to renamedWorks");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(renamedPersons).EOpposite.name = \"renamedWorks\"");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcoresWithReferences = this.parseWithTestEcoresWithReferences(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      final EdeltaCopiedEPackagesMap map = this.interpretProgram(it);
+      final EPackage testecoreforreferences1 = map.get("testecoreforreferences1");
+      final EPackage testecoreforreferences2 = map.get("testecoreforreferences2");
+      final EClass person = this.getEClassByName(testecoreforreferences1, "Person");
+      final Function1<EReference, String> _function_1 = (EReference it_1) -> {
+        return it_1.getName();
+      };
+      Assertions.<String>assertThat(IterableExtensions.<EReference, String>map(Iterables.<EReference>filter(person.getEStructuralFeatures(), EReference.class), _function_1)).containsOnly("renamedWorks");
+      final EClass workplace = this.getEClassByName(testecoreforreferences2, "WorkPlace");
+      final Function1<EReference, String> _function_2 = (EReference it_1) -> {
+        return it_1.getName();
+      };
+      Assertions.<String>assertThat(IterableExtensions.<EReference, String>map(Iterables.<EReference>filter(workplace.getEStructuralFeatures(), EReference.class), _function_2)).containsOnly("renamedPersons");
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoresWithReferences, _function);
   }
   
   @Test

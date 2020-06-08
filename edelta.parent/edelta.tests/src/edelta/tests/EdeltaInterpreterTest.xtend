@@ -27,6 +27,7 @@ import org.junit.runner.RunWith
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
 import org.eclipse.xtext.xbase.XbasePackage
+import org.eclipse.emf.ecore.EReference
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -802,6 +803,34 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			derivedEPackage.firstEClass => [
 				assertTrue(isAbstract)
 			]
+		]
+	}
+
+	@Test def void testReferencesAcrossEPackages() {
+		'''
+			package test
+
+			metamodel "testecoreforreferences1"
+			metamodel "testecoreforreferences2"
+
+			modifyEcore aTest1 epackage testecoreforreferences1 {
+				// renames WorkPlace.persons to renamedPersons
+				ecoreref(Person.works).EOpposite.name = "renamedPersons"
+			}
+			modifyEcore aTest2 epackage testecoreforreferences2 {
+				// renames Person.works to renamedWorks
+				ecoreref(renamedPersons).EOpposite.name = "renamedWorks"
+			}
+		'''.parseWithTestEcoresWithReferences => [
+			val map = interpretProgram
+			val testecoreforreferences1 = map.get("testecoreforreferences1")
+			val testecoreforreferences2 = map.get("testecoreforreferences2")
+			val person = testecoreforreferences1.getEClassByName("Person")
+			assertThat(person.EStructuralFeatures.filter(EReference).map[name])
+				.containsOnly("renamedWorks")
+			val workplace = testecoreforreferences2.getEClassByName("WorkPlace")
+			assertThat(workplace.EStructuralFeatures.filter(EReference).map[name])
+				.containsOnly("renamedPersons")
 		]
 	}
 
