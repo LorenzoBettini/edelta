@@ -1,5 +1,7 @@
 package edelta.tests.additional;
 
+import java.util.List;
+
 import org.eclipse.emf.ecore.EPackage;
 
 import com.google.inject.Singleton;
@@ -22,10 +24,9 @@ public class TestableEdeltaDerivedStateComputer extends EdeltaDerivedStateComput
 	}
 
 	@Override
-	protected EPackage getOrAddDerivedStateEPackage(final EPackage originalEPackage,
-			final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
-		final EPackage result = super.getOrAddDerivedStateEPackage(originalEPackage, copiedEPackagesMap);
-		originalEPackage.eAdapters().add(new EdeltaEContentAdapter());
-		return result;
+	protected void copyEPackages(List<EPackage> packages, EdeltaCopiedEPackagesMap copiedEPackagesMap) {
+		packages.stream()
+			.forEach(p -> p.eAdapters().add(new EdeltaEContentAdapter()));
+		super.copyEPackages(packages, copiedEPackagesMap);
 	}
 }
