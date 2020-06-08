@@ -78,6 +78,29 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testCopiedEPackagesWhenDuplicateImports() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("package test");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest1 epackage foo {}");
+    _builder.newLine();
+    _builder.append("modifyEcore aTest2 epackage foo {}");
+    _builder.newLine();
+    final EdeltaProgram program = this.parseWithTestEcore(_builder);
+    final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
+    final Function1<EPackage, String> _function = (EPackage it) -> {
+      return it.getName();
+    };
+    Assertions.<String>assertThat(IterableExtensions.<EPackage, String>map(packages, _function)).containsExactly("foo");
+  }
+  
+  @Test
   public void testInvalidDirectSubPackageAreNotCopied() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
