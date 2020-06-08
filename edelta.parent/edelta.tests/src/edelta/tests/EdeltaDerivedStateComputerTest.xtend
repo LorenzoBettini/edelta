@@ -67,6 +67,22 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCopiedEPackagesWhenUnresolvedPackages() {
+		val program = '''
+		package test
+		
+		metamodel "unresolved"
+		metamodel "unresolved"
+		
+		modifyEcore aTest1 epackage unresolved {}
+		modifyEcore aTest2 epackage unresolved {}
+		'''.
+		parseWithTestEcore
+		val packages = program.eResource.copiedEPackagesMap.values
+		assertThat(packages).isEmpty
+	}
+
+	@Test
 	def void testInvalidDirectSubPackageAreNotCopied() {
 		val program = '''
 		package test
@@ -97,20 +113,6 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		// only program must be there and the inferred Jvm Type
 		// since we don't install anything during preIndexingPhase
 		assertEquals("test.__synthetic0", (resource.contents.last as JvmGenericType).identifier)
-	}
-
-	@Test
-	def void testDerivedStateEcoreModifyWithMissingReferredPackage() {
-		val program = '''
-		package test
-		
-		modifyEcore aTest1 epackage foo {}
-		'''.
-		parseWithTestEcore
-		val packages = program.eResource.copiedEPackagesMap.values
-		assertThat(packages)
-			.hasSize(1)
-			.allMatch[p | p.eIsProxy]
 	}
 
 	@Test

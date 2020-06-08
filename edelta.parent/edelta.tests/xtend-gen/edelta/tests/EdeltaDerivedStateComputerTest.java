@@ -13,7 +13,6 @@ import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderTestableDerivedStateComputer;
 import edelta.tests.additional.TestableEdeltaDerivedStateComputer;
 import java.util.Collection;
-import java.util.function.Predicate;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
 import org.eclipse.emf.common.notify.Adapter;
@@ -101,6 +100,26 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testCopiedEPackagesWhenUnresolvedPackages() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("package test");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"unresolved\"");
+    _builder.newLine();
+    _builder.append("metamodel \"unresolved\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest1 epackage unresolved {}");
+    _builder.newLine();
+    _builder.append("modifyEcore aTest2 epackage unresolved {}");
+    _builder.newLine();
+    final EdeltaProgram program = this.parseWithTestEcore(_builder);
+    final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
+    Assertions.<EPackage>assertThat(packages).isEmpty();
+  }
+  
+  @Test
   public void testInvalidDirectSubPackageAreNotCopied() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
@@ -138,22 +157,6 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     this._testableEdeltaDerivedStateComputer.installDerivedState(((DerivedStateAwareResource) _eResource_1), true);
     EObject _last = IterableExtensions.<EObject>last(resource.getContents());
     Assert.assertEquals("test.__synthetic0", ((JvmGenericType) _last).getIdentifier());
-  }
-  
-  @Test
-  public void testDerivedStateEcoreModifyWithMissingReferredPackage() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("package test");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest1 epackage foo {}");
-    _builder.newLine();
-    final EdeltaProgram program = this.parseWithTestEcore(_builder);
-    final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
-    final Predicate<EPackage> _function = (EPackage p) -> {
-      return p.eIsProxy();
-    };
-    Assertions.<EPackage>assertThat(packages).hasSize(1).allMatch(_function);
   }
   
   @Test
