@@ -16,6 +16,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -469,7 +470,8 @@ public class EdeltaTest {
 		assertSame(persons.getEOpposite(), works);
 		// perform copy and EOpposite refers to the copied opposite
 		// and that is good for us!
-		Collection<EPackage> copyEPackages = EdeltaEcoreUtil.copyEPackages(original1, original2);
+		Collection<EPackage> copyEPackages =
+			EdeltaEcoreUtil.copyEPackages(Arrays.asList(original1, original2));
 		Iterator<EPackage> iterator = copyEPackages.iterator();
 		EPackage copied1 = iterator.next();
 		EPackage copied2 = iterator.next();
