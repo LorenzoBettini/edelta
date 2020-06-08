@@ -4,8 +4,8 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.ENamedElement;
@@ -63,7 +63,7 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 			// make sure packages under modification are copied
 			copyEPackages(modifyEcoreOperations.stream()
 				.map(EdeltaModifyEcoreOperation::getEpackage)
-				.filter(p -> Objects.nonNull(p.getName()))
+				.filter(Predicate.not(EPackage::eIsProxy))
 				.distinct()
 				.collect(toList()), copiedEPackagesMap);
 			// we must add the copied EPackages to the resource
