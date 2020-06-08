@@ -177,7 +177,7 @@ public abstract class EdeltaAbstractTest {
   }
   
   protected ResourceSet addEPackageForTests2(final ResourceSet resourceSet) {
-    return this.createTestResource(resourceSet, "bar.", this.EPackageForTests2());
+    return this.createTestResource(resourceSet, "bar", this.EPackageForTests2());
   }
   
   protected ResourceSet createTestResource(final ResourceSet resourceSet, final String ecoreName, final EPackage epackage) {
