@@ -1,7 +1,6 @@
 package edelta.tests
 
 import com.google.inject.Inject
-import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaFactory
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.scoping.EdeltaOriginalENamedElementRecorder
@@ -238,7 +237,4 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		]
 	}
 
-	def private getOriginalEnamedelement(EdeltaEcoreReference ref) {
-		ref.ecoreReferenceState.originalEnamedelement
-	}
 }

@@ -1,11 +1,15 @@
 package edelta.resource.derivedstate;
 
+import static org.eclipse.xtext.EcoreUtil2.getContainerOfType;
+
 import java.util.Objects;
 
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.Constants;
 import org.eclipse.xtext.resource.XtextResource;
+import org.eclipse.xtext.xbase.XExpression;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -67,4 +71,16 @@ public class EdeltaDerivedStateHelper {
 		return getOrInstallAdapter(resource).getEnamedElementXExpressionMap();
 	}
 
+	public ENamedElement getOriginalEnamedelement(EdeltaEcoreReference ecoreReference) {
+		return getEcoreReferenceState(ecoreReference)
+				.getOriginalEnamedelement();
+	}
+
+	public XExpression getResponsibleExpression(EdeltaEcoreReference ecoreReference) {
+		return getEcoreReferenceExpressionState(
+					getContainerOfType(ecoreReference,
+						EdeltaEcoreReferenceExpression.class))
+				.getEnamedElementXExpressionMap()
+				.get(ecoreReference.getEnamedelement());
+	}
 }

@@ -46,9 +46,9 @@ class EdeltaDerivedStateHelperTest extends EdeltaAbstractTest {
 		val res = "".parse.eResource
 		val ref = edeltaFactory.createEdeltaEcoreReference
 		res.contents += ref
-		assertNull(ref.ecoreReferenceState.originalEnamedelement)
+		assertNull(ref.originalEnamedelement)
 		val el = ecoreFactory.createEAttribute
 		ref.ecoreReferenceState.originalEnamedelement = el
-		assertSame(el, ref.ecoreReferenceState.originalEnamedelement)
+		assertSame(el, ref.originalEnamedelement)
 	}
 }
