@@ -440,4 +440,19 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		.assertNoErrors
 	}
 
+	@Test
+	def void testAccessToNotYetExistingElement() {
+		val input =
+		'''
+		metamodel "foo"
+		
+		modifyEcore aTest epackage foo {
+			ecoreref(ANewClass) // doesn't exist yet
+			addNewEClass("ANewClass")
+		}
+		'''
+		input
+		.parseWithTestEcore
+		.assertNoErrors
+	}
 }

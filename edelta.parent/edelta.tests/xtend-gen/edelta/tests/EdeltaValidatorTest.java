@@ -619,4 +619,24 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     final String input = _builder.toString();
     this._validationTestHelper.assertNoErrors(this.parseWithTestEcoreWithSubPackage(input));
   }
+  
+  @Test
+  public void testAccessToNotYetExistingElement() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(ANewClass) // doesn\'t exist yet");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"ANewClass\")");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    this._validationTestHelper.assertNoErrors(this.parseWithTestEcore(input));
+  }
 }
