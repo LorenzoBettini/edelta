@@ -3,7 +3,6 @@
  */
 package edelta.ui.navigation;
 
-import static org.eclipse.xtext.EcoreUtil2.getContainerOfType;
 import static org.eclipse.xtext.nodemodel.util.NodeModelUtils.findActualSemanticObjectFor;
 
 import org.eclipse.emf.ecore.ENamedElement;
@@ -17,7 +16,6 @@ import org.eclipse.xtext.xbase.ui.navigation.XbaseHyperLinkHelper;
 import com.google.inject.Inject;
 
 import edelta.edelta.EdeltaEcoreReference;
-import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 
 /**
@@ -38,18 +36,13 @@ public class EdeltaHyperlinkinHelper extends XbaseHyperLinkHelper {
 		if (semanticObj instanceof EdeltaEcoreReference) {
 			final EdeltaEcoreReference ecoreReference = (EdeltaEcoreReference) semanticObj;
 			final ENamedElement original = edeltaDerivedStateHelper
-					.getEcoreReferenceState(ecoreReference)
-					.getOriginalEnamedelement();
+					.getOriginalEnamedelement(ecoreReference);
 			if (original != null) {
 				super.createHyperlinksTo(resource, node, original, acceptor);
 				return;
 			}
 			XExpression expression = edeltaDerivedStateHelper
-				.getEcoreReferenceExpressionState(
-						getContainerOfType(ecoreReference,
-								EdeltaEcoreReferenceExpression.class))
-				.getEnamedElementXExpressionMap()
-				.get(ecoreReference.getEnamedelement());
+				.getResponsibleExpression(ecoreReference);
 			super.createHyperlinksTo(resource, node, expression, acceptor);
 			return;
 		}
