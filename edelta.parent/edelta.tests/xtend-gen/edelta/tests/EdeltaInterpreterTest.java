@@ -2054,6 +2054,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder.append("ecoreref(ANewClass) // doesn\'t exist yet");
     _builder.newLine();
     _builder.append("\t");
+    _builder.append("ecoreref(NonExisting) // doesn\'t exist at all");
+    _builder.newLine();
+    _builder.append("\t");
     _builder.append("addNewEClass(\"ANewClass\")");
     _builder.newLine();
     _builder.append("\t");
@@ -2065,10 +2068,12 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this.interpretProgram(it);
-      final EdeltaEcoreReference ecoreref = IterableExtensions.<EdeltaEcoreReferenceExpression>head(this.getAllEcoreReferenceExpressions(it)).getReference();
+      final EdeltaEcoreReference ecoreref1 = this.getAllEcoreReferenceExpressions(it).get(0).getReference();
+      final EdeltaEcoreReference ecoreref2 = this.getAllEcoreReferenceExpressions(it).get(1).getReference();
       final EdeltaUnresolvedEcoreReferences unresolved = this.derivedStateHelper.getUnresolvedEcoreReferences(it.eResource());
-      Assertions.<EdeltaEcoreReference>assertThat(unresolved).containsOnly(ecoreref);
-      Assertions.assertThat(ecoreref.getEnamedelement().eIsProxy()).isFalse();
+      Assertions.<EdeltaEcoreReference>assertThat(unresolved).containsOnly(ecoreref1, ecoreref2);
+      Assertions.assertThat(ecoreref1.getEnamedelement().eIsProxy()).isFalse();
+      Assertions.assertThat(ecoreref2.getEnamedelement().eIsProxy()).isTrue();
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }

@@ -1370,6 +1370,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		
 		modifyEcore aTest epackage foo {
 			ecoreref(ANewClass) // doesn't exist yet
+			ecoreref(NonExisting) // doesn't exist at all
 			addNewEClass("ANewClass")
 			ecoreref(ANewClass) // this is OK
 		}
@@ -1377,11 +1378,14 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		input
 		.parseWithTestEcore => [
 			interpretProgram
-			val ecoreref = allEcoreReferenceExpressions.head.reference
+			val ecoreref1 = allEcoreReferenceExpressions.get(0).reference
+			val ecoreref2 = allEcoreReferenceExpressions.get(1).reference
 			val unresolved = derivedStateHelper.getUnresolvedEcoreReferences(eResource)
-			assertThat(unresolved).containsOnly(ecoreref)
-			// also check that it is resolved in the end
-			assertThat(ecoreref.enamedelement.eIsProxy).isFalse
+			assertThat(unresolved)
+				.containsOnly(ecoreref1, ecoreref2)
+			// also check what's resolved in the end
+			assertThat(ecoreref1.enamedelement.eIsProxy).isFalse
+			assertThat(ecoreref2.enamedelement.eIsProxy).isTrue
 		]
 	}
 
