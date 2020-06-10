@@ -145,30 +145,75 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() {
+  public void testThrowNullPointerException() {
     final ThrowableAssert.ThrowingCallable _function = () -> {
       StringConcatenation _builder = new StringConcatenation();
+      _builder.append("import org.eclipse.emf.ecore.EClass");
+      _builder.newLine();
+      _builder.append("import edelta.tests.additional.MyCustomException");
+      _builder.newLine();
+      _builder.newLine();
       _builder.append("metamodel \"foo\"");
       _builder.newLine();
       _builder.newLine();
-      _builder.append("use NonExistant as my");
+      _builder.append("def op(EClass c) : void {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("throw new NullPointerException");
+      _builder.newLine();
+      _builder.append("}");
       _builder.newLine();
       _builder.newLine();
       _builder.append("modifyEcore aTest epackage foo {");
       _builder.newLine();
       _builder.append("\t");
-      _builder.append("val c = addNewEClass(\"NewClass\")");
+      _builder.append("addNewEClass(\"NewClass\") [");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("op(it)");
       _builder.newLine();
       _builder.append("\t");
-      _builder.append("my.createANewEAttribute(c)");
+      _builder.append("]");
       _builder.newLine();
       _builder.append("}");
       _builder.newLine();
       final Procedure1<EPackage> _function_1 = (EPackage it) -> {
       };
-      this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, false, _function_1);
+      this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, _function_1);
     };
-    Assertions.assertThatThrownBy(_function).isInstanceOf(IllegalStateException.class).hasMessageContaining("Cannot resolve proxy");
+    Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaInterpreterWrapperException.class).hasCauseExactlyInstanceOf(NullPointerException.class);
+  }
+  
+  @Test
+  public void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("use NonExistant as my");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("val c = addNewEClass(\"NewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("my.createANewEAttribute(c) // this won\'t break the interpreter");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"AnotherNewClass\")");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
+      EClass _lastEClass = this.getLastEClass(derivedEPackage);
+      final Procedure1<EClass> _function_1 = (EClass it) -> {
+        Assert.assertEquals("AnotherNewClass", it.getName());
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_lastEClass, _function_1);
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, false, _function);
   }
   
   @Test
@@ -480,6 +525,40 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("\t");
     _builder.append("ecoreref(nonexist).abstract = true // this won\'t break the interpreter");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass1\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass1).abstract = true");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
+      EClass _lastEClass = this.getLastEClass(derivedEPackage);
+      final Procedure1<EClass> _function_1 = (EClass it) -> {
+        Assert.assertEquals("NewClass1", it.getName());
+        Assertions.assertThat(it.isAbstract()).isTrue();
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_lastEClass, _function_1);
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, false, _function);
+  }
+  
+  @Test
+  public void testUnresolvedEcoreReferenceMethodCall2() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EClass");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(nonexist).ESuperTypes += ecoreref(MyClass) // this won\'t break the interpreter");
     _builder.newLine();
     _builder.append("\t");
     _builder.append("addNewEClass(\"NewClass1\")");

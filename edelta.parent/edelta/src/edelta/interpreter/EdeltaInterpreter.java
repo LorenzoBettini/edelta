@@ -226,7 +226,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		updateListenerCurrentExpression(expression);
 		try {
 			return super.doEvaluate(expression, context, indicator);
-		} catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException | IllegalStateException e) {
 			// we let the interpreter go on as much as possible
 			return new DefaultEvaluationResult(null, null);
 		}
