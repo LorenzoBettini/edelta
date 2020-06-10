@@ -1386,6 +1386,12 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			// also check what's resolved in the end
 			assertThat(ecoreref1.enamedelement.eIsProxy).isFalse
 			assertThat(ecoreref2.enamedelement.eIsProxy).isTrue
+			val map = derivedStateHelper.getEnamedElementXExpressionMap(eResource)
+			// we can access the expression that created the element
+			// that is not available in the current context
+			assertThat(map.get(ecoreref1.enamedelement))
+				.isNotNull
+				.isSameAs(lastModifyEcoreOperation.body.block.expressions.get(2))
 		]
 	}
 

@@ -13,6 +13,7 @@ import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.interpreter.EdeltaInterpreterWrapperException;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
+import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 import edelta.resource.derivedstate.EdeltaUnresolvedEcoreReferences;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
@@ -2074,6 +2075,8 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       Assertions.<EdeltaEcoreReference>assertThat(unresolved).containsOnly(ecoreref1, ecoreref2);
       Assertions.assertThat(ecoreref1.getEnamedelement().eIsProxy()).isFalse();
       Assertions.assertThat(ecoreref2.getEnamedelement().eIsProxy()).isTrue();
+      final EdeltaENamedElementXExpressionMap map = this.derivedStateHelper.getEnamedElementXExpressionMap(it.eResource());
+      Assertions.<XExpression>assertThat(map.get(ecoreref1.getEnamedelement())).isNotNull().isSameAs(this.getBlock(this.lastModifyEcoreOperation(it).getBody()).getExpressions().get(2));
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
