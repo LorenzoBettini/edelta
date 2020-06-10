@@ -512,4 +512,45 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 			)
 		]
 	}
+
+	@Test
+	def void testAccessToNotYetExistingElementInComplexExpression2() {
+		val input =
+		'''
+		metamodel "foo"
+		
+		modifyEcore aTest epackage foo {
+			// doesn't exist yet
+			ecoreref(ANewClass).ESuperTypes += 
+				ecoreref(ANewSuperClass) // doesn't exist yet
+			addNewEClass("ANewClass")
+			addNewEClass("ANewSuperClass")
+			ecoreref(ANewClass) // this is OK
+			ecoreref(ANewSuperClass) // this is OK
+		}
+		'''
+		input
+		.parseWithTestEcore => [
+			assertErrorsAsStrings(
+				'''
+				Element not yet available in this context: foo.ANewClass
+				Element not yet available in this context: foo.ANewSuperClass
+				'''
+			)
+			assertError(
+				EDELTA_ECORE_DIRECT_REFERENCE,
+				EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
+				input.indexOf("ANewClass"),
+				"ANewClass".length,
+				"Element not yet available in this context: foo.ANewClass"
+			)
+			assertError(
+				EDELTA_ECORE_DIRECT_REFERENCE,
+				EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
+				input.indexOf("ANewSuperClass"),
+				"ANewSuperClass".length,
+				"Element not yet available in this context: foo.ANewSuperClass"
+			)
+		]
+	}
 }
