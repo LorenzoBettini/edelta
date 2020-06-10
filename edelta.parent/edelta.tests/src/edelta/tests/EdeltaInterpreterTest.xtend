@@ -102,8 +102,32 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testThrowNullPointerException() {
+		assertThatThrownBy['''
+				import org.eclipse.emf.ecore.EClass
+				import edelta.tests.additional.MyCustomException
+				
+				metamodel "foo"
+				
+				def op(EClass c) : void {
+					throw new NullPointerException
+				}
+				
+				modifyEcore aTest epackage foo {
+					addNewEClass("NewClass") [
+						op(it)
+					]
+				}
+			'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation [
+				// never gets here
+			]
+		].isInstanceOf(EdeltaInterpreterWrapperException)
+			.hasCauseExactlyInstanceOf(NullPointerException)
+	}
+
+
+	@Test
 	def void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() {
-		assertThatThrownBy[
 		'''
 			metamodel "foo"
 			
@@ -111,11 +135,14 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			
 			modifyEcore aTest epackage foo {
 				val c = addNewEClass("NewClass")
-				my.createANewEAttribute(c)
+				my.createANewEAttribute(c) // this won't break the interpreter
+				addNewEClass("AnotherNewClass")
 			}
-		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ /* will not get here */ ]
-		].isInstanceOf(IllegalStateException)
-			.hasMessageContaining("Cannot resolve proxy")
+		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [derivedEPackage |
+			derivedEPackage.lastEClass => [
+				assertEquals("AnotherNewClass", name)
+			]
+		]
 	}
 
 	@Test
@@ -329,6 +356,27 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 			modifyEcore aTest epackage foo {
 				ecoreref(nonexist).abstract = true // this won't break the interpreter
+				addNewEClass("NewClass1")
+				ecoreref(NewClass1).abstract = true
+			}
+		'''
+		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ derivedEPackage |
+			derivedEPackage.lastEClass => [
+				assertEquals("NewClass1", name)
+				assertThat(isAbstract).isTrue
+			]
+		]
+	}
+
+	@Test
+	def void testUnresolvedEcoreReferenceMethodCall2() {
+		val input = '''
+			import org.eclipse.emf.ecore.EClass
+
+			metamodel "foo"
+
+			modifyEcore aTest epackage foo {
+				ecoreref(nonexist).ESuperTypes += ecoreref(MyClass) // this won't break the interpreter
 				addNewEClass("NewClass1")
 				ecoreref(NewClass1).abstract = true
 			}

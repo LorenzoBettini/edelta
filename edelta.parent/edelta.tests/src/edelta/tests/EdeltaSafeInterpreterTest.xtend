@@ -87,7 +87,7 @@ class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
 	@Test
 	def void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() {
 		// differently from EdeltaInterpreterTest,
-		// IllegalArgumentException is swallowed
+		// IllegalStateException is swallowed
 		'''
 			metamodel "foo"
 			
@@ -127,7 +127,7 @@ class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test // remove expected exception which the safe interpreter swallows
+	@Test
 	def void testCreateEClassAndCallOperationThatThrows() {
 		// differently from EdeltaInterpreterTest,
 		// MyCustomException is swallowed
@@ -139,6 +139,32 @@ class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
 			
 			def op(EClass c) : void {
 				throw new MyCustomException
+			}
+			
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass") [
+					op(it)
+				]
+			}
+		'''
+		.parseWithTestEcore
+		.assertAfterInterpretationOfEdeltaModifyEcoreOperation [
+			// never gets here
+		]
+	}
+
+	@Test
+	def void testThrowNullPointerException() {
+		// differently from EdeltaInterpreterTest,
+		// NullPointerException is swallowed
+		'''
+			import org.eclipse.emf.ecore.EClass
+			import edelta.tests.additional.MyCustomException
+			
+			metamodel "foo"
+			
+			def op(EClass c) : void {
+				throw new NullPointerException
 			}
 			
 			modifyEcore aTest epackage foo {

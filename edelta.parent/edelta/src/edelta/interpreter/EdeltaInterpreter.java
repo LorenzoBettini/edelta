@@ -234,7 +234,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		updateListenerCurrentExpression(expression);
 		try {
 			return super.doEvaluate(expression, context, indicator);
-		} catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException | IllegalStateException e) {
 			/*
 			 * first make sure to interpret all ecoreref expressions so that we still
 			 * collect information about them this is required because in some expressions,
