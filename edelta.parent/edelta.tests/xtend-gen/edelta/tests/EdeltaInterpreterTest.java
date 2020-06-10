@@ -402,7 +402,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, false, _function);
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testOperationWithErrorsDueToWrongParsing() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
@@ -414,15 +414,24 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder.append("modifyEcore aTest epackage foo {");
     _builder.newLine();
     _builder.append("\t");
-    _builder.append("addNewEClass(\"First\")");
+    _builder.append("addNewEClass(\"NewClass1\")");
     _builder.newLine();
     _builder.append("\t");
-    _builder.append("eclass First");
+    _builder.append("eclass NewClass1 // this won\'t break the interpreter");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass1).abstract = true");
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
     final String input = _builder.toString();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
+    final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
+      EClass _lastEClass = this.getLastEClass(derivedEPackage);
+      final Procedure1<EClass> _function_1 = (EClass it) -> {
+        Assert.assertEquals("NewClass1", it.getName());
+        Assertions.assertThat(it.isAbstract()).isTrue();
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_lastEClass, _function_1);
     };
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, false, _function);
   }
@@ -444,6 +453,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder.append("\t");
     _builder.append("ecoreref(nonexist) // this won\'t break the interpreter");
     _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass1).abstract = true");
+    _builder.newLine();
     _builder.append("}");
     _builder.newLine();
     final String input = _builder.toString();
@@ -451,6 +463,41 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       EClass _lastEClass = this.getLastEClass(derivedEPackage);
       final Procedure1<EClass> _function_1 = (EClass it) -> {
         Assert.assertEquals("NewClass1", it.getName());
+        Assertions.assertThat(it.isAbstract()).isTrue();
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_lastEClass, _function_1);
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, false, _function);
+  }
+  
+  @Test
+  public void testUnresolvedEcoreReferenceMethodCall() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EClass");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(nonexist).abstract = true // this won\'t break the interpreter");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass1\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass1).abstract = true");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
+      EClass _lastEClass = this.getLastEClass(derivedEPackage);
+      final Procedure1<EClass> _function_1 = (EClass it) -> {
+        Assert.assertEquals("NewClass1", it.getName());
+        Assertions.assertThat(it.isAbstract()).isTrue();
       };
       ObjectExtensions.<EClass>operator_doubleArrow(_lastEClass, _function_1);
     };

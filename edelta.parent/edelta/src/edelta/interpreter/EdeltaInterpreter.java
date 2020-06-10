@@ -26,6 +26,7 @@ import org.eclipse.xtext.util.IResourceScopeCache;
 import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
+import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationResult;
 import org.eclipse.xtext.xbase.interpreter.impl.InterpreterCanceledException;
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter;
 
@@ -223,7 +224,12 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				context, indicator);
 		}
 		updateListenerCurrentExpression(expression);
-		return super.doEvaluate(expression, context, indicator);
+		try {
+			return super.doEvaluate(expression, context, indicator);
+		} catch (IllegalArgumentException e) {
+			// we let the interpreter go on as much as possible
+			return new DefaultEvaluationResult(null, null);
+		}
 	}
 
 	private void updateListenerCurrentExpression(XExpression expression) {
