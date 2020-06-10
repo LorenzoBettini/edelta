@@ -2068,6 +2068,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       final EdeltaEcoreReference ecoreref = IterableExtensions.<EdeltaEcoreReferenceExpression>head(this.getAllEcoreReferenceExpressions(it)).getReference();
       final EdeltaUnresolvedEcoreReferences unresolved = this.derivedStateHelper.getUnresolvedEcoreReferences(it.eResource());
       Assertions.<EdeltaEcoreReference>assertThat(unresolved).containsOnly(ecoreref);
+      Assertions.assertThat(ecoreref.getEnamedelement().eIsProxy()).isFalse();
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }

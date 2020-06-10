@@ -1379,8 +1379,9 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			interpretProgram
 			val ecoreref = allEcoreReferenceExpressions.head.reference
 			val unresolved = derivedStateHelper.getUnresolvedEcoreReferences(eResource)
-			assertThat(unresolved)
-				.containsOnly(ecoreref)
+			assertThat(unresolved).containsOnly(ecoreref)
+			// also check that it is resolved in the end
+			assertThat(ecoreref.enamedelement.eIsProxy).isFalse
 		]
 	}
 
