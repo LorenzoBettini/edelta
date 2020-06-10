@@ -2,6 +2,7 @@ package edelta.interpreter;
 
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE;
 import static edelta.util.EdeltaModelUtil.getProgram;
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
 import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashMap;
@@ -244,7 +245,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			 */
 			getAllContentsOfType(expression, EdeltaEcoreReferenceExpression.class)
 				.stream()
-				.filter(ecoreRef -> !interpretedEcoreReferenceExpressions.contains(ecoreRef))
+				.filter(not(interpretedEcoreReferenceExpressions::contains))
 				.forEach(ecoreRef -> evaluateEcoreReferenceExpression(
 					ecoreRef, context, indicator));
 			// we let the interpreter go on as much as possible
