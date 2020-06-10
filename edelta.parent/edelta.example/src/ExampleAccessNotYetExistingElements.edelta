@@ -7,7 +7,7 @@ metamodel "mainpackage"
 
 modifyEcore creation epackage myecore {
 	// uncomment to see the error: Element not yet available in this context: myecore.NewClass
-	// ecoreref(NewClass)
+//	ecoreref(NewClass).abstract = true
 	addNewEClass("NewClass")
 	ecoreref(NewClass).abstract = true
 }
