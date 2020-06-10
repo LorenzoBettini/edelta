@@ -25,6 +25,7 @@ import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.util.EdeltaEcoreHelper
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import edelta.util.EdeltaModelUtil
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 
 /**
  * This class contains custom validation rules. 
@@ -38,6 +39,7 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	public static val INTERPRETER_TIMEOUT = PREFIX + "InterpreterTimeout";
 	public static val INTERPRETER_ACCESS_REMOVED_ELEMENT = PREFIX + "InterpreterAccessRemovedElement";
 	public static val INTERPRETER_ACCESS_RENAMED_ELEMENT = PREFIX + "InterpreterAccessRenamedElement";
+	public static val INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT = PREFIX + "InterpreterAccessNotYetExistingElement";
 	public static val DUPLICATE_DECLARATION = PREFIX + "DuplicateDeclaration";
 	public static val DUPLICATE_METAMODEL_IMPORT = PREFIX + "DuplicateMetamodelImport";
 	public static val INVALID_SUBPACKAGE_IMPORT = PREFIX + "InvalidSubPackageImport";
@@ -53,6 +55,7 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 	@Inject extension IJvmModelAssociations
 	@Inject extension EdeltaEcoreHelper
 	@Inject extension IQualifiedNameProvider
+	@Inject extension EdeltaDerivedStateHelper
 	@Inject IResourceScopeCache cache
 
 	@Check
@@ -131,6 +134,20 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 						DUPLICATE_DECLARATION
 					)
 				}
+			}
+		}
+
+		for (ecoreRef : p.eResource.unresolvedEcoreReferences) {
+			// it wasn't resolved during interpretation but it is
+			// in the end
+			if (!ecoreRef.enamedelement.eIsProxy) {
+				error(
+					"Element not yet available in this context: " +
+						ecoreRef.enamedelement.fullyQualifiedName,
+					ecoreRef,
+					EDELTA_ECORE_REFERENCE__ENAMEDELEMENT,
+					INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT
+				)
 			}
 		}
 	}

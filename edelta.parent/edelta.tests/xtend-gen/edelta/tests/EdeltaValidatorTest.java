@@ -632,11 +632,32 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     _builder.append("ecoreref(ANewClass) // doesn\'t exist yet");
     _builder.newLine();
     _builder.append("\t");
+    _builder.append("ecoreref(NonExisting) // doesn\'t exist at all");
+    _builder.newLine();
+    _builder.append("\t");
     _builder.append("addNewEClass(\"ANewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(ANewClass) // this is OK");
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
     final String input = _builder.toString();
-    this._validationTestHelper.assertNoErrors(this.parseWithTestEcore(input));
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
+        EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
+        input.indexOf("ANewClass"), 
+        "ANewClass".length(), 
+        "Element not yet available in this context: foo.ANewClass");
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("Element not yet available in this context: foo.ANewClass");
+      _builder_1.newLine();
+      _builder_1.append("NonExisting cannot be resolved.");
+      _builder_1.newLine();
+      this.assertErrorsAsStrings(it, _builder_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
 }

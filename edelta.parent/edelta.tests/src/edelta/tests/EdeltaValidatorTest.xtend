@@ -7,11 +7,11 @@ import edelta.validation.EdeltaValidator
 import org.eclipse.xtext.diagnostics.Diagnostic
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.xbase.validation.IssueCodes
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static edelta.edelta.EdeltaPackage.Literals.*
-import org.eclipse.xtext.xbase.validation.IssueCodes
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -448,11 +448,26 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		
 		modifyEcore aTest epackage foo {
 			ecoreref(ANewClass) // doesn't exist yet
+			ecoreref(NonExisting) // doesn't exist at all
 			addNewEClass("ANewClass")
+			ecoreref(ANewClass) // this is OK
 		}
 		'''
 		input
-		.parseWithTestEcore
-		.assertNoErrors
+		.parseWithTestEcore => [
+			assertError(
+				EDELTA_ECORE_DIRECT_REFERENCE,
+				EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
+				input.indexOf("ANewClass"),
+				"ANewClass".length,
+				"Element not yet available in this context: foo.ANewClass"
+			)
+			assertErrorsAsStrings(
+				'''
+				Element not yet available in this context: foo.ANewClass
+				NonExisting cannot be resolved.
+				'''
+			)
+		]
 	}
 }
