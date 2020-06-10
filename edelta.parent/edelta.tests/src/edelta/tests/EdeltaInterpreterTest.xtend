@@ -1362,6 +1362,28 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testAccessToNotYetExistingElement() {
+		val input =
+		'''
+		metamodel "foo"
+		
+		modifyEcore aTest epackage foo {
+			ecoreref(ANewClass) // doesn't exist yet
+			addNewEClass("ANewClass")
+			ecoreref(ANewClass) // this is OK
+		}
+		'''
+		input
+		.parseWithTestEcore => [
+			interpretProgram
+			val ecoreref = allEcoreReferenceExpressions.head.reference
+			val unresolved = derivedStateHelper.getUnresolvedEcoreReferences(eResource)
+			assertThat(unresolved)
+				.containsOnly(ecoreref)
+		]
+	}
+
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) {

@@ -239,8 +239,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	private Object evaluateEcoreReferenceExpression(EdeltaEcoreReferenceExpression ecoreReferenceExpression, final IEvaluationContext context,
 			final CancelIndicator indicator) {
-		if (ecoreReferenceExpression.getReference() == null ||
-			ecoreReferenceExpression.getReference().getEnamedelement() == null)
+		final var ecoreReference = ecoreReferenceExpression.getReference();
+		if (ecoreReference == null || ecoreReference.getEnamedelement() == null)
 			return null;
 		return edeltaCompilerUtil.buildMethodToCallForEcoreReference(
 			ecoreReferenceExpression,
@@ -258,6 +258,15 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 						(op, thisObject, args, context, indicator);
 					postProcess(result, ecoreReferenceExpression);
 					checkStaleAccess(result, ecoreReferenceExpression);
+				} else {
+					// record the unresolved reference in the derived state
+					// later type computations or relinking might make it resolvable
+					// but if it's not resolvable now, it means that in this part
+					// of the program it is not available and we'll have to
+					// issue a validation error explicitly in the validator
+					derivedStateHelper
+						.getUnresolvedEcoreReferences(ecoreReferenceExpression.eResource())
+						.add(ecoreReference);
 				}
 				return result;
 			});
