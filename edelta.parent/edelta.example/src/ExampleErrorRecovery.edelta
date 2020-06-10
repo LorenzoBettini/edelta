@@ -1,0 +1,16 @@
+// IMPORTANT: ecores must be in source directories
+// otherwise you can't refer to them
+
+metamodel "ecore"
+metamodel "myecore"
+
+modifyEcore creation epackage myecore {
+	// uncomment the next line to see errors, which will not prevent
+	// the rest to be interpreted
+//	ecoreref(nonexistent).abstract = true
+	addNewEClass("NewClass")
+	// even with the error above "NewClass" is still interpreted
+	// and "NewClass" can then be accessed
+	ecoreref(NewClass).abstract = true
+}
+
