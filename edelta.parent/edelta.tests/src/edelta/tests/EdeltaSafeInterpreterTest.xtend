@@ -87,7 +87,7 @@ class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
 	@Test
 	def void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() {
 		// differently from EdeltaInterpreterTest,
-		// IllegalArgumentException is swallowed
+		// IllegalStateException is swallowed
 		'''
 			metamodel "foo"
 			
