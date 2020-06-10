@@ -4,13 +4,18 @@
 package edelta.validation
 
 import com.google.inject.Inject
+import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaModifyEcoreOperation
 import edelta.edelta.EdeltaProgram
 import edelta.edelta.EdeltaUseAs
 import edelta.lib.AbstractEdelta
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper
+import edelta.util.EdeltaEcoreHelper
+import edelta.util.EdeltaModelUtil
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.common.types.JvmTypeReference
+import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.util.IResourceScopeCache
 import org.eclipse.xtext.validation.Check
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
@@ -21,11 +26,6 @@ import org.eclipse.xtext.xbase.typesystem.util.Multimaps2
 
 import static edelta.edelta.EdeltaPackage.Literals.*
 import static edelta.util.EdeltaModelUtil.*
-import edelta.edelta.EdeltaEcoreReferenceExpression
-import edelta.util.EdeltaEcoreHelper
-import org.eclipse.xtext.naming.IQualifiedNameProvider
-import edelta.util.EdeltaModelUtil
-import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 
 /**
  * This class contains custom validation rules. 
@@ -137,7 +137,8 @@ class EdeltaValidator extends AbstractEdeltaValidator {
 			}
 		}
 
-		for (ecoreRef : p.eResource.unresolvedEcoreReferences) {
+		val unresolvedEcoreReferences = p.eResource.unresolvedEcoreReferences
+		for (ecoreRef : unresolvedEcoreReferences) {
 			// it wasn't resolved during interpretation but it is
 			// in the end
 			if (!ecoreRef.enamedelement.eIsProxy) {

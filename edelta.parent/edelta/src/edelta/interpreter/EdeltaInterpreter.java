@@ -10,6 +10,7 @@ import static org.eclipse.xtext.xbase.lib.IterableExtensions.filter;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.forEach;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -92,6 +93,12 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	private EdeltaProgram currentProgram;
 
 	private EdeltaInterpreterResourceListener listener;
+
+	/**
+	 * Keeps track of {@link EdeltaEcoreReference} already evaluated.
+	 */
+	private Collection<EdeltaEcoreReferenceExpression> interpretedEcoreReferenceExpressions =
+		new HashSet<>();
 
 	class EdeltaInterpreterCancelIndicator implements CancelIndicator {
 		long stopAt = System.currentTimeMillis() +
@@ -227,6 +234,19 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		try {
 			return super.doEvaluate(expression, context, indicator);
 		} catch (IllegalArgumentException e) {
+			/*
+			 * first make sure to interpret all ecoreref expressions so that we still
+			 * collect information about them this is required because in some expressions,
+			 * the evaluation might terminate early with an IAE without interpreting
+			 * ecorerefs, e.g., in ecoreref(NonExistant).abstract = true the IAE is thrown
+			 * because abstract cannot be resolved without interpreting
+			 * ecoreref(NonExistant) and we cannot collect information about that
+			 */
+			getAllContentsOfType(expression, EdeltaEcoreReferenceExpression.class)
+				.stream()
+				.filter(ecoreRef -> !interpretedEcoreReferenceExpressions.contains(ecoreRef))
+				.forEach(ecoreRef -> evaluateEcoreReferenceExpression(
+					ecoreRef, context, indicator));
 			// we let the interpreter go on as much as possible
 			return new DefaultEvaluationResult(null, null);
 		}
@@ -274,6 +294,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 						.getUnresolvedEcoreReferences(ecoreReferenceExpression.eResource())
 						.add(ecoreReference);
 				}
+				interpretedEcoreReferenceExpressions.add(ecoreReferenceExpression);
 				return result;
 			});
 	}
