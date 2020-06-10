@@ -278,7 +278,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test(expected=IllegalArgumentException)
+	@Test
 	def void testOperationWithErrorsDueToWrongParsing() {
 		val input = '''
 			package test
@@ -286,11 +286,17 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			metamodel "foo"
 			
 			modifyEcore aTest epackage foo {
-				addNewEClass("First")
-				eclass First
+				addNewEClass("NewClass1")
+				eclass NewClass1 // this won't break the interpreter
+				ecoreref(NewClass1).abstract = true
 			}
 		'''
-		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ ]
+		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [derivedEPackage |
+			derivedEPackage.lastEClass => [
+				assertEquals("NewClass1", name)
+				assertThat(isAbstract).isTrue
+			]
+		]
 	}
 
 	@Test
@@ -303,11 +309,34 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			modifyEcore aTest epackage foo {
 				addNewEClass("NewClass1")
 				ecoreref(nonexist) // this won't break the interpreter
+				ecoreref(NewClass1).abstract = true
 			}
 		'''
 		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ derivedEPackage |
 			derivedEPackage.lastEClass => [
 				assertEquals("NewClass1", name)
+				assertThat(isAbstract).isTrue
+			]
+		]
+	}
+
+	@Test
+	def void testUnresolvedEcoreReferenceMethodCall() {
+		val input = '''
+			import org.eclipse.emf.ecore.EClass
+
+			metamodel "foo"
+
+			modifyEcore aTest epackage foo {
+				ecoreref(nonexist).abstract = true // this won't break the interpreter
+				addNewEClass("NewClass1")
+				ecoreref(NewClass1).abstract = true
+			}
+		'''
+		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ derivedEPackage |
+			derivedEPackage.lastEClass => [
+				assertEquals("NewClass1", name)
+				assertThat(isAbstract).isTrue
 			]
 		]
 	}
