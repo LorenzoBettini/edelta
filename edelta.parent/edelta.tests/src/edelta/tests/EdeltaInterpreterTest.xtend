@@ -1396,8 +1396,6 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	@Test
 	def void testIntroducedCycles() {
 		val input = '''
-			import org.eclipse.emf.ecore.EPackage
-
 			metamodel "foo"
 			
 			modifyEcore aTest epackage foo {

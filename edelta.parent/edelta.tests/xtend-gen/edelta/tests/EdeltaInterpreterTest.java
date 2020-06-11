@@ -2095,9 +2095,6 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   @Test
   public void testIntroducedCycles() {
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("import org.eclipse.emf.ecore.EPackage");
-    _builder.newLine();
-    _builder.newLine();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
     _builder.newLine();
