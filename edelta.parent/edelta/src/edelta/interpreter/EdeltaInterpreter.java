@@ -195,12 +195,13 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	}
 
 	private void configureContextForJavaThis(IEvaluationContext context) {
-		// 'this' and the name of the inferred class are mapped
-		// to an instance of AbstractEdelta, so that all reflective
-		// accesses, e.g., the inherited field 'lib', work out of the box
-		// calls to operations defined in the sources are intercepted
-		// in our custom invokeOperation and in that case we interpret the
-		// original source's XBlockExpression
+		/*
+		 * 'this' and the name of the inferred class are mapped to an instance of
+		 * AbstractEdelta, so that all reflective accesses, e.g., the inherited field
+		 * 'lib', work out of the box calls to operations defined in the sources are
+		 * intercepted in our custom invokeOperation and in that case we interpret the
+		 * original source's XBlockExpression
+		 */
 		context.newValue(QualifiedName.create("this"), thisObject);
 		context.newValue(QualifiedName.create(
 				edeltaJvmModelHelper.findJvmGenericType(currentProgram).getSimpleName()),
@@ -277,20 +278,22 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 					.findJvmOperation(
 						edeltaJvmModelHelper.findJvmGenericType(currentProgram),
 						methodName);
-				// it could be null due to an unresolved reference
-				// the returned op would be 'getENamedElement'
-				// which does not exist in AbstractEdelta
+				/*
+				 * it could be null due to an unresolved reference the returned op would be
+				 * 'getENamedElement' which does not exist in AbstractEdelta
+				 */
 				if (op != null) {
 					result = super.invokeOperation
 						(op, thisObject, args, context, indicator);
 					postProcess(result, ecoreReferenceExpression);
 					checkStaleAccess(result, ecoreReferenceExpression);
 				} else {
-					// record the unresolved reference in the derived state
-					// later type computations or relinking might make it resolvable
-					// but if it's not resolvable now, it means that in this part
-					// of the program it is not available and we'll have to
-					// issue a validation error explicitly in the validator
+					/*
+					 * record the unresolved reference in the derived state later type computations
+					 * or relinking might make it resolvable but if it's not resolvable now, it
+					 * means that in this part of the program it is not available and we'll have to
+					 * issue a validation error explicitly in the validator
+					 */
 					derivedStateHelper
 						.getUnresolvedEcoreReferences(ecoreReferenceExpression.eResource())
 						.add(ecoreReference);
