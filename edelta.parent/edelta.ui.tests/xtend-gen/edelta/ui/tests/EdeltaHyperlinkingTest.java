@@ -177,4 +177,27 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
     _builder.newLine();
     this.hasHyperlinkTo(_builder, "setName");
   }
+  
+  @Test
+  public void hyperlinkOnForwardCreatedEClass() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mypackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mypackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(");
+    _builder.append(this.c, "\t");
+    _builder.append("NewClass");
+    _builder.append(this.c, "\t");
+    _builder.append(")");
+    _builder.newLineIfNotEmpty();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\")");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    this.hasHyperlinkTo(_builder, "addNewEClass");
+  }
 }
