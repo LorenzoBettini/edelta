@@ -71,6 +71,9 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 				enamedElementXExpressionMap.put(
 					(ENamedElement) newValue,
 					currentExpression);
+				// cycles must be detected after performing the
+				// association to the current expression, otherwise
+				// the error won't be placed on the correct expression
 				checkCycles(feature, newValue);
 			}
 		}

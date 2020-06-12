@@ -109,4 +109,15 @@ class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 		'''.hasHyperlinkTo("setName")
 	}
 
+	@Test def hyperlinkOnForwardCreatedEClass() {
+		'''
+			metamodel "mypackage"
+			
+			modifyEcore aTest epackage mypackage {
+				ecoreref(«c»NewClass«c»)
+				addNewEClass("NewClass")
+			}
+		'''.hasHyperlinkTo("addNewEClass")
+	}
+
 }
