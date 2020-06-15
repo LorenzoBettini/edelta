@@ -10,7 +10,13 @@ modifyEcore creation epackage myecore {
 	// not that you can still navigate to the creation expression
 
 //	ecoreref(NewClass).abstract = true
+//	ecoreref(AnotherNewClass).abstract = true
 
 	addNewEClass("NewClass")
 	ecoreref(NewClass).ESuperTypes += ecoreref(MyEClass)
+}
+
+modifyEcore anotherCreation epackage myecore {
+	addNewEClass("AnotherNewClass")
+	ecoreref(AnotherNewClass).ESuperTypes += ecoreref(MyEClass)
 }

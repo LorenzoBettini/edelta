@@ -21,6 +21,12 @@ public class ExampleAccessNotYetExistingElements extends AbstractEdelta {
     _eSuperTypes.add(getEClass("myecore", "MyEClass"));
   }
   
+  public void anotherCreation(final EPackage it) {
+    this.lib.addNewEClass(it, "AnotherNewClass");
+    EList<EClass> _eSuperTypes = getEClass("myecore", "AnotherNewClass").getESuperTypes();
+    _eSuperTypes.add(getEClass("myecore", "MyEClass"));
+  }
+  
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("ecore");
@@ -30,5 +36,6 @@ public class ExampleAccessNotYetExistingElements extends AbstractEdelta {
   @Override
   protected void doExecute() throws Exception {
     creation(getEPackage("myecore"));
+    anotherCreation(getEPackage("myecore"));
   }
 }
