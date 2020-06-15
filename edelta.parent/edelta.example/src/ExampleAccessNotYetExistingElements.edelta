@@ -2,18 +2,15 @@
 
 // IMPORTANT: ecores must be in source directories
 // otherwise you can't refer to them
-
 metamodel "ecore"
 metamodel "myecore"
-metamodel "mainpackage"
 
 modifyEcore creation epackage myecore {
 	// uncomment to see the error: Element not yet available in this context: myecore.NewClass
 	// not that you can still navigate to the creation expression
-//	ecoreref(NewClass).abstract = false;
+
+//	ecoreref(NewClass).abstract = true
 
 	addNewEClass("NewClass")
-
-	ecoreref(NewClass).abstract = true
+	ecoreref(NewClass).ESuperTypes += ecoreref(MyEClass)
 }
-
