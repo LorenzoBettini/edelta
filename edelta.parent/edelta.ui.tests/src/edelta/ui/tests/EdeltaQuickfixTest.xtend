@@ -175,4 +175,30 @@ class EdeltaQuickfixTest extends AbstractQuickfixTest {
 		'''))
 	}
 
+	@Test def fixMoveToRightPosition() {
+		'''
+			metamodel "foo"
+			
+			modifyEcore creation epackage foo {
+				ecoreref(NewClass).abstract = true
+			
+				addNewEClass("NewClass")
+				ecoreref(NewClass).ESuperTypes += ecoreref(FooClass)
+			}
+		'''.testQuickfixesOn
+		(EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
+			new Quickfix("Move to the right position",
+			"Move to the right position",
+		'''
+			metamodel "foo"
+			
+			modifyEcore creation epackage foo {
+			
+				addNewEClass("NewClass")
+				ecoreref(NewClass).abstract = true
+				ecoreref(NewClass).ESuperTypes += ecoreref(FooClass)
+			}
+		'''))
+	}
+
 }

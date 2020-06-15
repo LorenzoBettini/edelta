@@ -255,4 +255,47 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
       "Remove duplicate metamodel import", _builder_1.toString());
     this.testQuickfixesOn(_builder, EdeltaValidator.DUPLICATE_METAMODEL_IMPORT, _quickfix);
   }
+  
+  @Test
+  public void fixMoveToRightPosition() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore creation epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass).abstract = true");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass).ESuperTypes += ecoreref(FooClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("metamodel \"foo\"");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("modifyEcore creation epackage foo {");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("addNewEClass(\"NewClass\")");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("ecoreref(NewClass).abstract = true");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("ecoreref(NewClass).ESuperTypes += ecoreref(FooClass)");
+    _builder_1.newLine();
+    _builder_1.append("}");
+    _builder_1.newLine();
+    AbstractQuickfixTest.Quickfix _quickfix = new AbstractQuickfixTest.Quickfix("Move to the right position", 
+      "Move to the right position", _builder_1.toString());
+    this.testQuickfixesOn(_builder, EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, _quickfix);
+  }
 }
