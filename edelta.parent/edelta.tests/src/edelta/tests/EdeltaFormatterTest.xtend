@@ -16,36 +16,6 @@ class EdeltaFormatterTest extends EdeltaAbstractTest {
 	@Test
 	def void testFormatting() {
 		assertFormatted[
-			expectation = '''
-				
-				
-				import edelta.refactorings.lib.EdeltaRefactorings
-				
-				// IMPORTANT: ecores must be in source directories
-				// otherwise you can't refer to them
-				metamodel "ecore"
-				metamodel "myexample"
-				metamodel "myecore"
-				
-				use Example as example 
-				use EdeltaRefactorings as std
-				
-				def createClass2(String name) {
-					newEClass(name)
-				}
-				
-				def createClass3() {
-					val a = newEAttribute(attrname) [
-						lowerBound = 1
-					]
-				}
-				
-				modifyEcore aModification epackage myecore {
-					std.addMandatoryAttr("name", ecoreref(EString), it)
-				}
-				
-				
-			'''
 			toBeFormatted = '''
 				
 				
@@ -54,28 +24,75 @@ class EdeltaFormatterTest extends EdeltaAbstractTest {
 				// IMPORTANT: ecores must be in source directories
 				// otherwise you can't refer to them
 				
-				metamodel "ecore"
-				metamodel "myexample"
+				package    my.code
+				
+				metamodel   "ecore"
+				metamodel  "myexample"
 				metamodel "myecore"
 				
-				use Example as example 
-				use EdeltaRefactorings as std
+				use  Example  as  example 
+				use EdeltaRefactorings as  extension  std
 				
-				def createClass2(String name) { 				newEClass(name)
+				def  createClass2 ( String  name  , int  i  ) { 				newEClass(name)
 				}
 				
-				def createClass3() {
+				
+				def createClass3()    :   String  {
 					val a= newEAttribute(attrname)[
 							lowerBound=1
 						]
 				}
 				
-				modifyEcore aModification epackage myecore {
+				modifyEcore   aModification   epackage   myecore    {
 					std . addMandatoryAttr( "name" , 
 					ecoreref(EString), it)
+					ecoreref (  ecore  .  EString  )  
+					ecoreref (    EString  )
+					
+					val a= newEAttribute(attrname)[
+												lowerBound=1
+											]
+					
+					
 				}
 				
 				
+			'''
+			expectation = '''
+				
+				import edelta.refactorings.lib.EdeltaRefactorings
+				
+				// IMPORTANT: ecores must be in source directories
+				// otherwise you can't refer to them
+				package my.code
+				
+				metamodel "ecore"
+				metamodel "myexample"
+				metamodel "myecore"
+				
+				use Example as example
+				use EdeltaRefactorings as extension std
+				
+				def createClass2(String name, int i) {
+					newEClass(name)
+				}
+				
+				def createClass3() : String {
+					val a = newEAttribute(attrname) [
+						lowerBound = 1
+					]
+				}
+				
+				modifyEcore aModification epackage myecore {
+					std.addMandatoryAttr("name", ecoreref(EString), it)
+					ecoreref(ecore.EString)
+					ecoreref(EString)
+				
+					val a = newEAttribute(attrname) [
+						lowerBound = 1
+					]
+				
+				}
 			'''
 		]
 	}
