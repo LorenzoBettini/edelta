@@ -6,6 +6,7 @@ package edelta.ui.quickfix;
 import static edelta.util.EdeltaModelUtil.getContainingBlockXExpression;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.ui.editor.model.edit.IModificationContext;
 import org.eclipse.xtext.ui.editor.quickfix.Fix;
@@ -123,7 +124,14 @@ public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider
 				sourceBlock.getExpressions().remove(blockExp);
 				var responsibleExpressionPosition =
 					expressions.indexOf(responsibleExpressionBlockExp);
-				expressions.add(responsibleExpressionPosition + 1, blockExp);
+				/*
+				 * it is crucial to copy the expression otherwise the formatter
+				 * will not be able to format the code correctly, resulting in
+				 * syntax errors after formatting (the expressions will not be
+				 * separated)
+				 */
+				expressions.add(responsibleExpressionPosition + 1,
+					EcoreUtil.copy(blockExp));
 			}
 		);
 	}
