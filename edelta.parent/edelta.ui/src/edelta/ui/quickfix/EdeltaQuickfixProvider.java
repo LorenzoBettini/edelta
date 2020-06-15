@@ -3,15 +3,22 @@
  */
 package edelta.ui.quickfix;
 
+import static edelta.util.EdeltaModelUtil.getContainingBlockXExpression;
+
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.ui.editor.model.edit.IModificationContext;
 import org.eclipse.xtext.ui.editor.quickfix.Fix;
 import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor;
 import org.eclipse.xtext.validation.Issue;
+import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.annotations.ui.quickfix.XbaseWithAnnotationsQuickfixProvider;
 
+import com.google.inject.Inject;
+
+import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaProgram;
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.util.EdeltaModelUtil;
 import edelta.validation.EdeltaValidator;
 
@@ -22,6 +29,9 @@ import edelta.validation.EdeltaValidator;
  * https://www.eclipse.org/Xtext/documentation/310_eclipse_support.html#quick-fixes
  */
 public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider {
+
+	@Inject
+	private EdeltaDerivedStateHelper derivedStateHelper;
 
 	@Fix(EdeltaValidator.INVALID_SUBPACKAGE_IMPORT)
 	public void importRootPackage(final Issue issue, final IssueResolutionAcceptor acceptor) {
@@ -90,6 +100,30 @@ public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider
 				int length = node.getEndOffset() - offset  + 1;
 				// also remove newline
 				context.getXtextDocument().replace(offset, length, "");
+			}
+		);
+	}
+
+	@Fix(EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT)
+	public void moveToRightPosition(final Issue issue, final IssueResolutionAcceptor acceptor) {
+		acceptor.accept(
+			issue,
+			"Move to the right position",
+			"Move to the right position",
+			"EObject.gif",
+			(EObject element, IModificationContext context) -> {
+				var ecoreRef = (EdeltaEcoreReference) element;
+				var blockExp = getContainingBlockXExpression(ecoreRef);
+				var sourceBlock = (XBlockExpression) blockExp.eContainer();
+				var responsibleExpression =
+					derivedStateHelper.getLastResponsibleExpression(ecoreRef.getEnamedelement());
+				var responsibleExpressionBlockExp = getContainingBlockXExpression(responsibleExpression);
+				var destBlock = (XBlockExpression) responsibleExpression.eContainer();
+				var expressions = destBlock.getExpressions();
+				sourceBlock.getExpressions().remove(blockExp);
+				var responsibleExpressionPosition =
+					expressions.indexOf(responsibleExpressionBlockExp);
+				expressions.add(responsibleExpressionPosition + 1, blockExp);
 			}
 		);
 	}
