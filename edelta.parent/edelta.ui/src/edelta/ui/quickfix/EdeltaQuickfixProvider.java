@@ -31,6 +31,8 @@ import edelta.validation.EdeltaValidator;
  */
 public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider {
 
+	private static final String E_OBJECT_GIF = "EObject.gif";
+
 	@Inject
 	private EdeltaDerivedStateHelper derivedStateHelper;
 
@@ -57,7 +59,7 @@ public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider
 			issue,
 			"Use renamed element",
 			"Use renamed element \'" + renamed + "\'",
-			"EObject.gif",
+			E_OBJECT_GIF,
 			context -> 
 				context.getXtextDocument().replace(
 					issue.getOffset(),
@@ -74,7 +76,7 @@ public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider
 				issue,
 				"Fix ambiguity with \'" + alternative + "\'",
 				"Fix ambiguity with \'" + alternative + "\'",
-				"EObject.gif",
+				E_OBJECT_GIF,
 				context -> 
 					context.getXtextDocument().replace(
 						issue.getOffset(),
@@ -111,7 +113,7 @@ public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider
 			issue,
 			"Move to the right position",
 			"Move to the right position",
-			"EObject.gif",
+			E_OBJECT_GIF,
 			(EObject element, IModificationContext context) -> {
 				var ecoreRef = (EdeltaEcoreReference) element;
 				var blockExp = getContainingBlockXExpression(ecoreRef);
