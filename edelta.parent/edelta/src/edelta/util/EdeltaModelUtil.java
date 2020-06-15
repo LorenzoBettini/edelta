@@ -99,7 +99,19 @@ public class EdeltaModelUtil {
 	 * @return
 	 */
 	public static XExpression getContainingBlockXExpression(EdeltaEcoreReference reference) {
-		XExpression blockExp = getContainerOfType(reference, EdeltaEcoreReferenceExpression.class);
+		return getContainingBlockXExpression(
+			getContainerOfType(reference, EdeltaEcoreReferenceExpression.class));
+	}
+
+	/**
+	 * Returns the containing {@link XExpression} that is contained directly in an
+	 * {@link XBlockExpression}.
+	 * 
+	 * @param reference
+	 * @return
+	 */
+	public static XExpression getContainingBlockXExpression(XExpression exp) {
+		XExpression blockExp = exp;
 		var container = blockExp.eContainer();
 		while (!(container instanceof XBlockExpression)) {
 			blockExp = (XExpression) container;
