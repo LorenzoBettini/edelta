@@ -389,6 +389,30 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testUnresolvedEcoreReferenceMethodCall3() {
+		val input = '''
+			import org.eclipse.emf.ecore.EClass
+
+			metamodel "foo"
+
+			modifyEcore creation epackage foo {
+				addNewEClass("NewClass")
+				// note that ESuperTypes is resolved, but not the argument
+				ecoreref(NewClass).ESuperTypes += ecoreref(AnotherNewClass) // this won't break the interpreter
+				addNewEClass("AnotherNewClass")
+				// the next one is not resolved, BAD
+				ecoreref(AnotherNewClass).abstract = true
+			}
+		'''
+		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ derivedEPackage |
+			derivedEPackage.lastEClass => [
+				assertEquals("AnotherNewClass", name)
+				assertThat(isAbstract).isTrue
+			]
+		]
+	}
+
+	@Test
 	def void testUnresolvedEcoreReferenceQualified() {
 		val input = '''
 			import org.eclipse.emf.ecore.EClass
