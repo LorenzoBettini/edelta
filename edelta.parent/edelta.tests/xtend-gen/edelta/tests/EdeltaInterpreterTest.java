@@ -581,6 +581,49 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testUnresolvedEcoreReferenceMethodCall3() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EClass");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore creation epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// note that ESuperTypes is resolved, but not the argument");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass).ESuperTypes += ecoreref(AnotherNewClass) // this won\'t break the interpreter");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"AnotherNewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// the next one is not resolved, BAD");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(AnotherNewClass).abstract = true");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
+      EClass _lastEClass = this.getLastEClass(derivedEPackage);
+      final Procedure1<EClass> _function_1 = (EClass it) -> {
+        Assert.assertEquals("AnotherNewClass", it.getName());
+        Assertions.assertThat(it.isAbstract()).isTrue();
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_lastEClass, _function_1);
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, false, _function);
+  }
+  
+  @Test
   public void testUnresolvedEcoreReferenceQualified() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import org.eclipse.emf.ecore.EClass");
