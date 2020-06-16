@@ -24,7 +24,8 @@ class EdeltaQuickfixTest extends AbstractQuickfixTest {
 		"src/" + super.getFileName()
 	}
 
-	@Before def void setup() {
+	@Before override void setUp() {
+		super.setUp
 		/*
 		 * Edelta requires a plug-in project to run the interpreter
 		 * with edelta.lib as dependency

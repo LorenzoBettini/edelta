@@ -28,8 +28,10 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
   }
   
   @Before
-  public void setup() {
+  @Override
+  public void setUp() {
     try {
+      super.setUp();
       this.projectHelper.createEdeltaPluginProject(this.getProjectName());
       String _projectName = this.getProjectName();
       StringConcatenation _builder = new StringConcatenation();
