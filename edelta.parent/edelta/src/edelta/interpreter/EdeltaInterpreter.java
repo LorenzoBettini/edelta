@@ -247,8 +247,14 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			getAllContentsOfType(expression, EdeltaEcoreReferenceExpression.class)
 				.stream()
 				.filter(not(interpretedEcoreReferenceExpressions::contains))
-				.forEach(ecoreRef -> evaluateEcoreReferenceExpression(
-					ecoreRef, context, indicator));
+				.forEach(ecoreRefExp -> {
+					try {
+						evaluateEcoreReferenceExpression(ecoreRefExp, context, indicator);
+					} catch (IllegalArgumentException | IllegalStateException e1) {
+						// we might get exceptions also when trying to evaluating ecoreref
+						recordUnresolvedReference(ecoreRefExp);
+					}
+				});
 			// we let the interpreter go on as much as possible
 			return new DefaultEvaluationResult(null, null);
 		}
@@ -288,19 +294,25 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 					postProcess(result, ecoreReferenceExpression);
 					checkStaleAccess(result, ecoreReferenceExpression);
 				} else {
-					/*
-					 * record the unresolved reference in the derived state later type computations
-					 * or relinking might make it resolvable but if it's not resolvable now, it
-					 * means that in this part of the program it is not available and we'll have to
-					 * issue a validation error explicitly in the validator
-					 */
-					derivedStateHelper
-						.getUnresolvedEcoreReferences(ecoreReferenceExpression.eResource())
-						.add(ecoreReference);
+					recordUnresolvedReference(ecoreReferenceExpression);
 				}
 				interpretedEcoreReferenceExpressions.add(ecoreReferenceExpression);
 				return result;
 			});
+	}
+
+	/**
+	 * record the unresolved reference in the derived state later type computations
+	 * or relinking might make it resolvable but if it's not resolvable now, it
+	 * means that in this part of the program it is not available and we'll have to
+	 * issue a validation error explicitly in the validator
+	 * 
+	 * @param ecoreReferenceExpression
+	 */
+	private void recordUnresolvedReference(EdeltaEcoreReferenceExpression ecoreReferenceExpression) {
+		derivedStateHelper
+			.getUnresolvedEcoreReferences(ecoreReferenceExpression.eResource())
+			.add(ecoreReferenceExpression.getReference());
 	}
 
 	private void postProcess(Object result, EdeltaEcoreReferenceExpression exp) {
