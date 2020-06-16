@@ -176,7 +176,8 @@ class EdeltaQuickfixTest extends AbstractQuickfixTest {
 		'''))
 	}
 
-	@Test def fixMoveToRightPosition() {
+	@Test
+	def fixMoveToRightPosition() {
 		'''
 			metamodel "foo"
 			
