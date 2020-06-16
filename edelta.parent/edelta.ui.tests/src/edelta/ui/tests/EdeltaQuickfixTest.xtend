@@ -7,7 +7,6 @@ import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.testing.AbstractQuickfixTest
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -24,7 +23,7 @@ class EdeltaQuickfixTest extends AbstractQuickfixTest {
 		"src/" + super.getFileName()
 	}
 
-	@Before override void setUp() {
+	override void setUp() {
 		super.setUp
 		/*
 		 * Edelta requires a plug-in project to run the interpreter

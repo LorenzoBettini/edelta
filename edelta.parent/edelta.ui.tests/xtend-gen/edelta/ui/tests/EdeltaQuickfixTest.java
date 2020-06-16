@@ -10,7 +10,6 @@ import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.ui.testing.AbstractQuickfixTest;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.xbase.lib.Exceptions;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -27,7 +26,6 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
     return ("src/" + _fileName);
   }
   
-  @Before
   @Override
   public void setUp() {
     try {
