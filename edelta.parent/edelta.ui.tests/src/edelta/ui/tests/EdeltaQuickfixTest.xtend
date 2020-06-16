@@ -3,10 +3,12 @@ package edelta.ui.tests
 import com.google.inject.Inject
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper
 import edelta.validation.EdeltaValidator
+import org.eclipse.xtext.testing.Flaky
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.testing.AbstractQuickfixTest
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -15,6 +17,9 @@ import org.junit.runner.RunWith
 class EdeltaQuickfixTest extends AbstractQuickfixTest {
 
 	@Inject EdeltaPluginProjectHelper projectHelper
+
+	@Rule
+	public Flaky.Rule testRule = new Flaky.Rule();
 
 	override protected getFileName() {
 		/*
@@ -61,7 +66,9 @@ class EdeltaQuickfixTest extends AbstractQuickfixTest {
 			)
 	}
 
-	@Test def fixSubPackageImport() {
+	@Test @Flaky
+	def fixSubPackageImport() {
+		println("*** Executing fixSubPackageImport...")
 		'''
 			metamodel "mainpackage.subpackage"
 		'''.testQuickfixesOn
@@ -73,7 +80,9 @@ class EdeltaQuickfixTest extends AbstractQuickfixTest {
 		'''))
 	}
 
-	@Test def fixSubPackageImportWithSeveralImports() {
+	@Test @Flaky
+	def fixSubPackageImportWithSeveralImports() {
+		println("*** Executing fixSubPackageImportWithSeveralImports...")
 		'''
 			metamodel "foo"
 			metamodel "mainpackage.subpackage.subsubpackage"

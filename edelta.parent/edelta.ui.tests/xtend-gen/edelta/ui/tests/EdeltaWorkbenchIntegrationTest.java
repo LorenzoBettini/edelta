@@ -8,6 +8,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.xtend2.lib.StringConcatenation;
+import org.eclipse.xtext.testing.Flaky;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest;
@@ -15,6 +16,7 @@ import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -30,6 +32,9 @@ public class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
   @Inject
   private EdeltaPluginProjectHelper edeltaProjectHelper;
   
+  @Rule
+  public Flaky.Rule testRule = new Flaky.Rule();
+  
   private final String TEST_PROJECT = "mytestproject";
   
   @Before
@@ -44,6 +49,7 @@ public class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
   }
   
   @Test
+  @Flaky
   public void testValidProject() {
     try {
       StringConcatenation _builder = new StringConcatenation();
@@ -73,6 +79,7 @@ public class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
   }
   
   @Test
+  @Flaky
   public void testInvalidProject() {
     try {
       StringConcatenation _builder = new StringConcatenation();
@@ -102,6 +109,7 @@ public class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
   }
   
   @Test
+  @Flaky
   public void testDerivedStateEPackagesDontInterfereWithOtherEdeltaFiles() {
     try {
       StringConcatenation _builder = new StringConcatenation();

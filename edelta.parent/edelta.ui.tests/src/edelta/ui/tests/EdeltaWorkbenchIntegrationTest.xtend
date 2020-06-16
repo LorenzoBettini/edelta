@@ -4,10 +4,12 @@ import com.google.inject.Inject
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper
 import edelta.ui.tests.utils.PluginProjectHelper
 import org.eclipse.core.resources.IProject
+import org.eclipse.xtext.testing.Flaky
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -23,6 +25,9 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 
 	@Inject EdeltaPluginProjectHelper edeltaProjectHelper
 
+	@Rule
+	public Flaky.Rule testRule = new Flaky.Rule();
+
 	val TEST_PROJECT = "mytestproject"
 
 	@Before
@@ -31,7 +36,8 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 		project = edeltaProjectHelper.createEdeltaPluginProject(TEST_PROJECT).project
 	}
 
-	@Test def void testValidProject() {
+	@Test @Flaky
+	def void testValidProject() {
 		createFile(
 			TEST_PROJECT + "/src/Test.edelta",
 			'''
@@ -52,7 +58,8 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 		assertSrcGenFolderFile("foo", "Test.java")
 	}
 
-	@Test def void testInvalidProject() {
+	@Test @Flaky
+	def void testInvalidProject() {
 		createFile(
 			TEST_PROJECT + "/src/Test.edelta",
 			'''
@@ -73,7 +80,8 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 		)
 	}
 
-	@Test def void testDerivedStateEPackagesDontInterfereWithOtherEdeltaFiles() {
+	@Test @Flaky
+	def void testDerivedStateEPackagesDontInterfereWithOtherEdeltaFiles() {
 		createFile(
 			TEST_PROJECT + "/src/Test.edelta",
 			'''

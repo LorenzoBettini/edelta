@@ -5,11 +5,14 @@ import edelta.ui.tests.EdeltaUiInjectorProvider;
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper;
 import edelta.validation.EdeltaValidator;
 import org.eclipse.xtend2.lib.StringConcatenation;
+import org.eclipse.xtext.testing.Flaky;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.ui.testing.AbstractQuickfixTest;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.xbase.lib.Exceptions;
+import org.eclipse.xtext.xbase.lib.InputOutput;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -19,6 +22,9 @@ import org.junit.runner.RunWith;
 public class EdeltaQuickfixTest extends AbstractQuickfixTest {
   @Inject
   private EdeltaPluginProjectHelper projectHelper;
+  
+  @Rule
+  public Flaky.Rule testRule = new Flaky.Rule();
   
   @Override
   protected String getFileName() {
@@ -101,7 +107,9 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
   }
   
   @Test
+  @Flaky
   public void fixSubPackageImport() {
+    InputOutput.<String>println("*** Executing fixSubPackageImport...");
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mainpackage.subpackage\"");
     _builder.newLine();
@@ -114,7 +122,9 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
   }
   
   @Test
+  @Flaky
   public void fixSubPackageImportWithSeveralImports() {
+    InputOutput.<String>println("*** Executing fixSubPackageImportWithSeveralImports...");
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
