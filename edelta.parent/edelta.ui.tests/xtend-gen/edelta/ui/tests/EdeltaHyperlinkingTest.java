@@ -16,7 +16,7 @@ import org.eclipse.xtext.ui.editor.model.IXtextDocument;
 import org.eclipse.xtext.ui.testing.AbstractHyperlinkingTest;
 import org.eclipse.xtext.util.concurrent.IUnitOfWork;
 import org.eclipse.xtext.xbase.XAbstractFeatureCall;
-import org.junit.Before;
+import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -35,9 +35,14 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
     return ("src/" + _fileName);
   }
   
-  @Before
-  public void setup() {
-    this.projectHelper.createEdeltaPluginProject(this.getProjectName());
+  @Override
+  public void setUp() {
+    try {
+      super.setUp();
+      this.projectHelper.createEdeltaPluginProject(this.getProjectName());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Override

@@ -8,7 +8,6 @@ import org.eclipse.xtext.testing.Flaky
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,7 +29,6 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 
 	val TEST_PROJECT = "mytestproject"
 
-	@Before
 	override void setUp() {
 		super.setUp
 		project = edeltaProjectHelper.createEdeltaPluginProject(TEST_PROJECT).project

@@ -15,7 +15,6 @@ import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +36,6 @@ public class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
   
   private final String TEST_PROJECT = "mytestproject";
   
-  @Before
   @Override
   public void setUp() {
     try {
