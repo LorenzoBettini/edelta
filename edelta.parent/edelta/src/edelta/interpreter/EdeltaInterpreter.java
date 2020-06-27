@@ -302,10 +302,10 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	}
 
 	/**
-	 * record the unresolved reference in the derived state later type computations
-	 * or relinking might make it resolvable but if it's not resolvable now, it
-	 * means that in this part of the program it is not available and we'll have to
-	 * issue a validation error explicitly in the validator
+	 * Record the unresolved reference in the derived state; subsequent type
+	 * computations or relinking might make it resolvable but if it's not resolvable
+	 * now, it means that in this part of the program it is not available and we'll
+	 * have to issue a validation error explicitly in the validator
 	 * 
 	 * @param ecoreReferenceExpression
 	 */
