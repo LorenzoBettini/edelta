@@ -25,7 +25,9 @@ public class EdeltaDiagnosticConverter extends DiagnosticConverterImpl {
 	@Override
 	public void convertValidatorDiagnostic(Diagnostic diagnostic, IAcceptor<Issue> acceptor) {
 		EObject causer = getCauser(diagnostic);
-		if (causer instanceof EdeltaEcoreReference) {
+		if (causer instanceof EdeltaEcoreReference &&
+				!EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT
+					.equals(getIssueCode(diagnostic))) {
 			return;
 		}
 		super.convertValidatorDiagnostic(diagnostic, acceptor);

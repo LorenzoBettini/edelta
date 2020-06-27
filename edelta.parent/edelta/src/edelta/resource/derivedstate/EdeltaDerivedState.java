@@ -14,6 +14,7 @@ public class EdeltaDerivedState extends AdapterImpl {
 	private EdeltaEcoreReferenceStateMap ecoreReferenceStateMap = new EdeltaEcoreReferenceStateMap();
 	private EdeltaEcoreReferenceExpressionStateMap ecoreReferenceExpressionStateMap = new EdeltaEcoreReferenceExpressionStateMap();
 	private EdeltaENamedElementXExpressionMap enamedElementXExpressionMap = new EdeltaENamedElementXExpressionMap();
+	private EdeltaUnresolvedEcoreReferences unresolvedEcoreReferences = new EdeltaUnresolvedEcoreReferences();
 
 	@Override
 	public boolean isAdapterForType(final Object type) {
@@ -34,5 +35,9 @@ public class EdeltaDerivedState extends AdapterImpl {
 
 	public EdeltaENamedElementXExpressionMap getEnamedElementXExpressionMap() {
 		return enamedElementXExpressionMap;
+	}
+
+	public EdeltaUnresolvedEcoreReferences getUnresolvedEcoreReferences() {
+		return unresolvedEcoreReferences;
 	}
 }

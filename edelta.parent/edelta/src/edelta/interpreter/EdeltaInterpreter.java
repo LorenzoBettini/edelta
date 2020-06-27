@@ -2,6 +2,7 @@ package edelta.interpreter;
 
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE;
 import static edelta.util.EdeltaModelUtil.getProgram;
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
 import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashMap;
@@ -10,6 +11,7 @@ import static org.eclipse.xtext.xbase.lib.IterableExtensions.filter;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.forEach;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -92,6 +94,12 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	private EdeltaProgram currentProgram;
 
 	private EdeltaInterpreterResourceListener listener;
+
+	/**
+	 * Keeps track of {@link EdeltaEcoreReference} already evaluated.
+	 */
+	private Collection<EdeltaEcoreReferenceExpression> interpretedEcoreReferenceExpressions =
+		new HashSet<>();
 
 	class EdeltaInterpreterCancelIndicator implements CancelIndicator {
 		long stopAt = System.currentTimeMillis() +
@@ -187,12 +195,13 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	}
 
 	private void configureContextForJavaThis(IEvaluationContext context) {
-		// 'this' and the name of the inferred class are mapped
-		// to an instance of AbstractEdelta, so that all reflective
-		// accesses, e.g., the inherited field 'lib', work out of the box
-		// calls to operations defined in the sources are intercepted
-		// in our custom invokeOperation and in that case we interpret the
-		// original source's XBlockExpression
+		/*
+		 * 'this' and the name of the inferred class are mapped to an instance of
+		 * AbstractEdelta, so that all reflective accesses, e.g., the inherited field
+		 * 'lib', work out of the box calls to operations defined in the sources are
+		 * intercepted in our custom invokeOperation and in that case we interpret the
+		 * original source's XBlockExpression
+		 */
 		context.newValue(QualifiedName.create("this"), thisObject);
 		context.newValue(QualifiedName.create(
 				edeltaJvmModelHelper.findJvmGenericType(currentProgram).getSimpleName()),
@@ -227,6 +236,25 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		try {
 			return super.doEvaluate(expression, context, indicator);
 		} catch (IllegalArgumentException | IllegalStateException e) {
+			/*
+			 * first make sure to interpret all ecoreref expressions so that we still
+			 * collect information about them this is required because in some expressions,
+			 * the evaluation might terminate early with an IAE without interpreting
+			 * ecorerefs, e.g., in ecoreref(NonExistant).abstract = true the IAE is thrown
+			 * because abstract cannot be resolved without interpreting
+			 * ecoreref(NonExistant) and we cannot collect information about that
+			 */
+			getAllContentsOfType(expression, EdeltaEcoreReferenceExpression.class)
+				.stream()
+				.filter(not(interpretedEcoreReferenceExpressions::contains))
+				.forEach(ecoreRefExp -> {
+					try {
+						evaluateEcoreReferenceExpression(ecoreRefExp, context, indicator);
+					} catch (IllegalArgumentException | IllegalStateException e1) {
+						// we might get exceptions also when trying to evaluating ecoreref
+						recordUnresolvedReference(ecoreRefExp);
+					}
+				});
 			// we let the interpreter go on as much as possible
 			return new DefaultEvaluationResult(null, null);
 		}
@@ -245,8 +273,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	private Object evaluateEcoreReferenceExpression(EdeltaEcoreReferenceExpression ecoreReferenceExpression, final IEvaluationContext context,
 			final CancelIndicator indicator) {
-		if (ecoreReferenceExpression.getReference() == null ||
-			ecoreReferenceExpression.getReference().getEnamedelement() == null)
+		final var ecoreReference = ecoreReferenceExpression.getReference();
+		if (ecoreReference == null || ecoreReference.getEnamedelement() == null)
 			return null;
 		return edeltaCompilerUtil.buildMethodToCallForEcoreReference(
 			ecoreReferenceExpression,
@@ -256,17 +284,35 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 					.findJvmOperation(
 						edeltaJvmModelHelper.findJvmGenericType(currentProgram),
 						methodName);
-				// it could be null due to an unresolved reference
-				// the returned op would be 'getENamedElement'
-				// which does not exist in AbstractEdelta
+				/*
+				 * it could be null due to an unresolved reference the returned op would be
+				 * 'getENamedElement' which does not exist in AbstractEdelta
+				 */
 				if (op != null) {
 					result = super.invokeOperation
 						(op, thisObject, args, context, indicator);
 					postProcess(result, ecoreReferenceExpression);
 					checkStaleAccess(result, ecoreReferenceExpression);
+				} else {
+					recordUnresolvedReference(ecoreReferenceExpression);
 				}
+				interpretedEcoreReferenceExpressions.add(ecoreReferenceExpression);
 				return result;
 			});
+	}
+
+	/**
+	 * Record the unresolved reference in the derived state; subsequent type
+	 * computations or relinking might make it resolvable but if it's not resolvable
+	 * now, it means that in this part of the program it is not available and we'll
+	 * have to issue a validation error explicitly in the validator
+	 * 
+	 * @param ecoreReferenceExpression
+	 */
+	private void recordUnresolvedReference(EdeltaEcoreReferenceExpression ecoreReferenceExpression) {
+		derivedStateHelper
+			.getUnresolvedEcoreReferences(ecoreReferenceExpression.eResource())
+			.add(ecoreReferenceExpression.getReference());
 	}
 
 	private void postProcess(Object result, EdeltaEcoreReferenceExpression exp) {

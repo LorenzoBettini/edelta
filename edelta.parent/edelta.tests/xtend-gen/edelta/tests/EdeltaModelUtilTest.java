@@ -1,9 +1,12 @@
 package edelta.tests;
 
+import edelta.edelta.EdeltaEcoreReference;
+import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderCustom;
 import edelta.util.EdeltaModelUtil;
+import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
@@ -13,8 +16,12 @@ import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
+import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
+import org.eclipse.xtext.xbase.XIfExpression;
+import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
+import org.eclipse.xtext.xbase.lib.ListExtensions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Assert;
@@ -189,5 +196,55 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
     Assertions.assertThat(EdeltaModelUtil.hasCycleInHierarchy(c3)).isTrue();
     Assertions.assertThat(EdeltaModelUtil.hasCycleInHierarchy(c2)).isTrue();
     Assertions.assertThat(EdeltaModelUtil.hasCycleInHierarchy(c1)).isTrue();
+  }
+  
+  @Test
+  public void testGetContainingBlockXExpression() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(FooClass) // 0");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(FooClass).abstract = true // 1");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(FooClass).ESuperTypes += null // 2");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("if (true) {");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("ecoreref(FooClass).ESuperTypes += null // 3");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("}");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      final XBlockExpression mainBlock = this.getBlock(this.lastModifyEcoreOperation(it).getBody());
+      final Function1<EdeltaEcoreReferenceExpression, EdeltaEcoreReference> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
+        return it_1.getReference();
+      };
+      final List<EdeltaEcoreReference> ecoreRefs = ListExtensions.<EdeltaEcoreReferenceExpression, EdeltaEcoreReference>map(this.getAllEcoreReferenceExpressions(it), _function_1);
+      EdeltaEcoreReference ecoreRef = ecoreRefs.get(0);
+      Assertions.<XExpression>assertThat(EdeltaModelUtil.getContainingBlockXExpression(ecoreRef)).isSameAs(ecoreRef.eContainer());
+      ecoreRef = ecoreRefs.get(1);
+      Assertions.<XExpression>assertThat(EdeltaModelUtil.getContainingBlockXExpression(ecoreRef)).isSameAs(mainBlock.getExpressions().get(1));
+      ecoreRef = ecoreRefs.get(2);
+      Assertions.<XExpression>assertThat(EdeltaModelUtil.getContainingBlockXExpression(ecoreRef)).isSameAs(mainBlock.getExpressions().get(2));
+      ecoreRef = ecoreRefs.get(3);
+      XExpression _get = mainBlock.getExpressions().get(3);
+      Assertions.<XExpression>assertThat(EdeltaModelUtil.getContainingBlockXExpression(ecoreRef)).isSameAs(
+        IterableExtensions.<XExpression>head(this.getBlock(((XIfExpression) _get).getThen()).getExpressions()));
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
 }

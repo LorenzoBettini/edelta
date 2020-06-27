@@ -12,8 +12,11 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.nodemodel.INode;
+import org.eclipse.xtext.xbase.XBlockExpression;
+import org.eclipse.xtext.xbase.XExpression;
 
 import edelta.edelta.EdeltaEcoreReference;
+import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
 
 /**
@@ -86,5 +89,34 @@ public class EdeltaModelUtil {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Returns the containing {@link XExpression} that is contained directly in an
+	 * {@link XBlockExpression}.
+	 * 
+	 * @param reference
+	 * @return
+	 */
+	public static XExpression getContainingBlockXExpression(EdeltaEcoreReference reference) {
+		return getContainingBlockXExpression(
+			getContainerOfType(reference, EdeltaEcoreReferenceExpression.class));
+	}
+
+	/**
+	 * Returns the containing {@link XExpression} that is contained directly in an
+	 * {@link XBlockExpression}.
+	 * 
+	 * @param reference
+	 * @return
+	 */
+	public static XExpression getContainingBlockXExpression(XExpression exp) {
+		XExpression blockExp = exp;
+		var container = blockExp.eContainer();
+		while (!(container instanceof XBlockExpression)) {
+			blockExp = (XExpression) container;
+			container = container.eContainer();
+		}
+		return blockExp;
 	}
 }

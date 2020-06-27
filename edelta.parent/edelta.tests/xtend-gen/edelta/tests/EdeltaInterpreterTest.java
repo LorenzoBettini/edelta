@@ -13,6 +13,8 @@ import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.interpreter.EdeltaInterpreterWrapperException;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
+import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
+import edelta.resource.derivedstate.EdeltaUnresolvedEcoreReferences;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime;
@@ -2202,6 +2204,44 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       _builder_1.append("foo cannot be resolved.");
       _builder_1.newLine();
       this.assertErrorsAsStrings(it, _builder_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testAccessToNotYetExistingElement() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(ANewClass) // doesn\'t exist yet");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NonExisting) // doesn\'t exist at all");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"ANewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(ANewClass) // this is OK");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      final EdeltaEcoreReference ecoreref1 = this.getAllEcoreReferenceExpressions(it).get(0).getReference();
+      final EdeltaEcoreReference ecoreref2 = this.getAllEcoreReferenceExpressions(it).get(1).getReference();
+      final EdeltaUnresolvedEcoreReferences unresolved = this.derivedStateHelper.getUnresolvedEcoreReferences(it.eResource());
+      Assertions.<EdeltaEcoreReference>assertThat(unresolved).containsOnly(ecoreref1, ecoreref2);
+      Assertions.assertThat(ecoreref1.getEnamedelement().eIsProxy()).isFalse();
+      Assertions.assertThat(ecoreref2.getEnamedelement().eIsProxy()).isTrue();
+      final EdeltaENamedElementXExpressionMap map = this.derivedStateHelper.getEnamedElementXExpressionMap(it.eResource());
+      Assertions.<XExpression>assertThat(map.get(ecoreref1.getEnamedelement())).isNotNull().isSameAs(this.getBlock(this.lastModifyEcoreOperation(it).getBody()).getExpressions().get(2));
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }

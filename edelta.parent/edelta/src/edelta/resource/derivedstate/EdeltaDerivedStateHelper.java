@@ -142,4 +142,9 @@ public class EdeltaDerivedStateHelper {
 		return getEnamedElementXExpressionMap(enamedElement.eResource())
 				.get(enamedElement);
 	}
+
+	public EdeltaUnresolvedEcoreReferences getUnresolvedEcoreReferences(final Resource resource) {
+		return getOrInstallAdapter(resource).getUnresolvedEcoreReferences();
+	}
+
 }
