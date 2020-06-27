@@ -107,6 +107,15 @@ public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider
 		);
 	}
 
+	/**
+	 * In case of a forward reference, that is, reference to an element that does
+	 * not yet exist in a given context, the quickfix moves the expression
+	 * containing the forward reference after the expression that creates such an
+	 * element.
+	 * 
+	 * @param issue
+	 * @param acceptor
+	 */
 	@Fix(EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT)
 	public void moveToRightPosition(final Issue issue, final IssueResolutionAcceptor acceptor) {
 		acceptor.accept(
@@ -115,25 +124,29 @@ public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider
 			"Move to the right position",
 			E_OBJECT_GIF,
 			(EObject element, IModificationContext context) -> {
-				var ecoreRef = (EdeltaEcoreReference) element;
-				var blockExp = getContainingBlockXExpression(ecoreRef);
-				var sourceBlock = (XBlockExpression) blockExp.eContainer();
+				var forwardEcoreRef = (EdeltaEcoreReference) element;
+				// the expression to move
+				var expToMove = getContainingBlockXExpression(forwardEcoreRef);
+				// the block containing the expression to move
+				var containingBlock = (XBlockExpression) expToMove.eContainer();
+				// the expression that creates the element referred by the forward reference
 				var responsibleExpression =
-					derivedStateHelper.getLastResponsibleExpression(ecoreRef.getEnamedelement());
+					derivedStateHelper.getLastResponsibleExpression(forwardEcoreRef.getEnamedelement());
 				var responsibleExpressionBlockExp = getContainingBlockXExpression(responsibleExpression);
+				// the block where we want to move our expression containing the forward reference
 				var destBlock = (XBlockExpression) responsibleExpression.eContainer();
-				var expressions = destBlock.getExpressions();
-				sourceBlock.getExpressions().remove(blockExp);
+				var destExpressions = destBlock.getExpressions();
+				containingBlock.getExpressions().remove(expToMove);
 				var responsibleExpressionPosition =
-					expressions.indexOf(responsibleExpressionBlockExp);
+					destExpressions.indexOf(responsibleExpressionBlockExp);
 				/*
 				 * it is crucial to copy the expression otherwise the formatter
 				 * will not be able to format the code correctly, resulting in
 				 * syntax errors after formatting (the expressions will not be
 				 * separated)
 				 */
-				expressions.add(responsibleExpressionPosition + 1,
-					EcoreUtil.copy(blockExp));
+				destExpressions.add(responsibleExpressionPosition + 1,
+					EcoreUtil.copy(expToMove));
 			}
 		);
 	}
