@@ -63,11 +63,11 @@ public class EdeltaDerivedStateHelperTest extends EdeltaAbstractTest {
       final EdeltaEcoreReference ref = this.edeltaFactory.createEdeltaEcoreReference();
       EList<EObject> _contents = res.getContents();
       _contents.add(ref);
-      Assert.assertNull(this._edeltaDerivedStateHelper.getEcoreReferenceState(ref).getOriginalEnamedelement());
+      Assert.assertNull(this._edeltaDerivedStateHelper.getOriginalEnamedelement(ref));
       final EAttribute el = this.ecoreFactory.createEAttribute();
       EdeltaEcoreReferenceState _ecoreReferenceState = this._edeltaDerivedStateHelper.getEcoreReferenceState(ref);
       _ecoreReferenceState.setOriginalEnamedelement(el);
-      Assert.assertSame(el, this._edeltaDerivedStateHelper.getEcoreReferenceState(ref).getOriginalEnamedelement());
+      Assert.assertSame(el, this._edeltaDerivedStateHelper.getOriginalEnamedelement(ref));
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }

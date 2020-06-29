@@ -2,7 +2,7 @@ package edelta.tests
 
 import com.google.inject.Inject
 import com.google.inject.Injector
-import edelta.edelta.EdeltaEcoreReferenceExpression
+import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaPackage
 import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreter
@@ -16,18 +16,17 @@ import edelta.tests.additional.MyCustomException
 import edelta.validation.EdeltaValidator
 import java.util.List
 import org.eclipse.emf.ecore.EAttribute
-import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.xbase.XbasePackage
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
-import org.eclipse.xtext.xbase.XbasePackage
-import org.eclipse.emf.ecore.EReference
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -103,8 +102,32 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testThrowNullPointerException() {
+		assertThatThrownBy['''
+				import org.eclipse.emf.ecore.EClass
+				import edelta.tests.additional.MyCustomException
+				
+				metamodel "foo"
+				
+				def op(EClass c) : void {
+					throw new NullPointerException
+				}
+				
+				modifyEcore aTest epackage foo {
+					addNewEClass("NewClass") [
+						op(it)
+					]
+				}
+			'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation [
+				// never gets here
+			]
+		].isInstanceOf(EdeltaInterpreterWrapperException)
+			.hasCauseExactlyInstanceOf(NullPointerException)
+	}
+
+
+	@Test
 	def void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() {
-		assertThatThrownBy[
 		'''
 			metamodel "foo"
 			
@@ -112,11 +135,14 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			
 			modifyEcore aTest epackage foo {
 				val c = addNewEClass("NewClass")
-				my.createANewEAttribute(c)
+				my.createANewEAttribute(c) // this won't break the interpreter
+				addNewEClass("AnotherNewClass")
 			}
-		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ /* will not get here */ ]
-		].isInstanceOf(IllegalStateException)
-			.hasMessageContaining("Cannot resolve proxy")
+		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [derivedEPackage |
+			derivedEPackage.lastEClass => [
+				assertEquals("AnotherNewClass", name)
+			]
+		]
 	}
 
 	@Test
@@ -279,7 +305,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test(expected=IllegalArgumentException)
+	@Test
 	def void testOperationWithErrorsDueToWrongParsing() {
 		val input = '''
 			package test
@@ -287,11 +313,17 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			metamodel "foo"
 			
 			modifyEcore aTest epackage foo {
-				addNewEClass("First")
-				eclass First
+				addNewEClass("NewClass1")
+				eclass NewClass1 // this won't break the interpreter
+				ecoreref(NewClass1).abstract = true
 			}
 		'''
-		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ ]
+		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [derivedEPackage |
+			derivedEPackage.lastEClass => [
+				assertEquals("NewClass1", name)
+				assertThat(isAbstract).isTrue
+			]
+		]
 	}
 
 	@Test
@@ -304,11 +336,79 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			modifyEcore aTest epackage foo {
 				addNewEClass("NewClass1")
 				ecoreref(nonexist) // this won't break the interpreter
+				ecoreref(NewClass1).abstract = true
 			}
 		'''
 		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ derivedEPackage |
 			derivedEPackage.lastEClass => [
 				assertEquals("NewClass1", name)
+				assertThat(isAbstract).isTrue
+			]
+		]
+	}
+
+	@Test
+	def void testUnresolvedEcoreReferenceMethodCall() {
+		val input = '''
+			import org.eclipse.emf.ecore.EClass
+
+			metamodel "foo"
+
+			modifyEcore aTest epackage foo {
+				ecoreref(nonexist).abstract = true // this won't break the interpreter
+				addNewEClass("NewClass1")
+				ecoreref(NewClass1).abstract = true
+			}
+		'''
+		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ derivedEPackage |
+			derivedEPackage.lastEClass => [
+				assertEquals("NewClass1", name)
+				assertThat(isAbstract).isTrue
+			]
+		]
+	}
+
+	@Test
+	def void testUnresolvedEcoreReferenceMethodCall2() {
+		val input = '''
+			import org.eclipse.emf.ecore.EClass
+
+			metamodel "foo"
+
+			modifyEcore aTest epackage foo {
+				ecoreref(nonexist).ESuperTypes += ecoreref(MyClass) // this won't break the interpreter
+				addNewEClass("NewClass1")
+				ecoreref(NewClass1).abstract = true
+			}
+		'''
+		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ derivedEPackage |
+			derivedEPackage.lastEClass => [
+				assertEquals("NewClass1", name)
+				assertThat(isAbstract).isTrue
+			]
+		]
+	}
+
+	@Test
+	def void testUnresolvedEcoreReferenceMethodCall3() {
+		val input = '''
+			import org.eclipse.emf.ecore.EClass
+
+			metamodel "foo"
+
+			modifyEcore creation epackage foo {
+				addNewEClass("NewClass")
+				// note that ESuperTypes is resolved, but not the argument
+				ecoreref(NewClass).ESuperTypes += ecoreref(AnotherNewClass) // this won't break the interpreter
+				addNewEClass("AnotherNewClass")
+				// the next one is not resolved, BAD
+				ecoreref(AnotherNewClass).abstract = true
+			}
+		'''
+		input.assertAfterInterpretationOfEdeltaModifyEcoreOperation(false) [ derivedEPackage |
+			derivedEPackage.lastEClass => [
+				assertEquals("AnotherNewClass", name)
+				assertThat(isAbstract).isTrue
 			]
 		]
 	}
@@ -872,7 +972,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			allEcoreReferenceExpressions.last => [
 				// ecoreref(NewClass) -> addNewEClass
 				assertEcoreRefExpElementMapsToXExpression
-					(reference.enamedelement, "addNewEClass")
+					(reference, "addNewEClass")
 			]
 		]
 	}
@@ -895,7 +995,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			allEcoreReferenceExpressions.last => [
 				// ecoreref(NewClass) -> addNewEClass
 				assertEcoreRefExpElementMapsToXExpression
-					(reference.enamedelement, "addNewEClass")
+					(reference, "addNewEClass")
 			]
 		]
 	}
@@ -925,7 +1025,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			allEcoreReferenceExpressions.last => [
 				// ecoreref(NewClass) -> create
 				assertEcoreRefExpElementMapsToXExpression
-					(reference.enamedelement, "create")
+					(reference, "create")
 			]
 		]
 	}
@@ -947,12 +1047,12 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreRefs.head => [
 				// ecoreref(NewClass) -> addNewEClass
 				assertEcoreRefExpElementMapsToXExpression
-					(reference.enamedelement, "addNewEClass")
+					(reference, "addNewEClass")
 			]
 			ecoreRefs.last => [
 				// ecoreref(Renamed) -> name = "Renamed"
 				assertEcoreRefExpElementMapsToXExpression
-					(reference.enamedelement, "setName")
+					(reference, "setName")
 			]
 		]
 	}
@@ -977,19 +1077,19 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			allEcoreReferenceExpressions => [
 				get(0) => [
 					assertEcoreRefExpElementMapsToXExpression
-						(reference.enamedelement, "addNewEClass")
+						(reference, "addNewEClass")
 				]
 				get(1) => [
 					assertEcoreRefExpElementMapsToXExpression
-						(reference.enamedelement, "addNewEClass")
+						(reference, "addNewEClass")
 				]
 				get(2) => [
 					assertEcoreRefExpElementMapsToXExpression
-						(reference.enamedelement, "addEClass")
+						(reference, "addEClass")
 				]
 				get(3) => [
 					assertEcoreRefExpElementMapsToXExpression
-						(reference.enamedelement, "addNewESubpackage")
+						(reference, "addNewESubpackage")
 				]
 			]
 		]
@@ -1009,9 +1109,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			val ecoreRefs = allEcoreReferenceExpressions
 			ecoreRefs.head => [
 				val exp = derivedStateHelper
-					.getEcoreReferenceExpressionState(it)
-					.getEnamedElementXExpressionMap
-					.get(reference.enamedelement)
+					.getResponsibleExpression(reference)
 				assertNull(exp)
 			]
 		]
@@ -1037,12 +1135,12 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreRefs.head => [
 				// ecoreref(NewClass) -> addNewEClass
 				assertEcoreRefExpElementMapsToXExpression
-					(reference.enamedelement, "addNewEClass")
+					(reference, "addNewEClass")
 			]
 			ecoreRefs.last => [
 				// ecoreref(Renamed) -> name = "Renamed"
 				assertEcoreRefExpElementMapsToXExpression
-					(reference.enamedelement, "setName")
+					(reference, "setName")
 			]
 		]
 	}
@@ -1349,8 +1447,6 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	@Test
 	def void testIntroducedCycles() {
 		val input = '''
-			import org.eclipse.emf.ecore.EPackage
-
 			metamodel "foo"
 			
 			modifyEcore aTest epackage foo {
@@ -1389,6 +1485,39 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			Cycle in superpackage/subpackage: foo.subpackage.foo
 			foo cannot be resolved.
 			''')
+		]
+	}
+
+	@Test
+	def void testAccessToNotYetExistingElement() {
+		val input =
+		'''
+		metamodel "foo"
+		
+		modifyEcore aTest epackage foo {
+			ecoreref(ANewClass) // doesn't exist yet
+			ecoreref(NonExisting) // doesn't exist at all
+			addNewEClass("ANewClass")
+			ecoreref(ANewClass) // this is OK
+		}
+		'''
+		input
+		.parseWithTestEcore => [
+			interpretProgram
+			val ecoreref1 = allEcoreReferenceExpressions.get(0).reference
+			val ecoreref2 = allEcoreReferenceExpressions.get(1).reference
+			val unresolved = derivedStateHelper.getUnresolvedEcoreReferences(eResource)
+			assertThat(unresolved)
+				.containsOnly(ecoreref1, ecoreref2)
+			// also check what's resolved in the end
+			assertThat(ecoreref1.enamedelement.eIsProxy).isFalse
+			assertThat(ecoreref2.enamedelement.eIsProxy).isTrue
+			val map = derivedStateHelper.getEnamedElementXExpressionMap(eResource)
+			// we can access the expression that created the element
+			// that is not available in the current context
+			assertThat(map.get(ecoreref1.enamedelement))
+				.isNotNull
+				.isSameAs(lastModifyEcoreOperation.body.block.expressions.get(2))
 		]
 	}
 
@@ -1448,14 +1577,11 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	private def void assertEcoreRefExpElementMapsToXExpression(
-		EdeltaEcoreReferenceExpression it,
-		ENamedElement element,
+		EdeltaEcoreReference reference,
 		String expectedFeatureCallSimpleName
 	) {
 		val exp = derivedStateHelper
-			.getEcoreReferenceExpressionState(it)
-			.getEnamedElementXExpressionMap
-			.get(element)
+			.getResponsibleExpression(reference)
 		assertNotNull(exp)
 		assertEquals(expectedFeatureCallSimpleName, exp.featureCall.feature.simpleName)
 	}

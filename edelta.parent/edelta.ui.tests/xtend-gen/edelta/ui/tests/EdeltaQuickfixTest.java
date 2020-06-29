@@ -5,12 +5,14 @@ import edelta.ui.tests.EdeltaUiInjectorProvider;
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper;
 import edelta.validation.EdeltaValidator;
 import org.eclipse.xtend2.lib.StringConcatenation;
+import org.eclipse.xtext.testing.Flaky;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.ui.testing.AbstractQuickfixTest;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.xbase.lib.Exceptions;
-import org.junit.Before;
+import org.eclipse.xtext.xbase.lib.InputOutput;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -21,15 +23,19 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
   @Inject
   private EdeltaPluginProjectHelper projectHelper;
   
+  @Rule
+  public Flaky.Rule testRule = new Flaky.Rule();
+  
   @Override
   protected String getFileName() {
     String _fileName = super.getFileName();
     return ("src/" + _fileName);
   }
   
-  @Before
-  public void setup() {
+  @Override
+  public void setUp() {
     try {
+      super.setUp();
       this.projectHelper.createEdeltaPluginProject(this.getProjectName());
       String _projectName = this.getProjectName();
       StringConcatenation _builder = new StringConcatenation();
@@ -101,7 +107,9 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
   }
   
   @Test
+  @Flaky
   public void fixSubPackageImport() {
+    InputOutput.<String>println("*** Executing fixSubPackageImport...");
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mainpackage.subpackage\"");
     _builder.newLine();
@@ -114,7 +122,9 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
   }
   
   @Test
+  @Flaky
   public void fixSubPackageImportWithSeveralImports() {
+    InputOutput.<String>println("*** Executing fixSubPackageImportWithSeveralImports...");
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -254,5 +264,48 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
     AbstractQuickfixTest.Quickfix _quickfix = new AbstractQuickfixTest.Quickfix("Remove duplicate metamodel import", 
       "Remove duplicate metamodel import", _builder_1.toString());
     this.testQuickfixesOn(_builder, EdeltaValidator.DUPLICATE_METAMODEL_IMPORT, _quickfix);
+  }
+  
+  @Test
+  public void fixMoveToRightPosition() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore creation epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass).abstract = true");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass).ESuperTypes += ecoreref(FooClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("metamodel \"foo\"");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("modifyEcore creation epackage foo {");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("addNewEClass(\"NewClass\")");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("ecoreref(NewClass).abstract = true");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("ecoreref(NewClass).ESuperTypes += ecoreref(FooClass)");
+    _builder_1.newLine();
+    _builder_1.append("}");
+    _builder_1.newLine();
+    AbstractQuickfixTest.Quickfix _quickfix = new AbstractQuickfixTest.Quickfix("Move to the right position", 
+      "Move to the right position", _builder_1.toString());
+    this.testQuickfixesOn(_builder, EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, _quickfix);
   }
 }

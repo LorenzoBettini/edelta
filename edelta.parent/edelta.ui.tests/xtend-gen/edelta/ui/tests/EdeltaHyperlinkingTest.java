@@ -16,7 +16,7 @@ import org.eclipse.xtext.ui.editor.model.IXtextDocument;
 import org.eclipse.xtext.ui.testing.AbstractHyperlinkingTest;
 import org.eclipse.xtext.util.concurrent.IUnitOfWork;
 import org.eclipse.xtext.xbase.XAbstractFeatureCall;
-import org.junit.Before;
+import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -35,9 +35,14 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
     return ("src/" + _fileName);
   }
   
-  @Before
-  public void setup() {
-    this.projectHelper.createEdeltaPluginProject(this.getProjectName());
+  @Override
+  public void setUp() {
+    try {
+      super.setUp();
+      this.projectHelper.createEdeltaPluginProject(this.getProjectName());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Override
@@ -176,5 +181,28 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
     _builder.append("}");
     _builder.newLine();
     this.hasHyperlinkTo(_builder, "setName");
+  }
+  
+  @Test
+  public void hyperlinkOnForwardCreatedEClass() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mypackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mypackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(");
+    _builder.append(this.c, "\t");
+    _builder.append("NewClass");
+    _builder.append(this.c, "\t");
+    _builder.append(")");
+    _builder.newLineIfNotEmpty();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\")");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    this.hasHyperlinkTo(_builder, "addNewEClass");
   }
 }

@@ -3,6 +3,7 @@ package edelta.tests;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaPackage;
@@ -13,6 +14,8 @@ import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.interpreter.EdeltaInterpreterWrapperException;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
+import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
+import edelta.resource.derivedstate.EdeltaUnresolvedEcoreReferences;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime;
@@ -27,7 +30,6 @@ import org.assertj.core.api.ThrowableAssert;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
-import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -147,30 +149,75 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() {
+  public void testThrowNullPointerException() {
     final ThrowableAssert.ThrowingCallable _function = () -> {
       StringConcatenation _builder = new StringConcatenation();
+      _builder.append("import org.eclipse.emf.ecore.EClass");
+      _builder.newLine();
+      _builder.append("import edelta.tests.additional.MyCustomException");
+      _builder.newLine();
+      _builder.newLine();
       _builder.append("metamodel \"foo\"");
       _builder.newLine();
       _builder.newLine();
-      _builder.append("use NonExistant as my");
+      _builder.append("def op(EClass c) : void {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("throw new NullPointerException");
+      _builder.newLine();
+      _builder.append("}");
       _builder.newLine();
       _builder.newLine();
       _builder.append("modifyEcore aTest epackage foo {");
       _builder.newLine();
       _builder.append("\t");
-      _builder.append("val c = addNewEClass(\"NewClass\")");
+      _builder.append("addNewEClass(\"NewClass\") [");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("op(it)");
       _builder.newLine();
       _builder.append("\t");
-      _builder.append("my.createANewEAttribute(c)");
+      _builder.append("]");
       _builder.newLine();
       _builder.append("}");
       _builder.newLine();
       final Procedure1<EPackage> _function_1 = (EPackage it) -> {
       };
-      this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, false, _function_1);
+      this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, _function_1);
     };
-    Assertions.assertThatThrownBy(_function).isInstanceOf(IllegalStateException.class).hasMessageContaining("Cannot resolve proxy");
+    Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaInterpreterWrapperException.class).hasCauseExactlyInstanceOf(NullPointerException.class);
+  }
+  
+  @Test
+  public void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("use NonExistant as my");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("val c = addNewEClass(\"NewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("my.createANewEAttribute(c) // this won\'t break the interpreter");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"AnotherNewClass\")");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
+      EClass _lastEClass = this.getLastEClass(derivedEPackage);
+      final Procedure1<EClass> _function_1 = (EClass it) -> {
+        Assert.assertEquals("AnotherNewClass", it.getName());
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_lastEClass, _function_1);
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, false, _function);
   }
   
   @Test
@@ -401,7 +448,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, false, _function);
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testOperationWithErrorsDueToWrongParsing() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
@@ -413,15 +460,24 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder.append("modifyEcore aTest epackage foo {");
     _builder.newLine();
     _builder.append("\t");
-    _builder.append("addNewEClass(\"First\")");
+    _builder.append("addNewEClass(\"NewClass1\")");
     _builder.newLine();
     _builder.append("\t");
-    _builder.append("eclass First");
+    _builder.append("eclass NewClass1 // this won\'t break the interpreter");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass1).abstract = true");
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
     final String input = _builder.toString();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
+    final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
+      EClass _lastEClass = this.getLastEClass(derivedEPackage);
+      final Procedure1<EClass> _function_1 = (EClass it) -> {
+        Assert.assertEquals("NewClass1", it.getName());
+        Assertions.assertThat(it.isAbstract()).isTrue();
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_lastEClass, _function_1);
     };
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, false, _function);
   }
@@ -443,6 +499,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder.append("\t");
     _builder.append("ecoreref(nonexist) // this won\'t break the interpreter");
     _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass1).abstract = true");
+    _builder.newLine();
     _builder.append("}");
     _builder.newLine();
     final String input = _builder.toString();
@@ -450,6 +509,118 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       EClass _lastEClass = this.getLastEClass(derivedEPackage);
       final Procedure1<EClass> _function_1 = (EClass it) -> {
         Assert.assertEquals("NewClass1", it.getName());
+        Assertions.assertThat(it.isAbstract()).isTrue();
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_lastEClass, _function_1);
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, false, _function);
+  }
+  
+  @Test
+  public void testUnresolvedEcoreReferenceMethodCall() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EClass");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(nonexist).abstract = true // this won\'t break the interpreter");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass1\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass1).abstract = true");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
+      EClass _lastEClass = this.getLastEClass(derivedEPackage);
+      final Procedure1<EClass> _function_1 = (EClass it) -> {
+        Assert.assertEquals("NewClass1", it.getName());
+        Assertions.assertThat(it.isAbstract()).isTrue();
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_lastEClass, _function_1);
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, false, _function);
+  }
+  
+  @Test
+  public void testUnresolvedEcoreReferenceMethodCall2() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EClass");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(nonexist).ESuperTypes += ecoreref(MyClass) // this won\'t break the interpreter");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass1\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass1).abstract = true");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
+      EClass _lastEClass = this.getLastEClass(derivedEPackage);
+      final Procedure1<EClass> _function_1 = (EClass it) -> {
+        Assert.assertEquals("NewClass1", it.getName());
+        Assertions.assertThat(it.isAbstract()).isTrue();
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_lastEClass, _function_1);
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, false, _function);
+  }
+  
+  @Test
+  public void testUnresolvedEcoreReferenceMethodCall3() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EClass");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore creation epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// note that ESuperTypes is resolved, but not the argument");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NewClass).ESuperTypes += ecoreref(AnotherNewClass) // this won\'t break the interpreter");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"AnotherNewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// the next one is not resolved, BAD");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(AnotherNewClass).abstract = true");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
+      EClass _lastEClass = this.getLastEClass(derivedEPackage);
+      final Procedure1<EClass> _function_1 = (EClass it) -> {
+        Assert.assertEquals("AnotherNewClass", it.getName());
+        Assertions.assertThat(it.isAbstract()).isTrue();
       };
       ObjectExtensions.<EClass>operator_doubleArrow(_lastEClass, _function_1);
     };
@@ -1317,7 +1488,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       this.interpretProgram(it);
       EdeltaEcoreReferenceExpression _last = IterableExtensions.<EdeltaEcoreReferenceExpression>last(this.getAllEcoreReferenceExpressions(it));
       final Procedure1<EdeltaEcoreReferenceExpression> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
-        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "addNewEClass");
+        this.assertEcoreRefExpElementMapsToXExpression(it_1.getReference(), "addNewEClass");
       };
       ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_last, _function_1);
     };
@@ -1355,7 +1526,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       this.interpretProgram(it);
       EdeltaEcoreReferenceExpression _last = IterableExtensions.<EdeltaEcoreReferenceExpression>last(this.getAllEcoreReferenceExpressions(it));
       final Procedure1<EdeltaEcoreReferenceExpression> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
-        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "addNewEClass");
+        this.assertEcoreRefExpElementMapsToXExpression(it_1.getReference(), "addNewEClass");
       };
       ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_last, _function_1);
     };
@@ -1398,7 +1569,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       this.interpretProgram(it);
       EdeltaEcoreReferenceExpression _last = IterableExtensions.<EdeltaEcoreReferenceExpression>last(this.getAllEcoreReferenceExpressions(it));
       final Procedure1<EdeltaEcoreReferenceExpression> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
-        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "create");
+        this.assertEcoreRefExpElementMapsToXExpression(it_1.getReference(), "create");
       };
       ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_last, _function_1);
     };
@@ -1433,12 +1604,12 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       final List<EdeltaEcoreReferenceExpression> ecoreRefs = this.getAllEcoreReferenceExpressions(it);
       EdeltaEcoreReferenceExpression _head = IterableExtensions.<EdeltaEcoreReferenceExpression>head(ecoreRefs);
       final Procedure1<EdeltaEcoreReferenceExpression> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
-        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "addNewEClass");
+        this.assertEcoreRefExpElementMapsToXExpression(it_1.getReference(), "addNewEClass");
       };
       ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_head, _function_1);
       EdeltaEcoreReferenceExpression _last = IterableExtensions.<EdeltaEcoreReferenceExpression>last(ecoreRefs);
       final Procedure1<EdeltaEcoreReferenceExpression> _function_2 = (EdeltaEcoreReferenceExpression it_1) -> {
-        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "setName");
+        this.assertEcoreRefExpElementMapsToXExpression(it_1.getReference(), "setName");
       };
       ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_last, _function_2);
     };
@@ -1486,22 +1657,22 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       final Procedure1<List<EdeltaEcoreReferenceExpression>> _function_1 = (List<EdeltaEcoreReferenceExpression> it_1) -> {
         EdeltaEcoreReferenceExpression _get = it_1.get(0);
         final Procedure1<EdeltaEcoreReferenceExpression> _function_2 = (EdeltaEcoreReferenceExpression it_2) -> {
-          this.assertEcoreRefExpElementMapsToXExpression(it_2, it_2.getReference().getEnamedelement(), "addNewEClass");
+          this.assertEcoreRefExpElementMapsToXExpression(it_2.getReference(), "addNewEClass");
         };
         ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_get, _function_2);
         EdeltaEcoreReferenceExpression _get_1 = it_1.get(1);
         final Procedure1<EdeltaEcoreReferenceExpression> _function_3 = (EdeltaEcoreReferenceExpression it_2) -> {
-          this.assertEcoreRefExpElementMapsToXExpression(it_2, it_2.getReference().getEnamedelement(), "addNewEClass");
+          this.assertEcoreRefExpElementMapsToXExpression(it_2.getReference(), "addNewEClass");
         };
         ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_get_1, _function_3);
         EdeltaEcoreReferenceExpression _get_2 = it_1.get(2);
         final Procedure1<EdeltaEcoreReferenceExpression> _function_4 = (EdeltaEcoreReferenceExpression it_2) -> {
-          this.assertEcoreRefExpElementMapsToXExpression(it_2, it_2.getReference().getEnamedelement(), "addEClass");
+          this.assertEcoreRefExpElementMapsToXExpression(it_2.getReference(), "addEClass");
         };
         ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_get_2, _function_4);
         EdeltaEcoreReferenceExpression _get_3 = it_1.get(3);
         final Procedure1<EdeltaEcoreReferenceExpression> _function_5 = (EdeltaEcoreReferenceExpression it_2) -> {
-          this.assertEcoreRefExpElementMapsToXExpression(it_2, it_2.getReference().getEnamedelement(), "addNewESubpackage");
+          this.assertEcoreRefExpElementMapsToXExpression(it_2.getReference(), "addNewESubpackage");
         };
         ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_get_3, _function_5);
       };
@@ -1532,7 +1703,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       final List<EdeltaEcoreReferenceExpression> ecoreRefs = this.getAllEcoreReferenceExpressions(it);
       EdeltaEcoreReferenceExpression _head = IterableExtensions.<EdeltaEcoreReferenceExpression>head(ecoreRefs);
       final Procedure1<EdeltaEcoreReferenceExpression> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
-        final XExpression exp = this.derivedStateHelper.getEcoreReferenceExpressionState(it_1).getEnamedElementXExpressionMap().get(it_1.getReference().getEnamedelement());
+        final XExpression exp = this.derivedStateHelper.getResponsibleExpression(it_1.getReference());
         Assert.assertNull(exp);
       };
       ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_head, _function_1);
@@ -1577,12 +1748,12 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       final List<EdeltaEcoreReferenceExpression> ecoreRefs = this.getAllEcoreReferenceExpressions(it);
       EdeltaEcoreReferenceExpression _head = IterableExtensions.<EdeltaEcoreReferenceExpression>head(ecoreRefs);
       final Procedure1<EdeltaEcoreReferenceExpression> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
-        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "addNewEClass");
+        this.assertEcoreRefExpElementMapsToXExpression(it_1.getReference(), "addNewEClass");
       };
       ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_head, _function_1);
       EdeltaEcoreReferenceExpression _last = IterableExtensions.<EdeltaEcoreReferenceExpression>last(ecoreRefs);
       final Procedure1<EdeltaEcoreReferenceExpression> _function_2 = (EdeltaEcoreReferenceExpression it_1) -> {
-        this.assertEcoreRefExpElementMapsToXExpression(it_1, it_1.getReference().getEnamedelement(), "setName");
+        this.assertEcoreRefExpElementMapsToXExpression(it_1.getReference(), "setName");
       };
       ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_last, _function_2);
     };
@@ -2024,9 +2195,6 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   @Test
   public void testIntroducedCycles() {
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("import org.eclipse.emf.ecore.EPackage");
-    _builder.newLine();
-    _builder.newLine();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
     _builder.newLine();
@@ -2095,6 +2263,44 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
   
+  @Test
+  public void testAccessToNotYetExistingElement() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(ANewClass) // doesn\'t exist yet");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NonExisting) // doesn\'t exist at all");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"ANewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(ANewClass) // this is OK");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      final EdeltaEcoreReference ecoreref1 = this.getAllEcoreReferenceExpressions(it).get(0).getReference();
+      final EdeltaEcoreReference ecoreref2 = this.getAllEcoreReferenceExpressions(it).get(1).getReference();
+      final EdeltaUnresolvedEcoreReferences unresolved = this.derivedStateHelper.getUnresolvedEcoreReferences(it.eResource());
+      Assertions.<EdeltaEcoreReference>assertThat(unresolved).containsOnly(ecoreref1, ecoreref2);
+      Assertions.assertThat(ecoreref1.getEnamedelement().eIsProxy()).isFalse();
+      Assertions.assertThat(ecoreref2.getEnamedelement().eIsProxy()).isTrue();
+      final EdeltaENamedElementXExpressionMap map = this.derivedStateHelper.getEnamedElementXExpressionMap(it.eResource());
+      Assertions.<XExpression>assertThat(map.get(ecoreref1.getEnamedelement())).isNotNull().isSameAs(this.getBlock(this.lastModifyEcoreOperation(it).getBody()).getExpressions().get(2));
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
   private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final Procedure1<? super EPackage> testExecutor) {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, true, testExecutor);
   }
@@ -2139,8 +2345,8 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     return copiedEPackagesMap;
   }
   
-  private void assertEcoreRefExpElementMapsToXExpression(final EdeltaEcoreReferenceExpression it, final ENamedElement element, final String expectedFeatureCallSimpleName) {
-    final XExpression exp = this.derivedStateHelper.getEcoreReferenceExpressionState(it).getEnamedElementXExpressionMap().get(element);
+  private void assertEcoreRefExpElementMapsToXExpression(final EdeltaEcoreReference reference, final String expectedFeatureCallSimpleName) {
+    final XExpression exp = this.derivedStateHelper.getResponsibleExpression(reference);
     Assert.assertNotNull(exp);
     Assert.assertEquals(expectedFeatureCallSimpleName, this.getFeatureCall(exp).getFeature().getSimpleName());
   }

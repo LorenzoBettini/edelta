@@ -3,11 +3,12 @@ package edelta.ui.tests
 import com.google.inject.Inject
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper
 import edelta.validation.EdeltaValidator
+import org.eclipse.xtext.testing.Flaky
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.testing.AbstractQuickfixTest
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -17,6 +18,9 @@ class EdeltaQuickfixTest extends AbstractQuickfixTest {
 
 	@Inject EdeltaPluginProjectHelper projectHelper
 
+	@Rule
+	public Flaky.Rule testRule = new Flaky.Rule();
+
 	override protected getFileName() {
 		/*
 		 * Better to put Edelta file in a source folder
@@ -24,7 +28,8 @@ class EdeltaQuickfixTest extends AbstractQuickfixTest {
 		"src/" + super.getFileName()
 	}
 
-	@Before def void setup() {
+	override void setUp() {
+		super.setUp
 		/*
 		 * Edelta requires a plug-in project to run the interpreter
 		 * with edelta.lib as dependency
@@ -61,7 +66,9 @@ class EdeltaQuickfixTest extends AbstractQuickfixTest {
 			)
 	}
 
-	@Test def fixSubPackageImport() {
+	@Test @Flaky
+	def fixSubPackageImport() {
+		println("*** Executing fixSubPackageImport...")
 		'''
 			metamodel "mainpackage.subpackage"
 		'''.testQuickfixesOn
@@ -73,7 +80,9 @@ class EdeltaQuickfixTest extends AbstractQuickfixTest {
 		'''))
 	}
 
-	@Test def fixSubPackageImportWithSeveralImports() {
+	@Test @Flaky
+	def fixSubPackageImportWithSeveralImports() {
+		println("*** Executing fixSubPackageImportWithSeveralImports...")
 		'''
 			metamodel "foo"
 			metamodel "mainpackage.subpackage.subsubpackage"
@@ -172,6 +181,33 @@ class EdeltaQuickfixTest extends AbstractQuickfixTest {
 			
 			
 			metamodel "foo"
+		'''))
+	}
+
+	@Test
+	def fixMoveToRightPosition() {
+		'''
+			metamodel "foo"
+			
+			modifyEcore creation epackage foo {
+				ecoreref(NewClass).abstract = true
+			
+				addNewEClass("NewClass")
+				ecoreref(NewClass).ESuperTypes += ecoreref(FooClass)
+			}
+		'''.testQuickfixesOn
+		(EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
+			new Quickfix("Move to the right position",
+			"Move to the right position",
+		'''
+			metamodel "foo"
+			
+			modifyEcore creation epackage foo {
+			
+				addNewEClass("NewClass")
+				ecoreref(NewClass).abstract = true
+				ecoreref(NewClass).ESuperTypes += ecoreref(FooClass)
+			}
 		'''))
 	}
 

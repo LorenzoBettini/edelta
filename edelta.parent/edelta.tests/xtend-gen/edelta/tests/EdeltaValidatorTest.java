@@ -619,4 +619,159 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     final String input = _builder.toString();
     this._validationTestHelper.assertNoErrors(this.parseWithTestEcoreWithSubPackage(input));
   }
+  
+  @Test
+  public void testAccessToNotYetExistingElement() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(ANewClass) // doesn\'t exist yet");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(NonExisting) // doesn\'t exist at all");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"ANewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(ANewClass) // this is OK");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
+        EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
+        input.indexOf("ANewClass"), 
+        "ANewClass".length(), 
+        "Element not yet available in this context: foo.ANewClass");
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("Element not yet available in this context: foo.ANewClass");
+      _builder_1.newLine();
+      _builder_1.append("NonExisting cannot be resolved.");
+      _builder_1.newLine();
+      this.assertErrorsAsStrings(it, _builder_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testAccessToNotYetExistingElementInComplexExpression() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// doesn\'t exist yet");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(ANewClass).ESuperTypes = ");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("ecoreref(ANewSuperClass) // doesn\'t exist yet");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"ANewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"ANewSuperClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(ANewClass) // this is OK");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(ANewSuperClass) // this is OK");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("Element not yet available in this context: foo.ANewClass");
+      _builder_1.newLine();
+      _builder_1.append("Element not yet available in this context: foo.ANewSuperClass");
+      _builder_1.newLine();
+      _builder_1.append("The method ESuperTypes(EClass) is undefined for the type EClass");
+      _builder_1.newLine();
+      this.assertErrorsAsStrings(it, _builder_1);
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
+        EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
+        input.indexOf("ANewClass"), 
+        "ANewClass".length(), 
+        "Element not yet available in this context: foo.ANewClass");
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
+        EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
+        input.indexOf("ANewSuperClass"), 
+        "ANewSuperClass".length(), 
+        "Element not yet available in this context: foo.ANewSuperClass");
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testAccessToNotYetExistingElementInComplexExpression2() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// doesn\'t exist yet");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(ANewClass).ESuperTypes += ");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("ecoreref(ANewSuperClass) // doesn\'t exist yet");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"ANewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"ANewSuperClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(ANewClass) // this is OK");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(ANewSuperClass) // this is OK");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("Element not yet available in this context: foo.ANewClass");
+      _builder_1.newLine();
+      _builder_1.append("Element not yet available in this context: foo.ANewSuperClass");
+      _builder_1.newLine();
+      this.assertErrorsAsStrings(it, _builder_1);
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
+        EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
+        input.indexOf("ANewClass"), 
+        "ANewClass".length(), 
+        "Element not yet available in this context: foo.ANewClass");
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
+        EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
+        input.indexOf("ANewSuperClass"), 
+        "ANewSuperClass".length(), 
+        "Element not yet available in this context: foo.ANewSuperClass");
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
 }

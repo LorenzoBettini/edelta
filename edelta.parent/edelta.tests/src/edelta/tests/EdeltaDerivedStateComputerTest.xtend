@@ -2,7 +2,6 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.edelta.EdeltaEcoreQualifiedReference
-import edelta.edelta.EdeltaEcoreReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreterRuntimeException
@@ -405,7 +404,4 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		)
 	}
 
-	def private getOriginalEnamedelement(EdeltaEcoreReference ref) {
-		ref.ecoreReferenceState.originalEnamedelement
-	}
 }

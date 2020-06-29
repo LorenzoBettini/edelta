@@ -9,6 +9,7 @@ import org.junit.runner.RunWith
 import static edelta.util.EdeltaModelUtil.*
 import static org.assertj.core.api.Assertions.assertThat
 import static org.junit.Assert.*
+import org.eclipse.xtext.xbase.XIfExpression
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -137,5 +138,40 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 		assertThat(hasCycleInHierarchy(c3)).isTrue
 		assertThat(hasCycleInHierarchy(c2)).isTrue
 		assertThat(hasCycleInHierarchy(c1)).isTrue
+	}
+
+	@Test
+	def void testGetContainingBlockXExpression() {
+		val input = '''
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				ecoreref(FooClass) // 0
+				ecoreref(FooClass).abstract = true // 1
+				ecoreref(FooClass).ESuperTypes += null // 2
+				if (true) {
+					ecoreref(FooClass).ESuperTypes += null // 3
+				}
+			}
+		'''
+		input.parseWithTestEcore => [
+			val mainBlock = lastModifyEcoreOperation.body.block
+			val ecoreRefs = allEcoreReferenceExpressions.map[reference]
+			var ecoreRef = ecoreRefs.get(0)
+			assertThat(getContainingBlockXExpression(ecoreRef))
+				.isSameAs(ecoreRef.eContainer)
+			ecoreRef = ecoreRefs.get(1)
+			assertThat(getContainingBlockXExpression(ecoreRef))
+				.isSameAs(mainBlock.expressions.get(1))
+			ecoreRef = ecoreRefs.get(2)
+			assertThat(getContainingBlockXExpression(ecoreRef))
+				.isSameAs(mainBlock.expressions.get(2))
+			ecoreRef = ecoreRefs.get(3)
+			assertThat(getContainingBlockXExpression(ecoreRef))
+				.isSameAs(
+					(mainBlock.expressions.get(3) as XIfExpression)
+						.then.block.expressions.head
+				)
+		]
 	}
 }

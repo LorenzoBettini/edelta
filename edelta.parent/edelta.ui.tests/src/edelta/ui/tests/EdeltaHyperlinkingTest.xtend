@@ -9,7 +9,6 @@ import org.eclipse.xtext.ui.editor.XtextEditor
 import org.eclipse.xtext.ui.editor.hyperlinking.XtextHyperlink
 import org.eclipse.xtext.ui.testing.AbstractHyperlinkingTest
 import org.eclipse.xtext.xbase.XAbstractFeatureCall
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -28,7 +27,8 @@ class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 		"src/" + super.getFileName()
 	}
 
-	@Before def void setup() {
+	override void setUp() {
+		super.setUp
 		/*
 		 * Edelta requires a plug-in project to run the interpreter
 		 * with edelta.lib as dependency
@@ -107,6 +107,17 @@ class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 				ecoreref(«c»Renamed«c»)
 			}
 		'''.hasHyperlinkTo("setName")
+	}
+
+	@Test def hyperlinkOnForwardCreatedEClass() {
+		'''
+			metamodel "mypackage"
+			
+			modifyEcore aTest epackage mypackage {
+				ecoreref(«c»NewClass«c»)
+				addNewEClass("NewClass")
+			}
+		'''.hasHyperlinkTo("addNewEClass")
 	}
 
 }
