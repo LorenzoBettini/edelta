@@ -78,7 +78,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		'''.
 		parseWithTestEcore
 		val packages = program.eResource.copiedEPackagesMap.values
-		assertThat(packages).isEmpty
+		assertThat(packages).hasSize(1)
 	}
 
 	@Test

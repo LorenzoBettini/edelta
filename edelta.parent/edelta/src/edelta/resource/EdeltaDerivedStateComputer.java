@@ -4,11 +4,7 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.parser.antlr.IReferableElementsUnloader;
@@ -63,7 +59,6 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 			// make sure packages under modification are copied
 			copyEPackages(modifyEcoreOperations.stream()
 				.map(EdeltaModifyEcoreOperation::getEpackage)
-				.filter(p -> Objects.nonNull(p.getName()))
 				.distinct()
 				.collect(toList()), copiedEPackagesMap);
 			// we must add the copied EPackages to the resource
@@ -77,10 +72,9 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 
 	protected void copyEPackages(List<EPackage> packages, EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		var copies = EdeltaEcoreUtil.copyEPackages(packages);
-		copiedEPackagesMap.putAll(
-			copies.stream()
-				.collect(Collectors.toMap(ENamedElement::getName, Function.identity()))
-		);
+		for (var copy : copies) {
+			copiedEPackagesMap.computeIfAbsent(copy.getName(), key -> copy);
+		}
 	}
 
 	protected void runInterpreter(final EdeltaProgram program, final EdeltaCopiedEPackagesMap copiedEPackagesMap) {

@@ -115,7 +115,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     _builder.newLine();
     final EdeltaProgram program = this.parseWithTestEcore(_builder);
     final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
-    Assertions.<EPackage>assertThat(packages).isEmpty();
+    Assertions.<EPackage>assertThat(packages).hasSize(1);
   }
   
   @Test
