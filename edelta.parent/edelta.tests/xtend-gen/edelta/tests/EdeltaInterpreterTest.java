@@ -1429,6 +1429,8 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
         return it_1.getName();
       };
       Assertions.<String>assertThat(IterableExtensions.<EReference, String>map(Iterables.<EReference>filter(workplace.getEStructuralFeatures(), EReference.class), _function_2)).containsOnly("renamedPersons");
+      final EdeltaUnresolvedEcoreReferences unresolvedEcoreRefs = this.derivedStateHelper.getUnresolvedEcoreReferences(it.eResource());
+      Assertions.<EdeltaEcoreReference>assertThat(unresolvedEcoreRefs).isEmpty();
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoresWithReferences, _function);
   }

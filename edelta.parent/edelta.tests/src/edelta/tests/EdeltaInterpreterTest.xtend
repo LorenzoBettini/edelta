@@ -932,6 +932,9 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			val workplace = testecoreforreferences2.getEClassByName("WorkPlace")
 			assertThat(workplace.EStructuralFeatures.filter(EReference).map[name])
 				.containsOnly("renamedPersons")
+			val unresolvedEcoreRefs =
+				derivedStateHelper.getUnresolvedEcoreReferences(eResource)
+			assertThat(unresolvedEcoreRefs).isEmpty
 		]
 	}
 
