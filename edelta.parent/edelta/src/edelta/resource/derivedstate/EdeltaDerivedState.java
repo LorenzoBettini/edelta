@@ -40,4 +40,12 @@ public class EdeltaDerivedState extends AdapterImpl {
 	public EdeltaUnresolvedEcoreReferences getUnresolvedEcoreReferences() {
 		return unresolvedEcoreReferences;
 	}
+
+	public void clear() {
+		copiedEPackagesMap.clear();
+		ecoreReferenceStateMap.clear();
+		ecoreReferenceExpressionStateMap.clear();
+		enamedElementXExpressionMap.clear();
+		unresolvedEcoreReferences.clear();
+	}
 }
