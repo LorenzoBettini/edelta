@@ -6,7 +6,6 @@ import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderTestableDerivedStateComputer;
-import edelta.tests.additional.EdeltaEContentAdapter;
 import edelta.testutils.EdeltaTestUtils;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -2347,7 +2346,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
       true);
   }
   
-  @Test(expected = EdeltaEContentAdapter.EdeltaEContentAdapterException.class)
+  @Test
   public void testCompilationOfRenameReferencesAcrossEPackagesWithRealEcoreFiles() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
@@ -2397,10 +2396,10 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder_1.newLine();
     _builder_1.append("@SuppressWarnings(\"all\")");
     _builder_1.newLine();
-    _builder_1.append("public class MyFile0 extends AbstractEdelta {");
+    _builder_1.append("public class Example extends AbstractEdelta {");
     _builder_1.newLine();
     _builder_1.append("  ");
-    _builder_1.append("public MyFile0() {");
+    _builder_1.append("public Example() {");
     _builder_1.newLine();
     _builder_1.append("    ");
     _builder_1.newLine();
@@ -2410,7 +2409,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder_1.append("  ");
     _builder_1.newLine();
     _builder_1.append("  ");
-    _builder_1.append("public MyFile0(final AbstractEdelta other) {");
+    _builder_1.append("public Example(final AbstractEdelta other) {");
     _builder_1.newLine();
     _builder_1.append("    ");
     _builder_1.append("super(other);");

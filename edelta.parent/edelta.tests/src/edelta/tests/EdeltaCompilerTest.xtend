@@ -3,6 +3,7 @@ package edelta.tests
 import com.google.common.base.Joiner
 import com.google.inject.Inject
 import edelta.testutils.EdeltaTestUtils
+import java.util.List
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.resource.FileExtensionProvider
@@ -21,8 +22,6 @@ import org.junit.runner.RunWith
 import static edelta.testutils.EdeltaTestUtils.*
 
 import static extension org.junit.Assert.*
-import java.util.List
-import edelta.tests.additional.EdeltaEContentAdapter.EdeltaEContentAdapterException
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
@@ -1129,8 +1128,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		)
 	}
 
-	// TODO: this highlights the problem of changing the original ecore through EOpposite
-	@Test(expected=EdeltaEContentAdapterException)
+	@Test
 	def void testCompilationOfRenameReferencesAcrossEPackagesWithRealEcoreFiles() {
 		val rs = createResourceSetWithEcores(
 		#["TestEcoreForReferences1.ecore", "TestEcoreForReferences2.ecore"],
@@ -1160,12 +1158,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			import org.eclipse.emf.ecore.EReference;
 			
 			@SuppressWarnings("all")
-			public class MyFile0 extends AbstractEdelta {
-			  public MyFile0() {
+			public class Example extends AbstractEdelta {
+			  public Example() {
 			    
 			  }
 			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public Example(final AbstractEdelta other) {
 			    super(other);
 			  }
 			  

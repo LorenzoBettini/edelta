@@ -38,8 +38,10 @@ public class EdeltaEcoreUtil {
 	}
 
 	public static Collection<EPackage> copyEPackages(Collection<EPackage> epackages) {
-		// we must not resolve proxies, that's why we don't simply call EcoreUtil.copy
-		Copier copier = new Copier(false);
+		// we must resolve proxies, so that references are resolved while copying
+		// this ensures that bidirectional references are correct and consistent
+		// in the copied EPackages
+		Copier copier = new Copier(true);
 		Collection<EPackage> copies = copier.copyAll(epackages);
 		copier.copyReferences();
 		return copies;

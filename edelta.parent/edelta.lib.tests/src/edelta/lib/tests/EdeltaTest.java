@@ -37,10 +37,6 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.impl.BasicEObjectImpl;
 import org.eclipse.emf.ecore.impl.EGenericTypeImpl;
-import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.util.Wrapper;
 import org.junit.Before;
@@ -475,18 +471,10 @@ public class EdeltaTest {
 		Iterator<EPackage> iterator = copyEPackages.iterator();
 		EPackage copied1 = iterator.next();
 		EPackage copied2 = iterator.next();
+		// the following is not true anymore, since we resolve proxies while copying:
 		// everything must be in a resource set, and the resources
 		// for the copied EPackages must have the same URIs of the
-		// original resources for the references to be resolved
-		Resource resource1 = new ResourceImpl();
-		resource1.setURI(original1.eResource().getURI());
-		resource1.getContents().add(copied1);
-		Resource resource2 = new ResourceImpl();
-		resource2.setURI(original2.eResource().getURI());
-		resource2.getContents().add(copied2);
-		final ResourceSet resourceSet = new ResourceSetImpl();
-		resourceSet.getResources().add(resource1);
-		resourceSet.getResources().add(resource2);
+		// original resources for the references to be resolved.
 		person = getEClassByName(copied1.getEClassifiers(), "Person");
 		workplace = getEClassByName(copied2.getEClassifiers(), "WorkPlace");
 		works = getEReferenceByName(person.getEStructuralFeatures(), "works");
