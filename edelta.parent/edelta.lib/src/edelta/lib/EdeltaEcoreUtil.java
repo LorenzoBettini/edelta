@@ -24,6 +24,11 @@ public class EdeltaEcoreUtil {
 		// empty constructor never to be called
 	}
 
+	/**
+	 * Removes the {@link EClassifier} and recursively its contents.
+	 * 
+	 * @param eClassifier
+	 */
 	public static void removeEClassifier(EClassifier eClassifier) {
 		EcoreUtil.delete(eClassifier, true);
 	}
