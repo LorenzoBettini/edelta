@@ -387,7 +387,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testPersonListExampleModifyEcore() {
-		val prog = parseWithLoadedEcore(PERSON_LIST_ECORE_PATH,
+		val prog = parseWithLoadedEcore(METAMODEL_PATH + PERSON_LIST_ECORE,
 			personListExampleModifyEcore
 		)
 		prog.assertNoErrors

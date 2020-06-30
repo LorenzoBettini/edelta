@@ -485,7 +485,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   
   @Test
   public void testPersonListExampleModifyEcore() {
-    final EdeltaProgram prog = this.parseWithLoadedEcore(EdeltaAbstractTest.PERSON_LIST_ECORE_PATH, 
+    final EdeltaProgram prog = this.parseWithLoadedEcore((EdeltaAbstractTest.METAMODEL_PATH + EdeltaAbstractTest.PERSON_LIST_ECORE), 
       this._inputs.personListExampleModifyEcore());
     this._validationTestHelper.assertNoErrors(prog);
   }

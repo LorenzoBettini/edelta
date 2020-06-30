@@ -2625,7 +2625,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   @Test
   public void testCompilationOfPersonListExampleModifyEcore() {
     final ResourceSet rs = this.createResourceSetWithEcore(
-      EdeltaAbstractTest.PERSON_LIST_ECORE, EdeltaAbstractTest.PERSON_LIST_ECORE_PATH, 
+      EdeltaAbstractTest.PERSON_LIST_ECORE, 
       this._inputs.personListExampleModifyEcore());
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package edelta.personlist.example;");
@@ -2920,11 +2920,11 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     }
   }
   
-  private ResourceSet createResourceSetWithEcore(final String ecoreName, final String ecorePath, final CharSequence input) {
+  private ResourceSet createResourceSetWithEcore(final String ecoreName, final CharSequence input) {
     try {
-      String _loadFile = EdeltaTestUtils.loadFile(EdeltaAbstractTest.ECORE_PATH);
-      Pair<String, String> _mappedTo = Pair.<String, String>of("EcoreForTests.ecore", _loadFile);
-      String _loadFile_1 = EdeltaTestUtils.loadFile(ecorePath);
+      String _loadFile = EdeltaTestUtils.loadFile((EdeltaAbstractTest.METAMODEL_PATH + EdeltaAbstractTest.ECORE_ECORE));
+      Pair<String, String> _mappedTo = Pair.<String, String>of(EdeltaAbstractTest.ECORE_ECORE, _loadFile);
+      String _loadFile_1 = EdeltaTestUtils.loadFile((EdeltaAbstractTest.METAMODEL_PATH + ecoreName));
       Pair<String, String> _mappedTo_1 = Pair.<String, String>of(ecoreName, _loadFile_1);
       String _primaryFileExtension = this.extensionProvider.getPrimaryFileExtension();
       String _plus = ("Example." + _primaryFileExtension);
