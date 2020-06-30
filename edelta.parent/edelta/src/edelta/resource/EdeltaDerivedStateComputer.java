@@ -27,7 +27,7 @@ import edelta.scoping.EdeltaOriginalENamedElementRecorder;
 @Singleton
 public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 	@Inject
-	private EdeltaDerivedStateHelper derivedState;
+	private EdeltaDerivedStateHelper derivedStateHelper;
 
 	@Inject
 	private IReferableElementsUnloader.GenericUnloader unloader;
@@ -42,7 +42,7 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 	private EdeltaOriginalENamedElementRecorder originalENamedElementRecorder;
 
 	private EdeltaCopiedEPackagesMap getCopiedEPackagesMap(final Resource resource) {
-		return this.derivedState.getCopiedEPackagesMap(resource);
+		return this.derivedStateHelper.getCopiedEPackagesMap(resource);
 	}
 
 	@Override
