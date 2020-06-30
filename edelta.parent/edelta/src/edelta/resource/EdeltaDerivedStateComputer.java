@@ -63,8 +63,7 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 		}
 	}
 
-	protected void copyEPackages(EdeltaProgram program,
-			EdeltaCopiedEPackagesMap copiedEPackagesMap) {
+	protected void copyEPackages(EdeltaProgram program, EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		final var packages = program.getMetamodels().stream()
 			.distinct()
 			.collect(toList());
