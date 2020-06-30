@@ -49,6 +49,23 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCopiedEPackagesWithSingleModifyEcore() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		metamodel "bar"
+		
+		modifyEcore aTest1 epackage foo {}
+		'''.
+		parseWithTestEcores
+		val packages = program.eResource.copiedEPackagesMap.values
+		// even if bar is not modified it is still copied
+		assertThat(packages.map[name])
+			.containsExactlyInAnyOrder("foo", "bar")
+	}
+
+	@Test
 	def void testCopiedEPackagesWhenDuplicateImports() {
 		val program = '''
 		package test
