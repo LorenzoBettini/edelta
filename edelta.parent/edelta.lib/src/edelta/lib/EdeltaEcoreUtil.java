@@ -37,10 +37,15 @@ public class EdeltaEcoreUtil {
 		return (T) result;
 	}
 
+	/**
+	 * Creates copies of all the passed {@link EPackage}s, copying them all together
+	 * and resolving proxies while copying, so that possible (even bidirectional)
+	 * references among {@link EPackage}s are consistent in the resulting copies.
+	 * 
+	 * @param epackages
+	 * @return
+	 */
 	public static Collection<EPackage> copyEPackages(Collection<EPackage> epackages) {
-		// we must resolve proxies, so that references are resolved while copying
-		// this ensures that bidirectional references are correct and consistent
-		// in the copied EPackages
 		Copier copier = new Copier(true);
 		Collection<EPackage> copies = copier.copyAll(epackages);
 		copier.copyReferences();
