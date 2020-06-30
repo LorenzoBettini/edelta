@@ -1435,6 +1435,42 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoresWithReferences, _function);
   }
   
+  @Test(expected = EdeltaInterpreterWrapperException.class)
+  public void testRenameReferencesAcrossEPackagesModifyingOnePackageOnly() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("package test");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"testecoreforreferences1\"");
+    _builder.newLine();
+    _builder.append("metamodel \"testecoreforreferences2\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest1 epackage testecoreforreferences1 {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// renames WorkPlace.persons to renamedPersons");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(Person.works).EOpposite.name = \"renamedPersons\"");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcoresWithReferences = this.parseWithTestEcoresWithReferences(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      final EdeltaCopiedEPackagesMap map = this.interpretProgram(it);
+      final EPackage testecoreforreferences1 = map.get("testecoreforreferences1");
+      final EClass person = this.getEClassByName(testecoreforreferences1, "Person");
+      final Function1<EReference, String> _function_1 = (EReference it_1) -> {
+        return it_1.getEOpposite().getName();
+      };
+      Assertions.<String>assertThat(IterableExtensions.<EReference, String>map(Iterables.<EReference>filter(person.getEStructuralFeatures(), EReference.class), _function_1)).containsOnly("renamedPersons");
+      final EdeltaUnresolvedEcoreReferences unresolvedEcoreRefs = this.derivedStateHelper.getUnresolvedEcoreReferences(it.eResource());
+      Assertions.<EdeltaEcoreReference>assertThat(unresolvedEcoreRefs).isEmpty();
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoresWithReferences, _function);
+  }
+  
   @Test
   public void testElementExpressionForCreatedEClassWithEdeltaAPI() {
     StringConcatenation _builder = new StringConcatenation();

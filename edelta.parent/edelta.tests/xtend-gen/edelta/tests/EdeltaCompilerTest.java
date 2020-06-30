@@ -6,6 +6,7 @@ import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderTestableDerivedStateComputer;
+import edelta.tests.additional.EdeltaEContentAdapter;
 import edelta.testutils.EdeltaTestUtils;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -2445,6 +2446,115 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     this.checkCompiledCodeExecution(
       Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList(EdeltaAbstractTest.TEST1_REFS_ECORE, EdeltaAbstractTest.TEST2_REFS_ECORE)), _builder, 
       Collections.<Pair<CharSequence, CharSequence>>unmodifiableList(CollectionLiterals.<Pair<CharSequence, CharSequence>>newArrayList(_mappedTo, _mappedTo_1)), 
+      true);
+  }
+  
+  @Test(expected = EdeltaEContentAdapter.EdeltaEContentAdapterException.class)
+  public void testCompilationOfRenameReferencesAcrossEPackagesWithRealEcoreFiles2() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("package test");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"testecoreforreferences1\"");
+    _builder.newLine();
+    _builder.append("metamodel \"testecoreforreferences2\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest1 epackage testecoreforreferences1 {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// renames WorkPlace.persons to renamedPersons");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(Person.works).EOpposite.name = \"renamedPersons\"");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final ResourceSet rs = this.createResourceSetWithEcores(
+      Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList(EdeltaAbstractTest.TEST1_REFS_ECORE, EdeltaAbstractTest.TEST2_REFS_ECORE)), _builder);
+    this.addEPackagesWithReferencesForTests(rs);
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("package test;");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("import edelta.lib.AbstractEdelta;");
+    _builder_1.newLine();
+    _builder_1.append("import org.eclipse.emf.ecore.EPackage;");
+    _builder_1.newLine();
+    _builder_1.append("import org.eclipse.emf.ecore.EReference;");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("@SuppressWarnings(\"all\")");
+    _builder_1.newLine();
+    _builder_1.append("public class Example extends AbstractEdelta {");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("public Example() {");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("}");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("public Example(final AbstractEdelta other) {");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.append("super(other);");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("}");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("public void aTest1(final EPackage it) {");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.append("EReference _eOpposite = getEReference(\"testecoreforreferences1\", \"Person\", \"works\").getEOpposite();");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.append("_eOpposite.setName(\"renamedPersons\");");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("}");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("@Override");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("public void performSanityChecks() throws Exception {");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.append("ensureEPackageIsLoaded(\"testecoreforreferences1\");");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.append("ensureEPackageIsLoaded(\"testecoreforreferences2\");");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("}");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("@Override");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("protected void doExecute() throws Exception {");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.append("aTest1(getEPackage(\"testecoreforreferences1\"));");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("}");
+    _builder_1.newLine();
+    _builder_1.append("}");
+    _builder_1.newLine();
+    this.checkCompilation(rs, _builder_1, 
       true);
   }
   

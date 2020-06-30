@@ -2,6 +2,7 @@ package edelta.tests
 
 import com.google.common.base.Joiner
 import com.google.inject.Inject
+import edelta.tests.additional.EdeltaEContentAdapter.EdeltaEContentAdapterException
 import edelta.testutils.EdeltaTestUtils
 import java.util.List
 import org.eclipse.emf.ecore.resource.ResourceSet
@@ -1180,6 +1181,64 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				</ecore:EPackage>
 				'''
 			],
+			true
+		)
+	}
+
+	// TODO exception should not be thrown
+	@Test(expected=EdeltaEContentAdapterException)
+	def void testCompilationOfRenameReferencesAcrossEPackagesWithRealEcoreFiles2() {
+		// it is crucial to use real ecore files so that we mimick what happens in
+		// the workbench and make sure that original ecores are not modified.
+		val rs = createResourceSetWithEcores(
+		#[TEST1_REFS_ECORE, TEST2_REFS_ECORE],
+		'''
+			package test
+			
+			metamodel "testecoreforreferences1"
+			metamodel "testecoreforreferences2"
+
+			modifyEcore aTest1 epackage testecoreforreferences1 {
+				// renames WorkPlace.persons to renamedPersons
+				ecoreref(Person.works).EOpposite.name = "renamedPersons"
+			}
+		''')
+		rs.addEPackagesWithReferencesForTests
+		checkCompilation(rs,
+			'''
+			package test;
+			
+			import edelta.lib.AbstractEdelta;
+			import org.eclipse.emf.ecore.EPackage;
+			import org.eclipse.emf.ecore.EReference;
+			
+			@SuppressWarnings("all")
+			public class Example extends AbstractEdelta {
+			  public Example() {
+			    
+			  }
+			  
+			  public Example(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  public void aTest1(final EPackage it) {
+			    EReference _eOpposite = getEReference("testecoreforreferences1", "Person", "works").getEOpposite();
+			    _eOpposite.setName("renamedPersons");
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("testecoreforreferences1");
+			    ensureEPackageIsLoaded("testecoreforreferences2");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    aTest1(getEPackage("testecoreforreferences1"));
+			  }
+			}
+			''',
 			true
 		)
 	}
