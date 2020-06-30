@@ -2348,6 +2348,107 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testExecutionOfRenameReferencesAcrossEPackagesWithRealEcoreFiles() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("package test");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"testecoreforreferences1\"");
+    _builder.newLine();
+    _builder.append("metamodel \"testecoreforreferences2\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest1 epackage testecoreforreferences1 {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// renames WorkPlace.persons to renamedPersons");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(Person.works).EOpposite.name = \"renamedPersons\"");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    _builder.append("modifyEcore aTest2 epackage testecoreforreferences2 {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// renames Person.works to renamedWorks");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// using the already renamed feature (was persons)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(renamedPersons).EOpposite.name = \"renamedWorks\"");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+    _builder_1.newLine();
+    _builder_1.append("<ecore:EPackage xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.append("xmlns:ecore=\"http://www.eclipse.org/emf/2002/Ecore\" name=\"testecoreforreferences1\" nsURI=\"http://my.testecoreforreferences1.org\"");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.append("nsPrefix=\"testecoreforreferences1\">");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"Person\">");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.append("<eStructuralFeatures xsi:type=\"ecore:EAttribute\" name=\"firstname\" eType=\"ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString\"/>");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.append("<eStructuralFeatures xsi:type=\"ecore:EAttribute\" name=\"lastname\" eType=\"ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString\"/>");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.append("<eStructuralFeatures xsi:type=\"ecore:EReference\" name=\"renamedWorks\" lowerBound=\"1\"");
+    _builder_1.newLine();
+    _builder_1.append("        ");
+    _builder_1.append("eType=\"ecore:EClass TestEcoreForReferences2.ecore#//WorkPlace\" eOpposite=\"TestEcoreForReferences2.ecore#//WorkPlace/renamedPersons\"/>");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("</eClassifiers>");
+    _builder_1.newLine();
+    _builder_1.append("</ecore:EPackage>");
+    _builder_1.newLine();
+    Pair<CharSequence, CharSequence> _mappedTo = Pair.<CharSequence, CharSequence>of("TestEcoreForReferences1.ecore", _builder_1.toString());
+    StringConcatenation _builder_2 = new StringConcatenation();
+    _builder_2.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+    _builder_2.newLine();
+    _builder_2.append("<ecore:EPackage xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
+    _builder_2.newLine();
+    _builder_2.append("    ");
+    _builder_2.append("xmlns:ecore=\"http://www.eclipse.org/emf/2002/Ecore\" name=\"testecoreforreferences2\" nsURI=\"http://my.testecoreforreferences2.org\"");
+    _builder_2.newLine();
+    _builder_2.append("    ");
+    _builder_2.append("nsPrefix=\"testecoreforreferences2\">");
+    _builder_2.newLine();
+    _builder_2.append("  ");
+    _builder_2.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"WorkPlace\">");
+    _builder_2.newLine();
+    _builder_2.append("    ");
+    _builder_2.append("<eStructuralFeatures xsi:type=\"ecore:EReference\" name=\"renamedPersons\" upperBound=\"-1\"");
+    _builder_2.newLine();
+    _builder_2.append("        ");
+    _builder_2.append("eType=\"ecore:EClass TestEcoreForReferences1.ecore#//Person\" eOpposite=\"TestEcoreForReferences1.ecore#//Person/renamedWorks\"/>");
+    _builder_2.newLine();
+    _builder_2.append("    ");
+    _builder_2.append("<eStructuralFeatures xsi:type=\"ecore:EAttribute\" name=\"address\" eType=\"ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString\"/>");
+    _builder_2.newLine();
+    _builder_2.append("  ");
+    _builder_2.append("</eClassifiers>");
+    _builder_2.newLine();
+    _builder_2.append("</ecore:EPackage>");
+    _builder_2.newLine();
+    Pair<CharSequence, CharSequence> _mappedTo_1 = Pair.<CharSequence, CharSequence>of("TestEcoreForReferences2.ecore", _builder_2.toString());
+    this.checkCompiledCodeExecution(
+      Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("TestEcoreForReferences1.ecore", "TestEcoreForReferences2.ecore")), _builder, 
+      Collections.<Pair<CharSequence, CharSequence>>unmodifiableList(CollectionLiterals.<Pair<CharSequence, CharSequence>>newArrayList(_mappedTo, _mappedTo_1)), 
+      true);
+  }
+  
+  @Test
   public void testExecutionOfComplexOperationsWithSubPackages() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
@@ -2965,6 +3066,37 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
         this._reflectExtensions.invoke(edeltaObj, "execute");
         this._reflectExtensions.invoke(edeltaObj, "saveModifiedEcores", new Object[] { EdeltaCompilerTest.MODIFIED });
         EdeltaTestUtils.compareSingleFileContents((EdeltaCompilerTest.MODIFIED + "/foo.ecore"), expectedGeneratedEcore.toString());
+      } catch (Throwable _e) {
+        throw Exceptions.sneakyThrow(_e);
+      }
+    };
+    this.compilationTestHelper.compile(rs, _function);
+  }
+  
+  private void checkCompiledCodeExecution(final List<String> ecoreNames, final CharSequence input, final List<Pair<CharSequence, CharSequence>> expectedModifiedEcores, final boolean checkValidationErrors) {
+    this.wipeModifiedDirectoryContents();
+    final ResourceSet rs = this.createResourceSetWithEcores(ecoreNames, input);
+    final IAcceptor<CompilationTestHelper.Result> _function = (CompilationTestHelper.Result it) -> {
+      try {
+        if (checkValidationErrors) {
+          this.assertNoValidationErrors(it);
+        }
+        if (checkValidationErrors) {
+          this.assertGeneratedJavaCodeCompiles(it);
+        }
+        final Class<?> genClass = it.getCompiledClass();
+        final Object edeltaObj = genClass.getDeclaredConstructor().newInstance();
+        for (final String ecoreName : ecoreNames) {
+          this._reflectExtensions.invoke(edeltaObj, "loadEcoreFile", new Object[] { (EdeltaAbstractTest.METAMODEL_PATH + ecoreName) });
+        }
+        this._reflectExtensions.invoke(edeltaObj, "execute");
+        this._reflectExtensions.invoke(edeltaObj, "saveModifiedEcores", new Object[] { EdeltaCompilerTest.MODIFIED });
+        for (final Pair<CharSequence, CharSequence> expected : expectedModifiedEcores) {
+          CharSequence _key = expected.getKey();
+          String _plus = ((EdeltaCompilerTest.MODIFIED + "/") + _key);
+          EdeltaTestUtils.compareSingleFileContents(_plus, 
+            expected.getValue().toString());
+        }
       } catch (Throwable _e) {
         throw Exceptions.sneakyThrow(_e);
       }
