@@ -93,9 +93,10 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 	@Override
 	public void discardDerivedState(final DerivedStateAwareResource resource) {
 		final var copiedEPackagesMap = this.getCopiedEPackagesMap(resource);
+		final var derivedState = derivedStateHelper.getOrInstallAdapter(resource);
 		unloadDerivedPackages(copiedEPackagesMap);
 		super.discardDerivedState(resource);
-		copiedEPackagesMap.clear();
+		derivedState.clear();
 	}
 
 	/**
