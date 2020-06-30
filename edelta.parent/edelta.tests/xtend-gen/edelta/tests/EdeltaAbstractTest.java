@@ -76,11 +76,13 @@ public abstract class EdeltaAbstractTest {
   @Extension
   protected Inputs _inputs = new Inputs();
   
-  protected static String ECORE_PATH = "src/edelta/tests/input/models/EcoreForTests.ecore";
+  protected static String METAMODEL_PATH = "src/edelta/tests/input/models/";
+  
+  protected static String ECORE_PATH = (EdeltaAbstractTest.METAMODEL_PATH + "EcoreForTests.ecore");
   
   protected static String PERSON_LIST_ECORE = "PersonList.ecore";
   
-  protected static String PERSON_LIST_ECORE_PATH = ("src/edelta/tests/input/models/" + EdeltaAbstractTest.PERSON_LIST_ECORE);
+  protected static String PERSON_LIST_ECORE_PATH = (EdeltaAbstractTest.METAMODEL_PATH + EdeltaAbstractTest.PERSON_LIST_ECORE);
   
   /**
    * Parse several input sources and returns the parsed program corresponding

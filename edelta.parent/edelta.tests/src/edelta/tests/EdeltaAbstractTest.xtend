@@ -50,9 +50,10 @@ abstract class EdeltaAbstractTest {
 
 	protected extension Inputs = new Inputs
 
-	protected static String ECORE_PATH = "src/edelta/tests/input/models/EcoreForTests.ecore"
+	protected static String METAMODEL_PATH = "src/edelta/tests/input/models/"
+	protected static String ECORE_PATH = METAMODEL_PATH + "EcoreForTests.ecore"
 	protected static String PERSON_LIST_ECORE = "PersonList.ecore"
-	protected static String PERSON_LIST_ECORE_PATH = "src/edelta/tests/input/models/" + PERSON_LIST_ECORE
+	protected static String PERSON_LIST_ECORE_PATH = METAMODEL_PATH + PERSON_LIST_ECORE
 
 	/**
 	 * Parse several input sources and returns the parsed program corresponding
