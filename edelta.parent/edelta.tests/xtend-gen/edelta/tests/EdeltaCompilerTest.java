@@ -2243,7 +2243,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder.append("}");
     _builder.newLine();
     final ResourceSet rs = this.createResourceSetWithEcores(
-      Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("TestEcoreForReferences1.ecore", "TestEcoreForReferences2.ecore")), _builder);
+      Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList(EdeltaAbstractTest.TEST1_REFS_ECORE, EdeltaAbstractTest.TEST2_REFS_ECORE)), _builder);
     this.addEPackagesWithReferencesForTests(rs);
     StringConcatenation _builder_1 = new StringConcatenation();
     _builder_1.append("package test;");
@@ -2412,7 +2412,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder_1.newLine();
     _builder_1.append("</ecore:EPackage>");
     _builder_1.newLine();
-    Pair<CharSequence, CharSequence> _mappedTo = Pair.<CharSequence, CharSequence>of("TestEcoreForReferences1.ecore", _builder_1.toString());
+    Pair<CharSequence, CharSequence> _mappedTo = Pair.<CharSequence, CharSequence>of(EdeltaAbstractTest.TEST1_REFS_ECORE, _builder_1.toString());
     StringConcatenation _builder_2 = new StringConcatenation();
     _builder_2.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
     _builder_2.newLine();
@@ -2441,9 +2441,9 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder_2.newLine();
     _builder_2.append("</ecore:EPackage>");
     _builder_2.newLine();
-    Pair<CharSequence, CharSequence> _mappedTo_1 = Pair.<CharSequence, CharSequence>of("TestEcoreForReferences2.ecore", _builder_2.toString());
+    Pair<CharSequence, CharSequence> _mappedTo_1 = Pair.<CharSequence, CharSequence>of(EdeltaAbstractTest.TEST2_REFS_ECORE, _builder_2.toString());
     this.checkCompiledCodeExecution(
-      Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("TestEcoreForReferences1.ecore", "TestEcoreForReferences2.ecore")), _builder, 
+      Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList(EdeltaAbstractTest.TEST1_REFS_ECORE, EdeltaAbstractTest.TEST2_REFS_ECORE)), _builder, 
       Collections.<Pair<CharSequence, CharSequence>>unmodifiableList(CollectionLiterals.<Pair<CharSequence, CharSequence>>newArrayList(_mappedTo, _mappedTo_1)), 
       true);
   }

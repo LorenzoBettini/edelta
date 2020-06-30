@@ -1068,7 +1068,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		// it is crucial to use real ecore files so that we mimick what happens in
 		// the workbench and make sure that original ecores are not modified.
 		val rs = createResourceSetWithEcores(
-		#["TestEcoreForReferences1.ecore", "TestEcoreForReferences2.ecore"],
+		#[TEST1_REFS_ECORE, TEST2_REFS_ECORE],
 		'''
 			package test
 			
@@ -1134,7 +1134,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	@Test
 	def void testExecutionOfRenameReferencesAcrossEPackagesWithRealEcoreFiles() {
 		checkCompiledCodeExecution(
-			#["TestEcoreForReferences1.ecore", "TestEcoreForReferences2.ecore"],
+			#[TEST1_REFS_ECORE, TEST2_REFS_ECORE],
 			'''
 				package test
 
@@ -1152,7 +1152,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				}
 			''',
 			#[
-				"TestEcoreForReferences1.ecore" ->
+				TEST1_REFS_ECORE ->
 				'''
 				<?xml version="1.0" encoding="UTF-8"?>
 				<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -1166,7 +1166,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				  </eClassifiers>
 				</ecore:EPackage>
 				''',
-				"TestEcoreForReferences2.ecore" ->
+				TEST2_REFS_ECORE ->
 				'''
 				<?xml version="1.0" encoding="UTF-8"?>
 				<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

@@ -84,6 +84,10 @@ public abstract class EdeltaAbstractTest {
   
   protected static String PERSON_LIST_ECORE = "PersonList.ecore";
   
+  protected static String TEST1_REFS_ECORE = "TestEcoreForReferences1.ecore";
+  
+  protected static String TEST2_REFS_ECORE = "TestEcoreForReferences2.ecore";
+  
   /**
    * Parse several input sources and returns the parsed program corresponding
    * to the last input source.
