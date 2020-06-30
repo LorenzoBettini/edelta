@@ -76,11 +76,11 @@ public abstract class EdeltaAbstractTest {
   @Extension
   protected Inputs _inputs = new Inputs();
   
-  protected static String ECORE_PATH = "src/edelta/tests/input/models/EcoreForTests.ecore";
+  protected static String METAMODEL_PATH = "src/edelta/tests/input/models/";
+  
+  protected static String ECORE_ECORE = "EcoreForTests.ecore";
   
   protected static String PERSON_LIST_ECORE = "PersonList.ecore";
-  
-  protected static String PERSON_LIST_ECORE_PATH = ("src/edelta/tests/input/models/" + EdeltaAbstractTest.PERSON_LIST_ECORE);
   
   /**
    * Parse several input sources and returns the parsed program corresponding
@@ -126,7 +126,7 @@ public abstract class EdeltaAbstractTest {
   protected EdeltaProgram parseWithLoadedEcore(final String path, final CharSequence input) {
     try {
       final XtextResourceSet resourceSet = this.resourceSetProvider.get();
-      resourceSet.getResource(this.createFileURIFromPath(EdeltaAbstractTest.ECORE_PATH), true);
+      resourceSet.getResource(this.createFileURIFromPath((EdeltaAbstractTest.METAMODEL_PATH + EdeltaAbstractTest.ECORE_ECORE)), true);
       final URI uri = this.createFileURIFromPath(path);
       resourceSet.getResource(uri, true);
       final EdeltaProgram prog = this._parseHelper.parse(input, resourceSet);

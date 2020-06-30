@@ -1200,7 +1200,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	@Test
 	def void testCompilationOfPersonListExampleModifyEcore() {
 		val rs = createResourceSetWithEcore(
-			PERSON_LIST_ECORE, PERSON_LIST_ECORE_PATH,
+			PERSON_LIST_ECORE,
 			personListExampleModifyEcore
 		)
 		rs.
@@ -1356,10 +1356,10 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		return rs
 	}
 
-	def private createResourceSetWithEcore(String ecoreName, String ecorePath, CharSequence input) {
+	def private createResourceSetWithEcore(String ecoreName, CharSequence input) {
 		val pairs = newArrayList(
-			"EcoreForTests.ecore" -> EdeltaTestUtils.loadFile(ECORE_PATH),
-			ecoreName -> EdeltaTestUtils.loadFile(ecorePath),
+			ECORE_ECORE -> EdeltaTestUtils.loadFile(METAMODEL_PATH + ECORE_ECORE),
+			ecoreName -> EdeltaTestUtils.loadFile(METAMODEL_PATH + ecoreName),
 			"Example." + 
 					extensionProvider.getPrimaryFileExtension() -> input
 		)
