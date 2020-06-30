@@ -42,7 +42,7 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 	private EdeltaOriginalENamedElementRecorder originalENamedElementRecorder;
 
 	private EdeltaCopiedEPackagesMap getCopiedEPackagesMap(final Resource resource) {
-		return this.derivedStateHelper.getCopiedEPackagesMap(resource);
+		return derivedStateHelper.getCopiedEPackagesMap(resource);
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 			if (modifyEcoreOperations.isEmpty()) {
 				return;
 			}
-			final var copiedEPackagesMap = this.getCopiedEPackagesMap(resource);
+			final var copiedEPackagesMap = getCopiedEPackagesMap(resource);
 			// make sure packages under modification are copied
 			copyEPackages(modifyEcoreOperations.stream()
 				.map(EdeltaModifyEcoreOperation::getEpackage)
@@ -78,7 +78,7 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 	}
 
 	protected void runInterpreter(final EdeltaProgram program, final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
-		this.interpreterFactory.create(program.eResource()).evaluateModifyEcoreOperations(program, copiedEPackagesMap);
+		interpreterFactory.create(program.eResource()).evaluateModifyEcoreOperations(program, copiedEPackagesMap);
 	}
 
 	protected void recordEcoreReferenceOriginalENamedElement(final Resource resource) {
@@ -92,7 +92,7 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 
 	@Override
 	public void discardDerivedState(final DerivedStateAwareResource resource) {
-		final var copiedEPackagesMap = this.getCopiedEPackagesMap(resource);
+		final var copiedEPackagesMap = getCopiedEPackagesMap(resource);
 		final var derivedState = derivedStateHelper.getOrInstallAdapter(resource);
 		unloadDerivedPackages(copiedEPackagesMap);
 		super.discardDerivedState(resource);
@@ -104,7 +104,7 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 	 */
 	protected void unloadDerivedPackages(final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		for (final var p : copiedEPackagesMap.values()) {
-			this.unloader.unloadRoot(p);
+			unloader.unloadRoot(p);
 		}
 	}
 }
