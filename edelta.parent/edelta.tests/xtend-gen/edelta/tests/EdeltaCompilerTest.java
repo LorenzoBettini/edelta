@@ -6,7 +6,6 @@ import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderTestableDerivedStateComputer;
-import edelta.tests.additional.EdeltaEContentAdapter;
 import edelta.testutils.EdeltaTestUtils;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -2449,7 +2448,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
       true);
   }
   
-  @Test(expected = EdeltaEContentAdapter.EdeltaEContentAdapterException.class)
+  @Test
   public void testCompilationOfRenameReferencesAcrossEPackagesWithRealEcoreFiles2() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");

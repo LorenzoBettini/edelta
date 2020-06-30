@@ -938,8 +938,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	// TODO exception should not be thrown
-	@Test(expected=EdeltaInterpreterWrapperException)
+	@Test
 	def void testRenameReferencesAcrossEPackagesModifyingOnePackageOnly() {
 		'''
 			package test
@@ -954,15 +953,15 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		'''.parseWithTestEcoresWithReferences => [
 			val map = interpretProgram
 			val testecoreforreferences1 = map.get("testecoreforreferences1")
-			// TODO this should be copied as well
-//			val testecoreforreferences2 = map.get("testecoreforreferences2")
+			val testecoreforreferences2 = map.get("testecoreforreferences2")
 			val person = testecoreforreferences1.getEClassByName("Person")
 			assertThat(person.EStructuralFeatures.filter(EReference).map[EOpposite.name])
 				.containsOnly("renamedPersons")
-			// TODO
-//			val workplace = testecoreforreferences2.getEClassByName("WorkPlace")
-//			assertThat(workplace.EStructuralFeatures.filter(EReference).map[name])
-//				.containsOnly("renamedPersons")
+			val workplace = testecoreforreferences2.getEClassByName("WorkPlace")
+			assertThat(workplace.EStructuralFeatures.filter(EReference).map[name])
+				.containsOnly("renamedPersons")
+			assertThat(person.EStructuralFeatures.filter(EReference).head.EOpposite)
+				.isSameAs(workplace.EStructuralFeatures.filter(EReference).head)
 			val unresolvedEcoreRefs =
 				derivedStateHelper.getUnresolvedEcoreReferences(eResource)
 			assertThat(unresolvedEcoreRefs).isEmpty

@@ -2,7 +2,6 @@ package edelta.tests
 
 import com.google.common.base.Joiner
 import com.google.inject.Inject
-import edelta.tests.additional.EdeltaEContentAdapter.EdeltaEContentAdapterException
 import edelta.testutils.EdeltaTestUtils
 import java.util.List
 import org.eclipse.emf.ecore.resource.ResourceSet
@@ -1185,8 +1184,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		)
 	}
 
-	// TODO exception should not be thrown
-	@Test(expected=EdeltaEContentAdapterException)
+	@Test
 	def void testCompilationOfRenameReferencesAcrossEPackagesWithRealEcoreFiles2() {
 		// it is crucial to use real ecore files so that we mimick what happens in
 		// the workbench and make sure that original ecores are not modified.
