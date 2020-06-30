@@ -1064,72 +1064,9 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCompilationOfRenameReferencesAcrossEPackages() {
-		val rs = createResourceSet(
-		'''
-			package test
-			
-			metamodel "testecoreforreferences1"
-			metamodel "testecoreforreferences2"
-
-			modifyEcore aTest1 epackage testecoreforreferences1 {
-				// renames WorkPlace.persons to renamedPersons
-				ecoreref(Person.works).EOpposite.name = "renamedPersons"
-			}
-			modifyEcore aTest2 epackage testecoreforreferences2 {
-				// renames Person.works to renamedWorks
-				// using the already renamed feature (was persons)
-				ecoreref(renamedPersons).EOpposite.name = "renamedWorks"
-			}
-		''')
-		rs.addEPackagesWithReferencesForTests
-		checkCompilation(rs,
-			'''
-			package test;
-			
-			import edelta.lib.AbstractEdelta;
-			import org.eclipse.emf.ecore.EPackage;
-			import org.eclipse.emf.ecore.EReference;
-			
-			@SuppressWarnings("all")
-			public class MyFile0 extends AbstractEdelta {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
-			    super(other);
-			  }
-			  
-			  public void aTest1(final EPackage it) {
-			    EReference _eOpposite = getEReference("testecoreforreferences1", "Person", "works").getEOpposite();
-			    _eOpposite.setName("renamedPersons");
-			  }
-			  
-			  public void aTest2(final EPackage it) {
-			    EReference _eOpposite = getEReference("testecoreforreferences2", "WorkPlace", "renamedPersons").getEOpposite();
-			    _eOpposite.setName("renamedWorks");
-			  }
-			  
-			  @Override
-			  public void performSanityChecks() throws Exception {
-			    ensureEPackageIsLoaded("testecoreforreferences1");
-			    ensureEPackageIsLoaded("testecoreforreferences2");
-			  }
-			  
-			  @Override
-			  protected void doExecute() throws Exception {
-			    aTest1(getEPackage("testecoreforreferences1"));
-			    aTest2(getEPackage("testecoreforreferences2"));
-			  }
-			}
-			''',
-			true
-		)
-	}
-
-	@Test
 	def void testCompilationOfRenameReferencesAcrossEPackagesWithRealEcoreFiles() {
+		// it is crucial to use real ecore files so that we mimick what happens in
+		// the workbench and make sure that original ecores are not modified.
 		val rs = createResourceSetWithEcores(
 		#["TestEcoreForReferences1.ecore", "TestEcoreForReferences2.ecore"],
 		'''
