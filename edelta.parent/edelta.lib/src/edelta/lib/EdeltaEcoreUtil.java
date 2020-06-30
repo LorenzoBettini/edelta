@@ -51,9 +51,6 @@ public class EdeltaEcoreUtil {
 	 * @return
 	 */
 	public static Collection<EPackage> copyEPackages(Collection<EPackage> epackages) {
-		Copier copier = new Copier(true);
-		Collection<EPackage> copies = copier.copyAll(epackages);
-		copier.copyReferences();
-		return copies;
+		return EcoreUtil.copyAll(epackages);
 	}
 }
