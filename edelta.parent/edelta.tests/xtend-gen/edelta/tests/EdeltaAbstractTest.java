@@ -13,6 +13,7 @@ import edelta.edelta.EdeltaProgram;
 import edelta.tests.EdeltaInjectorProvider;
 import edelta.tests.input.Inputs;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
@@ -45,6 +46,7 @@ import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.XVariableDeclaration;
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations;
+import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
@@ -81,6 +83,10 @@ public abstract class EdeltaAbstractTest {
   protected static String ECORE_ECORE = "EcoreForTests.ecore";
   
   protected static String PERSON_LIST_ECORE = "PersonList.ecore";
+  
+  protected static String TEST1_REFS_ECORE = "TestEcoreForReferences1.ecore";
+  
+  protected static String TEST2_REFS_ECORE = "TestEcoreForReferences2.ecore";
   
   /**
    * Parse several input sources and returns the parsed program corresponding
@@ -123,6 +129,14 @@ public abstract class EdeltaAbstractTest {
     }
   }
   
+  protected EdeltaProgram parseWithTestEcoresWithReferences(final CharSequence input) {
+    try {
+      return this._parseHelper.parse(input, this.resourceSetWithTestEcoresWithReferences());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
   protected EdeltaProgram parseWithLoadedEcore(final String path, final CharSequence input) {
     try {
       final XtextResourceSet resourceSet = this.resourceSetProvider.get();
@@ -157,6 +171,23 @@ public abstract class EdeltaAbstractTest {
       _xblockexpression = this.addEPackageWithSubPackageForTests(resourceSet);
     }
     return _xblockexpression;
+  }
+  
+  protected XtextResourceSet resourceSetWithTestEcoresWithReferences() {
+    XtextResourceSet _xblockexpression = null;
+    {
+      final XtextResourceSet resourceSet = this.resourceSetProvider.get();
+      this.addEPackagesWithReferencesForTests(resourceSet);
+      _xblockexpression = resourceSet;
+    }
+    return _xblockexpression;
+  }
+  
+  protected void addEPackagesWithReferencesForTests(final ResourceSet resourceSet) {
+    final List<EPackage> packages = this.EPackagesWithReferencesForTest();
+    for (final EPackage p : packages) {
+      this.createTestResource(resourceSet, p.getName(), p);
+    }
   }
   
   protected ResourceSet addEPackageForTests(final ResourceSet resourceSet) {
@@ -287,6 +318,77 @@ public abstract class EdeltaAbstractTest {
       EDataType _doubleArrow_1 = ObjectExtensions.<EDataType>operator_doubleArrow(_createEDataType, _function_2);
       _eClassifiers_1.add(_doubleArrow_1);
       _xblockexpression = fooPackage;
+    }
+    return _xblockexpression;
+  }
+  
+  protected List<EPackage> EPackagesWithReferencesForTest() {
+    List<EPackage> _xblockexpression = null;
+    {
+      EPackage _createEPackage = EcoreFactory.eINSTANCE.createEPackage();
+      final Procedure1<EPackage> _function = (EPackage it) -> {
+        it.setName("testecoreforreferences1");
+        it.setNsPrefix("testecoreforreferences1");
+        it.setNsURI("http://my.testecoreforreferences1.org");
+      };
+      final EPackage p1 = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
+      EList<EClassifier> _eClassifiers = p1.getEClassifiers();
+      EClass _createEClass = EcoreFactory.eINSTANCE.createEClass();
+      final Procedure1<EClass> _function_1 = (EClass it) -> {
+        it.setName("Person");
+        EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
+        EAttribute _createEAttribute = EcoreFactory.eINSTANCE.createEAttribute();
+        final Procedure1<EAttribute> _function_2 = (EAttribute it_1) -> {
+          it_1.setName("name");
+        };
+        EAttribute _doubleArrow = ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_2);
+        _eStructuralFeatures.add(_doubleArrow);
+        EList<EStructuralFeature> _eStructuralFeatures_1 = it.getEStructuralFeatures();
+        EReference _createEReference = EcoreFactory.eINSTANCE.createEReference();
+        final Procedure1<EReference> _function_3 = (EReference it_1) -> {
+          it_1.setName("works");
+          it_1.setContainment(false);
+        };
+        EReference _doubleArrow_1 = ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_3);
+        _eStructuralFeatures_1.add(_doubleArrow_1);
+      };
+      EClass _doubleArrow = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
+      _eClassifiers.add(_doubleArrow);
+      EPackage _createEPackage_1 = EcoreFactory.eINSTANCE.createEPackage();
+      final Procedure1<EPackage> _function_2 = (EPackage it) -> {
+        it.setName("testecoreforreferences2");
+        it.setNsPrefix("testecoreforreferences2");
+        it.setNsURI("http://my.testecoreforreferences2.org");
+      };
+      final EPackage p2 = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage_1, _function_2);
+      EList<EClassifier> _eClassifiers_1 = p2.getEClassifiers();
+      EClass _createEClass_1 = EcoreFactory.eINSTANCE.createEClass();
+      final Procedure1<EClass> _function_3 = (EClass it) -> {
+        it.setName("WorkPlace");
+        EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
+        EAttribute _createEAttribute = EcoreFactory.eINSTANCE.createEAttribute();
+        final Procedure1<EAttribute> _function_4 = (EAttribute it_1) -> {
+          it_1.setName("address");
+        };
+        EAttribute _doubleArrow_1 = ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_4);
+        _eStructuralFeatures.add(_doubleArrow_1);
+        EList<EStructuralFeature> _eStructuralFeatures_1 = it.getEStructuralFeatures();
+        EReference _createEReference = EcoreFactory.eINSTANCE.createEReference();
+        final Procedure1<EReference> _function_5 = (EReference it_1) -> {
+          it_1.setName("persons");
+          it_1.setContainment(false);
+          it_1.setUpperBound((-1));
+        };
+        EReference _doubleArrow_2 = ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_5);
+        _eStructuralFeatures_1.add(_doubleArrow_2);
+      };
+      EClass _doubleArrow_1 = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_3);
+      _eClassifiers_1.add(_doubleArrow_1);
+      final EReference works = this.getEReferenceByName(this.getEClassByName(p1, "Person"), "works");
+      final EReference persons = this.getEReferenceByName(this.getEClassByName(p2, "WorkPlace"), "persons");
+      works.setEOpposite(persons);
+      persons.setEOpposite(works);
+      _xblockexpression = Collections.<EPackage>unmodifiableList(CollectionLiterals.<EPackage>newArrayList(p1, p2));
     }
     return _xblockexpression;
   }
@@ -467,6 +569,14 @@ public abstract class EdeltaAbstractTest {
     return IterableExtensions.<EClassifier>findFirst(this.getEPackageByName(context, packagename).getEClassifiers(), _function);
   }
   
+  protected <T extends ENamedElement> T getByName(final Iterable<T> namedElements, final String nameToSearch) {
+    final Function1<T, Boolean> _function = (T it) -> {
+      String _name = it.getName();
+      return Boolean.valueOf(Objects.equal(_name, nameToSearch));
+    };
+    return IterableExtensions.<T>findFirst(namedElements, _function);
+  }
+  
   protected EdeltaModifyEcoreOperation lastModifyEcoreOperation(final EdeltaProgram p) {
     return IterableExtensions.<EdeltaModifyEcoreOperation>last(p.getModifyEcoreOperations());
   }
@@ -521,12 +631,28 @@ public abstract class EdeltaAbstractTest {
     return IterableExtensions.<EClassifier>findFirst(p.getEClassifiers(), _function);
   }
   
+  protected EClass getEClassByName(final EPackage p, final String nameToSearch) {
+    final Function1<EClass, Boolean> _function = (EClass it) -> {
+      String _name = it.getName();
+      return Boolean.valueOf(Objects.equal(_name, nameToSearch));
+    };
+    return IterableExtensions.<EClass>findFirst(Iterables.<EClass>filter(p.getEClassifiers(), EClass.class), _function);
+  }
+  
   protected EStructuralFeature getEStructuralFeatureByName(final EClassifier e, final String nameToSearch) {
     final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
       String _name = it.getName();
       return Boolean.valueOf(Objects.equal(_name, nameToSearch));
     };
     return IterableExtensions.<EStructuralFeature>findFirst(((EClass) e).getEStructuralFeatures(), _function);
+  }
+  
+  protected EReference getEReferenceByName(final EClassifier e, final String nameToSearch) {
+    final Function1<EReference, Boolean> _function = (EReference it) -> {
+      String _name = it.getName();
+      return Boolean.valueOf(Objects.equal(_name, nameToSearch));
+    };
+    return IterableExtensions.<EReference>findFirst(Iterables.<EReference>filter(((EClass) e).getEStructuralFeatures(), EReference.class), _function);
   }
   
   protected EAttribute getEAttributeByName(final EClassifier e, final String nameToSearch) {

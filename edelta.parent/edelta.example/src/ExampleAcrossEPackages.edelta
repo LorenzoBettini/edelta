@@ -1,0 +1,13 @@
+metamodel "testecoreforreferences1"
+metamodel "testecoreforreferences2"
+
+modifyEcore aTest1 epackage testecoreforreferences1 {
+	// renames WorkPlace.persons to renamedPersons
+	ecoreref(works).EOpposite.name = "renamedPersons"
+}
+
+modifyEcore aTest2 epackage testecoreforreferences2 {
+	// renames Person.works to renamedWorks
+	// using the already renamed feature (was persons)
+	ecoreref(renamedPersons).EOpposite.name = "renamedWorks"
+}

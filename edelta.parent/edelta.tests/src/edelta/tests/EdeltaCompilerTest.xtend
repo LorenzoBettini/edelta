@@ -3,6 +3,7 @@ package edelta.tests
 import com.google.common.base.Joiner
 import com.google.inject.Inject
 import edelta.testutils.EdeltaTestUtils
+import java.util.List
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.resource.FileExtensionProvider
@@ -21,7 +22,6 @@ import org.junit.runner.RunWith
 import static edelta.testutils.EdeltaTestUtils.*
 
 import static extension org.junit.Assert.*
-import java.util.List
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
@@ -1064,6 +1064,127 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCompilationOfRenameReferencesAcrossEPackagesWithRealEcoreFiles() {
+		// it is crucial to use real ecore files so that we mimick what happens in
+		// the workbench and make sure that original ecores are not modified.
+		val rs = createResourceSetWithEcores(
+		#[TEST1_REFS_ECORE, TEST2_REFS_ECORE],
+		'''
+			package test
+			
+			metamodel "testecoreforreferences1"
+			metamodel "testecoreforreferences2"
+
+			modifyEcore aTest1 epackage testecoreforreferences1 {
+				// renames WorkPlace.persons to renamedPersons
+				ecoreref(Person.works).EOpposite.name = "renamedPersons"
+			}
+			modifyEcore aTest2 epackage testecoreforreferences2 {
+				// renames Person.works to renamedWorks
+				// using the already renamed feature (was persons)
+				ecoreref(renamedPersons).EOpposite.name = "renamedWorks"
+			}
+		''')
+		rs.addEPackagesWithReferencesForTests
+		checkCompilation(rs,
+			'''
+			package test;
+			
+			import edelta.lib.AbstractEdelta;
+			import org.eclipse.emf.ecore.EPackage;
+			import org.eclipse.emf.ecore.EReference;
+			
+			@SuppressWarnings("all")
+			public class Example extends AbstractEdelta {
+			  public Example() {
+			    
+			  }
+			  
+			  public Example(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  public void aTest1(final EPackage it) {
+			    EReference _eOpposite = getEReference("testecoreforreferences1", "Person", "works").getEOpposite();
+			    _eOpposite.setName("renamedPersons");
+			  }
+			  
+			  public void aTest2(final EPackage it) {
+			    EReference _eOpposite = getEReference("testecoreforreferences2", "WorkPlace", "renamedPersons").getEOpposite();
+			    _eOpposite.setName("renamedWorks");
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("testecoreforreferences1");
+			    ensureEPackageIsLoaded("testecoreforreferences2");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    aTest1(getEPackage("testecoreforreferences1"));
+			    aTest2(getEPackage("testecoreforreferences2"));
+			  }
+			}
+			''',
+			true
+		)
+	}
+
+	@Test
+	def void testExecutionOfRenameReferencesAcrossEPackagesWithRealEcoreFiles() {
+		checkCompiledCodeExecution(
+			#[TEST1_REFS_ECORE, TEST2_REFS_ECORE],
+			'''
+				package test
+
+				metamodel "testecoreforreferences1"
+				metamodel "testecoreforreferences2"
+
+				modifyEcore aTest1 epackage testecoreforreferences1 {
+					// renames WorkPlace.persons to renamedPersons
+					ecoreref(Person.works).EOpposite.name = "renamedPersons"
+				}
+				modifyEcore aTest2 epackage testecoreforreferences2 {
+					// renames Person.works to renamedWorks
+					// using the already renamed feature (was persons)
+					ecoreref(renamedPersons).EOpposite.name = "renamedWorks"
+				}
+			''',
+			#[
+				TEST1_REFS_ECORE ->
+				'''
+				<?xml version="1.0" encoding="UTF-8"?>
+				<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="testecoreforreferences1" nsURI="http://my.testecoreforreferences1.org"
+				    nsPrefix="testecoreforreferences1">
+				  <eClassifiers xsi:type="ecore:EClass" name="Person">
+				    <eStructuralFeatures xsi:type="ecore:EAttribute" name="firstname" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+				    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lastname" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+				    <eStructuralFeatures xsi:type="ecore:EReference" name="renamedWorks" lowerBound="1"
+				        eType="ecore:EClass TestEcoreForReferences2.ecore#//WorkPlace" eOpposite="TestEcoreForReferences2.ecore#//WorkPlace/renamedPersons"/>
+				  </eClassifiers>
+				</ecore:EPackage>
+				''',
+				TEST2_REFS_ECORE ->
+				'''
+				<?xml version="1.0" encoding="UTF-8"?>
+				<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="testecoreforreferences2" nsURI="http://my.testecoreforreferences2.org"
+				    nsPrefix="testecoreforreferences2">
+				  <eClassifiers xsi:type="ecore:EClass" name="WorkPlace">
+				    <eStructuralFeatures xsi:type="ecore:EReference" name="renamedPersons" upperBound="-1"
+				        eType="ecore:EClass TestEcoreForReferences1.ecore#//Person" eOpposite="TestEcoreForReferences1.ecore#//Person/renamedWorks"/>
+				    <eStructuralFeatures xsi:type="ecore:EAttribute" name="address" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+				  </eClassifiers>
+				</ecore:EPackage>
+				'''
+			],
+			true
+		)
+	}
+
+	@Test
 	def void testExecutionOfComplexOperationsWithSubPackages() {
 		'''
 			metamodel "foo"
@@ -1387,6 +1508,36 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			edeltaObj.invoke("execute")
 			edeltaObj.invoke("saveModifiedEcores", #[MODIFIED])
 			compareSingleFileContents(MODIFIED+"/foo.ecore", expectedGeneratedEcore.toString)
+		]
+	}
+
+	def private checkCompiledCodeExecution(List<String> ecoreNames,
+			CharSequence input,
+			List<Pair<CharSequence, CharSequence>> expectedModifiedEcores,
+			boolean checkValidationErrors) {
+		wipeModifiedDirectoryContents
+		val rs = createResourceSetWithEcores(ecoreNames, input)
+		rs.compile [
+			if (checkValidationErrors) {
+				assertNoValidationErrors
+			}
+			if (checkValidationErrors) {
+				assertGeneratedJavaCodeCompiles
+			}
+			val genClass = compiledClass
+			val edeltaObj = genClass.getDeclaredConstructor().newInstance()
+			// load ecore files
+			for (ecoreName : ecoreNames) {
+				edeltaObj.invoke("loadEcoreFile", #[METAMODEL_PATH + ecoreName])
+			}
+			edeltaObj.invoke("execute")
+			edeltaObj.invoke("saveModifiedEcores", #[MODIFIED])
+			for (expected : expectedModifiedEcores) {
+				compareSingleFileContents(
+					MODIFIED+"/"+expected.key,
+					expected.value.toString
+				)
+			}
 		]
 	}
 

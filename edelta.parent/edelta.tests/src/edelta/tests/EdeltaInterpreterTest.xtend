@@ -17,6 +17,7 @@ import edelta.validation.EdeltaValidator
 import java.util.List
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.xbase.XbasePackage
@@ -902,6 +903,38 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			derivedEPackage.firstEClass => [
 				assertTrue(isAbstract)
 			]
+		]
+	}
+
+	@Test def void testRenameReferencesAcrossEPackages() {
+		'''
+			package test
+
+			metamodel "testecoreforreferences1"
+			metamodel "testecoreforreferences2"
+
+			modifyEcore aTest1 epackage testecoreforreferences1 {
+				// renames WorkPlace.persons to renamedPersons
+				ecoreref(Person.works).EOpposite.name = "renamedPersons"
+			}
+			modifyEcore aTest2 epackage testecoreforreferences2 {
+				// renames Person.works to renamedWorks
+				// using the already renamed feature (was persons)
+				ecoreref(renamedPersons).EOpposite.name = "renamedWorks"
+			}
+		'''.parseWithTestEcoresWithReferences => [
+			val map = interpretProgram
+			val testecoreforreferences1 = map.get("testecoreforreferences1")
+			val testecoreforreferences2 = map.get("testecoreforreferences2")
+			val person = testecoreforreferences1.getEClassByName("Person")
+			assertThat(person.EStructuralFeatures.filter(EReference).map[name])
+				.containsOnly("renamedWorks")
+			val workplace = testecoreforreferences2.getEClassByName("WorkPlace")
+			assertThat(workplace.EStructuralFeatures.filter(EReference).map[name])
+				.containsOnly("renamedPersons")
+			val unresolvedEcoreRefs =
+				derivedStateHelper.getUnresolvedEcoreReferences(eResource)
+			assertThat(unresolvedEcoreRefs).isEmpty
 		]
 	}
 

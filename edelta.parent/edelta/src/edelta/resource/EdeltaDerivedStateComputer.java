@@ -1,6 +1,9 @@
 package edelta.resource;
 
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
+
+import java.util.List;
 
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -12,6 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import edelta.edelta.EdeltaEcoreReferenceExpression;
+import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreterHelper;
@@ -52,16 +56,24 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 				return;
 			}
 			final var copiedEPackagesMap = this.getCopiedEPackagesMap(resource);
-			for (var op : modifyEcoreOperations) {
-				// make sure packages under modification are copied
-				getOrAddDerivedStateEPackage(op.getEpackage(), copiedEPackagesMap);
-			}
+			// make sure packages under modification are copied
+			copyEPackages(modifyEcoreOperations.stream()
+				.map(EdeltaModifyEcoreOperation::getEpackage)
+				.distinct()
+				.collect(toList()), copiedEPackagesMap);
 			// we must add the copied EPackages to the resource
 			resource.getContents().addAll(copiedEPackagesMap.values());
 			// record original ecore references before running the interpreter
 			recordEcoreReferenceOriginalENamedElement(resource);
 			// run the interpreter
 			runInterpreter(program, copiedEPackagesMap);
+		}
+	}
+
+	protected void copyEPackages(List<EPackage> packages, EdeltaCopiedEPackagesMap copiedEPackagesMap) {
+		var copies = EdeltaEcoreUtil.copyEPackages(packages);
+		for (var copy : copies) {
+			copiedEPackagesMap.computeIfAbsent(copy.getName(), key -> copy);
 		}
 	}
 
@@ -76,12 +88,6 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 		for (var r : references) {
 			originalENamedElementRecorder.recordOriginalENamedElement(r.getReference());
 		}
-	}
-
-	protected EPackage getOrAddDerivedStateEPackage(final EPackage originalEPackage,
-			final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
-		return copiedEPackagesMap.computeIfAbsent(originalEPackage.getName(),
-			key -> EdeltaEcoreUtil.copyENamedElement(originalEPackage));
 	}
 
 	@Override

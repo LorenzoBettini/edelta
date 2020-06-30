@@ -1,0 +1,15 @@
+package edelta.twopackages.example
+
+metamodel "person"
+metamodel "workplace"
+
+modifyEcore aTest1 epackage person {
+	// renames WorkPlace.persons to renamedPersons
+	ecoreref(works).EOpposite.name = "renamedPersons"
+}
+
+modifyEcore aTest2 epackage workplace {
+	// renames Person.works to renamedWorks
+	// using the already renamed feature (was persons)
+	ecoreref(renamedPersons).EOpposite.name = "renamedWorks"
+}

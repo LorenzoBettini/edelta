@@ -49,6 +49,67 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCopiedEPackagesWhenDuplicateImports() {
+		val program = '''
+		package test
+		
+		metamodel "foo"
+		metamodel "foo"
+		
+		modifyEcore aTest1 epackage foo {}
+		modifyEcore aTest2 epackage foo {}
+		'''.
+		parseWithTestEcore
+		val packages = program.eResource.copiedEPackagesMap.values
+		assertThat(packages.map[name])
+			.containsExactly("foo")
+	}
+
+	@Test
+	def void testCopiedEPackagesWhenUnresolvedPackages() {
+		val program = '''
+		package test
+		
+		metamodel "unresolved"
+		metamodel "unresolved"
+		
+		modifyEcore aTest1 epackage unresolved {}
+		modifyEcore aTest2 epackage unresolved {}
+		'''.
+		parseWithTestEcore
+		val packages = program.eResource.copiedEPackagesMap.values
+		assertThat(packages).hasSize(1)
+	}
+
+	@Test
+	def void testCopiedEPackagesWithReferences() {
+		val program = '''
+		package test
+		
+		metamodel "testecoreforreferences1"
+		metamodel "testecoreforreferences2"
+		
+		modifyEcore aTest1 epackage testecoreforreferences1 {}
+		modifyEcore aTest2 epackage testecoreforreferences2 {}
+		'''.
+		parseWithTestEcoresWithReferences
+		val packages = program.eResource.copiedEPackagesMap.values
+		assertThat(packages).hasSize(2)
+		val testecoreforreferences1 = packages.getByName("testecoreforreferences1")
+		val testecoreforreferences2 = packages.getByName("testecoreforreferences2")
+		val person = testecoreforreferences1.getEClassByName("Person")
+		val workplace = testecoreforreferences2.getEClassByName("WorkPlace")
+		assertSame(
+			person.getEReferenceByName("works").EOpposite,
+			workplace.getEReferenceByName("persons")
+		)
+		assertSame(
+			person.getEReferenceByName("works"),
+			workplace.getEReferenceByName("persons").EOpposite
+		)
+	}
+
+	@Test
 	def void testInvalidDirectSubPackageAreNotCopied() {
 		val program = '''
 		package test
@@ -79,20 +140,6 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		// only program must be there and the inferred Jvm Type
 		// since we don't install anything during preIndexingPhase
 		assertEquals("test.__synthetic0", (resource.contents.last as JvmGenericType).identifier)
-	}
-
-	@Test
-	def void testDerivedStateEcoreModifyWithMissingReferredPackage() {
-		val program = '''
-		package test
-		
-		modifyEcore aTest1 epackage foo {}
-		'''.
-		parseWithTestEcore
-		val packages = program.eResource.copiedEPackagesMap.values
-		assertThat(packages)
-			.hasSize(1)
-			.allMatch[p | p.eIsProxy]
 	}
 
 	@Test

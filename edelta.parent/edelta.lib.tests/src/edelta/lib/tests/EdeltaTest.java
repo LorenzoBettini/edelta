@@ -8,7 +8,6 @@ import static edelta.testutils.EdeltaTestUtils.compareFileContents;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -16,25 +15,23 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.WrappedException;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
-import org.eclipse.emf.ecore.EGenericType;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
-import org.eclipse.emf.ecore.impl.BasicEObjectImpl;
-import org.eclipse.emf.ecore.impl.EGenericTypeImpl;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.util.Wrapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,8 +59,10 @@ public class EdeltaTest {
 	private static final String MY_MAINPACKAGE = "mainpackage";
 	private static final String MY_SUBPACKAGE = "subpackage";
 	private static final String MY_SUBSUBPACKAGE = "subsubpackage";
-	private static final String TEST_ECORE_FOR_REFERENCES = "TestEcoreForReferences.ecore";
-	private static final String TEST_PACKAGE_FOR_REFERENCES = "testecoreforreferences";
+	private static final String TEST_ECORE_FOR_REFERENCES1 = "TestEcoreForReferences1.ecore";
+	private static final String TEST_PACKAGE_FOR_REFERENCES1 = "testecoreforreferences1";
+	private static final String TEST_ECORE_FOR_REFERENCES2 = "TestEcoreForReferences2.ecore";
+	private static final String TEST_PACKAGE_FOR_REFERENCES2 = "testecoreforreferences2";
 	private static final String TESTECORES = "testecores/";
 
 	public static class TestableEdelta extends AbstractEdelta {
@@ -354,132 +353,34 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testCopyEClassifier() {
-		loadTestEcore(MY_ECORE);
-		// modify the ecore model by copying MyBaseClass
-		EClass original = edelta.getEClass(MYPACKAGE, "MyDerivedClass");
-		EClass copy = (EClass) edelta.copyEClassifier(MYPACKAGE, "MyDerivedClass");
-		// check that the copy has the same attributes as the original one (in turn, copied)
-		EList<EStructuralFeature> originalFeatures = original.getEAllStructuralFeatures();
-		EList<EStructuralFeature> copiedFeatures = copy.getEAllStructuralFeatures();
-		assertEquals(originalFeatures.size(), copiedFeatures.size());
-		assertSame(original.getESuperTypes().get(0), copy.getESuperTypes().get(0));
-		// inherited features are references so they're not copied
-		assertSame(originalFeatures.get(0), copiedFeatures.get(0));
-		assertSame(originalFeatures.get(1), copiedFeatures.get(1));
-		// declared features are instead copied
-		assertNotSame(originalFeatures.get(2), copiedFeatures.get(2));
-		assertNotSame(originalFeatures.get(3), copiedFeatures.get(3));
-		assertEquals(originalFeatures.get(2).getName(), copiedFeatures.get(2).getName());
-		assertEquals(originalFeatures.get(3).getName(), copiedFeatures.get(3).getName());
-	}
-
-	@Test
-	public void testCopyEClassifierDoesNotResolveProxies() {
-		// We use EGenericType for playing with references and proxies, since using
-		// EClass.superTypes for that does not seem to be easy...
-		loadTestEcore(TEST_ECORE_FOR_REFERENCES);
-		// modify the ecore model by copying MyBaseClass
-		EClass original = edelta.getEClass(TEST_PACKAGE_FOR_REFERENCES, "MyClass");
-		EClass referred = edelta.getEClass(TEST_PACKAGE_FOR_REFERENCES, "MyReferredType");
-		EGenericType genericType = original.getETypeParameters().get(0).getEBounds().get(0);
-		EClassifier eClassifier = genericType.getEClassifier();
-		assertNull(eClassifier);
-		// explicitly set proxy for the reference EGenericType.eClassifier
-		eClassifier = EcoreFactory.eINSTANCE.createEClass();
-		((BasicEObjectImpl) eClassifier).eSetProxyURI(EcoreUtil.getURI(referred));
-		assertTrue(eClassifier.eIsProxy());
-		genericType.setEClassifier(eClassifier);
-		// perform copy and make sure proxy resolution is not triggered during the copy
-		EClass copy = (EClass) edelta.copyEClassifier(TEST_PACKAGE_FOR_REFERENCES, "MyClass");
-		EGenericType genericTypeCopied = copy.getETypeParameters().get(0).getEBounds().get(0);
-		// use basicGet, otherwise we trigger resolution of proxies
-		eClassifier = ((EGenericTypeImpl)genericTypeCopied).basicGetEClassifier();
-		assertTrue(eClassifier.eIsProxy());
-		// proxy resolution is not triggered in the original object either
-		eClassifier = ((EGenericTypeImpl)genericType).basicGetEClassifier();
-		assertTrue(eClassifier.eIsProxy());
-	}
-
-	@Test
-	public void testCopyEClassifierForEOppositeReferenceDoesNotWork() {
-		loadTestEcore(TEST_ECORE_FOR_REFERENCES);
-		EPackage original = edelta.getEPackage(TEST_PACKAGE_FOR_REFERENCES);
-		EClass person = getEClassByName(original.getEClassifiers(), "Person");
-		EClass workplace = getEClassByName(original.getEClassifiers(), "WorkPlace");
+	public void testCopyENamedElementEOppositeReferenceWorksAcrossEPackages() {
+		loadTestEcore(TEST_ECORE_FOR_REFERENCES1);
+		loadTestEcore(TEST_ECORE_FOR_REFERENCES2);
+		EPackage original1 = edelta.getEPackage(TEST_PACKAGE_FOR_REFERENCES1);
+		EPackage original2 = edelta.getEPackage(TEST_PACKAGE_FOR_REFERENCES2);
+		EClass person = getEClassByName(original1.getEClassifiers(), "Person");
+		EClass workplace = getEClassByName(original2.getEClassifiers(), "WorkPlace");
 		EReference works = getEReferenceByName(person.getEStructuralFeatures(), "works");
 		EReference persons = getEReferenceByName(workplace.getEStructuralFeatures(), "persons");
 		assertSame(works.getEOpposite(), persons);
-		// perform copy and EOpposite refers to the original opposite
-		// and that is bad for us!
-		EPackage another = EcoreFactory.eINSTANCE.createEPackage();
-		another.setName(TEST_PACKAGE_FOR_REFERENCES);
-		person = (EClass) edelta.copyEClassifier(TEST_PACKAGE_FOR_REFERENCES, "Person");
-		workplace = (EClass) edelta.copyEClassifier(TEST_PACKAGE_FOR_REFERENCES, "WorkPlace");
-		another.getEClassifiers().add(person);
-		another.getEClassifiers().add(workplace);
-		works = getEReferenceByName(person.getEStructuralFeatures(), "works");
-		persons = getEReferenceByName(workplace.getEStructuralFeatures(), "persons");
-		assertNotNull(works.getEOpposite());
-		assertNotNull(persons.getEOpposite());
-		assertNotSame(works.getEOpposite(), persons);
-	}
-
-	@Test
-	public void testCopyENamedElementEOppositeReferenceWorks() {
-		loadTestEcore(TEST_ECORE_FOR_REFERENCES);
-		EPackage original = edelta.getEPackage(TEST_PACKAGE_FOR_REFERENCES);
-		EClass person = getEClassByName(original.getEClassifiers(), "Person");
-		EClass workplace = getEClassByName(original.getEClassifiers(), "WorkPlace");
-		EReference works = getEReferenceByName(person.getEStructuralFeatures(), "works");
-		EReference persons = getEReferenceByName(workplace.getEStructuralFeatures(), "persons");
-		assertSame(works.getEOpposite(), persons);
+		assertSame(persons.getEOpposite(), works);
 		// perform copy and EOpposite refers to the copied opposite
 		// and that is good for us!
-		EPackage another = EdeltaEcoreUtil.copyENamedElement(original);
-		another.setName(TEST_PACKAGE_FOR_REFERENCES);
-		person = getEClassByName(another.getEClassifiers(), "Person");
-		workplace = getEClassByName(another.getEClassifiers(), "WorkPlace");
+		Collection<EPackage> copyEPackages =
+			EdeltaEcoreUtil.copyEPackages(Arrays.asList(original1, original2));
+		Iterator<EPackage> iterator = copyEPackages.iterator();
+		EPackage copied1 = iterator.next();
+		EPackage copied2 = iterator.next();
+		// the following is not true anymore, since we resolve proxies while copying:
+		// everything must be in a resource set, and the resources
+		// for the copied EPackages must have the same URIs of the
+		// original resources for the references to be resolved.
+		person = getEClassByName(copied1.getEClassifiers(), "Person");
+		workplace = getEClassByName(copied2.getEClassifiers(), "WorkPlace");
 		works = getEReferenceByName(person.getEStructuralFeatures(), "works");
 		persons = getEReferenceByName(workplace.getEStructuralFeatures(), "persons");
 		assertSame(works.getEOpposite(), persons);
-	}
-
-	@Test
-	public void testCopyENamedElementWithSubPackages() {
-		loadTestEcore(MY_SUBPACKAGES_ECORE);
-		EPackage originalPackage = edelta.getEPackage(MY_MAINPACKAGE);
-		EPackage originalSubPackage = originalPackage.getESubpackages().get(0);
-		EClass originalmyclass = getEClassByName(originalPackage.getEClassifiers(), "MyClass");
-		// perform copy and EOpposite refers to the copied opposite
-		// and that is good for us!
-		EPackage copied = EdeltaEcoreUtil.copyENamedElement(originalPackage);
-		EClass copiedmyclass = getEClassByName(copied.getEClassifiers(), "MyClass");
-		EPackage copiedSubPackage = copied.getESubpackages().get(0);
-		assertNotNull(copiedmyclass);
-		assertNotSame(copiedmyclass, originalmyclass);
-		assertNotNull(copiedSubPackage);
-		assertNotSame(copiedSubPackage, originalSubPackage);
-		assertSame(copied, copiedSubPackage.getESuperPackage());
-	}
-
-	@Test
-	public void testSaveModifiedEcoresAfterCopyingDerivedClass() throws IOException {
-		loadTestEcore(MY_ECORE);
-		// modify the ecore model by copying MyDerivedClass
-		// and then rename it to avoid having duplicates in the saved ecore
-		// which would not be valid
-		EClassifier copy = edelta.copyEClassifier(MYPACKAGE, "MyDerivedClass");
-		copy.setName("COPIED");
-		EPackage p = edelta.getEPackage(MYPACKAGE);
-		p.getEClassifiers().add(copy);
-		wipeModifiedDirectoryContents();
-		edelta.saveModifiedEcores(MODIFIED);
-		compareFileContents(
-				EXPECTATIONS+"/"+
-					"testSaveModifiedEcoresAfterCopyingDerivedClass"+"/"+
-						MY_ECORE,
-				MODIFIED+"/"+MY_ECORE);
+		assertSame(persons.getEOpposite(), works);
 	}
 
 	@Test
