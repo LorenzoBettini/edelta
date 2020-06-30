@@ -2,6 +2,7 @@ package edelta.tests;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
+import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderTestableDerivedStateComputer;
@@ -24,6 +25,7 @@ import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
+import org.eclipse.xtext.xbase.lib.ListExtensions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Pair;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
@@ -2486,8 +2488,8 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   
   @Test
   public void testCompilationOfPersonListExampleModifyEcore() {
-    final ResourceSet rs = this.createResourceSetWithEcore(
-      EdeltaAbstractTest.PERSON_LIST_ECORE, 
+    final ResourceSet rs = this.createResourceSetWithEcores(
+      Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList(EdeltaAbstractTest.PERSON_LIST_ECORE)), 
       this._inputs.personListExampleModifyEcore());
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package edelta.personlist.example;");
@@ -2782,16 +2784,24 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     }
   }
   
-  private ResourceSet createResourceSetWithEcore(final String ecoreName, final CharSequence input) {
+  private ResourceSet createResourceSetWithEcores(final List<String> ecoreNames, final CharSequence input) {
     try {
       String _loadFile = EdeltaTestUtils.loadFile((EdeltaAbstractTest.METAMODEL_PATH + EdeltaAbstractTest.ECORE_ECORE));
       Pair<String, String> _mappedTo = Pair.<String, String>of(EdeltaAbstractTest.ECORE_ECORE, _loadFile);
-      String _loadFile_1 = EdeltaTestUtils.loadFile((EdeltaAbstractTest.METAMODEL_PATH + ecoreName));
-      Pair<String, String> _mappedTo_1 = Pair.<String, String>of(ecoreName, _loadFile_1);
       String _primaryFileExtension = this.extensionProvider.getPrimaryFileExtension();
       String _plus = ("Example." + _primaryFileExtension);
-      Pair<String, CharSequence> _mappedTo_2 = Pair.<String, CharSequence>of(_plus, input);
-      final ArrayList<Pair<String, ? extends CharSequence>> pairs = CollectionLiterals.<Pair<String, ? extends CharSequence>>newArrayList(_mappedTo, _mappedTo_1, _mappedTo_2);
+      Pair<String, CharSequence> _mappedTo_1 = Pair.<String, CharSequence>of(_plus, input);
+      final ArrayList<Pair<String, ? extends CharSequence>> pairs = CollectionLiterals.<Pair<String, ? extends CharSequence>>newArrayList(_mappedTo, _mappedTo_1);
+      final Function1<String, Pair<String, String>> _function = (String ecoreName) -> {
+        try {
+          String _loadFile_1 = EdeltaTestUtils.loadFile((EdeltaAbstractTest.METAMODEL_PATH + ecoreName));
+          return Pair.<String, String>of(ecoreName, _loadFile_1);
+        } catch (Throwable _e) {
+          throw Exceptions.sneakyThrow(_e);
+        }
+      };
+      List<Pair<String, String>> _map = ListExtensions.<String, Pair<String, String>>map(ecoreNames, _function);
+      Iterables.<Pair<String, ? extends CharSequence>>addAll(pairs, _map);
       final ResourceSet rs = this.compilationTestHelper.resourceSet(((Pair<String, ? extends CharSequence>[])Conversions.unwrapArray(pairs, Pair.class)));
       return rs;
     } catch (Throwable _e) {
