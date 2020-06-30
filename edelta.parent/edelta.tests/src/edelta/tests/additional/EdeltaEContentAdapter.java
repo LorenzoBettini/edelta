@@ -28,6 +28,8 @@ public class EdeltaEContentAdapter extends EContentAdapter {
 	@Override
 	public void notifyChanged(Notification notification) {
 		super.notifyChanged(notification);
+		if (notification.isTouch())
+			return;
 
 		throw new EdeltaEContentAdapterException(notification);
 	}
