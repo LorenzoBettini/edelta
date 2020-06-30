@@ -5,9 +5,9 @@ package edelta.tests.additional;
 
 import java.util.List;
 
-import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 
+import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.resource.EdeltaDerivedStateComputer;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
@@ -33,9 +33,12 @@ public class EdeltaDerivedStateComputerWithoutInterpreter extends EdeltaDerivedS
 	}
 
 	@Override
-	protected void copyEPackages(List<EPackage> packages, EdeltaCopiedEPackagesMap copiedEPackagesMap) {
-		packages.stream()
+	protected void copyEPackages(List<EdeltaModifyEcoreOperation> modifyEcoreOperations,
+			EdeltaCopiedEPackagesMap copiedEPackagesMap) {
+		final var originalEPackages =
+			((EdeltaProgram) modifyEcoreOperations.get(0).eContainer()).getMetamodels();
+		originalEPackages.stream()
 			.forEach(p -> p.eAdapters().add(new EdeltaEContentAdapter()));
-		super.copyEPackages(packages, copiedEPackagesMap);
+		super.copyEPackages(modifyEcoreOperations, copiedEPackagesMap);
 	}
 }
