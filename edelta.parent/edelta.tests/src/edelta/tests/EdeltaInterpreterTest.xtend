@@ -1578,26 +1578,26 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			val elements1 = derivedStateHelper.getAccessibleElements(ecoreref1)
 			assertQualifiedNames(elements1,
 				'''
-				foo.FooClass
-				foo.FooDataType
-				foo.FooEnum
 				foo.FooClass.myAttribute
 				foo.FooClass.myReference
-				foo.FooEnum.FooEnumLiteral
 				foo
+				foo.FooEnum
+				foo.FooEnum.FooEnumLiteral
+				foo.FooClass
+				foo.FooDataType
 				'''
 			)
 			val elements2 = derivedStateHelper.getAccessibleElements(ecoreref2)
 			assertQualifiedNames(elements2,
 				'''
-				foo.FooClass
-				foo.FooDataType
-				foo.FooEnum
 				foo.ANewClass
 				foo.FooClass.myAttribute
 				foo.FooClass.myReference
-				foo.FooEnum.FooEnumLiteral
 				foo
+				foo.FooEnum
+				foo.FooEnum.FooEnumLiteral
+				foo.FooClass
+				foo.FooDataType
 				'''
 			)
 			val elements3 = derivedStateHelper.getAccessibleElements(ecoreref3)
@@ -1607,11 +1607,11 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			val elements4 = derivedStateHelper.getAccessibleElements(ecoreref4)
 			assertQualifiedNames(elements4,
 				'''
-				foo.FooDataType
-				foo.FooEnum
 				foo.ANewClass
-				foo.FooEnum.FooEnumLiteral
 				foo
+				foo.FooEnum
+				foo.FooEnum.FooEnumLiteral
+				foo.FooDataType
 				'''
 			)
 		]

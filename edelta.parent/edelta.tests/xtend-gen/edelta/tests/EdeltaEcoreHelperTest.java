@@ -146,21 +146,21 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       EdeltaAccessibleElements _programCopiedENamedElements = this._edeltaEcoreHelper.getProgramCopiedENamedElements(it);
       StringConcatenation _builder = new StringConcatenation();
-      _builder.append("foo.FooClass");
-      _builder.newLine();
-      _builder.append("foo.FooDataType");
-      _builder.newLine();
-      _builder.append("foo.FooEnum");
-      _builder.newLine();
-      _builder.append("foo.NewClass");
-      _builder.newLine();
       _builder.append("foo.FooClass.myAttribute");
       _builder.newLine();
       _builder.append("foo.FooClass.myReference");
       _builder.newLine();
+      _builder.append("foo");
+      _builder.newLine();
+      _builder.append("foo.NewClass");
+      _builder.newLine();
+      _builder.append("foo.FooEnum");
+      _builder.newLine();
       _builder.append("foo.FooEnum.FooEnumLiteral");
       _builder.newLine();
-      _builder.append("foo");
+      _builder.append("foo.FooClass");
+      _builder.newLine();
+      _builder.append("foo.FooDataType");
       _builder.newLine();
       this.assertQualifiedNames(_programCopiedENamedElements, _builder);
     };
@@ -173,13 +173,13 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       EdeltaAccessibleElements _programCopiedENamedElements = this._edeltaEcoreHelper.getProgramCopiedENamedElements(it);
       StringConcatenation _builder = new StringConcatenation();
-      _builder.append("foo.FooDataType");
+      _builder.append("foo");
       _builder.newLine();
       _builder.append("foo.FooEnum");
       _builder.newLine();
       _builder.append("foo.FooEnum.FooEnumLiteral");
       _builder.newLine();
-      _builder.append("foo");
+      _builder.append("foo.FooDataType");
       _builder.newLine();
       this.assertQualifiedNames(_programCopiedENamedElements, _builder);
     };

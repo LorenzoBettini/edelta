@@ -98,14 +98,14 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			getProgramCopiedENamedElements.
 			assertQualifiedNames(
 				'''
-				foo.FooClass
-				foo.FooDataType
-				foo.FooEnum
-				foo.NewClass
 				foo.FooClass.myAttribute
 				foo.FooClass.myReference
-				foo.FooEnum.FooEnumLiteral
 				foo
+				foo.NewClass
+				foo.FooEnum
+				foo.FooEnum.FooEnumLiteral
+				foo.FooClass
+				foo.FooDataType
 				'''
 			)
 		// NewClass is the one created in the program
@@ -118,10 +118,10 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			getProgramCopiedENamedElements.
 			assertQualifiedNames(
 				'''
-				foo.FooDataType
+				foo
 				foo.FooEnum
 				foo.FooEnum.FooEnumLiteral
-				foo
+				foo.FooDataType
 				'''
 				// FooClass has been removed
 			)

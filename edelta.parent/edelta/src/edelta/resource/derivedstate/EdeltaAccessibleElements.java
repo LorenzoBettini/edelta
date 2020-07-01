@@ -1,17 +1,17 @@
 package edelta.resource.derivedstate;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 import org.eclipse.xtext.naming.QualifiedName;
 
 /**
- * The list of available elements by their {@link QualifiedName}.
+ * The available elements by their {@link QualifiedName}.
  * 
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaAccessibleElements extends ArrayList<QualifiedName> {
+public class EdeltaAccessibleElements extends HashSet<QualifiedName> {
 
 	private static final long serialVersionUID = 1L;
 
