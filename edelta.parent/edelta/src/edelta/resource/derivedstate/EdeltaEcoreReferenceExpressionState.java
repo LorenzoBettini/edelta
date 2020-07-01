@@ -11,8 +11,13 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
 public class EdeltaEcoreReferenceExpressionState {
 
 	private EdeltaENamedElementXExpressionMap enamedElementXExpressionMap = new EdeltaENamedElementXExpressionMap();
+	private EdeltaEcoreReferenceExpressionAccessibleElements ecoreReferenceExpressionAccessibleElements = new EdeltaEcoreReferenceExpressionAccessibleElements();
 
 	public EdeltaENamedElementXExpressionMap getEnamedElementXExpressionMap() {
 		return enamedElementXExpressionMap;
+	}
+
+	public EdeltaEcoreReferenceExpressionAccessibleElements getAccessibleElements() {
+		return ecoreReferenceExpressionAccessibleElements;
 	}
 }

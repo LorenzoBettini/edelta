@@ -46,6 +46,7 @@ import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
+import edelta.util.EdeltaEcoreHelper;
 import edelta.util.EdeltaModelUtil;
 import edelta.validation.EdeltaValidator;
 
@@ -78,6 +79,9 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	@Inject
 	private EdeltaInterpreterDiagnosticHelper diagnosticHelper;
+
+	@Inject
+	private EdeltaEcoreHelper ecoreHelper;
 
 	private int interpreterTimeout =
 		Integer.parseInt(System.getProperty("edelta.interpreter.timeout", "2000"));
@@ -273,6 +277,9 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	private Object evaluateEcoreReferenceExpression(EdeltaEcoreReferenceExpression ecoreReferenceExpression, final IEvaluationContext context,
 			final CancelIndicator indicator) {
+		// always make sure to record the currently available elements
+		derivedStateHelper.getAccessibleElements(ecoreReferenceExpression)
+			.addAll(ecoreHelper.getProgramCopiedENamedElements(ecoreReferenceExpression));
 		final var ecoreReference = ecoreReferenceExpression.getReference();
 		if (ecoreReference == null || ecoreReference.getEnamedelement() == null)
 			return null;

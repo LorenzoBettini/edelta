@@ -1554,6 +1554,64 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testAccessibleElements() {
+		val input =
+		'''
+		metamodel "foo"
+		
+		modifyEcore aTest epackage foo {
+			ecoreref(FooClass) // 0
+			addNewEClass("ANewClass")
+			ecoreref(ANewClass) // 1
+			EClassifiers -= ecoreref(FooClass) // 2
+			ecoreref(ANewClass) // 3
+		}
+		'''
+		input
+		.parseWithTestEcore => [
+			interpretProgram
+			val ecoreref1 = allEcoreReferenceExpressions.get(0)
+			val ecoreref2 = allEcoreReferenceExpressions.get(1)
+			val ecoreref3 = allEcoreReferenceExpressions.get(3)
+			val elements1 = derivedStateHelper.getAccessibleElements(ecoreref1)
+			assertQualifiedNames(elements1,
+				'''
+				foo.FooClass
+				foo.FooDataType
+				foo.FooEnum
+				foo.FooClass.myAttribute
+				foo.FooClass.myReference
+				foo.FooEnum.FooEnumLiteral
+				foo
+				'''
+			)
+			val elements2 = derivedStateHelper.getAccessibleElements(ecoreref2)
+			assertQualifiedNames(elements2,
+				'''
+				foo.FooClass
+				foo.FooDataType
+				foo.FooEnum
+				foo.ANewClass
+				foo.FooClass.myAttribute
+				foo.FooClass.myReference
+				foo.FooEnum.FooEnumLiteral
+				foo
+				'''
+			)
+			val elements3 = derivedStateHelper.getAccessibleElements(ecoreref3)
+			assertQualifiedNames(elements3,
+				'''
+				foo.FooDataType
+				foo.FooEnum
+				foo.ANewClass
+				foo.FooEnum.FooEnumLiteral
+				foo
+				'''
+			)
+		]
+	}
+
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) {
