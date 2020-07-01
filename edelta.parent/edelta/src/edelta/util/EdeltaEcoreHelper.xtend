@@ -1,6 +1,7 @@
 package edelta.util
 
 import com.google.inject.Inject
+import edelta.resource.derivedstate.EdeltaAccessibleElements
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import java.util.List
 import org.eclipse.emf.ecore.EClass
@@ -8,11 +9,10 @@ import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
+import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.util.IResourceScopeCache
 
 import static edelta.util.EdeltaModelUtil.*
-import org.eclipse.xtext.naming.IQualifiedNameProvider
-import org.eclipse.xtext.naming.QualifiedName
 
 /**
  * Helper methods for accessing Ecore elements.
@@ -34,14 +34,14 @@ class EdeltaEcoreHelper {
 		]
 	}
 
-	def List<QualifiedName> getProgramCopiedENamedElements(EObject context) {
+	def EdeltaAccessibleElements getProgramCopiedENamedElements(EObject context) {
 		cache.get("getProgramCopiedENamedElements", context.eResource) [
 			val copied = context.eResource.copiedEPackagesMap.values
-			return (
+			return new EdeltaAccessibleElements((
 				copied.map[getAllENamedElements].flatten
 				+
 				copied
-			).map[fullyQualifiedName].filterNull.toList
+			).map[fullyQualifiedName].filterNull.toList)
 		]
 	}
 

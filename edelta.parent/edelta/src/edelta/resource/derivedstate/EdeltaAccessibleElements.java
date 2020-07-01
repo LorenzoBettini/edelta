@@ -1,6 +1,7 @@
 package edelta.resource.derivedstate;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import org.eclipse.xtext.naming.QualifiedName;
 
@@ -10,8 +11,16 @@ import org.eclipse.xtext.naming.QualifiedName;
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaEcoreReferenceExpressionAccessibleElements extends ArrayList<QualifiedName> {
+public class EdeltaAccessibleElements extends ArrayList<QualifiedName> {
 
 	private static final long serialVersionUID = 1L;
+
+	public EdeltaAccessibleElements() {
+		super();
+	}
+
+	public EdeltaAccessibleElements(Collection<? extends QualifiedName> c) {
+		super(c);
+	}
 
 }

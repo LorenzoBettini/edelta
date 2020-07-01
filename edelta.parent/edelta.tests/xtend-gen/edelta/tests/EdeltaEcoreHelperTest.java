@@ -2,16 +2,15 @@ package edelta.tests;
 
 import com.google.inject.Inject;
 import edelta.edelta.EdeltaProgram;
+import edelta.resource.derivedstate.EdeltaAccessibleElements;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderCustom;
 import edelta.util.EdeltaEcoreHelper;
-import java.util.List;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtend2.lib.StringConcatenation;
-import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.xbase.lib.Extension;
@@ -145,7 +144,7 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
   public void testProgramCopiedENamedElementsWithCreatedEClass() {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToCreatedEClass());
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      List<QualifiedName> _programCopiedENamedElements = this._edeltaEcoreHelper.getProgramCopiedENamedElements(it);
+      EdeltaAccessibleElements _programCopiedENamedElements = this._edeltaEcoreHelper.getProgramCopiedENamedElements(it);
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("foo.FooClass");
       _builder.newLine();
@@ -172,7 +171,7 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
   public void testProgramCopiedENamedElementsWithRemovedEClass() {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToEClassRemoved());
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      List<QualifiedName> _programCopiedENamedElements = this._edeltaEcoreHelper.getProgramCopiedENamedElements(it);
+      EdeltaAccessibleElements _programCopiedENamedElements = this._edeltaEcoreHelper.getProgramCopiedENamedElements(it);
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("foo.FooDataType");
       _builder.newLine();

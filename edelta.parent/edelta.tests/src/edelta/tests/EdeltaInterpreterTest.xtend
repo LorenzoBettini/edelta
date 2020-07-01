@@ -1573,7 +1573,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			interpretProgram
 			val ecoreref1 = allEcoreReferenceExpressions.get(0)
 			val ecoreref2 = allEcoreReferenceExpressions.get(1)
-			val ecoreref3 = allEcoreReferenceExpressions.get(3)
+			val ecoreref3 = allEcoreReferenceExpressions.get(2)
+			val ecoreref4 = allEcoreReferenceExpressions.get(3)
 			val elements1 = derivedStateHelper.getAccessibleElements(ecoreref1)
 			assertQualifiedNames(elements1,
 				'''
@@ -1600,7 +1601,11 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				'''
 			)
 			val elements3 = derivedStateHelper.getAccessibleElements(ecoreref3)
-			assertQualifiedNames(elements3,
+			// nothing has changed between ecoreref 2 and 3
+			// so the available elements must be the same
+			assertThat(elements2).isSameAs(elements3)
+			val elements4 = derivedStateHelper.getAccessibleElements(ecoreref4)
+			assertQualifiedNames(elements4,
 				'''
 				foo.FooDataType
 				foo.FooEnum

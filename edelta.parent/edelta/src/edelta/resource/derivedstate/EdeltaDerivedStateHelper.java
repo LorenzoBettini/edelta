@@ -147,9 +147,15 @@ public class EdeltaDerivedStateHelper {
 		return getOrInstallAdapter(resource).getUnresolvedEcoreReferences();
 	}
 
-	public EdeltaEcoreReferenceExpressionAccessibleElements getAccessibleElements(EdeltaEcoreReferenceExpression ecoreRefExp) {
+	public EdeltaAccessibleElements getAccessibleElements(EdeltaEcoreReferenceExpression ecoreRefExp) {
 		return getEcoreReferenceExpressionState(ecoreRefExp)
 				.getAccessibleElements();
+	}
+
+	public void setAccessibleElements(EdeltaEcoreReferenceExpression ecoreRefExp,
+			EdeltaAccessibleElements accessibleElements) {
+		getEcoreReferenceExpressionState(ecoreRefExp)
+			.setAccessibleElements(accessibleElements);
 	}
 
 }

@@ -278,8 +278,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	private Object evaluateEcoreReferenceExpression(EdeltaEcoreReferenceExpression ecoreReferenceExpression, final IEvaluationContext context,
 			final CancelIndicator indicator) {
 		// always make sure to record the currently available elements
-		derivedStateHelper.getAccessibleElements(ecoreReferenceExpression)
-			.addAll(ecoreHelper.getProgramCopiedENamedElements(ecoreReferenceExpression));
+		derivedStateHelper.setAccessibleElements(ecoreReferenceExpression,
+				ecoreHelper.getProgramCopiedENamedElements(ecoreReferenceExpression));
 		final var ecoreReference = ecoreReferenceExpression.getReference();
 		if (ecoreReference == null || ecoreReference.getEnamedelement() == null)
 			return null;
