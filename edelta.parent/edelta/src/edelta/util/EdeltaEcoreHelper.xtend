@@ -31,6 +31,17 @@ class EdeltaEcoreHelper {
 		]
 	}
 
+	def List<? extends ENamedElement> getProgramCopiedENamedElements(EObject context) {
+		cache.get("getProgramCopiedENamedElements", context.eResource) [
+			val copied = context.eResource.copiedEPackagesMap.values
+			return (
+				copied.map[getAllENamedElements].flatten
+				+
+				copied
+			).toList
+		]
+	}
+
 	def private Iterable<? extends ENamedElement> getProgramENamedElementsInternal(EObject context) {
 		val prog = getProgram(context)
 		val epackages = getProgramTopLevelEPackages(context)
