@@ -938,6 +938,36 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testRenameReferencesAcrossEPackagesModifyingOnePackageOnly() {
+		'''
+			package test
+
+			metamodel "testecoreforreferences1"
+			metamodel "testecoreforreferences2"
+
+			modifyEcore aTest1 epackage testecoreforreferences1 {
+				// renames WorkPlace.persons to renamedPersons
+				ecoreref(Person.works).EOpposite.name = "renamedPersons"
+			}
+		'''.parseWithTestEcoresWithReferences => [
+			val map = interpretProgram
+			val testecoreforreferences1 = map.get("testecoreforreferences1")
+			val testecoreforreferences2 = map.get("testecoreforreferences2")
+			val person = testecoreforreferences1.getEClassByName("Person")
+			assertThat(person.EStructuralFeatures.filter(EReference).map[EOpposite.name])
+				.containsOnly("renamedPersons")
+			val workplace = testecoreforreferences2.getEClassByName("WorkPlace")
+			assertThat(workplace.EStructuralFeatures.filter(EReference).map[name])
+				.containsOnly("renamedPersons")
+			assertThat(person.EStructuralFeatures.filter(EReference).head.EOpposite)
+				.isSameAs(workplace.EStructuralFeatures.filter(EReference).head)
+			val unresolvedEcoreRefs =
+				derivedStateHelper.getUnresolvedEcoreReferences(eResource)
+			assertThat(unresolvedEcoreRefs).isEmpty
+		]
+	}
+
 	@Test def void testElementExpressionForCreatedEClassWithEdeltaAPI() {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
