@@ -37,6 +37,7 @@ import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
+import org.eclipse.xtext.naming.QualifiedName
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -311,6 +312,12 @@ abstract class EdeltaAbstractTest {
 	def protected assertNamedElements(Iterable<? extends ENamedElement> elements, CharSequence expected) {
 		expected.assertEqualsStrings(
 			elements.map[name].join("\n") + "\n"
+		)
+	}
+
+	def protected assertQualifiedNames(Iterable<QualifiedName> elements, CharSequence expected) {
+		expected.assertEqualsStrings(
+			elements.map[toString].join("\n") + "\n"
 		)
 	}
 

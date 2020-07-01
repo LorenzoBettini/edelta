@@ -35,6 +35,7 @@ import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.diagnostics.Severity;
+import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.resource.XtextResourceSet;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
@@ -545,6 +546,15 @@ public abstract class EdeltaAbstractTest {
       return it.getName();
     };
     String _join = IterableExtensions.join(IterableExtensions.map(elements, _function), "\n");
+    String _plus = (_join + "\n");
+    this.assertEqualsStrings(expected, _plus);
+  }
+  
+  protected void assertQualifiedNames(final Iterable<QualifiedName> elements, final CharSequence expected) {
+    final Function1<QualifiedName, String> _function = (QualifiedName it) -> {
+      return it.toString();
+    };
+    String _join = IterableExtensions.join(IterableExtensions.<QualifiedName, String>map(elements, _function), "\n");
     String _plus = (_join + "\n");
     this.assertEqualsStrings(expected, _plus);
   }

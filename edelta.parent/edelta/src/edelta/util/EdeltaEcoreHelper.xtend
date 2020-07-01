@@ -11,6 +11,8 @@ import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.util.IResourceScopeCache
 
 import static edelta.util.EdeltaModelUtil.*
+import org.eclipse.xtext.naming.IQualifiedNameProvider
+import org.eclipse.xtext.naming.QualifiedName
 
 /**
  * Helper methods for accessing Ecore elements.
@@ -24,6 +26,7 @@ class EdeltaEcoreHelper {
 
 	@Inject IResourceScopeCache cache
 	@Inject extension EdeltaDerivedStateHelper
+	@Inject extension IQualifiedNameProvider
 
 	def Iterable<? extends ENamedElement> getProgramENamedElements(EObject context) {
 		cache.get("getProgramENamedElements", context.eResource) [
@@ -31,14 +34,14 @@ class EdeltaEcoreHelper {
 		]
 	}
 
-	def List<? extends ENamedElement> getProgramCopiedENamedElements(EObject context) {
+	def List<QualifiedName> getProgramCopiedENamedElements(EObject context) {
 		cache.get("getProgramCopiedENamedElements", context.eResource) [
 			val copied = context.eResource.copiedEPackagesMap.values
 			return (
 				copied.map[getAllENamedElements].flatten
 				+
 				copied
-			).toList
+			).map[fullyQualifiedName].filterNull.toList
 		]
 	}
 
