@@ -309,6 +309,29 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  public void testQualifiedEcoreReferenceAfterRemoval() {
+    try {
+      ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"mypackage\"");
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage mypackage { ");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(MyBaseClass).EStructuralFeatures -= ecoreref(myBaseAttribute)");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(MyBaseClass.");
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("myBaseReference");
+      _builder_1.newLine();
+      _newBuilder.append(_builder.toString()).assertText(this.fromLinesOfStringsToStringArray(_builder_1));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
   public void testUnqualifiedEcoreReferenceAfterRename() {
     try {
       ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();

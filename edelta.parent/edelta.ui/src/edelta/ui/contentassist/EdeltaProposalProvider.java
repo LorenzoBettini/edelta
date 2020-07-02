@@ -69,4 +69,22 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 					qualifiedNameProvider.getFullyQualifiedName(desc.getEObjectOrProxy()))
 			);
 	}
+
+	/**
+	 * Only proposes elements that are available in this context.
+	 */
+	@Override
+	public void completeEdeltaEcoreReference_Enamedelement(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		final var accessibleElements =
+				derivedStateHelper.getAccessibleElements(
+						getContainerOfType(model, EdeltaEcoreReferenceExpression.class));
+		lookupCrossReference(
+				((CrossReference)assignment.getTerminal()),
+				context,
+				acceptor,
+				(IEObjectDescription desc) ->
+				accessibleElements.contains(
+						qualifiedNameProvider.getFullyQualifiedName(desc.getEObjectOrProxy()))
+				);
+	}
 }

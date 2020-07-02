@@ -19,6 +19,10 @@ modifyEcore SomeChanges epackage myecore {
 	// now MyEClass and its feature astring are not proposed
 	ecoreref(NewClass)
 
+	ecoreref(MyEEnum)
+//	ecoreref(MyEEnum).ELiterals.remove(0)
+	ecoreref(MyEEnum).addNewEEnumLiteral("second")
+
 	ecoreref(MyEEnum).name = "RenamedEnum"
 	// now MyEEnum is proposed with its new name
 	ecoreref(RenamedEnum)

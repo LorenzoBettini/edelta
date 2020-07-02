@@ -189,6 +189,18 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		// are not proposed since they are not present anymore in this context
 	}
 
+	@Test def void testQualifiedEcoreReferenceAfterRemoval() {
+		newBuilder.append('''
+			metamodel "mypackage"
+			modifyEcore aTest epackage mypackage { 
+				ecoreref(MyBaseClass).EStructuralFeatures -= ecoreref(myBaseAttribute)
+				ecoreref(MyBaseClass.''').
+			assertText('''
+				myBaseReference
+				'''.fromLinesOfStringsToStringArray)
+		// myBaseAttribute is not proposed since it's not present anymore in this context
+	}
+
 	@Test def void testUnqualifiedEcoreReferenceAfterRename() {
 		newBuilder.append('''
 			metamodel "mypackage"

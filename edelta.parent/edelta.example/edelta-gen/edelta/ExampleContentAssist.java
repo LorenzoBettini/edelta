@@ -24,6 +24,8 @@ public class ExampleContentAssist extends AbstractEdelta {
     EList<EClassifier> _eClassifiers = it.getEClassifiers();
     _eClassifiers.remove(getEClass("myecore", "MyEClass"));
     getEClass("myecore", "NewClass");
+    getEEnum("myecore", "MyEEnum");
+    this.lib.addNewEEnumLiteral(getEEnum("myecore", "MyEEnum"), "second");
     getEEnum("myecore", "MyEEnum").setName("RenamedEnum");
     getEEnum("myecore", "RenamedEnum");
   }
