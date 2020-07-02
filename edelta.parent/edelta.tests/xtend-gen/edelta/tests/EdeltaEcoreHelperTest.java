@@ -144,7 +144,7 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
   public void testProgramCopiedENamedElementsWithCreatedEClass() {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToCreatedEClass());
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      EdeltaAccessibleElements _programCopiedENamedElements = this._edeltaEcoreHelper.getProgramCopiedENamedElements(it);
+      EdeltaAccessibleElements _computeAccessibleElements = this._edeltaEcoreHelper.computeAccessibleElements(it);
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("foo.FooClass.myAttribute");
       _builder.newLine();
@@ -162,7 +162,7 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
       _builder.newLine();
       _builder.append("foo.FooDataType");
       _builder.newLine();
-      this.assertQualifiedNames(_programCopiedENamedElements, _builder);
+      this.assertQualifiedNames(_computeAccessibleElements, _builder);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
@@ -171,7 +171,7 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
   public void testProgramCopiedENamedElementsWithRemovedEClass() {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToEClassRemoved());
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      EdeltaAccessibleElements _programCopiedENamedElements = this._edeltaEcoreHelper.getProgramCopiedENamedElements(it);
+      EdeltaAccessibleElements _computeAccessibleElements = this._edeltaEcoreHelper.computeAccessibleElements(it);
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("foo");
       _builder.newLine();
@@ -181,7 +181,7 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
       _builder.newLine();
       _builder.append("foo.FooDataType");
       _builder.newLine();
-      this.assertQualifiedNames(_programCopiedENamedElements, _builder);
+      this.assertQualifiedNames(_computeAccessibleElements, _builder);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }

@@ -34,8 +34,8 @@ class EdeltaEcoreHelper {
 		]
 	}
 
-	def EdeltaAccessibleElements getProgramCopiedENamedElements(EObject context) {
-		cache.get("getProgramCopiedENamedElements", context.eResource) [
+	def EdeltaAccessibleElements computeAccessibleElements(EObject context) {
+		cache.get("computeAccessibleElements", context.eResource) [
 			val copied = context.eResource.copiedEPackagesMap.values
 			return new EdeltaAccessibleElements((
 				copied.map[getAllENamedElements].flatten

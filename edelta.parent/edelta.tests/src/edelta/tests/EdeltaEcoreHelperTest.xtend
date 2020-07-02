@@ -95,7 +95,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	@Test
 	def void testProgramCopiedENamedElementsWithCreatedEClass() {
 		referenceToCreatedEClass.parseWithTestEcore => [
-			getProgramCopiedENamedElements.
+			computeAccessibleElements.
 			assertQualifiedNames(
 				'''
 				foo.FooClass.myAttribute
@@ -115,7 +115,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	@Test
 	def void testProgramCopiedENamedElementsWithRemovedEClass() {
 		referenceToEClassRemoved.parseWithTestEcore => [
-			getProgramCopiedENamedElements.
+			computeAccessibleElements.
 			assertQualifiedNames(
 				'''
 				foo
