@@ -148,9 +148,9 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("foo.FooClass.myAttribute");
       _builder.newLine();
-      _builder.append("foo.FooClass.myReference");
-      _builder.newLine();
       _builder.append("foo");
+      _builder.newLine();
+      _builder.append("foo.FooClass.myReference");
       _builder.newLine();
       _builder.append("foo.NewClass");
       _builder.newLine();

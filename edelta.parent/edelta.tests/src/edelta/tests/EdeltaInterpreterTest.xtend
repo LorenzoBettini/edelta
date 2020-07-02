@@ -1579,8 +1579,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			assertQualifiedNames(elements1,
 				'''
 				foo.FooClass.myAttribute
-				foo.FooClass.myReference
 				foo
+				foo.FooClass.myReference
 				foo.FooEnum
 				foo.FooEnum.FooEnumLiteral
 				foo.FooClass
@@ -1590,10 +1590,10 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			val elements2 = derivedStateHelper.getAccessibleElements(ecoreref2)
 			assertQualifiedNames(elements2,
 				'''
-				foo.ANewClass
 				foo.FooClass.myAttribute
-				foo.FooClass.myReference
+				foo.ANewClass
 				foo
+				foo.FooClass.myReference
 				foo.FooEnum
 				foo.FooEnum.FooEnumLiteral
 				foo.FooClass

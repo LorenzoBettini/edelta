@@ -13,6 +13,7 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.util.IResourceScopeCache
 
 import static edelta.util.EdeltaModelUtil.*
+import org.eclipse.xtext.EcoreUtil2
 
 /**
  * Helper methods for accessing Ecore elements.
@@ -38,9 +39,7 @@ class EdeltaEcoreHelper {
 		cache.get("computeAccessibleElements", context.eResource) [
 			val copied = context.eResource.copiedEPackagesMap.values
 			return new EdeltaAccessibleElements((
-				copied.map[getAllENamedElements].flatten
-				+
-				copied
+				copied.map[EcoreUtil2.eAllContents(it)].flatten
 			).map[fullyQualifiedName].filterNull.toList)
 		]
 	}

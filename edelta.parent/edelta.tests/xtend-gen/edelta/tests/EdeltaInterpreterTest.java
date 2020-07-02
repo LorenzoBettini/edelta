@@ -2385,9 +2385,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       StringConcatenation _builder_1 = new StringConcatenation();
       _builder_1.append("foo.FooClass.myAttribute");
       _builder_1.newLine();
-      _builder_1.append("foo.FooClass.myReference");
-      _builder_1.newLine();
       _builder_1.append("foo");
+      _builder_1.newLine();
+      _builder_1.append("foo.FooClass.myReference");
       _builder_1.newLine();
       _builder_1.append("foo.FooEnum");
       _builder_1.newLine();
@@ -2400,13 +2400,13 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       this.assertQualifiedNames(elements1, _builder_1);
       final EdeltaAccessibleElements elements2 = this.derivedStateHelper.getAccessibleElements(ecoreref2);
       StringConcatenation _builder_2 = new StringConcatenation();
-      _builder_2.append("foo.ANewClass");
-      _builder_2.newLine();
       _builder_2.append("foo.FooClass.myAttribute");
       _builder_2.newLine();
-      _builder_2.append("foo.FooClass.myReference");
+      _builder_2.append("foo.ANewClass");
       _builder_2.newLine();
       _builder_2.append("foo");
+      _builder_2.newLine();
+      _builder_2.append("foo.FooClass.myReference");
       _builder_2.newLine();
       _builder_2.append("foo.FooEnum");
       _builder_2.newLine();

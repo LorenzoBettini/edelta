@@ -99,8 +99,8 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			assertQualifiedNames(
 				'''
 				foo.FooClass.myAttribute
-				foo.FooClass.myReference
 				foo
+				foo.FooClass.myReference
 				foo.NewClass
 				foo.FooEnum
 				foo.FooEnum.FooEnumLiteral
