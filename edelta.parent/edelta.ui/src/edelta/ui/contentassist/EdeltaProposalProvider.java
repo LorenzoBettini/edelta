@@ -3,12 +3,20 @@
  */
 package edelta.ui.contentassist;
 
+import static org.eclipse.xtext.EcoreUtil2.getContainerOfType;
+
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.Assignment;
 import org.eclipse.xtext.CrossReference;
+import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext;
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor;
+
+import com.google.inject.Inject;
+
+import edelta.edelta.EdeltaEcoreReferenceExpression;
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 
 /**
  * See
@@ -18,6 +26,13 @@ import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor;
  * @author Lorenzo Bettini
  */
 public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
+
+	@Inject
+	private EdeltaDerivedStateHelper derivedStateHelper;
+
+	@Inject
+	private IQualifiedNameProvider qualifiedNameProvider;
+
 	/**
 	 * Avoids proposing subpackages since in Edelta they are not allowed
 	 * to be directly imported.
@@ -35,5 +50,23 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 			(IEObjectDescription desc) ->
 				desc.getQualifiedName().getSegmentCount() == 1
 		);
+	}
+
+	/**
+	 * Only proposes elements that are available in this context.
+	 */
+	@Override
+	public void completeEdeltaEcoreDirectReference_Enamedelement(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		final var accessibleElements =
+			derivedStateHelper.getAccessibleElements(
+				getContainerOfType(model, EdeltaEcoreReferenceExpression.class));
+		lookupCrossReference(
+			((CrossReference)assignment.getTerminal()),
+			context,
+			acceptor,
+			(IEObjectDescription desc) ->
+				accessibleElements.contains(
+					qualifiedNameProvider.getFullyQualifiedName(desc.getEObjectOrProxy()))
+			);
 	}
 }
