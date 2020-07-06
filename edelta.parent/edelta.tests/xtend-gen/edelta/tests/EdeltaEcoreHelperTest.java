@@ -141,6 +141,21 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testComputeAccessibleElementsWithUnresolvedEPackage() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"nonexisting\"");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      EdeltaAccessibleElements _computeAccessibleElements = this._edeltaEcoreHelper.computeAccessibleElements(it);
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.newLine();
+      this.assertAccessibleElements(_computeAccessibleElements, _builder_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
   public void testComputeAccessibleElementsWithCreatedEClass() {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToCreatedEClass());
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {

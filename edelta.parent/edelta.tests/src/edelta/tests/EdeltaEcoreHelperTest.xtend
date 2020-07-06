@@ -93,6 +93,20 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testComputeAccessibleElementsWithUnresolvedEPackage() {
+		'''
+		metamodel "nonexisting"
+		'''.parseWithTestEcore => [
+			computeAccessibleElements.
+			assertAccessibleElements(
+				'''
+
+				'''
+			)
+		]
+	}
+
+	@Test
 	def void testComputeAccessibleElementsWithCreatedEClass() {
 		referenceToCreatedEClass.parseWithTestEcore => [
 			computeAccessibleElements.
