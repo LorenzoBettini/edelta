@@ -7,6 +7,7 @@ import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaModifyEcoreOperation
 import edelta.edelta.EdeltaProgram
+import edelta.resource.derivedstate.EdeltaAccessibleElements
 import edelta.tests.input.Inputs
 import java.nio.file.Paths
 import java.util.List
@@ -37,7 +38,6 @@ import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
-import org.eclipse.xtext.naming.QualifiedName
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -315,9 +315,9 @@ abstract class EdeltaAbstractTest {
 		)
 	}
 
-	def protected assertAccessibleElements(Iterable<QualifiedName> elements, CharSequence expected) {
+	def protected assertAccessibleElements(EdeltaAccessibleElements elements, CharSequence expected) {
 		expected.assertEqualsStrings(
-			elements.map[toString].sortBy[it].join("\n") + "\n"
+			elements.map[qualifiedName.toString].sortBy[it].join("\n") + "\n"
 		)
 	}
 

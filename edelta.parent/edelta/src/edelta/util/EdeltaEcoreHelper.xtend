@@ -9,11 +9,12 @@ import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
+import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.util.IResourceScopeCache
 
 import static edelta.util.EdeltaModelUtil.*
-import org.eclipse.xtext.EcoreUtil2
+import edelta.resource.derivedstate.EdeltaAccessibleElement
 
 /**
  * Helper methods for accessing Ecore elements.
@@ -38,9 +39,10 @@ class EdeltaEcoreHelper {
 	def EdeltaAccessibleElements computeAccessibleElements(EObject context) {
 		cache.get("computeAccessibleElements", context.eResource) [
 			val copied = context.eResource.copiedEPackagesMap.values
-			return new EdeltaAccessibleElements((
-				copied.map[EcoreUtil2.eAllContents(it)].flatten
-			).map[fullyQualifiedName].filterNull.toList)
+			val flatten = copied.map[EcoreUtil2.eAllContents(it).filter(ENamedElement)].flatten
+			return new EdeltaAccessibleElements(
+				flatten.map[new EdeltaAccessibleElement(it, fullyQualifiedName)].toList
+			)
 		]
 	}
 

@@ -81,8 +81,9 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 			context,
 			acceptor,
 			(IEObjectDescription desc) ->
-			accessibleElements.contains(
-				qualifiedNameProvider.getFullyQualifiedName(desc.getEObjectOrProxy()))
+			accessibleElements.stream()
+				.anyMatch(elem -> elem.getQualifiedName().equals(
+						qualifiedNameProvider.getFullyQualifiedName(desc.getEObjectOrProxy())))
 			);
 	}
 }

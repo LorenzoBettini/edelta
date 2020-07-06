@@ -3,15 +3,13 @@ package edelta.resource.derivedstate;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.eclipse.xtext.naming.QualifiedName;
-
 /**
- * The available elements by their {@link QualifiedName}.
+ * The accessible elements in a given context.
  * 
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaAccessibleElements extends HashSet<QualifiedName> {
+public class EdeltaAccessibleElements extends HashSet<EdeltaAccessibleElement> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -19,7 +17,7 @@ public class EdeltaAccessibleElements extends HashSet<QualifiedName> {
 		super();
 	}
 
-	public EdeltaAccessibleElements(Collection<? extends QualifiedName> c) {
+	public EdeltaAccessibleElements(Collection<? extends EdeltaAccessibleElement> c) {
 		super(c);
 	}
 
