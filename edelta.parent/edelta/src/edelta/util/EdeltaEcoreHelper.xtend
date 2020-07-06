@@ -15,6 +15,7 @@ import org.eclipse.xtext.util.IResourceScopeCache
 
 import static edelta.util.EdeltaModelUtil.*
 import edelta.resource.derivedstate.EdeltaAccessibleElement
+import edelta.lib.EdeltaEcoreUtil
 
 /**
  * Helper methods for accessing Ecore elements.
@@ -39,9 +40,13 @@ class EdeltaEcoreHelper {
 	def EdeltaAccessibleElements computeAccessibleElements(EObject context) {
 		cache.get("computeAccessibleElements", context.eResource) [
 			val copied = context.eResource.copiedEPackagesMap.values
-			val flatten = copied.map[EcoreUtil2.eAllContents(it).filter(ENamedElement)].flatten
+			val flatten = EdeltaEcoreUtil.copyEPackages(copied)
+				.map[EcoreUtil2.eAllContents(it).filter(ENamedElement)]
+				.flatten
 			return new EdeltaAccessibleElements(
-				flatten.map[new EdeltaAccessibleElement(it, fullyQualifiedName)].toList
+				flatten.map[
+					new EdeltaAccessibleElement(it, fullyQualifiedName)
+				].toList
 			)
 		]
 	}
