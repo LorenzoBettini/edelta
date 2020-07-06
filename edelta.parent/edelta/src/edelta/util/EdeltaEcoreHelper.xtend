@@ -97,6 +97,11 @@ class EdeltaEcoreHelper {
 		e.EClassifiers.filter(EClass)
 	}
 
+	/**
+	 * Returns the ENamedElements directly contained in the passed ENamedElements,
+	 * but keeping into consideration also copied EPackages, so it uses elements
+	 * with the same name of the passed ENamedElement as the starting point.
+	 */
 	def Iterable<? extends ENamedElement> getENamedElements(ENamedElement e, EObject context) {
 		getENamedElementsInternal(e, context, true)
 	}
@@ -130,6 +135,15 @@ class EdeltaEcoreHelper {
 			default:
 				emptyList
 		}
+	}
+
+	/**
+	 * Simply returns the ENamedElements directly contained in the passed ENamedElements,
+	 * for example for EPackage it returns EClassifiers and subpackages, for EClass it returns
+	 * all its EStructuralFeatures, etc.
+	 */
+	def Iterable<? extends ENamedElement> getENamedElements(ENamedElement e) {
+		e.eContents.filter(ENamedElement)
 	}
 
 	def private List<? extends ENamedElement> getEPackageENamedElementsInternal(EPackage ePackage, EObject context, boolean includeCopiedEPackages) {

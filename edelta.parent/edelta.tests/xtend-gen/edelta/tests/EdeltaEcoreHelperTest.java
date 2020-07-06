@@ -509,4 +509,53 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
+  
+  @Test
+  public void testENamedElementsOfEPackage() {
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(this._inputs.referenceToMetamodelWithSubPackage());
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      Iterable<? extends ENamedElement> _eNamedElements = this._edeltaEcoreHelper.getENamedElements(this.getEPackageByName(it, "mainpackage"));
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("MainFooClass");
+      _builder.newLine();
+      _builder.append("MainFooDataType");
+      _builder.newLine();
+      _builder.append("MainFooEnum");
+      _builder.newLine();
+      _builder.append("MyClass");
+      _builder.newLine();
+      _builder.append("mainsubpackage");
+      _builder.newLine();
+      this.assertNamedElements(_eNamedElements, _builder);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
+  }
+  
+  @Test
+  public void testENamedElementsOfEClass() {
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToMetamodel());
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      Iterable<? extends ENamedElement> _eNamedElements = this._edeltaEcoreHelper.getENamedElements(this.getEClassifierByName(it, "foo", "FooClass"));
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("myAttribute");
+      _builder.newLine();
+      _builder.append("myReference");
+      _builder.newLine();
+      this.assertNamedElements(_eNamedElements, _builder);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testENamedElementsOfENum() {
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToMetamodel());
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      Iterable<? extends ENamedElement> _eNamedElements = this._edeltaEcoreHelper.getENamedElements(this.getEClassifierByName(it, "foo", "FooEnum"));
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("FooEnumLiteral");
+      _builder.newLine();
+      this.assertNamedElements(_eNamedElements, _builder);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
 }

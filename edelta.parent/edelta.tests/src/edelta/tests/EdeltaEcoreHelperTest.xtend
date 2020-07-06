@@ -417,4 +417,44 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testENamedElementsOfEPackage() {
+		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
+			getENamedElements(getEPackageByName("mainpackage")).
+			assertNamedElements(
+				'''
+				MainFooClass
+				MainFooDataType
+				MainFooEnum
+				MyClass
+				mainsubpackage
+				'''
+			)
+		]
+	}
+
+	@Test
+	def void testENamedElementsOfEClass() {
+		referenceToMetamodel.parseWithTestEcore => [
+			getENamedElements(getEClassifierByName("foo", "FooClass")).
+			assertNamedElements(
+				'''
+				myAttribute
+				myReference
+				'''
+			)
+		]
+	}
+
+	@Test
+	def void testENamedElementsOfENum() {
+		referenceToMetamodel.parseWithTestEcore => [
+			getENamedElements(getEClassifierByName("foo", "FooEnum")).
+			assertNamedElements(
+				'''
+				FooEnumLiteral
+				'''
+			)
+		]
+	}
 }
