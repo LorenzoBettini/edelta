@@ -550,11 +550,14 @@ public abstract class EdeltaAbstractTest {
     this.assertEqualsStrings(expected, _plus);
   }
   
-  protected void assertQualifiedNames(final Iterable<QualifiedName> elements, final CharSequence expected) {
+  protected void assertAccessibleElements(final Iterable<QualifiedName> elements, final CharSequence expected) {
     final Function1<QualifiedName, String> _function = (QualifiedName it) -> {
       return it.toString();
     };
-    String _join = IterableExtensions.join(IterableExtensions.<QualifiedName, String>map(elements, _function), "\n");
+    final Function1<String, String> _function_1 = (String it) -> {
+      return it;
+    };
+    String _join = IterableExtensions.join(IterableExtensions.<String, String>sortBy(IterableExtensions.<QualifiedName, String>map(elements, _function), _function_1), "\n");
     String _plus = (_join + "\n");
     this.assertEqualsStrings(expected, _plus);
   }

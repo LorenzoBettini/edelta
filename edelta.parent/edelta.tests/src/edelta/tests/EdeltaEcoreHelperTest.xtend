@@ -96,16 +96,16 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	def void testProgramCopiedENamedElementsWithCreatedEClass() {
 		referenceToCreatedEClass.parseWithTestEcore => [
 			computeAccessibleElements.
-			assertQualifiedNames(
+			assertAccessibleElements(
 				'''
-				foo.FooClass.myAttribute
 				foo
+				foo.FooClass
+				foo.FooClass.myAttribute
 				foo.FooClass.myReference
-				foo.NewClass
+				foo.FooDataType
 				foo.FooEnum
 				foo.FooEnum.FooEnumLiteral
-				foo.FooClass
-				foo.FooDataType
+				foo.NewClass
 				'''
 			)
 		// NewClass is the one created in the program
@@ -116,12 +116,12 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	def void testProgramCopiedENamedElementsWithRemovedEClass() {
 		referenceToEClassRemoved.parseWithTestEcore => [
 			computeAccessibleElements.
-			assertQualifiedNames(
+			assertAccessibleElements(
 				'''
 				foo
+				foo.FooDataType
 				foo.FooEnum
 				foo.FooEnum.FooEnumLiteral
-				foo.FooDataType
 				'''
 				// FooClass has been removed
 			)

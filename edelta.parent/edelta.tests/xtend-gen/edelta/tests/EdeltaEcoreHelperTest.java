@@ -146,23 +146,23 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       EdeltaAccessibleElements _computeAccessibleElements = this._edeltaEcoreHelper.computeAccessibleElements(it);
       StringConcatenation _builder = new StringConcatenation();
-      _builder.append("foo.FooClass.myAttribute");
-      _builder.newLine();
       _builder.append("foo");
+      _builder.newLine();
+      _builder.append("foo.FooClass");
+      _builder.newLine();
+      _builder.append("foo.FooClass.myAttribute");
       _builder.newLine();
       _builder.append("foo.FooClass.myReference");
       _builder.newLine();
-      _builder.append("foo.NewClass");
+      _builder.append("foo.FooDataType");
       _builder.newLine();
       _builder.append("foo.FooEnum");
       _builder.newLine();
       _builder.append("foo.FooEnum.FooEnumLiteral");
       _builder.newLine();
-      _builder.append("foo.FooClass");
+      _builder.append("foo.NewClass");
       _builder.newLine();
-      _builder.append("foo.FooDataType");
-      _builder.newLine();
-      this.assertQualifiedNames(_computeAccessibleElements, _builder);
+      this.assertAccessibleElements(_computeAccessibleElements, _builder);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
@@ -175,13 +175,13 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("foo");
       _builder.newLine();
+      _builder.append("foo.FooDataType");
+      _builder.newLine();
       _builder.append("foo.FooEnum");
       _builder.newLine();
       _builder.append("foo.FooEnum.FooEnumLiteral");
       _builder.newLine();
-      _builder.append("foo.FooDataType");
-      _builder.newLine();
-      this.assertQualifiedNames(_computeAccessibleElements, _builder);
+      this.assertAccessibleElements(_computeAccessibleElements, _builder);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }

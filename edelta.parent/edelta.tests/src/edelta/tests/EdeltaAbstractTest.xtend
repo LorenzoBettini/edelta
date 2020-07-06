@@ -315,9 +315,9 @@ abstract class EdeltaAbstractTest {
 		)
 	}
 
-	def protected assertQualifiedNames(Iterable<QualifiedName> elements, CharSequence expected) {
+	def protected assertAccessibleElements(Iterable<QualifiedName> elements, CharSequence expected) {
 		expected.assertEqualsStrings(
-			elements.map[toString].join("\n") + "\n"
+			elements.map[toString].sortBy[it].join("\n") + "\n"
 		)
 	}
 

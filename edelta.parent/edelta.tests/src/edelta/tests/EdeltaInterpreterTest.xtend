@@ -1576,28 +1576,28 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			val ecoreref3 = allEcoreReferenceExpressions.get(2)
 			val ecoreref4 = allEcoreReferenceExpressions.get(3)
 			val elements1 = derivedStateHelper.getAccessibleElements(ecoreref1)
-			assertQualifiedNames(elements1,
+			assertAccessibleElements(elements1,
 				'''
-				foo.FooClass.myAttribute
 				foo
+				foo.FooClass
+				foo.FooClass.myAttribute
 				foo.FooClass.myReference
+				foo.FooDataType
 				foo.FooEnum
 				foo.FooEnum.FooEnumLiteral
-				foo.FooClass
-				foo.FooDataType
 				'''
 			)
 			val elements2 = derivedStateHelper.getAccessibleElements(ecoreref2)
-			assertQualifiedNames(elements2,
+			assertAccessibleElements(elements2,
 				'''
-				foo.FooClass.myAttribute
-				foo.ANewClass
 				foo
+				foo.ANewClass
+				foo.FooClass
+				foo.FooClass.myAttribute
 				foo.FooClass.myReference
+				foo.FooDataType
 				foo.FooEnum
 				foo.FooEnum.FooEnumLiteral
-				foo.FooClass
-				foo.FooDataType
 				'''
 			)
 			val elements3 = derivedStateHelper.getAccessibleElements(ecoreref3)
@@ -1605,13 +1605,13 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			// so the available elements must be the same
 			assertThat(elements2).isSameAs(elements3)
 			val elements4 = derivedStateHelper.getAccessibleElements(ecoreref4)
-			assertQualifiedNames(elements4,
+			assertAccessibleElements(elements4,
 				'''
-				foo.ANewClass
 				foo
+				foo.ANewClass
+				foo.FooDataType
 				foo.FooEnum
 				foo.FooEnum.FooEnumLiteral
-				foo.FooDataType
 				'''
 			)
 		]
