@@ -93,7 +93,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testProgramCopiedENamedElementsWithCreatedEClass() {
+	def void testComputeAccessibleElementsWithCreatedEClass() {
 		referenceToCreatedEClass.parseWithTestEcore => [
 			computeAccessibleElements.
 			assertAccessibleElements(
@@ -113,7 +113,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testProgramCopiedENamedElementsWithRemovedEClass() {
+	def void testComputeAccessibleElementsWithRemovedEClass() {
 		referenceToEClassRemoved.parseWithTestEcore => [
 			computeAccessibleElements.
 			assertAccessibleElements(
