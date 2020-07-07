@@ -10,12 +10,18 @@ import org.eclipse.xtext.Assignment;
 import org.eclipse.xtext.CrossReference;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.resource.IEObjectDescription;
+import org.eclipse.xtext.scoping.Scopes;
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext;
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor;
 
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 
+import edelta.edelta.EdeltaEcoreQualifiedReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
+import edelta.edelta.EdeltaPackage;
+import edelta.resource.derivedstate.EdeltaAccessibleElement;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 
 /**
@@ -57,7 +63,26 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 	 */
 	@Override
 	public void completeEdeltaEcoreDirectReference_Enamedelement(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-		proposalsForEcoreReference(model, assignment, context, acceptor);
+		final var accessibleElements =
+			derivedStateHelper.getAccessibleElements(
+				getContainerOfType(model, EdeltaEcoreReferenceExpression.class));
+		getCrossReferenceProposalCreator()
+			.lookupCrossReference(
+				Scopes.scopeFor(Iterables.transform(accessibleElements, EdeltaAccessibleElement::getElement)),
+				model,
+				EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE__ENAMEDELEMENT,
+				acceptor,
+				Predicates.<IEObjectDescription> alwaysTrue(),
+				getProposalFactory("ID", context));
+//		lookupCrossReference(
+//			((CrossReference)assignment.getTerminal()),
+//			context,
+//			acceptor,
+//			(IEObjectDescription desc) ->
+//			accessibleElements.stream()
+//				.anyMatch(elem -> elem.getElement().getName().equals(
+//					desc.getName().toString()))
+//			);
 	}
 
 	/**
@@ -65,17 +90,12 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 	 */
 	@Override
 	public void completeEdeltaEcoreReference_Enamedelement(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-		proposalsForEcoreReference(model, assignment, context, acceptor);
-	}
-
-	/**
-	 * Only proposes elements that are available in this context.
-	 */
-	private void proposalsForEcoreReference(EObject model, Assignment assignment, ContentAssistContext context,
-			ICompletionProposalAcceptor acceptor) {
 		final var accessibleElements =
-				derivedStateHelper.getAccessibleElements(
-						getContainerOfType(model, EdeltaEcoreReferenceExpression.class));
+			derivedStateHelper.getAccessibleElements(
+				getContainerOfType(model, EdeltaEcoreReferenceExpression.class));
+		final var qualifiedReference = (EdeltaEcoreQualifiedReference) model;
+		final var qualification = qualifiedReference.getQualification();
+		final var eClass = qualification.getEnamedelement().eClass();
 		lookupCrossReference(
 			((CrossReference)assignment.getTerminal()),
 			context,
