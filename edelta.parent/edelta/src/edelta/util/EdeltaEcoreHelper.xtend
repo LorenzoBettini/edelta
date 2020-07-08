@@ -69,19 +69,9 @@ class EdeltaEcoreHelper {
 	}
 
 	def Iterable<? extends ENamedElement> getENamedElements(ENamedElement e) {
-		switch (e) {
-			EPackage:
-				(
-					e.getEClassifiers +
-					e.getESubpackages
-				).toList
-			EClass:
-				e.EStructuralFeatures
-			EEnum:
-				e.ELiterals
-			default:
-				emptyList
-		}
+		if (e === null)
+			return emptyList
+		return e.eContents.filter(ENamedElement)
 	}
 
 	def <T extends ENamedElement> getByName(Iterable<T> namedElements, String nameToSearch) {
