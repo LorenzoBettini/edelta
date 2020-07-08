@@ -43,7 +43,7 @@ class EdeltaEcoreHelper {
 	 * including subpackages and getAllENamedElements on each subpackage
 	 */
 	def private Iterable<ENamedElement> getAllENamedElements(EPackage e) {
-		EcoreUtil2.eAllContents(e).filter(ENamedElement)
+		EcoreUtil2.eAllOfType(e, ENamedElement)
 	}
 
 	def Iterable<? extends ENamedElement> getENamedElements(ENamedElement e) {
