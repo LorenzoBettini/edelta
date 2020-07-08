@@ -81,20 +81,14 @@ class EdeltaEcoreHelper {
 	) {
 		switch (e) {
 			EPackage:
-				cache.get("getEPackageENamedElements" + includeCopiedEPackages -> e, context.eResource) [
-					(
-						e.getEClassifiers +
-						e.getESubpackages
-					).toList
-				]
+				(
+					e.getEClassifiers +
+					e.getESubpackages
+				).toList
 			EClass:
-				cache.get("getEClassENamedElements" + includeCopiedEPackages -> e, context.eResource) [
-					e.EStructuralFeatures
-				]
+				e.EStructuralFeatures
 			EEnum:
-				cache.get("getEEnumENamedElements" + includeCopiedEPackages -> e, context.eResource) [
-					e.ELiterals
-				]
+				e.ELiterals
 			default:
 				emptyList
 		}
