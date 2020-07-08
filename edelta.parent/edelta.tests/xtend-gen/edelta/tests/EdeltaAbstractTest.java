@@ -26,6 +26,7 @@ import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -251,6 +252,13 @@ public abstract class EdeltaAbstractTest {
         };
         EReference _doubleArrow_1 = ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_3);
         _eStructuralFeatures_1.add(_doubleArrow_1);
+        EList<EOperation> _eOperations = it.getEOperations();
+        EOperation _createEOperation = EcoreFactory.eINSTANCE.createEOperation();
+        final Procedure1<EOperation> _function_4 = (EOperation it_1) -> {
+          it_1.setName("myOp");
+        };
+        EOperation _doubleArrow_2 = ObjectExtensions.<EOperation>operator_doubleArrow(_createEOperation, _function_4);
+        _eOperations.add(_doubleArrow_2);
       };
       EClass _doubleArrow = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
       _eClassifiers.add(_doubleArrow);
