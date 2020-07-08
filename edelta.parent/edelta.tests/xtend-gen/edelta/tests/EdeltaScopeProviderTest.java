@@ -656,8 +656,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
       this.getEClassiferByName(copiedEPackage, "RenamedClass"), 
       ((EClass) _enamedelement));
     ENamedElement _enamedelement_1 = referred.getQualification().getEnamedelement();
-    Assert.assertSame(
-      IterableExtensions.<EPackage>last(prog.getMetamodels()), 
+    Assert.assertSame(copiedEPackage, 
       ((EPackage) _enamedelement_1));
   }
   

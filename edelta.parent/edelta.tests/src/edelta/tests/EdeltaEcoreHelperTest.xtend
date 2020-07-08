@@ -54,8 +54,8 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				myAttribute
 				myReference
 				FooEnumLiteral
-				foo
 				bar
+				foo
 				'''
 			)
 	}

@@ -491,8 +491,9 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			referred.enamedelement as EClass
 		)
 		assertSame(
-			// the original one
-			prog.metamodels.last,
+			// the one copied by the derived state computer
+			// NOT the original one
+			copiedEPackage,
 			referred.qualification.enamedelement as EPackage
 		)
 	}

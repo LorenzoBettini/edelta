@@ -32,12 +32,11 @@ class EdeltaEcoreHelper {
 	}
 
 	def private Iterable<? extends ENamedElement> getProgramENamedElementsInternal(EObject context) {
-		val prog = getProgram(context)
 		val epackages = getProgramTopLevelEPackages(context)
 		(
 			epackages.map[getAllENamedElements].flatten
 		+
-			prog.metamodels
+			epackages
 		).toList
 	}
 

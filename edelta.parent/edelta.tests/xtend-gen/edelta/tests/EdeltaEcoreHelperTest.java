@@ -83,9 +83,9 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("FooEnumLiteral");
     _builder.newLine();
-    _builder.append("foo");
-    _builder.newLine();
     _builder.append("bar");
+    _builder.newLine();
+    _builder.append("foo");
     _builder.newLine();
     this.assertNamedElements(_programENamedElements, _builder);
   }
