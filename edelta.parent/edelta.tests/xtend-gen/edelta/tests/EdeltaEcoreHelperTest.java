@@ -6,7 +6,6 @@ import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderCustom;
 import edelta.util.EdeltaEcoreHelper;
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtend2.lib.StringConcatenation;
@@ -368,19 +367,6 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
       _builder.append("myReference");
       _builder.newLine();
       this.assertNamedElements(_eNamedElements, _builder);
-    };
-    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
-  }
-  
-  @Test
-  public void testGetAllEClasses() {
-    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToMetamodel());
-    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      Iterable<EClass> _allEClasses = this._edeltaEcoreHelper.getAllEClasses(this.getEPackageByName(it, "foo"));
-      StringConcatenation _builder = new StringConcatenation();
-      _builder.append("FooClass");
-      _builder.newLine();
-      this.assertNamedElements(_allEClasses, _builder);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }

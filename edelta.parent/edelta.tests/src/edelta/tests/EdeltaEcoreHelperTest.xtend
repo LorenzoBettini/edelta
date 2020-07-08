@@ -302,16 +302,4 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test
-	def void testGetAllEClasses() {
-		referenceToMetamodel.parseWithTestEcore => [
-			getAllEClasses(getEPackageByName("foo")).
-			assertNamedElements(
-				'''
-				FooClass
-				'''
-			)
-		]
-	}
-
 }

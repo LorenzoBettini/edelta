@@ -2,7 +2,6 @@ package edelta.util
 
 import com.google.inject.Inject
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper
-import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
@@ -45,10 +44,6 @@ class EdeltaEcoreHelper {
 	 */
 	def private Iterable<ENamedElement> getAllENamedElements(EPackage e) {
 		EcoreUtil2.eAllContents(e).filter(ENamedElement)
-	}
-
-	def getAllEClasses(EPackage e) {
-		e.EClassifiers.filter(EClass)
 	}
 
 	def Iterable<? extends ENamedElement> getENamedElements(ENamedElement e) {
