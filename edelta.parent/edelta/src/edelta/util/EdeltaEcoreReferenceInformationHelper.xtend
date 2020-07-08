@@ -13,6 +13,7 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
 
 import static edelta.util.EdeltaModelUtil.*
+import org.eclipse.emf.ecore.util.EcoreSwitch
 
 /**
  * Utilities for an ecore reference information
@@ -27,37 +28,50 @@ class EdeltaEcoreReferenceInformationHelper {
 	def getOrComputeInformation(EdeltaEcoreReferenceExpression exp) {
 		val e = exp.reference
 		val ecoreReferenceState = e.getEcoreReferenceState
-		var info = ecoreReferenceState.information
-		if (info !== null)
-			return info
-		info = new EdeltaEcoreReferenceStateInformation
+		var existing = ecoreReferenceState.information
+		if (existing !== null)
+			return existing
+		val info = new EdeltaEcoreReferenceStateInformation
 		ecoreReferenceState.information = info
 		val type = exp.resolveTypes.getActualType(exp)
 		info.type = type.simpleName
 
 		val element = e.enamedelement
-		switch (element) {
-			EPackage:
-				info.EPackageName = element.nameOrEmpty
-			EClassifier: {
-				info.EPackageName = element.EPackage.nameOrEmpty
-				info.EClassifierName = element.nameOrEmpty
+
+		new EcoreSwitch<Void> {
+
+			override caseEPackage(EPackage object) {
+				info.EPackageName = object.nameOrEmpty
+				return null
 			}
-			EEnumLiteral: {
-				val eEnum = element.EEnum
+
+			override caseEClassifier(EClassifier object) {
+				info.EPackageName = object.EPackage.nameOrEmpty
+				info.EClassifierName = object.nameOrEmpty
+				return null
+			}
+
+			override caseEEnumLiteral(EEnumLiteral object) {
+				val eEnum = object.EEnum
 				info.EPackageName = eEnum.EPackageOrNull.nameOrEmpty
 				info.EClassifierName = eEnum.nameOrEmpty
 				info.ENamedElementName = element.nameOrEmpty
+				return null
 			}
-			default: {
-				// unresolved proxies are of type EAttribute so we cast it to EStructuralFeature
-				val f = element as EStructuralFeature
-				val c = f.EContainingClass
+
+			/**
+			 * An unresolved proxy is of type EAttribute so we include it in
+			 * this case.
+			 */
+			override caseEStructuralFeature(EStructuralFeature object) {
+				val c = object.EContainingClass
 				info.EPackageName = c.EPackageOrNull.nameOrEmpty
 				info.EClassifierName = c.nameOrEmpty
 				info.ENamedElementName = element.nameOrEmpty
+				return null
 			}
-		}
+
+		}.doSwitch(element)
 
 		return info
 	}
