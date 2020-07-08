@@ -64,13 +64,13 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			.parseWithTestEcore.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
+			foo
 			FooClass
-			FooDataType
-			FooEnum
 			myAttribute
 			myReference
+			FooDataType
+			FooEnum
 			FooEnumLiteral
-			foo
 			''')
 	}
 
@@ -83,23 +83,23 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			.parseWithTestEcoreWithSubPackage.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
+			mainpackage
 			MainFooClass
-			MainFooDataType
-			MainFooEnum
-			MyClass
 			myAttribute
 			myReference
+			MainFooDataType
+			MainFooEnum
 			FooEnumLiteral
+			MyClass
 			myClassAttribute
 			mainsubpackage
 			MainSubPackageFooClass
-			MyClass
 			mySubPackageAttribute
 			mySubPackageReference
+			MyClass
 			myClassAttribute
 			subsubpackage
 			MyClass
-			mainpackage
 			''')
 	}
 
@@ -116,23 +116,23 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			.reference
 			.assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
+			mainpackage
 			MainFooClass
-			MainFooDataType
-			MainFooEnum
-			MyClass
 			myAttribute
 			myReference
+			MainFooDataType
+			MainFooEnum
 			FooEnumLiteral
+			MyClass
 			myClassAttribute
 			mainsubpackage
 			MainSubPackageFooClass
-			MyClass
 			mySubPackageAttribute
 			mySubPackageReference
+			MyClass
 			myClassAttribute
 			subsubpackage
 			MyClass
-			mainpackage
 			''')
 	}
 
@@ -195,13 +195,13 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		"ecoreref(".ecoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
+			foo
 			FooClass
-			FooDataType
-			FooEnum
 			myAttribute
 			myReference
+			FooDataType
+			FooEnum
 			FooEnumLiteral
-			foo
 			''')
 	}
 
@@ -318,16 +318,16 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			.lastEcoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
+			foo
 			FooClass
-			FooDataType
-			FooEnum
-			NewClass
 			myAttribute
 			myReference
+			FooDataType
+			FooEnum
 			FooEnumLiteral
+			NewClass
 			newAttribute
 			newAttribute2
-			foo
 			''')
 		// newAttributes are the ones created in the program
 	}
@@ -338,15 +338,15 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			.lastEcoreReferenceExpression.reference
 			.assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
+			foo
 			FooClass
-			FooDataType
-			FooEnum
-			NewClass
 			myAttribute
 			myReference
+			FooDataType
+			FooEnum
 			FooEnumLiteral
+			NewClass
 			changed
-			foo
 			''')
 		// "changed" is the one created in the program (with name "newAttribute", and whose
 		// name is changed in the body

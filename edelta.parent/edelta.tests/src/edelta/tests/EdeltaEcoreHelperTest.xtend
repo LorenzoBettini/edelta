@@ -20,18 +20,18 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			getProgramENamedElements.
 			assertNamedElements(
 				'''
+				foo
 				FooClass
+				myAttribute
+				myReference
 				FooDataType
 				FooEnum
-				myAttribute
-				myReference
 				FooEnumLiteral
+				bar
 				BarClass
-				BarDataType
 				myAttribute
 				myReference
-				foo
-				bar
+				BarDataType
 				'''
 			)
 	}
@@ -44,18 +44,18 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			getProgramENamedElements.
 			assertNamedElements(
 				'''
+				bar
 				BarClass
-				BarDataType
 				myAttribute
 				myReference
+				BarDataType
+				foo
 				FooClass
+				myAttribute
+				myReference
 				FooDataType
 				FooEnum
-				myAttribute
-				myReference
 				FooEnumLiteral
-				bar
-				foo
 				'''
 			)
 	}
@@ -70,23 +70,23 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			getProgramENamedElements.
 			assertNamedElements(
 				'''
+				mainpackage
 				MainFooClass
-				MainFooDataType
-				MainFooEnum
-				MyClass
 				myAttribute
 				myReference
+				MainFooDataType
+				MainFooEnum
 				FooEnumLiteral
+				MyClass
 				myClassAttribute
 				mainsubpackage
 				MainSubPackageFooClass
-				MyClass
 				mySubPackageAttribute
 				mySubPackageReference
+				MyClass
 				myClassAttribute
 				subsubpackage
 				MyClass
-				mainpackage
 				'''
 			)
 	}
@@ -97,14 +97,14 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			getProgramENamedElements.
 			assertNamedElements(
 				'''
+				foo
 				FooClass
-				FooDataType
-				FooEnum
-				NewClass
 				myAttribute
 				myReference
+				FooDataType
+				FooEnum
 				FooEnumLiteral
-				foo
+				NewClass
 				'''
 			)
 		// NewClass is the one created in the program

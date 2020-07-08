@@ -3,10 +3,10 @@ package edelta.util
 import com.google.inject.Inject
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EPackage
+import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.util.IResourceScopeCache
 
 import static edelta.util.EdeltaModelUtil.*
@@ -35,11 +35,7 @@ class EdeltaEcoreHelper {
 			val copied = prog.eResource.copiedEPackagesMap.values
 			// copied EPackage are present only when there's at least one modifyEcore
 			val epackages = copied.empty ? prog.metamodels : copied
-			return (
-				epackages.map[getAllENamedElements].flatten
-			+
-				epackages
-			).toList
+			return epackages.map[getAllENamedElements].flatten.toList
 		]
 	}
 
@@ -48,20 +44,7 @@ class EdeltaEcoreHelper {
 	 * including subpackages and getAllENamedElements on each subpackage
 	 */
 	def private Iterable<ENamedElement> getAllENamedElements(EPackage e) {
-		val classifiers = e.EClassifiers
-		val inner = classifiers.map[
-			switch (it) {
-				// important: don't use EAllStructuralFeatures
-				// or we can get into
-				// Cyclic linking detected : EdeltaEcoreReference.enamedelement->EdeltaEcoreReference.enamedelement
-				// when we resolve ecore reference to supertypes
-				EClass: EStructuralFeatures
-				EEnum: ELiterals
-				default: <ENamedElement>emptyList
-			}
-		].flatten
-		classifiers + inner + e.ESubpackages +
-			e.ESubpackages.map[getAllENamedElements].flatten
+		EcoreUtil2.eAllContents(e).filter(ENamedElement)
 	}
 
 	def getAllEClasses(EPackage e) {
