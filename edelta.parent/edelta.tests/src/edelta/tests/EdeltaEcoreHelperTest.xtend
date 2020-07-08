@@ -209,8 +209,6 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				'''
 				MyClass
 				mainpackage
-				MyClass
-				mainpackage
 				'''
 			)
 			// it simply returns the first package of the loop
@@ -236,25 +234,6 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				'''
 				myClassAttribute
 				''')
-		]
-	}
-
-	@Test
-	def void testEPackageENamedElementsWithCreatedEClass() {
-		referenceToCreatedEClass.parseWithTestEcore => [
-			getENamedElements(getEPackageByName("foo"), it).
-			assertNamedElements(
-				'''
-				FooClass
-				FooDataType
-				FooEnum
-				NewClass
-				FooClass
-				FooDataType
-				FooEnum
-				'''
-			)
-		// NewClass is the one created in the program
 		]
 	}
 
@@ -305,10 +284,8 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			assertNamedElements(
 				'''
 				FooEnumLiteral
-				FooEnumLiteral
 				'''
 			)
-			// we also have copied EPackages, that's why the elements appear twice
 		]
 	}
 
@@ -321,7 +298,6 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				FooEnumLiteral
 				'''
 			)
-			// we also have copied EPackages, that's why the elements appear twice
 		]
 	}
 
@@ -351,8 +327,6 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			getENamedElements(getEClassifierByName("foo", "FooClass"), it).
 			assertNamedElements(
 				'''
-				myAttribute
-				myReference
 				myAttribute
 				myReference
 				'''

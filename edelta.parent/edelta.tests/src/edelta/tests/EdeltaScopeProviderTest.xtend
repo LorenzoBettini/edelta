@@ -152,11 +152,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			MainSubPackageFooClass
 			MyClass
 			subsubpackage
-			MainSubPackageFooClass
-			MyClass
-			subsubpackage
 			''')
-			// duplicates because of copied EPackage
 	}
 
 	@Test
@@ -174,10 +170,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			'''
 			mySubPackageAttribute
 			mySubPackageReference
-			mySubPackageAttribute
-			mySubPackageReference
 			''')
-			// duplicates because of copied EPackage
 	}
 
 	@Test
@@ -194,9 +187,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			.assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
 			MyClass
-			MyClass
 			''')
-			// duplicates because of copied EPackage
 	}
 
 	@Test
@@ -222,9 +213,6 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			FooClass
 			FooDataType
 			FooEnum
-			FooClass
-			FooDataType
-			FooEnum
 			''')
 	}
 
@@ -235,10 +223,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			'''
 			myAttribute
 			myReference
-			myAttribute
-			myReference
 			''')
-			// duplicate features because of copied EPackage
 	}
 
 	@Test
@@ -397,9 +382,6 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
 			RenamedClass
-			FooDataType
-			FooEnum
-			FooClass
 			FooDataType
 			FooEnum
 			''')

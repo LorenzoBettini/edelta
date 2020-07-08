@@ -216,12 +216,6 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     _builder_1.newLine();
     _builder_1.append("subsubpackage");
     _builder_1.newLine();
-    _builder_1.append("MainSubPackageFooClass");
-    _builder_1.newLine();
-    _builder_1.append("MyClass");
-    _builder_1.newLine();
-    _builder_1.append("subsubpackage");
-    _builder_1.newLine();
     this.assertScope(_reference, _edeltaEcoreReference_Enamedelement, _builder_1);
   }
   
@@ -245,10 +239,6 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     _builder_1.newLine();
     _builder_1.append("mySubPackageReference");
     _builder_1.newLine();
-    _builder_1.append("mySubPackageAttribute");
-    _builder_1.newLine();
-    _builder_1.append("mySubPackageReference");
-    _builder_1.newLine();
     this.assertScope(_reference, _edeltaEcoreReference_Enamedelement, _builder_1);
   }
   
@@ -268,8 +258,6 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     EdeltaEcoreReference _reference = this.lastEcoreReferenceExpression(this.parseWithTestEcoreWithSubPackage(_builder)).getReference();
     EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
     StringConcatenation _builder_1 = new StringConcatenation();
-    _builder_1.append("MyClass");
-    _builder_1.newLine();
     _builder_1.append("MyClass");
     _builder_1.newLine();
     this.assertScope(_reference, _edeltaEcoreReference_Enamedelement, _builder_1);
@@ -308,12 +296,6 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("FooEnum");
     _builder.newLine();
-    _builder.append("FooClass");
-    _builder.newLine();
-    _builder.append("FooDataType");
-    _builder.newLine();
-    _builder.append("FooEnum");
-    _builder.newLine();
     this.assertScope(_reference, _edeltaEcoreReference_Enamedelement, _builder);
   }
   
@@ -322,10 +304,6 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     EdeltaEcoreReference _reference = this.ecoreReferenceExpression("ecoreref(foo.FooClass.").getReference();
     EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("myAttribute");
-    _builder.newLine();
-    _builder.append("myReference");
-    _builder.newLine();
     _builder.append("myAttribute");
     _builder.newLine();
     _builder.append("myReference");
@@ -528,12 +506,6 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
     StringConcatenation _builder_1 = new StringConcatenation();
     _builder_1.append("RenamedClass");
-    _builder_1.newLine();
-    _builder_1.append("FooDataType");
-    _builder_1.newLine();
-    _builder_1.append("FooEnum");
-    _builder_1.newLine();
-    _builder_1.append("FooClass");
     _builder_1.newLine();
     _builder_1.append("FooDataType");
     _builder_1.newLine();

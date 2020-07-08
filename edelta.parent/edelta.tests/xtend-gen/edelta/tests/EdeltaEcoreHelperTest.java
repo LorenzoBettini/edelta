@@ -273,10 +273,6 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
       _builder.newLine();
       _builder.append("mainpackage");
       _builder.newLine();
-      _builder.append("MyClass");
-      _builder.newLine();
-      _builder.append("mainpackage");
-      _builder.newLine();
       this.assertNamedElements(_eNamedElements, _builder);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
@@ -299,31 +295,6 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
       this.assertNamedElements(_eNamedElements_1, _builder_1);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
-  }
-  
-  @Test
-  public void testEPackageENamedElementsWithCreatedEClass() {
-    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToCreatedEClass());
-    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      Iterable<? extends ENamedElement> _eNamedElements = this._edeltaEcoreHelper.getENamedElements(this.getEPackageByName(it, "foo"), it);
-      StringConcatenation _builder = new StringConcatenation();
-      _builder.append("FooClass");
-      _builder.newLine();
-      _builder.append("FooDataType");
-      _builder.newLine();
-      _builder.append("FooEnum");
-      _builder.newLine();
-      _builder.append("NewClass");
-      _builder.newLine();
-      _builder.append("FooClass");
-      _builder.newLine();
-      _builder.append("FooDataType");
-      _builder.newLine();
-      _builder.append("FooEnum");
-      _builder.newLine();
-      this.assertNamedElements(_eNamedElements, _builder);
-    };
-    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
   
   @Test
@@ -376,8 +347,6 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("FooEnumLiteral");
       _builder.newLine();
-      _builder.append("FooEnumLiteral");
-      _builder.newLine();
       this.assertNamedElements(_eNamedElements, _builder);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
@@ -426,10 +395,6 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       Iterable<? extends ENamedElement> _eNamedElements = this._edeltaEcoreHelper.getENamedElements(this.getEClassifierByName(it, "foo", "FooClass"), it);
       StringConcatenation _builder = new StringConcatenation();
-      _builder.append("myAttribute");
-      _builder.newLine();
-      _builder.append("myReference");
-      _builder.newLine();
       _builder.append("myAttribute");
       _builder.newLine();
       _builder.append("myReference");

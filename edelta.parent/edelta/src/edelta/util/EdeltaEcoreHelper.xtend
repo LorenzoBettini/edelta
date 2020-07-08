@@ -83,7 +83,7 @@ class EdeltaEcoreHelper {
 		switch (e) {
 			EPackage:
 				cache.get("getEPackageENamedElements" + includeCopiedEPackages -> e, context.eResource) [
-					return getEPackageENamedElementsInternal(e, context, includeCopiedEPackages)
+					return getEPackageENamedElementsInternal(e)
 				]
 			EClass:
 				cache.get("getEClassENamedElements" + includeCopiedEPackages -> e, context.eResource) [
@@ -102,24 +102,6 @@ class EdeltaEcoreHelper {
 			default:
 				emptyList
 		}
-	}
-
-	def private List<? extends ENamedElement> getEPackageENamedElementsInternal(EPackage ePackage, EObject context, boolean includeCopiedEPackages) {
-		val imported =
-			getProgram(context).metamodels
-			.findEPackageByNameInRootEPackages(ePackage)
-		if (includeCopiedEPackages) {
-			val copiedEPackage =
-				context.eResource.copiedEPackagesMap.values
-					.findEPackageByNameInRootEPackages(ePackage)
-			if (copiedEPackage !== null) 
-				// there'll also be copied epackages
-				return (
-					copiedEPackage.getEPackageENamedElementsInternal +
-					imported.getEPackageENamedElementsInternal
-				).toList
-		}
-		return imported.getEPackageENamedElementsInternal
 	}
 
 	def private List<? extends ENamedElement> getEPackageENamedElementsInternal(EPackage ePackage) {
