@@ -2,7 +2,6 @@ package edelta.util
 
 import com.google.inject.Inject
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper
-import java.util.List
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.ENamedElement
@@ -83,7 +82,10 @@ class EdeltaEcoreHelper {
 		switch (e) {
 			EPackage:
 				cache.get("getEPackageENamedElements" + includeCopiedEPackages -> e, context.eResource) [
-					return getEPackageENamedElementsInternal(e)
+					(
+						e.getEClassifiers +
+						e.getESubpackages
+					).toList
 				]
 			EClass:
 				cache.get("getEClassENamedElements" + includeCopiedEPackages -> e, context.eResource) [
@@ -96,17 +98,6 @@ class EdeltaEcoreHelper {
 			default:
 				emptyList
 		}
-	}
-
-	def private List<? extends ENamedElement> getEPackageENamedElementsInternal(EPackage ePackage) {
-		// could be null if we searched for a new subpackage
-		// in the imported metamodels
-		if (ePackage === null)
-			return emptyList
-		return (
-			ePackage.getEClassifiers +
-			ePackage.getESubpackages
-		).toList
 	}
 
 	def <T extends ENamedElement> getByName(Iterable<T> namedElements, String nameToSearch) {
