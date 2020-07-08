@@ -37,8 +37,8 @@ public class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 		if (reference == EDELTA_ECORE_REFERENCE__ENAMEDELEMENT) {
 			if (context instanceof EdeltaEcoreQualifiedReference) {
 				return Scopes.scopeFor(edeltaEcoreHelper.getENamedElements(
-					((EdeltaEcoreQualifiedReference) context).getQualification().getEnamedelement(),
-						context));
+					((EdeltaEcoreQualifiedReference) context)
+						.getQualification().getEnamedelement()));
 			}
 			return Scopes.scopeFor(edeltaEcoreHelper.getProgramENamedElements(context));
 		} else if (reference == EDELTA_MODIFY_ECORE_OPERATION__EPACKAGE) {

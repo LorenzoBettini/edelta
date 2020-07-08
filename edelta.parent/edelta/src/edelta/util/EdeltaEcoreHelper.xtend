@@ -68,17 +68,7 @@ class EdeltaEcoreHelper {
 		e.EClassifiers.filter(EClass)
 	}
 
-	def Iterable<? extends ENamedElement> getENamedElements(ENamedElement e, EObject context) {
-		getENamedElementsInternal(e, context, true)
-	}
-
-	def Iterable<? extends ENamedElement> getENamedElementsWithoutCopiedEPackages(ENamedElement e, EObject context) {
-		getENamedElementsInternal(e, context, false)
-	}
-
-	def private Iterable<? extends ENamedElement> getENamedElementsInternal(ENamedElement e,
-		EObject context, boolean includeCopiedEPackages
-	) {
+	def Iterable<? extends ENamedElement> getENamedElements(ENamedElement e) {
 		switch (e) {
 			EPackage:
 				(

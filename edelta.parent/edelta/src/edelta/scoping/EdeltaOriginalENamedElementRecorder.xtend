@@ -58,7 +58,7 @@ class EdeltaOriginalENamedElementRecorder {
 	def private getENamedElementByName(ENamedElement container, EObject context, String name) {
 		container.
 			retrieveOriginalElement(context).
-			getENamedElementsWithoutCopiedEPackages(context).
+			getENamedElements().
 			getByName(name)
 	}
 }
