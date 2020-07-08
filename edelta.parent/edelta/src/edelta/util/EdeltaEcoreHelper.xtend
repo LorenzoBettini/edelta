@@ -25,25 +25,23 @@ class EdeltaEcoreHelper {
 	@Inject IResourceScopeCache cache
 	@Inject extension EdeltaDerivedStateHelper
 
+	/**
+	 * Returns all the ENamedElements in the program:
+	 * it uses the copied EPackages if present, otherwise it uses the original
+	 * imported metamodels, but NOT both.
+	 */
 	def Iterable<? extends ENamedElement> getProgramENamedElements(EObject context) {
 		cache.get("getProgramENamedElements", context.eResource) [
-			getProgramENamedElementsInternal(context)
+			val prog = getProgram(context)
+			val copied = prog.eResource.copiedEPackagesMap.values
+			// copied EPackage are present only when there's at least one modifyEcore
+			val epackages = copied.empty ? prog.metamodels : copied
+			return (
+				epackages.map[getAllENamedElements].flatten
+			+
+				epackages
+			).toList
 		]
-	}
-
-	def private Iterable<? extends ENamedElement> getProgramENamedElementsInternal(EObject context) {
-		val epackages = getProgramTopLevelEPackages(context)
-		(
-			epackages.map[getAllENamedElements].flatten
-		+
-			epackages
-		).toList
-	}
-
-	def private Iterable<? extends EPackage> getProgramTopLevelEPackages(EObject context) {
-		val prog = getProgram(context)
-		val copied = prog.eResource.copiedEPackagesMap.values
-		return copied.empty ? prog.metamodels : copied
 	}
 
 	/**
