@@ -60,8 +60,39 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testProgramENamedElementsWithCopiedEPackages() {
+    Iterable<? extends ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(this.parseWithTestEcores(this._inputs.referencesToMetamodelsWithCopiedEPackages()));
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("BarClass");
+    _builder.newLine();
+    _builder.append("BarDataType");
+    _builder.newLine();
+    _builder.append("myAttribute");
+    _builder.newLine();
+    _builder.append("myReference");
+    _builder.newLine();
+    _builder.append("FooClass");
+    _builder.newLine();
+    _builder.append("FooDataType");
+    _builder.newLine();
+    _builder.append("FooEnum");
+    _builder.newLine();
+    _builder.append("myAttribute");
+    _builder.newLine();
+    _builder.append("myReference");
+    _builder.newLine();
+    _builder.append("FooEnumLiteral");
+    _builder.newLine();
+    _builder.append("foo");
+    _builder.newLine();
+    _builder.append("bar");
+    _builder.newLine();
+    this.assertNamedElements(_programENamedElements, _builder);
+  }
+  
+  @Test
   public void testProgramENamedElementsWithSubPackages() {
-    Iterable<? extends ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(this.parseWithTestEcoreWithSubPackage(this._inputs.referenceToMetamodelWithSubPackage()));
+    Iterable<? extends ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(this.parseWithTestEcoreWithSubPackage(this._inputs.referenceToMetamodelWithSubPackageWithCopiedEPackages()));
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("MainFooClass");
     _builder.newLine();
@@ -113,18 +144,6 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
       _builder.append("FooEnum");
       _builder.newLine();
       _builder.append("NewClass");
-      _builder.newLine();
-      _builder.append("myAttribute");
-      _builder.newLine();
-      _builder.append("myReference");
-      _builder.newLine();
-      _builder.append("FooEnumLiteral");
-      _builder.newLine();
-      _builder.append("FooClass");
-      _builder.newLine();
-      _builder.append("FooDataType");
-      _builder.newLine();
-      _builder.append("FooEnum");
       _builder.newLine();
       _builder.append("myAttribute");
       _builder.newLine();

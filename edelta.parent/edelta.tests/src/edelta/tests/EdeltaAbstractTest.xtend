@@ -332,6 +332,10 @@ abstract class EdeltaAbstractTest {
 		p.modifyEcoreOperations.last
 	}
 
+	def protected lastOperation(EdeltaProgram p) {
+		p.operations.last
+	}
+
 	def protected getLastCopiedEPackageLastEClass(EObject context) {
 		val copiedEPackage = getLastCopiedEPackage(context)
 		copiedEPackage.EClassifiers.last as EClass

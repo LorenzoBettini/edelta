@@ -37,11 +37,36 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testProgramENamedElementsWithCopiedEPackages() {
+		// note that the order is different w.r.t. the previous test
+		// since here we retrieve copied EPackage that are stored in a Map
+		referencesToMetamodelsWithCopiedEPackages.parseWithTestEcores.
+			getProgramENamedElements.
+			assertNamedElements(
+				'''
+				BarClass
+				BarDataType
+				myAttribute
+				myReference
+				FooClass
+				FooDataType
+				FooEnum
+				myAttribute
+				myReference
+				FooEnumLiteral
+				foo
+				bar
+				'''
+			)
+	}
+
+	@Test
 	def void testProgramENamedElementsWithSubPackages() {
 		// MyClass with myClassAttribute
 		// is present in the package and in subpackages
 		// so it appears several times
-		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage.
+		referenceToMetamodelWithSubPackageWithCopiedEPackages
+			.parseWithTestEcoreWithSubPackage.
 			getProgramENamedElements.
 			assertNamedElements(
 				'''
@@ -76,12 +101,6 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				FooDataType
 				FooEnum
 				NewClass
-				myAttribute
-				myReference
-				FooEnumLiteral
-				FooClass
-				FooDataType
-				FooEnum
 				myAttribute
 				myReference
 				FooEnumLiteral

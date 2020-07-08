@@ -9,6 +9,7 @@ import edelta.edelta.EdeltaEcoreQualifiedReference;
 import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
+import edelta.edelta.EdeltaOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.tests.EdeltaInjectorProvider;
 import edelta.tests.input.Inputs;
@@ -579,6 +580,10 @@ public abstract class EdeltaAbstractTest {
   
   protected EdeltaModifyEcoreOperation lastModifyEcoreOperation(final EdeltaProgram p) {
     return IterableExtensions.<EdeltaModifyEcoreOperation>last(p.getModifyEcoreOperations());
+  }
+  
+  protected EdeltaOperation lastOperation(final EdeltaProgram p) {
+    return IterableExtensions.<EdeltaOperation>last(p.getOperations());
   }
   
   protected EClass getLastCopiedEPackageLastEClass(final EObject context) {

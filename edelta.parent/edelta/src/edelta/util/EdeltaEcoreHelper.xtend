@@ -43,13 +43,8 @@ class EdeltaEcoreHelper {
 
 	def private Iterable<? extends EPackage> getProgramTopLevelEPackages(EObject context) {
 		val prog = getProgram(context)
-		// we also must explicitly consider the copied elements for interpreting without
-		// breaking the original EMF package registries classes
-		(
-			prog.eResource.copiedEPackagesMap.values
-		+
-			prog.metamodels
-		)
+		val copied = prog.eResource.copiedEPackagesMap.values
+		return copied.empty ? prog.metamodels : copied
 	}
 
 	/**
