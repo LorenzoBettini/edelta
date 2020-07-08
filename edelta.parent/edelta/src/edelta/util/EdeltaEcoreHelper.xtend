@@ -90,7 +90,7 @@ class EdeltaEcoreHelper {
 					e.EPackage.getENamedElementsInternal(context, includeCopiedEPackages).
 						filter(EClass).
 						filter[name == e.name].
-						map[EAllStructuralFeatures].flatten
+						map[EStructuralFeatures].flatten
 				]
 			EEnum:
 				cache.get("getEEnumENamedElements" + includeCopiedEPackages -> e, context.eResource) [
