@@ -5,12 +5,8 @@ import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaEcoreReference
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.util.EdeltaEcoreHelper
-import org.eclipse.emf.ecore.EClassifier
-import org.eclipse.emf.ecore.EEnumLiteral
 import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.EPackage
-import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.xtext.util.IResourceScopeCache
 
 import static edelta.util.EdeltaModelUtil.*
@@ -41,12 +37,13 @@ class EdeltaOriginalENamedElementRecorder {
 	}
 
 	def private ENamedElement retrieveOriginalElement(ENamedElement e, EObject context) {
-		switch (e) {
-			EPackage: getEPackages(context).findEPackageByNameInRootEPackages(e)
-			EClassifier: e.EPackage.getENamedElementByName(context, e.name)
-			EStructuralFeature: e.EContainingClass.getENamedElementByName(context, e.name)
-			EEnumLiteral: e.EEnum.getENamedElementByName(context, e.name)
-		}
+		if (e === null)
+			return null
+		val container = e.eContainer
+		if (container === null)
+			return getEPackages(context).getByName(e.name)
+		return (container as ENamedElement)
+			.getENamedElementByName(context, e.name)
 	}
 
 	def private getEPackages(EObject context) {
@@ -61,4 +58,9 @@ class EdeltaOriginalENamedElementRecorder {
 			getENamedElements().
 			getByName(name)
 	}
+
+	def private <T extends ENamedElement> getByName(Iterable<T> namedElements, String nameToSearch) {
+		return namedElements.findFirst[name == nameToSearch]
+	}
+
 }

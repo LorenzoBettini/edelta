@@ -52,28 +52,4 @@ class EdeltaEcoreHelper {
 		return e.eContents.filter(ENamedElement)
 	}
 
-	def <T extends ENamedElement> getByName(Iterable<T> namedElements, String nameToSearch) {
-		return namedElements.findFirst[name == nameToSearch]
-	}
-
-	/**
-	 * Try to retrieve an EPackage with the same name of the passed EPackage
-	 * in the given EPackages, possibly by inspecting the super package relation.
-	 * In case of loop in the super package relation, simply returns the passed
-	 * EPackage.
-	 */
-	def EPackage findEPackageByNameInRootEPackages(Iterable<EPackage> roots, EPackage p) {
-		if (hasCycleInSuperPackage(p))
-			return p
-		if (p.ESuperPackage === null) {
-			return roots.getByName(p.name)
-		} else {
-			val foundSuperPackage =
-				findEPackageByNameInRootEPackages(roots, p.ESuperPackage)
-			// it might not be found (e.g., in copied EPackages)
-			if (foundSuperPackage === null)
-				return null
-			return foundSuperPackage.ESubpackages.getByName(p.name)
-		}
-	}
 }
