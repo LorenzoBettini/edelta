@@ -19,9 +19,6 @@ import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 /**
  * Helper methods for accessing Ecore elements.
  * 
- * Computations that require filtering or mapping are cached in the scope of the
- * resource.
- * 
  * @author Lorenzo Bettini
  */
 public class EdeltaEcoreHelper {

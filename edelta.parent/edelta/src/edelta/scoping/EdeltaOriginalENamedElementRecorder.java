@@ -18,8 +18,9 @@ import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.util.EdeltaEcoreHelper;
 
 /**
- * Records the original referred ENamedElement in an EdeltaEcoreReference
- * expression, before the interpreter runs potentially changing containments.
+ * Records the original referred {@link ENamedElement} in an
+ * {@link EdeltaEcoreReference} expression, that is elements in the original
+ * imported metamodels.
  * 
  * @author Lorenzo Bettini
  */
