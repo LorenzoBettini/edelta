@@ -4,6 +4,7 @@ import static com.google.common.collect.Iterables.filter;
 import static java.util.Collections.emptyList;
 import static org.eclipse.xtext.EcoreUtil2.eAllOfType;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -43,12 +44,7 @@ public class EdeltaEcoreHelper {
 	 */
 	public Iterable<ENamedElement> getProgramENamedElements(final EObject context) {
 		return cache.get("getProgramENamedElements", context.eResource(), () -> {
-			final var prog = EdeltaModelUtil.getProgram(context);
-			final var copied = derivedStateHelper.getCopiedEPackagesMap(prog.eResource())
-					.values();
-			// copied EPackage are present only when there's at least one modifyEcore
-			final var epackages =
-				copied.isEmpty() ? prog.getMetamodels() : copied;
+			final var epackages = getEPackagesToProcess(context);
 			return epackages.stream()
 				.flatMap(this::getAllENamedElements)
 				.collect(Collectors.toList());
@@ -57,20 +53,24 @@ public class EdeltaEcoreHelper {
 
 	public EdeltaAccessibleElements computeAccessibleElements(EObject context) {
 		return cache.get("computeAccessibleElements", context.eResource(), () -> {
-			final var prog = EdeltaModelUtil.getProgram(context);
-			final var copied = derivedStateHelper.getCopiedEPackagesMap(prog.eResource())
-					.values();
-			// copied EPackage are present only when there's at least one modifyEcore
-			final var epackages =
-				copied.isEmpty() ? prog.getMetamodels() : copied;
+			final var epackages = getEPackagesToProcess(context);
 			final var snapshot = EdeltaEcoreUtil.copyEPackages(epackages).stream()
 				.flatMap(this::getAllENamedElements)
 				.map(it -> new EdeltaAccessibleElement(it,
 						qualifiedNameProvider.getFullyQualifiedName(it)))
+				// qualified name is null for unresolved proxies
 				.filter(it -> Objects.nonNull(it.getQualifiedName()))
 				.collect(Collectors.toList());
 			return new EdeltaAccessibleElements(snapshot);
 		});
+	}
+
+	private Collection<EPackage> getEPackagesToProcess(final EObject context) {
+		final var prog = EdeltaModelUtil.getProgram(context);
+		final var copied = derivedStateHelper.getCopiedEPackagesMap(prog.eResource())
+				.values();
+		// copied EPackage are present only when there's at least one modifyEcore
+		return copied.isEmpty() ? prog.getMetamodels() : copied;
 	}
 
 	private Stream<ENamedElement> getAllENamedElements(final EPackage e) {
