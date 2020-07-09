@@ -20,18 +20,42 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			getProgramENamedElements.
 			assertNamedElements(
 				'''
+				foo
 				FooClass
+				myAttribute
+				myReference
 				FooDataType
 				FooEnum
-				myAttribute
-				myReference
 				FooEnumLiteral
+				bar
 				BarClass
-				BarDataType
 				myAttribute
 				myReference
-				foo
+				BarDataType
+				'''
+			)
+	}
+
+	@Test
+	def void testProgramENamedElementsWithCopiedEPackages() {
+		// note that the order is different w.r.t. the previous test
+		// since here we retrieve copied EPackage that are stored in a Map
+		referencesToMetamodelsWithCopiedEPackages.parseWithTestEcores.
+			getProgramENamedElements.
+			assertNamedElements(
+				'''
 				bar
+				BarClass
+				myAttribute
+				myReference
+				BarDataType
+				foo
+				FooClass
+				myAttribute
+				myReference
+				FooDataType
+				FooEnum
+				FooEnumLiteral
 				'''
 			)
 	}
@@ -41,27 +65,28 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 		// MyClass with myClassAttribute
 		// is present in the package and in subpackages
 		// so it appears several times
-		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage.
+		referenceToMetamodelWithSubPackageWithCopiedEPackages
+			.parseWithTestEcoreWithSubPackage.
 			getProgramENamedElements.
 			assertNamedElements(
 				'''
+				mainpackage
 				MainFooClass
-				MainFooDataType
-				MainFooEnum
-				MyClass
 				myAttribute
 				myReference
+				MainFooDataType
+				MainFooEnum
 				FooEnumLiteral
+				MyClass
 				myClassAttribute
 				mainsubpackage
 				MainSubPackageFooClass
-				MyClass
 				mySubPackageAttribute
 				mySubPackageReference
+				MyClass
 				myClassAttribute
 				subsubpackage
 				MyClass
-				mainpackage
 				'''
 			)
 	}
@@ -72,20 +97,14 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			getProgramENamedElements.
 			assertNamedElements(
 				'''
-				FooClass
-				FooDataType
-				FooEnum
-				NewClass
-				myAttribute
-				myReference
-				FooEnumLiteral
-				FooClass
-				FooDataType
-				FooEnum
-				myAttribute
-				myReference
-				FooEnumLiteral
 				foo
+				FooClass
+				myAttribute
+				myReference
+				FooDataType
+				FooEnum
+				FooEnumLiteral
+				NewClass
 				'''
 			)
 		// NewClass is the one created in the program
@@ -145,7 +164,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	@Test
 	def void testEPackageENamedElements() {
 		referenceToMetamodel.parseWithTestEcore => [
-			getENamedElements(getEPackageByName("foo"), it).
+			getENamedElements(getEPackageByName("foo")).
 			assertNamedElements(
 				'''
 				FooClass
@@ -159,7 +178,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	@Test
 	def void testEPackageENamedElementsWithSubPackages() {
 		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
-			getENamedElements(getEPackageByName("mainpackage"), it).
+			getENamedElements(getEPackageByName("mainpackage")).
 			assertNamedElements(
 				'''
 				MainFooClass
@@ -183,9 +202,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				]
 			}
 		'''.parseWithTestEcore => [
-			getENamedElements(
-				copiedEPackages.head.ESubpackages.head, it
-			).
+			getENamedElements(copiedEPackages.head.ESubpackages.head).
 			assertNamedElements(
 				'''
 				AddedInSubpackage
@@ -197,9 +214,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	@Test
 	def void testSubPackageEPackageENamedElementsWithSubPackages() {
 		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
-			getENamedElements(
-				getEPackageByName("mainpackage").ESubpackages.head, it
-			).
+			getENamedElements(getEPackageByName("mainpackage").ESubpackages.head).
 			assertNamedElements(
 				'''
 				MainSubPackageFooClass
@@ -216,7 +231,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			getENamedElements(
 				getEPackageByName("mainpackage")
 					.ESubpackages.head
-					.ESubpackages.head, it
+					.ESubpackages.head
 			).
 			assertNamedElements(
 				'''
@@ -235,11 +250,9 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 								.ESubpackages.head
 			// simulate the loop in the package relation
 			subsubpackage.ESubpackages += mainpackage
-			getENamedElements(subsubpackage, it).
+			getENamedElements(subsubpackage).
 			assertNamedElements(
 				'''
-				MyClass
-				mainpackage
 				MyClass
 				mainpackage
 				'''
@@ -257,12 +270,12 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 								.ESubpackages.head
 			// both packages have a class with the same name but with different
 			// structure
-			getENamedElements(subsubpackage.getEClassiferByName("MyClass"), it).
+			getENamedElements(subsubpackage.getEClassiferByName("MyClass")).
 				assertNamedElements(
 				'''
 
 				''')
-			getENamedElements(mainpackage.getEClassiferByName("MyClass"), it).
+			getENamedElements(mainpackage.getEClassiferByName("MyClass")).
 				assertNamedElements(
 				'''
 				myClassAttribute
@@ -271,44 +284,9 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testEPackageENamedElementsWithCreatedEClass() {
-		referenceToCreatedEClass.parseWithTestEcore => [
-			getENamedElements(getEPackageByName("foo"), it).
-			assertNamedElements(
-				'''
-				FooClass
-				FooDataType
-				FooEnum
-				NewClass
-				FooClass
-				FooDataType
-				FooEnum
-				'''
-			)
-		// NewClass is the one created in the program
-		]
-	}
-
-	@Test
-	def void testEPackageENamedElementsWithCreatedEClassWithoutCopiedEPackages() {
-		referenceToCreatedEClass.parseWithTestEcore => [
-			getENamedElementsWithoutCopiedEPackages(getEPackageByName("foo"), it).
-			assertNamedElements(
-				'''
-				FooClass
-				FooDataType
-				FooEnum
-				'''
-			)
-			// NewClass is the one created in the program
-			// but it's in the copied EPackages, not used here
-		]
-	}
-
-	@Test
 	def void testEDataTypeENamedElements() {
 		referenceToMetamodel.parseWithTestEcore => [
-			getENamedElements(getEClassifierByName("foo", "FooDataType"), it).
+			getENamedElements(getEClassifierByName("foo", "FooDataType")).
 			assertNamedElements(
 				'''
 
@@ -320,7 +298,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	@Test
 	def void testENumENamedElements() {
 		referenceToMetamodel.parseWithTestEcore => [
-			getENamedElements(getEClassifierByName("foo", "FooEnum"), it).
+			getENamedElements(getEClassifierByName("foo", "FooEnum")).
 			assertNamedElements(
 				'''
 				FooEnumLiteral
@@ -332,41 +310,26 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	@Test
 	def void testENumENamedElementsWithCreatedEClass() {
 		referenceToCreatedEClass.parseWithTestEcore => [
-			getENamedElements(getEClassifierByName("foo", "FooEnum"), it).
-			assertNamedElements(
-				'''
-				FooEnumLiteral
-				FooEnumLiteral
-				'''
-			)
-			// we also have copied EPackages, that's why the elements appear twice
-		]
-	}
-
-	@Test
-	def void testENumENamedElementsWithCreatedEClassWithoutCopiedEPackages() {
-		referenceToCreatedEClass.parseWithTestEcore => [
-			getENamedElementsWithoutCopiedEPackages(getEClassifierByName("foo", "FooEnum"), it).
+			getENamedElements(getEClassifierByName("foo", "FooEnum")).
 			assertNamedElements(
 				'''
 				FooEnumLiteral
 				'''
 			)
-			// we also have copied EPackages, that's why the elements appear twice
 		]
 	}
 
 	@Test
 	def void testNullENamedElements() {
 		referenceToMetamodel.parseWithTestEcore => [
-			Assert.assertTrue(getENamedElements(null, it).isEmpty)
+			Assert.assertTrue(getENamedElements(null).isEmpty)
 		]
 	}
 
 	@Test
 	def void testEClassENamedElements() {
 		referenceToMetamodel.parseWithTestEcore => [
-			getENamedElements(getEClassifierByName("foo", "FooClass"), it).
+			getENamedElements(getEClassifierByName("foo", "FooClass")).
 			assertNamedElements(
 				'''
 				myAttribute
@@ -379,39 +342,11 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	@Test
 	def void testEClassENamedElementsWithCreatedEClass() {
 		referenceToCreatedEClass.parseWithTestEcore => [
-			getENamedElements(getEClassifierByName("foo", "FooClass"), it).
+			getENamedElements(getEClassifierByName("foo", "FooClass")).
 			assertNamedElements(
 				'''
 				myAttribute
 				myReference
-				myAttribute
-				myReference
-				'''
-			)
-			// we also have copied EPackages, that's why the elements appear twice
-		]
-	}
-
-	@Test
-	def void testEClassENamedElementsWithCreatedEClassWithoutCopiedEPackages() {
-		referenceToCreatedEClass.parseWithTestEcore => [
-			getENamedElementsWithoutCopiedEPackages(getEClassifierByName("foo", "FooClass"), it).
-			assertNamedElements(
-				'''
-				myAttribute
-				myReference
-				'''
-			)
-		]
-	}
-
-	@Test
-	def void testGetAllEClasses() {
-		referenceToMetamodel.parseWithTestEcore => [
-			getAllEClasses(getEPackageByName("foo")).
-			assertNamedElements(
-				'''
-				FooClass
 				'''
 			)
 		]

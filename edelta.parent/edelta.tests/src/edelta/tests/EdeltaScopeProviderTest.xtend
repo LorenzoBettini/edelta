@@ -60,16 +60,17 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testScopeForEnamedElementInProgram() {
-		referenceToMetamodel.parseWithTestEcore.
+		referenceToMetamodelWithCopiedEPackage
+			.parseWithTestEcore.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
+			foo
 			FooClass
-			FooDataType
-			FooEnum
 			myAttribute
 			myReference
+			FooDataType
+			FooEnum
 			FooEnumLiteral
-			foo
 			''')
 	}
 
@@ -78,26 +79,27 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		// MyClass with myClassAttribute
 		// is present in the package and in subpackages
 		// so it appears several times
-		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage.
+		referenceToMetamodelWithSubPackageWithCopiedEPackages
+			.parseWithTestEcoreWithSubPackage.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
+			mainpackage
 			MainFooClass
-			MainFooDataType
-			MainFooEnum
-			MyClass
 			myAttribute
 			myReference
+			MainFooDataType
+			MainFooEnum
 			FooEnumLiteral
+			MyClass
 			myClassAttribute
 			mainsubpackage
 			MainSubPackageFooClass
-			MyClass
 			mySubPackageAttribute
 			mySubPackageReference
+			MyClass
 			myClassAttribute
 			subsubpackage
 			MyClass
-			mainpackage
 			''')
 	}
 
@@ -114,41 +116,24 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			.reference
 			.assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
-			MainFooClass
-			MainFooDataType
-			MainFooEnum
-			MyClass
-			myAttribute
-			myReference
-			FooEnumLiteral
-			myClassAttribute
-			mainsubpackage
-			MainSubPackageFooClass
-			MyClass
-			mySubPackageAttribute
-			mySubPackageReference
-			myClassAttribute
-			subsubpackage
-			MyClass
-			MainFooClass
-			MainFooDataType
-			MainFooEnum
-			MyClass
-			myAttribute
-			myReference
-			FooEnumLiteral
-			myClassAttribute
-			mainsubpackage
-			MainSubPackageFooClass
-			MyClass
-			mySubPackageAttribute
-			mySubPackageReference
-			myClassAttribute
-			subsubpackage
-			MyClass
 			mainpackage
+			MainFooClass
+			myAttribute
+			myReference
+			MainFooDataType
+			MainFooEnum
+			FooEnumLiteral
+			MyClass
+			myClassAttribute
+			mainsubpackage
+			MainSubPackageFooClass
+			mySubPackageAttribute
+			mySubPackageReference
+			MyClass
+			myClassAttribute
+			subsubpackage
+			MyClass
 			''')
-			// duplicates because of copied EPackage
 	}
 
 	@Test
@@ -167,11 +152,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			MainSubPackageFooClass
 			MyClass
 			subsubpackage
-			MainSubPackageFooClass
-			MyClass
-			subsubpackage
 			''')
-			// duplicates because of copied EPackage
 	}
 
 	@Test
@@ -189,10 +170,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			'''
 			mySubPackageAttribute
 			mySubPackageReference
-			mySubPackageAttribute
-			mySubPackageReference
 			''')
-			// duplicates because of copied EPackage
 	}
 
 	@Test
@@ -209,9 +187,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			.assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
 			MyClass
-			MyClass
 			''')
-			// duplicates because of copied EPackage
 	}
 
 	@Test
@@ -219,21 +195,14 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		"ecoreref(".ecoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
-			FooClass
-			FooDataType
-			FooEnum
-			myAttribute
-			myReference
-			FooEnumLiteral
-			FooClass
-			FooDataType
-			FooEnum
-			myAttribute
-			myReference
-			FooEnumLiteral
 			foo
+			FooClass
+			myAttribute
+			myReference
+			FooDataType
+			FooEnum
+			FooEnumLiteral
 			''')
-			// duplicates because of copied EPackage
 	}
 
 	@Test
@@ -244,11 +213,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			FooClass
 			FooDataType
 			FooEnum
-			FooClass
-			FooDataType
-			FooEnum
 			''')
-			// duplicate EClassifiers because of copied EPackage
 	}
 
 	@Test
@@ -258,10 +223,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			'''
 			myAttribute
 			myReference
-			myAttribute
-			myReference
 			''')
-			// duplicate features because of copied EPackage
 	}
 
 	@Test
@@ -286,7 +248,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForReferenceToCopiedEPackageEClassifierAfterCreatingEClass() {
+	def void testScopeForReferenceToCopiedEPackageEClassifierInModifyEcore() {
 		val prog = '''
 			metamodel "foo"
 			
@@ -306,30 +268,68 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testScopeForReferenceToOriginalEPackageEClassifierInOperation() {
+		val prog = '''
+			metamodel "foo"
+			
+			def anOp() {
+				ecoreref(FooDataType)
+			}
+		'''.
+			parseWithTestEcore
+		val eclassExp = prog
+			.lastOperation.body.blockLastExpression as EdeltaEcoreReferenceExpression
+		val dataType = eclassExp.reference.enamedelement as EDataType
+		// must be a reference to the original EPackage's datatype
+		assertSame(
+			prog.metamodels.head.EClassifiers.filter(EDataType).head,
+			dataType
+		)
+	}
+
+	@Test
+	def void testScopeForReferenceToCopiedEPackageEClassifierInOperationWhenTheresAModifyEcore() {
+		val prog = '''
+			metamodel "foo"
+			
+			def anOp() {
+				ecoreref(FooDataType)
+			}
+			
+			// this triggers copied EPackage
+			modifyEcore aTest epackage foo {
+				ecoreref(FooDataType)
+			}
+		'''.
+			parseWithTestEcore
+		val eclassExp = prog
+			.lastOperation.body.blockLastExpression as EdeltaEcoreReferenceExpression
+		val dataType = eclassExp.reference.enamedelement as EDataType
+		// must be a reference to the copied EPackage's datatype
+		assertSame(
+			prog.copiedEPackages.head.EClassifiers.filter(EDataType).head,
+			dataType
+		)
+	}
+
+	@Test
 	def void testScopeForReferenceToCreatedEAttribute() {
 		referenceToCreatedEAttributeSimple.parseWithTestEcore
 			.lastEcoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
+			foo
 			FooClass
-			FooDataType
-			FooEnum
-			NewClass
 			myAttribute
 			myReference
+			FooDataType
+			FooEnum
 			FooEnumLiteral
+			NewClass
 			newAttribute
 			newAttribute2
-			FooClass
-			FooDataType
-			FooEnum
-			myAttribute
-			myReference
-			FooEnumLiteral
-			foo
 			''')
 		// newAttributes are the ones created in the program
-		// we also have copied EPackages, that's why elements appear twice
 	}
 
 	@Test
@@ -338,21 +338,15 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			.lastEcoreReferenceExpression.reference
 			.assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
-			FooClass
-			FooDataType
-			FooEnum
-			NewClass
-			myAttribute
-			myReference
-			FooEnumLiteral
-			changed
-			FooClass
-			FooDataType
-			FooEnum
-			myAttribute
-			myReference
-			FooEnumLiteral
 			foo
+			FooClass
+			myAttribute
+			myReference
+			FooDataType
+			FooEnum
+			FooEnumLiteral
+			NewClass
+			changed
 			''')
 		// "changed" is the one created in the program (with name "newAttribute", and whose
 		// name is changed in the body
@@ -375,27 +369,6 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForReferenceToCopiedEClassInModifyEcore() {
-		val prog = '''
-			metamodel "foo"
-			
-			modifyEcore aTest epackage foo {
-				val c = ecoreref(FooClass)
-			}
-		'''.
-		parseWithTestEcore
-		val referred = prog.modifyEcoreOperations.last.body.
-			blockLastExpression.
-			variableDeclaration.right.edeltaEcoreReferenceExpression.
-			reference.enamedelement as EClass
-		assertSame(
-			// the one copied by the derived state computer
-			prog.copiedEPackages.head.getEClassiferByName("FooClass"),
-			referred
-		)
-	}
-
-	@Test
 	def void testScopeForRenamedEClassInModifyEcore() {
 		'''
 		metamodel "foo"
@@ -409,9 +382,6 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
 			RenamedClass
-			FooDataType
-			FooEnum
-			FooClass
 			FooDataType
 			FooEnum
 			''')
@@ -503,8 +473,9 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			referred.enamedelement as EClass
 		)
 		assertSame(
-			// the original one
-			prog.metamodels.last,
+			// the one copied by the derived state computer
+			// NOT the original one
+			copiedEPackage,
 			referred.qualification.enamedelement as EPackage
 		)
 	}

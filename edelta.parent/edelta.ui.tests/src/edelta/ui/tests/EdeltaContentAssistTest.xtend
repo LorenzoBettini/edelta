@@ -5,6 +5,7 @@ import edelta.ui.tests.utils.EdeltaPluginProjectHelper
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
+import java.util.List
 import java.util.stream.Collectors
 import org.eclipse.core.resources.IFile
 import org.eclipse.core.runtime.NullProgressMonitor
@@ -37,6 +38,9 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	@Rule
 	public Flaky.Rule testRule = new Flaky.Rule();
+
+	// cursor position marker
+	val cursor = '''<|>'''
 
 	@BeforeClass
 	def static void setUp() {
@@ -275,7 +279,25 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			assertProposal('foo')
 	}
 
+	@Test def void testQualifiedEcoreReferenceBeforeRemovalOfEClass() {
+		'''
+		metamodel "mypackage"
+		modifyEcore aTest epackage mypackage {
+			ecoreref(MyClass.«cursor»);
+			EClassifiers -= ecoreref(MyClass)
+		}'''.
+			testContentAssistant(#['myAttribute', 'myReference'])
+	}
+
 	def private fromLinesOfStringsToStringArray(CharSequence strings) {
 		strings.toString.replaceAll("\r", "").split("\n")
+	}
+
+	private def void testContentAssistant(CharSequence text, List<String> expectedProposals) {
+		val cursorPosition = text.toString.indexOf(cursor)
+		val content = text.toString.replace(cursor, "")
+
+		newBuilder.append(content).
+		assertTextAtCursorPosition(cursorPosition, expectedProposals)
 	}
 }

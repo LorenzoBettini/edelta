@@ -7,6 +7,8 @@ import edelta.ui.tests.utils.EdeltaPluginProjectHelper;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -28,7 +30,10 @@ import org.eclipse.xtext.ui.testing.AbstractContentAssistTest;
 import org.eclipse.xtext.ui.testing.ContentAssistProcessorTestBuilder;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.util.concurrent.IUnitOfWork;
+import org.eclipse.xtext.xbase.lib.CollectionLiterals;
+import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Exceptions;
+import org.eclipse.xtext.xbase.lib.Functions.Function0;
 import org.eclipse.xtext.xbase.lib.InputOutput;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -45,6 +50,15 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   
   @Rule
   public Flaky.Rule testRule = new Flaky.Rule();
+  
+  private final String cursor = new Function0<String>() {
+    @Override
+    public String apply() {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("<|>");
+      return _builder.toString();
+    }
+  }.apply();
   
   @BeforeClass
   public static void setUp() {
@@ -465,7 +479,36 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
     }
   }
   
+  @Test
+  public void testQualifiedEcoreReferenceBeforeRemovalOfEClass() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mypackage\"");
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mypackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(MyClass.");
+    _builder.append(this.cursor, "\t");
+    _builder.append(");");
+    _builder.newLineIfNotEmpty();
+    _builder.append("\t");
+    _builder.append("EClassifiers -= ecoreref(MyClass)");
+    _builder.newLine();
+    _builder.append("}");
+    this.testContentAssistant(_builder, Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("myAttribute", "myReference")));
+  }
+  
   private String[] fromLinesOfStringsToStringArray(final CharSequence strings) {
     return strings.toString().replaceAll("\r", "").split("\n");
+  }
+  
+  private void testContentAssistant(final CharSequence text, final List<String> expectedProposals) {
+    try {
+      final int cursorPosition = text.toString().indexOf(this.cursor);
+      final String content = text.toString().replace(this.cursor, "");
+      this.newBuilder().append(content).assertTextAtCursorPosition(cursorPosition, ((String[])Conversions.unwrapArray(expectedProposals, String.class)));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
 }
