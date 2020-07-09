@@ -7,6 +7,15 @@ class Inputs {
 		'''
 	}
 
+	def referenceToMetamodelWithCopiedEPackage() {
+		'''
+			metamodel "foo"
+			
+			// that's required to have copied EPackages
+			modifyEcore aTest foo {}
+		'''
+	}
+
 	def referencesToMetamodels() {
 		'''
 			metamodel "foo"
@@ -14,9 +23,28 @@ class Inputs {
 		'''
 	}
 
+	def referencesToMetamodelsWithCopiedEPackages() {
+		'''
+			metamodel "foo"
+			metamodel "bar"
+			
+			// that's required to have copied EPackages
+			modifyEcore aTest foo {}
+		'''
+	}
+
 	def referenceToMetamodelWithSubPackage() {
 		'''
 			metamodel "mainpackage"
+		'''
+	}
+
+	def referenceToMetamodelWithSubPackageWithCopiedEPackages() {
+		'''
+			metamodel "mainpackage"
+			
+			// that's required to have copied EPackages
+			modifyEcore aTest mainpackage {}
 		'''
 	}
 

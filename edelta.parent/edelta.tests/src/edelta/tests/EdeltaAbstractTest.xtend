@@ -163,6 +163,9 @@ abstract class EdeltaAbstractTest {
 			EStructuralFeatures += EcoreFactory.eINSTANCE.createEReference => [
 				name = "myReference"
 			]
+			EOperations += EcoreFactory.eINSTANCE.createEOperation => [
+				name = "myOp"
+			]
 		]
 		fooPackage.EClassifiers += EcoreFactory.eINSTANCE.createEDataType => [
 			name = "FooDataType"
@@ -330,6 +333,10 @@ abstract class EdeltaAbstractTest {
 
 	def protected lastModifyEcoreOperation(EdeltaProgram p) {
 		p.modifyEcoreOperations.last
+	}
+
+	def protected lastOperation(EdeltaProgram p) {
+		p.operations.last
 	}
 
 	def protected getLastCopiedEPackageLastEClass(EObject context) {
