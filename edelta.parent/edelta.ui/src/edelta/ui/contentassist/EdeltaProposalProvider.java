@@ -8,7 +8,6 @@ import static org.eclipse.xtext.EcoreUtil2.getContainerOfType;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.Assignment;
 import org.eclipse.xtext.CrossReference;
-import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.scoping.Scopes;
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext;
@@ -18,7 +17,6 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 
-import edelta.edelta.EdeltaEcoreQualifiedReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaPackage;
 import edelta.resource.derivedstate.EdeltaAccessibleElement;
@@ -35,9 +33,6 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 
 	@Inject
 	private EdeltaDerivedStateHelper derivedStateHelper;
-
-	@Inject
-	private IQualifiedNameProvider qualifiedNameProvider;
 
 	/**
 	 * Avoids proposing subpackages since in Edelta they are not allowed
@@ -74,36 +69,6 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 				acceptor,
 				Predicates.<IEObjectDescription> alwaysTrue(),
 				getProposalFactory("ID", context));
-//		lookupCrossReference(
-//			((CrossReference)assignment.getTerminal()),
-//			context,
-//			acceptor,
-//			(IEObjectDescription desc) ->
-//			accessibleElements.stream()
-//				.anyMatch(elem -> elem.getElement().getName().equals(
-//					desc.getName().toString()))
-//			);
 	}
 
-	/**
-	 * Only proposes elements that are available in this context.
-	 */
-	@Override
-	public void completeEdeltaEcoreReference_Enamedelement(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-		final var accessibleElements =
-			derivedStateHelper.getAccessibleElements(
-				getContainerOfType(model, EdeltaEcoreReferenceExpression.class));
-		final var qualifiedReference = (EdeltaEcoreQualifiedReference) model;
-		final var qualification = qualifiedReference.getQualification();
-		final var eClass = qualification.getEnamedelement().eClass();
-		lookupCrossReference(
-			((CrossReference)assignment.getTerminal()),
-			context,
-			acceptor,
-			(IEObjectDescription desc) ->
-			accessibleElements.stream()
-				.anyMatch(elem -> elem.getQualifiedName().equals(
-						qualifiedNameProvider.getFullyQualifiedName(desc.getEObjectOrProxy())))
-			);
-	}
 }
