@@ -223,6 +223,31 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			assertProposal('foo')
 	}
 
+	@Test def void testUnqualifiedEcoreReferenceBeforeRemovalOfEClass() {
+		'''
+		metamodel "mypackage"
+		modifyEcore aTest epackage mypackage {
+			ecoreref(«cursor»);
+			EClassifiers -= ecoreref(MyClass)
+		}'''.
+			testContentAssistant(
+				'''
+				MyBaseClass
+				MyClass
+				MyDataType
+				MyDerivedClass
+				myAttribute
+				myBaseAttribute
+				myBaseReference
+				myDerivedAttribute
+				myDerivedReference
+				myReference
+				mypackage
+				'''.fromLinesOfStringsToStringArray
+			)
+		// MyClass is still present in that context so it is proposed
+	}
+
 	@Test def void testQualifiedEcoreReferenceBeforeRemovalOfEClass() {
 		'''
 		metamodel "mypackage"
@@ -231,6 +256,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			EClassifiers -= ecoreref(MyClass)
 		}'''.
 			testContentAssistant(#['myAttribute', 'myReference'])
+		// MyClass is still present in that context so its features are proposed
 	}
 
 	@Test def void testUnqualifiedEcoreReferenceAfterRemoval() {
