@@ -259,6 +259,28 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		// MyClass is still present in that context so its features are proposed
 	}
 
+	@Test def void testQualifiedEcoreReferenceBeforeRemovalOfEStructuralFeature() {
+		'''
+		metamodel "mypackage"
+		modifyEcore aTest epackage mypackage {
+			ecoreref(MyClass.«cursor»);
+			ecoreref(MyClass).EStructuralFeatures -= ecoreref(myReference)
+		}'''.
+			testContentAssistant(#['myAttribute', 'myReference'])
+		// myReference is still present in that context so it is proposed
+	}
+
+	@Test def void testQualifiedEcoreReferenceBeforeAdditionOfEStructuralFeature() {
+		'''
+		metamodel "mypackage"
+		modifyEcore aTest epackage mypackage {
+			ecoreref(MyClass.«cursor»);
+			ecoreref(MyClass).addNewEAttribute("myNewAttribute", null)
+		}'''.
+			testContentAssistant(#['myAttribute', 'myReference'])
+		// myNewAttribute is not yet present in that context so it is not proposed
+	}
+
 	@Test def void testUnqualifiedEcoreReferenceAfterRemoval() {
 		newBuilder.append('''
 			metamodel "mypackage"
@@ -279,7 +301,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		// are not proposed since they are not present anymore in this context
 	}
 
-	@Test def void testQualifiedEcoreReferenceAfterRemoval() {
+	@Test def void testQualifiedEcoreReferenceAfterRemovalOfEStructuralFeature() {
 		newBuilder.append('''
 			metamodel "mypackage"
 			modifyEcore aTest epackage mypackage { 
@@ -289,6 +311,17 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 				myBaseReference
 				'''.fromLinesOfStringsToStringArray)
 		// myBaseAttribute is not proposed since it's not present anymore in this context
+	}
+
+	@Test def void testQualifiedEcoreReferenceAfterAdditionOfEStructuralFeature() {
+	'''
+		metamodel "mypackage"
+		modifyEcore aTest epackage mypackage {
+			ecoreref(MyClass).addNewEAttribute("myNewAttribute", null)
+			ecoreref(MyClass.«cursor»);
+		}'''.
+			testContentAssistant(#['myAttribute', 'myReference', "myNewAttribute"])
+		// myNewAttribute is now present in that context so it is proposed
 	}
 
 	@Test def void testUnqualifiedEcoreReferenceAfterRename() {

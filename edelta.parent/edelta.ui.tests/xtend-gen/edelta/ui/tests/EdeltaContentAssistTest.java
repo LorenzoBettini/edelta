@@ -439,6 +439,44 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  public void testQualifiedEcoreReferenceBeforeRemovalOfEStructuralFeature() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mypackage\"");
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mypackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(MyClass.");
+    _builder.append(this.cursor, "\t");
+    _builder.append(");");
+    _builder.newLineIfNotEmpty();
+    _builder.append("\t");
+    _builder.append("ecoreref(MyClass).EStructuralFeatures -= ecoreref(myReference)");
+    _builder.newLine();
+    _builder.append("}");
+    this.testContentAssistant(_builder, Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("myAttribute", "myReference")));
+  }
+  
+  @Test
+  public void testQualifiedEcoreReferenceBeforeAdditionOfEStructuralFeature() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mypackage\"");
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mypackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(MyClass.");
+    _builder.append(this.cursor, "\t");
+    _builder.append(");");
+    _builder.newLineIfNotEmpty();
+    _builder.append("\t");
+    _builder.append("ecoreref(MyClass).addNewEAttribute(\"myNewAttribute\", null)");
+    _builder.newLine();
+    _builder.append("}");
+    this.testContentAssistant(_builder, Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("myAttribute", "myReference")));
+  }
+  
+  @Test
   public void testUnqualifiedEcoreReferenceAfterRemoval() {
     try {
       ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
@@ -476,7 +514,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
-  public void testQualifiedEcoreReferenceAfterRemoval() {
+  public void testQualifiedEcoreReferenceAfterRemovalOfEStructuralFeature() {
     try {
       ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
       StringConcatenation _builder = new StringConcatenation();
@@ -496,6 +534,25 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
+  }
+  
+  @Test
+  public void testQualifiedEcoreReferenceAfterAdditionOfEStructuralFeature() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mypackage\"");
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mypackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(MyClass).addNewEAttribute(\"myNewAttribute\", null)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(MyClass.");
+    _builder.append(this.cursor, "\t");
+    _builder.append(");");
+    _builder.newLineIfNotEmpty();
+    _builder.append("}");
+    this.testContentAssistant(_builder, Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("myAttribute", "myReference", "myNewAttribute")));
   }
   
   @Test
