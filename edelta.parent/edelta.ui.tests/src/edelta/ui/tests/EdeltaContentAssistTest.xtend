@@ -314,7 +314,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test def void testQualifiedEcoreReferenceAfterAdditionOfEStructuralFeature() {
-	'''
+		'''
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
 			ecoreref(MyClass).addNewEAttribute("myNewAttribute", null)
@@ -322,6 +322,31 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		}'''.
 			testContentAssistant(#['myAttribute', 'myReference', "myNewAttribute"])
 		// myNewAttribute is now present in that context so it is proposed
+	}
+
+	@Test def void testUnqualifiedEcoreReferenceBeforeRename() {
+		'''
+		metamodel "mypackage"
+		modifyEcore aTest epackage mypackage {
+			ecoreref(«cursor»)
+			ecoreref(MyBaseClass).name = "Renamed"
+		}'''.
+			testContentAssistant(
+				'''
+				MyBaseClass
+				MyClass
+				MyDataType
+				MyDerivedClass
+				myAttribute
+				myBaseAttribute
+				myBaseReference
+				myDerivedAttribute
+				myDerivedReference
+				myReference
+				mypackage
+				'''.fromLinesOfStringsToStringArray
+			)
+		// MyBaseClass is not yet renamed in this context
 	}
 
 	@Test def void testUnqualifiedEcoreReferenceAfterRename() {

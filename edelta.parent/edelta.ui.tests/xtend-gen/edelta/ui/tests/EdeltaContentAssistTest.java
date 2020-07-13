@@ -556,6 +556,49 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  public void testUnqualifiedEcoreReferenceBeforeRename() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mypackage\"");
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mypackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(");
+    _builder.append(this.cursor, "\t");
+    _builder.append(")");
+    _builder.newLineIfNotEmpty();
+    _builder.append("\t");
+    _builder.append("ecoreref(MyBaseClass).name = \"Renamed\"");
+    _builder.newLine();
+    _builder.append("}");
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("MyBaseClass");
+    _builder_1.newLine();
+    _builder_1.append("MyClass");
+    _builder_1.newLine();
+    _builder_1.append("MyDataType");
+    _builder_1.newLine();
+    _builder_1.append("MyDerivedClass");
+    _builder_1.newLine();
+    _builder_1.append("myAttribute");
+    _builder_1.newLine();
+    _builder_1.append("myBaseAttribute");
+    _builder_1.newLine();
+    _builder_1.append("myBaseReference");
+    _builder_1.newLine();
+    _builder_1.append("myDerivedAttribute");
+    _builder_1.newLine();
+    _builder_1.append("myDerivedReference");
+    _builder_1.newLine();
+    _builder_1.append("myReference");
+    _builder_1.newLine();
+    _builder_1.append("mypackage");
+    _builder_1.newLine();
+    this.testContentAssistant(_builder, 
+      ((List<String>)Conversions.doWrapArray(this.fromLinesOfStringsToStringArray(_builder_1))));
+  }
+  
+  @Test
   public void testUnqualifiedEcoreReferenceAfterRename() {
     try {
       ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
