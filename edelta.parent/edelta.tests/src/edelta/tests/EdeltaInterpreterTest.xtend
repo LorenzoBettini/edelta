@@ -1681,8 +1681,16 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		'''
 		input
 		.parseWithTestEcoreWithSubPackage => [
-			interpretProgram
+			val map = interpretProgram
 			assertNoErrors
+			// mainpackage.mainsubpackage.MyClass
+			val mainSubPackageClass =
+				map.values.head.ESubpackages.head.lastEClass
+			val lastEcoreRef = allEcoreReferenceExpressions.last.reference
+			assertNotNull(lastEcoreRef.enamedelement)
+			// the non ambiguous ecoreref should be correctly linked
+			// to the only available element in that context
+			assertSame(mainSubPackageClass, lastEcoreRef.enamedelement)
 		]
 	}
 

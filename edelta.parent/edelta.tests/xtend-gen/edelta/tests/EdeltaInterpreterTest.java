@@ -2529,8 +2529,12 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     final String input = _builder.toString();
     EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      this.interpretProgram(it);
+      final EdeltaCopiedEPackagesMap map = this.interpretProgram(it);
       this._validationTestHelper.assertNoErrors(it);
+      final EClass mainSubPackageClass = this.getLastEClass(IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>head(map.values()).getESubpackages()));
+      final EdeltaEcoreReference lastEcoreRef = IterableExtensions.<EdeltaEcoreReferenceExpression>last(this.getAllEcoreReferenceExpressions(it)).getReference();
+      Assert.assertNotNull(lastEcoreRef.getEnamedelement());
+      Assert.assertSame(mainSubPackageClass, lastEcoreRef.getEnamedelement());
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
   }
