@@ -3,6 +3,8 @@ package edelta.interpreter;
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE;
 import static edelta.util.EdeltaModelUtil.getProgram;
 import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
 import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashMap;
@@ -15,9 +17,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.common.types.JvmField;
@@ -287,32 +288,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		final var ecoreReference = ecoreReferenceExpression.getReference();
 		if (ecoreReference == null || ecoreReference.getEnamedelement() == null)
 			return null;
-		if (ecoreReference instanceof EdeltaEcoreDirectReference) {
-			String refText = EdeltaModelUtil.getEcoreReferenceText(ecoreReference);
-			final var programENamedElements = ecoreHelper.getProgramENamedElements(ecoreReferenceExpression);
-			final var fqNames = programENamedElements.stream()
-				.map(e -> qualifiedNameProvider.getFullyQualifiedName(e))
-				.filter(Objects::nonNull)
-				.map(Object::toString)
-				.collect(Collectors.toCollection(LinkedHashSet::new));
-			String toSearch = "." + refText;
-			final var matches = fqNames.stream()
-				.filter(e -> e.endsWith(toSearch))
-				.collect(Collectors.toList());
-			if (matches.size() > 1) {
-				ecoreReferenceExpression.eResource().getErrors().add(
-					new EdeltaInterpreterDiagnostic(Severity.ERROR,
-						EdeltaValidator.AMBIGUOUS_REFERENCE,
-						"Ambiguous reference '" + refText + "':\n" +
-							matches.stream()
-								.map(m -> "  " + m)
-								.collect(Collectors.joining("\n")),
-						ecoreReferenceExpression,
-						EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE,
-						-1,
-						matches.toArray(new String[0])));
-			}
-		}
+		checkLinking(ecoreReferenceExpression);
 		return edeltaCompilerUtil.buildMethodToCallForEcoreReference(
 			ecoreReferenceExpression,
 			(methodName, args) -> {
@@ -336,6 +312,50 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				interpretedEcoreReferenceExpressions.add(ecoreReferenceExpression);
 				return result;
 			});
+	}
+
+	/**
+	 * Checks whether the linked reference is ambiguous in the current context and
+	 * also makes sure to relink the reference in case in this context there's no
+	 * ambiguity.
+	 * 
+	 * @param ecoreReferenceExpression
+	 */
+	private void checkLinking(EdeltaEcoreReferenceExpression ecoreReferenceExpression) {
+		final var ecoreReference = ecoreReferenceExpression.getReference();
+		// qualified references are not considered since they cannot be ambiguous
+		if (ecoreReference instanceof EdeltaEcoreDirectReference) {
+			String refText = EdeltaModelUtil.getEcoreReferenceText(ecoreReference);
+			// qualification '.' is the boundary for searching for matches
+			String toSearch = "." + refText;
+			final var matching = ecoreHelper.getProgramENamedElements(ecoreReferenceExpression)
+				.stream()
+				.filter(not(ENamedElement::eIsProxy)) // proxies have null qualified name
+				.filter(
+					e -> qualifiedNameProvider.getFullyQualifiedName(e)
+						.toString().endsWith(toSearch))
+				.collect(toList());
+			if (matching.size() > 1) {
+				Collection<String> matchingNames = matching.stream()
+					.map(e -> qualifiedNameProvider.getFullyQualifiedName(e).toString())
+					.collect(toCollection(LinkedHashSet::new));
+				ecoreReferenceExpression.eResource().getErrors().add(
+					new EdeltaInterpreterDiagnostic(Severity.ERROR,
+						EdeltaValidator.AMBIGUOUS_REFERENCE,
+						"Ambiguous reference '" + refText + "':\n" +
+							matchingNames.stream()
+								.map(m -> "  " + m)
+								.collect(joining("\n")),
+						ecoreReferenceExpression,
+						EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE,
+						-1,
+						matchingNames.toArray(new String[0])));
+			} else if (matching.size() == 1) {
+				final var newCandidate = matching.get(0);
+				if (newCandidate != ecoreReference.getEnamedelement())
+					ecoreReference.setEnamedelement(newCandidate);
+			}
+		}
 	}
 
 	/**

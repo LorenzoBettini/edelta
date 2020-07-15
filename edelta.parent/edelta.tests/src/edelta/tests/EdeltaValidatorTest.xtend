@@ -395,7 +395,6 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		.assertErrorsAsStrings(
 			'''
 			Ambiguous reference 'MyClass':
-			  mainpackage.MyClass
 			  mainpackage.mainsubpackage.MyClass
 			  mainpackage.mainsubpackage.subsubpackage.MyClass
 			'''
@@ -418,14 +417,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		'''
 		input
 		.parseWithTestEcoreWithSubPackage
-		.assertErrorsAsStrings(
-			'''
-			Ambiguous reference 'MyClass':
-			  mainpackage.MyClass
-			  mainpackage.mainsubpackage.MyClass
-			  mainpackage.mainsubpackage.subsubpackage.MyClass
-			'''
-		)
+		.assertNoErrors
 	}
 
 	@Test

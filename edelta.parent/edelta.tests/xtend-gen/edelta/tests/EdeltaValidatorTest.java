@@ -551,9 +551,6 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     _builder_1.append("Ambiguous reference \'MyClass\':");
     _builder_1.newLine();
     _builder_1.append("  ");
-    _builder_1.append("mainpackage.MyClass");
-    _builder_1.newLine();
-    _builder_1.append("  ");
     _builder_1.append("mainpackage.mainsubpackage.MyClass");
     _builder_1.newLine();
     _builder_1.append("  ");
@@ -585,20 +582,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     _builder.append("}");
     _builder.newLine();
     final String input = _builder.toString();
-    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
-    StringConcatenation _builder_1 = new StringConcatenation();
-    _builder_1.append("Ambiguous reference \'MyClass\':");
-    _builder_1.newLine();
-    _builder_1.append("  ");
-    _builder_1.append("mainpackage.MyClass");
-    _builder_1.newLine();
-    _builder_1.append("  ");
-    _builder_1.append("mainpackage.mainsubpackage.MyClass");
-    _builder_1.newLine();
-    _builder_1.append("  ");
-    _builder_1.append("mainpackage.mainsubpackage.subsubpackage.MyClass");
-    _builder_1.newLine();
-    this.assertErrorsAsStrings(_parseWithTestEcoreWithSubPackage, _builder_1);
+    this._validationTestHelper.assertNoErrors(this.parseWithTestEcoreWithSubPackage(input));
   }
   
   @Test
