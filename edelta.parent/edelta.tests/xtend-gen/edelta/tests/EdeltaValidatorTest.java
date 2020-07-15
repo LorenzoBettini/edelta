@@ -530,6 +530,78 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testAmbiguousEcorerefAfterRemoval() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("EClassifiers -= ecoreref(mainpackage.MyClass)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(MyClass) // still ambiguous");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("Ambiguous reference \'MyClass\':");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("mainpackage.MyClass");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("mainpackage.mainsubpackage.MyClass");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("mainpackage.mainsubpackage.subsubpackage.MyClass");
+    _builder_1.newLine();
+    this.assertErrorsAsStrings(_parseWithTestEcoreWithSubPackage, _builder_1);
+  }
+  
+  @Test
+  public void testNonAmbiguousEcorerefAfterRemoval() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import static org.eclipse.emf.ecore.util.EcoreUtil.remove");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("EClassifiers -= ecoreref(mainpackage.MyClass)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("remove(ecoreref(mainpackage.mainsubpackage.subsubpackage.MyClass))");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(MyClass) // non ambiguous");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("Ambiguous reference \'MyClass\':");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("mainpackage.MyClass");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("mainpackage.mainsubpackage.MyClass");
+    _builder_1.newLine();
+    _builder_1.append("  ");
+    _builder_1.append("mainpackage.mainsubpackage.subsubpackage.MyClass");
+    _builder_1.newLine();
+    this.assertErrorsAsStrings(_parseWithTestEcoreWithSubPackage, _builder_1);
+  }
+  
+  @Test
   public void testInvalidAmbiguousEcorerefWithCreatedElements() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mainpackage\"");

@@ -12,8 +12,11 @@ import static org.eclipse.xtext.xbase.lib.IterableExtensions.forEach;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
@@ -37,6 +40,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import edelta.compiler.EdeltaCompilerUtil;
+import edelta.edelta.EdeltaEcoreDirectReference;
 import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
@@ -283,6 +287,32 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		final var ecoreReference = ecoreReferenceExpression.getReference();
 		if (ecoreReference == null || ecoreReference.getEnamedelement() == null)
 			return null;
+		if (ecoreReference instanceof EdeltaEcoreDirectReference) {
+			String refText = EdeltaModelUtil.getEcoreReferenceText(ecoreReference);
+			final var programENamedElements = ecoreHelper.getProgramENamedElements(ecoreReferenceExpression);
+			final var fqNames = programENamedElements.stream()
+				.map(e -> qualifiedNameProvider.getFullyQualifiedName(e))
+				.filter(Objects::nonNull)
+				.map(Object::toString)
+				.collect(Collectors.toCollection(LinkedHashSet::new));
+			String toSearch = "." + refText;
+			final var matches = fqNames.stream()
+				.filter(e -> e.endsWith(toSearch))
+				.collect(Collectors.toList());
+			if (matches.size() > 1) {
+				ecoreReferenceExpression.eResource().getErrors().add(
+					new EdeltaInterpreterDiagnostic(Severity.ERROR,
+						EdeltaValidator.AMBIGUOUS_REFERENCE,
+						"Ambiguous reference '" + refText + "':\n" +
+							matches.stream()
+								.map(m -> "  " + m)
+								.collect(Collectors.joining("\n")),
+						ecoreReferenceExpression,
+						EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE,
+						-1,
+						matches.toArray(new String[0])));
+			}
+		}
 		return edeltaCompilerUtil.buildMethodToCallForEcoreReference(
 			ecoreReferenceExpression,
 			(methodName, args) -> {

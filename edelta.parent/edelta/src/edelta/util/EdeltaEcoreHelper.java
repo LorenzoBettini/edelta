@@ -15,6 +15,7 @@ import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.util.IResourceScopeCache;
+
 import com.google.common.base.Predicate;
 import com.google.inject.Inject;
 
@@ -42,7 +43,7 @@ public class EdeltaEcoreHelper {
 	 * Returns all the ENamedElements in the program: it uses the copied EPackages
 	 * if present, otherwise it uses the original imported metamodels, but NOT both.
 	 */
-	public Iterable<ENamedElement> getProgramENamedElements(final EObject context) {
+	public Collection<ENamedElement> getProgramENamedElements(final EObject context) {
 		return cache.get("getProgramENamedElements", context.eResource(), () -> {
 			final var epackages = getEPackagesToProcess(context);
 			return epackages.stream()

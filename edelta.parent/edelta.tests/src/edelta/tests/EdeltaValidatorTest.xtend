@@ -380,6 +380,55 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testAmbiguousEcorerefAfterRemoval() {
+		val input =
+		'''
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			EClassifiers -= ecoreref(mainpackage.MyClass)
+			ecoreref(MyClass) // still ambiguous
+		}
+		'''
+		input
+		.parseWithTestEcoreWithSubPackage
+		.assertErrorsAsStrings(
+			'''
+			Ambiguous reference 'MyClass':
+			  mainpackage.MyClass
+			  mainpackage.mainsubpackage.MyClass
+			  mainpackage.mainsubpackage.subsubpackage.MyClass
+			'''
+		)
+	}
+
+	@Test
+	def void testNonAmbiguousEcorerefAfterRemoval() {
+		val input =
+		'''
+		import static org.eclipse.emf.ecore.util.EcoreUtil.remove
+		
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			EClassifiers -= ecoreref(mainpackage.MyClass)
+			remove(ecoreref(mainpackage.mainsubpackage.subsubpackage.MyClass))
+			ecoreref(MyClass) // non ambiguous
+		}
+		'''
+		input
+		.parseWithTestEcoreWithSubPackage
+		.assertErrorsAsStrings(
+			'''
+			Ambiguous reference 'MyClass':
+			  mainpackage.MyClass
+			  mainpackage.mainsubpackage.MyClass
+			  mainpackage.mainsubpackage.subsubpackage.MyClass
+			'''
+		)
+	}
+
+	@Test
 	def void testInvalidAmbiguousEcorerefWithCreatedElements() {
 		val input =
 		'''
