@@ -1768,7 +1768,6 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTypedInFeatureCall2() {
-		// TODO: typing errors are not shown but they should be shown
 		val input =
 		'''
 		import static org.eclipse.emf.ecore.util.EcoreUtil.remove
@@ -1798,6 +1797,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				  mainpackage.created
 				  mainpackage.mainsubpackage.created
 				Cannot refer to org.eclipse.emf.ecore.EClass.getEStructuralFeatures()
+				Cannot refer to org.eclipse.emf.ecore.EClass.setAbstract(boolean)
 				'''
 			)
 		]

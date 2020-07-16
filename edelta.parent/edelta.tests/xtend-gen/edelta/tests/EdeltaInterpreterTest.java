@@ -2735,6 +2735,8 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       _builder_1.newLine();
       _builder_1.append("Cannot refer to org.eclipse.emf.ecore.EClass.getEStructuralFeatures()");
       _builder_1.newLine();
+      _builder_1.append("Cannot refer to org.eclipse.emf.ecore.EClass.setAbstract(boolean)");
+      _builder_1.newLine();
       this.assertErrorsAsStrings(it, _builder_1);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);

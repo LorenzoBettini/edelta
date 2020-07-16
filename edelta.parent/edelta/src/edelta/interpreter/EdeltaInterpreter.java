@@ -465,22 +465,38 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		try {
 			return super.invokeFeature(feature, featureCall, receiverObj, context, indicator);
 		} catch (IllegalStateException e) {
-			if (e.getCause() instanceof IllegalArgumentException && !feature.eIsProxy()) {
-				/* it means that receiver expression (an ecoreref) has been relinked
-				 * (see checkLinking) and the previously resolved feature is not
-				 * in the new type of the relinked ecoreref. The type computer will
-				 * not detect this changed, since the feature had already been linked,
-				 * so we must explicitly add an error. */
-				featureCall.eResource().getErrors().add(
-					new EdeltaInterpreterDiagnostic(Severity.ERROR,
-						Diagnostic.LINKING_DIAGNOSTIC,
-						"Cannot refer to " + feature.getIdentifier(),
-						featureCall,
-						XbasePackage.Literals.XABSTRACT_FEATURE_CALL__FEATURE,
-						-1,
-						new String[] {}));
-			}
+			checkUnresolvedFeatureDueToRelinking(feature, featureCall, e);
 			throw e;
+		}
+	}
+
+	@Override
+	protected Object assignValueTo(JvmIdentifiableElement feature, XAbstractFeatureCall assignment, Object value,
+			IEvaluationContext context, CancelIndicator indicator) {
+		try {
+			return super.assignValueTo(feature, assignment, value, context, indicator);
+		} catch (IllegalStateException e) {
+			checkUnresolvedFeatureDueToRelinking(feature, assignment, e);
+			throw e;
+		}
+	}
+
+	private void checkUnresolvedFeatureDueToRelinking(JvmIdentifiableElement feature, XAbstractFeatureCall featureCall,
+			IllegalStateException e) {
+		if (e.getCause() instanceof IllegalArgumentException && !feature.eIsProxy()) {
+			/* it means that receiver expression (an ecoreref) has been relinked
+			 * (see checkLinking) and the previously resolved feature is not
+			 * in the new type of the relinked ecoreref. The type computer will
+			 * not detect this changed, since the feature had already been linked,
+			 * so we must explicitly add an error. */
+			featureCall.eResource().getErrors().add(
+				new EdeltaInterpreterDiagnostic(Severity.ERROR,
+					Diagnostic.LINKING_DIAGNOSTIC,
+					"Cannot refer to " + feature.getIdentifier(),
+					featureCall,
+					XbasePackage.Literals.XABSTRACT_FEATURE_CALL__FEATURE,
+					-1,
+					new String[] {}));
 		}
 	}
 
