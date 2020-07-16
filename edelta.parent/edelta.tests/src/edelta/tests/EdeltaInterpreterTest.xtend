@@ -1695,6 +1695,43 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTyped() {
+		// TODO: typing errors are not shown but they should be shown
+		val input =
+		'''
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			addNewEClass("ANewClass") [
+				addNewEAttribute("created", null)
+			]
+			addNewEClass("AnotherNewClass") [
+				addNewEReference("created", null)
+			]
+			// "created" is ambiguous now
+			ecoreref(created)
+			EClassifiers -= ecoreref(ANewClass)
+			// "created" is not ambiguous anymore
+			ecoreref(created)
+			// and it's correctly typed (EReference, not EAttribute)
+			ecoreref(created).getEAttributeType // ERROR
+			ecoreref(created).getEReferenceType // OK
+		}
+		'''
+		input
+		.parseWithTestEcoreWithSubPackage => [
+			interpretProgram
+			assertErrorsAsStrings(
+				'''
+				Ambiguous reference 'created':
+				  mainpackage.ANewClass.created
+				  mainpackage.AnotherNewClass.created
+				'''
+			)
+		]
+	}
+
+	@Test
 	def void testInvalidAmbiguousEcorerefWithCreatedElements() {
 		val input =
 		'''

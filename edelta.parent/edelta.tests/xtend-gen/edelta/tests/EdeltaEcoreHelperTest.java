@@ -6,6 +6,7 @@ import edelta.resource.derivedstate.EdeltaAccessibleElements;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderCustom;
 import edelta.util.EdeltaEcoreHelper;
+import java.util.Collection;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
@@ -30,7 +31,7 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
   
   @Test
   public void testProgramENamedElements() {
-    Iterable<ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(this.parseWithTestEcores(this._inputs.referencesToMetamodels()));
+    Collection<ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(this.parseWithTestEcores(this._inputs.referencesToMetamodels()));
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("foo");
     _builder.newLine();
@@ -61,7 +62,7 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
   
   @Test
   public void testProgramENamedElementsWithCopiedEPackages() {
-    Iterable<ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(this.parseWithTestEcores(this._inputs.referencesToMetamodelsWithCopiedEPackages()));
+    Collection<ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(this.parseWithTestEcores(this._inputs.referencesToMetamodelsWithCopiedEPackages()));
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("bar");
     _builder.newLine();
@@ -92,7 +93,7 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
   
   @Test
   public void testProgramENamedElementsWithSubPackages() {
-    Iterable<ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(this.parseWithTestEcoreWithSubPackage(this._inputs.referenceToMetamodelWithSubPackageWithCopiedEPackages()));
+    Collection<ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(this.parseWithTestEcoreWithSubPackage(this._inputs.referenceToMetamodelWithSubPackageWithCopiedEPackages()));
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("mainpackage");
     _builder.newLine();
@@ -135,7 +136,7 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
   public void testProgramWithCreatedEClassENamedElements() {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToCreatedEClass());
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      Iterable<ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(it);
+      Collection<ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(it);
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("foo");
       _builder.newLine();
