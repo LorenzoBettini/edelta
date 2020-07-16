@@ -2540,7 +2540,70 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTyped() {
+  public void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTypedInAssignment() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EAttribute");
+    _builder.newLine();
+    _builder.append("import org.eclipse.emf.ecore.EReference");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"ANewClass\") [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("addNewEAttribute(\"created\", null)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"AnotherNewClass\") [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("addNewEReference(\"created\", null)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("EClassifiers -= ecoreref(ANewClass)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// \"created\" is not ambiguous anymore");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(created)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// and it\'s correctly typed (EReference, not EAttribute)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("val EAttribute a = ecoreref(created) // ERROR");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("val EReference r = ecoreref(created) // OK");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("Type mismatch: cannot convert from EReference to EAttribute");
+      _builder_1.newLine();
+      this.assertErrorsAsStrings(it, _builder_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
+  }
+  
+  @Test
+  public void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTypedInFeatureCall() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mainpackage\"");
     _builder.newLine();
