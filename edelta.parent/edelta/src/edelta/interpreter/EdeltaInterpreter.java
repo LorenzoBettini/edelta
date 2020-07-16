@@ -23,14 +23,18 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.common.types.JvmField;
 import org.eclipse.xtext.common.types.JvmFormalParameter;
+import org.eclipse.xtext.common.types.JvmIdentifiableElement;
 import org.eclipse.xtext.common.types.JvmOperation;
+import org.eclipse.xtext.diagnostics.Diagnostic;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.IResourceScopeCache;
+import org.eclipse.xtext.xbase.XAbstractFeatureCall;
 import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
+import org.eclipse.xtext.xbase.XbasePackage;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationResult;
 import org.eclipse.xtext.xbase.interpreter.impl.InterpreterCanceledException;
@@ -453,6 +457,31 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 					getJavaReflectAccess(), useAs, thisObject));
 		}
 		return super.featureCallField(jvmField, receiver);
+	}
+
+	@Override
+	protected Object invokeFeature(JvmIdentifiableElement feature, XAbstractFeatureCall featureCall, Object receiverObj,
+			IEvaluationContext context, CancelIndicator indicator) {
+		try {
+			return super.invokeFeature(feature, featureCall, receiverObj, context, indicator);
+		} catch (IllegalStateException e) {
+			if (e.getCause() instanceof IllegalArgumentException && !feature.eIsProxy()) {
+				/* it means that receiver expression (an ecoreref) has been relinked
+				 * (see checkLinking) and the previously resolved feature is not
+				 * in the new type of the relinked ecoreref. The type computer will
+				 * not detect this changed, since the feature had already been linked,
+				 * so we must explicitly add an error. */
+				featureCall.eResource().getErrors().add(
+					new EdeltaInterpreterDiagnostic(Severity.ERROR,
+						Diagnostic.LINKING_DIAGNOSTIC,
+						"Cannot refer to " + feature.getIdentifier(),
+						featureCall,
+						XbasePackage.Literals.XABSTRACT_FEATURE_CALL__FEATURE,
+						-1,
+						new String[] {}));
+			}
+			throw e;
+		}
 	}
 
 	@Override
