@@ -2603,78 +2603,6 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTypedInFeatureCall() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("metamodel \"mainpackage\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage mainpackage {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("addNewEClass(\"ANewClass\") [");
-    _builder.newLine();
-    _builder.append("\t\t");
-    _builder.append("addNewEAttribute(\"created\", null)");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("]");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("addNewEClass(\"AnotherNewClass\") [");
-    _builder.newLine();
-    _builder.append("\t\t");
-    _builder.append("addNewEReference(\"created\", null)");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("]");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("// \"created\" is ambiguous now");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(created)");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("EClassifiers -= ecoreref(ANewClass)");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("// \"created\" is not ambiguous anymore");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(created)");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("// and it\'s correctly typed (EReference, not EAttribute)");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(created).getEAttributeType // ERROR");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(created).getEReferenceType // OK");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final String input = _builder.toString();
-    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
-    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      this.interpretProgram(it);
-      StringConcatenation _builder_1 = new StringConcatenation();
-      _builder_1.append("Ambiguous reference \'created\':");
-      _builder_1.newLine();
-      _builder_1.append("  ");
-      _builder_1.append("mainpackage.ANewClass.created");
-      _builder_1.newLine();
-      _builder_1.append("  ");
-      _builder_1.append("mainpackage.AnotherNewClass.created");
-      _builder_1.newLine();
-      _builder_1.append("Cannot refer to org.eclipse.emf.ecore.EAttribute.getEAttributeType()");
-      _builder_1.newLine();
-      this.assertErrorsAsStrings(it, _builder_1);
-    };
-    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
-  }
-  
-  @Test
   public void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTypedInFeatureCall2() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import static org.eclipse.emf.ecore.util.EcoreUtil.remove");
@@ -2718,6 +2646,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder.append("\t");
     _builder.append("ecoreref(created).ESubpackages // OK");
     _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(created).nonExistent // ERROR to cover the last case in the interpreter");
+    _builder.newLine();
     _builder.append("}");
     _builder.newLine();
     final String input = _builder.toString();
@@ -2736,6 +2667,8 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       _builder_1.append("Cannot refer to org.eclipse.emf.ecore.EClass.getEStructuralFeatures()");
       _builder_1.newLine();
       _builder_1.append("Cannot refer to org.eclipse.emf.ecore.EClass.setAbstract(boolean)");
+      _builder_1.newLine();
+      _builder_1.append("The method or field nonExistent is undefined for the type EPackage");
       _builder_1.newLine();
       this.assertErrorsAsStrings(it, _builder_1);
     };

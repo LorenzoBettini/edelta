@@ -1730,43 +1730,6 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTypedInFeatureCall() {
-		val input =
-		'''
-		metamodel "mainpackage"
-		
-		modifyEcore aTest epackage mainpackage {
-			addNewEClass("ANewClass") [
-				addNewEAttribute("created", null)
-			]
-			addNewEClass("AnotherNewClass") [
-				addNewEReference("created", null)
-			]
-			// "created" is ambiguous now
-			ecoreref(created)
-			EClassifiers -= ecoreref(ANewClass)
-			// "created" is not ambiguous anymore
-			ecoreref(created)
-			// and it's correctly typed (EReference, not EAttribute)
-			ecoreref(created).getEAttributeType // ERROR
-			ecoreref(created).getEReferenceType // OK
-		}
-		'''
-		input
-		.parseWithTestEcoreWithSubPackage => [
-			interpretProgram
-			assertErrorsAsStrings(
-				'''
-				Ambiguous reference 'created':
-				  mainpackage.ANewClass.created
-				  mainpackage.AnotherNewClass.created
-				Cannot refer to org.eclipse.emf.ecore.EAttribute.getEAttributeType()
-				'''
-			)
-		]
-	}
-
-	@Test
 	def void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTypedInFeatureCall2() {
 		val input =
 		'''
@@ -1786,6 +1749,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				abstract = true // ERROR
 			]
 			ecoreref(created).ESubpackages // OK
+			ecoreref(created).nonExistent // ERROR to cover the last case in the interpreter
 		}
 		'''
 		input
@@ -1798,6 +1762,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				  mainpackage.mainsubpackage.created
 				Cannot refer to org.eclipse.emf.ecore.EClass.getEStructuralFeatures()
 				Cannot refer to org.eclipse.emf.ecore.EClass.setAbstract(boolean)
+				The method or field nonExistent is undefined for the type EPackage
 				'''
 			)
 		]

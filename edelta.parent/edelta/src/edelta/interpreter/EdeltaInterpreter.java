@@ -483,7 +483,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	private void checkUnresolvedFeatureDueToRelinking(JvmIdentifiableElement feature, XAbstractFeatureCall featureCall,
 			IllegalStateException e) {
-		if (e.getCause() instanceof IllegalArgumentException && !feature.eIsProxy()) {
+		if (e.getCause() instanceof IllegalArgumentException) {
 			/* it means that receiver expression (an ecoreref) has been relinked
 			 * (see checkLinking) and the previously resolved feature is not
 			 * in the new type of the relinked ecoreref. The type computer will
