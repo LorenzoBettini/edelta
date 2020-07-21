@@ -2,6 +2,7 @@ package edelta.tests;
 
 import com.google.inject.Inject;
 import edelta.edelta.EdeltaProgram;
+import edelta.resource.derivedstate.EdeltaAccessibleElements;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderCustom;
 import edelta.util.EdeltaEcoreHelper;
@@ -153,6 +154,94 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
       _builder.append("NewClass");
       _builder.newLine();
       this.assertNamedElements(_programENamedElements, _builder);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testCreateSnapshotOfAccessibleElementsWithUnresolvedEPackage() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"nonexisting\"");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      EdeltaAccessibleElements _createSnapshotOfAccessibleElements = this._edeltaEcoreHelper.createSnapshotOfAccessibleElements(it);
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.newLine();
+      this.assertAccessibleElements(_createSnapshotOfAccessibleElements, _builder_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testCreateSnapshotOfAccessibleElementsWithCreatedEClass() {
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToCreatedEClass());
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      EdeltaAccessibleElements _createSnapshotOfAccessibleElements = this._edeltaEcoreHelper.createSnapshotOfAccessibleElements(it);
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("foo");
+      _builder.newLine();
+      _builder.append("foo.FooClass");
+      _builder.newLine();
+      _builder.append("foo.FooClass.myAttribute");
+      _builder.newLine();
+      _builder.append("foo.FooClass.myReference");
+      _builder.newLine();
+      _builder.append("foo.FooDataType");
+      _builder.newLine();
+      _builder.append("foo.FooEnum");
+      _builder.newLine();
+      _builder.append("foo.FooEnum.FooEnumLiteral");
+      _builder.newLine();
+      _builder.append("foo.NewClass");
+      _builder.newLine();
+      this.assertAccessibleElements(_createSnapshotOfAccessibleElements, _builder);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testCreateSnapshotOfAccessibleElementsWithRemovedEClass() {
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToEClassRemoved());
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      EdeltaAccessibleElements _createSnapshotOfAccessibleElements = this._edeltaEcoreHelper.createSnapshotOfAccessibleElements(it);
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("foo");
+      _builder.newLine();
+      _builder.append("foo.FooDataType");
+      _builder.newLine();
+      _builder.append("foo.FooEnum");
+      _builder.newLine();
+      _builder.append("foo.FooEnum.FooEnumLiteral");
+      _builder.newLine();
+      this.assertAccessibleElements(_createSnapshotOfAccessibleElements, _builder);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testGetCurrentAccessibleElementsWithCreatedEClass() {
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToCreatedEClass());
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      EdeltaAccessibleElements _currentAccessibleElements = this._edeltaEcoreHelper.getCurrentAccessibleElements(it);
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("foo");
+      _builder.newLine();
+      _builder.append("foo.FooClass");
+      _builder.newLine();
+      _builder.append("foo.FooClass.myAttribute");
+      _builder.newLine();
+      _builder.append("foo.FooClass.myReference");
+      _builder.newLine();
+      _builder.append("foo.FooDataType");
+      _builder.newLine();
+      _builder.append("foo.FooEnum");
+      _builder.newLine();
+      _builder.append("foo.FooEnum.FooEnumLiteral");
+      _builder.newLine();
+      _builder.append("foo.NewClass");
+      _builder.newLine();
+      this.assertAccessibleElements(_currentAccessibleElements, _builder);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
@@ -365,6 +454,55 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
       _builder.append("myAttribute");
       _builder.newLine();
       _builder.append("myReference");
+      _builder.newLine();
+      this.assertNamedElements(_eNamedElements, _builder);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testENamedElementsOfEPackage() {
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(this._inputs.referenceToMetamodelWithSubPackage());
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      Iterable<ENamedElement> _eNamedElements = this._edeltaEcoreHelper.getENamedElements(this.getEPackageByName(it, "mainpackage"));
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("MainFooClass");
+      _builder.newLine();
+      _builder.append("MainFooDataType");
+      _builder.newLine();
+      _builder.append("MainFooEnum");
+      _builder.newLine();
+      _builder.append("MyClass");
+      _builder.newLine();
+      _builder.append("mainsubpackage");
+      _builder.newLine();
+      this.assertNamedElements(_eNamedElements, _builder);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
+  }
+  
+  @Test
+  public void testENamedElementsOfEClass() {
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToMetamodel());
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      Iterable<ENamedElement> _eNamedElements = this._edeltaEcoreHelper.getENamedElements(this.getEClassifierByName(it, "foo", "FooClass"));
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("myAttribute");
+      _builder.newLine();
+      _builder.append("myReference");
+      _builder.newLine();
+      this.assertNamedElements(_eNamedElements, _builder);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testENamedElementsOfENum() {
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToMetamodel());
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      Iterable<ENamedElement> _eNamedElements = this._edeltaEcoreHelper.getENamedElements(this.getEClassifierByName(it, "foo", "FooEnum"));
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("FooEnumLiteral");
       _builder.newLine();
       this.assertNamedElements(_eNamedElements, _builder);
     };

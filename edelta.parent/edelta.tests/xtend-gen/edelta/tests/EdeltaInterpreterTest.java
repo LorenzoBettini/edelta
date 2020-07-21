@@ -12,6 +12,8 @@ import edelta.interpreter.EdeltaInterpreter;
 import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.interpreter.EdeltaInterpreterWrapperException;
+import edelta.resource.derivedstate.EdeltaAccessibleElement;
+import edelta.resource.derivedstate.EdeltaAccessibleElements;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
@@ -2344,6 +2346,438 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       Assertions.<XExpression>assertThat(map.get(ecoreref1.getEnamedelement())).isNotNull().isSameAs(this.getBlock(this.lastModifyEcoreOperation(it).getBody()).getExpressions().get(2));
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testAccessibleElements() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(FooClass) // 0");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"ANewClass\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(ANewClass) // 1");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("EClassifiers -= ecoreref(FooClass) // 2");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(ANewClass) // 3");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      final EdeltaEcoreReferenceExpression ecoreref1 = this.getAllEcoreReferenceExpressions(it).get(0);
+      final EdeltaEcoreReferenceExpression ecoreref2 = this.getAllEcoreReferenceExpressions(it).get(1);
+      final EdeltaEcoreReferenceExpression ecoreref3 = this.getAllEcoreReferenceExpressions(it).get(2);
+      final EdeltaEcoreReferenceExpression ecoreref4 = this.getAllEcoreReferenceExpressions(it).get(3);
+      final EdeltaAccessibleElements elements1 = this.derivedStateHelper.getAccessibleElements(ecoreref1);
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("foo");
+      _builder_1.newLine();
+      _builder_1.append("foo.FooClass");
+      _builder_1.newLine();
+      _builder_1.append("foo.FooClass.myAttribute");
+      _builder_1.newLine();
+      _builder_1.append("foo.FooClass.myReference");
+      _builder_1.newLine();
+      _builder_1.append("foo.FooDataType");
+      _builder_1.newLine();
+      _builder_1.append("foo.FooEnum");
+      _builder_1.newLine();
+      _builder_1.append("foo.FooEnum.FooEnumLiteral");
+      _builder_1.newLine();
+      this.assertAccessibleElements(elements1, _builder_1);
+      final EdeltaAccessibleElements elements2 = this.derivedStateHelper.getAccessibleElements(ecoreref2);
+      StringConcatenation _builder_2 = new StringConcatenation();
+      _builder_2.append("foo");
+      _builder_2.newLine();
+      _builder_2.append("foo.ANewClass");
+      _builder_2.newLine();
+      _builder_2.append("foo.FooClass");
+      _builder_2.newLine();
+      _builder_2.append("foo.FooClass.myAttribute");
+      _builder_2.newLine();
+      _builder_2.append("foo.FooClass.myReference");
+      _builder_2.newLine();
+      _builder_2.append("foo.FooDataType");
+      _builder_2.newLine();
+      _builder_2.append("foo.FooEnum");
+      _builder_2.newLine();
+      _builder_2.append("foo.FooEnum.FooEnumLiteral");
+      _builder_2.newLine();
+      this.assertAccessibleElements(elements2, _builder_2);
+      final EdeltaAccessibleElements elements3 = this.derivedStateHelper.getAccessibleElements(ecoreref3);
+      Assertions.<EdeltaAccessibleElement>assertThat(elements2).isSameAs(elements3);
+      final EdeltaAccessibleElements elements4 = this.derivedStateHelper.getAccessibleElements(ecoreref4);
+      StringConcatenation _builder_3 = new StringConcatenation();
+      _builder_3.append("foo");
+      _builder_3.newLine();
+      _builder_3.append("foo.ANewClass");
+      _builder_3.newLine();
+      _builder_3.append("foo.FooDataType");
+      _builder_3.newLine();
+      _builder_3.append("foo.FooEnum");
+      _builder_3.newLine();
+      _builder_3.append("foo.FooEnum.FooEnumLiteral");
+      _builder_3.newLine();
+      this.assertAccessibleElements(elements4, _builder_3);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testInvalidAmbiguousEcoreref() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(MyClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("Ambiguous reference \'MyClass\':");
+      _builder_1.newLine();
+      _builder_1.append("  ");
+      _builder_1.append("mainpackage.MyClass");
+      _builder_1.newLine();
+      _builder_1.append("  ");
+      _builder_1.append("mainpackage.mainsubpackage.MyClass");
+      _builder_1.newLine();
+      _builder_1.append("  ");
+      _builder_1.append("mainpackage.mainsubpackage.subsubpackage.MyClass");
+      _builder_1.newLine();
+      this.assertErrorsAsStrings(it, _builder_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
+  }
+  
+  @Test
+  public void testAmbiguousEcorerefAfterRemoval() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("EClassifiers -= ecoreref(mainpackage.MyClass)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(MyClass) // still ambiguous");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("Ambiguous reference \'MyClass\':");
+      _builder_1.newLine();
+      _builder_1.append("  ");
+      _builder_1.append("mainpackage.mainsubpackage.MyClass");
+      _builder_1.newLine();
+      _builder_1.append("  ");
+      _builder_1.append("mainpackage.mainsubpackage.subsubpackage.MyClass");
+      _builder_1.newLine();
+      this.assertErrorsAsStrings(it, _builder_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
+  }
+  
+  @Test
+  public void testNonAmbiguousEcorerefAfterRemoval() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import static org.eclipse.emf.ecore.util.EcoreUtil.remove");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("EClassifiers -= ecoreref(mainpackage.MyClass)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("remove(ecoreref(mainpackage.mainsubpackage.subsubpackage.MyClass))");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(MyClass) // non ambiguous");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      final EdeltaCopiedEPackagesMap map = this.interpretProgram(it);
+      this._validationTestHelper.assertNoErrors(it);
+      final EClass mainSubPackageClass = this.getLastEClass(IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>head(map.values()).getESubpackages()));
+      final EdeltaEcoreReference lastEcoreRef = IterableExtensions.<EdeltaEcoreReferenceExpression>last(this.getAllEcoreReferenceExpressions(it)).getReference();
+      Assert.assertNotNull(lastEcoreRef.getEnamedelement());
+      Assert.assertSame(mainSubPackageClass, lastEcoreRef.getEnamedelement());
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
+  }
+  
+  @Test
+  public void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTypedInAssignment() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EAttribute");
+    _builder.newLine();
+    _builder.append("import org.eclipse.emf.ecore.EReference");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"ANewClass\") [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("addNewEAttribute(\"created\", null)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"AnotherNewClass\") [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("addNewEReference(\"created\", null)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("EClassifiers -= ecoreref(ANewClass)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// \"created\" is not ambiguous anymore");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(created)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// and it\'s correctly typed (EReference, not EAttribute)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("val EAttribute a = ecoreref(created) // ERROR");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("val EReference r = ecoreref(created) // OK");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("Type mismatch: cannot convert from EReference to EAttribute");
+      _builder_1.newLine();
+      this.assertErrorsAsStrings(it, _builder_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
+  }
+  
+  @Test
+  public void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTypedInFeatureCall2() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import static org.eclipse.emf.ecore.util.EcoreUtil.remove");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"created\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ESubpackages.head.addNewESubpackage(\"created\", null, null)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// \"created\" is ambiguous now");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(created)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("remove(EClassifiers.last)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// \"created\" is not ambiguous anymore: linked to EPackage \"created\"");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(created).EStructuralFeatures // ERROR");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(created) => [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("abstract = true // ERROR");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(created).ESubpackages // OK");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(created).nonExistent // ERROR to cover the last case in the interpreter");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("Ambiguous reference \'created\':");
+      _builder_1.newLine();
+      _builder_1.append("  ");
+      _builder_1.append("mainpackage.created");
+      _builder_1.newLine();
+      _builder_1.append("  ");
+      _builder_1.append("mainpackage.mainsubpackage.created");
+      _builder_1.newLine();
+      _builder_1.append("Cannot refer to org.eclipse.emf.ecore.EClass.getEStructuralFeatures()");
+      _builder_1.newLine();
+      _builder_1.append("Cannot refer to org.eclipse.emf.ecore.EClass.setAbstract(boolean)");
+      _builder_1.newLine();
+      _builder_1.append("The method or field nonExistent is undefined for the type EPackage");
+      _builder_1.newLine();
+      this.assertErrorsAsStrings(it, _builder_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
+  }
+  
+  @Test
+  public void testInvalidAmbiguousEcorerefWithCreatedElements() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"created\") [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("addNewEAttribute(\"created\", null)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(created)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("Ambiguous reference \'created\':");
+      _builder_1.newLine();
+      _builder_1.append("  ");
+      _builder_1.append("mainpackage.created");
+      _builder_1.newLine();
+      _builder_1.append("  ");
+      _builder_1.append("mainpackage.created.created");
+      _builder_1.newLine();
+      this.assertErrorsAsStrings(it, _builder_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
+  }
+  
+  @Test
+  public void testNonAmbiguousEcorerefWithQualification() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"created\") [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("addNewEAttribute(\"created\", null)");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(created.created) // NON ambiguous");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(mainpackage.created) // NON ambiguous");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      this._validationTestHelper.assertNoErrors(it);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
+  }
+  
+  @Test
+  public void testNonAmbiguousEcoreref() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"mainpackage\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage mainpackage {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"WorkPlace\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"LivingPlace\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"Place\")");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(Place) // NON ambiguous");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      this._validationTestHelper.assertNoErrors(it);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
   }
   
   private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final Procedure1<? super EPackage> testExecutor) {

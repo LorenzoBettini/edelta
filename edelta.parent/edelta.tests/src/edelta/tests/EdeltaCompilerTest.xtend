@@ -1432,6 +1432,80 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCompilationOfNonAmbiguousEcorerefAfterRemoval() {
+		val rs = createResourceSet(
+		'''
+			import org.eclipse.emf.ecore.EAttribute
+			import org.eclipse.emf.ecore.EReference
+			
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				addNewEClass("ANewClass") [
+					addNewEAttribute("created", null)
+				]
+				addNewEClass("AnotherNewClass") [
+					addNewEReference("created", null)
+				]
+				EClassifiers -= ecoreref(ANewClass)
+				// "created" is not ambiguous anymore
+				// and it's correctly typed (EReference, not EAttribute)
+				val EReference r = ecoreref(created) // OK
+			}
+		''')
+		rs.addEPackageWithSubPackageForTests
+		checkCompilation(rs,
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import java.util.function.Consumer;
+			import org.eclipse.emf.common.util.EList;
+			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.emf.ecore.EClassifier;
+			import org.eclipse.emf.ecore.EPackage;
+			import org.eclipse.emf.ecore.EReference;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  public MyFile0() {
+			    
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  public void aTest(final EPackage it) {
+			    final Consumer<EClass> _function = (EClass it_1) -> {
+			      this.lib.addNewEAttribute(it_1, "created", null);
+			    };
+			    this.lib.addNewEClass(it, "ANewClass", _function);
+			    final Consumer<EClass> _function_1 = (EClass it_1) -> {
+			      this.lib.addNewEReference(it_1, "created", null);
+			    };
+			    this.lib.addNewEClass(it, "AnotherNewClass", _function_1);
+			    EList<EClassifier> _eClassifiers = it.getEClassifiers();
+			    _eClassifiers.remove(getEClass("mainpackage", "ANewClass"));
+			    final EReference r = getEReference("mainpackage", "AnotherNewClass", "created");
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("mainpackage");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    aTest(getEPackage("mainpackage"));
+			  }
+			}
+			''',
+			true
+		)
+	}
+
+	@Test
 	def void testCompilationOfPersonListExampleModifyEcore() {
 		val rs = createResourceSetWithEcores(
 			#[PERSON_LIST_ECORE],

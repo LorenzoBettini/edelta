@@ -11,6 +11,8 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
 import edelta.edelta.EdeltaProgram;
+import edelta.resource.derivedstate.EdeltaAccessibleElement;
+import edelta.resource.derivedstate.EdeltaAccessibleElements;
 import edelta.tests.EdeltaInjectorProvider;
 import edelta.tests.input.Inputs;
 import java.nio.file.Paths;
@@ -53,6 +55,7 @@ import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
+import org.eclipse.xtext.xbase.lib.ListExtensions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Assert;
@@ -554,6 +557,18 @@ public abstract class EdeltaAbstractTest {
       return it.getName();
     };
     String _join = IterableExtensions.join(IterableExtensions.map(elements, _function), "\n");
+    String _plus = (_join + "\n");
+    this.assertEqualsStrings(expected, _plus);
+  }
+  
+  protected void assertAccessibleElements(final EdeltaAccessibleElements elements, final CharSequence expected) {
+    final Function1<EdeltaAccessibleElement, String> _function = (EdeltaAccessibleElement it) -> {
+      return it.getQualifiedName().toString();
+    };
+    final Function1<String, String> _function_1 = (String it) -> {
+      return it;
+    };
+    String _join = IterableExtensions.join(IterableExtensions.<String, String>sortBy(ListExtensions.<EdeltaAccessibleElement, String>map(elements, _function), _function_1), "\n");
     String _plus = (_join + "\n");
     this.assertEqualsStrings(expected, _plus);
   }

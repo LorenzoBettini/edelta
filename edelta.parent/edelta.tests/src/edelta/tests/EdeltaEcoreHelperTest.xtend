@@ -112,6 +112,76 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCreateSnapshotOfAccessibleElementsWithUnresolvedEPackage() {
+		'''
+		metamodel "nonexisting"
+		'''.parseWithTestEcore => [
+			createSnapshotOfAccessibleElements.
+			assertAccessibleElements(
+				'''
+
+				'''
+			)
+		]
+	}
+
+	@Test
+	def void testCreateSnapshotOfAccessibleElementsWithCreatedEClass() {
+		referenceToCreatedEClass.parseWithTestEcore => [
+			createSnapshotOfAccessibleElements.
+			assertAccessibleElements(
+				'''
+				foo
+				foo.FooClass
+				foo.FooClass.myAttribute
+				foo.FooClass.myReference
+				foo.FooDataType
+				foo.FooEnum
+				foo.FooEnum.FooEnumLiteral
+				foo.NewClass
+				'''
+			)
+		// NewClass is the one created in the program
+		]
+	}
+
+	@Test
+	def void testCreateSnapshotOfAccessibleElementsWithRemovedEClass() {
+		referenceToEClassRemoved.parseWithTestEcore => [
+			createSnapshotOfAccessibleElements.
+			assertAccessibleElements(
+				'''
+				foo
+				foo.FooDataType
+				foo.FooEnum
+				foo.FooEnum.FooEnumLiteral
+				'''
+				// FooClass has been removed
+			)
+		]
+	}
+
+	@Test
+	def void testGetCurrentAccessibleElementsWithCreatedEClass() {
+		referenceToCreatedEClass.parseWithTestEcore => [
+			getCurrentAccessibleElements.
+			assertAccessibleElements(
+				'''
+				foo
+				foo.FooClass
+				foo.FooClass.myAttribute
+				foo.FooClass.myReference
+				foo.FooDataType
+				foo.FooEnum
+				foo.FooEnum.FooEnumLiteral
+				foo.NewClass
+				'''
+			)
+		// NewClass is the one created in the program
+		]
+	}
+
+	@Test
 	def void testEPackageENamedElements() {
 		referenceToMetamodel.parseWithTestEcore => [
 			getENamedElements(getEPackageByName("foo")).
@@ -302,4 +372,44 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testENamedElementsOfEPackage() {
+		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
+			getENamedElements(getEPackageByName("mainpackage")).
+			assertNamedElements(
+				'''
+				MainFooClass
+				MainFooDataType
+				MainFooEnum
+				MyClass
+				mainsubpackage
+				'''
+			)
+		]
+	}
+
+	@Test
+	def void testENamedElementsOfEClass() {
+		referenceToMetamodel.parseWithTestEcore => [
+			getENamedElements(getEClassifierByName("foo", "FooClass")).
+			assertNamedElements(
+				'''
+				myAttribute
+				myReference
+				'''
+			)
+		]
+	}
+
+	@Test
+	def void testENamedElementsOfENum() {
+		referenceToMetamodel.parseWithTestEcore => [
+			getENamedElements(getEClassifierByName("foo", "FooEnum")).
+			assertNamedElements(
+				'''
+				FooEnumLiteral
+				'''
+			)
+		]
+	}
 }

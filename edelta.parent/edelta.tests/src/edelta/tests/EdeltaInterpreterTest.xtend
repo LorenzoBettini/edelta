@@ -1554,6 +1554,287 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testAccessibleElements() {
+		val input =
+		'''
+		metamodel "foo"
+		
+		modifyEcore aTest epackage foo {
+			ecoreref(FooClass) // 0
+			addNewEClass("ANewClass")
+			ecoreref(ANewClass) // 1
+			EClassifiers -= ecoreref(FooClass) // 2
+			ecoreref(ANewClass) // 3
+		}
+		'''
+		input
+		.parseWithTestEcore => [
+			interpretProgram
+			val ecoreref1 = allEcoreReferenceExpressions.get(0)
+			val ecoreref2 = allEcoreReferenceExpressions.get(1)
+			val ecoreref3 = allEcoreReferenceExpressions.get(2)
+			val ecoreref4 = allEcoreReferenceExpressions.get(3)
+			val elements1 = derivedStateHelper.getAccessibleElements(ecoreref1)
+			assertAccessibleElements(elements1,
+				'''
+				foo
+				foo.FooClass
+				foo.FooClass.myAttribute
+				foo.FooClass.myReference
+				foo.FooDataType
+				foo.FooEnum
+				foo.FooEnum.FooEnumLiteral
+				'''
+			)
+			val elements2 = derivedStateHelper.getAccessibleElements(ecoreref2)
+			assertAccessibleElements(elements2,
+				'''
+				foo
+				foo.ANewClass
+				foo.FooClass
+				foo.FooClass.myAttribute
+				foo.FooClass.myReference
+				foo.FooDataType
+				foo.FooEnum
+				foo.FooEnum.FooEnumLiteral
+				'''
+			)
+			val elements3 = derivedStateHelper.getAccessibleElements(ecoreref3)
+			// nothing has changed between ecoreref 2 and 3
+			// so the available elements must be the same
+			assertThat(elements2).isSameAs(elements3)
+			val elements4 = derivedStateHelper.getAccessibleElements(ecoreref4)
+			assertAccessibleElements(elements4,
+				'''
+				foo
+				foo.ANewClass
+				foo.FooDataType
+				foo.FooEnum
+				foo.FooEnum.FooEnumLiteral
+				'''
+			)
+		]
+	}
+
+	@Test
+	def void testInvalidAmbiguousEcoreref() {
+		val input =
+		'''
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			ecoreref(MyClass)
+		}
+		'''
+		input
+		.parseWithTestEcoreWithSubPackage => [
+			interpretProgram
+			assertErrorsAsStrings(
+				'''
+				Ambiguous reference 'MyClass':
+				  mainpackage.MyClass
+				  mainpackage.mainsubpackage.MyClass
+				  mainpackage.mainsubpackage.subsubpackage.MyClass
+				'''
+			)
+		]
+	}
+
+	@Test
+	def void testAmbiguousEcorerefAfterRemoval() {
+		val input =
+		'''
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			EClassifiers -= ecoreref(mainpackage.MyClass)
+			ecoreref(MyClass) // still ambiguous
+		}
+		'''
+		input
+		.parseWithTestEcoreWithSubPackage => [
+			interpretProgram
+			assertErrorsAsStrings(
+				'''
+				Ambiguous reference 'MyClass':
+				  mainpackage.mainsubpackage.MyClass
+				  mainpackage.mainsubpackage.subsubpackage.MyClass
+				'''
+			)
+		]
+	}
+
+	@Test
+	def void testNonAmbiguousEcorerefAfterRemoval() {
+		val input =
+		'''
+		import static org.eclipse.emf.ecore.util.EcoreUtil.remove
+		
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			EClassifiers -= ecoreref(mainpackage.MyClass)
+			remove(ecoreref(mainpackage.mainsubpackage.subsubpackage.MyClass))
+			ecoreref(MyClass) // non ambiguous
+		}
+		'''
+		input
+		.parseWithTestEcoreWithSubPackage => [
+			val map = interpretProgram
+			assertNoErrors
+			// mainpackage.mainsubpackage.MyClass
+			val mainSubPackageClass =
+				map.values.head.ESubpackages.head.lastEClass
+			val lastEcoreRef = allEcoreReferenceExpressions.last.reference
+			assertNotNull(lastEcoreRef.enamedelement)
+			// the non ambiguous ecoreref should be correctly linked
+			// to the only available element in that context
+			assertSame(mainSubPackageClass, lastEcoreRef.enamedelement)
+		]
+	}
+
+	@Test
+	def void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTypedInAssignment() {
+		val input =
+		'''
+		import org.eclipse.emf.ecore.EAttribute
+		import org.eclipse.emf.ecore.EReference
+		
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			addNewEClass("ANewClass") [
+				addNewEAttribute("created", null)
+			]
+			addNewEClass("AnotherNewClass") [
+				addNewEReference("created", null)
+			]
+			EClassifiers -= ecoreref(ANewClass)
+			// "created" is not ambiguous anymore
+			ecoreref(created)
+			// and it's correctly typed (EReference, not EAttribute)
+			val EAttribute a = ecoreref(created) // ERROR
+			val EReference r = ecoreref(created) // OK
+		}
+		'''
+		input
+		.parseWithTestEcoreWithSubPackage => [
+			interpretProgram
+			assertErrorsAsStrings(
+				'''
+				Type mismatch: cannot convert from EReference to EAttribute
+				'''
+			)
+		]
+	}
+
+	@Test
+	def void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTypedInFeatureCall2() {
+		val input =
+		'''
+		import static org.eclipse.emf.ecore.util.EcoreUtil.remove
+		
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			addNewEClass("created")
+			ESubpackages.head.addNewESubpackage("created", null, null)
+			// "created" is ambiguous now
+			ecoreref(created)
+			remove(EClassifiers.last)
+			// "created" is not ambiguous anymore: linked to EPackage "created"
+			ecoreref(created).EStructuralFeatures // ERROR
+			ecoreref(created) => [
+				abstract = true // ERROR
+			]
+			ecoreref(created).ESubpackages // OK
+			ecoreref(created).nonExistent // ERROR to cover the last case in the interpreter
+		}
+		'''
+		input
+		.parseWithTestEcoreWithSubPackage => [
+			interpretProgram
+			assertErrorsAsStrings(
+				'''
+				Ambiguous reference 'created':
+				  mainpackage.created
+				  mainpackage.mainsubpackage.created
+				Cannot refer to org.eclipse.emf.ecore.EClass.getEStructuralFeatures()
+				Cannot refer to org.eclipse.emf.ecore.EClass.setAbstract(boolean)
+				The method or field nonExistent is undefined for the type EPackage
+				'''
+			)
+		]
+	}
+
+	@Test
+	def void testInvalidAmbiguousEcorerefWithCreatedElements() {
+		val input =
+		'''
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			addNewEClass("created") [
+				addNewEAttribute("created", null)
+			]
+			ecoreref(created)
+		}
+		'''
+		input
+		.parseWithTestEcoreWithSubPackage => [
+			interpretProgram
+			assertErrorsAsStrings(
+				'''
+				Ambiguous reference 'created':
+				  mainpackage.created
+				  mainpackage.created.created
+				'''
+			)
+		]
+	}
+
+	@Test
+	def void testNonAmbiguousEcorerefWithQualification() {
+		val input =
+		'''
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			addNewEClass("created") [
+				addNewEAttribute("created", null)
+			]
+			ecoreref(created.created) // NON ambiguous
+			ecoreref(mainpackage.created) // NON ambiguous
+		}
+		'''
+		input
+		.parseWithTestEcoreWithSubPackage => [
+			interpretProgram
+			assertNoErrors
+		]
+	}
+
+	@Test
+	def void testNonAmbiguousEcoreref() {
+		val input =
+		'''
+		metamodel "mainpackage"
+		
+		modifyEcore aTest epackage mainpackage {
+			addNewEClass("WorkPlace")
+			addNewEClass("LivingPlace")
+			addNewEClass("Place")
+			ecoreref(Place) // NON ambiguous
+		}
+		'''
+		input
+		.parseWithTestEcoreWithSubPackage => [
+			interpretProgram
+			assertNoErrors
+		]
+	}
+
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) {

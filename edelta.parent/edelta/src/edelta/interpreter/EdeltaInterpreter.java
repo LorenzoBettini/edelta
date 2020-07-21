@@ -3,6 +3,8 @@ package edelta.interpreter;
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE;
 import static edelta.util.EdeltaModelUtil.getProgram;
 import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
 import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashMap;
@@ -12,21 +14,27 @@ import static org.eclipse.xtext.xbase.lib.IterableExtensions.forEach;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.common.types.JvmField;
 import org.eclipse.xtext.common.types.JvmFormalParameter;
+import org.eclipse.xtext.common.types.JvmIdentifiableElement;
 import org.eclipse.xtext.common.types.JvmOperation;
+import org.eclipse.xtext.diagnostics.Diagnostic;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.IResourceScopeCache;
+import org.eclipse.xtext.xbase.XAbstractFeatureCall;
 import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
+import org.eclipse.xtext.xbase.XbasePackage;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationResult;
 import org.eclipse.xtext.xbase.interpreter.impl.InterpreterCanceledException;
@@ -37,6 +45,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import edelta.compiler.EdeltaCompilerUtil;
+import edelta.edelta.EdeltaEcoreDirectReference;
 import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
@@ -46,6 +55,7 @@ import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
+import edelta.util.EdeltaEcoreHelper;
 import edelta.util.EdeltaModelUtil;
 import edelta.validation.EdeltaValidator;
 
@@ -78,6 +88,9 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	@Inject
 	private EdeltaInterpreterDiagnosticHelper diagnosticHelper;
+
+	@Inject
+	private EdeltaEcoreHelper ecoreHelper;
 
 	private int interpreterTimeout =
 		Integer.parseInt(System.getProperty("edelta.interpreter.timeout", "2000"));
@@ -273,9 +286,13 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	private Object evaluateEcoreReferenceExpression(EdeltaEcoreReferenceExpression ecoreReferenceExpression, final IEvaluationContext context,
 			final CancelIndicator indicator) {
+		// always make sure to record the currently available elements
+		derivedStateHelper.setAccessibleElements(ecoreReferenceExpression,
+				ecoreHelper.createSnapshotOfAccessibleElements(ecoreReferenceExpression));
 		final var ecoreReference = ecoreReferenceExpression.getReference();
 		if (ecoreReference == null || ecoreReference.getEnamedelement() == null)
 			return null;
+		checkLinking(ecoreReferenceExpression);
 		return edeltaCompilerUtil.buildMethodToCallForEcoreReference(
 			ecoreReferenceExpression,
 			(methodName, args) -> {
@@ -299,6 +316,47 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				interpretedEcoreReferenceExpressions.add(ecoreReferenceExpression);
 				return result;
 			});
+	}
+
+	/**
+	 * Checks whether the linked reference is ambiguous in the current context and
+	 * also makes sure to relink the reference in case in this context there's no
+	 * ambiguity.
+	 * 
+	 * @param ecoreReferenceExpression
+	 */
+	private void checkLinking(EdeltaEcoreReferenceExpression ecoreReferenceExpression) {
+		final var ecoreReference = ecoreReferenceExpression.getReference();
+		// qualified references are not considered since they cannot be ambiguous
+		if (ecoreReference instanceof EdeltaEcoreDirectReference) {
+			String refText = EdeltaModelUtil.getEcoreReferenceText(ecoreReference);
+			// qualification '.' is the boundary for searching for matches
+			String toSearch = "." + refText;
+			final var matching = ecoreHelper.getCurrentAccessibleElements(ecoreReferenceExpression)
+				.stream()
+				.filter(e -> e.getQualifiedName().toString().endsWith(toSearch))
+				.collect(toList());
+			if (matching.size() > 1) {
+				Collection<String> matchingNames = matching.stream()
+					.map(e -> e.getQualifiedName().toString())
+					.collect(toCollection(LinkedHashSet::new));
+				ecoreReferenceExpression.eResource().getErrors().add(
+					new EdeltaInterpreterDiagnostic(Severity.ERROR,
+						EdeltaValidator.AMBIGUOUS_REFERENCE,
+						"Ambiguous reference '" + refText + "':\n" +
+							matchingNames.stream()
+								.map(m -> "  " + m)
+								.collect(joining("\n")),
+						ecoreReferenceExpression,
+						EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE,
+						-1,
+						matchingNames.toArray(new String[0])));
+			} else if (matching.size() == 1) {
+				ENamedElement newCandidate = matching.get(0).getElement();
+				if (newCandidate != ecoreReference.getEnamedelement())
+					ecoreReference.setEnamedelement(newCandidate);
+			}
+		}
 	}
 
 	/**
@@ -396,6 +454,47 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 					getJavaReflectAccess(), useAs, thisObject));
 		}
 		return super.featureCallField(jvmField, receiver);
+	}
+
+	@Override
+	protected Object invokeFeature(JvmIdentifiableElement feature, XAbstractFeatureCall featureCall, Object receiverObj,
+			IEvaluationContext context, CancelIndicator indicator) {
+		try {
+			return super.invokeFeature(feature, featureCall, receiverObj, context, indicator);
+		} catch (IllegalStateException e) {
+			checkUnresolvedFeatureDueToRelinking(feature, featureCall, e);
+			throw e;
+		}
+	}
+
+	@Override
+	protected Object assignValueTo(JvmIdentifiableElement feature, XAbstractFeatureCall assignment, Object value,
+			IEvaluationContext context, CancelIndicator indicator) {
+		try {
+			return super.assignValueTo(feature, assignment, value, context, indicator);
+		} catch (IllegalStateException e) {
+			checkUnresolvedFeatureDueToRelinking(feature, assignment, e);
+			throw e;
+		}
+	}
+
+	private void checkUnresolvedFeatureDueToRelinking(JvmIdentifiableElement feature, XAbstractFeatureCall featureCall,
+			IllegalStateException e) {
+		if (e.getCause() instanceof IllegalArgumentException) {
+			/* it means that receiver expression (an ecoreref) has been relinked
+			 * (see checkLinking) and the previously resolved feature is not
+			 * in the new type of the relinked ecoreref. The type computer will
+			 * not detect this changed, since the feature had already been linked,
+			 * so we must explicitly add an error. */
+			featureCall.eResource().getErrors().add(
+				new EdeltaInterpreterDiagnostic(Severity.ERROR,
+					Diagnostic.LINKING_DIAGNOSTIC,
+					"Cannot refer to " + feature.getIdentifier(),
+					featureCall,
+					XbasePackage.Literals.XABSTRACT_FEATURE_CALL__FEATURE,
+					-1,
+					new String[] {}));
+		}
 	}
 
 	@Override

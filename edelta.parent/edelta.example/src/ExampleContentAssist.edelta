@@ -1,0 +1,29 @@
+// IMPORTANT: ecores must be in source directories
+// otherwise you can't refer to them
+
+metamodel "ecore"
+metamodel "myecore"
+
+modifyEcore SomeChanges epackage myecore {
+	// all elements in the imported ecores are proposed here
+	ecoreref(MyEClass)
+	ecoreref(astring)
+	// here NewClass is not proposed since it's not there yet
+	ecoreref(MyEEnum)
+
+	addNewEClass("NewClass")
+	// now also NewClass is proposed
+	ecoreref(NewClass)
+
+	EClassifiers -= ecoreref(MyEClass)
+	// now MyEClass and its feature astring are not proposed
+	ecoreref(NewClass)
+
+	ecoreref(MyEEnum)
+//	ecoreref(MyEEnum).ELiterals.remove(0)
+	ecoreref(MyEEnum).addNewEEnumLiteral("second")
+
+	ecoreref(MyEEnum).name = "RenamedEnum"
+	// now MyEEnum is proposed with its new name
+	ecoreref(RenamedEnum)
+}

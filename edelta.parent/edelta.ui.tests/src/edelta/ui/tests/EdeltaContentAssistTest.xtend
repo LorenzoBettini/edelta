@@ -223,6 +223,31 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			assertProposal('foo')
 	}
 
+	@Test def void testUnqualifiedEcoreReferenceBeforeRemovalOfEClass() {
+		'''
+		metamodel "mypackage"
+		modifyEcore aTest epackage mypackage {
+			ecoreref(«cursor»);
+			EClassifiers -= ecoreref(MyClass)
+		}'''.
+			testContentAssistant(
+				'''
+				MyBaseClass
+				MyClass
+				MyDataType
+				MyDerivedClass
+				myAttribute
+				myBaseAttribute
+				myBaseReference
+				myDerivedAttribute
+				myDerivedReference
+				myReference
+				mypackage
+				'''.fromLinesOfStringsToStringArray
+			)
+		// MyClass is still present in that context so it is proposed
+	}
+
 	@Test def void testQualifiedEcoreReferenceBeforeRemovalOfEClass() {
 		'''
 		metamodel "mypackage"
@@ -231,6 +256,121 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			EClassifiers -= ecoreref(MyClass)
 		}'''.
 			testContentAssistant(#['myAttribute', 'myReference'])
+		// MyClass is still present in that context so its features are proposed
+	}
+
+	@Test def void testQualifiedEcoreReferenceBeforeRemovalOfEStructuralFeature() {
+		'''
+		metamodel "mypackage"
+		modifyEcore aTest epackage mypackage {
+			ecoreref(MyClass.«cursor»);
+			ecoreref(MyClass).EStructuralFeatures -= ecoreref(myReference)
+		}'''.
+			testContentAssistant(#['myAttribute', 'myReference'])
+		// myReference is still present in that context so it is proposed
+	}
+
+	@Test def void testQualifiedEcoreReferenceBeforeAdditionOfEStructuralFeature() {
+		'''
+		metamodel "mypackage"
+		modifyEcore aTest epackage mypackage {
+			ecoreref(MyClass.«cursor»);
+			ecoreref(MyClass).addNewEAttribute("myNewAttribute", null)
+		}'''.
+			testContentAssistant(#['myAttribute', 'myReference'])
+		// myNewAttribute is not yet present in that context so it is not proposed
+	}
+
+	@Test def void testUnqualifiedEcoreReferenceAfterRemoval() {
+		newBuilder.append('''
+			metamodel "mypackage"
+			modifyEcore aTest epackage mypackage { 
+				EClassifiers -= ecoreref(MyBaseClass)
+				ecoreref(''').
+			assertText('''
+				MyClass
+				MyDataType
+				MyDerivedClass
+				myAttribute
+				myDerivedAttribute
+				myDerivedReference
+				myReference
+				mypackage
+				'''.fromLinesOfStringsToStringArray)
+		// MyBaseClass and its features myBaseAttribute and myBaseReference
+		// are not proposed since they are not present anymore in this context
+	}
+
+	@Test def void testQualifiedEcoreReferenceAfterRemovalOfEStructuralFeature() {
+		newBuilder.append('''
+			metamodel "mypackage"
+			modifyEcore aTest epackage mypackage { 
+				ecoreref(MyBaseClass).EStructuralFeatures -= ecoreref(myBaseAttribute)
+				ecoreref(MyBaseClass.''').
+			assertText('''
+				myBaseReference
+				'''.fromLinesOfStringsToStringArray)
+		// myBaseAttribute is not proposed since it's not present anymore in this context
+	}
+
+	@Test def void testQualifiedEcoreReferenceAfterAdditionOfEStructuralFeature() {
+		'''
+		metamodel "mypackage"
+		modifyEcore aTest epackage mypackage {
+			ecoreref(MyClass).addNewEAttribute("myNewAttribute", null)
+			ecoreref(MyClass.«cursor»);
+		}'''.
+			testContentAssistant(#['myAttribute', 'myReference', "myNewAttribute"])
+		// myNewAttribute is now present in that context so it is proposed
+	}
+
+	@Test def void testUnqualifiedEcoreReferenceBeforeRename() {
+		'''
+		metamodel "mypackage"
+		modifyEcore aTest epackage mypackage {
+			ecoreref(«cursor»)
+			ecoreref(MyBaseClass).name = "Renamed"
+		}'''.
+			testContentAssistant(
+				'''
+				MyBaseClass
+				MyClass
+				MyDataType
+				MyDerivedClass
+				myAttribute
+				myBaseAttribute
+				myBaseReference
+				myDerivedAttribute
+				myDerivedReference
+				myReference
+				mypackage
+				'''.fromLinesOfStringsToStringArray
+			)
+		// MyBaseClass is not yet renamed in this context
+	}
+
+	@Test def void testUnqualifiedEcoreReferenceAfterRename() {
+		newBuilder.append('''
+			metamodel "mypackage"
+			modifyEcore aTest epackage mypackage { 
+				ecoreref(MyBaseClass).name = "Renamed"
+				ecoreref(''').
+			assertText('''
+				MyClass
+				MyDataType
+				MyDerivedClass
+				Renamed
+				myAttribute
+				myBaseAttribute
+				myBaseReference
+				myDerivedAttribute
+				myDerivedReference
+				myReference
+				mypackage
+				'''.fromLinesOfStringsToStringArray)
+		// MyBaseClass is proposed with its new name Renamed
+		// and its features myBaseAttribute and myBaseReference
+		// are still proposed since they are still present in this context
 	}
 
 	def private fromLinesOfStringsToStringArray(CharSequence strings) {
