@@ -112,11 +112,11 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testComputeAccessibleElementsWithUnresolvedEPackage() {
+	def void testCreateSnapshotOfAccessibleElementsWithUnresolvedEPackage() {
 		'''
 		metamodel "nonexisting"
 		'''.parseWithTestEcore => [
-			computeAccessibleElements.
+			createSnapshotOfAccessibleElements.
 			assertAccessibleElements(
 				'''
 
@@ -126,9 +126,9 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testComputeAccessibleElementsWithCreatedEClass() {
+	def void testCreateSnapshotOfAccessibleElementsWithCreatedEClass() {
 		referenceToCreatedEClass.parseWithTestEcore => [
-			computeAccessibleElements.
+			createSnapshotOfAccessibleElements.
 			assertAccessibleElements(
 				'''
 				foo
@@ -146,9 +146,9 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testComputeAccessibleElementsWithRemovedEClass() {
+	def void testCreateSnapshotOfAccessibleElementsWithRemovedEClass() {
 		referenceToEClassRemoved.parseWithTestEcore => [
-			computeAccessibleElements.
+			createSnapshotOfAccessibleElements.
 			assertAccessibleElements(
 				'''
 				foo

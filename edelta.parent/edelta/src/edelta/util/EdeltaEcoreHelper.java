@@ -52,17 +52,23 @@ public class EdeltaEcoreHelper {
 		});
 	}
 
-	public EdeltaAccessibleElements computeAccessibleElements(EObject context) {
-		return cache.get("computeAccessibleElements", context.eResource(), () -> {
+	/**
+	 * Creates a snapshot of {@link EdeltaAccessibleElements} in the specified
+	 * context; elements of the snapshots are copies.
+	 * 
+	 * @param context
+	 * @return
+	 */
+	public EdeltaAccessibleElements createSnapshotOfAccessibleElements(EObject context) {
+		return cache.get("createSnapshotOfAccessibleElements", context.eResource(), () -> {
 			final var epackages = getEPackagesToProcess(context);
-			final var snapshot = EdeltaEcoreUtil.copyEPackages(epackages).stream()
+			return EdeltaEcoreUtil.copyEPackages(epackages).stream()
 				.flatMap(this::getAllENamedElements)
 				.map(it -> new EdeltaAccessibleElement(it,
 						qualifiedNameProvider.getFullyQualifiedName(it)))
 				// qualified name is null for unresolved proxies
 				.filter(it -> Objects.nonNull(it.getQualifiedName()))
-				.collect(Collectors.toList());
-			return new EdeltaAccessibleElements(snapshot);
+				.collect(Collectors.toCollection(EdeltaAccessibleElements::new));
 		});
 	}
 

@@ -288,7 +288,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			final CancelIndicator indicator) {
 		// always make sure to record the currently available elements
 		derivedStateHelper.setAccessibleElements(ecoreReferenceExpression,
-				ecoreHelper.computeAccessibleElements(ecoreReferenceExpression));
+				ecoreHelper.createSnapshotOfAccessibleElements(ecoreReferenceExpression));
 		final var ecoreReference = ecoreReferenceExpression.getReference();
 		if (ecoreReference == null || ecoreReference.getEnamedelement() == null)
 			return null;

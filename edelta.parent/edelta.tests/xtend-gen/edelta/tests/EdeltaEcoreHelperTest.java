@@ -160,25 +160,25 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testComputeAccessibleElementsWithUnresolvedEPackage() {
+  public void testCreateSnapshotOfAccessibleElementsWithUnresolvedEPackage() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"nonexisting\"");
     _builder.newLine();
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      EdeltaAccessibleElements _computeAccessibleElements = this._edeltaEcoreHelper.computeAccessibleElements(it);
+      EdeltaAccessibleElements _createSnapshotOfAccessibleElements = this._edeltaEcoreHelper.createSnapshotOfAccessibleElements(it);
       StringConcatenation _builder_1 = new StringConcatenation();
       _builder_1.newLine();
-      this.assertAccessibleElements(_computeAccessibleElements, _builder_1);
+      this.assertAccessibleElements(_createSnapshotOfAccessibleElements, _builder_1);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
   
   @Test
-  public void testComputeAccessibleElementsWithCreatedEClass() {
+  public void testCreateSnapshotOfAccessibleElementsWithCreatedEClass() {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToCreatedEClass());
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      EdeltaAccessibleElements _computeAccessibleElements = this._edeltaEcoreHelper.computeAccessibleElements(it);
+      EdeltaAccessibleElements _createSnapshotOfAccessibleElements = this._edeltaEcoreHelper.createSnapshotOfAccessibleElements(it);
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("foo");
       _builder.newLine();
@@ -196,16 +196,16 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
       _builder.newLine();
       _builder.append("foo.NewClass");
       _builder.newLine();
-      this.assertAccessibleElements(_computeAccessibleElements, _builder);
+      this.assertAccessibleElements(_createSnapshotOfAccessibleElements, _builder);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
   
   @Test
-  public void testComputeAccessibleElementsWithRemovedEClass() {
+  public void testCreateSnapshotOfAccessibleElementsWithRemovedEClass() {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToEClassRemoved());
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      EdeltaAccessibleElements _computeAccessibleElements = this._edeltaEcoreHelper.computeAccessibleElements(it);
+      EdeltaAccessibleElements _createSnapshotOfAccessibleElements = this._edeltaEcoreHelper.createSnapshotOfAccessibleElements(it);
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("foo");
       _builder.newLine();
@@ -215,7 +215,7 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
       _builder.newLine();
       _builder.append("foo.FooEnum.FooEnumLiteral");
       _builder.newLine();
-      this.assertAccessibleElements(_computeAccessibleElements, _builder);
+      this.assertAccessibleElements(_createSnapshotOfAccessibleElements, _builder);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
