@@ -55,6 +55,7 @@ import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
+import org.eclipse.xtext.xbase.lib.ListExtensions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Assert;
@@ -567,7 +568,7 @@ public abstract class EdeltaAbstractTest {
     final Function1<String, String> _function_1 = (String it) -> {
       return it;
     };
-    String _join = IterableExtensions.join(IterableExtensions.<String, String>sortBy(IterableExtensions.<EdeltaAccessibleElement, String>map(elements, _function), _function_1), "\n");
+    String _join = IterableExtensions.join(IterableExtensions.<String, String>sortBy(ListExtensions.<EdeltaAccessibleElement, String>map(elements, _function), _function_1), "\n");
     String _plus = (_join + "\n");
     this.assertEqualsStrings(expected, _plus);
   }

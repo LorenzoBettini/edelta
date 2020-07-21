@@ -1,7 +1,7 @@
 package edelta.resource.derivedstate;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 
 /**
  * A collection of {@link EdeltaAccessibleElement}.
@@ -9,7 +9,7 @@ import java.util.HashSet;
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaAccessibleElements extends HashSet<EdeltaAccessibleElement> {
+public class EdeltaAccessibleElements extends ArrayList<EdeltaAccessibleElement> {
 
 	private static final long serialVersionUID = 1L;
 
