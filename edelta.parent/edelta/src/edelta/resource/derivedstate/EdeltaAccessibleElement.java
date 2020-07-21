@@ -4,7 +4,7 @@ import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.xtext.naming.QualifiedName;
 
 /**
- * Represents an accessible element in a given context.
+ * Represents an accessible {@link ENamedElement} with its {@link QualifiedName}.
  * 
  * @author Lorenzo Bettini
  *

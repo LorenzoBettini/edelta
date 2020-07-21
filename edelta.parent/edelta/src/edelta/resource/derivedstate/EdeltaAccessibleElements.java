@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 /**
- * The accessible elements in a given context.
+ * A collection of {@link EdeltaAccessibleElement}.
  * 
  * @author Lorenzo Bettini
  *
