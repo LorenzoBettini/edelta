@@ -18,6 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.common.types.JvmField;
@@ -351,9 +352,9 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 						-1,
 						matchingNames.toArray(new String[0])));
 			} else if (matching.size() == 1) {
-				final var newCandidate = matching.get(0);
+				ENamedElement newCandidate = matching.get(0).getElement();
 				if (newCandidate != ecoreReference.getEnamedelement())
-					ecoreReference.setEnamedelement(newCandidate.getElement());
+					ecoreReference.setEnamedelement(newCandidate);
 			}
 		}
 	}
