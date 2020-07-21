@@ -6,7 +6,6 @@ import edelta.resource.derivedstate.EdeltaAccessibleElements;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderCustom;
 import edelta.util.EdeltaEcoreHelper;
-import java.util.Collection;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
@@ -31,7 +30,7 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
   
   @Test
   public void testProgramENamedElements() {
-    Collection<ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(this.parseWithTestEcores(this._inputs.referencesToMetamodels()));
+    Iterable<ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(this.parseWithTestEcores(this._inputs.referencesToMetamodels()));
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("foo");
     _builder.newLine();
@@ -62,7 +61,7 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
   
   @Test
   public void testProgramENamedElementsWithCopiedEPackages() {
-    Collection<ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(this.parseWithTestEcores(this._inputs.referencesToMetamodelsWithCopiedEPackages()));
+    Iterable<ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(this.parseWithTestEcores(this._inputs.referencesToMetamodelsWithCopiedEPackages()));
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("bar");
     _builder.newLine();
@@ -93,7 +92,7 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
   
   @Test
   public void testProgramENamedElementsWithSubPackages() {
-    Collection<ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(this.parseWithTestEcoreWithSubPackage(this._inputs.referenceToMetamodelWithSubPackageWithCopiedEPackages()));
+    Iterable<ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(this.parseWithTestEcoreWithSubPackage(this._inputs.referenceToMetamodelWithSubPackageWithCopiedEPackages()));
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("mainpackage");
     _builder.newLine();
@@ -136,7 +135,7 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
   public void testProgramWithCreatedEClassENamedElements() {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToCreatedEClass());
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      Collection<ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(it);
+      Iterable<ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(it);
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("foo");
       _builder.newLine();
@@ -216,6 +215,33 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
       _builder.append("foo.FooEnum.FooEnumLiteral");
       _builder.newLine();
       this.assertAccessibleElements(_createSnapshotOfAccessibleElements, _builder);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
+  public void testGetCurrentAccessibleElementsWithCreatedEClass() {
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToCreatedEClass());
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      EdeltaAccessibleElements _currentAccessibleElements = this._edeltaEcoreHelper.getCurrentAccessibleElements(it);
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("foo");
+      _builder.newLine();
+      _builder.append("foo.FooClass");
+      _builder.newLine();
+      _builder.append("foo.FooClass.myAttribute");
+      _builder.newLine();
+      _builder.append("foo.FooClass.myReference");
+      _builder.newLine();
+      _builder.append("foo.FooDataType");
+      _builder.newLine();
+      _builder.append("foo.FooEnum");
+      _builder.newLine();
+      _builder.append("foo.FooEnum.FooEnumLiteral");
+      _builder.newLine();
+      _builder.append("foo.NewClass");
+      _builder.newLine();
+      this.assertAccessibleElements(_currentAccessibleElements, _builder);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }

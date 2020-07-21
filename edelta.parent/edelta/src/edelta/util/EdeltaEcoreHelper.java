@@ -40,12 +40,16 @@ public class EdeltaEcoreHelper {
 	private IQualifiedNameProvider qualifiedNameProvider;
 
 	/**
-	 * Returns all the ENamedElements in the program: it uses the copied EPackages
-	 * if present, otherwise it uses the original imported metamodels, but NOT both.
+	 * Returns all the {@link ENamedElement} in the context's program: it uses the
+	 * copied EPackages if present, otherwise it uses the original imported
+	 * metamodels, but NOT both.
+	 * 
+	 * @param context
+	 * @return
 	 */
-	public Collection<ENamedElement> getProgramENamedElements(final EObject context) {
+	public Iterable<ENamedElement> getProgramENamedElements(final EObject context) {
 		return cache.get("getProgramENamedElements", context.eResource(), () -> {
-			final var epackages = getEPackagesToProcess(context);
+			final var epackages = getCurrentEPackagesToProcess(context);
 			return epackages.stream()
 				.flatMap(this::getAllENamedElements)
 				.collect(Collectors.toList());
@@ -60,19 +64,35 @@ public class EdeltaEcoreHelper {
 	 * @return
 	 */
 	public EdeltaAccessibleElements createSnapshotOfAccessibleElements(EObject context) {
-		return cache.get("createSnapshotOfAccessibleElements", context.eResource(), () -> {
-			final var epackages = getEPackagesToProcess(context);
-			return EdeltaEcoreUtil.copyEPackages(epackages).stream()
-				.flatMap(this::getAllENamedElements)
-				.map(it -> new EdeltaAccessibleElement(it,
-						qualifiedNameProvider.getFullyQualifiedName(it)))
-				// qualified name is null for unresolved proxies
-				.filter(it -> Objects.nonNull(it.getQualifiedName()))
-				.collect(Collectors.toCollection(EdeltaAccessibleElements::new));
-		});
+		return cache.get("createSnapshotOfAccessibleElements", context.eResource(),
+			() -> fromEPackagesToAccessibleElements
+				(EdeltaEcoreUtil.copyEPackages(getCurrentEPackagesToProcess(context))));
 	}
 
-	private Collection<EPackage> getEPackagesToProcess(final EObject context) {
+	/**
+	 * Returns {@link EdeltaAccessibleElements} using the current state of the
+	 * copied {@link EPackage}s, that is, the current state of the metamodels where
+	 * interpreted operations have been applied.
+	 * 
+	 * @param context
+	 * @return
+	 */
+	public EdeltaAccessibleElements getCurrentAccessibleElements(EObject context) {
+		return cache.get("getCurrentAccessibleElements", context.eResource(),
+			() -> fromEPackagesToAccessibleElements(getCurrentEPackagesToProcess(context)));
+	}
+
+	private EdeltaAccessibleElements fromEPackagesToAccessibleElements(final Collection<EPackage> epackages) {
+		return epackages.stream()
+			.flatMap(this::getAllENamedElements)
+			.map(it -> new EdeltaAccessibleElement(it,
+					qualifiedNameProvider.getFullyQualifiedName(it)))
+			// qualified name is null for unresolved proxies
+			.filter(it -> Objects.nonNull(it.getQualifiedName()))
+			.collect(Collectors.toCollection(EdeltaAccessibleElements::new));
+	}
+
+	private Collection<EPackage> getCurrentEPackagesToProcess(final EObject context) {
 		final var prog = EdeltaModelUtil.getProgram(context);
 		final var copied = derivedStateHelper.getCopiedEPackagesMap(prog.eResource())
 				.values();

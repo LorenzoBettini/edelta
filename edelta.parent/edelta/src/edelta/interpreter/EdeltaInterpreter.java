@@ -18,7 +18,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.common.types.JvmField;
@@ -332,16 +331,13 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			String refText = EdeltaModelUtil.getEcoreReferenceText(ecoreReference);
 			// qualification '.' is the boundary for searching for matches
 			String toSearch = "." + refText;
-			final var matching = ecoreHelper.getProgramENamedElements(ecoreReferenceExpression)
+			final var matching = ecoreHelper.getCurrentAccessibleElements(ecoreReferenceExpression)
 				.stream()
-				.filter(not(ENamedElement::eIsProxy)) // proxies have null qualified name
-				.filter(
-					e -> qualifiedNameProvider.getFullyQualifiedName(e)
-						.toString().endsWith(toSearch))
+				.filter(e -> e.getQualifiedName().toString().endsWith(toSearch))
 				.collect(toList());
 			if (matching.size() > 1) {
 				Collection<String> matchingNames = matching.stream()
-					.map(e -> qualifiedNameProvider.getFullyQualifiedName(e).toString())
+					.map(e -> e.getQualifiedName().toString())
 					.collect(toCollection(LinkedHashSet::new));
 				ecoreReferenceExpression.eResource().getErrors().add(
 					new EdeltaInterpreterDiagnostic(Severity.ERROR,
@@ -357,7 +353,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			} else if (matching.size() == 1) {
 				final var newCandidate = matching.get(0);
 				if (newCandidate != ecoreReference.getEnamedelement())
-					ecoreReference.setEnamedelement(newCandidate);
+					ecoreReference.setEnamedelement(newCandidate.getElement());
 			}
 		}
 	}
