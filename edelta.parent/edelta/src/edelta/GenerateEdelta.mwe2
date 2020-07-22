@@ -57,6 +57,9 @@ Workflow {
 			outline = {
 				generateXtendStub = false
 			}
+			labelProvider = {
+				generateXtendStub = false
+			}
 		}
 	}
 }
