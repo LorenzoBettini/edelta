@@ -89,7 +89,7 @@
     <!-- Method names should comply with a naming convention:
       UI classes in Xtext are based on some redefined methods starting with _ -->
     <sonar.issue.ignore.multicriteria.e15.ruleKey>java:S100</sonar.issue.ignore.multicriteria.e15.ruleKey>
-    <sonar.issue.ignore.multicriteria.e15.resourceKey>**/ui/**/*.java</sonar.issue.ignore.multicriteria.e15.resourceKey>
+    <sonar.issue.ignore.multicriteria.e15.resourceKey>**/*OutlineTreeProvider.java</sonar.issue.ignore.multicriteria.e15.resourceKey>
 
     <!-- since this could be used in the pluginManagement section, we need 
       to make sure the path always points to this pom's directory; project.basedir 
