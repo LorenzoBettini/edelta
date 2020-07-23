@@ -3,7 +3,6 @@
  */
 package edelta.ui.outline;
 
-import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider;
 
@@ -24,17 +23,21 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	private EdeltaDerivedStateHelper derivedStateHelper;
 
 	protected void _createChildren(final IOutlineNode parentNode, final EdeltaProgram p) {
-		for (final EdeltaOperation o : p.getOperations()) {
+		for (final var o : p.getOperations()) {
 			this.createNode(parentNode, o);
 		}
-		for (final EdeltaModifyEcoreOperation o : p.getModifyEcoreOperations()) {
+		for (final var o : p.getModifyEcoreOperations()) {
 			this.createNode(parentNode, o);
 		}
-		for (final EPackage copiedEPackage : this.derivedStateHelper.getCopiedEPackagesMap(p.eResource()).values()) {
+		final var eResource = p.eResource();
+		final var modifiedElements = derivedStateHelper.getModifiedElements(eResource);
+		for (final var ePackage : this.derivedStateHelper.getCopiedEPackagesMap(eResource).values()) {
 			// the cool thing is that we don't need to provide
 			// customization in the label provider for EPackage and EClass
 			// since Xtext defaults to the .edit plugin :)
-			this.createNode(parentNode, copiedEPackage);
+			if (modifiedElements.contains(ePackage))
+				this.createNode(parentNode, ePackage);
+			// only show EPackage with some modifications
 		}
 	}
 

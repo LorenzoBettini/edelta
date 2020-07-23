@@ -168,6 +168,27 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 		)
 	}
 
+	@Test @Flaky
+	def void testOutlineWhenNoElementIsModifiedThenTheEPackageIsNotShown() {
+		println("*** Executing testOutlineWhenNoElementIsModified...")
+		// wait for build so that ecores are indexed
+		// and then found by the test programs
+		waitForBuild
+
+		'''
+		metamodel "mypackage"
+		
+		modifyEcore aModification epackage mypackage {
+
+		}
+		'''.assertAllLabels(
+		'''
+		test
+		  aModification(EPackage) : void
+		'''
+		)
+	}
+
 
 	def private allOtherContents()
 	'''
