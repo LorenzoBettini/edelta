@@ -6,9 +6,9 @@ package edelta.ui.labeling;
 import static com.google.common.collect.Iterables.filter;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
 
-import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
@@ -23,6 +23,7 @@ import com.google.inject.Inject;
 
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 
 /**
  * Provides labels for EObjects.
@@ -33,6 +34,9 @@ import edelta.edelta.EdeltaOperation;
 public class EdeltaLabelProvider extends XbaseWithAnnotationsLabelProvider {
 	@Inject
 	private IJvmModelAssociations jvmModelAssociations;
+
+	@Inject
+	private EdeltaDerivedStateHelper derivedStateHelper;
 
 	private AdapterFactoryLabelProvider delegate;
 
@@ -69,7 +73,11 @@ public class EdeltaLabelProvider extends XbaseWithAnnotationsLabelProvider {
 		// delegate to the default Ecore edit label provider
 		// for Ecore model elements.
 		final var text = delegate.getText(e);
-		if (e instanceof EClass) {
+		if (e instanceof EPackage) {
+			return text; // no need to highlight EPackage
+			// since only the ones with modified elements are shown in the outline
+		}
+		if (derivedStateHelper.getModifiedElements(e.eResource()).contains(e)) {
 			return new StyledString(text, BOLD_FONT_STYLER);
 		}
 		return text;
