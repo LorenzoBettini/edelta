@@ -2,14 +2,11 @@ package edelta.interpreter;
 
 import static org.eclipse.emf.ecore.EcorePackage.Literals.*;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
@@ -86,26 +83,23 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 				checkCycles(feature, newValue);
 			}
 		}
-		updateModifiedelements(notifier, new HashSet<>());
-		updateModifiedelements(newValue, new HashSet<>());
+		updateModifiedElements(notifier);
+		updateModifiedElements(newValue);
 		cache.clear(resource);
 		clearIssues(resource.getErrors());
 		clearIssues(resource.getWarnings());
 	}
 
-	private void updateModifiedelements(Object element, Set<EObject> seen) {
+	private void updateModifiedElements(Object element) {
 		/*
-		 * we have to avoid stack overflows in case of cycles; we break the cycle for
-		 * supertype hierarchy, but when doing so we get another notification and in
-		 * that case the cycle it's still there
+		 * we have to avoid stack overflows, by checking the result of add in case of
+		 * cycles; we break the cycle for supertype hierarchy, but when doing so we get
+		 * another notification and in that case the cycle it's still there
 		 */
 		if (element instanceof ENamedElement) {
 			final var enamedElement = (ENamedElement) element;
-			if (seen.contains(enamedElement))
-				return;
-			seen.add(enamedElement);
-			modifiedElements.add(enamedElement);
-			updateModifiedelements(enamedElement.eContainer(), seen);
+			if (modifiedElements.add(enamedElement))
+				updateModifiedElements(enamedElement.eContainer());
 		}
 	}
 
