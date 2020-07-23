@@ -28,6 +28,8 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.assertThat
 import static org.mockito.Mockito.*
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper
+import edelta.resource.derivedstate.EdeltaModifiedElements
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -44,10 +46,12 @@ class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 
 	@Inject IResourceScopeCache cache
 	@Inject EdeltaInterpreterDiagnosticHelper diagnosticHelper
+	@Inject EdeltaDerivedStateHelper derivedStateHelper
 	var EdeltaInterpreterResourceListener listener
 	var EPackage ePackage
 	var Resource resource
 	var EdeltaENamedElementXExpressionMap enamedElementXExpressionMap
+	var EdeltaModifiedElements modifiedElements
 	var Provider<String> stringProvider
 
 	@Before
@@ -59,9 +63,10 @@ class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 			]
 		]
 		resource = "".parse.eResource
-		enamedElementXExpressionMap = new EdeltaENamedElementXExpressionMap
+		enamedElementXExpressionMap = derivedStateHelper.getEnamedElementXExpressionMap(resource)
+		modifiedElements = derivedStateHelper.getModifiedElements(resource)
 		listener = new EdeltaInterpreterResourceListener(
-			cache, resource, enamedElementXExpressionMap, diagnosticHelper
+			cache, resource, derivedStateHelper, diagnosticHelper
 		)
 		stringProvider = spy(new SpiedProvider)
 		ePackage.eAdapters += listener
@@ -257,6 +262,33 @@ class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 			"Cycle in inheritance hierarchy: aPackage.c3"
 		)
 		assertThat(resource.validate).hasSize(1)
+	}
+
+	@Test
+	def void testModifiedElementsIsUpdatedWhenNameIsChanged() {
+		val currentExpression = mock(XExpression)
+		listener.setCurrentExpression(currentExpression)
+		val element = ecoreFactory.createEClass
+		ePackage.EClassifiers += element
+		assertThat(modifiedElements)
+			.containsExactlyInAnyOrder(element, ePackage)
+	}
+
+	@Test
+	def void testModifiedElementsIsUpdatedWhenElementIsAdded() {
+		val currentExpression = mock(XExpression)
+		listener.setCurrentExpression(currentExpression)
+		val element = ePackage.EClassifiers.get(0)
+		// change the name
+		element.name = "Modified"
+		assertThat(modifiedElements)
+			.containsExactlyInAnyOrder(element, ePackage)
+	}
+
+	@Test
+	def void testModifiedElementsIsEmptyWhenNothingIsChanged() {
+		ePackage.eAdapters -= listener
+		assertThat(modifiedElements).isEmpty
 	}
 
 	def createEObjectDiagnosticMock(EObject problematicObject) {

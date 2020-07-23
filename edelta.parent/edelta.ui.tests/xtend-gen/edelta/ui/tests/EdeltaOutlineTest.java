@@ -268,6 +268,33 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
     }
   }
   
+  @Test
+  @Flaky
+  public void testOutlineWhenNoElementIsModifiedThenTheEPackageIsNotShown() {
+    try {
+      InputOutput.<String>println("*** Executing testOutlineWhenNoElementIsModified...");
+      IResourcesSetupUtil.waitForBuild();
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"mypackage\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aModification epackage mypackage {");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("test");
+      _builder_1.newLine();
+      _builder_1.append("  ");
+      _builder_1.append("aModification(EPackage) : void");
+      _builder_1.newLine();
+      this.assertAllLabels(_builder, _builder_1);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
   private CharSequence allOtherContents() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("MyClass");

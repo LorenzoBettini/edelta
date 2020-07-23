@@ -18,7 +18,9 @@ import org.eclipse.xtext.xbase.XExpression;
 
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.lib.EdeltaLibrary;
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
+import edelta.resource.derivedstate.EdeltaModifiedElements;
 import edelta.util.EdeltaModelUtil;
 import edelta.validation.EdeltaValidator;
 
@@ -47,12 +49,15 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 
 	private EdeltaLibrary lib = new EdeltaLibrary();
 
+	private EdeltaModifiedElements modifiedElements;
+
 	public EdeltaInterpreterResourceListener(IResourceScopeCache cache, Resource resource,
-			EdeltaENamedElementXExpressionMap enamedElementXExpressionMap,
+			EdeltaDerivedStateHelper derivedStateHelper,
 			EdeltaInterpreterDiagnosticHelper diagnosticHelper) {
 		this.cache = cache;
 		this.resource = resource;
-		this.enamedElementXExpressionMap = enamedElementXExpressionMap;
+		this.enamedElementXExpressionMap = derivedStateHelper.getEnamedElementXExpressionMap(resource);
+		this.modifiedElements = derivedStateHelper.getModifiedElements(resource);
 		this.diagnosticHelper = diagnosticHelper;
 	}
 
@@ -60,12 +65,13 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 	public void notifyChanged(Notification notification) {
 		super.notifyChanged(notification);
 		final Object feature = notification.getFeature();
+		final Object notifier = notification.getNotifier();
+		final Object newValue = notification.getNewValue();
 		if (feature == ENAMED_ELEMENT__NAME) {
 			enamedElementXExpressionMap.put(
-				(ENamedElement) notification.getNotifier(),
+				(ENamedElement) notifier,
 				currentExpression);
 		} else {
-			final Object newValue = notification.getNewValue();
 			if (notification.getEventType() == Notification.ADD &&
 					newValue instanceof ENamedElement) {
 				enamedElementXExpressionMap.put(
@@ -77,9 +83,26 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 				checkCycles(feature, newValue);
 			}
 		}
+		if (!notification.isTouch()) {
+			updateModifiedElements(notifier);
+			updateModifiedElements(newValue);
+		}
 		cache.clear(resource);
 		clearIssues(resource.getErrors());
 		clearIssues(resource.getWarnings());
+	}
+
+	private void updateModifiedElements(Object element) {
+		/*
+		 * we have to avoid stack overflows, by checking the result of add in case of
+		 * cycles; we break the cycle for supertype hierarchy, but when doing so we get
+		 * another notification and in that case the cycle it's still there
+		 */
+		if (element instanceof ENamedElement) {
+			final var enamedElement = (ENamedElement) element;
+			if (modifiedElements.add(enamedElement))
+				updateModifiedElements(enamedElement.eContainer());
+		}
 	}
 
 	private void checkCycles(final Object feature, final Object newValue) {
