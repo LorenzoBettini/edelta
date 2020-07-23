@@ -83,8 +83,10 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 				checkCycles(feature, newValue);
 			}
 		}
-		updateModifiedElements(notifier);
-		updateModifiedElements(newValue);
+		if (!notification.isTouch()) {
+			updateModifiedElements(notifier);
+			updateModifiedElements(newValue);
+		}
 		cache.clear(resource);
 		clearIssues(resource.getErrors());
 		clearIssues(resource.getWarnings());

@@ -275,6 +275,12 @@ class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 			.containsExactlyInAnyOrder(element, ePackage)
 	}
 
+	@Test
+	def void testModifiedElementsIsEmptyWhenNothingIsChanged() {
+		ePackage.eAdapters -= listener
+		assertThat(modifiedElements).isEmpty
+	}
+
 	def createEObjectDiagnosticMock(EObject problematicObject) {
 		mock(EObjectDiagnosticImpl) => [
 			when(getProblematicObject).thenReturn(problematicObject)

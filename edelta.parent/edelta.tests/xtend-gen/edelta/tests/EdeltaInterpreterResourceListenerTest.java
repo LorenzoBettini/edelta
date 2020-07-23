@@ -306,6 +306,13 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
     Assertions.<ENamedElement>assertThat(this.modifiedElements).containsExactlyInAnyOrder(element, this.ePackage);
   }
   
+  @Test
+  public void testModifiedElementsIsEmptyWhenNothingIsChanged() {
+    EList<Adapter> _eAdapters = this.ePackage.eAdapters();
+    _eAdapters.remove(this.listener);
+    Assertions.<ENamedElement>assertThat(this.modifiedElements).isEmpty();
+  }
+  
   public EObjectDiagnosticImpl createEObjectDiagnosticMock(final EObject problematicObject) {
     EObjectDiagnosticImpl _mock = Mockito.<EObjectDiagnosticImpl>mock(EObjectDiagnosticImpl.class);
     final Procedure1<EObjectDiagnosticImpl> _function = (EObjectDiagnosticImpl it) -> {
