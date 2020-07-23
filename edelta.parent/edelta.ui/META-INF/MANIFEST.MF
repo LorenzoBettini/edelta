@@ -27,9 +27,10 @@ Require-Bundle: edelta,
 Import-Package: org.apache.log4j
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: edelta.ui.contentassist,
+ edelta.ui.editor,
  edelta.ui.internal,
+ edelta.ui.labeling,
  edelta.ui.quickfix,
- edelta.ui.wizard,
- edelta.ui.editor
+ edelta.ui.wizard
 Bundle-Activator: edelta.ui.internal.EdeltaActivator
 Automatic-Module-Name: edelta.ui
