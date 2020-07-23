@@ -268,6 +268,16 @@ class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 	def void testModifiedElementsIsUpdatedWhenNameIsChanged() {
 		val currentExpression = mock(XExpression)
 		listener.setCurrentExpression(currentExpression)
+		val element = ecoreFactory.createEClass
+		ePackage.EClassifiers += element
+		assertThat(modifiedElements)
+			.containsExactlyInAnyOrder(element, ePackage)
+	}
+
+	@Test
+	def void testModifiedElementsIsUpdatedWhenElementIsAdded() {
+		val currentExpression = mock(XExpression)
+		listener.setCurrentExpression(currentExpression)
 		val element = ePackage.EClassifiers.get(0)
 		// change the name
 		element.name = "Modified"

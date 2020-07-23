@@ -301,6 +301,16 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
   public void testModifiedElementsIsUpdatedWhenNameIsChanged() {
     final XExpression currentExpression = Mockito.<XExpression>mock(XExpression.class);
     this.listener.setCurrentExpression(currentExpression);
+    final EClass element = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEClass();
+    EList<EClassifier> _eClassifiers = this.ePackage.getEClassifiers();
+    _eClassifiers.add(element);
+    Assertions.<ENamedElement>assertThat(this.modifiedElements).containsExactlyInAnyOrder(element, this.ePackage);
+  }
+  
+  @Test
+  public void testModifiedElementsIsUpdatedWhenElementIsAdded() {
+    final XExpression currentExpression = Mockito.<XExpression>mock(XExpression.class);
+    this.listener.setCurrentExpression(currentExpression);
     final EClassifier element = this.ePackage.getEClassifiers().get(0);
     element.setName("Modified");
     Assertions.<ENamedElement>assertThat(this.modifiedElements).containsExactlyInAnyOrder(element, this.ePackage);
