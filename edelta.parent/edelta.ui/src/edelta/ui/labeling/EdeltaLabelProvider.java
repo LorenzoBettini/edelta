@@ -6,10 +6,15 @@ package edelta.ui.labeling;
 import static com.google.common.collect.Iterables.filter;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
 
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.StyledString.Styler;
+import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.xtext.common.types.JvmOperation;
 import org.eclipse.xtext.xbase.annotations.ui.labeling.XbaseWithAnnotationsLabelProvider;
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations;
@@ -30,6 +35,13 @@ public class EdeltaLabelProvider extends XbaseWithAnnotationsLabelProvider {
 	private IJvmModelAssociations jvmModelAssociations;
 
 	private AdapterFactoryLabelProvider delegate;
+
+	private static final Styler BOLD_FONT_STYLER = new Styler() {
+		@Override
+		public void applyStyles(final TextStyle textStyle) {
+			textStyle.font = JFaceResources.getFontRegistry().getBold("Edelta");
+		}
+	};
 
 	@Inject
 	public EdeltaLabelProvider(final AdapterFactoryLabelProvider delegate) {
@@ -53,14 +65,17 @@ public class EdeltaLabelProvider extends XbaseWithAnnotationsLabelProvider {
 		return this.imageDescriptor(this.inferredJavaMethod(m));
 	}
 
-	public String text(final ENamedElement e) {
+	public Object text(final ENamedElement e) {
 		// delegate to the default Ecore edit label provider
 		// for Ecore model elements.
-		return delegate.getText(e);
+		final var text = delegate.getText(e);
+		if (e instanceof EClass) {
+			return new StyledString(text, BOLD_FONT_STYLER);
+		}
+		return text;
 	}
 
 	private JvmOperation inferredJavaMethod(final EObject e) {
-		return head(filter(
-			jvmModelAssociations.getJvmElements(e), JvmOperation.class));
+		return head(filter(jvmModelAssociations.getJvmElements(e), JvmOperation.class));
 	}
 }
