@@ -8,6 +8,7 @@ import edelta.interpreter.EdeltaInterpreterDiagnosticHelper;
 import edelta.interpreter.EdeltaInterpreterResourceListener;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
+import edelta.resource.derivedstate.EdeltaModifiedElements;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProvider;
 import edelta.validation.EdeltaValidator;
@@ -73,6 +74,8 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
   
   private EdeltaENamedElementXExpressionMap enamedElementXExpressionMap;
   
+  private EdeltaModifiedElements modifiedElements;
+  
   private Provider<String> stringProvider;
   
   @Before
@@ -93,6 +96,7 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
       this.ePackage = _doubleArrow;
       this.resource = this._parseHelper.parse("").eResource();
       this.enamedElementXExpressionMap = this.derivedStateHelper.getEnamedElementXExpressionMap(this.resource);
+      this.modifiedElements = this.derivedStateHelper.getModifiedElements(this.resource);
       EdeltaInterpreterResourceListener _edeltaInterpreterResourceListener = new EdeltaInterpreterResourceListener(
         this.cache, this.resource, this.derivedStateHelper, this.diagnosticHelper);
       this.listener = _edeltaInterpreterResourceListener;
@@ -291,6 +295,15 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
       EdeltaValidator.ECLASS_CYCLE, 
       "Cycle in inheritance hierarchy: aPackage.c3");
     Assertions.<Issue>assertThat(this._validationTestHelper.validate(this.resource)).hasSize(1);
+  }
+  
+  @Test
+  public void testModifiedElementsIsUpdatedWhenNameIsChanged() {
+    final XExpression currentExpression = Mockito.<XExpression>mock(XExpression.class);
+    this.listener.setCurrentExpression(currentExpression);
+    final EClassifier element = this.ePackage.getEClassifiers().get(0);
+    element.setName("Modified");
+    Assertions.<ENamedElement>assertThat(this.modifiedElements).containsExactlyInAnyOrder(element, this.ePackage);
   }
   
   public EObjectDiagnosticImpl createEObjectDiagnosticMock(final EObject problematicObject) {

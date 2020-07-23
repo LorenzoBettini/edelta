@@ -2,11 +2,14 @@ package edelta.interpreter;
 
 import static org.eclipse.emf.ecore.EcorePackage.Literals.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
@@ -20,6 +23,7 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.lib.EdeltaLibrary;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
+import edelta.resource.derivedstate.EdeltaModifiedElements;
 import edelta.util.EdeltaModelUtil;
 import edelta.validation.EdeltaValidator;
 
@@ -48,12 +52,15 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 
 	private EdeltaLibrary lib = new EdeltaLibrary();
 
+	private EdeltaModifiedElements modifiedElements;
+
 	public EdeltaInterpreterResourceListener(IResourceScopeCache cache, Resource resource,
 			EdeltaDerivedStateHelper derivedStateHelper,
 			EdeltaInterpreterDiagnosticHelper diagnosticHelper) {
 		this.cache = cache;
 		this.resource = resource;
 		this.enamedElementXExpressionMap = derivedStateHelper.getEnamedElementXExpressionMap(resource);
+		this.modifiedElements = derivedStateHelper.getModifiedElements(resource);
 		this.diagnosticHelper = diagnosticHelper;
 	}
 
@@ -61,12 +68,13 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 	public void notifyChanged(Notification notification) {
 		super.notifyChanged(notification);
 		final Object feature = notification.getFeature();
+		final Object notifier = notification.getNotifier();
+		final Object newValue = notification.getNewValue();
 		if (feature == ENAMED_ELEMENT__NAME) {
 			enamedElementXExpressionMap.put(
-				(ENamedElement) notification.getNotifier(),
+				(ENamedElement) notifier,
 				currentExpression);
 		} else {
-			final Object newValue = notification.getNewValue();
 			if (notification.getEventType() == Notification.ADD &&
 					newValue instanceof ENamedElement) {
 				enamedElementXExpressionMap.put(
@@ -78,9 +86,27 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 				checkCycles(feature, newValue);
 			}
 		}
+		updateModifiedelements(notifier, new HashSet<>());
+		updateModifiedelements(newValue, new HashSet<>());
 		cache.clear(resource);
 		clearIssues(resource.getErrors());
 		clearIssues(resource.getWarnings());
+	}
+
+	private void updateModifiedelements(Object element, Set<EObject> seen) {
+		/*
+		 * we have to avoid stack overflows in case of cycles; we break the cycle for
+		 * supertype hierarchy, but when doing so we get another notification and in
+		 * that case the cycle it's still there
+		 */
+		if (element instanceof ENamedElement) {
+			final var enamedElement = (ENamedElement) element;
+			if (seen.contains(enamedElement))
+				return;
+			seen.add(enamedElement);
+			modifiedElements.add(enamedElement);
+			updateModifiedelements(enamedElement.eContainer(), seen);
+		}
 	}
 
 	private void checkCycles(final Object feature, final Object newValue) {

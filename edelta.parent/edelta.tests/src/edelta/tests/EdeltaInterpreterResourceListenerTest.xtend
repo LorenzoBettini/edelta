@@ -29,6 +29,7 @@ import org.junit.runner.RunWith
 import static org.assertj.core.api.Assertions.assertThat
 import static org.mockito.Mockito.*
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper
+import edelta.resource.derivedstate.EdeltaModifiedElements
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -50,6 +51,7 @@ class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 	var EPackage ePackage
 	var Resource resource
 	var EdeltaENamedElementXExpressionMap enamedElementXExpressionMap
+	var EdeltaModifiedElements modifiedElements
 	var Provider<String> stringProvider
 
 	@Before
@@ -62,6 +64,7 @@ class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 		]
 		resource = "".parse.eResource
 		enamedElementXExpressionMap = derivedStateHelper.getEnamedElementXExpressionMap(resource)
+		modifiedElements = derivedStateHelper.getModifiedElements(resource)
 		listener = new EdeltaInterpreterResourceListener(
 			cache, resource, derivedStateHelper, diagnosticHelper
 		)
@@ -259,6 +262,17 @@ class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 			"Cycle in inheritance hierarchy: aPackage.c3"
 		)
 		assertThat(resource.validate).hasSize(1)
+	}
+
+	@Test
+	def void testModifiedElementsIsUpdatedWhenNameIsChanged() {
+		val currentExpression = mock(XExpression)
+		listener.setCurrentExpression(currentExpression)
+		val element = ePackage.EClassifiers.get(0)
+		// change the name
+		element.name = "Modified"
+		assertThat(modifiedElements)
+			.containsExactlyInAnyOrder(element, ePackage)
 	}
 
 	def createEObjectDiagnosticMock(EObject problematicObject) {

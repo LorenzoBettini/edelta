@@ -158,4 +158,8 @@ public class EdeltaDerivedStateHelper {
 			.setAccessibleElements(accessibleElements);
 	}
 
+	public EdeltaModifiedElements getModifiedElements(Resource resource) {
+		return getOrInstallAdapter(resource).getModifiedElements();
+	}
+
 }
