@@ -6,6 +6,7 @@ import edelta.edelta.EdeltaFactory;
 import edelta.interpreter.EdeltaInterpreterDiagnostic;
 import edelta.interpreter.EdeltaInterpreterDiagnosticHelper;
 import edelta.interpreter.EdeltaInterpreterResourceListener;
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProvider;
@@ -61,6 +62,9 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
   @Inject
   private EdeltaInterpreterDiagnosticHelper diagnosticHelper;
   
+  @Inject
+  private EdeltaDerivedStateHelper derivedStateHelper;
+  
   private EdeltaInterpreterResourceListener listener;
   
   private EPackage ePackage;
@@ -88,10 +92,9 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
       EPackage _doubleArrow = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
       this.ePackage = _doubleArrow;
       this.resource = this._parseHelper.parse("").eResource();
-      EdeltaENamedElementXExpressionMap _edeltaENamedElementXExpressionMap = new EdeltaENamedElementXExpressionMap();
-      this.enamedElementXExpressionMap = _edeltaENamedElementXExpressionMap;
+      this.enamedElementXExpressionMap = this.derivedStateHelper.getEnamedElementXExpressionMap(this.resource);
       EdeltaInterpreterResourceListener _edeltaInterpreterResourceListener = new EdeltaInterpreterResourceListener(
-        this.cache, this.resource, this.enamedElementXExpressionMap, this.diagnosticHelper);
+        this.cache, this.resource, this.derivedStateHelper, this.diagnosticHelper);
       this.listener = _edeltaInterpreterResourceListener;
       EdeltaInterpreterResourceListenerTest.SpiedProvider _spiedProvider = new EdeltaInterpreterResourceListenerTest.SpiedProvider();
       this.stringProvider = Mockito.<Provider<String>>spy(_spiedProvider);

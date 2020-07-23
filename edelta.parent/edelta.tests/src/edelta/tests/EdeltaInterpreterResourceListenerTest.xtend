@@ -28,6 +28,7 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.assertThat
 import static org.mockito.Mockito.*
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
@@ -44,6 +45,7 @@ class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 
 	@Inject IResourceScopeCache cache
 	@Inject EdeltaInterpreterDiagnosticHelper diagnosticHelper
+	@Inject EdeltaDerivedStateHelper derivedStateHelper
 	var EdeltaInterpreterResourceListener listener
 	var EPackage ePackage
 	var Resource resource
@@ -59,9 +61,9 @@ class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 			]
 		]
 		resource = "".parse.eResource
-		enamedElementXExpressionMap = new EdeltaENamedElementXExpressionMap
+		enamedElementXExpressionMap = derivedStateHelper.getEnamedElementXExpressionMap(resource)
 		listener = new EdeltaInterpreterResourceListener(
-			cache, resource, enamedElementXExpressionMap, diagnosticHelper
+			cache, resource, derivedStateHelper, diagnosticHelper
 		)
 		stringProvider = spy(new SpiedProvider)
 		ePackage.eAdapters += listener

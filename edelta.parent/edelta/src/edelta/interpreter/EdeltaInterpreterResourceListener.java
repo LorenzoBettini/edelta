@@ -18,6 +18,7 @@ import org.eclipse.xtext.xbase.XExpression;
 
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.lib.EdeltaLibrary;
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 import edelta.util.EdeltaModelUtil;
 import edelta.validation.EdeltaValidator;
@@ -48,11 +49,11 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 	private EdeltaLibrary lib = new EdeltaLibrary();
 
 	public EdeltaInterpreterResourceListener(IResourceScopeCache cache, Resource resource,
-			EdeltaENamedElementXExpressionMap enamedElementXExpressionMap,
+			EdeltaDerivedStateHelper derivedStateHelper,
 			EdeltaInterpreterDiagnosticHelper diagnosticHelper) {
 		this.cache = cache;
 		this.resource = resource;
-		this.enamedElementXExpressionMap = enamedElementXExpressionMap;
+		this.enamedElementXExpressionMap = derivedStateHelper.getEnamedElementXExpressionMap(resource);
 		this.diagnosticHelper = diagnosticHelper;
 	}
 

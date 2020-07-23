@@ -141,7 +141,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			edeltaInterpreterHelper.filterOperations(program.getModifyEcoreOperations());
 		final var eResource = program.eResource();
 		listener = new EdeltaInterpreterResourceListener(cache, eResource,
-				derivedStateHelper.getEnamedElementXExpressionMap(eResource),
+				derivedStateHelper,
 				diagnosticHelper);
 		try {
 			addResourceListener(copiedEPackages);
