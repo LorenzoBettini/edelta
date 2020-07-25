@@ -30,13 +30,17 @@ public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 	private static final String TEST_PROJECT = "mytestproject";
 
 	private String program = 
-			"package foo\n" + 
-	"			\n" + 
-	"			metamodel \"mypackage\"\n" + 
-	"			\n" + 
-	"			modifyEcore aTest epackage mypackage {\n" + 
-	"				ecoreref(MyClass)\n" + 
-	"			}";
+	"package foo\n" + 
+	"\n" + 
+	"metamodel \"mypackage\"\n" + 
+	"\n" + 
+	"def anOp() {\n" + 
+	"}\n" + 
+	"\n" + 
+	"modifyEcore aTest epackage mypackage {\n" + 
+	"	addNewEClass(\"MyNewClass\")\n" + 
+	"	ecoreref(MyClass)\n" + 
+	"}";
 
 	private XtextEditor editor;
 
@@ -64,8 +68,21 @@ public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 	}
 
 	@Test
-	public void testFromEditorToOutline() throws Exception {
-		whenEditorTextIsSelectedThenOutlineNodeIsSelected("modifyEcore", "aTest(EPackage) : void");
+	public void testSelectOperation() throws Exception {
+		whenEditorTextIsSelectedThenOutlineNodeIsSelected
+			("anOp", "anOp() : Object");
+	}
+
+	@Test
+	public void testSelectModifyEcore() throws Exception {
+		whenEditorTextIsSelectedThenOutlineNodeIsSelected
+			("modifyEcore", "aTest(EPackage) : void");
+	}
+
+	@Test
+	public void testSelectExpressionThatCreatesEClass() throws Exception {
+		whenEditorTextIsSelectedThenOutlineNodeIsSelected
+			("addNewEClass", "MyNewClass");
 	}
 
 	private void whenEditorTextIsSelectedThenOutlineNodeIsSelected(String textToSelect, String expectedNode) throws InterruptedException {
@@ -80,11 +97,11 @@ public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 	private TreeSelection waitForSelection() throws InterruptedException {
 		int attempts = 6;
 		for (int i = 0; i < attempts; ++i) {
-			Thread.sleep(2000);
 			executeAsyncDisplayJobs();
 			var selection = (TreeSelection) outlinePage.getTreeViewer().getSelection();
 			if (!selection.isEmpty())
 				return selection;
+			Thread.sleep(500);
 		}
 		fail("No node is selected in the outline");
 		return null;
