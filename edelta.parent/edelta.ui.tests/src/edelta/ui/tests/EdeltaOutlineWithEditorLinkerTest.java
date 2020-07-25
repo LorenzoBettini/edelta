@@ -2,8 +2,10 @@ package edelta.ui.tests;
 
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.createFile;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.waitForBuild;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 import org.assertj.core.api.Assertions;
+import org.awaitility.Awaitility;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.xtext.testing.InjectWith;
@@ -40,7 +42,7 @@ public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 	}
 
 	@Test
-	public void testValidProject() throws Exception {
+	public void testLinkToModifyEcore() throws Exception {
 		final var program = "package foo\n" + 
 		"			\n" + 
 		"			metamodel \"mypackage\"\n" + 
@@ -62,12 +64,17 @@ public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 		Assertions.assertThat(outlinePage).isNotNull();
 		editor.setFocus();
 		editor.getInternalSourceViewer().setSelectedRange(program.indexOf("modifyEcore"), 0);
-		Thread.sleep(2000);
-		executeAsyncDisplayJobs();
-		var selection = (TreeSelection) outlinePage.getTreeViewer().getSelection();
-		Assertions.assertThat(selection.isEmpty()).isFalse();
-		assertEquals("aTest(EPackage) : void",
-			((EObjectNode) selection.getFirstElement()).getText().toString());
+		Display.getCurrent().syncExec(() -> {
+			Awaitility.await()
+				.atMost(3, SECONDS)
+				.until(() -> {
+					executeAsyncDisplayJobs();
+					return !outlinePage.getTreeViewer().getSelection().isEmpty();
+				});
+			var selection = (TreeSelection) outlinePage.getTreeViewer().getSelection();
+			assertEquals("aTest(EPackage) : void",
+					((EObjectNode) selection.getFirstElement()).getText().toString());
+		});
 	}
 
 	private void executeAsyncDisplayJobs() {
