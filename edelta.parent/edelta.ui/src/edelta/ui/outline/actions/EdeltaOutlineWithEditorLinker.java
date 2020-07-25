@@ -51,17 +51,14 @@ public class EdeltaOutlineWithEditorLinker extends OutlineWithEditorLinker {
 			EObjectNode eObjectNode = (EObjectNode) child;
 			// our Outline nodes for Ecore elements are already associated with the
 			// text region of the corresponding responsible XExpression
-			if (eObjectNode.getSignificantTextRegion().contains(selectedTextRegion)) {
-				// check whether there's a child that also matches, since,
-				// as said before, an outer expression region might match an inner one
-				final var recursiveFind = findENamedElementNode(child, selectedTextRegion);
-				if (recursiveFind != null)
-					return recursiveFind;
+			final var recursiveFind = findENamedElementNode(child, selectedTextRegion);
+			// first check whether there's a child that matches, since,
+			// as said before, an outer expression region might match an inner one
+			if (recursiveFind != null) {
+				return recursiveFind;
+			} else if (eObjectNode.getSignificantTextRegion().contains(selectedTextRegion)) {
 				return eObjectNode;
 			}
-			final var recursiveFind = findENamedElementNode(child, selectedTextRegion);
-			if (recursiveFind != null)
-				return recursiveFind;
 		}
 		return null;
 	}
