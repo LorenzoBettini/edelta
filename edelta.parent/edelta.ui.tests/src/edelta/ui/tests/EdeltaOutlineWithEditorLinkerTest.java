@@ -87,7 +87,7 @@ public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 	@Test
 	public void testSelectNonResponsibleExpressionInModifyEcore() throws Exception {
 		whenEditorTextIsSelectedThenOutlineNodeIsSelected
-		("ecoreref(MyClass)", "aTest(EPackage) : void");
+			("ecoreref(MyClass)", "aTest(EPackage) : void");
 	}
 
 	@Test
