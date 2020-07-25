@@ -38,8 +38,13 @@ public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 	"}\n" + 
 	"\n" + 
 	"modifyEcore aTest epackage mypackage {\n" + 
-	"	addNewEClass(\"MyNewClass\")\n" + 
+	"	addNewEClass(\"MyNewClass\") [\n" + 
+	"		addNewEAttribute(\"MyNewAttribute\", null)\n" + 
+	"	]\n" + 
 	"	ecoreref(MyClass)\n" + 
+	"	ecoreref(MyDerivedClass) => [\n" + 
+	"		addNewEAttribute(\"MyNewDerivedClassAttribute\", null)\n" + 
+	"	]\n" + 
 	"}";
 
 	private XtextEditor editor;
@@ -80,9 +85,27 @@ public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 	}
 
 	@Test
+	public void testSelectNonResponsibleExpressionInModifyEcore() throws Exception {
+		whenEditorTextIsSelectedThenOutlineNodeIsSelected
+		("ecoreref(MyClass)", "aTest(EPackage) : void");
+	}
+
+	@Test
 	public void testSelectExpressionThatCreatesEClass() throws Exception {
 		whenEditorTextIsSelectedThenOutlineNodeIsSelected
 			("addNewEClass", "MyNewClass");
+	}
+
+	@Test
+	public void testSelectExpressionThatCreatesEAttributeInCreatedEClass() throws Exception {
+		whenEditorTextIsSelectedThenOutlineNodeIsSelected
+			("addNewEAttribute(\"MyNewAttribute", "MyNewAttribute");
+	}
+
+	@Test
+	public void testSelectExpressionThatCreatesEAttributeInExistingEClass() throws Exception {
+		whenEditorTextIsSelectedThenOutlineNodeIsSelected
+			("addNewEAttribute(\"MyNewDerivedClassAttribute", "MyNewDerivedClassAttribute");
 	}
 
 	private void whenEditorTextIsSelectedThenOutlineNodeIsSelected(String textToSelect, String expectedNode) throws InterruptedException {
