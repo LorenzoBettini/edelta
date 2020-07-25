@@ -95,13 +95,13 @@ public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 
 	@SuppressWarnings("all")
 	private TreeSelection waitForSelection() throws InterruptedException {
-		int attempts = 6;
+		int attempts = 30;
 		for (int i = 0; i < attempts; ++i) {
+			Thread.sleep(100);
 			executeAsyncDisplayJobs();
 			var selection = (TreeSelection) outlinePage.getTreeViewer().getSelection();
 			if (!selection.isEmpty())
 				return selection;
-			Thread.sleep(500);
 		}
 		fail("No node is selected in the outline");
 		return null;

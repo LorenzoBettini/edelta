@@ -38,16 +38,15 @@ public class EdeltaOutlineWithEditorLinker extends OutlineWithEditorLinker {
 
 	private IOutlineNode findENamedElementNode(IOutlineNode node, ITextRegion selectedTextRegion) {
 		for (var child : node.getChildren()) {
-			if (child instanceof EObjectNode) {
-				EObjectNode eObjectNode = (EObjectNode) child;
-				if (EcorePackage.Literals.ENAMED_ELEMENT.isSuperTypeOf(eObjectNode.getEClass())) {
-					if (eObjectNode.getSignificantTextRegion().contains(selectedTextRegion)) {
-						return eObjectNode;
-					}
-					final var recursiveFind = findENamedElementNode(child, selectedTextRegion);
-					if (recursiveFind != null)
-						return recursiveFind;
+			// at this point we are sure it's an EObjectNode
+			EObjectNode eObjectNode = (EObjectNode) child;
+			if (EcorePackage.Literals.ENAMED_ELEMENT.isSuperTypeOf(eObjectNode.getEClass())) {
+				if (eObjectNode.getSignificantTextRegion().contains(selectedTextRegion)) {
+					return eObjectNode;
 				}
+				final var recursiveFind = findENamedElementNode(child, selectedTextRegion);
+				if (recursiveFind != null)
+					return recursiveFind;
 			}
 		}
 		return null;
