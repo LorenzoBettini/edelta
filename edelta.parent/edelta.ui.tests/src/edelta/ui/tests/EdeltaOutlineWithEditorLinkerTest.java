@@ -8,6 +8,7 @@ import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
+import org.eclipse.xtext.ui.editor.XtextEditor;
 import org.eclipse.xtext.ui.editor.outline.impl.EObjectNode;
 import org.eclipse.xtext.ui.editor.outline.impl.OutlinePage;
 import org.eclipse.xtext.ui.testing.AbstractEditorTest;
@@ -28,6 +29,19 @@ public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 
 	private static final String TEST_PROJECT = "mytestproject";
 
+	private String program = 
+			"package foo\n" + 
+	"			\n" + 
+	"			metamodel \"mypackage\"\n" + 
+	"			\n" + 
+	"			modifyEcore aTest epackage mypackage {\n" + 
+	"				ecoreref(MyClass)\n" + 
+	"			}";
+
+	private XtextEditor editor;
+
+	private OutlinePage outlinePage;
+
 	@Override
 	protected String getEditorId() {
 		return EdeltaActivator.EDELTA_EDELTA;
@@ -37,37 +51,43 @@ public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 	public void setUp() throws Exception {
 		super.setUp();
 		edeltaProjectHelper.createEdeltaPluginProject(TEST_PROJECT);
-	}
-
-	@Test
-	public void testValidProject() throws Exception {
-		final var program = "package foo\n" + 
-		"			\n" + 
-		"			metamodel \"mypackage\"\n" + 
-		"			\n" + 
-		"			modifyEcore aTest epackage mypackage {\n" + 
-		"				ecoreref(MyClass)\n" + 
-		"			}";
 		var file = createFile(
 			TEST_PROJECT + "/src/Test.edelta",
 			program
 		);
 		// we need to wait for build twice when we run all the UI tests
 		waitForBuild();
-		var editor = openEditor(file);
-		// the ContentOutline must not be active,
-		// otherwise the selection change event is ignored by OutlineWithEditorLinker
-		// var outlinePart = editor.getEditorSite().getPage().showView("org.eclipse.ui.views.ContentOutline");
-		var outlinePage = editor.getAdapter(OutlinePage.class);
+		editor = openEditor(file);
+		outlinePage = editor.getAdapter(OutlinePage.class);
 		Assertions.assertThat(outlinePage).isNotNull();
 		editor.setFocus();
-		editor.getInternalSourceViewer().setSelectedRange(program.indexOf("modifyEcore"), 0);
-		Thread.sleep(2000);
-		executeAsyncDisplayJobs();
-		var selection = (TreeSelection) outlinePage.getTreeViewer().getSelection();
-		Assertions.assertThat(selection.isEmpty()).isFalse();
-		assertEquals("aTest(EPackage) : void",
+	}
+
+	@Test
+	public void testFromEditorToOutline() throws Exception {
+		whenEditorTextIsSelectedThenOutlineNodeIsSelected("modifyEcore", "aTest(EPackage) : void");
+	}
+
+	private void whenEditorTextIsSelectedThenOutlineNodeIsSelected(String textToSelect, String expectedNode) throws InterruptedException {
+		editor.getInternalSourceViewer()
+			.setSelectedRange(program.indexOf(textToSelect), 0);
+		var selection = waitForSelection();
+		assertEquals(expectedNode,
 			((EObjectNode) selection.getFirstElement()).getText().toString());
+	}
+
+	@SuppressWarnings("all")
+	private TreeSelection waitForSelection() throws InterruptedException {
+		int attempts = 6;
+		for (int i = 0; i < attempts; ++i) {
+			Thread.sleep(2000);
+			executeAsyncDisplayJobs();
+			var selection = (TreeSelection) outlinePage.getTreeViewer().getSelection();
+			if (!selection.isEmpty())
+				return selection;
+		}
+		fail("No node is selected in the outline");
+		return null;
 	}
 
 	private void executeAsyncDisplayJobs() {
