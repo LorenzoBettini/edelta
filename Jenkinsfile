@@ -67,6 +67,28 @@ node {
           exclusionPattern: '**/*Test*.class,**/edelta/edelta/**/*.class,**/antlr/**/*.class,**/serializer/*.class,**/*Abstract*RuntimeModule.class,**/*StandaloneSetup*.class,**/*Abstract*Validator.class,**/*GrammarAccess*.class,**/*Abstract*UiModule.class,**/**ExecutableExtensionFactory.class,**/*Abstract*ProposalProvider.class,**/internal/*.class,**/*ProjectTemplate.class'])
       }
    } else {
+      stage('Build and Deploy P2 Artifacts') {
+         sh (script:
+           "./mvnw -f edelta.parent/pom.xml ${mavenProfiles} ${mavenArguments}",
+         )
+      }
+      if (!isSnapshot) {
+         stage('Remove SNAPSHOT') {
+            // Since edelta.parent has edelta.bom as parent, but the aggregator
+            // is edelta.parent, the versions:set must be run only on the BOM
+            // (to avoid the error "Project version is inherited from parent")
+            // this will remove the -SNAPSHOT.
+            // Then we run tycho-versions-plugin on the edelta.parent (the aggregator)
+            // to remove the .qualifier
+            sh (script:
+              "./mvnw -f edelta.parent/edelta.bom/pom.xml ${mavenOnlyProfile} \
+                    versions:set -DgenerateBackupPoms=false -DremoveSnapshot=true \
+               && \
+               ./mvnw -f edelta.parent/pom.xml ${mavenOnlyProfile} \
+                    org.eclipse.tycho:tycho-versions-plugin:update-eclipse-metadata",
+            )
+         }
+      }
       stage('Build and Deploy Maven Artifacts') {
          sh (script:
            "./mvnw -f edelta.parent/pom.xml -Dmaven.repo.local='${env.WORKSPACE}'/.repository ${mavenOnlyProfile} -Psonatype-oss-release clean deploy",
