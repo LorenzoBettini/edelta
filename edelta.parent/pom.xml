@@ -311,6 +311,9 @@
             <!-- MJAVADOC-620 – Maven Javadoc Plugin fails to resolve the dependencies 
               when used with Java 11 -->
             <version>3.2.0</version>
+            <configuration>
+              <detectOfflineLinks>false</detectOfflineLinks>
+            </configuration>
           </plugin>
         </plugins>
       </build>
