@@ -35,6 +35,7 @@
 	-->
 	<target name="getMajorMinorVersion">
 		<property name="majorMinorVersion" value="${parsedVersion.majorVersion}.${parsedVersion.minorVersion}" />
+		<echo message="majorMinorVersion: ${majorMinorVersion}" />
 	</target>
 
 	<target name="test_getMajorMinor" depends="getMajorMinorVersion">

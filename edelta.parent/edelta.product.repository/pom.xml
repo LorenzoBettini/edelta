@@ -221,6 +221,8 @@
                     <args>-Dcomposite.base.dir=${project.build.directory}</args>
                     <args>-DunqualifiedVersion=${unqualifiedVersion}</args>
                     <args>-DbuildQualifier=${buildQualifier}</args>
+                    <args>-DparsedVersion.majorVersion=${parsedVersion.majorVersion}</args>
+                    <args>-DparsedVersion.minorVersion=${parsedVersion.minorVersion}</args>
                     <args>-Dchild.repo="http://download.eclipse.org/modeling/tmf/xtext/updates/releases/${xtextVersion}/"</args>
                   </applicationsArgs>
                 </configuration>
@@ -242,6 +244,8 @@
                     <args>-Dcomposite.base.dir=${project.build.directory}</args>
                     <args>-DunqualifiedVersion=${unqualifiedVersion}</args>
                     <args>-DbuildQualifier=${buildQualifier}</args>
+                    <args>-DparsedVersion.majorVersion=${parsedVersion.majorVersion}</args>
+                    <args>-DparsedVersion.minorVersion=${parsedVersion.minorVersion}</args>
                     <args>-Dchild.repo="http://download.eclipse.org/releases/${eclipseVersion}/"</args>
                   </applicationsArgs>
                 </configuration>
@@ -264,6 +268,8 @@
                     <args>-Dcomposite.base.dir=${project.build.directory}</args>
                     <args>-DunqualifiedVersion=${unqualifiedVersion}</args>
                     <args>-DbuildQualifier=${buildQualifier}</args>
+                    <args>-DparsedVersion.majorVersion=${parsedVersion.majorVersion}</args>
+                    <args>-DparsedVersion.minorVersion=${parsedVersion.minorVersion}</args>
                     <args>-Dchild.repository.path.prefix="${child.repository.path.prefix}"</args>
                   </applicationsArgs>
                 </configuration>
