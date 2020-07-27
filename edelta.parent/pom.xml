@@ -304,17 +304,15 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-javadoc-plugin</artifactId>
-              <!-- MJAVADOC-620 – Maven Javadoc Plugin fails to resolve the dependencies 
-                when used with Java 11 -->
-              <version>3.2.0</version>
-            </plugin>
-          </plugins>
-        </pluginManagement>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <!-- MJAVADOC-620 – Maven Javadoc Plugin fails to resolve the dependencies 
+              when used with Java 11 -->
+            <version>3.2.0</version>
+          </plugin>
+        </plugins>
       </build>
     </profile>
   </profiles>
