@@ -316,6 +316,19 @@
               <source>8</source>
             </configuration>
           </plugin>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-p2-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-p2-metadata</id>
+              </execution>
+            </executions>
+            <configuration>
+              <defaultP2Metadata>false</defaultP2Metadata>
+              <attachP2Metadata>false</attachP2Metadata>
+            </configuration>
+          </plugin>
         </plugins>
       </build>
     </profile>
