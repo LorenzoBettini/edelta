@@ -3,8 +3,13 @@
  */
 package edelta.ui.outline;
 
+import org.eclipse.emf.ecore.ENamedElement;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider;
+import org.eclipse.xtext.ui.editor.outline.impl.EObjectNode;
+import org.eclipse.xtext.xbase.XExpression;
 
 import com.google.inject.Inject;
 
@@ -47,5 +52,20 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 
 	public boolean _isLeaf(final EdeltaModifyEcoreOperation m) {
 		return true;
+	}
+
+	@Override
+	protected EObjectNode createEObjectNode(IOutlineNode parentNode, EObject modelElement, Image image, Object text,
+			boolean isLeaf) {
+		final var eObjectNode = super.createEObjectNode(parentNode, modelElement, image, text, isLeaf);
+		if (modelElement instanceof ENamedElement) {
+			// try to associate the node to the responsible XExpression
+			XExpression expression = derivedStateHelper.
+				getLastResponsibleExpression((ENamedElement) modelElement);
+			if (expression != null)
+				eObjectNode.setShortTextRegion(
+					locationInFileProvider.getSignificantTextRegion(expression));
+		}
+		return eObjectNode;
 	}
 }

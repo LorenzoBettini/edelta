@@ -9,7 +9,6 @@ import edelta.compiler.EdeltaXbaseCompiler
 import edelta.interpreter.EdeltaInterpreter
 import edelta.interpreter.EdeltaSafeInterpreter
 import edelta.resource.EdeltaDerivedStateComputer
-import edelta.resource.EdeltaLocationInFileProvider
 import edelta.resource.EdeltaResourceDescriptionStrategy
 import edelta.scoping.EdeltaQualifiedNameProvider
 import edelta.typesystem.EdeltaTypeComputer
@@ -35,10 +34,6 @@ class EdeltaRuntimeModule extends AbstractEdeltaRuntimeModule {
 
 	override bindIDerivedStateComputer() {
 		EdeltaDerivedStateComputer
-	}
-
-	override bindILocationInFileProvider() {
-		EdeltaLocationInFileProvider
 	}
 
 	override bindIDefaultResourceDescriptionStrategy() {
