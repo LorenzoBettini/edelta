@@ -66,6 +66,24 @@
       <build>
         <plugins>
           <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <executions>
+              <!-- sets the following properties that we use in our Ant scripts
+                parsedVersion.majorVersion
+                parsedVersion.minorVersion
+                bound by default to the validate phase
+              -->
+              <execution>
+                <id>parse-version</id>
+                <goals>
+                  <goal>parse-version</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
             <version>${maven-antrun-plugin.version}</version>
             <executions>
