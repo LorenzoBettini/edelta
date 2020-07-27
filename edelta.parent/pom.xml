@@ -298,6 +298,25 @@
         </pluginManagement>
       </build>
     </profile>
+    <profile>
+      <id>sonatype-oss-release</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <!-- MJAVADOC-620 – Maven Javadoc Plugin fails to resolve the dependencies 
+                when used with Java 11 -->
+              <version>3.2.0</version>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
   </profiles>
 
   <build>
@@ -318,12 +337,6 @@
     </plugins>
     <pluginManagement>
       <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <!-- MJAVADOC-620 – Maven Javadoc Plugin fails to resolve the dependencies when used with Java 11 -->
-          <version>3.2.0</version>
-        </plugin>
         <plugin>
           <!-- We don't use it, since we have edelta-maven-plugin, we leave it here
             just for historical reasons ;) -->
