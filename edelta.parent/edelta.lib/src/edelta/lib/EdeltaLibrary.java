@@ -28,30 +28,33 @@ import org.eclipse.emf.ecore.EcoreFactory;
  */
 public class EdeltaLibrary {
 
-	private EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
+	private static EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
 
-	private <T extends ENamedElement> void safeRunInitializer(Consumer<T> initializer, T e) {
+	private EdeltaLibrary() {
+	}
+
+	private static <T extends ENamedElement> void safeRunInitializer(Consumer<T> initializer, T e) {
 		if (initializer != null) {
 			initializer.accept(e);
 		}
 	}
 
-	public EClass newEClass(String name) {
+	public static EClass newEClass(String name) {
 		return newEClass(name, null);
 	}
 
-	public EClass newEClass(String name, Consumer<EClass> initializer) {
+	public static EClass newEClass(String name, Consumer<EClass> initializer) {
 		EClass c = ecoreFactory.createEClass();
 		c.setName(name);
 		safeRunInitializer(initializer, c);
 		return c;
 	}
 
-	public EAttribute newEAttribute(String name, EDataType dataType) {
+	public static EAttribute newEAttribute(String name, EDataType dataType) {
 		return newEAttribute(name, dataType, null);
 	}
 
-	public EAttribute newEAttribute(String name, EDataType dataType, Consumer<EAttribute> initializer) {
+	public static EAttribute newEAttribute(String name, EDataType dataType, Consumer<EAttribute> initializer) {
 		EAttribute e = ecoreFactory.createEAttribute();
 		e.setName(name);
 		e.setEType(dataType);
@@ -59,11 +62,11 @@ public class EdeltaLibrary {
 		return e;
 	}
 
-	public EReference newEReference(String name, EClass referenceType) {
+	public static EReference newEReference(String name, EClass referenceType) {
 		return newEReference(name, referenceType, null);
 	}
 
-	public EReference newEReference(String name, EClass referenceType, Consumer<EReference> initializer) {
+	public static EReference newEReference(String name, EClass referenceType, Consumer<EReference> initializer) {
 		EReference e = ecoreFactory.createEReference();
 		e.setName(name);
 		e.setEType(referenceType);
@@ -71,11 +74,11 @@ public class EdeltaLibrary {
 		return e;
 	}
 
-	public EDataType newEDataType(String name, String instanceTypeName) {
+	public static EDataType newEDataType(String name, String instanceTypeName) {
 		return newEDataType(name, instanceTypeName, null);
 	}
 
-	public EDataType newEDataType(String name, String instanceTypeName, Consumer<EDataType> initializer) {
+	public static EDataType newEDataType(String name, String instanceTypeName, Consumer<EDataType> initializer) {
 		EDataType e = ecoreFactory.createEDataType();
 		e.setName(name);
 		e.setInstanceTypeName(instanceTypeName);
@@ -83,22 +86,22 @@ public class EdeltaLibrary {
 		return e;
 	}
 
-	public EEnum newEEnum(String name) {
+	public static EEnum newEEnum(String name) {
 		return newEEnum(name, null);
 	}
 
-	public EEnum newEEnum(String name, Consumer<EEnum> initializer) {
+	public static EEnum newEEnum(String name, Consumer<EEnum> initializer) {
 		EEnum e = ecoreFactory.createEEnum();
 		e.setName(name);
 		safeRunInitializer(initializer, e);
 		return e;
 	}
 
-	public EEnumLiteral newEEnumLiteral(String name) {
+	public static EEnumLiteral newEEnumLiteral(String name) {
 		return newEEnumLiteral(name, null);
 	}
 
-	public EEnumLiteral newEEnumLiteral(String name, Consumer<EEnumLiteral> initializer) {
+	public static EEnumLiteral newEEnumLiteral(String name, Consumer<EEnumLiteral> initializer) {
 		EEnumLiteral e = ecoreFactory.createEEnumLiteral();
 		e.setName(name);
 		safeRunInitializer(initializer, e);
@@ -124,7 +127,7 @@ public class EdeltaLibrary {
 	 * @param e
 	 * @return
 	 */
-	public String getEObjectRepr(EObject e) {
+	public static String getEObjectRepr(EObject e) {
 		Set<EObject> seen = new HashSet<>();
 		StringBuilder builder = new StringBuilder();
 		EObject current = e;
@@ -144,23 +147,23 @@ public class EdeltaLibrary {
 		return builder.toString();
 	}
 
-	public void addEStructuralFeature(EClass eClass, EStructuralFeature eStructuralFeature) {
+	public static void addEStructuralFeature(EClass eClass, EStructuralFeature eStructuralFeature) {
 		eClass.getEStructuralFeatures().add(eStructuralFeature);
 	}
 
-	private void addEClassifier(EPackage ePackage, EClassifier eClassifier) {
+	private static void addEClassifier(EPackage ePackage, EClassifier eClassifier) {
 		ePackage.getEClassifiers().add(eClassifier);
 	}
 
-	public void addEClass(EPackage ePackage, EClass eClass) {
+	public static void addEClass(EPackage ePackage, EClass eClass) {
 		addEClassifier(ePackage, eClass);
 	}
 
-	public EClass addNewEClass(EPackage ePackage, String name) {
+	public static EClass addNewEClass(EPackage ePackage, String name) {
 		return addNewEClass(ePackage, name, null);
 	}
 
-	public EClass addNewEClass(EPackage ePackage, String name, Consumer<EClass> initializer) {
+	public static EClass addNewEClass(EPackage ePackage, String name, Consumer<EClass> initializer) {
 		EClass c = ecoreFactory.createEClass();
 		c.setName(name);
 		addEClass(ePackage, c);
@@ -168,15 +171,15 @@ public class EdeltaLibrary {
 		return c;
 	}
 
-	public void addEEnum(EPackage ePackage, EEnum eEnum) {
+	public static void addEEnum(EPackage ePackage, EEnum eEnum) {
 		addEClassifier(ePackage, eEnum);
 	}
 
-	public EEnum addNewEEnum(EPackage ePackage, String name) {
+	public static EEnum addNewEEnum(EPackage ePackage, String name) {
 		return addNewEEnum(ePackage, name, null);
 	}
 
-	public EEnum addNewEEnum(EPackage ePackage, String name, Consumer<EEnum> initializer) {
+	public static EEnum addNewEEnum(EPackage ePackage, String name, Consumer<EEnum> initializer) {
 		EEnum e = ecoreFactory.createEEnum();
 		e.setName(name);
 		addEEnum(ePackage, e);
@@ -184,15 +187,15 @@ public class EdeltaLibrary {
 		return e;
 	}
 
-	public void addEEnumLiteral(EEnum eEnum, EEnumLiteral eEnumLiteral) {
+	public static void addEEnumLiteral(EEnum eEnum, EEnumLiteral eEnumLiteral) {
 		eEnum.getELiterals().add(eEnumLiteral);
 	}
 
-	public EEnumLiteral addNewEEnumLiteral(EEnum eEnum, String name) {
+	public static EEnumLiteral addNewEEnumLiteral(EEnum eEnum, String name) {
 		return addNewEEnumLiteral(eEnum, name, null);
 	}
 
-	public EEnumLiteral addNewEEnumLiteral(EEnum eEnum, String name, Consumer<EEnumLiteral> initializer) {
+	public static EEnumLiteral addNewEEnumLiteral(EEnum eEnum, String name, Consumer<EEnumLiteral> initializer) {
 		EEnumLiteral e = ecoreFactory.createEEnumLiteral();
 		e.setName(name);
 		addEEnumLiteral(eEnum, e);
@@ -200,15 +203,15 @@ public class EdeltaLibrary {
 		return e;
 	}
 
-	public void addEDataType(EPackage ePackage, EDataType eDataType) {
+	public static void addEDataType(EPackage ePackage, EDataType eDataType) {
 		addEClassifier(ePackage, eDataType);
 	}
 
-	public EDataType addNewEDataType(EPackage ePackage, String name, String instanceTypeName) {
+	public static EDataType addNewEDataType(EPackage ePackage, String name, String instanceTypeName) {
 		return addNewEDataType(ePackage, name, instanceTypeName, null);
 	}
 
-	public EDataType addNewEDataType(EPackage ePackage, String name, String instanceTypeName, Consumer<EDataType> initializer) {
+	public static EDataType addNewEDataType(EPackage ePackage, String name, String instanceTypeName, Consumer<EDataType> initializer) {
 		EDataType e = ecoreFactory.createEDataType();
 		e.setName(name);
 		e.setInstanceTypeName(instanceTypeName);
@@ -217,15 +220,15 @@ public class EdeltaLibrary {
 		return e;
 	}
 
-	public void addEAttribute(EClass eClass, EAttribute eAttribute) {
+	public static void addEAttribute(EClass eClass, EAttribute eAttribute) {
 		addEStructuralFeature(eClass, eAttribute);
 	}
 
-	public EAttribute addNewEAttribute(EClass eClass, String name, EDataType dataType) {
+	public static EAttribute addNewEAttribute(EClass eClass, String name, EDataType dataType) {
 		return addNewEAttribute(eClass, name, dataType, null);
 	}
 
-	public EAttribute addNewEAttribute(EClass eClass, String name, EDataType dataType, Consumer<EAttribute> initializer) {
+	public static EAttribute addNewEAttribute(EClass eClass, String name, EDataType dataType, Consumer<EAttribute> initializer) {
 		EAttribute e = ecoreFactory.createEAttribute();
 		e.setName(name);
 		e.setEType(dataType);
@@ -234,15 +237,15 @@ public class EdeltaLibrary {
 		return e;
 	}
 
-	public void addEReference(EClass eClass, EReference eReference) {
+	public static void addEReference(EClass eClass, EReference eReference) {
 		addEStructuralFeature(eClass, eReference);
 	}
 
-	public EReference addNewEReference(EClass eClass, String name, EClass referenceType) {
+	public static EReference addNewEReference(EClass eClass, String name, EClass referenceType) {
 		return addNewEReference(eClass, name, referenceType, null);
 	}
 
-	public EReference addNewEReference(EClass eClass, String name, EClass referenceType, Consumer<EReference> initializer) {
+	public static EReference addNewEReference(EClass eClass, String name, EClass referenceType, Consumer<EReference> initializer) {
 		EReference e = ecoreFactory.createEReference();
 		e.setName(name);
 		e.setEType(referenceType);
@@ -251,19 +254,19 @@ public class EdeltaLibrary {
 		return e;
 	}
 
-	public void addESuperType(EClass subClass, EClass superClass) {
+	public static void addESuperType(EClass subClass, EClass superClass) {
 		subClass.getESuperTypes().add(superClass);
 	}
 
-	public void removeESuperType(EClass subClass, EClass superClass) {
+	public static void removeESuperType(EClass subClass, EClass superClass) {
 		subClass.getESuperTypes().remove(superClass);
 	}
 
-	public EPackage addNewESubpackage(EPackage superPackage, String name, String nsPrefix, String nsURI) {
+	public static EPackage addNewESubpackage(EPackage superPackage, String name, String nsPrefix, String nsURI) {
 		return addNewESubpackage(superPackage, name, nsPrefix, nsURI, null);
 	}
 
-	public EPackage addNewESubpackage(EPackage superPackage, String name, String nsPrefix, String nsURI,
+	public static EPackage addNewESubpackage(EPackage superPackage, String name, String nsPrefix, String nsURI,
 			Consumer<EPackage> initializer) {
 		EPackage newSubpackage = ecoreFactory.createEPackage();
 		newSubpackage.setName(name);

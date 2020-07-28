@@ -23,7 +23,6 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.xtext.xbase.lib.Extension;
 
 import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
@@ -53,12 +52,6 @@ public abstract class AbstractEdelta {
 	 * all EStructuralFeatures have been created.
 	 */
 	private List<Runnable> eStructuralFeaturesInitializers = new LinkedList<>();
-
-	/**
-	 * This will be used in the generated code with extension methods.
-	 */
-	@Extension
-	protected EdeltaLibrary lib = new EdeltaLibrary();
 
 	private Logger logger = Logger.getLogger(getClass());
 
@@ -197,11 +190,11 @@ public abstract class AbstractEdelta {
 	}
 
 	public void showError(ENamedElement problematicObject, String message) {
-		logError(() -> lib.getEObjectRepr(problematicObject) + ": " + message);
+		logError(() -> EdeltaLibrary.getEObjectRepr(problematicObject) + ": " + message);
 	}
 
 	public void showWarning(ENamedElement problematicObject, String message) {
-		logWarn(() -> lib.getEObjectRepr(problematicObject) + ": " + message);
+		logWarn(() -> EdeltaLibrary.getEObjectRepr(problematicObject) + ": " + message);
 	}
 
 	/**

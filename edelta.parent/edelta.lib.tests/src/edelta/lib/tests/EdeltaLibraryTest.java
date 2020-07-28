@@ -21,7 +21,6 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.impl.BasicEObjectImpl;
-import org.junit.Before;
 import org.junit.Test;
 
 import edelta.lib.EdeltaLibrary;
@@ -34,24 +33,17 @@ import edelta.lib.EdeltaLibrary;
  */
 public class EdeltaLibraryTest {
 
-	private EdeltaLibrary lib;
-
 	private EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
-
-	@Before
-	public void initLib() {
-		lib = new EdeltaLibrary();
-	}
 
 	@Test
 	public void testNewEClass() {
-		EClass c = lib.newEClass("test");
+		EClass c = EdeltaLibrary.newEClass("test");
 		assertEquals("test", c.getName());
 	}
 
 	@Test
 	public void testNewEClassWithInitializer() {
-		EClass c = lib.newEClass("test", cl -> {
+		EClass c = EdeltaLibrary.newEClass("test", cl -> {
 			cl.setName("changed");
 		});
 		assertEquals("changed", c.getName());
@@ -59,14 +51,14 @@ public class EdeltaLibraryTest {
 
 	@Test
 	public void testNewEAttribute() {
-		EAttribute e = lib.newEAttribute("test", ESTRING);
+		EAttribute e = EdeltaLibrary.newEAttribute("test", ESTRING);
 		assertEquals("test", e.getName());
 		assertEquals(ESTRING, e.getEAttributeType());
 	}
 
 	@Test
 	public void testNewEAttributeWithInitializer() {
-		EAttribute e = lib.newEAttribute("test", ESTRING, ee -> {
+		EAttribute e = EdeltaLibrary.newEAttribute("test", ESTRING, ee -> {
 			ee.setName("changed");
 		});
 		assertEquals("changed", e.getName());
@@ -75,14 +67,14 @@ public class EdeltaLibraryTest {
 
 	@Test
 	public void testNewEReference() {
-		EReference e = lib.newEReference("test", EOBJECT);
+		EReference e = EdeltaLibrary.newEReference("test", EOBJECT);
 		assertEquals("test", e.getName());
 		assertEquals(EOBJECT, e.getEReferenceType());
 	}
 
 	@Test
 	public void testNewEReferenceWithInitializer() {
-		EReference e = lib.newEReference("test", EOBJECT, ee -> {
+		EReference e = EdeltaLibrary.newEReference("test", EOBJECT, ee -> {
 			ee.setName("changed");
 		});
 		assertEquals("changed", e.getName());
@@ -91,7 +83,7 @@ public class EdeltaLibraryTest {
 
 	@Test
 	public void testNewEDataType() {
-		EDataType e = lib.newEDataType("test", "java.lang.String");
+		EDataType e = EdeltaLibrary.newEDataType("test", "java.lang.String");
 		assertEquals("test", e.getName());
 		assertEquals("java.lang.String", e.getInstanceTypeName());
 		assertEquals("java.lang.String", e.getInstanceClassName());
@@ -100,7 +92,7 @@ public class EdeltaLibraryTest {
 
 	@Test
 	public void testNewEDataTypeWithInitializer() {
-		EDataType e = lib.newEDataType("test", "java.lang.String", ee -> {
+		EDataType e = EdeltaLibrary.newEDataType("test", "java.lang.String", ee -> {
 			ee.setName("changed");
 		});
 		assertEquals("changed", e.getName());
@@ -111,13 +103,13 @@ public class EdeltaLibraryTest {
 
 	@Test
 	public void testNewEEnum() {
-		EEnum e = lib.newEEnum("test");
+		EEnum e = EdeltaLibrary.newEEnum("test");
 		assertEquals("test", e.getName());
 	}
 
 	@Test
 	public void testNewEEnumWithInitializer() {
-		EEnum e = lib.newEEnum("test", ee -> {
+		EEnum e = EdeltaLibrary.newEEnum("test", ee -> {
 			ee.setName("changed");
 		});
 		assertEquals("changed", e.getName());
@@ -125,13 +117,13 @@ public class EdeltaLibraryTest {
 
 	@Test
 	public void testNewEEnumLiteral() {
-		EEnumLiteral e = lib.newEEnumLiteral("test");
+		EEnumLiteral e = EdeltaLibrary.newEEnumLiteral("test");
 		assertEquals("test", e.getName());
 	}
 
 	@Test
 	public void testNewEEnumLiteralWithInitializer() {
-		EEnumLiteral e = lib.newEEnumLiteral("test", ee -> {
+		EEnumLiteral e = EdeltaLibrary.newEEnumLiteral("test", ee -> {
 			ee.setName("changed");
 		});
 		assertEquals("changed", e.getName());
@@ -141,7 +133,7 @@ public class EdeltaLibraryTest {
 	public void test_addEClass() {
 		EPackage ePackage = ecoreFactory.createEPackage();
 		EClass eClass = ecoreFactory.createEClass();
-		lib.addEClass(ePackage, eClass);
+		EdeltaLibrary.addEClass(ePackage, eClass);
 		assertSame(eClass,
 				ePackage.getEClassifiers().get(0));
 	}
@@ -149,7 +141,7 @@ public class EdeltaLibraryTest {
 	@Test
 	public void test_addNewEClass() {
 		EPackage ePackage = ecoreFactory.createEPackage();
-		EClass eClass = lib.addNewEClass(ePackage, "test");
+		EClass eClass = EdeltaLibrary.addNewEClass(ePackage, "test");
 		assertEquals("test", eClass.getName());
 		assertSame(eClass,
 			ePackage.getEClassifiers().get(0));
@@ -158,7 +150,7 @@ public class EdeltaLibraryTest {
 	@Test
 	public void test_addNewEClassWithInitializer() {
 		EPackage ePackage = ecoreFactory.createEPackage();
-		EClass eClass = lib.addNewEClass(ePackage, "test",
+		EClass eClass = EdeltaLibrary.addNewEClass(ePackage, "test",
 				cl -> {
 					assertNotNull(cl.getEPackage());
 					cl.setName("changed");
@@ -172,7 +164,7 @@ public class EdeltaLibraryTest {
 	public void test_addEEnum() {
 		EPackage ePackage = ecoreFactory.createEPackage();
 		EEnum eEnum = ecoreFactory.createEEnum();
-		lib.addEEnum(ePackage, eEnum);
+		EdeltaLibrary.addEEnum(ePackage, eEnum);
 		assertSame(eEnum,
 				ePackage.getEClassifiers().get(0));
 	}
@@ -180,7 +172,7 @@ public class EdeltaLibraryTest {
 	@Test
 	public void test_addNewEEnum() {
 		EPackage ePackage = ecoreFactory.createEPackage();
-		EEnum eEnum = lib.addNewEEnum(ePackage, "test");
+		EEnum eEnum = EdeltaLibrary.addNewEEnum(ePackage, "test");
 		assertEquals("test", eEnum.getName());
 		assertSame(eEnum,
 			ePackage.getEClassifiers().get(0));
@@ -189,7 +181,7 @@ public class EdeltaLibraryTest {
 	@Test
 	public void test_addNewEEnumWithInitializer() {
 		EPackage ePackage = ecoreFactory.createEPackage();
-		EEnum eEnum = lib.addNewEEnum(ePackage, "test",
+		EEnum eEnum = EdeltaLibrary.addNewEEnum(ePackage, "test",
 				cl -> {
 					assertNotNull(cl.getEPackage());
 					cl.setName("changed");
@@ -203,7 +195,7 @@ public class EdeltaLibraryTest {
 	public void test_addEEnumLiteral() {
 		EEnum eEnum = ecoreFactory.createEEnum();
 		EEnumLiteral eEnumLiteral = ecoreFactory.createEEnumLiteral();
-		lib.addEEnumLiteral(eEnum, eEnumLiteral);
+		EdeltaLibrary.addEEnumLiteral(eEnum, eEnumLiteral);
 		assertSame(eEnumLiteral,
 				eEnum.getELiterals().get(0));
 	}
@@ -212,7 +204,7 @@ public class EdeltaLibraryTest {
 	public void test_addNewEEnumLiteral() {
 		EEnum eEnum = ecoreFactory.createEEnum();
 		EEnumLiteral eEnumLiteral =
-				lib.addNewEEnumLiteral(eEnum, "test");
+				EdeltaLibrary.addNewEEnumLiteral(eEnum, "test");
 		assertEquals("test", eEnumLiteral.getName());
 		assertSame(eEnumLiteral,
 				eEnum.getELiterals().get(0));
@@ -221,7 +213,7 @@ public class EdeltaLibraryTest {
 	@Test
 	public void test_addNewEEnumLiteralWithInitializer() {
 		EEnum eEnum = ecoreFactory.createEEnum();
-		EEnumLiteral eEnumLiteral = lib.addNewEEnumLiteral(eEnum, "test",
+		EEnumLiteral eEnumLiteral = EdeltaLibrary.addNewEEnumLiteral(eEnum, "test",
 				lit -> {
 					assertNotNull(lit.getEEnum());
 					lit.setName("changed");
@@ -235,7 +227,7 @@ public class EdeltaLibraryTest {
 	public void test_addEDataType() {
 		EPackage ePackage = ecoreFactory.createEPackage();
 		EDataType eEnum = ecoreFactory.createEDataType();
-		lib.addEDataType(ePackage, eEnum);
+		EdeltaLibrary.addEDataType(ePackage, eEnum);
 		assertSame(eEnum,
 				ePackage.getEClassifiers().get(0));
 	}
@@ -243,7 +235,7 @@ public class EdeltaLibraryTest {
 	@Test
 	public void test_addNewEDataType() {
 		EPackage ePackage = ecoreFactory.createEPackage();
-		EDataType eDataType = lib.addNewEDataType(ePackage, "test", "java.lang.String");
+		EDataType eDataType = EdeltaLibrary.addNewEDataType(ePackage, "test", "java.lang.String");
 		assertEquals("test", eDataType.getName());
 		assertSame(eDataType,
 			ePackage.getEClassifiers().get(0));
@@ -255,7 +247,7 @@ public class EdeltaLibraryTest {
 	@Test
 	public void test_addNewEDataTypeWithInitializer() {
 		EPackage ePackage = ecoreFactory.createEPackage();
-		EDataType eDataType = lib.addNewEDataType(ePackage, "test", "java.lang.String",
+		EDataType eDataType = EdeltaLibrary.addNewEDataType(ePackage, "test", "java.lang.String",
 				cl -> {
 					assertNotNull(cl.getEPackage());
 					cl.setName("changed");
@@ -272,7 +264,7 @@ public class EdeltaLibraryTest {
 	public void test_addEAttribute() {
 		EClass eClass = ecoreFactory.createEClass();
 		EAttribute eAttribute = ecoreFactory.createEAttribute();
-		lib.addEAttribute(eClass, eAttribute);
+		EdeltaLibrary.addEAttribute(eClass, eAttribute);
 		assertSame(eAttribute,
 				eClass.getEStructuralFeatures().get(0));
 	}
@@ -281,7 +273,7 @@ public class EdeltaLibraryTest {
 	public void test_addNewEAttribute() {
 		EClass eClass = ecoreFactory.createEClass();
 		EAttribute eAttribute =
-				lib.addNewEAttribute(eClass, "test", ESTRING);
+				EdeltaLibrary.addNewEAttribute(eClass, "test", ESTRING);
 		assertEquals("test", eAttribute.getName());
 		assertEquals(ESTRING, eAttribute.getEType());
 		assertEquals(ESTRING, eAttribute.getEAttributeType());
@@ -293,7 +285,7 @@ public class EdeltaLibraryTest {
 	public void test_addNewEAttributeWithInitializer() {
 		EClass eClass = ecoreFactory.createEClass();
 		EAttribute eAttribute =
-			lib.addNewEAttribute(eClass, "test", ESTRING,
+			EdeltaLibrary.addNewEAttribute(eClass, "test", ESTRING,
 				attr -> {
 					assertNotNull(attr.getEContainingClass());
 					attr.setName("changed");
@@ -309,7 +301,7 @@ public class EdeltaLibraryTest {
 	public void test_addEReference() {
 		EClass eClass = ecoreFactory.createEClass();
 		EReference eReference = ecoreFactory.createEReference();
-		lib.addEReference(eClass, eReference);
+		EdeltaLibrary.addEReference(eClass, eReference);
 		assertSame(eReference,
 				eClass.getEStructuralFeatures().get(0));
 	}
@@ -318,7 +310,7 @@ public class EdeltaLibraryTest {
 	public void test_addNewEReference() {
 		EClass eClass = ecoreFactory.createEClass();
 		EReference eReference =
-				lib.addNewEReference(eClass, "test", EOBJECT);
+				EdeltaLibrary.addNewEReference(eClass, "test", EOBJECT);
 		assertEquals("test", eReference.getName());
 		assertEquals(EOBJECT, eReference.getEType());
 		assertEquals(EOBJECT, eReference.getEReferenceType());
@@ -330,7 +322,7 @@ public class EdeltaLibraryTest {
 	public void test_addNewEReferenceWithInitializer() {
 		EClass eClass = ecoreFactory.createEClass();
 		EReference eReference =
-			lib.addNewEReference(eClass, "test", EOBJECT,
+			EdeltaLibrary.addNewEReference(eClass, "test", EOBJECT,
 				ref -> {
 					assertNotNull(ref.getEContainingClass());
 					ref.setName("changed");
@@ -346,7 +338,7 @@ public class EdeltaLibraryTest {
 	public void test_addESuperType() {
 		EClass superClass = ecoreFactory.createEClass();
 		EClass subClass = ecoreFactory.createEClass();
-		lib.addESuperType(subClass, superClass);
+		EdeltaLibrary.addESuperType(subClass, superClass);
 		assertThat(subClass.getESuperTypes()).containsExactly(superClass);
 	}
 
@@ -356,7 +348,7 @@ public class EdeltaLibraryTest {
 		EClass subClass = ecoreFactory.createEClass();
 		subClass.getESuperTypes().add(superClass);
 		assertThat(subClass.getESuperTypes()).containsExactly(superClass);
-		lib.removeESuperType(subClass, superClass);
+		EdeltaLibrary.removeESuperType(subClass, superClass);
 		assertThat(subClass.getESuperTypes()).isEmpty();
 	}
 
@@ -364,7 +356,7 @@ public class EdeltaLibraryTest {
 	public void test_addNewESubpackage() {
 		EPackage superPackage = ecoreFactory.createEPackage();
 		EPackage subPackage =
-			lib.addNewESubpackage(superPackage, "newSubpackage", "prefix", "nsURI");
+			EdeltaLibrary.addNewESubpackage(superPackage, "newSubpackage", "prefix", "nsURI");
 		assertThat(subPackage)
 			.returns("newSubpackage", EPackage::getName)
 			.returns("prefix", EPackage::getNsPrefix)
@@ -377,7 +369,7 @@ public class EdeltaLibraryTest {
 	public void test_addNewESubpackageWithInitializer() {
 		EPackage superPackage = ecoreFactory.createEPackage();
 		EPackage subPackage =
-			lib.addNewESubpackage(superPackage, "newSubpackage", "prefix", "nsURI",
+			EdeltaLibrary.addNewESubpackage(superPackage, "newSubpackage", "prefix", "nsURI",
 				(EPackage p) -> p.setName("changed"));
 		assertThat(subPackage)
 			.returns("changed", EPackage::getName)
@@ -390,7 +382,7 @@ public class EdeltaLibraryTest {
 	@Test
 	public void testGetEObjectRepr() {
 		assertEquals("ecore.EClass.eSuperTypes",
-			lib.getEObjectRepr(EcorePackage.eINSTANCE.getEClass_ESuperTypes()));
+			EdeltaLibrary.getEObjectRepr(EcorePackage.eINSTANCE.getEClass_ESuperTypes()));
 		BasicEObjectImpl o = new BasicEObjectImpl() {
 			@Override
 			public String toString() {
@@ -403,9 +395,9 @@ public class EdeltaLibraryTest {
 			}
 		};
 		assertEquals("test",
-				lib.getEObjectRepr(o));
+				EdeltaLibrary.getEObjectRepr(o));
 		assertEquals("",
-				lib.getEObjectRepr(null));
+				EdeltaLibrary.getEObjectRepr(null));
 	}
 
 	@Test
@@ -420,6 +412,6 @@ public class EdeltaLibraryTest {
 		assertThat(p1.getESubpackages()).contains(p2);
 		assertThat(p2.getESubpackages()).contains(p1);
 		assertEquals("p1.p2.p1",
-				lib.getEObjectRepr(p1));
+				EdeltaLibrary.getEObjectRepr(p1));
 	}
 }
