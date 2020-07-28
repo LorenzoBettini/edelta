@@ -27,18 +27,19 @@
 
 	<property name="local.p2.repository" value="${target}/repository" />
 
+	<!--
+		The properties
+		parsedVersion.majorVersion
+		parsedVersion.minorVersion
+		are expected to be provided (see the POM and the use of build-helper-maven-plugin
+	-->
 	<target name="getMajorMinorVersion">
-		<script language="javascript">
-			<![CDATA[
+		<property name="majorMinorVersion" value="${parsedVersion.majorVersion}.${parsedVersion.minorVersion}" />
+		<echo message="majorMinorVersion: ${majorMinorVersion}" />
+	</target>
 
-	                // getting the value
-	                buildnumber = project.getProperty("unqualifiedVersion");
-	                index = buildnumber.lastIndexOf(".");
-	                counter = buildnumber.substring(0, index);
-	    			project.setProperty("majorMinorVersion",counter);
-
-	            ]]>
-		</script>
+	<target name="test_getMajorMinor" depends="getMajorMinorVersion">
+		<echo message="majorMinorVersion: ${majorMinorVersion}" />
 	</target>
 
 	<!-- Take from the remote URL the possible existing metadata -->

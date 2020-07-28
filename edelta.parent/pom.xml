@@ -298,6 +298,40 @@
         </pluginManagement>
       </build>
     </profile>
+    <profile>
+      <id>sonatype-oss-release</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <!-- MJAVADOC-620 – Maven Javadoc Plugin fails to resolve the dependencies 
+              when used with Java 11 -->
+            <version>3.2.0</version>
+            <configuration>
+              <detectOfflineLinks>false</detectOfflineLinks>
+              <source>8</source>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-p2-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-p2-metadata</id>
+              </execution>
+            </executions>
+            <configuration>
+              <defaultP2Metadata>false</defaultP2Metadata>
+              <attachP2Metadata>false</attachP2Metadata>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
   <build>
