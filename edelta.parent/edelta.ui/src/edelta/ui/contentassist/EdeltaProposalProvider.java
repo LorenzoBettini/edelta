@@ -8,9 +8,12 @@ import static org.eclipse.xtext.EcoreUtil2.getContainerOfType;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.Assignment;
 import org.eclipse.xtext.CrossReference;
+import org.eclipse.xtext.naming.QualifiedName;
+import org.eclipse.xtext.resource.EObjectDescription;
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.Scopes;
+import org.eclipse.xtext.scoping.impl.SimpleScope;
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext;
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor;
 
@@ -21,7 +24,6 @@ import com.google.inject.Inject;
 import edelta.edelta.EdeltaEcoreQualifiedReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaPackage;
-import edelta.resource.derivedstate.EdeltaAccessibleElement;
 import edelta.resource.derivedstate.EdeltaAccessibleElements;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.util.EdeltaEcoreHelper;
@@ -68,9 +70,20 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 	public void completeEdeltaEcoreDirectReference_Enamedelement(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 		final var accessibleElements = getAccessibleElements(model);
 		createENamedElementProposals(model, context, acceptor,
-			Scopes.scopeFor(
+			new SimpleScope(
 				Iterables.transform(accessibleElements,
-					EdeltaAccessibleElement::getElement)));
+					e -> new EObjectDescription(
+						QualifiedName.create(e.getElement().getName()),
+						e.getElement(),
+						null) {
+							@Override
+							public QualifiedName getQualifiedName() {
+								return e.getQualifiedName();
+							}
+						}
+					)
+				)
+			);
 	}
 
 	@Override
