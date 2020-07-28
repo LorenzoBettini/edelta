@@ -1,2 +1,9 @@
 # setting the version in pom.xml and MANIFEST.MF files
-mvn org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=0.0.1-SNAPSHOT -Dtycho.mode=maven
+# from the root folder
+./mvnw -f edelta.parent/pom.xml \
+	org.eclipse.tycho:tycho-versions-plugin:set-version \
+	-DnewVersion=2.0.0-SNAPSHOT \
+	-Dtycho.mode=maven
+
+# Does not work, due to the BOM and the examples.
+# Search/Replace form the workbench
