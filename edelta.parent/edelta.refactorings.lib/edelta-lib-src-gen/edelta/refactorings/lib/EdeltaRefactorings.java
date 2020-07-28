@@ -1,6 +1,7 @@
 package edelta.refactorings.lib;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaLibrary;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -39,17 +40,17 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final Consumer<EAttribute> _function = (EAttribute it) -> {
       it.setLowerBound(1);
     };
-    return this.lib.addNewEAttribute(eClass, attrname, dataType, _function);
+    return EdeltaLibrary.addNewEAttribute(eClass, attrname, dataType, _function);
   }
   
   public EReference mergeReferences(final String newReferenceName, final EClass newReferenceType, final List<EReference> refs) {
     this.removeFeaturesFromContainingClass(refs);
-    return this.lib.newEReference(newReferenceName, newReferenceType);
+    return EdeltaLibrary.newEReference(newReferenceName, newReferenceType);
   }
   
   public EAttribute mergeAttributes(final String newAttrName, final EDataType newAttributeType, final List<EAttribute> attrs) {
     this.removeFeaturesFromContainingClass(attrs);
-    return this.lib.newEAttribute(newAttrName, newAttributeType);
+    return EdeltaLibrary.newEAttribute(newAttrName, newAttributeType);
   }
   
   public void removeFeaturesFromContainingClass(final List<? extends EStructuralFeature> features) {
@@ -66,9 +67,9 @@ public class EdeltaRefactorings extends AbstractEdelta {
     for (final EEnumLiteral subc : _eLiterals) {
       {
         final Consumer<EClass> _function = (EClass it) -> {
-          this.lib.addESuperType(it, containingclass);
+          EdeltaLibrary.addESuperType(it, containingclass);
         };
-        this.lib.addNewEClass(containingclass.getEPackage(), subc.getLiteral(), _function);
+        EdeltaLibrary.addNewEClass(containingclass.getEPackage(), subc.getLiteral(), _function);
         EList<EStructuralFeature> _eStructuralFeatures = containingclass.getEStructuralFeatures();
         _eStructuralFeatures.remove(attr);
       }
@@ -87,7 +88,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
       for (final EAttribute attr : attrs) {
         EClass _eContainingClass = attr.getEContainingClass();
         final Procedure1<EClass> _function = (EClass it) -> {
-          this.lib.addESuperType(it, superclass);
+          EdeltaLibrary.addESuperType(it, superclass);
           EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
           _eStructuralFeatures.remove(attr);
         };
@@ -110,21 +111,21 @@ public class EdeltaRefactorings extends AbstractEdelta {
       it.setLowerBound(f.getEOpposite().getLowerBound());
       it.setUpperBound(1);
     };
-    final EReference ref_in = this.lib.newEReference(inReferenceName, extractedClass, _function);
+    final EReference ref_in = EdeltaLibrary.newEReference(inReferenceName, extractedClass, _function);
     final Consumer<EReference> _function_1 = (EReference it) -> {
       it.setLowerBound(1);
       it.setUpperBound(1);
       it.setEOpposite(ref_in);
     };
-    final EReference old_ref = this.lib.newEReference(f.getName(), f.getEReferenceType(), _function_1);
-    this.lib.addEReference(extractedClass, old_ref);
+    final EReference old_ref = EdeltaLibrary.newEReference(f.getName(), f.getEReferenceType(), _function_1);
+    EdeltaLibrary.addEReference(extractedClass, old_ref);
     ref_in.setEOpposite(old_ref);
     EReference _eOpposite = f.getEOpposite();
     _eOpposite.setLowerBound(1);
     EReference _eOpposite_1 = f.getEOpposite();
     _eOpposite_1.setUpperBound(1);
-    this.lib.addEReference(extractedClass, f.getEOpposite());
-    this.lib.addEReference(f.getEReferenceType(), ref_in);
+    EdeltaLibrary.addEReference(extractedClass, f.getEOpposite());
+    EdeltaLibrary.addEReference(f.getEReferenceType(), ref_in);
     f.setEType(extractedClass);
     f.setContainment(true);
     f.setName(outReferenceName);
@@ -147,13 +148,13 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final String superClassName = this.ensureEClassifierNameIsUnique(containingEPackage, _plus);
     final Consumer<EClass> _function = (EClass it) -> {
       it.setAbstract(true);
-      this.lib.addEStructuralFeature(it, EcoreUtil.<EStructuralFeature>copy(feature));
+      EdeltaLibrary.addEStructuralFeature(it, EcoreUtil.<EStructuralFeature>copy(feature));
     };
-    final EClass superclass = this.lib.addNewEClass(containingEPackage, superClassName, _function);
+    final EClass superclass = EdeltaLibrary.addNewEClass(containingEPackage, superClassName, _function);
     for (final EStructuralFeature duplicate : duplicates) {
       EClass _eContainingClass = duplicate.getEContainingClass();
       final Procedure1<EClass> _function_1 = (EClass it) -> {
-        this.lib.addESuperType(it, superclass);
+        EdeltaLibrary.addESuperType(it, superclass);
         EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
         _eStructuralFeatures.remove(duplicate);
       };
@@ -223,7 +224,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
       final Consumer<EEnum> _function_1 = (EEnum it) -> {
         final Procedure2<EClass, Integer> _function_2 = (EClass subClass, Integer index) -> {
           final String enumLiteralName = this.ensureEClassifierNameIsUnique(ePackage, subClass.getName().toUpperCase());
-          EEnumLiteral _addNewEEnumLiteral = this.lib.addNewEEnumLiteral(it, enumLiteralName);
+          EEnumLiteral _addNewEEnumLiteral = EdeltaLibrary.addNewEEnumLiteral(it, enumLiteralName);
           final Procedure1<EEnumLiteral> _function_3 = (EEnumLiteral it_1) -> {
             it_1.setValue(((index).intValue() + 1));
           };
@@ -231,10 +232,10 @@ public class EdeltaRefactorings extends AbstractEdelta {
         };
         IterableExtensions.<EClass>forEach(subClasses, _function_2);
       };
-      final EEnum enum_ = this.lib.addNewEEnum(ePackage, enumName, _function_1);
+      final EEnum enum_ = EdeltaLibrary.addNewEEnum(ePackage, enumName, _function_1);
       String _lowerCase = superClass.getName().toLowerCase();
       String _plus_1 = (_lowerCase + "Type");
-      this.lib.addNewEAttribute(superClass, _plus_1, enum_);
+      EdeltaLibrary.addNewEAttribute(superClass, _plus_1, enum_);
       EcoreUtil.removeAll(subClasses);
     };
     classificationsByHierarchy.forEach(_function);

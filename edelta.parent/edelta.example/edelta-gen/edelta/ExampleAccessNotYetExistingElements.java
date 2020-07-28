@@ -1,6 +1,7 @@
 package edelta;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaLibrary;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
@@ -16,13 +17,13 @@ public class ExampleAccessNotYetExistingElements extends AbstractEdelta {
   }
   
   public void creation(final EPackage it) {
-    this.lib.addNewEClass(it, "NewClass");
+    EdeltaLibrary.addNewEClass(it, "NewClass");
     EList<EClass> _eSuperTypes = getEClass("myecore", "NewClass").getESuperTypes();
     _eSuperTypes.add(getEClass("myecore", "MyEClass"));
   }
   
   public void anotherCreation(final EPackage it) {
-    this.lib.addNewEClass(it, "AnotherNewClass");
+    EdeltaLibrary.addNewEClass(it, "AnotherNewClass");
     EList<EClass> _eSuperTypes = getEClass("myecore", "AnotherNewClass").getESuperTypes();
     _eSuperTypes.add(getEClass("myecore", "MyEClass"));
   }

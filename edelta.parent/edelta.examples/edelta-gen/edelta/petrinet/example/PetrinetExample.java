@@ -1,6 +1,7 @@
 package edelta.petrinet.example;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaLibrary;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.Collections;
 import java.util.function.Consumer;
@@ -25,7 +26,7 @@ public class PetrinetExample extends AbstractEdelta {
     final Consumer<EAttribute> _function = (EAttribute it) -> {
       it.setLowerBound(1);
     };
-    return this.lib.addNewEAttribute(c, "weight", getEDataType("ecore", "EInt"), _function);
+    return EdeltaLibrary.addNewEAttribute(c, "weight", getEDataType("ecore", "EInt"), _function);
   }
   
   public void modifyNet(final EPackage it) {
@@ -39,7 +40,7 @@ public class PetrinetExample extends AbstractEdelta {
       this.refactorings.extractMetaClass(it_1, getEReference("petrinet", "Place", "dst"), "in", "out");
       this.addWeightAttribute(it_1);
     };
-    this.lib.addNewEClass(it, "PTArc", _function);
+    EdeltaLibrary.addNewEClass(it, "PTArc", _function);
   }
   
   public void introduceTPArc(final EPackage it) {
@@ -47,7 +48,7 @@ public class PetrinetExample extends AbstractEdelta {
       this.refactorings.extractMetaClass(it_1, getEReference("petrinet", "Transition", "dst"), "in", "out");
       this.addWeightAttribute(it_1);
     };
-    this.lib.addNewEClass(it, "TPArc", _function);
+    EdeltaLibrary.addNewEClass(it, "TPArc", _function);
   }
   
   public void introduceAbstractArc(final EPackage it) {
@@ -56,7 +57,7 @@ public class PetrinetExample extends AbstractEdelta {
       this.refactorings.extractIntoSuperclass(it_1, 
         Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("petrinet", "PTArc", "weight"), getEAttribute("petrinet", "TPArc", "weight"))));
     };
-    this.lib.addNewEClass(it, "Arc", _function);
+    EdeltaLibrary.addNewEClass(it, "Arc", _function);
   }
   
   @Override

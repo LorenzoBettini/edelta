@@ -1,6 +1,7 @@
 package edelta;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaLibrary;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
@@ -16,7 +17,7 @@ public class ExampleAccessStaleElements extends AbstractEdelta {
   }
   
   public void creation(final EPackage it) {
-    this.lib.addNewEClass(it, "NewClass");
+    EdeltaLibrary.addNewEClass(it, "NewClass");
   }
   
   public void renaming(final EPackage it) {

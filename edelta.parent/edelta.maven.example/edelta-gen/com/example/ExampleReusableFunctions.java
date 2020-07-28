@@ -1,6 +1,7 @@
 package com.example;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaLibrary;
 import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EClass;
 
@@ -16,9 +17,9 @@ public class ExampleReusableFunctions extends AbstractEdelta {
   
   public EClass createClassWithSubClass(final String name, final EClass superClass) {
     final Consumer<EClass> _function = (EClass it) -> {
-      this.lib.addESuperType(it, superClass);
+      EdeltaLibrary.addESuperType(it, superClass);
     };
-    return this.lib.newEClass(name, _function);
+    return EdeltaLibrary.newEClass(name, _function);
   }
   
   @Override
