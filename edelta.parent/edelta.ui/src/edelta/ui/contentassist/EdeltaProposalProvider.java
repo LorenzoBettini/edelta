@@ -5,11 +5,11 @@ package edelta.ui.contentassist;
 
 import static org.eclipse.xtext.EcoreUtil2.getContainerOfType;
 
-import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.Assignment;
 import org.eclipse.xtext.CrossReference;
 import org.eclipse.xtext.resource.IEObjectDescription;
+import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.Scopes;
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext;
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor;
@@ -68,7 +68,9 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 	public void completeEdeltaEcoreDirectReference_Enamedelement(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 		final var accessibleElements = getAccessibleElements(model);
 		createENamedElementProposals(model, context, acceptor,
-			Iterables.transform(accessibleElements, EdeltaAccessibleElement::getElement));
+			Scopes.scopeFor(
+				Iterables.transform(accessibleElements,
+					EdeltaAccessibleElement::getElement)));
 	}
 
 	@Override
@@ -83,7 +85,8 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 			.findFirst()
 			.ifPresent(e -> 
 				createENamedElementProposals(model, context, acceptor,
-					ecoreHelper.getENamedElements(e.getElement())));
+					Scopes.scopeFor(
+						ecoreHelper.getENamedElements(e.getElement()))));
 	}
 
 	private EdeltaAccessibleElements getAccessibleElements(EObject model) {
@@ -92,10 +95,10 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 	}
 
 	private void createENamedElementProposals(EObject model, ContentAssistContext context, ICompletionProposalAcceptor acceptor,
-			final Iterable<ENamedElement> contents) {
+			IScope scope) {
 		getCrossReferenceProposalCreator()
 			.lookupCrossReference(
-				Scopes.scopeFor(contents),
+				scope,
 				model,
 				EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE__ENAMEDELEMENT,
 				acceptor,
