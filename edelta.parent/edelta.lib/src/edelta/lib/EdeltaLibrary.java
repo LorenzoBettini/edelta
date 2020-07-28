@@ -30,6 +30,9 @@ public class EdeltaLibrary {
 
 	private static EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
 
+	private EdeltaLibrary() {
+	}
+
 	private static <T extends ENamedElement> void safeRunInitializer(Consumer<T> initializer, T e) {
 		if (initializer != null) {
 			initializer.accept(e);
