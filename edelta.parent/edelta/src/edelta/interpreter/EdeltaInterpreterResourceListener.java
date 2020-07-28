@@ -47,8 +47,6 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 
 	private EdeltaInterpreterDiagnosticHelper diagnosticHelper;
 
-	private EdeltaLibrary lib = new EdeltaLibrary();
-
 	private EdeltaModifiedElements modifiedElements;
 
 	public EdeltaInterpreterResourceListener(IResourceScopeCache cache, Resource resource,
@@ -111,7 +109,7 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 			if (EdeltaModelUtil.hasCycleInSuperPackage(subPackage)) {
 				diagnosticHelper.addError(subPackage, EdeltaValidator.EPACKAGE_CYCLE,
 					"Cycle in superpackage/subpackage: " +
-						lib.getEObjectRepr(subPackage));
+						EdeltaLibrary.getEObjectRepr(subPackage));
 				// break the cycle to avoid problems due to
 				// loop in containment (in other Xtext components, e.g., scoping)
 				subPackage.getESuperPackage()
@@ -123,7 +121,7 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 			if (EdeltaModelUtil.hasCycleInHierarchy(eClass)) {
 				diagnosticHelper.addError(eClass, EdeltaValidator.ECLASS_CYCLE,
 					"Cycle in inheritance hierarchy: " +
-						lib.getEObjectRepr(eClass));
+						EdeltaLibrary.getEObjectRepr(eClass));
 			}
 		}
 	}
