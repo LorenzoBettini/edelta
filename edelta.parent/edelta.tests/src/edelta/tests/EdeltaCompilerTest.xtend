@@ -1515,6 +1515,64 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		)
 	}
 
+	@Test def void testEcoreRefExpForCreatedEClassInInitializer() {
+		'''
+			import org.eclipse.emf.ecore.EcoreFactory
+			
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass") [
+					// even though the name is set after the initializer
+					// is executed we can still refer the newly created EClass
+					ecoreref(NewClass).abstract = true
+					ecoreref(NewClass).name = "Renamed"
+				]
+				ecoreref(Renamed)
+			}
+		'''.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import edelta.lib.EdeltaLibrary;
+			import java.util.function.Consumer;
+			import org.eclipse.emf.ecore.EClass;
+			import org.eclipse.emf.ecore.EPackage;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  public MyFile0() {
+			    
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  public void aTest(final EPackage it) {
+			    final Consumer<EClass> _function = (EClass it_1) -> {
+			      getEClass("foo", "NewClass").setAbstract(true);
+			      getEClass("foo", "NewClass").setName("Renamed");
+			    };
+			    EdeltaLibrary.addNewEClass(it, "NewClass", _function);
+			    getEClass("foo", "Renamed");
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    aTest(getEPackage("foo"));
+			  }
+			}
+			'''
+		)
+	}
+
 	@Test
 	def void testCompilationOfPersonListExampleModifyEcore() {
 		val rs = createResourceSetWithEcores(

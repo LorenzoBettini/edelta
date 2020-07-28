@@ -1808,6 +1808,52 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testEcoreRefExpForCreatedEClassRenamedInInitializer2() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EcoreFactory");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\") [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("ecoreref(NewClass).name = \"Renamed\"");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("abstract = true");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(Renamed)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      final List<EdeltaEcoreReferenceExpression> ecoreRefs = this.getAllEcoreReferenceExpressions(it);
+      EdeltaEcoreReferenceExpression _head = IterableExtensions.<EdeltaEcoreReferenceExpression>head(ecoreRefs);
+      final Procedure1<EdeltaEcoreReferenceExpression> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
+        this.assertEcoreRefExpElementMapsToXExpression(it_1.getReference(), "addNewEClass");
+      };
+      ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_head, _function_1);
+      EdeltaEcoreReferenceExpression _last = IterableExtensions.<EdeltaEcoreReferenceExpression>last(ecoreRefs);
+      final Procedure1<EdeltaEcoreReferenceExpression> _function_2 = (EdeltaEcoreReferenceExpression it_1) -> {
+        this.assertEcoreRefExpElementMapsToXExpression(it_1.getReference(), "setName");
+      };
+      ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_last, _function_2);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
   public void testElementExpressionMapForCreatedEClassWithEMFAPI() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import org.eclipse.emf.ecore.EcoreFactory");
