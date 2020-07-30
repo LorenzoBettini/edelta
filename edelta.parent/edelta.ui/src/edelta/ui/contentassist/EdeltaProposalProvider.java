@@ -3,9 +3,9 @@
  */
 package edelta.ui.contentassist;
 
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
 import static org.eclipse.xtext.EcoreUtil2.getContainerOfType;
-
-import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -120,8 +120,9 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 			Assignment assignment, ContentAssistContext context,
 			ICompletionProposalAcceptor acceptor) {
 		final var accessibleElements = getAccessibleElements(model);
-		final var groupedByName = accessibleElements.stream()
-			.collect(Collectors.groupingBy(e -> e.getElement().getName()));
+		final var countByName = accessibleElements.stream()
+			.collect(groupingBy(e -> e.getElement().getName(),
+						counting()));
 		createENamedElementProposals(model, context,
 			acceptor,
 			new SimpleScope(
@@ -134,7 +135,7 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 							e.getQualifiedName(),
 							e.getElement(),
 							// and store whether a proposal is ambiguous
-							groupedByName.get(name).size() > 1);
+							countByName.get(name) > 1);
 						}
 					)
 				)
