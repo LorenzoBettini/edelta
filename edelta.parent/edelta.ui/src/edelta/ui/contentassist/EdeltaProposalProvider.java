@@ -20,6 +20,7 @@ import org.eclipse.xtext.scoping.impl.SimpleScope;
 import org.eclipse.xtext.ui.editor.contentassist.ConfigurableCompletionProposal;
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext;
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor;
+import org.eclipse.xtext.ui.editor.contentassist.PrefixMatcher;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
@@ -91,15 +92,22 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 						return;
 					}
 					final var configurableProposal = (ConfigurableCompletionProposal) proposal;
-					final var replacement = configurableProposal.getReplacementString();
-					final var withSameName = groupedByName.get(replacement);
+					final var originalReplacement = configurableProposal.getReplacementString();
+					final var withSameName = groupedByName.get(originalReplacement);
 					if (withSameName != null) {
 						final var accessibleElement = withSameName.remove(0);
-						final var replacementString = accessibleElement.getQualifiedName().toString();
-						configurableProposal.setReplacementString(replacementString);
-						configurableProposal.setCursorPosition(replacementString.length());
+						final var qualifiedReplacement = accessibleElement.getQualifiedName().toString();
+						configurableProposal.setReplacementString(qualifiedReplacement);
+						configurableProposal.setCursorPosition(qualifiedReplacement.length());
+						final var originalMatcher = configurableProposal.getMatcher();
+						configurableProposal.setMatcher(new PrefixMatcher() {
+							@Override
+							public boolean isCandidateMatchingPrefix(String name, String prefix) {
+								return originalMatcher.isCandidateMatchingPrefix(originalReplacement, prefix);
+							}
+						});
 						if (withSameName.isEmpty()) {
-							groupedByName.remove(replacement);
+							groupedByName.remove(originalReplacement);
 						}
 					}
 					acceptor.accept(proposal);
