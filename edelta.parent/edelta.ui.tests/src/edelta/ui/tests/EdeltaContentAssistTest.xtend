@@ -107,6 +107,25 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test def void testMetamodelsInThePresenceOfSubpackages() {
+		createMySubPackagesEcore()
+		waitForBuild // required to index the new ecore file
+		// mainpackage.subpackage and mainpackage.subpackage.subsubpackage
+		// must not be proposed, since they are subpackages,
+		// which cannot be directly imported
+		newBuilder.append('metamodel ')
+			.assertText(
+				'''
+				"annotation"
+				"data"
+				"ecore"
+				"mainpackage"
+				"mypackage"
+				"namespace"
+				"type"
+				'''.fromLinesOfStringsToStringArray)
+	}
+
+	private def IFile createMySubPackagesEcore() {
 		createFile(PROJECT_NAME+"/model/MySubPackages.ecore",
 			'''
 			<?xml version="1.0" encoding="UTF-8"?>
@@ -132,21 +151,6 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			</ecore:EPackage>
 			'''
 		)
-		waitForBuild // required to index the new ecore file
-		// mainpackage.subpackage and mainpackage.subpackage.subsubpackage
-		// must not be proposed, since they are subpackages,
-		// which cannot be directly imported
-		newBuilder.append('metamodel ')
-			.assertText(
-				'''
-				"annotation"
-				"data"
-				"ecore"
-				"mainpackage"
-				"mypackage"
-				"namespace"
-				"type"
-				'''.fromLinesOfStringsToStringArray)
 	}
 
 	@Test def void testNoNSURIProposalMetamodels() {
@@ -170,6 +174,19 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 				myDerivedReference
 				myReference
 				mypackage
+				'''.fromLinesOfStringsToStringArray)
+	}
+
+	@Test def void testUnqualifiedEcoreReferenceWithPrefix() {
+		newBuilder.append('''
+			metamodel "mypackage"
+			modifyEcore aTest epackage mypackage { 
+				ecoreref(myd''').
+			assertText('''
+				MyDataType
+				MyDerivedClass
+				myDerivedAttribute
+				myDerivedReference
 				'''.fromLinesOfStringsToStringArray)
 	}
 
@@ -371,6 +388,32 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		// MyBaseClass is proposed with its new name Renamed
 		// and its features myBaseAttribute and myBaseReference
 		// are still proposed since they are still present in this context
+	}
+
+	@Test def void testAmbiguousReferences() {
+		createMySubPackagesEcore()
+		waitForBuild // required to index the new ecore file
+		// mainpackage.subpackage and mainpackage.subpackage.subsubpackage
+		// must not be proposed, since they are subpackages,
+		// which cannot be directly imported
+		newBuilder.append('''
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ecoreref(My''')
+			.assertText(
+				'''
+				MySubPackageClass
+				mainpackage.MyClass
+				mainpackage.MyClass.myAttribute
+				mainpackage.MyClass.myReference
+				mainpackage.subpackage.MyClass
+				mainpackage.subpackage.MyClass.myAttribute
+				mainpackage.subpackage.MyClass.myReference
+				mainpackage.subpackage.subsubpackage.MyClass
+				mainpackage.subpackage.subsubpackage.MyClass.myAttribute
+				mainpackage.subpackage.subsubpackage.MyClass.myReference
+				'''.fromLinesOfStringsToStringArray)
 	}
 
 	def private fromLinesOfStringsToStringArray(CharSequence strings) {
