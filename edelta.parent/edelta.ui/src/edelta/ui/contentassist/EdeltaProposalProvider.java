@@ -11,8 +11,8 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.xtext.Assignment;
 import org.eclipse.xtext.CrossReference;
+import org.eclipse.xtext.naming.IQualifiedNameConverter;
 import org.eclipse.xtext.naming.QualifiedName;
-import org.eclipse.xtext.resource.EObjectDescription;
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.Scopes;
@@ -22,6 +22,7 @@ import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext;
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor;
 import org.eclipse.xtext.ui.editor.contentassist.PrefixMatcher;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
@@ -48,6 +49,39 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 
 	@Inject
 	private EdeltaEcoreHelper ecoreHelper;
+
+	protected class EdeltaProposalCreator extends XbaseProposalCreator {
+
+		public EdeltaProposalCreator(ContentAssistContext contentAssistContext, String ruleName,
+				IQualifiedNameConverter qualifiedNameConverter) {
+			super(contentAssistContext, ruleName, qualifiedNameConverter);
+		}
+
+		@Override
+		public ICompletionProposal apply(IEObjectDescription candidate) {
+			final var completionProposal = super.apply(candidate);
+			if (completionProposal == null)
+				return completionProposal;
+			if (candidate instanceof EdeltaContentAssistEObjectDescription) {
+				EdeltaContentAssistEObjectDescription desc = (EdeltaContentAssistEObjectDescription) candidate;
+				if (desc.isAmbiguous()) {
+					final var configurableProposal = (ConfigurableCompletionProposal) completionProposal;
+					final var originalReplacement = configurableProposal.getReplacementString();
+					final var qualifiedReplacement = desc.getQualifiedName().toString();
+					configurableProposal.setReplacementString(qualifiedReplacement);
+					configurableProposal.setCursorPosition(qualifiedReplacement.length());
+					final var originalMatcher = configurableProposal.getMatcher();
+					configurableProposal.setMatcher(new PrefixMatcher() {
+						@Override
+						public boolean isCandidateMatchingPrefix(String name, String prefix) {
+							return originalMatcher.isCandidateMatchingPrefix(originalReplacement, prefix);
+						}
+					});
+				}
+			}
+			return completionProposal;
+		}
+	}
 
 	/**
 	 * Avoids proposing subpackages since in Edelta they are not allowed
@@ -78,51 +112,17 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 		final var accessibleElements = getAccessibleElements(model);
 		final var groupedByName = accessibleElements.stream()
 			.collect(Collectors.groupingBy(e -> e.getElement().getName()));
-		groupedByName.entrySet().removeIf(e -> e.getValue().size() == 1);
 		createENamedElementProposals(model, context,
-			new ICompletionProposalAcceptor() {
-				@Override
-				public boolean canAcceptMoreProposals() {
-					return acceptor.canAcceptMoreProposals();
-				}
-				@Override
-				public void accept(ICompletionProposal proposal) {
-					if (!(proposal instanceof ConfigurableCompletionProposal)) {
-						acceptor.accept(proposal);
-						return;
-					}
-					final var configurableProposal = (ConfigurableCompletionProposal) proposal;
-					final var originalReplacement = configurableProposal.getReplacementString();
-					final var withSameName = groupedByName.get(originalReplacement);
-					if (withSameName != null) {
-						final var accessibleElement = withSameName.remove(0);
-						final var qualifiedReplacement = accessibleElement.getQualifiedName().toString();
-						configurableProposal.setReplacementString(qualifiedReplacement);
-						configurableProposal.setCursorPosition(qualifiedReplacement.length());
-						final var originalMatcher = configurableProposal.getMatcher();
-						configurableProposal.setMatcher(new PrefixMatcher() {
-							@Override
-							public boolean isCandidateMatchingPrefix(String name, String prefix) {
-								return originalMatcher.isCandidateMatchingPrefix(originalReplacement, prefix);
-							}
-						});
-						if (withSameName.isEmpty()) {
-							groupedByName.remove(originalReplacement);
-						}
-					}
-					acceptor.accept(proposal);
-				}
-			},
+			acceptor,
 			new SimpleScope(
 				Iterables.transform(accessibleElements,
-					e -> new EObjectDescription(
-						QualifiedName.create(e.getElement().getName()),
-						e.getElement(),
-						null) {
-							@Override
-							public QualifiedName getQualifiedName() {
-								return e.getQualifiedName();
-							}
+					e -> {
+						final var name = e.getElement().getName();
+						return new EdeltaContentAssistEObjectDescription(
+							QualifiedName.create(name),
+							e.getQualifiedName(),
+							e.getElement(),
+							groupedByName.get(name).size() > 1);
 						}
 					)
 				)
@@ -160,6 +160,12 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 				acceptor,
 				Predicates.<IEObjectDescription> alwaysTrue(),
 				getProposalFactory("ID", context));
+	}
+
+	@Override
+	protected Function<IEObjectDescription, ICompletionProposal> getProposalFactory(final String ruleName,
+			final ContentAssistContext contentAssistContext) {
+		return new EdeltaProposalCreator(contentAssistContext, ruleName, getQualifiedNameConverter());
 	}
 
 }
