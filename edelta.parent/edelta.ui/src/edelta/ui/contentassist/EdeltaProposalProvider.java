@@ -56,6 +56,13 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 			super(contentAssistContext, ruleName, qualifiedNameConverter);
 		}
 
+		/**
+		 * If we have an ambiguous reference, then set the replacement string to the
+		 * fully qualified name, so that the resulting program will not contain an
+		 * ambiguous reference. This relies on the
+		 * {@link EdeltaContentAssistEObjectDescription} created by
+		 * {@link EdeltaProposalProvider#completeEdeltaEcoreDirectReference_Enamedelement}.
+		 */
 		@Override
 		public ICompletionProposal apply(IEObjectDescription candidate) {
 			final var completionProposal = super.apply(candidate);
@@ -68,8 +75,14 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 					final var originalReplacement = configurableProposal.getReplacementString();
 					final var qualifiedReplacement = desc.getQualifiedName().toString();
 					configurableProposal.setReplacementString(qualifiedReplacement);
+					// the cursor position after applying the proposal must be updated as well
+					// to the length of the new replacement string
 					configurableProposal.setCursorPosition(qualifiedReplacement.length());
 					final var originalMatcher = configurableProposal.getMatcher();
+					// the prefix matcher must be updated so that it takes into
+					// consideration the original replacement string, i.e., the one
+					// not fully qualified, otherwise the filtering won't work after
+					// the proposals have been shown and the user keeps on typing.
 					configurableProposal.setMatcher(
 						new EdeltaOverriddenPrefixMatcher(originalMatcher, originalReplacement));
 				}
@@ -98,7 +111,9 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 	}
 
 	/**
-	 * Only proposes elements that are available in this context.
+	 * Only proposes elements that are available in this context, and also
+	 * store information about possible ambiguities using {@link EdeltaContentAssistEObjectDescription},
+	 * used then by {@link EdeltaProposalCreator#apply(IEObjectDescription)}
 	 */
 	@Override
 	public void completeEdeltaEcoreDirectReference_Enamedelement(EObject model,
@@ -113,10 +128,12 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 				Iterables.transform(accessibleElements,
 					e -> {
 						final var name = e.getElement().getName();
+						// we also want to show the fully qualified name
 						return new EdeltaContentAssistEObjectDescription(
 							QualifiedName.create(name),
 							e.getQualifiedName(),
 							e.getElement(),
+							// and store whether a proposal is ambiguous
 							groupedByName.get(name).size() > 1);
 						}
 					)
@@ -124,6 +141,9 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 			);
 	}
 
+	/**
+	 * Only proposes children that are available in this context.
+	 */
 	@Override
 	public void completeEdeltaEcoreReference_Enamedelement(EObject model, Assignment assignment,
 			ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
