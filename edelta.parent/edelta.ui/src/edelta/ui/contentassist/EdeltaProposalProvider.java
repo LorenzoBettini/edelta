@@ -5,7 +5,10 @@ package edelta.ui.contentassist;
 
 import static org.eclipse.xtext.EcoreUtil2.getContainerOfType;
 
+import java.util.stream.Collectors;
+
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.xtext.Assignment;
 import org.eclipse.xtext.CrossReference;
 import org.eclipse.xtext.naming.QualifiedName;
@@ -14,6 +17,7 @@ import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.Scopes;
 import org.eclipse.xtext.scoping.impl.SimpleScope;
+import org.eclipse.xtext.ui.editor.contentassist.ConfigurableCompletionProposal;
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext;
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor;
 
@@ -67,9 +71,40 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 	 * Only proposes elements that are available in this context.
 	 */
 	@Override
-	public void completeEdeltaEcoreDirectReference_Enamedelement(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+	public void completeEdeltaEcoreDirectReference_Enamedelement(EObject model,
+			Assignment assignment, ContentAssistContext context,
+			ICompletionProposalAcceptor acceptor) {
 		final var accessibleElements = getAccessibleElements(model);
-		createENamedElementProposals(model, context, acceptor,
+		final var groupedByName = accessibleElements.stream()
+			.collect(Collectors.groupingBy(e -> e.getElement().getName()));
+		groupedByName.entrySet().removeIf(e -> e.getValue().size() == 1);
+		createENamedElementProposals(model, context,
+			new ICompletionProposalAcceptor() {
+				@Override
+				public boolean canAcceptMoreProposals() {
+					return acceptor.canAcceptMoreProposals();
+				}
+				@Override
+				public void accept(ICompletionProposal proposal) {
+					if (!(proposal instanceof ConfigurableCompletionProposal)) {
+						acceptor.accept(proposal);
+						return;
+					}
+					final var configurableProposal = (ConfigurableCompletionProposal) proposal;
+					final var replacement = configurableProposal.getReplacementString();
+					final var withSameName = groupedByName.get(replacement);
+					if (withSameName != null) {
+						final var accessibleElement = withSameName.remove(0);
+						final var replacementString = accessibleElement.getQualifiedName().toString();
+						configurableProposal.setReplacementString(replacementString);
+						configurableProposal.setCursorPosition(replacementString.length());
+						if (withSameName.isEmpty()) {
+							groupedByName.remove(replacement);
+						}
+					}
+					acceptor.accept(proposal);
+				}
+			},
 			new SimpleScope(
 				Iterables.transform(accessibleElements,
 					e -> new EObjectDescription(
