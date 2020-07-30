@@ -390,12 +390,9 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		// are still proposed since they are still present in this context
 	}
 
-	@Test def void testAmbiguousReferences() {
+	@Test def void testForAmbiguousReferencesFullyQualifiedNameIsProposed() {
 		createMySubPackagesEcore()
 		waitForBuild // required to index the new ecore file
-		// mainpackage.subpackage and mainpackage.subpackage.subsubpackage
-		// must not be proposed, since they are subpackages,
-		// which cannot be directly imported
 		newBuilder.append('''
 			metamodel "mainpackage"
 			
@@ -414,6 +411,22 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 				mainpackage.subpackage.subsubpackage.MyClass.myAttribute
 				mainpackage.subpackage.subsubpackage.MyClass.myReference
 				'''.fromLinesOfStringsToStringArray)
+	}
+
+	@Test def void testForAmbiguousReferencesFullyQualifiedNameIsReplaced() {
+		createMySubPackagesEcore()
+		waitForBuild // required to index the new ecore file
+		newBuilder.append('''
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ecoreref(My''')
+			.applyProposal("mainpackage.subpackage.MyClass.myAttribute")
+			.expectContent('''
+			metamodel "mainpackage"
+			
+			modifyEcore aTest epackage mainpackage {
+				ecoreref(mainpackage.subpackage.MyClass.myAttribute''')
 	}
 
 	def private fromLinesOfStringsToStringArray(CharSequence strings) {

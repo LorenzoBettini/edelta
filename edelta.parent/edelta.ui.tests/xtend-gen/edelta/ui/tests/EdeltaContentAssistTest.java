@@ -676,7 +676,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
-  public void testAmbiguousReferences() {
+  public void testForAmbiguousReferencesFullyQualifiedNameIsProposed() {
     try {
       this.createMySubPackagesEcore();
       IResourcesSetupUtil.waitForBuild();
@@ -712,6 +712,35 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
       _builder_1.newLine();
       _newBuilder.append(_builder.toString()).assertText(
         this.fromLinesOfStringsToStringArray(_builder_1));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
+  public void testForAmbiguousReferencesFullyQualifiedNameIsReplaced() {
+    try {
+      this.createMySubPackagesEcore();
+      IResourcesSetupUtil.waitForBuild();
+      ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"mainpackage\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage mainpackage {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(My");
+      ContentAssistProcessorTestBuilder _applyProposal = _newBuilder.append(_builder.toString()).applyProposal("mainpackage.subpackage.MyClass.myAttribute");
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("metamodel \"mainpackage\"");
+      _builder_1.newLine();
+      _builder_1.newLine();
+      _builder_1.append("modifyEcore aTest epackage mainpackage {");
+      _builder_1.newLine();
+      _builder_1.append("\t");
+      _builder_1.append("ecoreref(mainpackage.subpackage.MyClass.myAttribute");
+      _applyProposal.expectContent(_builder_1.toString());
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
