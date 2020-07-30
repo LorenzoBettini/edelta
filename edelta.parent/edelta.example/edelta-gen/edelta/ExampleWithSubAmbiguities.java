@@ -5,6 +5,7 @@ import edelta.lib.EdeltaLibrary;
 import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 
 @SuppressWarnings("all")
 public class ExampleWithSubAmbiguities extends AbstractEdelta {
@@ -22,6 +23,9 @@ public class ExampleWithSubAmbiguities extends AbstractEdelta {
         getEClass("mainpackage", "MyClass"));
     };
     EdeltaLibrary.addNewEClass(getEPackage("mainpackage.subpackage"), "AddedToSubPackage", _function);
+    EcoreUtil.remove(getEAttribute("mainpackage", "MyClass", "myAttribute"));
+    EcoreUtil.remove(getEAttribute("mainpackage.subpackage", "MyClass", "myAttribute"));
+    getEAttribute("mainpackage.subpackage.subsubpackage", "MyClass", "myAttribute");
   }
   
   @Override
