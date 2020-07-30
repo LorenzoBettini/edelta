@@ -1,3 +1,5 @@
+import org.eclipse.emf.ecore.util.EcoreUtil
+
 // IMPORTANT: ecores must be in source directories
 // otherwise you can't refer to them
 
@@ -14,4 +16,22 @@ modifyEcore SomeChanges epackage mainpackage {
 	// use the quickfix to use a fully qualified reference
 //	ecoreref(MyClass)
 //	ecoreref(myAttribute)
+
+	// uncomment the following and use the content assist after "My":
+	// for ambiguous references the fully qualified name is replaced
+//	ecoreref(My)
+
+	EcoreUtil.remove(ecoreref(mainpackage.MyClass.myAttribute))
+	// uncomment the following and use the content assist after "My":
+	// the mainpackage.MyClass.myAttribute is not proposed anymore
+//	ecoreref(My)
+
+	EcoreUtil.remove(ecoreref(mainpackage.subpackage.MyClass.myAttribute))
+	// the following is not ambiguous anymore in this context
+	ecoreref(myAttribute)
+
+	// uncomment the following and use the content assist after "My":
+	// choose myAttribute and the simple name is proposed since it's
+	// not ambiguous anymore in this context
+//	ecoreref(My)
 }
