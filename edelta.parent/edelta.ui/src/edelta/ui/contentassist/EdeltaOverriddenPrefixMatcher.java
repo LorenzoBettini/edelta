@@ -22,7 +22,7 @@ public final class EdeltaOverriddenPrefixMatcher extends PrefixMatcher {
 	}
 
 	/**
-	 * Ignores the passed name parameter and used the originalReplacement
+	 * Ignores the passed name parameter and uses the originalReplacement
 	 */
 	@Override
 	public boolean isCandidateMatchingPrefix(String name, String prefix) {
