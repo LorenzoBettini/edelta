@@ -20,7 +20,6 @@ import org.eclipse.xtext.scoping.impl.SimpleScope;
 import org.eclipse.xtext.ui.editor.contentassist.ConfigurableCompletionProposal;
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext;
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor;
-import org.eclipse.xtext.ui.editor.contentassist.PrefixMatcher;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
@@ -71,12 +70,8 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 					configurableProposal.setReplacementString(qualifiedReplacement);
 					configurableProposal.setCursorPosition(qualifiedReplacement.length());
 					final var originalMatcher = configurableProposal.getMatcher();
-					configurableProposal.setMatcher(new PrefixMatcher() {
-						@Override
-						public boolean isCandidateMatchingPrefix(String name, String prefix) {
-							return originalMatcher.isCandidateMatchingPrefix(originalReplacement, prefix);
-						}
-					});
+					configurableProposal.setMatcher(
+						new EdeltaOverriddenPrefixMatcher(originalMatcher, originalReplacement));
 				}
 			}
 			return completionProposal;
