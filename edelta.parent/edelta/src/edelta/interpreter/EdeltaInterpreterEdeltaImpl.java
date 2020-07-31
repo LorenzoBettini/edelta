@@ -22,6 +22,14 @@ public class EdeltaInterpreterEdeltaImpl extends AbstractEdelta {
 
 	private EdeltaInterpreterDiagnosticHelper diagnosticHelper;
 
+	/**
+	 * Uses the passed {@link EPackage}s to create an {@link EdeltaEPackageManager};
+	 * if an {@link EPackage} appears several times in the list, only the first
+	 * occurrence will be taken into consideration.
+	 * 
+	 * @param ePackages
+	 * @param diagnosticHelper
+	 */
 	public EdeltaInterpreterEdeltaImpl(List<EPackage> ePackages,
 			EdeltaInterpreterDiagnosticHelper diagnosticHelper) {
 		super(new EdeltaEPackageManager() {
