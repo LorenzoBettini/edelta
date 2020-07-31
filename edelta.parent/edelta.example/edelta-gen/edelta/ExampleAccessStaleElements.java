@@ -18,6 +18,7 @@ public class ExampleAccessStaleElements extends AbstractEdelta {
   
   public void creation(final EPackage it) {
     EdeltaLibrary.addNewEClass(it, "NewClass");
+    EdeltaLibrary.addNewEClass(it, "AnotherNewClass");
   }
   
   public void renaming(final EPackage it) {
@@ -27,6 +28,8 @@ public class ExampleAccessStaleElements extends AbstractEdelta {
   public void remove(final EPackage it) {
     EList<EClassifier> _eClassifiers = it.getEClassifiers();
     _eClassifiers.remove(getEClass("myecore", "MyEClass"));
+    EList<EClassifier> _eClassifiers_1 = it.getEClassifiers();
+    _eClassifiers_1.remove(getEClass("myecore", "AnotherNewClass"));
   }
   
   public void accessing(final EPackage it) {

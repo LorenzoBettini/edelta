@@ -7,6 +7,7 @@ metamodel "mainpackage"
 
 modifyEcore creation epackage myecore {
 	addNewEClass("NewClass")
+	addNewEClass("AnotherNewClass")
 }
 
 modifyEcore renaming epackage myecore {
@@ -15,11 +16,13 @@ modifyEcore renaming epackage myecore {
 
 modifyEcore remove epackage myecore {
 	EClassifiers -= ecoreref(MyEClass)
+	EClassifiers -= ecoreref(AnotherNewClass)
 }
 
 modifyEcore accessing epackage myecore {
 	// uncomment the following accesses to see errors
-//	ecoreref(MyEClass) // this doesn't exist anymore
+//	ecoreref(MyEClass) // this doesn't exist anymore (was in the imported metamodel)
+//	ecoreref(AnotherNewClass) // this doesn't exist anymore (was created in this program)
 
 	// uncomment the following accesses to see errors
 	// and use the quickfix for using the renamed element
