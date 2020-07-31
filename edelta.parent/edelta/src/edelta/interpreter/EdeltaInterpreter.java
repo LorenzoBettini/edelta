@@ -40,8 +40,6 @@ import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationResult;
 import org.eclipse.xtext.xbase.interpreter.impl.InterpreterCanceledException;
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import edelta.compiler.EdeltaCompilerUtil;
@@ -132,10 +130,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		this.currentProgram = program;
 		final var copiedEPackages = copiedEPackagesMap.values();
 		thisObject = new EdeltaInterpreterEdeltaImpl
-			(Lists.newArrayList(
-				Iterables.concat(copiedEPackages,
-						program.getMetamodels())),
-			diagnosticHelper);
+			(copiedEPackages, diagnosticHelper);
 		useAsFields = newHashMap();
 		var filteredOperations =
 			edeltaInterpreterHelper.filterOperations(program.getModifyEcoreOperations());
