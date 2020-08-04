@@ -7,7 +7,6 @@ import org.eclipse.emf.ecore.resource.Resource;
 
 import edelta.edelta.EdeltaProgram;
 import edelta.resource.EdeltaDerivedStateComputer;
-import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 
 /**
  * Avoids the derived state computer run the interpreter since the tests in this
@@ -30,10 +29,9 @@ public class EdeltaDerivedStateComputerWithoutInterpreter extends EdeltaDerivedS
 	}
 
 	@Override
-	protected void copyEPackages(EdeltaProgram program,
-			EdeltaCopiedEPackagesMap copiedEPackagesMap) {
+	protected void copyEPackages(EdeltaProgram program) {
 		program.getMetamodels().stream()
 			.forEach(p -> p.eAdapters().add(new EdeltaEContentAdapter()));
-		super.copyEPackages(program, copiedEPackagesMap);
+		super.copyEPackages(program);
 	}
 }
