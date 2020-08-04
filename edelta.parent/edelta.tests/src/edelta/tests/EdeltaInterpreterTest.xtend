@@ -906,6 +906,46 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testModificationsInSeveralFiles() {
+		val program = parseSeveralWithTestEcores(
+		#[
+		'''
+			import org.eclipse.emf.ecore.EClass
+
+			package test1
+			
+			metamodel "bar"
+			
+			def setBaseClass(EClass c) : void {
+				c.getESuperTypes += ecoreref(BarClass)
+			}
+		''',
+		'''
+			import org.eclipse.emf.ecore.EClass
+			import test1.__synthetic0
+			
+			package test2
+			
+			metamodel "foo"
+			
+			use test1.__synthetic0 as extension my
+			
+			modifyEcore aModificationTest epackage foo {
+				ecoreref(FooClass).setBaseClass
+			}
+		'''])
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, true)
+		[ derivedEPackage |
+			derivedEPackage.firstEClass => [
+				assertThat(ESuperTypes.map[name]).
+					isEmpty
+					// TODO: fix it (task 234)
+					// containsExactly("BarClass")
+			]
+		]
+	}
+
 	@Test def void testRenameReferencesAcrossEPackages() {
 		'''
 			package test
@@ -1887,12 +1927,16 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		EdeltaProgram program, boolean doValidate, (EPackage)=>void testExecutor
 	) {
-		assertAfterInterpretationOfEdeltaModifyEcoreOperation(interpreter, program, testExecutor)
-		// validation after interpretation, since the interpreter
-		// can make new elements available during validation
-		if (doValidate) {
-			program.assertNoErrors
-		}
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(interpreter, program) [
+			// validation after interpretation, since the interpreter
+			// can make new elements available during validation
+			if (doValidate) {
+				// if there are other files in the resource set, only
+				// this specific program will be checked for errors.
+				program.assertNoErrors
+			}
+			testExecutor.apply(it)
+		]
 	}
 
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(

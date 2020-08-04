@@ -59,11 +59,26 @@ abstract class EdeltaAbstractTest {
 	protected static String TEST2_REFS_ECORE = "TestEcoreForReferences2.ecore"
 
 	/**
-	 * Parse several input sources and returns the parsed program corresponding
+	 * Parse several input sources using the "foo" EPackage
+	 * and returns the parsed program corresponding
 	 * to the last input source.
 	 */
 	def protected parseSeveralWithTestEcore(List<CharSequence> inputs) {
 		val rs = resourceSetWithTestEcore
+		parseSeveralInputs(inputs, rs)
+	}
+
+	/**
+	 * Parse several input sources using the "foo" and "bar" EPackages
+	 * and returns the parsed program corresponding
+	 * to the last input source.
+	 */
+	def protected parseSeveralWithTestEcores(List<CharSequence> inputs) {
+		val rs = resourceSetWithTestEcores
+		parseSeveralInputs(inputs, rs)
+	}
+
+	protected def EdeltaProgram parseSeveralInputs(List<CharSequence> inputs, ResourceSet rs) {
 		var EdeltaProgram program
 		for (input : inputs)
 			program = input.parse(rs)

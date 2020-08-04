@@ -44,6 +44,7 @@ import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
+import org.eclipse.xtext.xbase.lib.ListExtensions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Assert;
@@ -1380,6 +1381,62 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     };
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(
       Collections.<CharSequence>unmodifiableList(CollectionLiterals.<CharSequence>newArrayList(_builder, _builder_1, _builder_2)), true, _function);
+  }
+  
+  @Test
+  public void testModificationsInSeveralFiles() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EClass");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("package test1");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"bar\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("def setBaseClass(EClass c) : void {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("c.getESuperTypes += ecoreref(BarClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("import org.eclipse.emf.ecore.EClass");
+    _builder_1.newLine();
+    _builder_1.append("import test1.__synthetic0");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("package test2");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("metamodel \"foo\"");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("use test1.__synthetic0 as extension my");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("modifyEcore aModificationTest epackage foo {");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("ecoreref(FooClass).setBaseClass");
+    _builder_1.newLine();
+    _builder_1.append("}");
+    _builder_1.newLine();
+    final EdeltaProgram program = this.parseSeveralWithTestEcores(
+      Collections.<CharSequence>unmodifiableList(CollectionLiterals.<CharSequence>newArrayList(_builder, _builder_1)));
+    final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
+      EClass _firstEClass = this.getFirstEClass(derivedEPackage);
+      final Procedure1<EClass> _function_1 = (EClass it) -> {
+        final Function1<EClass, String> _function_2 = (EClass it_1) -> {
+          return it_1.getName();
+        };
+        Assertions.<String>assertThat(ListExtensions.<EClass, String>map(it.getESuperTypes(), _function_2)).isEmpty();
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_firstEClass, _function_1);
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, true, _function);
   }
   
   @Test
@@ -2841,10 +2898,13 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaProgram program, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
-    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this.interpreter, program, testExecutor);
-    if (doValidate) {
-      this._validationTestHelper.assertNoErrors(program);
-    }
+    final Procedure1<EPackage> _function = (EPackage it) -> {
+      if (doValidate) {
+        this._validationTestHelper.assertNoErrors(program);
+      }
+      testExecutor.apply(it);
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this.interpreter, program, _function);
   }
   
   private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaInterpreter interpreter, final EdeltaProgram program, final Procedure1<? super EPackage> testExecutor) {
