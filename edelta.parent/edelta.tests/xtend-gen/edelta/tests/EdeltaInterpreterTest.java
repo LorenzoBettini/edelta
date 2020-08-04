@@ -20,6 +20,7 @@ import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 import edelta.resource.derivedstate.EdeltaUnresolvedEcoreReferences;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
+import edelta.tests.additional.EdeltaEContentAdapter;
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime;
 import edelta.tests.additional.MyCustomException;
 import edelta.validation.EdeltaValidator;
@@ -79,6 +80,24 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
+  }
+  
+  @Test
+  public void makeSureModificationsToOriginalEPackageAreDetected() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final EdeltaProgram prog = this.parseWithTestEcore(_builder);
+    final ThrowableAssert.ThrowingCallable _function = () -> {
+      EPackage _head = IterableExtensions.<EPackage>head(prog.getMetamodels());
+      _head.setName("changed");
+    };
+    Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaEContentAdapter.EdeltaEContentAdapterException.class);
   }
   
   @Test

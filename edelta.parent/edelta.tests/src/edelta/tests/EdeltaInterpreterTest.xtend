@@ -26,6 +26,7 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
+import edelta.tests.additional.EdeltaEContentAdapter.EdeltaEContentAdapterException
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -53,6 +54,20 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		val anotherInterprter = interpreterFactory.create("".parse.eResource)
 		assertThat(anotherInterprter.class)
 			.isSameAs(interpreter.class)
+	}
+
+	@Test
+	def void makeSureModificationsToOriginalEPackageAreDetected() {
+		val prog = '''
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+			}
+		'''
+		.parseWithTestEcore
+		assertThatThrownBy[
+			prog.metamodels.head.name = "changed"
+		].isInstanceOf(EdeltaEContentAdapterException)
 	}
 
 	@Test
