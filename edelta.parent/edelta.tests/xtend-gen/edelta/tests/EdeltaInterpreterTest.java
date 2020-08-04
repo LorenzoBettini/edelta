@@ -28,6 +28,7 @@ import java.util.List;
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
+import org.assertj.core.api.iterable.ThrowingExtractor;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
@@ -1383,7 +1384,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testModificationsInSeveralFiles() {
+  public void testModificationsOfMetamodelsAcrossSeveralFiles() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import org.eclipse.emf.ecore.EClass");
     _builder.newLine();
@@ -1419,7 +1420,24 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder_1.append("modifyEcore aModificationTest epackage foo {");
     _builder_1.newLine();
     _builder_1.append("\t");
+    _builder_1.append("// the other file\'s operation will set the");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("// base class of foo.FooClass to bar.BarClass");
+    _builder_1.newLine();
+    _builder_1.append("\t");
     _builder_1.append("ecoreref(FooClass).setBaseClass");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("// now the foo package refers to bar package");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("// now modify the bar\'s class");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("ecoreref(FooClass).ESuperTypes.head.abstract = true");
     _builder_1.newLine();
     _builder_1.append("}");
     _builder_1.newLine();
@@ -1431,11 +1449,16 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
         final Function1<EClass, String> _function_2 = (EClass it_1) -> {
           return it_1.getName();
         };
-        Assertions.<String>assertThat(ListExtensions.<EClass, String>map(it.getESuperTypes(), _function_2)).isEmpty();
+        Assertions.<String>assertThat(ListExtensions.<EClass, String>map(it.getESuperTypes(), _function_2)).containsExactly("BarClass");
+        Assertions.assertThat(IterableExtensions.<EClass>head(it.getESuperTypes()).isAbstract()).isTrue();
       };
       ObjectExtensions.<EClass>operator_doubleArrow(_firstEClass, _function_1);
     };
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, true, _function);
+    final ThrowingExtractor<EPackage, String, Exception> _function_1 = (EPackage it) -> {
+      return it.getName();
+    };
+    Assertions.<EPackage>assertThat(this.getCopiedEPackages(program)).<String, Exception>extracting(_function_1).containsExactlyInAnyOrder("foo", "bar");
   }
   
   @Test

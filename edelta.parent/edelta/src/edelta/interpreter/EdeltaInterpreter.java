@@ -510,10 +510,20 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			} else {
 				// create a new interpreter since the edelta operation is in
 				// another edelta source file.
+				// first copy the other program's imported metamodels into
+				// the current program's derived state
+				final var eResource = currentProgram.eResource();
+				final var copiedEPackagesMap = derivedStateHelper
+						.copyEPackages(containingProgram, eResource);
+				// this object is also recreated with possible new copied packages
+				thisObject = new EdeltaInterpreterEdeltaImpl
+					(copiedEPackagesMap.values(), diagnosticHelper);
+
 				var newInterpreter =
 						edeltaInterpreterFactory.create(containingProgram.eResource());
 				return newInterpreter
-					.evaluateEdeltaOperation(thisObject, containingProgram, edeltaOperation, argumentValues, indicator);
+					.evaluateEdeltaOperation(thisObject,
+						containingProgram, edeltaOperation, argumentValues, indicator);
 			}
 		}
 		return super.invokeOperation(

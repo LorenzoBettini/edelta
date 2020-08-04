@@ -66,7 +66,20 @@ public class EdeltaDerivedStateHelper {
 	 * @return
 	 */
 	public EdeltaCopiedEPackagesMap copyEPackages(EdeltaProgram program) {
-		final var resource = program.eResource();
+		return copyEPackages(program, program.eResource());
+	}
+
+	/**
+	 * Copies all imported {@link EPackage}s of the passed {@link EdeltaProgram} in
+	 * the {@link EdeltaCopiedEPackagesMap} in the derived state of the specified
+	 * {@link Resource}; the copied {@link EPackage}s are also inserted in the
+	 * specified resource.
+	 * 
+	 * @param program
+	 * @param resource
+	 * @return
+	 */
+	public EdeltaCopiedEPackagesMap copyEPackages(EdeltaProgram program, final Resource resource) {
 		final var packages = program.getMetamodels().stream()
 			.distinct()
 			.collect(toList());

@@ -906,7 +906,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testModificationsInSeveralFiles() {
+	def void testModificationsOfMetamodelsAcrossSeveralFiles() {
 		val program = parseSeveralWithTestEcores(
 		#[
 		'''
@@ -931,18 +931,29 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			use test1.__synthetic0 as extension my
 			
 			modifyEcore aModificationTest epackage foo {
+				// the other file's operation will set the
+				// base class of foo.FooClass to bar.BarClass
 				ecoreref(FooClass).setBaseClass
+				// now the foo package refers to bar package
+				
+				// now modify the bar's class
+				ecoreref(FooClass).ESuperTypes.head.abstract = true
 			}
 		'''])
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, true)
 		[ derivedEPackage |
 			derivedEPackage.firstEClass => [
 				assertThat(ESuperTypes.map[name]).
-					isEmpty
-					// TODO: fix it (task 234)
-					// containsExactly("BarClass")
+					containsExactly("BarClass")
+				assertThat(ESuperTypes.head.isAbstract)
+					.isTrue
 			]
 		]
+		// verify that also the EPackage of the other file is now
+		// copied in the main program's resource
+		assertThat(program.copiedEPackages)
+			.extracting([name])
+			.containsExactlyInAnyOrder("foo", "bar")
 	}
 
 	@Test def void testRenameReferencesAcrossEPackages() {
