@@ -59,7 +59,7 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 			// record original ecore references before running the interpreter
 			recordEcoreReferenceOriginalENamedElement(resource);
 			// run the interpreter
-			runInterpreter(program, copiedEPackagesMap);
+			runInterpreter(program);
 		}
 	}
 
@@ -73,8 +73,9 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 		}
 	}
 
-	protected void runInterpreter(final EdeltaProgram program, final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
-		interpreterFactory.create(program.eResource()).evaluateModifyEcoreOperations(program, copiedEPackagesMap);
+	protected void runInterpreter(final EdeltaProgram program) {
+		interpreterFactory.create(program.eResource())
+			.evaluateModifyEcoreOperations(program);
 	}
 
 	protected void recordEcoreReferenceOriginalENamedElement(final Resource resource) {

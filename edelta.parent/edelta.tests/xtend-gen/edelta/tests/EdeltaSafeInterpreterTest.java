@@ -8,10 +8,9 @@ import edelta.interpreter.EdeltaInterpreter;
 import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.interpreter.EdeltaSafeInterpreter;
-import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutSafeInterpreter;
-import java.util.Map;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
@@ -19,8 +18,6 @@ import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.xbase.lib.Exceptions;
-import org.eclipse.xtext.xbase.lib.Functions.Function1;
-import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Assert;
 import org.junit.Before;
@@ -36,6 +33,9 @@ public class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
   
   @Inject
   private Injector injector;
+  
+  @Inject
+  private EdeltaDerivedStateHelper derivedStateHelper;
   
   @Before
   public void setupInterpreter() {
@@ -237,14 +237,9 @@ public class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
   
   private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaProgram program, final Procedure1<? super EPackage> testExecutor) {
     final EdeltaModifyEcoreOperation it = this.lastModifyEcoreOperation(program);
-    final Function1<EPackage, String> _function = (EPackage it_1) -> {
-      return it_1.getName();
-    };
-    Map<String, EPackage> _map = IterableExtensions.<String, EPackage>toMap(this.getCopiedEPackages(it), _function);
-    final EdeltaCopiedEPackagesMap copiedEPackagesMap = new EdeltaCopiedEPackagesMap(_map);
-    this.interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap);
+    this.interpreter.evaluateModifyEcoreOperations(program);
     final String packageName = it.getEpackage().getName();
-    final EPackage epackage = copiedEPackagesMap.get(packageName);
+    final EPackage epackage = this.derivedStateHelper.getCopiedEPackagesMap(program.eResource()).get(packageName);
     testExecutor.apply(epackage);
   }
 }

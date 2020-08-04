@@ -126,15 +126,17 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		this.interpreterTimeout = interpreterTimeout;
 	}
 
-	public void evaluateModifyEcoreOperations(final EdeltaProgram program, final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
+	public void evaluateModifyEcoreOperations(final EdeltaProgram program) {
 		this.currentProgram = program;
+		final var eResource = program.eResource();
+		final var copiedEPackagesMap = derivedStateHelper
+				.getCopiedEPackagesMap(eResource);
 		final var copiedEPackages = copiedEPackagesMap.values();
 		thisObject = new EdeltaInterpreterEdeltaImpl
 			(copiedEPackages, diagnosticHelper);
 		useAsFields = newHashMap();
 		var filteredOperations =
 			edeltaInterpreterHelper.filterOperations(program.getModifyEcoreOperations());
-		final var eResource = program.eResource();
 		listener = new EdeltaInterpreterResourceListener(cache, eResource,
 				derivedStateHelper,
 				diagnosticHelper);

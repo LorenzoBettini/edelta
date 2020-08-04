@@ -6,7 +6,6 @@ package edelta.interpreter;
 import org.apache.log4j.Logger;
 
 import edelta.edelta.EdeltaProgram;
-import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 
 /**
  * An interpreter that swallows all {@link RuntimeException}s except for
@@ -21,11 +20,10 @@ public class EdeltaSafeInterpreter extends EdeltaInterpreter {
 
 	@Override
 	@SuppressWarnings("all") // avoid warning for nested try block
-	public void evaluateModifyEcoreOperations(EdeltaProgram program,
-			EdeltaCopiedEPackagesMap copiedEPackagesMap) {
+	public void evaluateModifyEcoreOperations(EdeltaProgram program) {
 		try {
 			try {
-				super.evaluateModifyEcoreOperations(program, copiedEPackagesMap);
+				super.evaluateModifyEcoreOperations(program);
 			} catch (EdeltaInterpreterWrapperException e) {
 				throw e.getException();
 			}

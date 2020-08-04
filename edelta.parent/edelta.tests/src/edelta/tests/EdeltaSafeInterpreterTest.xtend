@@ -6,7 +6,7 @@ import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreterFactory
 import edelta.interpreter.EdeltaInterpreterRuntimeException
 import edelta.interpreter.EdeltaSafeInterpreter
-import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
@@ -24,6 +24,8 @@ class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
 	@Inject EdeltaSafeInterpreter interpreter
 
 	@Inject Injector injector
+
+	@Inject EdeltaDerivedStateHelper derivedStateHelper
 
 	@Before
 	def void setupInterpreter() {
@@ -184,13 +186,10 @@ class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
 		(EPackage)=>void testExecutor
 	) {
 		val it = program.lastModifyEcoreOperation
-		// mimic the behavior of derived state computer that runs the interpreter
-		// on copied EPackages, not on the original ones
-		val copiedEPackagesMap =
-			new EdeltaCopiedEPackagesMap(copiedEPackages.toMap[name])
-		interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap)
+		interpreter.evaluateModifyEcoreOperations(program)
 		val packageName = it.epackage.name
-		val epackage = copiedEPackagesMap.get(packageName)
+		val epackage = derivedStateHelper
+			.getCopiedEPackagesMap(program.eResource).get(packageName)
 		testExecutor.apply(epackage)
 	}
 }

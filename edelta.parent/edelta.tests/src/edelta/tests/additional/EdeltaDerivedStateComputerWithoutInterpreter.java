@@ -20,7 +20,7 @@ import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 public class EdeltaDerivedStateComputerWithoutInterpreter extends EdeltaDerivedStateComputer {
 
 	@Override
-	protected void runInterpreter(EdeltaProgram program, EdeltaCopiedEPackagesMap copiedEPackagesMap) {
+	protected void runInterpreter(EdeltaProgram program) {
 		// No interpreter is run
 	}
 

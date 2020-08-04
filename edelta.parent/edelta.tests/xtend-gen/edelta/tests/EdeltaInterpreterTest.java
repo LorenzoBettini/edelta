@@ -25,7 +25,6 @@ import edelta.tests.additional.MyCustomException;
 import edelta.validation.EdeltaValidator;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
@@ -2904,30 +2903,20 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       }
       testExecutor.apply(it);
     };
-    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this.interpreter, program, _function);
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, _function);
   }
   
-  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaInterpreter interpreter, final EdeltaProgram program, final Procedure1<? super EPackage> testExecutor) {
+  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaProgram program, final Procedure1<? super EPackage> testExecutor) {
     final EdeltaModifyEcoreOperation it = this.lastModifyEcoreOperation(program);
-    final Function1<EPackage, String> _function = (EPackage it_1) -> {
-      return it_1.getName();
-    };
-    Map<String, EPackage> _map = IterableExtensions.<String, EPackage>toMap(this.getCopiedEPackages(it), _function);
-    final EdeltaCopiedEPackagesMap copiedEPackagesMap = new EdeltaCopiedEPackagesMap(_map);
-    interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap);
+    this.interpreter.evaluateModifyEcoreOperations(program);
     final String packageName = it.getEpackage().getName();
-    final EPackage epackage = copiedEPackagesMap.get(packageName);
+    final EPackage epackage = this.derivedStateHelper.getCopiedEPackagesMap(program.eResource()).get(packageName);
     testExecutor.apply(epackage);
   }
   
   private EdeltaCopiedEPackagesMap interpretProgram(final EdeltaProgram program) {
-    final Function1<EPackage, String> _function = (EPackage it) -> {
-      return it.getName();
-    };
-    Map<String, EPackage> _map = IterableExtensions.<String, EPackage>toMap(this.getCopiedEPackages(program), _function);
-    final EdeltaCopiedEPackagesMap copiedEPackagesMap = new EdeltaCopiedEPackagesMap(_map);
-    this.interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap);
-    return copiedEPackagesMap;
+    this.interpreter.evaluateModifyEcoreOperations(program);
+    return this.derivedStateHelper.getCopiedEPackagesMap(program.eResource());
   }
   
   private void assertEcoreRefExpElementMapsToXExpression(final EdeltaEcoreReference reference, final String expectedFeatureCallSimpleName) {

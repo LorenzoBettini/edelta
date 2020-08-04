@@ -9,7 +9,6 @@ import edelta.interpreter.EdeltaInterpreter
 import edelta.interpreter.EdeltaInterpreterFactory
 import edelta.interpreter.EdeltaInterpreterRuntimeException
 import edelta.interpreter.EdeltaInterpreterWrapperException
-import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 import edelta.tests.additional.MyCustomException
@@ -1927,7 +1926,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		EdeltaProgram program, boolean doValidate, (EPackage)=>void testExecutor
 	) {
-		assertAfterInterpretationOfEdeltaModifyEcoreOperation(interpreter, program) [
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program) [
 			// validation after interpretation, since the interpreter
 			// can make new elements available during validation
 			if (doValidate) {
@@ -1940,27 +1939,21 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
-		EdeltaInterpreter interpreter, EdeltaProgram program,
+		EdeltaProgram program,
 		(EPackage)=>void testExecutor
 	) {
 		val it = program.lastModifyEcoreOperation
-		// mimic the behavior of derived state computer that runs the interpreter
-		// on copied EPackages, not on the original ones
-		val copiedEPackagesMap =
-			new EdeltaCopiedEPackagesMap(copiedEPackages.toMap[name])
-		interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap)
+		interpreter.evaluateModifyEcoreOperations(program)
 		val packageName = it.epackage.name
-		val epackage = copiedEPackagesMap.get(packageName)
+		val epackage = derivedStateHelper
+			.getCopiedEPackagesMap(program.eResource).get(packageName)
 		testExecutor.apply(epackage)
 	}
 
 	def private interpretProgram(EdeltaProgram program) {
-		// mimic the behavior of derived state computer that runs the interpreter
-		// on copied EPackages, not on the original ones
-		val copiedEPackagesMap =
-			new EdeltaCopiedEPackagesMap(program.copiedEPackages.toMap[name])
-		interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap)
-		return copiedEPackagesMap
+		interpreter.evaluateModifyEcoreOperations(program)
+		return derivedStateHelper
+			.getCopiedEPackagesMap(program.eResource)
 	}
 
 	private def void assertEcoreRefExpElementMapsToXExpression(
