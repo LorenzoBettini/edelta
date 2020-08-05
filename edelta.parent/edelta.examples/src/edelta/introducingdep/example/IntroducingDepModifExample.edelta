@@ -1,0 +1,30 @@
+package edelta.introducingdep.example
+
+metamodel "anothersimple"
+
+use IntroducingDepOpExample as extension operations
+
+modifyEcore aModificationTest epackage anothersimple {
+	// the other file's operation will set the
+	// base class of this package class to another package class
+	ecoreref(AnotherSimpleClass).setBaseClass
+	// now anothersimple refers to simple (created dependency)
+
+	val referenceToSuperClass = ecoreref(AnotherSimpleClass).ESuperTypes.head
+
+	// also add a reference to the other epackage
+	ecoreref(AnotherSimpleClass)
+		.addNewEReference(
+			"aReferenceToSimpleClass",
+			referenceToSuperClass
+		)
+
+	// now modify the superclass in the other package
+	// introducing a mutual dependency
+	referenceToSuperClass
+		.addNewEReference("aReferenceToAnotherSimpleClass", ecoreref(AnotherSimpleClass)) [
+			// also make the references bidirectional
+			EOpposite = ecoreref(aReferenceToSimpleClass)
+			ecoreref(aReferenceToSimpleClass).EOpposite = it
+		]
+}

@@ -20,15 +20,16 @@ import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 import edelta.resource.derivedstate.EdeltaUnresolvedEcoreReferences;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
+import edelta.tests.additional.EdeltaEContentAdapter;
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime;
 import edelta.tests.additional.MyCustomException;
 import edelta.validation.EdeltaValidator;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
+import org.assertj.core.api.iterable.ThrowingExtractor;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
@@ -44,6 +45,7 @@ import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
+import org.eclipse.xtext.xbase.lib.ListExtensions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Assert;
@@ -78,6 +80,24 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
+  }
+  
+  @Test
+  public void makeSureModificationsToOriginalEPackageAreDetected() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final EdeltaProgram prog = this.parseWithTestEcore(_builder);
+    final ThrowableAssert.ThrowingCallable _function = () -> {
+      EPackage _head = IterableExtensions.<EPackage>head(prog.getMetamodels());
+      _head.setName("changed");
+    };
+    Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaEContentAdapter.EdeltaEContentAdapterException.class);
   }
   
   @Test
@@ -1380,6 +1400,84 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     };
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(
       Collections.<CharSequence>unmodifiableList(CollectionLiterals.<CharSequence>newArrayList(_builder, _builder_1, _builder_2)), true, _function);
+  }
+  
+  @Test
+  public void testModificationsOfMetamodelsAcrossSeveralFilesIntroducingDepOnAnotherMetamodel() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EClass");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("package test1");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"bar\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("def setBaseClass(EClass c) : void {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("c.getESuperTypes += ecoreref(BarClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("import org.eclipse.emf.ecore.EClass");
+    _builder_1.newLine();
+    _builder_1.append("import test1.__synthetic0");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("package test2");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("metamodel \"foo\"");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("use test1.__synthetic0 as extension my");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("modifyEcore aModificationTest epackage foo {");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("// the other file\'s operation will set the");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("// base class of foo.FooClass to bar.BarClass");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("ecoreref(FooClass).setBaseClass");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("// now the foo package refers to bar package");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("// now modify the bar\'s class");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("ecoreref(FooClass).ESuperTypes.head.abstract = true");
+    _builder_1.newLine();
+    _builder_1.append("}");
+    _builder_1.newLine();
+    final EdeltaProgram program = this.parseSeveralWithTestEcores(
+      Collections.<CharSequence>unmodifiableList(CollectionLiterals.<CharSequence>newArrayList(_builder, _builder_1)));
+    final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
+      EClass _firstEClass = this.getFirstEClass(derivedEPackage);
+      final Procedure1<EClass> _function_1 = (EClass it) -> {
+        final Function1<EClass, String> _function_2 = (EClass it_1) -> {
+          return it_1.getName();
+        };
+        Assertions.<String>assertThat(ListExtensions.<EClass, String>map(it.getESuperTypes(), _function_2)).containsExactly("BarClass");
+        Assertions.assertThat(IterableExtensions.<EClass>head(it.getESuperTypes()).isAbstract()).isTrue();
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_firstEClass, _function_1);
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, true, _function);
+    final ThrowingExtractor<EPackage, String, Exception> _function_1 = (EPackage it) -> {
+      return it.getName();
+    };
+    Assertions.<EPackage>assertThat(this.getCopiedEPackages(program)).<String, Exception>extracting(_function_1).containsExactlyInAnyOrder("foo", "bar");
   }
   
   @Test
@@ -2841,33 +2939,26 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaProgram program, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
-    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this.interpreter, program, testExecutor);
-    if (doValidate) {
-      this._validationTestHelper.assertNoErrors(program);
-    }
+    final Procedure1<EPackage> _function = (EPackage it) -> {
+      if (doValidate) {
+        this._validationTestHelper.assertNoErrors(program);
+      }
+      testExecutor.apply(it);
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, _function);
   }
   
-  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaInterpreter interpreter, final EdeltaProgram program, final Procedure1<? super EPackage> testExecutor) {
+  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaProgram program, final Procedure1<? super EPackage> testExecutor) {
     final EdeltaModifyEcoreOperation it = this.lastModifyEcoreOperation(program);
-    final Function1<EPackage, String> _function = (EPackage it_1) -> {
-      return it_1.getName();
-    };
-    Map<String, EPackage> _map = IterableExtensions.<String, EPackage>toMap(this.getCopiedEPackages(it), _function);
-    final EdeltaCopiedEPackagesMap copiedEPackagesMap = new EdeltaCopiedEPackagesMap(_map);
-    interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap);
+    this.interpreter.evaluateModifyEcoreOperations(program);
     final String packageName = it.getEpackage().getName();
-    final EPackage epackage = copiedEPackagesMap.get(packageName);
+    final EPackage epackage = this.derivedStateHelper.getCopiedEPackagesMap(program.eResource()).get(packageName);
     testExecutor.apply(epackage);
   }
   
   private EdeltaCopiedEPackagesMap interpretProgram(final EdeltaProgram program) {
-    final Function1<EPackage, String> _function = (EPackage it) -> {
-      return it.getName();
-    };
-    Map<String, EPackage> _map = IterableExtensions.<String, EPackage>toMap(this.getCopiedEPackages(program), _function);
-    final EdeltaCopiedEPackagesMap copiedEPackagesMap = new EdeltaCopiedEPackagesMap(_map);
-    this.interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap);
-    return copiedEPackagesMap;
+    this.interpreter.evaluateModifyEcoreOperations(program);
+    return this.derivedStateHelper.getCopiedEPackagesMap(program.eResource());
   }
   
   private void assertEcoreRefExpElementMapsToXExpression(final EdeltaEcoreReference reference, final String expectedFeatureCallSimpleName) {

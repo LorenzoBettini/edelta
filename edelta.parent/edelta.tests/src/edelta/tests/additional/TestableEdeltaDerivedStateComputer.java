@@ -21,11 +21,10 @@ public class TestableEdeltaDerivedStateComputer extends EdeltaDerivedStateComput
 	}
 
 	@Override
-	protected void copyEPackages(EdeltaProgram program,
-			EdeltaCopiedEPackagesMap copiedEPackagesMap) {
+	protected void copyEPackages(EdeltaProgram program) {
 		program.getMetamodels().stream()
 			.forEach(p -> p.eAdapters().add(new EdeltaEContentAdapter()));
-		super.copyEPackages(program, copiedEPackagesMap);
+		super.copyEPackages(program);
 	}
 
 }

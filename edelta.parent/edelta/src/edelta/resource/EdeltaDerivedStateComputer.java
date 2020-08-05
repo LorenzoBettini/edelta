@@ -1,6 +1,5 @@
 package edelta.resource;
 
-import static java.util.stream.Collectors.toList;
 import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
 
 import org.eclipse.emf.ecore.resource.Resource;
@@ -15,7 +14,6 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreterHelper;
-import edelta.lib.EdeltaEcoreUtil;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.scoping.EdeltaOriginalENamedElementRecorder;
@@ -37,10 +35,6 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 	@Inject
 	private EdeltaOriginalENamedElementRecorder originalENamedElementRecorder;
 
-	private EdeltaCopiedEPackagesMap getCopiedEPackagesMap(final Resource resource) {
-		return derivedStateHelper.getCopiedEPackagesMap(resource);
-	}
-
 	@Override
 	public void installDerivedState(final DerivedStateAwareResource resource, final boolean preIndexingPhase) {
 		super.installDerivedState(resource, preIndexingPhase);
@@ -51,30 +45,22 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 			if (modifyEcoreOperations.isEmpty()) {
 				return;
 			}
-			final var copiedEPackagesMap = getCopiedEPackagesMap(resource);
-			// make sure packages under modification are copied
-			copyEPackages(program, copiedEPackagesMap);
-			// we must add the copied EPackages to the resource
-			resource.getContents().addAll(copiedEPackagesMap.values());
+			// make sure packages of the program are copied
+			copyEPackages(program);
 			// record original ecore references before running the interpreter
 			recordEcoreReferenceOriginalENamedElement(resource);
 			// run the interpreter
-			runInterpreter(program, copiedEPackagesMap);
+			runInterpreter(program);
 		}
 	}
 
-	protected void copyEPackages(EdeltaProgram program, EdeltaCopiedEPackagesMap copiedEPackagesMap) {
-		final var packages = program.getMetamodels().stream()
-			.distinct()
-			.collect(toList());
-		var copies = EdeltaEcoreUtil.copyEPackages(packages);
-		for (var copy : copies) {
-			copiedEPackagesMap.computeIfAbsent(copy.getName(), key -> copy);
-		}
+	protected void copyEPackages(EdeltaProgram program) {
+		derivedStateHelper.copyEPackages(program);
 	}
 
-	protected void runInterpreter(final EdeltaProgram program, final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
-		interpreterFactory.create(program.eResource()).evaluateModifyEcoreOperations(program, copiedEPackagesMap);
+	protected void runInterpreter(final EdeltaProgram program) {
+		interpreterFactory.create(program.eResource())
+			.evaluateModifyEcoreOperations(program);
 	}
 
 	protected void recordEcoreReferenceOriginalENamedElement(final Resource resource) {
@@ -88,7 +74,7 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 
 	@Override
 	public void discardDerivedState(final DerivedStateAwareResource resource) {
-		final var copiedEPackagesMap = getCopiedEPackagesMap(resource);
+		final var copiedEPackagesMap = derivedStateHelper.getCopiedEPackagesMap(resource);
 		final var derivedState = derivedStateHelper.getOrInstallAdapter(resource);
 		unloadDerivedPackages(copiedEPackagesMap);
 		super.discardDerivedState(resource);

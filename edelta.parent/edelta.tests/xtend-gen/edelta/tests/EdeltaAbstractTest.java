@@ -93,13 +93,40 @@ public abstract class EdeltaAbstractTest {
   
   protected static String TEST2_REFS_ECORE = "TestEcoreForReferences2.ecore";
   
+  protected static String SIMPLE_ECORE = "Simple.ecore";
+  
+  protected static String ANOTHER_SIMPLE_ECORE = "AnotherSimple.ecore";
+  
   /**
-   * Parse several input sources and returns the parsed program corresponding
+   * Parse several input sources using the "foo" EPackage
+   * and returns the parsed program corresponding
    * to the last input source.
    */
   protected EdeltaProgram parseSeveralWithTestEcore(final List<CharSequence> inputs) {
-    try {
+    EdeltaProgram _xblockexpression = null;
+    {
       final ResourceSet rs = this.resourceSetWithTestEcore();
+      _xblockexpression = this.parseSeveralInputs(inputs, rs);
+    }
+    return _xblockexpression;
+  }
+  
+  /**
+   * Parse several input sources using the "foo" and "bar" EPackages
+   * and returns the parsed program corresponding
+   * to the last input source.
+   */
+  protected EdeltaProgram parseSeveralWithTestEcores(final List<CharSequence> inputs) {
+    EdeltaProgram _xblockexpression = null;
+    {
+      final ResourceSet rs = this.resourceSetWithTestEcores();
+      _xblockexpression = this.parseSeveralInputs(inputs, rs);
+    }
+    return _xblockexpression;
+  }
+  
+  protected EdeltaProgram parseSeveralInputs(final List<CharSequence> inputs, final ResourceSet rs) {
+    try {
       EdeltaProgram program = null;
       for (final CharSequence input : inputs) {
         program = this._parseHelper.parse(input, rs);

@@ -9,7 +9,6 @@ import edelta.interpreter.EdeltaInterpreter
 import edelta.interpreter.EdeltaInterpreterFactory
 import edelta.interpreter.EdeltaInterpreterRuntimeException
 import edelta.interpreter.EdeltaInterpreterWrapperException
-import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 import edelta.tests.additional.MyCustomException
@@ -27,6 +26,7 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
+import edelta.tests.additional.EdeltaEContentAdapter.EdeltaEContentAdapterException
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -54,6 +54,20 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		val anotherInterprter = interpreterFactory.create("".parse.eResource)
 		assertThat(anotherInterprter.class)
 			.isSameAs(interpreter.class)
+	}
+
+	@Test
+	def void makeSureModificationsToOriginalEPackageAreDetected() {
+		val prog = '''
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+			}
+		'''
+		.parseWithTestEcore
+		assertThatThrownBy[
+			prog.metamodels.head.name = "changed"
+		].isInstanceOf(EdeltaEContentAdapterException)
 	}
 
 	@Test
@@ -904,6 +918,57 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				assertTrue(isAbstract)
 			]
 		]
+	}
+
+	@Test
+	def void testModificationsOfMetamodelsAcrossSeveralFilesIntroducingDepOnAnotherMetamodel() {
+		val program = parseSeveralWithTestEcores(
+		#[
+		'''
+			import org.eclipse.emf.ecore.EClass
+
+			package test1
+			
+			metamodel "bar"
+			
+			def setBaseClass(EClass c) : void {
+				c.getESuperTypes += ecoreref(BarClass)
+			}
+		''',
+		'''
+			import org.eclipse.emf.ecore.EClass
+			import test1.__synthetic0
+			
+			package test2
+			
+			metamodel "foo"
+			
+			use test1.__synthetic0 as extension my
+			
+			modifyEcore aModificationTest epackage foo {
+				// the other file's operation will set the
+				// base class of foo.FooClass to bar.BarClass
+				ecoreref(FooClass).setBaseClass
+				// now the foo package refers to bar package
+				
+				// now modify the bar's class
+				ecoreref(FooClass).ESuperTypes.head.abstract = true
+			}
+		'''])
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, true)
+		[ derivedEPackage |
+			derivedEPackage.firstEClass => [
+				assertThat(ESuperTypes.map[name]).
+					containsExactly("BarClass")
+				assertThat(ESuperTypes.head.isAbstract)
+					.isTrue
+			]
+		]
+		// verify that also the EPackage of the other file is now
+		// copied in the main program's resource
+		assertThat(program.copiedEPackages)
+			.extracting([name])
+			.containsExactlyInAnyOrder("foo", "bar")
 	}
 
 	@Test def void testRenameReferencesAcrossEPackages() {
@@ -1887,36 +1952,34 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		EdeltaProgram program, boolean doValidate, (EPackage)=>void testExecutor
 	) {
-		assertAfterInterpretationOfEdeltaModifyEcoreOperation(interpreter, program, testExecutor)
-		// validation after interpretation, since the interpreter
-		// can make new elements available during validation
-		if (doValidate) {
-			program.assertNoErrors
-		}
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program) [
+			// validation after interpretation, since the interpreter
+			// can make new elements available during validation
+			if (doValidate) {
+				// if there are other files in the resource set, only
+				// this specific program will be checked for errors.
+				program.assertNoErrors
+			}
+			testExecutor.apply(it)
+		]
 	}
 
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
-		EdeltaInterpreter interpreter, EdeltaProgram program,
+		EdeltaProgram program,
 		(EPackage)=>void testExecutor
 	) {
 		val it = program.lastModifyEcoreOperation
-		// mimic the behavior of derived state computer that runs the interpreter
-		// on copied EPackages, not on the original ones
-		val copiedEPackagesMap =
-			new EdeltaCopiedEPackagesMap(copiedEPackages.toMap[name])
-		interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap)
+		interpreter.evaluateModifyEcoreOperations(program)
 		val packageName = it.epackage.name
-		val epackage = copiedEPackagesMap.get(packageName)
+		val epackage = derivedStateHelper
+			.getCopiedEPackagesMap(program.eResource).get(packageName)
 		testExecutor.apply(epackage)
 	}
 
 	def private interpretProgram(EdeltaProgram program) {
-		// mimic the behavior of derived state computer that runs the interpreter
-		// on copied EPackages, not on the original ones
-		val copiedEPackagesMap =
-			new EdeltaCopiedEPackagesMap(program.copiedEPackages.toMap[name])
-		interpreter.evaluateModifyEcoreOperations(program, copiedEPackagesMap)
-		return copiedEPackagesMap
+		interpreter.evaluateModifyEcoreOperations(program)
+		return derivedStateHelper
+			.getCopiedEPackagesMap(program.eResource)
 	}
 
 	private def void assertEcoreRefExpElementMapsToXExpression(

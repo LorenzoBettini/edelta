@@ -1,5 +1,6 @@
 package edelta.resource.derivedstate;
 
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.xtext.EcoreUtil2.getContainerOfType;
 
 import java.util.Objects;
@@ -18,6 +19,8 @@ import com.google.inject.name.Named;
 
 import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
+import edelta.edelta.EdeltaProgram;
+import edelta.lib.EdeltaEcoreUtil;
 
 /**
  * Provides access (and possibly install) to the {@link EdeltaDerivedState}.
@@ -51,6 +54,43 @@ public class EdeltaDerivedStateHelper {
 
 	public EdeltaCopiedEPackagesMap getCopiedEPackagesMap(final Resource resource) {
 		return getOrInstallAdapter(resource).getCopiedEPackagesMap();
+	}
+
+	/**
+	 * Copies all imported {@link EPackage}s of the passed {@link EdeltaProgram} in
+	 * the {@link EdeltaCopiedEPackagesMap} in the derived state of the program's
+	 * {@link Resource}; the copied {@link EPackage}s are also inserted in the
+	 * resource.
+	 * 
+	 * @param program
+	 * @return
+	 */
+	public EdeltaCopiedEPackagesMap copyEPackages(EdeltaProgram program) {
+		return copyEPackages(program, program.eResource());
+	}
+
+	/**
+	 * Copies all imported {@link EPackage}s of the passed {@link EdeltaProgram} in
+	 * the {@link EdeltaCopiedEPackagesMap} in the derived state of the specified
+	 * {@link Resource}; the copied {@link EPackage}s are also inserted in the
+	 * specified resource.
+	 * 
+	 * @param program
+	 * @param resource
+	 * @return
+	 */
+	public EdeltaCopiedEPackagesMap copyEPackages(EdeltaProgram program, final Resource resource) {
+		final var packages = program.getMetamodels().stream()
+			.distinct()
+			.collect(toList());
+		final var copiedEPackagesMap = getCopiedEPackagesMap(resource);
+		var copies = EdeltaEcoreUtil.copyEPackages(packages);
+		for (var copy : copies) {
+			copiedEPackagesMap.computeIfAbsent(copy.getName(), key -> copy);
+		}
+		// we must add the copied EPackages to the resource
+		resource.getContents().addAll(copiedEPackagesMap.values());
+		return copiedEPackagesMap;
 	}
 
 	public EdeltaEcoreReferenceState getEcoreReferenceState(EdeltaEcoreReference edeltaEcoreReference) {

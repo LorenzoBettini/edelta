@@ -40,8 +40,6 @@ import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationResult;
 import org.eclipse.xtext.xbase.interpreter.impl.InterpreterCanceledException;
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 import edelta.compiler.EdeltaCompilerUtil;
@@ -128,18 +126,17 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		this.interpreterTimeout = interpreterTimeout;
 	}
 
-	public void evaluateModifyEcoreOperations(final EdeltaProgram program, final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
+	public void evaluateModifyEcoreOperations(final EdeltaProgram program) {
 		this.currentProgram = program;
+		final var eResource = program.eResource();
+		final var copiedEPackagesMap = derivedStateHelper
+				.getCopiedEPackagesMap(eResource);
 		final var copiedEPackages = copiedEPackagesMap.values();
 		thisObject = new EdeltaInterpreterEdeltaImpl
-			(Lists.newArrayList(
-				Iterables.concat(copiedEPackages,
-						program.getMetamodels())),
-			diagnosticHelper);
+			(copiedEPackages, diagnosticHelper);
 		useAsFields = newHashMap();
 		var filteredOperations =
 			edeltaInterpreterHelper.filterOperations(program.getModifyEcoreOperations());
-		final var eResource = program.eResource();
 		listener = new EdeltaInterpreterResourceListener(cache, eResource,
 				derivedStateHelper,
 				diagnosticHelper);
@@ -513,10 +510,20 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			} else {
 				// create a new interpreter since the edelta operation is in
 				// another edelta source file.
+				// first copy the other program's imported metamodels into
+				// the current program's derived state
+				final var eResource = currentProgram.eResource();
+				final var copiedEPackagesMap = derivedStateHelper
+						.copyEPackages(containingProgram, eResource);
+				// this object is also recreated with possible new copied packages
+				thisObject = new EdeltaInterpreterEdeltaImpl
+					(copiedEPackagesMap.values(), diagnosticHelper);
+
 				var newInterpreter =
 						edeltaInterpreterFactory.create(containingProgram.eResource());
 				return newInterpreter
-					.evaluateEdeltaOperation(thisObject, containingProgram, edeltaOperation, argumentValues, indicator);
+					.evaluateEdeltaOperation(thisObject,
+						containingProgram, edeltaOperation, argumentValues, indicator);
 			}
 		}
 		return super.invokeOperation(

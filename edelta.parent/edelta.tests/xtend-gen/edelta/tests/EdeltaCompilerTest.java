@@ -2688,6 +2688,253 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testExecutionOfModificationsOfMetamodelsAcrossSeveralFilesIntroducingDepOnAnotherMetamodel() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EClass");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("package test1");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"simple\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("def setBaseClass(EClass c) : void {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("c.getESuperTypes += ecoreref(SimpleClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("import org.eclipse.emf.ecore.EClass");
+    _builder_1.newLine();
+    _builder_1.append("import test1.MyFile0");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("package test2");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("metamodel \"anothersimple\"");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("use test1.MyFile0 as extension my");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("modifyEcore aModificationTest epackage anothersimple {");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("// the other file\'s operation will set the");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("// base class of this package class to another package class");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("ecoreref(AnotherSimpleClass).setBaseClass");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("// now anothersimple refers to simple");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("// now modify the abstract property of the");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("// superclass in the other package");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("ecoreref(AnotherSimpleClass).ESuperTypes.head.abstract = true");
+    _builder_1.newLine();
+    _builder_1.append("}");
+    _builder_1.newLine();
+    StringConcatenation _builder_2 = new StringConcatenation();
+    _builder_2.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+    _builder_2.newLine();
+    _builder_2.append("<ecore:EPackage xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
+    _builder_2.newLine();
+    _builder_2.append("    ");
+    _builder_2.append("xmlns:ecore=\"http://www.eclipse.org/emf/2002/Ecore\" name=\"simple\" nsURI=\"http://www.simple\" nsPrefix=\"simple\">");
+    _builder_2.newLine();
+    _builder_2.append("  ");
+    _builder_2.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"SimpleClass\" abstract=\"true\"/>");
+    _builder_2.newLine();
+    _builder_2.append("</ecore:EPackage>");
+    _builder_2.newLine();
+    Pair<CharSequence, CharSequence> _mappedTo = Pair.<CharSequence, CharSequence>of(EdeltaAbstractTest.SIMPLE_ECORE, _builder_2.toString());
+    StringConcatenation _builder_3 = new StringConcatenation();
+    _builder_3.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+    _builder_3.newLine();
+    _builder_3.append("<ecore:EPackage xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
+    _builder_3.newLine();
+    _builder_3.append("    ");
+    _builder_3.append("xmlns:ecore=\"http://www.eclipse.org/emf/2002/Ecore\" name=\"anothersimple\" nsURI=\"http://www.anothersimple\" nsPrefix=\"anothersimple\">");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"AnotherSimpleClass\" eSuperTypes=\"Simple.ecore#//SimpleClass\"/>");
+    _builder_3.newLine();
+    _builder_3.append("</ecore:EPackage>");
+    _builder_3.newLine();
+    Pair<CharSequence, CharSequence> _mappedTo_1 = Pair.<CharSequence, CharSequence>of(EdeltaAbstractTest.ANOTHER_SIMPLE_ECORE, _builder_3.toString());
+    this.checkCompiledCodeExecutionWithSeveralFiles(
+      Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList(EdeltaAbstractTest.SIMPLE_ECORE, EdeltaAbstractTest.ANOTHER_SIMPLE_ECORE)), 
+      Collections.<CharSequence>unmodifiableList(CollectionLiterals.<CharSequence>newArrayList(_builder, _builder_1)), 
+      "test2.MyFile1", 
+      Collections.<Pair<CharSequence, CharSequence>>unmodifiableList(CollectionLiterals.<Pair<CharSequence, CharSequence>>newArrayList(_mappedTo, _mappedTo_1)), 
+      true);
+  }
+  
+  @Test
+  public void testExecutionOfModificationsOfMetamodelsAcrossSeveralFilesIntroducingMutualDepOnAnotherMetamodel() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EClass");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("package test1");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"simple\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("def setBaseClass(EClass c) : void {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("c.getESuperTypes += ecoreref(SimpleClass)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("import org.eclipse.emf.ecore.EClass");
+    _builder_1.newLine();
+    _builder_1.append("import test1.MyFile0");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("package test2");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("metamodel \"anothersimple\"");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("use test1.MyFile0 as extension my");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("modifyEcore aModificationTest epackage anothersimple {");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("// the other file\'s operation will set the");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("// base class of this package class to another package class");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("ecoreref(AnotherSimpleClass).setBaseClass");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("// now anothersimple refers to simple (created dependency)");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("val referenceToSuperClass = ecoreref(AnotherSimpleClass).ESuperTypes.head");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("// also add a reference to the other epackage");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("ecoreref(AnotherSimpleClass)");
+    _builder_1.newLine();
+    _builder_1.append("\t\t");
+    _builder_1.append(".addNewEReference(");
+    _builder_1.newLine();
+    _builder_1.append("\t\t\t");
+    _builder_1.append("\"aReferenceToSimpleClass\",");
+    _builder_1.newLine();
+    _builder_1.append("\t\t\t");
+    _builder_1.append("referenceToSuperClass");
+    _builder_1.newLine();
+    _builder_1.append("\t\t");
+    _builder_1.append(")");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("// now modify the superclass in the other package");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("// introducing a mutual dependency");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("referenceToSuperClass");
+    _builder_1.newLine();
+    _builder_1.append("\t\t");
+    _builder_1.append(".addNewEReference(\"aReferenceToAnotherSimpleClass\", ecoreref(AnotherSimpleClass)) [");
+    _builder_1.newLine();
+    _builder_1.append("\t\t\t");
+    _builder_1.append("// also make the references bidirectional");
+    _builder_1.newLine();
+    _builder_1.append("\t\t\t");
+    _builder_1.append("EOpposite = ecoreref(aReferenceToSimpleClass)");
+    _builder_1.newLine();
+    _builder_1.append("\t\t\t");
+    _builder_1.append("ecoreref(aReferenceToSimpleClass).EOpposite = it");
+    _builder_1.newLine();
+    _builder_1.append("\t\t");
+    _builder_1.append("]");
+    _builder_1.newLine();
+    _builder_1.append("}");
+    _builder_1.newLine();
+    StringConcatenation _builder_2 = new StringConcatenation();
+    _builder_2.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+    _builder_2.newLine();
+    _builder_2.append("<ecore:EPackage xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
+    _builder_2.newLine();
+    _builder_2.append("    ");
+    _builder_2.append("xmlns:ecore=\"http://www.eclipse.org/emf/2002/Ecore\" name=\"simple\" nsURI=\"http://www.simple\" nsPrefix=\"simple\">");
+    _builder_2.newLine();
+    _builder_2.append("  ");
+    _builder_2.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"SimpleClass\">");
+    _builder_2.newLine();
+    _builder_2.append("    ");
+    _builder_2.append("<eStructuralFeatures xsi:type=\"ecore:EReference\" name=\"aReferenceToAnotherSimpleClass\"");
+    _builder_2.newLine();
+    _builder_2.append("        ");
+    _builder_2.append("eType=\"ecore:EClass AnotherSimple.ecore#//AnotherSimpleClass\" eOpposite=\"AnotherSimple.ecore#//AnotherSimpleClass/aReferenceToSimpleClass\"/>");
+    _builder_2.newLine();
+    _builder_2.append("  ");
+    _builder_2.append("</eClassifiers>");
+    _builder_2.newLine();
+    _builder_2.append("</ecore:EPackage>");
+    _builder_2.newLine();
+    Pair<CharSequence, CharSequence> _mappedTo = Pair.<CharSequence, CharSequence>of(EdeltaAbstractTest.SIMPLE_ECORE, _builder_2.toString());
+    StringConcatenation _builder_3 = new StringConcatenation();
+    _builder_3.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+    _builder_3.newLine();
+    _builder_3.append("<ecore:EPackage xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
+    _builder_3.newLine();
+    _builder_3.append("    ");
+    _builder_3.append("xmlns:ecore=\"http://www.eclipse.org/emf/2002/Ecore\" name=\"anothersimple\" nsURI=\"http://www.anothersimple\" nsPrefix=\"anothersimple\">");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"AnotherSimpleClass\" eSuperTypes=\"Simple.ecore#//SimpleClass\">");
+    _builder_3.newLine();
+    _builder_3.append("    ");
+    _builder_3.append("<eStructuralFeatures xsi:type=\"ecore:EReference\" name=\"aReferenceToSimpleClass\"");
+    _builder_3.newLine();
+    _builder_3.append("        ");
+    _builder_3.append("eType=\"ecore:EClass Simple.ecore#//SimpleClass\" eOpposite=\"Simple.ecore#//SimpleClass/aReferenceToAnotherSimpleClass\"/>");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("</eClassifiers>");
+    _builder_3.newLine();
+    _builder_3.append("</ecore:EPackage>");
+    _builder_3.newLine();
+    Pair<CharSequence, CharSequence> _mappedTo_1 = Pair.<CharSequence, CharSequence>of(EdeltaAbstractTest.ANOTHER_SIMPLE_ECORE, _builder_3.toString());
+    this.checkCompiledCodeExecutionWithSeveralFiles(
+      Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList(EdeltaAbstractTest.SIMPLE_ECORE, EdeltaAbstractTest.ANOTHER_SIMPLE_ECORE)), 
+      Collections.<CharSequence>unmodifiableList(CollectionLiterals.<CharSequence>newArrayList(_builder, _builder_1)), 
+      "test2.MyFile1", 
+      Collections.<Pair<CharSequence, CharSequence>>unmodifiableList(CollectionLiterals.<Pair<CharSequence, CharSequence>>newArrayList(_mappedTo, _mappedTo_1)), 
+      true);
+  }
+  
+  @Test
   public void testExecutionOfComplexOperationsWithSubPackages() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
@@ -3543,23 +3790,27 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   
   private ResourceSet createResourceSet(final CharSequence... inputs) {
     try {
-      ArrayList<Pair<String, ? extends CharSequence>> _newArrayList = CollectionLiterals.<Pair<String, ? extends CharSequence>>newArrayList();
-      final Procedure1<ArrayList<Pair<String, ? extends CharSequence>>> _function = (ArrayList<Pair<String, ? extends CharSequence>> list) -> {
-        final Procedure2<CharSequence, Integer> _function_1 = (CharSequence e, Integer i) -> {
-          String _primaryFileExtension = this.extensionProvider.getPrimaryFileExtension();
-          String _plus = ((("MyFile" + i) + ".") + _primaryFileExtension);
-          Pair<String, CharSequence> _mappedTo = Pair.<String, CharSequence>of(_plus, e);
-          list.add(_mappedTo);
-        };
-        IterableExtensions.<CharSequence>forEach(((Iterable<CharSequence>)Conversions.doWrapArray(inputs)), _function_1);
-      };
-      final ArrayList<Pair<String, ? extends CharSequence>> pairs = ObjectExtensions.<ArrayList<Pair<String, ? extends CharSequence>>>operator_doubleArrow(_newArrayList, _function);
+      final ArrayList<Pair<String, CharSequence>> pairs = this.createInputPairs(inputs);
       final ResourceSet rs = this.compilationTestHelper.resourceSet(((Pair<String, ? extends CharSequence>[])Conversions.unwrapArray(pairs, Pair.class)));
       this.addEPackageForTests(rs);
       return rs;
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
+  }
+  
+  private ArrayList<Pair<String, CharSequence>> createInputPairs(final CharSequence[] inputs) {
+    ArrayList<Pair<String, CharSequence>> _newArrayList = CollectionLiterals.<Pair<String, CharSequence>>newArrayList();
+    final Procedure1<ArrayList<Pair<String, CharSequence>>> _function = (ArrayList<Pair<String, CharSequence>> list) -> {
+      final Procedure2<CharSequence, Integer> _function_1 = (CharSequence e, Integer i) -> {
+        String _primaryFileExtension = this.extensionProvider.getPrimaryFileExtension();
+        String _plus = ((("MyFile" + i) + ".") + _primaryFileExtension);
+        Pair<String, CharSequence> _mappedTo = Pair.<String, CharSequence>of(_plus, e);
+        list.add(_mappedTo);
+      };
+      IterableExtensions.<CharSequence>forEach(((Iterable<CharSequence>)Conversions.doWrapArray(inputs)), _function_1);
+    };
+    return ObjectExtensions.<ArrayList<Pair<String, CharSequence>>>operator_doubleArrow(_newArrayList, _function);
   }
   
   private ResourceSet createResourceSetWithEcores(final List<String> ecoreNames, final CharSequence input) {
@@ -3581,6 +3832,30 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
       List<Pair<String, String>> _map = ListExtensions.<String, Pair<String, String>>map(ecoreNames, _function);
       Iterables.<Pair<String, ? extends CharSequence>>addAll(pairs, _map);
       final ResourceSet rs = this.compilationTestHelper.resourceSet(((Pair<String, ? extends CharSequence>[])Conversions.unwrapArray(pairs, Pair.class)));
+      return rs;
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  private ResourceSet createResourceSetWithEcoresAndSeveralInputs(final List<String> ecoreNames, final List<CharSequence> inputs) {
+    try {
+      String _loadFile = EdeltaTestUtils.loadFile((EdeltaAbstractTest.METAMODEL_PATH + EdeltaAbstractTest.ECORE_ECORE));
+      Pair<String, String> _mappedTo = Pair.<String, String>of(EdeltaAbstractTest.ECORE_ECORE, _loadFile);
+      final ArrayList<Pair<String, String>> ecorePairs = CollectionLiterals.<Pair<String, String>>newArrayList(_mappedTo);
+      final Function1<String, Pair<String, String>> _function = (String ecoreName) -> {
+        try {
+          String _loadFile_1 = EdeltaTestUtils.loadFile((EdeltaAbstractTest.METAMODEL_PATH + ecoreName));
+          return Pair.<String, String>of(ecoreName, _loadFile_1);
+        } catch (Throwable _e) {
+          throw Exceptions.sneakyThrow(_e);
+        }
+      };
+      List<Pair<String, String>> _map = ListExtensions.<String, Pair<String, String>>map(ecoreNames, _function);
+      Iterables.<Pair<String, String>>addAll(ecorePairs, _map);
+      final ArrayList<Pair<String, CharSequence>> inputPairs = this.createInputPairs(((CharSequence[])Conversions.unwrapArray(inputs, CharSequence.class)));
+      Iterable<Pair<String, ? extends CharSequence>> _plus = Iterables.<Pair<String, ? extends CharSequence>>concat(ecorePairs, inputPairs);
+      final ResourceSet rs = this.compilationTestHelper.resourceSet(((Pair<String, ? extends CharSequence>[])Conversions.unwrapArray(_plus, Pair.class)));
       return rs;
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
@@ -3615,31 +3890,51 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     this.wipeModifiedDirectoryContents();
     final ResourceSet rs = this.createResourceSetWithEcores(ecoreNames, input);
     final IAcceptor<CompilationTestHelper.Result> _function = (CompilationTestHelper.Result it) -> {
-      try {
-        if (checkValidationErrors) {
-          this.assertNoValidationErrors(it);
-        }
-        if (checkValidationErrors) {
-          this.assertGeneratedJavaCodeCompiles(it);
-        }
-        final Class<?> genClass = it.getCompiledClass();
-        final Object edeltaObj = genClass.getDeclaredConstructor().newInstance();
-        for (final String ecoreName : ecoreNames) {
-          this._reflectExtensions.invoke(edeltaObj, "loadEcoreFile", new Object[] { (EdeltaAbstractTest.METAMODEL_PATH + ecoreName) });
-        }
-        this._reflectExtensions.invoke(edeltaObj, "execute");
-        this._reflectExtensions.invoke(edeltaObj, "saveModifiedEcores", new Object[] { EdeltaCompilerTest.MODIFIED });
-        for (final Pair<CharSequence, CharSequence> expected : expectedModifiedEcores) {
-          CharSequence _key = expected.getKey();
-          String _plus = ((EdeltaCompilerTest.MODIFIED + "/") + _key);
-          EdeltaTestUtils.compareSingleFileContents(_plus, 
-            expected.getValue().toString());
-        }
-      } catch (Throwable _e) {
-        throw Exceptions.sneakyThrow(_e);
+      if (checkValidationErrors) {
+        this.assertNoValidationErrors(it);
       }
+      if (checkValidationErrors) {
+        this.assertGeneratedJavaCodeCompiles(it);
+      }
+      final Class<?> genClass = it.getCompiledClass();
+      this.checkExecutionAndAssertExpectedModifiedEcores(genClass, ecoreNames, expectedModifiedEcores);
     };
     this.compilationTestHelper.compile(rs, _function);
+  }
+  
+  private void checkCompiledCodeExecutionWithSeveralFiles(final List<String> ecoreNames, final List<CharSequence> inputs, final String classToExecute, final List<Pair<CharSequence, CharSequence>> expectedModifiedEcores, final boolean checkValidationErrors) {
+    this.wipeModifiedDirectoryContents();
+    final ResourceSet rs = this.createResourceSetWithEcoresAndSeveralInputs(ecoreNames, inputs);
+    final IAcceptor<CompilationTestHelper.Result> _function = (CompilationTestHelper.Result it) -> {
+      if (checkValidationErrors) {
+        this.assertNoValidationErrors(it);
+      }
+      if (checkValidationErrors) {
+        this.assertGeneratedJavaCodeCompiles(it);
+      }
+      final Class<?> genClass = it.getCompiledClass(classToExecute);
+      this.checkExecutionAndAssertExpectedModifiedEcores(genClass, ecoreNames, expectedModifiedEcores);
+    };
+    this.compilationTestHelper.compile(rs, _function);
+  }
+  
+  private void checkExecutionAndAssertExpectedModifiedEcores(final Class<?> genClass, final List<String> ecoreNames, final List<Pair<CharSequence, CharSequence>> expectedModifiedEcores) {
+    try {
+      final Object edeltaObj = genClass.getDeclaredConstructor().newInstance();
+      for (final String ecoreName : ecoreNames) {
+        this._reflectExtensions.invoke(edeltaObj, "loadEcoreFile", new Object[] { (EdeltaAbstractTest.METAMODEL_PATH + ecoreName) });
+      }
+      this._reflectExtensions.invoke(edeltaObj, "execute");
+      this._reflectExtensions.invoke(edeltaObj, "saveModifiedEcores", new Object[] { EdeltaCompilerTest.MODIFIED });
+      for (final Pair<CharSequence, CharSequence> expected : expectedModifiedEcores) {
+        CharSequence _key = expected.getKey();
+        String _plus = ((EdeltaCompilerTest.MODIFIED + "/") + _key);
+        EdeltaTestUtils.compareSingleFileContents(_plus, 
+          expected.getValue().toString());
+      }
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   private void wipeModifiedDirectoryContents() {

@@ -1195,7 +1195,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testCompilationOfRenameReferencesAcrossEPackagesSingleModifyEcore() {
-		// it is crucial to use real ecore files so that we mimick what happens in
+		// it is crucial to use real ecore files so that we mimic what happens in
 		// the workbench and make sure that original ecores are not modified.
 		val rs = createResourceSetWithEcores(
 		#[TEST1_REFS_ECORE, TEST2_REFS_ECORE],
@@ -1298,6 +1298,147 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				    <eStructuralFeatures xsi:type="ecore:EReference" name="renamedPersons" upperBound="-1"
 				        eType="ecore:EClass TestEcoreForReferences1.ecore#//Person" eOpposite="TestEcoreForReferences1.ecore#//Person/renamedWorks"/>
 				    <eStructuralFeatures xsi:type="ecore:EAttribute" name="address" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+				  </eClassifiers>
+				</ecore:EPackage>
+				'''
+			],
+			true
+		)
+	}
+
+	@Test
+	def void testExecutionOfModificationsOfMetamodelsAcrossSeveralFilesIntroducingDepOnAnotherMetamodel() {
+		checkCompiledCodeExecutionWithSeveralFiles(
+			#[SIMPLE_ECORE, ANOTHER_SIMPLE_ECORE],
+			#[
+				'''
+					import org.eclipse.emf.ecore.EClass
+					
+					package test1
+					
+					metamodel "simple"
+					
+					def setBaseClass(EClass c) : void {
+						c.getESuperTypes += ecoreref(SimpleClass)
+					}
+				''',
+				'''
+					import org.eclipse.emf.ecore.EClass
+					import test1.MyFile0
+					
+					package test2
+					
+					metamodel "anothersimple"
+					
+					use test1.MyFile0 as extension my
+					
+					modifyEcore aModificationTest epackage anothersimple {
+						// the other file's operation will set the
+						// base class of this package class to another package class
+						ecoreref(AnotherSimpleClass).setBaseClass
+						// now anothersimple refers to simple
+						// now modify the abstract property of the
+						// superclass in the other package
+						ecoreref(AnotherSimpleClass).ESuperTypes.head.abstract = true
+					}
+				'''
+			],
+			"test2.MyFile1",
+			#[
+				SIMPLE_ECORE ->
+				'''
+				<?xml version="1.0" encoding="UTF-8"?>
+				<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="simple" nsURI="http://www.simple" nsPrefix="simple">
+				  <eClassifiers xsi:type="ecore:EClass" name="SimpleClass" abstract="true"/>
+				</ecore:EPackage>
+				''',
+				ANOTHER_SIMPLE_ECORE ->
+				'''
+				<?xml version="1.0" encoding="UTF-8"?>
+				<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="anothersimple" nsURI="http://www.anothersimple" nsPrefix="anothersimple">
+				  <eClassifiers xsi:type="ecore:EClass" name="AnotherSimpleClass" eSuperTypes="Simple.ecore#//SimpleClass"/>
+				</ecore:EPackage>
+				'''
+			],
+			true
+		)
+	}
+
+	@Test
+	def void testExecutionOfModificationsOfMetamodelsAcrossSeveralFilesIntroducingMutualDepOnAnotherMetamodel() {
+		checkCompiledCodeExecutionWithSeveralFiles(
+			#[SIMPLE_ECORE, ANOTHER_SIMPLE_ECORE],
+			#[
+				'''
+					import org.eclipse.emf.ecore.EClass
+					
+					package test1
+					
+					metamodel "simple"
+					
+					def setBaseClass(EClass c) : void {
+						c.getESuperTypes += ecoreref(SimpleClass)
+					}
+				''',
+				'''
+					import org.eclipse.emf.ecore.EClass
+					import test1.MyFile0
+					
+					package test2
+					
+					metamodel "anothersimple"
+					
+					use test1.MyFile0 as extension my
+					
+					modifyEcore aModificationTest epackage anothersimple {
+						// the other file's operation will set the
+						// base class of this package class to another package class
+						ecoreref(AnotherSimpleClass).setBaseClass
+						// now anothersimple refers to simple (created dependency)
+					
+						val referenceToSuperClass = ecoreref(AnotherSimpleClass).ESuperTypes.head
+					
+						// also add a reference to the other epackage
+						ecoreref(AnotherSimpleClass)
+							.addNewEReference(
+								"aReferenceToSimpleClass",
+								referenceToSuperClass
+							)
+					
+						// now modify the superclass in the other package
+						// introducing a mutual dependency
+						referenceToSuperClass
+							.addNewEReference("aReferenceToAnotherSimpleClass", ecoreref(AnotherSimpleClass)) [
+								// also make the references bidirectional
+								EOpposite = ecoreref(aReferenceToSimpleClass)
+								ecoreref(aReferenceToSimpleClass).EOpposite = it
+							]
+					}
+				'''
+			],
+			"test2.MyFile1",
+			#[
+				SIMPLE_ECORE ->
+				'''
+				<?xml version="1.0" encoding="UTF-8"?>
+				<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="simple" nsURI="http://www.simple" nsPrefix="simple">
+				  <eClassifiers xsi:type="ecore:EClass" name="SimpleClass">
+				    <eStructuralFeatures xsi:type="ecore:EReference" name="aReferenceToAnotherSimpleClass"
+				        eType="ecore:EClass AnotherSimple.ecore#//AnotherSimpleClass" eOpposite="AnotherSimple.ecore#//AnotherSimpleClass/aReferenceToSimpleClass"/>
+				  </eClassifiers>
+				</ecore:EPackage>
+				''',
+				ANOTHER_SIMPLE_ECORE ->
+				'''
+				<?xml version="1.0" encoding="UTF-8"?>
+				<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="anothersimple" nsURI="http://www.anothersimple" nsPrefix="anothersimple">
+				  <eClassifiers xsi:type="ecore:EClass" name="AnotherSimpleClass" eSuperTypes="Simple.ecore#//SimpleClass">
+				    <eStructuralFeatures xsi:type="ecore:EReference" name="aReferenceToSimpleClass"
+				        eType="ecore:EClass Simple.ecore#//SimpleClass" eOpposite="Simple.ecore#//SimpleClass/aReferenceToAnotherSimpleClass"/>
 				  </eClassifiers>
 				</ecore:EPackage>
 				'''
@@ -1721,16 +1862,20 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	def private createResourceSet(CharSequence... inputs) {
-		val pairs = newArrayList() => [
+		val pairs = createInputPairs(inputs)
+		val rs = resourceSet(pairs)
+		addEPackageForTests(rs)
+		return rs
+	}
+
+	def private createInputPairs(CharSequence[] inputs) {
+		newArrayList() => [
 			list |
 			inputs.forEach[e, i|
 				list += "MyFile" + i + "." + 
 					extensionProvider.getPrimaryFileExtension() -> e
 			]
 		]
-		val rs = resourceSet(pairs)
-		addEPackageForTests(rs)
-		return rs
 	}
 
 	def private createResourceSetWithEcores(List<String> ecoreNames, CharSequence input) {
@@ -1743,6 +1888,18 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			ecoreNames.map[ecoreName |
 				ecoreName -> EdeltaTestUtils.loadFile(METAMODEL_PATH + ecoreName)]
 		val rs = resourceSet(pairs)
+		return rs
+	}
+
+	def private createResourceSetWithEcoresAndSeveralInputs(List<String> ecoreNames, List<CharSequence> inputs) {
+		val ecorePairs = newArrayList(
+			ECORE_ECORE -> EdeltaTestUtils.loadFile(METAMODEL_PATH + ECORE_ECORE)
+		)
+		ecorePairs +=
+			ecoreNames.map[ecoreName |
+				ecoreName -> EdeltaTestUtils.loadFile(METAMODEL_PATH + ecoreName)]
+		val inputPairs = createInputPairs(inputs)
+		val rs = resourceSet(ecorePairs + inputPairs)
 		return rs
 	}
 
@@ -1781,20 +1938,43 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				assertGeneratedJavaCodeCompiles
 			}
 			val genClass = compiledClass
-			val edeltaObj = genClass.getDeclaredConstructor().newInstance()
-			// load ecore files
-			for (ecoreName : ecoreNames) {
-				edeltaObj.invoke("loadEcoreFile", #[METAMODEL_PATH + ecoreName])
-			}
-			edeltaObj.invoke("execute")
-			edeltaObj.invoke("saveModifiedEcores", #[MODIFIED])
-			for (expected : expectedModifiedEcores) {
-				compareSingleFileContents(
-					MODIFIED+"/"+expected.key,
-					expected.value.toString
-				)
-			}
+			checkExecutionAndAssertExpectedModifiedEcores(genClass, ecoreNames, expectedModifiedEcores)
 		]
+	}
+
+	def private checkCompiledCodeExecutionWithSeveralFiles(List<String> ecoreNames,
+			List<CharSequence> inputs,
+			String classToExecute,
+			List<Pair<CharSequence, CharSequence>> expectedModifiedEcores,
+			boolean checkValidationErrors) {
+		wipeModifiedDirectoryContents
+		val rs = createResourceSetWithEcoresAndSeveralInputs(ecoreNames, inputs)
+		rs.compile [
+			if (checkValidationErrors) {
+				assertNoValidationErrors
+			}
+			if (checkValidationErrors) {
+				assertGeneratedJavaCodeCompiles
+			}
+			val genClass = getCompiledClass(classToExecute)
+			checkExecutionAndAssertExpectedModifiedEcores(genClass, ecoreNames, expectedModifiedEcores)
+		]
+	}
+
+	private def void checkExecutionAndAssertExpectedModifiedEcores(Class<?> genClass, List<String> ecoreNames, List<Pair<CharSequence, CharSequence>> expectedModifiedEcores) {
+		val edeltaObj = genClass.getDeclaredConstructor().newInstance()
+		// load ecore files
+		for (ecoreName : ecoreNames) {
+			edeltaObj.invoke("loadEcoreFile", #[METAMODEL_PATH + ecoreName])
+		}
+		edeltaObj.invoke("execute")
+		edeltaObj.invoke("saveModifiedEcores", #[MODIFIED])
+		for (expected : expectedModifiedEcores) {
+			compareSingleFileContents(
+				MODIFIED+"/"+expected.key,
+				expected.value.toString
+			)
+		}
 	}
 
 	def private void wipeModifiedDirectoryContents() {

@@ -1,6 +1,6 @@
 package edelta.interpreter;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -22,10 +22,18 @@ public class EdeltaInterpreterEdeltaImpl extends AbstractEdelta {
 
 	private EdeltaInterpreterDiagnosticHelper diagnosticHelper;
 
-	public EdeltaInterpreterEdeltaImpl(List<EPackage> ePackages,
+	/**
+	 * Uses the passed {@link EPackage}s to create an {@link EdeltaEPackageManager};
+	 * if an {@link EPackage} appears several times in the list, only the first
+	 * occurrence will be taken into consideration.
+	 * 
+	 * @param copiedEPackages
+	 * @param diagnosticHelper
+	 */
+	public EdeltaInterpreterEdeltaImpl(Collection<EPackage> copiedEPackages,
 			EdeltaInterpreterDiagnosticHelper diagnosticHelper) {
 		super(new EdeltaEPackageManager() {
-			private Map<String, EPackage> packageMap = ePackages.stream().collect(
+			private Map<String, EPackage> packageMap = copiedEPackages.stream().collect(
 					Collectors.toMap(
 							EPackage::getName,
 							Function.identity(),
