@@ -57,6 +57,8 @@ abstract class EdeltaAbstractTest {
 	protected static String PERSON_LIST_ECORE = "PersonList.ecore"
 	protected static String TEST1_REFS_ECORE = "TestEcoreForReferences1.ecore"
 	protected static String TEST2_REFS_ECORE = "TestEcoreForReferences2.ecore"
+	protected static String SIMPLE_ECORE = "Simple.ecore"
+	protected static String ANOTHER_SIMPLE_ECORE = "AnotherSimple.ecore"
 
 	/**
 	 * Parse several input sources using the "foo" EPackage

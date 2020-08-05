@@ -921,7 +921,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testModificationsOfMetamodelsAcrossSeveralFiles() {
+	def void testModificationsOfMetamodelsAcrossSeveralFilesIntroducingDepOnAnotherMetamodel() {
 		val program = parseSeveralWithTestEcores(
 		#[
 		'''
