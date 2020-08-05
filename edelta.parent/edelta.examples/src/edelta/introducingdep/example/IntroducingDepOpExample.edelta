@@ -1,0 +1,9 @@
+import org.eclipse.emf.ecore.EClass
+
+package edelta.introducingdep.example
+
+metamodel "simple"
+
+def setBaseClass(EClass c) : void {
+	c.getESuperTypes += ecoreref(SimpleClass)
+}

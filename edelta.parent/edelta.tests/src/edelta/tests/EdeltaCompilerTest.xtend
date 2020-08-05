@@ -1367,6 +1367,87 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testExecutionOfModificationsOfMetamodelsAcrossSeveralFilesIntroducingMutualDepOnAnotherMetamodel() {
+		checkCompiledCodeExecutionWithSeveralFiles(
+			#[SIMPLE_ECORE, ANOTHER_SIMPLE_ECORE],
+			#[
+				'''
+					import org.eclipse.emf.ecore.EClass
+					
+					package test1
+					
+					metamodel "simple"
+					
+					def setBaseClass(EClass c) : void {
+						c.getESuperTypes += ecoreref(SimpleClass)
+					}
+				''',
+				'''
+					import org.eclipse.emf.ecore.EClass
+					import test1.MyFile0
+					
+					package test2
+					
+					metamodel "anothersimple"
+					
+					use test1.MyFile0 as extension my
+					
+					modifyEcore aModificationTest epackage anothersimple {
+						// the other file's operation will set the
+						// base class of this package class to another package class
+						ecoreref(AnotherSimpleClass).setBaseClass
+						// now anothersimple refers to simple (created dependency)
+					
+						val referenceToSuperClass = ecoreref(AnotherSimpleClass).ESuperTypes.head
+					
+						// also add a reference to the other epackage
+						ecoreref(AnotherSimpleClass)
+							.addNewEReference(
+								"aReferenceToSimpleClass",
+								referenceToSuperClass
+							)
+					
+						// now modify the superclass in the other package
+						// introducing a mutual dependency
+						referenceToSuperClass
+							.addNewEReference("aReferenceToAnotherSimpleClass", ecoreref(AnotherSimpleClass)) [
+								// also make the references bidirectional
+								EOpposite = ecoreref(aReferenceToSimpleClass)
+								ecoreref(aReferenceToSimpleClass).EOpposite = it
+							]
+					}
+				'''
+			],
+			"test2.MyFile1",
+			#[
+				SIMPLE_ECORE ->
+				'''
+				<?xml version="1.0" encoding="UTF-8"?>
+				<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="simple" nsURI="http://www.simple" nsPrefix="simple">
+				  <eClassifiers xsi:type="ecore:EClass" name="SimpleClass">
+				    <eStructuralFeatures xsi:type="ecore:EReference" name="aReferenceToAnotherSimpleClass"
+				        eType="ecore:EClass AnotherSimple.ecore#//AnotherSimpleClass" eOpposite="AnotherSimple.ecore#//AnotherSimpleClass/aReferenceToSimpleClass"/>
+				  </eClassifiers>
+				</ecore:EPackage>
+				''',
+				ANOTHER_SIMPLE_ECORE ->
+				'''
+				<?xml version="1.0" encoding="UTF-8"?>
+				<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="anothersimple" nsURI="http://www.anothersimple" nsPrefix="anothersimple">
+				  <eClassifiers xsi:type="ecore:EClass" name="AnotherSimpleClass" eSuperTypes="Simple.ecore#//SimpleClass">
+				    <eStructuralFeatures xsi:type="ecore:EReference" name="aReferenceToSimpleClass"
+				        eType="ecore:EClass Simple.ecore#//SimpleClass" eOpposite="Simple.ecore#//SimpleClass/aReferenceToAnotherSimpleClass"/>
+				  </eClassifiers>
+				</ecore:EPackage>
+				'''
+			],
+			true
+		)
+	}
+
+	@Test
 	def void testExecutionOfComplexOperationsWithSubPackages() {
 		'''
 			metamodel "foo"
