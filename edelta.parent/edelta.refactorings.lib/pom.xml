@@ -11,18 +11,22 @@
   <packaging>eclipse-plugin</packaging>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <configuration>
+            <filesets combine.children="append">
+              <fileset>
+                <directory>${basedir}/edelta-lib-src-gen</directory>
+              </fileset>
+            </filesets>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clean-plugin</artifactId>
-        <configuration>
-          <filesets combine.children="append">
-            <fileset>
-              <directory>${basedir}/edelta-lib-src-gen</directory>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
       <!-- Main configuration is in the parent POM -->
       <plugin>
         <groupId>io.github.lorenzobettini.edelta</groupId>
