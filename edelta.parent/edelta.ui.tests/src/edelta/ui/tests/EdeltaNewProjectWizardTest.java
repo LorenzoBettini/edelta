@@ -1,6 +1,7 @@
 package edelta.ui.tests;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -82,7 +83,7 @@ public class EdeltaNewProjectWizardTest extends AbstractWorkbenchTest {
 
 	@Test
 	@Flaky
-	public void testEdeltaNewProjectWizard() {
+	public void testEdeltaNewProjectWizard() throws CoreException {
 		System.out.println("*** Executing testEdeltaNewProjectWizard...");
 		System.out.println("Creating new project wizard...");
 		final EdeltaTestableNewProjectWizard wizard = wizardProvider.get();
