@@ -911,6 +911,9 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder.append("    ");
     _builder.append("super(other);");
     _builder.newLine();
+    _builder.append("    ");
+    _builder.append("my = new MyCustomEdelta(other);");
+    _builder.newLine();
     _builder.append("  ");
     _builder.append("}");
     _builder.newLine();
@@ -1005,6 +1008,9 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("    ");
     _builder.append("super(other);");
+    _builder.newLine();
+    _builder.append("    ");
+    _builder.append("my = new MyCustomEdelta(other);");
     _builder.newLine();
     _builder.append("  ");
     _builder.append("}");
@@ -1113,6 +1119,12 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder_1.newLine();
     _builder_1.append("    ");
     _builder_1.append("super(other);");
+    _builder_1.newLine();
+    _builder_1.append("     ");
+    _builder_1.append("= new MyCustomEdelta(other);");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.append("my = new (other);");
     _builder_1.newLine();
     _builder_1.append("  ");
     _builder_1.append("}");
@@ -3157,6 +3169,9 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder_3.append("    ");
     _builder_3.append("super(other);");
     _builder_3.newLine();
+    _builder_3.append("    ");
+    _builder_3.append("my = new MyFile1(other);");
+    _builder_3.newLine();
     _builder_3.append("  ");
     _builder_3.append("}");
     _builder_3.newLine();
@@ -3212,6 +3227,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
       Collections.<Pair<String, CharSequence>>unmodifiableList(CollectionLiterals.<Pair<String, CharSequence>>newArrayList(_mappedTo)));
   }
   
+  @Test
   public void testExecutionOfSeveralFilesWithUseAs() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import org.eclipse.emf.ecore.EClass");
@@ -3305,7 +3321,19 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder_3.append("xmlns:ecore=\"http://www.eclipse.org/emf/2002/Ecore\" name=\"simple\" nsURI=\"http://www.simple\" nsPrefix=\"simple\">");
     _builder_3.newLine();
     _builder_3.append("  ");
-    _builder_3.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"SimpleClass\" abstract=\"true\"/>");
+    _builder_3.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"SimpleClass\">");
+    _builder_3.newLine();
+    _builder_3.append("    ");
+    _builder_3.append("<eStructuralFeatures xsi:type=\"ecore:EAttribute\" name=\"prefixAttr\" eType=\"ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString\"/>");
+    _builder_3.newLine();
+    _builder_3.append("    ");
+    _builder_3.append("<eStructuralFeatures xsi:type=\"ecore:EReference\" name=\"prefixRef\" eType=\"ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject\"");
+    _builder_3.newLine();
+    _builder_3.append("        ");
+    _builder_3.append("containment=\"true\"/>");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("</eClassifiers>");
     _builder_3.newLine();
     _builder_3.append("</ecore:EPackage>");
     _builder_3.newLine();
@@ -3679,6 +3707,9 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("    ");
     _builder.append("super(other);");
+    _builder.newLine();
+    _builder.append("    ");
+    _builder.append("refactorings = new EdeltaRefactorings(other);");
     _builder.newLine();
     _builder.append("  ");
     _builder.append("}");
