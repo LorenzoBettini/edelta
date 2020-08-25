@@ -24,6 +24,8 @@ public class EdeltaBadSmellsResolver extends AbstractEdelta {
   
   public EdeltaBadSmellsResolver(final AbstractEdelta other) {
     super(other);
+    refactorings = new EdeltaRefactorings(other);
+    finder = new EdeltaBadSmellsFinder(other);
   }
   
   /**

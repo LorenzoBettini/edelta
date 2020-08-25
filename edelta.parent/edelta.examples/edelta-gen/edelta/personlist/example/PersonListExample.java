@@ -25,6 +25,7 @@ public class PersonListExample extends AbstractEdelta {
   
   public PersonListExample(final AbstractEdelta other) {
     super(other);
+    refactorings = new EdeltaRefactorings(other);
   }
   
   public void improvePerson(final EPackage it) {

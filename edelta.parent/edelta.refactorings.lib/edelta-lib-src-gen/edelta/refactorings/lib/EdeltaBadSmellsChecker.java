@@ -21,6 +21,7 @@ public class EdeltaBadSmellsChecker extends AbstractEdelta {
   
   public EdeltaBadSmellsChecker(final AbstractEdelta other) {
     super(other);
+    finder = new EdeltaBadSmellsFinder(other);
   }
   
   /**

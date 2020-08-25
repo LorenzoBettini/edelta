@@ -20,6 +20,7 @@ public class PetrinetExample extends AbstractEdelta {
   
   public PetrinetExample(final AbstractEdelta other) {
     super(other);
+    refactorings = new EdeltaRefactorings(other);
   }
   
   public EAttribute addWeightAttribute(final EClass c) {
