@@ -76,6 +76,9 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 				parameters += program.toParameter("other", AbstractEdelta.typeRef)
 				body = '''
 				super(other);
+				«FOR u : program.useAsClauses»
+				«u.name» = new «u.type»(other);
+				«ENDFOR»
 				'''
 			]
 			for (o : program.operations) {
