@@ -458,6 +458,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
+			    my = new MyCustomEdelta(other);
 			  }
 			  
 			  public void aTest(final EPackage it) {
@@ -501,6 +502,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
+			    my = new MyCustomEdelta(other);
 			  }
 			  
 			  public void aTest(final EPackage it) {
@@ -553,6 +555,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
+			     = new MyCustomEdelta(other);
+			    my = new (other);
 			  }
 			  
 			  public void aTest(final EPackage it) {
@@ -1558,6 +1562,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				  
 				  public MyFile2(final AbstractEdelta other) {
 				    super(other);
+				    my = new MyFile1(other);
 				  }
 				  
 				  public void aModificationTest(final EPackage it) {
@@ -1578,6 +1583,75 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				}
 				'''
 			]
+		)
+	}
+
+	@Test
+	def void testExecutionOfSeveralFilesWithUseAs() {
+		checkCompiledCodeExecutionWithSeveralFiles(
+			#[SIMPLE_ECORE],
+			#[
+			'''
+				import org.eclipse.emf.ecore.EClass
+				import org.eclipse.emf.ecore.EcorePackage
+
+				package test1
+				
+				def enrichWithReference(EClass c, String prefix) : void {
+					c.addNewEReference(prefix + "Ref",
+						EcorePackage.eINSTANCE.EObject)
+				}
+			''',
+			'''
+				import org.eclipse.emf.ecore.EClass
+				import org.eclipse.emf.ecore.EcorePackage
+				import test1.MyFile0
+
+				package test2
+				
+				use test1.MyFile0 as extension my
+
+				def enrichWithAttribute(EClass c, String prefix) : void {
+					c.addNewEAttribute(prefix + "Attr",
+						EcorePackage.eINSTANCE.EString)
+					c.enrichWithReference(prefix)
+				}
+			''',
+			'''
+				import org.eclipse.emf.ecore.EClass
+				import test2.MyFile1
+				
+				package test3
+				
+				metamodel "simple"
+				
+				use test2.MyFile1 as extension my
+				
+				modifyEcore aModificationTest epackage simple {
+					ecoreref(SimpleClass)
+						.enrichWithAttribute("prefix")
+					// attribute and reference are added by the calls
+					// to external operations!
+					ecoreref(prefixAttr).changeable = true
+					ecoreref(prefixRef).containment = true
+				}
+			'''],
+			"test3.MyFile2",
+			#[
+				SIMPLE_ECORE ->
+				'''
+				<?xml version="1.0" encoding="UTF-8"?>
+				<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="simple" nsURI="http://www.simple" nsPrefix="simple">
+				  <eClassifiers xsi:type="ecore:EClass" name="SimpleClass">
+				    <eStructuralFeatures xsi:type="ecore:EAttribute" name="prefixAttr" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+				    <eStructuralFeatures xsi:type="ecore:EReference" name="prefixRef" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"
+				        containment="true"/>
+				  </eClassifiers>
+				</ecore:EPackage>
+				'''
+			],
+			true
 		)
 	}
 
@@ -1750,6 +1824,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public Example(final AbstractEdelta other) {
 			    super(other);
+			    refactorings = new EdeltaRefactorings(other);
 			  }
 			  
 			  public void improvePerson(final EPackage it) {

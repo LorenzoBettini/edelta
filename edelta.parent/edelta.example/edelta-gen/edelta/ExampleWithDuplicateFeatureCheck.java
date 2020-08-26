@@ -20,6 +20,7 @@ public class ExampleWithDuplicateFeatureCheck extends AbstractEdelta {
   
   public ExampleWithDuplicateFeatureCheck(final AbstractEdelta other) {
     super(other);
+    checker = new EdeltaBadSmellsChecker(other);
   }
   
   public void someChanges(final EPackage it) {

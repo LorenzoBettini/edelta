@@ -21,6 +21,7 @@ public class IntroducingDepModifExample extends AbstractEdelta {
   
   public IntroducingDepModifExample(final AbstractEdelta other) {
     super(other);
+    operations = new IntroducingDepOpExample(other);
   }
   
   public void aModificationTest(final EPackage it) {

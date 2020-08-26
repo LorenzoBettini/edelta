@@ -24,6 +24,8 @@ public class Example extends AbstractEdelta {
   
   public Example(final AbstractEdelta other) {
     super(other);
+    refactorings = new EdeltaRefactorings(other);
+    myfunctions = new ExampleReusableFunctions(other);
   }
   
   public EClass createSubClassOfMyEClass(final String name) {

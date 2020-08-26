@@ -17,6 +17,8 @@ public class AnotherExample extends AbstractEdelta {
   
   public AnotherExample(final AbstractEdelta other) {
     super(other);
+    example = new Example(other);
+    std = new EdeltaRefactorings(other);
   }
   
   @Override

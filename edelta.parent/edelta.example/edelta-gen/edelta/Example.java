@@ -19,6 +19,7 @@ public class Example extends AbstractEdelta {
   
   public Example(final AbstractEdelta other) {
     super(other);
+    myfunctions = new ExampleReusableFunctions(other);
   }
   
   public void SomeChanges(final EPackage it) {

@@ -911,6 +911,9 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder.append("    ");
     _builder.append("super(other);");
     _builder.newLine();
+    _builder.append("    ");
+    _builder.append("my = new MyCustomEdelta(other);");
+    _builder.newLine();
     _builder.append("  ");
     _builder.append("}");
     _builder.newLine();
@@ -1005,6 +1008,9 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("    ");
     _builder.append("super(other);");
+    _builder.newLine();
+    _builder.append("    ");
+    _builder.append("my = new MyCustomEdelta(other);");
     _builder.newLine();
     _builder.append("  ");
     _builder.append("}");
@@ -1113,6 +1119,12 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder_1.newLine();
     _builder_1.append("    ");
     _builder_1.append("super(other);");
+    _builder_1.newLine();
+    _builder_1.append("     ");
+    _builder_1.append("= new MyCustomEdelta(other);");
+    _builder_1.newLine();
+    _builder_1.append("    ");
+    _builder_1.append("my = new (other);");
     _builder_1.newLine();
     _builder_1.append("  ");
     _builder_1.append("}");
@@ -3157,6 +3169,9 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder_3.append("    ");
     _builder_3.append("super(other);");
     _builder_3.newLine();
+    _builder_3.append("    ");
+    _builder_3.append("my = new MyFile1(other);");
+    _builder_3.newLine();
     _builder_3.append("  ");
     _builder_3.append("}");
     _builder_3.newLine();
@@ -3210,6 +3225,125 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     Pair<String, CharSequence> _mappedTo = Pair.<String, CharSequence>of("test3.MyFile2", _builder_3.toString());
     this.checkCompilationOfSeveralFiles(Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList(_builder.toString(), _builder_1.toString(), _builder_2.toString())), 
       Collections.<Pair<String, CharSequence>>unmodifiableList(CollectionLiterals.<Pair<String, CharSequence>>newArrayList(_mappedTo)));
+  }
+  
+  @Test
+  public void testExecutionOfSeveralFilesWithUseAs() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EClass");
+    _builder.newLine();
+    _builder.append("import org.eclipse.emf.ecore.EcorePackage");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("package test1");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("def enrichWithReference(EClass c, String prefix) : void {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("c.addNewEReference(prefix + \"Ref\",");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("EcorePackage.eINSTANCE.EObject)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("import org.eclipse.emf.ecore.EClass");
+    _builder_1.newLine();
+    _builder_1.append("import org.eclipse.emf.ecore.EcorePackage");
+    _builder_1.newLine();
+    _builder_1.append("import test1.MyFile0");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("package test2");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("use test1.MyFile0 as extension my");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("def enrichWithAttribute(EClass c, String prefix) : void {");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("c.addNewEAttribute(prefix + \"Attr\",");
+    _builder_1.newLine();
+    _builder_1.append("\t\t");
+    _builder_1.append("EcorePackage.eINSTANCE.EString)");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("c.enrichWithReference(prefix)");
+    _builder_1.newLine();
+    _builder_1.append("}");
+    _builder_1.newLine();
+    StringConcatenation _builder_2 = new StringConcatenation();
+    _builder_2.append("import org.eclipse.emf.ecore.EClass");
+    _builder_2.newLine();
+    _builder_2.append("import test2.MyFile1");
+    _builder_2.newLine();
+    _builder_2.newLine();
+    _builder_2.append("package test3");
+    _builder_2.newLine();
+    _builder_2.newLine();
+    _builder_2.append("metamodel \"simple\"");
+    _builder_2.newLine();
+    _builder_2.newLine();
+    _builder_2.append("use test2.MyFile1 as extension my");
+    _builder_2.newLine();
+    _builder_2.newLine();
+    _builder_2.append("modifyEcore aModificationTest epackage simple {");
+    _builder_2.newLine();
+    _builder_2.append("\t");
+    _builder_2.append("ecoreref(SimpleClass)");
+    _builder_2.newLine();
+    _builder_2.append("\t\t");
+    _builder_2.append(".enrichWithAttribute(\"prefix\")");
+    _builder_2.newLine();
+    _builder_2.append("\t");
+    _builder_2.append("// attribute and reference are added by the calls");
+    _builder_2.newLine();
+    _builder_2.append("\t");
+    _builder_2.append("// to external operations!");
+    _builder_2.newLine();
+    _builder_2.append("\t");
+    _builder_2.append("ecoreref(prefixAttr).changeable = true");
+    _builder_2.newLine();
+    _builder_2.append("\t");
+    _builder_2.append("ecoreref(prefixRef).containment = true");
+    _builder_2.newLine();
+    _builder_2.append("}");
+    _builder_2.newLine();
+    StringConcatenation _builder_3 = new StringConcatenation();
+    _builder_3.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+    _builder_3.newLine();
+    _builder_3.append("<ecore:EPackage xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
+    _builder_3.newLine();
+    _builder_3.append("    ");
+    _builder_3.append("xmlns:ecore=\"http://www.eclipse.org/emf/2002/Ecore\" name=\"simple\" nsURI=\"http://www.simple\" nsPrefix=\"simple\">");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"SimpleClass\">");
+    _builder_3.newLine();
+    _builder_3.append("    ");
+    _builder_3.append("<eStructuralFeatures xsi:type=\"ecore:EAttribute\" name=\"prefixAttr\" eType=\"ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString\"/>");
+    _builder_3.newLine();
+    _builder_3.append("    ");
+    _builder_3.append("<eStructuralFeatures xsi:type=\"ecore:EReference\" name=\"prefixRef\" eType=\"ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject\"");
+    _builder_3.newLine();
+    _builder_3.append("        ");
+    _builder_3.append("containment=\"true\"/>");
+    _builder_3.newLine();
+    _builder_3.append("  ");
+    _builder_3.append("</eClassifiers>");
+    _builder_3.newLine();
+    _builder_3.append("</ecore:EPackage>");
+    _builder_3.newLine();
+    Pair<CharSequence, CharSequence> _mappedTo = Pair.<CharSequence, CharSequence>of(EdeltaAbstractTest.SIMPLE_ECORE, _builder_3.toString());
+    this.checkCompiledCodeExecutionWithSeveralFiles(
+      Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList(EdeltaAbstractTest.SIMPLE_ECORE)), 
+      Collections.<CharSequence>unmodifiableList(CollectionLiterals.<CharSequence>newArrayList(_builder, _builder_1, _builder_2)), 
+      "test3.MyFile2", 
+      Collections.<Pair<CharSequence, CharSequence>>unmodifiableList(CollectionLiterals.<Pair<CharSequence, CharSequence>>newArrayList(_mappedTo)), 
+      true);
   }
   
   @Test
@@ -3573,6 +3707,9 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("    ");
     _builder.append("super(other);");
+    _builder.newLine();
+    _builder.append("    ");
+    _builder.append("refactorings = new EdeltaRefactorings(other);");
     _builder.newLine();
     _builder.append("  ");
     _builder.append("}");
