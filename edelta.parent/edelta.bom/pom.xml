@@ -127,16 +127,6 @@
 
   <profiles>
     <profile>
-      <!-- This is needed only when updating versions and should never be enabled -->
-      <id>only-for-version-update</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <modules>
-        <module>../pom.xml</module>
-      </modules>
-    </profile>
-    <profile>
       <id>useSnapshots</id>
       <activation>
         <activeByDefault>false</activeByDefault>
