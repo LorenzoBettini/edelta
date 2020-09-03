@@ -1,8 +1,24 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <project name="IncrementVersionsTask" basedir="." default="set-version">
 
-	<!-- Make sure this points to the root folder of your project -->
+	<!-- IMPORTANT: Make sure this points to the root folder of your project -->
 	<property name="WORKSPACE" location="${ant.file}/../../../" />
+
+	<!--
+		IMPORTANT: this will update the first occurrence of <version> in POMs,
+		so if one of your POM inherits from an external parent with an unrelated number
+		make sure the <parent> part comes after the <version> part of the POM
+		you want to update. For example,
+		
+		<groupId>your group id</groupId>
+		<artifactId>your artifact id</artifactId>
+		<version>the version you want to update</version>
+		<parent>
+			<groupId>external parent group id</groupId>
+			<artifactId>external parent artifact id</artifactId>
+			<version>external parent version that must not be updated</version>
+		</parent>
+	-->
 
 	<!--Set these properties manually when increasing versions -->
 	<property name="version.major" value="2" />
