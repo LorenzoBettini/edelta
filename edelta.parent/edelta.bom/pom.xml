@@ -5,6 +5,9 @@
   <groupId>io.github.lorenzobettini.edelta</groupId>
   <artifactId>edelta.bom</artifactId>
   <version>2.0.1-SNAPSHOT</version>
+  <!-- IMPORTANT: the parent's version (unrelated to this artifact's version) 
+    must come after this artifact version to make the increment_version.ant behave 
+    correctly. -->
   <parent>
     <groupId>io.github.lorenzobettini.xtextutils</groupId>
     <artifactId>xtext-tycho-parent</artifactId>
