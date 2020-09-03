@@ -1,7 +1,8 @@
 # setting the version in pom.xml and MANIFEST.MF files
 # From the root folder
 
-# NOTE: better to use the increment_version.ant file
+# NOTE: If you use the increment_version.ant file, then remember that it will
+# update the very first version encountered: this breaks the edelta.bom
 
 ./mvnw -f edelta.parent/edelta.bom/pom.xml \
     versions:set -DnewVersion=2.0.0-SNAPSHOT \
