@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Edelta Refactorings Lib
 Bundle-Vendor: Lorenzo Bettini
-Bundle-Version: 2.0.0.qualifier
+Bundle-Version: 2.0.1.qualifier
 Bundle-SymbolicName: edelta.refactorings.lib; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: edelta.lib;visibility:=reexport
