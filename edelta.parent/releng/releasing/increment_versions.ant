@@ -11,20 +11,10 @@
 
 	<!-- Compute the version properties -->
 	<property name="version.main" value="${version.major}.${version.minor}.${version.patch}" />
-	<property name="version.osgi" value="${version.main}.qualifier"/>
-	<property name="version.mvn" value="${version.main}-SNAPSHOT"/>
 	<property name="majorMinorVersion" value="${version.major}.${version.minor}" />
 
 	<target name="show-workspace-path">
 		<echo message="WORKSPACE: ${WORKSPACE}" />
-	</target>
-
-	<target name="showVersionProperties" >
-		<echo message="WORKSPACE   : ${WORKSPACE}" />
-		<echo message="version.main: ${version.main}" />
-		<echo message="version.osgi: ${version.osgi}" />
-		<echo message="version.mvn : ${version.mvn}" />
-		<echo message="majorMinorVersion: ${majorMinorVersion}"/>
 	</target>
 
 	<target name="set-version" description="Modifies artifacts to set a release version" >
@@ -37,6 +27,20 @@
 			<entry key="version_mvn" value="${version.mvn}" />
 			<entry key="majorMinorVersion" value="${majorMinorVersion}" />
 		</propertyfile>
+
+		<antcall target="-modify-artifacts"/>
+	</target>
+
+	<!-- strip the -SNAPSHOT from the property project.version -->
+	<target name="set-version-release" description="Modifies artifacts to set a release version (without -SNAPSHOT)" >
+		<property name="version.osgi" value="${version.main}"/>
+		<property name="version.mvn" value="${version.main}"/>
+
+		<echo message="VERSION MAIN: ${version.main}" />
+		<echo message="VERSION OSGI: ${version.osgi}" />
+		<echo message="VERSION MVN : ${version.mvn}" />
+		<echo message="WORKSPACE   : ${WORKSPACE}" />
+		<echo message="" />
 
 		<antcall target="-modify-artifacts"/>
 	</target>
