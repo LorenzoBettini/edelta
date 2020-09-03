@@ -10,5 +10,10 @@
     org.eclipse.tycho:tycho-versions-plugin:update-eclipse-metadata \
     -Dtycho.mode=maven
 
+./mvnw -f edelta.parent/edelta.maven.example/pom.xml \
+    versions:set -DnewVersion=2.0.0-SNAPSHOT \
+    -DgenerateBackupPoms=false \
+    -Dtycho.mode=maven
+
 # Replace in category.xml 0.9.x with 2.0.x
 # Replace in other POMs
