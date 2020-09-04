@@ -9,7 +9,7 @@ matrix:
   include:
     # always build this environment
     - os: linux
-      dist: xenial
+      dist: bionic
       jdk: openjdk11
       services:
       - xvfb
