@@ -3,7 +3,7 @@ Automatic-Module-Name: edelta.examples
 Bundle-ManifestVersion: 2
 Bundle-Name: edelta.examples
 Bundle-Vendor: Lorenzo Bettini
-Bundle-Version: 2.0.1.qualifier
+Bundle-Version: 2.1.0.qualifier
 Bundle-SymbolicName: edelta.examples;singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: edelta.lib,
