@@ -7,6 +7,10 @@ An Xtext DSL for EMF metamodels refactoring and migration
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=io.github.lorenzobettini.edelta%3Aedelta.parent&metric=alert_status)](https://sonarcloud.io/dashboard?id=io.github.lorenzobettini.edelta%3Aedelta.parent)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.lorenzobettini.edelta/edelta.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.github.lorenzobettini.edelta%22%20AND%20a:%22edelta%22)
 
+### Requirements
+
+Edelta requires Java 11.
+
 ### Eclipse update site
 
 Copy the following URL and paste it into your Eclipse "Install New Software" dialog ("Help" => "Install New Software..."), wait for the list of available features to show and select the latest version of "Edelta Feature". (The URL is NOT meant to be opened with a browser)
