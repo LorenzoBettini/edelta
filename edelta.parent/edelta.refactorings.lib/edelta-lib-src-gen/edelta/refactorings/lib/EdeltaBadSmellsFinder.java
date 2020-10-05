@@ -134,17 +134,17 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
         final Function1<Map.Entry<EStructuralFeature, List<EStructuralFeature>>, Boolean> _function = (Map.Entry<EStructuralFeature, List<EStructuralFeature>> it) -> {
           return Boolean.valueOf(matcher.test(it.getKey(), f));
         };
-        final Map.Entry<EStructuralFeature, List<EStructuralFeature>> found = IterableExtensions.<Map.Entry<EStructuralFeature, List<EStructuralFeature>>>findFirst(map.entrySet(), _function);
-        if ((found != null)) {
-          List<EStructuralFeature> _value = found.getValue();
+        final Map.Entry<EStructuralFeature, List<EStructuralFeature>> existing = IterableExtensions.<Map.Entry<EStructuralFeature, List<EStructuralFeature>>>findFirst(map.entrySet(), _function);
+        if ((existing != null)) {
+          List<EStructuralFeature> _value = existing.getValue();
           _value.add(f);
         } else {
           map.put(f, CollectionLiterals.<EStructuralFeature>newArrayList(f));
         }
       }
     }
-    final Function2<EStructuralFeature, List<EStructuralFeature>, Boolean> _function = (EStructuralFeature p1, List<EStructuralFeature> p2) -> {
-      int _size = p2.size();
+    final Function2<EStructuralFeature, List<EStructuralFeature>, Boolean> _function = (EStructuralFeature key, List<EStructuralFeature> values) -> {
+      int _size = values.size();
       return Boolean.valueOf((_size > 1));
     };
     return MapExtensions.<EStructuralFeature, List<EStructuralFeature>>filter(map, _function);

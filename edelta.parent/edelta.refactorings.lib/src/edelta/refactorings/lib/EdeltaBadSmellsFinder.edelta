@@ -101,15 +101,15 @@ def findDuplicateFeatures(EPackage ePackage) {
 def findDuplicateFeaturesInCollection(Collection<EStructuralFeature> features, BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
 	val map = <EStructuralFeature, List<EStructuralFeature>>newLinkedHashMap
 	for (f : features) {
-		val found = map.entrySet.findFirst[matcher.test(it.key, f)]
-		if (found !== null) {
-			found.value += f
+		val existing = map.entrySet.findFirst[matcher.test(it.key, f)]
+		if (existing !== null) {
+			existing.value += f
 		} else {
 			map.put(f, newArrayList(f))
 		}
 	}
 	// only entries with a mapped list of size > 1 are duplicates
-	return map.filter[p1, p2| p2.size > 1]
+	return map.filter[key, values| values.size > 1]
 }
 
 /**
