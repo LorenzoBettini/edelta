@@ -122,9 +122,9 @@ def extractSuperclass(List<? extends EStructuralFeature> duplicates){
 
 	for (duplicate : duplicates) {
 		duplicate.EContainingClass => [
-			// set supertype of the EClass of the attribute
+			// set supertype of the EClass of the feature
 			addESuperType(superclass)
-			// and then remove the attribute from the original EClass
+			// and then remove the feature from the original EClass
 			EStructuralFeatures -= duplicate
 		]
 	}
