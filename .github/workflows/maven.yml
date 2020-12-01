@@ -28,4 +28,7 @@ jobs:
         key: ${{ runner.os }}-m2
         restore-keys: ${{ runner.os }}-m2
     - name: Build with Maven
-      run: xvfb-run ./mvnw -f edelta.parent/pom.xml -U clean verify -Pjacoco,build-ide,test-ide,run-its
+      run: xvfb-run ./mvnw -f edelta.parent/pom.xml -U clean verify -Pjacoco,build-ide,test-ide,run-its sonar:sonar
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
