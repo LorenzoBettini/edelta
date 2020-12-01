@@ -27,6 +27,7 @@ jobs:
       with:
         path: |
           ~/.m2
+          ~/.sonar/cache
           !**/*edelta*
         key: ${{ runner.os }}-m2
         restore-keys: ${{ runner.os }}-m2
