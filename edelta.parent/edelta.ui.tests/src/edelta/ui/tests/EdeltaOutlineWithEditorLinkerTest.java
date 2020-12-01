@@ -108,7 +108,7 @@ public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 			("addNewEAttribute(\"MyNewDerivedClassAttribute", "MyNewDerivedClassAttribute");
 	}
 
-	private void whenEditorTextIsSelectedThenOutlineNodeIsSelected(String textToSelect, String expectedNode) throws InterruptedException {
+	private void whenEditorTextIsSelectedThenOutlineNodeIsSelected(String textToSelect, String expectedNode) {
 		editor.getInternalSourceViewer()
 			.setSelectedRange(program.indexOf(textToSelect), 0);
 		var selection = waitForSelection();
@@ -117,10 +117,14 @@ public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 	}
 
 	@SuppressWarnings("all")
-	private TreeSelection waitForSelection() throws InterruptedException {
+	private TreeSelection waitForSelection() {
 		int attempts = 30;
 		for (int i = 0; i < attempts; ++i) {
-			Thread.sleep(100);
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				System.err.println("Interrupted while waiting for selection");
+			}
 			executeAsyncDisplayJobs();
 			var selection = (TreeSelection) outlinePage.getTreeViewer().getSelection();
 			if (!selection.isEmpty())
