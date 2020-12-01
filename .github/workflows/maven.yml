@@ -43,5 +43,5 @@ jobs:
       run: ./mvnw -f edelta.parent/pom.xml -U clean verify -Pbuild-ide,test-ide,run-its
       if: runner.os == 'macOS'
     - name: Build with Maven
-      run: mvnw.cmd -f edelta.parent/pom.xml -U clean verify -Pbuild-ide,test-ide,run-its
+      run: mvnw.cmd -f edelta.parent/pom.xml -U clean verify '-Pbuild-ide,test-ide,run-its'
       if: runner.os == 'Windows'
