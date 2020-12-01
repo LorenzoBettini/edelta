@@ -27,4 +27,4 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
     - name: Build with Maven
-      run: xvfb-run ./mvnw -f edelta.parent/pom.xml -U clean verify
+      run: xvfb-run ./mvnw -f edelta.parent/pom.xml -U clean verify -Pjacoco,build-ide,test-ide,run-its
