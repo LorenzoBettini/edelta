@@ -29,6 +29,7 @@ import org.junit.runner.RunWith
 
 import static edelta.ui.tests.utils.EdeltaPluginProjectHelper.*
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
+import org.eclipse.xtext.util.Strings
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaUiInjectorProvider)
@@ -74,7 +75,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	 */
 	override getResourceFor(InputStream inputStream) {
 		val result = new BufferedReader(new InputStreamReader(inputStream)).
-			lines().collect(Collectors.joining("\n"));
+			lines().collect(Collectors.joining(Strings.newLine()));
+		// IMPORTANT: use Strings.newLine to avoid problems with missing \r in Windows
 		val editor = openEditor(
 			createFile(
 				PROJECT_NAME+"/src/Test.edelta",
@@ -191,11 +193,10 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test def void testQualifiedEcoreReference() {
-		// don't use Xtend ''' ''' strings since the content assist test
-		// seems to have problems with \r in Windows...
-		newBuilder.append("metamodel \"mypackage\"
-				modifyEcore aTest epackage mypackage {
-					ecoreref(MyClass.").
+		newBuilder.append('''
+			metamodel "mypackage"
+			modifyEcore aTest epackage mypackage {
+				ecoreref(MyClass.''').
 			assertText('myAttribute', 'myReference')
 	}
 

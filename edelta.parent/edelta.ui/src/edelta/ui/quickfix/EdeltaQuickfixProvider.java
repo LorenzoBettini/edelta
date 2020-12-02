@@ -100,8 +100,11 @@ public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider
 				// the node corresponding to the keyword 'metamodel'
 				INode metamodelNode = node.getPreviousSibling().getPreviousSibling();
 				int offset = metamodelNode.getOffset();
-				int length = node.getEndOffset() - offset  + 1;
-				// also remove newline
+				// also remove newline, in an OS independent way
+				int endOfLineLength = context.getXtextDocument()
+					.getLineDelimiter(node.getEndLine()).length();
+				int length = node.getTotalEndOffset() - offset +
+					endOfLineLength;
 				context.getXtextDocument().replace(offset, length, "");
 			}
 		);
