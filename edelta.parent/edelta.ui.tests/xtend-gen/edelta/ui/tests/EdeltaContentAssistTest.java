@@ -29,6 +29,7 @@ import org.eclipse.xtext.ui.editor.utils.EditorUtils;
 import org.eclipse.xtext.ui.testing.AbstractContentAssistTest;
 import org.eclipse.xtext.ui.testing.ContentAssistProcessorTestBuilder;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
+import org.eclipse.xtext.util.Strings;
 import org.eclipse.xtext.util.concurrent.IUnitOfWork;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Conversions;
@@ -98,7 +99,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   public XtextResource getResourceFor(final InputStream inputStream) {
     try {
       InputStreamReader _inputStreamReader = new InputStreamReader(inputStream);
-      final String result = new BufferedReader(_inputStreamReader).lines().collect(Collectors.joining("\n"));
+      final String result = new BufferedReader(_inputStreamReader).lines().collect(Collectors.joining(Strings.newLine()));
       final XtextEditor editor = this.openEditor(
         IResourcesSetupUtil.createFile(
           (EdeltaPluginProjectHelper.PROJECT_NAME + "/src/Test.edelta"), result));
@@ -322,7 +323,15 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   @Test
   public void testQualifiedEcoreReference() {
     try {
-      this.newBuilder().append("metamodel \"mypackage\"\n\t\t\t\tmodifyEcore aTest epackage mypackage {\n\t\t\t\t\tecoreref(MyClass.").assertText("myAttribute", "myReference");
+      ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"mypackage\"");
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage mypackage {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(MyClass.");
+      _newBuilder.append(_builder.toString()).assertText("myAttribute", "myReference");
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
