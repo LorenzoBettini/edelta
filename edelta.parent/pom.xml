@@ -347,6 +347,9 @@
               <version>${project.version}</version>
             </artifact>
           </target>
+          <!-- ignore should be the default and can be removed after
+            https://bugs.eclipse.org/bugs/show_bug.cgi?id=569399
+            has been fixed -->
           <pomDependencies>ignore</pomDependencies>
         </configuration>
       </plugin>
