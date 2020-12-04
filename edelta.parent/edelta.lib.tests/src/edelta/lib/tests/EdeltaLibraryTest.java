@@ -423,10 +423,33 @@ public class EdeltaLibraryTest {
 		ePackage.getEClassifiers().add(superClass);
 		ePackage.getEClassifiers().add(subClass);
 		subClass.getESuperTypes().add(superClass);
+		EReference referenceToSuperClass = ecoreFactory.createEReference();
+		referenceToSuperClass.setEType(superClass);
+		EReference referenceToSubClass = ecoreFactory.createEReference();
+		referenceToSubClass.setEType(subClass);
+		subClass.getEStructuralFeatures().add(referenceToSubClass);
+		subClass.getEStructuralFeatures().add(referenceToSuperClass);
 		assertThat(subClass.getESuperTypes()).containsExactly(superClass);
 		EdeltaLibrary.removeElement(superClass);
-		// reference to the removed class should be removed as well
+		// references to the removed class should be removed as well
 		assertThat(subClass.getESuperTypes()).isEmpty();
+		assertThat(subClass.getEStructuralFeatures())
+			.containsOnly(referenceToSubClass);
+		// also try to remove something that's not an EClassifier
+		EdeltaLibrary.removeElement(referenceToSubClass);
+		assertThat(subClass.getEStructuralFeatures()).isEmpty();
+	}
+
+	@Test
+	public void test_allEClasses() {
+		assertThat(EdeltaLibrary.allEClasses(null)).isEmpty();
+		EPackage ePackage = ecoreFactory.createEPackage();
+		EClass eClass = ecoreFactory.createEClass();
+		EDataType dataType = ecoreFactory.createEDataType();
+		ePackage.getEClassifiers().add(eClass);
+		ePackage.getEClassifiers().add(dataType);
+		assertThat(EdeltaLibrary.allEClasses(ePackage))
+			.containsOnly(eClass);
 	}
 
 }

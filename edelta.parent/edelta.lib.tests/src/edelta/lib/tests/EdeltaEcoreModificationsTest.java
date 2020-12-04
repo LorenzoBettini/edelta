@@ -40,6 +40,7 @@ public class EdeltaEcoreModificationsTest {
 	private static final String MODIFIED = "modified";
 	private static final String EXPECTATIONS = "expectations";
 	private static final String MY_ECORE = "My.ecore";
+	private static final String TEST_ECORE_FOR_REMOVE = "TestEcoreForRemove.ecore";
 	private static final String TEST_ECORE_FOR_REFERENCES1 = "TestEcoreForReferences1.ecore";
 	private static final String TEST_PACKAGE_FOR_REFERENCES1 = "testecoreforreferences1";
 	private static final String TEST_ECORE_FOR_REFERENCES2 = "TestEcoreForReferences2.ecore";
@@ -87,6 +88,23 @@ public class EdeltaEcoreModificationsTest {
 					"testSaveModifiedEcoresAfterRemovingBaseClass"+"/"+
 						MY_ECORE,
 				MODIFIED+"/"+MY_ECORE);
+	}
+
+	@Test
+	public void testSaveModifiedEcoresAfterRemovingReferredClass() throws IOException {
+		loadTestEcore(TEST_ECORE_FOR_REMOVE);
+		// modify the ecore model by removing MyClass
+		// this will also remove existing references, so the model
+		// is still valid
+		EdeltaLibrary.removeElement(
+				edelta.getEClassifier(MYPACKAGE, "MyClass"));
+		wipeModifiedDirectoryContents();
+		edelta.saveModifiedEcores(MODIFIED);
+		compareFileContents(
+				EXPECTATIONS+"/"+
+						"testSaveModifiedEcoresAfterRemovingReferredClass"+"/"+
+						TEST_ECORE_FOR_REMOVE,
+						MODIFIED+"/"+TEST_ECORE_FOR_REMOVE);
 	}
 
 	@Test

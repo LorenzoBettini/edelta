@@ -3,9 +3,12 @@
  */
 package edelta.lib;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -20,6 +23,9 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.xtext.xbase.lib.IterableExtensions;
+
+import com.google.common.collect.Iterables;
 
 /**
  * Library functions to be reused in Edelta programs.
@@ -284,7 +290,30 @@ public class EdeltaLibrary {
 	 * @param element
 	 */
 	public static void removeElement(ENamedElement element) {
+		if (element instanceof EClassifier) {
+			EClassifier classifier = (EClassifier) element;
+			// first remove possible features mentioning this classifier as type
+			List<EStructuralFeature> toRemove = allEClasses(classifier.getEPackage()).stream()
+				.flatMap(c -> c.getEStructuralFeatures().stream())
+				.filter(f -> f.getEType() == classifier)
+				.collect(Collectors.toList());
+			EcoreUtil.deleteAll(toRemove, true);
+		}
 		EcoreUtil.delete(element, true);
+	}
+
+	/**
+	 * Returns a list of all the {@link EClass}es of the specified
+	 * {@link EPackage}.
+	 * 
+	 * @param ePackage
+	 * @return an empty list if the ePackage is null
+	 */
+	public static List<EClass> allEClasses(EPackage ePackage) {
+		if (ePackage == null)
+			return Collections.emptyList();
+		return IterableExtensions.toList(
+			Iterables.filter(ePackage.getEClassifiers(), EClass.class));
 	}
 
 }
