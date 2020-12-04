@@ -6,6 +6,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MyClientClass">
     <eStructuralFeatures xsi:type="ecore:EReference" name="myReference" eType="#//MyClass"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="myAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MyDerivedClass" eSuperTypes="#//MyClass"/>
 </ecore:EPackage>
