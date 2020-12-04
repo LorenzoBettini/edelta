@@ -55,7 +55,7 @@ public abstract class AbstractEdelta {
 
 	private Logger logger = Logger.getLogger(getClass());
 
-	public AbstractEdelta() {
+	protected AbstractEdelta() {
 		packageManager = new EdeltaEPackageManager();
 	}
 
@@ -64,7 +64,7 @@ public abstract class AbstractEdelta {
 	 * 
 	 * @param other
 	 */
-	public AbstractEdelta(AbstractEdelta other) {
+	protected AbstractEdelta(AbstractEdelta other) {
 		this(other.packageManager);
 	}
 
@@ -73,7 +73,7 @@ public abstract class AbstractEdelta {
 	 * 
 	 * @param packageManager
 	 */
-	public AbstractEdelta(EdeltaEPackageManager packageManager) {
+	protected AbstractEdelta(EdeltaEPackageManager packageManager) {
 		this.packageManager = packageManager;
 	}
 
