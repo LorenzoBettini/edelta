@@ -295,6 +295,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  @Flaky
   public void testUnqualifiedEcoreReferenceWithPrefix() {
     try {
       ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
@@ -321,6 +322,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  @Flaky
   public void testQualifiedEcoreReference() {
     try {
       ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
@@ -338,6 +340,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  @Flaky
   public void testEClassifierAfterCreatingAnEClass() {
     try {
       ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
@@ -359,6 +362,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  @Flaky
   public void testEClassifierAfterRenamingAnEClass() {
     try {
       ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
@@ -420,6 +424,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  @Flaky
   public void testUnqualifiedEcoreReferenceBeforeRemovalOfEClass() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mypackage\"");
@@ -463,6 +468,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  @Flaky
   public void testQualifiedEcoreReferenceBeforeRemovalOfEClass() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mypackage\"");
@@ -482,6 +488,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  @Flaky
   public void testQualifiedEcoreReferenceBeforeRemovalOfEStructuralFeature() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mypackage\"");
@@ -501,6 +508,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  @Flaky
   public void testQualifiedEcoreReferenceBeforeAdditionOfEStructuralFeature() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mypackage\"");
@@ -520,6 +528,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  @Flaky
   public void testUnqualifiedEcoreReferenceAfterRemoval() {
     try {
       ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
@@ -557,6 +566,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  @Flaky
   public void testQualifiedEcoreReferenceAfterRemovalOfEStructuralFeature() {
     try {
       ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
@@ -580,6 +590,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  @Flaky
   public void testQualifiedEcoreReferenceAfterAdditionOfEStructuralFeature() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mypackage\"");
@@ -599,6 +610,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  @Flaky
   public void testUnqualifiedEcoreReferenceBeforeRename() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mypackage\"");
@@ -642,6 +654,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  @Flaky
   public void testUnqualifiedEcoreReferenceAfterRename() {
     try {
       ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
@@ -685,6 +698,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  @Flaky
   public void testForAmbiguousReferencesFullyQualifiedNameIsProposed() {
     try {
       this.createMySubPackagesEcore();
@@ -727,6 +741,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  @Flaky
   public void testForAmbiguousReferencesFullyQualifiedNameIsReplaced() {
     try {
       this.createMySubPackagesEcore();

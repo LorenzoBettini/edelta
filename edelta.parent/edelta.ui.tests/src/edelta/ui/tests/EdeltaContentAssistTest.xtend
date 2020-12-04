@@ -179,7 +179,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 				'''.fromLinesOfStringsToStringArray)
 	}
 
-	@Test def void testUnqualifiedEcoreReferenceWithPrefix() {
+	@Test @Flaky
+	def void testUnqualifiedEcoreReferenceWithPrefix() {
 		newBuilder.append('''
 			metamodel "mypackage"
 			modifyEcore aTest epackage mypackage { 
@@ -192,7 +193,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 				'''.fromLinesOfStringsToStringArray)
 	}
 
-	@Test def void testQualifiedEcoreReference() {
+	@Test @Flaky
+	def void testQualifiedEcoreReference() {
 		newBuilder.append('''
 			metamodel "mypackage"
 			modifyEcore aTest epackage mypackage {
@@ -200,7 +202,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			assertText('myAttribute', 'myReference')
 	}
 
-	@Test def void testEClassifierAfterCreatingAnEClass() {
+	@Test @Flaky
+	def void testEClassifierAfterCreatingAnEClass() {
 		newBuilder.append('''
 			metamodel "mypackage"
 			
@@ -210,7 +213,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			assertProposal('AAA')
 	}
 
-	@Test def void testEClassifierAfterRenamingAnEClass() {
+	@Test @Flaky
+	def void testEClassifierAfterRenamingAnEClass() {
 		newBuilder.append('''
 			metamodel "mypackage"
 			
@@ -241,7 +245,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			assertProposal('foo')
 	}
 
-	@Test def void testUnqualifiedEcoreReferenceBeforeRemovalOfEClass() {
+	@Test @Flaky
+	def void testUnqualifiedEcoreReferenceBeforeRemovalOfEClass() {
 		'''
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
@@ -266,7 +271,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		// MyClass is still present in that context so it is proposed
 	}
 
-	@Test def void testQualifiedEcoreReferenceBeforeRemovalOfEClass() {
+	@Test @Flaky
+	def void testQualifiedEcoreReferenceBeforeRemovalOfEClass() {
 		'''
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
@@ -277,7 +283,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		// MyClass is still present in that context so its features are proposed
 	}
 
-	@Test def void testQualifiedEcoreReferenceBeforeRemovalOfEStructuralFeature() {
+	@Test @Flaky
+	def void testQualifiedEcoreReferenceBeforeRemovalOfEStructuralFeature() {
 		'''
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
@@ -288,7 +295,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		// myReference is still present in that context so it is proposed
 	}
 
-	@Test def void testQualifiedEcoreReferenceBeforeAdditionOfEStructuralFeature() {
+	@Test @Flaky
+	def void testQualifiedEcoreReferenceBeforeAdditionOfEStructuralFeature() {
 		'''
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
@@ -299,7 +307,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		// myNewAttribute is not yet present in that context so it is not proposed
 	}
 
-	@Test def void testUnqualifiedEcoreReferenceAfterRemoval() {
+	@Test @Flaky
+	def void testUnqualifiedEcoreReferenceAfterRemoval() {
 		newBuilder.append('''
 			metamodel "mypackage"
 			modifyEcore aTest epackage mypackage { 
@@ -319,7 +328,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		// are not proposed since they are not present anymore in this context
 	}
 
-	@Test def void testQualifiedEcoreReferenceAfterRemovalOfEStructuralFeature() {
+	@Test @Flaky
+	def void testQualifiedEcoreReferenceAfterRemovalOfEStructuralFeature() {
 		newBuilder.append('''
 			metamodel "mypackage"
 			modifyEcore aTest epackage mypackage { 
@@ -331,7 +341,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		// myBaseAttribute is not proposed since it's not present anymore in this context
 	}
 
-	@Test def void testQualifiedEcoreReferenceAfterAdditionOfEStructuralFeature() {
+	@Test @Flaky
+	def void testQualifiedEcoreReferenceAfterAdditionOfEStructuralFeature() {
 		'''
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
@@ -342,7 +353,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		// myNewAttribute is now present in that context so it is proposed
 	}
 
-	@Test def void testUnqualifiedEcoreReferenceBeforeRename() {
+	@Test @Flaky
+	def void testUnqualifiedEcoreReferenceBeforeRename() {
 		'''
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
@@ -367,7 +379,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		// MyBaseClass is not yet renamed in this context
 	}
 
-	@Test def void testUnqualifiedEcoreReferenceAfterRename() {
+	@Test @Flaky
+	def void testUnqualifiedEcoreReferenceAfterRename() {
 		newBuilder.append('''
 			metamodel "mypackage"
 			modifyEcore aTest epackage mypackage { 
@@ -391,7 +404,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		// are still proposed since they are still present in this context
 	}
 
-	@Test def void testForAmbiguousReferencesFullyQualifiedNameIsProposed() {
+	@Test @Flaky
+	def void testForAmbiguousReferencesFullyQualifiedNameIsProposed() {
 		createMySubPackagesEcore()
 		waitForBuild // required to index the new ecore file
 		newBuilder.append('''
@@ -414,7 +428,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 				'''.fromLinesOfStringsToStringArray)
 	}
 
-	@Test def void testForAmbiguousReferencesFullyQualifiedNameIsReplaced() {
+	@Test @Flaky
+	def void testForAmbiguousReferencesFullyQualifiedNameIsReplaced() {
 		createMySubPackagesEcore()
 		waitForBuild // required to index the new ecore file
 		newBuilder.append('''
