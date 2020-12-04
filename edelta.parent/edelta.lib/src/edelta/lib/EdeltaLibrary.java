@@ -19,6 +19,7 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 
 /**
  * Library functions to be reused in Edelta programs.
@@ -275,6 +276,15 @@ public class EdeltaLibrary {
 		superPackage.getESubpackages().add(newSubpackage);
 		safeRunInitializer(initializer, newSubpackage);
 		return newSubpackage;
+	}
+
+	/**
+	 * Removes the {@link ENamedElement} and recursively its contents.
+	 * 
+	 * @param element
+	 */
+	public static void removeElement(ENamedElement element) {
+		EcoreUtil.delete(element, true);
 	}
 
 }

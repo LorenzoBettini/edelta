@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaEcoreUtil;
+import edelta.lib.EdeltaLibrary;
 
 /**
  * Tests manipulations of Ecore models.
@@ -77,7 +78,8 @@ public class EdeltaEcoreModificationsTest {
 		// modify the ecore model by removing MyBaseClass
 		// this will also remove existing references, so the model
 		// is still valid
-		edelta.removeEClassifier(MYPACKAGE, "MyBaseClass");
+		EdeltaLibrary.removeElement(
+			edelta.getEClassifier(MYPACKAGE, "MyBaseClass"));
 		wipeModifiedDirectoryContents();
 		edelta.saveModifiedEcores(MODIFIED);
 		compareFileContents(
@@ -95,7 +97,8 @@ public class EdeltaEcoreModificationsTest {
 			edelta.getEClassifier(MYPACKAGE, "MyBaseClass"),
 			edelta.getEClass(MYPACKAGE, "MyDerivedClass").getESuperTypes().get(0));
 		// modify the ecore model by removing MyBaseClass
-		edelta.removeEClassifier(MYPACKAGE, "MyBaseClass");
+		EdeltaLibrary.removeElement(
+			edelta.getEClassifier(MYPACKAGE, "MyBaseClass"));
 		// check that MyDerivedClass is not its subclass anymore
 		assertEquals(0, edelta.getEClass(MYPACKAGE, "MyDerivedClass").getESuperTypes().size());
 	}

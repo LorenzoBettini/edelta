@@ -5,7 +5,6 @@ package edelta.lib;
 
 import java.util.Collection;
 
-import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
@@ -19,15 +18,6 @@ public class EdeltaEcoreUtil {
 
 	private EdeltaEcoreUtil() {
 		// empty constructor never to be called
-	}
-
-	/**
-	 * Removes the {@link EClassifier} and recursively its contents.
-	 * 
-	 * @param eClassifier
-	 */
-	public static void removeEClassifier(EClassifier eClassifier) {
-		EcoreUtil.delete(eClassifier, true);
 	}
 
 	/**

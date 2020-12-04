@@ -414,4 +414,19 @@ public class EdeltaLibraryTest {
 		assertEquals("p1.p2.p1",
 				EdeltaLibrary.getEObjectRepr(p1));
 	}
+
+	@Test
+	public void test_removeElement() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		EClass superClass = ecoreFactory.createEClass();
+		EClass subClass = ecoreFactory.createEClass();
+		ePackage.getEClassifiers().add(superClass);
+		ePackage.getEClassifiers().add(subClass);
+		subClass.getESuperTypes().add(superClass);
+		assertThat(subClass.getESuperTypes()).containsExactly(superClass);
+		EdeltaLibrary.removeElement(superClass);
+		// reference to the removed class should be removed as well
+		assertThat(subClass.getESuperTypes()).isEmpty();
+	}
+
 }
