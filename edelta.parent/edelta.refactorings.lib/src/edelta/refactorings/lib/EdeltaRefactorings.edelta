@@ -99,6 +99,24 @@ def extractMetaClass(EClass extractedClass, EReference f, String inReferenceName
 	f.name = outReferenceName;
 }
 
+def extractMetaClass(String name, EReference reference) {
+	val ePackage = reference.EContainingClass.EPackage
+	val extracted = ePackage.addNewEClass(name)
+	val extractedRef = extracted.addNewEReference(reference.name.toFirstLower, reference.EReferenceType) [
+		lowerBound = 1
+		upperBound = 1
+	]
+	reference.EOpposite?.moveTo(extracted)
+	val backward = reference.EReferenceType.addNewEReference(name.toFirstLower, extracted) [
+		lowerBound = 0
+		upperBound = 1
+	]
+	backward.makeBidirectional(extractedRef)
+	reference.name = name.toFirstLower
+	reference.EType = extracted
+	return extracted
+}
+
 /**
  * Given a non empty list of {@link EStructuralFeature}, which are known to
  * appear in several classes as duplicates, extracts a new common superclass,

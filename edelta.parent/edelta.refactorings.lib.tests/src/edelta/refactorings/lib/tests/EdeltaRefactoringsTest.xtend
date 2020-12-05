@@ -179,6 +179,121 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			.containsExactly(personWorks)
 	}
 
+	@Test
+	def void test_extractMetaClass2() {
+		val p = factory.createEPackage
+		val person = p.createEClass("Person")
+		val workPlace = p.createEClass("WorkPlace")
+		val personWorks = person.createEReference("works") => [
+			lowerBound = 1
+		]
+		val workPlacePersons = workPlace.createEReference("persons") => [
+			EOpposite = personWorks
+			EType = person
+			upperBound = -1
+		]
+		personWorks.EType = workPlace
+		personWorks.EOpposite = workPlacePersons
+
+		assertThat(workPlace.EStructuralFeatures)
+			.contains(workPlacePersons)
+
+		val workingPosition = refactorings.extractMetaClass("WorkingPosition", personWorks)
+
+		assertThat(workingPosition.EStructuralFeatures.filter(EReference))
+			.hasSize(2)
+			.contains(workPlacePersons)
+			.anySatisfy[
+				assertThat
+					.returns("works", [name])
+					.returns(workPlace, [EType])
+					.returns(1, [lowerBound])
+					.returns(1, [upperBound])
+					.returns("workingPosition", [EOpposite.name])
+					.returns(workingPosition, [EOpposite.EReferenceType])
+			]
+			.anySatisfy[
+				assertThat
+					.returns("persons", [name])
+					.returns(person, [EType])
+					.returns(0, [lowerBound])
+					.returns(-1, [upperBound])
+					.returns("workingPosition", [EOpposite.name])
+					.returns(workingPosition, [EOpposite.EReferenceType])
+			]
+		assertThat(workPlace.EStructuralFeatures.filter(EReference))
+			.hasSize(1)
+			.doesNotContain(workPlacePersons)
+			.anySatisfy[
+				assertThat
+					.returns("workingPosition", [name])
+					.returns(workingPosition, [EType])
+					.returns(0, [lowerBound])
+					.returns(1, [upperBound])
+					.returns("works", [EOpposite.name])
+					.returns(workPlace, [EOpposite.EType])
+			]
+		assertThat(person.EStructuralFeatures.filter(EReference))
+			.containsExactly(personWorks)
+			.anySatisfy[
+				assertThat
+					.returns("workingPosition", [name])
+					.returns(workingPosition, [EType])
+					.returns(1, [lowerBound])
+					.returns(1, [upperBound])
+					.returns("persons", [EOpposite.name])
+					.returns(person, [EOpposite.EReferenceType])
+			]
+	}
+
+	@Test
+	def void test_extractMetaClassWithoutEOpposite() {
+		val p = factory.createEPackage
+		val person = p.createEClass("Person")
+		val workPlace = p.createEClass("WorkPlace")
+		val personWorks = person.createEReference("works") => [
+			lowerBound = 1
+			EType = workPlace
+		]
+
+		assertThat(workPlace.EStructuralFeatures)
+			.isEmpty
+
+		val workingPosition = refactorings.extractMetaClass("WorkingPosition", personWorks)
+
+		assertThat(workingPosition.EStructuralFeatures.filter(EReference))
+			.hasSize(1)
+			.anySatisfy[
+				assertThat
+					.returns("works", [name])
+					.returns(workPlace, [EType])
+					.returns(1, [lowerBound])
+					.returns(1, [upperBound])
+					.returns("workingPosition", [EOpposite.name])
+					.returns(workingPosition, [EOpposite.EReferenceType])
+			]
+		assertThat(workPlace.EStructuralFeatures.filter(EReference))
+			.hasSize(1)
+			.anySatisfy[
+				assertThat
+					.returns("workingPosition", [name])
+					.returns(workingPosition, [EType])
+					.returns(0, [lowerBound])
+					.returns(1, [upperBound])
+					.returns("works", [EOpposite.name])
+					.returns(workPlace, [EOpposite.EType])
+			]
+		assertThat(person.EStructuralFeatures.filter(EReference))
+			.containsExactly(personWorks)
+			.anySatisfy[
+				assertThat
+					.returns("workingPosition", [name])
+					.returns(workingPosition, [EType])
+					.returns(1, [lowerBound])
+					.returns(1, [upperBound])
+			]
+	}
+
 	@Test def void test_extractSuperClass() {
 		val p = factory.createEPackage => [
 			createEClass("C1") => [

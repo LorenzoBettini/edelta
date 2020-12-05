@@ -131,6 +131,29 @@ public class EdeltaRefactorings extends AbstractEdelta {
     f.setName(outReferenceName);
   }
   
+  public EClass extractMetaClass(final String name, final EReference reference) {
+    final EPackage ePackage = reference.getEContainingClass().getEPackage();
+    final EClass extracted = EdeltaLibrary.addNewEClass(ePackage, name);
+    final Consumer<EReference> _function = (EReference it) -> {
+      it.setLowerBound(1);
+      it.setUpperBound(1);
+    };
+    final EReference extractedRef = EdeltaLibrary.addNewEReference(extracted, StringExtensions.toFirstLower(reference.getName()), reference.getEReferenceType(), _function);
+    EReference _eOpposite = reference.getEOpposite();
+    if (_eOpposite!=null) {
+      EdeltaLibrary.moveTo(_eOpposite, extracted);
+    }
+    final Consumer<EReference> _function_1 = (EReference it) -> {
+      it.setLowerBound(0);
+      it.setUpperBound(1);
+    };
+    final EReference backward = EdeltaLibrary.addNewEReference(reference.getEReferenceType(), StringExtensions.toFirstLower(name), extracted, _function_1);
+    EdeltaLibrary.makeBidirectional(backward, extractedRef);
+    reference.setName(StringExtensions.toFirstLower(name));
+    reference.setEType(extracted);
+    return extracted;
+  }
+  
   /**
    * Given a non empty list of {@link EStructuralFeature}, which are known to
    * appear in several classes as duplicates, extracts a new common superclass,
