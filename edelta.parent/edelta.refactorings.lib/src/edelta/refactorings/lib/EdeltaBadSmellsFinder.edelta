@@ -156,10 +156,6 @@ def allEStructuralFeatures(EPackage ePackage) {
 		flatten
 }
 
-def allEClasses(EPackage ePackage) {
-	ePackage.EClassifiers.filter(EClass)
-}
-
 /**
  * Finds all the features corresponding to a redundant container,
  * that is, a missed opposite reference to the container.

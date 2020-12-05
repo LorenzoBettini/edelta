@@ -160,7 +160,7 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
    */
   public LinkedHashMap<EClass, Map<EStructuralFeature, List<EStructuralFeature>>> findDuplicateFeaturesInSubclasses(final EPackage ePackage) {
     final LinkedHashMap<EClass, Map<EStructuralFeature, List<EStructuralFeature>>> map = CollectionLiterals.<EClass, Map<EStructuralFeature, List<EStructuralFeature>>>newLinkedHashMap();
-    Iterable<EClass> _allEClasses = this.allEClasses(ePackage);
+    List<EClass> _allEClasses = EdeltaLibrary.allEClasses(ePackage);
     for (final EClass c : _allEClasses) {
       {
         final Iterable<EClass> directSubclasses = this.directSubclasses(c);
@@ -208,11 +208,7 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
     final Function1<EClass, EList<EStructuralFeature>> _function = (EClass it) -> {
       return it.getEStructuralFeatures();
     };
-    return Iterables.<EStructuralFeature>concat(IterableExtensions.<EClass, EList<EStructuralFeature>>map(this.allEClasses(ePackage), _function));
-  }
-  
-  public Iterable<EClass> allEClasses(final EPackage ePackage) {
-    return Iterables.<EClass>filter(ePackage.getEClassifiers(), EClass.class);
+    return Iterables.<EStructuralFeature>concat(ListExtensions.<EClass, EList<EStructuralFeature>>map(EdeltaLibrary.allEClasses(ePackage), _function));
   }
   
   /**
@@ -236,7 +232,7 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
     final Function1<EClass, ArrayList<Pair<EReference, EReference>>> _function = (EClass it) -> {
       return this.findRedundantContainers(it);
     };
-    return Iterables.<Pair<EReference, EReference>>concat(IterableExtensions.<EClass, ArrayList<Pair<EReference, EReference>>>map(this.allEClasses(ePackage), _function));
+    return Iterables.<Pair<EReference, EReference>>concat(ListExtensions.<EClass, ArrayList<Pair<EReference, EReference>>>map(EdeltaLibrary.allEClasses(ePackage), _function));
   }
   
   /**
@@ -343,7 +339,7 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
       int _size = subclasses.size();
       return Boolean.valueOf((_size > 1));
     };
-    final Map<EClass, List<EClass>> classification = MapExtensions.<EClass, List<EClass>>filter(IterableExtensions.<EClass, EClass>groupBy(IterableExtensions.<EClass>filter(this.allEClasses(ePackage), _function), _function_1), _function_2);
+    final Map<EClass, List<EClass>> classification = MapExtensions.<EClass, List<EClass>>filter(IterableExtensions.<EClass, EClass>groupBy(IterableExtensions.<EClass>filter(EdeltaLibrary.allEClasses(ePackage), _function), _function_1), _function_2);
     final Consumer<Map.Entry<EClass, List<EClass>>> _function_3 = (Map.Entry<EClass, List<EClass>> it) -> {
       final Supplier<String> _function_4 = () -> {
         String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it.getKey());
@@ -372,7 +368,7 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
       return Boolean.valueOf(((!cl.isAbstract()) && 
         this.hasSubclasses(cl)));
     };
-    final Iterable<EClass> classes = IterableExtensions.<EClass>filter(this.allEClasses(ePackage), _function);
+    final Iterable<EClass> classes = IterableExtensions.<EClass>filter(EdeltaLibrary.allEClasses(ePackage), _function);
     final Consumer<EClass> _function_1 = (EClass it) -> {
       final Supplier<String> _function_2 = () -> {
         String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it);
@@ -416,7 +412,7 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
       return Boolean.valueOf((cl.isAbstract() && 
         (!this.hasSubclasses(cl))));
     };
-    final Iterable<EClass> classes = IterableExtensions.<EClass>filter(this.allEClasses(ePackage), _function);
+    final Iterable<EClass> classes = IterableExtensions.<EClass>filter(EdeltaLibrary.allEClasses(ePackage), _function);
     final Consumer<EClass> _function_1 = (EClass it) -> {
       final Supplier<String> _function_2 = () -> {
         String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it);
@@ -440,7 +436,7 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
           return Boolean.valueOf((!_isAbstract));
         }))));
     };
-    final Iterable<EClass> classes = IterableExtensions.<EClass>filter(this.allEClasses(ePackage), _function);
+    final Iterable<EClass> classes = IterableExtensions.<EClass>filter(EdeltaLibrary.allEClasses(ePackage), _function);
     final Consumer<EClass> _function_1 = (EClass it) -> {
       final Supplier<String> _function_2 = () -> {
         String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it);
