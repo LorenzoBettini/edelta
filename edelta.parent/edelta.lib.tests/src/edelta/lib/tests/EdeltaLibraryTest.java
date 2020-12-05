@@ -18,6 +18,7 @@ import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.impl.BasicEObjectImpl;
@@ -450,6 +451,23 @@ public class EdeltaLibraryTest {
 		ePackage.getEClassifiers().add(dataType);
 		assertThat(EdeltaLibrary.allEClasses(ePackage))
 			.containsOnly(eClass);
+	}
+
+	@Test
+	public void test_moveTo() {
+		EClass eClassSrc = ecoreFactory.createEClass();
+		EClass eClassDest = ecoreFactory.createEClass();
+		EStructuralFeature feature = ecoreFactory.createEAttribute();
+		eClassSrc.getEStructuralFeatures().add(feature);
+		// before
+		assertThat(eClassDest.getEStructuralFeatures()).isEmpty();
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.contains(feature);
+		EdeltaLibrary.moveTo(feature, eClassDest);
+		// after
+		assertThat(eClassSrc.getEStructuralFeatures()).isEmpty();
+		assertThat(eClassDest.getEStructuralFeatures())
+			.contains(feature);
 	}
 
 }

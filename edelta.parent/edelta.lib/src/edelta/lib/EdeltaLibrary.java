@@ -316,4 +316,15 @@ public class EdeltaLibrary {
 			Iterables.filter(ePackage.getEClassifiers(), EClass.class));
 	}
 
+	/**
+	 * Moves the specified {@link EStructuralFeature} into the specified
+	 * {@link EClass}.
+	 * 
+	 * @param feature
+	 * @param eClassDest
+	 */
+	public static void moveTo(EStructuralFeature feature, EClass eClassDest) {
+		eClassDest.getEStructuralFeatures().add(feature);
+	}
+
 }
