@@ -498,4 +498,14 @@ public class EdeltaLibraryTest {
 		assertThat(c2Ref.getEOpposite()).isSameAs(c1Ref);
 	}
 
+	@Test
+	public void test_referringANewEClassDoesNotAddItToEPackageAutomatically() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		EClass client = ecoreFactory.createEClass();
+		ePackage.getEClassifiers().add(client);
+		EClass referred = ecoreFactory.createEClass();
+		client.getESuperTypes().add(referred);
+		assertThat(client.getEPackage()).isSameAs(ePackage);
+		assertThat(referred.getEPackage()).isNull();
+	}
 }
