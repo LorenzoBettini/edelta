@@ -327,4 +327,15 @@ public class EdeltaLibrary {
 		eClassDest.getEStructuralFeatures().add(feature);
 	}
 
+	/**
+	 * Sets the EOpposite property of the two references.
+	 * 
+	 * @param ref1
+	 * @param ref2
+	 */
+	public static void makeBidirectional(EReference ref1, EReference ref2) {
+		ref1.setEOpposite(ref2);
+		ref2.setEOpposite(ref1);
+	}
+
 }

@@ -470,4 +470,32 @@ public class EdeltaLibraryTest {
 			.contains(feature);
 	}
 
+	@Test
+	public void test_setEOppositeDoesNotMakeReferenceBidirectionalAutomatically() {
+		EClass c1 = ecoreFactory.createEClass();
+		EClass c2 = ecoreFactory.createEClass();
+		EReference c1Ref = ecoreFactory.createEReference();
+		c1.getEStructuralFeatures().add(c1Ref);
+		EReference c2Ref = ecoreFactory.createEReference();
+		c2.getEStructuralFeatures().add(c2Ref);
+
+		c1Ref.setEOpposite(c2Ref);
+		assertThat(c2Ref.getEOpposite()).isNull();
+	}
+
+	@Test
+	public void test_makeBidirectional() {
+		EClass c1 = ecoreFactory.createEClass();
+		EClass c2 = ecoreFactory.createEClass();
+		EReference c1Ref = ecoreFactory.createEReference();
+		c1.getEStructuralFeatures().add(c1Ref);
+		EReference c2Ref = ecoreFactory.createEReference();
+		c2.getEStructuralFeatures().add(c2Ref);
+		EdeltaLibrary.makeBidirectional(c1Ref, c2Ref);
+		assertThat(c1Ref.getEOpposite()).isNotNull();
+		assertThat(c2Ref.getEOpposite()).isNotNull();
+		assertThat(c1Ref.getEOpposite()).isSameAs(c2Ref);
+		assertThat(c2Ref.getEOpposite()).isSameAs(c1Ref);
+	}
+
 }
