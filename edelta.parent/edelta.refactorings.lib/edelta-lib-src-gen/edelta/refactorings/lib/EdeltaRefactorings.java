@@ -158,8 +158,8 @@ public class EdeltaRefactorings extends AbstractEdelta {
         EdeltaLibrary.makeBidirectional(it, reference);
       };
       EdeltaLibrary.addNewEReference(extracted, StringExtensions.toFirstLower(owner.getName()), owner, _function_1);
-      eOpposite.setEType(extracted);
       eOpposite.setName(newOppositeReferenceName);
+      eOpposite.setEType(extracted);
       EdeltaLibrary.makeBidirectional(eOpposite, extractedRef);
     }
     reference.setName(newReferenceName);

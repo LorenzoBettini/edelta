@@ -126,8 +126,8 @@ def extractMetaClass(String name, EReference reference,
 			upperBound = 1
 			makeBidirectional(reference)
 		]
-		eOpposite.EType = extracted
 		eOpposite.name = newOppositeReferenceName
+		eOpposite.EType = extracted
 		eOpposite.makeBidirectional(extractedRef)
 	}
 	reference.name = newReferenceName
