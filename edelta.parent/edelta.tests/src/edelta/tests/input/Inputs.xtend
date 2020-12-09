@@ -324,11 +324,10 @@ class Inputs {
 		}
 		
 		modifyEcore introduceWorkingPosition epackage PersonList {
-			extractMetaClass("WorkingPosition", ecoreref(Person.works)) => [
+			addNewEClass("WorkingPosition") [
 				addNewEAttribute("description", ecoreref(EString))
+				extractMetaClass(ecoreref(Person.works), "position", "works")
 			]
-			ecoreref(WorkPlace.workingPosition).name = "position"
-			ecoreref(Person.workingPosition).name = "works"
 		}
 		
 		modifyEcore improveList epackage PersonList {
@@ -339,5 +338,6 @@ class Inputs {
 				)
 			)
 		}
+		
 	'''
 }
