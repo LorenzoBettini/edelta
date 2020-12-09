@@ -251,7 +251,8 @@ public class EdeltaRefactoringsTest extends AbstractTest {
     personWorks.setEType(workPlace);
     personWorks.setEOpposite(workPlacePersons);
     Assertions.<EStructuralFeature>assertThat(workPlace.getEStructuralFeatures()).contains(workPlacePersons);
-    final EClass workingPosition = this.refactorings.extractMetaClass("WorkingPosition", personWorks);
+    final EClass workingPosition = this.refactorings.extractMetaClass("WorkingPosition", personWorks, "worksAs", "position");
+    final List<EReference> workingPositionReferences = IterableExtensions.<EReference>toList(Iterables.<EReference>filter(workingPosition.getEStructuralFeatures(), EReference.class));
     final Consumer<EReference> _function_2 = (EReference it) -> {
       final Function<EReference, String> _function_3 = (EReference it_1) -> {
         return it_1.getName();
@@ -271,7 +272,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       final Function<EReference, EClass> _function_8 = (EReference it_1) -> {
         return it_1.getEOpposite().getEReferenceType();
       };
-      Assertions.<EReference>assertThat(it).<String>returns("works", _function_3).<EClassifier>returns(workPlace, _function_4).<Integer>returns(Integer.valueOf(1), _function_5).<Integer>returns(Integer.valueOf(1), _function_6).<String>returns("workingPosition", _function_7).<EClass>returns(workingPosition, _function_8);
+      Assertions.<EReference>assertThat(it).<String>returns("workPlace", _function_3).<EClassifier>returns(workPlace, _function_4).<Integer>returns(Integer.valueOf(1), _function_5).<Integer>returns(Integer.valueOf(1), _function_6).<String>returns("position", _function_7).<EClass>returns(workingPosition, _function_8);
     };
     final Consumer<EReference> _function_3 = (EReference it) -> {
       final Function<EReference, String> _function_4 = (EReference it_1) -> {
@@ -292,9 +293,10 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       final Function<EReference, EClass> _function_9 = (EReference it_1) -> {
         return it_1.getEOpposite().getEReferenceType();
       };
-      Assertions.<EReference>assertThat(it).<String>returns("persons", _function_4).<EClassifier>returns(person, _function_5).<Integer>returns(Integer.valueOf(0), _function_6).<Integer>returns(Integer.valueOf((-1)), _function_7).<String>returns("workingPosition", _function_8).<EClass>returns(workingPosition, _function_9);
+      Assertions.<EReference>assertThat(it).<String>returns("person", _function_4).<EClassifier>returns(person, _function_5).<Integer>returns(Integer.valueOf(1), _function_6).<Integer>returns(Integer.valueOf(1), _function_7).<String>returns("worksAs", _function_8).<EClass>returns(workingPosition, _function_9);
     };
-    Assertions.<EReference>assertThat(Iterables.<EReference>filter(workingPosition.getEStructuralFeatures(), EReference.class)).hasSize(2).contains(workPlacePersons).anySatisfy(_function_2).anySatisfy(_function_3);
+    Assertions.<EReference>assertThat(workingPositionReferences).hasSize(2).anySatisfy(_function_2).anySatisfy(_function_3);
+    final List<EReference> workPlaceReferences = IterableExtensions.<EReference>toList(Iterables.<EReference>filter(workPlace.getEStructuralFeatures(), EReference.class));
     final Consumer<EReference> _function_4 = (EReference it) -> {
       final Function<EReference, String> _function_5 = (EReference it_1) -> {
         return it_1.getName();
@@ -314,9 +316,10 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       final Function<EReference, EClassifier> _function_10 = (EReference it_1) -> {
         return it_1.getEOpposite().getEType();
       };
-      Assertions.<EReference>assertThat(it).<String>returns("workingPosition", _function_5).<EClassifier>returns(workingPosition, _function_6).<Integer>returns(Integer.valueOf(0), _function_7).<Integer>returns(Integer.valueOf(1), _function_8).<String>returns("works", _function_9).<EClassifier>returns(workPlace, _function_10);
+      Assertions.<EReference>assertThat(it).<String>returns("position", _function_5).<EClassifier>returns(workingPosition, _function_6).<Integer>returns(Integer.valueOf(0), _function_7).<Integer>returns(Integer.valueOf((-1)), _function_8).<String>returns("workPlace", _function_9).<EClassifier>returns(workPlace, _function_10);
     };
-    Assertions.<EReference>assertThat(Iterables.<EReference>filter(workPlace.getEStructuralFeatures(), EReference.class)).hasSize(1).doesNotContain(workPlacePersons).anySatisfy(_function_4);
+    Assertions.<EReference>assertThat(workPlaceReferences).hasSize(1).containsExactly(workPlacePersons).anySatisfy(_function_4);
+    final List<EReference> personReferences = IterableExtensions.<EReference>toList(Iterables.<EReference>filter(person.getEStructuralFeatures(), EReference.class));
     final Consumer<EReference> _function_5 = (EReference it) -> {
       final Function<EReference, String> _function_6 = (EReference it_1) -> {
         return it_1.getName();
@@ -330,15 +333,18 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       final Function<EReference, Integer> _function_9 = (EReference it_1) -> {
         return Integer.valueOf(it_1.getUpperBound());
       };
-      final Function<EReference, String> _function_10 = (EReference it_1) -> {
+      final Function<EReference, Boolean> _function_10 = (EReference it_1) -> {
+        return Boolean.valueOf(it_1.isContainment());
+      };
+      final Function<EReference, String> _function_11 = (EReference it_1) -> {
         return it_1.getEOpposite().getName();
       };
-      final Function<EReference, EClass> _function_11 = (EReference it_1) -> {
+      final Function<EReference, EClass> _function_12 = (EReference it_1) -> {
         return it_1.getEOpposite().getEReferenceType();
       };
-      Assertions.<EReference>assertThat(it).<String>returns("workingPosition", _function_6).<EClassifier>returns(workingPosition, _function_7).<Integer>returns(Integer.valueOf(1), _function_8).<Integer>returns(Integer.valueOf(1), _function_9).<String>returns("persons", _function_10).<EClass>returns(person, _function_11);
+      Assertions.<EReference>assertThat(it).<String>returns("worksAs", _function_6).<EClassifier>returns(workingPosition, _function_7).<Integer>returns(Integer.valueOf(1), _function_8).<Integer>returns(Integer.valueOf(1), _function_9).<Boolean>returns(Boolean.valueOf(true), _function_10).<String>returns("person", _function_11).<EClass>returns(person, _function_12);
     };
-    Assertions.<EReference>assertThat(Iterables.<EReference>filter(person.getEStructuralFeatures(), EReference.class)).containsExactly(personWorks).anySatisfy(_function_5);
+    Assertions.<EReference>assertThat(personReferences).containsExactly(personWorks).anySatisfy(_function_5);
   }
   
   @Test
@@ -353,7 +359,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
     };
     final EReference personWorks = ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function);
     Assertions.<EStructuralFeature>assertThat(workPlace.getEStructuralFeatures()).isEmpty();
-    final EClass workingPosition = this.refactorings.extractMetaClass("WorkingPosition", personWorks);
+    final EClass workingPosition = this.refactorings.extractMetaClass("WorkingPosition", personWorks, "worksAs", null);
     final Consumer<EReference> _function_1 = (EReference it) -> {
       final Function<EReference, String> _function_2 = (EReference it_1) -> {
         return it_1.getName();
@@ -367,15 +373,13 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       final Function<EReference, Integer> _function_5 = (EReference it_1) -> {
         return Integer.valueOf(it_1.getUpperBound());
       };
-      final Function<EReference, String> _function_6 = (EReference it_1) -> {
-        return it_1.getEOpposite().getName();
+      final Function<EReference, EReference> _function_6 = (EReference it_1) -> {
+        return it_1.getEOpposite();
       };
-      final Function<EReference, EClass> _function_7 = (EReference it_1) -> {
-        return it_1.getEOpposite().getEReferenceType();
-      };
-      Assertions.<EReference>assertThat(it).<String>returns("works", _function_2).<EClassifier>returns(workPlace, _function_3).<Integer>returns(Integer.valueOf(1), _function_4).<Integer>returns(Integer.valueOf(1), _function_5).<String>returns("workingPosition", _function_6).<EClass>returns(workingPosition, _function_7);
+      Assertions.<EReference>assertThat(it).<String>returns("workPlace", _function_2).<EClassifier>returns(workPlace, _function_3).<Integer>returns(Integer.valueOf(1), _function_4).<Integer>returns(Integer.valueOf(1), _function_5).<EReference>returns(null, _function_6);
     };
     Assertions.<EReference>assertThat(Iterables.<EReference>filter(workingPosition.getEStructuralFeatures(), EReference.class)).hasSize(1).anySatisfy(_function_1);
+    Assertions.<EReference>assertThat(Iterables.<EReference>filter(workPlace.getEStructuralFeatures(), EReference.class)).isEmpty();
     final Consumer<EReference> _function_2 = (EReference it) -> {
       final Function<EReference, String> _function_3 = (EReference it_1) -> {
         return it_1.getName();
@@ -389,31 +393,15 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       final Function<EReference, Integer> _function_6 = (EReference it_1) -> {
         return Integer.valueOf(it_1.getUpperBound());
       };
-      final Function<EReference, String> _function_7 = (EReference it_1) -> {
-        return it_1.getEOpposite().getName();
+      final Function<EReference, Boolean> _function_7 = (EReference it_1) -> {
+        return Boolean.valueOf(it_1.isContainment());
       };
-      final Function<EReference, EClassifier> _function_8 = (EReference it_1) -> {
-        return it_1.getEOpposite().getEType();
+      final Function<EReference, EReference> _function_8 = (EReference it_1) -> {
+        return it_1.getEOpposite();
       };
-      Assertions.<EReference>assertThat(it).<String>returns("workingPosition", _function_3).<EClassifier>returns(workingPosition, _function_4).<Integer>returns(Integer.valueOf(0), _function_5).<Integer>returns(Integer.valueOf(1), _function_6).<String>returns("works", _function_7).<EClassifier>returns(workPlace, _function_8);
+      Assertions.<EReference>assertThat(it).<String>returns("worksAs", _function_3).<EClassifier>returns(workingPosition, _function_4).<Integer>returns(Integer.valueOf(1), _function_5).<Integer>returns(Integer.valueOf(1), _function_6).<Boolean>returns(Boolean.valueOf(true), _function_7).<EReference>returns(null, _function_8);
     };
-    Assertions.<EReference>assertThat(Iterables.<EReference>filter(workPlace.getEStructuralFeatures(), EReference.class)).hasSize(1).anySatisfy(_function_2);
-    final Consumer<EReference> _function_3 = (EReference it) -> {
-      final Function<EReference, String> _function_4 = (EReference it_1) -> {
-        return it_1.getName();
-      };
-      final Function<EReference, EClassifier> _function_5 = (EReference it_1) -> {
-        return it_1.getEType();
-      };
-      final Function<EReference, Integer> _function_6 = (EReference it_1) -> {
-        return Integer.valueOf(it_1.getLowerBound());
-      };
-      final Function<EReference, Integer> _function_7 = (EReference it_1) -> {
-        return Integer.valueOf(it_1.getUpperBound());
-      };
-      Assertions.<EReference>assertThat(it).<String>returns("workingPosition", _function_4).<EClassifier>returns(workingPosition, _function_5).<Integer>returns(Integer.valueOf(1), _function_6).<Integer>returns(Integer.valueOf(1), _function_7);
-    };
-    Assertions.<EReference>assertThat(Iterables.<EReference>filter(person.getEStructuralFeatures(), EReference.class)).containsExactly(personWorks).anySatisfy(_function_3);
+    Assertions.<EReference>assertThat(Iterables.<EReference>filter(person.getEStructuralFeatures(), EReference.class)).containsExactly(personWorks).anySatisfy(_function_2);
   }
   
   @Test

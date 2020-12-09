@@ -133,26 +133,38 @@ public class EdeltaRefactorings extends AbstractEdelta {
     reference.setName(newReferenceName);
   }
   
-  public EClass extractMetaClass(final String name, final EReference reference) {
+  /**
+   * @param reference the reference to extract
+   * @param newReferenceName the new name for the reference from the owner class to the
+   * extracted class (basically used to rename the original passed reference)
+   * @param newOppositeReferenceName the new name for the opposite reference from the original
+   * target class to the extracted class (basically used to rename the original opposite reference)
+   * @return the extracted metaclass
+   */
+  public EClass extractMetaClass(final String name, final EReference reference, final String newReferenceName, final String newOppositeReferenceName) {
+    final EClass owner = reference.getEContainingClass();
     final EPackage ePackage = reference.getEContainingClass().getEPackage();
     final EClass extracted = EdeltaLibrary.addNewEClass(ePackage, name);
     final Consumer<EReference> _function = (EReference it) -> {
       it.setLowerBound(1);
       it.setUpperBound(1);
     };
-    final EReference extractedRef = EdeltaLibrary.addNewEReference(extracted, StringExtensions.toFirstLower(reference.getName()), reference.getEReferenceType(), _function);
-    EReference _eOpposite = reference.getEOpposite();
-    if (_eOpposite!=null) {
-      EdeltaLibrary.moveTo(_eOpposite, extracted);
+    final EReference extractedRef = EdeltaLibrary.addNewEReference(extracted, StringExtensions.toFirstLower(reference.getEType().getName()), reference.getEReferenceType(), _function);
+    final EReference eOpposite = reference.getEOpposite();
+    if ((eOpposite != null)) {
+      final Consumer<EReference> _function_1 = (EReference it) -> {
+        it.setLowerBound(1);
+        it.setUpperBound(1);
+        EdeltaLibrary.makeBidirectional(it, reference);
+      };
+      EdeltaLibrary.addNewEReference(extracted, StringExtensions.toFirstLower(owner.getName()), owner, _function_1);
+      eOpposite.setEType(extracted);
+      eOpposite.setName(newOppositeReferenceName);
+      EdeltaLibrary.makeBidirectional(eOpposite, extractedRef);
     }
-    final Consumer<EReference> _function_1 = (EReference it) -> {
-      it.setLowerBound(0);
-      it.setUpperBound(1);
-    };
-    final EReference backward = EdeltaLibrary.addNewEReference(reference.getEReferenceType(), StringExtensions.toFirstLower(name), extracted, _function_1);
-    EdeltaLibrary.makeBidirectional(backward, extractedRef);
-    reference.setName(StringExtensions.toFirstLower(name));
+    reference.setName(newReferenceName);
     reference.setEType(extracted);
+    reference.setContainment(true);
     return extracted;
   }
   

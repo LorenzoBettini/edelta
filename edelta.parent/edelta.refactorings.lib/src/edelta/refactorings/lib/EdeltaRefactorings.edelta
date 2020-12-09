@@ -102,21 +102,37 @@ def extractMetaClass(EClass extractedClass, EReference reference,
 	reference.name = newReferenceName;
 }
 
-def extractMetaClass(String name, EReference reference) {
+/**
+ * @param reference the reference to extract
+ * @param newReferenceName the new name for the reference from the owner class to the
+ * extracted class (basically used to rename the original passed reference)
+ * @param newOppositeReferenceName the new name for the opposite reference from the original
+ * target class to the extracted class (basically used to rename the original opposite reference)
+ * @return the extracted metaclass
+ */
+def extractMetaClass(String name, EReference reference,
+			String newReferenceName, String newOppositeReferenceName) {
+	val owner = reference.EContainingClass
 	val ePackage = reference.EContainingClass.EPackage
 	val extracted = ePackage.addNewEClass(name)
-	val extractedRef = extracted.addNewEReference(reference.name.toFirstLower, reference.EReferenceType) [
+	val extractedRef = extracted.addNewEReference(reference.EType.name.toFirstLower, reference.EReferenceType) [
 		lowerBound = 1
 		upperBound = 1
 	]
-	reference.EOpposite?.moveTo(extracted)
-	val backward = reference.EReferenceType.addNewEReference(name.toFirstLower, extracted) [
-		lowerBound = 0
-		upperBound = 1
-	]
-	backward.makeBidirectional(extractedRef)
-	reference.name = name.toFirstLower
+	val eOpposite = reference.EOpposite
+	if (eOpposite !== null) {
+		extracted.addNewEReference(owner.name.toFirstLower, owner) [
+			lowerBound = 1
+			upperBound = 1
+			makeBidirectional(reference)
+		]
+		eOpposite.EType = extracted
+		eOpposite.name = newOppositeReferenceName
+		eOpposite.makeBidirectional(extractedRef)
+	}
+	reference.name = newReferenceName
 	reference.EType = extracted
+	reference.containment = true
 	return extracted
 }
 

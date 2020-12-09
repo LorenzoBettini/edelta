@@ -198,50 +198,57 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertThat(workPlace.EStructuralFeatures)
 			.contains(workPlacePersons)
 
-		val workingPosition = refactorings.extractMetaClass("WorkingPosition", personWorks)
+		val workingPosition =
+			refactorings.extractMetaClass("WorkingPosition", personWorks, "worksAs", "position")
 
-		assertThat(workingPosition.EStructuralFeatures.filter(EReference))
+		val workingPositionReferences =
+			workingPosition.EStructuralFeatures.filter(EReference).toList
+		assertThat(workingPositionReferences)
 			.hasSize(2)
-			.contains(workPlacePersons)
 			.anySatisfy[
 				assertThat
-					.returns("works", [name])
+					.returns("workPlace", [name])
 					.returns(workPlace, [EType])
 					.returns(1, [lowerBound])
 					.returns(1, [upperBound])
-					.returns("workingPosition", [EOpposite.name])
+					.returns("position", [EOpposite.name])
 					.returns(workingPosition, [EOpposite.EReferenceType])
 			]
 			.anySatisfy[
 				assertThat
-					.returns("persons", [name])
+					.returns("person", [name])
 					.returns(person, [EType])
-					.returns(0, [lowerBound])
-					.returns(-1, [upperBound])
-					.returns("workingPosition", [EOpposite.name])
+					.returns(1, [lowerBound])
+					.returns(1, [upperBound])
+					.returns("worksAs", [EOpposite.name])
 					.returns(workingPosition, [EOpposite.EReferenceType])
 			]
-		assertThat(workPlace.EStructuralFeatures.filter(EReference))
+		val workPlaceReferences =
+			workPlace.EStructuralFeatures.filter(EReference).toList
+		assertThat(workPlaceReferences)
 			.hasSize(1)
-			.doesNotContain(workPlacePersons)
+			.containsExactly(workPlacePersons) // actually renamed to "position"
 			.anySatisfy[
 				assertThat
-					.returns("workingPosition", [name])
+					.returns("position", [name])
 					.returns(workingPosition, [EType])
 					.returns(0, [lowerBound])
-					.returns(1, [upperBound])
-					.returns("works", [EOpposite.name])
+					.returns(-1, [upperBound])
+					.returns("workPlace", [EOpposite.name])
 					.returns(workPlace, [EOpposite.EType])
 			]
-		assertThat(person.EStructuralFeatures.filter(EReference))
-			.containsExactly(personWorks)
+		val personReferences =
+			person.EStructuralFeatures.filter(EReference).toList
+		assertThat(personReferences)
+			.containsExactly(personWorks) // actually renamed to "worksAs"
 			.anySatisfy[
 				assertThat
-					.returns("workingPosition", [name])
+					.returns("worksAs", [name])
 					.returns(workingPosition, [EType])
 					.returns(1, [lowerBound])
 					.returns(1, [upperBound])
-					.returns("persons", [EOpposite.name])
+					.returns(true, [containment])
+					.returns("person", [EOpposite.name])
 					.returns(person, [EOpposite.EReferenceType])
 			]
 	}
@@ -259,38 +266,31 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertThat(workPlace.EStructuralFeatures)
 			.isEmpty
 
-		val workingPosition = refactorings.extractMetaClass("WorkingPosition", personWorks)
+		val workingPosition =
+			refactorings.extractMetaClass("WorkingPosition", personWorks, "worksAs", null)
 
 		assertThat(workingPosition.EStructuralFeatures.filter(EReference))
 			.hasSize(1)
 			.anySatisfy[
 				assertThat
-					.returns("works", [name])
+					.returns("workPlace", [name])
 					.returns(workPlace, [EType])
 					.returns(1, [lowerBound])
 					.returns(1, [upperBound])
-					.returns("workingPosition", [EOpposite.name])
-					.returns(workingPosition, [EOpposite.EReferenceType])
+					.returns(null, [EOpposite])
 			]
 		assertThat(workPlace.EStructuralFeatures.filter(EReference))
-			.hasSize(1)
-			.anySatisfy[
-				assertThat
-					.returns("workingPosition", [name])
-					.returns(workingPosition, [EType])
-					.returns(0, [lowerBound])
-					.returns(1, [upperBound])
-					.returns("works", [EOpposite.name])
-					.returns(workPlace, [EOpposite.EType])
-			]
+			.isEmpty
 		assertThat(person.EStructuralFeatures.filter(EReference))
-			.containsExactly(personWorks)
+			.containsExactly(personWorks) // actually renamed to "worksAs"
 			.anySatisfy[
 				assertThat
-					.returns("workingPosition", [name])
+					.returns("worksAs", [name])
 					.returns(workingPosition, [EType])
 					.returns(1, [lowerBound])
 					.returns(1, [upperBound])
+					.returns(true, [containment])
+					.returns(null, [EOpposite])
 			]
 	}
 
