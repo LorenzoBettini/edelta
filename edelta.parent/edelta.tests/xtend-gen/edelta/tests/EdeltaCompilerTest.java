@@ -3790,7 +3790,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder.append("EdeltaLibrary.addNewEAttribute(it_1, \"description\", getEDataType(\"ecore\", \"EString\"));");
     _builder.newLine();
     _builder.append("      ");
-    _builder.append("this.refactorings.extractMetaClass(it_1, getEReference(\"PersonList\", \"Person\", \"works\"), \"position\", \"works\");");
+    _builder.append("this.refactorings.extractMetaClass(it_1, getEReference(\"PersonList\", \"Person\", \"works\"), \"works\", \"position\");");
     _builder.newLine();
     _builder.append("    ");
     _builder.append("};");

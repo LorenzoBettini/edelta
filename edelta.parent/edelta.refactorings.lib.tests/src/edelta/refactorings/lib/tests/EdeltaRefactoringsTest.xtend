@@ -156,7 +156,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertThat(workPlace.EStructuralFeatures)
 			.contains(workPlacePersons)
 
-		refactorings.extractMetaClass(workingPosition, personWorks, "position", "works")
+		refactorings.extractMetaClass(workingPosition, personWorks, "works", "position")
 
 		assertThat(workingPosition.EStructuralFeatures)
 			.hasSize(2)

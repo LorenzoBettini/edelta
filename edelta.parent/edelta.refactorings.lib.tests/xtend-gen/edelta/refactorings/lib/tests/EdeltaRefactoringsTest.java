@@ -204,7 +204,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
     final EClass workingPosition = this.createEClass(p, "WorkingPosition");
     Assertions.<EStructuralFeature>assertThat(workingPosition.getEStructuralFeatures()).isEmpty();
     Assertions.<EStructuralFeature>assertThat(workPlace.getEStructuralFeatures()).contains(workPlacePersons);
-    this.refactorings.extractMetaClass(workingPosition, personWorks, "position", "works");
+    this.refactorings.extractMetaClass(workingPosition, personWorks, "works", "position");
     final Consumer<EStructuralFeature> _function_2 = (EStructuralFeature it) -> {
       final Function<EStructuralFeature, String> _function_3 = (EStructuralFeature it_1) -> {
         return it_1.getName();

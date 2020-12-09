@@ -38,7 +38,7 @@ public class PetrinetExample extends AbstractEdelta {
   
   public void introducePTArc(final EPackage it) {
     final Consumer<EClass> _function = (EClass it_1) -> {
-      this.refactorings.extractMetaClass(it_1, getEReference("petrinet", "Place", "dst"), "in", "out");
+      this.refactorings.extractMetaClass(it_1, getEReference("petrinet", "Place", "dst"), "out", "in");
       this.addWeightAttribute(it_1);
     };
     EdeltaLibrary.addNewEClass(it, "PTArc", _function);
@@ -46,7 +46,7 @@ public class PetrinetExample extends AbstractEdelta {
   
   public void introduceTPArc(final EPackage it) {
     final Consumer<EClass> _function = (EClass it_1) -> {
-      this.refactorings.extractMetaClass(it_1, getEReference("petrinet", "Transition", "dst"), "in", "out");
+      this.refactorings.extractMetaClass(it_1, getEReference("petrinet", "Transition", "dst"), "out", "in");
       this.addWeightAttribute(it_1);
     };
     EdeltaLibrary.addNewEClass(it, "TPArc", _function);

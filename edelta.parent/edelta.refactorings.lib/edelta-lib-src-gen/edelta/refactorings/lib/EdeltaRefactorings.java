@@ -103,12 +103,12 @@ public class EdeltaRefactorings extends AbstractEdelta {
   /**
    * @param extractedClass the created EClass created representing the extracted metaclass
    * @param reference
-   * @param newOppositeReferenceName the new name for the opposite reference from the original
-   * target class to the extracted class (basically used to rename the original opposite reference)
    * @param newReferenceName the new name for the reference from the owner class to the
    * extracted class (basically used to rename the original passed reference)
+   * @param newOppositeReferenceName the new name for the opposite reference from the original
+   * target class to the extracted class (basically used to rename the original opposite reference)
    */
-  public void extractMetaClass(final EClass extractedClass, final EReference reference, final String newOppositeReferenceName, final String newReferenceName) {
+  public void extractMetaClass(final EClass extractedClass, final EReference reference, final String newReferenceName, final String newOppositeReferenceName) {
     final Consumer<EReference> _function = (EReference it) -> {
       it.setLowerBound(reference.getEOpposite().getLowerBound());
       it.setUpperBound(1);

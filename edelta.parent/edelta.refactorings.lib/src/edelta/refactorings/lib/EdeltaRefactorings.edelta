@@ -68,13 +68,13 @@ def extractIntoSuperclass(EClass superclass, List<EAttribute> attrs){
 /**
  * @param extractedClass the created EClass created representing the extracted metaclass
  * @param reference
- * @param newOppositeReferenceName the new name for the opposite reference from the original
- * target class to the extracted class (basically used to rename the original opposite reference)
  * @param newReferenceName the new name for the reference from the owner class to the
  * extracted class (basically used to rename the original passed reference)
+ * @param newOppositeReferenceName the new name for the opposite reference from the original
+ * target class to the extracted class (basically used to rename the original opposite reference)
  */
 def extractMetaClass(EClass extractedClass, EReference reference,
-				String newOppositeReferenceName, String newReferenceName) : void {
+				String newReferenceName, String newOppositeReferenceName) : void {
 	val ref_in = newEReference(newOppositeReferenceName, extractedClass) [
 		lowerBound = reference.EOpposite.lowerBound;
 		upperBound = 1;
