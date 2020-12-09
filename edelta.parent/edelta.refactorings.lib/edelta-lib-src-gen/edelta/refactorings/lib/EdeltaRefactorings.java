@@ -102,33 +102,35 @@ public class EdeltaRefactorings extends AbstractEdelta {
   
   /**
    * @param extractedClass the created EClass created representing the extracted metaclass
-   * @param f
-   * @param inReferenceName
-   * @param outReferenceName
+   * @param reference
+   * @param newOppositeReferenceName the new name for the opposite reference from the original
+   * target class to the extracted class (basically used to rename the original opposite reference)
+   * @param newReferenceName the new name for the reference from the owner class to the
+   * extracted class (basically used to rename the original passed reference)
    */
-  public void extractMetaClass(final EClass extractedClass, final EReference f, final String inReferenceName, final String outReferenceName) {
+  public void extractMetaClass(final EClass extractedClass, final EReference reference, final String newOppositeReferenceName, final String newReferenceName) {
     final Consumer<EReference> _function = (EReference it) -> {
-      it.setLowerBound(f.getEOpposite().getLowerBound());
+      it.setLowerBound(reference.getEOpposite().getLowerBound());
       it.setUpperBound(1);
     };
-    final EReference ref_in = EdeltaLibrary.newEReference(inReferenceName, extractedClass, _function);
+    final EReference ref_in = EdeltaLibrary.newEReference(newOppositeReferenceName, extractedClass, _function);
     final Consumer<EReference> _function_1 = (EReference it) -> {
       it.setLowerBound(1);
       it.setUpperBound(1);
       it.setEOpposite(ref_in);
     };
-    final EReference old_ref = EdeltaLibrary.newEReference(f.getName(), f.getEReferenceType(), _function_1);
+    final EReference old_ref = EdeltaLibrary.newEReference(reference.getName(), reference.getEReferenceType(), _function_1);
     EdeltaLibrary.addEReference(extractedClass, old_ref);
     ref_in.setEOpposite(old_ref);
-    EReference _eOpposite = f.getEOpposite();
+    EReference _eOpposite = reference.getEOpposite();
     _eOpposite.setLowerBound(1);
-    EReference _eOpposite_1 = f.getEOpposite();
+    EReference _eOpposite_1 = reference.getEOpposite();
     _eOpposite_1.setUpperBound(1);
-    EdeltaLibrary.addEReference(extractedClass, f.getEOpposite());
-    EdeltaLibrary.addEReference(f.getEReferenceType(), ref_in);
-    f.setEType(extractedClass);
-    f.setContainment(true);
-    f.setName(outReferenceName);
+    EdeltaLibrary.addEReference(extractedClass, reference.getEOpposite());
+    EdeltaLibrary.addEReference(reference.getEReferenceType(), ref_in);
+    reference.setEType(extractedClass);
+    reference.setContainment(true);
+    reference.setName(newReferenceName);
   }
   
   public EClass extractMetaClass(final String name, final EReference reference) {

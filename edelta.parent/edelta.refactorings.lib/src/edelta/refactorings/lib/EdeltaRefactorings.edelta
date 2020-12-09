@@ -67,18 +67,21 @@ def extractIntoSuperclass(EClass superclass, List<EAttribute> attrs){
 
 /**
  * @param extractedClass the created EClass created representing the extracted metaclass
- * @param f 
- * @param inReferenceName
- * @param outReferenceName
+ * @param reference
+ * @param newOppositeReferenceName the new name for the opposite reference from the original
+ * target class to the extracted class (basically used to rename the original opposite reference)
+ * @param newReferenceName the new name for the reference from the owner class to the
+ * extracted class (basically used to rename the original passed reference)
  */
-def extractMetaClass(EClass extractedClass, EReference f, String inReferenceName, String outReferenceName) : void {
-	val ref_in = newEReference(inReferenceName, extractedClass) [
-		lowerBound = f.EOpposite.lowerBound;
+def extractMetaClass(EClass extractedClass, EReference reference,
+				String newOppositeReferenceName, String newReferenceName) : void {
+	val ref_in = newEReference(newOppositeReferenceName, extractedClass) [
+		lowerBound = reference.EOpposite.lowerBound;
 		upperBound = 1;
 		// f.EOpposite.upperBound;
 	];
 
-	val old_ref = newEReference(f.name, f.EReferenceType) [
+	val old_ref = newEReference(reference.name, reference.EReferenceType) [
 		lowerBound = 1;
 		upperBound = 1;
 		EOpposite = ref_in;
@@ -86,17 +89,17 @@ def extractMetaClass(EClass extractedClass, EReference f, String inReferenceName
 
 	extractedClass.addEReference(old_ref);
 	ref_in.EOpposite = old_ref;
-	f.EOpposite.lowerBound = 1;
-	f.EOpposite.upperBound = 1;
+	reference.EOpposite.lowerBound = 1;
+	reference.EOpposite.upperBound = 1;
 
-	extractedClass.addEReference(f.EOpposite);
+	extractedClass.addEReference(reference.EOpposite);
 
 	// already created from outside in the right package
 	// f.EContainingClass.EPackage.EClassifiers+=extracted_class;
-	f.EReferenceType.addEReference(ref_in);
-	f.EType = extractedClass;
-	f.containment = true;
-	f.name = outReferenceName;
+	reference.EReferenceType.addEReference(ref_in);
+	reference.EType = extractedClass;
+	reference.containment = true;
+	reference.name = newReferenceName;
 }
 
 def extractMetaClass(String name, EReference reference) {
