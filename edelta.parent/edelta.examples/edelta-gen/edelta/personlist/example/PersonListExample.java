@@ -51,11 +51,11 @@ public class PersonListExample extends AbstractEdelta {
   }
   
   public void introduceWorkingPosition(final EPackage it) {
-    final Consumer<EClass> _function = (EClass it_1) -> {
+    EClass _extractMetaClass = this.refactorings.extractMetaClass("WorkingPosition", getEReference("PersonList", "Person", "works"), "works", "position");
+    final Procedure1<EClass> _function = (EClass it_1) -> {
       EdeltaLibrary.addNewEAttribute(it_1, "description", getEDataType("ecore", "EString"));
-      this.refactorings.extractMetaClass(it_1, getEReference("PersonList", "Person", "works"), "works", "position");
     };
-    EdeltaLibrary.addNewEClass(it, "WorkingPosition", _function);
+    ObjectExtensions.<EClass>operator_doubleArrow(_extractMetaClass, _function);
   }
   
   public void improveList(final EPackage it) {
