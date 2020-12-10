@@ -155,7 +155,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
       it.setLowerBound(1);
       it.setUpperBound(1);
     };
-    final EReference extractedRef = EdeltaLibrary.addNewEReference(extracted, StringExtensions.toFirstLower(reference.getEType().getName()), reference.getEReferenceType(), _function);
+    final EReference extractedRef = EdeltaLibrary.addNewEReference(extracted, reference.getName(), reference.getEReferenceType(), _function);
     final EReference eOpposite = reference.getEOpposite();
     if ((eOpposite != null)) {
       final Consumer<EReference> _function_1 = (EReference it) -> {
@@ -163,7 +163,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
         it.setUpperBound(1);
         EdeltaLibrary.makeBidirectional(it, reference);
       };
-      EdeltaLibrary.addNewEReference(extracted, StringExtensions.toFirstLower(owner.getName()), owner, _function_1);
+      EdeltaLibrary.addNewEReference(extracted, eOpposite.getName(), owner, _function_1);
       eOpposite.setName(newOppositeReferenceName);
       eOpposite.setEType(extracted);
       EdeltaLibrary.makeBidirectional(eOpposite, extractedRef);
