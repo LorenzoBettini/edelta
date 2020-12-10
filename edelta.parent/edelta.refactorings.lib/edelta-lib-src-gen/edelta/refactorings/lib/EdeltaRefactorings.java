@@ -186,6 +186,43 @@ public class EdeltaRefactorings extends AbstractEdelta {
   }
   
   /**
+   * @param name the name for the extracted class
+   * @param reference the reference to turn into a reference to the extracted class
+   * @return the extracted class
+   */
+  public EClass referenceToClass(final String name, final EReference reference) {
+    boolean _isContainment = reference.isContainment();
+    if (_isContainment) {
+      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(reference);
+      String _plus = ("Cannot apply referenceToClass on containment reference: " + _eObjectRepr);
+      this.showError(reference, _plus);
+      return null;
+    }
+    final EClass owner = reference.getEContainingClass();
+    final EPackage ePackage = reference.getEContainingClass().getEPackage();
+    final EClass extracted = EdeltaLibrary.addNewEClass(ePackage, name);
+    final Consumer<EReference> _function = (EReference it) -> {
+      it.setLowerBound(1);
+      it.setUpperBound(1);
+    };
+    final EReference extractedRef = EdeltaLibrary.addNewEReference(extracted, StringExtensions.toFirstLower(reference.getEType().getName()), reference.getEReferenceType(), _function);
+    final EReference eOpposite = reference.getEOpposite();
+    if ((eOpposite != null)) {
+      eOpposite.setEType(extracted);
+      EdeltaLibrary.makeBidirectional(eOpposite, extractedRef);
+    }
+    final Consumer<EReference> _function_1 = (EReference it) -> {
+      it.setLowerBound(1);
+      it.setUpperBound(1);
+      EdeltaLibrary.makeBidirectional(it, reference);
+    };
+    EdeltaLibrary.addNewEReference(extracted, StringExtensions.toFirstLower(owner.getName()), owner, _function_1);
+    reference.setEType(extracted);
+    reference.setContainment(true);
+    return extracted;
+  }
+  
+  /**
    * Given a non empty list of {@link EStructuralFeature}, which are known to
    * appear in several classes as duplicates, extracts a new common superclass,
    * with the duplicate feature,

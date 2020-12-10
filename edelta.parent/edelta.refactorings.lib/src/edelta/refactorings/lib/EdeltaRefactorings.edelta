@@ -139,6 +139,41 @@ def extractMetaClass(String name, Collection<EAttribute> attributes,
 }
 
 /**
+ * @param name the name for the extracted class
+ * @param reference the reference to turn into a reference to the extracted class
+ * @return the extracted class
+ */
+def referenceToClass(String name, EReference reference) {
+	if (reference.containment) {
+		showError(reference,
+			"Cannot apply referenceToClass on containment reference: " +
+			getEObjectRepr(reference)
+		)
+		return null
+	}
+	val owner = reference.EContainingClass
+	val ePackage = reference.EContainingClass.EPackage
+	val extracted = ePackage.addNewEClass(name)
+	val extractedRef = extracted.addNewEReference(reference.EType.name.toFirstLower, reference.EReferenceType) [
+		lowerBound = 1
+		upperBound = 1
+	]
+	val eOpposite = reference.EOpposite
+	if (eOpposite !== null) {
+		eOpposite.EType = extracted
+		eOpposite.makeBidirectional(extractedRef)
+	}
+	extracted.addNewEReference(owner.name.toFirstLower, owner) [
+		lowerBound = 1
+		upperBound = 1
+		makeBidirectional(reference)
+	]
+	reference.EType = extracted
+	reference.containment = true
+	return extracted
+}
+
+/**
  * Given a non empty list of {@link EStructuralFeature}, which are known to
  * appear in several classes as duplicates, extracts a new common superclass,
  * with the duplicate feature,

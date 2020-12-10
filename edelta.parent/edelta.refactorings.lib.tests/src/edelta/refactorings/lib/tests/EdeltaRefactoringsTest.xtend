@@ -259,6 +259,38 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertThat(result).isNull
 	}
 
+	@Test
+	def void test_referenceToClassBidirectional() {
+		withInputModel("referenceToClassBidirectional", "PersonList.ecore")
+		loadModelFile
+		val ref = refactorings.getEReference("PersonList", "Person", "works")
+		refactorings.referenceToClass("WorkingPosition", ref)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFile
+	}
+
+	@Test
+	def void test_referenceToClassUnidirectional() {
+		withInputModel("referenceToClassUnidirectional", "PersonList.ecore")
+		loadModelFile
+		val ref = refactorings.getEReference("PersonList", "Person", "works")
+		refactorings.referenceToClass("WorkingPosition", ref)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFile
+	}
+
+	@Test
+	def void test_referenceToClassWithContainmentReference() {
+		withInputModel("referenceToClassWithContainmentReference", "PersonList.ecore")
+		loadModelFile
+		val ref = refactorings.getEReference("PersonList", "Person", "works")
+		refactorings.referenceToClass("WorkingPosition", ref)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFileIsSameAsOriginal
+		assertThat(appender.result.trim)
+			.isEqualTo("ERROR: PersonList.Person.works: Cannot apply referenceToClass on containment reference: PersonList.Person.works")
+	}
+
 	@Test def void test_extractSuperClass() {
 		val p = factory.createEPackage => [
 			createEClass("C1") => [

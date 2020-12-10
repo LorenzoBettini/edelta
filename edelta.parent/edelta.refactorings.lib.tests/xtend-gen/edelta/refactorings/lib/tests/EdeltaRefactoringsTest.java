@@ -336,6 +336,49 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
+  public void test_referenceToClassBidirectional() {
+    try {
+      this.withInputModel("referenceToClassBidirectional", "PersonList.ecore");
+      this.loadModelFile();
+      final EReference ref = this.refactorings.getEReference("PersonList", "Person", "works");
+      this.refactorings.referenceToClass("WorkingPosition", ref);
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
+  public void test_referenceToClassUnidirectional() {
+    try {
+      this.withInputModel("referenceToClassUnidirectional", "PersonList.ecore");
+      this.loadModelFile();
+      final EReference ref = this.refactorings.getEReference("PersonList", "Person", "works");
+      this.refactorings.referenceToClass("WorkingPosition", ref);
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
+  public void test_referenceToClassWithContainmentReference() {
+    try {
+      this.withInputModel("referenceToClassWithContainmentReference", "PersonList.ecore");
+      this.loadModelFile();
+      final EReference ref = this.refactorings.getEReference("PersonList", "Person", "works");
+      this.refactorings.referenceToClass("WorkingPosition", ref);
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFileIsSameAsOriginal();
+      Assertions.assertThat(this.appender.getResult().trim()).isEqualTo("ERROR: PersonList.Person.works: Cannot apply referenceToClass on containment reference: PersonList.Person.works");
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
   public void test_extractSuperClass() {
     EPackage _createEPackage = this.factory.createEPackage();
     final Procedure1<EPackage> _function = (EPackage it) -> {
