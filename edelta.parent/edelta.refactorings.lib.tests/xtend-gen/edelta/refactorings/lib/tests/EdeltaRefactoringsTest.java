@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import edelta.lib.AbstractEdelta;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import edelta.refactorings.lib.tests.AbstractTest;
+import edelta.testutils.EdeltaTestUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -23,6 +24,7 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Conversions;
+import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.ListExtensions;
@@ -345,6 +347,22 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       Assertions.<EReference>assertThat(it).<String>returns("worksAs", _function_6).<EClassifier>returns(workingPosition, _function_7).<Integer>returns(Integer.valueOf(1), _function_8).<Integer>returns(Integer.valueOf(1), _function_9).<Boolean>returns(Boolean.valueOf(true), _function_10).<String>returns("person", _function_11).<EClass>returns(person, _function_12);
     };
     Assertions.<EReference>assertThat(personReferences).containsExactly(personWorks).anySatisfy(_function_5);
+  }
+  
+  @Test
+  public void test_extractMetaClass3() {
+    try {
+      this.refactorings.loadEcoreFile(
+        (AbstractTest.TESTECORES + "extractMetaClassBidirectional/PersonList.ecore"));
+      final EReference ref = this.refactorings.getEReference("PersonList", "Person", "works");
+      this.refactorings.extractMetaClass("WorkingPosition", ref, "worksAs", "position");
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      EdeltaTestUtils.compareFileContents(
+        (AbstractTest.EXPECTATIONS + "extractMetaClassBidirectional/PersonList.ecore"), 
+        (AbstractTest.MODIFIED + "PersonList.ecore"));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test

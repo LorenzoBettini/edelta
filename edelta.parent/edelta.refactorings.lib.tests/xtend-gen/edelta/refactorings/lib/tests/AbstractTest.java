@@ -29,6 +29,12 @@ public abstract class AbstractTest {
   
   protected EClass eClassReference = EcorePackage.eINSTANCE.getEClass();
   
+  protected static final String MODIFIED = "modified/";
+  
+  protected static final String TESTECORES = "test-input-models/";
+  
+  protected static final String EXPECTATIONS = "test-output-expectations/";
+  
   protected EClass createEClass(final EPackage epackage, final String name) {
     final EClass c = this.createEClassWithoutPackage(name);
     EList<EClassifier> _eClassifiers = epackage.getEClassifiers();

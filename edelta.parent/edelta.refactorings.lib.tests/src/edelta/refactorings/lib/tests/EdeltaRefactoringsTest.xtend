@@ -18,6 +18,7 @@ import static org.junit.Assert.assertSame
 import static org.junit.Assert.assertTrue
 
 import static extension org.assertj.core.api.Assertions.*
+import static edelta.testutils.EdeltaTestUtils.compareFileContents
 
 class EdeltaRefactoringsTest extends AbstractTest {
 	var EdeltaRefactorings refactorings
@@ -251,6 +252,20 @@ class EdeltaRefactoringsTest extends AbstractTest {
 					.returns("person", [EOpposite.name])
 					.returns(person, [EOpposite.EReferenceType])
 			]
+	}
+
+	@Test
+	def void test_extractMetaClass3() {
+		refactorings
+			.loadEcoreFile(
+				TESTECORES + "extractMetaClassBidirectional/PersonList.ecore"
+			)
+		val ref = refactorings.getEReference("PersonList", "Person", "works")
+		refactorings.extractMetaClass("WorkingPosition", ref, "worksAs", "position")
+		refactorings.saveModifiedEcores(MODIFIED)
+		compareFileContents(
+				EXPECTATIONS+"extractMetaClassBidirectional/PersonList.ecore",
+				MODIFIED+"PersonList.ecore")
 	}
 
 	@Test

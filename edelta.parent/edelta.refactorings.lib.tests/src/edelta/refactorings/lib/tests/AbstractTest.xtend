@@ -17,6 +17,11 @@ abstract class AbstractTest {
 
 	protected var eClassReference = EcorePackage.eINSTANCE.EClass
 
+	protected static final String MODIFIED = "modified/";
+	protected static final String TESTECORES = "test-input-models/";
+	protected static final String EXPECTATIONS = "test-output-expectations/";
+
+
 	def protected createEClass(EPackage epackage, String name) {
 		val c = createEClassWithoutPackage(name)
 		epackage.EClassifiers += c
