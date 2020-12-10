@@ -24,6 +24,7 @@ import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Exceptions;
@@ -284,6 +285,54 @@ public class EdeltaRefactoringsTest extends AbstractTest {
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
+  }
+  
+  @Test
+  public void test_extractMetaClassWithAttributes() {
+    try {
+      this.withInputModel("extractMetaClassWithAttributes", "PersonList.ecore");
+      this.loadModelFile();
+      EAttribute _eAttribute = this.refactorings.getEAttribute("PersonList", "Person", "street");
+      EAttribute _eAttribute_1 = this.refactorings.getEAttribute("PersonList", "Person", "houseNumber");
+      this.refactorings.extractMetaClass("Address", 
+        Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(_eAttribute, _eAttribute_1)), 
+        "address");
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
+  public void test_extractMetaClassWithAttributesContainedInDifferentClasses() {
+    try {
+      this.withInputModel("extractMetaClassWithAttributesContainedInDifferentClasses", "PersonList.ecore");
+      this.loadModelFile();
+      EAttribute _eAttribute = this.refactorings.getEAttribute("PersonList", "Person", "street");
+      EAttribute _eAttribute_1 = this.refactorings.getEAttribute("PersonList", "Person2", "street");
+      this.refactorings.extractMetaClass("Address", 
+        Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(_eAttribute, _eAttribute_1)), 
+        "address");
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFileIsSameAsOriginal();
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("ERROR: PersonList.Person: Extracted attributes must belong to the same class: PersonList.Person");
+      _builder.newLine();
+      _builder.append("ERROR: PersonList.Person2: Extracted attributes must belong to the same class: PersonList.Person2");
+      Assertions.assertThat(this.appender.getResult().trim()).isEqualTo(
+        _builder.toString());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
+  public void test_extractMetaClassWithAttributesEmpty() {
+    final EClass result = this.refactorings.extractMetaClass("Address", 
+      Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList()), 
+      "address");
+    Assertions.<EClass>assertThat(result).isNull();
   }
   
   @Test

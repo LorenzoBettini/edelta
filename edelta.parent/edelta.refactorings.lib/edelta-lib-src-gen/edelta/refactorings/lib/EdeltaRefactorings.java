@@ -2,8 +2,10 @@ package edelta.refactorings.lib;
 
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaLibrary;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
@@ -101,6 +103,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
   }
   
   /**
+   * @param name the name for the extracted class
    * @param reference the reference to extract
    * @param newReferenceName the new name for the reference from the owner class to the
    * extracted class (basically used to rename the original passed reference)
@@ -139,6 +142,46 @@ public class EdeltaRefactorings extends AbstractEdelta {
     reference.setName(newReferenceName);
     reference.setEType(extracted);
     reference.setContainment(true);
+    return extracted;
+  }
+  
+  /**
+   * @param name the name for the extracted class
+   * @param attributes the attributes to extract
+   * @param newReferenceName the new name for the reference from the owner class to the
+   * extracted class
+   * @return the extracted metaclass
+   */
+  public EClass extractMetaClass(final String name, final Collection<EAttribute> attributes, final String newReferenceName) {
+    final Function1<EAttribute, EClass> _function = (EAttribute it) -> {
+      return it.getEContainingClass();
+    };
+    final Set<EClass> owners = IterableExtensions.<EClass>toSet(IterableExtensions.<EAttribute, EClass>map(attributes, _function));
+    boolean _isEmpty = owners.isEmpty();
+    if (_isEmpty) {
+      return null;
+    }
+    int _size = owners.size();
+    boolean _greaterThan = (_size > 1);
+    if (_greaterThan) {
+      final Consumer<EClass> _function_1 = (EClass owner) -> {
+        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(owner);
+        String _plus = ("Extracted attributes must belong to the same class: " + _eObjectRepr);
+        this.showError(owner, _plus);
+      };
+      owners.forEach(_function_1);
+      return null;
+    }
+    final EClass owner = IterableExtensions.<EClass>head(owners);
+    final EClass extracted = EdeltaLibrary.addNewEClass(owner.getEPackage(), name);
+    final Consumer<EReference> _function_2 = (EReference it) -> {
+      it.setContainment(true);
+    };
+    EdeltaLibrary.addNewEReference(owner, newReferenceName, extracted, _function_2);
+    final Consumer<EAttribute> _function_3 = (EAttribute it) -> {
+      EdeltaLibrary.moveTo(it, extracted);
+    };
+    attributes.forEach(_function_3);
     return extracted;
   }
   

@@ -209,6 +209,56 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			.isEqualTo("ERROR: PersonList.Person.works: Cannot apply extractMetaClass on containment reference: PersonList.Person.works")
 	}
 
+	@Test
+	def void test_extractMetaClassWithAttributes() {
+		withInputModel("extractMetaClassWithAttributes", "PersonList.ecore")
+		loadModelFile
+		refactorings
+			.extractMetaClass("Address",
+				#[
+					refactorings.getEAttribute("PersonList", "Person", "street"),
+					refactorings.getEAttribute("PersonList", "Person", "houseNumber")
+				],
+				"address"
+			)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFile
+	}
+
+	@Test
+	def void test_extractMetaClassWithAttributesContainedInDifferentClasses() {
+		withInputModel("extractMetaClassWithAttributesContainedInDifferentClasses", "PersonList.ecore")
+		loadModelFile
+		refactorings
+			.extractMetaClass("Address",
+				#[
+					refactorings.getEAttribute("PersonList", "Person", "street"),
+					refactorings.getEAttribute("PersonList", "Person2", "street")
+				],
+				"address"
+			)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFileIsSameAsOriginal
+		assertThat(appender.result.trim)
+			.isEqualTo(
+				'''
+				ERROR: PersonList.Person: Extracted attributes must belong to the same class: PersonList.Person
+				ERROR: PersonList.Person2: Extracted attributes must belong to the same class: PersonList.Person2'''
+				.toString
+			)
+	}
+
+	@Test
+	def void test_extractMetaClassWithAttributesEmpty() {
+		val result = refactorings
+			.extractMetaClass("Address",
+				#[
+				],
+				"address"
+			)
+		assertThat(result).isNull
+	}
+
 	@Test def void test_extractSuperClass() {
 		val p = factory.createEPackage => [
 			createEClass("C1") => [
