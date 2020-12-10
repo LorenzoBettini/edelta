@@ -37,14 +37,16 @@ class PetrinetExampleTest {
 				        eOpposite="#//Petrinet/places"/>
 				    <eStructuralFeatures xsi:type="ecore:EReference" name="out" upperBound="-1" eType="#//PTArc"
 				        containment="true" eOpposite="#//PTArc/src"/>
-				    <eStructuralFeatures xsi:type="ecore:EReference" name="in" eType="#//TPArc" eOpposite="#//TPArc/dst"/>
+				    <eStructuralFeatures xsi:type="ecore:EReference" name="in" upperBound="-1" eType="#//TPArc"
+				        eOpposite="#//TPArc/dst"/>
 				  </eClassifiers>
 				  <eClassifiers xsi:type="ecore:EClass" name="Transition" eSuperTypes="#//NamedElement">
 				    <eStructuralFeatures xsi:type="ecore:EReference" name="net" lowerBound="1" eType="#//Petrinet"
 				        eOpposite="#//Petrinet/transitions"/>
+				    <eStructuralFeatures xsi:type="ecore:EReference" name="in" upperBound="-1" eType="#//PTArc"
+				        eOpposite="#//PTArc/dst"/>
 				    <eStructuralFeatures xsi:type="ecore:EReference" name="out" upperBound="-1" eType="#//TPArc"
 				        containment="true" eOpposite="#//TPArc/src"/>
-				    <eStructuralFeatures xsi:type="ecore:EReference" name="in" eType="#//PTArc" eOpposite="#//PTArc/dst"/>
 				  </eClassifiers>
 				  <eClassifiers xsi:type="ecore:EClass" name="PTArc" eSuperTypes="#//Arc">
 				    <eStructuralFeatures xsi:type="ecore:EReference" name="dst" lowerBound="1" eType="#//Transition"

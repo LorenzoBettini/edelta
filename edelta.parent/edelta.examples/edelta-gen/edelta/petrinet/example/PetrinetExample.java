@@ -9,6 +9,8 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
+import org.eclipse.xtext.xbase.lib.ObjectExtensions;
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class PetrinetExample extends AbstractEdelta {
@@ -37,19 +39,19 @@ public class PetrinetExample extends AbstractEdelta {
   }
   
   public void introducePTArc(final EPackage it) {
-    final Consumer<EClass> _function = (EClass it_1) -> {
-      this.refactorings.extractMetaClass(it_1, getEReference("petrinet", "Place", "dst"), "out", "in");
+    EClass _extractMetaClass = this.refactorings.extractMetaClass("PTArc", getEReference("petrinet", "Place", "dst"), "out", "in");
+    final Procedure1<EClass> _function = (EClass it_1) -> {
       this.addWeightAttribute(it_1);
     };
-    EdeltaLibrary.addNewEClass(it, "PTArc", _function);
+    ObjectExtensions.<EClass>operator_doubleArrow(_extractMetaClass, _function);
   }
   
   public void introduceTPArc(final EPackage it) {
-    final Consumer<EClass> _function = (EClass it_1) -> {
-      this.refactorings.extractMetaClass(it_1, getEReference("petrinet", "Transition", "dst"), "out", "in");
+    EClass _extractMetaClass = this.refactorings.extractMetaClass("TPArc", getEReference("petrinet", "Transition", "dst"), "out", "in");
+    final Procedure1<EClass> _function = (EClass it_1) -> {
       this.addWeightAttribute(it_1);
     };
-    EdeltaLibrary.addNewEClass(it, "TPArc", _function);
+    ObjectExtensions.<EClass>operator_doubleArrow(_extractMetaClass, _function);
   }
   
   public void introduceAbstractArc(final EPackage it) {

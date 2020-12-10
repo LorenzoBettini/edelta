@@ -25,15 +25,13 @@ modifyEcore modifyNet epackage petrinet {
 }
 
 modifyEcore introducePTArc epackage petrinet {
-	addNewEClass("PTArc") [
-		refactorings.extractMetaClass(it, ecoreref(Place.dst), 'out', 'in')
+	refactorings.extractMetaClass("PTArc", ecoreref(Place.dst), 'out', 'in') => [
 		addWeightAttribute
 	]
 }
 
 modifyEcore introduceTPArc epackage petrinet {
-	addNewEClass("TPArc") [
-		refactorings.extractMetaClass(it, ecoreref(Transition.dst), 'out', 'in')
+	refactorings.extractMetaClass("TPArc", ecoreref(Transition.dst), 'out', 'in') => [
 		addWeightAttribute
 	]
 }
