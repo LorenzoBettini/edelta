@@ -328,7 +328,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       this.refactorings.extractMetaClass("WorkingPosition", ref, "worksAs", "position");
       this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
       this.assertModifiedFileIsSameAsOriginal();
-      Assertions.assertThat(this.appender.getResult().trim()).isEqualTo("ERROR: PersonList.Person.works: Cannot apply extractMetaClass on containment reference");
+      Assertions.assertThat(this.appender.getResult().trim()).isEqualTo("ERROR: PersonList.Person.works: Cannot apply extractMetaClass on containment reference: PersonList.Person.works");
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }

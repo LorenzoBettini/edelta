@@ -249,7 +249,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		refactorings.saveModifiedEcores(MODIFIED)
 		assertModifiedFileIsSameAsOriginal
 		assertThat(appender.result.trim)
-			.isEqualTo("ERROR: PersonList.Person.works: Cannot apply extractMetaClass on containment reference")
+			.isEqualTo("ERROR: PersonList.Person.works: Cannot apply extractMetaClass on containment reference: PersonList.Person.works")
 	}
 
 	@Test def void test_extractSuperClass() {
