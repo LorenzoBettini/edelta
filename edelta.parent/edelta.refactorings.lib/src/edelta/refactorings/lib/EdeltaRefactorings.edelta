@@ -10,6 +10,7 @@ import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.xbase.lib.Pair
+import org.eclipse.emf.ecore.EClassifier
 
 package edelta.refactorings.lib
 
@@ -146,7 +147,8 @@ def referenceToClass(String name, EReference reference) {
 	val owner = reference.EContainingClass
 	val ePackage = reference.EContainingClass.EPackage
 	val extracted = ePackage.addNewEClass(name)
-	val extractedRef = extracted.addNewEReference(reference.EType.name.toFirstLower, reference.EReferenceType) [
+	val extractedRef = extracted.addNewEReference(
+		reference.EType.fromTypeToFeatureName, reference.EReferenceType) [
 		makeSingleRequired
 	]
 	val eOpposite = reference.EOpposite
@@ -154,7 +156,7 @@ def referenceToClass(String name, EReference reference) {
 		eOpposite.EType = extracted
 		eOpposite.makeBidirectional(extractedRef)
 	}
-	extracted.addNewEReference(owner.name.toFirstLower, owner) [
+	extracted.addNewEReference(owner.fromTypeToFeatureName, owner) [
 		makeSingleRequired
 		makeBidirectional(reference)
 	]
@@ -273,6 +275,10 @@ def concreteBaseMetaclassToAbstract(Iterable<EClass> concreteAbstractMetaclasses
  */
 def abstractBaseMetaclassToConcrete(Iterable<EClass> abstractConcreteMetaclasses) {
 	abstractConcreteMetaclasses.forEach[abstract = false]
+}
+
+def fromTypeToFeatureName(EClassifier type) {
+	type.name.toFirstLower
 }
 
 /**

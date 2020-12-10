@@ -200,7 +200,8 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final Consumer<EReference> _function = (EReference it) -> {
       EdeltaLibrary.makeSingleRequired(it);
     };
-    final EReference extractedRef = EdeltaLibrary.addNewEReference(extracted, StringExtensions.toFirstLower(reference.getEType().getName()), reference.getEReferenceType(), _function);
+    final EReference extractedRef = EdeltaLibrary.addNewEReference(extracted, 
+      this.fromTypeToFeatureName(reference.getEType()), reference.getEReferenceType(), _function);
     final EReference eOpposite = reference.getEOpposite();
     if ((eOpposite != null)) {
       eOpposite.setEType(extracted);
@@ -210,7 +211,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
       EdeltaLibrary.makeSingleRequired(it);
       EdeltaLibrary.makeBidirectional(it, reference);
     };
-    EdeltaLibrary.addNewEReference(extracted, StringExtensions.toFirstLower(owner.getName()), owner, _function_1);
+    EdeltaLibrary.addNewEReference(extracted, this.fromTypeToFeatureName(owner), owner, _function_1);
     reference.setEType(extracted);
     reference.setContainment(true);
     return extracted;
@@ -344,6 +345,10 @@ public class EdeltaRefactorings extends AbstractEdelta {
       it.setAbstract(false);
     };
     abstractConcreteMetaclasses.forEach(_function);
+  }
+  
+  public String fromTypeToFeatureName(final EClassifier type) {
+    return StringExtensions.toFirstLower(type.getName());
   }
   
   /**
