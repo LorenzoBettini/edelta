@@ -54,6 +54,21 @@ class EdeltaRefactoringsTest extends AbstractTest {
 				EXPECTATIONS + testModelDirectory + "/" + testModelFile,
 				MODIFIED + testModelFile)
 		assertThat(appender.result).isEmpty
+		// no need to explicitly validate:
+		// if the ecore file is saved then it is valid
+		/*
+		val packageManager = new EdeltaEPackageManager
+		packageManager.loadEcoreFile(MODIFIED + testModelFile)
+		assertThat(packageManager.getEPackage("ecore")).isNotNull // ensure Ecore is loaded
+		val diagnostician = Diagnostician.INSTANCE
+		packageManager.resourceMapEntrySet.map[value].forEach[
+			contents.forEach[
+				val diagnostic = diagnostician.validate(it)
+				assertThat(diagnostic.severity)
+					.isEqualTo(Diagnostic.OK)
+			]
+		]
+		*/
 	}
 
 	def private assertModifiedFileIsSameAsOriginal() {

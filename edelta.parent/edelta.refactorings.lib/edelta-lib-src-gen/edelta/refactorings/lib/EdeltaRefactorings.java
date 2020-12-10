@@ -112,11 +112,10 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @return the extracted metaclass
    */
   public EClass extractMetaClass(final String name, final EReference reference, final String newReferenceName, final String newOppositeReferenceName) {
-    boolean _isContainment = reference.isContainment();
-    if (_isContainment) {
-      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(reference);
-      String _plus = ("Cannot apply extractMetaClass on containment reference: " + _eObjectRepr);
-      this.showError(reference, _plus);
+    boolean _checkNotContainment = this.checkNotContainment(reference, 
+      "Cannot apply extractMetaClass on containment reference");
+    boolean _not = (!_checkNotContainment);
+    if (_not) {
       return null;
     }
     final EClass owner = reference.getEContainingClass();
@@ -191,11 +190,10 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @return the extracted class
    */
   public EClass referenceToClass(final String name, final EReference reference) {
-    boolean _isContainment = reference.isContainment();
-    if (_isContainment) {
-      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(reference);
-      String _plus = ("Cannot apply referenceToClass on containment reference: " + _eObjectRepr);
-      this.showError(reference, _plus);
+    boolean _checkNotContainment = this.checkNotContainment(reference, 
+      "Cannot apply referenceToClass on containment reference");
+    boolean _not = (!_checkNotContainment);
+    if (_not) {
       return null;
     }
     final EClass owner = reference.getEContainingClass();
@@ -350,5 +348,22 @@ public class EdeltaRefactorings extends AbstractEdelta {
       it.setAbstract(false);
     };
     abstractConcreteMetaclasses.forEach(_function);
+  }
+  
+  /**
+   * @param reference the reference that must not be a containment reference
+   * @param message the message to show in case the reference
+   * is a containment reference
+   * @return true if the passed reference is not a containment reference
+   */
+  public boolean checkNotContainment(final EReference reference, final String message) {
+    boolean _isContainment = reference.isContainment();
+    if (_isContainment) {
+      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(reference);
+      String _plus = ((message + ": ") + _eObjectRepr);
+      this.showError(reference, _plus);
+      return false;
+    }
+    return true;
   }
 }

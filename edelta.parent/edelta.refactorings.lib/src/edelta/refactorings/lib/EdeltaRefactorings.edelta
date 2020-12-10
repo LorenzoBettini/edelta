@@ -77,11 +77,8 @@ def extractIntoSuperclass(EClass superclass, List<EAttribute> attrs){
  */
 def extractMetaClass(String name, EReference reference,
 			String newReferenceName, String newOppositeReferenceName) {
-	if (reference.containment) {
-		showError(reference,
-			"Cannot apply extractMetaClass on containment reference: " +
-			getEObjectRepr(reference)
-		)
+	if (!checkNotContainment(reference,
+			"Cannot apply extractMetaClass on containment reference")) {
 		return null
 	}
 	val owner = reference.EContainingClass
@@ -144,11 +141,8 @@ def extractMetaClass(String name, Collection<EAttribute> attributes,
  * @return the extracted class
  */
 def referenceToClass(String name, EReference reference) {
-	if (reference.containment) {
-		showError(reference,
-			"Cannot apply referenceToClass on containment reference: " +
-			getEObjectRepr(reference)
-		)
+	if (!checkNotContainment(reference,
+			"Cannot apply referenceToClass on containment reference")) {
 		return null
 	}
 	val owner = reference.EContainingClass
@@ -285,3 +279,19 @@ def abstractBaseMetaclassToConcrete(Iterable<EClass> abstractConcreteMetaclasses
 	abstractConcreteMetaclasses.forEach[abstract = false]
 }
 
+/**
+ * @param reference the reference that must not be a containment reference
+ * @param message the message to show in case the reference
+ * is a containment reference
+ * @return true if the passed reference is not a containment reference
+ */
+def checkNotContainment(EReference reference, String message) : boolean {
+	if (reference.containment) {
+		showError(reference,
+			message + ": " +
+			getEObjectRepr(reference)
+		)
+		return false
+	}
+	return true
+}
