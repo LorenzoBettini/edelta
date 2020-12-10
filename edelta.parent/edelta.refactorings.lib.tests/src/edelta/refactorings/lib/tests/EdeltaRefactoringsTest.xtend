@@ -23,9 +23,37 @@ import static edelta.testutils.EdeltaTestUtils.compareFileContents
 class EdeltaRefactoringsTest extends AbstractTest {
 	var EdeltaRefactorings refactorings
 
+	var String testModelDirectory
+	var String testModelFile
+
 	@Before
 	def void setup() {
 		refactorings = new EdeltaRefactorings
+	}
+
+	def private withInputModel(String testModelDirectory, String testModelFile) {
+		this.testModelDirectory = testModelDirectory
+		this.testModelFile = testModelFile
+	}
+
+	def private loadModelFile() {
+		checkInputModelSettings
+		refactorings
+			.loadEcoreFile(
+				TESTECORES + testModelDirectory + "/" + testModelFile
+			)
+	}
+
+	def private assertModifiedFile() {
+		checkInputModelSettings
+		compareFileContents(
+				EXPECTATIONS + testModelDirectory + "/" + testModelFile,
+				MODIFIED + testModelFile)
+	}
+
+	def private checkInputModelSettings() {
+		assertThat(testModelDirectory).isNotNull
+		assertThat(testModelFile).isNotNull
 	}
 
 	@Test
@@ -182,131 +210,22 @@ class EdeltaRefactoringsTest extends AbstractTest {
 
 	@Test
 	def void test_extractMetaClass2() {
-		val p = factory.createEPackage
-		val person = p.createEClass("Person")
-		val workPlace = p.createEClass("WorkPlace")
-		val personWorks = person.createEReference("works") => [
-			lowerBound = 1
-		]
-		val workPlacePersons = workPlace.createEReference("persons") => [
-			EOpposite = personWorks
-			EType = person
-			upperBound = -1
-		]
-		personWorks.EType = workPlace
-		personWorks.EOpposite = workPlacePersons
-
-		assertThat(workPlace.EStructuralFeatures)
-			.contains(workPlacePersons)
-
-		val workingPosition =
-			refactorings.extractMetaClass("WorkingPosition", personWorks, "worksAs", "position")
-
-		val workingPositionReferences =
-			workingPosition.EStructuralFeatures.filter(EReference).toList
-		assertThat(workingPositionReferences)
-			.hasSize(2)
-			.anySatisfy[
-				assertThat
-					.returns("workPlace", [name])
-					.returns(workPlace, [EType])
-					.returns(1, [lowerBound])
-					.returns(1, [upperBound])
-					.returns("position", [EOpposite.name])
-					.returns(workingPosition, [EOpposite.EReferenceType])
-			]
-			.anySatisfy[
-				assertThat
-					.returns("person", [name])
-					.returns(person, [EType])
-					.returns(1, [lowerBound])
-					.returns(1, [upperBound])
-					.returns("worksAs", [EOpposite.name])
-					.returns(workingPosition, [EOpposite.EReferenceType])
-			]
-		val workPlaceReferences =
-			workPlace.EStructuralFeatures.filter(EReference).toList
-		assertThat(workPlaceReferences)
-			.hasSize(1)
-			.containsExactly(workPlacePersons) // actually renamed to "position"
-			.anySatisfy[
-				assertThat
-					.returns("position", [name])
-					.returns(workingPosition, [EType])
-					.returns(0, [lowerBound])
-					.returns(-1, [upperBound])
-					.returns("workPlace", [EOpposite.name])
-					.returns(workPlace, [EOpposite.EType])
-			]
-		val personReferences =
-			person.EStructuralFeatures.filter(EReference).toList
-		assertThat(personReferences)
-			.containsExactly(personWorks) // actually renamed to "worksAs"
-			.anySatisfy[
-				assertThat
-					.returns("worksAs", [name])
-					.returns(workingPosition, [EType])
-					.returns(1, [lowerBound])
-					.returns(1, [upperBound])
-					.returns(true, [containment])
-					.returns("person", [EOpposite.name])
-					.returns(person, [EOpposite.EReferenceType])
-			]
-	}
-
-	@Test
-	def void test_extractMetaClass3() {
-		refactorings
-			.loadEcoreFile(
-				TESTECORES + "extractMetaClassBidirectional/PersonList.ecore"
-			)
+		withInputModel("extractMetaClassBidirectional", "PersonList.ecore")
+		loadModelFile
 		val ref = refactorings.getEReference("PersonList", "Person", "works")
 		refactorings.extractMetaClass("WorkingPosition", ref, "worksAs", "position")
 		refactorings.saveModifiedEcores(MODIFIED)
-		compareFileContents(
-				EXPECTATIONS+"extractMetaClassBidirectional/PersonList.ecore",
-				MODIFIED+"PersonList.ecore")
+		assertModifiedFile
 	}
 
 	@Test
-	def void test_extractMetaClassWithoutEOpposite() {
-		val p = factory.createEPackage
-		val person = p.createEClass("Person")
-		val workPlace = p.createEClass("WorkPlace")
-		val personWorks = person.createEReference("works") => [
-			lowerBound = 1
-			EType = workPlace
-		]
-
-		assertThat(workPlace.EStructuralFeatures)
-			.isEmpty
-
-		val workingPosition =
-			refactorings.extractMetaClass("WorkingPosition", personWorks, "worksAs", null)
-
-		assertThat(workingPosition.EStructuralFeatures.filter(EReference))
-			.hasSize(1)
-			.anySatisfy[
-				assertThat
-					.returns("workPlace", [name])
-					.returns(workPlace, [EType])
-					.returns(1, [lowerBound])
-					.returns(1, [upperBound])
-					.returns(null, [EOpposite])
-			]
-		assertThat(workPlace.EStructuralFeatures.filter(EReference))
-			.isEmpty
-		assertThat(person.EStructuralFeatures.filter(EReference))
-			.containsExactly(personWorks) // actually renamed to "worksAs"
-			.anySatisfy[
-				assertThat
-					.returns("worksAs", [name])
-					.returns(workingPosition, [EType])
-					.returns(1, [lowerBound])
-					.returns(1, [upperBound])
-					.returns(true, [containment])
-					.returns(null, [EOpposite])
-			]
+	def void test_extractMetaClassUnidirectional() {
+		withInputModel("extractMetaClassUnidirectional", "PersonList.ecore")
+		loadModelFile
+		val ref = refactorings.getEReference("PersonList", "Person", "works")
+		refactorings.extractMetaClass("WorkingPosition", ref, "worksAs", "position")
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFile
 	}
 
 	@Test def void test_extractSuperClass() {
