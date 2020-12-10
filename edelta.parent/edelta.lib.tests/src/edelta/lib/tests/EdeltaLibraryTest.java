@@ -19,6 +19,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.impl.BasicEObjectImpl;
@@ -496,6 +497,17 @@ public class EdeltaLibraryTest {
 		assertThat(c2Ref.getEOpposite()).isNotNull();
 		assertThat(c1Ref.getEOpposite()).isSameAs(c2Ref);
 		assertThat(c2Ref.getEOpposite()).isSameAs(c1Ref);
+	}
+
+	@Test
+	public void test_makeSingleRequired() {
+		EStructuralFeature feature = ecoreFactory.createEReference();
+		feature.setLowerBound(0);
+		feature.setUpperBound(-1);
+		EdeltaLibrary.makeSingleRequired(feature);
+		assertThat(feature)
+			.returns(1, ETypedElement::getLowerBound)
+			.returns(1, ETypedElement::getUpperBound);
 	}
 
 	@Test

@@ -338,4 +338,13 @@ public class EdeltaLibrary {
 		ref2.setEOpposite(ref1);
 	}
 
+	/**
+	 * Makes this feature required as a single-valued (lower = upper = 1)
+	 * 
+	 * @param feature
+	 */
+	public static void makeSingleRequired(EStructuralFeature feature) {
+		feature.setLowerBound(1);
+		feature.setUpperBound(1);
+	}
 }
