@@ -178,50 +178,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	def void test_extractMetaClass() {
-		val p = factory.createEPackage
-		val person = p.createEClass("Person")
-		val workPlace = p.createEClass("WorkPlace")
-		val personWorks = person.createEReference("works") => [
-			lowerBound = 1
-		]
-		val workPlacePersons = workPlace.createEReference("persons") => [
-			EOpposite = personWorks
-			EType = person
-		]
-		personWorks.EType = workPlace
-		personWorks.EOpposite = workPlacePersons
-		val workingPosition = p.createEClass("WorkingPosition")
-
-		assertThat(workingPosition.EStructuralFeatures).isEmpty
-		assertThat(workPlace.EStructuralFeatures)
-			.contains(workPlacePersons)
-
-		refactorings.extractMetaClass(workingPosition, personWorks, "works", "position")
-
-		assertThat(workingPosition.EStructuralFeatures)
-			.hasSize(2)
-			.contains(workPlacePersons)
-			.anySatisfy[
-				assertThat
-					.returns("works", [name])
-					.returns(workPlace, [EType])
-					.returns(1, [lowerBound])
-			]
-		assertThat(workPlace.EStructuralFeatures)
-			.hasSize(1)
-			.doesNotContain(workPlacePersons)
-			.anySatisfy[
-				assertThat
-					.returns("position", [name])
-					.returns(workingPosition, [EType])
-			]
-		assertThat(person.EStructuralFeatures)
-			.containsExactly(personWorks)
-	}
-
-	@Test
-	def void test_extractMetaClass2() {
+	def void test_extractMetaClassBidirectional() {
 		withInputModel("extractMetaClassBidirectional", "PersonList.ecore")
 		loadModelFile
 		val ref = refactorings.getEReference("PersonList", "Person", "works")

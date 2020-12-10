@@ -244,55 +244,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
-  public void test_extractMetaClass() {
-    final EPackage p = this.factory.createEPackage();
-    final EClass person = this.createEClass(p, "Person");
-    final EClass workPlace = this.createEClass(p, "WorkPlace");
-    EReference _createEReference = this.createEReference(person, "works");
-    final Procedure1<EReference> _function = (EReference it) -> {
-      it.setLowerBound(1);
-    };
-    final EReference personWorks = ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function);
-    EReference _createEReference_1 = this.createEReference(workPlace, "persons");
-    final Procedure1<EReference> _function_1 = (EReference it) -> {
-      it.setEOpposite(personWorks);
-      it.setEType(person);
-    };
-    final EReference workPlacePersons = ObjectExtensions.<EReference>operator_doubleArrow(_createEReference_1, _function_1);
-    personWorks.setEType(workPlace);
-    personWorks.setEOpposite(workPlacePersons);
-    final EClass workingPosition = this.createEClass(p, "WorkingPosition");
-    Assertions.<EStructuralFeature>assertThat(workingPosition.getEStructuralFeatures()).isEmpty();
-    Assertions.<EStructuralFeature>assertThat(workPlace.getEStructuralFeatures()).contains(workPlacePersons);
-    this.refactorings.extractMetaClass(workingPosition, personWorks, "works", "position");
-    final Consumer<EStructuralFeature> _function_2 = (EStructuralFeature it) -> {
-      final Function<EStructuralFeature, String> _function_3 = (EStructuralFeature it_1) -> {
-        return it_1.getName();
-      };
-      final Function<EStructuralFeature, EClassifier> _function_4 = (EStructuralFeature it_1) -> {
-        return it_1.getEType();
-      };
-      final Function<EStructuralFeature, Integer> _function_5 = (EStructuralFeature it_1) -> {
-        return Integer.valueOf(it_1.getLowerBound());
-      };
-      Assertions.<EStructuralFeature>assertThat(it).<String>returns("works", _function_3).<EClassifier>returns(workPlace, _function_4).<Integer>returns(Integer.valueOf(1), _function_5);
-    };
-    Assertions.<EStructuralFeature>assertThat(workingPosition.getEStructuralFeatures()).hasSize(2).contains(workPlacePersons).anySatisfy(_function_2);
-    final Consumer<EStructuralFeature> _function_3 = (EStructuralFeature it) -> {
-      final Function<EStructuralFeature, String> _function_4 = (EStructuralFeature it_1) -> {
-        return it_1.getName();
-      };
-      final Function<EStructuralFeature, EClassifier> _function_5 = (EStructuralFeature it_1) -> {
-        return it_1.getEType();
-      };
-      Assertions.<EStructuralFeature>assertThat(it).<String>returns("position", _function_4).<EClassifier>returns(workingPosition, _function_5);
-    };
-    Assertions.<EStructuralFeature>assertThat(workPlace.getEStructuralFeatures()).hasSize(1).doesNotContain(workPlacePersons).anySatisfy(_function_3);
-    Assertions.<EStructuralFeature>assertThat(person.getEStructuralFeatures()).containsExactly(personWorks);
-  }
-  
-  @Test
-  public void test_extractMetaClass2() {
+  public void test_extractMetaClassBidirectional() {
     try {
       this.withInputModel("extractMetaClassBidirectional", "PersonList.ecore");
       this.loadModelFile();
