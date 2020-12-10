@@ -19,9 +19,11 @@ import static org.junit.Assert.assertTrue
 
 import static extension org.assertj.core.api.Assertions.*
 import static edelta.testutils.EdeltaTestUtils.compareFileContents
+import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender
 
 class EdeltaRefactoringsTest extends AbstractTest {
 	var EdeltaRefactorings refactorings
+	var InMemoryLoggerAppender appender
 
 	var String testModelDirectory
 	var String testModelFile
@@ -29,6 +31,8 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Before
 	def void setup() {
 		refactorings = new EdeltaRefactorings
+		appender = new InMemoryLoggerAppender
+		refactorings.logger.addAppender(appender)
 	}
 
 	def private withInputModel(String testModelDirectory, String testModelFile) {
@@ -48,6 +52,14 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		checkInputModelSettings
 		compareFileContents(
 				EXPECTATIONS + testModelDirectory + "/" + testModelFile,
+				MODIFIED + testModelFile)
+		assertThat(appender.result).isEmpty
+	}
+
+	def private assertModifiedFileIsSameAsOriginal() {
+		checkInputModelSettings
+		compareFileContents(
+				TESTECORES + testModelDirectory + "/" + testModelFile,
 				MODIFIED + testModelFile)
 	}
 
@@ -226,6 +238,18 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		refactorings.extractMetaClass("WorkingPosition", ref, "worksAs", "position")
 		refactorings.saveModifiedEcores(MODIFIED)
 		assertModifiedFile
+	}
+
+	@Test
+	def void test_extractMetaClassWithContainmentReference() {
+		withInputModel("extractMetaClassWithContainmentReference", "PersonList.ecore")
+		loadModelFile
+		val ref = refactorings.getEReference("PersonList", "Person", "works")
+		refactorings.extractMetaClass("WorkingPosition", ref, "worksAs", "position")
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFileIsSameAsOriginal
+		assertThat(appender.result.trim)
+			.isEqualTo("ERROR: PersonList.Person.works: Cannot apply extractMetaClass on containment reference")
 	}
 
 	@Test def void test_extractSuperClass() {

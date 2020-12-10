@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import edelta.lib.AbstractEdelta;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import edelta.refactorings.lib.tests.AbstractTest;
+import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 import edelta.testutils.EdeltaTestUtils;
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +41,8 @@ import org.junit.Test;
 public class EdeltaRefactoringsTest extends AbstractTest {
   private EdeltaRefactorings refactorings;
   
+  private InMemoryLoggerAppender appender;
+  
   private String testModelDirectory;
   
   private String testModelFile;
@@ -48,6 +51,9 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   public void setup() {
     EdeltaRefactorings _edeltaRefactorings = new EdeltaRefactorings();
     this.refactorings = _edeltaRefactorings;
+    InMemoryLoggerAppender _inMemoryLoggerAppender = new InMemoryLoggerAppender();
+    this.appender = _inMemoryLoggerAppender;
+    this.refactorings.getLogger().addAppender(this.appender);
   }
   
   private String withInputModel(final String testModelDirectory, final String testModelFile) {
@@ -70,6 +76,18 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       this.checkInputModelSettings();
       EdeltaTestUtils.compareFileContents(
         (((AbstractTest.EXPECTATIONS + this.testModelDirectory) + "/") + this.testModelFile), 
+        (AbstractTest.MODIFIED + this.testModelFile));
+      Assertions.assertThat(this.appender.getResult()).isEmpty();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  private void assertModifiedFileIsSameAsOriginal() {
+    try {
+      this.checkInputModelSettings();
+      EdeltaTestUtils.compareFileContents(
+        (((AbstractTest.TESTECORES + this.testModelDirectory) + "/") + this.testModelFile), 
         (AbstractTest.MODIFIED + this.testModelFile));
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
@@ -296,6 +314,21 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       this.refactorings.extractMetaClass("WorkingPosition", ref, "worksAs", "position");
       this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
       this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
+  public void test_extractMetaClassWithContainmentReference() {
+    try {
+      this.withInputModel("extractMetaClassWithContainmentReference", "PersonList.ecore");
+      this.loadModelFile();
+      final EReference ref = this.refactorings.getEReference("PersonList", "Person", "works");
+      this.refactorings.extractMetaClass("WorkingPosition", ref, "worksAs", "position");
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFileIsSameAsOriginal();
+      Assertions.assertThat(this.appender.getResult().trim()).isEqualTo("ERROR: PersonList.Person.works: Cannot apply extractMetaClass on containment reference");
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }

@@ -142,6 +142,12 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @return the extracted metaclass
    */
   public EClass extractMetaClass(final String name, final EReference reference, final String newReferenceName, final String newOppositeReferenceName) {
+    boolean _isContainment = reference.isContainment();
+    if (_isContainment) {
+      this.showError(reference, 
+        "Cannot apply extractMetaClass on containment reference");
+      return null;
+    }
     final EClass owner = reference.getEContainingClass();
     final EPackage ePackage = reference.getEContainingClass().getEPackage();
     final EClass extracted = EdeltaLibrary.addNewEClass(ePackage, name);

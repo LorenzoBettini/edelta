@@ -112,6 +112,12 @@ def extractMetaClass(EClass extractedClass, EReference reference,
  */
 def extractMetaClass(String name, EReference reference,
 			String newReferenceName, String newOppositeReferenceName) {
+	if (reference.containment) {
+		showError(reference,
+			"Cannot apply extractMetaClass on containment reference"
+		)
+		return null
+	}
 	val owner = reference.EContainingClass
 	val ePackage = reference.EContainingClass.EPackage
 	val extracted = ePackage.addNewEClass(name)
