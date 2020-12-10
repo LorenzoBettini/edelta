@@ -122,15 +122,13 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final EPackage ePackage = reference.getEContainingClass().getEPackage();
     final EClass extracted = EdeltaLibrary.addNewEClass(ePackage, name);
     final Consumer<EReference> _function = (EReference it) -> {
-      it.setLowerBound(1);
-      it.setUpperBound(1);
+      EdeltaLibrary.makeSingleRequired(it);
     };
     final EReference extractedRef = EdeltaLibrary.addNewEReference(extracted, reference.getName(), reference.getEReferenceType(), _function);
     final EReference eOpposite = reference.getEOpposite();
     if ((eOpposite != null)) {
       final Consumer<EReference> _function_1 = (EReference it) -> {
-        it.setLowerBound(1);
-        it.setUpperBound(1);
+        EdeltaLibrary.makeSingleRequired(it);
         EdeltaLibrary.makeBidirectional(it, reference);
       };
       EdeltaLibrary.addNewEReference(extracted, eOpposite.getName(), owner, _function_1);
@@ -200,8 +198,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final EPackage ePackage = reference.getEContainingClass().getEPackage();
     final EClass extracted = EdeltaLibrary.addNewEClass(ePackage, name);
     final Consumer<EReference> _function = (EReference it) -> {
-      it.setLowerBound(1);
-      it.setUpperBound(1);
+      EdeltaLibrary.makeSingleRequired(it);
     };
     final EReference extractedRef = EdeltaLibrary.addNewEReference(extracted, StringExtensions.toFirstLower(reference.getEType().getName()), reference.getEReferenceType(), _function);
     final EReference eOpposite = reference.getEOpposite();
@@ -210,8 +207,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
       EdeltaLibrary.makeBidirectional(eOpposite, extractedRef);
     }
     final Consumer<EReference> _function_1 = (EReference it) -> {
-      it.setLowerBound(1);
-      it.setUpperBound(1);
+      EdeltaLibrary.makeSingleRequired(it);
       EdeltaLibrary.makeBidirectional(it, reference);
     };
     EdeltaLibrary.addNewEReference(extracted, StringExtensions.toFirstLower(owner.getName()), owner, _function_1);

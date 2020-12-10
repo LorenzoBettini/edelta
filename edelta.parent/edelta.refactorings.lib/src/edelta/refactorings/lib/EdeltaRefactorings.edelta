@@ -85,14 +85,12 @@ def extractMetaClass(String name, EReference reference,
 	val ePackage = reference.EContainingClass.EPackage
 	val extracted = ePackage.addNewEClass(name)
 	val extractedRef = extracted.addNewEReference(reference.name, reference.EReferenceType) [
-		lowerBound = 1
-		upperBound = 1
+		makeSingleRequired
 	]
 	val eOpposite = reference.EOpposite
 	if (eOpposite !== null) {
 		extracted.addNewEReference(eOpposite.name, owner) [
-			lowerBound = 1
-			upperBound = 1
+			makeSingleRequired
 			makeBidirectional(reference)
 		]
 		eOpposite.name = newOppositeReferenceName
@@ -149,8 +147,7 @@ def referenceToClass(String name, EReference reference) {
 	val ePackage = reference.EContainingClass.EPackage
 	val extracted = ePackage.addNewEClass(name)
 	val extractedRef = extracted.addNewEReference(reference.EType.name.toFirstLower, reference.EReferenceType) [
-		lowerBound = 1
-		upperBound = 1
+		makeSingleRequired
 	]
 	val eOpposite = reference.EOpposite
 	if (eOpposite !== null) {
@@ -158,8 +155,7 @@ def referenceToClass(String name, EReference reference) {
 		eOpposite.makeBidirectional(extractedRef)
 	}
 	extracted.addNewEReference(owner.name.toFirstLower, owner) [
-		lowerBound = 1
-		upperBound = 1
+		makeSingleRequired
 		makeBidirectional(reference)
 	]
 	reference.EType = extracted
