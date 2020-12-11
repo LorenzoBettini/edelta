@@ -37,6 +37,7 @@ import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.XbasePackage;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationResult;
+import org.eclipse.xtext.xbase.interpreter.impl.EvaluationException;
 import org.eclipse.xtext.xbase.interpreter.impl.InterpreterCanceledException;
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter;
 
@@ -503,27 +504,28 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		if (edeltaOperation != null) {
 			var containingProgram = getProgram(edeltaOperation);
 			if (containingProgram == currentProgram) {
-				final var context = parentContext.fork();
-				configureContextForParameterArguments(context,
-						operation.getParameters(), argumentValues);
-				return internalEvaluate(edeltaOperation.getBody(), context, indicator);
+				return evaluateEdeltaOperation(edeltaOperation, argumentValues,
+						parentContext.fork(), indicator);
 			} else {
 				// create a new interpreter since the edelta operation is in
 				// another edelta source file.
-				// first copy the other program's imported metamodels into
+				// First copy the other program's imported metamodels into
 				// the current program's derived state
 				final var eResource = currentProgram.eResource();
 				final var copiedEPackagesMap = derivedStateHelper
 						.copyEPackages(containingProgram, eResource);
-				// this object is also recreated with possible new copied packages
+				// This object is also recreated with possible new copied packages
 				thisObject = new EdeltaInterpreterEdeltaImpl
 					(copiedEPackagesMap.values(), diagnosticHelper);
 
 				var newInterpreter =
 						edeltaInterpreterFactory.create(containingProgram.eResource());
-				return newInterpreter
-					.evaluateEdeltaOperation(thisObject,
-						containingProgram, edeltaOperation, argumentValues, indicator);
+				newInterpreter.currentProgram = containingProgram;
+				newInterpreter.thisObject = thisObject;
+				var context = newInterpreter.createContext();
+				newInterpreter.configureContextForJavaThis(context);
+				return newInterpreter.evaluateEdeltaOperation(edeltaOperation, argumentValues,
+						context, indicator);
 			}
 		}
 		return super.invokeOperation(
@@ -540,21 +542,35 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		);
 	}
 
-	protected Object evaluateEdeltaOperation(EdeltaInterpreterEdeltaImpl thisObject,
-			EdeltaProgram program, EdeltaOperation edeltaOperation,
-			List<Object> argumentValues, CancelIndicator indicator) {
-		this.currentProgram = program;
-		this.thisObject = thisObject;
-		var context = createContext();
-		configureContextForJavaThis(context);
+	/**
+	 * Since this is meant to execute a method, we must call evaluate, not
+	 * internalEvaluate, otherwise if in the method there's a return it will
+	 * terminate the whole interpretation, since a return is interpreted with a
+	 * throw of a ReturnValue (see
+	 * {@link XbaseInterpreter#_doEvaluate(XReturnExpression, IEvaluationContext, CancelIndicator)}).
+	 * If we call evaluate then it will take care of catching the exception
+	 * ReturnValue and will wrap it in a returned {@link DefaultEvaluationResult}.
+	 * 
+	 * @param edeltaOperation
+	 * @param argumentValues
+	 * @param context
+	 * @param indicator
+	 * @return
+	 */
+	private Object evaluateEdeltaOperation(EdeltaOperation edeltaOperation, List<Object> argumentValues,
+			IEvaluationContext context, CancelIndicator indicator) {
 		configureContextForParameterArguments(context,
 				edeltaOperation.getParams(), argumentValues);
 		final var result = evaluate(edeltaOperation.getBody(), context,
 				indicator);
 		if (result == null ||
 				// our timeoutGuardThread interrupted us
-				result.getException() instanceof InterruptedException)
+				result.getException() instanceof InterruptedException) {
 			throw new InterpreterCanceledException();
+		}
+		if (result.getException() != null) {
+			throw new EvaluationException(result.getException());
+		}
 		return result.getResult();
 	}
 
