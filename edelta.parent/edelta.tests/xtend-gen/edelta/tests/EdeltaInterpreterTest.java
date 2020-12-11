@@ -2924,6 +2924,121 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
   }
   
+  @Test
+  public void testCallOperationThatCallsAnotherNonVoidOperation() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("def createANewClassInMyEcore(String name) {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// if (aCheck()) // uncomment these lines and see the bug");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("//\treturn null");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(foo).addNewEClass(name)");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("def aCheck() {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("return false");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore SomeChanges epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// the ANewClass is not actually created");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// not shown in the outline");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("\"ANewClass\".createANewClassInMyEcore() => [");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("abstract = true");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("]");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
+      EClass _lastEClass = this.getLastEClass(derivedEPackage);
+      final Procedure1<EClass> _function_1 = (EClass it) -> {
+        Assert.assertEquals("ANewClass", it.getName());
+        Assert.assertTrue(it.isAbstract());
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_lastEClass, _function_1);
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, _function);
+  }
+  
+  @Test
+  public void testCallOperationThatCallsAnotherNonVoidOperationInAnother() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EPackage");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("def create(EPackage it) {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// if (aCheck()) // uncomment these lines and see the bug");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("//\treturn null");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("addNewEClass(\"NewClass\")");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("def aCheck() {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("return false");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.append("metamodel \"foo\"");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("use edelta.__synthetic0 as extension my");
+    _builder_1.newLine();
+    _builder_1.newLine();
+    _builder_1.append("modifyEcore anotherTest epackage foo {");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("create(it)");
+    _builder_1.newLine();
+    _builder_1.append("\t");
+    _builder_1.append("ecoreref(NewClass)");
+    _builder_1.newLine();
+    _builder_1.append("}");
+    _builder_1.newLine();
+    EdeltaProgram _parseSeveralWithTestEcore = this.parseSeveralWithTestEcore(
+      Collections.<CharSequence>unmodifiableList(CollectionLiterals.<CharSequence>newArrayList(_builder, _builder_1)));
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      EdeltaCopiedEPackagesMap _interpretProgram = this.interpretProgram(it);
+      final Procedure1<EdeltaCopiedEPackagesMap> _function_1 = (EdeltaCopiedEPackagesMap it_1) -> {
+        final EClass created = this.getEClassByName(it_1.get("foo"), "NewClass");
+        Assert.assertNotNull(created);
+      };
+      ObjectExtensions.<EdeltaCopiedEPackagesMap>operator_doubleArrow(_interpretProgram, _function_1);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseSeveralWithTestEcore, _function);
+  }
+  
   private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final Procedure1<? super EPackage> testExecutor) {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, true, testExecutor);
   }

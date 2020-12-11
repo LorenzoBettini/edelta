@@ -1929,6 +1929,72 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testCallOperationThatCallsAnotherNonVoidOperation() {
+		// see https://github.com/LorenzoBettini/edelta/issues/268
+		'''
+			metamodel "foo"
+			
+			def createANewClassInMyEcore(String name) {
+				// if (aCheck()) // uncomment these lines and see the bug
+				//	return null
+				ecoreref(foo).addNewEClass(name)
+			}
+			
+			def aCheck() {
+				return false
+			}
+			
+			modifyEcore SomeChanges epackage foo {
+				// the ANewClass is not actually created
+				// not shown in the outline
+				"ANewClass".createANewClassInMyEcore() => [
+					abstract = true
+				]
+			}
+		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation [ derivedEPackage |
+			derivedEPackage.lastEClass => [
+				assertEquals("ANewClass", name)
+				assertTrue(isAbstract)
+			]
+		]
+	}
+
+	@Test def void testCallOperationThatCallsAnotherNonVoidOperationInAnother() {
+		// see https://github.com/LorenzoBettini/edelta/issues/268
+		parseSeveralWithTestEcore(
+		#[
+		'''
+			import org.eclipse.emf.ecore.EPackage
+			
+			def create(EPackage it) {
+				// if (aCheck()) // uncomment these lines and see the bug
+				//	return null
+				addNewEClass("NewClass")
+			}
+			
+			def aCheck() {
+				return false
+			}
+		''',
+		'''
+			metamodel "foo"
+			
+			use edelta.__synthetic0 as extension my
+			
+			modifyEcore anotherTest epackage foo {
+				create(it)
+				ecoreref(NewClass)
+			}
+		'''
+		]) => [
+			interpretProgram => [
+				val created = get("foo").getEClassByName("NewClass")
+				assertNotNull(created)
+			]
+		]
+	}
+
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) {
