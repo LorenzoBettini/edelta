@@ -1938,6 +1938,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			def createANewClassInMyEcore(String name) {
 				if (aCheck()) // this will always return false
 					return null // so this won't be executed
+				if (aCheck2()) // this will always return false
+					return null // so this won't be executed
 				ecoreref(foo).addNewEClass(name)
 			}
 			
@@ -1964,7 +1966,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testCallOperationThatCallsAnotherNonVoidOperationInAnother() {
+	@Test def void testCallOperationThatCallsAnotherNonVoidOperationInAnotherFile() {
 		// see https://github.com/LorenzoBettini/edelta/issues/268
 		parseSeveralWithTestEcore(
 		#[
@@ -1974,11 +1976,17 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			def create(EPackage it) {
 				if (aCheck()) // this will always return false
 					return null // so this won't be executed
+				if (aCheck2()) // this will always return false
+					return null // so this won't be executed
 				addNewEClass("NewClass")
 			}
 			
 			def aCheck() {
 				return false
+			}
+			
+			def aCheck2() : boolean {
+				false
 			}
 		''',
 		'''

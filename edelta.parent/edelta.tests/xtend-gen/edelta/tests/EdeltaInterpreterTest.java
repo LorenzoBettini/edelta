@@ -2939,6 +2939,12 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder.append("return null // so this won\'t be executed");
     _builder.newLine();
     _builder.append("\t");
+    _builder.append("if (aCheck2()) // this will always return false");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("return null // so this won\'t be executed");
+    _builder.newLine();
+    _builder.append("\t");
     _builder.append("ecoreref(foo).addNewEClass(name)");
     _builder.newLine();
     _builder.append("}");
@@ -2991,7 +2997,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testCallOperationThatCallsAnotherNonVoidOperationInAnother() {
+  public void testCallOperationThatCallsAnotherNonVoidOperationInAnotherFile() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import org.eclipse.emf.ecore.EPackage");
     _builder.newLine();
@@ -3000,6 +3006,12 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("\t");
     _builder.append("if (aCheck()) // this will always return false");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("return null // so this won\'t be executed");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("if (aCheck2()) // this will always return false");
     _builder.newLine();
     _builder.append("\t\t");
     _builder.append("return null // so this won\'t be executed");
@@ -3014,6 +3026,14 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("\t");
     _builder.append("return false");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("def aCheck2() : boolean {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("false");
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
