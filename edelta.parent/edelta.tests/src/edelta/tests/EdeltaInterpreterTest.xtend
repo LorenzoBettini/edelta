@@ -1929,6 +1929,84 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testCallOperationThatCallsAnotherNonVoidOperation() {
+		// see https://github.com/LorenzoBettini/edelta/issues/268
+		'''
+			metamodel "foo"
+			
+			def createANewClassInMyEcore(String name) {
+				if (aCheck()) // this will always return false
+					return null // so this won't be executed
+				if (aCheck2()) // this will always return false
+					return null // so this won't be executed
+				ecoreref(foo).addNewEClass(name)
+			}
+			
+			def aCheck() {
+				return false
+			}
+			
+			def aCheck2() : boolean {
+				false
+			}
+			
+			modifyEcore SomeChanges epackage foo {
+				// the ANewClass is not actually created
+				// not shown in the outline
+				"ANewClass".createANewClassInMyEcore() => [
+					abstract = true
+				]
+			}
+		'''.assertAfterInterpretationOfEdeltaModifyEcoreOperation [ derivedEPackage |
+			derivedEPackage.lastEClass => [
+				assertEquals("ANewClass", name)
+				assertTrue(isAbstract)
+			]
+		]
+	}
+
+	@Test def void testCallOperationThatCallsAnotherNonVoidOperationInAnotherFile() {
+		// see https://github.com/LorenzoBettini/edelta/issues/268
+		parseSeveralWithTestEcore(
+		#[
+		'''
+			import org.eclipse.emf.ecore.EPackage
+			
+			def create(EPackage it) {
+				if (aCheck()) // this will always return false
+					return null // so this won't be executed
+				if (aCheck2()) // this will always return false
+					return null // so this won't be executed
+				addNewEClass("NewClass")
+			}
+			
+			def aCheck() {
+				return false
+			}
+			
+			def aCheck2() : boolean {
+				false
+			}
+		''',
+		'''
+			metamodel "foo"
+			
+			use edelta.__synthetic0 as extension my
+			
+			modifyEcore anotherTest epackage foo {
+				create(it)
+				ecoreref(NewClass)
+			}
+		'''
+		]) => [
+			interpretProgram => [
+				val created = get("foo").getEClassByName("NewClass")
+				assertNotNull(created)
+			]
+		]
+	}
+
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) {
