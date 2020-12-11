@@ -78,10 +78,14 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       EdeltaTestUtils.compareFileContents(
         (((AbstractTest.EXPECTATIONS + this.testModelDirectory) + "/") + this.testModelFile), 
         (AbstractTest.MODIFIED + this.testModelFile));
-      Assertions.assertThat(this.appender.getResult()).isEmpty();
+      this.assertLogIsEmpty();
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
+  }
+  
+  private void assertLogIsEmpty() {
+    Assertions.assertThat(this.appender.getResult()).isEmpty();
   }
   
   private void assertModifiedFileIsSameAsOriginal() {
@@ -90,6 +94,19 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       EdeltaTestUtils.compareFileContents(
         (((AbstractTest.TESTECORES + this.testModelDirectory) + "/") + this.testModelFile), 
         (AbstractTest.MODIFIED + this.testModelFile));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  private void assertOppositeRefactorings(final Runnable first, final Runnable second) {
+    try {
+      this.loadModelFile();
+      first.run();
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      second.run();
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFileIsSameAsOriginal();
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -376,6 +393,101 @@ public class EdeltaRefactoringsTest extends AbstractTest {
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
+  }
+  
+  @Test
+  public void test_classToReferenceWhenClassIsNotReferred() {
+    EPackage _createEPackage = this.factory.createEPackage();
+    final Procedure1<EPackage> _function = (EPackage it) -> {
+      it.setName("p");
+    };
+    final EPackage ePackage = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
+    final EClass c = this.createEClass(ePackage, "C");
+    this.refactorings.classToReference(c);
+    Assertions.assertThat(this.appender.getResult().trim()).isEqualTo("ERROR: p.C: The EClass is not referred: p.C");
+  }
+  
+  @Test
+  public void test_classToReferenceWhenClassIsReferredMoreThanOnce() {
+    EPackage _createEPackage = this.factory.createEPackage();
+    final Procedure1<EPackage> _function = (EPackage it) -> {
+      it.setName("p");
+    };
+    final EPackage ePackage = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
+    final EClass c = this.createEClass(ePackage, "C");
+    EClass _createEClass = this.createEClass(ePackage, "C1");
+    final Procedure1<EClass> _function_1 = (EClass it) -> {
+      EReference _createEReference = this.createEReference(it, "r1");
+      final Procedure1<EReference> _function_2 = (EReference it_1) -> {
+        it_1.setEType(c);
+      };
+      ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_2);
+    };
+    ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
+    EClass _createEClass_1 = this.createEClass(ePackage, "C2");
+    final Procedure1<EClass> _function_2 = (EClass it) -> {
+      EReference _createEReference = this.createEReference(it, "r2");
+      final Procedure1<EReference> _function_3 = (EReference it_1) -> {
+        it_1.setEType(c);
+      };
+      ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_3);
+    };
+    ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_2);
+    this.refactorings.classToReference(c);
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("ERROR: p.C: The EClass is referred more than once:");
+    _builder.newLine();
+    _builder.append("  ");
+    _builder.append("p.C1.r1");
+    _builder.newLine();
+    _builder.append("  ");
+    _builder.append("p.C2.r2");
+    _builder.newLine();
+    Assertions.assertThat(this.appender.getResult()).isEqualTo(_builder.toString());
+  }
+  
+  @Test
+  public void test_classToReferenceUnidirectional() {
+    try {
+      this.withInputModel("classToReferenceUnidirectional", "PersonList.ecore");
+      this.loadModelFile();
+      final EClass cl = this.refactorings.getEClass("PersonList", "WorkingPosition");
+      this.refactorings.classToReference(cl);
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
+  public void test_referenceToClass_IsOppositeOf_classToReferenceUnidirectional() {
+    this.withInputModel("referenceToClassUnidirectional", "PersonList.ecore");
+    final Runnable _function = () -> {
+      this.refactorings.referenceToClass("WorkingPosition", 
+        this.refactorings.getEReference("PersonList", "Person", "works"));
+    };
+    final Runnable _function_1 = () -> {
+      this.refactorings.classToReference(
+        this.refactorings.getEClass("PersonList", "WorkingPosition"));
+    };
+    this.assertOppositeRefactorings(_function, _function_1);
+    this.assertLogIsEmpty();
+  }
+  
+  @Test
+  public void test_referenceToClass_IsOppositeOf_classToReferenceUnidirectional2() {
+    this.withInputModel("classToReferenceUnidirectional", "PersonList.ecore");
+    final Runnable _function = () -> {
+      this.refactorings.classToReference(
+        this.refactorings.getEClass("PersonList", "WorkingPosition"));
+    };
+    final Runnable _function_1 = () -> {
+      this.refactorings.referenceToClass("WorkingPosition", 
+        this.refactorings.getEReference("PersonList", "Person", "works"));
+    };
+    this.assertOppositeRefactorings(_function, _function_1);
+    this.assertLogIsEmpty();
   }
   
   @Test

@@ -1,5 +1,7 @@
 package edelta.refactorings.lib;
 
+import com.google.common.base.Objects;
+import com.google.common.collect.Iterables;
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaLibrary;
 import java.util.Collection;
@@ -15,6 +17,7 @@ import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -217,6 +220,51 @@ public class EdeltaRefactorings extends AbstractEdelta {
     return extracted;
   }
   
+  public void classToReference(final EClass cl) {
+    final Function1<EStructuralFeature.Setting, Boolean> _function = (EStructuralFeature.Setting it) -> {
+      EStructuralFeature _eStructuralFeature = it.getEStructuralFeature();
+      return Boolean.valueOf(Objects.equal(_eStructuralFeature, getEReference("ecore", "EReference", "eReferenceType")));
+    };
+    final Function1<EStructuralFeature.Setting, EObject> _function_1 = (EStructuralFeature.Setting it) -> {
+      return it.getEObject();
+    };
+    final Iterable<EReference> references = Iterables.<EReference>filter(IterableExtensions.<EStructuralFeature.Setting, EObject>map(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()), _function), _function_1), EReference.class);
+    boolean _isEmpty = IterableExtensions.isEmpty(references);
+    if (_isEmpty) {
+      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(cl);
+      String _plus = ("The EClass is not referred: " + _eObjectRepr);
+      this.showError(cl, _plus);
+      return;
+    } else {
+      int _size = IterableExtensions.size(references);
+      boolean _greaterThan = (_size > 1);
+      if (_greaterThan) {
+        final Function1<EReference, String> _function_2 = (EReference it) -> {
+          String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(it);
+          return ("  " + _eObjectRepr_1);
+        };
+        String _join = IterableExtensions.join(IterableExtensions.<EReference, String>map(references, _function_2), "\n");
+        String _plus_1 = ("The EClass is referred more than once:\n" + _join);
+        this.showError(cl, _plus_1);
+        return;
+      }
+    }
+    final EReference reference = IterableExtensions.<EReference>head(references);
+    final EClass owner = reference.getEContainingClass();
+    final Function1<EStructuralFeature, Boolean> _function_3 = (EStructuralFeature it) -> {
+      EClassifier _eType = it.getEType();
+      return Boolean.valueOf(Objects.equal(_eType, owner));
+    };
+    final EStructuralFeature referenceToOwner = IterableExtensions.<EStructuralFeature>head(IterableExtensions.<EStructuralFeature>filter(cl.getEStructuralFeatures(), _function_3));
+    final Function1<EStructuralFeature, Boolean> _function_4 = (EStructuralFeature it) -> {
+      return Boolean.valueOf((it != referenceToOwner));
+    };
+    final EStructuralFeature referenceToTarget = IterableExtensions.<EStructuralFeature>head(IterableExtensions.<EStructuralFeature>toList(IterableExtensions.<EStructuralFeature>filter(cl.getEStructuralFeatures(), _function_4)));
+    reference.setEType(referenceToTarget.getEType());
+    reference.setContainment(false);
+    EdeltaLibrary.removeElement(cl);
+  }
+  
   /**
    * Given a non empty list of {@link EStructuralFeature}, which are known to
    * appear in several classes as duplicates, extracts a new common superclass,
@@ -365,5 +413,10 @@ public class EdeltaRefactorings extends AbstractEdelta {
       this.showError(reference, _plus);
     }
     return (!containment);
+  }
+  
+  @Override
+  public void performSanityChecks() throws Exception {
+    ensureEPackageIsLoaded("ecore");
   }
 }

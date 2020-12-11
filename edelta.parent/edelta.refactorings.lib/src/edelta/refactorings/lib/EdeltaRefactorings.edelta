@@ -14,6 +14,8 @@ import org.eclipse.xtext.xbase.lib.Pair
 
 package edelta.refactorings.lib
 
+metamodel "ecore"
+
 def addMandatoryAttr(EClass eClass, String attrname, EDataType dataType): EAttribute {
 	return eClass.addNewEAttribute(attrname, dataType) [
 		lowerBound = 1;
@@ -163,6 +165,30 @@ def referenceToClass(String name, EReference reference) {
 	reference.EType = extracted
 	reference.containment = true
 	return extracted
+}
+
+def classToReference(EClass cl) {
+	// find the EReferences that have type cl
+	val references = EcoreUtil.UsageCrossReferencer
+		.find(cl, cl.EPackage)
+		.filter[EStructuralFeature == ecoreref(eReferenceType)]
+		.map[EObject]
+		.filter(EReference)
+	if (references.isEmpty) {
+		showError(cl, "The EClass is not referred: " + getEObjectRepr(cl))
+		return
+	} else if (references.size > 1) {
+		showError(cl, "The EClass is referred more than once:\n" +
+			references.map["  " + getEObjectRepr(it)].join("\n"))
+		return
+	}
+	val reference = references.head
+	val owner = reference.EContainingClass
+	val referenceToOwner = cl.EStructuralFeatures.filter[EType == owner].head
+	val referenceToTarget = cl.EStructuralFeatures.filter[it !== referenceToOwner].toList.head
+	reference.EType = referenceToTarget.EType
+	reference.containment = false
+	removeElement(cl)
 }
 
 /**

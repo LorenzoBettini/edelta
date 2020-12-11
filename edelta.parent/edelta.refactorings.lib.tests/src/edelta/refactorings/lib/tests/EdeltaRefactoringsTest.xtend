@@ -2,6 +2,7 @@ package edelta.refactorings.lib.tests
 
 import edelta.lib.AbstractEdelta
 import edelta.refactorings.lib.EdeltaRefactorings
+import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender
 import java.util.stream.Collectors
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
@@ -10,6 +11,7 @@ import org.eclipse.emf.ecore.EReference
 import org.junit.Before
 import org.junit.Test
 
+import static edelta.testutils.EdeltaTestUtils.compareFileContents
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertNotNull
@@ -18,8 +20,6 @@ import static org.junit.Assert.assertSame
 import static org.junit.Assert.assertTrue
 
 import static extension org.assertj.core.api.Assertions.*
-import static edelta.testutils.EdeltaTestUtils.compareFileContents
-import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender
 
 class EdeltaRefactoringsTest extends AbstractTest {
 	var EdeltaRefactorings refactorings
@@ -53,7 +53,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		compareFileContents(
 				EXPECTATIONS + testModelDirectory + "/" + testModelFile,
 				MODIFIED + testModelFile)
-		assertThat(appender.result).isEmpty
+		assertLogIsEmpty()
 		// no need to explicitly validate:
 		// if the ecore file is saved then it is valid
 		/*
@@ -71,11 +71,24 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		*/
 	}
 
+	private def void assertLogIsEmpty() {
+		assertThat(appender.result).isEmpty
+	}
+
 	def private assertModifiedFileIsSameAsOriginal() {
 		checkInputModelSettings
 		compareFileContents(
 				TESTECORES + testModelDirectory + "/" + testModelFile,
 				MODIFIED + testModelFile)
+	}
+
+	def private assertOppositeRefactorings(Runnable first, Runnable second) {
+		loadModelFile
+		first.run()
+		refactorings.saveModifiedEcores(MODIFIED)
+		second.run()
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFileIsSameAsOriginal
 	}
 
 	def private checkInputModelSettings() {
@@ -304,6 +317,76 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertModifiedFileIsSameAsOriginal
 		assertThat(appender.result.trim)
 			.isEqualTo("ERROR: PersonList.Person.works: Cannot apply referenceToClass on containment reference: PersonList.Person.works")
+	}
+
+	@Test
+	def void test_classToReferenceWhenClassIsNotReferred() {
+		val ePackage = factory.createEPackage => [
+			name = "p"
+		]
+		val c = ePackage.createEClass("C")
+		refactorings.classToReference(c)
+		assertThat(appender.result.trim)
+			.isEqualTo("ERROR: p.C: The EClass is not referred: p.C")
+	}
+
+	@Test
+	def void test_classToReferenceWhenClassIsReferredMoreThanOnce() {
+		val ePackage = factory.createEPackage => [
+			name = "p"
+		]
+		val c = ePackage.createEClass("C")
+		ePackage.createEClass("C1") => [
+			createEReference("r1") => [
+				EType = c
+			]
+		]
+		ePackage.createEClass("C2") => [
+			createEReference("r2") => [
+				EType = c
+			]
+		]
+		refactorings.classToReference(c)
+		assertThat(appender.result)
+			.isEqualTo('''
+			ERROR: p.C: The EClass is referred more than once:
+			  p.C1.r1
+			  p.C2.r2
+			'''.toString)
+	}
+
+	@Test
+	def void test_classToReferenceUnidirectional() {
+		withInputModel("classToReferenceUnidirectional", "PersonList.ecore")
+		loadModelFile
+		val cl = refactorings.getEClass("PersonList", "WorkingPosition")
+		refactorings.classToReference(cl)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFile
+	}
+
+	@Test
+	def void test_referenceToClass_IsOppositeOf_classToReferenceUnidirectional() {
+		withInputModel("referenceToClassUnidirectional", "PersonList.ecore")
+		assertOppositeRefactorings(
+			[refactorings.referenceToClass("WorkingPosition",
+				refactorings.getEReference("PersonList", "Person", "works"))],
+			[refactorings.classToReference(
+				refactorings.getEClass("PersonList", "WorkingPosition"))]
+		)
+		assertLogIsEmpty
+	}
+
+	@Test
+	def void test_referenceToClass_IsOppositeOf_classToReferenceUnidirectional2() {
+		withInputModel("classToReferenceUnidirectional", "PersonList.ecore")
+		assertOppositeRefactorings(
+			[refactorings.classToReference(
+				refactorings.getEClass("PersonList", "WorkingPosition"))],
+			[refactorings.referenceToClass("WorkingPosition",
+				refactorings.getEReference("PersonList", "Person", "works"))]
+		)
+		assertLogIsEmpty
 	}
 
 	@Test def void test_extractSuperClass() {
