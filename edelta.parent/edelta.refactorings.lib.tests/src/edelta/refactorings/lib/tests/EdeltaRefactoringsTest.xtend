@@ -367,6 +367,36 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
+	def void test_classToReferenceWithMissingTarget() {
+		withInputModel("classToReferenceUnidirectional", "PersonList.ecore")
+		loadModelFile
+		val cl = refactorings.getEClass("PersonList", "WorkingPosition")
+		// manually remove reference to target class WorkPlace
+		cl.EStructuralFeatures -= cl.getEStructuralFeature("workPlace")
+		refactorings.classToReference(cl)
+		assertThat(appender.result.trim)
+			.isEqualTo("ERROR: PersonList.WorkingPosition: Missing reference to target type: PersonList.WorkingPosition")
+	}
+
+	@Test
+	def void test_classToReferenceWithTooManyTargets() {
+		withInputModel("classToReferenceUnidirectional", "PersonList.ecore")
+		loadModelFile
+		val cl = refactorings.getEClass("PersonList", "WorkingPosition")
+		// manually add another reference to target class
+		cl.createEReference("another") => [
+			EType = refactorings.getEClass("PersonList", "List")
+		]
+		refactorings.classToReference(cl)
+		assertThat(appender.result)
+			.isEqualTo('''
+			ERROR: PersonList.WorkingPosition: Too many references to target type:
+			  PersonList.WorkingPosition.workPlace
+			  PersonList.WorkingPosition.another
+		  '''.toString)
+	}
+
+	@Test
 	def void test_referenceToClass_IsOppositeOf_classToReferenceUnidirectional() {
 		withInputModel("referenceToClassUnidirectional", "PersonList.ecore")
 		assertOppositeRefactorings(

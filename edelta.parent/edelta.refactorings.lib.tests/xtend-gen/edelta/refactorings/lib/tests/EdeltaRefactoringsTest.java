@@ -466,6 +466,41 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
+  public void test_classToReferenceWithMissingTarget() {
+    this.withInputModel("classToReferenceUnidirectional", "PersonList.ecore");
+    this.loadModelFile();
+    final EClass cl = this.refactorings.getEClass("PersonList", "WorkingPosition");
+    EList<EStructuralFeature> _eStructuralFeatures = cl.getEStructuralFeatures();
+    EStructuralFeature _eStructuralFeature = cl.getEStructuralFeature("workPlace");
+    _eStructuralFeatures.remove(_eStructuralFeature);
+    this.refactorings.classToReference(cl);
+    Assertions.assertThat(this.appender.getResult().trim()).isEqualTo("ERROR: PersonList.WorkingPosition: Missing reference to target type: PersonList.WorkingPosition");
+  }
+  
+  @Test
+  public void test_classToReferenceWithTooManyTargets() {
+    this.withInputModel("classToReferenceUnidirectional", "PersonList.ecore");
+    this.loadModelFile();
+    final EClass cl = this.refactorings.getEClass("PersonList", "WorkingPosition");
+    EReference _createEReference = this.createEReference(cl, "another");
+    final Procedure1<EReference> _function = (EReference it) -> {
+      it.setEType(this.refactorings.getEClass("PersonList", "List"));
+    };
+    ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function);
+    this.refactorings.classToReference(cl);
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("ERROR: PersonList.WorkingPosition: Too many references to target type:");
+    _builder.newLine();
+    _builder.append("  ");
+    _builder.append("PersonList.WorkingPosition.workPlace");
+    _builder.newLine();
+    _builder.append("  ");
+    _builder.append("PersonList.WorkingPosition.another");
+    _builder.newLine();
+    Assertions.assertThat(this.appender.getResult()).isEqualTo(_builder.toString());
+  }
+  
+  @Test
   public void test_referenceToClass_IsOppositeOf_classToReferenceUnidirectional() {
     this.withInputModel("referenceToClassUnidirectional", "PersonList.ecore");
     final Runnable _function = () -> {

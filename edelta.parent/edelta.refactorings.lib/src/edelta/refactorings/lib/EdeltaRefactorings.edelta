@@ -185,7 +185,17 @@ def classToReference(EClass cl) {
 	val reference = references.head
 	val owner = reference.EContainingClass
 	val referenceToOwner = cl.EStructuralFeatures.filter[EType == owner].head
-	val referenceToTarget = cl.EStructuralFeatures.filter[it !== referenceToOwner].toList.head
+	val otherReferences = cl.EStructuralFeatures.filter[it !== referenceToOwner].toList
+	if (otherReferences.empty) {
+		showError(cl, "Missing reference to target type: " + getEObjectRepr(cl))
+		return
+	}
+	if (otherReferences.size > 1) {
+		showError(cl, "Too many references to target type:\n" +
+			otherReferences.map["  " + getEObjectRepr(it)].join("\n"))
+		return
+	}
+	val referenceToTarget = otherReferences.head
 	reference.EType = referenceToTarget.EType
 	reference.containment = false
 	removeElement(cl)

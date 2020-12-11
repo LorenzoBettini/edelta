@@ -259,7 +259,27 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final Function1<EStructuralFeature, Boolean> _function_4 = (EStructuralFeature it) -> {
       return Boolean.valueOf((it != referenceToOwner));
     };
-    final EStructuralFeature referenceToTarget = IterableExtensions.<EStructuralFeature>head(IterableExtensions.<EStructuralFeature>toList(IterableExtensions.<EStructuralFeature>filter(cl.getEStructuralFeatures(), _function_4)));
+    final List<EStructuralFeature> otherReferences = IterableExtensions.<EStructuralFeature>toList(IterableExtensions.<EStructuralFeature>filter(cl.getEStructuralFeatures(), _function_4));
+    boolean _isEmpty_1 = otherReferences.isEmpty();
+    if (_isEmpty_1) {
+      String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(cl);
+      String _plus_2 = ("Missing reference to target type: " + _eObjectRepr_1);
+      this.showError(cl, _plus_2);
+      return;
+    }
+    int _size_1 = otherReferences.size();
+    boolean _greaterThan_1 = (_size_1 > 1);
+    if (_greaterThan_1) {
+      final Function1<EStructuralFeature, String> _function_5 = (EStructuralFeature it) -> {
+        String _eObjectRepr_2 = EdeltaLibrary.getEObjectRepr(it);
+        return ("  " + _eObjectRepr_2);
+      };
+      String _join_1 = IterableExtensions.join(ListExtensions.<EStructuralFeature, String>map(otherReferences, _function_5), "\n");
+      String _plus_3 = ("Too many references to target type:\n" + _join_1);
+      this.showError(cl, _plus_3);
+      return;
+    }
+    final EStructuralFeature referenceToTarget = IterableExtensions.<EStructuralFeature>head(otherReferences);
     reference.setEType(referenceToTarget.getEType());
     reference.setContainment(false);
     EdeltaLibrary.removeElement(cl);
