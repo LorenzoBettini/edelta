@@ -1936,13 +1936,17 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			metamodel "foo"
 			
 			def createANewClassInMyEcore(String name) {
-				// if (aCheck()) // uncomment these lines and see the bug
-				//	return null
+				if (aCheck()) // this will always return false
+					return null // so this won't be executed
 				ecoreref(foo).addNewEClass(name)
 			}
 			
 			def aCheck() {
 				return false
+			}
+			
+			def aCheck2() : boolean {
+				false
 			}
 			
 			modifyEcore SomeChanges epackage foo {
@@ -1968,8 +1972,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			import org.eclipse.emf.ecore.EPackage
 			
 			def create(EPackage it) {
-				// if (aCheck()) // uncomment these lines and see the bug
-				//	return null
+				if (aCheck()) // this will always return false
+					return null // so this won't be executed
 				addNewEClass("NewClass")
 			}
 			

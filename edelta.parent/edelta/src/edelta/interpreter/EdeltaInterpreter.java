@@ -37,6 +37,7 @@ import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.XbasePackage;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationResult;
+import org.eclipse.xtext.xbase.interpreter.impl.EvaluationException;
 import org.eclipse.xtext.xbase.interpreter.impl.InterpreterCanceledException;
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter;
 
@@ -503,10 +504,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		if (edeltaOperation != null) {
 			var containingProgram = getProgram(edeltaOperation);
 			if (containingProgram == currentProgram) {
-				final var context = parentContext.fork();
-				configureContextForParameterArguments(context,
-						operation.getParameters(), argumentValues);
-				return internalEvaluate(edeltaOperation.getBody(), context, indicator);
+				return evaluateEdeltaOperation(edeltaOperation, argumentValues,
+						parentContext.fork(), indicator);
 			} else {
 				// create a new interpreter since the edelta operation is in
 				// another edelta source file.
@@ -547,14 +546,38 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		this.thisObject = thisObject;
 		var context = createContext();
 		configureContextForJavaThis(context);
+		return evaluateEdeltaOperation(edeltaOperation, argumentValues, context, indicator);
+	}
+
+	/**
+	 * Since this is meant to execute a method, we must call evaluate, not
+	 * internalEvaluate, otherwise if in the method there's a return it will
+	 * terminate the whole interpretation, since a return is interpreted with a
+	 * throw of a ReturnValue (see
+	 * {@link XbaseInterpreter#_doEvaluate(XReturnExpression, IEvaluationContext, CancelIndicator)}).
+	 * If we call evaluate then it will take care of catching the exception
+	 * ReturnValue and will wrap it in a returned {@link DefaultEvaluationResult}.
+	 * 
+	 * @param edeltaOperation
+	 * @param argumentValues
+	 * @param context
+	 * @param indicator
+	 * @return
+	 */
+	private Object evaluateEdeltaOperation(EdeltaOperation edeltaOperation, List<Object> argumentValues,
+			IEvaluationContext context, CancelIndicator indicator) {
 		configureContextForParameterArguments(context,
 				edeltaOperation.getParams(), argumentValues);
 		final var result = evaluate(edeltaOperation.getBody(), context,
 				indicator);
 		if (result == null ||
 				// our timeoutGuardThread interrupted us
-				result.getException() instanceof InterruptedException)
+				result.getException() instanceof InterruptedException) {
 			throw new InterpreterCanceledException();
+		}
+		if (result.getException() != null) {
+			throw new EvaluationException(result.getException());
+		}
 		return result.getResult();
 	}
 
