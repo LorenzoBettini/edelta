@@ -50,11 +50,16 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   
   @Before
   public void setup() {
-    EdeltaRefactorings _edeltaRefactorings = new EdeltaRefactorings();
-    this.refactorings = _edeltaRefactorings;
-    InMemoryLoggerAppender _inMemoryLoggerAppender = new InMemoryLoggerAppender();
-    this.appender = _inMemoryLoggerAppender;
-    this.refactorings.getLogger().addAppender(this.appender);
+    try {
+      EdeltaRefactorings _edeltaRefactorings = new EdeltaRefactorings();
+      this.refactorings = _edeltaRefactorings;
+      InMemoryLoggerAppender _inMemoryLoggerAppender = new InMemoryLoggerAppender();
+      this.appender = _inMemoryLoggerAppender;
+      this.refactorings.getLogger().addAppender(this.appender);
+      this.refactorings.performSanityChecks();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   private String withInputModel(final String testModelDirectory, final String testModelFile) {

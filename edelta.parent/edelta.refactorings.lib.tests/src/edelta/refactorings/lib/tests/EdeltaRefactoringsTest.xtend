@@ -33,6 +33,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		refactorings = new EdeltaRefactorings
 		appender = new InMemoryLoggerAppender
 		refactorings.logger.addAppender(appender)
+		refactorings.performSanityChecks
 	}
 
 	def private withInputModel(String testModelDirectory, String testModelFile) {
