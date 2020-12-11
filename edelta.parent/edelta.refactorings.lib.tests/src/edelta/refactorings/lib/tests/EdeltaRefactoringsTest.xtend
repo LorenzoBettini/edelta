@@ -339,18 +339,20 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		val c = ePackage.createEClass("C")
 		ePackage.createEClass("C1") => [
 			createEReference("r1") => [
+				containment = true
 				EType = c
 			]
 		]
 		ePackage.createEClass("C2") => [
 			createEReference("r2") => [
+				containment = true
 				EType = c
 			]
 		]
 		refactorings.classToReference(c)
 		assertThat(appender.result)
 			.isEqualTo('''
-			ERROR: p.C: The EClass is referred more than once:
+			ERROR: p.C: The EClass is referred by more than one container:
 			  p.C1.r1
 			  p.C2.r2
 			'''.toString)
@@ -412,6 +414,16 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
+	def void test_classToReferenceBidirectional() {
+		withInputModel("classToReferenceBidirectional", "PersonList.ecore")
+		loadModelFile
+		val cl = refactorings.getEClass("PersonList", "WorkingPosition")
+		refactorings.classToReference(cl)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFile
+	}
+
+	@Test
 	def void test_referenceToClass_IsOppositeOf_classToReferenceUnidirectional() {
 		withInputModel("referenceToClassUnidirectional", "PersonList.ecore")
 		assertOppositeRefactorings(
@@ -426,6 +438,30 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	def void test_referenceToClass_IsOppositeOf_classToReferenceUnidirectional2() {
 		withInputModel("classToReferenceUnidirectional", "PersonList.ecore")
+		assertOppositeRefactorings(
+			[refactorings.classToReference(
+				refactorings.getEClass("PersonList", "WorkingPosition"))],
+			[refactorings.referenceToClass("WorkingPosition",
+				refactorings.getEReference("PersonList", "Person", "works"))]
+		)
+		assertLogIsEmpty
+	}
+
+	@Test
+	def void test_referenceToClass_IsOppositeOf_classToReferenceBidirectional() {
+		withInputModel("referenceToClassBidirectional", "PersonList.ecore")
+		assertOppositeRefactorings(
+			[refactorings.referenceToClass("WorkingPosition",
+				refactorings.getEReference("PersonList", "Person", "works"))],
+			[refactorings.classToReference(
+				refactorings.getEClass("PersonList", "WorkingPosition"))]
+		)
+		assertLogIsEmpty
+	}
+
+	@Test
+	def void test_referenceToClass_IsOppositeOf_classToReferenceBidirectional2() {
+		withInputModel("classToReferenceBidirectional", "PersonList.ecore")
 		assertOppositeRefactorings(
 			[refactorings.classToReference(
 				refactorings.getEClass("PersonList", "WorkingPosition"))],

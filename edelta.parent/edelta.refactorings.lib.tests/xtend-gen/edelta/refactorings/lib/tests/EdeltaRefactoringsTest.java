@@ -424,6 +424,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
     final Procedure1<EClass> _function_1 = (EClass it) -> {
       EReference _createEReference = this.createEReference(it, "r1");
       final Procedure1<EReference> _function_2 = (EReference it_1) -> {
+        it_1.setContainment(true);
         it_1.setEType(c);
       };
       ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_2);
@@ -433,6 +434,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
     final Procedure1<EClass> _function_2 = (EClass it) -> {
       EReference _createEReference = this.createEReference(it, "r2");
       final Procedure1<EReference> _function_3 = (EReference it_1) -> {
+        it_1.setContainment(true);
         it_1.setEType(c);
       };
       ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_3);
@@ -440,7 +442,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
     ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_2);
     this.refactorings.classToReference(c);
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("ERROR: p.C: The EClass is referred more than once:");
+    _builder.append("ERROR: p.C: The EClass is referred by more than one container:");
     _builder.newLine();
     _builder.append("  ");
     _builder.append("p.C1.r1");
@@ -523,6 +525,20 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
+  public void test_classToReferenceBidirectional() {
+    try {
+      this.withInputModel("classToReferenceBidirectional", "PersonList.ecore");
+      this.loadModelFile();
+      final EClass cl = this.refactorings.getEClass("PersonList", "WorkingPosition");
+      this.refactorings.classToReference(cl);
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
   public void test_referenceToClass_IsOppositeOf_classToReferenceUnidirectional() {
     this.withInputModel("referenceToClassUnidirectional", "PersonList.ecore");
     final Runnable _function = () -> {
@@ -540,6 +556,36 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   @Test
   public void test_referenceToClass_IsOppositeOf_classToReferenceUnidirectional2() {
     this.withInputModel("classToReferenceUnidirectional", "PersonList.ecore");
+    final Runnable _function = () -> {
+      this.refactorings.classToReference(
+        this.refactorings.getEClass("PersonList", "WorkingPosition"));
+    };
+    final Runnable _function_1 = () -> {
+      this.refactorings.referenceToClass("WorkingPosition", 
+        this.refactorings.getEReference("PersonList", "Person", "works"));
+    };
+    this.assertOppositeRefactorings(_function, _function_1);
+    this.assertLogIsEmpty();
+  }
+  
+  @Test
+  public void test_referenceToClass_IsOppositeOf_classToReferenceBidirectional() {
+    this.withInputModel("referenceToClassBidirectional", "PersonList.ecore");
+    final Runnable _function = () -> {
+      this.refactorings.referenceToClass("WorkingPosition", 
+        this.refactorings.getEReference("PersonList", "Person", "works"));
+    };
+    final Runnable _function_1 = () -> {
+      this.refactorings.classToReference(
+        this.refactorings.getEClass("PersonList", "WorkingPosition"));
+    };
+    this.assertOppositeRefactorings(_function, _function_1);
+    this.assertLogIsEmpty();
+  }
+  
+  @Test
+  public void test_referenceToClass_IsOppositeOf_classToReferenceBidirectional2() {
+    this.withInputModel("classToReferenceBidirectional", "PersonList.ecore");
     final Runnable _function = () -> {
       this.refactorings.classToReference(
         this.refactorings.getEClass("PersonList", "WorkingPosition"));

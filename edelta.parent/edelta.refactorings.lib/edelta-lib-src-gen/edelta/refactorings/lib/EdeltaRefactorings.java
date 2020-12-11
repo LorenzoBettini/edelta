@@ -236,30 +236,33 @@ public class EdeltaRefactorings extends AbstractEdelta {
       this.showError(cl, _plus);
       return;
     } else {
-      int _size = IterableExtensions.size(references);
+      final Function1<EReference, Boolean> _function_2 = (EReference it) -> {
+        return Boolean.valueOf(it.isContainment());
+      };
+      int _size = IterableExtensions.size(IterableExtensions.<EReference>filter(references, _function_2));
       boolean _greaterThan = (_size > 1);
       if (_greaterThan) {
-        final Function1<EReference, String> _function_2 = (EReference it) -> {
+        final Function1<EReference, String> _function_3 = (EReference it) -> {
           String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(it);
           return ("  " + _eObjectRepr_1);
         };
-        String _join = IterableExtensions.join(IterableExtensions.<EReference, String>map(references, _function_2), "\n");
-        String _plus_1 = ("The EClass is referred more than once:\n" + _join);
+        String _join = IterableExtensions.join(IterableExtensions.<EReference, String>map(references, _function_3), "\n");
+        String _plus_1 = ("The EClass is referred by more than one container:\n" + _join);
         this.showError(cl, _plus_1);
         return;
       }
     }
     final EReference reference = IterableExtensions.<EReference>head(references);
     final EClass owner = reference.getEContainingClass();
-    final Function1<EStructuralFeature, Boolean> _function_3 = (EStructuralFeature it) -> {
+    final Function1<EStructuralFeature, Boolean> _function_4 = (EStructuralFeature it) -> {
       EClassifier _eType = it.getEType();
       return Boolean.valueOf(Objects.equal(_eType, owner));
     };
-    final EStructuralFeature referenceToOwner = IterableExtensions.<EStructuralFeature>head(IterableExtensions.<EStructuralFeature>filter(cl.getEStructuralFeatures(), _function_3));
-    final Function1<EStructuralFeature, Boolean> _function_4 = (EStructuralFeature it) -> {
+    final EStructuralFeature referenceToOwner = IterableExtensions.<EStructuralFeature>head(IterableExtensions.<EStructuralFeature>filter(cl.getEStructuralFeatures(), _function_4));
+    final Function1<EStructuralFeature, Boolean> _function_5 = (EStructuralFeature it) -> {
       return Boolean.valueOf((it != referenceToOwner));
     };
-    final List<EStructuralFeature> otherReferences = IterableExtensions.<EStructuralFeature>toList(IterableExtensions.<EStructuralFeature>filter(cl.getEStructuralFeatures(), _function_4));
+    final List<EReference> otherReferences = IterableExtensions.<EReference>toList(Iterables.<EReference>filter(IterableExtensions.<EStructuralFeature>filter(cl.getEStructuralFeatures(), _function_5), EReference.class));
     boolean _isEmpty_1 = otherReferences.isEmpty();
     if (_isEmpty_1) {
       String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(cl);
@@ -270,18 +273,23 @@ public class EdeltaRefactorings extends AbstractEdelta {
     int _size_1 = otherReferences.size();
     boolean _greaterThan_1 = (_size_1 > 1);
     if (_greaterThan_1) {
-      final Function1<EStructuralFeature, String> _function_5 = (EStructuralFeature it) -> {
+      final Function1<EReference, String> _function_6 = (EReference it) -> {
         String _eObjectRepr_2 = EdeltaLibrary.getEObjectRepr(it);
         return ("  " + _eObjectRepr_2);
       };
-      String _join_1 = IterableExtensions.join(ListExtensions.<EStructuralFeature, String>map(otherReferences, _function_5), "\n");
+      String _join_1 = IterableExtensions.join(ListExtensions.<EReference, String>map(otherReferences, _function_6), "\n");
       String _plus_3 = ("Too many references to target type:\n" + _join_1);
       this.showError(cl, _plus_3);
       return;
     }
-    final EStructuralFeature referenceToTarget = IterableExtensions.<EStructuralFeature>head(otherReferences);
+    final EReference referenceToTarget = IterableExtensions.<EReference>head(otherReferences);
     reference.setEType(referenceToTarget.getEType());
     reference.setContainment(false);
+    final EReference opposite = referenceToTarget.getEOpposite();
+    if ((opposite != null)) {
+      opposite.setEType(owner);
+      EdeltaLibrary.makeBidirectional(reference, opposite);
+    }
     EdeltaLibrary.removeElement(cl);
   }
   

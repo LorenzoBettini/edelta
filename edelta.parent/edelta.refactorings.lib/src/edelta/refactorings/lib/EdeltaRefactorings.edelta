@@ -177,8 +177,8 @@ def classToReference(EClass cl) {
 	if (references.isEmpty) {
 		showError(cl, "The EClass is not referred: " + getEObjectRepr(cl))
 		return
-	} else if (references.size > 1) {
-		showError(cl, "The EClass is referred more than once:\n" +
+	} else if (references.filter[containment].size > 1) {
+		showError(cl, "The EClass is referred by more than one container:\n" +
 			references.map["  " + getEObjectRepr(it)].join("\n"))
 		return
 	}
@@ -186,7 +186,10 @@ def classToReference(EClass cl) {
 	val owner = reference.EContainingClass
 	// back reference to owner is allowed to be null
 	val referenceToOwner = cl.EStructuralFeatures.filter[EType == owner].head
-	val otherReferences = cl.EStructuralFeatures.filter[it !== referenceToOwner].toList
+	val otherReferences = cl.EStructuralFeatures
+		.filter[it !== referenceToOwner]
+		.filter(EReference)
+		.toList
 	if (otherReferences.empty) {
 		showError(cl, "Missing reference to target type: " + getEObjectRepr(cl))
 		return
@@ -199,6 +202,11 @@ def classToReference(EClass cl) {
 	val referenceToTarget = otherReferences.head
 	reference.EType = referenceToTarget.EType
 	reference.containment = false
+	val opposite = referenceToTarget.EOpposite
+	if (opposite !== null) {
+		opposite.EType = owner
+		makeBidirectional(reference, opposite)
+	}
 	removeElement(cl)
 }
 
