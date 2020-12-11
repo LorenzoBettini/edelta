@@ -501,6 +501,28 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
+  public void test_classToReferenceUnidirectionalWithoutOppositeIsOk() {
+    try {
+      this.withInputModel("classToReferenceUnidirectional", "PersonList.ecore");
+      this.loadModelFile();
+      final EClass cl = this.refactorings.getEClass("PersonList", "WorkingPosition");
+      EList<EStructuralFeature> _eStructuralFeatures = cl.getEStructuralFeatures();
+      EStructuralFeature _eStructuralFeature = cl.getEStructuralFeature("person");
+      final Procedure1<EStructuralFeature> _function = (EStructuralFeature it) -> {
+        EReference _eOpposite = ((EReference) it).getEOpposite();
+        _eOpposite.setEOpposite(null);
+      };
+      EStructuralFeature _doubleArrow = ObjectExtensions.<EStructuralFeature>operator_doubleArrow(_eStructuralFeature, _function);
+      _eStructuralFeatures.remove(_doubleArrow);
+      this.refactorings.classToReference(cl);
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
   public void test_referenceToClass_IsOppositeOf_classToReferenceUnidirectional() {
     this.withInputModel("referenceToClassUnidirectional", "PersonList.ecore");
     final Runnable _function = () -> {

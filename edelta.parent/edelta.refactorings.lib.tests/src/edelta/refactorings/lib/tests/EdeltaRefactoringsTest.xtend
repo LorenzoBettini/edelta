@@ -397,6 +397,21 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
+	def void test_classToReferenceUnidirectionalWithoutOppositeIsOk() {
+		withInputModel("classToReferenceUnidirectional", "PersonList.ecore")
+		loadModelFile
+		val cl = refactorings.getEClass("PersonList", "WorkingPosition")
+		// manually remove the opposite reference
+		cl.EStructuralFeatures -= cl.getEStructuralFeature("person") => [
+			// also appropriately update the opposite, otherwise we have a dangling reference
+			(it as EReference).EOpposite.EOpposite = null
+		]
+		refactorings.classToReference(cl)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFile
+	}
+
+	@Test
 	def void test_referenceToClass_IsOppositeOf_classToReferenceUnidirectional() {
 		withInputModel("referenceToClassUnidirectional", "PersonList.ecore")
 		assertOppositeRefactorings(

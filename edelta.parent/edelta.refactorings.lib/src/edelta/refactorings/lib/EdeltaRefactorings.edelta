@@ -184,6 +184,7 @@ def classToReference(EClass cl) {
 	}
 	val reference = references.head
 	val owner = reference.EContainingClass
+	// back reference to owner is allowed to be null
 	val referenceToOwner = cl.EStructuralFeatures.filter[EType == owner].head
 	val otherReferences = cl.EStructuralFeatures.filter[it !== referenceToOwner].toList
 	if (otherReferences.empty) {
