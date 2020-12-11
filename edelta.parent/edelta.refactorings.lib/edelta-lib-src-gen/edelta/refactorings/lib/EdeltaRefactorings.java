@@ -358,13 +358,12 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @return true if the passed reference is not a containment reference
    */
   public boolean checkNotContainment(final EReference reference, final String message) {
-    boolean _isContainment = reference.isContainment();
-    if (_isContainment) {
+    final boolean containment = reference.isContainment();
+    if (containment) {
       String _eObjectRepr = EdeltaLibrary.getEObjectRepr(reference);
       String _plus = ((message + ": ") + _eObjectRepr);
       this.showError(reference, _plus);
-      return false;
     }
-    return true;
+    return (!containment);
   }
 }
