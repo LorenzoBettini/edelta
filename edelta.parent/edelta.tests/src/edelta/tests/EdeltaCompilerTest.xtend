@@ -1850,11 +1850,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  }
 			  
 			  public void introduceWorkingPosition(final EPackage it) {
-			    EClass _extractMetaClass = this.refactorings.extractMetaClass("WorkingPosition", getEReference("PersonList", "Person", "works"), "works", "position");
+			    EClass _referenceToClass = this.refactorings.referenceToClass("WorkingPosition", getEReference("PersonList", "Person", "works"));
 			    final Procedure1<EClass> _function = (EClass it_1) -> {
 			      EdeltaLibrary.addNewEAttribute(it_1, "description", getEDataType("ecore", "EString"));
 			    };
-			    ObjectExtensions.<EClass>operator_doubleArrow(_extractMetaClass, _function);
+			    ObjectExtensions.<EClass>operator_doubleArrow(_referenceToClass, _function);
+			    getEReference("PersonList", "WorkPlace", "persons").setName("position");
 			  }
 			  
 			  public void improveList(final EPackage it) {

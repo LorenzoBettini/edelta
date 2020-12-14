@@ -3784,7 +3784,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder.append("public void introduceWorkingPosition(final EPackage it) {");
     _builder.newLine();
     _builder.append("    ");
-    _builder.append("EClass _extractMetaClass = this.refactorings.extractMetaClass(\"WorkingPosition\", getEReference(\"PersonList\", \"Person\", \"works\"), \"works\", \"position\");");
+    _builder.append("EClass _referenceToClass = this.refactorings.referenceToClass(\"WorkingPosition\", getEReference(\"PersonList\", \"Person\", \"works\"));");
     _builder.newLine();
     _builder.append("    ");
     _builder.append("final Procedure1<EClass> _function = (EClass it_1) -> {");
@@ -3796,7 +3796,10 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder.append("};");
     _builder.newLine();
     _builder.append("    ");
-    _builder.append("ObjectExtensions.<EClass>operator_doubleArrow(_extractMetaClass, _function);");
+    _builder.append("ObjectExtensions.<EClass>operator_doubleArrow(_referenceToClass, _function);");
+    _builder.newLine();
+    _builder.append("    ");
+    _builder.append("getEReference(\"PersonList\", \"WorkPlace\", \"persons\").setName(\"position\");");
     _builder.newLine();
     _builder.append("  ");
     _builder.append("}");

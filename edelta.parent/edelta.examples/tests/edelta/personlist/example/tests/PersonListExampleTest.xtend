@@ -32,14 +32,14 @@ class PersonListExampleTest {
 			    <eStructuralFeatures xsi:type="ecore:EReference" name="list" lowerBound="1" eType="#//List"
 			        eOpposite="#//List/members"/>
 			    <eStructuralFeatures xsi:type="ecore:EReference" name="works" lowerBound="1" eType="#//WorkingPosition"
-			        containment="true" eOpposite="#//WorkingPosition/persons"/>
+			        containment="true" eOpposite="#//WorkingPosition/person"/>
 			    <eStructuralFeatures xsi:type="ecore:EReference" name="home" lowerBound="1" eType="#//LivingPlace"
 			        eOpposite="#//LivingPlace/persons"/>
 			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
 			  </eClassifiers>
 			  <eClassifiers xsi:type="ecore:EClass" name="WorkPlace" eSuperTypes="#//Place">
 			    <eStructuralFeatures xsi:type="ecore:EReference" name="position" upperBound="-1"
-			        eType="#//WorkingPosition" eOpposite="#//WorkingPosition/works"/>
+			        eType="#//WorkingPosition" eOpposite="#//WorkingPosition/workPlace"/>
 			  </eClassifiers>
 			  <eClassifiers xsi:type="ecore:EClass" name="LivingPlace" eSuperTypes="#//Place">
 			    <eStructuralFeatures xsi:type="ecore:EReference" name="persons" upperBound="-1"
@@ -55,9 +55,9 @@ class PersonListExampleTest {
 			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="address" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
 			  </eClassifiers>
 			  <eClassifiers xsi:type="ecore:EClass" name="WorkingPosition">
-			    <eStructuralFeatures xsi:type="ecore:EReference" name="works" lowerBound="1" eType="#//WorkPlace"
-			        eOpposite="#//WorkPlace/position"/>
-			    <eStructuralFeatures xsi:type="ecore:EReference" name="persons" lowerBound="1"
+			    <eStructuralFeatures xsi:type="ecore:EReference" name="workPlace" lowerBound="1"
+			        eType="#//WorkPlace" eOpposite="#//WorkPlace/position"/>
+			    <eStructuralFeatures xsi:type="ecore:EReference" name="person" lowerBound="1"
 			        eType="#//Person" eOpposite="#//Person/works"/>
 			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="description" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
 			  </eClassifiers>
