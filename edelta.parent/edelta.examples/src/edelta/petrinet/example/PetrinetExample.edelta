@@ -25,15 +25,29 @@ modifyEcore modifyNet epackage petrinet {
 }
 
 modifyEcore introducePTArc epackage petrinet {
-	refactorings.extractMetaClass("PTArc", ecoreref(Place.dst), 'out', 'in') => [
+//	refactorings.extractMetaClass("PTArc", ecoreref(Place.dst), 'out', 'in') => [
+//		addWeightAttribute
+//	]
+	refactorings.referenceToClass("PTArc", ecoreref(Place.dst)) => [
 		addWeightAttribute
 	]
+	ecoreref(Place.dst).name = "out"
+	ecoreref(Transition.src).name = "in"
+	ecoreref(PTArc.transition).name = "dst"
+	ecoreref(PTArc.place).name = "src"
 }
 
 modifyEcore introduceTPArc epackage petrinet {
-	refactorings.extractMetaClass("TPArc", ecoreref(Transition.dst), 'out', 'in') => [
+//	refactorings.extractMetaClass("TPArc", ecoreref(Transition.dst), 'out', 'in') => [
+//		addWeightAttribute
+//	]
+	refactorings.referenceToClass("TPArc", ecoreref(Transition.dst)) => [
 		addWeightAttribute
 	]
+	ecoreref(Place.src).name = "in"
+	ecoreref(Transition.dst).name = "out"
+	ecoreref(TPArc.transition).name = "src"
+	ecoreref(TPArc.place).name = "dst"
 }
 
 modifyEcore introduceAbstractArc epackage petrinet {

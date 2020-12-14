@@ -39,19 +39,27 @@ public class PetrinetExample extends AbstractEdelta {
   }
   
   public void introducePTArc(final EPackage it) {
-    EClass _extractMetaClass = this.refactorings.extractMetaClass("PTArc", getEReference("petrinet", "Place", "dst"), "out", "in");
+    EClass _referenceToClass = this.refactorings.referenceToClass("PTArc", getEReference("petrinet", "Place", "dst"));
     final Procedure1<EClass> _function = (EClass it_1) -> {
       this.addWeightAttribute(it_1);
     };
-    ObjectExtensions.<EClass>operator_doubleArrow(_extractMetaClass, _function);
+    ObjectExtensions.<EClass>operator_doubleArrow(_referenceToClass, _function);
+    getEReference("petrinet", "Place", "dst").setName("out");
+    getEReference("petrinet", "Transition", "src").setName("in");
+    getEReference("petrinet", "PTArc", "transition").setName("dst");
+    getEReference("petrinet", "PTArc", "place").setName("src");
   }
   
   public void introduceTPArc(final EPackage it) {
-    EClass _extractMetaClass = this.refactorings.extractMetaClass("TPArc", getEReference("petrinet", "Transition", "dst"), "out", "in");
+    EClass _referenceToClass = this.refactorings.referenceToClass("TPArc", getEReference("petrinet", "Transition", "dst"));
     final Procedure1<EClass> _function = (EClass it_1) -> {
       this.addWeightAttribute(it_1);
     };
-    ObjectExtensions.<EClass>operator_doubleArrow(_extractMetaClass, _function);
+    ObjectExtensions.<EClass>operator_doubleArrow(_referenceToClass, _function);
+    getEReference("petrinet", "Place", "src").setName("in");
+    getEReference("petrinet", "Transition", "dst").setName("out");
+    getEReference("petrinet", "TPArc", "transition").setName("src");
+    getEReference("petrinet", "TPArc", "place").setName("dst");
   }
   
   public void introduceAbstractArc(final EPackage it) {
