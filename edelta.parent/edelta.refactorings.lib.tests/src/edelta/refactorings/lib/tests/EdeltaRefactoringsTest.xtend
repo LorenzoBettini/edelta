@@ -207,38 +207,6 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	def void test_extractMetaClassBidirectional() {
-		withInputModel("extractMetaClassBidirectional", "PersonList.ecore")
-		loadModelFile
-		val ref = refactorings.getEReference("PersonList", "Person", "works")
-		refactorings.extractMetaClass("WorkingPosition", ref, "worksAs", "position")
-		refactorings.saveModifiedEcores(MODIFIED)
-		assertModifiedFile
-	}
-
-	@Test
-	def void test_extractMetaClassUnidirectional() {
-		withInputModel("extractMetaClassUnidirectional", "PersonList.ecore")
-		loadModelFile
-		val ref = refactorings.getEReference("PersonList", "Person", "works")
-		refactorings.extractMetaClass("WorkingPosition", ref, "worksAs", "position")
-		refactorings.saveModifiedEcores(MODIFIED)
-		assertModifiedFile
-	}
-
-	@Test
-	def void test_extractMetaClassWithContainmentReference() {
-		withInputModel("extractMetaClassWithContainmentReference", "PersonList.ecore")
-		loadModelFile
-		val ref = refactorings.getEReference("PersonList", "Person", "works")
-		refactorings.extractMetaClass("WorkingPosition", ref, "worksAs", "position")
-		refactorings.saveModifiedEcores(MODIFIED)
-		assertModifiedFileIsSameAsOriginal
-		assertThat(appender.result.trim)
-			.isEqualTo("ERROR: PersonList.Person.works: Cannot apply extractMetaClass on containment reference: PersonList.Person.works")
-	}
-
-	@Test
 	def void test_extractMetaClassWithAttributes() {
 		withInputModel("extractMetaClassWithAttributes", "PersonList.ecore")
 		loadModelFile

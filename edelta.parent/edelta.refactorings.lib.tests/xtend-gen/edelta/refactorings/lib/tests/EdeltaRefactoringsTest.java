@@ -267,49 +267,6 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
-  public void test_extractMetaClassBidirectional() {
-    try {
-      this.withInputModel("extractMetaClassBidirectional", "PersonList.ecore");
-      this.loadModelFile();
-      final EReference ref = this.refactorings.getEReference("PersonList", "Person", "works");
-      this.refactorings.extractMetaClass("WorkingPosition", ref, "worksAs", "position");
-      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-      this.assertModifiedFile();
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
-  }
-  
-  @Test
-  public void test_extractMetaClassUnidirectional() {
-    try {
-      this.withInputModel("extractMetaClassUnidirectional", "PersonList.ecore");
-      this.loadModelFile();
-      final EReference ref = this.refactorings.getEReference("PersonList", "Person", "works");
-      this.refactorings.extractMetaClass("WorkingPosition", ref, "worksAs", "position");
-      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-      this.assertModifiedFile();
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
-  }
-  
-  @Test
-  public void test_extractMetaClassWithContainmentReference() {
-    try {
-      this.withInputModel("extractMetaClassWithContainmentReference", "PersonList.ecore");
-      this.loadModelFile();
-      final EReference ref = this.refactorings.getEReference("PersonList", "Person", "works");
-      this.refactorings.extractMetaClass("WorkingPosition", ref, "worksAs", "position");
-      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-      this.assertModifiedFileIsSameAsOriginal();
-      Assertions.assertThat(this.appender.getResult().trim()).isEqualTo("ERROR: PersonList.Person.works: Cannot apply extractMetaClass on containment reference: PersonList.Person.works");
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
-  }
-  
-  @Test
   public void test_extractMetaClassWithAttributes() {
     try {
       this.withInputModel("extractMetaClassWithAttributes", "PersonList.ecore");

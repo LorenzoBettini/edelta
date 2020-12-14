@@ -71,43 +71,6 @@ def extractIntoSuperclass(EClass superclass, List<EAttribute> attrs){
 
 /**
  * @param name the name for the extracted class
- * @param reference the reference to extract
- * @param newReferenceName the new name for the reference from the owner class to the
- * extracted class (basically used to rename the original passed reference)
- * @param newOppositeReferenceName the new name for the opposite reference from the original
- * target class to the extracted class (basically used to rename the original opposite reference)
- * @return the extracted metaclass
- */
-def extractMetaClass(String name, EReference reference,
-			String newReferenceName, String newOppositeReferenceName) {
-	if (!checkNotContainment(reference,
-			"Cannot apply extractMetaClass on containment reference")) {
-		return null
-	}
-	val owner = reference.EContainingClass
-	val ePackage = reference.EContainingClass.EPackage
-	val extracted = ePackage.addNewEClass(name)
-	val extractedRef = extracted.addNewEReference(reference.name, reference.EReferenceType) [
-		makeSingleRequired
-	]
-	val eOpposite = reference.EOpposite
-	if (eOpposite !== null) {
-		extracted.addNewEReference(eOpposite.name, owner) [
-			makeSingleRequired
-			makeBidirectional(reference)
-		]
-		eOpposite.name = newOppositeReferenceName
-		eOpposite.EType = extracted
-		eOpposite.makeBidirectional(extractedRef)
-	}
-	reference.name = newReferenceName
-	reference.EType = extracted
-	reference.containment = true
-	return extracted
-}
-
-/**
- * @param name the name for the extracted class
  * @param attributes the attributes to extract
  * @param newReferenceName the new name for the reference from the owner class to the
  * extracted class

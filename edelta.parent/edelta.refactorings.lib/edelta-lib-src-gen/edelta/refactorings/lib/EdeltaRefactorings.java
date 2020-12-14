@@ -107,46 +107,6 @@ public class EdeltaRefactorings extends AbstractEdelta {
   
   /**
    * @param name the name for the extracted class
-   * @param reference the reference to extract
-   * @param newReferenceName the new name for the reference from the owner class to the
-   * extracted class (basically used to rename the original passed reference)
-   * @param newOppositeReferenceName the new name for the opposite reference from the original
-   * target class to the extracted class (basically used to rename the original opposite reference)
-   * @return the extracted metaclass
-   */
-  public EClass extractMetaClass(final String name, final EReference reference, final String newReferenceName, final String newOppositeReferenceName) {
-    boolean _checkNotContainment = this.checkNotContainment(reference, 
-      "Cannot apply extractMetaClass on containment reference");
-    boolean _not = (!_checkNotContainment);
-    if (_not) {
-      return null;
-    }
-    final EClass owner = reference.getEContainingClass();
-    final EPackage ePackage = reference.getEContainingClass().getEPackage();
-    final EClass extracted = EdeltaLibrary.addNewEClass(ePackage, name);
-    final Consumer<EReference> _function = (EReference it) -> {
-      EdeltaLibrary.makeSingleRequired(it);
-    };
-    final EReference extractedRef = EdeltaLibrary.addNewEReference(extracted, reference.getName(), reference.getEReferenceType(), _function);
-    final EReference eOpposite = reference.getEOpposite();
-    if ((eOpposite != null)) {
-      final Consumer<EReference> _function_1 = (EReference it) -> {
-        EdeltaLibrary.makeSingleRequired(it);
-        EdeltaLibrary.makeBidirectional(it, reference);
-      };
-      EdeltaLibrary.addNewEReference(extracted, eOpposite.getName(), owner, _function_1);
-      eOpposite.setName(newOppositeReferenceName);
-      eOpposite.setEType(extracted);
-      EdeltaLibrary.makeBidirectional(eOpposite, extractedRef);
-    }
-    reference.setName(newReferenceName);
-    reference.setEType(extracted);
-    reference.setContainment(true);
-    return extracted;
-  }
-  
-  /**
-   * @param name the name for the extracted class
    * @param attributes the attributes to extract
    * @param newReferenceName the new name for the reference from the owner class to the
    * extracted class
