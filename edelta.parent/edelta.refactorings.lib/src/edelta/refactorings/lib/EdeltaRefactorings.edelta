@@ -76,7 +76,7 @@ def extractIntoSuperclass(EClass superclass, List<EAttribute> attrs){
  * extracted class
  * @return the extracted metaclass
  */
-def extractMetaClass(String name, Collection<EAttribute> attributes,
+def extractClass(String name, Collection<EAttribute> attributes,
 			String newReferenceName) {
 	val owners = attributes.map[EContainingClass].toSet
 	if (owners.empty)

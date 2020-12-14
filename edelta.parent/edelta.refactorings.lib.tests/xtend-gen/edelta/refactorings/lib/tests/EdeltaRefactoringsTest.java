@@ -267,13 +267,13 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
-  public void test_extractMetaClassWithAttributes() {
+  public void test_extractClassWithAttributes() {
     try {
-      this.withInputModel("extractMetaClassWithAttributes", "PersonList.ecore");
+      this.withInputModel("extractClassWithAttributes", "PersonList.ecore");
       this.loadModelFile();
       EAttribute _eAttribute = this.refactorings.getEAttribute("PersonList", "Person", "street");
       EAttribute _eAttribute_1 = this.refactorings.getEAttribute("PersonList", "Person", "houseNumber");
-      this.refactorings.extractMetaClass("Address", 
+      this.refactorings.extractClass("Address", 
         Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(_eAttribute, _eAttribute_1)), 
         "address");
       this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
@@ -284,13 +284,13 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
-  public void test_extractMetaClassWithAttributesContainedInDifferentClasses() {
+  public void test_extractClassWithAttributesContainedInDifferentClasses() {
     try {
-      this.withInputModel("extractMetaClassWithAttributesContainedInDifferentClasses", "PersonList.ecore");
+      this.withInputModel("extractClassWithAttributesContainedInDifferentClasses", "PersonList.ecore");
       this.loadModelFile();
       EAttribute _eAttribute = this.refactorings.getEAttribute("PersonList", "Person", "street");
       EAttribute _eAttribute_1 = this.refactorings.getEAttribute("PersonList", "Person2", "street");
-      this.refactorings.extractMetaClass("Address", 
+      this.refactorings.extractClass("Address", 
         Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(_eAttribute, _eAttribute_1)), 
         "address");
       this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
@@ -307,8 +307,8 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
-  public void test_extractMetaClassWithAttributesEmpty() {
-    final EClass result = this.refactorings.extractMetaClass("Address", 
+  public void test_extractClassWithAttributesEmpty() {
+    final EClass result = this.refactorings.extractClass("Address", 
       Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList()), 
       "address");
     Assertions.<EClass>assertThat(result).isNull();

@@ -112,7 +112,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * extracted class
    * @return the extracted metaclass
    */
-  public EClass extractMetaClass(final String name, final Collection<EAttribute> attributes, final String newReferenceName) {
+  public EClass extractClass(final String name, final Collection<EAttribute> attributes, final String newReferenceName) {
     final Function1<EAttribute, EClass> _function = (EAttribute it) -> {
       return it.getEContainingClass();
     };

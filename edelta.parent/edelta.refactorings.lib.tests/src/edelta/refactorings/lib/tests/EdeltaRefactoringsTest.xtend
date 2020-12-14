@@ -207,11 +207,11 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	def void test_extractMetaClassWithAttributes() {
-		withInputModel("extractMetaClassWithAttributes", "PersonList.ecore")
+	def void test_extractClassWithAttributes() {
+		withInputModel("extractClassWithAttributes", "PersonList.ecore")
 		loadModelFile
 		refactorings
-			.extractMetaClass("Address",
+			.extractClass("Address",
 				#[
 					refactorings.getEAttribute("PersonList", "Person", "street"),
 					refactorings.getEAttribute("PersonList", "Person", "houseNumber")
@@ -223,11 +223,11 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	def void test_extractMetaClassWithAttributesContainedInDifferentClasses() {
-		withInputModel("extractMetaClassWithAttributesContainedInDifferentClasses", "PersonList.ecore")
+	def void test_extractClassWithAttributesContainedInDifferentClasses() {
+		withInputModel("extractClassWithAttributesContainedInDifferentClasses", "PersonList.ecore")
 		loadModelFile
 		refactorings
-			.extractMetaClass("Address",
+			.extractClass("Address",
 				#[
 					refactorings.getEAttribute("PersonList", "Person", "street"),
 					refactorings.getEAttribute("PersonList", "Person2", "street")
@@ -246,9 +246,9 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	def void test_extractMetaClassWithAttributesEmpty() {
+	def void test_extractClassWithAttributesEmpty() {
 		val result = refactorings
-			.extractMetaClass("Address",
+			.extractClass("Address",
 				#[
 				],
 				"address"
