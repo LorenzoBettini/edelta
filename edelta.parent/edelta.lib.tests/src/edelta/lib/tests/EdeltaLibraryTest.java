@@ -497,6 +497,10 @@ public class EdeltaLibraryTest {
 		assertThat(c2Ref.getEOpposite()).isNotNull();
 		assertThat(c1Ref.getEOpposite()).isSameAs(c2Ref);
 		assertThat(c2Ref.getEOpposite()).isSameAs(c1Ref);
+		assertThat(c1Ref.getEReferenceType()).isSameAs(c2);
+		assertThat(c2Ref.getEReferenceType()).isSameAs(c1);
+		assertThat(c1Ref.getEOpposite().getEReferenceType()).isSameAs(c1);
+		assertThat(c2Ref.getEOpposite().getEReferenceType()).isSameAs(c2);
 	}
 
 	@Test

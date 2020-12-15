@@ -328,14 +328,19 @@ public class EdeltaLibrary {
 	}
 
 	/**
-	 * Sets the EOpposite property of the two references.
+	 * Sets the EOpposite property of the two references and sets the EReferenceType
+	 * accordingly (that is, if <tt>C1.r1</tt> and <tt>C2.r2</tt> are made
+	 * bidirectional, then, <tt>C1.r1</tt> will have type <tt>C2</tt> and
+	 * <tt>C2.r2</tt> will have type <tt>C1</tt>.
 	 * 
 	 * @param ref1
 	 * @param ref2
 	 */
 	public static void makeBidirectional(EReference ref1, EReference ref2) {
 		ref1.setEOpposite(ref2);
+		ref1.setEType(ref2.getEContainingClass());
 		ref2.setEOpposite(ref1);
+		ref2.setEType(ref1.getEContainingClass());
 	}
 
 	/**
