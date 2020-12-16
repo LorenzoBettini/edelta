@@ -35,15 +35,11 @@ abstract class AbstractTest {
 	}
 
 	def protected createEEnum(EPackage epackage, String name) {
-		val e = createEEnumWithoutPackage(name)
-		epackage.EClassifiers += e
-		return e
-	}
-
-	protected def EEnum createEEnumWithoutPackage(String name) {
-		factory.createEEnum => [
+		val e = factory.createEEnum => [
 			it.name = name
 		]
+		epackage.EClassifiers += e
+		return e
 	}
 
 	def protected EEnumLiteral createEEnumLiteral(EEnum en, String name) {

@@ -52,13 +52,13 @@ def resolveClassificationByHierarchy(EPackage ePackage) {
 }
 
 def resolveConcreteAbstractMetaclass(EPackage ePackage) {
-	refactorings.concreteBaseMetaclassToAbstract(
+	refactorings.makeAbstract(
 		finder.findConcreteAbstractMetaclasses(ePackage)
 	)
 }
 
 def resolveAbstractConcreteMetaclass(EPackage ePackage) {
-	refactorings.abstractBaseMetaclassToConcrete(
+	refactorings.makeConcrete(
 		finder.findAbstractConcreteMetaclasses(ePackage)
 	)
 }

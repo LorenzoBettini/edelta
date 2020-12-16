@@ -51,18 +51,14 @@ public abstract class AbstractTest {
   }
   
   protected EEnum createEEnum(final EPackage epackage, final String name) {
-    final EEnum e = this.createEEnumWithoutPackage(name);
-    EList<EClassifier> _eClassifiers = epackage.getEClassifiers();
-    _eClassifiers.add(e);
-    return e;
-  }
-  
-  protected EEnum createEEnumWithoutPackage(final String name) {
     EEnum _createEEnum = this.factory.createEEnum();
     final Procedure1<EEnum> _function = (EEnum it) -> {
       it.setName(name);
     };
-    return ObjectExtensions.<EEnum>operator_doubleArrow(_createEEnum, _function);
+    final EEnum e = ObjectExtensions.<EEnum>operator_doubleArrow(_createEEnum, _function);
+    EList<EClassifier> _eClassifiers = epackage.getEClassifiers();
+    _eClassifiers.add(e);
+    return e;
   }
   
   protected EEnumLiteral createEEnumLiteral(final EEnum en, final String name) {

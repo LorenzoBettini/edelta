@@ -113,10 +113,10 @@ def findDuplicateFeaturesInCollection(Collection<EStructuralFeature> features, B
 }
 
 /**
- * If a class has more than one subclass, it finds duplicate features in all
- * of its subclasses.
+ * If a class has more than one direct subclass, it finds duplicate features in all
+ * of its direct subclasses.
  * 
- * Returns a map where the key is the class with more than one subclasses
+ * Returns a map where the key is the class with more than one direct subclass
  * with duplicate features; the value is another map as returned by
  * {@link #findDuplicateFeaturesInCollection(Collection, BiPredicate)}
  */
@@ -134,7 +134,8 @@ def findDuplicateFeaturesInSubclasses(EPackage ePackage) {
 					]
 				)
 			// only entries with a mapped list of size = num of subclasses are duplicates
-			val duplicates = candidates.filter[p1, p2| p2.size == numOfSubclasses]
+			val duplicates = candidates
+				.filter[key, values | values.size == numOfSubclasses]
 			if (!duplicates.empty) {
 				map.put(c, duplicates)
 				duplicates.entrySet.forEach[

@@ -73,12 +73,12 @@ public class EdeltaBadSmellsResolver extends AbstractEdelta {
   }
   
   public void resolveConcreteAbstractMetaclass(final EPackage ePackage) {
-    this.refactorings.concreteBaseMetaclassToAbstract(
+    this.refactorings.makeAbstract(
       this.finder.findConcreteAbstractMetaclasses(ePackage));
   }
   
   public void resolveAbstractConcreteMetaclass(final EPackage ePackage) {
-    this.refactorings.abstractBaseMetaclassToConcrete(
+    this.refactorings.makeConcrete(
       this.finder.findAbstractConcreteMetaclasses(ePackage));
   }
 }

@@ -151,10 +151,10 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
   }
   
   /**
-   * If a class has more than one subclass, it finds duplicate features in all
-   * of its subclasses.
+   * If a class has more than one direct subclass, it finds duplicate features in all
+   * of its direct subclasses.
    * 
-   * Returns a map where the key is the class with more than one subclasses
+   * Returns a map where the key is the class with more than one direct subclass
    * with duplicate features; the value is another map as returned by
    * {@link #findDuplicateFeaturesInCollection(Collection, BiPredicate)}
    */
@@ -174,8 +174,8 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
           };
           final Map<EStructuralFeature, List<EStructuralFeature>> candidates = this.findDuplicateFeaturesInCollection(
             IterableExtensions.<EStructuralFeature>toList(Iterables.<EStructuralFeature>concat(IterableExtensions.<EClass, EList<EStructuralFeature>>map(directSubclasses, _function))), _function_1);
-          final Function2<EStructuralFeature, List<EStructuralFeature>, Boolean> _function_2 = (EStructuralFeature p1, List<EStructuralFeature> p2) -> {
-            int _size = p2.size();
+          final Function2<EStructuralFeature, List<EStructuralFeature>, Boolean> _function_2 = (EStructuralFeature key, List<EStructuralFeature> values) -> {
+            int _size = values.size();
             return Boolean.valueOf((_size == numOfSubclasses));
           };
           final Map<EStructuralFeature, List<EStructuralFeature>> duplicates = MapExtensions.<EStructuralFeature, List<EStructuralFeature>>filter(candidates, _function_2);

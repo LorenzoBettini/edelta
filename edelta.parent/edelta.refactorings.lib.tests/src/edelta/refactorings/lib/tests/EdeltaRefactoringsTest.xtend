@@ -593,7 +593,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertSame(enum, attr.EType)
 	}
 
-	@Test def void test_concreteBaseMetaclassToAbstract() {
+	@Test def void test_makeAbstract() {
 		val p = factory.createEPackage => [
 			val base = createEClass("ConcreteAbstractMetaclass")
 			createEClass("Derived1") => [
@@ -602,11 +602,11 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		]
 		val c = p.EClasses.head
 		assertFalse(c.abstract)
-		refactorings.concreteBaseMetaclassToAbstract(#[c])
+		refactorings.makeAbstract(#[c])
 		assertTrue(c.abstract)
 	}
 
-	@Test def void test_abstractBaseMetaclassToConcrete() {
+	@Test def void test_makeConcrete() {
 		val p = factory.createEPackage => [
 			createEClass("AbstractConcreteMetaclass") => [
 				abstract = true
@@ -614,7 +614,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		]
 		val c = p.EClasses.head
 		assertTrue(c.abstract)
-		refactorings.abstractBaseMetaclassToConcrete(#[c])
+		refactorings.makeConcrete(#[c])
 		assertFalse(c.abstract)
 	}
 }

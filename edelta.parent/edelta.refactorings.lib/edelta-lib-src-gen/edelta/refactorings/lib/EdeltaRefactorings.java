@@ -382,21 +382,21 @@ public class EdeltaRefactorings extends AbstractEdelta {
   /**
    * Turns the given EClasses to abstract
    */
-  public void concreteBaseMetaclassToAbstract(final Iterable<EClass> concreteAbstractMetaclasses) {
+  public void makeAbstract(final Iterable<EClass> classes) {
     final Consumer<EClass> _function = (EClass it) -> {
       it.setAbstract(true);
     };
-    concreteAbstractMetaclasses.forEach(_function);
+    classes.forEach(_function);
   }
   
   /**
    * Turns the given EClasses to NON abstract
    */
-  public void abstractBaseMetaclassToConcrete(final Iterable<EClass> abstractConcreteMetaclasses) {
+  public void makeConcrete(final Iterable<EClass> classes) {
     final Consumer<EClass> _function = (EClass it) -> {
       it.setAbstract(false);
     };
-    abstractConcreteMetaclasses.forEach(_function);
+    classes.forEach(_function);
   }
   
   public String fromTypeToFeatureName(final EClassifier type) {

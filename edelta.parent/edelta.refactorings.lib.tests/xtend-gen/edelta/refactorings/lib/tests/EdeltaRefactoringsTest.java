@@ -775,7 +775,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
-  public void test_concreteBaseMetaclassToAbstract() {
+  public void test_makeAbstract() {
     EPackage _createEPackage = this.factory.createEPackage();
     final Procedure1<EPackage> _function = (EPackage it) -> {
       final EClass base = this.createEClass(it, "ConcreteAbstractMetaclass");
@@ -789,12 +789,12 @@ public class EdeltaRefactoringsTest extends AbstractTest {
     final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
     final EClass c = IterableExtensions.<EClass>head(this.EClasses(p));
     Assert.assertFalse(c.isAbstract());
-    this.refactorings.concreteBaseMetaclassToAbstract(Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(c)));
+    this.refactorings.makeAbstract(Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(c)));
     Assert.assertTrue(c.isAbstract());
   }
   
   @Test
-  public void test_abstractBaseMetaclassToConcrete() {
+  public void test_makeConcrete() {
     EPackage _createEPackage = this.factory.createEPackage();
     final Procedure1<EPackage> _function = (EPackage it) -> {
       EClass _createEClass = this.createEClass(it, "AbstractConcreteMetaclass");
@@ -806,7 +806,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
     final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
     final EClass c = IterableExtensions.<EClass>head(this.EClasses(p));
     Assert.assertTrue(c.isAbstract());
-    this.refactorings.abstractBaseMetaclassToConcrete(Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(c)));
+    this.refactorings.makeConcrete(Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(c)));
     Assert.assertFalse(c.isAbstract());
   }
 }
