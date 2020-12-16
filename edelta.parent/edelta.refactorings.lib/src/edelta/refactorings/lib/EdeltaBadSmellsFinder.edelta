@@ -290,7 +290,7 @@ def findConcreteAbstractMetaclasses(EPackage ePackage) {
 	classes.forEach[
 		logInfo["Concrete abstract class: " + getEObjectRepr(it)]
 	]
-	return classes;	
+	return classes;
 }
 
 def hasSubclasses(EClass cl) {
@@ -321,7 +321,7 @@ def findAbstractConcreteMetaclasses(EPackage ePackage) {
 	classes.forEach[
 		logInfo["Abstract concrete class: " + getEObjectRepr(it)]
 	]
-	return classes;	
+	return classes;
 }
 
 /**
@@ -338,6 +338,6 @@ def findAbstractSubclassesOfConcreteSuperclasses(EPackage ePackage) {
 	classes.forEach[
 		logInfo["Abstract class with concrete superclasses: " + getEObjectRepr(it)]
 	]
-	return classes;	
+	return classes;
 }
 
