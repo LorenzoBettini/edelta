@@ -720,6 +720,65 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
+  public void test_pullUpFeaturesDifferent() {
+    try {
+      this.withInputModel("pullUpFeaturesDifferent", "PersonList.ecore");
+      this.loadModelFile();
+      final EClass person = this.refactorings.getEClass("PersonList", "Person");
+      final EClass student = this.refactorings.getEClass("PersonList", "Student");
+      final EClass employee = this.refactorings.getEClass("PersonList", "Employee");
+      EStructuralFeature _eStructuralFeature = student.getEStructuralFeature("name");
+      EStructuralFeature _eStructuralFeature_1 = employee.getEStructuralFeature("name");
+      this.refactorings.pullUpFeatures(person, 
+        Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eStructuralFeature, _eStructuralFeature_1)));
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFileIsSameAsOriginal();
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("ERROR: PersonList.Employee.name: The two features are not equal:");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("PersonList.Student.name");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("PersonList.Employee.name");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("different for ecore.ETypedElement.lowerBound");
+      _builder.newLine();
+      Assertions.assertThat(this.appender.getResult()).isEqualTo(
+        _builder.toString());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
+  public void test_pullUpFeaturesNotSubclass() {
+    try {
+      this.withInputModel("pullUpFeaturesNotSubclass", "PersonList.ecore");
+      this.loadModelFile();
+      final EClass person = this.refactorings.getEClass("PersonList", "Person");
+      final EClass student = this.refactorings.getEClass("PersonList", "Student");
+      final EClass employee = this.refactorings.getEClass("PersonList", "Employee");
+      EStructuralFeature _eStructuralFeature = student.getEStructuralFeature("name");
+      EStructuralFeature _eStructuralFeature_1 = employee.getEStructuralFeature("name");
+      this.refactorings.pullUpFeatures(person, 
+        Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eStructuralFeature, _eStructuralFeature_1)));
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFileIsSameAsOriginal();
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("ERROR: PersonList.Student.name: Not a direct subclass of destination: PersonList.Student");
+      _builder.newLine();
+      _builder.append("ERROR: PersonList.Employee.name: Not a direct subclass of destination: PersonList.Employee");
+      _builder.newLine();
+      Assertions.assertThat(this.appender.getResult()).isEqualTo(
+        _builder.toString());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
   public void test_redundantContainerToEOpposite() {
     EPackage _createEPackage = this.factory.createEPackage();
     final Procedure1<EPackage> _function = (EPackage it) -> {

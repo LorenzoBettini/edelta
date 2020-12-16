@@ -11,6 +11,7 @@ import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.xbase.lib.Pair
+import edelta.refactorings.lib.helper.EstructuralFeatureEqualityHelper
 
 package edelta.refactorings.lib
 
@@ -225,8 +226,31 @@ def extractSuperclass(List<? extends EStructuralFeature> duplicates){
  * @param dest
  * @param duplicates
  */
-def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates){
-	val feature = duplicates.head;
+def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates) {
+	val feature = duplicates.head
+	val equality = new EstructuralFeatureEqualityHelper
+	val different = duplicates
+		.findFirst[feature !== it && !equality.equals(feature, it)]
+	if (different !== null) {
+		showError(different,
+			"The two features are not equal:\n" +
+			"  " + getEObjectRepr(feature) + "\n" +
+			"  " + getEObjectRepr(different) + "\n" +
+			"  different for " + getEObjectRepr(equality.difference)
+		)
+		return
+	}
+	val wrongFeatures = duplicates
+		.filter[!EContainingClass.ESuperTypes.contains(dest)]
+	if (!wrongFeatures.empty) {
+		wrongFeatures.forEach[
+			showError(it,
+				"Not a direct subclass of destination: " +
+					getEObjectRepr(EContainingClass)
+			)
+		]
+		return
+	}
 	dest.addEStructuralFeature(EcoreUtil.copy(feature))
 	duplicates.forEach[removeElement]
 }

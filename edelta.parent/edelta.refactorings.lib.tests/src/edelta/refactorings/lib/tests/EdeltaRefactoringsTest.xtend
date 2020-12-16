@@ -555,6 +555,48 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertModifiedFile
 	}
 
+	@Test
+	def void test_pullUpFeaturesDifferent() {
+		withInputModel("pullUpFeaturesDifferent", "PersonList.ecore")
+		loadModelFile
+		val person = refactorings.getEClass("PersonList", "Person")
+		val student = refactorings.getEClass("PersonList", "Student")
+		val employee = refactorings.getEClass("PersonList", "Employee")
+		refactorings.pullUpFeatures(person,
+			#[student.getEStructuralFeature("name"),employee.getEStructuralFeature("name")]
+		)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFileIsSameAsOriginal
+		assertThat(appender.result)
+			.isEqualTo(
+			'''
+			ERROR: PersonList.Employee.name: The two features are not equal:
+			  PersonList.Student.name
+			  PersonList.Employee.name
+			  different for ecore.ETypedElement.lowerBound
+			'''.toString)
+	}
+
+	@Test
+	def void test_pullUpFeaturesNotSubclass() {
+		withInputModel("pullUpFeaturesNotSubclass", "PersonList.ecore")
+		loadModelFile
+		val person = refactorings.getEClass("PersonList", "Person")
+		val student = refactorings.getEClass("PersonList", "Student")
+		val employee = refactorings.getEClass("PersonList", "Employee")
+		refactorings.pullUpFeatures(person,
+			#[student.getEStructuralFeature("name"),employee.getEStructuralFeature("name")]
+		)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFileIsSameAsOriginal
+		assertThat(appender.result)
+			.isEqualTo(
+			'''
+			ERROR: PersonList.Student.name: Not a direct subclass of destination: PersonList.Student
+			ERROR: PersonList.Employee.name: Not a direct subclass of destination: PersonList.Employee
+			'''.toString)
+	}
+
 	@Test def void test_redundantContainerToEOpposite() {
 		val p = factory.createEPackage => [
 			val containedWithRedundant = createEClass("ContainedWithRedundant")
