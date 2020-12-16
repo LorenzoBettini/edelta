@@ -301,6 +301,24 @@ public class EdeltaRefactorings extends AbstractEdelta {
   }
   
   /**
+   * Given a non empty list of {@link EStructuralFeature}, which are known to
+   * appear in several subclasses as duplicates, pulls them up in
+   * the given common superclass
+   * (and removes the duplicate feature from each subclass).
+   * 
+   * @param dest
+   * @param duplicates
+   */
+  public void pullUpFeatures(final EClass dest, final List<? extends EStructuralFeature> duplicates) {
+    final EStructuralFeature feature = IterableExtensions.head(duplicates);
+    EdeltaLibrary.addEStructuralFeature(dest, EcoreUtil.<EStructuralFeature>copy(feature));
+    final Consumer<EStructuralFeature> _function = (EStructuralFeature it) -> {
+      EdeltaLibrary.removeElement(it);
+    };
+    duplicates.forEach(_function);
+  }
+  
+  /**
    * Ensures that the proposed classifier name is unique within the specified
    * package; if not, it appends an incremental index until the name
    * is actually unique

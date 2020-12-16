@@ -217,6 +217,21 @@ def extractSuperclass(List<? extends EStructuralFeature> duplicates){
 }
 
 /**
+ * Given a non empty list of {@link EStructuralFeature}, which are known to
+ * appear in several subclasses as duplicates, pulls them up in
+ * the given common superclass
+ * (and removes the duplicate feature from each subclass).
+ * 
+ * @param dest
+ * @param duplicates
+ */
+def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates){
+	val feature = duplicates.head;
+	dest.addEStructuralFeature(EcoreUtil.copy(feature))
+	duplicates.forEach[removeElement]
+}
+
+/**
  * Ensures that the proposed classifier name is unique within the specified
  * package; if not, it appends an incremental index until the name
  * is actually unique

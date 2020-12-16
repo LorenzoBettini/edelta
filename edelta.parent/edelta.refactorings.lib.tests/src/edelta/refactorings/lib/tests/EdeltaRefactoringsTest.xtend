@@ -541,6 +541,20 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertThat(extractedA1WithLowerBound.lowerBound).isEqualTo(2)
 	}
 
+	@Test
+	def void test_pullUpFeatures() {
+		withInputModel("pullUpFeatures", "PersonList.ecore")
+		loadModelFile
+		val person = refactorings.getEClass("PersonList", "Person")
+		val student = refactorings.getEClass("PersonList", "Student")
+		val employee = refactorings.getEClass("PersonList", "Employee")
+		refactorings.pullUpFeatures(person,
+			#[student.getEStructuralFeature("name"),employee.getEStructuralFeature("name")]
+		)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFile
+	}
+
 	@Test def void test_redundantContainerToEOpposite() {
 		val p = factory.createEPackage => [
 			val containedWithRedundant = createEClass("ContainedWithRedundant")

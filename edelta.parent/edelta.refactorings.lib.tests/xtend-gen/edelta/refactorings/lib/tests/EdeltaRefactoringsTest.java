@@ -701,6 +701,25 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
+  public void test_pullUpFeatures() {
+    try {
+      this.withInputModel("pullUpFeatures", "PersonList.ecore");
+      this.loadModelFile();
+      final EClass person = this.refactorings.getEClass("PersonList", "Person");
+      final EClass student = this.refactorings.getEClass("PersonList", "Student");
+      final EClass employee = this.refactorings.getEClass("PersonList", "Employee");
+      EStructuralFeature _eStructuralFeature = student.getEStructuralFeature("name");
+      EStructuralFeature _eStructuralFeature_1 = employee.getEStructuralFeature("name");
+      this.refactorings.pullUpFeatures(person, 
+        Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eStructuralFeature, _eStructuralFeature_1)));
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
   public void test_redundantContainerToEOpposite() {
     EPackage _createEPackage = this.factory.createEPackage();
     final Procedure1<EPackage> _function = (EPackage it) -> {
