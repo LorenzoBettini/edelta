@@ -329,6 +329,20 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
+  public void test_referenceToClassWithCardinality() {
+    try {
+      this.withInputModel("referenceToClassWithCardinality", "PersonList.ecore");
+      this.loadModelFile();
+      final EReference ref = this.refactorings.getEReference("PersonList", "Person", "works");
+      this.refactorings.referenceToClass("WorkingPosition", ref);
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
   public void test_referenceToClassUnidirectional() {
     try {
       this.withInputModel("referenceToClassUnidirectional", "PersonList.ecore");
@@ -485,6 +499,20 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   public void test_classToReferenceBidirectional() {
     try {
       this.withInputModel("classToReferenceBidirectional", "PersonList.ecore");
+      this.loadModelFile();
+      final EClass cl = this.refactorings.getEClass("PersonList", "WorkingPosition");
+      this.refactorings.classToReference(cl);
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
+  public void test_classToReferenceWithCardinality() {
+    try {
+      this.withInputModel("classToReferenceWithCardinality", "PersonList.ecore");
       this.loadModelFile();
       final EClass cl = this.refactorings.getEClass("PersonList", "WorkingPosition");
       this.refactorings.classToReference(cl);

@@ -267,6 +267,16 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
+	def void test_referenceToClassWithCardinality() {
+		withInputModel("referenceToClassWithCardinality", "PersonList.ecore")
+		loadModelFile
+		val ref = refactorings.getEReference("PersonList", "Person", "works")
+		refactorings.referenceToClass("WorkingPosition", ref)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFile
+	}
+
+	@Test
 	def void test_referenceToClassUnidirectional() {
 		withInputModel("referenceToClassUnidirectional", "PersonList.ecore")
 		loadModelFile
@@ -384,6 +394,16 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	def void test_classToReferenceBidirectional() {
 		withInputModel("classToReferenceBidirectional", "PersonList.ecore")
+		loadModelFile
+		val cl = refactorings.getEClass("PersonList", "WorkingPosition")
+		refactorings.classToReference(cl)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFile
+	}
+
+	@Test
+	def void test_classToReferenceWithCardinality() {
+		withInputModel("classToReferenceWithCardinality", "PersonList.ecore")
 		loadModelFile
 		val cl = refactorings.getEClass("PersonList", "WorkingPosition")
 		refactorings.classToReference(cl)
