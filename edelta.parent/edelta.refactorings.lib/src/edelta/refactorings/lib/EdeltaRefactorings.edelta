@@ -93,6 +93,7 @@ def extractClass(String name, Collection<EStructuralFeature> features,
 	val owner = owners.head
 	val extracted = owner.EPackage.addNewEClass(name)
 	owner.addNewEReference(newReferenceName, extracted) [
+		makeSingleRequired
 		makeContainmentBidirectional
 	]
 	features.forEach[moveTo(extracted)]
@@ -107,7 +108,6 @@ def extractClass(String name, Collection<EStructuralFeature> features,
  */
 def makeContainmentBidirectional(EReference reference) {
 	reference.containment = true
-	reference.makeSingleRequired
 	val owner = reference.EContainingClass
 	val referredType = reference.EReferenceType
 	referredType.addNewEReference(owner.fromTypeToFeatureName, owner) [
@@ -126,7 +126,6 @@ def referenceToClass(String name, EReference reference) {
 			"Cannot apply referenceToClass on containment reference")) {
 		return null
 	}
-	val owner = reference.EContainingClass
 	val ePackage = reference.EContainingClass.EPackage
 	val extracted = ePackage.addNewEClass(name)
 	val extractedRef = extracted.addNewEReference(
@@ -138,12 +137,8 @@ def referenceToClass(String name, EReference reference) {
 		eOpposite.EType = extracted
 		eOpposite.makeBidirectional(extractedRef)
 	}
-	extracted.addNewEReference(owner.fromTypeToFeatureName, owner) [
-		makeSingleRequired
-		makeBidirectional(reference)
-	]
 	reference.EType = extracted
-	reference.containment = true
+	reference.makeContainmentBidirectional
 	return extracted
 }
 

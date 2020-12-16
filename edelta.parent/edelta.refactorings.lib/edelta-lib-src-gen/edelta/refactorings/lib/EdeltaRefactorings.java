@@ -135,6 +135,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final EClass owner = IterableExtensions.<EClass>head(owners);
     final EClass extracted = EdeltaLibrary.addNewEClass(owner.getEPackage(), name);
     final Consumer<EReference> _function_2 = (EReference it) -> {
+      EdeltaLibrary.makeSingleRequired(it);
       this.makeContainmentBidirectional(it);
     };
     EdeltaLibrary.addNewEReference(owner, newReferenceName, extracted, _function_2);
@@ -155,7 +156,6 @@ public class EdeltaRefactorings extends AbstractEdelta {
     EReference _xblockexpression = null;
     {
       reference.setContainment(true);
-      EdeltaLibrary.makeSingleRequired(reference);
       final EClass owner = reference.getEContainingClass();
       final EClass referredType = reference.getEReferenceType();
       final Consumer<EReference> _function = (EReference it) -> {
@@ -179,7 +179,6 @@ public class EdeltaRefactorings extends AbstractEdelta {
     if (_not) {
       return null;
     }
-    final EClass owner = reference.getEContainingClass();
     final EPackage ePackage = reference.getEContainingClass().getEPackage();
     final EClass extracted = EdeltaLibrary.addNewEClass(ePackage, name);
     final Consumer<EReference> _function = (EReference it) -> {
@@ -192,13 +191,8 @@ public class EdeltaRefactorings extends AbstractEdelta {
       eOpposite.setEType(extracted);
       EdeltaLibrary.makeBidirectional(eOpposite, extractedRef);
     }
-    final Consumer<EReference> _function_1 = (EReference it) -> {
-      EdeltaLibrary.makeSingleRequired(it);
-      EdeltaLibrary.makeBidirectional(it, reference);
-    };
-    EdeltaLibrary.addNewEReference(extracted, this.fromTypeToFeatureName(owner), owner, _function_1);
     reference.setEType(extracted);
-    reference.setContainment(true);
+    this.makeContainmentBidirectional(reference);
     return extracted;
   }
   
