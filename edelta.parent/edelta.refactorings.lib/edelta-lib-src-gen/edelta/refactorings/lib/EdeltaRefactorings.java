@@ -279,26 +279,28 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * 
    * @param duplicates
    */
-  public void extractSuperclass(final List<? extends EStructuralFeature> duplicates) {
-    final EStructuralFeature feature = IterableExtensions.head(duplicates);
-    final EPackage containingEPackage = feature.getEContainingClass().getEPackage();
-    String _firstUpper = StringExtensions.toFirstUpper(feature.getName());
-    String _plus = (_firstUpper + "Element");
-    final String superClassName = this.ensureEClassifierNameIsUnique(containingEPackage, _plus);
-    final Consumer<EClass> _function = (EClass it) -> {
-      it.setAbstract(true);
-      EdeltaLibrary.addEStructuralFeature(it, EcoreUtil.<EStructuralFeature>copy(feature));
-    };
-    final EClass superclass = EdeltaLibrary.addNewEClass(containingEPackage, superClassName, _function);
-    for (final EStructuralFeature duplicate : duplicates) {
-      EClass _eContainingClass = duplicate.getEContainingClass();
-      final Procedure1<EClass> _function_1 = (EClass it) -> {
-        EdeltaLibrary.addESuperType(it, superclass);
-        EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
-        _eStructuralFeatures.remove(duplicate);
+  public EClass extractSuperclass(final List<? extends EStructuralFeature> duplicates) {
+    EClass _xblockexpression = null;
+    {
+      final EStructuralFeature feature = IterableExtensions.head(duplicates);
+      final EPackage containingEPackage = feature.getEContainingClass().getEPackage();
+      String _firstUpper = StringExtensions.toFirstUpper(feature.getName());
+      String _plus = (_firstUpper + "Element");
+      final String superClassName = this.ensureEClassifierNameIsUnique(containingEPackage, _plus);
+      final Consumer<EClass> _function = (EClass it) -> {
+        it.setAbstract(true);
+        final Function1<EStructuralFeature, EClass> _function_1 = (EStructuralFeature it_1) -> {
+          return it_1.getEContainingClass();
+        };
+        final Consumer<EClass> _function_2 = (EClass c) -> {
+          EdeltaLibrary.addESuperType(c, it);
+        };
+        ListExtensions.map(duplicates, _function_1).forEach(_function_2);
+        this.pullUpFeatures(it, duplicates);
       };
-      ObjectExtensions.<EClass>operator_doubleArrow(_eContainingClass, _function_1);
+      _xblockexpression = EdeltaLibrary.addNewEClass(containingEPackage, superClassName, _function);
     }
+    return _xblockexpression;
   }
   
   /**

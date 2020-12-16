@@ -195,26 +195,20 @@ def classToReference(EClass cl) {
  * 
  * @param duplicates
  */
-def extractSuperclass(List<? extends EStructuralFeature> duplicates){
+def extractSuperclass(List<? extends EStructuralFeature> duplicates) {
 	val feature = duplicates.head;
 	val containingEPackage = feature.EContainingClass.EPackage
 	val superClassName =
 		ensureEClassifierNameIsUnique(containingEPackage,
 			feature.name.toFirstUpper + "Element")
 
-	val superclass = containingEPackage.addNewEClass(superClassName) [
+	containingEPackage.addNewEClass(superClassName) [
 		abstract = true;
-		addEStructuralFeature(EcoreUtil.copy(feature))
+		duplicates
+			.map[EContainingClass]
+			.forEach[c | c.addESuperType(it)]
+		pullUpFeatures(duplicates)
 	]
-
-	for (duplicate : duplicates) {
-		duplicate.EContainingClass => [
-			// set supertype of the EClass of the feature
-			addESuperType(superclass)
-			// and then remove the feature from the original EClass
-			EStructuralFeatures -= duplicate
-		]
-	}
 }
 
 /**
