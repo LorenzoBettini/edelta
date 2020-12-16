@@ -315,7 +315,7 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 		assertIterable(result, #[p.EClasses.head])
 	}
 
-	@Test def void test_findAbstractSubclassesOfConcreteSuperclass() {
+	@Test def void test_findAbstractSubclassesOfConcreteSuperclasses() {
 		val p = factory.createEPackage => [
 			val abstractSuperclass = createEClass("AbstractSuperclass") => [
 				abstract = true
@@ -331,8 +331,9 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 				ESuperTypes += #[concreteSuperclass1, concreteSuperclass2]
 			]
 		]
-		var result = finder.findAbstractSubclassesOfConcreteSuperclass(p)
-		assertIterable(result, #[p.EClasses.last])
+		var result = finder.findAbstractSubclassesOfConcreteSuperclasses(p)
+		assertThat(result)
+			.containsOnly(p.EClasses.last)
 	}
 
 	@Test def void test_directSubclasses() {

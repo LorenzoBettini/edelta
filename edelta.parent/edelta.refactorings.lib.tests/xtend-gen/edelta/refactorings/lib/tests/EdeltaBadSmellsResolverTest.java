@@ -1,9 +1,11 @@
 package edelta.refactorings.lib.tests;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Iterables;
 import edelta.lib.AbstractEdelta;
 import edelta.refactorings.lib.EdeltaBadSmellsResolver;
 import edelta.refactorings.lib.tests.AbstractTest;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -17,6 +19,7 @@ import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
@@ -267,5 +270,37 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
     Assert.assertTrue(c.isAbstract());
     this.resolver.resolveAbstractConcreteMetaclass(p);
     Assert.assertFalse(c.isAbstract());
+  }
+  
+  @Test
+  public void test_resolveAbstractSubclassesOfConcreteSuperclasses() {
+    EPackage _createEPackage = this.factory.createEPackage();
+    final Procedure1<EPackage> _function = (EPackage it) -> {
+      EClass _createEClass = this.createEClass(it, "AbstractSuperclass");
+      final Procedure1<EClass> _function_1 = (EClass it_1) -> {
+        it_1.setAbstract(true);
+      };
+      final EClass abstractSuperclass = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
+      final EClass concreteSuperclass1 = this.createEClass(it, "ConcreteSuperclass1");
+      final EClass concreteSuperclass2 = this.createEClass(it, "ConcreteSuperclass2");
+      EClass _createEClass_1 = this.createEClass(it, "WithoutSmell");
+      final Procedure1<EClass> _function_2 = (EClass it_1) -> {
+        it_1.setAbstract(true);
+        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
+        Iterables.<EClass>addAll(_eSuperTypes, Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(concreteSuperclass1, abstractSuperclass)));
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_2);
+      EClass _createEClass_2 = this.createEClass(it, "WithSmell");
+      final Procedure1<EClass> _function_3 = (EClass it_1) -> {
+        it_1.setAbstract(true);
+        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
+        Iterables.<EClass>addAll(_eSuperTypes, Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(concreteSuperclass1, concreteSuperclass2)));
+      };
+      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_2, _function_3);
+    };
+    final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
+    Assertions.assertThat(IterableExtensions.<EClass>last(this.EClasses(p)).isAbstract()).isTrue();
+    this.resolver.resolveAbstractSubclassesOfConcreteSuperclasses(p);
+    Assertions.assertThat(IterableExtensions.<EClass>last(this.EClasses(p)).isAbstract()).isFalse();
   }
 }

@@ -63,3 +63,9 @@ def resolveAbstractConcreteMetaclass(EPackage ePackage) {
 	)
 }
 
+def resolveAbstractSubclassesOfConcreteSuperclasses(EPackage ePackage) {
+	refactorings.makeConcrete(
+		finder.findAbstractSubclassesOfConcreteSuperclasses(ePackage)
+	)
+}
+

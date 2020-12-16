@@ -325,9 +325,9 @@ def findAbstractConcreteMetaclasses(EPackage ePackage) {
 }
 
 /**
- * Finds classes that are abstract though they have concrete superclasses.
+ * Finds classes that are abstract though they have only concrete superclasses.
  */
-def findAbstractSubclassesOfConcreteSuperclass(EPackage ePackage) {
+def findAbstractSubclassesOfConcreteSuperclasses(EPackage ePackage) {
 	val classes= ePackage.allEClasses
 		.filter[
 			cl |

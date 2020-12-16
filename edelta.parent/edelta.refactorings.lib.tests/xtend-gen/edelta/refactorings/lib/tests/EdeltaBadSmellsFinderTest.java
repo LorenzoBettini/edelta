@@ -488,7 +488,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
   }
   
   @Test
-  public void test_findAbstractSubclassesOfConcreteSuperclass() {
+  public void test_findAbstractSubclassesOfConcreteSuperclasses() {
     EPackage _createEPackage = this.factory.createEPackage();
     final Procedure1<EPackage> _function = (EPackage it) -> {
       EClass _createEClass = this.createEClass(it, "AbstractSuperclass");
@@ -514,9 +514,8 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
       ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_2, _function_3);
     };
     final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-    Iterable<EClass> result = this.finder.findAbstractSubclassesOfConcreteSuperclass(p);
-    EClass _last = IterableExtensions.<EClass>last(this.EClasses(p));
-    this.<EClass>assertIterable(result, Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(_last)));
+    Iterable<EClass> result = this.finder.findAbstractSubclassesOfConcreteSuperclasses(p);
+    Assertions.<EClass>assertThat(result).containsOnly(IterableExtensions.<EClass>last(this.EClasses(p)));
   }
   
   @Test

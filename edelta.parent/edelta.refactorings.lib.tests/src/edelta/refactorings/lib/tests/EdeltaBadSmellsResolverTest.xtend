@@ -174,4 +174,26 @@ class EdeltaBadSmellsResolverTest extends AbstractTest {
 		resolver.resolveAbstractConcreteMetaclass(p)
 		assertFalse(c.abstract)
 	}
+
+	@Test def void test_resolveAbstractSubclassesOfConcreteSuperclasses() {
+		val p = factory.createEPackage => [
+			val abstractSuperclass = createEClass("AbstractSuperclass") => [
+				abstract = true
+			]
+			val concreteSuperclass1 = createEClass("ConcreteSuperclass1")
+			val concreteSuperclass2 = createEClass("ConcreteSuperclass2")
+			createEClass("WithoutSmell") => [
+				abstract = true
+				ESuperTypes += #[concreteSuperclass1, abstractSuperclass]
+			]
+			createEClass("WithSmell") => [
+				abstract = true
+				ESuperTypes += #[concreteSuperclass1, concreteSuperclass2]
+			]
+		]
+		assertThat(p.EClasses.last.isAbstract).isTrue
+		resolver.resolveAbstractSubclassesOfConcreteSuperclasses(p)
+		assertThat(p.EClasses.last.isAbstract).isFalse
+	}
+
 }

@@ -425,9 +425,9 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
   }
   
   /**
-   * Finds classes that are abstract though they have concrete superclasses.
+   * Finds classes that are abstract though they have only concrete superclasses.
    */
-  public Iterable<EClass> findAbstractSubclassesOfConcreteSuperclass(final EPackage ePackage) {
+  public Iterable<EClass> findAbstractSubclassesOfConcreteSuperclasses(final EPackage ePackage) {
     final Function1<EClass, Boolean> _function = (EClass cl) -> {
       return Boolean.valueOf(((cl.isAbstract() && 
         (!cl.getESuperTypes().isEmpty())) && 
