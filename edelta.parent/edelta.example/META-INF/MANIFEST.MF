@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Edelta Example Project
 Bundle-SymbolicName: edelta.example
-Bundle-Version: 2.3.1.qualifier
+Bundle-Version: 2.3.2.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: edelta.model.example;bundle-version="0.1.0",
  edelta.lib,
