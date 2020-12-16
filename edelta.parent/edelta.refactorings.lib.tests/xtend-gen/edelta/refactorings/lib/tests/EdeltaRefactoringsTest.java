@@ -274,7 +274,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       EAttribute _eAttribute = this.refactorings.getEAttribute("PersonList", "Person", "street");
       EAttribute _eAttribute_1 = this.refactorings.getEAttribute("PersonList", "Person", "houseNumber");
       this.refactorings.extractClass("Address", 
-        Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(_eAttribute, _eAttribute_1)), 
+        Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eAttribute, _eAttribute_1)), 
         "address");
       this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
       this.assertModifiedFile();
@@ -291,14 +291,14 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       EAttribute _eAttribute = this.refactorings.getEAttribute("PersonList", "Person", "street");
       EAttribute _eAttribute_1 = this.refactorings.getEAttribute("PersonList", "Person2", "street");
       this.refactorings.extractClass("Address", 
-        Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(_eAttribute, _eAttribute_1)), 
+        Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eAttribute, _eAttribute_1)), 
         "address");
       this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
       this.assertModifiedFileIsSameAsOriginal();
       StringConcatenation _builder = new StringConcatenation();
-      _builder.append("ERROR: PersonList.Person: Extracted attributes must belong to the same class: PersonList.Person");
+      _builder.append("ERROR: PersonList.Person: Extracted features must belong to the same class: PersonList.Person");
       _builder.newLine();
-      _builder.append("ERROR: PersonList.Person2: Extracted attributes must belong to the same class: PersonList.Person2");
+      _builder.append("ERROR: PersonList.Person2: Extracted features must belong to the same class: PersonList.Person2");
       Assertions.assertThat(this.appender.getResult().trim()).isEqualTo(
         _builder.toString());
     } catch (Throwable _e) {
@@ -309,7 +309,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   @Test
   public void test_extractClassWithAttributesEmpty() {
     final EClass result = this.refactorings.extractClass("Address", 
-      Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList()), 
+      Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList()), 
       "address");
     Assertions.<EClass>assertThat(result).isNull();
   }

@@ -71,20 +71,20 @@ def extractIntoSuperclass(EClass superclass, List<EAttribute> attrs){
 
 /**
  * @param name the name for the extracted class
- * @param attributes the attributes to extract
+ * @param features the features to extract
  * @param newReferenceName the new name for the reference from the owner class to the
  * extracted class
  * @return the extracted metaclass
  */
-def extractClass(String name, Collection<EAttribute> attributes,
+def extractClass(String name, Collection<EStructuralFeature> features,
 			String newReferenceName) {
-	val owners = attributes.map[EContainingClass].toSet
+	val owners = features.map[EContainingClass].toSet
 	if (owners.empty)
-		return null
+		return null // TODO: error?
 	if (owners.size > 1) {
 		owners.forEach[owner|
 			showError(owner,
-				"Extracted attributes must belong to the same class: " +
+				"Extracted features must belong to the same class: " +
 				getEObjectRepr(owner)
 			)
 		]
@@ -93,10 +93,27 @@ def extractClass(String name, Collection<EAttribute> attributes,
 	val owner = owners.head
 	val extracted = owner.EPackage.addNewEClass(name)
 	owner.addNewEReference(newReferenceName, extracted) [
-		containment = true
+		makeContainmentBidirectional
 	]
-	attributes.forEach[moveTo(extracted)]
+	features.forEach[moveTo(extracted)]
 	return extracted
+}
+
+/**
+ * Makes the EReference, which is assumed to be already part of an EClass,
+ * a single required containment reference, adds to the referred
+ * type, which is assumed to be set, an opposite required single reference.
+ * @param reference
+ */
+def makeContainmentBidirectional(EReference reference) {
+	reference.containment = true
+	reference.makeSingleRequired
+	val owner = reference.EContainingClass
+	val referredType = reference.EReferenceType
+	referredType.addNewEReference(owner.fromTypeToFeatureName, owner) [
+		makeBidirectional(reference)
+		makeSingleRequired
+	]
 }
 
 /**

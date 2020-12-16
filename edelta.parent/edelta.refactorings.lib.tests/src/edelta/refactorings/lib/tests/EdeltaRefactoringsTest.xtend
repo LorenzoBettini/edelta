@@ -239,8 +239,8 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertThat(appender.result.trim)
 			.isEqualTo(
 				'''
-				ERROR: PersonList.Person: Extracted attributes must belong to the same class: PersonList.Person
-				ERROR: PersonList.Person2: Extracted attributes must belong to the same class: PersonList.Person2'''
+				ERROR: PersonList.Person: Extracted features must belong to the same class: PersonList.Person
+				ERROR: PersonList.Person2: Extracted features must belong to the same class: PersonList.Person2'''
 				.toString
 			)
 	}

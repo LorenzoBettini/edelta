@@ -107,16 +107,16 @@ public class EdeltaRefactorings extends AbstractEdelta {
   
   /**
    * @param name the name for the extracted class
-   * @param attributes the attributes to extract
+   * @param features the features to extract
    * @param newReferenceName the new name for the reference from the owner class to the
    * extracted class
    * @return the extracted metaclass
    */
-  public EClass extractClass(final String name, final Collection<EAttribute> attributes, final String newReferenceName) {
-    final Function1<EAttribute, EClass> _function = (EAttribute it) -> {
+  public EClass extractClass(final String name, final Collection<EStructuralFeature> features, final String newReferenceName) {
+    final Function1<EStructuralFeature, EClass> _function = (EStructuralFeature it) -> {
       return it.getEContainingClass();
     };
-    final Set<EClass> owners = IterableExtensions.<EClass>toSet(IterableExtensions.<EAttribute, EClass>map(attributes, _function));
+    final Set<EClass> owners = IterableExtensions.<EClass>toSet(IterableExtensions.<EStructuralFeature, EClass>map(features, _function));
     boolean _isEmpty = owners.isEmpty();
     if (_isEmpty) {
       return null;
@@ -126,7 +126,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     if (_greaterThan) {
       final Consumer<EClass> _function_1 = (EClass owner) -> {
         String _eObjectRepr = EdeltaLibrary.getEObjectRepr(owner);
-        String _plus = ("Extracted attributes must belong to the same class: " + _eObjectRepr);
+        String _plus = ("Extracted features must belong to the same class: " + _eObjectRepr);
         this.showError(owner, _plus);
       };
       owners.forEach(_function_1);
@@ -135,14 +135,36 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final EClass owner = IterableExtensions.<EClass>head(owners);
     final EClass extracted = EdeltaLibrary.addNewEClass(owner.getEPackage(), name);
     final Consumer<EReference> _function_2 = (EReference it) -> {
-      it.setContainment(true);
+      this.makeContainmentBidirectional(it);
     };
     EdeltaLibrary.addNewEReference(owner, newReferenceName, extracted, _function_2);
-    final Consumer<EAttribute> _function_3 = (EAttribute it) -> {
+    final Consumer<EStructuralFeature> _function_3 = (EStructuralFeature it) -> {
       EdeltaLibrary.moveTo(it, extracted);
     };
-    attributes.forEach(_function_3);
+    features.forEach(_function_3);
     return extracted;
+  }
+  
+  /**
+   * Makes the EReference, which is assumed to be already part of an EClass,
+   * a single required containment reference, adds to the referred
+   * type, which is assumed to be set, an opposite required single reference.
+   * @param reference
+   */
+  public EReference makeContainmentBidirectional(final EReference reference) {
+    EReference _xblockexpression = null;
+    {
+      reference.setContainment(true);
+      EdeltaLibrary.makeSingleRequired(reference);
+      final EClass owner = reference.getEContainingClass();
+      final EClass referredType = reference.getEReferenceType();
+      final Consumer<EReference> _function = (EReference it) -> {
+        EdeltaLibrary.makeBidirectional(it, reference);
+        EdeltaLibrary.makeSingleRequired(it);
+      };
+      _xblockexpression = EdeltaLibrary.addNewEReference(referredType, this.fromTypeToFeatureName(owner), owner, _function);
+    }
+    return _xblockexpression;
   }
   
   /**
