@@ -558,11 +558,11 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
   public void test_findDuplicateFeaturesInSubclasses() {
     EPackage _createEPackage = this.factory.createEPackage();
     final Procedure1<EPackage> _function = (EPackage it) -> {
-      final EClass superclassWithSuplicatesInSubclasses = this.createEClass(it, "SuperClassWithDuplicatesInSubclasses");
+      final EClass superclassWithDuplicatesInSubclasses = this.createEClass(it, "SuperClassWithDuplicatesInSubclasses");
       EClass _createEClass = this.createEClass(it, "C1");
       final Procedure1<EClass> _function_1 = (EClass it_1) -> {
         EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(superclassWithSuplicatesInSubclasses);
+        _eSuperTypes.add(superclassWithDuplicatesInSubclasses);
         EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
         final Procedure1<EAttribute> _function_2 = (EAttribute it_2) -> {
           it_2.setEType(this.stringDataType);
@@ -573,7 +573,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
       EClass _createEClass_1 = this.createEClass(it, "C2");
       final Procedure1<EClass> _function_2 = (EClass it_1) -> {
         EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(superclassWithSuplicatesInSubclasses);
+        _eSuperTypes.add(superclassWithDuplicatesInSubclasses);
         EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
         final Procedure1<EAttribute> _function_3 = (EAttribute it_2) -> {
           it_2.setEType(this.stringDataType);
@@ -581,11 +581,11 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
         ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_3);
       };
       ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_2);
-      final EClass superclassWithoutSuplicatesInAllSubclasses = this.createEClass(it, "SuperClassWithoutDuplicatesInAllSubclasses");
+      final EClass superclassWithoutDuplicatesInAllSubclasses = this.createEClass(it, "SuperClassWithoutDuplicatesInAllSubclasses");
       EClass _createEClass_2 = this.createEClass(it, "D1");
       final Procedure1<EClass> _function_3 = (EClass it_1) -> {
         EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(superclassWithoutSuplicatesInAllSubclasses);
+        _eSuperTypes.add(superclassWithoutDuplicatesInAllSubclasses);
         EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
         final Procedure1<EAttribute> _function_4 = (EAttribute it_2) -> {
           it_2.setEType(this.stringDataType);
@@ -596,7 +596,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
       EClass _createEClass_3 = this.createEClass(it, "D2");
       final Procedure1<EClass> _function_4 = (EClass it_1) -> {
         EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(superclassWithoutSuplicatesInAllSubclasses);
+        _eSuperTypes.add(superclassWithoutDuplicatesInAllSubclasses);
         EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
         final Procedure1<EAttribute> _function_5 = (EAttribute it_2) -> {
           it_2.setEType(this.stringDataType);
@@ -607,7 +607,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
       EClass _createEClass_4 = this.createEClass(it, "D3");
       final Procedure1<EClass> _function_5 = (EClass it_1) -> {
         EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(superclassWithoutSuplicatesInAllSubclasses);
+        _eSuperTypes.add(superclassWithoutDuplicatesInAllSubclasses);
         EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
         final Procedure1<EAttribute> _function_6 = (EAttribute it_2) -> {
           it_2.setEType(this.intDataType);

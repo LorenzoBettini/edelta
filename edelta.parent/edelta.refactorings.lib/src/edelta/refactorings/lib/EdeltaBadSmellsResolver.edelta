@@ -69,3 +69,12 @@ def resolveAbstractSubclassesOfConcreteSuperclasses(EPackage ePackage) {
 	)
 }
 
+def resolveDuplicateFeaturesInSubclasses(EPackage ePackage) {
+	finder.findDuplicateFeaturesInSubclasses(ePackage)
+		.forEach[superClass, duplicates|
+			duplicates.forEach[key, values|
+				refactorings.pullUpFeatures(superClass, values)
+			]
+		]
+}
+

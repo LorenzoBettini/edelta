@@ -359,34 +359,34 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 
 	@Test def void test_findDuplicateFeaturesInSubclasses() {
 		val p = factory.createEPackage => [
-			val superclassWithSuplicatesInSubclasses = createEClass("SuperClassWithDuplicatesInSubclasses")
+			val superclassWithDuplicatesInSubclasses = createEClass("SuperClassWithDuplicatesInSubclasses")
 			createEClass("C1") => [
-				ESuperTypes += superclassWithSuplicatesInSubclasses
+				ESuperTypes += superclassWithDuplicatesInSubclasses
 				createEAttribute("A1") => [
 					EType = stringDataType
 				]
 			]
 			createEClass("C2") => [
-				ESuperTypes += superclassWithSuplicatesInSubclasses
+				ESuperTypes += superclassWithDuplicatesInSubclasses
 				createEAttribute("A1") => [
 					EType = stringDataType
 				]
 			]
-			val superclassWithoutSuplicatesInAllSubclasses = createEClass("SuperClassWithoutDuplicatesInAllSubclasses")
+			val superclassWithoutDuplicatesInAllSubclasses = createEClass("SuperClassWithoutDuplicatesInAllSubclasses")
 			createEClass("D1") => [
-				ESuperTypes += superclassWithoutSuplicatesInAllSubclasses
+				ESuperTypes += superclassWithoutDuplicatesInAllSubclasses
 				createEAttribute("A1") => [
 					EType = stringDataType
 				]
 			]
 			createEClass("D2") => [
-				ESuperTypes += superclassWithoutSuplicatesInAllSubclasses
+				ESuperTypes += superclassWithoutDuplicatesInAllSubclasses
 				createEAttribute("A1") => [
 					EType = stringDataType
 				]
 			]
 			createEClass("D3") => [
-				ESuperTypes += superclassWithoutSuplicatesInAllSubclasses
+				ESuperTypes += superclassWithoutDuplicatesInAllSubclasses
 				createEAttribute("A1") => [
 					EType = intDataType // all subclasses must have the duplicate
 					// this is not a duplicate

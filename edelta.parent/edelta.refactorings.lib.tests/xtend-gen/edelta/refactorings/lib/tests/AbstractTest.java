@@ -35,6 +35,14 @@ public abstract class AbstractTest {
   
   protected static final String EXPECTATIONS = "test-output-expectations/";
   
+  protected EPackage createEPackage(final String name) {
+    EPackage _createEPackage = this.factory.createEPackage();
+    final Procedure1<EPackage> _function = (EPackage it) -> {
+      it.setName(name);
+    };
+    return ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
+  }
+  
   protected EClass createEClass(final EPackage epackage, final String name) {
     final EClass c = this.createEClassWithoutPackage(name);
     EList<EClassifier> _eClassifiers = epackage.getEClassifiers();

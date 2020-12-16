@@ -21,6 +21,11 @@ abstract class AbstractTest {
 	protected static final String TESTECORES = "test-input-models/";
 	protected static final String EXPECTATIONS = "test-output-expectations/";
 
+	def protected createEPackage(String name) {
+		factory.createEPackage => [
+			it.name = name
+		]
+	}
 
 	def protected createEClass(EPackage epackage, String name) {
 		val c = createEClassWithoutPackage(name)

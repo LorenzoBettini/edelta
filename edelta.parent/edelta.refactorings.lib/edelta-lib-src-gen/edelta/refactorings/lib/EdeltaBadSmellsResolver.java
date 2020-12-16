@@ -4,8 +4,11 @@ import edelta.lib.AbstractEdelta;
 import edelta.refactorings.lib.EdeltaBadSmellsFinder;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -85,5 +88,15 @@ public class EdeltaBadSmellsResolver extends AbstractEdelta {
   public void resolveAbstractSubclassesOfConcreteSuperclasses(final EPackage ePackage) {
     this.refactorings.makeConcrete(
       this.finder.findAbstractSubclassesOfConcreteSuperclasses(ePackage));
+  }
+  
+  public void resolveDuplicateFeaturesInSubclasses(final EPackage ePackage) {
+    final BiConsumer<EClass, Map<EStructuralFeature, List<EStructuralFeature>>> _function = (EClass superClass, Map<EStructuralFeature, List<EStructuralFeature>> duplicates) -> {
+      final BiConsumer<EStructuralFeature, List<EStructuralFeature>> _function_1 = (EStructuralFeature key, List<EStructuralFeature> values) -> {
+        this.refactorings.pullUpFeatures(superClass, values);
+      };
+      duplicates.forEach(_function_1);
+    };
+    this.finder.findDuplicateFeaturesInSubclasses(ePackage).forEach(_function);
   }
 }

@@ -196,4 +196,55 @@ class EdeltaBadSmellsResolverTest extends AbstractTest {
 		assertThat(p.EClasses.last.isAbstract).isFalse
 	}
 
+	@Test def void test_resolveDuplicateFeaturesInSubclasses() {
+		val p = createEPackage("p") => [
+			val superclassWithDuplicatesInSubclasses = createEClass("SuperClassWithDuplicatesInSubclasses")
+			createEClass("C1") => [
+				ESuperTypes += superclassWithDuplicatesInSubclasses
+				createEAttribute("A1") => [
+					EType = stringDataType
+				]
+			]
+			createEClass("C2") => [
+				ESuperTypes += superclassWithDuplicatesInSubclasses
+				createEAttribute("A1") => [
+					EType = stringDataType
+				]
+			]
+			val superclassWithoutDuplicatesInAllSubclasses = createEClass("SuperClassWithoutDuplicatesInAllSubclasses")
+			createEClass("D1") => [
+				ESuperTypes += superclassWithoutDuplicatesInAllSubclasses
+				createEAttribute("A1") => [
+					EType = stringDataType
+				]
+			]
+			createEClass("D2") => [
+				ESuperTypes += superclassWithoutDuplicatesInAllSubclasses
+				createEAttribute("A1") => [
+					EType = stringDataType
+				]
+			]
+			createEClass("D3") => [
+				ESuperTypes += superclassWithoutDuplicatesInAllSubclasses
+				createEAttribute("A1") => [
+					EType = intDataType // all subclasses must have the duplicate
+					// this is not a duplicate
+				]
+			]
+		]
+		val superClass = p.EClasses.head
+		val classesWithDuplicates = p.EClasses.filter[name.startsWith("C")]
+		assertThat(classesWithDuplicates
+			.map[EStructuralFeatures]
+			.flatten
+			.map[name]
+			.toSet)
+			.containsOnly("A1")
+		assertThat(superClass.EStructuralFeatures).isEmpty
+		resolver.resolveDuplicateFeaturesInSubclasses(p)
+		assertThat(classesWithDuplicates.map[EStructuralFeatures].flatten)
+			.isEmpty
+		assertThat(superClass.EStructuralFeatures.map[name])
+			.containsOnly("A1")
+	}
 }
