@@ -190,8 +190,14 @@ def classToReference(EClass cl) {
  * Given a non empty list of {@link EStructuralFeature}, which are known to
  * appear in several classes as duplicates, extracts a new common superclass,
  * with the duplicate feature,
- * adds the extracted superclass to the classes with the duplicate
- * feature and removes the duplicate feature from each class.
+ * adds the extracted class as the superclass of the classes with the duplicate
+ * feature and removes the duplicate feature from such each class.
+ * 
+ * The name of the extracted class is the name of the feature, with the first
+ * letter capitalized and the "Element" suffix (example, if the feature is
+ * "name" the extracted class will be called "NameElement").
+ * An additional number can be
+ * added as a suffix to avoid name clashes with existing classes.
  * 
  * @param duplicates
  */
