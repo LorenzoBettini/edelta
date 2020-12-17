@@ -501,6 +501,17 @@ public class EdeltaLibraryTest {
 		assertThat(c2Ref.getEReferenceType()).isSameAs(c1);
 		assertThat(c1Ref.getEOpposite().getEReferenceType()).isSameAs(c1);
 		assertThat(c2Ref.getEOpposite().getEReferenceType()).isSameAs(c2);
+		// test it with an existing opposite
+		EClass c3 = ecoreFactory.createEClass();
+		EReference c3Ref = ecoreFactory.createEReference();
+		c3.getEStructuralFeatures().add(c3Ref);
+		EdeltaLibrary.makeBidirectional(c1Ref, c3Ref);
+		assertThat(c1Ref.getEOpposite()).isNotNull();
+		assertThat(c2Ref.getEOpposite()).isNull();
+		assertThat(c1Ref.getEOpposite()).isSameAs(c3Ref);
+		assertThat(c1Ref.getEReferenceType()).isSameAs(c3);
+		assertThat(c1Ref.getEOpposite().getEReferenceType()).isSameAs(c1);
+		assertThat(c3Ref.getEOpposite().getEReferenceType()).isSameAs(c3);
 	}
 
 	@Test
