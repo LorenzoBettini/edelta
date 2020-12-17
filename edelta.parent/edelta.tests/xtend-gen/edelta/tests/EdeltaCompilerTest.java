@@ -2110,7 +2110,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder_1.append("public void modifyFoo(final EPackage it) {");
     _builder_1.newLine();
     _builder_1.append("    ");
-    _builder_1.append("EcoreUtil.delete(null);");
+    _builder_1.append("EcoreUtil.delete(getEClass(\"foo\", \"FooClass\"));");
     _builder_1.newLine();
     _builder_1.append("  ");
     _builder_1.append("}");

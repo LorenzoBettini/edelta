@@ -98,7 +98,7 @@ public class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
     _builder.append("ecoreref()");
     EdeltaEcoreReferenceExpression _ecoreReferenceExpression = this.ecoreReferenceExpression(_builder);
     final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
-      Assert.assertEquals("null", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
+      Assert.assertEquals("getENamedElement()", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
     };
     ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_ecoreReferenceExpression, _function);
   }
