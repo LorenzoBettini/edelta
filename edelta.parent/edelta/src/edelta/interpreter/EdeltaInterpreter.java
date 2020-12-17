@@ -417,7 +417,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			// the effective qualified name of the EObject
 			String currentQualifiedName = qualifiedNameProvider
 				.getFullyQualifiedName((EObject) result).toString();
-			// the reference string in the Edelta program,
+			// rely on the reference string in the Edelta program,
 			// which is different in case the EObject has been renamed
 			if (!currentQualifiedName.endsWith(ecoreReferenceText))
 				addStaleAccessError(
