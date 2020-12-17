@@ -507,11 +507,14 @@ public class EdeltaLibraryTest {
 		c3.getEStructuralFeatures().add(c3Ref);
 		EdeltaLibrary.makeBidirectional(c1Ref, c3Ref);
 		assertThat(c1Ref.getEOpposite()).isNotNull();
-		assertThat(c2Ref.getEOpposite()).isNull();
+		assertThat(c3Ref.getEOpposite()).isNotNull();
 		assertThat(c1Ref.getEOpposite()).isSameAs(c3Ref);
+		assertThat(c3Ref.getEOpposite()).isSameAs(c1Ref);
 		assertThat(c1Ref.getEReferenceType()).isSameAs(c3);
+		assertThat(c3Ref.getEReferenceType()).isSameAs(c1);
 		assertThat(c1Ref.getEOpposite().getEReferenceType()).isSameAs(c1);
 		assertThat(c3Ref.getEOpposite().getEReferenceType()).isSameAs(c3);
+		assertThat(c2Ref.getEOpposite()).isNull();
 	}
 
 	@Test
