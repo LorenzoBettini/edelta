@@ -87,7 +87,7 @@ public class EdeltaEPackageManager {
 			stream().
 			map(resource -> resource.getContents().get(0)).
 			filter(o -> o instanceof EPackage).
-			map(o -> (EPackage) o).
+			map(EPackage.class::cast).
 			filter(p -> p.getName().equals(packageName)).
 			findAny().
 			orElse(null);
