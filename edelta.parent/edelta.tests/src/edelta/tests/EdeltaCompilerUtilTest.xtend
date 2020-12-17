@@ -69,7 +69,7 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 	@Test
 	def void testGetStringForEcoreReferenceExpressionIncomplete2() {
 		'''ecoreref()'''.ecoreReferenceExpression => [
-			'null'.
+			'getENamedElement()'.
 				assertEquals(stringForEcoreReferenceExpression)
 		]
 	}

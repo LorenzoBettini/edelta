@@ -1,6 +1,7 @@
 package edelta.interpreter;
 
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE;
+import static edelta.util.EdeltaModelUtil.getEcoreReferenceText;
 import static edelta.util.EdeltaModelUtil.getProgram;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
@@ -31,6 +32,7 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.IResourceScopeCache;
+import org.eclipse.xtext.util.Strings;
 import org.eclipse.xtext.xbase.XAbstractFeatureCall;
 import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
@@ -287,8 +289,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		// always make sure to record the currently available elements
 		derivedStateHelper.setAccessibleElements(ecoreReferenceExpression,
 				ecoreHelper.createSnapshotOfAccessibleElements(ecoreReferenceExpression));
-		final var ecoreReference = ecoreReferenceExpression.getReference();
-		if (ecoreReference == null || ecoreReference.getEnamedelement() == null)
+		if (!checkValidReference(ecoreReferenceExpression))
 			return null;
 		checkLinking(ecoreReferenceExpression);
 		return edeltaCompilerUtil.buildMethodToCallForEcoreReference(
@@ -314,6 +315,23 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				interpretedEcoreReferenceExpressions.add(ecoreReferenceExpression);
 				return result;
 			});
+	}
+
+	private boolean checkValidReference(EdeltaEcoreReferenceExpression ecoreReferenceExpression) {
+		final var ecoreReference = ecoreReferenceExpression.getReference();
+		if (ecoreReference == null)
+			return false;
+		if (ecoreReference.getEnamedelement() == null) {
+			// it might be due to an element removed with EcoreUtil.delete ...
+			// (see https://github.com/LorenzoBettini/edelta/issues/271)
+			final var ecoreReferenceText = getEcoreReferenceText(ecoreReference);
+			// ... if the program text contains something ...
+			if (!Strings.isEmpty(ecoreReferenceText))
+				addNotAvailableAnymoreError(ecoreReferenceExpression, ecoreReferenceText);
+			// ... otherwise it's simply an incomplete program with ecoreref()
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -391,32 +409,34 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	}
 
 	private void checkStaleAccess(Object result, EdeltaEcoreReferenceExpression ecoreReferenceExpression) {
+		final var ecoreReferenceText = getEcoreReferenceText
+				(ecoreReferenceExpression.getReference());
 		if (result == null) {
-			addStaleAccessError(
-				ecoreReferenceExpression,
-				"The element is not available anymore in this context: '" +
-					ecoreReferenceExpression.getReference()
-					.getEnamedelement().getName() + "'",
-					EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT,
-					new String[] {});
+			addNotAvailableAnymoreError(ecoreReferenceExpression, ecoreReferenceText);
 		} else {
 			// the effective qualified name of the EObject
 			String currentQualifiedName = qualifiedNameProvider
 				.getFullyQualifiedName((EObject) result).toString();
-			// the reference string in the Edelta program,
+			// rely on the reference string in the Edelta program,
 			// which is different in case the EObject has been renamed
-			String originalReferenceText =
-				EdeltaModelUtil.getEcoreReferenceText
-					(ecoreReferenceExpression.getReference());
-			if (!currentQualifiedName.endsWith(originalReferenceText))
+			if (!currentQualifiedName.endsWith(ecoreReferenceText))
 				addStaleAccessError(
 					ecoreReferenceExpression,
 					String.format(
 						"The element '%s' is now available as '%s'",
-						originalReferenceText, currentQualifiedName),
+						ecoreReferenceText, currentQualifiedName),
 					EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT,
 					new String[] {currentQualifiedName});
 		}
+	}
+
+	private void addNotAvailableAnymoreError(EdeltaEcoreReferenceExpression ecoreReferenceExpression, String name) {
+		addStaleAccessError(
+			ecoreReferenceExpression,
+			"The element is not available anymore in this context: '" +
+				name + "'",
+				EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT,
+				new String[] {});
 	}
 
 	private void addStaleAccessError(EdeltaEcoreReferenceExpression ecoreReferenceExpression,

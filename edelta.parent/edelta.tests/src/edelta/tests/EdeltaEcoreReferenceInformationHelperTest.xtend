@@ -212,6 +212,24 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testNullENamedElement() {
+		'''
+		metamodel "foo"
+		
+		modifyEcore aTest epackage foo {
+			ecoreref()
+		}
+		'''.parseWithTestEcore.lastEcoreRef => [
+			var info = informationHelper.getOrComputeInformation(it)
+			assertThat(info)
+				.returns("ENamedElement", [type])
+				.returns(null, [EPackageName])
+				.returns(null, [EClassifierName])
+				.returns(null, [ENamedElementName])
+		]
+	}
+
 	def private lastEcoreRef(EdeltaProgram p) {
 		p.lastEcoreReferenceExpression
 	}

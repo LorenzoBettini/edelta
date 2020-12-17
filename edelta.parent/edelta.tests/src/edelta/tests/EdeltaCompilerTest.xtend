@@ -1000,6 +1000,54 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testCompilationEcorerefWhenElementRemovedFromEcoreReference() {
+		// EcoreUtil.delete sets to null also the ENamedElement of the ecoreref
+		// see https://github.com/LorenzoBettini/edelta/issues/271
+		'''
+			import static org.eclipse.emf.ecore.util.EcoreUtil.delete
+			
+			metamodel "foo"
+			
+			modifyEcore modifyFoo epackage foo {
+				delete(ecoreref(FooClass))
+			}
+		'''.checkCompilation(
+			'''
+			package edelta;
+			
+			import edelta.lib.AbstractEdelta;
+			import org.eclipse.emf.ecore.EPackage;
+			import org.eclipse.emf.ecore.util.EcoreUtil;
+			
+			@SuppressWarnings("all")
+			public class MyFile0 extends AbstractEdelta {
+			  public MyFile0() {
+			    
+			  }
+			  
+			  public MyFile0(final AbstractEdelta other) {
+			    super(other);
+			  }
+			  
+			  public void modifyFoo(final EPackage it) {
+			    EcoreUtil.delete(getEClass("foo", "FooClass"));
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			  
+			  @Override
+			  protected void doExecute() throws Exception {
+			    modifyFoo(getEPackage("foo"));
+			  }
+			}
+			'''
+		)
+	}
+
+	@Test
 	def void testCompilationOfComplexOperationsWithSubPackages() {
 		'''
 			metamodel "foo"

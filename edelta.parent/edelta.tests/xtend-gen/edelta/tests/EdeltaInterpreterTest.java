@@ -2103,6 +2103,43 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testReferenceToEClassDeleted() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import static org.eclipse.emf.ecore.util.EcoreUtil.delete");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("delete(ecoreref(FooClass))");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref(FooClass).abstract // this doesn\'t exist anymore");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      final ThrowableAssert.ThrowingCallable _function_1 = () -> {
+        this.interpretProgram(it);
+      };
+      Assertions.assertThatThrownBy(_function_1).isInstanceOf(EdeltaInterpreterWrapperException.class);
+      this._validationTestHelper.assertError(it, 
+        EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
+        EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT, 
+        input.lastIndexOf("FooClass"), 
+        "FooClass".length(), 
+        "The element is not available anymore in this context: \'FooClass\'");
+      this.assertErrorsAsStrings(it, "The element is not available anymore in this context: \'FooClass\'");
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
   public void testReferenceToEClassRemovedInLoop() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");

@@ -50,6 +50,8 @@ public class EdeltaEcoreReferenceInformationHelper {
 		final var type = typeResolver.resolveTypes(exp).getActualType(exp);
 		info.setType(type.getSimpleName());
 		final var element = reference.getEnamedelement();
+		if (element == null)
+			return info;
 
 		new EcoreSwitch<Void>() {
 			@Override
