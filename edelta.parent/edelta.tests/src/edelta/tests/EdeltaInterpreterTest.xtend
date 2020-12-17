@@ -1379,6 +1379,34 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testReferenceToEClassDeleted() {
+		// EcoreUtil.delete sets to null also the ENamedElement of the ecoreref
+		// see https://github.com/LorenzoBettini/edelta/issues/271
+		val input = '''
+			import static org.eclipse.emf.ecore.util.EcoreUtil.delete
+			
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				delete(ecoreref(FooClass))
+				ecoreref(FooClass).abstract // this doesn't exist anymore
+			}
+		'''.toString
+		input.parseWithTestEcore =>[
+			assertThatThrownBy[interpretProgram]
+				.isInstanceOf(EdeltaInterpreterWrapperException)
+			assertError(
+				EdeltaPackage.eINSTANCE.edeltaEcoreReferenceExpression,
+				EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT,
+				input.lastIndexOf("FooClass"),
+				"FooClass".length,
+				"The element is not available anymore in this context: 'FooClass'"
+			)
+			assertErrorsAsStrings("The element is not available anymore in this context: 'FooClass'")
+		]
+	}
+
+	@Test
 	def void testReferenceToEClassRemovedInLoop() {
 		val input = '''
 			metamodel "foo"

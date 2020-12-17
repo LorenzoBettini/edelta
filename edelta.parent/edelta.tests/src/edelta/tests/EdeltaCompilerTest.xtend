@@ -1002,6 +1002,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	@Test
 	def void testCompilationEcorerefWhenElementRemovedFromEcoreReference() {
 		// EcoreUtil.delete sets to null also the ENamedElement of the ecoreref
+		// see https://github.com/LorenzoBettini/edelta/issues/271
 		'''
 			import static org.eclipse.emf.ecore.util.EcoreUtil.delete
 			
