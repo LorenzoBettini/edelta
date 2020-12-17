@@ -293,6 +293,26 @@ public class EdeltaRefactorings extends AbstractEdelta {
       String _firstUpper = StringExtensions.toFirstUpper(feature.getName());
       String _plus = (_firstUpper + "Element");
       final String superClassName = this.ensureEClassifierNameIsUnique(containingEPackage, _plus);
+      _xblockexpression = this.extractSuperclass(superClassName, duplicates);
+    }
+    return _xblockexpression;
+  }
+  
+  /**
+   * Given a non empty list of {@link EStructuralFeature}, which are known to
+   * appear in several classes as duplicates, extracts a new common superclass,
+   * with the given name, with the duplicate feature,
+   * adds the extracted class as the superclass of the classes with the duplicate
+   * feature and removes the duplicate feature from such each class.
+   * 
+   * @param name
+   * @param duplicates
+   */
+  public EClass extractSuperclass(final String name, final List<? extends EStructuralFeature> duplicates) {
+    EClass _xblockexpression = null;
+    {
+      final EStructuralFeature feature = IterableExtensions.head(duplicates);
+      final EPackage containingEPackage = feature.getEContainingClass().getEPackage();
       final Consumer<EClass> _function = (EClass it) -> {
         it.setAbstract(true);
         final Function1<EStructuralFeature, EClass> _function_1 = (EStructuralFeature it_1) -> {
@@ -304,7 +324,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
         ListExtensions.map(duplicates, _function_1).forEach(_function_2);
         this.pullUpFeatures(it, duplicates);
       };
-      _xblockexpression = EdeltaLibrary.addNewEClass(containingEPackage, superClassName, _function);
+      _xblockexpression = EdeltaLibrary.addNewEClass(containingEPackage, name, _function);
     }
     return _xblockexpression;
   }
