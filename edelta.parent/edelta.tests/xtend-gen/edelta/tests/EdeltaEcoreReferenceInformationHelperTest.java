@@ -374,6 +374,39 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
     ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_lastEcoreRef, _function);
   }
   
+  @Test
+  public void testNullENamedElement() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("ecoreref()");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    EdeltaEcoreReferenceExpression _lastEcoreRef = this.lastEcoreRef(this.parseWithTestEcore(_builder));
+    final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
+      EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation info = this.informationHelper.getOrComputeInformation(it);
+      final Function<EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation, String> _function_1 = (EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation it_1) -> {
+        return it_1.getType();
+      };
+      final Function<EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation, String> _function_2 = (EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation it_1) -> {
+        return it_1.getEPackageName();
+      };
+      final Function<EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation, String> _function_3 = (EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation it_1) -> {
+        return it_1.getEClassifierName();
+      };
+      final Function<EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation, String> _function_4 = (EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation it_1) -> {
+        return it_1.getENamedElementName();
+      };
+      Assertions.<EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation>assertThat(info).<String>returns("ENamedElement", _function_1).<String>returns(null, _function_2).<String>returns(null, _function_3).<String>returns(null, _function_4);
+    };
+    ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_lastEcoreRef, _function);
+  }
+  
   private EdeltaEcoreReferenceExpression lastEcoreRef(final EdeltaProgram p) {
     return this.lastEcoreReferenceExpression(p);
   }

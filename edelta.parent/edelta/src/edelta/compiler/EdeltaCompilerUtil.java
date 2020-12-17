@@ -33,9 +33,13 @@ public class EdeltaCompilerUtil {
 
 	public String getStringForEcoreReferenceExpression(final EdeltaEcoreReferenceExpression e) {
 		final var reference = e.getReference();
-		if (reference == null || reference.getEnamedelement() == null) {
+		if (reference == null) {
 			return "null";
 		}
+		// Note that reference.getEnamedelement() might be null also because
+		// during the interpretation we used something like EcoreUtil.delete
+		// which sets to null the reference to the deleted ENamedElement
+		// see https://github.com/LorenzoBettini/edelta/issues/271
 		return buildMethodToCallForEcoreReference(e,
 			(name, args) -> {
 				final var builder = new StringBuilder();
