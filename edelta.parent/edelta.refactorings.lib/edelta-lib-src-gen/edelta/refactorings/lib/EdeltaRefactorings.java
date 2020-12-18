@@ -430,7 +430,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
       String _lowerCase = superClass.getName().toLowerCase();
       String _plus_1 = (_lowerCase + "Type");
       EdeltaLibrary.addNewEAttribute(superClass, _plus_1, enum_);
-      EcoreUtil.removeAll(subClasses);
+      EdeltaLibrary.removeAllElements(subClasses);
     };
     classificationsByHierarchy.forEach(_function);
   }

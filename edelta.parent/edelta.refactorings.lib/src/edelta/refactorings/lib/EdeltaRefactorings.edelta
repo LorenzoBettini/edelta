@@ -311,7 +311,7 @@ def classificationByHierarchyToEnum(Map<EClass, List<EClass>> classificationsByH
 				]
 			]
 			superClass.addNewEAttribute(superClass.name.toLowerCase + "Type", enum)
-			EcoreUtil.removeAll(subClasses)
+			removeAllElements(subClasses)
 		]
 }
 
