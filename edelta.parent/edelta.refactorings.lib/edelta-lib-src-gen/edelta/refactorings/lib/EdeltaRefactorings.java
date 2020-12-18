@@ -165,7 +165,6 @@ public class EdeltaRefactorings extends AbstractEdelta {
       this.fromTypeToFeatureName(reference.getEType()), reference.getEReferenceType(), _function);
     final EReference eOpposite = reference.getEOpposite();
     if ((eOpposite != null)) {
-      eOpposite.setEType(extracted);
       EdeltaLibrary.makeBidirectional(eOpposite, extractedRef);
     }
     reference.setEType(extracted);
@@ -240,7 +239,6 @@ public class EdeltaRefactorings extends AbstractEdelta {
     reference.setContainment(false);
     final EReference opposite = referenceToTarget.getEOpposite();
     if ((opposite != null)) {
-      opposite.setEType(owner);
       EdeltaLibrary.makeBidirectional(reference, opposite);
     }
     EdeltaLibrary.removeElement(cl);

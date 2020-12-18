@@ -113,7 +113,6 @@ def referenceToClass(String name, EReference reference) {
 	]
 	val eOpposite = reference.EOpposite
 	if (eOpposite !== null) {
-		eOpposite.EType = extracted
 		eOpposite.makeBidirectional(extractedRef)
 	}
 	reference.EType = extracted
@@ -158,7 +157,6 @@ def classToReference(EClass cl) {
 	reference.containment = false
 	val opposite = referenceToTarget.EOpposite
 	if (opposite !== null) {
-		opposite.EType = owner
 		makeBidirectional(reference, opposite)
 	}
 	removeElement(cl)
