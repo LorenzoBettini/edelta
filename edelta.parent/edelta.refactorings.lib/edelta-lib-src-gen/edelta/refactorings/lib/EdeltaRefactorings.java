@@ -385,12 +385,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
    */
   public void redundantContainerToEOpposite(final Iterable<Pair<EReference, EReference>> redundantContainers) {
     for (final Pair<EReference, EReference> redundant : redundantContainers) {
-      {
-        EReference _key = redundant.getKey();
-        _key.setEOpposite(redundant.getValue());
-        EReference _value = redundant.getValue();
-        _value.setEOpposite(redundant.getKey());
-      }
+      EdeltaLibrary.makeBidirectional(redundant.getKey(), redundant.getValue());
     }
   }
   

@@ -274,8 +274,7 @@ def ensureEClassifierNameIsUnique(EPackage ePackage, String proposedName) {
  */
 def redundantContainerToEOpposite(Iterable<Pair<EReference, EReference>> redundantContainers) {
 	for (redundant : redundantContainers) {
-		redundant.key.EOpposite = redundant.value
-		redundant.value.EOpposite = redundant.key
+		makeBidirectional(redundant.key, redundant.value)
 	}
 }
 
