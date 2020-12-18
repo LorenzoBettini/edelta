@@ -429,16 +429,33 @@ public class EdeltaLibraryTest {
 		referenceToSuperClass.setEType(superClass);
 		EReference referenceToSubClass = ecoreFactory.createEReference();
 		referenceToSubClass.setEType(subClass);
+		EReference opposite = ecoreFactory.createEReference();
+		opposite.setEOpposite(referenceToSubClass);
+		referenceToSubClass.setEOpposite(opposite);
 		subClass.getEStructuralFeatures().add(referenceToSubClass);
+		subClass.getEStructuralFeatures().add(opposite);
 		subClass.getEStructuralFeatures().add(referenceToSuperClass);
 		assertThat(subClass.getESuperTypes()).containsExactly(superClass);
 		EdeltaLibrary.removeElement(superClass);
 		// references to the removed class should be removed as well
 		assertThat(subClass.getESuperTypes()).isEmpty();
 		assertThat(subClass.getEStructuralFeatures())
-			.containsOnly(referenceToSubClass);
-		// also try to remove something that's not an EClassifier
+			.containsOnly(referenceToSubClass, opposite);
+		// the opposite reference should be set to null as well
 		EdeltaLibrary.removeElement(referenceToSubClass);
+		assertThat(subClass.getEStructuralFeatures())
+			.containsOnly(opposite);
+		assertThat(opposite.getEOpposite()).isNull();
+		// try to remove something simpler
+		EAttribute attribute = ecoreFactory.createEAttribute();
+		subClass.getEStructuralFeatures().add(attribute);
+		EdeltaLibrary.removeElement(attribute);
+		assertThat(subClass.getEStructuralFeatures())
+			.containsOnly(opposite);
+		// try to remove an EClass and its contents
+		attribute = ecoreFactory.createEAttribute();
+		subClass.getEStructuralFeatures().add(attribute);
+		EdeltaLibrary.removeElement(subClass);
 		assertThat(subClass.getEStructuralFeatures()).isEmpty();
 	}
 

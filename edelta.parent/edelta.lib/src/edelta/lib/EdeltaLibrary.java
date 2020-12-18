@@ -3,6 +3,7 @@
  */
 package edelta.lib;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -285,21 +286,54 @@ public class EdeltaLibrary {
 	}
 
 	/**
-	 * Removes the {@link ENamedElement} and recursively its contents.
+	 * Removes the {@link ENamedElement} and recursively its contents; it also makes
+	 * sure that no dangling references are left in the Ecore model: if we remove an
+	 * {@link EClassifier} it will also be removed as superclass, and
+	 * {@link EReference}s that have such a type will be removed as well; moreover,
+	 * if an {@link EReference} is removed, also its EOpposite will be removed.
+	 * 
+	 * This is meant to provide an alternative, and hopefully more efficient,
+	 * implementation to {@link EcoreUtil#delete(EObject, boolean)}.
 	 * 
 	 * @param element
 	 */
 	public static void removeElement(ENamedElement element) {
+		removeFutureDanglingReferences(element);
+		EcoreUtil.remove(element);
+	}
+
+	/**
+	 * This is meant to provide an alternative, and hopefully more efficient,
+	 * implementation to {@link EcoreUtil#deleteAll(Collection, boolean)}.
+	 * 
+	 * @param elements
+	 * @see EdeltaLibrary#removeElement(ENamedElement)
+	 */
+	public static void removeAllElements(Collection<? extends EObject> elements) {
+		elements.stream().forEach(EdeltaLibrary::removeFutureDanglingReferences);
+		EcoreUtil.removeAll(elements);
+	}
+
+	private static void removeFutureDanglingReferences(EObject element) {
 		if (element instanceof EClassifier) {
 			EClassifier classifier = (EClassifier) element;
-			// first remove possible features mentioning this classifier as type
-			List<EStructuralFeature> toRemove = allEClasses(classifier.getEPackage()).stream()
+			// first remove possible references to this classifier as type
+			final var allEClasses = allEClasses(classifier.getEPackage());
+			final var featuresToRemove = allEClasses.stream()
 				.flatMap(c -> c.getEStructuralFeatures().stream())
 				.filter(f -> f.getEType() == classifier)
 				.collect(Collectors.toList());
-			EcoreUtil.deleteAll(toRemove, true);
+			removeAllElements(featuresToRemove);
+			// then remove possible superclass relations referring this classifier
+			for (EClass eClass : allEClasses) {
+				eClass.getESuperTypes().remove(classifier);
+			}
+		} else if (element instanceof EReference) {
+			EReference reference = (EReference) element;
+			if (reference.getEOpposite() != null)
+				reference.getEOpposite().setEOpposite(null);
 		}
-		EcoreUtil.delete(element, true);
+		removeAllElements(element.eContents());
 	}
 
 	/**
