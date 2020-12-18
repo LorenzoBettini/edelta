@@ -353,10 +353,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
       return;
     }
     EdeltaLibrary.addEStructuralFeature(dest, EcoreUtil.<EStructuralFeature>copy(feature));
-    final Consumer<EStructuralFeature> _function_3 = (EStructuralFeature it) -> {
-      EdeltaLibrary.removeElement(it);
-    };
-    duplicates.forEach(_function_3);
+    EdeltaLibrary.removeAllElements(duplicates);
   }
   
   /**
