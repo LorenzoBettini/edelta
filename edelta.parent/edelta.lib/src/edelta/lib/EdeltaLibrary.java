@@ -372,14 +372,19 @@ public class EdeltaLibrary {
 	 * @param ref2
 	 */
 	public static void makeBidirectional(EReference ref1, EReference ref2) {
+		resetOpposite(ref1);
+		resetOpposite(ref2);
 		makeBidirectionalInternal(ref1, ref2);
 		makeBidirectionalInternal(ref2, ref1);
 	}
 
-	private static void makeBidirectionalInternal(EReference r1, EReference r2) {
-		final var existingOpposite = r1.getEOpposite();
+	private static void resetOpposite(EReference reference) {
+		final var existingOpposite = reference.getEOpposite();
 		if (existingOpposite != null)
 			existingOpposite.setEOpposite(null);
+	}
+
+	private static void makeBidirectionalInternal(EReference r1, EReference r2) {
 		r1.setEOpposite(r2);
 		r1.setEType(r2.getEContainingClass());
 	}
