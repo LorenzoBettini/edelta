@@ -44,27 +44,19 @@ public class EdeltaRefactorings extends AbstractEdelta {
   
   public EAttribute addMandatoryAttr(final EClass eClass, final String attrname, final EDataType dataType) {
     final Consumer<EAttribute> _function = (EAttribute it) -> {
-      it.setLowerBound(1);
+      EdeltaLibrary.makeSingleRequired(it);
     };
     return EdeltaLibrary.addNewEAttribute(eClass, attrname, dataType, _function);
   }
   
   public EReference mergeReferences(final String newReferenceName, final EClass newReferenceType, final List<EReference> refs) {
-    this.removeFeaturesFromContainingClass(refs);
+    EdeltaLibrary.removeAllElements(refs);
     return EdeltaLibrary.newEReference(newReferenceName, newReferenceType);
   }
   
   public EAttribute mergeAttributes(final String newAttrName, final EDataType newAttributeType, final List<EAttribute> attrs) {
-    this.removeFeaturesFromContainingClass(attrs);
+    EdeltaLibrary.removeAllElements(attrs);
     return EdeltaLibrary.newEAttribute(newAttrName, newAttributeType);
-  }
-  
-  public void removeFeaturesFromContainingClass(final List<? extends EStructuralFeature> features) {
-    final Consumer<EStructuralFeature> _function = (EStructuralFeature it) -> {
-      EList<EStructuralFeature> _eStructuralFeatures = it.getEContainingClass().getEStructuralFeatures();
-      _eStructuralFeatures.remove(it);
-    };
-    features.forEach(_function);
   }
   
   public void introduceSubclasses(final EClass containingclass, final EAttribute attr, final EEnum enumType) {

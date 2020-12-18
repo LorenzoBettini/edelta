@@ -19,23 +19,18 @@ metamodel "ecore"
 
 def addMandatoryAttr(EClass eClass, String attrname, EDataType dataType): EAttribute {
 	return eClass.addNewEAttribute(attrname, dataType) [
-		lowerBound = 1;
+		makeSingleRequired
 	]
 }
 
 def mergeReferences(String newReferenceName, EClass newReferenceType, List<EReference> refs): EReference {
-	refs.removeFeaturesFromContainingClass
+	removeAllElements(refs)
 	return newEReference(newReferenceName, newReferenceType)
 }
 
 def mergeAttributes(String newAttrName, EDataType newAttributeType, List<EAttribute> attrs) : EAttribute {
-	attrs.removeFeaturesFromContainingClass
+	removeAllElements(attrs)
 	return newEAttribute(newAttrName, newAttributeType)
-}
-
-def removeFeaturesFromContainingClass(List<? extends EStructuralFeature> features) {
-	features
-		.forEach[EContainingClass.EStructuralFeatures -= it]
 }
 
 def introduceSubclasses(EClass containingclass, EAttribute attr, EEnum enumType) {
