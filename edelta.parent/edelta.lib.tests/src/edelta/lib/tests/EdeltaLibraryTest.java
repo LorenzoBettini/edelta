@@ -23,6 +23,7 @@ import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.impl.BasicEObjectImpl;
+import org.eclipse.emf.ecore.util.EcoreUtil.EqualityHelper;
 import org.junit.Test;
 
 import edelta.lib.EdeltaLibrary;
@@ -469,6 +470,26 @@ public class EdeltaLibraryTest {
 		ePackage.getEClassifiers().add(dataType);
 		assertThat(EdeltaLibrary.allEClasses(ePackage))
 			.containsOnly(eClass);
+	}
+
+	@Test
+	public void test_copyTo() {
+		EClass eClassSrc = ecoreFactory.createEClass();
+		EClass eClassDest = ecoreFactory.createEClass();
+		EStructuralFeature feature = ecoreFactory.createEAttribute();
+		eClassSrc.getEStructuralFeatures().add(feature);
+		// before
+		assertThat(eClassDest.getEStructuralFeatures()).isEmpty();
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.contains(feature);
+		EdeltaLibrary.copyTo(feature, eClassDest);
+		// after
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.contains(feature);
+		assertThat(eClassDest.getEStructuralFeatures())
+			.hasSize(1)
+			.first()
+				.satisfies(f -> new EqualityHelper().equals(f, feature));
 	}
 
 	@Test

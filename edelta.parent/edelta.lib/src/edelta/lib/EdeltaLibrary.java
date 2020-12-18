@@ -351,6 +351,18 @@ public class EdeltaLibrary {
 	}
 
 	/**
+	 * Copies the specified {@link EStructuralFeature} into the specified
+	 * {@link EClass}, using {@link EcoreUtil#copy(EObject)}.
+	 * 
+	 * @param feature
+	 * @param eClassDest
+	 * @see EcoreUtil#copy(EObject)
+	 */
+	public static void copyTo(EStructuralFeature feature, EClass eClassDest) {
+		eClassDest.getEStructuralFeatures().add(EcoreUtil.copy(feature));
+	}
+
+	/**
 	 * Moves the specified {@link EStructuralFeature} into the specified
 	 * {@link EClass}.
 	 * 
