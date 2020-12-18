@@ -244,7 +244,7 @@ def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates) {
 		]
 		return
 	}
-	dest.addEStructuralFeature(EcoreUtil.copy(feature))
+	feature.copyTo(dest)
 	removeAllElements(duplicates)
 }
 
