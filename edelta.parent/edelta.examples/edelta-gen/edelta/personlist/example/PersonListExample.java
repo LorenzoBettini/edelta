@@ -4,11 +4,11 @@ import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaLibrary;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.Collections;
-import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
@@ -43,11 +43,8 @@ public class PersonListExample extends AbstractEdelta {
   }
   
   public void introducePlace(final EPackage it) {
-    final Consumer<EClass> _function = (EClass it_1) -> {
-      it_1.setAbstract(true);
-      this.refactorings.extractIntoSuperclass(it_1, Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "LivingPlace", "address"), getEAttribute("PersonList", "WorkPlace", "address"))));
-    };
-    EdeltaLibrary.addNewEClass(it, "Place", _function);
+    this.refactorings.extractSuperclass("Place", 
+      Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(getEAttribute("PersonList", "LivingPlace", "address"), getEAttribute("PersonList", "WorkPlace", "address"))));
   }
   
   public void introduceWorkingPosition(final EPackage it) {

@@ -317,10 +317,8 @@ class Inputs {
 		}
 		
 		modifyEcore introducePlace epackage PersonList {
-			addNewEClass("Place") [
-				abstract = true
-				extractIntoSuperclass(#[ecoreref(LivingPlace.address), ecoreref(WorkPlace.address)])
-			]
+			extractSuperclass("Place",
+				#[ecoreref(LivingPlace.address), ecoreref(WorkPlace.address)])
 		}
 		
 		modifyEcore introduceWorkingPosition epackage PersonList {
