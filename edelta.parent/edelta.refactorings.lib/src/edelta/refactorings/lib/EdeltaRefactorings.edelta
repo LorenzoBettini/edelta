@@ -49,28 +49,6 @@ def introduceSubclasses(EClass containingclass, EAttribute attr, EEnum enumType)
 }
 
 /**
- * @param superclass where to pull up a single instance of the passed attributes
- * @param the attributes that are expected to be the same; the first element will be
- * pulled up in the superclass
- */
-def extractIntoSuperclass(EClass superclass, List<EAttribute> attrs){
-	val extracted_attr = attrs.head;
-	// print(extracted_attr.name);
-	// already created from outside in the right package
-	// extracted_attr.EContainingClass.EPackage.EClassifiers+=superclass;
-	for (attr : attrs) {
-		attr.EContainingClass => [
-			// set supertype of the EClass of the attribute
-			addESuperType(superclass)
-			// and then remove the attribute from the original EClass
-			EStructuralFeatures -= attr
-		]
-	}
-
-	superclass.EStructuralFeatures += extracted_attr;
-}
-
-/**
  * @param name the name for the extracted class
  * @param features the features to extract
  * @param newReferenceName the new name for the reference from the owner class to the

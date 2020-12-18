@@ -83,30 +83,6 @@ public class EdeltaRefactorings extends AbstractEdelta {
   }
   
   /**
-   * @param superclass where to pull up a single instance of the passed attributes
-   * @param the attributes that are expected to be the same; the first element will be
-   * pulled up in the superclass
-   */
-  public boolean extractIntoSuperclass(final EClass superclass, final List<EAttribute> attrs) {
-    boolean _xblockexpression = false;
-    {
-      final EAttribute extracted_attr = IterableExtensions.<EAttribute>head(attrs);
-      for (final EAttribute attr : attrs) {
-        EClass _eContainingClass = attr.getEContainingClass();
-        final Procedure1<EClass> _function = (EClass it) -> {
-          EdeltaLibrary.addESuperType(it, superclass);
-          EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
-          _eStructuralFeatures.remove(attr);
-        };
-        ObjectExtensions.<EClass>operator_doubleArrow(_eContainingClass, _function);
-      }
-      EList<EStructuralFeature> _eStructuralFeatures = superclass.getEStructuralFeatures();
-      _xblockexpression = _eStructuralFeatures.add(extracted_attr);
-    }
-    return _xblockexpression;
-  }
-  
-  /**
    * @param name the name for the extracted class
    * @param features the features to extract
    * @param newReferenceName the new name for the reference from the owner class to the

@@ -248,25 +248,6 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
-  public void test_extractIntoSuperclass() {
-    final EPackage p = this.factory.createEPackage();
-    final EClass superClass = this.createEClass(p, "SuperClass");
-    final EClass c1 = this.createEClass(p, "C1");
-    final EClass c2 = this.createEClass(p, "C2");
-    final EAttribute attr1 = this.createEAttribute(c1, "attr");
-    final EAttribute attr2 = this.createEAttribute(c2, "attr");
-    Assertions.<EStructuralFeature>assertThat(superClass.getEStructuralFeatures()).isEmpty();
-    Assertions.<EStructuralFeature>assertThat(c1.getEStructuralFeatures()).isNotEmpty();
-    Assertions.<EStructuralFeature>assertThat(c2.getEStructuralFeatures()).isNotEmpty();
-    this.refactorings.extractIntoSuperclass(superClass, Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(attr1, attr2)));
-    Assertions.<EStructuralFeature>assertThat(c1.getEStructuralFeatures()).isEmpty();
-    Assertions.<EStructuralFeature>assertThat(c2.getEStructuralFeatures()).isEmpty();
-    Assertions.<EStructuralFeature>assertThat(superClass.getEStructuralFeatures()).containsExactly(attr1);
-    Assertions.<EClass>assertThat(c1.getESuperTypes()).containsExactly(superClass);
-    Assertions.<EClass>assertThat(c2.getESuperTypes()).containsExactly(superClass);
-  }
-  
-  @Test
   public void test_extractClassWithAttributes() {
     try {
       this.withInputModel("extractClassWithAttributes", "PersonList.ecore");

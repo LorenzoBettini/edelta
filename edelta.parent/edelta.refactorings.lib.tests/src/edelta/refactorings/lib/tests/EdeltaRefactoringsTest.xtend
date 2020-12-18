@@ -185,28 +185,6 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	def void test_extractIntoSuperclass() {
-		val p = factory.createEPackage
-		val superClass = p.createEClass("SuperClass")
-		val c1 = p.createEClass("C1")
-		val c2 = p.createEClass("C2")
-		val attr1 = c1.createEAttribute("attr")
-		val attr2 = c2.createEAttribute("attr")
-		assertThat(superClass.EStructuralFeatures).isEmpty
-		assertThat(c1.EStructuralFeatures).isNotEmpty
-		assertThat(c2.EStructuralFeatures).isNotEmpty
-
-		refactorings.extractIntoSuperclass(superClass, #[attr1, attr2])
-
-		assertThat(c1.EStructuralFeatures).isEmpty
-		assertThat(c2.EStructuralFeatures).isEmpty
-		assertThat(superClass.EStructuralFeatures)
-			.containsExactly(attr1)
-		assertThat(c1.ESuperTypes).containsExactly(superClass)
-		assertThat(c2.ESuperTypes).containsExactly(superClass)
-	}
-
-	@Test
 	def void test_extractClassWithAttributes() {
 		withInputModel("extractClassWithAttributes", "PersonList.ecore")
 		loadModelFile
