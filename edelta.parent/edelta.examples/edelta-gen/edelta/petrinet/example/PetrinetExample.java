@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
@@ -63,12 +64,8 @@ public class PetrinetExample extends AbstractEdelta {
   }
   
   public void introduceAbstractArc(final EPackage it) {
-    final Consumer<EClass> _function = (EClass it_1) -> {
-      it_1.setAbstract(true);
-      this.refactorings.extractIntoSuperclass(it_1, 
-        Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("petrinet", "PTArc", "weight"), getEAttribute("petrinet", "TPArc", "weight"))));
-    };
-    EdeltaLibrary.addNewEClass(it, "Arc", _function);
+    this.refactorings.extractSuperclass("Arc", 
+      Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(getEAttribute("petrinet", "PTArc", "weight"), getEAttribute("petrinet", "TPArc", "weight"))));
   }
   
   @Override

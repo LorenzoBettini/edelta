@@ -51,11 +51,6 @@ modifyEcore introduceTPArc epackage petrinet {
 }
 
 modifyEcore introduceAbstractArc epackage petrinet {
-	addNewEClass("Arc") [
-		abstract = true
-		refactorings.extractIntoSuperclass(
-			it,
-			#[ecoreref(PTArc.weight), ecoreref(TPArc.weight)]
-		);
-	]
+	refactorings.extractSuperclass("Arc",
+		#[ecoreref(PTArc.weight), ecoreref(TPArc.weight)])
 }
