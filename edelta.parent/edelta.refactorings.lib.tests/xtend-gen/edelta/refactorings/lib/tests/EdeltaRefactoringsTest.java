@@ -158,6 +158,23 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
+  public void test_addMandatoryReference() {
+    final EClass c = this.createEClassWithoutPackage("C1");
+    this.refactorings.addMandatoryReference(c, "test", this.eClassReference);
+    final EReference attr = IterableExtensions.<EReference>head(Iterables.<EReference>filter(c.getEStructuralFeatures(), EReference.class));
+    final Function<EReference, String> _function = (EReference it) -> {
+      return it.getName();
+    };
+    final Function<EReference, EClass> _function_1 = (EReference it) -> {
+      return it.getEReferenceType();
+    };
+    final Function<EReference, Boolean> _function_2 = (EReference it) -> {
+      return Boolean.valueOf(it.isRequired());
+    };
+    Assertions.<EReference>assertThat(attr).<String>returns("test", _function).<EClass>returns(this.eClassReference, _function_1).<Boolean>returns(Boolean.valueOf(true), _function_2);
+  }
+  
+  @Test
   public void test_mergeReferences() {
     final EClass refType = this.createEClassWithoutPackage("RefType");
     EClass _createEClassWithoutPackage = this.createEClassWithoutPackage("C1");

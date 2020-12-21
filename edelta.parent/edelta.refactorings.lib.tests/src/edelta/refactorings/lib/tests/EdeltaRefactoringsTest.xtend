@@ -119,6 +119,17 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
+	def void test_addMandatoryReference() {
+		val c = createEClassWithoutPackage("C1")
+		refactorings.addMandatoryReference(c, "test", eClassReference)
+		val attr = c.EStructuralFeatures.filter(EReference).head
+		assertThat(attr)
+			.returns("test", [name])
+			.returns(eClassReference, [EReferenceType])
+			.returns(true, [isRequired])
+	}
+
+	@Test
 	def void test_mergeReferences() {
 		val refType = createEClassWithoutPackage("RefType")
 		val c = createEClassWithoutPackage("C1") => [

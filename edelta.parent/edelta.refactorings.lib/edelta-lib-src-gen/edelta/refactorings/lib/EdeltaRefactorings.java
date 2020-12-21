@@ -42,11 +42,18 @@ public class EdeltaRefactorings extends AbstractEdelta {
     super(other);
   }
   
-  public EAttribute addMandatoryAttribute(final EClass eClass, final String attrname, final EDataType dataType) {
+  public EAttribute addMandatoryAttribute(final EClass eClass, final String attributeName, final EDataType dataType) {
     final Consumer<EAttribute> _function = (EAttribute it) -> {
       EdeltaLibrary.makeSingleRequired(it);
     };
-    return EdeltaLibrary.addNewEAttribute(eClass, attrname, dataType, _function);
+    return EdeltaLibrary.addNewEAttribute(eClass, attributeName, dataType, _function);
+  }
+  
+  public EReference addMandatoryReference(final EClass eClass, final String referenceName, final EClass type) {
+    final Consumer<EReference> _function = (EReference it) -> {
+      EdeltaLibrary.makeSingleRequired(it);
+    };
+    return EdeltaLibrary.addNewEReference(eClass, referenceName, type, _function);
   }
   
   public EReference mergeReferences(final String newReferenceName, final EClass newReferenceType, final List<EReference> refs) {
