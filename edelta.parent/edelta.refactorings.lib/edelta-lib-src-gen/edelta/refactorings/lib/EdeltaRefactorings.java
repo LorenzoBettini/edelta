@@ -115,10 +115,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
       this.makeContainmentBidirectional(it);
     };
     ObjectExtensions.<EReference>operator_doubleArrow(_addMandatoryReference, _function_2);
-    final Consumer<EStructuralFeature> _function_3 = (EStructuralFeature it) -> {
-      EdeltaLibrary.moveTo(it, extracted);
-    };
-    features.forEach(_function_3);
+    EdeltaLibrary.moveAllTo(features, extracted);
     return extracted;
   }
   

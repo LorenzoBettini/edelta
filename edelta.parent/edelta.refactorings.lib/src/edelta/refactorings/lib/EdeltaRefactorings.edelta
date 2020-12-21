@@ -75,7 +75,7 @@ def extractClass(String name, Collection<EStructuralFeature> features,
 	owner.addMandatoryReference(newReferenceName, extracted) => [
 		makeContainmentBidirectional
 	]
-	features.forEach[moveTo(extracted)]
+	features.moveAllTo(extracted)
 	return extracted
 }
 
