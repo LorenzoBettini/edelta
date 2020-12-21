@@ -17,7 +17,7 @@ package edelta.refactorings.lib
 
 metamodel "ecore"
 
-def addMandatoryAttr(EClass eClass, String attrname, EDataType dataType): EAttribute {
+def addMandatoryAttribute(EClass eClass, String attrname, EDataType dataType): EAttribute {
 	return eClass.addNewEAttribute(attrname, dataType) [
 		makeSingleRequired
 	]

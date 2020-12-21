@@ -42,7 +42,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     super(other);
   }
   
-  public EAttribute addMandatoryAttr(final EClass eClass, final String attrname, final EDataType dataType) {
+  public EAttribute addMandatoryAttribute(final EClass eClass, final String attrname, final EDataType dataType) {
     final Consumer<EAttribute> _function = (EAttribute it) -> {
       EdeltaLibrary.makeSingleRequired(it);
     };

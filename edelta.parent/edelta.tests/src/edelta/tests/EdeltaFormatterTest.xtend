@@ -44,7 +44,7 @@ class EdeltaFormatterTest extends EdeltaAbstractTest {
 				}
 				
 				modifyEcore   aModification   epackage   myecore    {
-					std . addMandatoryAttr( "name" , 
+					std . addMandatoryAttribute( "name" , 
 					ecoreref(EString), it)
 					ecoreref (  ecore  .  EString  )  
 					ecoreref (    EString  )
@@ -84,7 +84,7 @@ class EdeltaFormatterTest extends EdeltaAbstractTest {
 				}
 				
 				modifyEcore aModification epackage myecore {
-					std.addMandatoryAttr("name", ecoreref(EString), it)
+					std.addMandatoryAttribute("name", ecoreref(EString), it)
 					ecoreref(ecore.EString)
 					ecoreref(EString)
 				

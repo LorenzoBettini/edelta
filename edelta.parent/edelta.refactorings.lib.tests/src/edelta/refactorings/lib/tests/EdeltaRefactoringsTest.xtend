@@ -101,16 +101,16 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	def void test_ConstructorArgument() {
 		refactorings = new EdeltaRefactorings(new AbstractEdelta() {})
 		val c = createEClassWithoutPackage("C1")
-		refactorings.addMandatoryAttr(c, "test", stringDataType)
+		refactorings.addMandatoryAttribute(c, "test", stringDataType)
 		val attr = c.EStructuralFeatures.filter(EAttribute).head
 		assertThat(attr)
 			.returns("test", [name])
 	}
 
 	@Test
-	def void test_addMandatoryAttr() {
+	def void test_addMandatoryAttribute() {
 		val c = createEClassWithoutPackage("C1")
-		refactorings.addMandatoryAttr(c, "test", stringDataType)
+		refactorings.addMandatoryAttribute(c, "test", stringDataType)
 		val attr = c.EStructuralFeatures.filter(EAttribute).head
 		assertThat(attr)
 			.returns("test", [name])

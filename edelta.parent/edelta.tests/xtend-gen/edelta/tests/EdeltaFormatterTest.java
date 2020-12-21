@@ -73,7 +73,7 @@ public class EdeltaFormatterTest extends EdeltaAbstractTest {
       _builder.append("modifyEcore   aModification   epackage   myecore    {");
       _builder.newLine();
       _builder.append("\t");
-      _builder.append("std . addMandatoryAttr( \"name\" , ");
+      _builder.append("std . addMandatoryAttribute( \"name\" , ");
       _builder.newLine();
       _builder.append("\t");
       _builder.append("ecoreref(EString), it)");
@@ -153,7 +153,7 @@ public class EdeltaFormatterTest extends EdeltaAbstractTest {
       _builder_1.append("modifyEcore aModification epackage myecore {");
       _builder_1.newLine();
       _builder_1.append("\t");
-      _builder_1.append("std.addMandatoryAttr(\"name\", ecoreref(EString), it)");
+      _builder_1.append("std.addMandatoryAttribute(\"name\", ecoreref(EString), it)");
       _builder_1.newLine();
       _builder_1.append("\t");
       _builder_1.append("ecoreref(ecore.EString)");

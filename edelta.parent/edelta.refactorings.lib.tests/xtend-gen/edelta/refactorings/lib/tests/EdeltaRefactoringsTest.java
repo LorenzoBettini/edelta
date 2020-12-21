@@ -132,7 +132,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
     });
     this.refactorings = _edeltaRefactorings;
     final EClass c = this.createEClassWithoutPackage("C1");
-    this.refactorings.addMandatoryAttr(c, "test", this.stringDataType);
+    this.refactorings.addMandatoryAttribute(c, "test", this.stringDataType);
     final EAttribute attr = IterableExtensions.<EAttribute>head(Iterables.<EAttribute>filter(c.getEStructuralFeatures(), EAttribute.class));
     final Function<EAttribute, String> _function = (EAttribute it) -> {
       return it.getName();
@@ -141,9 +141,9 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
-  public void test_addMandatoryAttr() {
+  public void test_addMandatoryAttribute() {
     final EClass c = this.createEClassWithoutPackage("C1");
-    this.refactorings.addMandatoryAttr(c, "test", this.stringDataType);
+    this.refactorings.addMandatoryAttribute(c, "test", this.stringDataType);
     final EAttribute attr = IterableExtensions.<EAttribute>head(Iterables.<EAttribute>filter(c.getEStructuralFeatures(), EAttribute.class));
     final Function<EAttribute, String> _function = (EAttribute it) -> {
       return it.getName();
