@@ -169,6 +169,48 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
+	def void test_mergeFeatures() {
+		withInputModel("mergeFeatures", "PersonList.ecore")
+		loadModelFile
+		val person = refactorings.getEClass("PersonList", "Person")
+		refactorings.mergeFeatures("name",
+			#[person.getEStructuralFeature("firstName"),person.getEStructuralFeature("lastName")]
+		)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFile
+	}
+
+	@Test
+	def void test_mergeFeaturesDifferent() {
+		withInputModel("mergeFeaturesDifferent", "PersonList.ecore")
+		loadModelFile
+		val person = refactorings.getEClass("PersonList", "Person")
+		refactorings.mergeFeatures("name",
+			#[person.getEStructuralFeature("firstName"),person.getEStructuralFeature("lastName")]
+		)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFileIsSameAsOriginal
+		val student = refactorings.getEClass("PersonList", "Student")
+		refactorings.mergeFeatures("name",
+			#[person.getEStructuralFeature("lastName"),student.getEStructuralFeature("lastName")]
+		)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFileIsSameAsOriginal
+		assertThat(appender.result)
+			.isEqualTo(
+			'''
+			ERROR: PersonList.Person.lastName: The two features cannot be merged:
+			  PersonList.Person.firstName
+			  PersonList.Person.lastName
+			  different for ecore.ETypedElement.lowerBound
+			ERROR: PersonList.Student.lastName: The two features cannot be merged:
+			  PersonList.Person.lastName
+			  PersonList.Student.lastName
+			  different for ecore.EStructuralFeature.eContainingClass
+			'''.toString)
+	}
+
+	@Test
 	def void test_introduceSubclasses() {
 		val p = factory.createEPackage
 		val enum = p.createEEnum("AnEnum") => [

@@ -12,6 +12,7 @@ import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.xbase.lib.Pair
 import edelta.refactorings.lib.helper.EstructuralFeatureEqualityHelper
+import edelta.refactorings.lib.helper.EstructuralFeatureCharacteristicEqualityHelper
 
 package edelta.refactorings.lib
 
@@ -37,6 +38,35 @@ def mergeReferences(String newReferenceName, EClass newReferenceType, List<ERefe
 def mergeAttributes(String newAttrName, EDataType newAttributeType, List<EAttribute> attrs) : EAttribute {
 	removeAllElements(attrs)
 	return newEAttribute(newAttrName, newAttributeType)
+}
+
+/**
+ * Merges the given features into a single feature in the containing class.
+ * The features must be compatible (same containing class, same type, same cardinality, etc).
+ * 
+ * @param newFeatureName
+ * @param features
+ */
+def mergeFeatures(String newFeatureName, Collection<EStructuralFeature> features) : EStructuralFeature {
+	val equality = new EstructuralFeatureCharacteristicEqualityHelper
+	val feature = features.head
+	val different = features
+		.findFirst[feature !== it && !equality.equals(feature, it)]
+	if (different !== null) {
+		showError(different,
+			"The two features cannot be merged:\n" +
+			"  " + getEObjectRepr(feature) + "\n" +
+			"  " + getEObjectRepr(different) + "\n" +
+			"  different for " + getEObjectRepr(equality.difference)
+		)
+		return null
+	}
+	val owner = feature.EContainingClass
+	val copy = feature.copyTo(owner) => [
+		name = newFeatureName
+	]
+	removeAllElements(features)
+	return copy
 }
 
 def introduceSubclasses(EClass containingclass, EAttribute attr, EEnum enumType) {

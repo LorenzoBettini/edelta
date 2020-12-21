@@ -356,10 +356,13 @@ public class EdeltaLibrary {
 	 * 
 	 * @param feature
 	 * @param eClassDest
+	 * @return the copied feature
 	 * @see EcoreUtil#copy(EObject)
 	 */
-	public static void copyTo(EStructuralFeature feature, EClass eClassDest) {
-		eClassDest.getEStructuralFeatures().add(EcoreUtil.copy(feature));
+	public static EStructuralFeature copyTo(EStructuralFeature feature, EClass eClassDest) {
+		EStructuralFeature copy = EcoreUtil.copy(feature);
+		eClassDest.getEStructuralFeatures().add(copy);
+		return copy;
 	}
 
 	/**

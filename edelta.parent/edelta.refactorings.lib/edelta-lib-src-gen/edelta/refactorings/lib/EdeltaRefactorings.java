@@ -4,6 +4,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaLibrary;
+import edelta.refactorings.lib.helper.EstructuralFeatureCharacteristicEqualityHelper;
 import edelta.refactorings.lib.helper.EstructuralFeatureEqualityHelper;
 import java.util.Collection;
 import java.util.List;
@@ -64,6 +65,47 @@ public class EdeltaRefactorings extends AbstractEdelta {
   public EAttribute mergeAttributes(final String newAttrName, final EDataType newAttributeType, final List<EAttribute> attrs) {
     EdeltaLibrary.removeAllElements(attrs);
     return EdeltaLibrary.newEAttribute(newAttrName, newAttributeType);
+  }
+  
+  /**
+   * Merges the given features into a single feature in the containing class.
+   * The features must be compatible (same containing class, same type, same cardinality, etc).
+   * 
+   * @param newFeatureName
+   * @param features
+   */
+  public EStructuralFeature mergeFeatures(final String newFeatureName, final Collection<EStructuralFeature> features) {
+    final EstructuralFeatureCharacteristicEqualityHelper equality = new EstructuralFeatureCharacteristicEqualityHelper();
+    final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
+    final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
+      return Boolean.valueOf(((feature != it) && (!equality.equals(feature, it))));
+    };
+    final EStructuralFeature different = IterableExtensions.<EStructuralFeature>findFirst(features, _function);
+    if ((different != null)) {
+      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(feature);
+      String _plus = (("The two features cannot be merged:\n" + 
+        "  ") + _eObjectRepr);
+      String _plus_1 = (_plus + "\n");
+      String _plus_2 = (_plus_1 + 
+        "  ");
+      String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(different);
+      String _plus_3 = (_plus_2 + _eObjectRepr_1);
+      String _plus_4 = (_plus_3 + "\n");
+      String _plus_5 = (_plus_4 + 
+        "  different for ");
+      String _eObjectRepr_2 = EdeltaLibrary.getEObjectRepr(equality.getDifference());
+      String _plus_6 = (_plus_5 + _eObjectRepr_2);
+      this.showError(different, _plus_6);
+      return null;
+    }
+    final EClass owner = feature.getEContainingClass();
+    EStructuralFeature _copyTo = EdeltaLibrary.copyTo(feature, owner);
+    final Procedure1<EStructuralFeature> _function_1 = (EStructuralFeature it) -> {
+      it.setName(newFeatureName);
+    };
+    final EStructuralFeature copy = ObjectExtensions.<EStructuralFeature>operator_doubleArrow(_copyTo, _function_1);
+    EdeltaLibrary.removeAllElements(features);
+    return copy;
   }
   
   public void introduceSubclasses(final EClass containingclass, final EAttribute attr, final EEnum enumType) {

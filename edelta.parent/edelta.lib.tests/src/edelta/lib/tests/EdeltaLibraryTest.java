@@ -484,14 +484,13 @@ public class EdeltaLibraryTest {
 		assertThat(eClassDest.getEStructuralFeatures()).isEmpty();
 		assertThat(eClassSrc.getEStructuralFeatures())
 			.contains(feature);
-		EdeltaLibrary.copyTo(feature, eClassDest);
+		var copy = EdeltaLibrary.copyTo(feature, eClassDest);
 		// after
 		assertThat(eClassSrc.getEStructuralFeatures())
 			.contains(feature);
 		assertThat(eClassDest.getEStructuralFeatures())
 			.hasSize(1)
-			.first()
-				.matches(f -> new EqualityHelper().equals(f, feature));
+			.containsOnly(copy);
 	}
 
 	@Test

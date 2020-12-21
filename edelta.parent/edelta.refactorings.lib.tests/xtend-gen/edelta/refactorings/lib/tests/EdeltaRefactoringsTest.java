@@ -232,6 +232,72 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
+  public void test_mergeFeatures() {
+    try {
+      this.withInputModel("mergeFeatures", "PersonList.ecore");
+      this.loadModelFile();
+      final EClass person = this.refactorings.getEClass("PersonList", "Person");
+      EStructuralFeature _eStructuralFeature = person.getEStructuralFeature("firstName");
+      EStructuralFeature _eStructuralFeature_1 = person.getEStructuralFeature("lastName");
+      this.refactorings.mergeFeatures("name", 
+        Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eStructuralFeature, _eStructuralFeature_1)));
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
+  public void test_mergeFeaturesDifferent() {
+    try {
+      this.withInputModel("mergeFeaturesDifferent", "PersonList.ecore");
+      this.loadModelFile();
+      final EClass person = this.refactorings.getEClass("PersonList", "Person");
+      EStructuralFeature _eStructuralFeature = person.getEStructuralFeature("firstName");
+      EStructuralFeature _eStructuralFeature_1 = person.getEStructuralFeature("lastName");
+      this.refactorings.mergeFeatures("name", 
+        Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eStructuralFeature, _eStructuralFeature_1)));
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFileIsSameAsOriginal();
+      final EClass student = this.refactorings.getEClass("PersonList", "Student");
+      EStructuralFeature _eStructuralFeature_2 = person.getEStructuralFeature("lastName");
+      EStructuralFeature _eStructuralFeature_3 = student.getEStructuralFeature("lastName");
+      this.refactorings.mergeFeatures("name", 
+        Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eStructuralFeature_2, _eStructuralFeature_3)));
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFileIsSameAsOriginal();
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("ERROR: PersonList.Person.lastName: The two features cannot be merged:");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("PersonList.Person.firstName");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("PersonList.Person.lastName");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("different for ecore.ETypedElement.lowerBound");
+      _builder.newLine();
+      _builder.append("ERROR: PersonList.Student.lastName: The two features cannot be merged:");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("PersonList.Person.lastName");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("PersonList.Student.lastName");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("different for ecore.EStructuralFeature.eContainingClass");
+      _builder.newLine();
+      Assertions.assertThat(this.appender.getResult()).isEqualTo(
+        _builder.toString());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
   public void test_introduceSubclasses() {
     final EPackage p = this.factory.createEPackage();
     EEnum _createEEnum = this.createEEnum(p, "AnEnum");
