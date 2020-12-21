@@ -307,13 +307,9 @@ class Inputs {
 					ecoreref(Person.gender),
 					ecoreref(Gender)
 				)
-				addEAttribute(
-					refactorings.mergeAttributes("name",
-						ecoreref(Person.firstname).EAttributeType,
-						#[ecoreref(Person.firstname), ecoreref(Person.lastname)]
-					)
-				)
 			]
+			refactorings.mergeFeatures("name",
+				#[ecoreref(Person.firstname), ecoreref(Person.lastname)])
 		}
 		
 		modifyEcore introducePlace epackage PersonList {

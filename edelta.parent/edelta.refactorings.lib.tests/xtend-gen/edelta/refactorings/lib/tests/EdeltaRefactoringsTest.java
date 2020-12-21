@@ -267,6 +267,12 @@ public class EdeltaRefactoringsTest extends AbstractTest {
         Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eStructuralFeature_2, _eStructuralFeature_3)));
       this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
       this.assertModifiedFileIsSameAsOriginal();
+      EStructuralFeature _eStructuralFeature_4 = person.getEStructuralFeature("list");
+      EStructuralFeature _eStructuralFeature_5 = person.getEStructuralFeature("lastName");
+      this.refactorings.mergeFeatures("name", 
+        Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eStructuralFeature_4, _eStructuralFeature_5)));
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFileIsSameAsOriginal();
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("ERROR: PersonList.Person.lastName: The two features cannot be merged:");
       _builder.newLine();
@@ -289,6 +295,17 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       _builder.newLine();
       _builder.append("  ");
       _builder.append("different for ecore.EStructuralFeature.eContainingClass");
+      _builder.newLine();
+      _builder.append("ERROR: PersonList.Person.lastName: The two features cannot be merged:");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("PersonList.Person.list");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("PersonList.Person.lastName");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("different for ");
       _builder.newLine();
       Assertions.assertThat(this.appender.getResult()).isEqualTo(
         _builder.toString());

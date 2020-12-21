@@ -4,7 +4,6 @@ import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaLibrary;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.Collections;
-import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
@@ -33,13 +32,11 @@ public class PersonListExample extends AbstractEdelta {
       this.refactorings.introduceSubclasses(it_1, 
         getEAttribute("PersonList", "Person", "gender"), 
         getEEnum("PersonList", "Gender"));
-      EdeltaLibrary.addEAttribute(it_1, 
-        this.refactorings.mergeAttributes("name", 
-          getEAttribute("PersonList", "Person", "firstname").getEAttributeType(), 
-          Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname")))));
     };
     ObjectExtensions.<EClass>operator_doubleArrow(
       getEClass("PersonList", "Person"), _function);
+    this.refactorings.mergeFeatures("name", 
+      Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname"))));
   }
   
   public void introducePlace(final EPackage it) {

@@ -196,6 +196,11 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		)
 		refactorings.saveModifiedEcores(MODIFIED)
 		assertModifiedFileIsSameAsOriginal
+		refactorings.mergeFeatures("name",
+			#[person.getEStructuralFeature("list"),person.getEStructuralFeature("lastName")]
+		)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFileIsSameAsOriginal
 		assertThat(appender.result)
 			.isEqualTo(
 			'''
@@ -207,6 +212,10 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			  PersonList.Person.lastName
 			  PersonList.Student.lastName
 			  different for ecore.EStructuralFeature.eContainingClass
+			ERROR: PersonList.Person.lastName: The two features cannot be merged:
+			  PersonList.Person.list
+			  PersonList.Person.lastName
+			  different for 
 			'''.toString)
 	}
 
