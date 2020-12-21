@@ -7,6 +7,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 
+import java.util.Arrays;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.emf.ecore.EcorePackage.Literals.*;
 
@@ -489,7 +491,29 @@ public class EdeltaLibraryTest {
 		assertThat(eClassDest.getEStructuralFeatures())
 			.hasSize(1)
 			.first()
-				.satisfies(f -> new EqualityHelper().equals(f, feature));
+				.matches(f -> new EqualityHelper().equals(f, feature));
+	}
+
+	@Test
+	public void test_copyAllTo() {
+		EClass eClassSrc = ecoreFactory.createEClass();
+		EClass eClassDest = ecoreFactory.createEClass();
+		EStructuralFeature feature1 = ecoreFactory.createEAttribute();
+		eClassSrc.getEStructuralFeatures().add(feature1);
+		EStructuralFeature feature2 = ecoreFactory.createEReference();
+		eClassSrc.getEStructuralFeatures().add(feature2);
+		// before
+		assertThat(eClassDest.getEStructuralFeatures()).isEmpty();
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.contains(feature1, feature2);
+		EdeltaLibrary.copyAllTo(Arrays.asList(feature1, feature2), eClassDest);
+		// after
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.contains(feature1, feature2);
+		assertThat(eClassDest.getEStructuralFeatures())
+			.hasSize(2)
+			.allMatch(f -> new EqualityHelper().equals(f, feature1)
+						|| new EqualityHelper().equals(f, feature2));
 	}
 
 	@Test
@@ -507,6 +531,25 @@ public class EdeltaLibraryTest {
 		assertThat(eClassSrc.getEStructuralFeatures()).isEmpty();
 		assertThat(eClassDest.getEStructuralFeatures())
 			.contains(feature);
+	}
+
+	@Test
+	public void test_moveAllTo() {
+		EClass eClassSrc = ecoreFactory.createEClass();
+		EClass eClassDest = ecoreFactory.createEClass();
+		EStructuralFeature feature1 = ecoreFactory.createEAttribute();
+		eClassSrc.getEStructuralFeatures().add(feature1);
+		EStructuralFeature feature2 = ecoreFactory.createEReference();
+		eClassSrc.getEStructuralFeatures().add(feature2);
+		// before
+		assertThat(eClassDest.getEStructuralFeatures()).isEmpty();
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.contains(feature1, feature2);
+		EdeltaLibrary.moveAllTo(Arrays.asList(feature1, feature2), eClassDest);
+		// after
+		assertThat(eClassSrc.getEStructuralFeatures()).isEmpty();
+		assertThat(eClassDest.getEStructuralFeatures())
+			.contains(feature1, feature2);
 	}
 
 	@Test
