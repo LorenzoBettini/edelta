@@ -110,11 +110,11 @@ public class EdeltaRefactorings extends AbstractEdelta {
     }
     final EClass owner = IterableExtensions.<EClass>head(owners);
     final EClass extracted = EdeltaLibrary.addNewEClass(owner.getEPackage(), name);
-    final Consumer<EReference> _function_2 = (EReference it) -> {
-      EdeltaLibrary.makeSingleRequired(it);
+    EReference _addMandatoryReference = this.addMandatoryReference(owner, newReferenceName, extracted);
+    final Procedure1<EReference> _function_2 = (EReference it) -> {
       this.makeContainmentBidirectional(it);
     };
-    EdeltaLibrary.addNewEReference(owner, newReferenceName, extracted, _function_2);
+    ObjectExtensions.<EReference>operator_doubleArrow(_addMandatoryReference, _function_2);
     final Consumer<EStructuralFeature> _function_3 = (EStructuralFeature it) -> {
       EdeltaLibrary.moveTo(it, extracted);
     };
@@ -134,11 +134,11 @@ public class EdeltaRefactorings extends AbstractEdelta {
       reference.setContainment(true);
       final EClass owner = reference.getEContainingClass();
       final EClass referredType = reference.getEReferenceType();
-      final Consumer<EReference> _function = (EReference it) -> {
+      EReference _addMandatoryReference = this.addMandatoryReference(referredType, this.fromTypeToFeatureName(owner), owner);
+      final Procedure1<EReference> _function = (EReference it) -> {
         EdeltaLibrary.makeBidirectional(it, reference);
-        EdeltaLibrary.makeSingleRequired(it);
       };
-      _xblockexpression = EdeltaLibrary.addNewEReference(referredType, this.fromTypeToFeatureName(owner), owner, _function);
+      _xblockexpression = ObjectExtensions.<EReference>operator_doubleArrow(_addMandatoryReference, _function);
     }
     return _xblockexpression;
   }
@@ -157,11 +157,8 @@ public class EdeltaRefactorings extends AbstractEdelta {
     }
     final EPackage ePackage = reference.getEContainingClass().getEPackage();
     final EClass extracted = EdeltaLibrary.addNewEClass(ePackage, name);
-    final Consumer<EReference> _function = (EReference it) -> {
-      EdeltaLibrary.makeSingleRequired(it);
-    };
-    final EReference extractedRef = EdeltaLibrary.addNewEReference(extracted, 
-      this.fromTypeToFeatureName(reference.getEType()), reference.getEReferenceType(), _function);
+    final EReference extractedRef = this.addMandatoryReference(extracted, 
+      this.fromTypeToFeatureName(reference.getEType()), reference.getEReferenceType());
     final EReference eOpposite = reference.getEOpposite();
     if ((eOpposite != null)) {
       EdeltaLibrary.makeBidirectional(eOpposite, extractedRef);

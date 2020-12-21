@@ -72,8 +72,7 @@ def extractClass(String name, Collection<EStructuralFeature> features,
 	}
 	val owner = owners.head
 	val extracted = owner.EPackage.addNewEClass(name)
-	owner.addNewEReference(newReferenceName, extracted) [
-		makeSingleRequired
+	owner.addMandatoryReference(newReferenceName, extracted) => [
 		makeContainmentBidirectional
 	]
 	features.forEach[moveTo(extracted)]
@@ -90,9 +89,8 @@ def makeContainmentBidirectional(EReference reference) {
 	reference.containment = true
 	val owner = reference.EContainingClass
 	val referredType = reference.EReferenceType
-	referredType.addNewEReference(owner.fromTypeToFeatureName, owner) [
+	referredType.addMandatoryReference(owner.fromTypeToFeatureName, owner) => [
 		makeBidirectional(reference)
-		makeSingleRequired
 	]
 }
 
@@ -108,10 +106,8 @@ def referenceToClass(String name, EReference reference) {
 	}
 	val ePackage = reference.EContainingClass.EPackage
 	val extracted = ePackage.addNewEClass(name)
-	val extractedRef = extracted.addNewEReference(
-		reference.EType.fromTypeToFeatureName, reference.EReferenceType) [
-		makeSingleRequired
-	]
+	val extractedRef = extracted.addMandatoryReference(
+		reference.EType.fromTypeToFeatureName, reference.EReferenceType)
 	val eOpposite = reference.EOpposite
 	if (eOpposite !== null) {
 		eOpposite.makeBidirectional(extractedRef)
