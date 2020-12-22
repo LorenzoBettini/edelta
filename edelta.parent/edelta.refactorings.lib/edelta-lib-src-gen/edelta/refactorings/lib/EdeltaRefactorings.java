@@ -74,24 +74,19 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @param features
    */
   public EStructuralFeature mergeFeatures(final String newFeatureName, final Collection<EStructuralFeature> features) {
-    final EdeltaFeatureDifferenceFinder equality = new EdeltaFeatureDifferenceFinder().ignoringName();
-    final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
-    final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
-      return Boolean.valueOf(((feature != it) && (!equality.equals(feature, it))));
-    };
-    final EStructuralFeature different = IterableExtensions.<EStructuralFeature>findFirst(features, _function);
-    if ((different != null)) {
-      String _differenceDetails = equality.getDifferenceDetails();
-      String _plus = ("The two features cannot be merged:\n" + _differenceDetails);
-      this.showError(different, _plus);
+    final EdeltaFeatureDifferenceFinder diffFinder = new EdeltaFeatureDifferenceFinder().ignoringName();
+    boolean _checkNoDifferences = this.checkNoDifferences(features, diffFinder, "The two features cannot be merged");
+    boolean _not = (!_checkNoDifferences);
+    if (_not) {
       return null;
     }
+    final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
     final EClass owner = feature.getEContainingClass();
     EStructuralFeature _copyTo = EdeltaLibrary.copyTo(feature, owner);
-    final Procedure1<EStructuralFeature> _function_1 = (EStructuralFeature it) -> {
+    final Procedure1<EStructuralFeature> _function = (EStructuralFeature it) -> {
       it.setName(newFeatureName);
     };
-    final EStructuralFeature copy = ObjectExtensions.<EStructuralFeature>operator_doubleArrow(_copyTo, _function_1);
+    final EStructuralFeature copy = ObjectExtensions.<EStructuralFeature>operator_doubleArrow(_copyTo, _function);
     EdeltaLibrary.removeAllElements(features);
     return copy;
   }
@@ -336,35 +331,29 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @param duplicates
    */
   public void pullUpFeatures(final EClass dest, final List<? extends EStructuralFeature> duplicates) {
-    final EStructuralFeature feature = IterableExtensions.head(duplicates);
-    final EdeltaFeatureDifferenceFinder equality = new EdeltaFeatureDifferenceFinder().ignoringContainingClass();
-    final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
-      return Boolean.valueOf(((feature != it) && (!equality.equals(feature, it))));
-    };
-    final EStructuralFeature different = IterableExtensions.findFirst(duplicates, _function);
-    if ((different != null)) {
-      String _differenceDetails = equality.getDifferenceDetails();
-      String _plus = ("The two features are not equal:\n" + _differenceDetails);
-      this.showError(different, _plus);
+    final EdeltaFeatureDifferenceFinder diffFinder = new EdeltaFeatureDifferenceFinder().ignoringContainingClass();
+    boolean _checkNoDifferences = this.checkNoDifferences(duplicates, diffFinder, "The two features are not equal");
+    boolean _not = (!_checkNoDifferences);
+    if (_not) {
       return;
     }
-    final Function1<EStructuralFeature, Boolean> _function_1 = (EStructuralFeature it) -> {
+    final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
       boolean _contains = it.getEContainingClass().getESuperTypes().contains(dest);
       return Boolean.valueOf((!_contains));
     };
-    final Iterable<? extends EStructuralFeature> wrongFeatures = IterableExtensions.filter(duplicates, _function_1);
+    final Iterable<? extends EStructuralFeature> wrongFeatures = IterableExtensions.filter(duplicates, _function);
     boolean _isEmpty = IterableExtensions.isEmpty(wrongFeatures);
-    boolean _not = (!_isEmpty);
-    if (_not) {
-      final Consumer<EStructuralFeature> _function_2 = (EStructuralFeature it) -> {
+    boolean _not_1 = (!_isEmpty);
+    if (_not_1) {
+      final Consumer<EStructuralFeature> _function_1 = (EStructuralFeature it) -> {
         String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it.getEContainingClass());
-        String _plus_1 = ("Not a direct subclass of destination: " + _eObjectRepr);
-        this.showError(it, _plus_1);
+        String _plus = ("Not a direct subclass of destination: " + _eObjectRepr);
+        this.showError(it, _plus);
       };
-      wrongFeatures.forEach(_function_2);
+      wrongFeatures.forEach(_function_1);
       return;
     }
-    EdeltaLibrary.copyTo(feature, dest);
+    EdeltaLibrary.copyTo(IterableExtensions.head(duplicates), dest);
     EdeltaLibrary.removeAllElements(duplicates);
   }
   
@@ -480,6 +469,31 @@ public class EdeltaRefactorings extends AbstractEdelta {
       this.showError(reference, _plus);
     }
     return (!containment);
+  }
+  
+  /**
+   * Makes sure that there are no differences in the passed features,
+   * using the specified differenceFinder, otherwise it shows an error message
+   * with the details of the differences.
+   * 
+   * @param features
+   * @param differenceFinder
+   * @param errorMessage
+   * @return true if there are no differences
+   */
+  public boolean checkNoDifferences(final Collection<? extends EStructuralFeature> features, final EdeltaFeatureDifferenceFinder differenceFinder, final String errorMessage) {
+    final EStructuralFeature feature = IterableExtensions.head(features);
+    final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
+      return Boolean.valueOf(((feature != it) && (!differenceFinder.equals(feature, it))));
+    };
+    final EStructuralFeature different = IterableExtensions.findFirst(features, _function);
+    if ((different != null)) {
+      String _differenceDetails = differenceFinder.getDifferenceDetails();
+      String _plus = ((errorMessage + ":\n") + _differenceDetails);
+      this.showError(different, _plus);
+      return false;
+    }
+    return true;
   }
   
   @Override

@@ -47,17 +47,10 @@ def mergeAttributes(String newAttrName, EDataType newAttributeType, List<EAttrib
  * @param features
  */
 def mergeFeatures(String newFeatureName, Collection<EStructuralFeature> features) : EStructuralFeature {
-	val equality = new EdeltaFeatureDifferenceFinder().ignoringName
-	val feature = features.head
-	val different = features
-		.findFirst[feature !== it && !equality.equals(feature, it)]
-	if (different !== null) {
-		showError(different,
-			"The two features cannot be merged:\n" +
-			equality.differenceDetails
-		)
+	val diffFinder = new EdeltaFeatureDifferenceFinder().ignoringName
+	if (!checkNoDifferences(features, diffFinder, "The two features cannot be merged"))
 		return null
-	}
+	val feature = features.head
 	val owner = feature.EContainingClass
 	val copy = feature.copyTo(owner) => [
 		name = newFeatureName
@@ -244,17 +237,10 @@ def extractSuperclass(String name, List<? extends EStructuralFeature> duplicates
  * @param duplicates
  */
 def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates) {
-	val feature = duplicates.head
-	val equality = new EdeltaFeatureDifferenceFinder().ignoringContainingClass
-	val different = duplicates
-		.findFirst[feature !== it && !equality.equals(feature, it)]
-	if (different !== null) {
-		showError(different,
-			"The two features are not equal:\n" +
-			equality.differenceDetails
-		)
-		return
-	}
+	val diffFinder = new EdeltaFeatureDifferenceFinder().ignoringContainingClass
+	if (!checkNoDifferences(duplicates, diffFinder, "The two features are not equal"))
+		return 
+
 	val wrongFeatures = duplicates
 		.filter[!EContainingClass.ESuperTypes.contains(dest)]
 	if (!wrongFeatures.empty) {
@@ -266,7 +252,7 @@ def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates) {
 		]
 		return
 	}
-	feature.copyTo(dest)
+	duplicates.head.copyTo(dest)
 	removeAllElements(duplicates)
 }
 
@@ -365,4 +351,31 @@ def checkNotContainment(EReference reference, String message) : boolean {
 	if (containment)
 		showError(reference, message + ": " + getEObjectRepr(reference))
 	return !containment
+}
+
+/**
+ * Makes sure that there are no differences in the passed features,
+ * using the specified differenceFinder, otherwise it shows an error message
+ * with the details of the differences.
+ * 
+ * @param features
+ * @param differenceFinder
+ * @param errorMessage
+ * @return true if there are no differences
+ */
+def checkNoDifferences(Collection<? extends EStructuralFeature> features,
+	EdeltaFeatureDifferenceFinder differenceFinder,
+	String errorMessage
+) : boolean {
+	val feature = features.head
+	val different = features
+		.findFirst[feature !== it && !differenceFinder.equals(feature, it)]
+	if (different !== null) {
+		showError(different,
+			errorMessage + ":\n" +
+			differenceFinder.differenceDetails
+		)
+		return false
+	}
+	return true
 }
