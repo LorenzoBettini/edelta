@@ -1,3 +1,4 @@
+import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder
 import java.util.Collection
 import java.util.List
 import java.util.Map
@@ -11,8 +12,6 @@ import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.xbase.lib.Pair
-import edelta.refactorings.lib.helper.EstructuralFeatureEqualityHelper
-import edelta.refactorings.lib.helper.EstructuralFeatureCharacteristicEqualityHelper
 
 package edelta.refactorings.lib
 
@@ -48,16 +47,14 @@ def mergeAttributes(String newAttrName, EDataType newAttributeType, List<EAttrib
  * @param features
  */
 def mergeFeatures(String newFeatureName, Collection<EStructuralFeature> features) : EStructuralFeature {
-	val equality = new EstructuralFeatureCharacteristicEqualityHelper
+	val equality = new EdeltaFeatureDifferenceFinder().ignoringName
 	val feature = features.head
 	val different = features
 		.findFirst[feature !== it && !equality.equals(feature, it)]
 	if (different !== null) {
 		showError(different,
 			"The two features cannot be merged:\n" +
-			"  " + getEObjectRepr(feature) + "\n" +
-			"  " + getEObjectRepr(different) + "\n" +
-			"  different for " + getEObjectRepr(equality.difference)
+			equality.differenceDetails
 		)
 		return null
 	}
@@ -248,15 +245,13 @@ def extractSuperclass(String name, List<? extends EStructuralFeature> duplicates
  */
 def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates) {
 	val feature = duplicates.head
-	val equality = new EstructuralFeatureEqualityHelper
+	val equality = new EdeltaFeatureDifferenceFinder().ignoringContainingClass
 	val different = duplicates
 		.findFirst[feature !== it && !equality.equals(feature, it)]
 	if (different !== null) {
 		showError(different,
 			"The two features are not equal:\n" +
-			"  " + getEObjectRepr(feature) + "\n" +
-			"  " + getEObjectRepr(different) + "\n" +
-			"  different for " + getEObjectRepr(equality.difference)
+			equality.differenceDetails
 		)
 		return
 	}

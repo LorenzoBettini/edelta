@@ -205,17 +205,23 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			.isEqualTo(
 			'''
 			ERROR: PersonList.Person.lastName: The two features cannot be merged:
-			  PersonList.Person.firstName
-			  PersonList.Person.lastName
-			  different for ecore.ETypedElement.lowerBound
+			ecore.ETypedElement.lowerBound:
+			  PersonList.Person.firstName: 0
+			  PersonList.Person.lastName: 1
+			
 			ERROR: PersonList.Student.lastName: The two features cannot be merged:
-			  PersonList.Person.lastName
-			  PersonList.Student.lastName
-			  different for ecore.EStructuralFeature.eContainingClass
+			ecore.ENamedElement.name:
+			  PersonList.Person: Person
+			  PersonList.Student: Student
+			ecore.EStructuralFeature.eContainingClass:
+			  PersonList.Person.lastName: PersonList.Person
+			  PersonList.Student.lastName: PersonList.Student
+			
 			ERROR: PersonList.Person.lastName: The two features cannot be merged:
-			  PersonList.Person.list
-			  PersonList.Person.lastName
-			  different for 
+			different kinds:
+			  PersonList.Person.list: ecore.EReference
+			  PersonList.Person.lastName: ecore.EAttribute
+			
 			'''.toString)
 	}
 
@@ -611,9 +617,10 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			.isEqualTo(
 			'''
 			ERROR: PersonList.Employee.name: The two features are not equal:
-			  PersonList.Student.name
-			  PersonList.Employee.name
-			  different for ecore.ETypedElement.lowerBound
+			ecore.ETypedElement.lowerBound:
+			  PersonList.Student.name: 0
+			  PersonList.Employee.name: 1
+			
 			'''.toString)
 	}
 

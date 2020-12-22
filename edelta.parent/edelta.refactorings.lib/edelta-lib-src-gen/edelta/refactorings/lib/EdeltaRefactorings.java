@@ -4,8 +4,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaLibrary;
-import edelta.refactorings.lib.helper.EstructuralFeatureCharacteristicEqualityHelper;
-import edelta.refactorings.lib.helper.EstructuralFeatureEqualityHelper;
+import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -75,27 +74,16 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @param features
    */
   public EStructuralFeature mergeFeatures(final String newFeatureName, final Collection<EStructuralFeature> features) {
-    final EstructuralFeatureCharacteristicEqualityHelper equality = new EstructuralFeatureCharacteristicEqualityHelper();
+    final EdeltaFeatureDifferenceFinder equality = new EdeltaFeatureDifferenceFinder().ignoringName();
     final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
     final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
       return Boolean.valueOf(((feature != it) && (!equality.equals(feature, it))));
     };
     final EStructuralFeature different = IterableExtensions.<EStructuralFeature>findFirst(features, _function);
     if ((different != null)) {
-      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(feature);
-      String _plus = (("The two features cannot be merged:\n" + 
-        "  ") + _eObjectRepr);
-      String _plus_1 = (_plus + "\n");
-      String _plus_2 = (_plus_1 + 
-        "  ");
-      String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(different);
-      String _plus_3 = (_plus_2 + _eObjectRepr_1);
-      String _plus_4 = (_plus_3 + "\n");
-      String _plus_5 = (_plus_4 + 
-        "  different for ");
-      String _eObjectRepr_2 = EdeltaLibrary.getEObjectRepr(equality.getDifference());
-      String _plus_6 = (_plus_5 + _eObjectRepr_2);
-      this.showError(different, _plus_6);
+      String _differenceDetails = equality.getDifferenceDetails();
+      String _plus = ("The two features cannot be merged:\n" + _differenceDetails);
+      this.showError(different, _plus);
       return null;
     }
     final EClass owner = feature.getEContainingClass();
@@ -349,26 +337,15 @@ public class EdeltaRefactorings extends AbstractEdelta {
    */
   public void pullUpFeatures(final EClass dest, final List<? extends EStructuralFeature> duplicates) {
     final EStructuralFeature feature = IterableExtensions.head(duplicates);
-    final EstructuralFeatureEqualityHelper equality = new EstructuralFeatureEqualityHelper();
+    final EdeltaFeatureDifferenceFinder equality = new EdeltaFeatureDifferenceFinder().ignoringContainingClass();
     final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
       return Boolean.valueOf(((feature != it) && (!equality.equals(feature, it))));
     };
     final EStructuralFeature different = IterableExtensions.findFirst(duplicates, _function);
     if ((different != null)) {
-      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(feature);
-      String _plus = (("The two features are not equal:\n" + 
-        "  ") + _eObjectRepr);
-      String _plus_1 = (_plus + "\n");
-      String _plus_2 = (_plus_1 + 
-        "  ");
-      String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(different);
-      String _plus_3 = (_plus_2 + _eObjectRepr_1);
-      String _plus_4 = (_plus_3 + "\n");
-      String _plus_5 = (_plus_4 + 
-        "  different for ");
-      String _eObjectRepr_2 = EdeltaLibrary.getEObjectRepr(equality.getDifference());
-      String _plus_6 = (_plus_5 + _eObjectRepr_2);
-      this.showError(different, _plus_6);
+      String _differenceDetails = equality.getDifferenceDetails();
+      String _plus = ("The two features are not equal:\n" + _differenceDetails);
+      this.showError(different, _plus);
       return;
     }
     final Function1<EStructuralFeature, Boolean> _function_1 = (EStructuralFeature it) -> {
@@ -380,9 +357,9 @@ public class EdeltaRefactorings extends AbstractEdelta {
     boolean _not = (!_isEmpty);
     if (_not) {
       final Consumer<EStructuralFeature> _function_2 = (EStructuralFeature it) -> {
-        String _eObjectRepr_3 = EdeltaLibrary.getEObjectRepr(it.getEContainingClass());
-        String _plus_7 = ("Not a direct subclass of destination: " + _eObjectRepr_3);
-        this.showError(it, _plus_7);
+        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it.getEContainingClass());
+        String _plus_1 = ("Not a direct subclass of destination: " + _eObjectRepr);
+        this.showError(it, _plus_1);
       };
       wrongFeatures.forEach(_function_2);
       return;
