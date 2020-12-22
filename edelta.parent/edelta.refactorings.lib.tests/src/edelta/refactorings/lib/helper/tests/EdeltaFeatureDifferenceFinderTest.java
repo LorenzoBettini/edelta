@@ -68,6 +68,18 @@ public class EdeltaFeatureDifferenceFinderTest {
 	}
 
 	@Test
+	public void whenTwoFeaturesAreEqualIgnoringContainingClass() {
+		var feature1 = newEReference("r1", ECLASS, f -> f.setLowerBound(1));
+		var feature2 = newEReference("r1", ECLASS, f -> f.setLowerBound(1));
+		newEClass("C1", c -> addEReference(c, feature1));
+		newEClass("C2", c -> addEReference(c, feature2));
+		var differenceFinder = new EdeltaFeatureDifferenceFinder()
+			.ignoringContainingClass();
+		assertThat(differenceFinder.equals(feature1, feature2))
+			.isTrue();
+	}
+
+	@Test
 	public void whenTwoFeaturesHaveDifferentLowerBoundWithDifferenceDetails() {
 		var feature1 = newEReference("r1", ECLASS, f -> f.setLowerBound(1));
 		var feature2 = newEReference("r1", ECLASS, f -> f.setLowerBound(2));
@@ -114,7 +126,10 @@ public class EdeltaFeatureDifferenceFinderTest {
 			.isFalse();
 		String details = differenceFinder.getDifferenceDetails();
 		assertThat(details)
-			.isEmpty(); // TODO: this must contain details about different kinds
+			.isEqualTo("different kinds:\n"
+					+ "  r1: ecore.EReference\n"
+					+ "  r1: ecore.EAttribute\n"
+					+ "");
 	}
 
 	@Test
@@ -124,7 +139,16 @@ public class EdeltaFeatureDifferenceFinderTest {
 		var differenceFinder = new EdeltaFeatureDifferenceFinder()
 				.ignoringName();
 		assertThat(differenceFinder.equals(feature1, feature2))
-		.isTrue(); // TODO: this must be false
+			.isFalse();
+		String details = differenceFinder.getDifferenceDetails();
+		assertThat(details)
+			.isEqualTo("ecore.ENamedElement.name:\n"
+					+ "  aType1: aType1\n"
+					+ "  aType2: aType2\n"
+					+ "ecore.ETypedElement.eType:\n"
+					+ "  r1: aType1\n"
+					+ "  r1: aType2\n"
+					+ "");
 	}
 
 }
