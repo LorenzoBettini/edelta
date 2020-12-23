@@ -52,9 +52,7 @@ def mergeFeatures(String newFeatureName, Collection<EStructuralFeature> features
 		return null
 	val feature = features.head
 	val owner = feature.EContainingClass
-	val copy = feature.copyTo(owner) => [
-		name = newFeatureName
-	]
+	val copy = feature.copyToAs(owner, newFeatureName)
 	removeAllElements(features)
 	return copy
 }

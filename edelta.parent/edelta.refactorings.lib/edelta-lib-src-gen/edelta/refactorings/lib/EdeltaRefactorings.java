@@ -82,11 +82,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     }
     final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
     final EClass owner = feature.getEContainingClass();
-    EStructuralFeature _copyTo = EdeltaLibrary.copyTo(feature, owner);
-    final Procedure1<EStructuralFeature> _function = (EStructuralFeature it) -> {
-      it.setName(newFeatureName);
-    };
-    final EStructuralFeature copy = ObjectExtensions.<EStructuralFeature>operator_doubleArrow(_copyTo, _function);
+    final EStructuralFeature copy = EdeltaLibrary.copyToAs(feature, owner, newFeatureName);
     EdeltaLibrary.removeAllElements(features);
     return copy;
   }

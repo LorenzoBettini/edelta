@@ -17,6 +17,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
@@ -491,6 +492,29 @@ public class EdeltaLibraryTest {
 		assertThat(eClassDest.getEStructuralFeatures())
 			.hasSize(1)
 			.containsOnly(copy);
+	}
+
+	@Test
+	public void test_copyToAs() {
+		EClass eClassSrc = ecoreFactory.createEClass();
+		EClass eClassDest = ecoreFactory.createEClass();
+		EStructuralFeature feature = ecoreFactory.createEAttribute();
+		eClassSrc.getEStructuralFeatures().add(feature);
+		feature.setName("originalName");
+		// before
+		assertThat(eClassDest.getEStructuralFeatures()).isEmpty();
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.contains(feature);
+		var copy = EdeltaLibrary.copyToAs(feature, eClassDest, "newName");
+		// after
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.containsOnly(feature)
+			.first()
+			.returns("originalName", ENamedElement::getName);
+		assertThat(eClassDest.getEStructuralFeatures())
+			.containsOnly(copy)
+			.first()
+			.returns("newName", ENamedElement::getName);
 	}
 
 	@Test
