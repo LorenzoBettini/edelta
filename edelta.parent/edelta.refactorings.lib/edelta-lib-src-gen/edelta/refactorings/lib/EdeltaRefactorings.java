@@ -6,11 +6,13 @@ import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaLibrary;
 import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -23,6 +25,7 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.ListExtensions;
@@ -72,6 +75,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * 
    * @param newFeatureName
    * @param features
+   * @return the new feature added to the containing class of the features
    */
   public EStructuralFeature mergeFeatures(final String newFeatureName, final Collection<EStructuralFeature> features) {
     final EdeltaFeatureDifferenceFinder diffFinder = new EdeltaFeatureDifferenceFinder().ignoringName();
@@ -85,6 +89,24 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final EStructuralFeature copy = EdeltaLibrary.copyToAs(feature, owner, newFeatureName);
     EdeltaLibrary.removeAllElements(features);
     return copy;
+  }
+  
+  /**
+   * Merges the given features into the single given feature in the containing class.
+   * The features must be compatible (same containing class, same type, same cardinality, etc)
+   * and their types must be subtypes of the specified feature.
+   * 
+   * @param feature the features will be merged into this feature
+   * @param features
+   */
+  public EStructuralFeature mergeFeatures(final EStructuralFeature feature, final Collection<EStructuralFeature> features) {
+    final EdeltaFeatureDifferenceFinder diffFinder = new EdeltaFeatureDifferenceFinder().ignoringName().ignoringType();
+    if (((!this.checkCompliant(feature, features)) || 
+      (!this.checkNoDifferences(Iterables.<EStructuralFeature>concat(Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(feature)), features), diffFinder, "The two features cannot be merged")))) {
+      return null;
+    }
+    EdeltaLibrary.removeAllElements(features);
+    return feature;
   }
   
   public void introduceSubclasses(final EClass containingclass, final EAttribute attr, final EEnum enumType) {
@@ -477,7 +499,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @param errorMessage
    * @return true if there are no differences
    */
-  public boolean checkNoDifferences(final Collection<? extends EStructuralFeature> features, final EdeltaFeatureDifferenceFinder differenceFinder, final String errorMessage) {
+  public boolean checkNoDifferences(final Iterable<? extends EStructuralFeature> features, final EdeltaFeatureDifferenceFinder differenceFinder, final String errorMessage) {
     final EStructuralFeature feature = IterableExtensions.head(features);
     final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
       return Boolean.valueOf(((feature != it) && (!differenceFinder.equals(feature, it))));
@@ -487,6 +509,62 @@ public class EdeltaRefactorings extends AbstractEdelta {
       String _differenceDetails = differenceFinder.getDifferenceDetails();
       String _plus = ((errorMessage + ":\n") + _differenceDetails);
       this.showError(different, _plus);
+      return false;
+    }
+    return true;
+  }
+  
+  /**
+   * Makes sure that the features have types that are subtypes of the
+   * specified feature.
+   * 
+   * @param feature
+   * @param features
+   * @return true if they are all compliant
+   */
+  public boolean checkCompliant(final EStructuralFeature feature, final Collection<? extends EStructuralFeature> features) {
+    Predicate<EStructuralFeature> _xifexpression = null;
+    if ((feature instanceof EReference)) {
+      final Predicate<EStructuralFeature> _function = (EStructuralFeature other) -> {
+        boolean _xifexpression_1 = false;
+        if ((other instanceof EReference)) {
+          _xifexpression_1 = ((EReference)feature).getEReferenceType().isSuperTypeOf(((EReference)other).getEReferenceType());
+        } else {
+          _xifexpression_1 = false;
+        }
+        return _xifexpression_1;
+      };
+      _xifexpression = _function;
+    } else {
+      final Predicate<EStructuralFeature> _function_1 = (EStructuralFeature other) -> {
+        EClassifier _eType = feature.getEType();
+        EClassifier _eType_1 = other.getEType();
+        return (_eType == _eType_1);
+      };
+      _xifexpression = _function_1;
+    }
+    final Predicate<EStructuralFeature> compliance = _xifexpression;
+    final Function1<EStructuralFeature, Boolean> _function_2 = (EStructuralFeature it) -> {
+      boolean _test = compliance.test(it);
+      return Boolean.valueOf((!_test));
+    };
+    final Iterable<? extends EStructuralFeature> nonCompliant = IterableExtensions.filter(features, _function_2);
+    boolean _isEmpty = IterableExtensions.isEmpty(nonCompliant);
+    boolean _not = (!_isEmpty);
+    if (_not) {
+      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(feature.getEType());
+      String _plus = ("features not compliant with type " + _eObjectRepr);
+      String _plus_1 = (_plus + ":\n");
+      final Function1<EStructuralFeature, String> _function_3 = (EStructuralFeature it) -> {
+        String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(it);
+        String _plus_2 = ("  " + _eObjectRepr_1);
+        String _plus_3 = (_plus_2 + ": ");
+        String _eObjectRepr_2 = EdeltaLibrary.getEObjectRepr(it.getEType());
+        return (_plus_3 + _eObjectRepr_2);
+      };
+      String _join = IterableExtensions.join(IterableExtensions.map(nonCompliant, _function_3), "\n");
+      String _plus_2 = (_plus_1 + _join);
+      this.showError(feature, _plus_2);
       return false;
     }
     return true;

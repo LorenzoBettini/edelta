@@ -12,6 +12,7 @@ import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.xbase.lib.Pair
+import java.util.function.Predicate
 
 package edelta.refactorings.lib
 
@@ -45,6 +46,7 @@ def mergeAttributes(String newAttrName, EDataType newAttributeType, List<EAttrib
  * 
  * @param newFeatureName
  * @param features
+ * @return the new feature added to the containing class of the features
  */
 def mergeFeatures(String newFeatureName, Collection<EStructuralFeature> features) : EStructuralFeature {
 	val diffFinder = new EdeltaFeatureDifferenceFinder().ignoringName
@@ -55,6 +57,25 @@ def mergeFeatures(String newFeatureName, Collection<EStructuralFeature> features
 	val copy = feature.copyToAs(owner, newFeatureName)
 	removeAllElements(features)
 	return copy
+}
+
+/**
+ * Merges the given features into the single given feature in the containing class.
+ * The features must be compatible (same containing class, same type, same cardinality, etc)
+ * and their types must be subtypes of the specified feature.
+ * 
+ * @param feature the features will be merged into this feature
+ * @param features
+ */
+def mergeFeatures(EStructuralFeature feature, Collection<EStructuralFeature> features) : EStructuralFeature {
+	val diffFinder = new EdeltaFeatureDifferenceFinder()
+		.ignoringName
+		.ignoringType
+	if (!checkCompliant(feature, features) ||
+		!checkNoDifferences(#[feature] + features, diffFinder, "The two features cannot be merged"))
+		return null
+	removeAllElements(features)
+	return feature
 }
 
 def introduceSubclasses(EClass containingclass, EAttribute attr, EEnum enumType) {
@@ -361,7 +382,7 @@ def checkNotContainment(EReference reference, String message) : boolean {
  * @param errorMessage
  * @return true if there are no differences
  */
-def checkNoDifferences(Collection<? extends EStructuralFeature> features,
+def checkNoDifferences(Iterable<? extends EStructuralFeature> features,
 	EdeltaFeatureDifferenceFinder differenceFinder,
 	String errorMessage
 ) : boolean {
@@ -377,3 +398,36 @@ def checkNoDifferences(Collection<? extends EStructuralFeature> features,
 	}
 	return true
 }
+
+/**
+ * Makes sure that the features have types that are subtypes of the
+ * specified feature.
+ * 
+ * @param feature
+ * @param features
+ * @return true if they are all compliant
+ */
+def checkCompliant(EStructuralFeature feature, Collection<? extends EStructuralFeature> features) : boolean {
+	val Predicate<EStructuralFeature> compliance = if (feature instanceof EReference) {
+		[other |
+			if (other instanceof EReference)
+				feature.EReferenceType.isSuperTypeOf(other.EReferenceType)
+			else
+				false // attribute's type is surely not compliant
+		]
+	} else {
+		[other | feature.EType === other.EType]
+	}
+	val nonCompliant = features
+		.filter[!compliance.test(it)]
+	if (!nonCompliant.empty) {
+		showError(feature,
+			"features not compliant with type " + getEObjectRepr(feature.EType) + ":\n" +
+			nonCompliant
+				.map["  " + getEObjectRepr(it) + ": " + getEObjectRepr(EType)].join("\n")
+		)
+		return false
+	}
+	return true
+}
+

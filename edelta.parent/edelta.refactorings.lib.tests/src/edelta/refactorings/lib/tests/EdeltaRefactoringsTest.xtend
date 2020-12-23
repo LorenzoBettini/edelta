@@ -226,6 +226,66 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
+	def void test_mergeFeatures2() {
+		withInputModel("mergeFeatures2", "PersonList.ecore")
+		loadModelFile
+		val list = refactorings.getEClass("PersonList", "List")
+		val person = refactorings.getEClass("PersonList", "Person")
+		refactorings.mergeFeatures(list.getEStructuralFeature("places"),
+			#[list.getEStructuralFeature("wplaces"),list.getEStructuralFeature("lplaces")]
+		)
+		refactorings.mergeFeatures(person.getEStructuralFeature("name"),
+			#[person.getEStructuralFeature("firstName"),person.getEStructuralFeature("lastName")]
+		)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFile
+	}
+
+	@Test
+	def void test_mergeFeatures2NonCompliant() {
+		withInputModel("mergeFeatures2", "PersonList.ecore")
+		loadModelFile
+		val list = refactorings.getEClass("PersonList", "List")
+		val person = refactorings.getEClass("PersonList", "Person")
+		// Place is not subtype of WorkPlace
+		val wplaces = list.getEStructuralFeature("wplaces")
+		refactorings.mergeFeatures(wplaces,
+			#[list.getEStructuralFeature("places"),list.getEStructuralFeature("lplaces")]
+		)
+		// different lowerbound
+		wplaces.lowerBound = 1
+		refactorings.mergeFeatures(list.getEStructuralFeature("places"),
+			#[list.getEStructuralFeature("wplaces"),list.getEStructuralFeature("lplaces")]
+		)
+		// merge attributes with reference
+		refactorings.mergeFeatures(list.getEStructuralFeature("places"),
+			#[person.getEStructuralFeature("firstName"),person.getEStructuralFeature("lastName")]
+		)
+		// merge attributes with different types
+		refactorings.mergeFeatures(person.getEStructuralFeature("age"),
+			#[person.getEStructuralFeature("firstName"),person.getEStructuralFeature("lastName")]
+		)
+		assertThat(appender.result)
+			.isEqualTo(
+			'''
+			ERROR: PersonList.List.wplaces: features not compliant with type PersonList.WorkPlace:
+			  PersonList.List.places: PersonList.Place
+			  PersonList.List.lplaces: PersonList.LivingPlace
+			ERROR: PersonList.List.wplaces: The two features cannot be merged:
+			ecore.ETypedElement.lowerBound:
+			  PersonList.List.places: 0
+			  PersonList.List.wplaces: 1
+			
+			ERROR: PersonList.List.places: features not compliant with type PersonList.Place:
+			  PersonList.Person.firstName: ecore.EString
+			  PersonList.Person.lastName: ecore.EString
+			ERROR: PersonList.Person.age: features not compliant with type ecore.EInt:
+			  PersonList.Person.firstName: ecore.EString
+			  PersonList.Person.lastName: ecore.EString
+			'''.toString)
+	}
+
+	@Test
 	def void test_introduceSubclasses() {
 		val p = factory.createEPackage
 		val enum = p.createEEnum("AnEnum") => [

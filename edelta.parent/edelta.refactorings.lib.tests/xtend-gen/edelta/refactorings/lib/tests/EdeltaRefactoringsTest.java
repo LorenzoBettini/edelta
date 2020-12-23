@@ -323,6 +323,92 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
+  public void test_mergeFeatures2() {
+    try {
+      this.withInputModel("mergeFeatures2", "PersonList.ecore");
+      this.loadModelFile();
+      final EClass list = this.refactorings.getEClass("PersonList", "List");
+      final EClass person = this.refactorings.getEClass("PersonList", "Person");
+      EStructuralFeature _eStructuralFeature = list.getEStructuralFeature("wplaces");
+      EStructuralFeature _eStructuralFeature_1 = list.getEStructuralFeature("lplaces");
+      this.refactorings.mergeFeatures(list.getEStructuralFeature("places"), 
+        Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eStructuralFeature, _eStructuralFeature_1)));
+      EStructuralFeature _eStructuralFeature_2 = person.getEStructuralFeature("firstName");
+      EStructuralFeature _eStructuralFeature_3 = person.getEStructuralFeature("lastName");
+      this.refactorings.mergeFeatures(person.getEStructuralFeature("name"), 
+        Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eStructuralFeature_2, _eStructuralFeature_3)));
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
+  public void test_mergeFeatures2NonCompliant() {
+    this.withInputModel("mergeFeatures2", "PersonList.ecore");
+    this.loadModelFile();
+    final EClass list = this.refactorings.getEClass("PersonList", "List");
+    final EClass person = this.refactorings.getEClass("PersonList", "Person");
+    final EStructuralFeature wplaces = list.getEStructuralFeature("wplaces");
+    EStructuralFeature _eStructuralFeature = list.getEStructuralFeature("places");
+    EStructuralFeature _eStructuralFeature_1 = list.getEStructuralFeature("lplaces");
+    this.refactorings.mergeFeatures(wplaces, 
+      Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eStructuralFeature, _eStructuralFeature_1)));
+    wplaces.setLowerBound(1);
+    EStructuralFeature _eStructuralFeature_2 = list.getEStructuralFeature("wplaces");
+    EStructuralFeature _eStructuralFeature_3 = list.getEStructuralFeature("lplaces");
+    this.refactorings.mergeFeatures(list.getEStructuralFeature("places"), 
+      Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eStructuralFeature_2, _eStructuralFeature_3)));
+    EStructuralFeature _eStructuralFeature_4 = person.getEStructuralFeature("firstName");
+    EStructuralFeature _eStructuralFeature_5 = person.getEStructuralFeature("lastName");
+    this.refactorings.mergeFeatures(list.getEStructuralFeature("places"), 
+      Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eStructuralFeature_4, _eStructuralFeature_5)));
+    EStructuralFeature _eStructuralFeature_6 = person.getEStructuralFeature("firstName");
+    EStructuralFeature _eStructuralFeature_7 = person.getEStructuralFeature("lastName");
+    this.refactorings.mergeFeatures(person.getEStructuralFeature("age"), 
+      Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eStructuralFeature_6, _eStructuralFeature_7)));
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("ERROR: PersonList.List.wplaces: features not compliant with type PersonList.WorkPlace:");
+    _builder.newLine();
+    _builder.append("  ");
+    _builder.append("PersonList.List.places: PersonList.Place");
+    _builder.newLine();
+    _builder.append("  ");
+    _builder.append("PersonList.List.lplaces: PersonList.LivingPlace");
+    _builder.newLine();
+    _builder.append("ERROR: PersonList.List.wplaces: The two features cannot be merged:");
+    _builder.newLine();
+    _builder.append("ecore.ETypedElement.lowerBound:");
+    _builder.newLine();
+    _builder.append("  ");
+    _builder.append("PersonList.List.places: 0");
+    _builder.newLine();
+    _builder.append("  ");
+    _builder.append("PersonList.List.wplaces: 1");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("ERROR: PersonList.List.places: features not compliant with type PersonList.Place:");
+    _builder.newLine();
+    _builder.append("  ");
+    _builder.append("PersonList.Person.firstName: ecore.EString");
+    _builder.newLine();
+    _builder.append("  ");
+    _builder.append("PersonList.Person.lastName: ecore.EString");
+    _builder.newLine();
+    _builder.append("ERROR: PersonList.Person.age: features not compliant with type ecore.EInt:");
+    _builder.newLine();
+    _builder.append("  ");
+    _builder.append("PersonList.Person.firstName: ecore.EString");
+    _builder.newLine();
+    _builder.append("  ");
+    _builder.append("PersonList.Person.lastName: ecore.EString");
+    _builder.newLine();
+    Assertions.assertThat(this.appender.getResult()).isEqualTo(
+      _builder.toString());
+  }
+  
+  @Test
   public void test_introduceSubclasses() {
     final EPackage p = this.factory.createEPackage();
     EEnum _createEEnum = this.createEEnum(p, "AnEnum");
