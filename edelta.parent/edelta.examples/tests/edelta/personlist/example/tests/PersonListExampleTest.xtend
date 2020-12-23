@@ -46,10 +46,6 @@ class PersonListExampleTest {
 			    <eStructuralFeatures xsi:type="ecore:EReference" name="persons" upperBound="-1"
 			        eType="#//Person" eOpposite="#//Person/home"/>
 			  </eClassifiers>
-			  <eClassifiers xsi:type="ecore:EEnum" name="Gender">
-			    <eLiterals name="Male"/>
-			    <eLiterals name="Female" value="1"/>
-			  </eClassifiers>
 			  <eClassifiers xsi:type="ecore:EClass" name="Male" eSuperTypes="#//Person"/>
 			  <eClassifiers xsi:type="ecore:EClass" name="Female" eSuperTypes="#//Person"/>
 			  <eClassifiers xsi:type="ecore:EClass" name="Place" abstract="true">

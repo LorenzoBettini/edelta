@@ -265,29 +265,16 @@ class EdeltaRefactoringsTest extends AbstractTest {
 
 	@Test
 	def void test_enumToSubclasses() {
-		val p = factory.createEPackage
-		val enum = p.createEEnum("AnEnum") => [
-			createEEnumLiteral("Lit1")
-			createEEnumLiteral("Lit2")
-		]
-		val c = p.createEClass("C1") => [
-			abstract = false
-		]
-		val attr = c.createEAttribute("attr") => [
-			EType = enum
-		]
-		refactorings.enumToSubclasses(c, attr, enum)
-		assertThat(c.isAbstract).isTrue
-		assertThat(c.EStructuralFeatures).isEmpty
-		assertThat(p.EClassifiers.filter(EClass))
-			.hasSize(3)
-			.allSatisfy[
-				if (name != "C1") {
-					assertThat(name).startsWith("Lit")
-					assertThat(ESuperTypes)
-						.containsExactly(c)
-				}
-			]
+		withInputModel("enumToSubclasses", "PersonList.ecore")
+		loadModelFile
+		val person = refactorings.getEClass("PersonList", "Person")
+		val gender = refactorings.getEEnum("PersonList", "Gender")
+		refactorings.enumToSubclasses(person,
+			person.getEStructuralFeature("gender") as EAttribute,
+			gender
+		)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFile
 	}
 
 	@Test

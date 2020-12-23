@@ -120,15 +120,12 @@ public class EdeltaRefactorings extends AbstractEdelta {
     containingclass.setAbstract(true);
     EList<EEnumLiteral> _eLiterals = enumType.getELiterals();
     for (final EEnumLiteral subc : _eLiterals) {
-      {
-        final Consumer<EClass> _function = (EClass it) -> {
-          EdeltaLibrary.addESuperType(it, containingclass);
-        };
-        EdeltaLibrary.addNewEClass(containingclass.getEPackage(), subc.getLiteral(), _function);
-        EList<EStructuralFeature> _eStructuralFeatures = containingclass.getEStructuralFeatures();
-        _eStructuralFeatures.remove(attr);
-      }
+      final Consumer<EClass> _function = (EClass it) -> {
+        EdeltaLibrary.addESuperType(it, containingclass);
+      };
+      EdeltaLibrary.addNewEClass(containingclass.getEPackage(), subc.getLiteral(), _function);
     }
+    EdeltaLibrary.removeElement(enumType);
   }
   
   /**

@@ -1,6 +1,5 @@
 package edelta.refactorings.lib.tests;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import edelta.lib.AbstractEdelta;
 import edelta.refactorings.lib.EdeltaRefactorings;
@@ -9,7 +8,6 @@ import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 import edelta.testutils.EdeltaTestUtils;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.assertj.core.api.AbstractStringAssert;
@@ -376,35 +374,19 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   
   @Test
   public void test_enumToSubclasses() {
-    final EPackage p = this.factory.createEPackage();
-    EEnum _createEEnum = this.createEEnum(p, "AnEnum");
-    final Procedure1<EEnum> _function = (EEnum it) -> {
-      this.createEEnumLiteral(it, "Lit1");
-      this.createEEnumLiteral(it, "Lit2");
-    };
-    final EEnum enum_ = ObjectExtensions.<EEnum>operator_doubleArrow(_createEEnum, _function);
-    EClass _createEClass = this.createEClass(p, "C1");
-    final Procedure1<EClass> _function_1 = (EClass it) -> {
-      it.setAbstract(false);
-    };
-    final EClass c = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
-    EAttribute _createEAttribute = this.createEAttribute(c, "attr");
-    final Procedure1<EAttribute> _function_2 = (EAttribute it) -> {
-      it.setEType(enum_);
-    };
-    final EAttribute attr = ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_2);
-    this.refactorings.enumToSubclasses(c, attr, enum_);
-    Assertions.assertThat(c.isAbstract()).isTrue();
-    Assertions.<EStructuralFeature>assertThat(c.getEStructuralFeatures()).isEmpty();
-    final Consumer<EClass> _function_3 = (EClass it) -> {
-      String _name = it.getName();
-      boolean _notEquals = (!Objects.equal(_name, "C1"));
-      if (_notEquals) {
-        Assertions.assertThat(it.getName()).startsWith("Lit");
-        Assertions.<EClass>assertThat(it.getESuperTypes()).containsExactly(c);
-      }
-    };
-    Assertions.<EClass>assertThat(Iterables.<EClass>filter(p.getEClassifiers(), EClass.class)).hasSize(3).allSatisfy(_function_3);
+    try {
+      this.withInputModel("enumToSubclasses", "PersonList.ecore");
+      this.loadModelFile();
+      final EClass person = this.refactorings.getEClass("PersonList", "Person");
+      final EEnum gender = this.refactorings.getEEnum("PersonList", "Gender");
+      EStructuralFeature _eStructuralFeature = person.getEStructuralFeature("gender");
+      this.refactorings.enumToSubclasses(person, 
+        ((EAttribute) _eStructuralFeature), gender);
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
