@@ -264,7 +264,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	def void test_introduceSubclasses() {
+	def void test_enumToSubclasses() {
 		val p = factory.createEPackage
 		val enum = p.createEEnum("AnEnum") => [
 			createEEnumLiteral("Lit1")
@@ -276,7 +276,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		val attr = c.createEAttribute("attr") => [
 			EType = enum
 		]
-		refactorings.introduceSubclasses(c, attr, enum)
+		refactorings.enumToSubclasses(c, attr, enum)
 		assertThat(c.isAbstract).isTrue
 		assertThat(c.EStructuralFeatures).isEmpty
 		assertThat(p.EClassifiers.filter(EClass))

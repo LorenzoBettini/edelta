@@ -1874,7 +1874,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  }
 			  
 			  public void improvePerson(final EPackage it) {
-			    this.refactorings.introduceSubclasses(getEClass("PersonList", "Person"), 
+			    this.refactorings.enumToSubclasses(getEClass("PersonList", "Person"), 
 			      getEAttribute("PersonList", "Person", "gender"), 
 			      getEEnum("PersonList", "Gender"));
 			    this.refactorings.mergeFeatures("name", 

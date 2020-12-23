@@ -3810,7 +3810,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder.append("public void improvePerson(final EPackage it) {");
     _builder.newLine();
     _builder.append("    ");
-    _builder.append("this.refactorings.introduceSubclasses(getEClass(\"PersonList\", \"Person\"), ");
+    _builder.append("this.refactorings.enumToSubclasses(getEClass(\"PersonList\", \"Person\"), ");
     _builder.newLine();
     _builder.append("      ");
     _builder.append("getEAttribute(\"PersonList\", \"Person\", \"gender\"), ");

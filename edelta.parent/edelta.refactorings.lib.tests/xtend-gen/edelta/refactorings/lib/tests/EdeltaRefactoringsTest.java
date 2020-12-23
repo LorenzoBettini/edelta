@@ -375,7 +375,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
-  public void test_introduceSubclasses() {
+  public void test_enumToSubclasses() {
     final EPackage p = this.factory.createEPackage();
     EEnum _createEEnum = this.createEEnum(p, "AnEnum");
     final Procedure1<EEnum> _function = (EEnum it) -> {
@@ -393,7 +393,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       it.setEType(enum_);
     };
     final EAttribute attr = ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_2);
-    this.refactorings.introduceSubclasses(c, attr, enum_);
+    this.refactorings.enumToSubclasses(c, attr, enum_);
     Assertions.assertThat(c.isAbstract()).isTrue();
     Assertions.<EStructuralFeature>assertThat(c.getEStructuralFeatures()).isEmpty();
     final Consumer<EClass> _function_3 = (EClass it) -> {

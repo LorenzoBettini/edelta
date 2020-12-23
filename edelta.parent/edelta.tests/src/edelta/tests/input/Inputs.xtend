@@ -303,7 +303,7 @@ class Inputs {
 			// since 'refactorings' is an 'extension'
 			// we use its method as an extension method
 			ecoreref(PersonList.Person)
-				.introduceSubclasses(
+				.enumToSubclasses(
 					ecoreref(Person.gender),
 					ecoreref(Gender)
 				)

@@ -116,7 +116,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     return copy;
   }
   
-  public void introduceSubclasses(final EClass containingclass, final EAttribute attr, final EEnum enumType) {
+  public void enumToSubclasses(final EClass containingclass, final EAttribute attr, final EEnum enumType) {
     containingclass.setAbstract(true);
     EList<EEnumLiteral> _eLiterals = enumType.getELiterals();
     for (final EEnumLiteral subc : _eLiterals) {

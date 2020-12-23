@@ -85,7 +85,7 @@ def mergeFeatures(String newFeatureName, EClassifier type, Collection<EStructura
 	return copy
 }
 
-def introduceSubclasses(EClass containingclass, EAttribute attr, EEnum enumType) {
+def enumToSubclasses(EClass containingclass, EAttribute attr, EEnum enumType) {
 	containingclass.abstract = true;
 	for (subc : enumType.ELiterals) {
 		containingclass.EPackage.addNewEClass(subc.literal) [
