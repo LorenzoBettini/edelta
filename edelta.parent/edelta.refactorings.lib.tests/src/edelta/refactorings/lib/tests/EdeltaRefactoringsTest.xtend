@@ -286,6 +286,23 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
+	def void test_mergeFeatures3() {
+		withInputModel("mergeFeatures3", "PersonList.ecore")
+		loadModelFile
+		val list = refactorings.getEClass("PersonList", "List")
+		val place = refactorings.getEClass("PersonList", "Place")
+		val person = refactorings.getEClass("PersonList", "Person")
+		refactorings.mergeFeatures("places", place,
+			#[list.getEStructuralFeature("wplaces"),list.getEStructuralFeature("lplaces")]
+		)
+		refactorings.mergeFeatures("name", stringDataType,
+			#[person.getEStructuralFeature("firstName"),person.getEStructuralFeature("lastName")]
+		)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFile
+	}
+
+	@Test
 	def void test_introduceSubclasses() {
 		val p = factory.createEPackage
 		val enum = p.createEEnum("AnEnum") => [

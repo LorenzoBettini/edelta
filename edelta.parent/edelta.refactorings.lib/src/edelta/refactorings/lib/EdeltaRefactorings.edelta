@@ -41,7 +41,7 @@ def mergeAttributes(String newAttrName, EDataType newAttributeType, List<EAttrib
 }
 
 /**
- * Merges the given features into a single feature in the containing class.
+ * Merges the given features into a single new feature in the containing class.
  * The features must be compatible (same containing class, same type, same cardinality, etc).
  * 
  * @param newFeatureName
@@ -60,7 +60,7 @@ def mergeFeatures(String newFeatureName, Collection<EStructuralFeature> features
 }
 
 /**
- * Merges the given features into the single given feature in the containing class.
+ * Merges the given features into the single given existing feature in the containing class.
  * The features must be compatible (same containing class, same type, same cardinality, etc)
  * and their types must be subtypes of the specified feature.
  * 
@@ -76,6 +76,23 @@ def mergeFeatures(EStructuralFeature feature, Collection<EStructuralFeature> fea
 		return null
 	removeAllElements(features)
 	return feature
+}
+
+/**
+ * Merges the given features into a single new feature, with the given type, in the containing class.
+ * The features must be compatible (same containing class, same type, same cardinality, etc)
+ * and their types must be subtypes of the specified type.
+ * 
+ * @param newFeatureName
+ * @param type
+ * @param features
+ */
+def mergeFeatures(String newFeatureName, EClassifier type, Collection<EStructuralFeature> features) : EStructuralFeature {
+	val feature = features.head
+	val owner = feature.EContainingClass
+	val copy = feature.copyToAs(owner, newFeatureName, type)
+	mergeFeatures(copy, features)
+	return copy
 }
 
 def introduceSubclasses(EClass containingclass, EAttribute attr, EEnum enumType) {

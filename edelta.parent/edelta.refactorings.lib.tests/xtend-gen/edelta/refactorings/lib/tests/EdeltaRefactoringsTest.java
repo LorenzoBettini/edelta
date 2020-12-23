@@ -409,6 +409,29 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
+  public void test_mergeFeatures3() {
+    try {
+      this.withInputModel("mergeFeatures3", "PersonList.ecore");
+      this.loadModelFile();
+      final EClass list = this.refactorings.getEClass("PersonList", "List");
+      final EClass place = this.refactorings.getEClass("PersonList", "Place");
+      final EClass person = this.refactorings.getEClass("PersonList", "Person");
+      EStructuralFeature _eStructuralFeature = list.getEStructuralFeature("wplaces");
+      EStructuralFeature _eStructuralFeature_1 = list.getEStructuralFeature("lplaces");
+      this.refactorings.mergeFeatures("places", place, 
+        Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eStructuralFeature, _eStructuralFeature_1)));
+      EStructuralFeature _eStructuralFeature_2 = person.getEStructuralFeature("firstName");
+      EStructuralFeature _eStructuralFeature_3 = person.getEStructuralFeature("lastName");
+      this.refactorings.mergeFeatures("name", this.stringDataType, 
+        Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eStructuralFeature_2, _eStructuralFeature_3)));
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
   public void test_introduceSubclasses() {
     final EPackage p = this.factory.createEPackage();
     EEnum _createEEnum = this.createEEnum(p, "AnEnum");

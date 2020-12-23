@@ -70,7 +70,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
   }
   
   /**
-   * Merges the given features into a single feature in the containing class.
+   * Merges the given features into a single new feature in the containing class.
    * The features must be compatible (same containing class, same type, same cardinality, etc).
    * 
    * @param newFeatureName
@@ -92,7 +92,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
   }
   
   /**
-   * Merges the given features into the single given feature in the containing class.
+   * Merges the given features into the single given existing feature in the containing class.
    * The features must be compatible (same containing class, same type, same cardinality, etc)
    * and their types must be subtypes of the specified feature.
    * 
@@ -107,6 +107,23 @@ public class EdeltaRefactorings extends AbstractEdelta {
     }
     EdeltaLibrary.removeAllElements(features);
     return feature;
+  }
+  
+  /**
+   * Merges the given features into a single new feature, with the given type, in the containing class.
+   * The features must be compatible (same containing class, same type, same cardinality, etc)
+   * and their types must be subtypes of the specified type.
+   * 
+   * @param newFeatureName
+   * @param type
+   * @param features
+   */
+  public EStructuralFeature mergeFeatures(final String newFeatureName, final EClassifier type, final Collection<EStructuralFeature> features) {
+    final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
+    final EClass owner = feature.getEContainingClass();
+    final EStructuralFeature copy = EdeltaLibrary.copyToAs(feature, owner, newFeatureName, type);
+    this.mergeFeatures(copy, features);
+    return copy;
   }
   
   public void introduceSubclasses(final EClass containingclass, final EAttribute attr, final EEnum enumType) {
