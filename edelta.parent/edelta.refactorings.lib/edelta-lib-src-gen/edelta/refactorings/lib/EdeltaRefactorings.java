@@ -117,7 +117,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
   }
   
   public void enumToSubclasses(final EClass containingclass, final EAttribute attr, final EEnum enumType) {
-    containingclass.setAbstract(true);
+    EdeltaLibrary.makeAbstract(containingclass);
     EList<EEnumLiteral> _eLiterals = enumType.getELiterals();
     for (final EEnumLiteral subc : _eLiterals) {
       final Consumer<EClass> _function = (EClass it) -> {
@@ -328,7 +328,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
       final EStructuralFeature feature = IterableExtensions.head(duplicates);
       final EPackage containingEPackage = feature.getEContainingClass().getEPackage();
       final Consumer<EClass> _function = (EClass it) -> {
-        it.setAbstract(true);
+        EdeltaLibrary.makeAbstract(it);
         final Function1<EStructuralFeature, EClass> _function_1 = (EStructuralFeature it_1) -> {
           return it_1.getEContainingClass();
         };
@@ -458,7 +458,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
    */
   public void makeAbstract(final Iterable<EClass> classes) {
     final Consumer<EClass> _function = (EClass it) -> {
-      it.setAbstract(true);
+      EdeltaLibrary.makeAbstract(it);
     };
     classes.forEach(_function);
   }
@@ -468,7 +468,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
    */
   public void makeConcrete(final Iterable<EClass> classes) {
     final Consumer<EClass> _function = (EClass it) -> {
-      it.setAbstract(false);
+      EdeltaLibrary.makeConcrete(it);
     };
     classes.forEach(_function);
   }
