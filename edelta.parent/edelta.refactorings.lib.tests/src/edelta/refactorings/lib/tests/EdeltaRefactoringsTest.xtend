@@ -269,7 +269,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		loadModelFile
 		val person = refactorings.getEClass("PersonList", "Person")
 		val gender = refactorings.getEEnum("PersonList", "Gender")
-		refactorings.enumToSubclasses(person,
+		refactorings.enumToSubclasses(
 			person.getEStructuralFeature("gender") as EAttribute,
 			gender
 		)

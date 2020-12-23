@@ -380,7 +380,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       final EClass person = this.refactorings.getEClass("PersonList", "Person");
       final EEnum gender = this.refactorings.getEEnum("PersonList", "Gender");
       EStructuralFeature _eStructuralFeature = person.getEStructuralFeature("gender");
-      this.refactorings.enumToSubclasses(person, 
+      this.refactorings.enumToSubclasses(
         ((EAttribute) _eStructuralFeature), gender);
       this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
       this.assertModifiedFile();

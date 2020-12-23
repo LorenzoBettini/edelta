@@ -85,11 +85,12 @@ def mergeFeatures(String newFeatureName, EClassifier type, Collection<EStructura
 	return copy
 }
 
-def enumToSubclasses(EClass containingclass, EAttribute attr, EEnum enumType) {
-	containingclass.makeAbstract
+def enumToSubclasses(EAttribute attr, EEnum enumType) {
+	val owner = attr.EContainingClass
+	owner.makeAbstract
 	for (subc : enumType.ELiterals) {
-		containingclass.EPackage.addNewEClass(subc.literal) [
-			addESuperType(containingclass)
+		owner.EPackage.addNewEClass(subc.literal) [
+			addESuperType(owner)
 		];
 	}
 	removeElement(enumType) // will also remove the attribute

@@ -302,11 +302,7 @@ class Inputs {
 		modifyEcore improvePerson epackage PersonList {
 			// since 'refactorings' is an 'extension'
 			// we use its method as an extension method
-			ecoreref(PersonList.Person)
-				.enumToSubclasses(
-					ecoreref(Person.gender),
-					ecoreref(Gender)
-				)
+			ecoreref(Person.gender).enumToSubclasses(ecoreref(Gender))
 			refactorings.mergeFeatures("name",
 				#[ecoreref(Person.firstname), ecoreref(Person.lastname)])
 		}
