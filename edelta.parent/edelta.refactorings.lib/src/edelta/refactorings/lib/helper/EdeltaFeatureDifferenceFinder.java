@@ -108,6 +108,15 @@ public class EdeltaFeatureDifferenceFinder {
 	}
 
 	/**
+	 * Shortcut for {@link #ignoring(ETYPED_ELEMENT__ETYPE)}
+	 * 
+	 * @return
+	 */
+	public EdeltaFeatureDifferenceFinder ignoringType() {
+		return ignoring(ETYPED_ELEMENT__ETYPE);
+	}
+
+	/**
 	 * Retrieves the string containing difference details if any.
 	 * 
 	 * @return

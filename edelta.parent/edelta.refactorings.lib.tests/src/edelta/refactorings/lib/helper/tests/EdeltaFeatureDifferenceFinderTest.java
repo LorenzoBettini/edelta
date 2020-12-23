@@ -80,6 +80,16 @@ public class EdeltaFeatureDifferenceFinderTest {
 	}
 
 	@Test
+	public void whenTwoFeaturesAreEqualIgnoringType() {
+		var feature1 = newEReference("r1", aType1, f -> f.setLowerBound(1));
+		var feature2 = newEReference("r1", aType2, f -> f.setLowerBound(1));
+		var differenceFinder = new EdeltaFeatureDifferenceFinder()
+			.ignoringType();
+		assertThat(differenceFinder.equals(feature1, feature2))
+			.isTrue();
+	}
+
+	@Test
 	public void whenTwoFeaturesHaveDifferentLowerBoundWithDifferenceDetails() {
 		var feature1 = newEReference("r1", ECLASS, f -> f.setLowerBound(1));
 		var feature2 = newEReference("r1", ECLASS, f -> f.setLowerBound(2));
