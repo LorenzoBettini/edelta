@@ -474,4 +474,22 @@ public class EdeltaLibrary {
 		feature.setLowerBound(1);
 		feature.setUpperBound(1);
 	}
+
+	/**
+	 * Makes this {@link EClass} abstract
+	 * 
+	 * @param feature
+	 */
+	public static void makeAbstract(EClass cl) {
+		cl.setAbstract(true);
+	}
+
+	/**
+	 * Makes this {@link EClass} concrete (that is, not abstract)
+	 * 
+	 * @param feature
+	 */
+	public static void makeConcrete(EClass cl) {
+		cl.setAbstract(false);
+	}
 }

@@ -659,6 +659,22 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
+	public void test_makeAbstract() {
+		var c = ecoreFactory.createEClass();
+		c.setAbstract(false);
+		EdeltaLibrary.makeAbstract(c);
+		assertThat(c.isAbstract()).isTrue();
+	}
+
+	@Test
+	public void test_makeConcrete() {
+		var c = ecoreFactory.createEClass();
+		c.setAbstract(true);
+		EdeltaLibrary.makeConcrete(c);
+		assertThat(c.isAbstract()).isFalse();
+	}
+
+	@Test
 	public void test_referringANewEClassDoesNotAddItToEPackageAutomatically() {
 		EPackage ePackage = ecoreFactory.createEPackage();
 		EClass client = ecoreFactory.createEClass();
