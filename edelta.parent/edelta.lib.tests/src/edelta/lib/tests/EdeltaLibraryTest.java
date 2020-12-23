@@ -518,6 +518,32 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
+	public void test_copyToAsWithType() {
+		EClass eClassSrc = ecoreFactory.createEClass();
+		EClass eClassDest = ecoreFactory.createEClass();
+		EStructuralFeature feature = ecoreFactory.createEAttribute();
+		eClassSrc.getEStructuralFeatures().add(feature);
+		feature.setName("originalName");
+		// before
+		assertThat(eClassDest.getEStructuralFeatures()).isEmpty();
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.contains(feature);
+		var copy = EdeltaLibrary.copyToAs(feature, eClassDest, "newName",
+				EOBJECT);
+		// after
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.containsOnly(feature)
+			.first()
+			.returns("originalName", ENamedElement::getName)
+			.returns(null, ETypedElement::getEType);
+		assertThat(eClassDest.getEStructuralFeatures())
+			.containsOnly(copy)
+			.first()
+			.returns("newName", ENamedElement::getName)
+			.returns(EOBJECT, ETypedElement::getEType);
+	}
+
+	@Test
 	public void test_copyAllTo() {
 		EClass eClassSrc = ecoreFactory.createEClass();
 		EClass eClassDest = ecoreFactory.createEClass();
