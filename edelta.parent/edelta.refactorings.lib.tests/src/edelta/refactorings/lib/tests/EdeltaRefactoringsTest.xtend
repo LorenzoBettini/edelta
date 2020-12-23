@@ -130,45 +130,6 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	def void test_mergeReferences() {
-		val refType = createEClassWithoutPackage("RefType")
-		val c = createEClassWithoutPackage("C1") => [
-			createEReference("ref1") => [
-				EType = refType
-			]
-			createEReference("ref2") => [
-				EType = refType
-			]
-		]
-		val merged = refactorings.mergeReferences("test", refType, 
-			c.EStructuralFeatures.filter(EReference).toList
-		)
-		assertThat(c.EStructuralFeatures).isEmpty
-		assertThat(merged)
-			.returns("test", [name])
-			.returns(refType, [EReferenceType])
-	}
-
-	@Test
-	def void test_mergeAttributes() {
-		val c = createEClassWithoutPackage("C1") => [
-			createEAttribute("a1") => [
-				EType = stringDataType
-			]
-			createEAttribute("a2") => [
-				EType = stringDataType
-			]
-		]
-		val merged = refactorings.mergeAttributes("test", stringDataType, 
-			c.EStructuralFeatures.filter(EAttribute).toList
-		)
-		assertThat(c.EStructuralFeatures).isEmpty
-		assertThat(merged)
-			.returns("test", [name])
-			.returns(stringDataType, [EAttributeType])
-	}
-
-	@Test
 	def void test_mergeFeatures() {
 		withInputModel("mergeFeatures", "PersonList.ecore")
 		loadModelFile

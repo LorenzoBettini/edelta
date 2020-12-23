@@ -30,16 +30,6 @@ def addMandatoryReference(EClass eClass, String referenceName, EClass type): ERe
 	]
 }
 
-def mergeReferences(String newReferenceName, EClass newReferenceType, List<EReference> refs): EReference {
-	removeAllElements(refs)
-	return newEReference(newReferenceName, newReferenceType)
-}
-
-def mergeAttributes(String newAttrName, EDataType newAttributeType, List<EAttribute> attrs) : EAttribute {
-	removeAllElements(attrs)
-	return newEAttribute(newAttrName, newAttributeType)
-}
-
 /**
  * Merges the given features into a single new feature in the containing class.
  * The features must be compatible (same containing class, same type, same cardinality, etc).

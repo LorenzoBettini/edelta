@@ -175,63 +175,6 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
-  public void test_mergeReferences() {
-    final EClass refType = this.createEClassWithoutPackage("RefType");
-    EClass _createEClassWithoutPackage = this.createEClassWithoutPackage("C1");
-    final Procedure1<EClass> _function = (EClass it) -> {
-      EReference _createEReference = this.createEReference(it, "ref1");
-      final Procedure1<EReference> _function_1 = (EReference it_1) -> {
-        it_1.setEType(refType);
-      };
-      ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_1);
-      EReference _createEReference_1 = this.createEReference(it, "ref2");
-      final Procedure1<EReference> _function_2 = (EReference it_1) -> {
-        it_1.setEType(refType);
-      };
-      ObjectExtensions.<EReference>operator_doubleArrow(_createEReference_1, _function_2);
-    };
-    final EClass c = ObjectExtensions.<EClass>operator_doubleArrow(_createEClassWithoutPackage, _function);
-    final EReference merged = this.refactorings.mergeReferences("test", refType, 
-      IterableExtensions.<EReference>toList(Iterables.<EReference>filter(c.getEStructuralFeatures(), EReference.class)));
-    Assertions.<EStructuralFeature>assertThat(c.getEStructuralFeatures()).isEmpty();
-    final Function<EReference, String> _function_1 = (EReference it) -> {
-      return it.getName();
-    };
-    final Function<EReference, EClass> _function_2 = (EReference it) -> {
-      return it.getEReferenceType();
-    };
-    Assertions.<EReference>assertThat(merged).<String>returns("test", _function_1).<EClass>returns(refType, _function_2);
-  }
-  
-  @Test
-  public void test_mergeAttributes() {
-    EClass _createEClassWithoutPackage = this.createEClassWithoutPackage("C1");
-    final Procedure1<EClass> _function = (EClass it) -> {
-      EAttribute _createEAttribute = this.createEAttribute(it, "a1");
-      final Procedure1<EAttribute> _function_1 = (EAttribute it_1) -> {
-        it_1.setEType(this.stringDataType);
-      };
-      ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_1);
-      EAttribute _createEAttribute_1 = this.createEAttribute(it, "a2");
-      final Procedure1<EAttribute> _function_2 = (EAttribute it_1) -> {
-        it_1.setEType(this.stringDataType);
-      };
-      ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute_1, _function_2);
-    };
-    final EClass c = ObjectExtensions.<EClass>operator_doubleArrow(_createEClassWithoutPackage, _function);
-    final EAttribute merged = this.refactorings.mergeAttributes("test", this.stringDataType, 
-      IterableExtensions.<EAttribute>toList(Iterables.<EAttribute>filter(c.getEStructuralFeatures(), EAttribute.class)));
-    Assertions.<EStructuralFeature>assertThat(c.getEStructuralFeatures()).isEmpty();
-    final Function<EAttribute, String> _function_1 = (EAttribute it) -> {
-      return it.getName();
-    };
-    final Function<EAttribute, EDataType> _function_2 = (EAttribute it) -> {
-      return it.getEAttributeType();
-    };
-    Assertions.<EAttribute>assertThat(merged).<String>returns("test", _function_1).<EDataType>returns(this.stringDataType, _function_2);
-  }
-  
-  @Test
   public void test_mergeFeatures() {
     try {
       this.withInputModel("mergeFeatures", "PersonList.ecore");

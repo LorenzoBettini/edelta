@@ -59,16 +59,6 @@ public class EdeltaRefactorings extends AbstractEdelta {
     return EdeltaLibrary.addNewEReference(eClass, referenceName, type, _function);
   }
   
-  public EReference mergeReferences(final String newReferenceName, final EClass newReferenceType, final List<EReference> refs) {
-    EdeltaLibrary.removeAllElements(refs);
-    return EdeltaLibrary.newEReference(newReferenceName, newReferenceType);
-  }
-  
-  public EAttribute mergeAttributes(final String newAttrName, final EDataType newAttributeType, final List<EAttribute> attrs) {
-    EdeltaLibrary.removeAllElements(attrs);
-    return EdeltaLibrary.newEAttribute(newAttrName, newAttributeType);
-  }
-  
   /**
    * Merges the given features into a single new feature in the containing class.
    * The features must be compatible (same containing class, same type, same cardinality, etc).
