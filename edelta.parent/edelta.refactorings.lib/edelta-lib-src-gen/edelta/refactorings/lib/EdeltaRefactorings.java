@@ -116,17 +116,24 @@ public class EdeltaRefactorings extends AbstractEdelta {
     return copy;
   }
   
-  public void enumToSubclasses(final EAttribute attr, final EEnum enumType) {
-    final EClass owner = attr.getEContainingClass();
-    EdeltaLibrary.makeAbstract(owner);
-    EList<EEnumLiteral> _eLiterals = enumType.getELiterals();
-    for (final EEnumLiteral subc : _eLiterals) {
-      final Consumer<EClass> _function = (EClass it) -> {
-        EdeltaLibrary.addESuperType(it, owner);
-      };
-      EdeltaLibrary.addNewEClass(owner.getEPackage(), subc.getLiteral(), _function);
+  public void enumToSubclasses(final EAttribute attr) {
+    final EDataType type = attr.getEAttributeType();
+    if ((type instanceof EEnum)) {
+      final EClass owner = attr.getEContainingClass();
+      EdeltaLibrary.makeAbstract(owner);
+      EList<EEnumLiteral> _eLiterals = ((EEnum)type).getELiterals();
+      for (final EEnumLiteral subc : _eLiterals) {
+        final Consumer<EClass> _function = (EClass it) -> {
+          EdeltaLibrary.addESuperType(it, owner);
+        };
+        EdeltaLibrary.addNewEClass(owner.getEPackage(), subc.getLiteral(), _function);
+      }
+      EdeltaLibrary.removeElement(type);
+    } else {
+      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(type);
+      String _plus = ("Not an EEnum: " + _eObjectRepr);
+      this.showError(attr, _plus);
     }
-    EdeltaLibrary.removeElement(enumType);
   }
   
   /**

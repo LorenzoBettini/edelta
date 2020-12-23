@@ -268,13 +268,25 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		withInputModel("enumToSubclasses", "PersonList.ecore")
 		loadModelFile
 		val person = refactorings.getEClass("PersonList", "Person")
-		val gender = refactorings.getEEnum("PersonList", "Gender")
 		refactorings.enumToSubclasses(
-			person.getEStructuralFeature("gender") as EAttribute,
-			gender
+			person.getEStructuralFeature("gender") as EAttribute
 		)
 		refactorings.saveModifiedEcores(MODIFIED)
 		assertModifiedFile
+	}
+
+	@Test
+	def void test_enumToSubclassesNotAnEEnum() {
+		withInputModel("enumToSubclasses", "PersonList.ecore")
+		loadModelFile
+		val person = refactorings.getEClass("PersonList", "Person")
+		refactorings.enumToSubclasses(
+			person.getEStructuralFeature("firstname") as EAttribute
+		)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFileIsSameAsOriginal
+		assertThat(appender.result.trim)
+			.isEqualTo("ERROR: PersonList.Person.firstname: Not an EEnum: ecore.EString")
 	}
 
 	@Test

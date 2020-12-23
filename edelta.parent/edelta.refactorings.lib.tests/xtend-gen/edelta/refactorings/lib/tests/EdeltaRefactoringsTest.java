@@ -378,12 +378,28 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       this.withInputModel("enumToSubclasses", "PersonList.ecore");
       this.loadModelFile();
       final EClass person = this.refactorings.getEClass("PersonList", "Person");
-      final EEnum gender = this.refactorings.getEEnum("PersonList", "Gender");
       EStructuralFeature _eStructuralFeature = person.getEStructuralFeature("gender");
       this.refactorings.enumToSubclasses(
-        ((EAttribute) _eStructuralFeature), gender);
+        ((EAttribute) _eStructuralFeature));
       this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
       this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
+  public void test_enumToSubclassesNotAnEEnum() {
+    try {
+      this.withInputModel("enumToSubclasses", "PersonList.ecore");
+      this.loadModelFile();
+      final EClass person = this.refactorings.getEClass("PersonList", "Person");
+      EStructuralFeature _eStructuralFeature = person.getEStructuralFeature("firstname");
+      this.refactorings.enumToSubclasses(
+        ((EAttribute) _eStructuralFeature));
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFileIsSameAsOriginal();
+      Assertions.assertThat(this.appender.getResult().trim()).isEqualTo("ERROR: PersonList.Person.firstname: Not an EEnum: ecore.EString");
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
