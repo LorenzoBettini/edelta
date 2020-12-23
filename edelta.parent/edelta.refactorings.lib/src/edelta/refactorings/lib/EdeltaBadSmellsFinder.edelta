@@ -1,5 +1,7 @@
-import edelta.refactorings.lib.helper.EstructuralFeatureEqualityHelper
+import edelta.refactorings.lib.helper.EdeltaFeatureEqualityHelper
+import java.util.Collection
 import java.util.List
+import java.util.Map
 import java.util.function.BiPredicate
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
@@ -8,8 +10,6 @@ import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.EcorePackage
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.emf.ecore.util.EcoreUtil.CrossReferencer
-import java.util.Collection
-import java.util.Map
 
 package edelta.refactorings.lib
 
@@ -44,7 +44,7 @@ def findDuplicateFeatures(EPackage ePackage) {
 	return findDuplicateFeaturesCustom(
 		ePackage,
 		[existing, current|
-			new EstructuralFeatureEqualityHelper().equals(existing, current)
+			new EdeltaFeatureEqualityHelper().equals(existing, current)
 		]
 	)
 }
@@ -130,7 +130,7 @@ def findDuplicateFeaturesInSubclasses(EPackage ePackage) {
 				findDuplicateFeaturesInCollection(
 					directSubclasses.map[EStructuralFeatures].flatten.toList,
 					[existing, current|
-						new EstructuralFeatureEqualityHelper().equals(existing, current)
+						new EdeltaFeatureEqualityHelper().equals(existing, current)
 					]
 				)
 			// only entries with a mapped list of size = num of subclasses are duplicates

@@ -16,7 +16,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil.EqualityHelper;
  * @author Lorenzo Bettini
  *
  */
-public class EstructuralFeatureEqualityHelper {
+public class EdeltaFeatureEqualityHelper {
 
 	public boolean equals(EObject eObject1, EObject eObject2) {
 		return new EqualityHelper() {

@@ -3,7 +3,7 @@ package edelta.refactorings.lib;
 import com.google.common.collect.Iterables;
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaLibrary;
-import edelta.refactorings.lib.helper.EstructuralFeatureEqualityHelper;
+import edelta.refactorings.lib.helper.EdeltaFeatureEqualityHelper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -68,7 +68,7 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
    */
   public Map<EStructuralFeature, List<EStructuralFeature>> findDuplicateFeatures(final EPackage ePackage) {
     final BiPredicate<EStructuralFeature, EStructuralFeature> _function = (EStructuralFeature existing, EStructuralFeature current) -> {
-      return new EstructuralFeatureEqualityHelper().equals(existing, current);
+      return new EdeltaFeatureEqualityHelper().equals(existing, current);
     };
     return this.findDuplicateFeaturesCustom(ePackage, _function);
   }
@@ -170,7 +170,7 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
             return it.getEStructuralFeatures();
           };
           final BiPredicate<EStructuralFeature, EStructuralFeature> _function_1 = (EStructuralFeature existing, EStructuralFeature current) -> {
-            return new EstructuralFeatureEqualityHelper().equals(existing, current);
+            return new EdeltaFeatureEqualityHelper().equals(existing, current);
           };
           final Map<EStructuralFeature, List<EStructuralFeature>> candidates = this.findDuplicateFeaturesInCollection(
             IterableExtensions.<EStructuralFeature>toList(Iterables.<EStructuralFeature>concat(IterableExtensions.<EClass, EList<EStructuralFeature>>map(directSubclasses, _function))), _function_1);
