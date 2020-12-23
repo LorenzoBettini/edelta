@@ -26,7 +26,8 @@ class PersonListExampleTest {
 			  <eClassifiers xsi:type="ecore:EClass" name="List">
 			    <eStructuralFeatures xsi:type="ecore:EReference" name="members" upperBound="-1"
 			        eType="#//Person" containment="true" eOpposite="#//Person/list"/>
-			    <eStructuralFeatures xsi:type="ecore:EReference" name="places" eType="#//Place"/>
+			    <eStructuralFeatures xsi:type="ecore:EReference" name="places" upperBound="-1"
+			        eType="#//Place" containment="true"/>
 			  </eClassifiers>
 			  <eClassifiers xsi:type="ecore:EClass" name="Person" abstract="true">
 			    <eStructuralFeatures xsi:type="ecore:EReference" name="list" lowerBound="1" eType="#//List"

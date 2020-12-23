@@ -1853,7 +1853,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			import java.util.Collections;
 			import org.eclipse.emf.ecore.EClass;
 			import org.eclipse.emf.ecore.EPackage;
-			import org.eclipse.emf.ecore.EReference;
 			import org.eclipse.emf.ecore.EStructuralFeature;
 			import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 			import org.eclipse.xtext.xbase.lib.Extension;
@@ -1901,10 +1900,9 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  }
 			  
 			  public void improveList(final EPackage it) {
-			    EdeltaLibrary.addEReference(getEClass("PersonList", "List"), 
-			      this.refactorings.mergeReferences("places", 
-			        getEClass("PersonList", "Place"), 
-			        Collections.<EReference>unmodifiableList(CollectionLiterals.<EReference>newArrayList(getEReference("PersonList", "List", "wplaces"), getEReference("PersonList", "List", "lplaces")))));
+			    this.refactorings.mergeFeatures("places", 
+			      getEClass("PersonList", "Place"), 
+			      Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(getEReference("PersonList", "List", "wplaces"), getEReference("PersonList", "List", "lplaces"))));
 			  }
 			  
 			  @Override

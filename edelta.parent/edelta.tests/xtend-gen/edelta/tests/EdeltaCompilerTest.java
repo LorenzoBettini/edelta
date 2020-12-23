@@ -3758,8 +3758,6 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("import org.eclipse.emf.ecore.EPackage;");
     _builder.newLine();
-    _builder.append("import org.eclipse.emf.ecore.EReference;");
-    _builder.newLine();
     _builder.append("import org.eclipse.emf.ecore.EStructuralFeature;");
     _builder.newLine();
     _builder.append("import org.eclipse.xtext.xbase.lib.CollectionLiterals;");
@@ -3887,16 +3885,13 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
     _builder.append("public void improveList(final EPackage it) {");
     _builder.newLine();
     _builder.append("    ");
-    _builder.append("EdeltaLibrary.addEReference(getEClass(\"PersonList\", \"List\"), ");
+    _builder.append("this.refactorings.mergeFeatures(\"places\", ");
     _builder.newLine();
     _builder.append("      ");
-    _builder.append("this.refactorings.mergeReferences(\"places\", ");
-    _builder.newLine();
-    _builder.append("        ");
     _builder.append("getEClass(\"PersonList\", \"Place\"), ");
     _builder.newLine();
-    _builder.append("        ");
-    _builder.append("Collections.<EReference>unmodifiableList(CollectionLiterals.<EReference>newArrayList(getEReference(\"PersonList\", \"List\", \"wplaces\"), getEReference(\"PersonList\", \"List\", \"lplaces\")))));");
+    _builder.append("      ");
+    _builder.append("Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(getEReference(\"PersonList\", \"List\", \"wplaces\"), getEReference(\"PersonList\", \"List\", \"lplaces\"))));");
     _builder.newLine();
     _builder.append("  ");
     _builder.append("}");

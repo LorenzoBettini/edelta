@@ -35,11 +35,9 @@ modifyEcore introduceWorkingPosition epackage PersonList {
 }
 
 modifyEcore improveList epackage PersonList {
-	ecoreref(PersonList.List).addEReference(
-		refactorings.mergeReferences("places",
-			ecoreref(Place),
-			#[ecoreref(List.wplaces), ecoreref(List.lplaces)]
-		)
+	refactorings.mergeFeatures("places",
+		ecoreref(Place),
+		#[ecoreref(List.wplaces), ecoreref(List.lplaces)]
 	)
 }
 
