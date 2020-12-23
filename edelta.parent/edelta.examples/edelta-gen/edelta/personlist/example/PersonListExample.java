@@ -27,13 +27,9 @@ public class PersonListExample extends AbstractEdelta {
   }
   
   public void improvePerson(final EPackage it) {
-    final Procedure1<EClass> _function = (EClass it_1) -> {
-      this.refactorings.introduceSubclasses(it_1, 
-        getEAttribute("PersonList", "Person", "gender"), 
-        getEEnum("PersonList", "Gender"));
-    };
-    ObjectExtensions.<EClass>operator_doubleArrow(
-      getEClass("PersonList", "Person"), _function);
+    this.refactorings.introduceSubclasses(getEClass("PersonList", "Person"), 
+      getEAttribute("PersonList", "Person", "gender"), 
+      getEEnum("PersonList", "Gender"));
     this.refactorings.mergeFeatures("name", 
       Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname"))));
   }

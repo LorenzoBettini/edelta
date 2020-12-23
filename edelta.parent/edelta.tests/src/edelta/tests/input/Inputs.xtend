@@ -300,14 +300,13 @@ class Inputs {
 		use EdeltaRefactorings as extension refactorings
 		
 		modifyEcore improvePerson epackage PersonList {
-			ecoreref(PersonList.Person) => [
-				// since 'refactorings' is an 'extension'
-				// we use its method as an extension method
-				introduceSubclasses(
+			// since 'refactorings' is an 'extension'
+			// we use its method as an extension method
+			ecoreref(PersonList.Person)
+				.introduceSubclasses(
 					ecoreref(Person.gender),
 					ecoreref(Gender)
 				)
-			]
 			refactorings.mergeFeatures("name",
 				#[ecoreref(Person.firstname), ecoreref(Person.lastname)])
 		}
