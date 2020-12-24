@@ -1,17 +1,13 @@
 # This workflow will build a Java project with Maven
-# This runs only on PR (also when the PR is merged:
-# this way also caches for macos and windows are updated
-# in the master branch)
+# This runs only on PR
 
 name: Java CI with Maven
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, closed]
 
 jobs:
   build:
-    if: github.event.action != 'closed' || github.event.pull_request.merged == true
     strategy:
       matrix:
         os: ['macos-latest', 'windows-latest']
