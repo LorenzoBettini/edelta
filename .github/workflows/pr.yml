@@ -1,13 +1,17 @@
 # This workflow will build a Java project with Maven
-# This runs only on PR
+# This runs only on PR (also when the PR is merged:
+# this way also caches for macos and windows are updated
+# in the master branch)
 
 name: Java CI with Maven
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, closed]
 
 jobs:
   build:
+    if: github.event.action != 'closed' || github.event.pull_request.merged == true
     strategy:
       matrix:
         os: ['macos-latest', 'windows-latest']
@@ -27,7 +31,7 @@ jobs:
           ~/.sonar/cache
           !**/*edelta*
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
+        restore-keys: ${{ runner.os }}-m2-
     - name: Build with Maven
       run: ./mvnw -f edelta.parent/pom.xml -U clean verify -Pbuild-ide,test-ide,run-its
       if: runner.os == 'macOS'
