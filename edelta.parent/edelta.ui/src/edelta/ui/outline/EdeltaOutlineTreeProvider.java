@@ -27,11 +27,15 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	@Inject
 	private EdeltaDerivedStateHelper derivedStateHelper;
 
-	protected void _createChildren(final IOutlineNode parentNode, final EdeltaProgram p) {
+	protected void _createChildren(final IOutlineNode parentNode, final EdeltaProgram p) { // NOSONAR OutlineTreeProvider in Xtext is based on some redefined methods starting with _
 		for (final var o : p.getOperations()) {
 			this.createNode(parentNode, o);
 		}
-		for (final var o : p.getModifyEcoreOperations()) {
+		final var modifyEcoreOperations = p.getModifyEcoreOperations();
+		if (modifyEcoreOperations.isEmpty()) {
+			return;
+		}
+		for (final var o : modifyEcoreOperations) {
 			this.createNode(parentNode, o);
 		}
 		final var eResource = p.eResource();
@@ -46,11 +50,11 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		}
 	}
 
-	public boolean _isLeaf(final EdeltaOperation m) {
+	public boolean _isLeaf(final EdeltaOperation m) { // NOSONAR OutlineTreeProvider in Xtext is based on some redefined methods starting with _
 		return true;
 	}
 
-	public boolean _isLeaf(final EdeltaModifyEcoreOperation m) {
+	public boolean _isLeaf(final EdeltaModifyEcoreOperation m) { // NOSONAR OutlineTreeProvider in Xtext is based on some redefined methods starting with _
 		return true;
 	}
 
