@@ -31,7 +31,11 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		for (final var o : p.getOperations()) {
 			this.createNode(parentNode, o);
 		}
-		for (final var o : p.getModifyEcoreOperations()) {
+		final var modifyEcoreOperations = p.getModifyEcoreOperations();
+		if (modifyEcoreOperations.isEmpty()) {
+			return;
+		}
+		for (final var o : modifyEcoreOperations) {
 			this.createNode(parentNode, o);
 		}
 		final var eResource = p.eResource();
