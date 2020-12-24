@@ -116,6 +116,13 @@ public class EdeltaRefactorings extends AbstractEdelta {
     return copy;
   }
   
+  /**
+   * Given an EAttributed, expected to have an EEnum type, creates a subclass of
+   * the containing class, for each value of the referred EEnum.
+   * The attribute will then be removed and so will the EEnum.
+   * 
+   * @param attr
+   */
   public void enumToSubclasses(final EAttribute attr) {
     final EDataType type = attr.getEAttributeType();
     if ((type instanceof EEnum)) {
