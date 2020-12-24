@@ -26,8 +26,10 @@ jobs:
           ~/.m2
           ~/.sonar/cache
           !**/*edelta*
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
+        key: m2-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          m2-${{ runner.os }}-
+          m2-
     - name: Build with Maven
       run: ./mvnw -f edelta.parent/pom.xml -U clean verify -Pbuild-ide,test-ide,run-its
       if: runner.os == 'macOS'
