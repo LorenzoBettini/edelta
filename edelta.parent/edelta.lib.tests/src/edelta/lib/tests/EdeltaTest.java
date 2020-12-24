@@ -95,12 +95,12 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testDefaultExecuteDoesNotThrow() throws Exception {
+	public void testDefaultExecuteDoesNotThrow() throws Exception { // NOSONAR just make sure it runs
 		edelta.execute();
 	}
 
 	@Test
-	public void testLoadEcoreFile() {
+	public void testLoadEcoreFile() { // NOSONAR just make sure it runs
 		loadTestEcore(MY_ECORE);
 	}
 
@@ -182,7 +182,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testEnsureEPackageIsLoaded() throws EdeltaPackageNotLoadedException {
+	public void testEnsureEPackageIsLoaded() throws EdeltaPackageNotLoadedException { // NOSONAR just make sure it runs
 		loadTestEcore(MY_ECORE);
 		edelta.ensureEPackageIsLoaded(MYPACKAGE);
 	}
@@ -263,7 +263,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testSaveModifiedEcores() throws IOException {
+	public void testSaveModifiedEcores() throws IOException { // NOSONAR custom assertions
 		loadTestEcore(MY_ECORE);
 		loadTestEcore(MY2_ECORE);
 		wipeModifiedDirectoryContents();
@@ -277,7 +277,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testSaveModifiedEcoresAfterRemovingBaseClass() throws IOException {
+	public void testSaveModifiedEcoresAfterRemovingBaseClass() throws IOException { // NOSONAR custom assertions
 		loadTestEcore(MY_ECORE);
 		// modify the ecore model by removing MyBaseClass
 		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
@@ -295,7 +295,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testSaveModifiedEcoresAfterRemovingBaseClass2() throws IOException {
+	public void testSaveModifiedEcoresAfterRemovingBaseClass2() throws IOException { // NOSONAR custom assertions
 		loadTestEcore(MY_ECORE);
 		// modify the ecore model by removing MyBaseClass
 		// this will also remove existing references, so the model
@@ -337,7 +337,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testSaveModifiedEcoresAfterRenamingBaseClass() throws IOException {
+	public void testSaveModifiedEcoresAfterRenamingBaseClass() throws IOException { // NOSONAR custom assertions
 		loadTestEcore(MY_ECORE);
 		// modify the ecore model by renaming MyBaseClass
 		// this will also renaming existing references, so the model
@@ -384,7 +384,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testGetLogger() {
+	public void testGetLogger() { // NOSONAR just make sure it runs
 		edelta.getLogger().info("test message");
 	}
 
