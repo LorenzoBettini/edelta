@@ -8,7 +8,7 @@
 # The build consists in a Maven run but skipping tests.
 # The Maven build is run only if we did not have a cache hit.
 
-name: Updates Cache on Windows and MacOS
+name: Update Cache on Windows and MacOS
 
 on:
   push:
