@@ -96,7 +96,7 @@ public abstract class AbstractEdelta {
 	 * 
 	 * @throws Exception
 	 */
-	protected void performSanityChecks() throws Exception {
+	protected void performSanityChecks() throws Exception { // NOSONAR we can't predict a specific exception
 		// to be implemented by the generated code
 	}
 
@@ -106,7 +106,7 @@ public abstract class AbstractEdelta {
 	 * 
 	 * @throws Exception
 	 */
-	protected void doExecute() throws Exception {
+	protected void doExecute() throws Exception { // NOSONAR we can't predict a specific exception
 		// to be implemented by the generated code
 	}
 
