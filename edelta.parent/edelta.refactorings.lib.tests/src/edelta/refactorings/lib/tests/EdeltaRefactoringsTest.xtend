@@ -268,11 +268,14 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		withInputModel("enumToSubclasses", "PersonList.ecore")
 		loadModelFile
 		val person = refactorings.getEClass("PersonList", "Person")
-		refactorings.enumToSubclasses(
+		val result = refactorings.enumToSubclasses(
 			person.getEStructuralFeature("gender") as EAttribute
 		)
 		refactorings.saveModifiedEcores(MODIFIED)
 		assertModifiedFile
+		assertThat(result)
+			.extracting([name])
+			.containsExactlyInAnyOrder("Male", "Female")
 	}
 
 	@Test
@@ -280,9 +283,10 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		withInputModel("enumToSubclasses", "PersonList.ecore")
 		loadModelFile
 		val person = refactorings.getEClass("PersonList", "Person")
-		refactorings.enumToSubclasses(
+		val result = refactorings.enumToSubclasses(
 			person.getEStructuralFeature("firstname") as EAttribute
 		)
+		assertThat(result).isNull
 		refactorings.saveModifiedEcores(MODIFIED)
 		assertModifiedFileIsSameAsOriginal
 		assertThat(appender.result.trim)

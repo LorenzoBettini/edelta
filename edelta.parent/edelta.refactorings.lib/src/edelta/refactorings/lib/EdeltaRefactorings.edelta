@@ -86,27 +86,31 @@ def mergeFeatures(String newFeatureName, EClassifier type, Collection<EStructura
 }
 
 /**
- * Given an EAttributed, expected to have an EEnum type, creates a subclass of
- * the containing class, for each value of the referred EEnum.
+ * Given an EAttribute, expected to have an EEnum type, creates a subclass of
+ * the containing class for each value of the referred EEnum.
  * The attribute will then be removed and so will the EEnum.
  * 
  * @param attr
+ * @return the collection of created subclasses
  */
-def enumToSubclasses(EAttribute attr) : void {
+def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 	val type = attr.EAttributeType
 	if (type instanceof EEnum) {
+		val createdSubclasses = newArrayList
 		val owner = attr.EContainingClass
 		owner.makeAbstract
 		for (subc : type.ELiterals) {
-			owner.EPackage.addNewEClass(subc.literal) [
+			createdSubclasses += owner.EPackage.addNewEClass(subc.literal) [
 				addESuperType(owner)
-			];
+			]
 		}
 		removeElement(type) // will also remove the attribute
+		return createdSubclasses
 	} else {
 		showError(attr,
 			"Not an EEnum: " + getEObjectRepr(type)
 		)
+		return null
 	}
 }
 

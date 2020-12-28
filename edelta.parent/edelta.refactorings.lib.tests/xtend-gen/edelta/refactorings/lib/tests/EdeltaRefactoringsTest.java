@@ -6,12 +6,14 @@ import edelta.refactorings.lib.EdeltaRefactorings;
 import edelta.refactorings.lib.tests.AbstractTest;
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 import edelta.testutils.EdeltaTestUtils;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.iterable.ThrowingExtractor;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -379,10 +381,14 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       this.loadModelFile();
       final EClass person = this.refactorings.getEClass("PersonList", "Person");
       EStructuralFeature _eStructuralFeature = person.getEStructuralFeature("gender");
-      this.refactorings.enumToSubclasses(
+      final Collection<EClass> result = this.refactorings.enumToSubclasses(
         ((EAttribute) _eStructuralFeature));
       this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
       this.assertModifiedFile();
+      final ThrowingExtractor<EClass, String, Exception> _function = (EClass it) -> {
+        return it.getName();
+      };
+      Assertions.<EClass>assertThat(result).<String, Exception>extracting(_function).containsExactlyInAnyOrder("Male", "Female");
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -395,8 +401,9 @@ public class EdeltaRefactoringsTest extends AbstractTest {
       this.loadModelFile();
       final EClass person = this.refactorings.getEClass("PersonList", "Person");
       EStructuralFeature _eStructuralFeature = person.getEStructuralFeature("firstname");
-      this.refactorings.enumToSubclasses(
+      final Collection<EClass> result = this.refactorings.enumToSubclasses(
         ((EAttribute) _eStructuralFeature));
+      Assertions.<EClass>assertThat(result).isNull();
       this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
       this.assertModifiedFileIsSameAsOriginal();
       Assertions.assertThat(this.appender.getResult().trim()).isEqualTo("ERROR: PersonList.Person.firstname: Not an EEnum: ecore.EString");

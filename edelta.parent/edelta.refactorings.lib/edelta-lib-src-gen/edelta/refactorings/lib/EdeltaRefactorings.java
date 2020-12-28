@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaLibrary;
 import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -117,15 +118,17 @@ public class EdeltaRefactorings extends AbstractEdelta {
   }
   
   /**
-   * Given an EAttributed, expected to have an EEnum type, creates a subclass of
-   * the containing class, for each value of the referred EEnum.
+   * Given an EAttribute, expected to have an EEnum type, creates a subclass of
+   * the containing class for each value of the referred EEnum.
    * The attribute will then be removed and so will the EEnum.
    * 
    * @param attr
+   * @return the collection of created subclasses
    */
-  public void enumToSubclasses(final EAttribute attr) {
+  public Collection<EClass> enumToSubclasses(final EAttribute attr) {
     final EDataType type = attr.getEAttributeType();
     if ((type instanceof EEnum)) {
+      final ArrayList<EClass> createdSubclasses = CollectionLiterals.<EClass>newArrayList();
       final EClass owner = attr.getEContainingClass();
       EdeltaLibrary.makeAbstract(owner);
       EList<EEnumLiteral> _eLiterals = ((EEnum)type).getELiterals();
@@ -133,13 +136,16 @@ public class EdeltaRefactorings extends AbstractEdelta {
         final Consumer<EClass> _function = (EClass it) -> {
           EdeltaLibrary.addESuperType(it, owner);
         };
-        EdeltaLibrary.addNewEClass(owner.getEPackage(), subc.getLiteral(), _function);
+        EClass _addNewEClass = EdeltaLibrary.addNewEClass(owner.getEPackage(), subc.getLiteral(), _function);
+        createdSubclasses.add(_addNewEClass);
       }
       EdeltaLibrary.removeElement(type);
+      return createdSubclasses;
     } else {
       String _eObjectRepr = EdeltaLibrary.getEObjectRepr(type);
       String _plus = ("Not an EEnum: " + _eObjectRepr);
       this.showError(attr, _plus);
+      return null;
     }
   }
   
