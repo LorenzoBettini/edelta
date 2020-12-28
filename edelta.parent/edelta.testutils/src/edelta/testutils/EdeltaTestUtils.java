@@ -42,7 +42,7 @@ public class EdeltaTestUtils {
 	}
 
 	/**
-	 * Compares the two files, given their paths, as strings using
+	 * Compares the string contents of the two files, given their paths,
 	 * {@link Assert#assertEquals(Object, Object)}
 	 * 
 	 * @param pathOfExpectedContents
