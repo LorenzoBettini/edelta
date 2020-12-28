@@ -42,27 +42,31 @@ public class EdeltaTestUtils {
 	}
 
 	/**
-	 * Compares the two files as strings using
+	 * Compares the two files, given their paths, as strings using
 	 * {@link Assert#assertEquals(Object, Object)}
 	 * 
-	 * @param fileWithExpectedContents
-	 * @param fileWithActualContents
+	 * @param pathOfExpectedContents
+	 * @param pathOfActualContents
 	 * @throws IOException
 	 */
-	public static void compareFileContents(String fileWithExpectedContents, String fileWithActualContents) throws IOException {
-		assertEquals(removeCR(loadFile(fileWithExpectedContents)), removeCR(loadFile(fileWithActualContents)));
+	public static void assertFilesAreEquals(String pathOfExpectedContents, String pathOfActualContents) throws IOException {
+		assertEquals(
+			removeCR(loadFile(pathOfExpectedContents)),
+			removeCR(loadFile(pathOfActualContents)));
 	}
 
 	/**
-	 * Compares the file contents with the specified string using
+	 * Compares the contents of the file, given its path, with the specified string using
 	 * {@link Assert#assertEquals(Object, Object)}
 	 * 
-	 * @param file1
+	 * @param path
 	 * @param expectedContents
 	 * @throws IOException
 	 */
-	public static void compareSingleFileContents(String file1, String expectedContents) throws IOException {
-		assertEquals(removeCR(expectedContents), removeCR(loadFile(file1)));
+	public static void compareSingleFileContents(String path, String expectedContents) throws IOException {
+		assertEquals(
+			removeCR(expectedContents),
+			removeCR(loadFile(path)));
 	}
 
 	/**

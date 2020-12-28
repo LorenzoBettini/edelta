@@ -4,7 +4,7 @@
 package edelta.lib.tests;
 
 import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
-import static edelta.testutils.EdeltaTestUtils.compareFileContents;
+import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -270,9 +270,9 @@ public class EdeltaTest {
 		edelta.saveModifiedEcores(MODIFIED);
 		// we did not modify anything so the generated files and the
 		// original ones must be the same
-		compareFileContents(
+		assertFilesAreEquals(
 				TESTECORES+"/"+MY_ECORE, MODIFIED+"/"+MY_ECORE);
-		compareFileContents(
+		assertFilesAreEquals(
 				TESTECORES+"/"+MY2_ECORE, MODIFIED+"/"+MY2_ECORE);
 	}
 
@@ -287,7 +287,7 @@ public class EdeltaTest {
 		edelta.getEClass(MYPACKAGE, "MyDerivedClass").getESuperTypes().clear();
 		wipeModifiedDirectoryContents();
 		edelta.saveModifiedEcores(MODIFIED);
-		compareFileContents(
+		assertFilesAreEquals(
 				EXPECTATIONS+"/"+
 					"testSaveModifiedEcoresAfterRemovingBaseClass"+"/"+
 						MY_ECORE,
@@ -303,7 +303,7 @@ public class EdeltaTest {
 		edelta.removeEClassifier(MYPACKAGE, "MyBaseClass");
 		wipeModifiedDirectoryContents();
 		edelta.saveModifiedEcores(MODIFIED);
-		compareFileContents(
+		assertFilesAreEquals(
 				EXPECTATIONS+"/"+
 					"testSaveModifiedEcoresAfterRemovingBaseClass"+"/"+
 						MY_ECORE,
@@ -345,7 +345,7 @@ public class EdeltaTest {
 		edelta.getEClassifier(MYPACKAGE, "MyBaseClass").setName("RENAMED");
 		wipeModifiedDirectoryContents();
 		edelta.saveModifiedEcores(MODIFIED);
-		compareFileContents(
+		assertFilesAreEquals(
 				EXPECTATIONS+"/"+
 					"testSaveModifiedEcoresAfterRenamingBaseClass"+"/"+
 						MY_ECORE,
