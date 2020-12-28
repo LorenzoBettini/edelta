@@ -56,6 +56,8 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 
 	private void assertModifiedFile() throws IOException {
 		checkInputModelSettings();
+		// no need to explicitly validate:
+		// if the ecore file is saved then it is valid
 		EdeltaTestUtils.assertFilesAreEquals(
 				AbstractTest.EXPECTATIONS +
 					testModelDirectory +
@@ -211,19 +213,23 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 		final EClass list = refactorings.getEClass("PersonList", "List");
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		final EStructuralFeature wplaces = list.getEStructuralFeature("wplaces");
+		// Place is not subtype of WorkPlace
 		refactorings.mergeFeatures(wplaces,
 			asList(
 				list.getEStructuralFeature("places"),
 				list.getEStructuralFeature("lplaces")));
+		// different lowerbound
 		wplaces.setLowerBound(1);
 		refactorings.mergeFeatures(list.getEStructuralFeature("places"),
 			asList(
 				list.getEStructuralFeature("wplaces"),
 				list.getEStructuralFeature("lplaces")));
+		// merge attributes with reference
 		refactorings.mergeFeatures(list.getEStructuralFeature("places"),
 			asList(
 				person.getEStructuralFeature("firstName"),
 				person.getEStructuralFeature("lastName")));
+		// merge attributes with different types
 		refactorings.mergeFeatures(person.getEStructuralFeature("age"),
 			asList(
 				person.getEStructuralFeature("firstName"),
@@ -511,6 +517,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 		withInputModel("classToReferenceUnidirectional", "PersonList.ecore");
 		loadModelFile();
 		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
+		// manually remove reference to target class WorkPlace
 		cl.getEStructuralFeatures().remove(cl.getEStructuralFeature("workPlace"));
 		refactorings.classToReference(cl);
 		assertThat(appender.getResult().trim()).isEqualTo(
@@ -522,6 +529,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 		withInputModel("classToReferenceUnidirectional", "PersonList.ecore");
 		loadModelFile();
 		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
+		// manually add another reference to target class
 		EReference ref = this.createEReference(cl, "another");
 		ref.setEType(refactorings.getEClass("PersonList", "List"));
 		refactorings.classToReference(cl);
@@ -538,6 +546,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 		withInputModel("classToReferenceUnidirectional", "PersonList.ecore");
 		loadModelFile();
 		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
+		// manually remove the opposite reference
 		EReference personFeature = (EReference) cl.getEStructuralFeature("person");
 		// also appropriately update the opposite, otherwise we have a dangling reference
 		personFeature.getEOpposite().setEOpposite(null);
