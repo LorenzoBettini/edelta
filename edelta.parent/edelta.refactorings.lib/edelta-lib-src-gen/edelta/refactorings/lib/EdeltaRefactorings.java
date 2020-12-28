@@ -179,6 +179,11 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @return the created EAttribute
    */
   public EAttribute subclassesToEnum(final String name, final Collection<EClass> subclasses) {
+    boolean _checkEmpty = this.checkEmpty(subclasses);
+    boolean _not = (!_checkEmpty);
+    if (_not) {
+      return null;
+    }
     final EClass superclass = IterableExtensions.<EClass>head(IterableExtensions.<EClass>head(subclasses).getESuperTypes());
     final EPackage ePackage = superclass.getEPackage();
     final Consumer<EEnum> _function = (EEnum it) -> {
@@ -643,6 +648,46 @@ public class EdeltaRefactorings extends AbstractEdelta {
       return false;
     }
     return true;
+  }
+  
+  /**
+   * Makes sure the passed EClasses have no feature
+   * 
+   * @param classes
+   * @return true if the EClass is empty
+   */
+  public boolean checkEmpty(final Collection<EClass> classes) {
+    final Function1<EClass, Boolean> _function = (EClass it) -> {
+      return Boolean.valueOf(this.checkEmpty(it));
+    };
+    final Function1<Boolean, Boolean> _function_1 = (Boolean it) -> {
+      return it;
+    };
+    return IterableExtensions.<Boolean>forall(IterableExtensions.<Boolean>toList(IterableExtensions.<EClass, Boolean>map(classes, _function)), _function_1);
+  }
+  
+  /**
+   * Makes sure the passed EClass has no feature
+   * 
+   * @param c
+   * @return true if the EClass is empty
+   */
+  public boolean checkEmpty(final EClass c) {
+    final EList<EStructuralFeature> features = c.getEStructuralFeatures();
+    final boolean empty = features.isEmpty();
+    if ((!empty)) {
+      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(c);
+      String _plus = ("Not an empty class: " + _eObjectRepr);
+      String _plus_1 = (_plus + ":\n");
+      final Function1<EStructuralFeature, String> _function = (EStructuralFeature it) -> {
+        String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(it);
+        return ("  " + _eObjectRepr_1);
+      };
+      String _join = IterableExtensions.join(ListExtensions.<EStructuralFeature, String>map(features, _function), "\n");
+      String _plus_2 = (_plus_1 + _join);
+      this.showError(c, _plus_2);
+    }
+    return empty;
   }
   
   @Override

@@ -311,6 +311,31 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
+	def void test_subclassesToEnumSubclassesNotEmpty() {
+		withInputModel("subclassesToEnumSubclassesNotEmpty", "PersonList.ecore")
+		loadModelFile
+		val personList = refactorings.getEPackage("PersonList")
+		val result = refactorings.subclassesToEnum("Gender",
+			#[
+				personList.getEClassifier("Male") as EClass,
+				personList.getEClassifier("NotSpecified") as EClass,
+				personList.getEClassifier("Female") as EClass
+			]
+		)
+		assertThat(result).isNull
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFileIsSameAsOriginal
+		assertThat(appender.result.trim)
+			.isEqualTo(
+				'''
+				ERROR: PersonList.Male: Not an empty class: PersonList.Male:
+				  PersonList.Male.maleName
+				ERROR: PersonList.Female: Not an empty class: PersonList.Female:
+				  PersonList.Female.femaleName'''.toString
+			)
+	}
+
+	@Test
 	def void test_enumToSubclasses_IsOppositeOf_subclassesToEnum() {
 		withInputModel("enumToSubclasses", "PersonList.ecore")
 		assertOppositeRefactorings(

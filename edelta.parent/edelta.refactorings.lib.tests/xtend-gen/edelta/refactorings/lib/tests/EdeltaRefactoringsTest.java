@@ -434,6 +434,37 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
+  public void test_subclassesToEnumSubclassesNotEmpty() {
+    try {
+      this.withInputModel("subclassesToEnumSubclassesNotEmpty", "PersonList.ecore");
+      this.loadModelFile();
+      final EPackage personList = this.refactorings.getEPackage("PersonList");
+      EClassifier _eClassifier = personList.getEClassifier("Male");
+      EClassifier _eClassifier_1 = personList.getEClassifier("NotSpecified");
+      EClassifier _eClassifier_2 = personList.getEClassifier("Female");
+      final EAttribute result = this.refactorings.subclassesToEnum("Gender", 
+        Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(((EClass) _eClassifier), ((EClass) _eClassifier_1), ((EClass) _eClassifier_2))));
+      Assertions.<EAttribute>assertThat(result).isNull();
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFileIsSameAsOriginal();
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("ERROR: PersonList.Male: Not an empty class: PersonList.Male:");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("PersonList.Male.maleName");
+      _builder.newLine();
+      _builder.append("ERROR: PersonList.Female: Not an empty class: PersonList.Female:");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("PersonList.Female.femaleName");
+      Assertions.assertThat(this.appender.getResult().trim()).isEqualTo(
+        _builder.toString());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
   public void test_enumToSubclasses_IsOppositeOf_subclassesToEnum() {
     this.withInputModel("enumToSubclasses", "PersonList.ecore");
     final Runnable _function = () -> {

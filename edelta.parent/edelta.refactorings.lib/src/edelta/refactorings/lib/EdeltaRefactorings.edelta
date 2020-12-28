@@ -143,6 +143,8 @@ def enumToSubclasses(EAttribute attr) : Collection<EClass> {
  * @return the created EAttribute
  */
 def subclassesToEnum(String name, Collection<EClass> subclasses) : EAttribute {
+	if (!checkEmpty(subclasses))
+		return null
 	val superclass = subclasses.head.ESuperTypes.head
 	val ePackage = superclass.EPackage
 	val enum = ePackage.addNewEEnum(name) [
@@ -501,5 +503,33 @@ def checkCompliant(EStructuralFeature feature, Collection<? extends EStructuralF
 		return false
 	}
 	return true
+}
+
+/**
+ * Makes sure the passed EClasses have no feature
+ * 
+ * @param classes
+ * @return true if the EClass is empty
+ */
+def checkEmpty(Collection<EClass> classes) : boolean {
+	return classes.map[checkEmpty].toList.forall[it]
+}
+
+/**
+ * Makes sure the passed EClass has no feature
+ * 
+ * @param c
+ * @return true if the EClass is empty
+ */
+def checkEmpty(EClass c) : boolean {
+	val features = c.EStructuralFeatures
+	val empty = features.empty
+	if (!empty) {
+		showError(c,
+			"Not an empty class: " + getEObjectRepr(c) + ":\n" +
+				features.map["  " + EObjectRepr].join("\n")
+		)
+	}
+	return empty
 }
 
