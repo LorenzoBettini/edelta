@@ -497,34 +497,18 @@ class EdeltaRefactoringsTest extends AbstractTest {
 
 	@Test
 	def void test_classToReferenceWhenClassIsNotReferred() {
-		val ePackage = factory.createEPackage => [
-			name = "p"
-		]
-		val c = ePackage.createEClass("C")
-		refactorings.classToReference(c)
+		withInputModel("classToReferenceWronglyReferred", "TestEcore.ecore")
+		loadModelFile
+		refactorings.classToReference(refactorings.getEClass("p", "CNotReferred"))
 		assertThat(appender.result.trim)
-			.isEqualTo("ERROR: p.C: The EClass is not referred: p.C")
+			.isEqualTo("ERROR: p.CNotReferred: The EClass is not referred: p.CNotReferred")
 	}
 
 	@Test
 	def void test_classToReferenceWhenClassIsReferredMoreThanOnce() {
-		val ePackage = factory.createEPackage => [
-			name = "p"
-		]
-		val c = ePackage.createEClass("C")
-		ePackage.createEClass("C1") => [
-			createEReference("r1") => [
-				containment = true
-				EType = c
-			]
-		]
-		ePackage.createEClass("C2") => [
-			createEReference("r2") => [
-				containment = true
-				EType = c
-			]
-		]
-		refactorings.classToReference(c)
+		withInputModel("classToReferenceWronglyReferred", "TestEcore.ecore")
+		loadModelFile
+		refactorings.classToReference(refactorings.getEClass("p", "C"))
 		assertThat(appender.result)
 			.isEqualTo('''
 			ERROR: p.C: The EClass is referred by more than one container:

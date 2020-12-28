@@ -661,45 +661,17 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   
   @Test
   public void test_classToReferenceWhenClassIsNotReferred() {
-    EPackage _createEPackage = this.factory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
-      it.setName("p");
-    };
-    final EPackage ePackage = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-    final EClass c = this.createEClass(ePackage, "C");
-    this.refactorings.classToReference(c);
-    Assertions.assertThat(this.appender.getResult().trim()).isEqualTo("ERROR: p.C: The EClass is not referred: p.C");
+    this.withInputModel("classToReferenceWronglyReferred", "TestEcore.ecore");
+    this.loadModelFile();
+    this.refactorings.classToReference(this.refactorings.getEClass("p", "CNotReferred"));
+    Assertions.assertThat(this.appender.getResult().trim()).isEqualTo("ERROR: p.CNotReferred: The EClass is not referred: p.CNotReferred");
   }
   
   @Test
   public void test_classToReferenceWhenClassIsReferredMoreThanOnce() {
-    EPackage _createEPackage = this.factory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
-      it.setName("p");
-    };
-    final EPackage ePackage = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-    final EClass c = this.createEClass(ePackage, "C");
-    EClass _createEClass = this.createEClass(ePackage, "C1");
-    final Procedure1<EClass> _function_1 = (EClass it) -> {
-      EReference _createEReference = this.createEReference(it, "r1");
-      final Procedure1<EReference> _function_2 = (EReference it_1) -> {
-        it_1.setContainment(true);
-        it_1.setEType(c);
-      };
-      ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_2);
-    };
-    ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
-    EClass _createEClass_1 = this.createEClass(ePackage, "C2");
-    final Procedure1<EClass> _function_2 = (EClass it) -> {
-      EReference _createEReference = this.createEReference(it, "r2");
-      final Procedure1<EReference> _function_3 = (EReference it_1) -> {
-        it_1.setContainment(true);
-        it_1.setEType(c);
-      };
-      ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_3);
-    };
-    ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_2);
-    this.refactorings.classToReference(c);
+    this.withInputModel("classToReferenceWronglyReferred", "TestEcore.ecore");
+    this.loadModelFile();
+    this.refactorings.classToReference(this.refactorings.getEClass("p", "C"));
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("ERROR: p.C: The EClass is referred by more than one container:");
     _builder.newLine();
