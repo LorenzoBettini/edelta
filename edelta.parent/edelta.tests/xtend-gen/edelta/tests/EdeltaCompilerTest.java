@@ -4169,6 +4169,10 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   }
   
   private void wipeModifiedDirectoryContents() {
-    EdeltaTestUtils.cleanDirectory(EdeltaCompilerTest.MODIFIED);
+    try {
+      EdeltaTestUtils.cleanDirectory(EdeltaCompilerTest.MODIFIED);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
 }

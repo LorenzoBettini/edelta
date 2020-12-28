@@ -450,7 +450,7 @@ public class EdeltaTest {
 			((EClass) eAttribute.eContainer()).getEPackage().getName());
 	}
 
-	private void wipeModifiedDirectoryContents() {
+	private void wipeModifiedDirectoryContents() throws IOException {
 		cleanDirectory(MODIFIED);
 	}
 

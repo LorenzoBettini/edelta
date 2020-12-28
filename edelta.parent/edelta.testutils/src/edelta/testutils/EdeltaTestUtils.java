@@ -1,7 +1,6 @@
 package edelta.testutils;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,12 +27,13 @@ public class EdeltaTestUtils {
 	 * and possible subdirectories.
 	 * 
 	 * @param directory
+	 * @throws IOException
 	 */
-	public static void cleanDirectory(String directory) {
+	public static void cleanDirectory(String directory) throws IOException {
 		File dir = new File(directory);
 		for (File file : dir.listFiles())
 			if (!file.isDirectory() && !file.getName().equals(".gitignore"))
-				assertTrue("File not deleted " + file.getAbsolutePath(), file.delete());
+				Files.delete(file.toPath());
 	}
 
 	public static String loadFile(String file) throws IOException {
