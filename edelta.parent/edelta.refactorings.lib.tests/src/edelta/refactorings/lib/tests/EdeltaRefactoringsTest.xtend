@@ -13,9 +13,6 @@ import org.junit.Test
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.assertFalse
-import static org.junit.Assert.assertNotNull
-import static org.junit.Assert.assertNull
-import static org.junit.Assert.assertSame
 import static org.junit.Assert.assertTrue
 
 class EdeltaRefactoringsTest extends AbstractTest {
@@ -798,30 +795,6 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			ERROR: PersonList.Student.name: Not a direct subclass of destination: PersonList.Student
 			ERROR: PersonList.Employee.name: Not a direct subclass of destination: PersonList.Employee
 			'''.toString)
-	}
-
-	@Test def void test_redundantContainerToEOpposite() {
-		val p = factory.createEPackage => [
-			val containedWithRedundant = createEClass("ContainedWithRedundant")
-			val container = createEClass("Container") => [
-				createEReference("containedWithRedundant") => [
-					EType = containedWithRedundant
-					containment = true
-				]
-			]
-			containedWithRedundant.createEReference("redundant") => [
-				EType = container
-				lowerBound = 1
-			]
-		]
-		val redundant = p.EClasses.head.EReferences.head
-		val opposite = p.EClasses.last.EReferences.head
-		assertNull(redundant.EOpposite)
-		assertNull(opposite.EOpposite)
-		refactorings.redundantContainerToEOpposite(#[redundant -> opposite])
-		assertNotNull(redundant.EOpposite)
-		assertSame(redundant.EOpposite, opposite)
-		assertSame(opposite.EOpposite, redundant)
 	}
 
 	@Test def void test_makeAbstract() {

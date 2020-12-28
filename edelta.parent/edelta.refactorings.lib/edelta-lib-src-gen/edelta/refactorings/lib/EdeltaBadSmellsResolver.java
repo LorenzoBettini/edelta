@@ -1,6 +1,7 @@
 package edelta.refactorings.lib;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaLibrary;
 import edelta.refactorings.lib.EdeltaBadSmellsFinder;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.List;
@@ -11,8 +12,10 @@ import java.util.function.Predicate;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.xtext.xbase.lib.Pair;
 
 @SuppressWarnings("all")
 public class EdeltaBadSmellsResolver extends AbstractEdelta {
@@ -63,8 +66,11 @@ public class EdeltaBadSmellsResolver extends AbstractEdelta {
    * Applies redundantContainerToEOpposite to redundant containers
    */
   public void resolveRedundantContainers(final EPackage ePackage) {
-    this.refactorings.redundantContainerToEOpposite(
-      this.finder.findRedundantContainers(ePackage));
+    final Iterable<Pair<EReference, EReference>> findRedundantContainers = this.finder.findRedundantContainers(ePackage);
+    final Consumer<Pair<EReference, EReference>> _function = (Pair<EReference, EReference> it) -> {
+      EdeltaLibrary.makeBidirectional(it.getKey(), it.getValue());
+    };
+    findRedundantContainers.forEach(_function);
   }
   
   /**
