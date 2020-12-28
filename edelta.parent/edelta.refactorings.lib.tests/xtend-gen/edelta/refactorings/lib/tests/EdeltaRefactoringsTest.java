@@ -8,9 +8,7 @@ import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 import edelta.testutils.EdeltaTestUtils;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.iterable.ThrowingExtractor;
@@ -24,11 +22,8 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
-import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Exceptions;
-import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
-import org.eclipse.xtext.xbase.lib.ListExtensions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Before;
@@ -844,120 +839,24 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
-  public void test_extractSuperClass() {
-    EPackage _createEPackage = this.factory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
-      EClass _createEClass = this.createEClass(it, "C1");
-      final Procedure1<EClass> _function_1 = (EClass it_1) -> {
-        EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
-        final Procedure1<EAttribute> _function_2 = (EAttribute it_2) -> {
-          it_2.setEType(this.stringDataType);
-        };
-        ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_2);
-      };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
-      EClass _createEClass_1 = this.createEClass(it, "C2");
-      final Procedure1<EClass> _function_2 = (EClass it_1) -> {
-        EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
-        final Procedure1<EAttribute> _function_3 = (EAttribute it_2) -> {
-          it_2.setEType(this.stringDataType);
-        };
-        ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_3);
-      };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_2);
-    };
-    final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-    final Function1<EClass, EList<EAttribute>> _function_1 = (EClass it) -> {
-      return it.getEAttributes();
-    };
-    final List<EAttribute> duplicates = IterableExtensions.<EAttribute>toList(Iterables.<EAttribute>concat(IterableExtensions.<EClass, EList<EAttribute>>map(this.EClasses(p), _function_1)));
-    this.refactorings.extractSuperclass(duplicates);
-    final Function1<EClassifier, String> _function_2 = (EClassifier it) -> {
-      return it.getName();
-    };
-    final List<String> classifiersNames = ListExtensions.<EClassifier, String>map(p.getEClassifiers(), _function_2);
-    Assertions.<String>assertThat(classifiersNames).hasSize(3).containsExactly("C1", "C2", "A1Element");
-    final Iterable<EClass> classes = this.EClasses(p);
-    Assertions.<EAttribute>assertThat((((EClass[])Conversions.unwrapArray(classes, EClass.class))[0]).getEAttributes()).isEmpty();
-    Assertions.<EAttribute>assertThat((((EClass[])Conversions.unwrapArray(classes, EClass.class))[1]).getEAttributes()).isEmpty();
-    Assertions.<EAttribute>assertThat((((EClass[])Conversions.unwrapArray(classes, EClass.class))[2]).getEAttributes()).hasSize(1);
-    final EAttribute extracted = IterableExtensions.<EAttribute>head((((EClass[])Conversions.unwrapArray(classes, EClass.class))[2]).getEAttributes());
-    Assertions.assertThat(extracted.getName()).isEqualTo("A1");
-    Assertions.<EDataType>assertThat(extracted.getEAttributeType()).isEqualTo(this.stringDataType);
-  }
-  
-  @Test
-  public void test_extractSuperClassUnique() {
-    EPackage _createEPackage = this.factory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
-      EClass _createEClass = this.createEClass(it, "C1");
-      final Procedure1<EClass> _function_1 = (EClass it_1) -> {
-        EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
-        final Procedure1<EAttribute> _function_2 = (EAttribute it_2) -> {
-          it_2.setEType(this.stringDataType);
-        };
-        ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_2);
-      };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
-      EClass _createEClass_1 = this.createEClass(it, "C2");
-      final Procedure1<EClass> _function_2 = (EClass it_1) -> {
-        EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
-        final Procedure1<EAttribute> _function_3 = (EAttribute it_2) -> {
-          it_2.setEType(this.stringDataType);
-        };
-        ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_3);
-      };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_2);
-      EClass _createEClass_2 = this.createEClass(it, "C3");
-      final Procedure1<EClass> _function_3 = (EClass it_1) -> {
-        EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
-        final Procedure1<EAttribute> _function_4 = (EAttribute it_2) -> {
-          it_2.setEType(this.stringDataType);
-          it_2.setLowerBound(2);
-        };
-        ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_4);
-      };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_2, _function_3);
-      EClass _createEClass_3 = this.createEClass(it, "C4");
-      final Procedure1<EClass> _function_4 = (EClass it_1) -> {
-        EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
-        final Procedure1<EAttribute> _function_5 = (EAttribute it_2) -> {
-          it_2.setEType(this.stringDataType);
-          it_2.setLowerBound(2);
-        };
-        ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_5);
-      };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_3, _function_4);
-    };
-    final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-    final Function1<EClass, EList<EAttribute>> _function_1 = (EClass it) -> {
-      return it.getEAttributes();
-    };
-    final List<EAttribute> attributes = IterableExtensions.<EAttribute>toList(Iterables.<EAttribute>concat(IterableExtensions.<EClass, EList<EAttribute>>map(this.EClasses(p), _function_1)));
-    this.refactorings.extractSuperclass(
-      IterableExtensions.<EAttribute>toList(IterableExtensions.<EAttribute>take(attributes, 2)));
-    this.refactorings.extractSuperclass(
-      attributes.stream().skip(2).collect(Collectors.<EAttribute>toList()));
-    final Function1<EClassifier, String> _function_2 = (EClassifier it) -> {
-      return it.getName();
-    };
-    final List<String> classifiersNames = ListExtensions.<EClassifier, String>map(p.getEClassifiers(), _function_2);
-    Assertions.<String>assertThat(classifiersNames).containsExactly("C1", "C2", "C3", "C4", "A1Element", "A1Element1");
-    final Iterable<EClass> classes = this.EClasses(p);
-    Assertions.<EAttribute>assertThat((((EClass[])Conversions.unwrapArray(classes, EClass.class))[0]).getEAttributes()).isEmpty();
-    Assertions.<EAttribute>assertThat((((EClass[])Conversions.unwrapArray(classes, EClass.class))[1]).getEAttributes()).isEmpty();
-    Assertions.<EAttribute>assertThat((((EClass[])Conversions.unwrapArray(classes, EClass.class))[2]).getEAttributes()).isEmpty();
-    Assertions.<EAttribute>assertThat((((EClass[])Conversions.unwrapArray(classes, EClass.class))[3]).getEAttributes()).isEmpty();
-    Assertions.<EAttribute>assertThat((((EClass[])Conversions.unwrapArray(classes, EClass.class))[4]).getEAttributes()).hasSize(1);
-    Assertions.<EAttribute>assertThat((((EClass[])Conversions.unwrapArray(classes, EClass.class))[5]).getEAttributes()).hasSize(1);
-    final EAttribute extractedA1NoLowerBound = IterableExtensions.<EAttribute>head((((EClass[])Conversions.unwrapArray(classes, EClass.class))[4]).getEAttributes());
-    Assertions.assertThat(extractedA1NoLowerBound.getName()).isEqualTo("A1");
-    Assertions.<EDataType>assertThat(extractedA1NoLowerBound.getEAttributeType()).isEqualTo(this.stringDataType);
-    Assertions.assertThat(extractedA1NoLowerBound.getLowerBound()).isZero();
-    final EAttribute extractedA1WithLowerBound = IterableExtensions.<EAttribute>head((((EClass[])Conversions.unwrapArray(classes, EClass.class))[5]).getEAttributes());
-    Assertions.assertThat(extractedA1WithLowerBound.getName()).isEqualTo("A1");
-    Assertions.<EDataType>assertThat(extractedA1WithLowerBound.getEAttributeType()).isEqualTo(this.stringDataType);
-    Assertions.assertThat(extractedA1WithLowerBound.getLowerBound()).isEqualTo(2);
+  public void test_extractSuperclass() {
+    try {
+      this.withInputModel("extractSuperclass", "TestEcore.ecore");
+      this.loadModelFile();
+      EAttribute _eAttribute = this.refactorings.getEAttribute("p", "C1", "a1");
+      EAttribute _eAttribute_1 = this.refactorings.getEAttribute("p", "C2", "a1");
+      this.refactorings.extractSuperclass(
+        Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eAttribute, _eAttribute_1)));
+      EAttribute _eAttribute_2 = this.refactorings.getEAttribute("p", "C3", "a1");
+      EAttribute _eAttribute_3 = this.refactorings.getEAttribute("p", "C4", "a1");
+      this.refactorings.extractSuperclass(
+        Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_eAttribute_2, _eAttribute_3)));
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+      this.assertLogIsEmpty();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test

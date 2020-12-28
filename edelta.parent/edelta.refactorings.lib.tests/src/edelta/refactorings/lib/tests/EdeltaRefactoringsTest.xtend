@@ -3,7 +3,6 @@ package edelta.refactorings.lib.tests
 import edelta.lib.AbstractEdelta
 import edelta.refactorings.lib.EdeltaRefactorings
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender
-import java.util.stream.Collectors
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EReference
@@ -640,86 +639,24 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertLogIsEmpty
 	}
 
-	@Test def void test_extractSuperClass() {
-		val p = factory.createEPackage => [
-			createEClass("C1") => [
-				createEAttribute("A1") => [
-					EType = stringDataType
-				]
-			]
-			createEClass("C2") => [
-				createEAttribute("A1") => [
-					EType = stringDataType
-				]
-			]
-		]
-		// we know the duplicates, manually
-		val duplicates = p.EClasses.map[EAttributes].flatten.toList
-		refactorings.extractSuperclass(duplicates)
-		val classifiersNames = p.EClassifiers.map[name]
-		assertThat(classifiersNames)
-			.hasSize(3)
-			.containsExactly("C1", "C2", "A1Element")
-		val classes = p.EClasses
-		assertThat(classes.get(0).EAttributes).isEmpty
-		assertThat(classes.get(1).EAttributes).isEmpty
-		assertThat(classes.get(2).EAttributes).hasSize(1)
-		val extracted = classes.get(2).EAttributes.head
-		assertThat(extracted.name).isEqualTo("A1")
-		assertThat(extracted.EAttributeType).isEqualTo(stringDataType)
-	}
-
-	@Test def void test_extractSuperClassUnique() {
-		val p = factory.createEPackage => [
-			createEClass("C1") => [
-				createEAttribute("A1") => [
-					EType = stringDataType
-				]
-			]
-			createEClass("C2") => [
-				createEAttribute("A1") => [
-					EType = stringDataType
-				]
-			]
-			createEClass("C3") => [
-				createEAttribute("A1") => [
-					EType = stringDataType
-					lowerBound = 2
-				]
-			]
-			createEClass("C4") => [
-				createEAttribute("A1") => [
-					EType = stringDataType
-					lowerBound = 2
-				]
-			]
-		]
-		// we know the duplicates, manually
-		val attributes = p.EClasses.map[EAttributes].flatten.toList
+	@Test def void test_extractSuperclass() {
+		withInputModel("extractSuperclass", "TestEcore.ecore")
+		loadModelFile
 		refactorings.extractSuperclass(
-			attributes.take(2).toList // A1 without lowerbound
+			#[
+				refactorings.getEAttribute("p", "C1", "a1"),
+				refactorings.getEAttribute("p", "C2", "a1")
+			]
 		)
 		refactorings.extractSuperclass(
-			attributes.stream.skip(2).collect(Collectors.toList) // A1 with lowerbound
+			#[
+				refactorings.getEAttribute("p", "C3", "a1"),
+				refactorings.getEAttribute("p", "C4", "a1")
+			]
 		)
-		val classifiersNames = p.EClassifiers.map[name]
-		assertThat(classifiersNames)
-			.containsExactly("C1", "C2", "C3", "C4", "A1Element", "A1Element1")
-		val classes = p.EClasses
-		assertThat(classes.get(0).EAttributes).isEmpty // C1
-		assertThat(classes.get(1).EAttributes).isEmpty // C2
-		assertThat(classes.get(2).EAttributes).isEmpty // C3
-		assertThat(classes.get(3).EAttributes).isEmpty // C4
-		assertThat(classes.get(4).EAttributes).hasSize(1) // WithA1EString
-		assertThat(classes.get(5).EAttributes).hasSize(1) // WithA1EString1
-		val extractedA1NoLowerBound = classes.get(4).EAttributes.head
-		assertThat(extractedA1NoLowerBound.name).isEqualTo("A1")
-		assertThat(extractedA1NoLowerBound.EAttributeType).isEqualTo(stringDataType)
-		assertThat(extractedA1NoLowerBound.lowerBound).isZero
-		val extractedA1WithLowerBound = classes.get(5).EAttributes.head
-		assertThat(extractedA1WithLowerBound.name).isEqualTo("A1")
-		assertThat(extractedA1WithLowerBound.EAttributeType).isEqualTo(stringDataType)
-		assertThat(extractedA1WithLowerBound.lowerBound).isEqualTo(2)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFile
+		assertLogIsEmpty
 	}
 
 	@Test
