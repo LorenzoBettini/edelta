@@ -263,7 +263,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testSaveModifiedEcores() throws IOException { // NOSONAR custom assertions
+	public void testSaveModifiedEcores() throws IOException {
 		loadTestEcore(MY_ECORE);
 		loadTestEcore(MY2_ECORE);
 		wipeModifiedDirectoryContents();
@@ -277,7 +277,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testSaveModifiedEcoresAfterRemovingBaseClass() throws IOException { // NOSONAR custom assertions
+	public void testSaveModifiedEcoresAfterRemovingBaseClass() throws IOException {
 		loadTestEcore(MY_ECORE);
 		// modify the ecore model by removing MyBaseClass
 		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
@@ -295,7 +295,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testSaveModifiedEcoresAfterRemovingBaseClass2() throws IOException { // NOSONAR custom assertions
+	public void testSaveModifiedEcoresAfterRemovingBaseClass2() throws IOException {
 		loadTestEcore(MY_ECORE);
 		// modify the ecore model by removing MyBaseClass
 		// this will also remove existing references, so the model
@@ -337,7 +337,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testSaveModifiedEcoresAfterRenamingBaseClass() throws IOException { // NOSONAR custom assertions
+	public void testSaveModifiedEcoresAfterRenamingBaseClass() throws IOException {
 		loadTestEcore(MY_ECORE);
 		// modify the ecore model by renaming MyBaseClass
 		// this will also renaming existing references, so the model
