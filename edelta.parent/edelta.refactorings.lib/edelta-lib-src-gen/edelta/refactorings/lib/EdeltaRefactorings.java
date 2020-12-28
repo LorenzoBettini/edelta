@@ -468,26 +468,6 @@ public class EdeltaRefactorings extends AbstractEdelta {
     return className;
   }
   
-  /**
-   * Turns the given EClasses to abstract
-   */
-  public void makeAbstract(final Iterable<EClass> classes) {
-    final Consumer<EClass> _function = (EClass it) -> {
-      EdeltaLibrary.makeAbstract(it);
-    };
-    classes.forEach(_function);
-  }
-  
-  /**
-   * Turns the given EClasses to NON abstract
-   */
-  public void makeConcrete(final Iterable<EClass> classes) {
-    final Consumer<EClass> _function = (EClass it) -> {
-      EdeltaLibrary.makeConcrete(it);
-    };
-    classes.forEach(_function);
-  }
-  
   public String fromTypeToFeatureName(final EClassifier type) {
     return StringExtensions.toFirstLower(type.getName());
   }

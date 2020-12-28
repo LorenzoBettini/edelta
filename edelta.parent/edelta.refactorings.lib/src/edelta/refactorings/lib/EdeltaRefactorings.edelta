@@ -362,20 +362,6 @@ def ensureEClassifierNameIsUnique(EPackage ePackage, String proposedName) {
 	return className
 }
 
-/**
- * Turns the given EClasses to abstract
- */
-def makeAbstract(Iterable<EClass> classes) : void {
-	classes.forEach[makeAbstract]
-}
-
-/**
- * Turns the given EClasses to NON abstract
- */
-def makeConcrete(Iterable<EClass> classes) : void {
-	classes.forEach[makeConcrete]
-}
-
 def fromTypeToFeatureName(EClassifier type) {
 	type.name.toFirstLower
 }

@@ -87,18 +87,24 @@ public class EdeltaBadSmellsResolver extends AbstractEdelta {
   }
   
   public void resolveConcreteAbstractMetaclass(final EPackage ePackage) {
-    this.refactorings.makeAbstract(
-      this.finder.findConcreteAbstractMetaclasses(ePackage));
+    final Consumer<EClass> _function = (EClass it) -> {
+      EdeltaLibrary.makeAbstract(it);
+    };
+    this.finder.findConcreteAbstractMetaclasses(ePackage).forEach(_function);
   }
   
   public void resolveAbstractConcreteMetaclass(final EPackage ePackage) {
-    this.refactorings.makeConcrete(
-      this.finder.findAbstractConcreteMetaclasses(ePackage));
+    final Consumer<EClass> _function = (EClass it) -> {
+      EdeltaLibrary.makeConcrete(it);
+    };
+    this.finder.findAbstractConcreteMetaclasses(ePackage).forEach(_function);
   }
   
   public void resolveAbstractSubclassesOfConcreteSuperclasses(final EPackage ePackage) {
-    this.refactorings.makeConcrete(
-      this.finder.findAbstractSubclassesOfConcreteSuperclasses(ePackage));
+    final Consumer<EClass> _function = (EClass it) -> {
+      EdeltaLibrary.makeConcrete(it);
+    };
+    this.finder.findAbstractSubclassesOfConcreteSuperclasses(ePackage).forEach(_function);
   }
   
   public void resolveDuplicateFeaturesInSubclasses(final EPackage ePackage) {

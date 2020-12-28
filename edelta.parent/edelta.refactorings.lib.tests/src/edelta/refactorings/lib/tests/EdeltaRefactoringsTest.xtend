@@ -12,8 +12,6 @@ import org.junit.Test
 
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals
 import static org.assertj.core.api.Assertions.*
-import static org.junit.Assert.assertFalse
-import static org.junit.Assert.assertTrue
 
 class EdeltaRefactoringsTest extends AbstractTest {
 	var EdeltaRefactorings refactorings
@@ -797,28 +795,4 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			'''.toString)
 	}
 
-	@Test def void test_makeAbstract() {
-		val p = factory.createEPackage => [
-			val base = createEClass("ConcreteAbstractMetaclass")
-			createEClass("Derived1") => [
-				ESuperTypes += base
-			]
-		]
-		val c = p.EClasses.head
-		assertFalse(c.abstract)
-		refactorings.makeAbstract(#[c])
-		assertTrue(c.abstract)
-	}
-
-	@Test def void test_makeConcrete() {
-		val p = factory.createEPackage => [
-			createEClass("AbstractConcreteMetaclass") => [
-				abstract = true
-			]
-		]
-		val c = p.EClasses.head
-		assertTrue(c.abstract)
-		refactorings.makeConcrete(#[c])
-		assertFalse(c.abstract)
-	}
 }

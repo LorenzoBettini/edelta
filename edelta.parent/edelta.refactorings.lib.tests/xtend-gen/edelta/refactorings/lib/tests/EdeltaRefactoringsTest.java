@@ -31,7 +31,6 @@ import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.ListExtensions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -1065,41 +1064,5 @@ public class EdeltaRefactoringsTest extends AbstractTest {
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
-  }
-  
-  @Test
-  public void test_makeAbstract() {
-    EPackage _createEPackage = this.factory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
-      final EClass base = this.createEClass(it, "ConcreteAbstractMetaclass");
-      EClass _createEClass = this.createEClass(it, "Derived1");
-      final Procedure1<EClass> _function_1 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(base);
-      };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
-    };
-    final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-    final EClass c = IterableExtensions.<EClass>head(this.EClasses(p));
-    Assert.assertFalse(c.isAbstract());
-    this.refactorings.makeAbstract(Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(c)));
-    Assert.assertTrue(c.isAbstract());
-  }
-  
-  @Test
-  public void test_makeConcrete() {
-    EPackage _createEPackage = this.factory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
-      EClass _createEClass = this.createEClass(it, "AbstractConcreteMetaclass");
-      final Procedure1<EClass> _function_1 = (EClass it_1) -> {
-        it_1.setAbstract(true);
-      };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
-    };
-    final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-    final EClass c = IterableExtensions.<EClass>head(this.EClasses(p));
-    Assert.assertTrue(c.isAbstract());
-    this.refactorings.makeConcrete(Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(c)));
-    Assert.assertFalse(c.isAbstract());
   }
 }

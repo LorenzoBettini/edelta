@@ -54,21 +54,18 @@ def resolveClassificationByHierarchy(EPackage ePackage) {
 }
 
 def resolveConcreteAbstractMetaclass(EPackage ePackage) {
-	refactorings.makeAbstract(
-		finder.findConcreteAbstractMetaclasses(ePackage)
-	)
+	finder.findConcreteAbstractMetaclasses(ePackage)
+		.forEach[makeAbstract]
 }
 
 def resolveAbstractConcreteMetaclass(EPackage ePackage) {
-	refactorings.makeConcrete(
-		finder.findAbstractConcreteMetaclasses(ePackage)
-	)
+	finder.findAbstractConcreteMetaclasses(ePackage)
+		.forEach[makeConcrete]
 }
 
 def resolveAbstractSubclassesOfConcreteSuperclasses(EPackage ePackage) {
-	refactorings.makeConcrete(
-		finder.findAbstractSubclassesOfConcreteSuperclasses(ePackage)
-	)
+	finder.findAbstractSubclassesOfConcreteSuperclasses(ePackage)
+		.forEach[makeConcrete]
 }
 
 def resolveDuplicateFeaturesInSubclasses(EPackage ePackage) {
