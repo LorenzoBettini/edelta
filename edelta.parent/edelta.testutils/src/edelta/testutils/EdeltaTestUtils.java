@@ -73,6 +73,6 @@ public class EdeltaTestUtils {
 	 * @return
 	 */
 	public static String removeCR(String s) {
-		return s.replaceAll("\r", "");
+		return s.replace("\r", "");
 	}
 }
