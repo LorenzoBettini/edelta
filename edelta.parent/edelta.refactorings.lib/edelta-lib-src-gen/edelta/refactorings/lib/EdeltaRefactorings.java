@@ -121,6 +121,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * Given an EAttribute, expected to have an EEnum type, creates a subclass of
    * the containing class for each value of the referred EEnum.
    * The attribute will then be removed and so will the EEnum.
+   * The original containing EClass is made abstract.
    * 
    * @param attr
    * @return the collection of created subclasses
@@ -147,6 +148,48 @@ public class EdeltaRefactorings extends AbstractEdelta {
       this.showError(attr, _plus);
       return null;
     }
+  }
+  
+  /**
+   * Given a collection of subclasses, which are expected to be direct subclasses of
+   * an EClass, say superclass, generates an EEnum (in the superclass' package)
+   * with the specified name, representing the inheritance relation,
+   * with an EEnumLiteral for each subclass (the name is the name
+   * of the subclass in uppercase); the subclasses are removed, and
+   * an attributed is added to the superclass with the created EEnum as type
+   * (the name is the name of the EEnum, first letter lowercase).
+   * 
+   * For example, given the name "BaseType" and the collection of classes
+   * {"Derived1", "Derived2"} subclasses of the superclass "Base",
+   * it creates the EEnum "BaseType" with literals "DERIVED1", "DERIVED2",
+   * (the values will be incremental numbers starting from 0,
+   * according to the order of the subclasses in the collection)
+   * it adds to "Base" the EAttribute "baseType" of type "BaseType".
+   * The EClasses "Derived1" and "Derived2" are removed from the package.
+   * 
+   * @param name the name for the created EEnum
+   * @param subclasses
+   * @return the created EAttribute
+   */
+  public EAttribute subclassesToEnum(final String name, final Collection<EClass> subclasses) {
+    final EClass superclass = IterableExtensions.<EClass>head(IterableExtensions.<EClass>head(subclasses).getESuperTypes());
+    final EPackage ePackage = superclass.getEPackage();
+    final Consumer<EEnum> _function = (EEnum it) -> {
+      final Procedure2<EClass, Integer> _function_1 = (EClass subClass, Integer index) -> {
+        final String enumLiteralName = this.ensureEClassifierNameIsUnique(ePackage, subClass.getName().toUpperCase());
+        EEnumLiteral _addNewEEnumLiteral = EdeltaLibrary.addNewEEnumLiteral(it, enumLiteralName);
+        final Procedure1<EEnumLiteral> _function_2 = (EEnumLiteral it_1) -> {
+          it_1.setValue((index).intValue());
+        };
+        ObjectExtensions.<EEnumLiteral>operator_doubleArrow(_addNewEEnumLiteral, _function_2);
+      };
+      IterableExtensions.<EClass>forEach(subclasses, _function_1);
+    };
+    final EEnum enum_ = EdeltaLibrary.addNewEEnum(ePackage, name, _function);
+    final EAttribute attribute = EdeltaLibrary.addNewEAttribute(superclass, this.fromTypeToFeatureName(enum_), enum_);
+    EdeltaLibrary.makeConcrete(superclass);
+    EdeltaLibrary.removeAllElements(subclasses);
+    return attribute;
   }
   
   /**

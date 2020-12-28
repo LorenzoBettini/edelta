@@ -2,6 +2,7 @@ import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder
 import java.util.Collection
 import java.util.List
 import java.util.Map
+import java.util.function.Predicate
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
@@ -12,7 +13,6 @@ import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.xbase.lib.Pair
-import java.util.function.Predicate
 
 package edelta.refactorings.lib
 
@@ -89,6 +89,7 @@ def mergeFeatures(String newFeatureName, EClassifier type, Collection<EStructura
  * Given an EAttribute, expected to have an EEnum type, creates a subclass of
  * the containing class for each value of the referred EEnum.
  * The attribute will then be removed and so will the EEnum.
+ * The original containing EClass is made abstract.
  * 
  * @param attr
  * @return the collection of created subclasses
@@ -112,6 +113,45 @@ def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 		)
 		return null
 	}
+}
+
+/**
+ * Given a collection of subclasses, which are expected to be direct subclasses of
+ * an EClass, say superclass, generates an EEnum (in the superclass' package)
+ * with the specified name, representing the inheritance relation,
+ * with an EEnumLiteral for each subclass (the name is the name
+ * of the subclass in uppercase); the subclasses are removed, and
+ * an attributed is added to the superclass with the created EEnum as type
+ * (the name is the name of the EEnum, first letter lowercase).
+ * 
+ * For example, given the name "BaseType" and the collection of classes
+ * {"Derived1", "Derived2"} subclasses of the superclass "Base",
+ * it creates the EEnum "BaseType" with literals "DERIVED1", "DERIVED2",
+ * (the values will be incremental numbers starting from 0,
+ * according to the order of the subclasses in the collection)
+ * it adds to "Base" the EAttribute "baseType" of type "BaseType".
+ * The EClasses "Derived1" and "Derived2" are removed from the package.
+ * 
+ * @param name the name for the created EEnum
+ * @param subclasses
+ * @return the created EAttribute
+ */
+def subclassesToEnum(String name, Collection<EClass> subclasses) : EAttribute {
+	val superclass = subclasses.head.ESuperTypes.head
+	val ePackage = superclass.EPackage
+	val enum = ePackage.addNewEEnum(name) [
+		subclasses.forEach[subClass, index |
+			val enumLiteralName = ensureEClassifierNameIsUnique
+				(ePackage, subClass.name.toUpperCase)
+			addNewEEnumLiteral(enumLiteralName) => [
+				value = index
+			]
+		]
+	]
+	val attribute = superclass.addNewEAttribute(enum.fromTypeToFeatureName, enum)
+	superclass.makeConcrete
+	removeAllElements(subclasses)
+	return attribute
 }
 
 /**

@@ -294,6 +294,23 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
+	def void test_subclassesToEnum() {
+		withInputModel("subclassesToEnum", "PersonList.ecore")
+		loadModelFile
+		val personList = refactorings.getEPackage("PersonList")
+		val result = refactorings.subclassesToEnum("Gender",
+			#[
+				personList.getEClassifier("Male") as EClass,
+				personList.getEClassifier("Female") as EClass
+			]
+		)
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFile
+		assertThat(result)
+			.returns("gender", [name])
+	}
+
+	@Test
 	def void test_extractClassWithAttributes() {
 		withInputModel("extractClassWithAttributes", "PersonList.ecore")
 		loadModelFile

@@ -413,6 +413,27 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
+  public void test_subclassesToEnum() {
+    try {
+      this.withInputModel("subclassesToEnum", "PersonList.ecore");
+      this.loadModelFile();
+      final EPackage personList = this.refactorings.getEPackage("PersonList");
+      EClassifier _eClassifier = personList.getEClassifier("Male");
+      EClassifier _eClassifier_1 = personList.getEClassifier("Female");
+      final EAttribute result = this.refactorings.subclassesToEnum("Gender", 
+        Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(((EClass) _eClassifier), ((EClass) _eClassifier_1))));
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+      final Function<EAttribute, String> _function = (EAttribute it) -> {
+        return it.getName();
+      };
+      Assertions.<EAttribute>assertThat(result).<String>returns("gender", _function);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
   public void test_extractClassWithAttributes() {
     try {
       this.withInputModel("extractClassWithAttributes", "PersonList.ecore");
