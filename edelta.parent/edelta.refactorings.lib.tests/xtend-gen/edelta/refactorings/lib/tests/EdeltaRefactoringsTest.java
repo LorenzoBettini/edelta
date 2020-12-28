@@ -78,7 +78,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   private void assertModifiedFile() {
     try {
       this.checkInputModelSettings();
-      EdeltaTestUtils.compareFileContents(
+      EdeltaTestUtils.assertFilesAreEquals(
         (((AbstractTest.EXPECTATIONS + this.testModelDirectory) + "/") + this.testModelFile), 
         (AbstractTest.MODIFIED + this.testModelFile));
       this.assertLogIsEmpty();
@@ -94,7 +94,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   private void assertModifiedFileIsSameAsOriginal() {
     try {
       this.checkInputModelSettings();
-      EdeltaTestUtils.compareFileContents(
+      EdeltaTestUtils.assertFilesAreEquals(
         (((AbstractTest.TESTECORES + this.testModelDirectory) + "/") + this.testModelFile), 
         (AbstractTest.MODIFIED + this.testModelFile));
     } catch (Throwable _e) {

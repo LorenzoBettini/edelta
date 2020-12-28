@@ -4,7 +4,7 @@
 package edelta.lib.tests;
 
 import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
-import static edelta.testutils.EdeltaTestUtils.compareFileContents;
+import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
@@ -56,7 +56,7 @@ public class EdeltaEcoreModificationsTest {
 	}
 
 	@Test
-	public void testSaveModifiedEcoresAfterRemovingBaseClass() throws IOException { // NOSONAR custom assertions
+	public void testSaveModifiedEcoresAfterRemovingBaseClass() throws IOException {
 		loadTestEcore(MY_ECORE);
 		// modify the ecore model by removing MyBaseClass
 		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
@@ -66,7 +66,7 @@ public class EdeltaEcoreModificationsTest {
 		edelta.getEClass(MYPACKAGE, "MyDerivedClass").getESuperTypes().clear();
 		wipeModifiedDirectoryContents();
 		edelta.saveModifiedEcores(MODIFIED);
-		compareFileContents(
+		assertFilesAreEquals(
 				EXPECTATIONS+"/"+
 					"testSaveModifiedEcoresAfterRemovingBaseClass"+"/"+
 						MY_ECORE,
@@ -74,7 +74,7 @@ public class EdeltaEcoreModificationsTest {
 	}
 
 	@Test
-	public void testSaveModifiedEcoresAfterRemovingBaseClass2() throws IOException { // NOSONAR custom assertions
+	public void testSaveModifiedEcoresAfterRemovingBaseClass2() throws IOException {
 		loadTestEcore(MY_ECORE);
 		// modify the ecore model by removing MyBaseClass
 		// this will also remove existing references, so the model
@@ -83,7 +83,7 @@ public class EdeltaEcoreModificationsTest {
 			edelta.getEClassifier(MYPACKAGE, "MyBaseClass"));
 		wipeModifiedDirectoryContents();
 		edelta.saveModifiedEcores(MODIFIED);
-		compareFileContents(
+		assertFilesAreEquals(
 				EXPECTATIONS+"/"+
 					"testSaveModifiedEcoresAfterRemovingBaseClass"+"/"+
 						MY_ECORE,
@@ -91,7 +91,7 @@ public class EdeltaEcoreModificationsTest {
 	}
 
 	@Test
-	public void testSaveModifiedEcoresAfterRemovingReferredClass() throws IOException { // NOSONAR custom assertions
+	public void testSaveModifiedEcoresAfterRemovingReferredClass() throws IOException {
 		loadTestEcore(TEST_ECORE_FOR_REMOVE);
 		// modify the ecore model by removing MyClass
 		// this will also remove existing references, so the model
@@ -100,7 +100,7 @@ public class EdeltaEcoreModificationsTest {
 				edelta.getEClassifier(MYPACKAGE, "MyClass"));
 		wipeModifiedDirectoryContents();
 		edelta.saveModifiedEcores(MODIFIED);
-		compareFileContents(
+		assertFilesAreEquals(
 				EXPECTATIONS+"/"+
 						"testSaveModifiedEcoresAfterRemovingReferredClass"+"/"+
 						TEST_ECORE_FOR_REMOVE,
@@ -135,7 +135,7 @@ public class EdeltaEcoreModificationsTest {
 	}
 
 	@Test
-	public void testSaveModifiedEcoresAfterRenamingBaseClass() throws IOException { // NOSONAR custom assertions
+	public void testSaveModifiedEcoresAfterRenamingBaseClass() throws IOException {
 		loadTestEcore(MY_ECORE);
 		// modify the ecore model by renaming MyBaseClass
 		// this will also renaming existing references, so the model
@@ -143,7 +143,7 @@ public class EdeltaEcoreModificationsTest {
 		edelta.getEClassifier(MYPACKAGE, "MyBaseClass").setName("RENAMED");
 		wipeModifiedDirectoryContents();
 		edelta.saveModifiedEcores(MODIFIED);
-		compareFileContents(
+		assertFilesAreEquals(
 				EXPECTATIONS+"/"+
 					"testSaveModifiedEcoresAfterRenamingBaseClass"+"/"+
 						MY_ECORE,
@@ -181,7 +181,7 @@ public class EdeltaEcoreModificationsTest {
 		assertSame(persons.getEOpposite(), works);
 	}
 
-	private void wipeModifiedDirectoryContents() {
+	private void wipeModifiedDirectoryContents() throws IOException {
 		cleanDirectory(MODIFIED);
 	}
 

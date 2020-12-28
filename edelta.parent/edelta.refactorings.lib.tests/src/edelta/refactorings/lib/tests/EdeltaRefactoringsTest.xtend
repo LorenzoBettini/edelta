@@ -11,7 +11,7 @@ import org.eclipse.emf.ecore.EReference
 import org.junit.Before
 import org.junit.Test
 
-import static edelta.testutils.EdeltaTestUtils.compareFileContents
+import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertNotNull
@@ -51,7 +51,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 
 	def private assertModifiedFile() {
 		checkInputModelSettings
-		compareFileContents(
+		assertFilesAreEquals(
 				EXPECTATIONS + testModelDirectory + "/" + testModelFile,
 				MODIFIED + testModelFile)
 		assertLogIsEmpty()
@@ -78,7 +78,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 
 	def private assertModifiedFileIsSameAsOriginal() {
 		checkInputModelSettings
-		compareFileContents(
+		assertFilesAreEquals(
 				TESTECORES + testModelDirectory + "/" + testModelFile,
 				MODIFIED + testModelFile)
 	}

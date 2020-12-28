@@ -4,7 +4,7 @@
 package edelta.lib.tests;
 
 import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
-import static edelta.testutils.EdeltaTestUtils.compareFileContents;
+import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -249,16 +249,16 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testSaveModifiedEcores() throws IOException { // NOSONAR custom assertions
+	public void testSaveModifiedEcores() throws IOException {
 		loadTestEcore(MY_ECORE);
 		loadTestEcore(MY2_ECORE);
 		wipeModifiedDirectoryContents();
 		edelta.saveModifiedEcores(MODIFIED);
 		// we did not modify anything so the generated files and the
 		// original ones must be the same
-		compareFileContents(
+		assertFilesAreEquals(
 				TESTECORES+"/"+MY_ECORE, MODIFIED+"/"+MY_ECORE);
-		compareFileContents(
+		assertFilesAreEquals(
 				TESTECORES+"/"+MY2_ECORE, MODIFIED+"/"+MY2_ECORE);
 	}
 
@@ -329,7 +329,7 @@ public class EdeltaTest {
 			((EClass) eAttribute.eContainer()).getEPackage().getName());
 	}
 
-	private void wipeModifiedDirectoryContents() {
+	private void wipeModifiedDirectoryContents() throws IOException {
 		cleanDirectory(MODIFIED);
 	}
 
