@@ -232,11 +232,7 @@ def referenceToClass(String name, EReference reference) {
 
 def classToReference(EClass cl) {
 	// find the EReferences that have type cl
-	val references = EcoreUtil.UsageCrossReferencer
-		.find(cl, cl.EPackage)
-		.filter[EStructuralFeature == ecoreref(eReferenceType)]
-		.map[EObject]
-		.filter(EReference)
+	val references = findReferencesToClass(cl)
 	if (references.isEmpty) {
 		showError(cl, "The EClass is not referred: " + getEObjectRepr(cl))
 		return
@@ -533,3 +529,14 @@ def checkNoFeatures(EClass c) : boolean {
 	return empty
 }
 
+/**
+ * Finds all the EReferences to the given EClass in the
+ * EClass' package
+ */
+def findReferencesToClass(EClass cl) {
+	EcoreUtil.UsageCrossReferencer
+		.find(cl, cl.EPackage)
+		.filter[EStructuralFeature == ecoreref(eReferenceType)]
+		.map[EObject]
+		.filter(EReference)
+}
