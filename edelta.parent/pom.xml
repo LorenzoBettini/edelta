@@ -44,7 +44,6 @@
       **/emf-gen/**,
       **/edelta-gen/**,
       **/impl/*ImplCustom.java,
-      **/testutils/**,
       **/*RuntimeModule.java,
       **/*UiModule.java,
       **/*StandaloneSetup*.java,

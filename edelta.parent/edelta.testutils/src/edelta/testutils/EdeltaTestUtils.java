@@ -1,7 +1,6 @@
 package edelta.testutils;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,12 +27,13 @@ public class EdeltaTestUtils {
 	 * and possible subdirectories.
 	 * 
 	 * @param directory
+	 * @throws IOException
 	 */
-	public static void cleanDirectory(String directory) {
+	public static void cleanDirectory(String directory) throws IOException {
 		File dir = new File(directory);
 		for (File file : dir.listFiles())
 			if (!file.isDirectory() && !file.getName().equals(".gitignore"))
-				assertTrue("File not deleted " + file.getAbsolutePath(), file.delete());
+				Files.delete(file.toPath());
 	}
 
 	public static String loadFile(String file) throws IOException {
@@ -42,27 +42,31 @@ public class EdeltaTestUtils {
 	}
 
 	/**
-	 * Compares the two files as strings using
+	 * Compares the string contents of the two files, given their paths,
 	 * {@link Assert#assertEquals(Object, Object)}
 	 * 
-	 * @param fileWithExpectedContents
-	 * @param fileWithActualContents
+	 * @param pathOfExpectedContents
+	 * @param pathOfActualContents
 	 * @throws IOException
 	 */
-	public static void compareFileContents(String fileWithExpectedContents, String fileWithActualContents) throws IOException {
-		assertEquals(removeCR(loadFile(fileWithExpectedContents)), removeCR(loadFile(fileWithActualContents)));
+	public static void assertFilesAreEquals(String pathOfExpectedContents, String pathOfActualContents) throws IOException {
+		assertEquals(
+			removeCR(loadFile(pathOfExpectedContents)),
+			removeCR(loadFile(pathOfActualContents)));
 	}
 
 	/**
-	 * Compares the file contents with the specified string using
-	 * {@link Assert#assertEquals(Object, Object)}
+	 * Compares the string contents of the file, given its path, with the specified
+	 * string using {@link Assert#assertEquals(Object, Object)}
 	 * 
-	 * @param file1
+	 * @param path
 	 * @param expectedContents
 	 * @throws IOException
 	 */
-	public static void compareSingleFileContents(String file1, String expectedContents) throws IOException {
-		assertEquals(removeCR(expectedContents), removeCR(loadFile(file1)));
+	public static void assertFileContents(String path, String expectedContents) throws IOException {
+		assertEquals(
+			removeCR(expectedContents),
+			removeCR(loadFile(path)));
 	}
 
 	/**
@@ -73,6 +77,6 @@ public class EdeltaTestUtils {
 	 * @return
 	 */
 	public static String removeCR(String s) {
-		return s.replaceAll("\r", "");
+		return s.replace("\r", "");
 	}
 }

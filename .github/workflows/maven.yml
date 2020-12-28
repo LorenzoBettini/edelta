@@ -33,7 +33,7 @@ jobs:
       run: >
         xvfb-run
         ./mvnw -f edelta.parent/pom.xml
-        -U clean verify
+        clean verify
         -Pjacoco,build-ide,test-ide,run-its
         sonar:sonar
         -Dsonar.organization=lorenzobettini-github

@@ -4109,7 +4109,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
         this._reflectExtensions.invoke(edeltaObj, "loadEcoreFile", new Object[] { "testecores/foo.ecore" });
         this._reflectExtensions.invoke(edeltaObj, "execute");
         this._reflectExtensions.invoke(edeltaObj, "saveModifiedEcores", new Object[] { EdeltaCompilerTest.MODIFIED });
-        EdeltaTestUtils.compareSingleFileContents((EdeltaCompilerTest.MODIFIED + "/foo.ecore"), expectedGeneratedEcore.toString());
+        EdeltaTestUtils.assertFileContents((EdeltaCompilerTest.MODIFIED + "/foo.ecore"), expectedGeneratedEcore.toString());
       } catch (Throwable _e) {
         throw Exceptions.sneakyThrow(_e);
       }
@@ -4160,7 +4160,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
       for (final Pair<CharSequence, CharSequence> expected : expectedModifiedEcores) {
         CharSequence _key = expected.getKey();
         String _plus = ((EdeltaCompilerTest.MODIFIED + "/") + _key);
-        EdeltaTestUtils.compareSingleFileContents(_plus, 
+        EdeltaTestUtils.assertFileContents(_plus, 
           expected.getValue().toString());
       }
     } catch (Throwable _e) {
@@ -4169,6 +4169,10 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   }
   
   private void wipeModifiedDirectoryContents() {
-    EdeltaTestUtils.cleanDirectory(EdeltaCompilerTest.MODIFIED);
+    try {
+      EdeltaTestUtils.cleanDirectory(EdeltaCompilerTest.MODIFIED);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
 }
