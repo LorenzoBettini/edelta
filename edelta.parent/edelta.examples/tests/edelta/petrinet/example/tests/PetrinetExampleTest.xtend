@@ -17,7 +17,7 @@ class PetrinetExampleTest {
 		// Save the modified Ecore model into a new path
 		edelta.saveModifiedEcores("modified");
 
-		EdeltaTestUtils.compareSingleFileContents(
+		EdeltaTestUtils.assertFileContents(
 			"modified/Petrinet.ecore",
 			'''
 				<?xml version="1.0" encoding="UTF-8"?>

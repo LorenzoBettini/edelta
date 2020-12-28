@@ -56,14 +56,14 @@ public class EdeltaTestUtils {
 	}
 
 	/**
-	 * Compares the contents of the file, given its path, with the specified string using
-	 * {@link Assert#assertEquals(Object, Object)}
+	 * Compares the string contents of the file, given its path, with the specified
+	 * string using {@link Assert#assertEquals(Object, Object)}
 	 * 
 	 * @param path
 	 * @param expectedContents
 	 * @throws IOException
 	 */
-	public static void compareSingleFileContents(String path, String expectedContents) throws IOException {
+	public static void assertFileContents(String path, String expectedContents) throws IOException {
 		assertEquals(
 			removeCR(expectedContents),
 			removeCR(loadFile(path)));

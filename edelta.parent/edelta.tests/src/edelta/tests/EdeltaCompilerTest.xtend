@@ -2043,7 +2043,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			edeltaObj.invoke("loadEcoreFile", #["testecores/foo.ecore"])
 			edeltaObj.invoke("execute")
 			edeltaObj.invoke("saveModifiedEcores", #[MODIFIED])
-			compareSingleFileContents(MODIFIED+"/foo.ecore", expectedGeneratedEcore.toString)
+			assertFileContents(MODIFIED+"/foo.ecore", expectedGeneratedEcore.toString)
 		]
 	}
 
@@ -2093,7 +2093,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		edeltaObj.invoke("execute")
 		edeltaObj.invoke("saveModifiedEcores", #[MODIFIED])
 		for (expected : expectedModifiedEcores) {
-			compareSingleFileContents(
+			assertFileContents(
 				MODIFIED+"/"+expected.key,
 				expected.value.toString
 			)
