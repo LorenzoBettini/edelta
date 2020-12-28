@@ -179,8 +179,8 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @return the created EAttribute
    */
   public EAttribute subclassesToEnum(final String name, final Collection<EClass> subclasses) {
-    boolean _checkEmpty = this.checkEmpty(subclasses);
-    boolean _not = (!_checkEmpty);
+    boolean _checkNoFeatures = this.checkNoFeatures(subclasses);
+    boolean _not = (!_checkNoFeatures);
     if (_not) {
       return null;
     }
@@ -654,11 +654,11 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * Makes sure the passed EClasses have no feature
    * 
    * @param classes
-   * @return true if the EClass is empty
+   * @return true if all the EClasses have no features
    */
-  public boolean checkEmpty(final Collection<EClass> classes) {
+  public boolean checkNoFeatures(final Collection<EClass> classes) {
     final Function1<EClass, Boolean> _function = (EClass it) -> {
-      return Boolean.valueOf(this.checkEmpty(it));
+      return Boolean.valueOf(this.checkNoFeatures(it));
     };
     final Function1<Boolean, Boolean> _function_1 = (Boolean it) -> {
       return it;
@@ -670,9 +670,9 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * Makes sure the passed EClass has no feature
    * 
    * @param c
-   * @return true if the EClass is empty
+   * @return true if the EClass has no feature
    */
-  public boolean checkEmpty(final EClass c) {
+  public boolean checkNoFeatures(final EClass c) {
     final EList<EStructuralFeature> features = c.getEStructuralFeatures();
     final boolean empty = features.isEmpty();
     if ((!empty)) {
