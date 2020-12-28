@@ -145,7 +145,9 @@ def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 def subclassesToEnum(String name, Collection<EClass> subclasses) : EAttribute {
 	if (!checkNoFeatures(subclasses))
 		return null
-	val superclass = subclasses.head.ESuperTypes.head
+	val superclass = getSingleDirectSuperclass(subclasses)
+	if (superclass === null)
+		return null
 	val ePackage = superclass.EPackage
 	val enum = ePackage.addNewEEnum(name) [
 		subclasses.forEach[subClass, index |
@@ -540,3 +542,61 @@ def findReferencesToClass(EClass cl) {
 		.map[EObject]
 		.filter(EReference)
 }
+
+/**
+ * Checks that the passed subclasses have all exactly one superclass
+ * and that it is the same and returns that as a result. It also checks
+ * that such a common superclass has no further subclasses.
+ * 
+ * In case of failure, besides reporting errors, it returns null.
+ */
+def getSingleDirectSuperclass(Collection<EClass> subclasses) {
+	val invalid = subclasses.filter[
+		ESuperTypes.size != 1
+	]
+	if (!invalid.empty) {
+		invalid.forEach[
+			val superclasses = ESuperTypes
+			showError(it,
+				"Expected one superclass: " + EObjectRepr + " instead of:\n" +
+				if (superclasses.empty)
+					"  empty"
+				else
+					superclasses.map["  " + EObjectRepr].join("\n")
+			)
+		]
+		return null
+	}
+	// now all subclasses are known to have exactly one superclass
+	val result = subclasses.head.ESuperTypes.head
+	val differences = subclasses
+		.filter[ESuperTypes.head !== result]
+	if (!differences.empty) {
+		differences.forEach[
+			showError(it,
+				"Wrong superclass of " + EObjectRepr + ":\n"+
+				"  Expected: " + getEObjectRepr(result) + "\n" +
+				"  Actual  : " + getEObjectRepr(ESuperTypes.head)
+			)
+		]
+		return null
+	}
+	val additionalSubclasses = directSubclasses(result).toSet
+	additionalSubclasses.removeAll(subclasses.toSet)
+	if (!additionalSubclasses.empty) {
+		showError(result,
+			"The class has additional subclasses:\n" +
+			additionalSubclasses.map["  " + EObjectRepr].join("\n")
+		)
+		return null
+	}
+	return result
+}
+
+def directSubclasses(EClass cl) {
+	EcoreUtil.UsageCrossReferencer
+		.find(cl, cl.EPackage)
+		.filter[EStructuralFeature == ecoreref(eSuperTypes)]
+		.map[EObject as EClass]
+}
+

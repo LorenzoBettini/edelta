@@ -184,7 +184,10 @@ public class EdeltaRefactorings extends AbstractEdelta {
     if (_not) {
       return null;
     }
-    final EClass superclass = IterableExtensions.<EClass>head(IterableExtensions.<EClass>head(subclasses).getESuperTypes());
+    final EClass superclass = this.getSingleDirectSuperclass(subclasses);
+    if ((superclass == null)) {
+      return null;
+    }
     final EPackage ePackage = superclass.getEPackage();
     final Consumer<EEnum> _function = (EEnum it) -> {
       final Procedure2<EClass, Integer> _function_1 = (EClass subClass, Integer index) -> {
@@ -696,6 +699,100 @@ public class EdeltaRefactorings extends AbstractEdelta {
       return it.getEObject();
     };
     return Iterables.<EReference>filter(IterableExtensions.<EStructuralFeature.Setting, EObject>map(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()), _function), _function_1), EReference.class);
+  }
+  
+  /**
+   * Checks that the passed subclasses have all exactly one superclass
+   * and that it is the same and returns that as a result. It also checks
+   * that such a common superclass has no further subclasses.
+   * 
+   * In case of failure, besides reporting errors, it returns null.
+   */
+  public EClass getSingleDirectSuperclass(final Collection<EClass> subclasses) {
+    final Function1<EClass, Boolean> _function = (EClass it) -> {
+      int _size = it.getESuperTypes().size();
+      return Boolean.valueOf((_size != 1));
+    };
+    final Iterable<EClass> invalid = IterableExtensions.<EClass>filter(subclasses, _function);
+    boolean _isEmpty = IterableExtensions.isEmpty(invalid);
+    boolean _not = (!_isEmpty);
+    if (_not) {
+      final Consumer<EClass> _function_1 = (EClass it) -> {
+        final EList<EClass> superclasses = it.getESuperTypes();
+        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it);
+        String _plus = ("Expected one superclass: " + _eObjectRepr);
+        String _plus_1 = (_plus + " instead of:\n");
+        String _xifexpression = null;
+        boolean _isEmpty_1 = superclasses.isEmpty();
+        if (_isEmpty_1) {
+          _xifexpression = "  empty";
+        } else {
+          final Function1<EClass, String> _function_2 = (EClass it_1) -> {
+            String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(it_1);
+            return ("  " + _eObjectRepr_1);
+          };
+          _xifexpression = IterableExtensions.join(ListExtensions.<EClass, String>map(superclasses, _function_2), "\n");
+        }
+        String _plus_2 = (_plus_1 + _xifexpression);
+        this.showError(it, _plus_2);
+      };
+      invalid.forEach(_function_1);
+      return null;
+    }
+    final EClass result = IterableExtensions.<EClass>head(IterableExtensions.<EClass>head(subclasses).getESuperTypes());
+    final Function1<EClass, Boolean> _function_2 = (EClass it) -> {
+      EClass _head = IterableExtensions.<EClass>head(it.getESuperTypes());
+      return Boolean.valueOf((_head != result));
+    };
+    final Iterable<EClass> differences = IterableExtensions.<EClass>filter(subclasses, _function_2);
+    boolean _isEmpty_1 = IterableExtensions.isEmpty(differences);
+    boolean _not_1 = (!_isEmpty_1);
+    if (_not_1) {
+      final Consumer<EClass> _function_3 = (EClass it) -> {
+        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it);
+        String _plus = ("Wrong superclass of " + _eObjectRepr);
+        String _plus_1 = (_plus + ":\n");
+        String _plus_2 = (_plus_1 + 
+          "  Expected: ");
+        String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(result);
+        String _plus_3 = (_plus_2 + _eObjectRepr_1);
+        String _plus_4 = (_plus_3 + "\n");
+        String _plus_5 = (_plus_4 + 
+          "  Actual  : ");
+        String _eObjectRepr_2 = EdeltaLibrary.getEObjectRepr(IterableExtensions.<EClass>head(it.getESuperTypes()));
+        String _plus_6 = (_plus_5 + _eObjectRepr_2);
+        this.showError(it, _plus_6);
+      };
+      differences.forEach(_function_3);
+      return null;
+    }
+    final Set<EClass> additionalSubclasses = IterableExtensions.<EClass>toSet(this.directSubclasses(result));
+    additionalSubclasses.removeAll(IterableExtensions.<EClass>toSet(subclasses));
+    boolean _isEmpty_2 = additionalSubclasses.isEmpty();
+    boolean _not_2 = (!_isEmpty_2);
+    if (_not_2) {
+      final Function1<EClass, String> _function_4 = (EClass it) -> {
+        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it);
+        return ("  " + _eObjectRepr);
+      };
+      String _join = IterableExtensions.join(IterableExtensions.<EClass, String>map(additionalSubclasses, _function_4), "\n");
+      String _plus = ("The class has additional subclasses:\n" + _join);
+      this.showError(result, _plus);
+      return null;
+    }
+    return result;
+  }
+  
+  public Iterable<EClass> directSubclasses(final EClass cl) {
+    final Function1<EStructuralFeature.Setting, Boolean> _function = (EStructuralFeature.Setting it) -> {
+      EStructuralFeature _eStructuralFeature = it.getEStructuralFeature();
+      return Boolean.valueOf(Objects.equal(_eStructuralFeature, getEReference("ecore", "EClass", "eSuperTypes")));
+    };
+    final Function1<EStructuralFeature.Setting, EClass> _function_1 = (EStructuralFeature.Setting it) -> {
+      EObject _eObject = it.getEObject();
+      return ((EClass) _eObject);
+    };
+    return IterableExtensions.<EStructuralFeature.Setting, EClass>map(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()), _function), _function_1);
   }
   
   @Override

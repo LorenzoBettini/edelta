@@ -465,6 +465,66 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
+  public void test_subclassesToEnumSubclassesWrongSubclasses() {
+    try {
+      this.withInputModel("subclassesToEnumSubclassesWrongSubclasses", "PersonList.ecore");
+      this.loadModelFile();
+      final EPackage personList = this.refactorings.getEPackage("PersonList");
+      EClassifier _eClassifier = personList.getEClassifier("Male");
+      EClassifier _eClassifier_1 = personList.getEClassifier("Female");
+      EClassifier _eClassifier_2 = personList.getEClassifier("FemaleEmployee");
+      EClassifier _eClassifier_3 = personList.getEClassifier("Employee");
+      EAttribute result = this.refactorings.subclassesToEnum("Gender", 
+        Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(((EClass) _eClassifier), ((EClass) _eClassifier_1), ((EClass) _eClassifier_2), ((EClass) _eClassifier_3))));
+      Assertions.<EAttribute>assertThat(result).isNull();
+      EClassifier _eClassifier_4 = personList.getEClassifier("Female");
+      EClassifier _eClassifier_5 = personList.getEClassifier("AnotherFemale");
+      result = this.refactorings.subclassesToEnum("Gender", 
+        Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(((EClass) _eClassifier_4), ((EClass) _eClassifier_5))));
+      Assertions.<EAttribute>assertThat(result).isNull();
+      EClassifier _eClassifier_6 = personList.getEClassifier("Female");
+      result = this.refactorings.subclassesToEnum("Gender", 
+        Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(((EClass) _eClassifier_6))));
+      Assertions.<EAttribute>assertThat(result).isNull();
+      this.refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFileIsSameAsOriginal();
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("ERROR: PersonList.FemaleEmployee: Expected one superclass: PersonList.FemaleEmployee instead of:");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("PersonList.Person");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("PersonList.Employee");
+      _builder.newLine();
+      _builder.append("ERROR: PersonList.Employee: Expected one superclass: PersonList.Employee instead of:");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("empty");
+      _builder.newLine();
+      _builder.append("ERROR: PersonList.AnotherFemale: Wrong superclass of PersonList.AnotherFemale:");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("Expected: PersonList.Person");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("Actual  : PersonList.AnotherPerson");
+      _builder.newLine();
+      _builder.append("ERROR: PersonList.Person: The class has additional subclasses:");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("PersonList.Male");
+      _builder.newLine();
+      _builder.append("  ");
+      _builder.append("PersonList.FemaleEmployee");
+      Assertions.assertThat(this.appender.getResult().trim()).isEqualTo(
+        _builder.toString());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
   public void test_enumToSubclasses_IsOppositeOf_subclassesToEnum() {
     this.withInputModel("enumToSubclasses", "PersonList.ecore");
     final Runnable _function = () -> {

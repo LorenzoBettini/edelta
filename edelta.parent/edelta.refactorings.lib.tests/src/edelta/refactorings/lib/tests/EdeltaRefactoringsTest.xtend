@@ -336,6 +336,52 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
+	def void test_subclassesToEnumSubclassesWrongSubclasses() {
+		withInputModel("subclassesToEnumSubclassesWrongSubclasses", "PersonList.ecore")
+		loadModelFile
+		val personList = refactorings.getEPackage("PersonList")
+		var result = refactorings.subclassesToEnum("Gender",
+			#[
+				personList.getEClassifier("Male") as EClass,
+				personList.getEClassifier("Female") as EClass,
+				personList.getEClassifier("FemaleEmployee") as EClass,
+				personList.getEClassifier("Employee") as EClass
+			]
+		)
+		assertThat(result).isNull
+		result = refactorings.subclassesToEnum("Gender",
+			#[
+				personList.getEClassifier("Female") as EClass,
+				personList.getEClassifier("AnotherFemale") as EClass
+			]
+		)
+		assertThat(result).isNull
+		result = refactorings.subclassesToEnum("Gender",
+			#[
+				personList.getEClassifier("Female") as EClass
+			]
+		)
+		assertThat(result).isNull
+		refactorings.saveModifiedEcores(MODIFIED)
+		assertModifiedFileIsSameAsOriginal
+		assertThat(appender.result.trim)
+			.isEqualTo(
+				'''
+				ERROR: PersonList.FemaleEmployee: Expected one superclass: PersonList.FemaleEmployee instead of:
+				  PersonList.Person
+				  PersonList.Employee
+				ERROR: PersonList.Employee: Expected one superclass: PersonList.Employee instead of:
+				  empty
+				ERROR: PersonList.AnotherFemale: Wrong superclass of PersonList.AnotherFemale:
+				  Expected: PersonList.Person
+				  Actual  : PersonList.AnotherPerson
+				ERROR: PersonList.Person: The class has additional subclasses:
+				  PersonList.Male
+				  PersonList.FemaleEmployee'''.toString
+			)
+	}
+
+	@Test
 	def void test_enumToSubclasses_IsOppositeOf_subclassesToEnum() {
 		withInputModel("enumToSubclasses", "PersonList.ecore")
 		assertOppositeRefactorings(
