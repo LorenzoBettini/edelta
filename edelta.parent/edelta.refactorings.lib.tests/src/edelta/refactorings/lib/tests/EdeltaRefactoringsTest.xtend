@@ -311,6 +311,36 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
+	def void test_enumToSubclasses_IsOppositeOf_subclassesToEnum() {
+		withInputModel("enumToSubclasses", "PersonList.ecore")
+		assertOppositeRefactorings(
+			[refactorings.enumToSubclasses(
+				refactorings.getEAttribute("PersonList", "Person", "gender"))],
+			[refactorings.subclassesToEnum("Gender",
+				#[
+					refactorings.getEClass("PersonList", "Male"),
+					refactorings.getEClass("PersonList", "Female")
+				])]
+		)
+		assertLogIsEmpty
+	}
+
+	@Test
+	def void test_subclassesToEnum_IsOppositeOf_enumToSubclasses() {
+		withInputModel("subclassesToEnum", "PersonList.ecore")
+		assertOppositeRefactorings(
+			[refactorings.subclassesToEnum("Gender",
+				#[
+					refactorings.getEClass("PersonList", "Male"),
+					refactorings.getEClass("PersonList", "Female")
+				])],
+			[refactorings.enumToSubclasses(
+				refactorings.getEAttribute("PersonList", "Person", "gender"))]
+		)
+		assertLogIsEmpty
+	}
+
+	@Test
 	def void test_extractClassWithAttributes() {
 		withInputModel("extractClassWithAttributes", "PersonList.ecore")
 		loadModelFile

@@ -434,6 +434,40 @@ public class EdeltaRefactoringsTest extends AbstractTest {
   }
   
   @Test
+  public void test_enumToSubclasses_IsOppositeOf_subclassesToEnum() {
+    this.withInputModel("enumToSubclasses", "PersonList.ecore");
+    final Runnable _function = () -> {
+      this.refactorings.enumToSubclasses(
+        this.refactorings.getEAttribute("PersonList", "Person", "gender"));
+    };
+    final Runnable _function_1 = () -> {
+      EClass _eClass = this.refactorings.getEClass("PersonList", "Male");
+      EClass _eClass_1 = this.refactorings.getEClass("PersonList", "Female");
+      this.refactorings.subclassesToEnum("Gender", 
+        Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(_eClass, _eClass_1)));
+    };
+    this.assertOppositeRefactorings(_function, _function_1);
+    this.assertLogIsEmpty();
+  }
+  
+  @Test
+  public void test_subclassesToEnum_IsOppositeOf_enumToSubclasses() {
+    this.withInputModel("subclassesToEnum", "PersonList.ecore");
+    final Runnable _function = () -> {
+      EClass _eClass = this.refactorings.getEClass("PersonList", "Male");
+      EClass _eClass_1 = this.refactorings.getEClass("PersonList", "Female");
+      this.refactorings.subclassesToEnum("Gender", 
+        Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(_eClass, _eClass_1)));
+    };
+    final Runnable _function_1 = () -> {
+      this.refactorings.enumToSubclasses(
+        this.refactorings.getEAttribute("PersonList", "Person", "gender"));
+    };
+    this.assertOppositeRefactorings(_function, _function_1);
+    this.assertLogIsEmpty();
+  }
+  
+  @Test
   public void test_extractClassWithAttributes() {
     try {
       this.withInputModel("extractClassWithAttributes", "PersonList.ecore");
