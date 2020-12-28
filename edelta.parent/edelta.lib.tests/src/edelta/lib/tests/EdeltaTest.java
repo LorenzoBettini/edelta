@@ -81,12 +81,12 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testDefaultExecuteDoesNotThrow() throws Exception {
+	public void testDefaultExecuteDoesNotThrow() throws Exception { // NOSONAR just make sure it runs
 		edelta.execute();
 	}
 
 	@Test
-	public void testLoadEcoreFile() {
+	public void testLoadEcoreFile() { // NOSONAR just make sure it runs
 		loadTestEcore(MY_ECORE);
 	}
 
@@ -168,7 +168,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testEnsureEPackageIsLoaded() throws EdeltaPackageNotLoadedException {
+	public void testEnsureEPackageIsLoaded() throws EdeltaPackageNotLoadedException { // NOSONAR just make sure it runs
 		loadTestEcore(MY_ECORE);
 		edelta.ensureEPackageIsLoaded(MYPACKAGE);
 	}
@@ -249,7 +249,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testSaveModifiedEcores() throws IOException {
+	public void testSaveModifiedEcores() throws IOException { // NOSONAR custom assertions
 		loadTestEcore(MY_ECORE);
 		loadTestEcore(MY2_ECORE);
 		wipeModifiedDirectoryContents();
@@ -263,7 +263,7 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testGetLogger() {
+	public void testGetLogger() { // NOSONAR just make sure it runs
 		edelta.getLogger().info("test message");
 	}
 
