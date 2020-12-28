@@ -6,20 +6,17 @@ import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender
 import java.util.stream.Collectors
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.EReference
 import org.junit.Before
 import org.junit.Test
 
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals
-import static org.junit.Assert.assertEquals
+import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertNull
 import static org.junit.Assert.assertSame
 import static org.junit.Assert.assertTrue
-
-import static extension org.assertj.core.api.Assertions.*
 
 class EdeltaRefactoringsTest extends AbstractTest {
 	var EdeltaRefactorings refactorings
@@ -825,34 +822,6 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertNotNull(redundant.EOpposite)
 		assertSame(redundant.EOpposite, opposite)
 		assertSame(opposite.EOpposite, redundant)
-	}
-
-	@Test def void test_classificationByHierarchyToEnum() {
-		val p = factory.createEPackage => [
-			val base = createEClass("Base")
-			createEClass("Derived1") => [
-				ESuperTypes += base
-			]
-			createEClass("Derived2") => [
-				ESuperTypes += base
-			]
-		]
-		val base = p.EClasses.get(0)
-		val derived1 = p.EClasses.get(1)
-		val derived2 = p.EClasses.get(2)
-		refactorings.classificationByHierarchyToEnum(#{base -> #[derived1, derived2]})
-		assertEquals(2, p.EClassifiers.size)
-		val enum = p.EClassifiers.last as EEnum
-		assertEquals("BaseType", enum.name)
-		val eLiterals = enum.ELiterals
-		assertEquals(2, eLiterals.size)
-		assertEquals("DERIVED1", eLiterals.get(0).name)
-		assertEquals("DERIVED2", eLiterals.get(1).name)
-		assertEquals(1, eLiterals.get(0).value)
-		assertEquals(2, eLiterals.get(1).value)
-		val c = p.EClassifiers.head as EClass
-		val attr = findEAttribute(c, "baseType")
-		assertSame(enum, attr.EType)
 	}
 
 	@Test def void test_makeAbstract() {

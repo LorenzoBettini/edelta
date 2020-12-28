@@ -19,8 +19,6 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
-import org.eclipse.emf.ecore.EEnum;
-import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -1102,46 +1100,6 @@ public class EdeltaRefactoringsTest extends AbstractTest {
     Assert.assertNotNull(redundant.getEOpposite());
     Assert.assertSame(redundant.getEOpposite(), opposite);
     Assert.assertSame(opposite.getEOpposite(), redundant);
-  }
-  
-  @Test
-  public void test_classificationByHierarchyToEnum() {
-    EPackage _createEPackage = this.factory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
-      final EClass base = this.createEClass(it, "Base");
-      EClass _createEClass = this.createEClass(it, "Derived1");
-      final Procedure1<EClass> _function_1 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(base);
-      };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
-      EClass _createEClass_1 = this.createEClass(it, "Derived2");
-      final Procedure1<EClass> _function_2 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(base);
-      };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_2);
-    };
-    final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-    final EClass base = ((EClass[])Conversions.unwrapArray(this.EClasses(p), EClass.class))[0];
-    final EClass derived1 = ((EClass[])Conversions.unwrapArray(this.EClasses(p), EClass.class))[1];
-    final EClass derived2 = ((EClass[])Conversions.unwrapArray(this.EClasses(p), EClass.class))[2];
-    Pair<EClass, List<EClass>> _mappedTo = Pair.<EClass, List<EClass>>of(base, Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(derived1, derived2)));
-    this.refactorings.classificationByHierarchyToEnum(Collections.<EClass, List<EClass>>unmodifiableMap(CollectionLiterals.<EClass, List<EClass>>newHashMap(_mappedTo)));
-    Assert.assertEquals(2, p.getEClassifiers().size());
-    EClassifier _last = IterableExtensions.<EClassifier>last(p.getEClassifiers());
-    final EEnum enum_ = ((EEnum) _last);
-    Assert.assertEquals("BaseType", enum_.getName());
-    final EList<EEnumLiteral> eLiterals = enum_.getELiterals();
-    Assert.assertEquals(2, eLiterals.size());
-    Assert.assertEquals("DERIVED1", eLiterals.get(0).getName());
-    Assert.assertEquals("DERIVED2", eLiterals.get(1).getName());
-    Assert.assertEquals(1, eLiterals.get(0).getValue());
-    Assert.assertEquals(2, eLiterals.get(1).getValue());
-    EClassifier _head = IterableExtensions.<EClassifier>head(p.getEClassifiers());
-    final EClass c = ((EClass) _head);
-    final EAttribute attr = this.findEAttribute(c, "baseType");
-    Assert.assertSame(enum_, attr.getEType());
   }
   
   @Test

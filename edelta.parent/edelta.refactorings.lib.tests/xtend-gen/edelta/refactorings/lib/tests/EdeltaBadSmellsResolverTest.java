@@ -229,8 +229,8 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
     Assert.assertEquals(2, eLiterals.size());
     Assert.assertEquals("DERIVED1", eLiterals.get(0).getName());
     Assert.assertEquals("DERIVED2", eLiterals.get(1).getName());
-    Assert.assertEquals(1, eLiterals.get(0).getValue());
-    Assert.assertEquals(2, eLiterals.get(1).getValue());
+    Assert.assertEquals(0, eLiterals.get(0).getValue());
+    Assert.assertEquals(1, eLiterals.get(1).getValue());
     EClassifier _head = IterableExtensions.<EClassifier>head(p.getEClassifiers());
     final EClass c = ((EClass) _head);
     final EAttribute attr = this.findEAttribute(c, "baseType");

@@ -143,8 +143,8 @@ class EdeltaBadSmellsResolverTest extends AbstractTest {
 		assertEquals(2, eLiterals.size)
 		assertEquals("DERIVED1", eLiterals.get(0).name)
 		assertEquals("DERIVED2", eLiterals.get(1).name)
-		assertEquals(1, eLiterals.get(0).value)
-		assertEquals(2, eLiterals.get(1).value)
+		assertEquals(0, eLiterals.get(0).value)
+		assertEquals(1, eLiterals.get(1).value)
 		val c = p.EClassifiers.head as EClass
 		val attr = findEAttribute(c, "baseType")
 		assertSame(enum, attr.EType)

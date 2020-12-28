@@ -43,12 +43,13 @@ def resolveRedundantContainers(EPackage ePackage) {
 }
 
 /**
- * Applies classificationByHierarchyToEnum to findClassificationByHierarchy
+ * Applies subclassesToEnum to findClassificationByHierarchy
  */
 def resolveClassificationByHierarchy(EPackage ePackage) {
-	refactorings.classificationByHierarchyToEnum(
-		finder.findClassificationByHierarchy(ePackage)
-	)
+	val findClassificationByHierarchy = finder.findClassificationByHierarchy(ePackage)
+	findClassificationByHierarchy.entrySet.forEach[
+		refactorings.subclassesToEnum(key.name + "Type", value)
+	]
 }
 
 def resolveConcreteAbstractMetaclass(EPackage ePackage) {

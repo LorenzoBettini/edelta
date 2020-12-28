@@ -68,11 +68,16 @@ public class EdeltaBadSmellsResolver extends AbstractEdelta {
   }
   
   /**
-   * Applies classificationByHierarchyToEnum to findClassificationByHierarchy
+   * Applies subclassesToEnum to findClassificationByHierarchy
    */
   public void resolveClassificationByHierarchy(final EPackage ePackage) {
-    this.refactorings.classificationByHierarchyToEnum(
-      this.finder.findClassificationByHierarchy(ePackage));
+    final Map<EClass, List<EClass>> findClassificationByHierarchy = this.finder.findClassificationByHierarchy(ePackage);
+    final Consumer<Map.Entry<EClass, List<EClass>>> _function = (Map.Entry<EClass, List<EClass>> it) -> {
+      String _name = it.getKey().getName();
+      String _plus = (_name + "Type");
+      this.refactorings.subclassesToEnum(_plus, it.getValue());
+    };
+    findClassificationByHierarchy.entrySet().forEach(_function);
   }
   
   public void resolveConcreteAbstractMetaclass(final EPackage ePackage) {
