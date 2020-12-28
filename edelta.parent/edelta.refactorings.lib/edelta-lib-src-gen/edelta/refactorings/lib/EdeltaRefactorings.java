@@ -119,7 +119,10 @@ public class EdeltaRefactorings extends AbstractEdelta {
   
   /**
    * Given an EAttribute, expected to have an EEnum type, creates a subclass of
-   * the containing class for each value of the referred EEnum.
+   * the containing class for each value of the referred EEnum
+   * (each subclass is given a name corresponding to the the EEnumLiteral,
+   * all lowercase but the first letter, for example, given the literal
+   * "LITERAL1", the subclass is given the name "Literal1").
    * The attribute will then be removed and so will the EEnum.
    * The original containing EClass is made abstract.
    * 
@@ -131,14 +134,18 @@ public class EdeltaRefactorings extends AbstractEdelta {
     if ((type instanceof EEnum)) {
       final ArrayList<EClass> createdSubclasses = CollectionLiterals.<EClass>newArrayList();
       final EClass owner = attr.getEContainingClass();
+      final EPackage ePackage = owner.getEPackage();
       EdeltaLibrary.makeAbstract(owner);
       EList<EEnumLiteral> _eLiterals = ((EEnum)type).getELiterals();
       for (final EEnumLiteral subc : _eLiterals) {
-        final Consumer<EClass> _function = (EClass it) -> {
-          EdeltaLibrary.addESuperType(it, owner);
-        };
-        EClass _addNewEClass = EdeltaLibrary.addNewEClass(owner.getEPackage(), subc.getLiteral(), _function);
-        createdSubclasses.add(_addNewEClass);
+        {
+          final String subclassName = this.ensureEClassifierNameIsUnique(ePackage, StringExtensions.toFirstUpper(subc.getLiteral().toLowerCase()));
+          final Consumer<EClass> _function = (EClass it) -> {
+            EdeltaLibrary.addESuperType(it, owner);
+          };
+          EClass _addNewEClass = EdeltaLibrary.addNewEClass(ePackage, subclassName, _function);
+          createdSubclasses.add(_addNewEClass);
+        }
       }
       EdeltaLibrary.removeElement(type);
       return createdSubclasses;

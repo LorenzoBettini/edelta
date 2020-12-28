@@ -13,7 +13,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="gender" eType="#//Gender"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EEnum" name="Gender">
-    <eLiterals name="Male"/>
-    <eLiterals name="Female" value="1"/>
+    <eLiterals name="MALE"/>
+    <eLiterals name="FEMALE" value="1"/>
   </eClassifiers>
 </ecore:EPackage>
