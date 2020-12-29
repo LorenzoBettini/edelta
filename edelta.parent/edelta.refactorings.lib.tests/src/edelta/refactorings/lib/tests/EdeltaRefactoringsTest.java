@@ -36,6 +36,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	public void setup() throws Exception {
 		refactorings = new EdeltaRefactorings();
 		appender = new InMemoryLoggerAppender();
+		appender.setLineSeparator("\n");
 		refactorings.getLogger().addAppender(appender);
 		refactorings.performSanityChecks();
 	}
