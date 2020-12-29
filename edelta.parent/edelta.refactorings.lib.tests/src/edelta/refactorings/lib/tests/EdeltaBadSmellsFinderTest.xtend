@@ -2,14 +2,13 @@ package edelta.refactorings.lib.tests
 
 import edelta.lib.AbstractEdelta
 import edelta.refactorings.lib.EdeltaBadSmellsFinder
-import org.eclipse.emf.ecore.ENamedElement
 import org.junit.Before
 import org.junit.Test
 
 import static org.assertj.core.api.Assertions.*
-import static org.junit.Assert.assertTrue
-import static org.junit.Assert.assertNotNull
-import static org.junit.Assert.assertEquals
+
+import static extension edelta.lib.EdeltaLibrary.*
+import org.assertj.core.util.Maps
 
 class EdeltaBadSmellsFinderTest extends AbstractTest {
 	var EdeltaBadSmellsFinder finder
@@ -27,91 +26,83 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 	}
 
 	@Test def void test_findDuplicateFeatures_whenNoDuplicates() {
-		val p = factory.createEPackage => [
-			createEClass("C1") => [
-				createEAttribute("A1") => [
-					EType = stringDataType
-				]
+		val p = createEPackage("p") [
+			addNewEClass("C1") [
+				addNewEAttribute("a1", stringDataType)
 			]
-			createEClass("C2") => [
-				createEAttribute("A1") => [
-					EType = intDataType
-				]
+			addNewEClass("C2") [
+				addNewEAttribute("a1", intDataType)
 			]
 		]
 		val result = finder.findDuplicateFeatures(p)
-		assertTrue("result: " + result, result.empty)
+		assertThat(result).isEmpty
 	}
 
 	@Test def void test_findDuplicateFeatures_withDuplicates() {
-		val p = factory.createEPackage => [
-			createEClass("C1") => [
-				createEAttribute("A1") => [
-					EType = stringDataType
-				]
+		val p = createEPackage("p") [
+			addNewEClass("C1") [
+				addNewEAttribute("a1", stringDataType)
 			]
-			createEClass("C2") => [
-				createEAttribute("A1") => [
-					EType = stringDataType
-				]
+			addNewEClass("C2") [
+				addNewEAttribute("a1", stringDataType)
 			]
 		]
 		val result = finder.findDuplicateFeatures(p)
-		val expected = p.EClasses.map[EStructuralFeatures].flatten
-		val actual = result.values.flatten
-		assertIterable(actual, expected)
+		assertThat(result)
+			.containsExactly(
+				entry(p.findEStructuralFeature("C1", "a1"),
+					#[
+						p.findEStructuralFeature("C1", "a1"),
+						p.findEStructuralFeature("C2", "a1")
+					]
+				)
+			)
 	}
 
 	@Test def void test_findDuplicateFeatures_withDifferingAttributesByLowerBound() {
-		val p = factory.createEPackage => [
-			createEClass("C1") => [
-				createEAttribute("A1") => [
-					EType = stringDataType
-					lowerBound = 1 // different lowerbound from C2.A1
+		val p = createEPackage("p") [
+			addNewEClass("C1") [
+				addNewEAttribute("a1", stringDataType) [
+					lowerBound = 1 // different lowerbound from C2.a1
 				]
 			]
-			createEClass("C2") => [
-				createEAttribute("A1") => [
-					EType = stringDataType
-					lowerBound = 2 // different lowerbound from C1.A1
+			addNewEClass("C2") [
+				addNewEAttribute("a1", stringDataType) [
+					lowerBound = 2 // different lowerbound from C1.a1
 				]
 			]
 		]
 		val result = finder.findDuplicateFeatures(p)
-		assertTrue("result: " + result, result.empty)
+		assertThat(result).isEmpty
 	}
 
 	@Test def void test_findDuplicateFeatures_withDifferingContainment() {
-		val p = factory.createEPackage => [
-			createEClass("C1") => [
-				createEReference("r1") => [
-					EType = eClassReference
+		val p = createEPackage("p") [
+			addNewEClass("C1") => [
+				addNewEReference("r1", eClassReference) [
 					containment = true
 				]
 			]
-			createEClass("C2") => [
-				createEReference("r1") => [
-					EType = eClassReference
+			addNewEClass("C2") => [
+				addNewEReference("r1", eClassReference) [
 					containment = false
 				]
 			]
 		]
 		val result = finder.findDuplicateFeatures(p)
-		assertTrue("result: " + result, result.empty)
+		assertThat(result).isEmpty
 	}
 
 	@Test def void test_findDuplicateFeatures_withCustomEqualityPredicate() {
-		val p = factory.createEPackage => [
-			createEClass("C1") => [
-				createEAttribute("A1") => [
-					EType = stringDataType
-					lowerBound = 1 // different lowerbound from C2.A1
+		val p = createEPackage("p") [
+			addNewEClass("C1") [
+				addNewEAttribute("a1", stringDataType) [
+					lowerBound = 1 // different lowerbound from C2.a1
 				]
 			]
-			createEClass("C2") => [
-				createEAttribute("A1") => [
-					EType = stringDataType
-					lowerBound = 2 // different lowerbound from C1.A1
+			addNewEClass("C2") [
+				addNewEAttribute("a1", stringDataType) [
+					lowerBound = 2 // different lowerbound from C1.a1
 				]
 			]
 		]
@@ -121,100 +112,93 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 			findDuplicateFeaturesCustom(p) [
 				f1, f2 | f1.name == f2.name && f1.EType == f2.EType
 			]
-		val expected = p.EClasses.map[EStructuralFeatures].flatten
-		val actual = result.values.flatten
-		assertIterable(actual, expected)
+		assertThat(result)
+			.containsExactly(
+				entry(p.findEStructuralFeature("C1", "a1"),
+					#[
+						p.findEStructuralFeature("C1", "a1"),
+						p.findEStructuralFeature("C2", "a1")
+					]
+				)
+			)
 	}
 
 	@Test def void test_findRedundantContainers() {
-		val p = factory.createEPackage => [
-			val containedWithRedundant = createEClass("ContainedWithRedundant")
-			val containedWithOpposite = createEClass("ContainedWithOpposite")
-			val containedWithContained = createEClass("ContainedWithContained")
-			val containedWithOptional = createEClass("ContainedWithOptional")
-			val anotherClass = createEClass("AnotherClass")
-			val containedWithUnrelated = createEClass("Unrelated")
-			val container = createEClass("Container") => [
-				createEReference("containedWithRedundant") => [
-					EType = containedWithRedundant
+		val p = createEPackage("p") [
+			val containedWithRedundant = addNewEClass("ContainedWithRedundant")
+			val containedWithOpposite = addNewEClass("ContainedWithOpposite")
+			val containedWithContained = addNewEClass("ContainedWithContained")
+			val containedWithOptional = addNewEClass("ContainedWithOptional")
+			val anotherClass = addNewEClass("AnotherClass")
+			val containedWithUnrelated = addNewEClass("Unrelated")
+			val container = addNewEClass("Container") [
+				addNewEReference("containedWithRedundant", containedWithRedundant) [
 					containment = true
 				]
-				createEReference("containedWithUnrelated") => [
-					EType = containedWithUnrelated
+				addNewEReference("containedWithUnrelated", containedWithUnrelated) [
 					containment = true
 				]
-				createEReference("containedWithOpposite") => [
-					EType = containedWithOpposite
+				addNewEReference("containedWithOpposite", containedWithOpposite) [
 					containment = true
 				]
-				createEReference("containedWithOptional") => [
-					EType = containedWithOptional
+				addNewEReference("containedWithOptional", containedWithOptional) [
 					containment = true
 				]
 			]
-			containedWithRedundant.createEReference("redundant") => [
-				EType = container
+			containedWithRedundant.addNewEReference("redundant", container) [
 				lowerBound = 1
 			]
-			containedWithUnrelated.createEReference("unrelated") => [
-				EType = anotherClass
+			containedWithUnrelated.addNewEReference("unrelated", anotherClass) [
 				lowerBound = 1
 			]
-			containedWithOpposite.createEReference("correctWithOpposite") => [
-				EType = container
+			containedWithOpposite.addNewEReference("correctWithOpposite", container) [
 				lowerBound = 1
 				EOpposite = container.EReferences.last
 			]
-			containedWithContained.createEReference("correctWithContainment") => [
-				EType = container
+			containedWithContained.addNewEReference("correctWithContainment", container) [
 				lowerBound = 1
 				// this is correct since it's another contament relation
 				containment = true
 			]
-			containedWithOptional.createEReference("correctNotRequired") => [
-				EType = container
+			containedWithOptional.addNewEReference("correctNotRequired", container)
 				// this is correct since it's not required
-			]
 		]
 		val result = finder.findRedundantContainers(p)
 		// we expect the pair
 		// redundant -> containedWithRedundant
-		val expected = p.EClasses.head.EReferences.head -> p.EClasses.last.EReferences.head
-		val actual = result.head
-		assertThat(result).hasSize(1)
-		assertNotNull(expected)
-		assertNotNull(actual)
-		assertEquals(expected, actual)
+		assertThat(result)
+			.containsExactly(
+				p.findEReference("ContainedWithRedundant", "redundant") ->
+				p.findEReference("Container", "containedWithRedundant")
+			)
 	}
 
 	@Test def void test_findDeadClassifiers() {
-		val p = factory.createEPackage => [
-			createEClass("Unused1")
-			val used1 = createEClass("Used1")
-			val used2 = createEClass("Used2")
-			createEClass("Unused2") => [
-				createEReference("used1") => [
-					EType = used1
+		val p = createEPackage("p") [
+			addNewEClass("Unused1")
+			val used1 = addNewEClass("Used1")
+			val used2 = addNewEClass("Used2")
+			addNewEClass("Unused2") [
+				addNewEReference("used1", used1) [
 					containment = true
 				]
-				createEReference("used2") => [
-					EType = used2
+				addNewEReference("used2", used2) [
 					containment = false
 				]
 			]
 		]
 		val result = finder.findDeadClassifiers(p)
-		assertIterable(result, #[p.EClasses.head])
+		assertThat(result)
+			.containsExactly(p.findEClass("Unused1"))
 	}
 
 	@Test def void test_hasNoReferenceInThisPackage() {
-		val otherPackage = factory.createEPackage
-		val used1 = otherPackage.createEClass("Used1")
-		val p = factory.createEPackage => [
-			createEClass("HasNoReferenceInThisPackage") => [
+		val otherPackage = createEPackage("otherPackage")
+		val used1 = otherPackage.addNewEClass("Used1")
+		val p = createEPackage("p") [
+			addNewEClass("HasNoReferenceInThisPackage") [
 				// has a reference to a class in a different package
-				createEReference("used1") => [
-					EType = used1
+				addNewEReference("used1", used1) [
 					containment = false
 				]
 			]
@@ -224,31 +208,27 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 	}
 
 	@Test def void test_findClassificationByHierarchy() {
-		val p = factory.createEPackage => [
-			val base = createEClass("Base")
-			createEClass("Derived1") => [
+		val p = createEPackage("p") [
+			val base = addNewEClass("Base")
+			addNewEClass("Derived1") [
 				ESuperTypes += base
 			]
-			createEClass("Derived2") => [
+			addNewEClass("Derived2") [
 				ESuperTypes += base
 			]
-			createEClass("DerivedOK") => [
+			addNewEClass("DerivedOK") [
 				ESuperTypes += base
 				// not in result because has features
-				createEAttribute("anAttribute") => [
-					EType = stringDataType
-				]
+				addNewEAttribute("anAttribute", stringDataType)
 			]
-			val referenced = createEClass("DerivedOK2") => [
+			val referenced = addNewEClass("DerivedOK2") [
 				// not in result because it's referenced
 				ESuperTypes += base
 			]
-			val another = createEClass("Another") => [
-				createEReference("aRef") => [
-					EType = referenced
-				]
+			val another = addNewEClass("Another") [
+				addNewEReference("aRef", referenced)
 			]
-			createEClass("DerivedOK3") => [
+			addNewEClass("DerivedOK3") [
 				ESuperTypes += base
 				ESuperTypes += another
 				// not in result because has several superclasses
@@ -256,18 +236,19 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 		]
 		val result = finder.findClassificationByHierarchy(p)
 		assertThat(result)
-			.containsExactlyEntriesOf(newHashMap(
-				p.EClasses.head -> newArrayList(
-					p.EClasses.get(1),
-					p.EClasses.get(2)
-				)
+			.containsExactly(
+				entry(p.findEClass("Base"),
+					#[
+						p.findEClass("Derived1"),
+						p.findEClass("Derived2")
+					]
 			))
 	}
 
 	@Test def void test_findClassificationByHierarchy_withOneSubclass() {
-		val p = factory.createEPackage => [
-			val base = createEClass("Base")
-			createEClass("Derived1") => [
+		val p = createEPackage("p") [
+			val base = addNewEClass("Base")
+			addNewEClass("Derived1") [
 				ESuperTypes += base
 			]
 		]
@@ -277,131 +258,128 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 	}
 
 	@Test def void test_findConcreteAbstractMetaclasses() {
-		val p = factory.createEPackage => [
-			val base = createEClass("ConcreteAbstractMetaclass")
-			val other = createEClass("CorrectAbstractMetaclass") => [
+		val p = createEPackage("p") [
+			val base = addNewEClass("ConcreteAbstractMetaclass")
+			val other = addNewEClass("CorrectAbstractMetaclass") [
 				abstract = true
 			]
-			val referred = createEClass("NonBaseClass")
-			createEClass("Derived1") => [
+			val referred = addNewEClass("NonBaseClass")
+			addNewEClass("Derived1") [
 				ESuperTypes += base
 			]
-			createEClass("Derived2") => [
+			addNewEClass("Derived2") [
 				ESuperTypes += other
 			]
-			createEClass("Another") => [
-				createEReference("aRef") => [
-					EType = referred
-				]
+			addNewEClass("Another") [
+				addNewEReference("aRef", referred)
 			]
 		]
 		var result = finder.findConcreteAbstractMetaclasses(p)
-		assertIterable(result, #[p.EClasses.head])
+		assertThat(result)
+			.containsExactly(p.findEClass("ConcreteAbstractMetaclass"))
 	}
 
 	@Test def void test_findAbstractConcreteMetaclasses() {
-		val p = factory.createEPackage => [
-			createEClass("AbstractConcreteMetaclass") => [
+		val p = createEPackage("p") [
+			addNewEClass("AbstractConcreteMetaclass") [
 				abstract = true
 			]
-			val base = createEClass("AbstractMetaclass") => [
+			val base = addNewEClass("AbstractMetaclass") [
 				abstract = true
 			]
-			createEClass("Derived1") => [
+			addNewEClass("Derived1") [
 				ESuperTypes += base
 			]
 		]
 		var result = finder.findAbstractConcreteMetaclasses(p)
-		assertIterable(result, #[p.EClasses.head])
+		assertThat(result)
+			.containsExactly(p.findEClass("AbstractConcreteMetaclass"))
 	}
 
 	@Test def void test_findAbstractSubclassesOfConcreteSuperclasses() {
-		val p = factory.createEPackage => [
-			val abstractSuperclass = createEClass("AbstractSuperclass") => [
+		val p = createEPackage("p") [
+			val abstractSuperclass = addNewEClass("AbstractSuperclass") [
 				abstract = true
 			]
-			val concreteSuperclass1 = createEClass("ConcreteSuperclass1")
-			val concreteSuperclass2 = createEClass("ConcreteSuperclass2")
-			createEClass("WithoutSmell") => [
+			val concreteSuperclass1 = addNewEClass("ConcreteSuperclass1")
+			val concreteSuperclass2 = addNewEClass("ConcreteSuperclass2")
+			addNewEClass("WithoutSmell") [
 				abstract = true
 				ESuperTypes += #[concreteSuperclass1, abstractSuperclass]
 			]
-			createEClass("WithSmell") => [
+			addNewEClass("WithSmell") [
 				abstract = true
 				ESuperTypes += #[concreteSuperclass1, concreteSuperclass2]
 			]
 		]
 		var result = finder.findAbstractSubclassesOfConcreteSuperclasses(p)
 		assertThat(result)
-			.containsOnly(p.EClasses.last)
+			.containsOnly(p.findEClass("WithSmell"))
 	}
 
 	@Test def void test_directSubclasses() {
-		val p = factory.createEPackage => [
-			val superclass = createEClass("ASuperclass")
-			val subclass1 = createEClass("ASubclass1") => [
+		val p = createEPackage("p") [
+			val superclass = addNewEClass("ASuperclass")
+			val subclass1 = addNewEClass("ASubclass1") [
 				ESuperTypes += superclass
 			]
-			createEClass("ASubclass1Subclass") => [
+			addNewEClass("ASubclass1Subclass") [
 				ESuperTypes += subclass1
 			]
-			createEClass("ASubclass2") => [
+			addNewEClass("ASubclass2") [
 				ESuperTypes += superclass
 			]
 		]
-		assertThat(finder.directSubclasses(p.EClasses.head).map[name]) // ASuperclass
+		assertThat(finder.directSubclasses(p.findEClass("ASuperclass")).map[name])
 			.containsExactlyInAnyOrder("ASubclass1", "ASubclass2")
-		assertThat(finder.directSubclasses(p.EClasses.get(1)).map[name]) // ASubclass1
+		assertThat(finder.directSubclasses(p.findEClass("ASubclass1")).map[name])
 			.containsExactlyInAnyOrder("ASubclass1Subclass")
-		assertThat(finder.directSubclasses(p.EClasses.get(2))) // ASubclass1Subclass
+		assertThat(finder.directSubclasses(p.findEClass("ASubclass1Subclass")))
 			.isEmpty
 	}
 
 	@Test def void test_findDuplicateFeaturesInSubclasses() {
-		val p = factory.createEPackage => [
-			val superclassWithDuplicatesInSubclasses = createEClass("SuperClassWithDuplicatesInSubclasses")
-			createEClass("C1") => [
+		val p = createEPackage("p") [
+			val superclassWithDuplicatesInSubclasses =
+				addNewEClass("SuperClassWithDuplicatesInSubclasses")
+			addNewEClass("C1") [
 				ESuperTypes += superclassWithDuplicatesInSubclasses
-				createEAttribute("A1") => [
-					EType = stringDataType
-				]
+				addNewEAttribute("A1", stringDataType)
 			]
-			createEClass("C2") => [
+			addNewEClass("C2") [
 				ESuperTypes += superclassWithDuplicatesInSubclasses
-				createEAttribute("A1") => [
-					EType = stringDataType
-				]
+				addNewEAttribute("A1", stringDataType)
 			]
-			val superclassWithoutDuplicatesInAllSubclasses = createEClass("SuperClassWithoutDuplicatesInAllSubclasses")
-			createEClass("D1") => [
+			val superclassWithoutDuplicatesInAllSubclasses =
+				addNewEClass("SuperClassWithoutDuplicatesInAllSubclasses")
+			addNewEClass("D1") [
 				ESuperTypes += superclassWithoutDuplicatesInAllSubclasses
-				createEAttribute("A1") => [
-					EType = stringDataType
-				]
+				addNewEAttribute("A1", stringDataType)
 			]
-			createEClass("D2") => [
+			addNewEClass("D2") [
 				ESuperTypes += superclassWithoutDuplicatesInAllSubclasses
-				createEAttribute("A1") => [
-					EType = stringDataType
-				]
+				addNewEAttribute("A1", stringDataType)
 			]
-			createEClass("D3") => [
+			addNewEClass("D3") [
 				ESuperTypes += superclassWithoutDuplicatesInAllSubclasses
-				createEAttribute("A1") => [
-					EType = intDataType // all subclasses must have the duplicate
+				addNewEAttribute("A1", intDataType) // all subclasses must have the duplicate
 					// this is not a duplicate
-				]
 			]
 		]
 		val result = finder.findDuplicateFeaturesInSubclasses(p)
-		val expected = p.EClasses.take(3).map[EStructuralFeatures].flatten
-		val actual = result.get(p.EClasses.head).values.flatten
-		assertIterable(actual, expected)
-		val notMatched = p.EClasses.get(3) // SuperClassWithoutDuplicatesInAllSubclasses
-		assertThat(result.get(notMatched)).isNull
+		assertThat(result)
+			.containsExactly(
+				entry(
+					p.findEClass("SuperClassWithDuplicatesInSubclasses"),
+					Maps.newHashMap(
+						p.findEStructuralFeature("C1", "A1"),
+						#[
+							p.findEStructuralFeature("C1", "A1"),
+							p.findEStructuralFeature("C2", "A1")
+						]
+					)
+				)
+			)
 	}
 
-	def private <T extends ENamedElement> void assertIterable(Iterable<T> actual, Iterable<? extends T> expected) {
-		assertThat(actual).containsExactlyInAnyOrder(expected)
-	}
 }
