@@ -13,8 +13,9 @@ Require-Bundle: edelta.testutils,
  org.eclipse.xtext.xbase.lib,
  org.eclipse.xtend.lib,
  org.eclipse.xtend.lib.macro,
- org.eclipse.emf.ecore,
- org.junit;bundle-version="4.13.0"
+ org.eclipse.emf.ecore
 Automatic-Module-Name: edelta.lib.tests
-Import-Package: org.junit.jupiter.api;version="5.7.0",
- org.junit.jupiter.params;version="5.7.0"
+Import-Package: org.junit;version="4.13.0",
+ org.junit.jupiter.api;version="5.6",
+ org.junit.jupiter.params;version="5.6",
+ org.junit.jupiter.params.provider;version="5.6"

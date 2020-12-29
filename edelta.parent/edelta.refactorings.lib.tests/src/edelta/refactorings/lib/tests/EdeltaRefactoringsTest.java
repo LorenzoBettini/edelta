@@ -17,6 +17,8 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import edelta.lib.AbstractEdelta;
 import edelta.refactorings.lib.EdeltaRefactorings;
@@ -438,29 +440,14 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertThat(result).isNull();
 	}
 
-	@Test
-	void test_referenceToClassBidirectional() throws IOException {
-		withInputModel("referenceToClassBidirectional", "PersonList.ecore");
-		loadModelFile();
-		final EReference ref = refactorings.getEReference("PersonList", "Person", "works");
-		refactorings.referenceToClass("WorkingPosition", ref);
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFile();
-	}
-
-	@Test
-	void test_referenceToClassWithCardinality() throws IOException {
-		withInputModel("referenceToClassWithCardinality", "PersonList.ecore");
-		loadModelFile();
-		final EReference ref = refactorings.getEReference("PersonList", "Person", "works");
-		refactorings.referenceToClass("WorkingPosition", ref);
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFile();
-	}
-
-	@Test
-	void test_referenceToClassUnidirectional() throws IOException {
-		withInputModel("referenceToClassUnidirectional", "PersonList.ecore");
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"referenceToClassBidirectional",
+		"referenceToClassWithCardinality",
+		"referenceToClassUnidirectional"
+	})
+	void test_referenceToClass(String directory) throws IOException {
+		withInputModel(directory, "PersonList.ecore");
 		loadModelFile();
 		final EReference ref = refactorings.getEReference("PersonList", "Person", "works");
 		refactorings.referenceToClass("WorkingPosition", ref);
@@ -478,6 +465,21 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertModifiedFileIsSameAsOriginal();
 		assertThat(appender.getResult().trim()).isEqualTo(
 			"ERROR: PersonList.Person.works: Cannot apply referenceToClass on containment reference: PersonList.Person.works");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"classToReferenceUnidirectional",
+		"classToReferenceBidirectional",
+		"classToReferenceWithCardinality"
+	})
+	void test_classToReferenceUnidirectional(String directory) throws IOException {
+		withInputModel(directory, "PersonList.ecore");
+		loadModelFile();
+		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
+		refactorings.classToReference(cl);
+		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		assertModifiedFile();
 	}
 
 	@Test
@@ -500,16 +502,6 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			+ "  p.C1.r1\n"
 			+ "  p.C2.r2\n"
 			+ "");
-	}
-
-	@Test
-	void test_classToReferenceUnidirectional() throws IOException {
-		withInputModel("classToReferenceUnidirectional", "PersonList.ecore");
-		loadModelFile();
-		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
-		refactorings.classToReference(cl);
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFile();
 	}
 
 	@Test
@@ -551,26 +543,6 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		// also appropriately update the opposite, otherwise we have a dangling reference
 		personFeature.getEOpposite().setEOpposite(null);
 		cl.getEStructuralFeatures().remove(personFeature);
-		refactorings.classToReference(cl);
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFile();
-	}
-
-	@Test
-	void test_classToReferenceBidirectional() throws IOException {
-		withInputModel("classToReferenceBidirectional", "PersonList.ecore");
-		loadModelFile();
-		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
-		refactorings.classToReference(cl);
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFile();
-	}
-
-	@Test
-	void test_classToReferenceWithCardinality() throws IOException {
-		withInputModel("classToReferenceWithCardinality", "PersonList.ecore");
-		loadModelFile();
-		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
 		refactorings.classToReference(cl);
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFile();
