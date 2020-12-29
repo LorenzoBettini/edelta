@@ -15,15 +15,17 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import edelta.lib.AbstractEdelta;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 import edelta.testutils.EdeltaTestUtils;
 
-public class EdeltaRefactoringsTest extends AbstractTest {
+class EdeltaRefactoringsTest extends AbstractTest {
 	private EdeltaRefactorings refactorings;
 
 	private InMemoryLoggerAppender appender;
@@ -32,8 +34,8 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 
 	private String testModelFile;
 
-	@Before
-	public void setup() throws Exception {
+	@BeforeEach
+	void setup() throws Exception {
 		refactorings = new EdeltaRefactorings();
 		appender = new InMemoryLoggerAppender();
 		appender.setLineSeparator("\n");
@@ -97,7 +99,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_ConstructorArgument() {
+	void test_ConstructorArgument() {
 		refactorings = new EdeltaRefactorings(new AbstractEdelta() {
 		});
 		final EClass c = this.createEClassWithoutPackage("C1");
@@ -108,7 +110,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_addMandatoryAttribute() {
+	void test_addMandatoryAttribute() {
 		final EClass c = this.createEClassWithoutPackage("C1");
 		refactorings.addMandatoryAttribute(c, "test", this.stringDataType);
 		final EAttribute attr = head(c.getEAttributes());
@@ -119,7 +121,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_addMandatoryReference() {
+	void test_addMandatoryReference() {
 		final EClass c = this.createEClassWithoutPackage("C1");
 		refactorings.addMandatoryReference(c, "test", this.eClassReference);
 		final EReference attr = head(c.getEReferences());
@@ -130,7 +132,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_mergeFeatures() throws IOException {
+	void test_mergeFeatures() throws IOException {
 		withInputModel("mergeFeatures", "PersonList.ecore");
 		loadModelFile();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
@@ -143,7 +145,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_mergeFeaturesDifferent() throws IOException {
+	void test_mergeFeaturesDifferent() throws IOException {
 		withInputModel("mergeFeaturesDifferent", "PersonList.ecore");
 		loadModelFile();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
@@ -190,7 +192,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_mergeFeatures2() throws IOException {
+	void test_mergeFeatures2() throws IOException {
 		withInputModel("mergeFeatures2", "PersonList.ecore");
 		loadModelFile();
 		final EClass list = refactorings.getEClass("PersonList", "List");
@@ -208,7 +210,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_mergeFeatures2NonCompliant() {
+	void test_mergeFeatures2NonCompliant() {
 		withInputModel("mergeFeatures2", "PersonList.ecore");
 		loadModelFile();
 		final EClass list = refactorings.getEClass("PersonList", "List");
@@ -255,7 +257,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_mergeFeatures3() throws IOException {
+	void test_mergeFeatures3() throws IOException {
 		withInputModel("mergeFeatures3", "PersonList.ecore");
 		loadModelFile();
 		final EClass list = refactorings.getEClass("PersonList", "List");
@@ -274,7 +276,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_enumToSubclasses() throws IOException {
+	void test_enumToSubclasses() throws IOException {
 		withInputModel("enumToSubclasses", "PersonList.ecore");
 		loadModelFile();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
@@ -288,7 +290,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_enumToSubclassesNotAnEEnum() throws IOException {
+	void test_enumToSubclassesNotAnEEnum() throws IOException {
 		withInputModel("enumToSubclasses", "PersonList.ecore");
 		loadModelFile();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
@@ -303,7 +305,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_subclassesToEnum() throws IOException {
+	void test_subclassesToEnum() throws IOException {
 		withInputModel("subclassesToEnum", "PersonList.ecore");
 		loadModelFile();
 		final EPackage personList = refactorings.getEPackage("PersonList");
@@ -318,7 +320,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_subclassesToEnumSubclassesNotEmpty() throws IOException {
+	void test_subclassesToEnumSubclassesNotEmpty() throws IOException {
 		withInputModel("subclassesToEnumSubclassesNotEmpty", "PersonList.ecore");
 		loadModelFile();
 		final EPackage personList = refactorings.getEPackage("PersonList");
@@ -339,7 +341,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_subclassesToEnumSubclassesWrongSubclasses() throws IOException {
+	void test_subclassesToEnumSubclassesWrongSubclasses() throws IOException {
 		withInputModel("subclassesToEnumSubclassesWrongSubclasses", "PersonList.ecore");
 		loadModelFile();
 		final EPackage personList = refactorings.getEPackage("PersonList");
@@ -376,7 +378,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_enumToSubclasses_IsOppositeOf_subclassesToEnum() throws IOException {
+	void test_enumToSubclasses_IsOppositeOf_subclassesToEnum() throws IOException {
 		withInputModel("enumToSubclasses", "PersonList.ecore");
 		assertOppositeRefactorings(
 			() -> refactorings.enumToSubclasses(
@@ -389,7 +391,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_subclassesToEnum_IsOppositeOf_enumToSubclasses() throws IOException {
+	void test_subclassesToEnum_IsOppositeOf_enumToSubclasses() throws IOException {
 		withInputModel("subclassesToEnum", "PersonList.ecore");
 		assertOppositeRefactorings(
 			() -> refactorings.subclassesToEnum("Gender",
@@ -402,7 +404,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_extractClassWithAttributes() throws IOException {
+	void test_extractClassWithAttributes() throws IOException {
 		withInputModel("extractClassWithAttributes", "PersonList.ecore");
 		loadModelFile();
 		refactorings.extractClass("Address",
@@ -415,7 +417,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_extractClassWithAttributesContainedInDifferentClasses() throws IOException {
+	void test_extractClassWithAttributesContainedInDifferentClasses() throws IOException {
 		withInputModel("extractClassWithAttributesContainedInDifferentClasses", "PersonList.ecore");
 		loadModelFile();
 		refactorings.extractClass("Address",
@@ -432,16 +434,21 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_extractClassWithAttributesEmpty() {
+	void test_extractClassWithAttributesEmpty() {
 		final EClass result = refactorings.extractClass("Address",
 			emptyList(),
 			"address");
 		assertThat(result).isNull();
 	}
 
-	@Test
-	public void test_referenceToClassBidirectional() throws IOException {
-		withInputModel("referenceToClassBidirectional", "PersonList.ecore");
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"referenceToClassBidirectional",
+		"referenceToClassWithCardinality",
+		"referenceToClassUnidirectional"
+	})
+	void test_referenceToClass(String directory) throws IOException {
+		withInputModel(directory, "PersonList.ecore");
 		loadModelFile();
 		final EReference ref = refactorings.getEReference("PersonList", "Person", "works");
 		refactorings.referenceToClass("WorkingPosition", ref);
@@ -450,27 +457,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_referenceToClassWithCardinality() throws IOException {
-		withInputModel("referenceToClassWithCardinality", "PersonList.ecore");
-		loadModelFile();
-		final EReference ref = refactorings.getEReference("PersonList", "Person", "works");
-		refactorings.referenceToClass("WorkingPosition", ref);
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFile();
-	}
-
-	@Test
-	public void test_referenceToClassUnidirectional() throws IOException {
-		withInputModel("referenceToClassUnidirectional", "PersonList.ecore");
-		loadModelFile();
-		final EReference ref = refactorings.getEReference("PersonList", "Person", "works");
-		refactorings.referenceToClass("WorkingPosition", ref);
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFile();
-	}
-
-	@Test
-	public void test_referenceToClassWithContainmentReference() throws IOException {
+	void test_referenceToClassWithContainmentReference() throws IOException {
 		withInputModel("referenceToClassWithContainmentReference", "PersonList.ecore");
 		loadModelFile();
 		final EReference ref = refactorings.getEReference("PersonList", "Person", "works");
@@ -481,8 +468,23 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 			"ERROR: PersonList.Person.works: Cannot apply referenceToClass on containment reference: PersonList.Person.works");
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"classToReferenceUnidirectional",
+		"classToReferenceBidirectional",
+		"classToReferenceWithCardinality"
+	})
+	void test_classToReferenceUnidirectional(String directory) throws IOException {
+		withInputModel(directory, "PersonList.ecore");
+		loadModelFile();
+		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
+		refactorings.classToReference(cl);
+		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		assertModifiedFile();
+	}
+
 	@Test
-	public void test_classToReferenceWhenClassIsNotReferred() {
+	void test_classToReferenceWhenClassIsNotReferred() {
 		withInputModel("classToReferenceWronglyReferred", "TestEcore.ecore");
 		loadModelFile();
 		refactorings.classToReference(refactorings.getEClass("p", "CNotReferred"));
@@ -491,7 +493,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_classToReferenceWhenClassIsReferredMoreThanOnce() {
+	void test_classToReferenceWhenClassIsReferredMoreThanOnce() {
 		withInputModel("classToReferenceWronglyReferred", "TestEcore.ecore");
 		loadModelFile();
 		refactorings.classToReference(refactorings.getEClass("p", "C"));
@@ -504,17 +506,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_classToReferenceUnidirectional() throws IOException {
-		withInputModel("classToReferenceUnidirectional", "PersonList.ecore");
-		loadModelFile();
-		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
-		refactorings.classToReference(cl);
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFile();
-	}
-
-	@Test
-	public void test_classToReferenceWithMissingTarget() {
+	void test_classToReferenceWithMissingTarget() {
 		withInputModel("classToReferenceUnidirectional", "PersonList.ecore");
 		loadModelFile();
 		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
@@ -526,7 +518,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_classToReferenceWithTooManyTargets() {
+	void test_classToReferenceWithTooManyTargets() {
 		withInputModel("classToReferenceUnidirectional", "PersonList.ecore");
 		loadModelFile();
 		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
@@ -543,7 +535,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_classToReferenceUnidirectionalWithoutOppositeIsOk() throws IOException {
+	void test_classToReferenceUnidirectionalWithoutOppositeIsOk() throws IOException {
 		withInputModel("classToReferenceUnidirectional", "PersonList.ecore");
 		loadModelFile();
 		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
@@ -558,27 +550,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_classToReferenceBidirectional() throws IOException {
-		withInputModel("classToReferenceBidirectional", "PersonList.ecore");
-		loadModelFile();
-		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
-		refactorings.classToReference(cl);
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFile();
-	}
-
-	@Test
-	public void test_classToReferenceWithCardinality() throws IOException {
-		withInputModel("classToReferenceWithCardinality", "PersonList.ecore");
-		loadModelFile();
-		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
-		refactorings.classToReference(cl);
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFile();
-	}
-
-	@Test
-	public void test_referenceToClass_IsOppositeOf_classToReferenceUnidirectional() throws IOException {
+	void test_referenceToClass_IsOppositeOf_classToReferenceUnidirectional() throws IOException {
 		withInputModel("referenceToClassUnidirectional", "PersonList.ecore");
 		assertOppositeRefactorings(
 			() -> refactorings.referenceToClass("WorkingPosition",
@@ -589,7 +561,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_referenceToClass_IsOppositeOf_classToReferenceUnidirectional2() throws IOException {
+	void test_referenceToClass_IsOppositeOf_classToReferenceUnidirectional2() throws IOException {
 		withInputModel("classToReferenceUnidirectional", "PersonList.ecore");
 		assertOppositeRefactorings(
 			() -> refactorings.classToReference(
@@ -600,7 +572,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_referenceToClass_IsOppositeOf_classToReferenceBidirectional() throws IOException {
+	void test_referenceToClass_IsOppositeOf_classToReferenceBidirectional() throws IOException {
 		withInputModel("referenceToClassBidirectional", "PersonList.ecore");
 		assertOppositeRefactorings(
 			() -> refactorings.referenceToClass("WorkingPosition",
@@ -611,7 +583,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_referenceToClass_IsOppositeOf_classToReferenceBidirectional2() throws IOException {
+	void test_referenceToClass_IsOppositeOf_classToReferenceBidirectional2() throws IOException {
 		withInputModel("classToReferenceBidirectional", "PersonList.ecore");
 		assertOppositeRefactorings(
 			() -> refactorings.classToReference(
@@ -622,7 +594,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_extractSuperclass() throws IOException {
+	void test_extractSuperclass() throws IOException {
 		withInputModel("extractSuperclass", "TestEcore.ecore");
 		loadModelFile();
 		refactorings.extractSuperclass(
@@ -639,7 +611,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_pullUpFeatures() throws IOException {
+	void test_pullUpFeatures() throws IOException {
 		withInputModel("pullUpFeatures", "PersonList.ecore");
 		loadModelFile();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
@@ -654,7 +626,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_pullUpFeaturesDifferent() throws IOException {
+	void test_pullUpFeaturesDifferent() throws IOException {
 		withInputModel("pullUpFeaturesDifferent", "PersonList.ecore");
 		loadModelFile();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
@@ -677,7 +649,7 @@ public class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_pullUpFeaturesNotSubclass() throws IOException {
+	void test_pullUpFeaturesNotSubclass() throws IOException {
 		withInputModel("pullUpFeaturesNotSubclass", "PersonList.ecore");
 		loadModelFile();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
