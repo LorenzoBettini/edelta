@@ -1600,6 +1600,28 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testShowErrorOnCreatedEClassGeneratedByJavaOperation() {
+		// see https://github.com/LorenzoBettini/edelta/issues/289
+		val input = '''
+			import edelta.tests.additional.MyCustomEdeltaShowingError
+
+			metamodel "foo"
+			
+			use MyCustomEdeltaShowingError as extension my
+			
+			modifyEcore aTest epackage foo {
+				checkClassName(addNewEClass("NewClass"))
+				checkClassName(addNewEClass("anotherNewClass"))
+			}
+		'''.toString
+		input
+		.parseWithTestEcore => [
+			interpretProgram
+			assertNoErrors
+		]
+	}
+
+	@Test
 	def void testIntroducedCycles() {
 		val input = '''
 			metamodel "foo"

@@ -2421,6 +2421,37 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
+  public void testShowErrorOnCreatedEClassGeneratedByJavaOperation() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import edelta.tests.additional.MyCustomEdeltaShowingError");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("use MyCustomEdeltaShowingError as extension my");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("checkClassName(addNewEClass(\"NewClass\"))");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("checkClassName(addNewEClass(\"anotherNewClass\"))");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final String input = _builder.toString();
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+      this.interpretProgram(it);
+      this._validationTestHelper.assertNoErrors(it);
+    };
+    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+  }
+  
+  @Test
   public void testIntroducedCycles() {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
