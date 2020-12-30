@@ -11,6 +11,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -38,6 +39,7 @@ import org.junit.Test;
 
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaEcoreUtil;
+import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
 /**
@@ -426,6 +428,18 @@ public class EdeltaTest {
 		edelta.showWarning(problematicObject, "a warning");
 		verify(logger).log(Level.ERROR, "anEPackage: an error");
 		verify(logger).log(Level.WARN, "anEPackage: a warning");
+	}
+
+	@Test
+	public void testSetIssuePresenter() {
+		var issuePresenter = mock(EdeltaIssuePresenter.class);
+		edelta.setIssuePresenter(issuePresenter);
+		EPackage problematicObject = EcoreFactory.eINSTANCE.createEPackage();
+		problematicObject.setName("anEPackage");
+		edelta.showError(problematicObject, "an error");
+		edelta.showWarning(problematicObject, "a warning");
+		verify(issuePresenter).showError(problematicObject, "an error");
+		verify(issuePresenter).showWarning(problematicObject, "a warning");
 	}
 
 	@Test
