@@ -135,8 +135,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		final var copiedEPackagesMap = derivedStateHelper
 				.getCopiedEPackagesMap(eResource);
 		final var copiedEPackages = copiedEPackagesMap.values();
-		thisObject = new EdeltaInterpreterEdeltaImpl
-			(copiedEPackages, diagnosticHelper);
+		thisObject = createThisObject(copiedEPackages);
 		useAsFields = newHashMap();
 		var filteredOperations =
 			edeltaInterpreterHelper.filterOperations(program.getModifyEcoreOperations());
@@ -151,6 +150,13 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		} finally {
 			removeResourceListener(copiedEPackages);
 		}
+	}
+
+	private EdeltaInterpreterEdeltaImpl createThisObject(final Collection<EPackage> copiedEPackages) {
+		EdeltaInterpreterEdeltaImpl edeltaImpl =
+			new EdeltaInterpreterEdeltaImpl(copiedEPackages);
+		edeltaImpl.setIssuePresenter(new EdeltaInterpreterIssuePresenter(diagnosticHelper));
+		return edeltaImpl;
 	}
 
 	private void removeResourceListener(final Collection<EPackage> copiedEPackages) {
@@ -535,8 +541,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				final var copiedEPackagesMap = derivedStateHelper
 						.copyEPackages(containingProgram, eResource);
 				// This object is also recreated with possible new copied packages
-				thisObject = new EdeltaInterpreterEdeltaImpl
-					(copiedEPackagesMap.values(), diagnosticHelper);
+				thisObject = createThisObject(copiedEPackagesMap.values());
 
 				var newInterpreter =
 						edeltaInterpreterFactory.create(containingProgram.eResource());
