@@ -1617,7 +1617,15 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		input
 		.parseWithTestEcore => [
 			interpretProgram
-			assertNoErrors
+			val offendingString = 'checkClassName(addNewEClass("anotherNewClass"))'
+			assertError(
+				XbasePackage.eINSTANCE.XFeatureCall,
+				EdeltaValidator.LIVE_VALIDATION_ERROR,
+				input.lastIndexOf(offendingString),
+				offendingString.length,
+				"Name should start with a capital: anotherNewClass"
+			)
+			assertErrorsAsStrings("Name should start with a capital: anotherNewClass")
 		]
 	}
 

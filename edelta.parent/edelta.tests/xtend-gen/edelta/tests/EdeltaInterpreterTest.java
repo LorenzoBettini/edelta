@@ -2446,7 +2446,14 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this.interpretProgram(it);
-      this._validationTestHelper.assertNoErrors(it);
+      final String offendingString = "checkClassName(addNewEClass(\"anotherNewClass\"))";
+      this._validationTestHelper.assertError(it, 
+        XbasePackage.eINSTANCE.getXFeatureCall(), 
+        EdeltaValidator.LIVE_VALIDATION_ERROR, 
+        input.lastIndexOf(offendingString), 
+        offendingString.length(), 
+        "Name should start with a capital: anotherNewClass");
+      this.assertErrorsAsStrings(it, "Name should start with a capital: anotherNewClass");
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
