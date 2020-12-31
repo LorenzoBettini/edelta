@@ -283,7 +283,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * A <-------> B <------> C
    * </pre>
    * 
-   * (where the opposite "a" might not be present)
+   * (where the opposites "a" and "b2" might not be present)
    * if we pass "B", then the result will be
    * <pre>
    *    b2    b1
@@ -291,8 +291,10 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * </pre>
    * 
    * @param cl
+   * @return the EReference that now represents the relation, that is,
+   * the EReference originally of type cl ("b1" above)
    */
-  public void classToReference(final EClass cl) {
+  public EReference classToReference(final EClass cl) {
     final EReference reference = this.findSingleReferenceToThisClass(cl);
     final EClass owner = reference.getEContainingClass();
     final EReference referenceToTarget = this.findSingleReferenceNotOfType(cl, owner);
@@ -303,6 +305,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
       EdeltaLibrary.makeBidirectional(reference, opposite);
     }
     EdeltaLibrary.removeElement(cl);
+    return reference;
   }
   
   /**

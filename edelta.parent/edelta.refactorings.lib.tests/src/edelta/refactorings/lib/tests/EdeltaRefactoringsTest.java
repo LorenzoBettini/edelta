@@ -475,7 +475,9 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		withInputModel(directory, "PersonList.ecore");
 		loadModelFile();
 		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
-		refactorings.classToReference(cl);
+		var result = refactorings.classToReference(cl);
+		assertThat(result)
+			.isEqualTo(refactorings.getEReference("PersonList", "Person", "works"));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFile();
 	}

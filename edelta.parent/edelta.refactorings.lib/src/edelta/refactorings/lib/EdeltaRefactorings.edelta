@@ -234,7 +234,7 @@ def referenceToClass(String name, EReference reference) {
  * A <-------> B <------> C
  * </pre>
  * 
- * (where the opposite "a" might not be present)
+ * (where the opposites "a" and "b2" might not be present)
  * if we pass "B", then the result will be
  * <pre>
  *    b2    b1
@@ -242,8 +242,10 @@ def referenceToClass(String name, EReference reference) {
  * </pre>
  * 
  * @param cl
+ * @return the EReference that now represents the relation, that is,
+ * the EReference originally of type cl ("b1" above)
  */
-def classToReference(EClass cl) {
+def classToReference(EClass cl) : EReference {
 	// search for a single EReference that has type cl ("b1" above)
 	val reference = findSingleReferenceToThisClass(cl)
 	// "A" above
@@ -260,6 +262,7 @@ def classToReference(EClass cl) {
 		makeBidirectional(reference, opposite)
 	}
 	removeElement(cl)
+	return reference
 }
 
 /**
