@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -17,6 +18,7 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -344,22 +346,18 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	void test_subclassesToEnumSubclassesWrongSubclasses() throws IOException {
 		withInputModel("subclassesToEnumSubclassesWrongSubclasses", "PersonList.ecore");
 		loadModelFile();
-		final EPackage personList = refactorings.getEPackage("PersonList");
-		EAttribute result = refactorings.subclassesToEnum("Gender",
-			asList(
-				(EClass) personList.getEClassifier("Male"),
-				(EClass) personList.getEClassifier("Female"),
-				(EClass) personList.getEClassifier("FemaleEmployee"),
-				(EClass) personList.getEClassifier("Employee")));
-		assertThat(result).isNull();
-		result = refactorings.subclassesToEnum("Gender",
-			asList(
-				(EClass) personList.getEClassifier("Female"),
-				(EClass) personList.getEClassifier("AnotherFemale")));
-		assertThat(result).isNull();
-		result = refactorings.subclassesToEnum("Gender",
-			asList((EClass) personList.getEClassifier("Female")));
-		assertThat(result).isNull();
+		var personList = refactorings.getEPackage("PersonList");
+		var female = (EClass) personList.getEClassifier("Female");
+		var anotherFemale = (EClass) personList.getEClassifier("AnotherFemale");
+		var male = (EClass) personList.getEClassifier("Male");
+		var femaleEmployee = (EClass) personList.getEClassifier("FemaleEmployee");
+		var employee = (EClass) personList.getEClassifier("Employee");
+		assertThrowsIAE(() -> refactorings.subclassesToEnum("Gender",
+				asList(male, female, femaleEmployee, employee)));
+		assertThrowsIAE(() -> refactorings.subclassesToEnum("Gender",
+				asList(female, anotherFemale)));
+		assertThrowsIAE(() -> refactorings.subclassesToEnum("Gender",
+				asList(female)));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFileIsSameAsOriginal();
 		assertThat(appender.getResult().trim())
@@ -666,5 +664,10 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			"ERROR: PersonList.Student.name: Not a direct subclass of destination: PersonList.Student\n"
 			+ "ERROR: PersonList.Employee.name: Not a direct subclass of destination: PersonList.Employee\n"
 			+ "");
+	}
+
+	private static void assertThrowsIAE(Executable executable) {
+		assertThrows(IllegalArgumentException.class,
+			executable);
 	}
 }

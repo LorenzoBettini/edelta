@@ -182,9 +182,6 @@ public class EdeltaRefactorings extends AbstractEdelta {
       return null;
     }
     final EClass superclass = this.getSingleDirectSuperclass(subclasses);
-    if ((superclass == null)) {
-      return null;
-    }
     final EPackage ePackage = superclass.getEPackage();
     final Consumer<EEnum> _function = (EEnum it) -> {
       final Procedure2<EClass, Integer> _function_1 = (EClass subClass, Integer index) -> {
@@ -660,7 +657,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
         this.showError(it, _plus_2);
       };
       invalid.forEach(_function_1);
-      return null;
+      throw new IllegalArgumentException("Wrong superclasses");
     }
     final EClass result = IterableExtensions.<EClass>head(IterableExtensions.<EClass>head(subclasses).getESuperTypes());
     final Function1<EClass, Boolean> _function_2 = (EClass it) -> {
@@ -683,11 +680,11 @@ public class EdeltaRefactorings extends AbstractEdelta {
         String _plus_5 = (_plus_4 + 
           "  Actual  : ");
         String _eObjectRepr_2 = EdeltaLibrary.getEObjectRepr(IterableExtensions.<EClass>head(it.getESuperTypes()));
-        String _plus_6 = (_plus_5 + _eObjectRepr_2);
-        this.showError(it, _plus_6);
+        final String message = (_plus_5 + _eObjectRepr_2);
+        this.showError(it, message);
       };
       differences.forEach(_function_3);
-      return null;
+      throw new IllegalArgumentException("Wrong superclasses");
     }
     final Set<EClass> additionalSubclasses = IterableExtensions.<EClass>toSet(this.directSubclasses(result));
     additionalSubclasses.removeAll(IterableExtensions.<EClass>toSet(subclasses));
@@ -699,9 +696,9 @@ public class EdeltaRefactorings extends AbstractEdelta {
         return ("  " + _eObjectRepr);
       };
       String _join = IterableExtensions.join(IterableExtensions.<EClass, String>map(additionalSubclasses, _function_4), "\n");
-      String _plus = ("The class has additional subclasses:\n" + _join);
-      this.showError(result, _plus);
-      return null;
+      final String message = ("The class has additional subclasses:\n" + _join);
+      this.showError(result, message);
+      throw new IllegalArgumentException(message);
     }
     return result;
   }

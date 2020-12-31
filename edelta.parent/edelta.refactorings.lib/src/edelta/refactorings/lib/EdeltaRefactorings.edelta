@@ -144,8 +144,6 @@ def subclassesToEnum(String name, Collection<EClass> subclasses) : EAttribute {
 	if (!checkNoFeatures(subclasses))
 		return null
 	val superclass = getSingleDirectSuperclass(subclasses)
-	if (superclass === null)
-		return null
 	val ePackage = superclass.EPackage
 	val enum = ePackage.addNewEEnum(name) [
 		subclasses.forEach[subClass, index |
@@ -500,7 +498,7 @@ def getSingleDirectSuperclass(Collection<EClass> subclasses) {
 					superclasses.map["  " + EObjectRepr].join("\n")
 			)
 		]
-		return null
+		throw new IllegalArgumentException("Wrong superclasses")
 	}
 	// now all subclasses are known to have exactly one superclass
 	val result = subclasses.head.ESuperTypes.head
@@ -508,22 +506,20 @@ def getSingleDirectSuperclass(Collection<EClass> subclasses) {
 		.filter[ESuperTypes.head !== result]
 	if (!differences.empty) {
 		differences.forEach[
-			showError(it,
-				"Wrong superclass of " + EObjectRepr + ":\n"+
-				"  Expected: " + getEObjectRepr(result) + "\n" +
-				"  Actual  : " + getEObjectRepr(ESuperTypes.head)
-			)
+			val message = "Wrong superclass of " + EObjectRepr + ":\n"+
+							"  Expected: " + getEObjectRepr(result) + "\n" +
+							"  Actual  : " + getEObjectRepr(ESuperTypes.head)
+			showError(it, message)
 		]
-		return null
+		throw new IllegalArgumentException("Wrong superclasses")
 	}
 	val additionalSubclasses = directSubclasses(result).toSet
 	additionalSubclasses.removeAll(subclasses.toSet)
 	if (!additionalSubclasses.empty) {
-		showError(result,
-			"The class has additional subclasses:\n" +
-			additionalSubclasses.map["  " + EObjectRepr].join("\n")
-		)
-		return null
+		val message = "The class has additional subclasses:\n" +
+					additionalSubclasses.map["  " + EObjectRepr].join("\n")
+		showError(result, message)
+		throw new IllegalArgumentException(message)
 	}
 	return result
 }
