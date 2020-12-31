@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -17,6 +18,7 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -149,23 +151,23 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		withInputModel("mergeFeaturesDifferent", "PersonList.ecore");
 		loadModelFile();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
-		refactorings.mergeFeatures("name",
+		assertThrowsIAE(() -> refactorings.mergeFeatures("name",
 			asList(
 				person.getEStructuralFeature("firstName"),
-				person.getEStructuralFeature("lastName")));
+				person.getEStructuralFeature("lastName"))));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFileIsSameAsOriginal();
 		final EClass student = refactorings.getEClass("PersonList", "Student");
-		refactorings.mergeFeatures("name",
+		assertThrowsIAE(() -> refactorings.mergeFeatures("name",
 			asList(
 				person.getEStructuralFeature("lastName"),
-				student.getEStructuralFeature("lastName")));
+				student.getEStructuralFeature("lastName"))));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFileIsSameAsOriginal();
-		refactorings.mergeFeatures("name",
+		assertThrowsIAE(() -> refactorings.mergeFeatures("name",
 			asList(
 				person.getEStructuralFeature("list"),
-				person.getEStructuralFeature("lastName")));
+				person.getEStructuralFeature("lastName"))));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFileIsSameAsOriginal();
 		assertThat(appender.getResult())
@@ -217,26 +219,26 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		final EStructuralFeature wplaces = list.getEStructuralFeature("wplaces");
 		// Place is not subtype of WorkPlace
-		refactorings.mergeFeatures(wplaces,
+		assertThrowsIAE(() -> refactorings.mergeFeatures(wplaces,
 			asList(
 				list.getEStructuralFeature("places"),
-				list.getEStructuralFeature("lplaces")));
+				list.getEStructuralFeature("lplaces"))));
 		// different lowerbound
 		wplaces.setLowerBound(1);
-		refactorings.mergeFeatures(list.getEStructuralFeature("places"),
+		assertThrowsIAE(() -> refactorings.mergeFeatures(list.getEStructuralFeature("places"),
 			asList(
 				list.getEStructuralFeature("wplaces"),
-				list.getEStructuralFeature("lplaces")));
+				list.getEStructuralFeature("lplaces"))));
 		// merge attributes with reference
-		refactorings.mergeFeatures(list.getEStructuralFeature("places"),
+		assertThrowsIAE(() -> refactorings.mergeFeatures(list.getEStructuralFeature("places"),
 			asList(
 				person.getEStructuralFeature("firstName"),
-				person.getEStructuralFeature("lastName")));
+				person.getEStructuralFeature("lastName"))));
 		// merge attributes with different types
-		refactorings.mergeFeatures(person.getEStructuralFeature("age"),
+		assertThrowsIAE(() -> refactorings.mergeFeatures(person.getEStructuralFeature("age"),
 			asList(
 				person.getEStructuralFeature("firstName"),
-				person.getEStructuralFeature("lastName")));
+				person.getEStructuralFeature("lastName"))));
 		assertThat(appender.getResult())
 			.isEqualTo(
 			"ERROR: PersonList.List.wplaces: features not compliant with type PersonList.WorkPlace:\n"
@@ -324,12 +326,11 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		withInputModel("subclassesToEnumSubclassesNotEmpty", "PersonList.ecore");
 		loadModelFile();
 		final EPackage personList = refactorings.getEPackage("PersonList");
-		final EAttribute result = refactorings.subclassesToEnum("Gender",
+		assertThrowsIAE(() -> refactorings.subclassesToEnum("Gender",
 			asList(
 				(EClass) personList.getEClassifier("Male"),
 				(EClass) personList.getEClassifier("NotSpecified"),
-				(EClass) personList.getEClassifier("Female")));
-		assertThat(result).isNull();
+				(EClass) personList.getEClassifier("Female"))));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFileIsSameAsOriginal();
 		assertThat(appender.getResult().trim())
@@ -344,22 +345,18 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	void test_subclassesToEnumSubclassesWrongSubclasses() throws IOException {
 		withInputModel("subclassesToEnumSubclassesWrongSubclasses", "PersonList.ecore");
 		loadModelFile();
-		final EPackage personList = refactorings.getEPackage("PersonList");
-		EAttribute result = refactorings.subclassesToEnum("Gender",
-			asList(
-				(EClass) personList.getEClassifier("Male"),
-				(EClass) personList.getEClassifier("Female"),
-				(EClass) personList.getEClassifier("FemaleEmployee"),
-				(EClass) personList.getEClassifier("Employee")));
-		assertThat(result).isNull();
-		result = refactorings.subclassesToEnum("Gender",
-			asList(
-				(EClass) personList.getEClassifier("Female"),
-				(EClass) personList.getEClassifier("AnotherFemale")));
-		assertThat(result).isNull();
-		result = refactorings.subclassesToEnum("Gender",
-			asList((EClass) personList.getEClassifier("Female")));
-		assertThat(result).isNull();
+		var personList = refactorings.getEPackage("PersonList");
+		var female = (EClass) personList.getEClassifier("Female");
+		var anotherFemale = (EClass) personList.getEClassifier("AnotherFemale");
+		var male = (EClass) personList.getEClassifier("Male");
+		var femaleEmployee = (EClass) personList.getEClassifier("FemaleEmployee");
+		var employee = (EClass) personList.getEClassifier("Employee");
+		assertThrowsIAE(() -> refactorings.subclassesToEnum("Gender",
+				asList(male, female, femaleEmployee, employee)));
+		assertThrowsIAE(() -> refactorings.subclassesToEnum("Gender",
+				asList(female, anotherFemale)));
+		assertThrowsIAE(() -> refactorings.subclassesToEnum("Gender",
+				asList(female)));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFileIsSameAsOriginal();
 		assertThat(appender.getResult().trim())
@@ -461,7 +458,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		withInputModel("referenceToClassWithContainmentReference", "PersonList.ecore");
 		loadModelFile();
 		final EReference ref = refactorings.getEReference("PersonList", "Person", "works");
-		refactorings.referenceToClass("WorkingPosition", ref);
+		assertThrowsIAE(() -> refactorings.referenceToClass("WorkingPosition", ref));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFileIsSameAsOriginal();
 		assertThat(appender.getResult().trim()).isEqualTo(
@@ -478,7 +475,9 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		withInputModel(directory, "PersonList.ecore");
 		loadModelFile();
 		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
-		refactorings.classToReference(cl);
+		var result = refactorings.classToReference(cl);
+		assertThat(result)
+			.isEqualTo(refactorings.getEReference("PersonList", "Person", "works"));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFile();
 	}
@@ -487,7 +486,8 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	void test_classToReferenceWhenClassIsNotReferred() {
 		withInputModel("classToReferenceWronglyReferred", "TestEcore.ecore");
 		loadModelFile();
-		refactorings.classToReference(refactorings.getEClass("p", "CNotReferred"));
+		assertThrowsIAE(() -> refactorings.classToReference(
+				refactorings.getEClass("p", "CNotReferred")));
 		assertThat(appender.getResult().trim())
 			.isEqualTo("ERROR: p.CNotReferred: The EClass is not referred: p.CNotReferred");
 	}
@@ -496,7 +496,8 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	void test_classToReferenceWhenClassIsReferredMoreThanOnce() {
 		withInputModel("classToReferenceWronglyReferred", "TestEcore.ecore");
 		loadModelFile();
-		refactorings.classToReference(refactorings.getEClass("p", "C"));
+		assertThrowsIAE(() -> refactorings.classToReference(
+				refactorings.getEClass("p", "C")));
 		assertThat(appender.getResult())
 			.isEqualTo(
 			"ERROR: p.C: The EClass is referred by more than one container:\n"
@@ -512,9 +513,9 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
 		// manually remove reference to target class WorkPlace
 		cl.getEStructuralFeatures().remove(cl.getEStructuralFeature("workPlace"));
-		refactorings.classToReference(cl);
+		assertThrowsIAE(() -> refactorings.classToReference(cl));
 		assertThat(appender.getResult().trim()).isEqualTo(
-			"ERROR: PersonList.WorkingPosition: Missing reference to target type: PersonList.WorkingPosition");
+			"ERROR: PersonList.WorkingPosition: No references not of type PersonList.Person");
 	}
 
 	@Test
@@ -525,10 +526,10 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		// manually add another reference to target class
 		EReference ref = this.createEReference(cl, "another");
 		ref.setEType(refactorings.getEClass("PersonList", "List"));
-		refactorings.classToReference(cl);
+		assertThrowsIAE(() -> refactorings.classToReference(cl));
 		assertThat(appender.getResult())
 			.isEqualTo(
-			"ERROR: PersonList.WorkingPosition: Too many references to target type:\n"
+			"ERROR: PersonList.WorkingPosition: Too many references not of type PersonList.Person:\n"
 			+ "  PersonList.WorkingPosition.workPlace\n"
 			+ "  PersonList.WorkingPosition.another\n"
 			+ "");
@@ -632,10 +633,10 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		final EClass student = refactorings.getEClass("PersonList", "Student");
 		final EClass employee = refactorings.getEClass("PersonList", "Employee");
-		refactorings.pullUpFeatures(person,
+		assertThrowsIAE(() -> refactorings.pullUpFeatures(person,
 			asList(
 				student.getEStructuralFeature("name"),
-				employee.getEStructuralFeature("name")));
+				employee.getEStructuralFeature("name"))));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFileIsSameAsOriginal();
 		assertThat(appender.getResult())
@@ -666,5 +667,10 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			"ERROR: PersonList.Student.name: Not a direct subclass of destination: PersonList.Student\n"
 			+ "ERROR: PersonList.Employee.name: Not a direct subclass of destination: PersonList.Employee\n"
 			+ "");
+	}
+
+	private static void assertThrowsIAE(Executable executable) {
+		assertThrows(IllegalArgumentException.class,
+			executable);
 	}
 }
