@@ -247,7 +247,7 @@ def referenceToClass(String name, EReference reference) {
  */
 def classToReference(EClass cl) : EReference {
 	// search for a single EReference that has type cl ("b1" above)
-	val reference = findSingleReferenceToThisClass(cl)
+	val reference = findSingleContainmentReferenceToThisClass(cl)
 	// "A" above
 	val owner = reference.EContainingClass
 	// search for a single EReference ("c" above) in cl that has not type owner
@@ -456,14 +456,14 @@ def checkNoFeatures(Collection<EClass> classes) {
 }
 
 /**
- * Finds the single EReference to the given EClass in the
+ * Finds the single containment EReference to the given EClass in the
  * EClass' package, performing validation (that is,
  * no reference is found, or more than one) checks and in case
  * show errors and throws an IllegalArgumentException
  * 
  * @param cl
  */
-def findSingleReferenceToThisClass(EClass cl) {
+def findSingleContainmentReferenceToThisClass(EClass cl) {
 	val references = findReferencesToThisClass(cl)
 	if (references.isEmpty) {
 		val message = "The EClass is not referred: " + getEObjectRepr(cl)

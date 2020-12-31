@@ -295,7 +295,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * the EReference originally of type cl ("b1" above)
    */
   public EReference classToReference(final EClass cl) {
-    final EReference reference = this.findSingleReferenceToThisClass(cl);
+    final EReference reference = this.findSingleContainmentReferenceToThisClass(cl);
     final EClass owner = reference.getEContainingClass();
     final EReference referenceToTarget = this.findSingleReferenceNotOfType(cl, owner);
     reference.setEType(referenceToTarget.getEType());
@@ -554,14 +554,14 @@ public class EdeltaRefactorings extends AbstractEdelta {
   }
   
   /**
-   * Finds the single EReference to the given EClass in the
+   * Finds the single containment EReference to the given EClass in the
    * EClass' package, performing validation (that is,
    * no reference is found, or more than one) checks and in case
    * show errors and throws an IllegalArgumentException
    * 
    * @param cl
    */
-  public EReference findSingleReferenceToThisClass(final EClass cl) {
+  public EReference findSingleContainmentReferenceToThisClass(final EClass cl) {
     final Iterable<EReference> references = this.findReferencesToThisClass(cl);
     boolean _isEmpty = IterableExtensions.isEmpty(references);
     if (_isEmpty) {
