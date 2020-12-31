@@ -481,9 +481,10 @@ def findReferencesToClass(EClass cl) {
  * and that it is the same and returns that as a result. It also checks
  * that such a common superclass has no further subclasses.
  * 
- * In case of failure, besides reporting errors, it returns null.
+ * In case of failure, besides reporting errors, it throws an
+ * IllegalArgumentException.
  */
-def getSingleDirectSuperclass(Collection<EClass> subclasses) {
+def getSingleDirectSuperclass(Collection<EClass> subclasses) : EClass {
 	val invalid = subclasses.filter[
 		ESuperTypes.size != 1
 	]

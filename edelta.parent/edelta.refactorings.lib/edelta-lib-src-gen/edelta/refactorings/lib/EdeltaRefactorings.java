@@ -626,7 +626,8 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * and that it is the same and returns that as a result. It also checks
    * that such a common superclass has no further subclasses.
    * 
-   * In case of failure, besides reporting errors, it returns null.
+   * In case of failure, besides reporting errors, it throws an
+   * IllegalArgumentException.
    */
   public EClass getSingleDirectSuperclass(final Collection<EClass> subclasses) {
     final Function1<EClass, Boolean> _function = (EClass it) -> {
