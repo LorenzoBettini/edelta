@@ -326,12 +326,11 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		withInputModel("subclassesToEnumSubclassesNotEmpty", "PersonList.ecore");
 		loadModelFile();
 		final EPackage personList = refactorings.getEPackage("PersonList");
-		final EAttribute result = refactorings.subclassesToEnum("Gender",
+		assertThrowsIAE(() -> refactorings.subclassesToEnum("Gender",
 			asList(
 				(EClass) personList.getEClassifier("Male"),
 				(EClass) personList.getEClassifier("NotSpecified"),
-				(EClass) personList.getEClassifier("Female")));
-		assertThat(result).isNull();
+				(EClass) personList.getEClassifier("Female"))));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFileIsSameAsOriginal();
 		assertThat(appender.getResult().trim())

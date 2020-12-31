@@ -141,8 +141,7 @@ def enumToSubclasses(EAttribute attr) : Collection<EClass> {
  * @return the created EAttribute
  */
 def subclassesToEnum(String name, Collection<EClass> subclasses) : EAttribute {
-	if (!checkNoFeatures(subclasses))
-		return null
+	checkNoFeatures(subclasses)
 	val superclass = getSingleDirectSuperclass(subclasses)
 	val ePackage = superclass.EPackage
 	val enum = ePackage.addNewEEnum(name) [
@@ -437,31 +436,26 @@ def checkCompliant(EStructuralFeature feature, Collection<? extends EStructuralF
 }
 
 /**
- * Makes sure the passed EClasses have no feature
+ * Makes sure the passed EClasses have no features, if not, shows
+ * error information and throws an IllegalArgumentException.
  * 
  * @param classes
  * @return true if all the EClasses have no features
  */
-def checkNoFeatures(Collection<EClass> classes) : boolean {
-	return classes.map[checkNoFeatures].toList.forall[it]
-}
-
-/**
- * Makes sure the passed EClass has no feature
- * 
- * @param c
- * @return true if the EClass has no feature
- */
-def checkNoFeatures(EClass c) : boolean {
-	val features = c.EStructuralFeatures
-	val empty = features.empty
-	if (!empty) {
-		showError(c,
-			"Not an empty class: " + getEObjectRepr(c) + ":\n" +
-				features.map["  " + EObjectRepr].join("\n")
-		)
-	}
-	return empty
+def checkNoFeatures(Collection<EClass> classes) {
+	val classesWithFeatures = classes.filter[c |
+		val features = c.EStructuralFeatures
+		val empty = features.empty
+		if (!empty) {
+			showError(c,
+				"Not an empty class: " + getEObjectRepr(c) + ":\n" +
+					features.map["  " + EObjectRepr].join("\n")
+			)
+		}
+		return !empty
+	].toList
+	if (!classesWithFeatures.empty)
+		throw new IllegalArgumentException("Classes not empty")
 }
 
 /**

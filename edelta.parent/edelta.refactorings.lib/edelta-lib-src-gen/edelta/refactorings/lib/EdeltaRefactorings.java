@@ -176,11 +176,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @return the created EAttribute
    */
   public EAttribute subclassesToEnum(final String name, final Collection<EClass> subclasses) {
-    boolean _checkNoFeatures = this.checkNoFeatures(subclasses);
-    boolean _not = (!_checkNoFeatures);
-    if (_not) {
-      return null;
-    }
+    this.checkNoFeatures(subclasses);
     final EClass superclass = this.getSingleDirectSuperclass(subclasses);
     final EPackage ePackage = superclass.getEPackage();
     final Consumer<EEnum> _function = (EEnum it) -> {
@@ -567,43 +563,36 @@ public class EdeltaRefactorings extends AbstractEdelta {
   }
   
   /**
-   * Makes sure the passed EClasses have no feature
+   * Makes sure the passed EClasses have no features, if not, shows
+   * error information and throws an IllegalArgumentException.
    * 
    * @param classes
    * @return true if all the EClasses have no features
    */
-  public boolean checkNoFeatures(final Collection<EClass> classes) {
-    final Function1<EClass, Boolean> _function = (EClass it) -> {
-      return Boolean.valueOf(this.checkNoFeatures(it));
+  public void checkNoFeatures(final Collection<EClass> classes) {
+    final Function1<EClass, Boolean> _function = (EClass c) -> {
+      final EList<EStructuralFeature> features = c.getEStructuralFeatures();
+      final boolean empty = features.isEmpty();
+      if ((!empty)) {
+        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(c);
+        String _plus = ("Not an empty class: " + _eObjectRepr);
+        String _plus_1 = (_plus + ":\n");
+        final Function1<EStructuralFeature, String> _function_1 = (EStructuralFeature it) -> {
+          String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(it);
+          return ("  " + _eObjectRepr_1);
+        };
+        String _join = IterableExtensions.join(ListExtensions.<EStructuralFeature, String>map(features, _function_1), "\n");
+        String _plus_2 = (_plus_1 + _join);
+        this.showError(c, _plus_2);
+      }
+      return Boolean.valueOf((!empty));
     };
-    final Function1<Boolean, Boolean> _function_1 = (Boolean it) -> {
-      return it;
-    };
-    return IterableExtensions.<Boolean>forall(IterableExtensions.<Boolean>toList(IterableExtensions.<EClass, Boolean>map(classes, _function)), _function_1);
-  }
-  
-  /**
-   * Makes sure the passed EClass has no feature
-   * 
-   * @param c
-   * @return true if the EClass has no feature
-   */
-  public boolean checkNoFeatures(final EClass c) {
-    final EList<EStructuralFeature> features = c.getEStructuralFeatures();
-    final boolean empty = features.isEmpty();
-    if ((!empty)) {
-      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(c);
-      String _plus = ("Not an empty class: " + _eObjectRepr);
-      String _plus_1 = (_plus + ":\n");
-      final Function1<EStructuralFeature, String> _function = (EStructuralFeature it) -> {
-        String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(it);
-        return ("  " + _eObjectRepr_1);
-      };
-      String _join = IterableExtensions.join(ListExtensions.<EStructuralFeature, String>map(features, _function), "\n");
-      String _plus_2 = (_plus_1 + _join);
-      this.showError(c, _plus_2);
+    final List<EClass> classesWithFeatures = IterableExtensions.<EClass>toList(IterableExtensions.<EClass>filter(classes, _function));
+    boolean _isEmpty = classesWithFeatures.isEmpty();
+    boolean _not = (!_isEmpty);
+    if (_not) {
+      throw new IllegalArgumentException("Classes not empty");
     }
-    return empty;
   }
   
   /**
