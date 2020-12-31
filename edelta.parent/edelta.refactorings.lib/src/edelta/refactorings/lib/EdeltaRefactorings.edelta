@@ -38,8 +38,7 @@ def addMandatoryReference(EClass eClass, String referenceName, EClass type): ERe
  */
 def mergeFeatures(String newFeatureName, Collection<EStructuralFeature> features) : EStructuralFeature {
 	val diffFinder = new EdeltaFeatureDifferenceFinder().ignoringName
-	if (!checkNoDifferences(features, diffFinder, "The two features cannot be merged"))
-		return null
+	checkNoDifferences(features, diffFinder, "The two features cannot be merged")
 	val feature = features.head
 	val owner = feature.EContainingClass
 	val copy = feature.copyToAs(owner, newFeatureName)
@@ -59,9 +58,9 @@ def mergeFeatures(EStructuralFeature feature, Collection<EStructuralFeature> fea
 	val diffFinder = new EdeltaFeatureDifferenceFinder()
 		.ignoringName
 		.ignoringType
-	if (!checkCompliant(feature, features) ||
-		!checkNoDifferences(#[feature] + features, diffFinder, "The two features cannot be merged"))
-		return null
+	checkCompliant(feature, features)
+	checkNoDifferences(#[feature] + features, diffFinder,
+		"The two features cannot be merged")
 	removeAllElements(features)
 	return feature
 }
@@ -324,8 +323,7 @@ def extractSuperclass(String name, List<? extends EStructuralFeature> duplicates
  */
 def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates) {
 	val diffFinder = new EdeltaFeatureDifferenceFinder().ignoringContainingClass
-	if (!checkNoDifferences(duplicates, diffFinder, "The two features are not equal"))
-		return 
+	checkNoDifferences(duplicates, diffFinder, "The two features are not equal")
 
 	val wrongFeatures = duplicates
 		.filter[!EContainingClass.ESuperTypes.contains(dest)]
@@ -379,7 +377,7 @@ def checkNotContainment(EReference reference, String message) : boolean {
 /**
  * Makes sure that there are no differences in the passed features,
  * using the specified differenceFinder, otherwise it shows an error message
- * with the details of the differences.
+ * with the details of the differences and throws an IllegalArgumentException.
  * 
  * @param features
  * @param differenceFinder
@@ -388,30 +386,27 @@ def checkNotContainment(EReference reference, String message) : boolean {
  */
 def checkNoDifferences(Iterable<? extends EStructuralFeature> features,
 	EdeltaFeatureDifferenceFinder differenceFinder,
-	String errorMessage
-) : boolean {
+	String errorMessage) {
 	val feature = features.head
 	val different = features
 		.findFirst[feature !== it && !differenceFinder.equals(feature, it)]
 	if (different !== null) {
-		showError(different,
-			errorMessage + ":\n" +
-			differenceFinder.differenceDetails
-		)
-		return false
+		val message = errorMessage + ":\n" +
+					differenceFinder.differenceDetails
+		showError(different, message)
+		throw new IllegalArgumentException(message)
 	}
-	return true
 }
 
 /**
  * Makes sure that the features have types that are subtypes of the
- * specified feature.
+ * specified feature, if not, shows
+ * error information and throws an IllegalArgumentException.
  * 
  * @param feature
  * @param features
- * @return true if they are all compliant
  */
-def checkCompliant(EStructuralFeature feature, Collection<? extends EStructuralFeature> features) : boolean {
+def checkCompliant(EStructuralFeature feature, Collection<? extends EStructuralFeature> features) {
 	val Predicate<EStructuralFeature> compliance = if (feature instanceof EReference) {
 		[other |
 			if (other instanceof EReference)
@@ -422,17 +417,15 @@ def checkCompliant(EStructuralFeature feature, Collection<? extends EStructuralF
 	} else {
 		[other | feature.EType === other.EType]
 	}
-	val nonCompliant = features
-		.filter[!compliance.test(it)]
+	val nonCompliant = features.filter[!compliance.test(it)]
 	if (!nonCompliant.empty) {
-		showError(feature,
+		val message =
 			"features not compliant with type " + getEObjectRepr(feature.EType) + ":\n" +
-			nonCompliant
-				.map["  " + getEObjectRepr(it) + ": " + getEObjectRepr(EType)].join("\n")
-		)
-		return false
+				nonCompliant
+					.map["  " + getEObjectRepr(it) + ": " + getEObjectRepr(EType)].join("\n")
+		showError(feature, message)
+		throw new IllegalArgumentException(message)
 	}
-	return true
 }
 
 /**
@@ -440,7 +433,6 @@ def checkCompliant(EStructuralFeature feature, Collection<? extends EStructuralF
  * error information and throws an IllegalArgumentException.
  * 
  * @param classes
- * @return true if all the EClasses have no features
  */
 def checkNoFeatures(Collection<EClass> classes) {
 	val classesWithFeatures = classes.filter[c |

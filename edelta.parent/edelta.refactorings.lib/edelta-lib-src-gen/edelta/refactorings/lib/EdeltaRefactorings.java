@@ -67,11 +67,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
    */
   public EStructuralFeature mergeFeatures(final String newFeatureName, final Collection<EStructuralFeature> features) {
     final EdeltaFeatureDifferenceFinder diffFinder = new EdeltaFeatureDifferenceFinder().ignoringName();
-    boolean _checkNoDifferences = this.checkNoDifferences(features, diffFinder, "The two features cannot be merged");
-    boolean _not = (!_checkNoDifferences);
-    if (_not) {
-      return null;
-    }
+    this.checkNoDifferences(features, diffFinder, "The two features cannot be merged");
     final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
     final EClass owner = feature.getEContainingClass();
     final EStructuralFeature copy = EdeltaLibrary.copyToAs(feature, owner, newFeatureName);
@@ -89,10 +85,10 @@ public class EdeltaRefactorings extends AbstractEdelta {
    */
   public EStructuralFeature mergeFeatures(final EStructuralFeature feature, final Collection<EStructuralFeature> features) {
     final EdeltaFeatureDifferenceFinder diffFinder = new EdeltaFeatureDifferenceFinder().ignoringName().ignoringType();
-    if (((!this.checkCompliant(feature, features)) || 
-      (!this.checkNoDifferences(Iterables.<EStructuralFeature>concat(Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(feature)), features), diffFinder, "The two features cannot be merged")))) {
-      return null;
-    }
+    this.checkCompliant(feature, features);
+    Iterable<EStructuralFeature> _plus = Iterables.<EStructuralFeature>concat(Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(feature)), features);
+    this.checkNoDifferences(_plus, diffFinder, 
+      "The two features cannot be merged");
     EdeltaLibrary.removeAllElements(features);
     return feature;
   }
@@ -416,19 +412,15 @@ public class EdeltaRefactorings extends AbstractEdelta {
    */
   public void pullUpFeatures(final EClass dest, final List<? extends EStructuralFeature> duplicates) {
     final EdeltaFeatureDifferenceFinder diffFinder = new EdeltaFeatureDifferenceFinder().ignoringContainingClass();
-    boolean _checkNoDifferences = this.checkNoDifferences(duplicates, diffFinder, "The two features are not equal");
-    boolean _not = (!_checkNoDifferences);
-    if (_not) {
-      return;
-    }
+    this.checkNoDifferences(duplicates, diffFinder, "The two features are not equal");
     final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
       boolean _contains = it.getEContainingClass().getESuperTypes().contains(dest);
       return Boolean.valueOf((!_contains));
     };
     final Iterable<? extends EStructuralFeature> wrongFeatures = IterableExtensions.filter(duplicates, _function);
     boolean _isEmpty = IterableExtensions.isEmpty(wrongFeatures);
-    boolean _not_1 = (!_isEmpty);
-    if (_not_1) {
+    boolean _not = (!_isEmpty);
+    if (_not) {
       final Consumer<EStructuralFeature> _function_1 = (EStructuralFeature it) -> {
         String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it.getEContainingClass());
         String _plus = ("Not a direct subclass of destination: " + _eObjectRepr);
@@ -484,14 +476,14 @@ public class EdeltaRefactorings extends AbstractEdelta {
   /**
    * Makes sure that there are no differences in the passed features,
    * using the specified differenceFinder, otherwise it shows an error message
-   * with the details of the differences.
+   * with the details of the differences and throws an IllegalArgumentException.
    * 
    * @param features
    * @param differenceFinder
    * @param errorMessage
    * @return true if there are no differences
    */
-  public boolean checkNoDifferences(final Iterable<? extends EStructuralFeature> features, final EdeltaFeatureDifferenceFinder differenceFinder, final String errorMessage) {
+  public void checkNoDifferences(final Iterable<? extends EStructuralFeature> features, final EdeltaFeatureDifferenceFinder differenceFinder, final String errorMessage) {
     final EStructuralFeature feature = IterableExtensions.head(features);
     final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
       return Boolean.valueOf(((feature != it) && (!differenceFinder.equals(feature, it))));
@@ -499,22 +491,21 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final EStructuralFeature different = IterableExtensions.findFirst(features, _function);
     if ((different != null)) {
       String _differenceDetails = differenceFinder.getDifferenceDetails();
-      String _plus = ((errorMessage + ":\n") + _differenceDetails);
-      this.showError(different, _plus);
-      return false;
+      final String message = ((errorMessage + ":\n") + _differenceDetails);
+      this.showError(different, message);
+      throw new IllegalArgumentException(message);
     }
-    return true;
   }
   
   /**
    * Makes sure that the features have types that are subtypes of the
-   * specified feature.
+   * specified feature, if not, shows
+   * error information and throws an IllegalArgumentException.
    * 
    * @param feature
    * @param features
-   * @return true if they are all compliant
    */
-  public boolean checkCompliant(final EStructuralFeature feature, final Collection<? extends EStructuralFeature> features) {
+  public void checkCompliant(final EStructuralFeature feature, final Collection<? extends EStructuralFeature> features) {
     Predicate<EStructuralFeature> _xifexpression = null;
     if ((feature instanceof EReference)) {
       final Predicate<EStructuralFeature> _function = (EStructuralFeature other) -> {
@@ -555,11 +546,10 @@ public class EdeltaRefactorings extends AbstractEdelta {
         return (_plus_3 + _eObjectRepr_2);
       };
       String _join = IterableExtensions.join(IterableExtensions.map(nonCompliant, _function_3), "\n");
-      String _plus_2 = (_plus_1 + _join);
-      this.showError(feature, _plus_2);
-      return false;
+      final String message = (_plus_1 + _join);
+      this.showError(feature, message);
+      throw new IllegalArgumentException(message);
     }
-    return true;
   }
   
   /**
@@ -567,7 +557,6 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * error information and throws an IllegalArgumentException.
    * 
    * @param classes
-   * @return true if all the EClasses have no features
    */
   public void checkNoFeatures(final Collection<EClass> classes) {
     final Function1<EClass, Boolean> _function = (EClass c) -> {

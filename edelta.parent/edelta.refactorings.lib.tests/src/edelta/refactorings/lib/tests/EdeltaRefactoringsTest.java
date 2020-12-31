@@ -151,23 +151,23 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		withInputModel("mergeFeaturesDifferent", "PersonList.ecore");
 		loadModelFile();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
-		refactorings.mergeFeatures("name",
+		assertThrowsIAE(() -> refactorings.mergeFeatures("name",
 			asList(
 				person.getEStructuralFeature("firstName"),
-				person.getEStructuralFeature("lastName")));
+				person.getEStructuralFeature("lastName"))));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFileIsSameAsOriginal();
 		final EClass student = refactorings.getEClass("PersonList", "Student");
-		refactorings.mergeFeatures("name",
+		assertThrowsIAE(() -> refactorings.mergeFeatures("name",
 			asList(
 				person.getEStructuralFeature("lastName"),
-				student.getEStructuralFeature("lastName")));
+				student.getEStructuralFeature("lastName"))));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFileIsSameAsOriginal();
-		refactorings.mergeFeatures("name",
+		assertThrowsIAE(() -> refactorings.mergeFeatures("name",
 			asList(
 				person.getEStructuralFeature("list"),
-				person.getEStructuralFeature("lastName")));
+				person.getEStructuralFeature("lastName"))));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFileIsSameAsOriginal();
 		assertThat(appender.getResult())
@@ -219,26 +219,26 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		final EStructuralFeature wplaces = list.getEStructuralFeature("wplaces");
 		// Place is not subtype of WorkPlace
-		refactorings.mergeFeatures(wplaces,
+		assertThrowsIAE(() -> refactorings.mergeFeatures(wplaces,
 			asList(
 				list.getEStructuralFeature("places"),
-				list.getEStructuralFeature("lplaces")));
+				list.getEStructuralFeature("lplaces"))));
 		// different lowerbound
 		wplaces.setLowerBound(1);
-		refactorings.mergeFeatures(list.getEStructuralFeature("places"),
+		assertThrowsIAE(() -> refactorings.mergeFeatures(list.getEStructuralFeature("places"),
 			asList(
 				list.getEStructuralFeature("wplaces"),
-				list.getEStructuralFeature("lplaces")));
+				list.getEStructuralFeature("lplaces"))));
 		// merge attributes with reference
-		refactorings.mergeFeatures(list.getEStructuralFeature("places"),
+		assertThrowsIAE(() -> refactorings.mergeFeatures(list.getEStructuralFeature("places"),
 			asList(
 				person.getEStructuralFeature("firstName"),
-				person.getEStructuralFeature("lastName")));
+				person.getEStructuralFeature("lastName"))));
 		// merge attributes with different types
-		refactorings.mergeFeatures(person.getEStructuralFeature("age"),
+		assertThrowsIAE(() -> refactorings.mergeFeatures(person.getEStructuralFeature("age"),
 			asList(
 				person.getEStructuralFeature("firstName"),
-				person.getEStructuralFeature("lastName")));
+				person.getEStructuralFeature("lastName"))));
 		assertThat(appender.getResult())
 			.isEqualTo(
 			"ERROR: PersonList.List.wplaces: features not compliant with type PersonList.WorkPlace:\n"
@@ -629,10 +629,10 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		final EClass student = refactorings.getEClass("PersonList", "Student");
 		final EClass employee = refactorings.getEClass("PersonList", "Employee");
-		refactorings.pullUpFeatures(person,
+		assertThrowsIAE(() -> refactorings.pullUpFeatures(person,
 			asList(
 				student.getEStructuralFeature("name"),
-				employee.getEStructuralFeature("name")));
+				employee.getEStructuralFeature("name"))));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFileIsSameAsOriginal();
 		assertThat(appender.getResult())
