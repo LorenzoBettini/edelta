@@ -204,6 +204,31 @@ def makeContainmentBidirectional(EReference reference) {
 }
 
 /**
+ * Replaces an EReference with an EClass (with the given name, the same package
+ * as the package of the reference's containing class),
+ * updating possible opposite reference,
+ * so that a relation can be extended with additional features.
+ * The original reference will be made a containment reference,
+ * (its other properties will not be changed)
+ * to the added EClass (and made bidirectional).
+ * 
+ * For example, given
+ * <pre>
+ *    b2    b1
+ * A <-------> C
+ * </pre>
+ * 
+ * (where the opposite "b2" might not be present)
+ * if we pass "b1" and the name "B", then the result will be
+ * 
+ * <pre>
+ *    a     b1    b2    c
+ * A <-------> B <------> C
+ * </pre>
+ * 
+ * where "b1" will be a containment reference.
+ * Note the names inferred for the new additional opposite references.
+ * 
  * @param name the name for the extracted class
  * @param reference the reference to turn into a reference to the extracted class
  * @return the extracted class
