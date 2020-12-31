@@ -448,16 +448,55 @@ public class EdeltaLibrary {
 	 * @param ref2
 	 */
 	public static void makeBidirectional(EReference ref1, EReference ref2) {
-		resetOpposite(ref1);
-		resetOpposite(ref2);
+		dropOpposite(ref1);
+		dropOpposite(ref2);
 		makeBidirectionalInternal(ref1, ref2);
 		makeBidirectionalInternal(ref2, ref1);
 	}
 
-	private static void resetOpposite(EReference reference) {
+	/**
+	 * Sets the EOpposite property to null; if the reference has an EOpposite,
+	 * the EOpposite of the EOpposite is also set to null. No references are removed.
+	 * 
+	 * @param reference
+	 */
+	public static void dropOpposite(EReference reference) {
 		final var existingOpposite = reference.getEOpposite();
 		if (existingOpposite != null)
 			existingOpposite.setEOpposite(null);
+		reference.setEOpposite(null);
+	}
+
+	/**
+	 * Removes the possible EOpposite of the passed reference:
+	 * corresponds to {@link #dropOpposite(EReference)} and
+	 * {@link #removeElement(ENamedElement)} passing both the possible EOpposite
+	 * reference.
+	 * 
+	 * @param reference
+	 */
+	public static void removeOpposite(EReference reference) {
+		final var opposite = reference.getEOpposite();
+		if (opposite != null) {
+			dropOpposite(opposite);
+			removeElement(opposite);
+		}
+	}
+
+	/**
+	 * Creates a new EOpposite of the passed reference (dropping possibly
+	 * existing one), with the correct type (that is, the result of
+	 * {@link EReference#getEContainingClass()} and adding it as a reference in
+	 * the specified target {@link EClass}.
+	 * 
+	 * @param reference
+	 * @param name
+	 * @return the created EOpposite reference
+	 */
+	public static EReference createOpposite(EReference reference, String name, EClass target) {
+		return addNewEReference(target, name, reference.getEContainingClass(),
+			newRef -> makeBidirectional(newRef, reference)
+		);
 	}
 
 	private static void makeBidirectionalInternal(EReference r1, EReference r2) {

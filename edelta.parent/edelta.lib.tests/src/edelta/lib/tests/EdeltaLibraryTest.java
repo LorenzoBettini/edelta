@@ -648,6 +648,86 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
+	public void test_dropOpposite() {
+		EClass c1 = ecoreFactory.createEClass();
+		EClass c2 = ecoreFactory.createEClass();
+		EReference c1Ref = ecoreFactory.createEReference();
+		c1.getEStructuralFeatures().add(c1Ref);
+		EReference c2Ref = ecoreFactory.createEReference();
+		c2.getEStructuralFeatures().add(c2Ref);
+		// test it with no existing opposite
+		EdeltaLibrary.dropOpposite(c1Ref);
+		assertThat(c1Ref.getEOpposite()).isNull();
+		// test it with an existing opposite
+		c1Ref.setEOpposite(c2Ref);
+		c2Ref.setEOpposite(c1Ref);
+		assertThat(c1Ref.getEOpposite()).isSameAs(c2Ref);
+		assertThat(c2Ref.getEOpposite()).isSameAs(c1Ref);
+		EdeltaLibrary.dropOpposite(c1Ref);
+		assertThat(c1Ref.getEOpposite()).isNull();
+		assertThat(c2Ref.getEOpposite()).isNull();
+	}
+
+	@Test
+	public void test_removeOpposite() {
+		EClass c1 = ecoreFactory.createEClass();
+		EClass c2 = ecoreFactory.createEClass();
+		EReference c1Ref = ecoreFactory.createEReference();
+		c1.getEStructuralFeatures().add(c1Ref);
+		EReference c2Ref = ecoreFactory.createEReference();
+		c2.getEStructuralFeatures().add(c2Ref);
+		// test it with no existing opposite
+		EdeltaLibrary.removeOpposite(c1Ref);
+		assertThat(c1Ref.getEOpposite()).isNull();
+		assertThat(c1.getEReferences()).containsExactly(c1Ref);
+		assertThat(c2.getEReferences()).containsExactly(c2Ref);
+		// test it with an existing opposite
+		c1Ref.setEOpposite(c2Ref);
+		c2Ref.setEOpposite(c1Ref);
+		assertThat(c1Ref.getEOpposite()).isSameAs(c2Ref);
+		assertThat(c2Ref.getEOpposite()).isSameAs(c1Ref);
+		EdeltaLibrary.removeOpposite(c1Ref);
+		assertThat(c1Ref.getEOpposite()).isNull();
+		assertThat(c2Ref.getEOpposite()).isNull();
+		assertThat(c1.getEReferences()).containsExactly(c1Ref);
+		assertThat(c2.getEReferences()).isEmpty();
+	}
+
+	@Test
+	public void test_createOpposite() {
+		EClass c1 = ecoreFactory.createEClass();
+		EClass c2 = ecoreFactory.createEClass();
+		EReference c1Ref = ecoreFactory.createEReference();
+		c1.getEStructuralFeatures().add(c1Ref);
+		EReference c2Ref = EdeltaLibrary.createOpposite(c1Ref, "c2Ref", c2);
+		assertThat(c1Ref.getEOpposite()).isNotNull();
+		assertThat(c2Ref.getEOpposite()).isNotNull();
+		assertThat(c1Ref.getEOpposite()).isSameAs(c2Ref);
+		assertThat(c2Ref.getEOpposite()).isSameAs(c1Ref);
+		assertThat(c1Ref.getEReferenceType()).isSameAs(c2);
+		assertThat(c2Ref.getEReferenceType()).isSameAs(c1);
+		assertThat(c1Ref.getEOpposite().getEReferenceType()).isSameAs(c1);
+		assertThat(c2Ref.getEOpposite().getEReferenceType()).isSameAs(c2);
+		assertThat(c1.getEReferences()).containsExactly(c1Ref);
+		assertThat(c2.getEReferences()).containsExactly(c2Ref);
+		// test it with an existing opposite
+		EClass c3 = ecoreFactory.createEClass();
+		EReference c3Ref = EdeltaLibrary.createOpposite(c1Ref, "c3Ref", c3);
+		assertThat(c1Ref.getEOpposite()).isNotNull();
+		assertThat(c3Ref.getEOpposite()).isNotNull();
+		assertThat(c1Ref.getEOpposite()).isSameAs(c3Ref);
+		assertThat(c3Ref.getEOpposite()).isSameAs(c1Ref);
+		assertThat(c1Ref.getEReferenceType()).isSameAs(c3);
+		assertThat(c3Ref.getEReferenceType()).isSameAs(c1);
+		assertThat(c1Ref.getEOpposite().getEReferenceType()).isSameAs(c1);
+		assertThat(c3Ref.getEOpposite().getEReferenceType()).isSameAs(c3);
+		assertThat(c2Ref.getEOpposite()).isNull();
+		assertThat(c1.getEReferences()).containsExactly(c1Ref);
+		assertThat(c2.getEReferences()).containsExactly(c2Ref);
+		assertThat(c3.getEReferences()).containsExactly(c3Ref);
+	}
+
+	@Test
 	public void test_makeSingleRequired() {
 		EStructuralFeature feature = ecoreFactory.createEReference();
 		feature.setLowerBound(0);
