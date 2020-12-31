@@ -224,39 +224,39 @@ def referenceToClass(String name, EReference reference) {
 	return extracted
 }
 
+/**
+ * Given an EClass, which is meant to represent a relation,
+ * removes such a class, transforming the relation into an EReference.
+ * 
+ * For example, given
+ * <pre>
+ *    a     b1    b2    c
+ * A <-------> B <------> C
+ * </pre>
+ * 
+ * (where the opposite "a" might not be present)
+ * if we pass "B", then the result will be
+ * <pre>
+ *    b2    b1
+ * A <-------> C
+ * </pre>
+ * 
+ * @param cl
+ */
 def classToReference(EClass cl) {
-	// find the EReferences that have type cl
-	val references = findReferencesToClass(cl)
-	if (references.isEmpty) {
-		showError(cl, "The EClass is not referred: " + getEObjectRepr(cl))
-		return
-	} else if (references.filter[containment].size > 1) {
-		showError(cl, "The EClass is referred by more than one container:\n" +
-			references.map["  " + getEObjectRepr(it)].join("\n"))
-		return
-	}
-	val reference = references.head
+	// search for a single EReference that has type cl ("b1" above)
+	val reference = findSingleReferenceToThisClass(cl)
+	// "A" above
 	val owner = reference.EContainingClass
-	// back reference to owner is allowed to be null
-	val referenceToOwner = cl.EStructuralFeatures.filter[EType == owner].head
-	val otherReferences = cl.EStructuralFeatures
-		.filter[it !== referenceToOwner]
-		.filter(EReference)
-		.toList
-	if (otherReferences.empty) {
-		showError(cl, "Missing reference to target type: " + getEObjectRepr(cl))
-		return
-	}
-	if (otherReferences.size > 1) {
-		showError(cl, "Too many references to target type:\n" +
-			otherReferences.map["  " + getEObjectRepr(it)].join("\n"))
-		return
-	}
-	val referenceToTarget = otherReferences.head
+	// search for a single EReference ("c" above) in cl that has not type owner
+	// (the one with type owner, if exists, would be the EOpposite
+	// of reference, which we are not interested in, "a" above)
+	val referenceToTarget = cl.findSingleReferenceNotOfType(owner)
+	// reference will now refer to referenceToTarget's type ("C" above)
 	reference.EType = referenceToTarget.EType
 	reference.containment = false
 	val opposite = referenceToTarget.EOpposite
-	if (opposite !== null) {
+	if (opposite !== null) { // "b2" above
 		makeBidirectional(reference, opposite)
 	}
 	removeElement(cl)
@@ -453,15 +453,67 @@ def checkNoFeatures(Collection<EClass> classes) {
 }
 
 /**
+ * Finds the single EReference to the given EClass in the
+ * EClass' package, performing validation (that is,
+ * no reference is found, or more than one) checks and in case
+ * show errors and throws an IllegalArgumentException
+ * 
+ * @param cl
+ */
+def findSingleReferenceToThisClass(EClass cl) {
+	val references = findReferencesToThisClass(cl)
+	if (references.isEmpty) {
+		val message = "The EClass is not referred: " + getEObjectRepr(cl)
+		showError(cl, message)
+		throw new IllegalArgumentException(message)
+	} else if (references.filter[containment].size > 1) {
+		val message = "The EClass is referred by more than one container:\n" +
+					references.map["  " + getEObjectRepr(it)].join("\n")
+		showError(cl, message)
+		throw new IllegalArgumentException(message)
+	}
+	return references.head
+}
+
+/**
  * Finds all the EReferences to the given EClass in the
  * EClass' package
+ * 
+ * @param cl
  */
-def findReferencesToClass(EClass cl) {
+def findReferencesToThisClass(EClass cl) {
 	EcoreUtil.UsageCrossReferencer
 		.find(cl, cl.EPackage)
 		.filter[EStructuralFeature == ecoreref(eReferenceType)]
 		.map[EObject]
 		.filter(EReference)
+}
+
+/**
+ * Finds the single EReference, in the EReferences of the given EClass,
+ * with a type different from the given type, performing validation (that is,
+ * no reference is found, or more than one) checks and in case
+ * show errors and throws an IllegalArgumentException
+ * 
+ * @param cl
+ * @param target
+ */
+def findSingleReferenceNotOfType(EClass cl, EClass type) {
+	val otherReferences = cl.EReferences
+		.filter[EType !== type]
+		.toList
+	if (otherReferences.empty) {
+		val message = "No references not of type " + getEObjectRepr(type)
+		showError(cl, message)
+		throw new IllegalArgumentException(message)
+	}
+	if (otherReferences.size > 1) {
+		val message = "Too many references not of type " + getEObjectRepr(type) +
+			":\n" + otherReferences.map["  " + getEObjectRepr(it)].join("\n")
+		showError(cl, message)
+		throw new IllegalArgumentException(message)
+	}
+	return otherReferences.head
 }
 
 /**

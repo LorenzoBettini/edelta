@@ -484,7 +484,8 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	void test_classToReferenceWhenClassIsNotReferred() {
 		withInputModel("classToReferenceWronglyReferred", "TestEcore.ecore");
 		loadModelFile();
-		refactorings.classToReference(refactorings.getEClass("p", "CNotReferred"));
+		assertThrowsIAE(() -> refactorings.classToReference(
+				refactorings.getEClass("p", "CNotReferred")));
 		assertThat(appender.getResult().trim())
 			.isEqualTo("ERROR: p.CNotReferred: The EClass is not referred: p.CNotReferred");
 	}
@@ -493,7 +494,8 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	void test_classToReferenceWhenClassIsReferredMoreThanOnce() {
 		withInputModel("classToReferenceWronglyReferred", "TestEcore.ecore");
 		loadModelFile();
-		refactorings.classToReference(refactorings.getEClass("p", "C"));
+		assertThrowsIAE(() -> refactorings.classToReference(
+				refactorings.getEClass("p", "C")));
 		assertThat(appender.getResult())
 			.isEqualTo(
 			"ERROR: p.C: The EClass is referred by more than one container:\n"
@@ -509,9 +511,9 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
 		// manually remove reference to target class WorkPlace
 		cl.getEStructuralFeatures().remove(cl.getEStructuralFeature("workPlace"));
-		refactorings.classToReference(cl);
+		assertThrowsIAE(() -> refactorings.classToReference(cl));
 		assertThat(appender.getResult().trim()).isEqualTo(
-			"ERROR: PersonList.WorkingPosition: Missing reference to target type: PersonList.WorkingPosition");
+			"ERROR: PersonList.WorkingPosition: No references not of type PersonList.Person");
 	}
 
 	@Test
@@ -522,10 +524,10 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		// manually add another reference to target class
 		EReference ref = this.createEReference(cl, "another");
 		ref.setEType(refactorings.getEClass("PersonList", "List"));
-		refactorings.classToReference(cl);
+		assertThrowsIAE(() -> refactorings.classToReference(cl));
 		assertThat(appender.getResult())
 			.isEqualTo(
-			"ERROR: PersonList.WorkingPosition: Too many references to target type:\n"
+			"ERROR: PersonList.WorkingPosition: Too many references not of type PersonList.Person:\n"
 			+ "  PersonList.WorkingPosition.workPlace\n"
 			+ "  PersonList.WorkingPosition.another\n"
 			+ "");
