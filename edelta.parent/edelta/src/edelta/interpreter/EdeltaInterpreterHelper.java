@@ -27,9 +27,11 @@ import edelta.lib.AbstractEdelta;
 @Singleton
 public class EdeltaInterpreterHelper {
 
-	private static Object defaultInstance = new Object();
+	private static AbstractEdelta defaultInstance = new AbstractEdelta() {
+		
+	};
 
-	public Object safeInstantiate(JavaReflectAccess javaReflectAccess, EdeltaUseAs useAs, AbstractEdelta other) {
+	public AbstractEdelta safeInstantiate(JavaReflectAccess javaReflectAccess, EdeltaUseAs useAs, AbstractEdelta other) {
 		JvmTypeReference typeRef = useAs.getType();
 		if (typeRef == null) {
 			return defaultInstance;
@@ -50,7 +52,7 @@ public class EdeltaInterpreterHelper {
 			};
 		}
 		try {
-			return javaType.getConstructor(AbstractEdelta.class)
+			return (AbstractEdelta) javaType.getConstructor(AbstractEdelta.class)
 						.newInstance(other);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {

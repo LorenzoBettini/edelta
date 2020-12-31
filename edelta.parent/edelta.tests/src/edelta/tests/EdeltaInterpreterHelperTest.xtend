@@ -60,10 +60,9 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 		'''
 			use as my
 		'''.parse.useAsClauses.head => [
-			assertEquals(
-				Object,
+			assertThat(
 				interpreterHelper.safeInstantiate(javaReflectAccess, it, other).class
-			)
+			).isNotNull
 		]
 	}
 
@@ -73,10 +72,9 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 			import edelta.tests.EdeltaInterpreterHelperTest.InstantiateExceptionClass
 			use InstantiateExceptionClass as my
 		'''.parse.useAsClauses.head => [
-			assertEquals(
-				Object,
+			assertThat(
 				interpreterHelper.safeInstantiate(javaReflectAccess, it, other).class
-			)
+			).isNotNull
 		]
 	}
 
