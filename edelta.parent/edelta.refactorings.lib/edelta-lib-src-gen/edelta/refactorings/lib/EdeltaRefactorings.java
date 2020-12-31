@@ -258,12 +258,8 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @return the extracted class
    */
   public EClass referenceToClass(final String name, final EReference reference) {
-    boolean _checkNotContainment = this.checkNotContainment(reference, 
+    this.checkNotContainment(reference, 
       "Cannot apply referenceToClass on containment reference");
-    boolean _not = (!_checkNotContainment);
-    if (_not) {
-      return null;
-    }
     final EPackage ePackage = reference.getEContainingClass().getEPackage();
     final EClass extracted = EdeltaLibrary.addNewEClass(ePackage, name);
     final EReference extractedRef = this.addMandatoryReference(extracted, 
@@ -458,19 +454,22 @@ public class EdeltaRefactorings extends AbstractEdelta {
   }
   
   /**
+   * Makes sure that this is not a containment reference,
+   * otherwise it shows an error message
+   * with the details of the differences and throws an IllegalArgumentException.
+   * 
    * @param reference the reference that must not be a containment reference
-   * @param message the message to show in case the reference
+   * @param errorMessage the message to show in case the reference
    * is a containment reference
-   * @return true if the passed reference is not a containment reference
    */
-  public boolean checkNotContainment(final EReference reference, final String message) {
-    final boolean containment = reference.isContainment();
-    if (containment) {
+  public void checkNotContainment(final EReference reference, final String errorMessage) {
+    boolean _isContainment = reference.isContainment();
+    if (_isContainment) {
       String _eObjectRepr = EdeltaLibrary.getEObjectRepr(reference);
-      String _plus = ((message + ": ") + _eObjectRepr);
-      this.showError(reference, _plus);
+      final String message = ((errorMessage + ": ") + _eObjectRepr);
+      this.showError(reference, message);
+      throw new IllegalArgumentException(message);
     }
-    return (!containment);
   }
   
   /**

@@ -209,10 +209,8 @@ def makeContainmentBidirectional(EReference reference) {
  * @return the extracted class
  */
 def referenceToClass(String name, EReference reference) {
-	if (!checkNotContainment(reference,
-			"Cannot apply referenceToClass on containment reference")) {
-		return null
-	}
+	checkNotContainment(reference,
+			"Cannot apply referenceToClass on containment reference")
 	val ePackage = reference.EContainingClass.EPackage
 	val extracted = ePackage.addNewEClass(name)
 	val extractedRef = extracted.addMandatoryReference(
@@ -362,16 +360,20 @@ def fromTypeToFeatureName(EClassifier type) {
 }
 
 /**
+ * Makes sure that this is not a containment reference,
+ * otherwise it shows an error message
+ * with the details of the differences and throws an IllegalArgumentException.
+ * 
  * @param reference the reference that must not be a containment reference
- * @param message the message to show in case the reference
+ * @param errorMessage the message to show in case the reference
  * is a containment reference
- * @return true if the passed reference is not a containment reference
  */
-def checkNotContainment(EReference reference, String message) : boolean {
-	val containment = reference.containment
-	if (containment)
-		showError(reference, message + ": " + getEObjectRepr(reference))
-	return !containment
+def checkNotContainment(EReference reference, String errorMessage) {
+	if (reference.containment) {
+		val message = errorMessage + ": " + getEObjectRepr(reference)
+		showError(reference, message)
+		throw new IllegalArgumentException(message)
+	}
 }
 
 /**

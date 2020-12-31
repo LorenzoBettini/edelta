@@ -458,7 +458,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		withInputModel("referenceToClassWithContainmentReference", "PersonList.ecore");
 		loadModelFile();
 		final EReference ref = refactorings.getEReference("PersonList", "Person", "works");
-		refactorings.referenceToClass("WorkingPosition", ref);
+		assertThrowsIAE(() -> refactorings.referenceToClass("WorkingPosition", ref));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFileIsSameAsOriginal();
 		assertThat(appender.getResult().trim()).isEqualTo(
