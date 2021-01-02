@@ -8,6 +8,7 @@ import org.junit.Test
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender
+import static extension edelta.lib.EdeltaLibrary.*
 
 class EdeltaBadSmellsCheckerTest extends AbstractTest {
 	var EdeltaBadSmellsChecker checker
@@ -28,16 +29,12 @@ class EdeltaBadSmellsCheckerTest extends AbstractTest {
 	}
 
 	@Test def void test_checkDuplicateFeatures_whenNoDuplicates() {
-		val p = factory.createEPackage => [
-			createEClass("C1") => [
-				createEAttribute("A1") => [
-					EType = stringDataType
-				]
+		val p = createEPackage("p") [
+			addNewEClass("C1") [
+				addNewEAttribute("A1", stringDataType)
 			]
-			createEClass("C2") => [
-				createEAttribute("A1") => [
-					EType = intDataType
-				]
+			addNewEClass("C2") [
+				addNewEAttribute("A1", intDataType)
 			]
 		]
 		checker.checkDuplicateFeatures(p)
@@ -45,22 +42,15 @@ class EdeltaBadSmellsCheckerTest extends AbstractTest {
 	}
 
 	@Test def void test_checkDuplicateFeatures_withDuplicates() {
-		val p = factory.createEPackage => [
-			name = "pack"
-			createEClass("C1") => [
-				createEAttribute("A1") => [
-					EType = stringDataType
-				]
+		val p = createEPackage("pack") [
+			addNewEClass("C1") [
+				addNewEAttribute("A1", stringDataType)
 			]
-			createEClass("C2") => [
-				createEAttribute("A1") => [
-					EType = stringDataType
-				]
+			addNewEClass("C2") [
+				addNewEAttribute("A1", stringDataType)
 			]
-			createEClass("C3") => [
-				createEAttribute("A1") => [
-					EType = stringDataType
-				]
+			addNewEClass("C3") [
+				addNewEAttribute("A1", stringDataType)
 			]
 		]
 		checker.checkDuplicateFeatures(p)

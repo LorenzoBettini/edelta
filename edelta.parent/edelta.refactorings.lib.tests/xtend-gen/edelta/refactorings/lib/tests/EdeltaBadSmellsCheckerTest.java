@@ -1,16 +1,15 @@
 package edelta.refactorings.lib.tests;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaLibrary;
 import edelta.refactorings.lib.EdeltaBadSmellsChecker;
 import edelta.refactorings.lib.tests.AbstractTest;
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
+import java.util.function.Consumer;
 import org.assertj.core.api.Assertions;
-import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtend2.lib.StringConcatenation;
-import org.eclipse.xtext.xbase.lib.ObjectExtensions;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,66 +39,38 @@ public class EdeltaBadSmellsCheckerTest extends AbstractTest {
   
   @Test
   public void test_checkDuplicateFeatures_whenNoDuplicates() {
-    EPackage _createEPackage = this.factory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
-      EClass _createEClass = this.createEClass(it, "C1");
-      final Procedure1<EClass> _function_1 = (EClass it_1) -> {
-        EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
-        final Procedure1<EAttribute> _function_2 = (EAttribute it_2) -> {
-          it_2.setEType(this.stringDataType);
-        };
-        ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_2);
+    final Consumer<EPackage> _function = (EPackage it) -> {
+      final Consumer<EClass> _function_1 = (EClass it_1) -> {
+        EdeltaLibrary.addNewEAttribute(it_1, "A1", this.stringDataType);
       };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
-      EClass _createEClass_1 = this.createEClass(it, "C2");
-      final Procedure1<EClass> _function_2 = (EClass it_1) -> {
-        EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
-        final Procedure1<EAttribute> _function_3 = (EAttribute it_2) -> {
-          it_2.setEType(this.intDataType);
-        };
-        ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_3);
+      EdeltaLibrary.addNewEClass(it, "C1", _function_1);
+      final Consumer<EClass> _function_2 = (EClass it_1) -> {
+        EdeltaLibrary.addNewEAttribute(it_1, "A1", this.intDataType);
       };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_2);
+      EdeltaLibrary.addNewEClass(it, "C2", _function_2);
     };
-    final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
+    final EPackage p = this.createEPackage("p", _function);
     this.checker.checkDuplicateFeatures(p);
     Assertions.assertThat(this.appender.getResult()).isEmpty();
   }
   
   @Test
   public void test_checkDuplicateFeatures_withDuplicates() {
-    EPackage _createEPackage = this.factory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
-      it.setName("pack");
-      EClass _createEClass = this.createEClass(it, "C1");
-      final Procedure1<EClass> _function_1 = (EClass it_1) -> {
-        EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
-        final Procedure1<EAttribute> _function_2 = (EAttribute it_2) -> {
-          it_2.setEType(this.stringDataType);
-        };
-        ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_2);
+    final Consumer<EPackage> _function = (EPackage it) -> {
+      final Consumer<EClass> _function_1 = (EClass it_1) -> {
+        EdeltaLibrary.addNewEAttribute(it_1, "A1", this.stringDataType);
       };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
-      EClass _createEClass_1 = this.createEClass(it, "C2");
-      final Procedure1<EClass> _function_2 = (EClass it_1) -> {
-        EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
-        final Procedure1<EAttribute> _function_3 = (EAttribute it_2) -> {
-          it_2.setEType(this.stringDataType);
-        };
-        ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_3);
+      EdeltaLibrary.addNewEClass(it, "C1", _function_1);
+      final Consumer<EClass> _function_2 = (EClass it_1) -> {
+        EdeltaLibrary.addNewEAttribute(it_1, "A1", this.stringDataType);
       };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_2);
-      EClass _createEClass_2 = this.createEClass(it, "C3");
-      final Procedure1<EClass> _function_3 = (EClass it_1) -> {
-        EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
-        final Procedure1<EAttribute> _function_4 = (EAttribute it_2) -> {
-          it_2.setEType(this.stringDataType);
-        };
-        ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_4);
+      EdeltaLibrary.addNewEClass(it, "C2", _function_2);
+      final Consumer<EClass> _function_3 = (EClass it_1) -> {
+        EdeltaLibrary.addNewEAttribute(it_1, "A1", this.stringDataType);
       };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_2, _function_3);
+      EdeltaLibrary.addNewEClass(it, "C3", _function_3);
     };
-    final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
+    final EPackage p = this.createEPackage("pack", _function);
     this.checker.checkDuplicateFeatures(p);
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("WARN: pack.C1.A1: pack.C1.A1, duplicate features: pack.C2.A1, pack.C3.A1");
