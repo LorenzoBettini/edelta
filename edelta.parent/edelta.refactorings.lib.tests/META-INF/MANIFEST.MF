@@ -17,5 +17,6 @@ Require-Bundle: edelta.testutils,
 Automatic-Module-Name: edelta.lib.tests
 Import-Package: org.junit;version="4.13.0",
  org.junit.jupiter.api;version="5.6",
+ org.junit.jupiter.api.function;version="5.6",
  org.junit.jupiter.params;version="5.6",
  org.junit.jupiter.params.provider;version="5.6"

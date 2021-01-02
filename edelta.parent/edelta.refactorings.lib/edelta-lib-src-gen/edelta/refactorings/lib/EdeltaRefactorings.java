@@ -67,11 +67,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
    */
   public EStructuralFeature mergeFeatures(final String newFeatureName, final Collection<EStructuralFeature> features) {
     final EdeltaFeatureDifferenceFinder diffFinder = new EdeltaFeatureDifferenceFinder().ignoringName();
-    boolean _checkNoDifferences = this.checkNoDifferences(features, diffFinder, "The two features cannot be merged");
-    boolean _not = (!_checkNoDifferences);
-    if (_not) {
-      return null;
-    }
+    this.checkNoDifferences(features, diffFinder, "The two features cannot be merged");
     final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
     final EClass owner = feature.getEContainingClass();
     final EStructuralFeature copy = EdeltaLibrary.copyToAs(feature, owner, newFeatureName);
@@ -89,10 +85,10 @@ public class EdeltaRefactorings extends AbstractEdelta {
    */
   public EStructuralFeature mergeFeatures(final EStructuralFeature feature, final Collection<EStructuralFeature> features) {
     final EdeltaFeatureDifferenceFinder diffFinder = new EdeltaFeatureDifferenceFinder().ignoringName().ignoringType();
-    if (((!this.checkCompliant(feature, features)) || 
-      (!this.checkNoDifferences(Iterables.<EStructuralFeature>concat(Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(feature)), features), diffFinder, "The two features cannot be merged")))) {
-      return null;
-    }
+    this.checkCompliant(feature, features);
+    Iterable<EStructuralFeature> _plus = Iterables.<EStructuralFeature>concat(Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(feature)), features);
+    this.checkNoDifferences(_plus, diffFinder, 
+      "The two features cannot be merged");
     EdeltaLibrary.removeAllElements(features);
     return feature;
   }
@@ -176,15 +172,8 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @return the created EAttribute
    */
   public EAttribute subclassesToEnum(final String name, final Collection<EClass> subclasses) {
-    boolean _checkNoFeatures = this.checkNoFeatures(subclasses);
-    boolean _not = (!_checkNoFeatures);
-    if (_not) {
-      return null;
-    }
+    this.checkNoFeatures(subclasses);
     final EClass superclass = this.getSingleDirectSuperclass(subclasses);
-    if ((superclass == null)) {
-      return null;
-    }
     final EPackage ePackage = superclass.getEPackage();
     final Consumer<EEnum> _function = (EEnum it) -> {
       final Procedure2<EClass, Integer> _function_1 = (EClass subClass, Integer index) -> {
@@ -264,17 +253,38 @@ public class EdeltaRefactorings extends AbstractEdelta {
   }
   
   /**
+   * Replaces an EReference with an EClass (with the given name, the same package
+   * as the package of the reference's containing class),
+   * updating possible opposite reference,
+   * so that a relation can be extended with additional features.
+   * The original reference will be made a containment reference,
+   * (its other properties will not be changed)
+   * to the added EClass (and made bidirectional).
+   * 
+   * For example, given
+   * <pre>
+   *    b2    b1
+   * A <-------> C
+   * </pre>
+   * 
+   * (where the opposite "b2" might not be present)
+   * if we pass "b1" and the name "B", then the result will be
+   * 
+   * <pre>
+   *    a     b1    b2    c
+   * A <-------> B <------> C
+   * </pre>
+   * 
+   * where "b1" will be a containment reference.
+   * Note the names inferred for the new additional opposite references.
+   * 
    * @param name the name for the extracted class
    * @param reference the reference to turn into a reference to the extracted class
    * @return the extracted class
    */
   public EClass referenceToClass(final String name, final EReference reference) {
-    boolean _checkNotContainment = this.checkNotContainment(reference, 
+    this.checkNotContainment(reference, 
       "Cannot apply referenceToClass on containment reference");
-    boolean _not = (!_checkNotContainment);
-    if (_not) {
-      return null;
-    }
     final EPackage ePackage = reference.getEContainingClass().getEPackage();
     final EClass extracted = EdeltaLibrary.addNewEClass(ePackage, name);
     final EReference extractedRef = this.addMandatoryReference(extracted, 
@@ -288,62 +298,31 @@ public class EdeltaRefactorings extends AbstractEdelta {
     return extracted;
   }
   
-  public void classToReference(final EClass cl) {
-    final Iterable<EReference> references = this.findReferencesToClass(cl);
-    boolean _isEmpty = IterableExtensions.isEmpty(references);
-    if (_isEmpty) {
-      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(cl);
-      String _plus = ("The EClass is not referred: " + _eObjectRepr);
-      this.showError(cl, _plus);
-      return;
-    } else {
-      final Function1<EReference, Boolean> _function = (EReference it) -> {
-        return Boolean.valueOf(it.isContainment());
-      };
-      int _size = IterableExtensions.size(IterableExtensions.<EReference>filter(references, _function));
-      boolean _greaterThan = (_size > 1);
-      if (_greaterThan) {
-        final Function1<EReference, String> _function_1 = (EReference it) -> {
-          String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(it);
-          return ("  " + _eObjectRepr_1);
-        };
-        String _join = IterableExtensions.join(IterableExtensions.<EReference, String>map(references, _function_1), "\n");
-        String _plus_1 = ("The EClass is referred by more than one container:\n" + _join);
-        this.showError(cl, _plus_1);
-        return;
-      }
-    }
-    final EReference reference = IterableExtensions.<EReference>head(references);
+  /**
+   * Given an EClass, which is meant to represent a relation,
+   * removes such a class, transforming the relation into an EReference.
+   * 
+   * For example, given
+   * <pre>
+   *    a     b1    b2    c
+   * A <-------> B <------> C
+   * </pre>
+   * 
+   * (where the opposites "a" and "b2" might not be present)
+   * if we pass "B", then the result will be
+   * <pre>
+   *    b2    b1
+   * A <-------> C
+   * </pre>
+   * 
+   * @param cl
+   * @return the EReference that now represents the relation, that is,
+   * the EReference originally of type cl ("b1" above)
+   */
+  public EReference classToReference(final EClass cl) {
+    final EReference reference = this.findSingleContainmentReferenceToThisClass(cl);
     final EClass owner = reference.getEContainingClass();
-    final Function1<EStructuralFeature, Boolean> _function_2 = (EStructuralFeature it) -> {
-      EClassifier _eType = it.getEType();
-      return Boolean.valueOf(Objects.equal(_eType, owner));
-    };
-    final EStructuralFeature referenceToOwner = IterableExtensions.<EStructuralFeature>head(IterableExtensions.<EStructuralFeature>filter(cl.getEStructuralFeatures(), _function_2));
-    final Function1<EStructuralFeature, Boolean> _function_3 = (EStructuralFeature it) -> {
-      return Boolean.valueOf((it != referenceToOwner));
-    };
-    final List<EReference> otherReferences = IterableExtensions.<EReference>toList(Iterables.<EReference>filter(IterableExtensions.<EStructuralFeature>filter(cl.getEStructuralFeatures(), _function_3), EReference.class));
-    boolean _isEmpty_1 = otherReferences.isEmpty();
-    if (_isEmpty_1) {
-      String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(cl);
-      String _plus_2 = ("Missing reference to target type: " + _eObjectRepr_1);
-      this.showError(cl, _plus_2);
-      return;
-    }
-    int _size_1 = otherReferences.size();
-    boolean _greaterThan_1 = (_size_1 > 1);
-    if (_greaterThan_1) {
-      final Function1<EReference, String> _function_4 = (EReference it) -> {
-        String _eObjectRepr_2 = EdeltaLibrary.getEObjectRepr(it);
-        return ("  " + _eObjectRepr_2);
-      };
-      String _join_1 = IterableExtensions.join(ListExtensions.<EReference, String>map(otherReferences, _function_4), "\n");
-      String _plus_3 = ("Too many references to target type:\n" + _join_1);
-      this.showError(cl, _plus_3);
-      return;
-    }
-    final EReference referenceToTarget = IterableExtensions.<EReference>head(otherReferences);
+    final EReference referenceToTarget = this.findSingleReferenceNotOfType(cl, owner);
     reference.setEType(referenceToTarget.getEType());
     reference.setContainment(false);
     final EReference opposite = referenceToTarget.getEOpposite();
@@ -351,6 +330,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
       EdeltaLibrary.makeBidirectional(reference, opposite);
     }
     EdeltaLibrary.removeElement(cl);
+    return reference;
   }
   
   /**
@@ -423,19 +403,15 @@ public class EdeltaRefactorings extends AbstractEdelta {
    */
   public void pullUpFeatures(final EClass dest, final List<? extends EStructuralFeature> duplicates) {
     final EdeltaFeatureDifferenceFinder diffFinder = new EdeltaFeatureDifferenceFinder().ignoringContainingClass();
-    boolean _checkNoDifferences = this.checkNoDifferences(duplicates, diffFinder, "The two features are not equal");
-    boolean _not = (!_checkNoDifferences);
-    if (_not) {
-      return;
-    }
+    this.checkNoDifferences(duplicates, diffFinder, "The two features are not equal");
     final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
       boolean _contains = it.getEContainingClass().getESuperTypes().contains(dest);
       return Boolean.valueOf((!_contains));
     };
     final Iterable<? extends EStructuralFeature> wrongFeatures = IterableExtensions.filter(duplicates, _function);
     boolean _isEmpty = IterableExtensions.isEmpty(wrongFeatures);
-    boolean _not_1 = (!_isEmpty);
-    if (_not_1) {
+    boolean _not = (!_isEmpty);
+    if (_not) {
       final Consumer<EStructuralFeature> _function_1 = (EStructuralFeature it) -> {
         String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it.getEContainingClass());
         String _plus = ("Not a direct subclass of destination: " + _eObjectRepr);
@@ -473,32 +449,35 @@ public class EdeltaRefactorings extends AbstractEdelta {
   }
   
   /**
+   * Makes sure that this is not a containment reference,
+   * otherwise it shows an error message
+   * with the details of the differences and throws an IllegalArgumentException.
+   * 
    * @param reference the reference that must not be a containment reference
-   * @param message the message to show in case the reference
+   * @param errorMessage the message to show in case the reference
    * is a containment reference
-   * @return true if the passed reference is not a containment reference
    */
-  public boolean checkNotContainment(final EReference reference, final String message) {
-    final boolean containment = reference.isContainment();
-    if (containment) {
+  public void checkNotContainment(final EReference reference, final String errorMessage) {
+    boolean _isContainment = reference.isContainment();
+    if (_isContainment) {
       String _eObjectRepr = EdeltaLibrary.getEObjectRepr(reference);
-      String _plus = ((message + ": ") + _eObjectRepr);
-      this.showError(reference, _plus);
+      final String message = ((errorMessage + ": ") + _eObjectRepr);
+      this.showError(reference, message);
+      throw new IllegalArgumentException(message);
     }
-    return (!containment);
   }
   
   /**
    * Makes sure that there are no differences in the passed features,
    * using the specified differenceFinder, otherwise it shows an error message
-   * with the details of the differences.
+   * with the details of the differences and throws an IllegalArgumentException.
    * 
    * @param features
    * @param differenceFinder
    * @param errorMessage
    * @return true if there are no differences
    */
-  public boolean checkNoDifferences(final Iterable<? extends EStructuralFeature> features, final EdeltaFeatureDifferenceFinder differenceFinder, final String errorMessage) {
+  public void checkNoDifferences(final Iterable<? extends EStructuralFeature> features, final EdeltaFeatureDifferenceFinder differenceFinder, final String errorMessage) {
     final EStructuralFeature feature = IterableExtensions.head(features);
     final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
       return Boolean.valueOf(((feature != it) && (!differenceFinder.equals(feature, it))));
@@ -506,22 +485,21 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final EStructuralFeature different = IterableExtensions.findFirst(features, _function);
     if ((different != null)) {
       String _differenceDetails = differenceFinder.getDifferenceDetails();
-      String _plus = ((errorMessage + ":\n") + _differenceDetails);
-      this.showError(different, _plus);
-      return false;
+      final String message = ((errorMessage + ":\n") + _differenceDetails);
+      this.showError(different, message);
+      throw new IllegalArgumentException(message);
     }
-    return true;
   }
   
   /**
    * Makes sure that the features have types that are subtypes of the
-   * specified feature.
+   * specified feature, if not, shows
+   * error information and throws an IllegalArgumentException.
    * 
    * @param feature
    * @param features
-   * @return true if they are all compliant
    */
-  public boolean checkCompliant(final EStructuralFeature feature, final Collection<? extends EStructuralFeature> features) {
+  public void checkCompliant(final EStructuralFeature feature, final Collection<? extends EStructuralFeature> features) {
     Predicate<EStructuralFeature> _xifexpression = null;
     if ((feature instanceof EReference)) {
       final Predicate<EStructuralFeature> _function = (EStructuralFeature other) -> {
@@ -562,58 +540,87 @@ public class EdeltaRefactorings extends AbstractEdelta {
         return (_plus_3 + _eObjectRepr_2);
       };
       String _join = IterableExtensions.join(IterableExtensions.map(nonCompliant, _function_3), "\n");
-      String _plus_2 = (_plus_1 + _join);
-      this.showError(feature, _plus_2);
-      return false;
+      final String message = (_plus_1 + _join);
+      this.showError(feature, message);
+      throw new IllegalArgumentException(message);
     }
-    return true;
   }
   
   /**
-   * Makes sure the passed EClasses have no feature
+   * Makes sure the passed EClasses have no features, if not, shows
+   * error information and throws an IllegalArgumentException.
    * 
    * @param classes
-   * @return true if all the EClasses have no features
    */
-  public boolean checkNoFeatures(final Collection<EClass> classes) {
-    final Function1<EClass, Boolean> _function = (EClass it) -> {
-      return Boolean.valueOf(this.checkNoFeatures(it));
+  public void checkNoFeatures(final Collection<EClass> classes) {
+    final Function1<EClass, Boolean> _function = (EClass c) -> {
+      final EList<EStructuralFeature> features = c.getEStructuralFeatures();
+      final boolean empty = features.isEmpty();
+      if ((!empty)) {
+        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(c);
+        String _plus = ("Not an empty class: " + _eObjectRepr);
+        String _plus_1 = (_plus + ":\n");
+        final Function1<EStructuralFeature, String> _function_1 = (EStructuralFeature it) -> {
+          String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(it);
+          return ("  " + _eObjectRepr_1);
+        };
+        String _join = IterableExtensions.join(ListExtensions.<EStructuralFeature, String>map(features, _function_1), "\n");
+        String _plus_2 = (_plus_1 + _join);
+        this.showError(c, _plus_2);
+      }
+      return Boolean.valueOf((!empty));
     };
-    final Function1<Boolean, Boolean> _function_1 = (Boolean it) -> {
-      return it;
-    };
-    return IterableExtensions.<Boolean>forall(IterableExtensions.<Boolean>toList(IterableExtensions.<EClass, Boolean>map(classes, _function)), _function_1);
+    final List<EClass> classesWithFeatures = IterableExtensions.<EClass>toList(IterableExtensions.<EClass>filter(classes, _function));
+    boolean _isEmpty = classesWithFeatures.isEmpty();
+    boolean _not = (!_isEmpty);
+    if (_not) {
+      throw new IllegalArgumentException("Classes not empty");
+    }
   }
   
   /**
-   * Makes sure the passed EClass has no feature
+   * Finds the single containment EReference to the given EClass in the
+   * EClass' package, performing validation (that is,
+   * no reference is found, or more than one) checks and in case
+   * show errors and throws an IllegalArgumentException
    * 
-   * @param c
-   * @return true if the EClass has no feature
+   * @param cl
    */
-  public boolean checkNoFeatures(final EClass c) {
-    final EList<EStructuralFeature> features = c.getEStructuralFeatures();
-    final boolean empty = features.isEmpty();
-    if ((!empty)) {
-      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(c);
-      String _plus = ("Not an empty class: " + _eObjectRepr);
-      String _plus_1 = (_plus + ":\n");
-      final Function1<EStructuralFeature, String> _function = (EStructuralFeature it) -> {
-        String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(it);
-        return ("  " + _eObjectRepr_1);
+  public EReference findSingleContainmentReferenceToThisClass(final EClass cl) {
+    final Iterable<EReference> references = this.findReferencesToThisClass(cl);
+    boolean _isEmpty = IterableExtensions.isEmpty(references);
+    if (_isEmpty) {
+      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(cl);
+      final String message = ("The EClass is not referred: " + _eObjectRepr);
+      this.showError(cl, message);
+      throw new IllegalArgumentException(message);
+    } else {
+      final Function1<EReference, Boolean> _function = (EReference it) -> {
+        return Boolean.valueOf(it.isContainment());
       };
-      String _join = IterableExtensions.join(ListExtensions.<EStructuralFeature, String>map(features, _function), "\n");
-      String _plus_2 = (_plus_1 + _join);
-      this.showError(c, _plus_2);
+      int _size = IterableExtensions.size(IterableExtensions.<EReference>filter(references, _function));
+      boolean _greaterThan = (_size > 1);
+      if (_greaterThan) {
+        final Function1<EReference, String> _function_1 = (EReference it) -> {
+          String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(it);
+          return ("  " + _eObjectRepr_1);
+        };
+        String _join = IterableExtensions.join(IterableExtensions.<EReference, String>map(references, _function_1), "\n");
+        final String message_1 = ("The EClass is referred by more than one container:\n" + _join);
+        this.showError(cl, message_1);
+        throw new IllegalArgumentException(message_1);
+      }
     }
-    return empty;
+    return IterableExtensions.<EReference>head(references);
   }
   
   /**
    * Finds all the EReferences to the given EClass in the
    * EClass' package
+   * 
+   * @param cl
    */
-  public Iterable<EReference> findReferencesToClass(final EClass cl) {
+  public Iterable<EReference> findReferencesToThisClass(final EClass cl) {
     final Function1<EStructuralFeature.Setting, Boolean> _function = (EStructuralFeature.Setting it) -> {
       EStructuralFeature _eStructuralFeature = it.getEStructuralFeature();
       return Boolean.valueOf(Objects.equal(_eStructuralFeature, getEReference("ecore", "EReference", "eReferenceType")));
@@ -625,11 +632,53 @@ public class EdeltaRefactorings extends AbstractEdelta {
   }
   
   /**
+   * Finds the single EReference, in the EReferences of the given EClass,
+   * with a type different from the given type, performing validation (that is,
+   * no reference is found, or more than one) checks and in case
+   * show errors and throws an IllegalArgumentException
+   * 
+   * @param cl
+   * @param target
+   */
+  public EReference findSingleReferenceNotOfType(final EClass cl, final EClass type) {
+    final Function1<EReference, Boolean> _function = (EReference it) -> {
+      EClassifier _eType = it.getEType();
+      return Boolean.valueOf((_eType != type));
+    };
+    final List<EReference> otherReferences = IterableExtensions.<EReference>toList(IterableExtensions.<EReference>filter(cl.getEReferences(), _function));
+    boolean _isEmpty = otherReferences.isEmpty();
+    if (_isEmpty) {
+      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(type);
+      final String message = ("No references not of type " + _eObjectRepr);
+      this.showError(cl, message);
+      throw new IllegalArgumentException(message);
+    }
+    int _size = otherReferences.size();
+    boolean _greaterThan = (_size > 1);
+    if (_greaterThan) {
+      String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(type);
+      String _plus = ("Too many references not of type " + _eObjectRepr_1);
+      String _plus_1 = (_plus + 
+        ":\n");
+      final Function1<EReference, String> _function_1 = (EReference it) -> {
+        String _eObjectRepr_2 = EdeltaLibrary.getEObjectRepr(it);
+        return ("  " + _eObjectRepr_2);
+      };
+      String _join = IterableExtensions.join(ListExtensions.<EReference, String>map(otherReferences, _function_1), "\n");
+      final String message_1 = (_plus_1 + _join);
+      this.showError(cl, message_1);
+      throw new IllegalArgumentException(message_1);
+    }
+    return IterableExtensions.<EReference>head(otherReferences);
+  }
+  
+  /**
    * Checks that the passed subclasses have all exactly one superclass
    * and that it is the same and returns that as a result. It also checks
    * that such a common superclass has no further subclasses.
    * 
-   * In case of failure, besides reporting errors, it returns null.
+   * In case of failure, besides reporting errors, it throws an
+   * IllegalArgumentException.
    */
   public EClass getSingleDirectSuperclass(final Collection<EClass> subclasses) {
     final Function1<EClass, Boolean> _function = (EClass it) -> {
@@ -660,7 +709,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
         this.showError(it, _plus_2);
       };
       invalid.forEach(_function_1);
-      return null;
+      throw new IllegalArgumentException("Wrong superclasses");
     }
     final EClass result = IterableExtensions.<EClass>head(IterableExtensions.<EClass>head(subclasses).getESuperTypes());
     final Function1<EClass, Boolean> _function_2 = (EClass it) -> {
@@ -683,11 +732,11 @@ public class EdeltaRefactorings extends AbstractEdelta {
         String _plus_5 = (_plus_4 + 
           "  Actual  : ");
         String _eObjectRepr_2 = EdeltaLibrary.getEObjectRepr(IterableExtensions.<EClass>head(it.getESuperTypes()));
-        String _plus_6 = (_plus_5 + _eObjectRepr_2);
-        this.showError(it, _plus_6);
+        final String message = (_plus_5 + _eObjectRepr_2);
+        this.showError(it, message);
       };
       differences.forEach(_function_3);
-      return null;
+      throw new IllegalArgumentException("Wrong superclasses");
     }
     final Set<EClass> additionalSubclasses = IterableExtensions.<EClass>toSet(this.directSubclasses(result));
     additionalSubclasses.removeAll(IterableExtensions.<EClass>toSet(subclasses));
@@ -699,9 +748,9 @@ public class EdeltaRefactorings extends AbstractEdelta {
         return ("  " + _eObjectRepr);
       };
       String _join = IterableExtensions.join(IterableExtensions.<EClass, String>map(additionalSubclasses, _function_4), "\n");
-      String _plus = ("The class has additional subclasses:\n" + _join);
-      this.showError(result, _plus);
-      return null;
+      final String message = ("The class has additional subclasses:\n" + _join);
+      this.showError(result, message);
+      throw new IllegalArgumentException(message);
     }
     return result;
   }

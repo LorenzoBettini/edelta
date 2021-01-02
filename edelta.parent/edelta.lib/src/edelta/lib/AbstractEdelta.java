@@ -55,6 +55,18 @@ public abstract class AbstractEdelta {
 
 	private Logger logger = Logger.getLogger(getClass());
 
+	private EdeltaIssuePresenter issuePresenter = new EdeltaIssuePresenter() {
+		@Override
+		public void showWarning(ENamedElement problematicObject, String message) {
+			// nop
+		}
+
+		@Override
+		public void showError(ENamedElement problematicObject, String message) {
+			// nop
+		}
+	};
+
 	protected AbstractEdelta() {
 		packageManager = new EdeltaEPackageManager();
 	}
@@ -167,6 +179,10 @@ public abstract class AbstractEdelta {
 		this.logger = logger;
 	}
 
+	public void setIssuePresenter(EdeltaIssuePresenter issuePresenter) {
+		this.issuePresenter = issuePresenter;
+	}
+
 	public void logError(Supplier<String> messageSupplier) {
 		internalLog(Level.ERROR, messageSupplier);
 	}
@@ -191,10 +207,12 @@ public abstract class AbstractEdelta {
 
 	public void showError(ENamedElement problematicObject, String message) {
 		logError(() -> EdeltaLibrary.getEObjectRepr(problematicObject) + ": " + message);
+		issuePresenter.showError(problematicObject, message);
 	}
 
 	public void showWarning(ENamedElement problematicObject, String message) {
 		logWarn(() -> EdeltaLibrary.getEObjectRepr(problematicObject) + ": " + message);
+		issuePresenter.showWarning(problematicObject, message);
 	}
 
 	/**

@@ -179,6 +179,17 @@ public class EdeltaLibrary {
 		return c;
 	}
 
+	public static EClass addNewAbstractEClass(EPackage ePackage, String name) {
+		return addNewAbstractEClass(ePackage, name, null);
+	}
+
+	public static EClass addNewAbstractEClass(EPackage ePackage, String name, Consumer<EClass> initializer) {
+		return addNewEClass(ePackage, name, c -> {
+			c.setAbstract(true);
+			safeRunInitializer(initializer, c);
+		});
+	}
+
 	public static void addEEnum(EPackage ePackage, EEnum eEnum) {
 		addEClassifier(ePackage, eEnum);
 	}
@@ -262,8 +273,30 @@ public class EdeltaLibrary {
 		return e;
 	}
 
+	public static EReference addNewContainmentEReference(EClass eClass, String name, EClass referenceType) {
+		return addNewContainmentEReference(eClass, name, referenceType, null);
+	}
+
+	public static EReference addNewContainmentEReference(EClass eClass, String name, EClass referenceType, Consumer<EReference> initializer) {
+		return addNewEReference(eClass, name, referenceType, r -> {
+			r.setContainment(true);
+			safeRunInitializer(initializer, r);
+		});
+	}
+
 	public static void addESuperType(EClass subClass, EClass superClass) {
 		subClass.getESuperTypes().add(superClass);
+	}
+
+	public static EClass addNewSubclass(EClass superClass, String name) {
+		return addNewSubclass(superClass, name, null);
+	}
+
+	public static EClass addNewSubclass(EClass superClass, String name, Consumer<EClass> initializer) {
+		return addNewEClass(superClass.getEPackage(), name, c -> {
+			c.getESuperTypes().add(superClass);
+			safeRunInitializer(initializer, c);
+		});
 	}
 
 	public static void removeESuperType(EClass subClass, EClass superClass) {
@@ -448,16 +481,55 @@ public class EdeltaLibrary {
 	 * @param ref2
 	 */
 	public static void makeBidirectional(EReference ref1, EReference ref2) {
-		resetOpposite(ref1);
-		resetOpposite(ref2);
+		dropOpposite(ref1);
+		dropOpposite(ref2);
 		makeBidirectionalInternal(ref1, ref2);
 		makeBidirectionalInternal(ref2, ref1);
 	}
 
-	private static void resetOpposite(EReference reference) {
+	/**
+	 * Sets the EOpposite property to null; if the reference has an EOpposite,
+	 * the EOpposite of the EOpposite is also set to null. No references are removed.
+	 * 
+	 * @param reference
+	 */
+	public static void dropOpposite(EReference reference) {
 		final var existingOpposite = reference.getEOpposite();
 		if (existingOpposite != null)
 			existingOpposite.setEOpposite(null);
+		reference.setEOpposite(null);
+	}
+
+	/**
+	 * Removes the possible EOpposite of the passed reference:
+	 * corresponds to {@link #dropOpposite(EReference)} and
+	 * {@link #removeElement(ENamedElement)} passing both the possible EOpposite
+	 * reference.
+	 * 
+	 * @param reference
+	 */
+	public static void removeOpposite(EReference reference) {
+		final var opposite = reference.getEOpposite();
+		if (opposite != null) {
+			dropOpposite(opposite);
+			removeElement(opposite);
+		}
+	}
+
+	/**
+	 * Creates a new EOpposite of the passed reference (dropping possibly
+	 * existing one), with the correct type (that is, the result of
+	 * {@link EReference#getEContainingClass()} and adding it as a reference in
+	 * the specified target {@link EClass}.
+	 * 
+	 * @param reference
+	 * @param name
+	 * @return the created EOpposite reference
+	 */
+	public static EReference createOpposite(EReference reference, String name, EClass target) {
+		return addNewEReference(target, name, reference.getEContainingClass(),
+			newRef -> makeBidirectional(newRef, reference)
+		);
 	}
 
 	private static void makeBidirectionalInternal(EReference r1, EReference r2) {
