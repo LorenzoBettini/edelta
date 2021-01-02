@@ -14,7 +14,6 @@ import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.IterableAssert;
-import org.assertj.core.util.Maps;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -384,7 +383,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
     Assertions.<EClass, Map<EStructuralFeature, List<EStructuralFeature>>>assertThat(result).containsExactly(
       Assertions.<EClass, Map<EStructuralFeature, List<EStructuralFeature>>>entry(
         this.findEClass(p, "SuperClassWithDuplicatesInSubclasses"), 
-        Maps.<EStructuralFeature, List<EStructuralFeature>>newHashMap(
+        Map.<EStructuralFeature, List<EStructuralFeature>>of(
           this.findEStructuralFeature(p, "C1", "A1"), 
           Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(_findEStructuralFeature, _findEStructuralFeature_1)))));
   }

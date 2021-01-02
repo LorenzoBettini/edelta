@@ -2,13 +2,13 @@ package edelta.refactorings.lib.tests
 
 import edelta.lib.AbstractEdelta
 import edelta.refactorings.lib.EdeltaBadSmellsFinder
+import java.util.Map
 import org.junit.Before
 import org.junit.Test
 
 import static org.assertj.core.api.Assertions.*
 
 import static extension edelta.lib.EdeltaLibrary.*
-import org.assertj.core.util.Maps
 
 class EdeltaBadSmellsFinderTest extends AbstractTest {
 	var EdeltaBadSmellsFinder finder
@@ -317,7 +317,7 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 			.containsExactly(
 				entry(
 					p.findEClass("SuperClassWithDuplicatesInSubclasses"),
-					Maps.newHashMap(
+					Map.of(
 						p.findEStructuralFeature("C1", "A1"),
 						#[
 							p.findEStructuralFeature("C1", "A1"),
