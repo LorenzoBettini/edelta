@@ -1,4 +1,4 @@
-package edelta.petrinet.example.tests;
+package edelta.petrinet.tests;
 
 import org.junit.Test;
 

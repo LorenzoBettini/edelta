@@ -1,4 +1,4 @@
-package edelta.introducingdep.example.tests;
+package edelta.introducingdep.tests;
 
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package edelta.personlist.example.tests;
+package edelta.personlist.tests;
 
 import org.junit.Test;
 
