@@ -288,6 +288,17 @@ public class EdeltaLibrary {
 		subClass.getESuperTypes().add(superClass);
 	}
 
+	public static EClass addNewSubclass(EClass superClass, String name) {
+		return addNewSubclass(superClass, name, null);
+	}
+
+	public static EClass addNewSubclass(EClass superClass, String name, Consumer<EClass> initializer) {
+		return addNewEClass(superClass.getEPackage(), name, c -> {
+			c.getESuperTypes().add(superClass);
+			safeRunInitializer(initializer, c);
+		});
+	}
+
 	public static void removeESuperType(EClass subClass, EClass superClass) {
 		subClass.getESuperTypes().remove(superClass);
 	}

@@ -405,6 +405,38 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
+	public void test_addNewSubclass() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		EClass superClass = ecoreFactory.createEClass();
+		superClass.setName("Superclass");
+		ePackage.getEClassifiers().add(superClass);
+		EClass subClass = EdeltaLibrary.addNewSubclass(superClass, "test");
+		assertEquals("test", subClass.getName());
+		assertThat(subClass.getESuperTypes())
+			.containsExactly(superClass);
+		assertThat(ePackage.getEClassifiers())
+			.containsExactlyInAnyOrder(superClass, subClass);
+	}
+
+	@Test
+	public void test_addNewSubclassWithInitializer() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		EClass superClass = ecoreFactory.createEClass();
+		superClass.setName("Superclass");
+		ePackage.getEClassifiers().add(superClass);
+		EClass subClass = EdeltaLibrary.addNewSubclass(superClass, "test",
+				cl -> {
+					assertNotNull(cl.getEPackage());
+					cl.setName("changed");
+				});
+		assertEquals("changed", subClass.getName());
+		assertThat(subClass.getESuperTypes())
+			.containsExactly(superClass);
+		assertThat(ePackage.getEClassifiers())
+			.containsExactlyInAnyOrder(superClass, subClass);
+	}
+
+	@Test
 	public void test_removeESuperType() {
 		EClass superClass = ecoreFactory.createEClass();
 		EClass subClass = ecoreFactory.createEClass();
