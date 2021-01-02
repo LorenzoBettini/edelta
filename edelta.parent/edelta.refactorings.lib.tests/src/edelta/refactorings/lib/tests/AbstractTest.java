@@ -4,6 +4,7 @@ import static com.google.common.collect.Iterables.filter;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.findFirst;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -11,8 +12,11 @@ import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
+
+import edelta.lib.EdeltaLibrary;
 
 public abstract class AbstractTest {
 	protected EcoreFactory factory = EcoreFactory.eINSTANCE;
@@ -32,6 +36,13 @@ public abstract class AbstractTest {
 	protected EPackage createEPackage(final String name) {
 		EPackage p = this.factory.createEPackage();
 		p.setName(name);
+		return p;
+	}
+
+	protected EPackage createEPackage(final String name, Consumer<EPackage> init) {
+		EPackage p = this.factory.createEPackage();
+		p.setName(name);
+		init.accept(p);
 		return p;
 	}
 
@@ -66,12 +77,29 @@ public abstract class AbstractTest {
 	}
 
 	protected EClassifier findEClassifier(final EPackage p, final String byName) {
-		return findFirst(p.getEClassifiers(),
-			it -> Objects.equals(it.getName(), byName));
+		return findFirst(p.getEClassifiers(), it -> Objects.equals(it.getName(), byName));
+	}
+
+	protected EClass findEClass(final EPackage p, final String byName) {
+		return (EClass) findEClassifier(p, byName);
 	}
 
 	protected EAttribute findEAttribute(final EClass c, final String byName) {
-		return findFirst(c.getEAttributes(),
-			it -> Objects.equals(it.getName(), byName));
+		return findFirst(c.getEAttributes(), it -> Objects.equals(it.getName(), byName));
 	}
+
+	protected EStructuralFeature findEStructuralFeature(final EPackage p, final String className,
+			final String featureName) {
+		return EdeltaLibrary.allEClasses(p).stream()
+				.filter(c -> c.getName().equals(className))
+				.findFirst()
+				.map(c -> c.getEStructuralFeature(featureName))
+				.orElse(null);
+	}
+
+	protected EReference findEReference(final EPackage p, final String className,
+			final String referenceName) {
+		return (EReference) findEStructuralFeature(p, className, referenceName);
+	}
+
 }
