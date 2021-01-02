@@ -179,6 +179,17 @@ public class EdeltaLibrary {
 		return c;
 	}
 
+	public static EClass addNewAbstractEClass(EPackage ePackage, String name) {
+		return addNewAbstractEClass(ePackage, name, null);
+	}
+
+	public static EClass addNewAbstractEClass(EPackage ePackage, String name, Consumer<EClass> initializer) {
+		return addNewEClass(ePackage, name, c -> {
+			c.setAbstract(true);
+			safeRunInitializer(initializer, c);
+		});
+	}
+
 	public static void addEEnum(EPackage ePackage, EEnum eEnum) {
 		addEClassifier(ePackage, eEnum);
 	}

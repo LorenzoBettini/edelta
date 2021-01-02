@@ -167,6 +167,32 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
+	public void test_addNewAbstractEClass() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		EClass eClass = EdeltaLibrary.addNewAbstractEClass(ePackage, "test");
+		assertEquals("test", eClass.getName());
+		assertThat(eClass.isAbstract())
+			.isTrue();
+		assertSame(eClass,
+			ePackage.getEClassifiers().get(0));
+	}
+
+	@Test
+	public void test_addNewAbstractEClassWithInitializer() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		EClass eClass = EdeltaLibrary.addNewAbstractEClass(ePackage, "test",
+				cl -> {
+					assertNotNull(cl.getEPackage());
+					cl.setName("changed");
+				});
+		assertEquals("changed", eClass.getName());
+		assertThat(eClass.isAbstract())
+			.isTrue();
+		assertSame(eClass,
+				ePackage.getEClassifiers().get(0));
+	}
+
+	@Test
 	public void test_addEEnum() {
 		EPackage ePackage = ecoreFactory.createEPackage();
 		EEnum eEnum = ecoreFactory.createEEnum();
