@@ -367,6 +367,36 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
+	public void test_addNewContainmentEReference() {
+		EClass eClass = ecoreFactory.createEClass();
+		EReference eReference =
+				EdeltaLibrary.addNewContainmentEReference(eClass, "test", EOBJECT);
+		assertEquals("test", eReference.getName());
+		assertEquals(EOBJECT, eReference.getEType());
+		assertEquals(EOBJECT, eReference.getEReferenceType());
+		assertThat(eReference.isContainment()).isTrue();
+		assertSame(eReference,
+				eClass.getEStructuralFeatures().get(0));
+	}
+
+	@Test
+	public void test_addNewContainmentEReferenceWithInitializer() {
+		EClass eClass = ecoreFactory.createEClass();
+		EReference eReference =
+			EdeltaLibrary.addNewContainmentEReference(eClass, "test", EOBJECT,
+				ref -> {
+					assertNotNull(ref.getEContainingClass());
+					ref.setName("changed");
+				});
+		assertEquals("changed", eReference.getName());
+		assertEquals(EOBJECT, eReference.getEType());
+		assertEquals(EOBJECT, eReference.getEReferenceType());
+		assertThat(eReference.isContainment()).isTrue();
+		assertSame(eReference,
+				eClass.getEStructuralFeatures().get(0));
+	}
+
+	@Test
 	public void test_addESuperType() {
 		EClass superClass = ecoreFactory.createEClass();
 		EClass subClass = ecoreFactory.createEClass();

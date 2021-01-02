@@ -273,6 +273,17 @@ public class EdeltaLibrary {
 		return e;
 	}
 
+	public static EReference addNewContainmentEReference(EClass eClass, String name, EClass referenceType) {
+		return addNewContainmentEReference(eClass, name, referenceType, null);
+	}
+
+	public static EReference addNewContainmentEReference(EClass eClass, String name, EClass referenceType, Consumer<EReference> initializer) {
+		return addNewEReference(eClass, name, referenceType, r -> {
+			r.setContainment(true);
+			safeRunInitializer(initializer, r);
+		});
+	}
+
 	public static void addESuperType(EClass subClass, EClass superClass) {
 		subClass.getESuperTypes().add(superClass);
 	}
