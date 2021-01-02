@@ -12,6 +12,7 @@
 
   <properties>
     <!-- Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=397015 -->
+    <sonar.sources>src</sonar.sources>
     <sonar.tests>tests</sonar.tests>
   </properties>
 
