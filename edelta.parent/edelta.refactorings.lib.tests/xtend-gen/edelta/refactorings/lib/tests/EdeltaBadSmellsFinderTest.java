@@ -115,18 +115,12 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
     final Consumer<EPackage> _function = (EPackage it) -> {
       EClass _addNewEClass = EdeltaLibrary.addNewEClass(it, "C1");
       final Procedure1<EClass> _function_1 = (EClass it_1) -> {
-        final Consumer<EReference> _function_2 = (EReference it_2) -> {
-          it_2.setContainment(true);
-        };
-        EdeltaLibrary.addNewEReference(it_1, "r1", this.eClassReference, _function_2);
+        EdeltaLibrary.addNewContainmentEReference(it_1, "r1", this.eClassReference);
       };
       ObjectExtensions.<EClass>operator_doubleArrow(_addNewEClass, _function_1);
       EClass _addNewEClass_1 = EdeltaLibrary.addNewEClass(it, "C2");
       final Procedure1<EClass> _function_2 = (EClass it_1) -> {
-        final Consumer<EReference> _function_3 = (EReference it_2) -> {
-          it_2.setContainment(false);
-        };
-        EdeltaLibrary.addNewEReference(it_1, "r1", this.eClassReference, _function_3);
+        EdeltaLibrary.addNewEReference(it_1, "r1", this.eClassReference);
       };
       ObjectExtensions.<EClass>operator_doubleArrow(_addNewEClass_1, _function_2);
     };
@@ -175,22 +169,10 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
       final EClass anotherClass = EdeltaLibrary.addNewEClass(it, "AnotherClass");
       final EClass containedWithUnrelated = EdeltaLibrary.addNewEClass(it, "Unrelated");
       final Consumer<EClass> _function_1 = (EClass it_1) -> {
-        final Consumer<EReference> _function_2 = (EReference it_2) -> {
-          it_2.setContainment(true);
-        };
-        EdeltaLibrary.addNewEReference(it_1, "containedWithRedundant", containedWithRedundant, _function_2);
-        final Consumer<EReference> _function_3 = (EReference it_2) -> {
-          it_2.setContainment(true);
-        };
-        EdeltaLibrary.addNewEReference(it_1, "containedWithUnrelated", containedWithUnrelated, _function_3);
-        final Consumer<EReference> _function_4 = (EReference it_2) -> {
-          it_2.setContainment(true);
-        };
-        EdeltaLibrary.addNewEReference(it_1, "containedWithOpposite", containedWithOpposite, _function_4);
-        final Consumer<EReference> _function_5 = (EReference it_2) -> {
-          it_2.setContainment(true);
-        };
-        EdeltaLibrary.addNewEReference(it_1, "containedWithOptional", containedWithOptional, _function_5);
+        EdeltaLibrary.addNewContainmentEReference(it_1, "containedWithRedundant", containedWithRedundant);
+        EdeltaLibrary.addNewContainmentEReference(it_1, "containedWithUnrelated", containedWithUnrelated);
+        EdeltaLibrary.addNewContainmentEReference(it_1, "containedWithOpposite", containedWithOpposite);
+        EdeltaLibrary.addNewContainmentEReference(it_1, "containedWithOptional", containedWithOptional);
       };
       final EClass container = EdeltaLibrary.addNewEClass(it, "Container", _function_1);
       final Consumer<EReference> _function_2 = (EReference it_1) -> {
@@ -208,9 +190,8 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
       EdeltaLibrary.addNewEReference(containedWithOpposite, "correctWithOpposite", container, _function_4);
       final Consumer<EReference> _function_5 = (EReference it_1) -> {
         it_1.setLowerBound(1);
-        it_1.setContainment(true);
       };
-      EdeltaLibrary.addNewEReference(containedWithContained, "correctWithContainment", container, _function_5);
+      EdeltaLibrary.addNewContainmentEReference(containedWithContained, "correctWithContainment", container, _function_5);
       EdeltaLibrary.addNewEReference(containedWithOptional, "correctNotRequired", container);
     };
     final EPackage p = this.createEPackage("p", _function);
@@ -229,14 +210,8 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
       final EClass used1 = EdeltaLibrary.addNewEClass(it, "Used1");
       final EClass used2 = EdeltaLibrary.addNewEClass(it, "Used2");
       final Consumer<EClass> _function_1 = (EClass it_1) -> {
-        final Consumer<EReference> _function_2 = (EReference it_2) -> {
-          it_2.setContainment(true);
-        };
-        EdeltaLibrary.addNewEReference(it_1, "used1", used1, _function_2);
-        final Consumer<EReference> _function_3 = (EReference it_2) -> {
-          it_2.setContainment(false);
-        };
-        EdeltaLibrary.addNewEReference(it_1, "used2", used2, _function_3);
+        EdeltaLibrary.addNewContainmentEReference(it_1, "used1", used1);
+        EdeltaLibrary.addNewEReference(it_1, "used2", used2);
       };
       EdeltaLibrary.addNewEClass(it, "Unused2", _function_1);
     };
@@ -251,10 +226,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
     final EClass used1 = EdeltaLibrary.addNewEClass(otherPackage, "Used1");
     final Consumer<EPackage> _function = (EPackage it) -> {
       final Consumer<EClass> _function_1 = (EClass it_1) -> {
-        final Consumer<EReference> _function_2 = (EReference it_2) -> {
-          it_2.setContainment(false);
-        };
-        EdeltaLibrary.addNewEReference(it_1, "used1", used1, _function_2);
+        EdeltaLibrary.addNewEReference(it_1, "used1", used1);
       };
       EdeltaLibrary.addNewEClass(it, "HasNoReferenceInThisPackage", _function_1);
     };
@@ -266,38 +238,22 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
   public void test_findClassificationByHierarchy() {
     final Consumer<EPackage> _function = (EPackage it) -> {
       final EClass base = EdeltaLibrary.addNewEClass(it, "Base");
+      EdeltaLibrary.addNewSubclass(base, "Derived1");
+      EdeltaLibrary.addNewSubclass(base, "Derived2");
       final Consumer<EClass> _function_1 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(base);
-      };
-      EdeltaLibrary.addNewEClass(it, "Derived1", _function_1);
-      final Consumer<EClass> _function_2 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(base);
-      };
-      EdeltaLibrary.addNewEClass(it, "Derived2", _function_2);
-      final Consumer<EClass> _function_3 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(base);
         EdeltaLibrary.addNewEAttribute(it_1, "anAttribute", this.stringDataType);
       };
-      EdeltaLibrary.addNewEClass(it, "DerivedOK", _function_3);
-      final Consumer<EClass> _function_4 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(base);
-      };
-      final EClass referenced = EdeltaLibrary.addNewEClass(it, "DerivedOK2", _function_4);
-      final Consumer<EClass> _function_5 = (EClass it_1) -> {
+      EdeltaLibrary.addNewSubclass(base, "DerivedOK", _function_1);
+      final EClass referenced = EdeltaLibrary.addNewSubclass(base, "DerivedOK2");
+      final Consumer<EClass> _function_2 = (EClass it_1) -> {
         EdeltaLibrary.addNewEReference(it_1, "aRef", referenced);
       };
-      final EClass another = EdeltaLibrary.addNewEClass(it, "Another", _function_5);
-      final Consumer<EClass> _function_6 = (EClass it_1) -> {
+      final EClass another = EdeltaLibrary.addNewEClass(it, "Another", _function_2);
+      final Consumer<EClass> _function_3 = (EClass it_1) -> {
         EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(base);
-        EList<EClass> _eSuperTypes_1 = it_1.getESuperTypes();
-        _eSuperTypes_1.add(another);
+        _eSuperTypes.add(another);
       };
-      EdeltaLibrary.addNewEClass(it, "DerivedOK3", _function_6);
+      EdeltaLibrary.addNewSubclass(base, "DerivedOK3", _function_3);
     };
     final EPackage p = this.createEPackage("p", _function);
     final Map<EClass, List<EClass>> result = this.finder.findClassificationByHierarchy(p);
@@ -311,12 +267,10 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
   @Test
   public void test_findClassificationByHierarchy_withOneSubclass() {
     final Consumer<EPackage> _function = (EPackage it) -> {
-      final EClass base = EdeltaLibrary.addNewEClass(it, "Base");
       final Consumer<EClass> _function_1 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(base);
+        EdeltaLibrary.addNewSubclass(it_1, "Derived1");
       };
-      EdeltaLibrary.addNewEClass(it, "Derived1", _function_1);
+      EdeltaLibrary.addNewEClass(it, "Base", _function_1);
     };
     final EPackage p = this.createEPackage("p", _function);
     final Map<EClass, List<EClass>> result = this.finder.findClassificationByHierarchy(p);
@@ -327,25 +281,14 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
   public void test_findConcreteAbstractMetaclasses() {
     final Consumer<EPackage> _function = (EPackage it) -> {
       final EClass base = EdeltaLibrary.addNewEClass(it, "ConcreteAbstractMetaclass");
-      final Consumer<EClass> _function_1 = (EClass it_1) -> {
-        it_1.setAbstract(true);
-      };
-      final EClass other = EdeltaLibrary.addNewEClass(it, "CorrectAbstractMetaclass", _function_1);
+      final EClass other = EdeltaLibrary.addNewAbstractEClass(it, "CorrectAbstractMetaclass");
       final EClass referred = EdeltaLibrary.addNewEClass(it, "NonBaseClass");
-      final Consumer<EClass> _function_2 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(base);
-      };
-      EdeltaLibrary.addNewEClass(it, "Derived1", _function_2);
-      final Consumer<EClass> _function_3 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(other);
-      };
-      EdeltaLibrary.addNewEClass(it, "Derived2", _function_3);
-      final Consumer<EClass> _function_4 = (EClass it_1) -> {
+      EdeltaLibrary.addNewSubclass(base, "Derived1");
+      EdeltaLibrary.addNewSubclass(other, "Derived2");
+      final Consumer<EClass> _function_1 = (EClass it_1) -> {
         EdeltaLibrary.addNewEReference(it_1, "aRef", referred);
       };
-      EdeltaLibrary.addNewEClass(it, "Another", _function_4);
+      EdeltaLibrary.addNewEClass(it, "Another", _function_1);
     };
     final EPackage p = this.createEPackage("p", _function);
     Iterable<EClass> result = this.finder.findConcreteAbstractMetaclasses(p);
@@ -355,19 +298,11 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
   @Test
   public void test_findAbstractConcreteMetaclasses() {
     final Consumer<EPackage> _function = (EPackage it) -> {
+      EdeltaLibrary.addNewAbstractEClass(it, "AbstractConcreteMetaclass");
       final Consumer<EClass> _function_1 = (EClass it_1) -> {
-        it_1.setAbstract(true);
+        EdeltaLibrary.addNewSubclass(it_1, "Derived1");
       };
-      EdeltaLibrary.addNewEClass(it, "AbstractConcreteMetaclass", _function_1);
-      final Consumer<EClass> _function_2 = (EClass it_1) -> {
-        it_1.setAbstract(true);
-      };
-      final EClass base = EdeltaLibrary.addNewEClass(it, "AbstractMetaclass", _function_2);
-      final Consumer<EClass> _function_3 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(base);
-      };
-      EdeltaLibrary.addNewEClass(it, "Derived1", _function_3);
+      EdeltaLibrary.addNewAbstractEClass(it, "AbstractMetaclass", _function_1);
     };
     final EPackage p = this.createEPackage("p", _function);
     Iterable<EClass> result = this.finder.findAbstractConcreteMetaclasses(p);
@@ -377,24 +312,19 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
   @Test
   public void test_findAbstractSubclassesOfConcreteSuperclasses() {
     final Consumer<EPackage> _function = (EPackage it) -> {
-      final Consumer<EClass> _function_1 = (EClass it_1) -> {
-        it_1.setAbstract(true);
-      };
-      final EClass abstractSuperclass = EdeltaLibrary.addNewEClass(it, "AbstractSuperclass", _function_1);
+      final EClass abstractSuperclass = EdeltaLibrary.addNewAbstractEClass(it, "AbstractSuperclass");
       final EClass concreteSuperclass1 = EdeltaLibrary.addNewEClass(it, "ConcreteSuperclass1");
       final EClass concreteSuperclass2 = EdeltaLibrary.addNewEClass(it, "ConcreteSuperclass2");
-      final Consumer<EClass> _function_2 = (EClass it_1) -> {
-        it_1.setAbstract(true);
+      final Consumer<EClass> _function_1 = (EClass it_1) -> {
         EList<EClass> _eSuperTypes = it_1.getESuperTypes();
         Iterables.<EClass>addAll(_eSuperTypes, Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(concreteSuperclass1, abstractSuperclass)));
       };
-      EdeltaLibrary.addNewEClass(it, "WithoutSmell", _function_2);
-      final Consumer<EClass> _function_3 = (EClass it_1) -> {
-        it_1.setAbstract(true);
+      EdeltaLibrary.addNewAbstractEClass(it, "WithoutSmell", _function_1);
+      final Consumer<EClass> _function_2 = (EClass it_1) -> {
         EList<EClass> _eSuperTypes = it_1.getESuperTypes();
         Iterables.<EClass>addAll(_eSuperTypes, Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(concreteSuperclass1, concreteSuperclass2)));
       };
-      EdeltaLibrary.addNewEClass(it, "WithSmell", _function_3);
+      EdeltaLibrary.addNewAbstractEClass(it, "WithSmell", _function_2);
     };
     final EPackage p = this.createEPackage("p", _function);
     Iterable<EClass> result = this.finder.findAbstractSubclassesOfConcreteSuperclasses(p);
@@ -405,21 +335,9 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
   public void test_directSubclasses() {
     final Consumer<EPackage> _function = (EPackage it) -> {
       final EClass superclass = EdeltaLibrary.addNewEClass(it, "ASuperclass");
-      final Consumer<EClass> _function_1 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(superclass);
-      };
-      final EClass subclass1 = EdeltaLibrary.addNewEClass(it, "ASubclass1", _function_1);
-      final Consumer<EClass> _function_2 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(subclass1);
-      };
-      EdeltaLibrary.addNewEClass(it, "ASubclass1Subclass", _function_2);
-      final Consumer<EClass> _function_3 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(superclass);
-      };
-      EdeltaLibrary.addNewEClass(it, "ASubclass2", _function_3);
+      final EClass subclass1 = EdeltaLibrary.addNewSubclass(superclass, "ASubclass1");
+      EdeltaLibrary.addNewSubclass(subclass1, "ASubclass1Subclass");
+      EdeltaLibrary.addNewSubclass(superclass, "ASubclass2");
     };
     final EPackage p = this.createEPackage("p", _function);
     final Function1<EClass, String> _function_1 = (EClass it) -> {
@@ -438,36 +356,26 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
     final Consumer<EPackage> _function = (EPackage it) -> {
       final EClass superclassWithDuplicatesInSubclasses = EdeltaLibrary.addNewEClass(it, "SuperClassWithDuplicatesInSubclasses");
       final Consumer<EClass> _function_1 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(superclassWithDuplicatesInSubclasses);
         EdeltaLibrary.addNewEAttribute(it_1, "A1", this.stringDataType);
       };
-      EdeltaLibrary.addNewEClass(it, "C1", _function_1);
+      EdeltaLibrary.addNewSubclass(superclassWithDuplicatesInSubclasses, "C1", _function_1);
       final Consumer<EClass> _function_2 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(superclassWithDuplicatesInSubclasses);
         EdeltaLibrary.addNewEAttribute(it_1, "A1", this.stringDataType);
       };
-      EdeltaLibrary.addNewEClass(it, "C2", _function_2);
+      EdeltaLibrary.addNewSubclass(superclassWithDuplicatesInSubclasses, "C2", _function_2);
       final EClass superclassWithoutDuplicatesInAllSubclasses = EdeltaLibrary.addNewEClass(it, "SuperClassWithoutDuplicatesInAllSubclasses");
       final Consumer<EClass> _function_3 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(superclassWithoutDuplicatesInAllSubclasses);
         EdeltaLibrary.addNewEAttribute(it_1, "A1", this.stringDataType);
       };
-      EdeltaLibrary.addNewEClass(it, "D1", _function_3);
+      EdeltaLibrary.addNewSubclass(superclassWithoutDuplicatesInAllSubclasses, "D1", _function_3);
       final Consumer<EClass> _function_4 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(superclassWithoutDuplicatesInAllSubclasses);
         EdeltaLibrary.addNewEAttribute(it_1, "A1", this.stringDataType);
       };
-      EdeltaLibrary.addNewEClass(it, "D2", _function_4);
+      EdeltaLibrary.addNewSubclass(superclassWithoutDuplicatesInAllSubclasses, "D2", _function_4);
       final Consumer<EClass> _function_5 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(superclassWithoutDuplicatesInAllSubclasses);
         EdeltaLibrary.addNewEAttribute(it_1, "A1", this.intDataType);
       };
-      EdeltaLibrary.addNewEClass(it, "D3", _function_5);
+      EdeltaLibrary.addNewSubclass(superclassWithoutDuplicatesInAllSubclasses, "D3", _function_5);
     };
     final EPackage p = this.createEPackage("p", _function);
     final LinkedHashMap<EClass, Map<EStructuralFeature, List<EStructuralFeature>>> result = this.finder.findDuplicateFeaturesInSubclasses(p);

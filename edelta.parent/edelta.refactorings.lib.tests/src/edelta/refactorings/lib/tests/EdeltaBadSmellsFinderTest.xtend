@@ -79,14 +79,10 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test def void test_findDuplicateFeatures_withDifferingContainment() {
 		val p = createEPackage("p") [
 			addNewEClass("C1") => [
-				addNewEReference("r1", eClassReference) [
-					containment = true
-				]
+				addNewContainmentEReference("r1", eClassReference)
 			]
 			addNewEClass("C2") => [
-				addNewEReference("r1", eClassReference) [
-					containment = false
-				]
+				addNewEReference("r1", eClassReference)
 			]
 		]
 		val result = finder.findDuplicateFeatures(p)
@@ -132,18 +128,10 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 			val anotherClass = addNewEClass("AnotherClass")
 			val containedWithUnrelated = addNewEClass("Unrelated")
 			val container = addNewEClass("Container") [
-				addNewEReference("containedWithRedundant", containedWithRedundant) [
-					containment = true
-				]
-				addNewEReference("containedWithUnrelated", containedWithUnrelated) [
-					containment = true
-				]
-				addNewEReference("containedWithOpposite", containedWithOpposite) [
-					containment = true
-				]
-				addNewEReference("containedWithOptional", containedWithOptional) [
-					containment = true
-				]
+				addNewContainmentEReference("containedWithRedundant", containedWithRedundant)
+				addNewContainmentEReference("containedWithUnrelated", containedWithUnrelated)
+				addNewContainmentEReference("containedWithOpposite", containedWithOpposite)
+				addNewContainmentEReference("containedWithOptional", containedWithOptional)
 			]
 			containedWithRedundant.addNewEReference("redundant", container) [
 				lowerBound = 1
@@ -155,13 +143,12 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 				lowerBound = 1
 				EOpposite = container.EReferences.last
 			]
-			containedWithContained.addNewEReference("correctWithContainment", container) [
+			// this is correct since it's another containment relation
+			containedWithContained.addNewContainmentEReference("correctWithContainment", container) [
 				lowerBound = 1
-				// this is correct since it's another contament relation
-				containment = true
 			]
+			// this is correct since it's not required
 			containedWithOptional.addNewEReference("correctNotRequired", container)
-				// this is correct since it's not required
 		]
 		val result = finder.findRedundantContainers(p)
 		// we expect the pair
@@ -179,12 +166,8 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 			val used1 = addNewEClass("Used1")
 			val used2 = addNewEClass("Used2")
 			addNewEClass("Unused2") [
-				addNewEReference("used1", used1) [
-					containment = true
-				]
-				addNewEReference("used2", used2) [
-					containment = false
-				]
+				addNewContainmentEReference("used1", used1)
+				addNewEReference("used2", used2)
 			]
 		]
 		val result = finder.findDeadClassifiers(p)
@@ -198,9 +181,7 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 		val p = createEPackage("p") [
 			addNewEClass("HasNoReferenceInThisPackage") [
 				// has a reference to a class in a different package
-				addNewEReference("used1", used1) [
-					containment = false
-				]
+				addNewEReference("used1", used1)
 			]
 		]
 		assertThat(finder.hasNoReferenceInThisPackage(p.EClasses.head))
@@ -210,28 +191,20 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test def void test_findClassificationByHierarchy() {
 		val p = createEPackage("p") [
 			val base = addNewEClass("Base")
-			addNewEClass("Derived1") [
-				ESuperTypes += base
-			]
-			addNewEClass("Derived2") [
-				ESuperTypes += base
-			]
-			addNewEClass("DerivedOK") [
-				ESuperTypes += base
-				// not in result because has features
+			base.addNewSubclass("Derived1")
+			base.addNewSubclass("Derived2")
+			// not in result because has features
+			base.addNewSubclass("DerivedOK") [
 				addNewEAttribute("anAttribute", stringDataType)
 			]
-			val referenced = addNewEClass("DerivedOK2") [
-				// not in result because it's referenced
-				ESuperTypes += base
-			]
+			// not in result because it's referenced
+			val referenced = base.addNewSubclass("DerivedOK2")
 			val another = addNewEClass("Another") [
 				addNewEReference("aRef", referenced)
 			]
-			addNewEClass("DerivedOK3") [
-				ESuperTypes += base
+			// not in result because has several superclasses
+			base.addNewSubclass("DerivedOK3") [
 				ESuperTypes += another
-				// not in result because has several superclasses
 			]
 		]
 		val result = finder.findClassificationByHierarchy(p)
@@ -247,9 +220,8 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 
 	@Test def void test_findClassificationByHierarchy_withOneSubclass() {
 		val p = createEPackage("p") [
-			val base = addNewEClass("Base")
-			addNewEClass("Derived1") [
-				ESuperTypes += base
+			addNewEClass("Base") [
+				addNewSubclass("Derived1")
 			]
 		]
 		val result = finder.findClassificationByHierarchy(p)
@@ -260,16 +232,10 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test def void test_findConcreteAbstractMetaclasses() {
 		val p = createEPackage("p") [
 			val base = addNewEClass("ConcreteAbstractMetaclass")
-			val other = addNewEClass("CorrectAbstractMetaclass") [
-				abstract = true
-			]
+			val other = addNewAbstractEClass("CorrectAbstractMetaclass")
 			val referred = addNewEClass("NonBaseClass")
-			addNewEClass("Derived1") [
-				ESuperTypes += base
-			]
-			addNewEClass("Derived2") [
-				ESuperTypes += other
-			]
+			base.addNewSubclass("Derived1")
+			other.addNewSubclass("Derived2")
 			addNewEClass("Another") [
 				addNewEReference("aRef", referred)
 			]
@@ -281,14 +247,9 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 
 	@Test def void test_findAbstractConcreteMetaclasses() {
 		val p = createEPackage("p") [
-			addNewEClass("AbstractConcreteMetaclass") [
-				abstract = true
-			]
-			val base = addNewEClass("AbstractMetaclass") [
-				abstract = true
-			]
-			addNewEClass("Derived1") [
-				ESuperTypes += base
+			addNewAbstractEClass("AbstractConcreteMetaclass")
+			addNewAbstractEClass("AbstractMetaclass") [
+				addNewSubclass("Derived1")
 			]
 		]
 		var result = finder.findAbstractConcreteMetaclasses(p)
@@ -298,17 +259,13 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 
 	@Test def void test_findAbstractSubclassesOfConcreteSuperclasses() {
 		val p = createEPackage("p") [
-			val abstractSuperclass = addNewEClass("AbstractSuperclass") [
-				abstract = true
-			]
+			val abstractSuperclass = addNewAbstractEClass("AbstractSuperclass")
 			val concreteSuperclass1 = addNewEClass("ConcreteSuperclass1")
 			val concreteSuperclass2 = addNewEClass("ConcreteSuperclass2")
-			addNewEClass("WithoutSmell") [
-				abstract = true
+			addNewAbstractEClass("WithoutSmell") [
 				ESuperTypes += #[concreteSuperclass1, abstractSuperclass]
 			]
-			addNewEClass("WithSmell") [
-				abstract = true
+			addNewAbstractEClass("WithSmell") [
 				ESuperTypes += #[concreteSuperclass1, concreteSuperclass2]
 			]
 		]
@@ -320,15 +277,9 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test def void test_directSubclasses() {
 		val p = createEPackage("p") [
 			val superclass = addNewEClass("ASuperclass")
-			val subclass1 = addNewEClass("ASubclass1") [
-				ESuperTypes += superclass
-			]
-			addNewEClass("ASubclass1Subclass") [
-				ESuperTypes += subclass1
-			]
-			addNewEClass("ASubclass2") [
-				ESuperTypes += superclass
-			]
+			val subclass1 = superclass.addNewSubclass("ASubclass1")
+			subclass1.addNewSubclass("ASubclass1Subclass")
+			superclass.addNewSubclass("ASubclass2")
 		]
 		assertThat(finder.directSubclasses(p.findEClass("ASuperclass")).map[name])
 			.containsExactlyInAnyOrder("ASubclass1", "ASubclass2")
@@ -342,26 +293,21 @@ class EdeltaBadSmellsFinderTest extends AbstractTest {
 		val p = createEPackage("p") [
 			val superclassWithDuplicatesInSubclasses =
 				addNewEClass("SuperClassWithDuplicatesInSubclasses")
-			addNewEClass("C1") [
-				ESuperTypes += superclassWithDuplicatesInSubclasses
+			superclassWithDuplicatesInSubclasses.addNewSubclass("C1") [
 				addNewEAttribute("A1", stringDataType)
 			]
-			addNewEClass("C2") [
-				ESuperTypes += superclassWithDuplicatesInSubclasses
+			superclassWithDuplicatesInSubclasses.addNewSubclass("C2") [
 				addNewEAttribute("A1", stringDataType)
 			]
 			val superclassWithoutDuplicatesInAllSubclasses =
 				addNewEClass("SuperClassWithoutDuplicatesInAllSubclasses")
-			addNewEClass("D1") [
-				ESuperTypes += superclassWithoutDuplicatesInAllSubclasses
+			superclassWithoutDuplicatesInAllSubclasses.addNewSubclass("D1") [
 				addNewEAttribute("A1", stringDataType)
 			]
-			addNewEClass("D2") [
-				ESuperTypes += superclassWithoutDuplicatesInAllSubclasses
+			superclassWithoutDuplicatesInAllSubclasses.addNewSubclass("D2") [
 				addNewEAttribute("A1", stringDataType)
 			]
-			addNewEClass("D3") [
-				ESuperTypes += superclassWithoutDuplicatesInAllSubclasses
+			superclassWithoutDuplicatesInAllSubclasses.addNewSubclass("D3") [
 				addNewEAttribute("A1", intDataType) // all subclasses must have the duplicate
 					// this is not a duplicate
 			]
