@@ -10,6 +10,11 @@
   <artifactId>edelta.examples</artifactId>
   <packaging>eclipse-test-plugin</packaging>
 
+  <properties>
+    <!-- Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=397015 -->
+    <sonar.tests>tests</sonar.tests>
+  </properties>
+
   <build>
     <plugins>
       <plugin>
