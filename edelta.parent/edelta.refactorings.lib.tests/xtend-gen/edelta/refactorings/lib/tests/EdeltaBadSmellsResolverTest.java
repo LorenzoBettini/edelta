@@ -3,10 +3,11 @@ package edelta.refactorings.lib.tests;
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaLibrary;
 import edelta.refactorings.lib.EdeltaBadSmellsResolver;
 import edelta.refactorings.lib.tests.AbstractTest;
 import edelta.testutils.EdeltaTestUtils;
-import java.util.Collections;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.common.util.EList;
@@ -15,14 +16,12 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.ListExtensions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -134,51 +133,25 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
   
   @Test
   public void test_resolveAbstractConcreteMetaclass() {
-    EPackage _createEPackage = this.factory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
-      EClass _createEClass = this.createEClass(it, "AbstractConcreteMetaclass");
-      final Procedure1<EClass> _function_1 = (EClass it_1) -> {
-        it_1.setAbstract(true);
-      };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
+    final Consumer<EPackage> _function = (EPackage it) -> {
+      EdeltaLibrary.addNewAbstractEClass(it, "AbstractConcreteMetaclass");
     };
-    final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
+    final EPackage p = this.createEPackage("p", _function);
     final EClass c = IterableExtensions.<EClass>head(this.EClasses(p));
-    Assert.assertTrue(c.isAbstract());
     this.resolver.resolveAbstractConcreteMetaclass(p);
-    Assert.assertFalse(c.isAbstract());
+    Assertions.assertThat(c.isAbstract()).isFalse();
   }
   
   @Test
   public void test_resolveAbstractSubclassesOfConcreteSuperclasses() {
-    EPackage _createEPackage = this.factory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
-      EClass _createEClass = this.createEClass(it, "AbstractSuperclass");
-      final Procedure1<EClass> _function_1 = (EClass it_1) -> {
-        it_1.setAbstract(true);
-      };
-      final EClass abstractSuperclass = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
-      final EClass concreteSuperclass1 = this.createEClass(it, "ConcreteSuperclass1");
-      final EClass concreteSuperclass2 = this.createEClass(it, "ConcreteSuperclass2");
-      EClass _createEClass_1 = this.createEClass(it, "WithoutSmell");
-      final Procedure1<EClass> _function_2 = (EClass it_1) -> {
-        it_1.setAbstract(true);
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        Iterables.<EClass>addAll(_eSuperTypes, Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(concreteSuperclass1, abstractSuperclass)));
-      };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_2);
-      EClass _createEClass_2 = this.createEClass(it, "WithSmell");
-      final Procedure1<EClass> _function_3 = (EClass it_1) -> {
-        it_1.setAbstract(true);
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        Iterables.<EClass>addAll(_eSuperTypes, Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(concreteSuperclass1, concreteSuperclass2)));
-      };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_2, _function_3);
-    };
-    final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-    Assertions.assertThat(IterableExtensions.<EClass>last(this.EClasses(p)).isAbstract()).isTrue();
-    this.resolver.resolveAbstractSubclassesOfConcreteSuperclasses(p);
-    Assertions.assertThat(IterableExtensions.<EClass>last(this.EClasses(p)).isAbstract()).isFalse();
+    try {
+      this.loadModelFile("resolveAbstractSubclassesOfConcreteSuperclasses", "TestEcore.ecore");
+      this.resolver.resolveAbstractSubclassesOfConcreteSuperclasses(this.resolver.getEPackage("p"));
+      this.resolver.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test

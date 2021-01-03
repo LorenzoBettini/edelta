@@ -7,8 +7,8 @@ import org.junit.Before
 import org.junit.Test
 
 import static org.assertj.core.api.Assertions.*
-import static org.junit.Assert.assertFalse
-import static org.junit.Assert.assertTrue
+
+import static extension edelta.lib.EdeltaLibrary.*
 
 class EdeltaBadSmellsResolverTest extends AbstractTest {
 	var EdeltaBadSmellsResolver resolver
@@ -86,36 +86,19 @@ class EdeltaBadSmellsResolverTest extends AbstractTest {
 	}
 
 	@Test def void test_resolveAbstractConcreteMetaclass() {
-		val p = factory.createEPackage => [
-			createEClass("AbstractConcreteMetaclass") => [
-				abstract = true
-			]
+		val p = createEPackage("p") [
+			addNewAbstractEClass("AbstractConcreteMetaclass")
 		]
 		val c = p.EClasses.head
-		assertTrue(c.abstract)
 		resolver.resolveAbstractConcreteMetaclass(p)
-		assertFalse(c.abstract)
+		assertThat(c.abstract).isFalse
 	}
 
 	@Test def void test_resolveAbstractSubclassesOfConcreteSuperclasses() {
-		val p = factory.createEPackage => [
-			val abstractSuperclass = createEClass("AbstractSuperclass") => [
-				abstract = true
-			]
-			val concreteSuperclass1 = createEClass("ConcreteSuperclass1")
-			val concreteSuperclass2 = createEClass("ConcreteSuperclass2")
-			createEClass("WithoutSmell") => [
-				abstract = true
-				ESuperTypes += #[concreteSuperclass1, abstractSuperclass]
-			]
-			createEClass("WithSmell") => [
-				abstract = true
-				ESuperTypes += #[concreteSuperclass1, concreteSuperclass2]
-			]
-		]
-		assertThat(p.EClasses.last.isAbstract).isTrue
-		resolver.resolveAbstractSubclassesOfConcreteSuperclasses(p)
-		assertThat(p.EClasses.last.isAbstract).isFalse
+		loadModelFile("resolveAbstractSubclassesOfConcreteSuperclasses", "TestEcore.ecore")
+		resolver.resolveAbstractSubclassesOfConcreteSuperclasses(resolver.getEPackage("p"))
+		resolver.saveModifiedEcores(MODIFIED);
+		assertModifiedFile
 	}
 
 	@Test def void test_resolveDuplicateFeaturesInSubclasses() {
