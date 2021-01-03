@@ -5,23 +5,21 @@ import com.google.common.collect.Iterables;
 import edelta.lib.AbstractEdelta;
 import edelta.refactorings.lib.EdeltaBadSmellsResolver;
 import edelta.refactorings.lib.tests.AbstractTest;
+import edelta.testutils.EdeltaTestUtils;
 import java.util.Collections;
-import java.util.List;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
-import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
-import org.eclipse.xtext.xbase.lib.Conversions;
+import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.ListExtensions;
@@ -35,10 +33,34 @@ import org.junit.Test;
 public class EdeltaBadSmellsResolverTest extends AbstractTest {
   private EdeltaBadSmellsResolver resolver;
   
+  private String testModelDirectory;
+  
+  private String testModelFile;
+  
   @Before
   public void setup() {
     EdeltaBadSmellsResolver _edeltaBadSmellsResolver = new EdeltaBadSmellsResolver();
     this.resolver = _edeltaBadSmellsResolver;
+  }
+  
+  private void loadModelFile(final String testModelDirectory, final String testModelFile) {
+    this.testModelDirectory = testModelDirectory;
+    this.testModelFile = testModelFile;
+    this.resolver.loadEcoreFile((((AbstractTest.TESTECORES + testModelDirectory) + 
+      "/") + testModelFile));
+  }
+  
+  private void assertModifiedFile() {
+    try {
+      EdeltaTestUtils.assertFilesAreEquals(
+        (((AbstractTest.EXPECTATIONS + 
+          this.testModelDirectory) + 
+          "/") + 
+          this.testModelFile), 
+        (AbstractTest.MODIFIED + this.testModelFile));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
@@ -50,122 +72,31 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
   }
   
   @Test
-  public void test_resolveDuplicateFeatures() {
-    EPackage _createEPackage = this.factory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
-      EClass _createEClass = this.createEClass(it, "C1");
-      final Procedure1<EClass> _function_1 = (EClass it_1) -> {
-        EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
-        final Procedure1<EAttribute> _function_2 = (EAttribute it_2) -> {
-          it_2.setEType(this.stringDataType);
-        };
-        ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_2);
-      };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
-      EClass _createEClass_1 = this.createEClass(it, "C2");
-      final Procedure1<EClass> _function_2 = (EClass it_1) -> {
-        EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
-        final Procedure1<EAttribute> _function_3 = (EAttribute it_2) -> {
-          it_2.setEType(this.stringDataType);
-        };
-        ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_3);
-      };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_2);
-      EClass _createEClass_2 = this.createEClass(it, "C3");
-      final Procedure1<EClass> _function_3 = (EClass it_1) -> {
-        EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
-        final Procedure1<EAttribute> _function_4 = (EAttribute it_2) -> {
-          it_2.setEType(this.stringDataType);
-          it_2.setLowerBound(2);
-        };
-        ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_4);
-      };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_2, _function_3);
-      EClass _createEClass_3 = this.createEClass(it, "C4");
-      final Procedure1<EClass> _function_4 = (EClass it_1) -> {
-        EAttribute _createEAttribute = this.createEAttribute(it_1, "A1");
-        final Procedure1<EAttribute> _function_5 = (EAttribute it_2) -> {
-          it_2.setEType(this.stringDataType);
-          it_2.setLowerBound(2);
-        };
-        ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_5);
-      };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_3, _function_4);
-    };
-    final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-    this.resolver.resolveDuplicatedFeatures(p);
-    final Function1<EClassifier, String> _function_1 = (EClassifier it) -> {
-      return it.getName();
-    };
-    final List<String> classifiersNames = ListExtensions.<EClassifier, String>map(p.getEClassifiers(), _function_1);
-    Assertions.<String>assertThat(classifiersNames).containsExactly("C1", "C2", "C3", "C4", "A1Element", "A1Element1");
-    final Iterable<EClass> classes = this.EClasses(p);
-    Assertions.<EAttribute>assertThat((((EClass[])Conversions.unwrapArray(classes, EClass.class))[0]).getEAttributes()).isEmpty();
-    Assertions.<EAttribute>assertThat((((EClass[])Conversions.unwrapArray(classes, EClass.class))[1]).getEAttributes()).isEmpty();
-    Assertions.<EAttribute>assertThat((((EClass[])Conversions.unwrapArray(classes, EClass.class))[2]).getEAttributes()).isEmpty();
-    Assertions.<EAttribute>assertThat((((EClass[])Conversions.unwrapArray(classes, EClass.class))[3]).getEAttributes()).isEmpty();
-    Assertions.<EAttribute>assertThat((((EClass[])Conversions.unwrapArray(classes, EClass.class))[4]).getEAttributes()).hasSize(1);
-    Assertions.<EAttribute>assertThat((((EClass[])Conversions.unwrapArray(classes, EClass.class))[5]).getEAttributes()).hasSize(1);
-    final EAttribute extractedA1NoLowerBound = IterableExtensions.<EAttribute>head((((EClass[])Conversions.unwrapArray(classes, EClass.class))[4]).getEAttributes());
-    final Function<EAttribute, String> _function_2 = (EAttribute it) -> {
-      return it.getName();
-    };
-    final Function<EAttribute, EDataType> _function_3 = (EAttribute it) -> {
-      return it.getEAttributeType();
-    };
-    final Function<EAttribute, Integer> _function_4 = (EAttribute it) -> {
-      return Integer.valueOf(it.getLowerBound());
-    };
-    Assertions.<EAttribute>assertThat(extractedA1NoLowerBound).<String>returns("A1", _function_2).<EDataType>returns(this.stringDataType, _function_3).<Integer>returns(Integer.valueOf(0), _function_4);
-    final EAttribute extractedA1WithLowerBound = IterableExtensions.<EAttribute>head((((EClass[])Conversions.unwrapArray(classes, EClass.class))[5]).getEAttributes());
-    final Function<EAttribute, String> _function_5 = (EAttribute it) -> {
-      return it.getName();
-    };
-    final Function<EAttribute, EDataType> _function_6 = (EAttribute it) -> {
-      return it.getEAttributeType();
-    };
-    final Function<EAttribute, Integer> _function_7 = (EAttribute it) -> {
-      return Integer.valueOf(it.getLowerBound());
-    };
-    Assertions.<EAttribute>assertThat(extractedA1WithLowerBound).<String>returns("A1", _function_5).<EDataType>returns(this.stringDataType, _function_6).<Integer>returns(Integer.valueOf(2), _function_7);
+  public void test_resolveDuplicatedFeatures() {
+    try {
+      this.loadModelFile("resolveDuplicatedFeatures", "TestEcore.ecore");
+      this.resolver.resolveDuplicatedFeatures(this.resolver.getEPackage("p"));
+      this.resolver.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void test_resolveDeadClassifiers() {
-    EPackage _createEPackage = this.factory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
-      this.createEClass(it, "Unused1");
-      this.createEClass(it, "Unused2");
-      final EClass used1 = this.createEClass(it, "Used1");
-      final EClass used2 = this.createEClass(it, "Used2");
-      EClass _createEClass = this.createEClass(it, "Unused3");
-      final Procedure1<EClass> _function_1 = (EClass it_1) -> {
-        EReference _createEReference = this.createEReference(it_1, "used1");
-        final Procedure1<EReference> _function_2 = (EReference it_2) -> {
-          it_2.setEType(used1);
-          it_2.setContainment(true);
-        };
-        ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_2);
-        EReference _createEReference_1 = this.createEReference(it_1, "used2");
-        final Procedure1<EReference> _function_3 = (EReference it_2) -> {
-          it_2.setEType(used2);
-          it_2.setContainment(false);
-        };
-        ObjectExtensions.<EReference>operator_doubleArrow(_createEReference_1, _function_3);
+    try {
+      this.loadModelFile("resolveDeadClassifiers", "TestEcore.ecore");
+      final Predicate<EClassifier> _function = (EClassifier it) -> {
+        String _name = it.getName();
+        return Objects.equal(_name, "Unused2");
       };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
-    };
-    final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-    final Predicate<EClassifier> _function_1 = (EClassifier it) -> {
-      String _name = it.getName();
-      return Objects.equal(_name, "Unused2");
-    };
-    this.resolver.resolveDeadClassifiers(p, _function_1);
-    final Predicate<EClassifier> _function_2 = (EClassifier it) -> {
-      String _name = it.getName();
-      return Objects.equal(_name, "Unused2");
-    };
-    Assertions.<EClassifier>assertThat(p.getEClassifiers()).hasSize(4).noneMatch(_function_2);
+      this.resolver.resolveDeadClassifiers(this.resolver.getEPackage("p"), _function);
+      this.resolver.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
