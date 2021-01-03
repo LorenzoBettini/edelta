@@ -3,15 +3,11 @@ package edelta.refactorings.lib.tests
 import edelta.lib.AbstractEdelta
 import edelta.refactorings.lib.EdeltaBadSmellsResolver
 import edelta.testutils.EdeltaTestUtils
-import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.EEnum
 import org.junit.Before
 import org.junit.Test
 
 import static org.assertj.core.api.Assertions.*
-import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertFalse
-import static org.junit.Assert.assertSame
 import static org.junit.Assert.assertTrue
 
 class EdeltaBadSmellsResolverTest extends AbstractTest {
@@ -83,16 +79,10 @@ class EdeltaBadSmellsResolverTest extends AbstractTest {
 	}
 
 	@Test def void test_resolveConcreteAbstractMetaclass() {
-		val p = factory.createEPackage => [
-			val base = createEClass("ConcreteAbstractMetaclass")
-			createEClass("Derived1") => [
-				ESuperTypes += base
-			]
-		]
-		val c = p.EClasses.head
-		assertFalse(c.abstract)
-		resolver.resolveConcreteAbstractMetaclass(p)
-		assertTrue(c.abstract)
+		loadModelFile("resolveConcreteAbstractMetaclass", "TestEcore.ecore")
+		resolver.resolveConcreteAbstractMetaclass(resolver.getEPackage("p"))
+		resolver.saveModifiedEcores(MODIFIED);
+		assertModifiedFile
 	}
 
 	@Test def void test_resolveAbstractConcreteMetaclass() {

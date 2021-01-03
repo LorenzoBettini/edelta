@@ -122,21 +122,14 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
   
   @Test
   public void test_resolveConcreteAbstractMetaclass() {
-    EPackage _createEPackage = this.factory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
-      final EClass base = this.createEClass(it, "ConcreteAbstractMetaclass");
-      EClass _createEClass = this.createEClass(it, "Derived1");
-      final Procedure1<EClass> _function_1 = (EClass it_1) -> {
-        EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-        _eSuperTypes.add(base);
-      };
-      ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
-    };
-    final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-    final EClass c = IterableExtensions.<EClass>head(this.EClasses(p));
-    Assert.assertFalse(c.isAbstract());
-    this.resolver.resolveConcreteAbstractMetaclass(p);
-    Assert.assertTrue(c.isAbstract());
+    try {
+      this.loadModelFile("resolveConcreteAbstractMetaclass", "TestEcore.ecore");
+      this.resolver.resolveConcreteAbstractMetaclass(this.resolver.getEPackage("p"));
+      this.resolver.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
