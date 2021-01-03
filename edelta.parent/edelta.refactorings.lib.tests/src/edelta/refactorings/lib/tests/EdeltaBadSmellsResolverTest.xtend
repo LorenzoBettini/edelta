@@ -2,6 +2,7 @@ package edelta.refactorings.lib.tests
 
 import edelta.lib.AbstractEdelta
 import edelta.refactorings.lib.EdeltaBadSmellsResolver
+import edelta.testutils.EdeltaTestUtils
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EEnum
 import org.junit.Before
@@ -9,12 +10,9 @@ import org.junit.Test
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertNotNull
-import static org.junit.Assert.assertNull
-import static org.junit.Assert.assertSame
 import static org.junit.Assert.assertFalse
+import static org.junit.Assert.assertSame
 import static org.junit.Assert.assertTrue
-import edelta.testutils.EdeltaTestUtils
 
 class EdeltaBadSmellsResolverTest extends AbstractTest {
 	var EdeltaBadSmellsResolver resolver
@@ -71,27 +69,10 @@ class EdeltaBadSmellsResolverTest extends AbstractTest {
 	}
 
 	@Test def void test_resolveRedundantContainers() {
-		val p = factory.createEPackage => [
-			val containedWithRedundant = createEClass("ContainedWithRedundant")
-			val container = createEClass("Container") => [
-				createEReference("containedWithRedundant") => [
-					EType = containedWithRedundant
-					containment = true
-				]
-			]
-			containedWithRedundant.createEReference("redundant") => [
-				EType = container
-				lowerBound = 1
-			]
-		]
-		val redundant = p.EClasses.head.EReferences.head
-		val opposite = p.EClasses.last.EReferences.head
-		assertNull(redundant.EOpposite)
-		assertNull(opposite.EOpposite)
-		resolver.resolveRedundantContainers(p)
-		assertNotNull(redundant.EOpposite)
-		assertSame(redundant.EOpposite, opposite)
-		assertSame(opposite.EOpposite, redundant)
+		loadModelFile("resolveRedundantContainers", "TestEcore.ecore")
+		resolver.resolveRedundantContainers(resolver.getEPackage("p"))
+		resolver.saveModifiedEcores(MODIFIED);
+		assertModifiedFile
 	}
 
 	@Test def void test_resolveClassificationByHierarchy() {

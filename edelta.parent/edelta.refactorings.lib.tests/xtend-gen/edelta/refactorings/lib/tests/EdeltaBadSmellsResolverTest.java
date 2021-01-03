@@ -16,7 +16,6 @@ import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Exceptions;
@@ -101,35 +100,14 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
   
   @Test
   public void test_resolveRedundantContainers() {
-    EPackage _createEPackage = this.factory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
-      final EClass containedWithRedundant = this.createEClass(it, "ContainedWithRedundant");
-      EClass _createEClass = this.createEClass(it, "Container");
-      final Procedure1<EClass> _function_1 = (EClass it_1) -> {
-        EReference _createEReference = this.createEReference(it_1, "containedWithRedundant");
-        final Procedure1<EReference> _function_2 = (EReference it_2) -> {
-          it_2.setEType(containedWithRedundant);
-          it_2.setContainment(true);
-        };
-        ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_2);
-      };
-      final EClass container = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
-      EReference _createEReference = this.createEReference(containedWithRedundant, "redundant");
-      final Procedure1<EReference> _function_2 = (EReference it_1) -> {
-        it_1.setEType(container);
-        it_1.setLowerBound(1);
-      };
-      ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_2);
-    };
-    final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-    final EReference redundant = IterableExtensions.<EReference>head(IterableExtensions.<EClass>head(this.EClasses(p)).getEReferences());
-    final EReference opposite = IterableExtensions.<EReference>head(IterableExtensions.<EClass>last(this.EClasses(p)).getEReferences());
-    Assert.assertNull(redundant.getEOpposite());
-    Assert.assertNull(opposite.getEOpposite());
-    this.resolver.resolveRedundantContainers(p);
-    Assert.assertNotNull(redundant.getEOpposite());
-    Assert.assertSame(redundant.getEOpposite(), opposite);
-    Assert.assertSame(opposite.getEOpposite(), redundant);
+    try {
+      this.loadModelFile("resolveRedundantContainers", "TestEcore.ecore");
+      this.resolver.resolveRedundantContainers(this.resolver.getEPackage("p"));
+      this.resolver.saveModifiedEcores(AbstractTest.MODIFIED);
+      this.assertModifiedFile();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
