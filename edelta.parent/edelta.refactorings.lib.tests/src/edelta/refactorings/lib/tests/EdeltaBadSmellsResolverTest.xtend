@@ -76,28 +76,10 @@ class EdeltaBadSmellsResolverTest extends AbstractTest {
 	}
 
 	@Test def void test_resolveClassificationByHierarchy() {
-		val p = factory.createEPackage => [
-			val base = createEClass("Base")
-			createEClass("Derived1") => [
-				ESuperTypes += base
-			]
-			createEClass("Derived2") => [
-				ESuperTypes += base
-			]
-		]
-		resolver.resolveClassificationByHierarchy(p)
-		assertEquals(2, p.EClassifiers.size)
-		val enum = p.EClassifiers.last as EEnum
-		assertEquals("BaseType", enum.name)
-		val eLiterals = enum.ELiterals
-		assertEquals(2, eLiterals.size)
-		assertEquals("DERIVED1", eLiterals.get(0).name)
-		assertEquals("DERIVED2", eLiterals.get(1).name)
-		assertEquals(0, eLiterals.get(0).value)
-		assertEquals(1, eLiterals.get(1).value)
-		val c = p.EClassifiers.head as EClass
-		val attr = findEAttribute(c, "baseType")
-		assertSame(enum, attr.EType)
+		loadModelFile("resolveClassificationByHierarchy", "TestEcore.ecore")
+		resolver.resolveClassificationByHierarchy(resolver.getEPackage("p"))
+		resolver.saveModifiedEcores(MODIFIED);
+		assertModifiedFile
 	}
 
 	@Test def void test_resolveConcreteAbstractMetaclass() {
