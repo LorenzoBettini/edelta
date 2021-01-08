@@ -30,7 +30,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
   public void testEmptyProgram() {
     try {
       StringConcatenation _builder = new StringConcatenation();
-      final EdeltaProgram result = this._parseHelper.parse(_builder);
+      final EdeltaProgram result = this.parseHelper.parse(_builder);
       Assert.assertNotNull(result);
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
@@ -43,7 +43,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("metamodel \"ecore\"");
       _builder.newLine();
-      final EdeltaProgram result = this._parseHelper.parse(_builder);
+      final EdeltaProgram result = this.parseHelper.parse(_builder);
       Assert.assertNotNull(result);
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
@@ -58,7 +58,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
       _builder.newLine();
       _builder.append("metamodel \"type\"");
       _builder.newLine();
-      final EdeltaProgram result = this._parseHelper.parse(_builder);
+      final EdeltaProgram result = this.parseHelper.parse(_builder);
       Assert.assertNotNull(result);
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
@@ -122,7 +122,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("use");
       _builder.newLine();
-      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this._parseHelper.parse(_builder).getUseAsClauses());
+      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this.parseHelper.parse(_builder).getUseAsClauses());
       final Procedure1<EdeltaUseAs> _function = (EdeltaUseAs it) -> {
         Assert.assertNull(it.getType());
         Assert.assertNull(it.getName());
@@ -139,7 +139,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("use as foo");
       _builder.newLine();
-      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this._parseHelper.parse(_builder).getUseAsClauses());
+      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this.parseHelper.parse(_builder).getUseAsClauses());
       final Procedure1<EdeltaUseAs> _function = (EdeltaUseAs it) -> {
         Assert.assertNull(it.getType());
         Assert.assertNotNull(it.getName());
@@ -156,7 +156,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("use Foo as ");
       _builder.newLine();
-      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this._parseHelper.parse(_builder).getUseAsClauses());
+      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this.parseHelper.parse(_builder).getUseAsClauses());
       final Procedure1<EdeltaUseAs> _function = (EdeltaUseAs it) -> {
         Assert.assertNotNull(it.getType());
         Assert.assertNull(it.getName());
@@ -173,7 +173,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("use Foo as foo");
       _builder.newLine();
-      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this._parseHelper.parse(_builder).getUseAsClauses());
+      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this.parseHelper.parse(_builder).getUseAsClauses());
       final Procedure1<EdeltaUseAs> _function = (EdeltaUseAs it) -> {
         Assert.assertNotNull(it.getType());
         Assert.assertNotNull(it.getName());
@@ -186,7 +186,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
   
   private EdeltaEcoreReferenceExpression getEcoreReferenceExpression(final CharSequence ecoreRefArg) {
     try {
-      return this.getEdeltaEcoreReferenceExpression(IterableExtensions.<XExpression>last(this.getBlock(this.lastModifyEcoreOperation(this._parseHelper.parse(this.textForEcoreRef(ecoreRefArg))).getBody()).getExpressions()));
+      return this.getEdeltaEcoreReferenceExpression(IterableExtensions.<XExpression>last(this.getBlock(this.lastModifyEcoreOperation(this.parseHelper.parse(this.textForEcoreRef(ecoreRefArg))).getBody()).getExpressions()));
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }

@@ -94,7 +94,7 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
       };
       EPackage _doubleArrow = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
       this.ePackage = _doubleArrow;
-      this.resource = this._parseHelper.parse("").eResource();
+      this.resource = this.parseHelper.parse("").eResource();
       this.enamedElementXExpressionMap = this.derivedStateHelper.getEnamedElementXExpressionMap(this.resource);
       this.modifiedElements = this.derivedStateHelper.getModifiedElements(this.resource);
       EdeltaInterpreterResourceListener _edeltaInterpreterResourceListener = new EdeltaInterpreterResourceListener(

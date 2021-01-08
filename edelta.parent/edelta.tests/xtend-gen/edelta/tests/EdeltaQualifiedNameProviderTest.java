@@ -31,7 +31,7 @@ public class EdeltaQualifiedNameProviderTest extends EdeltaAbstractTest {
   public void testProgramWithoutPackage() {
     try {
       StringConcatenation _builder = new StringConcatenation();
-      Assert.assertEquals("edelta.__synthetic0", this._iQualifiedNameProvider.getFullyQualifiedName(this._parseHelper.parse(_builder)).toString());
+      Assert.assertEquals("edelta.__synthetic0", this._iQualifiedNameProvider.getFullyQualifiedName(this.parseHelper.parse(_builder)).toString());
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -42,7 +42,7 @@ public class EdeltaQualifiedNameProviderTest extends EdeltaAbstractTest {
     try {
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("package foo");
-      Assert.assertEquals("foo.__synthetic0", this._iQualifiedNameProvider.getFullyQualifiedName(this._parseHelper.parse(_builder)).toString());
+      Assert.assertEquals("foo.__synthetic0", this._iQualifiedNameProvider.getFullyQualifiedName(this.parseHelper.parse(_builder)).toString());
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }

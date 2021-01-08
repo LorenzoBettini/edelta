@@ -59,7 +59,7 @@ public class EdeltaDerivedStateHelperTest extends EdeltaAbstractTest {
   @Test
   public void testGetEdeltaEcoreReferenceState() {
     try {
-      final Resource res = this._parseHelper.parse("").eResource();
+      final Resource res = this.parseHelper.parse("").eResource();
       final EdeltaEcoreReference ref = this.edeltaFactory.createEdeltaEcoreReference();
       EList<EObject> _contents = res.getContents();
       _contents.add(ref);

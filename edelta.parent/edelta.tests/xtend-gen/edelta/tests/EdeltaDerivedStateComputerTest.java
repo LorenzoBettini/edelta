@@ -365,7 +365,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
       _builder.append("package test");
       _builder.newLine();
       Assert.assertNull(
-        this._testableEdeltaDerivedStateComputer.getPrimarySourceElement(this._parseHelper.parse(_builder)));
+        this._testableEdeltaDerivedStateComputer.getPrimarySourceElement(this.parseHelper.parse(_builder)));
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }

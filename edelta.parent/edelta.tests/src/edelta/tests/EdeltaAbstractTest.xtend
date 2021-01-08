@@ -46,7 +46,7 @@ abstract class EdeltaAbstractTest {
 	@Inject
 	Provider<XtextResourceSet> resourceSetProvider
 
-	@Inject protected extension ParseHelper<EdeltaProgram>
+	@Inject protected extension ParseHelper<EdeltaProgram> parseHelper
 	@Inject protected extension ValidationTestHelper
 	@Inject protected extension IJvmModelAssociations
 

@@ -64,7 +64,7 @@ public class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
       _builder.newLine();
       _builder.append("use MyCustomEdelta as my");
       _builder.newLine();
-      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this._parseHelper.parse(_builder).getUseAsClauses());
+      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this.parseHelper.parse(_builder).getUseAsClauses());
       final Procedure1<EdeltaUseAs> _function = (EdeltaUseAs it) -> {
         Assert.assertEquals(
           MyCustomEdelta.class, 
@@ -82,7 +82,7 @@ public class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("use as my");
       _builder.newLine();
-      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this._parseHelper.parse(_builder).getUseAsClauses());
+      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this.parseHelper.parse(_builder).getUseAsClauses());
       final Procedure1<EdeltaUseAs> _function = (EdeltaUseAs it) -> {
         Assertions.assertThat(
           this.interpreterHelper.safeInstantiate(this.javaReflectAccess, it, this.other).getClass()).isNotNull();
@@ -101,7 +101,7 @@ public class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
       _builder.newLine();
       _builder.append("use InstantiateExceptionClass as my");
       _builder.newLine();
-      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this._parseHelper.parse(_builder).getUseAsClauses());
+      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this.parseHelper.parse(_builder).getUseAsClauses());
       final Procedure1<EdeltaUseAs> _function = (EdeltaUseAs it) -> {
         Assertions.assertThat(
           this.interpreterHelper.safeInstantiate(this.javaReflectAccess, it, this.other).getClass()).isNotNull();
@@ -118,7 +118,7 @@ public class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("use NonExistent as my");
       _builder.newLine();
-      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this._parseHelper.parse(_builder).getUseAsClauses());
+      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this.parseHelper.parse(_builder).getUseAsClauses());
       final Procedure1<EdeltaUseAs> _function_1 = (EdeltaUseAs it) -> {
         this.interpreterHelper.safeInstantiate(this.javaReflectAccess, it, this.other).getClass();
       };
@@ -136,7 +136,7 @@ public class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
       _builder.newLine();
       _builder.append("use MyCustomEdeltaThatCannotBeLoadedAtRuntime as my");
       _builder.newLine();
-      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this._parseHelper.parse(_builder).getUseAsClauses());
+      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this.parseHelper.parse(_builder).getUseAsClauses());
       final Procedure1<EdeltaUseAs> _function_1 = (EdeltaUseAs it) -> {
         this.interpreterHelper.safeInstantiate(this.javaReflectAccess, it, this.other).getClass();
       };
@@ -159,7 +159,7 @@ public class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
       _builder.newLine();
       _builder.append("modifyEcore second epackage foo {}");
       _builder.newLine();
-      EdeltaProgram _parse = this._parseHelper.parse(_builder);
+      EdeltaProgram _parse = this.parseHelper.parse(_builder);
       final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
         Assertions.<EdeltaModifyEcoreOperation>assertThat(this.interpreterHelper.filterOperations(it.getModifyEcoreOperations())).containsExactly(IterableExtensions.<EdeltaModifyEcoreOperation>last(it.getModifyEcoreOperations()));
       };

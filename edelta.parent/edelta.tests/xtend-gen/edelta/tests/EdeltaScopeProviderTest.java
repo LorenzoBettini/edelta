@@ -49,7 +49,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
       _builder.newLine();
       _builder.append("}");
       _builder.newLine();
-      this._iScopeProvider.getScope(this.getBlockLastExpression(this.lastModifyEcoreOperation(this._parseHelper.parse(_builder)).getBody()), EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation_Body());
+      this._iScopeProvider.getScope(this.getBlockLastExpression(this.lastModifyEcoreOperation(this.parseHelper.parse(_builder)).getBody()), EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation_Body());
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }

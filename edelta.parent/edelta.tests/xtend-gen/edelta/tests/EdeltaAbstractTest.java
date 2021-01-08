@@ -70,7 +70,7 @@ public abstract class EdeltaAbstractTest {
   
   @Inject
   @Extension
-  protected ParseHelper<EdeltaProgram> _parseHelper;
+  protected ParseHelper<EdeltaProgram> parseHelper;
   
   @Inject
   @Extension
@@ -129,7 +129,7 @@ public abstract class EdeltaAbstractTest {
     try {
       EdeltaProgram program = null;
       for (final CharSequence input : inputs) {
-        program = this._parseHelper.parse(input, rs);
+        program = this.parseHelper.parse(input, rs);
       }
       return program;
     } catch (Throwable _e) {
@@ -139,7 +139,7 @@ public abstract class EdeltaAbstractTest {
   
   protected EdeltaProgram parseWithTestEcore(final CharSequence input) {
     try {
-      return this._parseHelper.parse(input, this.resourceSetWithTestEcore());
+      return this.parseHelper.parse(input, this.resourceSetWithTestEcore());
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -147,7 +147,7 @@ public abstract class EdeltaAbstractTest {
   
   protected EdeltaProgram parseWithTestEcores(final CharSequence input) {
     try {
-      return this._parseHelper.parse(input, this.resourceSetWithTestEcores());
+      return this.parseHelper.parse(input, this.resourceSetWithTestEcores());
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -155,7 +155,7 @@ public abstract class EdeltaAbstractTest {
   
   protected EdeltaProgram parseWithTestEcoreWithSubPackage(final CharSequence input) {
     try {
-      return this._parseHelper.parse(input, this.resourceSetWithTestEcoreWithSubPackage());
+      return this.parseHelper.parse(input, this.resourceSetWithTestEcoreWithSubPackage());
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -163,7 +163,7 @@ public abstract class EdeltaAbstractTest {
   
   protected EdeltaProgram parseWithTestEcoresWithReferences(final CharSequence input) {
     try {
-      return this._parseHelper.parse(input, this.resourceSetWithTestEcoresWithReferences());
+      return this.parseHelper.parse(input, this.resourceSetWithTestEcoresWithReferences());
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -175,7 +175,7 @@ public abstract class EdeltaAbstractTest {
       resourceSet.getResource(this.createFileURIFromPath((EdeltaAbstractTest.METAMODEL_PATH + EdeltaAbstractTest.ECORE_ECORE)), true);
       final URI uri = this.createFileURIFromPath(path);
       resourceSet.getResource(uri, true);
-      final EdeltaProgram prog = this._parseHelper.parse(input, resourceSet);
+      final EdeltaProgram prog = this.parseHelper.parse(input, resourceSet);
       return prog;
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);

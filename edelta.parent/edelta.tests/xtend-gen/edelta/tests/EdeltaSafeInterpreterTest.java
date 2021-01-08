@@ -46,7 +46,7 @@ public class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
   public void sanityTestCheck() {
     try {
       final EdeltaInterpreterFactory interpreterFactory = this.injector.<EdeltaInterpreterFactory>getInstance(EdeltaInterpreterFactory.class);
-      final EdeltaInterpreter anotherInterprter = interpreterFactory.create(this._parseHelper.parse("").eResource());
+      final EdeltaInterpreter anotherInterprter = interpreterFactory.create(this.parseHelper.parse("").eResource());
       Assertions.assertThat(anotherInterprter.getClass()).isSameAs(this.interpreter.getClass());
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);

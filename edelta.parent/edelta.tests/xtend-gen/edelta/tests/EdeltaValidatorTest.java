@@ -26,7 +26,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   public void testEmptyProgram() {
     try {
       StringConcatenation _builder = new StringConcatenation();
-      this._validationTestHelper.assertNoErrors(this._parseHelper.parse(_builder));
+      this._validationTestHelper.assertNoErrors(this.parseHelper.parse(_builder));
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -40,7 +40,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   @Test
   public void testUseImportedJavaTypes() {
     try {
-      this._validationTestHelper.assertNoErrors(this._parseHelper.parse(this._inputs.useImportedJavaTypes()));
+      this._validationTestHelper.assertNoErrors(this.parseHelper.parse(this._inputs.useImportedJavaTypes()));
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -64,7 +64,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
       _builder.newLine();
       _builder.append("use MyCustomEdelta as foo");
       _builder.newLine();
-      this._validationTestHelper.assertNoIssues(this._parseHelper.parse(_builder));
+      this._validationTestHelper.assertNoIssues(this.parseHelper.parse(_builder));
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -79,7 +79,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
       _builder.append("use List as foo");
       _builder.newLine();
       final String input = _builder.toString();
-      EdeltaProgram _parse = this._parseHelper.parse(input);
+      EdeltaProgram _parse = this.parseHelper.parse(input);
       int _lastIndexOf = input.lastIndexOf("List");
       String _name = AbstractEdelta.class.getName();
       String _plus = ("Not a valid type: must be an " + _name);
@@ -100,7 +100,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
       _builder.append("use MyCustomAbstractEdelta as foo");
       _builder.newLine();
       final String input = _builder.toString();
-      this._validationTestHelper.assertError(this._parseHelper.parse(input), 
+      this._validationTestHelper.assertError(this.parseHelper.parse(input), 
         EdeltaPackage.Literals.EDELTA_USE_AS, 
         EdeltaValidator.TYPE_MISMATCH, 
         input.lastIndexOf("MyCustomAbstractEdelta"), "MyCustomAbstractEdelta".length(), 
@@ -117,7 +117,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
       _builder.append("use Unknown as foo");
       _builder.newLine();
       final String input = _builder.toString();
-      this.assertErrorsAsStrings(this._parseHelper.parse(input), 
+      this.assertErrorsAsStrings(this.parseHelper.parse(input), 
         "Unknown cannot be resolved to a type.");
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
