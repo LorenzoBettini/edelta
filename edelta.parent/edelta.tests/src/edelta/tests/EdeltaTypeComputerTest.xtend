@@ -94,11 +94,10 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	}
 
 	def private assertType(CharSequence input, String expectedTypeFQN) {
-		input.ecoreReferenceExpression => [
-			expectedTypeFQN.assertEquals(
-				resolveTypes.getActualType(it).identifier
-			)
-		]
+		val ecoreRefExp = input.ecoreReferenceExpression
+		expectedTypeFQN.assertEquals(
+			ecoreRefExp.resolveTypes.getActualType(ecoreRefExp).identifier
+		)
 	}
 
 	def private assertENamedElement(CharSequence input) {
@@ -106,13 +105,14 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	}
 
 	def private assertTypeOfRightExpression(CharSequence input, String expectedTypeFQN) {
-		'''
-			metamodel "foo"
+		"
+			metamodel \"foo\"
 			
 			modifyEcore aTest epackage foo {
 				«input»
 			}
-		'''
+		".
+		replace("«input»", input)
 		.parseWithTestEcore
 		.lastModifyEcoreOperation.body.blockLastExpression => [
 			expectedTypeFQN.assertEquals(

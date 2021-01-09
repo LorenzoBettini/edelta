@@ -97,32 +97,18 @@ public class EdeltaTypeComputerTest extends EdeltaAbstractTest {
       this.typeResolver.resolveTypes(ecoreref).getActualType(ecoreref).getIdentifier());
   }
   
-  private EdeltaEcoreReferenceExpression assertType(final CharSequence input, final String expectedTypeFQN) {
-    EdeltaEcoreReferenceExpression _ecoreReferenceExpression = this.ecoreReferenceExpression(input);
-    final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
-      Assertions.assertEquals(expectedTypeFQN, 
-        this.typeResolver.resolveTypes(it).getActualType(it).getIdentifier());
-    };
-    return ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_ecoreReferenceExpression, _function);
+  private void assertType(final CharSequence input, final String expectedTypeFQN) {
+    final EdeltaEcoreReferenceExpression ecoreRefExp = this.ecoreReferenceExpression(input);
+    Assertions.assertEquals(expectedTypeFQN, 
+      this.typeResolver.resolveTypes(ecoreRefExp).getActualType(ecoreRefExp).getIdentifier());
   }
   
-  private EdeltaEcoreReferenceExpression assertENamedElement(final CharSequence input) {
-    return this.assertType(input, "org.eclipse.emf.ecore.ENamedElement");
+  private void assertENamedElement(final CharSequence input) {
+    this.assertType(input, "org.eclipse.emf.ecore.ENamedElement");
   }
   
   private XExpression assertTypeOfRightExpression(final CharSequence input, final String expectedTypeFQN) {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append(input, "\t");
-    _builder.newLineIfNotEmpty();
-    _builder.append("}");
-    _builder.newLine();
-    XExpression _blockLastExpression = this.getBlockLastExpression(this.lastModifyEcoreOperation(this.parseWithTestEcore(_builder)).getBody());
+    XExpression _blockLastExpression = this.getBlockLastExpression(this.lastModifyEcoreOperation(this.parseWithTestEcore("\n\t\t\tmetamodel \"foo\"\n\t\t\t\n\t\t\tmodifyEcore aTest epackage foo {\n\t\t\t\t«input»\n\t\t\t}\n\t\t".replace("«input»", input))).getBody());
     final Procedure1<XExpression> _function = (XExpression it) -> {
       Assertions.assertEquals(expectedTypeFQN, 
         this.typeResolver.resolveTypes(it).getActualType(
