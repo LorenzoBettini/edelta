@@ -1,86 +1,50 @@
 package edelta.tests
 
 import com.google.inject.Inject
-import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.EDataType
-import org.eclipse.emf.ecore.EEnum
-import org.eclipse.emf.ecore.EEnumLiteral
-import org.eclipse.emf.ecore.ENamedElement
-import org.eclipse.emf.ecore.EPackage
-import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.testing.InjectWith
-import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.testing.extensions.InjectionExtension
 import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.^extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 
-import static extension org.junit.Assert.*
+import static extension org.junit.jupiter.api.Assertions.*
 
-@RunWith(XtextRunner)
+@ExtendWith(InjectionExtension)
 @InjectWith(EdeltaInjectorProviderCustom)
 class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 
-	@Inject extension IBatchTypeResolver
+	@Inject extension IBatchTypeResolver typeResolver
 
-	@Test
-	def void testTypeOfReferenceToEPackage() {
-		"ecoreref(foo)".assertType(EPackage)
+	@ParameterizedTest
+	@CsvSource(#[
+		"foo, EPackage",
+		"FooClass, EClass",
+		"FooDataType, EDataType",
+		"FooEnum, EEnum",
+		"myAttribute, EAttribute",
+		"myReference, EReference",
+		"FooEnumLiteral, EEnumLiteral",
+		"NonExistant, ENamedElement"
+	])
+	def void testTypeOfEcoreReference(String ecoreRefArg, String expectedType) {
+		assertType(
+			"ecoreref(" + ecoreRefArg + ")",
+			"org.eclipse.emf.ecore." + expectedType)
 	}
 
-	@Test
-	def void testTypeOfReferenceToEClass() {
-		"ecoreref(FooClass)".assertType(EClass)
-	}
-
-	@Test
-	def void testTypeOfReferenceToEDataType() {
-		"ecoreref(FooDataType)".assertType(EDataType)
-	}
-
-	@Test
-	def void testTypeOfReferenceToEEnum() {
-		"ecoreref(FooEnum)".assertType(EEnum)
-	}
-
-	@Test
-	def void testTypeOfReferenceToEAttribute() {
-		"ecoreref(myAttribute)".assertType(EAttribute)
-	}
-
-	@Test
-	def void testTypeOfReferenceToEReference() {
-		"ecoreref(myReference)".assertType(EReference)
-	}
-
-	@Test
-	def void testTypeOfReferenceToEEnumLiteral() {
-		"ecoreref(FooEnumLiteral)".assertType(EEnumLiteral)
-	}
-
-	@Test
-	def void testTypeOfReferenceToUnresolvedENamedElement() {
-		"ecoreref(NonExistant)".assertType(ENamedElement)
-	}
-
-	@Test
-	def void testTypeOfReferenceToUnresolvedENamedElementWithExpectations() {
-		"val org.eclipse.emf.ecore.EClass c = ecoreref(NonExistant)".
-			assertTypeOfRightExpression(EClass)
-	}
-
-	@Test
-	def void testTypeOfReferenceToUnresolvedQualifiedENamedElementWithExpectations() {
-		'''
-			val org.eclipse.emf.ecore.EClass c = ecoreref(FooClass.NonExistant)
-		'''.
-			assertTypeOfRightExpression(EClass)
-	}
-
-	@Test
-	def void testTypeOfReferenceToUnresolvedENamedElementAtLeastENamedElement() {
-		"val Object c = ecoreref(NonExistant)".
-			assertTypeOfRightExpression(ENamedElement)
+	@ParameterizedTest
+	@CsvSource(#[
+		"'val org.eclipse.emf.ecore.EClass c = ecoreref(NonExistant)', EClass",
+		"'val org.eclipse.emf.ecore.EClass c = ecoreref(FooClass.NonExistant)', EClass",
+		"'val Object c = ecoreref(NonExistant)', ENamedElement"
+	])
+	def void testTypeOfEcoreReferenceWithExpectation(String input, String expectedType) {
+		assertTypeOfRightExpression(
+			input,
+			"org.eclipse.emf.ecore." + expectedType)
 	}
 
 	@Test
@@ -129,23 +93,19 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 		)
 	}
 
-	def private assertType(CharSequence input, Class<?> expected) {
+	def private assertType(CharSequence input, String expectedTypeFQN) {
 		input.ecoreReferenceExpression => [
-			expected.canonicalName.assertEquals(
+			expectedTypeFQN.assertEquals(
 				resolveTypes.getActualType(it).identifier
 			)
 		]
 	}
 
 	def private assertENamedElement(CharSequence input) {
-		input.ecoreReferenceExpression => [
-			ENamedElement.canonicalName.assertEquals(
-				resolveTypes.getActualType(it).identifier
-			)
-		]
+		input.assertType("org.eclipse.emf.ecore.ENamedElement")
 	}
 
-	def private assertTypeOfRightExpression(CharSequence input, Class<?> expected) {
+	def private assertTypeOfRightExpression(CharSequence input, String expectedTypeFQN) {
 		'''
 			metamodel "foo"
 			
@@ -155,7 +115,7 @@ class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 		'''
 		.parseWithTestEcore
 		.lastModifyEcoreOperation.body.blockLastExpression => [
-			expected.canonicalName.assertEquals(
+			expectedTypeFQN.assertEquals(
 				resolveTypes.getActualType(
 					variableDeclaration.right
 				).identifier
