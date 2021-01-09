@@ -312,8 +312,8 @@ abstract class EdeltaAbstractTest {
 	}
 
 	def protected assertEqualsStrings(CharSequence expected, CharSequence actual) {
-		expected.toString.replaceAll("\r", "").
-			assertEquals(actual.toString.replaceAll("\r", ""))
+		expected.toString.replace("\r", "").
+			assertEquals(actual.toString.replace("\r", ""))
 	}
 
 	def protected assertNamedElements(Iterable<? extends ENamedElement> elements, CharSequence expected) {

@@ -515,7 +515,7 @@ public abstract class EdeltaAbstractTest {
   }
   
   protected void assertEqualsStrings(final CharSequence expected, final CharSequence actual) {
-    Assert.assertEquals(expected.toString().replaceAll("\r", ""), actual.toString().replaceAll("\r", ""));
+    Assert.assertEquals(expected.toString().replace("\r", ""), actual.toString().replace("\r", ""));
   }
   
   protected void assertNamedElements(final Iterable<? extends ENamedElement> elements, final CharSequence expected) {
