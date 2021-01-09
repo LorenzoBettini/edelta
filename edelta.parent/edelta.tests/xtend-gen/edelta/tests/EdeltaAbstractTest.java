@@ -13,7 +13,6 @@ import edelta.edelta.EdeltaOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.resource.derivedstate.EdeltaAccessibleElement;
 import edelta.resource.derivedstate.EdeltaAccessibleElements;
-import edelta.tests.EdeltaInjectorProvider;
 import edelta.tests.input.Inputs;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -40,8 +39,6 @@ import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.resource.XtextResourceSet;
-import org.eclipse.xtext.testing.InjectWith;
-import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.testing.util.ParseHelper;
 import org.eclipse.xtext.testing.validation.ValidationTestHelper;
 import org.eclipse.xtext.validation.Issue;
@@ -59,10 +56,7 @@ import org.eclipse.xtext.xbase.lib.ListExtensions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Assert;
-import org.junit.runner.RunWith;
 
-@RunWith(XtextRunner.class)
-@InjectWith(EdeltaInjectorProvider.class)
 @SuppressWarnings("all")
 public abstract class EdeltaAbstractTest {
   @Inject

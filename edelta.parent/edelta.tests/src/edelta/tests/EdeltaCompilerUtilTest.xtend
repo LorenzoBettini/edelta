@@ -2,19 +2,21 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.compiler.EdeltaCompilerUtil
-import org.eclipse.xtext.testing.InjectWith
-import org.eclipse.xtext.testing.XtextRunner
-import org.junit.Test
-import org.junit.runner.RunWith
-
-import static extension org.junit.Assert.*
 import org.eclipse.emf.ecore.EcoreFactory
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.extensions.InjectionExtension
+import org.junit.jupiter.api.^extension.ExtendWith
 
-@RunWith(XtextRunner)
+import org.junit.jupiter.api.Test
+import static extension org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
+
+@ExtendWith(InjectionExtension)
 @InjectWith(EdeltaInjectorProviderCustom)
 class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 
-	@Inject extension EdeltaCompilerUtil
+	@Inject extension EdeltaCompilerUtil edeltaCompilerUtil
 
 	@Test
 	def void testGetEPackageNameOrNull() {
@@ -26,62 +28,23 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 		"test".assertEquals(p.EPackageNameOrNull)
 	}
 
-	@Test
-	def void testGetStringForEcoreReferenceExpressionEClass() {
-		'''ecoreref(FooClass)'''.ecoreReferenceExpression => [
-			'getEClass("foo", "FooClass")'.
-				assertEquals(stringForEcoreReferenceExpression)
-		]
+	@ParameterizedTest
+	@CsvSource(#[
+		"ecoreref(FooClass), 'getEClass(\"foo\", \"FooClass\")'",
+		"ecoreref(myAttribute), 'getEAttribute(\"foo\", \"FooClass\", \"myAttribute\")'",
+		"ecoreref(FooEnumLiteral), 'getEEnumLiteral(\"foo\", \"FooEnum\", \"FooEnumLiteral\")'",
+		"ecoreref(foo), 'getEPackage(\"foo\")'",
+		"ecoreref, 'null'", // incomplete -> null
+		"ecoreref(), 'getENamedElement()'", // incomplete
+		"ecoreref(NonExistant), 'getENamedElement(\"\", \"\", \"\")'"
+	])
+	def void testGetStringForEcoreReferenceExpression(String input, String expected) {
+		val ecoreRefExp = input.ecoreReferenceExpression
+		expected.
+			assertEquals(
+				edeltaCompilerUtil.getStringForEcoreReferenceExpression(ecoreRefExp)
+			)
 	}
-
-	@Test
-	def void testGetStringForEcoreReferenceExpressionEAttribute() {
-		'''ecoreref(myAttribute)'''.ecoreReferenceExpression => [
-			'getEAttribute("foo", "FooClass", "myAttribute")'.
-				assertEquals(stringForEcoreReferenceExpression)
-		]
-	}
-
-	@Test
-	def void testGetStringForEcoreReferenceExpressionEEnumLiteral() {
-		'''ecoreref(FooEnumLiteral)'''.ecoreReferenceExpression => [
-			'getEEnumLiteral("foo", "FooEnum", "FooEnumLiteral")'.
-				assertEquals(stringForEcoreReferenceExpression)
-		]
-	}
-
-	@Test
-	def void testGetStringForEcoreReferenceExpressionEPackage() {
-		'''ecoreref(foo)'''.ecoreReferenceExpression=> [
-			'getEPackage("foo")'.
-				assertEquals(stringForEcoreReferenceExpression)
-		]
-	}
-
-	@Test
-	def void testGetStringForEcoreReferenceExpressionIncomplete() {
-		'''ecoreref'''.ecoreReferenceExpression => [
-			'null'.
-				assertEquals(stringForEcoreReferenceExpression)
-		]
-	}
-
-	@Test
-	def void testGetStringForEcoreReferenceExpressionIncomplete2() {
-		'''ecoreref()'''.ecoreReferenceExpression => [
-			'getENamedElement()'.
-				assertEquals(stringForEcoreReferenceExpression)
-		]
-	}
-
-	@Test
-	def void testGetStringForEcoreReferenceExpressionUnresolved() {
-		'''ecoreref(NonExistant)'''.ecoreReferenceExpression => [
-			'getENamedElement("", "", "")'.
-				assertEquals(stringForEcoreReferenceExpression)
-		]
-	}
-
 	@Test
 	def void testGetStringForEcoreReferenceExpressionEAttributeInSubPackage() {
 		'''
