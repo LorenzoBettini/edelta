@@ -35,6 +35,8 @@ import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
 
 import static extension org.junit.Assert.*
+import static extension edelta.lib.EdeltaLibrary.*
+import java.util.function.Consumer
 
 abstract class EdeltaAbstractTest {
 
@@ -159,58 +161,48 @@ abstract class EdeltaAbstractTest {
 		resourceSet
 	}
 
+	def protected createEPackage(String name, String nsPrefix, String nsURI, Consumer<EPackage> initializer) {
+		val pack = EcoreFactory.eINSTANCE.createEPackage
+		pack.name = name
+		pack.nsPrefix = nsPrefix
+		pack.nsURI = nsURI
+		initializer.accept(pack)
+		return pack
+	}
+
+	def protected void createEOperation(EClass c, String name) {
+		val op = EcoreFactory.eINSTANCE.createEOperation
+		op.name = name
+		c.EOperations += op
+	}
+
+	/**
+	 * IMPORTANT: if you add something to this ecore, which is created on the fly,
+	 * and you have a test for the generated Java code, then you must also
+	 * update testecores/foo.ecore accordingly
+	 */
 	def protected EPackageForTests() {
-		// IMPORTANT: if you add something to this ecore, which is created on the fly,
-		// and you have a test for the generated Java code, then you must also
-		// update testecores/foo.ecore accordingly
-		val fooPackage = EcoreFactory.eINSTANCE.createEPackage => [
-			name = "foo"
-			nsPrefix = "foo"
-			nsURI = "http://foo"
-		]
-		fooPackage.EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
-			name = "FooClass"
-			EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
-				name = "myAttribute"
+		createEPackage("foo", "foo", "http://foo") [
+			addNewEClass("FooClass") [
+				addNewEAttribute("myAttribute", null)
+				addNewEReference("myReference", null)
+				createEOperation("myOp")
 			]
-			EStructuralFeatures += EcoreFactory.eINSTANCE.createEReference => [
-				name = "myReference"
-			]
-			EOperations += EcoreFactory.eINSTANCE.createEOperation => [
-				name = "myOp"
+			addNewEDataType("FooDataType", null)
+			addNewEEnum("FooEnum") [
+				addNewEEnumLiteral("FooEnumLiteral")
 			]
 		]
-		fooPackage.EClassifiers += EcoreFactory.eINSTANCE.createEDataType => [
-			name = "FooDataType"
-		]
-		fooPackage.EClassifiers += EcoreFactory.eINSTANCE.createEEnum => [
-			name = "FooEnum"
-			ELiterals += EcoreFactory.eINSTANCE.createEEnumLiteral => [
-				name = "FooEnumLiteral"
-			]
-		]
-		fooPackage
 	}
 
 	def protected EPackageForTests2() {
-		val fooPackage = EcoreFactory.eINSTANCE.createEPackage => [
-			name = "bar"
-			nsPrefix = "bar"
-			nsURI = "http://bar"
-		]
-		fooPackage.EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
-			name = "BarClass"
-			EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
-				name = "myAttribute"
+		createEPackage("bar", "bar", "http://bar") [
+			addNewEClass("BarClass") [
+				addNewEAttribute("myAttribute", null)
+				addNewEReference("myReference", null)
 			]
-			EStructuralFeatures += EcoreFactory.eINSTANCE.createEReference => [
-				name = "myReference"
-			]
+			addNewEDataType("BarDataType", null)
 		]
-		fooPackage.EClassifiers += EcoreFactory.eINSTANCE.createEDataType => [
-			name = "BarDataType"
-		]
-		fooPackage
 	}
 
 	def protected EPackagesWithReferencesForTest() {

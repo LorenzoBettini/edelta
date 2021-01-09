@@ -11,12 +11,14 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
 import edelta.edelta.EdeltaProgram;
+import edelta.lib.EdeltaLibrary;
 import edelta.resource.derivedstate.EdeltaAccessibleElement;
 import edelta.resource.derivedstate.EdeltaAccessibleElements;
 import edelta.tests.input.Inputs;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
@@ -248,111 +250,54 @@ public abstract class EdeltaAbstractTest {
     return _xblockexpression;
   }
   
+  protected EPackage createEPackage(final String name, final String nsPrefix, final String nsURI, final Consumer<EPackage> initializer) {
+    final EPackage pack = EcoreFactory.eINSTANCE.createEPackage();
+    pack.setName(name);
+    pack.setNsPrefix(nsPrefix);
+    pack.setNsURI(nsURI);
+    initializer.accept(pack);
+    return pack;
+  }
+  
+  protected void createEOperation(final EClass c, final String name) {
+    final EOperation op = EcoreFactory.eINSTANCE.createEOperation();
+    op.setName(name);
+    EList<EOperation> _eOperations = c.getEOperations();
+    _eOperations.add(op);
+  }
+  
+  /**
+   * IMPORTANT: if you add something to this ecore, which is created on the fly,
+   * and you have a test for the generated Java code, then you must also
+   * update testecores/foo.ecore accordingly
+   */
   protected EPackage EPackageForTests() {
-    EPackage _xblockexpression = null;
-    {
-      EPackage _createEPackage = EcoreFactory.eINSTANCE.createEPackage();
-      final Procedure1<EPackage> _function = (EPackage it) -> {
-        it.setName("foo");
-        it.setNsPrefix("foo");
-        it.setNsURI("http://foo");
+    final Consumer<EPackage> _function = (EPackage it) -> {
+      final Consumer<EClass> _function_1 = (EClass it_1) -> {
+        EdeltaLibrary.addNewEAttribute(it_1, "myAttribute", null);
+        EdeltaLibrary.addNewEReference(it_1, "myReference", null);
+        this.createEOperation(it_1, "myOp");
       };
-      final EPackage fooPackage = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-      EList<EClassifier> _eClassifiers = fooPackage.getEClassifiers();
-      EClass _createEClass = EcoreFactory.eINSTANCE.createEClass();
-      final Procedure1<EClass> _function_1 = (EClass it) -> {
-        it.setName("FooClass");
-        EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
-        EAttribute _createEAttribute = EcoreFactory.eINSTANCE.createEAttribute();
-        final Procedure1<EAttribute> _function_2 = (EAttribute it_1) -> {
-          it_1.setName("myAttribute");
-        };
-        EAttribute _doubleArrow = ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_2);
-        _eStructuralFeatures.add(_doubleArrow);
-        EList<EStructuralFeature> _eStructuralFeatures_1 = it.getEStructuralFeatures();
-        EReference _createEReference = EcoreFactory.eINSTANCE.createEReference();
-        final Procedure1<EReference> _function_3 = (EReference it_1) -> {
-          it_1.setName("myReference");
-        };
-        EReference _doubleArrow_1 = ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_3);
-        _eStructuralFeatures_1.add(_doubleArrow_1);
-        EList<EOperation> _eOperations = it.getEOperations();
-        EOperation _createEOperation = EcoreFactory.eINSTANCE.createEOperation();
-        final Procedure1<EOperation> _function_4 = (EOperation it_1) -> {
-          it_1.setName("myOp");
-        };
-        EOperation _doubleArrow_2 = ObjectExtensions.<EOperation>operator_doubleArrow(_createEOperation, _function_4);
-        _eOperations.add(_doubleArrow_2);
+      EdeltaLibrary.addNewEClass(it, "FooClass", _function_1);
+      EdeltaLibrary.addNewEDataType(it, "FooDataType", null);
+      final Consumer<EEnum> _function_2 = (EEnum it_1) -> {
+        EdeltaLibrary.addNewEEnumLiteral(it_1, "FooEnumLiteral");
       };
-      EClass _doubleArrow = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
-      _eClassifiers.add(_doubleArrow);
-      EList<EClassifier> _eClassifiers_1 = fooPackage.getEClassifiers();
-      EDataType _createEDataType = EcoreFactory.eINSTANCE.createEDataType();
-      final Procedure1<EDataType> _function_2 = (EDataType it) -> {
-        it.setName("FooDataType");
-      };
-      EDataType _doubleArrow_1 = ObjectExtensions.<EDataType>operator_doubleArrow(_createEDataType, _function_2);
-      _eClassifiers_1.add(_doubleArrow_1);
-      EList<EClassifier> _eClassifiers_2 = fooPackage.getEClassifiers();
-      EEnum _createEEnum = EcoreFactory.eINSTANCE.createEEnum();
-      final Procedure1<EEnum> _function_3 = (EEnum it) -> {
-        it.setName("FooEnum");
-        EList<EEnumLiteral> _eLiterals = it.getELiterals();
-        EEnumLiteral _createEEnumLiteral = EcoreFactory.eINSTANCE.createEEnumLiteral();
-        final Procedure1<EEnumLiteral> _function_4 = (EEnumLiteral it_1) -> {
-          it_1.setName("FooEnumLiteral");
-        };
-        EEnumLiteral _doubleArrow_2 = ObjectExtensions.<EEnumLiteral>operator_doubleArrow(_createEEnumLiteral, _function_4);
-        _eLiterals.add(_doubleArrow_2);
-      };
-      EEnum _doubleArrow_2 = ObjectExtensions.<EEnum>operator_doubleArrow(_createEEnum, _function_3);
-      _eClassifiers_2.add(_doubleArrow_2);
-      _xblockexpression = fooPackage;
-    }
-    return _xblockexpression;
+      EdeltaLibrary.addNewEEnum(it, "FooEnum", _function_2);
+    };
+    return this.createEPackage("foo", "foo", "http://foo", _function);
   }
   
   protected EPackage EPackageForTests2() {
-    EPackage _xblockexpression = null;
-    {
-      EPackage _createEPackage = EcoreFactory.eINSTANCE.createEPackage();
-      final Procedure1<EPackage> _function = (EPackage it) -> {
-        it.setName("bar");
-        it.setNsPrefix("bar");
-        it.setNsURI("http://bar");
+    final Consumer<EPackage> _function = (EPackage it) -> {
+      final Consumer<EClass> _function_1 = (EClass it_1) -> {
+        EdeltaLibrary.addNewEAttribute(it_1, "myAttribute", null);
+        EdeltaLibrary.addNewEReference(it_1, "myReference", null);
       };
-      final EPackage fooPackage = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-      EList<EClassifier> _eClassifiers = fooPackage.getEClassifiers();
-      EClass _createEClass = EcoreFactory.eINSTANCE.createEClass();
-      final Procedure1<EClass> _function_1 = (EClass it) -> {
-        it.setName("BarClass");
-        EList<EStructuralFeature> _eStructuralFeatures = it.getEStructuralFeatures();
-        EAttribute _createEAttribute = EcoreFactory.eINSTANCE.createEAttribute();
-        final Procedure1<EAttribute> _function_2 = (EAttribute it_1) -> {
-          it_1.setName("myAttribute");
-        };
-        EAttribute _doubleArrow = ObjectExtensions.<EAttribute>operator_doubleArrow(_createEAttribute, _function_2);
-        _eStructuralFeatures.add(_doubleArrow);
-        EList<EStructuralFeature> _eStructuralFeatures_1 = it.getEStructuralFeatures();
-        EReference _createEReference = EcoreFactory.eINSTANCE.createEReference();
-        final Procedure1<EReference> _function_3 = (EReference it_1) -> {
-          it_1.setName("myReference");
-        };
-        EReference _doubleArrow_1 = ObjectExtensions.<EReference>operator_doubleArrow(_createEReference, _function_3);
-        _eStructuralFeatures_1.add(_doubleArrow_1);
-      };
-      EClass _doubleArrow = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
-      _eClassifiers.add(_doubleArrow);
-      EList<EClassifier> _eClassifiers_1 = fooPackage.getEClassifiers();
-      EDataType _createEDataType = EcoreFactory.eINSTANCE.createEDataType();
-      final Procedure1<EDataType> _function_2 = (EDataType it) -> {
-        it.setName("BarDataType");
-      };
-      EDataType _doubleArrow_1 = ObjectExtensions.<EDataType>operator_doubleArrow(_createEDataType, _function_2);
-      _eClassifiers_1.add(_doubleArrow_1);
-      _xblockexpression = fooPackage;
-    }
-    return _xblockexpression;
+      EdeltaLibrary.addNewEClass(it, "BarClass", _function_1);
+      EdeltaLibrary.addNewEDataType(it, "BarDataType", null);
+    };
+    return this.createEPackage("bar", "bar", "http://bar", _function);
   }
   
   protected List<EPackage> EPackagesWithReferencesForTest() {
