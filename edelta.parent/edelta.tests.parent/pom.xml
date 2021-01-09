@@ -10,6 +10,41 @@
   <artifactId>edelta.tests.parent</artifactId>
   <packaging>pom</packaging>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <configuration>
+          <filters>
+            <!--
+              See https://bugs.eclipse.org/bugs/show_bug.cgi?id=569949
+              We need to restrict Jupiter to version 5.6, otherwise, when
+              building with platform 2020-12 we'll take Jupiter 5.7:
+              the new abstract method is introduced
+              org.junit.jupiter.api.extension.ExtensionContext.Store
+                .getOrComputeIfAbsent(K, Function<K, V>, Class<V>)
+              and since Tycho surefire only supports Jupiter 5.6 we'll get this error
+              when using @ParameterizedTest:
+              java.lang.AbstractMethodError:
+              Receiver class org.junit.jupiter.engine.descriptor.TestTemplateExtensionContext
+              does not define or inherit an implementation of the resolved method
+              'abstract java.util.Optional getConfigurationParameter(java.lang.String, java.util.function.Function)'
+              of interface org.junit.jupiter.api.extension.ExtensionContext.
+              -->
+            <filter>
+              <type>eclipse-plugin</type>
+              <id>org.junit.jupiter.api</id>
+              <restrictTo>
+                <versionRange>[5.6,5.7)</versionRange>
+              </restrictTo>
+            </filter>
+          </filters>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
   <profiles>
     <profile>
       <!-- We enable jacoco-maven-plugin, already configured in the parent,
