@@ -9,15 +9,15 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.testing.InjectWith;
-import org.eclipse.xtext.testing.XtextRunner;
+import org.eclipse.xtext.testing.extensions.InjectionExtension;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-@RunWith(XtextRunner.class)
+@ExtendWith(InjectionExtension.class)
 @InjectWith(EdeltaInjectorProviderCustom.class)
 @SuppressWarnings("all")
 public class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
@@ -28,13 +28,13 @@ public class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
   @Test
   public void testGetEPackageNameOrNull() {
     final EcoreFactory factory = EcoreFactory.eINSTANCE;
-    Assert.assertNull(this._edeltaCompilerUtil.getEPackageNameOrNull(null));
+    Assertions.assertNull(this._edeltaCompilerUtil.getEPackageNameOrNull(null));
     EPackage _createEPackage = factory.createEPackage();
     final Procedure1<EPackage> _function = (EPackage it) -> {
       it.setName("test");
     };
     final EPackage p = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-    Assert.assertEquals("test", this._edeltaCompilerUtil.getEPackageNameOrNull(p));
+    Assertions.assertEquals("test", this._edeltaCompilerUtil.getEPackageNameOrNull(p));
   }
   
   @Test
@@ -43,7 +43,7 @@ public class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
     _builder.append("ecoreref(FooClass)");
     EdeltaEcoreReferenceExpression _ecoreReferenceExpression = this.ecoreReferenceExpression(_builder);
     final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
-      Assert.assertEquals("getEClass(\"foo\", \"FooClass\")", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
+      Assertions.assertEquals("getEClass(\"foo\", \"FooClass\")", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
     };
     ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_ecoreReferenceExpression, _function);
   }
@@ -54,7 +54,7 @@ public class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
     _builder.append("ecoreref(myAttribute)");
     EdeltaEcoreReferenceExpression _ecoreReferenceExpression = this.ecoreReferenceExpression(_builder);
     final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
-      Assert.assertEquals("getEAttribute(\"foo\", \"FooClass\", \"myAttribute\")", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
+      Assertions.assertEquals("getEAttribute(\"foo\", \"FooClass\", \"myAttribute\")", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
     };
     ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_ecoreReferenceExpression, _function);
   }
@@ -65,7 +65,7 @@ public class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
     _builder.append("ecoreref(FooEnumLiteral)");
     EdeltaEcoreReferenceExpression _ecoreReferenceExpression = this.ecoreReferenceExpression(_builder);
     final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
-      Assert.assertEquals("getEEnumLiteral(\"foo\", \"FooEnum\", \"FooEnumLiteral\")", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
+      Assertions.assertEquals("getEEnumLiteral(\"foo\", \"FooEnum\", \"FooEnumLiteral\")", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
     };
     ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_ecoreReferenceExpression, _function);
   }
@@ -76,7 +76,7 @@ public class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
     _builder.append("ecoreref(foo)");
     EdeltaEcoreReferenceExpression _ecoreReferenceExpression = this.ecoreReferenceExpression(_builder);
     final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
-      Assert.assertEquals("getEPackage(\"foo\")", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
+      Assertions.assertEquals("getEPackage(\"foo\")", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
     };
     ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_ecoreReferenceExpression, _function);
   }
@@ -87,7 +87,7 @@ public class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
     _builder.append("ecoreref");
     EdeltaEcoreReferenceExpression _ecoreReferenceExpression = this.ecoreReferenceExpression(_builder);
     final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
-      Assert.assertEquals("null", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
+      Assertions.assertEquals("null", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
     };
     ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_ecoreReferenceExpression, _function);
   }
@@ -98,7 +98,7 @@ public class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
     _builder.append("ecoreref()");
     EdeltaEcoreReferenceExpression _ecoreReferenceExpression = this.ecoreReferenceExpression(_builder);
     final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
-      Assert.assertEquals("getENamedElement()", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
+      Assertions.assertEquals("getENamedElement()", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
     };
     ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_ecoreReferenceExpression, _function);
   }
@@ -109,7 +109,7 @@ public class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
     _builder.append("ecoreref(NonExistant)");
     EdeltaEcoreReferenceExpression _ecoreReferenceExpression = this.ecoreReferenceExpression(_builder);
     final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
-      Assert.assertEquals("getENamedElement(\"\", \"\", \"\")", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
+      Assertions.assertEquals("getENamedElement(\"\", \"\", \"\")", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
     };
     ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_ecoreReferenceExpression, _function);
   }
@@ -129,7 +129,7 @@ public class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
     _builder.newLine();
     EdeltaEcoreReferenceExpression _lastEcoreReferenceExpression = this.lastEcoreReferenceExpression(this.parseWithTestEcoreWithSubPackage(_builder));
     final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
-      Assert.assertEquals("getEAttribute(\"mainpackage.mainsubpackage\", \"MainSubPackageFooClass\", \"mySubPackageAttribute\")", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
+      Assertions.assertEquals("getEAttribute(\"mainpackage.mainsubpackage\", \"MainSubPackageFooClass\", \"mySubPackageAttribute\")", this._edeltaCompilerUtil.getStringForEcoreReferenceExpression(it));
     };
     ObjectExtensions.<EdeltaEcoreReferenceExpression>operator_doubleArrow(_lastEcoreReferenceExpression, _function);
   }

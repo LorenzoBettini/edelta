@@ -2,15 +2,15 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.compiler.EdeltaCompilerUtil
-import org.eclipse.xtext.testing.InjectWith
-import org.eclipse.xtext.testing.XtextRunner
-import org.junit.Test
-import org.junit.runner.RunWith
-
-import static extension org.junit.Assert.*
 import org.eclipse.emf.ecore.EcoreFactory
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.extensions.InjectionExtension
+import org.junit.jupiter.api.^extension.ExtendWith
 
-@RunWith(XtextRunner)
+import org.junit.jupiter.api.Test
+import static extension org.junit.jupiter.api.Assertions.*
+
+@ExtendWith(InjectionExtension)
 @InjectWith(EdeltaInjectorProviderCustom)
 class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 
