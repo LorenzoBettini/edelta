@@ -432,8 +432,8 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     Assert.assertEquals("NewClass", ec.getName());
     final EStructuralFeature attr = IterableExtensions.<EStructuralFeature>head(ec.getEStructuralFeatures());
     Assert.assertEquals("myAttribute", attr.getName());
-    this._validationTestHelper.validate(program);
-    this._validationTestHelper.assertNoErrors(program);
+    this.validationTestHelper.validate(program);
+    this.validationTestHelper.assertNoErrors(program);
     final EdeltaEcoreQualifiedReference ecoreref = this.getEcoreRefInManipulationExpressionBlock(program);
     ENamedElement _enamedelement = ecoreref.getQualification().getEnamedelement();
     EClass eClass = ((EClass) _enamedelement);
@@ -466,8 +466,8 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     final EdeltaProgram program = this.parseWithTestEcore(_builder);
     final EClass derivedEClass = this.getLastCopiedEPackageLastEClass(program);
     Assert.assertEquals("NewClass", derivedEClass.getName());
-    this._validationTestHelper.validate(program);
-    this._validationTestHelper.assertNoErrors(program);
+    this.validationTestHelper.validate(program);
+    this.validationTestHelper.assertNoErrors(program);
     final Function1<EClassifier, Boolean> _function = (EClassifier it) -> {
       String _name = it.getName();
       return Boolean.valueOf(Objects.equal(_name, "FooClass"));
@@ -508,7 +508,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   public void testPersonListExampleModifyEcore() {
     final EdeltaProgram prog = this.parseWithLoadedEcore((EdeltaAbstractTest.METAMODEL_PATH + EdeltaAbstractTest.PERSON_LIST_ECORE), 
       this._inputs.personListExampleModifyEcore());
-    this._validationTestHelper.assertNoErrors(prog);
+    this.validationTestHelper.assertNoErrors(prog);
   }
   
   private EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(final EdeltaProgram program) {

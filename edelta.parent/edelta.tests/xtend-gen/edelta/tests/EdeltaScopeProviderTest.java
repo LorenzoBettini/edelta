@@ -593,7 +593,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     _builder.append("}");
     _builder.newLine();
     final EdeltaProgram prog = this.parseWithTestEcore(_builder);
-    this._validationTestHelper.assertNoErrors(prog);
+    this.validationTestHelper.assertNoErrors(prog);
     final EdeltaEcoreReference referred = this.getEdeltaEcoreReferenceExpression(this.getBlockLastExpression(this.lastModifyEcoreOperation(prog).getBody())).getReference();
     final EPackage copiedEPackage = IterableExtensions.<EPackage>head(this.getCopiedEPackages(prog));
     ENamedElement _enamedelement = referred.getEnamedelement();
@@ -619,7 +619,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     _builder.append("}");
     _builder.newLine();
     final EdeltaProgram prog = this.parseWithTestEcore(_builder);
-    this._validationTestHelper.assertNoErrors(prog);
+    this.validationTestHelper.assertNoErrors(prog);
     EdeltaEcoreReference _reference = this.getEdeltaEcoreReferenceExpression(this.getBlockLastExpression(this.lastModifyEcoreOperation(prog).getBody())).getReference();
     final EdeltaEcoreQualifiedReference referred = ((EdeltaEcoreQualifiedReference) _reference);
     final EPackage copiedEPackage = IterableExtensions.<EPackage>head(this.getCopiedEPackages(prog));

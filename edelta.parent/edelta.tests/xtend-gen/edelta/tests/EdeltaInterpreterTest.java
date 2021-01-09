@@ -897,7 +897,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
         Assert.assertEquals(Boolean.valueOf(false), Boolean.valueOf(it.isAbstract()));
         final String offendingString = "Thread.sleep(1000)";
         final int initialIndex = input.lastIndexOf(offendingString);
-        this._validationTestHelper.assertWarning(it, 
+        this.validationTestHelper.assertWarning(it, 
           XbasePackage.eINSTANCE.getXMemberFeatureCall(), 
           EdeltaValidator.INTERPRETER_TIMEOUT, initialIndex, offendingString.length(), 
           "Timeout while interpreting");
@@ -940,7 +940,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
         Assert.assertEquals(Boolean.valueOf(false), Boolean.valueOf(it.isAbstract()));
         final String offendingString = "op(EClassifiers.last as EClass)";
         final int initialIndex = input.lastIndexOf(offendingString);
-        this._validationTestHelper.assertWarning(it, 
+        this.validationTestHelper.assertWarning(it, 
           XbasePackage.eINSTANCE.getXFeatureCall(), 
           EdeltaValidator.INTERPRETER_TIMEOUT, initialIndex, offendingString.length(), 
           "Timeout while interpreting");
@@ -1031,7 +1031,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
         Assert.assertEquals(Boolean.valueOf(false), Boolean.valueOf(it.isAbstract()));
         final String offendingString = "op(EClassifiers.last as EClass)";
         final int initialIndex = input.lastIndexOf(offendingString);
-        this._validationTestHelper.assertWarning(it, 
+        this.validationTestHelper.assertWarning(it, 
           XbasePackage.eINSTANCE.getXFeatureCall(), 
           EdeltaValidator.INTERPRETER_TIMEOUT, initialIndex, offendingString.length(), 
           "Timeout while interpreting");
@@ -2091,7 +2091,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
         this.interpretProgram(it);
       };
       Assertions.assertThatThrownBy(_function_1).isInstanceOf(EdeltaInterpreterWrapperException.class);
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
         EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT, 
         input.lastIndexOf("FooClass"), 
@@ -2128,7 +2128,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
         this.interpretProgram(it);
       };
       Assertions.assertThatThrownBy(_function_1).isInstanceOf(EdeltaInterpreterWrapperException.class);
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
         EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT, 
         input.lastIndexOf("FooClass"), 
@@ -2171,13 +2171,13 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this.interpretProgram(it);
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
         EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT, 
         input.lastIndexOf("NewClass1"), 
         "NewClass1".length(), 
         "The element is not available anymore in this context: \'NewClass1\'");
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
         EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT, 
         input.lastIndexOf("NewClass2"), 
@@ -2224,7 +2224,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this.interpretProgram(it);
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
         EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT, 
         input.lastIndexOf("NewClass"), 
@@ -2241,7 +2241,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this.interpretProgram(it);
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
         EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT, 
         input.lastIndexOf("FooClass"), 
@@ -2258,7 +2258,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this.interpretProgram(it);
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(), 
         EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT, 
         input.lastIndexOf("NewClass"), 
@@ -2304,7 +2304,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this.interpretProgram(it);
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         XbasePackage.eINSTANCE.getXIfExpression(), 
         EdeltaValidator.LIVE_VALIDATION_ERROR, 
         "Found class FooClass");
@@ -2351,7 +2351,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this.interpretProgram(it);
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         XbasePackage.eINSTANCE.getXFeatureCall(), 
         EdeltaValidator.LIVE_VALIDATION_ERROR, 
         "Found class NewClass");
@@ -2409,7 +2409,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this.interpretProgram(it);
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         XbasePackage.eINSTANCE.getXFeatureCall(), 
         EdeltaValidator.LIVE_VALIDATION_ERROR, 
         input.lastIndexOf("addNewEClass(\"NewClass\")"), 
@@ -2447,7 +2447,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this.interpretProgram(it);
       final String offendingString = "checkClassName(addNewEClass(\"anotherNewClass\"))";
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         XbasePackage.eINSTANCE.getXFeatureCall(), 
         EdeltaValidator.LIVE_VALIDATION_ERROR, 
         input.lastIndexOf(offendingString), 
@@ -2505,13 +2505,13 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this.interpretProgram(it);
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         XbasePackage.eINSTANCE.getXBinaryOperation(), 
         EdeltaValidator.ECLASS_CYCLE, 
         input.lastIndexOf("ecoreref(C1).ESuperTypes += ecoreref(C3)"), 
         "ecoreref(C1).ESuperTypes += ecoreref(C3)".length(), 
         "Cycle in inheritance hierarchy: foo.C3");
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         XbasePackage.eINSTANCE.getXBinaryOperation(), 
         EdeltaValidator.EPACKAGE_CYCLE, 
         input.lastIndexOf("ecoreref(subpackage).ESubpackages += it"), 
@@ -2749,7 +2749,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       final EdeltaCopiedEPackagesMap map = this.interpretProgram(it);
-      this._validationTestHelper.assertNoErrors(it);
+      this.validationTestHelper.assertNoErrors(it);
       final EClass mainSubPackageClass = this.getLastEClass(IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>head(map.values()).getESubpackages()));
       final EdeltaEcoreReference lastEcoreRef = IterableExtensions.<EdeltaEcoreReferenceExpression>last(this.getAllEcoreReferenceExpressions(it)).getReference();
       Assert.assertNotNull(lastEcoreRef.getEnamedelement());
@@ -2963,7 +2963,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this.interpretProgram(it);
-      this._validationTestHelper.assertNoErrors(it);
+      this.validationTestHelper.assertNoErrors(it);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
   }
@@ -2994,7 +2994,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this.interpretProgram(it);
-      this._validationTestHelper.assertNoErrors(it);
+      this.validationTestHelper.assertNoErrors(it);
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
   }
@@ -3159,7 +3159,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaProgram program, final boolean doValidate, final Procedure1<? super EPackage> testExecutor) {
     final Procedure1<EPackage> _function = (EPackage it) -> {
       if (doValidate) {
-        this._validationTestHelper.assertNoErrors(program);
+        this.validationTestHelper.assertNoErrors(program);
       }
       testExecutor.apply(it);
     };

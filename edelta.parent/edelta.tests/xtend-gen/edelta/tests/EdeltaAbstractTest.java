@@ -68,7 +68,7 @@ public abstract class EdeltaAbstractTest {
   
   @Inject
   @Extension
-  protected ValidationTestHelper _validationTestHelper;
+  protected ValidationTestHelper validationTestHelper;
   
   @Inject
   @Extension
@@ -566,7 +566,7 @@ public abstract class EdeltaAbstractTest {
       return it.getMessage();
     };
     this.assertEqualsStrings(expected.toString().trim(), 
-      IterableExtensions.join(IterableExtensions.<String>sort(IterableExtensions.<Issue, String>map(IterableExtensions.<Issue>filter(this._validationTestHelper.validate(o), _function), _function_1)), "\n"));
+      IterableExtensions.join(IterableExtensions.<String>sort(IterableExtensions.<Issue, String>map(IterableExtensions.<Issue>filter(this.validationTestHelper.validate(o), _function), _function_1)), "\n"));
   }
   
   protected void assertEqualsStrings(final CharSequence expected, final CharSequence actual) {

@@ -246,11 +246,11 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
     _eSubpackages.add(subpackage);
     EList<EPackage> _eSubpackages_1 = subpackage.getESubpackages();
     _eSubpackages_1.add(this.ePackage);
-    this._validationTestHelper.assertError(this.resource, 
+    this.validationTestHelper.assertError(this.resource, 
       XbasePackage.eINSTANCE.getXAssignment(), 
       EdeltaValidator.EPACKAGE_CYCLE, 
       "Cycle in superpackage/subpackage: aPackage.subpackage.aPackage");
-    Assertions.<Issue>assertThat(this._validationTestHelper.validate(this.resource)).hasSize(1);
+    Assertions.<Issue>assertThat(this.validationTestHelper.validate(this.resource)).hasSize(1);
     Assertions.<EPackage>assertThat(subpackage.getESubpackages()).isEmpty();
     Assertions.<EPackage>assertThat(this.ePackage.getESubpackages()).containsOnly(subpackage);
   }
@@ -284,17 +284,17 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
     final EClass c3 = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_2, _function_2);
     EList<EClass> _eSuperTypes = c3.getESuperTypes();
     _eSuperTypes.add(c2);
-    this._validationTestHelper.assertNoIssues(this.resource);
+    this.validationTestHelper.assertNoIssues(this.resource);
     EList<EClass> _eSuperTypes_1 = c2.getESuperTypes();
     _eSuperTypes_1.add(c1);
-    this._validationTestHelper.assertNoIssues(this.resource);
+    this.validationTestHelper.assertNoIssues(this.resource);
     EList<EClass> _eSuperTypes_2 = c1.getESuperTypes();
     _eSuperTypes_2.add(c3);
-    this._validationTestHelper.assertError(this.resource, 
+    this.validationTestHelper.assertError(this.resource, 
       XbasePackage.eINSTANCE.getXAssignment(), 
       EdeltaValidator.ECLASS_CYCLE, 
       "Cycle in inheritance hierarchy: aPackage.c3");
-    Assertions.<Issue>assertThat(this._validationTestHelper.validate(this.resource)).hasSize(1);
+    Assertions.<Issue>assertThat(this.validationTestHelper.validate(this.resource)).hasSize(1);
   }
   
   @Test

@@ -26,7 +26,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   public void testEmptyProgram() {
     try {
       StringConcatenation _builder = new StringConcatenation();
-      this._validationTestHelper.assertNoErrors(this.parseHelper.parse(_builder));
+      this.validationTestHelper.assertNoErrors(this.parseHelper.parse(_builder));
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -34,13 +34,13 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   
   @Test
   public void testCanReferToMetamodel() {
-    this._validationTestHelper.assertNoErrors(this.parseWithTestEcore(this._inputs.referenceToMetamodel()));
+    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this._inputs.referenceToMetamodel()));
   }
   
   @Test
   public void testUseImportedJavaTypes() {
     try {
-      this._validationTestHelper.assertNoErrors(this.parseHelper.parse(this._inputs.useImportedJavaTypes()));
+      this.validationTestHelper.assertNoErrors(this.parseHelper.parse(this._inputs.useImportedJavaTypes()));
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -48,12 +48,12 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   
   @Test
   public void testReferenceToCreatedEClass() {
-    this._validationTestHelper.assertNoErrors(this.parseWithTestEcore(this._inputs.referenceToCreatedEClass()));
+    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this._inputs.referenceToCreatedEClass()));
   }
   
   @Test
   public void testReferenceToCreatedEAttribute() {
-    this._validationTestHelper.assertNoErrors(this.parseWithTestEcore(this._inputs.referenceToCreatedEAttributeRenamed()));
+    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this._inputs.referenceToCreatedEAttributeRenamed()));
   }
   
   @Test
@@ -64,7 +64,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
       _builder.newLine();
       _builder.append("use MyCustomEdelta as foo");
       _builder.newLine();
-      this._validationTestHelper.assertNoIssues(this.parseHelper.parse(_builder));
+      this.validationTestHelper.assertNoIssues(this.parseHelper.parse(_builder));
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -83,7 +83,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
       int _lastIndexOf = input.lastIndexOf("List");
       String _name = AbstractEdelta.class.getName();
       String _plus = ("Not a valid type: must be an " + _name);
-      this._validationTestHelper.assertError(_parse, 
+      this.validationTestHelper.assertError(_parse, 
         EdeltaPackage.Literals.EDELTA_USE_AS, 
         EdeltaValidator.TYPE_MISMATCH, _lastIndexOf, 4, _plus);
     } catch (Throwable _e) {
@@ -100,7 +100,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
       _builder.append("use MyCustomAbstractEdelta as foo");
       _builder.newLine();
       final String input = _builder.toString();
-      this._validationTestHelper.assertError(this.parseHelper.parse(input), 
+      this.validationTestHelper.assertError(this.parseHelper.parse(input), 
         EdeltaPackage.Literals.EDELTA_USE_AS, 
         EdeltaValidator.TYPE_MISMATCH, 
         input.lastIndexOf("MyCustomAbstractEdelta"), "MyCustomAbstractEdelta".length(), 
@@ -156,7 +156,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    this._validationTestHelper.assertNoErrors(this.parseWithTestEcore(_builder));
+    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(_builder));
   }
   
   @Test
@@ -176,7 +176,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     _builder.append("}");
     _builder.newLine();
     final EdeltaProgram prog = this.parseWithTestEcore(_builder);
-    this._validationTestHelper.assertNoErrors(prog);
+    this.validationTestHelper.assertNoErrors(prog);
   }
   
   @Test
@@ -196,7 +196,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     _builder.append("}");
     _builder.newLine();
     final EdeltaProgram prog = this.parseWithTestEcore(_builder);
-    this._validationTestHelper.assertNoErrors(prog);
+    this.validationTestHelper.assertNoErrors(prog);
   }
   
   @Test
@@ -254,7 +254,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    this._validationTestHelper.assertNoErrors(this.parseWithTestEcore(_builder));
+    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(_builder));
   }
   
   @Test
@@ -279,7 +279,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    this._validationTestHelper.assertNoErrors(this.parseWithTestEcore(_builder));
+    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(_builder));
   }
   
   @Test
@@ -307,7 +307,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    this._validationTestHelper.assertNoErrors(this.parseWithTestEcore(_builder));
+    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(_builder));
   }
   
   @Test
@@ -322,7 +322,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    this._validationTestHelper.assertError(this.parseWithTestEcore(_builder), 
+    this.validationTestHelper.assertError(this.parseWithTestEcore(_builder), 
       EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation(), 
       Diagnostic.LINKING_DIAGNOSTIC, 
       "foo cannot be resolved.");
@@ -330,7 +330,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   
   @Test
   public void testValidLibMethodsInModifyEcore() {
-    this._validationTestHelper.assertNoErrors(this.parseWithTestEcore(this._inputs.modifyEcoreUsingLibMethods()));
+    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this._inputs.modifyEcoreUsingLibMethods()));
   }
   
   @Test
@@ -364,12 +364,12 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     final String input = _builder.toString();
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         EdeltaPackage.eINSTANCE.getEdeltaOperation(), 
         EdeltaValidator.DUPLICATE_DECLARATION, 
         input.indexOf("anotherDuplicate"), "anotherDuplicate".length(), 
         "Duplicate definition \'anotherDuplicate\'");
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation(), 
         EdeltaValidator.DUPLICATE_DECLARATION, 
         input.lastIndexOf("anotherDuplicate"), "anotherDuplicate".length(), 
@@ -408,12 +408,12 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     final String input = _builder.toString();
     EdeltaProgram _parseWithTestEcores = this.parseWithTestEcores(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         EdeltaPackage.eINSTANCE.getEdeltaProgram(), 
         EdeltaValidator.DUPLICATE_METAMODEL_IMPORT, 
         input.lastIndexOf("\"nonexistent\""), "\"nonexistent\"".length(), 
         "Duplicate metamodel import \"nonexistent\"");
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         EdeltaPackage.eINSTANCE.getEdeltaProgram(), 
         EdeltaValidator.DUPLICATE_METAMODEL_IMPORT, 
         input.lastIndexOf("\"foo\""), "\"foo\"".length(), 
@@ -434,7 +434,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     int _lastIndexOf = input.lastIndexOf("\"");
     int _minus = (_lastIndexOf - start);
     int _plus = (_minus + 1);
-    this._validationTestHelper.assertError(_parseWithTestEcoreWithSubPackage, _edeltaProgram, 
+    this.validationTestHelper.assertError(_parseWithTestEcoreWithSubPackage, _edeltaProgram, 
       EdeltaValidator.INVALID_SUBPACKAGE_IMPORT, start, _plus, 
       "Invalid subpackage import \'mainsubpackage\'");
   }
@@ -457,7 +457,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     EClass _edeltaModifyEcoreOperation = EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation();
     int _indexOf = input.indexOf(" {");
     int _minus = (_indexOf - start);
-    this._validationTestHelper.assertError(_parseWithTestEcoreWithSubPackage, _edeltaModifyEcoreOperation, 
+    this.validationTestHelper.assertError(_parseWithTestEcoreWithSubPackage, _edeltaModifyEcoreOperation, 
       EdeltaValidator.INVALID_SUBPACKAGE_MODIFICATION, start, _minus, 
       "Invalid direct subpackage modification \'mainsubpackage\'");
   }
@@ -489,7 +489,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     final String input = _builder.toString();
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION, 
         IssueCodes.INCOMPATIBLE_TYPES, 
         input.lastIndexOf("ecoreref(RenamedClass)"), "ecoreref(RenamedClass)".length(), 
@@ -524,7 +524,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
     final String input = _builder.toString();
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
         EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
         input.indexOf("ANewClass"), 
@@ -582,13 +582,13 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
       _builder_1.append("The method ESuperTypes(EClass) is undefined for the type EClass");
       _builder_1.newLine();
       this.assertErrorsAsStrings(it, _builder_1);
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
         EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
         input.indexOf("ANewClass"), 
         "ANewClass".length(), 
         "Element not yet available in this context: foo.ANewClass");
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
         EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
         input.indexOf("ANewSuperClass"), 
@@ -638,13 +638,13 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
       _builder_1.append("Element not yet available in this context: foo.ANewSuperClass");
       _builder_1.newLine();
       this.assertErrorsAsStrings(it, _builder_1);
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
         EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
         input.indexOf("ANewClass"), 
         "ANewClass".length(), 
         "Element not yet available in this context: foo.ANewClass");
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
         EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
         input.indexOf("ANewSuperClass"), 

@@ -47,7 +47,7 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
       final XExpression exp = this.getBlockLastExpression(this.lastModifyEcoreOperation(it).getBody());
       this.diagnosticHelper.setCurrentExpression(exp);
       this.diagnosticHelper.addError(null, "issueCode", "an error");
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         XbasePackage.Literals.XVARIABLE_DECLARATION, 
         "issueCode", 
         input.lastIndexOf("val s = null"), 
@@ -82,7 +82,7 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
       final XExpression currentExpression = this.getBlockLastExpression(this.lastModifyEcoreOperation(it).getBody());
       this.diagnosticHelper.setCurrentExpression(currentExpression);
       this.diagnosticHelper.addError(problematic, "issueCode", "an error");
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         XbasePackage.Literals.XVARIABLE_DECLARATION, 
         "issueCode", 
         input.lastIndexOf("val s = null"), 
@@ -111,7 +111,7 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
       final XExpression exp = this.getBlockLastExpression(this.lastModifyEcoreOperation(it).getBody());
       this.diagnosticHelper.setCurrentExpression(exp);
       this.diagnosticHelper.addWarning(null, "issueCode", "a warning");
-      this._validationTestHelper.assertWarning(it, 
+      this.validationTestHelper.assertWarning(it, 
         XbasePackage.Literals.XVARIABLE_DECLARATION, 
         "issueCode", 
         input.lastIndexOf("val s = null"), 
@@ -146,7 +146,7 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
       final XExpression currentExpression = this.getBlockLastExpression(this.lastModifyEcoreOperation(it).getBody());
       this.diagnosticHelper.setCurrentExpression(currentExpression);
       this.diagnosticHelper.addWarning(problematic, "issueCode", "a warning");
-      this._validationTestHelper.assertWarning(it, 
+      this.validationTestHelper.assertWarning(it, 
         XbasePackage.Literals.XVARIABLE_DECLARATION, 
         "issueCode", 
         input.lastIndexOf("val s = null"), 

@@ -52,7 +52,7 @@ public class EdeltaResourceDescriptionStrategyTest extends EdeltaAbstractTest {
 
 	private void assertExportedEPackages(final CharSequence input, final CharSequence expected) {
 		var program = parseWithTestEcore(input);
-		_validationTestHelper.validate(program);
+		validationTestHelper.validate(program);
 		assertEqualsStrings(expected,
 			join(map(
 				getExportedEPackageEObjectDescriptions(program),
