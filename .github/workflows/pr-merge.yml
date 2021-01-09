@@ -18,6 +18,8 @@ on:
       - master
       # Push events to branches matching
       - experiments*
+      # Push events to branches matching
+      - task*
 
 jobs:
   build:
