@@ -26,8 +26,6 @@ import org.eclipse.emf.ecore.xmi.XMIResource
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.resource.XtextResourceSet
-import org.eclipse.xtext.testing.InjectWith
-import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.testing.util.ParseHelper
 import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import org.eclipse.xtext.xbase.XAbstractFeatureCall
@@ -35,12 +33,9 @@ import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations
-import org.junit.runner.RunWith
 
 import static extension org.junit.Assert.*
 
-@RunWith(XtextRunner)
-@InjectWith(EdeltaInjectorProvider)
 abstract class EdeltaAbstractTest {
 
 	@Inject
