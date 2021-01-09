@@ -31,13 +31,13 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 
 	@ParameterizedTest
 	@CsvSource({
-		"ecoreref(FooClass), \'getEClass(\"foo\", \"FooClass\")\'",
-		"ecoreref(myAttribute), \'getEAttribute(\"foo\", \"FooClass\", \"myAttribute\")\'",
-		"ecoreref(FooEnumLiteral), \'getEEnumLiteral(\"foo\", \"FooEnum\", \"FooEnumLiteral\")\'",
-		"ecoreref(foo), \'getEPackage(\"foo\")\'",
-		"ecoreref, \'null\'", // incomplete -> null
-		"ecoreref(), \'getENamedElement()\'", // incomplete
-		"ecoreref(NonExistant), \'getENamedElement(\"\", \"\", \"\")\'"
+		"ecoreref(FooClass), 'getEClass(\"foo\", \"FooClass\")'",
+		"ecoreref(myAttribute), 'getEAttribute(\"foo\", \"FooClass\", \"myAttribute\")'",
+		"ecoreref(FooEnumLiteral), 'getEEnumLiteral(\"foo\", \"FooEnum\", \"FooEnumLiteral\")'",
+		"ecoreref(foo), 'getEPackage(\"foo\")'",
+		"ecoreref, 'null'", // incomplete -> null
+		"ecoreref(), 'getENamedElement()'", // incomplete
+		"ecoreref(NonExistant), 'getENamedElement(\"\", \"\", \"\")'"
 	})
 	void testGetStringForEcoreReferenceExpression(final String input, final String expected) {
 		assertEquals(expected,
