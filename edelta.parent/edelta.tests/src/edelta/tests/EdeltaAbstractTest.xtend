@@ -206,35 +206,24 @@ abstract class EdeltaAbstractTest {
 	}
 
 	def protected EPackagesWithReferencesForTest() {
-		val p1 = EcoreFactory.eINSTANCE.createEPackage => [
-			name = "testecoreforreferences1"
-			nsPrefix = "testecoreforreferences1"
-			nsURI = "http://my.testecoreforreferences1.org"
-		]
-		p1.EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
-			name = "Person"
-			EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
-				name = "name"
-			]
-			EStructuralFeatures += EcoreFactory.eINSTANCE.createEReference => [
-				name = "works"
-				containment = false
+		val p1 = createEPackage(
+				"testecoreforreferences1",
+				"testecoreforreferences1",
+				"http://my.testecoreforreferences1") [
+			addNewEClass("Person") [
+				addNewEAttribute("name", null)
+				addNewEReference("works", null)
 			]
 		]
-		val p2 = EcoreFactory.eINSTANCE.createEPackage => [
-			name = "testecoreforreferences2"
-			nsPrefix = "testecoreforreferences2"
-			nsURI = "http://my.testecoreforreferences2.org"
-		]
-		p2.EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
-			name = "WorkPlace"
-			EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
-				name = "address"
-			]
-			EStructuralFeatures += EcoreFactory.eINSTANCE.createEReference => [
-				name = "persons"
-				containment = false
-				upperBound = -1
+		val p2 = createEPackage(
+				"testecoreforreferences2",
+				"testecoreforreferences2",
+				"http://my.testecoreforreferences2") [
+			addNewEClass("WorkPlace") [
+				addNewEAttribute("address", null)
+				addNewEReference("persons", null) [
+					upperBound = -1
+				]
 			]
 		]
 		val works = p1.getEClassByName("Person").getEReferenceByName("works")
@@ -245,64 +234,31 @@ abstract class EdeltaAbstractTest {
 	}
 
 	def protected EPackageWithSubPackageForTests() {
-		val mainPackage = EcoreFactory.eINSTANCE.createEPackage => [
-			name = "mainpackage"
-			nsPrefix = "mainpackage"
-			nsURI = "http://mainpackage"
-		]
-		mainPackage.EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
-			name = "MainFooClass"
-			EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
-				name = "myAttribute"
+		createEPackage("mainpackage", "mainpackage", "http://mainpackage") [
+			addNewEClass("MainFooClass") [
+				addNewEAttribute("myAttribute", null)
+				addNewEReference("myReference", null)
 			]
-			EStructuralFeatures += EcoreFactory.eINSTANCE.createEReference => [
-				name = "myReference"
+			addNewEDataType("MainFooDataType", null)
+			addNewEEnum("MainFooEnum") [
+				addNewEEnumLiteral("FooEnumLiteral")
 			]
-		]
-		mainPackage.EClassifiers += EcoreFactory.eINSTANCE.createEDataType => [
-			name = "MainFooDataType"
-		]
-		mainPackage.EClassifiers += EcoreFactory.eINSTANCE.createEEnum => [
-			name = "MainFooEnum"
-			ELiterals += EcoreFactory.eINSTANCE.createEEnumLiteral => [
-				name = "FooEnumLiteral"
+			addNewEClass("MyClass") [ // this is present also in subpackages with the same name
+				addNewEAttribute("myClassAttribute", null)
 			]
-		]
-		mainPackage.EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
-			name = "MyClass" // this is present also in subpackages with the same name
-			EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
-				name = "myClassAttribute"
-			]
-		]
-		mainPackage.ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
-			name = "mainsubpackage"
-			nsPrefix = "mainsubpackage"
-			nsURI = "http://mainsubpackage"
-			EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
-				name = "MainSubPackageFooClass"
-				EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
-					name = "mySubPackageAttribute"
+			addNewESubpackage("mainsubpackage", "mainsubpackage", "http://mainsubpackage") [
+				addNewEClass("MainSubPackageFooClass") [
+					addNewEAttribute("mySubPackageAttribute", null)
+					addNewEReference("mySubPackageReference", null)
 				]
-				EStructuralFeatures += EcoreFactory.eINSTANCE.createEReference => [
-					name = "mySubPackageReference"
+				addNewEClass("MyClass") [ // this is present also in subpackages with the same name
+					addNewEAttribute("myClassAttribute", null)
 				]
-			]
-			EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
-				name = "MyClass" // this is present also in subpackages with the same name
-				EStructuralFeatures += EcoreFactory.eINSTANCE.createEAttribute => [
-					name = "myClassAttribute"
-				]
-			]
-			ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
-				name = "subsubpackage"
-				nsPrefix = "subsubpackage"
-				nsURI = "http://subsubpackage"
-				EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
-					name = "MyClass" // this is present also in subpackages with the same name
+				addNewESubpackage("subsubpackage", "subsubpackage", "http://subsubpackage") [
+					addNewEClass("MyClass") // this is present also in subpackages with the same name
 				]
 			]
 		]
-		mainPackage
 	}
 
 	def protected assertErrorsAsStrings(EObject o, CharSequence expected) {
