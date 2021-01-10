@@ -268,6 +268,7 @@ public abstract class EdeltaAbstractTest {
 			addNewEEnum(p, "MainFooEnum", e -> {
 				addNewEEnumLiteral(e, "FooEnumLiteral");
 			});
+			// this is present also in subpackages with the same name
 			addNewEClass(p, "MyClass", c -> {
 				addNewEAttribute(c, "myClassAttribute", null);
 			});
@@ -277,11 +278,13 @@ public abstract class EdeltaAbstractTest {
 						addNewEAttribute(c, "mySubPackageAttribute", null);
 						addNewEReference(c, "mySubPackageReference", null);
 					});
+					// this is present also in subpackages with the same name
 					addNewEClass(p1, "MyClass", c -> {
 						addNewEAttribute(c, "myClassAttribute", null);
 					});
 					addNewESubpackage(p1, "subsubpackage", "subsubpackage", "http://subsubpackage",
 						p2 -> {
+							// this is present also in subpackages with the same name
 							addNewEClass(p2, "MyClass");
 						});
 				});
