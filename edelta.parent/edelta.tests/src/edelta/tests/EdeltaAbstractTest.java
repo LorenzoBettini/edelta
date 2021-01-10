@@ -186,6 +186,14 @@ public abstract class EdeltaAbstractTest {
 		return resourceSet;
 	}
 
+	protected EPackage createEPackage(String name) {
+		return createEPackage(name, p -> {});
+	}
+
+	protected EPackage createEPackage(String name, Consumer<EPackage> initializer) {
+		return createEPackage(name, "", "", initializer);
+	}
+
 	protected EPackage createEPackage(String name, String nsPrefix, String nsURI, Consumer<EPackage> initializer) {
 		var pack = EcoreFactory.eINSTANCE.createEPackage();
 		pack.setName(name);

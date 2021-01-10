@@ -6,6 +6,7 @@ import edelta.edelta.EdeltaFactory;
 import edelta.interpreter.EdeltaInterpreterDiagnostic;
 import edelta.interpreter.EdeltaInterpreterDiagnosticHelper;
 import edelta.interpreter.EdeltaInterpreterResourceListener;
+import edelta.lib.EdeltaLibrary;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 import edelta.resource.derivedstate.EdeltaModifiedElements;
@@ -35,8 +36,6 @@ import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.XbaseFactory;
 import org.eclipse.xtext.xbase.XbasePackage;
 import org.eclipse.xtext.xbase.lib.Exceptions;
-import org.eclipse.xtext.xbase.lib.ObjectExtensions;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,19 +80,10 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
   @Before
   public void setup() {
     try {
-      EPackage _createEPackage = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEPackage();
-      final Procedure1<EPackage> _function = (EPackage it) -> {
-        it.setName("aPackage");
-        EList<EClassifier> _eClassifiers = it.getEClassifiers();
-        EClass _createEClass = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEClass();
-        final Procedure1<EClass> _function_1 = (EClass it_1) -> {
-          it_1.setName("AClass");
-        };
-        EClass _doubleArrow = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function_1);
-        _eClassifiers.add(_doubleArrow);
+      final Consumer<EPackage> _function = (EPackage it) -> {
+        EdeltaLibrary.addNewEClass(it, "AClass");
       };
-      EPackage _doubleArrow = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
-      this.ePackage = _doubleArrow;
+      this.ePackage = this.createEPackage("aPackage", _function);
       this.resource = this.parseHelper.parse("").eResource();
       this.enamedElementXExpressionMap = this.derivedStateHelper.getEnamedElementXExpressionMap(this.resource);
       this.modifiedElements = this.derivedStateHelper.getModifiedElements(this.resource);
@@ -237,11 +227,7 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
     EList<EObject> _contents = this.resource.getContents();
     _contents.add(currentExpression);
     this.diagnosticHelper.setCurrentExpression(currentExpression);
-    EPackage _createEPackage = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
-      it.setName("subpackage");
-    };
-    final EPackage subpackage = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
+    final EPackage subpackage = this.createEPackage("subpackage");
     EList<EPackage> _eSubpackages = this.ePackage.getESubpackages();
     _eSubpackages.add(subpackage);
     EList<EPackage> _eSubpackages_1 = subpackage.getESubpackages();
@@ -261,27 +247,9 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
     EList<EObject> _contents = this.resource.getContents();
     _contents.add(currentExpression);
     this.diagnosticHelper.setCurrentExpression(currentExpression);
-    EClass _createEClass = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEClass();
-    final Procedure1<EClass> _function = (EClass it) -> {
-      it.setName("c1");
-      EList<EClassifier> _eClassifiers = this.ePackage.getEClassifiers();
-      _eClassifiers.add(it);
-    };
-    final EClass c1 = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass, _function);
-    EClass _createEClass_1 = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEClass();
-    final Procedure1<EClass> _function_1 = (EClass it) -> {
-      it.setName("c2");
-      EList<EClassifier> _eClassifiers = this.ePackage.getEClassifiers();
-      _eClassifiers.add(it);
-    };
-    final EClass c2 = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_1, _function_1);
-    EClass _createEClass_2 = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEClass();
-    final Procedure1<EClass> _function_2 = (EClass it) -> {
-      it.setName("c3");
-      EList<EClassifier> _eClassifiers = this.ePackage.getEClassifiers();
-      _eClassifiers.add(it);
-    };
-    final EClass c3 = ObjectExtensions.<EClass>operator_doubleArrow(_createEClass_2, _function_2);
+    final EClass c1 = EdeltaLibrary.addNewEClass(this.ePackage, "c1");
+    final EClass c2 = EdeltaLibrary.addNewEClass(this.ePackage, "c2");
+    final EClass c3 = EdeltaLibrary.addNewEClass(this.ePackage, "c3");
     EList<EClass> _eSuperTypes = c3.getESuperTypes();
     _eSuperTypes.add(c2);
     this.validationTestHelper.assertNoIssues(this.resource);
@@ -324,10 +292,8 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
   }
   
   public EObjectDiagnosticImpl createEObjectDiagnosticMock(final EObject problematicObject) {
-    EObjectDiagnosticImpl _mock = Mockito.<EObjectDiagnosticImpl>mock(EObjectDiagnosticImpl.class);
-    final Procedure1<EObjectDiagnosticImpl> _function = (EObjectDiagnosticImpl it) -> {
-      Mockito.<EObject>when(it.getProblematicObject()).thenReturn(problematicObject);
-    };
-    return ObjectExtensions.<EObjectDiagnosticImpl>operator_doubleArrow(_mock, _function);
+    final EObjectDiagnosticImpl d = Mockito.<EObjectDiagnosticImpl>mock(EObjectDiagnosticImpl.class);
+    Mockito.<EObject>when(d.getProblematicObject()).thenReturn(problematicObject);
+    return d;
   }
 }

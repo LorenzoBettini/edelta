@@ -31,6 +31,8 @@ import static org.mockito.Mockito.*
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.resource.derivedstate.EdeltaModifiedElements
 
+import static extension edelta.lib.EdeltaLibrary.*
+
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProvider)
 class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
@@ -56,11 +58,8 @@ class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 
 	@Before
 	def void setup() {
-		ePackage = ecoreFactory.createEPackage => [
-			name = "aPackage"
-			EClassifiers += ecoreFactory.createEClass => [
-				name = "AClass"
-			]
+		ePackage = createEPackage("aPackage") [
+			addNewEClass("AClass")
 		]
 		resource = "".parse.eResource
 		enamedElementXExpressionMap = derivedStateHelper.getEnamedElementXExpressionMap(resource)
@@ -218,9 +217,7 @@ class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 		val currentExpression = XbaseFactory.eINSTANCE.createXAssignment
 		resource.contents += currentExpression
 		diagnosticHelper.setCurrentExpression(currentExpression)
-		val subpackage = ecoreFactory.createEPackage => [
-			name = "subpackage"
-		]
+		val subpackage = createEPackage("subpackage")
 		ePackage.ESubpackages += subpackage
 		subpackage.ESubpackages += ePackage
 		resource.assertError(
@@ -239,18 +236,9 @@ class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 		val currentExpression = XbaseFactory.eINSTANCE.createXAssignment
 		resource.contents += currentExpression
 		diagnosticHelper.setCurrentExpression(currentExpression)
-		val c1 = ecoreFactory.createEClass => [
-			name = "c1"
-			ePackage.EClassifiers += it
-		]
-		val c2 = ecoreFactory.createEClass => [
-			name = "c2"
-			ePackage.EClassifiers += it
-		]
-		val c3 = ecoreFactory.createEClass => [
-			name = "c3"
-			ePackage.EClassifiers += it
-		]
+		val c1 = ePackage.addNewEClass("c1")
+		val c2 = ePackage.addNewEClass("c2")
+		val c3 = ePackage.addNewEClass("c3")
 		c3.ESuperTypes += c2
 		resource.assertNoIssues
 		c2.ESuperTypes += c1
@@ -292,8 +280,8 @@ class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 	}
 
 	def createEObjectDiagnosticMock(EObject problematicObject) {
-		mock(EObjectDiagnosticImpl) => [
-			when(getProblematicObject).thenReturn(problematicObject)
-		]
+		val d = mock(EObjectDiagnosticImpl)
+		when(d.getProblematicObject).thenReturn(problematicObject)
+		return d
 	}
 }
