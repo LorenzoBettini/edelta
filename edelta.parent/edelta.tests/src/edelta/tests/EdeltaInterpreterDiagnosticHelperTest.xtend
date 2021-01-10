@@ -18,7 +18,7 @@ class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
 
 	@Inject EdeltaDerivedStateHelper derivedStateHelper
 
-	@Test def void testAddErrorWithCurrentExpression() {
+	@Test def void testAddErrorWithCurrentExpression() throws Exception {
 		val input = '''
 		metamodel "foo"
 		
@@ -40,7 +40,7 @@ class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testAddErrorWithDifferentCorrespondingExpression() {
+	@Test def void testAddErrorWithDifferentCorrespondingExpression() throws Exception {
 		val input = '''
 		metamodel "foo"
 		
@@ -72,7 +72,7 @@ class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testAddWarningWithCurrentExpression() {
+	@Test def void testAddWarningWithCurrentExpression() throws Exception {
 		val input = '''
 		metamodel "foo"
 		
@@ -94,7 +94,7 @@ class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testAddWarningWithDifferentCorrespondingExpression() {
+	@Test def void testAddWarningWithDifferentCorrespondingExpression() throws Exception {
 		val input = '''
 		metamodel "foo"
 		

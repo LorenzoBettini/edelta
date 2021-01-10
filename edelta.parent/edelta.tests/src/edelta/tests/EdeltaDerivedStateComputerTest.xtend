@@ -32,7 +32,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	@Inject extension EdeltaDerivedStateHelper
 
 	@Test
-	def void testCopiedEPackages() {
+	def void testCopiedEPackages() throws Exception {
 		val program = '''
 		package test
 		
@@ -49,7 +49,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCopiedEPackagesWithSingleModifyEcore() {
+	def void testCopiedEPackagesWithSingleModifyEcore() throws Exception {
 		val program = '''
 		package test
 		
@@ -66,7 +66,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCopiedEPackagesWhenDuplicateImports() {
+	def void testCopiedEPackagesWhenDuplicateImports() throws Exception {
 		val program = '''
 		package test
 		
@@ -83,7 +83,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCopiedEPackagesWhenUnresolvedPackages() {
+	def void testCopiedEPackagesWhenUnresolvedPackages() throws Exception {
 		val program = '''
 		package test
 		
@@ -99,7 +99,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCopiedEPackagesWithReferences() {
+	def void testCopiedEPackagesWithReferences() throws Exception {
 		val program = '''
 		package test
 		
@@ -127,7 +127,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testInvalidDirectSubPackageAreNotCopied() {
+	def void testInvalidDirectSubPackageAreNotCopied() throws Exception {
 		val program = '''
 		package test
 		
@@ -143,7 +143,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testInstallDerivedStateDuringPreIndexingPhase() {
+	def void testInstallDerivedStateDuringPreIndexingPhase() throws Exception {
 		val program = '''
 		package test
 		
@@ -160,7 +160,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testDerivedStateForModifyEcoreWithMissingPackage() {
+	def void testDerivedStateForModifyEcoreWithMissingPackage() throws Exception {
 		val program = '''
 			package test
 
@@ -175,7 +175,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testDerivedStateIsCorrectlyDiscarded() {
+	def void testDerivedStateIsCorrectlyDiscarded() throws Exception {
 		val program = '''
 		package test
 		
@@ -196,7 +196,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testDerivedStateIsCorrectlyDiscardedAndUnloaded() {
+	def void testDerivedStateIsCorrectlyDiscardedAndUnloaded() throws Exception {
 		val program = '''
 		package test
 		
@@ -225,7 +225,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testAdaptersAreRemovedFromDerivedEPackagesAfterUnloading() {
+	def void testAdaptersAreRemovedFromDerivedEPackagesAfterUnloading() throws Exception {
 		val program = '''
 		package test
 		
@@ -256,7 +256,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testMapsAreClearedAfterDiscarding() {
+	def void testMapsAreClearedAfterDiscarding() throws Exception {
 		val program = '''
 		package test
 		
@@ -286,12 +286,12 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testSourceElementOfNull() {
+	def void testSourceElementOfNull() throws Exception {
 		assertNull(getPrimarySourceElement(null))
 	}
 
 	@Test
-	def void testSourceElementOfNotDerived() {
+	def void testSourceElementOfNotDerived() throws Exception {
 		assertNull('''
 		package test
 		'''.
@@ -300,7 +300,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCopiedEPackageWithRenamedEClass() {
+	def void testCopiedEPackageWithRenamedEClass() throws Exception {
 		val program = '''
 		package test
 		
@@ -316,7 +316,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testDerivedStateForCreatedEAttributeInChangeEClassWithNewName() {
+	def void testDerivedStateForCreatedEAttributeInChangeEClassWithNewName() throws Exception {
 		val program = '''
 		package test
 		
@@ -337,7 +337,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testInterpretedCreateEClassAndStealEAttribute() {
+	def void testInterpretedCreateEClassAndStealEAttribute() throws Exception {
 		val program = createEClassStealingAttribute.
 			parseWithTestEcore
 		// the interpretation is done on copied epackages
@@ -363,7 +363,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testInterpretedRemovedEClassDoesNotTouchTheOriginalEcore() {
+	def void testInterpretedRemovedEClassDoesNotTouchTheOriginalEcore() throws Exception {
 		val program = '''
 			metamodel "foo"
 			
@@ -386,7 +386,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testContentAdapter() {
+	def void testContentAdapter() throws Exception {
 		val program = '''
 			metamodel "foo"
 			
@@ -403,19 +403,19 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testPersonListExampleModifyEcore() {
+	def void testPersonListExampleModifyEcore() throws Exception {
 		val prog = parseWithLoadedEcore(METAMODEL_PATH + PERSON_LIST_ECORE,
 			personListExampleModifyEcore
 		)
 		prog.assertNoErrors
 	}
 
-	private def EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {
+	private def EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) throws Exception {
 		program.lastModifyEcoreOperation.body.getAllContentsOfType(EdeltaEcoreReferenceExpression)
 			.last.reference.edeltaEcoreQualifiedReference
 	}
 
-	def private assertEClassContainsFeature(EClass c, EStructuralFeature f, boolean expected) {
+	def private assertEClassContainsFeature(EClass c, EStructuralFeature f, boolean expected) throws Exception {
 		assertEquals(expected,
 			c.EStructuralFeatures.contains(f)
 		)

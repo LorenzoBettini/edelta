@@ -14,7 +14,6 @@ import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.xbase.XExpression;
-import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
@@ -27,46 +26,34 @@ import org.junit.runner.RunWith;
 @SuppressWarnings("all")
 public class EdeltaParsingTest extends EdeltaAbstractTest {
   @Test
-  public void testEmptyProgram() {
-    try {
-      StringConcatenation _builder = new StringConcatenation();
-      final EdeltaProgram result = this.parseHelper.parse(_builder);
-      Assert.assertNotNull(result);
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
+  public void testEmptyProgram() throws Exception {
+    StringConcatenation _builder = new StringConcatenation();
+    final EdeltaProgram result = this.parseHelper.parse(_builder);
+    Assert.assertNotNull(result);
   }
   
   @Test
-  public void testSingleMetamodel() {
-    try {
-      StringConcatenation _builder = new StringConcatenation();
-      _builder.append("metamodel \"ecore\"");
-      _builder.newLine();
-      final EdeltaProgram result = this.parseHelper.parse(_builder);
-      Assert.assertNotNull(result);
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
+  public void testSingleMetamodel() throws Exception {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"ecore\"");
+    _builder.newLine();
+    final EdeltaProgram result = this.parseHelper.parse(_builder);
+    Assert.assertNotNull(result);
   }
   
   @Test
-  public void testTwoMetamodels() {
-    try {
-      StringConcatenation _builder = new StringConcatenation();
-      _builder.append("metamodel \"ecore\"");
-      _builder.newLine();
-      _builder.append("metamodel \"type\"");
-      _builder.newLine();
-      final EdeltaProgram result = this.parseHelper.parse(_builder);
-      Assert.assertNotNull(result);
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
+  public void testTwoMetamodels() throws Exception {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("metamodel \"ecore\"");
+    _builder.newLine();
+    _builder.append("metamodel \"type\"");
+    _builder.newLine();
+    final EdeltaProgram result = this.parseHelper.parse(_builder);
+    Assert.assertNotNull(result);
   }
   
   @Test
-  public void testDirectEcoreReference() {
+  public void testDirectEcoreReference() throws Exception {
     EdeltaEcoreReferenceExpression _ecoreReferenceExpression = this.getEcoreReferenceExpression("foo");
     final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
       Assert.assertNotNull(this.getEdeltaEcoreDirectReference(it.getReference()).getEnamedelement());
@@ -75,7 +62,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testDirectEcoreReferenceIncomplete() {
+  public void testDirectEcoreReferenceIncomplete() throws Exception {
     EdeltaEcoreReferenceExpression _ecoreReferenceExpression = this.getEcoreReferenceExpression("");
     final Procedure1<EdeltaEcoreReferenceExpression> _function = (EdeltaEcoreReferenceExpression it) -> {
       Assert.assertNull(this.getEdeltaEcoreDirectReference(it.getReference()).getEnamedelement());
@@ -84,7 +71,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testQualifiedEcoreReference() {
+  public void testQualifiedEcoreReference() throws Exception {
     EdeltaEcoreQualifiedReference _edeltaEcoreQualifiedReference = this.getEdeltaEcoreQualifiedReference(this.getEcoreReferenceExpression("foo.bar").getReference());
     final Procedure1<EdeltaEcoreQualifiedReference> _function = (EdeltaEcoreQualifiedReference it) -> {
       Assert.assertEquals("foo", this.getTextualRepresentation(it.getQualification()));
@@ -95,7 +82,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testQualifiedEcoreReference2() {
+  public void testQualifiedEcoreReference2() throws Exception {
     EdeltaEcoreQualifiedReference _edeltaEcoreQualifiedReference = this.getEdeltaEcoreQualifiedReference(this.getEcoreReferenceExpression("foo.bar.baz").getReference());
     final Procedure1<EdeltaEcoreQualifiedReference> _function = (EdeltaEcoreQualifiedReference it) -> {
       Assert.assertEquals("foo.bar", this.getTextualRepresentation(it.getQualification()));
@@ -106,7 +93,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testQualifiedEcoreReferenceIncomplete() {
+  public void testQualifiedEcoreReferenceIncomplete() throws Exception {
     EdeltaEcoreQualifiedReference _edeltaEcoreQualifiedReference = this.getEdeltaEcoreQualifiedReference(this.getEcoreReferenceExpression("foo.").getReference());
     final Procedure1<EdeltaEcoreQualifiedReference> _function = (EdeltaEcoreQualifiedReference it) -> {
       Assert.assertEquals("foo", this.getTextualRepresentation(it.getQualification()));
@@ -117,82 +104,62 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testEdeltaUseAsIncomplete() {
-    try {
-      StringConcatenation _builder = new StringConcatenation();
-      _builder.append("use");
-      _builder.newLine();
-      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this.parseHelper.parse(_builder).getUseAsClauses());
-      final Procedure1<EdeltaUseAs> _function = (EdeltaUseAs it) -> {
-        Assert.assertNull(it.getType());
-        Assert.assertNull(it.getName());
-      };
-      ObjectExtensions.<EdeltaUseAs>operator_doubleArrow(_head, _function);
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
+  public void testEdeltaUseAsIncomplete() throws Exception {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("use");
+    _builder.newLine();
+    EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this.parseHelper.parse(_builder).getUseAsClauses());
+    final Procedure1<EdeltaUseAs> _function = (EdeltaUseAs it) -> {
+      Assert.assertNull(it.getType());
+      Assert.assertNull(it.getName());
+    };
+    ObjectExtensions.<EdeltaUseAs>operator_doubleArrow(_head, _function);
   }
   
   @Test
-  public void testEdeltaUseAsIncompleteNoType() {
-    try {
-      StringConcatenation _builder = new StringConcatenation();
-      _builder.append("use as foo");
-      _builder.newLine();
-      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this.parseHelper.parse(_builder).getUseAsClauses());
-      final Procedure1<EdeltaUseAs> _function = (EdeltaUseAs it) -> {
-        Assert.assertNull(it.getType());
-        Assert.assertNotNull(it.getName());
-      };
-      ObjectExtensions.<EdeltaUseAs>operator_doubleArrow(_head, _function);
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
+  public void testEdeltaUseAsIncompleteNoType() throws Exception {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("use as foo");
+    _builder.newLine();
+    EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this.parseHelper.parse(_builder).getUseAsClauses());
+    final Procedure1<EdeltaUseAs> _function = (EdeltaUseAs it) -> {
+      Assert.assertNull(it.getType());
+      Assert.assertNotNull(it.getName());
+    };
+    ObjectExtensions.<EdeltaUseAs>operator_doubleArrow(_head, _function);
   }
   
   @Test
-  public void testEdeltaUseAsIncompleteNoName() {
-    try {
-      StringConcatenation _builder = new StringConcatenation();
-      _builder.append("use Foo as ");
-      _builder.newLine();
-      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this.parseHelper.parse(_builder).getUseAsClauses());
-      final Procedure1<EdeltaUseAs> _function = (EdeltaUseAs it) -> {
-        Assert.assertNotNull(it.getType());
-        Assert.assertNull(it.getName());
-      };
-      ObjectExtensions.<EdeltaUseAs>operator_doubleArrow(_head, _function);
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
+  public void testEdeltaUseAsIncompleteNoName() throws Exception {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("use Foo as ");
+    _builder.newLine();
+    EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this.parseHelper.parse(_builder).getUseAsClauses());
+    final Procedure1<EdeltaUseAs> _function = (EdeltaUseAs it) -> {
+      Assert.assertNotNull(it.getType());
+      Assert.assertNull(it.getName());
+    };
+    ObjectExtensions.<EdeltaUseAs>operator_doubleArrow(_head, _function);
   }
   
   @Test
-  public void testEdeltaUseAs() {
-    try {
-      StringConcatenation _builder = new StringConcatenation();
-      _builder.append("use Foo as foo");
-      _builder.newLine();
-      EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this.parseHelper.parse(_builder).getUseAsClauses());
-      final Procedure1<EdeltaUseAs> _function = (EdeltaUseAs it) -> {
-        Assert.assertNotNull(it.getType());
-        Assert.assertNotNull(it.getName());
-      };
-      ObjectExtensions.<EdeltaUseAs>operator_doubleArrow(_head, _function);
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
+  public void testEdeltaUseAs() throws Exception {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("use Foo as foo");
+    _builder.newLine();
+    EdeltaUseAs _head = IterableExtensions.<EdeltaUseAs>head(this.parseHelper.parse(_builder).getUseAsClauses());
+    final Procedure1<EdeltaUseAs> _function = (EdeltaUseAs it) -> {
+      Assert.assertNotNull(it.getType());
+      Assert.assertNotNull(it.getName());
+    };
+    ObjectExtensions.<EdeltaUseAs>operator_doubleArrow(_head, _function);
   }
   
-  private EdeltaEcoreReferenceExpression getEcoreReferenceExpression(final CharSequence ecoreRefArg) {
-    try {
-      return this.getEdeltaEcoreReferenceExpression(IterableExtensions.<XExpression>last(this.getBlock(this.lastModifyEcoreOperation(this.parseHelper.parse(this.textForEcoreRef(ecoreRefArg))).getBody()).getExpressions()));
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
+  private EdeltaEcoreReferenceExpression getEcoreReferenceExpression(final CharSequence ecoreRefArg) throws Exception {
+    return this.getEdeltaEcoreReferenceExpression(IterableExtensions.<XExpression>last(this.getBlock(this.lastModifyEcoreOperation(this.parseHelper.parse(this.textForEcoreRef(ecoreRefArg))).getBody()).getExpressions()));
   }
   
-  private CharSequence textForEcoreRef(final CharSequence ecoreRefArg) {
+  private CharSequence textForEcoreRef(final CharSequence ecoreRefArg) throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("modifyEcore aTest epackage foo {");
     _builder.newLine();

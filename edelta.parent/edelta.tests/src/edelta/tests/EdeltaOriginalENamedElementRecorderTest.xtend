@@ -18,7 +18,7 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 	@Inject extension EdeltaOriginalENamedElementRecorder
 	@Inject extension EdeltaDerivedStateHelper
 
-	@Test def void testNull() {
+	@Test def void testNull() throws Exception {
 		'''
 			metamodel "foo"
 		'''.parseWithTestEcore => [
@@ -26,7 +26,7 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testNullENamedElement() {
+	@Test def void testNullENamedElement() throws Exception {
 		'''
 			metamodel "foo"
 		'''.parseWithTestEcore => [
@@ -36,13 +36,13 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testUnresolvedENamedElement() {
+	@Test def void testUnresolvedENamedElement() throws Exception {
 		val ref = "ecoreref(NonExistant)".ecoreReferenceExpression.reference
 		ref.recordOriginalENamedElement
 		assertNull(ref.originalEnamedelement)
 	}
 
-	@Test def void testEClassifierDirectReference() {
+	@Test def void testEClassifierDirectReference() throws Exception {
 		'''
 			metamodel "foo"
 			
@@ -57,7 +57,7 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testSubPackageDirectReference() {
+	@Test def void testSubPackageDirectReference() throws Exception {
 		'''
 			metamodel "mainpackage"
 			
@@ -72,7 +72,7 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testSubPackageEClassDirectReference() {
+	@Test def void testSubPackageEClassDirectReference() throws Exception {
 		'''
 			metamodel "mainpackage"
 			
@@ -89,7 +89,7 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testSubSubPackageEClassQualifiedReference() {
+	@Test def void testSubSubPackageEClassQualifiedReference() throws Exception {
 		'''
 			metamodel "mainpackage"
 			
@@ -107,7 +107,7 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testEClassifierQualifiedReference() {
+	@Test def void testEClassifierQualifiedReference() throws Exception {
 		'''
 			metamodel "foo"
 			
@@ -125,7 +125,7 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testCreatedEClassifierDirectReference() {
+	@Test def void testCreatedEClassifierDirectReference() throws Exception {
 		'''
 			metamodel "foo"
 			
@@ -140,7 +140,7 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testCreatedEClassifierQualifiedReference() {
+	@Test def void testCreatedEClassifierQualifiedReference() throws Exception {
 		'''
 			metamodel "foo"
 			
@@ -160,7 +160,7 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testEStrucutralFeatureDirectReference() {
+	@Test def void testEStrucutralFeatureDirectReference() throws Exception {
 		'''
 			metamodel "foo"
 			
@@ -177,7 +177,7 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testEStrucutralFeatureQualifiedReference() {
+	@Test def void testEStrucutralFeatureQualifiedReference() throws Exception {
 		'''
 			metamodel "foo"
 			
@@ -196,7 +196,7 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testEStrucutralFeatureFullyQualifiedReference() {
+	@Test def void testEStrucutralFeatureFullyQualifiedReference() throws Exception {
 		'''
 			metamodel "foo"
 			
@@ -220,7 +220,7 @@ class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testEEnumLiteraDirectReference() {
+	@Test def void testEEnumLiteraDirectReference() throws Exception {
 		'''
 			metamodel "foo"
 			

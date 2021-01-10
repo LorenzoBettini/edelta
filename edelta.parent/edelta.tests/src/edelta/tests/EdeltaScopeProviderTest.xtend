@@ -24,7 +24,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	@Inject extension IScopeProvider
 
 	@Test
-	def void testSuperScope() {
+	def void testSuperScope() throws Exception {
 		// just check that nothing wrong happens when we call super.getScope
 		'''
 		modifyEcore aTest epackage foo {
@@ -37,7 +37,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForMetamodel() {
+	def void testScopeForMetamodel() throws Exception {
 		referenceToMetamodel.parseWithTestEcore.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaProgram_Metamodels,
 			'''
@@ -48,7 +48,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForMetamodels() {
+	def void testScopeForMetamodels() throws Exception {
 		referencesToMetamodels.parseWithTestEcores.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaProgram_Metamodels,
 			'''
@@ -59,7 +59,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForEnamedElementInProgram() {
+	def void testScopeForEnamedElementInProgram() throws Exception {
 		referenceToMetamodelWithCopiedEPackage
 			.parseWithTestEcore.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
@@ -75,7 +75,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForEnamedElementWithSubPackageInProgram() {
+	def void testScopeForEnamedElementWithSubPackageInProgram() throws Exception {
 		// MyClass with myClassAttribute
 		// is present in the package and in subpackages
 		// so it appears several times
@@ -104,7 +104,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForEnamedElementInEcoreReferenceExpressionWithSubPackages() {
+	def void testScopeForEnamedElementInEcoreReferenceExpressionWithSubPackages() throws Exception {
 		'''
 			metamodel "mainpackage"
 			
@@ -137,7 +137,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForSubPackageInEcoreReferenceExpressionWithSubPackages() {
+	def void testScopeForSubPackageInEcoreReferenceExpressionWithSubPackages() throws Exception {
 		'''
 			metamodel "mainpackage"
 			
@@ -156,7 +156,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForSubPackageEClassInEcoreReferenceExpressionWithSubPackages() {
+	def void testScopeForSubPackageEClassInEcoreReferenceExpressionWithSubPackages() throws Exception {
 		'''
 			metamodel "mainpackage"
 			
@@ -174,7 +174,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForSubSubPackageInEcoreReferenceExpressionWithSubPackages() {
+	def void testScopeForSubSubPackageInEcoreReferenceExpressionWithSubPackages() throws Exception {
 		'''
 			metamodel "mainpackage"
 			
@@ -191,7 +191,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForEnamedElementInEcoreReferenceExpression() {
+	def void testScopeForEnamedElementInEcoreReferenceExpression() throws Exception {
 		"ecoreref(".ecoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
@@ -206,7 +206,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForEnamedElementInEcoreReferenceExpressionQualifiedPackage() {
+	def void testScopeForEnamedElementInEcoreReferenceExpressionQualifiedPackage() throws Exception {
 		"ecoreref(foo.".ecoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
@@ -217,7 +217,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForEnamedElementInEcoreReferenceExpressionQualifiedEClass() {
+	def void testScopeForEnamedElementInEcoreReferenceExpressionQualifiedEClass() throws Exception {
 		"ecoreref(foo.FooClass.".ecoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
@@ -227,7 +227,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForReferenceToCreatedEClassWithTheSameNameAsAnExistingEClass() {
+	def void testScopeForReferenceToCreatedEClassWithTheSameNameAsAnExistingEClass() throws Exception {
 		// our created EClass with the same name as an existing one must be
 		// the one that is actually linked
 		val prog = '''
@@ -248,7 +248,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForReferenceToCopiedEPackageEClassifierInModifyEcore() {
+	def void testScopeForReferenceToCopiedEPackageEClassifierInModifyEcore() throws Exception {
 		val prog = '''
 			metamodel "foo"
 			
@@ -268,7 +268,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForReferenceToOriginalEPackageEClassifierInOperation() {
+	def void testScopeForReferenceToOriginalEPackageEClassifierInOperation() throws Exception {
 		val prog = '''
 			metamodel "foo"
 			
@@ -288,7 +288,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForReferenceToCopiedEPackageEClassifierInOperationWhenTheresAModifyEcore() {
+	def void testScopeForReferenceToCopiedEPackageEClassifierInOperationWhenTheresAModifyEcore() throws Exception {
 		val prog = '''
 			metamodel "foo"
 			
@@ -313,7 +313,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForReferenceToCreatedEAttribute() {
+	def void testScopeForReferenceToCreatedEAttribute() throws Exception {
 		referenceToCreatedEAttributeSimple.parseWithTestEcore
 			.lastEcoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
@@ -333,7 +333,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForReferenceToCreatedEAttributeChangingNameInBody() {
+	def void testScopeForReferenceToCreatedEAttributeChangingNameInBody() throws Exception {
 		referenceToCreatedEAttributeRenamed.parseWithTestEcore
 			.lastEcoreReferenceExpression.reference
 			.assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
@@ -353,7 +353,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForModifyEcore() {
+	def void testScopeForModifyEcore() throws Exception {
 		'''
 			metamodel "foo"
 			metamodel "bar"
@@ -369,7 +369,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForRenamedEClassInModifyEcore() {
+	def void testScopeForRenamedEClassInModifyEcore() throws Exception {
 		'''
 		metamodel "foo"
 		metamodel "bar"
@@ -389,7 +389,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForEnamedElementInEcoreReferenceExpressionReferringToRenamedEClassInModifyEcore() {
+	def void testScopeForEnamedElementInEcoreReferenceExpressionReferringToRenamedEClassInModifyEcore() throws Exception {
 		'''
 		metamodel "foo"
 		metamodel "bar"
@@ -409,7 +409,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testScopeForFeaturesOfRenamedEClassInModifyEcore() {
+	def void testScopeForFeaturesOfRenamedEClassInModifyEcore() throws Exception {
 		'''
 		metamodel "foo"
 		metamodel "bar"
@@ -431,7 +431,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testLinkForRenamedEClassInModifyEcore() {
+	def void testLinkForRenamedEClassInModifyEcore() throws Exception {
 		val prog =
 		'''
 		metamodel "foo"
@@ -453,7 +453,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testLinkForRenamedQualifiedEClassInModifyEcore() {
+	def void testLinkForRenamedQualifiedEClassInModifyEcore() throws Exception {
 		val prog =
 		'''
 		metamodel "foo"

@@ -19,7 +19,7 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 	@Inject EdeltaEcoreReferenceInformationHelper informationHelper
 
 	@Test
-	def void testWhenAlreadySetThenReturnsTheStoredInformation() {
+	def void testWhenAlreadySetThenReturnsTheStoredInformation() throws Exception {
 		'''
 		metamodel "foo"
 		
@@ -36,7 +36,7 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToEPackage() {
+	def void testReferenceToEPackage() throws Exception {
 		'''
 		metamodel "foo"
 		
@@ -54,7 +54,7 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToSubPackage() {
+	def void testReferenceToSubPackage() throws Exception {
 		'''
 		metamodel "mainpackage"
 		
@@ -72,7 +72,7 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToEStructuralFeatureWithSubPackage() {
+	def void testReferenceToEStructuralFeatureWithSubPackage() throws Exception {
 		'''
 		metamodel "mainpackage"
 		
@@ -90,7 +90,7 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToSubPackageWithCycle() {
+	def void testReferenceToSubPackageWithCycle() throws Exception {
 		'''
 		metamodel "mainpackage"
 		
@@ -112,7 +112,7 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToEClassifier() {
+	def void testReferenceToEClassifier() throws Exception {
 		'''
 		metamodel "foo"
 		
@@ -130,7 +130,7 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToEEnumLiteral() {
+	def void testReferenceToEEnumLiteral() throws Exception {
 		'''
 		metamodel "foo"
 		
@@ -148,7 +148,7 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToEStructuralFeature() {
+	def void testReferenceToEStructuralFeature() throws Exception {
 		'''
 		metamodel "foo"
 		
@@ -166,7 +166,7 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToUnresolved() {
+	def void testReferenceToUnresolved() throws Exception {
 		'''
 		metamodel "foo"
 		
@@ -184,7 +184,7 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testAfterChange() {
+	def void testAfterChange() throws Exception {
 		'''
 		metamodel "foo"
 		
@@ -213,7 +213,7 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testNullENamedElement() {
+	def void testNullENamedElement() throws Exception {
 		'''
 		metamodel "foo"
 		
@@ -230,7 +230,7 @@ class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTest {
 		]
 	}
 
-	def private lastEcoreRef(EdeltaProgram p) {
+	def private lastEcoreRef(EdeltaProgram p) throws Exception {
 		p.lastEcoreReferenceExpression
 	}
 } 

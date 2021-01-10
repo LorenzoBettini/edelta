@@ -18,32 +18,32 @@ import static edelta.edelta.EdeltaPackage.Literals.*
 class EdeltaValidatorTest extends EdeltaAbstractTest {
 
 	@Test
-	def void testEmptyProgram() {
+	def void testEmptyProgram() throws Exception {
 		''''''.parse.assertNoErrors
 	}
 
 	@Test
-	def void testCanReferToMetamodel() {
+	def void testCanReferToMetamodel() throws Exception {
 		referenceToMetamodel.parseWithTestEcore.assertNoErrors
 	}
 
 	@Test
-	def void testUseImportedJavaTypes() {
+	def void testUseImportedJavaTypes() throws Exception {
 		useImportedJavaTypes.parse.assertNoErrors
 	}
 
 	@Test
-	def void testReferenceToCreatedEClass() {
+	def void testReferenceToCreatedEClass() throws Exception {
 		referenceToCreatedEClass.parseWithTestEcore.assertNoErrors
 	}
 
 	@Test
-	def void testReferenceToCreatedEAttribute() {
+	def void testReferenceToCreatedEAttribute() throws Exception {
 		referenceToCreatedEAttributeRenamed.parseWithTestEcore.assertNoErrors
 	}
 
 	@Test
-	def void testValidUseAs() {
+	def void testValidUseAs() throws Exception {
 		'''
 		import edelta.tests.additional.MyCustomEdelta;
 		use MyCustomEdelta as foo
@@ -51,7 +51,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testInvalidUseAsNotAnEdelta() {
+	def void testInvalidUseAsNotAnEdelta() throws Exception {
 		val input = '''
 		import java.util.List;
 		use List as foo
@@ -65,7 +65,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testInvalidUseAsAbstractEdelta() {
+	def void testInvalidUseAsAbstractEdelta() throws Exception {
 		val input = '''
 		import edelta.tests.additional.MyCustomAbstractEdelta;
 		use MyCustomAbstractEdelta as foo
@@ -79,7 +79,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testInvalidUseAsUnresolvedProxy() {
+	def void testInvalidUseAsUnresolvedProxy() throws Exception {
 		val input = '''
 		use Unknown as foo
 		'''
@@ -89,7 +89,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testUnresolvedEcoreReference() {
+	def void testUnresolvedEcoreReference() throws Exception {
 		'''
 		metamodel "foo"
 		
@@ -101,7 +101,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testNoDanglingReferencesAfterInterpretation() {
+	def void testNoDanglingReferencesAfterInterpretation() throws Exception {
 		'''
 		metamodel "foo"
 		
@@ -112,7 +112,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCallMethodOnRenanedEClassInModifyEcore() {
+	def void testCallMethodOnRenanedEClassInModifyEcore() throws Exception {
 		val prog =
 		'''
 		metamodel "foo"
@@ -126,7 +126,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCallMethodOnQualifiedRenanedEClassInModifyEcore() {
+	def void testCallMethodOnQualifiedRenanedEClassInModifyEcore() throws Exception {
 		val prog =
 		'''
 		metamodel "foo"
@@ -140,7 +140,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCallNonExistingMethodOnRenanedEClassInModifyEcore() {
+	def void testCallNonExistingMethodOnRenanedEClassInModifyEcore() throws Exception {
 		val prog =
 		'''
 		metamodel "foo"
@@ -161,7 +161,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToAddedAttributeofRenamedClassInModifyEcore() {
+	def void testReferenceToAddedAttributeofRenamedClassInModifyEcore() throws Exception {
 		'''
 		metamodel "foo"
 
@@ -175,7 +175,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToAddedAttributeofRenamedClassInModifyEcore2() {
+	def void testReferenceToAddedAttributeofRenamedClassInModifyEcore2() throws Exception {
 		'''
 		import org.eclipse.emf.ecore.EClass
 
@@ -190,7 +190,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToRenamedClassInModifyEcore() {
+	def void testReferenceToRenamedClassInModifyEcore() throws Exception {
 		'''
 		import org.eclipse.emf.ecore.EClass
 
@@ -206,7 +206,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToUnknownEPackageInModifyEcore() {
+	def void testReferenceToUnknownEPackageInModifyEcore() throws Exception {
 		'''
 		import org.eclipse.emf.ecore.EClass
 
@@ -221,12 +221,12 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testValidLibMethodsInModifyEcore() {
+	def void testValidLibMethodsInModifyEcore() throws Exception {
 		modifyEcoreUsingLibMethods.parseWithTestEcore.assertNoErrors
 	}
 
 	@Test
-	def void testDuplicateDeclarations() {
+	def void testDuplicateDeclarations() throws Exception {
 		val input = '''
 		import java.util.List
 		import org.eclipse.emf.ecore.EPackage
@@ -270,7 +270,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testDuplicateMetamodelImport() {
+	def void testDuplicateMetamodelImport() throws Exception {
 		val input = '''
 		metamodel "foo"
 		metamodel "bar"
@@ -295,7 +295,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testInvalidSubPackageImportedMetamodel() {
+	def void testInvalidSubPackageImportedMetamodel() throws Exception {
 		val input =
 		'''
 		metamodel "mainpackage.mainsubpackage"
@@ -312,7 +312,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testInvalidModifyEcoreOfSubPackage() {
+	def void testInvalidModifyEcoreOfSubPackage() throws Exception {
 		val input =
 		'''
 		metamodel "mainpackage.mainsubpackage"
@@ -333,7 +333,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testTypeMismatchOfEcoreRefExp() {
+	def void testTypeMismatchOfEcoreRefExp() throws Exception {
 		val input = '''
 		import org.eclipse.emf.ecore.EClass
 		import org.eclipse.emf.ecore.EPackage
@@ -358,7 +358,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testAccessToNotYetExistingElement() {
+	def void testAccessToNotYetExistingElement() throws Exception {
 		val input =
 		'''
 		metamodel "foo"
@@ -389,7 +389,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testAccessToNotYetExistingElementInComplexExpression() {
+	def void testAccessToNotYetExistingElementInComplexExpression() throws Exception {
 		val input =
 		'''
 		metamodel "foo"
@@ -431,7 +431,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testAccessToNotYetExistingElementInComplexExpression2() {
+	def void testAccessToNotYetExistingElementInComplexExpression2() throws Exception {
 		val input =
 		'''
 		metamodel "foo"

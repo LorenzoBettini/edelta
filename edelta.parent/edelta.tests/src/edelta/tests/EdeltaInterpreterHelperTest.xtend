@@ -42,7 +42,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testSafeInstantiateOfValidUseAs() {
+	def void testSafeInstantiateOfValidUseAs() throws Exception {
 		'''
 			import edelta.tests.additional.MyCustomEdelta
 			
@@ -56,7 +56,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testSafeInstantiateOfUseAsWithoutType() {
+	def void testSafeInstantiateOfUseAsWithoutType() throws Exception {
 		'''
 			use as my
 		'''.parse.useAsClauses.head => [
@@ -67,7 +67,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testSafeInstantiateOfValidUseAsWithoutType() {
+	def void testSafeInstantiateOfValidUseAsWithoutType() throws Exception {
 		'''
 			import edelta.tests.EdeltaInterpreterHelperTest.InstantiateExceptionClass
 			use InstantiateExceptionClass as my
@@ -79,7 +79,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testSafeInstantiateOfUnresolvedUseAsType() {
+	def void testSafeInstantiateOfUnresolvedUseAsType() throws Exception {
 		assertThatThrownBy[
 		'''
 			use NonExistent as my
@@ -91,7 +91,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testSafeInstantiateOfValidUseAsButNotFoundAtRuntime() {
+	def void testSafeInstantiateOfValidUseAsButNotFoundAtRuntime() throws Exception {
 		// this is a simulation of what would happen if a type is resolved
 		// but the interpreter cannot load it with Class.forName
 		// because the ClassLoader cannot find it
@@ -109,7 +109,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testFilterOperationsWithNullEPackage() {
+	def void testFilterOperationsWithNullEPackage() throws Exception {
 		'''
 		modifyEcore first epackage {}
 		modifyEcore second epackage foo {}
@@ -120,7 +120,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testFilterOperationsWithSubPackage() {
+	def void testFilterOperationsWithSubPackage() throws Exception {
 		'''
 		metamodel "mainpackage.mainsubpackage"
 

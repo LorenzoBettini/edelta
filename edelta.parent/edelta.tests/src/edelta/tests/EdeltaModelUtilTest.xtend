@@ -16,7 +16,7 @@ import org.eclipse.xtext.xbase.XIfExpression
 class EdeltaModelUtilTest extends EdeltaAbstractTest {
 
 	@Test
-	def void testGetProgram() {
+	def void testGetProgram() throws Exception {
 		'''
 			metamodel "foo"
 			
@@ -27,7 +27,7 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testHasCycleInSuperPackageWithNoCycle() {
+	def void testHasCycleInSuperPackageWithNoCycle() throws Exception {
 		val ecoreFactory = EcoreFactory.eINSTANCE
 		val ePackage = ecoreFactory.createEPackage() => [
 			ESubpackages += ecoreFactory.createEPackage() => [
@@ -40,7 +40,7 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testHasCycleInSuperPackageWithCycle() {
+	def void testHasCycleInSuperPackageWithCycle() throws Exception {
 		val ecoreFactory = EcoreFactory.eINSTANCE
 		val ePackage = ecoreFactory.createEPackage() => [
 			ESubpackages += ecoreFactory.createEPackage() => [
@@ -57,7 +57,7 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testFindRootSuperPackage() {
+	def void testFindRootSuperPackage() throws Exception {
 		val ecoreFactory = EcoreFactory.eINSTANCE
 		val rootPackage = ecoreFactory.createEPackage() => [
 			ESubpackages += ecoreFactory.createEPackage() => [
@@ -73,7 +73,7 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testGetEcoreReferenceText() {
+	def void testGetEcoreReferenceText() throws Exception {
 		'''
 			metamodel "foo"
 			
@@ -99,7 +99,7 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testGetMetamodelImportText() {
+	def void testGetMetamodelImportText() throws Exception {
 		val input = '''
 			metamodel "foo"
 			metamodel "bar"
@@ -119,7 +119,7 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testHasCycleInHierarchy() {
+	def void testHasCycleInHierarchy() throws Exception {
 		val ecoreFactory = EcoreFactory.eINSTANCE
 		val c1 = ecoreFactory.createEClass
 		assertThat(hasCycleInHierarchy(c1)).isFalse
@@ -141,7 +141,7 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testGetContainingBlockXExpression() {
+	def void testGetContainingBlockXExpression() throws Exception {
 		val input = '''
 			metamodel "foo"
 			

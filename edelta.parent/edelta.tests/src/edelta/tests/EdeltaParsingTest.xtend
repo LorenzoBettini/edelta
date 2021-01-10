@@ -16,14 +16,14 @@ import static org.junit.Assert.*
 class EdeltaParsingTest extends EdeltaAbstractTest {
 
 	@Test
-	def void testEmptyProgram() {
+	def void testEmptyProgram() throws Exception {
 		val result = parse('''
 		''')
 		Assert.assertNotNull(result)
 	}
 
 	@Test
-	def void testSingleMetamodel() {
+	def void testSingleMetamodel() throws Exception {
 		val result = parse('''
 			metamodel "ecore"
 		''')
@@ -31,7 +31,7 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testTwoMetamodels() {
+	def void testTwoMetamodels() throws Exception {
 		val result = parse('''
 			metamodel "ecore"
 			metamodel "type"
@@ -40,21 +40,21 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testDirectEcoreReference() {
+	def void testDirectEcoreReference() throws Exception {
 		getEcoreReferenceExpression("foo") => [
 			assertNotNull(reference.edeltaEcoreDirectReference.enamedelement)
 		]
 	}
 
 	@Test
-	def void testDirectEcoreReferenceIncomplete() {
+	def void testDirectEcoreReferenceIncomplete() throws Exception {
 		getEcoreReferenceExpression("") => [
 			assertNull(reference.edeltaEcoreDirectReference.enamedelement)
 		]
 	}
 
 	@Test
-	def void testQualifiedEcoreReference() {
+	def void testQualifiedEcoreReference() throws Exception {
 		getEcoreReferenceExpression("foo.bar")
 		.reference.edeltaEcoreQualifiedReference => [
 			assertEquals("foo", qualification.textualRepresentation)
@@ -64,7 +64,7 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testQualifiedEcoreReference2() {
+	def void testQualifiedEcoreReference2() throws Exception {
 		getEcoreReferenceExpression("foo.bar.baz")
 		.reference.edeltaEcoreQualifiedReference => [
 			assertEquals("foo.bar", qualification.textualRepresentation)
@@ -74,7 +74,7 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testQualifiedEcoreReferenceIncomplete() {
+	def void testQualifiedEcoreReferenceIncomplete() throws Exception {
 		getEcoreReferenceExpression("foo.")
 		.reference.edeltaEcoreQualifiedReference => [
 			assertEquals("foo", qualification.textualRepresentation)
@@ -84,7 +84,7 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testEdeltaUseAsIncomplete() {
+	def void testEdeltaUseAsIncomplete() throws Exception {
 		'''
 		use
 		'''.parse.useAsClauses.head => [
@@ -94,7 +94,7 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testEdeltaUseAsIncompleteNoType() {
+	def void testEdeltaUseAsIncompleteNoType() throws Exception {
 		'''
 		use as foo
 		'''.parse.useAsClauses.head => [
@@ -104,7 +104,7 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testEdeltaUseAsIncompleteNoName() {
+	def void testEdeltaUseAsIncompleteNoName() throws Exception {
 		'''
 		use Foo as 
 		'''.parse.useAsClauses.head => [
@@ -114,7 +114,7 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testEdeltaUseAs() {
+	def void testEdeltaUseAs() throws Exception {
 		'''
 		use Foo as foo
 		'''.parse.useAsClauses.head => [
@@ -123,7 +123,7 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 		]
 	}
 
-	def private getEcoreReferenceExpression(CharSequence ecoreRefArg) {
+	def private getEcoreReferenceExpression(CharSequence ecoreRefArg) throws Exception {
 		textForEcoreRef(ecoreRefArg)
 			.parse
 			.lastModifyEcoreOperation
@@ -134,7 +134,7 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 			.edeltaEcoreReferenceExpression
 	}
 
-	def private textForEcoreRef(CharSequence ecoreRefArg) {
+	def private textForEcoreRef(CharSequence ecoreRefArg) throws Exception {
 		'''
 		modifyEcore aTest epackage foo {
 			ecoreref(«ecoreRefArg»
