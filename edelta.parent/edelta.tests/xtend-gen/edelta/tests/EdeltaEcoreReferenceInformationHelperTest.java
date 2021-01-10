@@ -5,7 +5,7 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
 import edelta.resource.derivedstate.EdeltaEcoreReferenceState;
 import edelta.tests.EdeltaAbstractTest;
-import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
+import edelta.tests.injectors.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
 import edelta.util.EdeltaEcoreReferenceInformationHelper;
 import java.util.function.Function;
 import org.assertj.core.api.Assertions;

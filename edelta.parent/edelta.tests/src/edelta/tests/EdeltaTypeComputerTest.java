@@ -3,6 +3,7 @@ package edelta.tests;
 import com.google.inject.Inject;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
+import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

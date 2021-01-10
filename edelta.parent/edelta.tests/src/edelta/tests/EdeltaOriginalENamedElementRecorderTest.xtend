@@ -4,6 +4,7 @@ import com.google.inject.Inject
 import edelta.edelta.EdeltaFactory
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.scoping.EdeltaOriginalENamedElementRecorder
+import edelta.tests.injectors.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test

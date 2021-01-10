@@ -1,6 +1,7 @@
 package edelta.tests
 
 import com.google.inject.Inject
+import edelta.tests.injectors.EdeltaInjectorProviderCustom
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.testing.formatter.FormatterTestHelper

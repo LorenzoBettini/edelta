@@ -5,7 +5,7 @@ import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreterDiagnosticHelper;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.tests.EdeltaAbstractTest;
-import edelta.tests.EdeltaInjectorProviderCustom;
+import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.testing.InjectWith;

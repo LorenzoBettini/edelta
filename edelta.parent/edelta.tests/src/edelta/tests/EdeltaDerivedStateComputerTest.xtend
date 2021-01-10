@@ -7,6 +7,7 @@ import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreterRuntimeException
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.tests.additional.TestableEdeltaDerivedStateComputer
+import edelta.tests.injectors.EdeltaInjectorProviderTestableDerivedStateComputer
 import org.eclipse.emf.common.notify.impl.AdapterImpl
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass

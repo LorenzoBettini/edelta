@@ -3,6 +3,7 @@ package edelta.tests
 
 import edelta.edelta.EdeltaPackage
 import edelta.lib.AbstractEdelta
+import edelta.tests.injectors.EdeltaInjectorProviderCustom
 import edelta.validation.EdeltaValidator
 import org.eclipse.xtext.diagnostics.Diagnostic
 import org.eclipse.xtext.testing.InjectWith

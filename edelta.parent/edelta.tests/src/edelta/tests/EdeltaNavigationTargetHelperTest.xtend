@@ -2,6 +2,7 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.navigation.EdeltaNavigationTargetHelper
+import edelta.tests.injectors.EdeltaInjectorProviderCustom
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner

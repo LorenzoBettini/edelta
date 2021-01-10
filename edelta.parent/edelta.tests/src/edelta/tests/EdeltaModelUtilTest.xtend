@@ -1,15 +1,16 @@
 package edelta.tests
 
+import edelta.tests.injectors.EdeltaInjectorProviderCustom
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
+import org.eclipse.xtext.xbase.XIfExpression
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static edelta.util.EdeltaModelUtil.*
 import static org.assertj.core.api.Assertions.assertThat
 import static org.junit.Assert.*
-import org.eclipse.xtext.xbase.XIfExpression
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)

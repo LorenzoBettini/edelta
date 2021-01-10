@@ -6,6 +6,7 @@ import edelta.interpreter.EdeltaInterpreterRuntimeException
 import edelta.lib.AbstractEdelta
 import edelta.tests.additional.MyCustomEdelta
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
+import edelta.tests.injectors.EdeltaInjectorProviderForJavaReflectAccess
 import org.eclipse.xtext.common.types.util.JavaReflectAccess
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner

@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import edelta.edelta.EdeltaProgram;
 import edelta.resource.derivedstate.EdeltaAccessibleElements;
 import edelta.tests.EdeltaAbstractTest;
-import edelta.tests.EdeltaInjectorProviderCustom;
+import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 import edelta.util.EdeltaEcoreHelper;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.ENamedElement;

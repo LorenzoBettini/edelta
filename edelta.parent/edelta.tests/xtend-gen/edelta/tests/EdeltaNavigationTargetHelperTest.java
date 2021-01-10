@@ -5,7 +5,7 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
 import edelta.navigation.EdeltaNavigationTargetHelper;
 import edelta.tests.EdeltaAbstractTest;
-import edelta.tests.EdeltaInjectorProviderCustom;
+import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;

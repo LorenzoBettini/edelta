@@ -2,6 +2,7 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.edelta.EdeltaProgram
+import edelta.tests.injectors.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter
 import edelta.util.EdeltaEcoreReferenceInformationHelper
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EPackage

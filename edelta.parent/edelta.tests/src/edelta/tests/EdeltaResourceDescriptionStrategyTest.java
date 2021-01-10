@@ -15,6 +15,8 @@ import org.junit.runner.RunWith;
 
 import com.google.inject.Inject;
 
+import edelta.tests.injectors.EdeltaInjectorProviderCustom;
+
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaInjectorProviderCustom.class)
 public class EdeltaResourceDescriptionStrategyTest extends EdeltaAbstractTest {

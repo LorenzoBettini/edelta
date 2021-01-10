@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import com.google.inject.Inject;
 
 import edelta.compiler.EdeltaCompilerUtil;
+import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 
 @ExtendWith(InjectionExtension.class)
 @InjectWith(EdeltaInjectorProviderCustom.class)

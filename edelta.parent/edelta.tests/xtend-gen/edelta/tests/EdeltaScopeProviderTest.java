@@ -8,7 +8,7 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaPackage;
 import edelta.edelta.EdeltaProgram;
 import edelta.tests.EdeltaAbstractTest;
-import edelta.tests.EdeltaInjectorProviderCustom;
+import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.ENamedElement;

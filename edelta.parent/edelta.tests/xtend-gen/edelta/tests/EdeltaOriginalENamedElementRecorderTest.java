@@ -9,7 +9,7 @@ import edelta.edelta.EdeltaProgram;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.scoping.EdeltaOriginalENamedElementRecorder;
 import edelta.tests.EdeltaAbstractTest;
-import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
+import edelta.tests.injectors.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EPackage;

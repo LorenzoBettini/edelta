@@ -10,8 +10,10 @@ import edelta.interpreter.EdeltaInterpreterFactory
 import edelta.interpreter.EdeltaInterpreterRuntimeException
 import edelta.interpreter.EdeltaInterpreterWrapperException
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper
+import edelta.tests.additional.EdeltaEContentAdapter.EdeltaEContentAdapterException
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 import edelta.tests.additional.MyCustomException
+import edelta.tests.injectors.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter
 import edelta.validation.EdeltaValidator
 import java.util.List
 import org.eclipse.emf.ecore.EAttribute
@@ -26,7 +28,6 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
-import edelta.tests.additional.EdeltaEContentAdapter.EdeltaEContentAdapterException
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
