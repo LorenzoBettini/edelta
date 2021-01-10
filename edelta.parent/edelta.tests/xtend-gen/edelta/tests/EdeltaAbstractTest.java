@@ -71,10 +71,10 @@ public abstract class EdeltaAbstractTest {
   
   @Inject
   @Extension
-  protected IJvmModelAssociations _iJvmModelAssociations;
+  protected IJvmModelAssociations jvmModelAssociations;
   
   @Extension
-  protected Inputs _inputs = new Inputs();
+  protected Inputs inputs = new Inputs();
   
   protected static String METAMODEL_PATH = "src/edelta/tests/input/models/";
   

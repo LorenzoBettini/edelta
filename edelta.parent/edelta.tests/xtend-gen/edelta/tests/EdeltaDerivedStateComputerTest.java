@@ -427,7 +427,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   
   @Test
   public void testInterpretedCreateEClassAndStealEAttribute() {
-    final EdeltaProgram program = this.parseWithTestEcore(this._inputs.createEClassStealingAttribute());
+    final EdeltaProgram program = this.parseWithTestEcore(this.inputs.createEClassStealingAttribute());
     final EClass ec = this.getLastCopiedEPackageFirstEClass(program, "NewClass");
     Assert.assertEquals("NewClass", ec.getName());
     final EStructuralFeature attr = IterableExtensions.<EStructuralFeature>head(ec.getEStructuralFeatures());
@@ -507,7 +507,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   @Test
   public void testPersonListExampleModifyEcore() {
     final EdeltaProgram prog = this.parseWithLoadedEcore((EdeltaAbstractTest.METAMODEL_PATH + EdeltaAbstractTest.PERSON_LIST_ECORE), 
-      this._inputs.personListExampleModifyEcore());
+      this.inputs.personListExampleModifyEcore());
     this.validationTestHelper.assertNoErrors(prog);
   }
   

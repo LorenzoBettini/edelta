@@ -45,9 +45,9 @@ abstract class EdeltaAbstractTest {
 
 	@Inject protected extension ParseHelper<EdeltaProgram> parseHelper
 	@Inject protected extension ValidationTestHelper validationTestHelper
-	@Inject protected extension IJvmModelAssociations
+	@Inject protected extension IJvmModelAssociations jvmModelAssociations
 
-	protected extension Inputs = new Inputs
+	protected extension Inputs inputs = new Inputs
 
 	protected static String METAMODEL_PATH = "src/edelta/tests/input/models/"
 	protected static String ECORE_ECORE = "EcoreForTests.ecore"

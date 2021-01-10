@@ -185,7 +185,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   
   @Test
   public void testOperationWithInferredReturnType() {
-    CharSequence _operationWithInferredReturnType = this._inputs.operationWithInferredReturnType();
+    CharSequence _operationWithInferredReturnType = this.inputs.operationWithInferredReturnType();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package foo;");
     _builder.newLine();
@@ -234,7 +234,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   
   @Test
   public void testOperationWithReturnType() {
-    CharSequence _operationWithReturnType = this._inputs.operationWithReturnType();
+    CharSequence _operationWithReturnType = this.inputs.operationWithReturnType();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package foo;");
     _builder.newLine();
@@ -283,7 +283,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   
   @Test
   public void testOperationAccessingLib() {
-    CharSequence _operationAccessingLib = this._inputs.operationAccessingLib();
+    CharSequence _operationAccessingLib = this.inputs.operationAccessingLib();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package foo;");
     _builder.newLine();
@@ -336,7 +336,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   
   @Test
   public void testOperationNewEClassWithInitializer() {
-    CharSequence _operationNewEClassWithInitializer = this._inputs.operationNewEClassWithInitializer();
+    CharSequence _operationNewEClassWithInitializer = this.inputs.operationNewEClassWithInitializer();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package foo;");
     _builder.newLine();
@@ -665,7 +665,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   
   @Test
   public void testReferenceToCreatedEClass() {
-    CharSequence _referenceToCreatedEClass = this._inputs.referenceToCreatedEClass();
+    CharSequence _referenceToCreatedEClass = this.inputs.referenceToCreatedEClass();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package edelta;");
     _builder.newLine();
@@ -760,7 +760,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   
   @Test
   public void testReferenceToCreatedEClassRenamed() {
-    CharSequence _referenceToCreatedEClassRenamed = this._inputs.referenceToCreatedEClassRenamed();
+    CharSequence _referenceToCreatedEClassRenamed = this.inputs.referenceToCreatedEClassRenamed();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package edelta;");
     _builder.newLine();
@@ -873,7 +873,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   
   @Test
   public void testUseAs() {
-    CharSequence _useAsCustomEdeltaCreatingEClass = this._inputs.useAsCustomEdeltaCreatingEClass();
+    CharSequence _useAsCustomEdeltaCreatingEClass = this.inputs.useAsCustomEdeltaCreatingEClass();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package edelta;");
     _builder.newLine();
@@ -966,7 +966,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   
   @Test
   public void testUseAsExtension() {
-    CharSequence _useAsCustomEdeltaAsExtensionCreatingEClass = this._inputs.useAsCustomEdeltaAsExtensionCreatingEClass();
+    CharSequence _useAsCustomEdeltaAsExtensionCreatingEClass = this.inputs.useAsCustomEdeltaAsExtensionCreatingEClass();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package edelta;");
     _builder.newLine();
@@ -1176,7 +1176,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   
   @Test
   public void testUseAsExecution() {
-    CharSequence _useAsCustomEdeltaCreatingEClass = this._inputs.useAsCustomEdeltaCreatingEClass();
+    CharSequence _useAsCustomEdeltaCreatingEClass = this.inputs.useAsCustomEdeltaCreatingEClass();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
     _builder.newLine();
@@ -1211,7 +1211,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   
   @Test
   public void testUseAsExtensionExecution() {
-    CharSequence _useAsCustomEdeltaAsExtensionCreatingEClass = this._inputs.useAsCustomEdeltaAsExtensionCreatingEClass();
+    CharSequence _useAsCustomEdeltaAsExtensionCreatingEClass = this.inputs.useAsCustomEdeltaAsExtensionCreatingEClass();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
     _builder.newLine();
@@ -1246,7 +1246,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   
   @Test
   public void testStatefulUseAsExecution() {
-    CharSequence _useAsCustomStatefulEdeltaCreatingEClass = this._inputs.useAsCustomStatefulEdeltaCreatingEClass();
+    CharSequence _useAsCustomStatefulEdeltaCreatingEClass = this.inputs.useAsCustomStatefulEdeltaCreatingEClass();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
     _builder.newLine();
@@ -1609,7 +1609,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   
   @Test
   public void testCompilationAfterInterpretationOfCreatedEClassStealingAttribute() {
-    CharSequence _createEClassStealingAttribute = this._inputs.createEClassStealingAttribute();
+    CharSequence _createEClassStealingAttribute = this.inputs.createEClassStealingAttribute();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package edelta;");
     _builder.newLine();
@@ -1703,7 +1703,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   
   @Test
   public void testCompilationAfterInterpretationChangeEClassRemovingAttribute() {
-    CharSequence _changeEClassRemovingAttribute = this._inputs.changeEClassRemovingAttribute();
+    CharSequence _changeEClassRemovingAttribute = this.inputs.changeEClassRemovingAttribute();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package edelta;");
     _builder.newLine();
@@ -1789,7 +1789,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   
   @Test
   public void testCompilationOfModifyEcoreCallingLibMethods() {
-    CharSequence _modifyEcoreUsingLibMethods = this._inputs.modifyEcoreUsingLibMethods();
+    CharSequence _modifyEcoreUsingLibMethods = this.inputs.modifyEcoreUsingLibMethods();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package edelta;");
     _builder.newLine();
@@ -3741,7 +3741,7 @@ public class EdeltaCompilerTest extends EdeltaAbstractTest {
   public void testCompilationOfPersonListExampleModifyEcore() {
     final ResourceSet rs = this.createResourceSetWithEcores(
       Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList(EdeltaAbstractTest.PERSON_LIST_ECORE)), 
-      this._inputs.personListExampleModifyEcore());
+      this.inputs.personListExampleModifyEcore());
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package edelta.personlist.example;");
     _builder.newLine();

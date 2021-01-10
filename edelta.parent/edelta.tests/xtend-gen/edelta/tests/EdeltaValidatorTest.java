@@ -34,13 +34,13 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   
   @Test
   public void testCanReferToMetamodel() {
-    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this._inputs.referenceToMetamodel()));
+    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this.inputs.referenceToMetamodel()));
   }
   
   @Test
   public void testUseImportedJavaTypes() {
     try {
-      this.validationTestHelper.assertNoErrors(this.parseHelper.parse(this._inputs.useImportedJavaTypes()));
+      this.validationTestHelper.assertNoErrors(this.parseHelper.parse(this.inputs.useImportedJavaTypes()));
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -48,12 +48,12 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   
   @Test
   public void testReferenceToCreatedEClass() {
-    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this._inputs.referenceToCreatedEClass()));
+    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this.inputs.referenceToCreatedEClass()));
   }
   
   @Test
   public void testReferenceToCreatedEAttribute() {
-    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this._inputs.referenceToCreatedEAttributeRenamed()));
+    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this.inputs.referenceToCreatedEAttributeRenamed()));
   }
   
   @Test
@@ -330,7 +330,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   
   @Test
   public void testValidLibMethodsInModifyEcore() {
-    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this._inputs.modifyEcoreUsingLibMethods()));
+    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this.inputs.modifyEcoreUsingLibMethods()));
   }
   
   @Test

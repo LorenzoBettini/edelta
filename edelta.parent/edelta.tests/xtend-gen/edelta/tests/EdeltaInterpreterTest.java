@@ -361,7 +361,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       Assert.assertEquals("aNewAttr", 
         ((EAttribute) _head).getName());
     };
-    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this._inputs.useAsCustomEdeltaCreatingEClass(), _function);
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this.inputs.useAsCustomEdeltaCreatingEClass(), _function);
   }
   
   @Test
@@ -373,7 +373,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       Assert.assertEquals("aNewAttr", 
         ((EAttribute) _head).getName());
     };
-    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this._inputs.useAsCustomEdeltaAsExtensionCreatingEClass(), _function);
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this.inputs.useAsCustomEdeltaAsExtensionCreatingEClass(), _function);
   }
   
   @Test
@@ -385,7 +385,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
       Assert.assertEquals("aNewAttr4", 
         ((EAttribute) _head).getName());
     };
-    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this._inputs.useAsCustomStatefulEdeltaCreatingEClass(), _function);
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this.inputs.useAsCustomStatefulEdeltaCreatingEClass(), _function);
   }
   
   @Test
@@ -2084,7 +2084,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   
   @Test
   public void testReferenceToEClassRemoved() {
-    final String input = this._inputs.referenceToEClassRemoved().toString();
+    final String input = this.inputs.referenceToEClassRemoved().toString();
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       final ThrowableAssert.ThrowingCallable _function_1 = () -> {
@@ -2237,7 +2237,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   
   @Test
   public void testReferenceToEClassRenamed() {
-    final String input = this._inputs.referenceToEClassRenamed().toString();
+    final String input = this.inputs.referenceToEClassRenamed().toString();
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this.interpretProgram(it);
@@ -2254,7 +2254,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   
   @Test
   public void testReferenceToCreatedEClassRenamed() {
-    final String input = this._inputs.referenceToCreatedEClassRenamed().toString();
+    final String input = this.inputs.referenceToCreatedEClassRenamed().toString();
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       this.interpretProgram(it);
