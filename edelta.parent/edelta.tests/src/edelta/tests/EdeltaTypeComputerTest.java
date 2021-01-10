@@ -38,7 +38,7 @@ public class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 		"FooEnumLiteral, EEnumLiteral",
 		"NonExistant, ENamedElement"
 	})
-	public void testTypeOfEcoreReference(String ecoreRefArg, String expectedType) {
+	public void testTypeOfEcoreReference(String ecoreRefArg, String expectedType) throws Exception {
 		assertType(
 			"ecoreref(" + ecoreRefArg + ")",
 			"org.eclipse.emf.ecore." + expectedType
@@ -51,7 +51,7 @@ public class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 		"'val org.eclipse.emf.ecore.EClass c = ecoreref(FooClass.NonExistant)', EClass",
 		"'val Object c = ecoreref(NonExistant)', ENamedElement"
 	})
-	public void testTypeOfEcoreReferenceWithExpectation(String input, String expectedType) {
+	public void testTypeOfEcoreReferenceWithExpectation(String input, String expectedType) throws Exception {
 		assertTypeOfRightExpression(
 			input,
 			"org.eclipse.emf.ecore." + expectedType
@@ -59,17 +59,17 @@ public class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	public void testTypeOfReferenceToNullNamedElement() {
+	public void testTypeOfReferenceToNullNamedElement() throws Exception {
 		assertENamedElement("ecoreref");
 	}
 
 	@Test
-	public void testTypeOfReferenceToNullNamedElement2() {
+	public void testTypeOfReferenceToNullNamedElement2() throws Exception {
 		assertENamedElement("ecoreref()");
 	}
 
 	@Test
-	public void testTypeForRenamedEClassInModifyEcore() {
+	public void testTypeForRenamedEClassInModifyEcore() throws Exception {
 		var prog = parseWithTestEcore(
 			"metamodel \"foo\"\n"
 			+ "\n"
@@ -86,7 +86,7 @@ public class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	public void testTypeForRenamedQualifiedEClassInModifyEcore() {
+	public void testTypeForRenamedQualifiedEClassInModifyEcore() throws Exception {
 		var prog = parseWithTestEcore(
 			"metamodel \"foo\"\n"
 			+ "\n"
@@ -102,18 +102,18 @@ public class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 				.getActualType(ecoreRefExp).getIdentifier());
 	}
 
-	private void assertType(CharSequence input, String expectedTypeFQN) {
+	private void assertType(CharSequence input, String expectedTypeFQN) throws Exception {
 		var ecoreRefExp = ecoreReferenceExpression(input);
 		assertEquals(expectedTypeFQN,
 			typeResolver.resolveTypes(ecoreRefExp)
 				.getActualType(ecoreRefExp).getIdentifier());
 	}
 
-	private void assertENamedElement(CharSequence input) {
+	private void assertENamedElement(CharSequence input) throws Exception {
 		assertType(input, "org.eclipse.emf.ecore.ENamedElement");
 	}
 
-	private void assertTypeOfRightExpression(CharSequence input, String expectedTypeFQN) {
+	private void assertTypeOfRightExpression(CharSequence input, String expectedTypeFQN) throws Exception {
 		var blockLastExpression = getBlockLastExpression(lastModifyEcoreOperation(
 			parseWithTestEcore(
 				String.format(

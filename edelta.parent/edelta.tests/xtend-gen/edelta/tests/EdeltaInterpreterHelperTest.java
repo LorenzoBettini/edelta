@@ -171,20 +171,24 @@ public class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
   
   @Test
   public void testFilterOperationsWithSubPackage() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("metamodel \"mainpackage.mainsubpackage\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage mainsubpackage {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(_builder);
-    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      Assertions.<EdeltaModifyEcoreOperation>assertThat(this.interpreterHelper.filterOperations(it.getModifyEcoreOperations())).isEmpty();
-    };
-    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"mainpackage.mainsubpackage\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage mainsubpackage {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(_builder);
+      final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+        Assertions.<EdeltaModifyEcoreOperation>assertThat(this.interpreterHelper.filterOperations(it.getModifyEcoreOperations())).isEmpty();
+      };
+      ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcoreWithSubPackage, _function);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
 }

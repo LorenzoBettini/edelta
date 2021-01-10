@@ -54,303 +54,351 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   
   @Test
   public void testCopiedEPackages() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("package test");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.append("metamodel \"bar\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest1 epackage foo {}");
-    _builder.newLine();
-    _builder.append("modifyEcore aTest2 epackage bar {}");
-    _builder.newLine();
-    final EdeltaProgram program = this.parseWithTestEcores(_builder);
-    final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
-    final Function1<EPackage, String> _function = (EPackage it) -> {
-      return it.getName();
-    };
-    Assertions.<String>assertThat(IterableExtensions.<EPackage, String>map(packages, _function)).containsExactlyInAnyOrder("foo", "bar");
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("package test");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.append("metamodel \"bar\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest1 epackage foo {}");
+      _builder.newLine();
+      _builder.append("modifyEcore aTest2 epackage bar {}");
+      _builder.newLine();
+      final EdeltaProgram program = this.parseWithTestEcores(_builder);
+      final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
+      final Function1<EPackage, String> _function = (EPackage it) -> {
+        return it.getName();
+      };
+      Assertions.<String>assertThat(IterableExtensions.<EPackage, String>map(packages, _function)).containsExactlyInAnyOrder("foo", "bar");
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testCopiedEPackagesWithSingleModifyEcore() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("package test");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.append("metamodel \"bar\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest1 epackage foo {}");
-    _builder.newLine();
-    final EdeltaProgram program = this.parseWithTestEcores(_builder);
-    final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
-    final Function1<EPackage, String> _function = (EPackage it) -> {
-      return it.getName();
-    };
-    Assertions.<String>assertThat(IterableExtensions.<EPackage, String>map(packages, _function)).containsExactlyInAnyOrder("foo", "bar");
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("package test");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.append("metamodel \"bar\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest1 epackage foo {}");
+      _builder.newLine();
+      final EdeltaProgram program = this.parseWithTestEcores(_builder);
+      final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
+      final Function1<EPackage, String> _function = (EPackage it) -> {
+        return it.getName();
+      };
+      Assertions.<String>assertThat(IterableExtensions.<EPackage, String>map(packages, _function)).containsExactlyInAnyOrder("foo", "bar");
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testCopiedEPackagesWhenDuplicateImports() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("package test");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest1 epackage foo {}");
-    _builder.newLine();
-    _builder.append("modifyEcore aTest2 epackage foo {}");
-    _builder.newLine();
-    final EdeltaProgram program = this.parseWithTestEcore(_builder);
-    final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
-    final Function1<EPackage, String> _function = (EPackage it) -> {
-      return it.getName();
-    };
-    Assertions.<String>assertThat(IterableExtensions.<EPackage, String>map(packages, _function)).containsExactly("foo");
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("package test");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest1 epackage foo {}");
+      _builder.newLine();
+      _builder.append("modifyEcore aTest2 epackage foo {}");
+      _builder.newLine();
+      final EdeltaProgram program = this.parseWithTestEcore(_builder);
+      final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
+      final Function1<EPackage, String> _function = (EPackage it) -> {
+        return it.getName();
+      };
+      Assertions.<String>assertThat(IterableExtensions.<EPackage, String>map(packages, _function)).containsExactly("foo");
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testCopiedEPackagesWhenUnresolvedPackages() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("package test");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"unresolved\"");
-    _builder.newLine();
-    _builder.append("metamodel \"unresolved\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest1 epackage unresolved {}");
-    _builder.newLine();
-    _builder.append("modifyEcore aTest2 epackage unresolved {}");
-    _builder.newLine();
-    final EdeltaProgram program = this.parseWithTestEcore(_builder);
-    final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
-    Assertions.<EPackage>assertThat(packages).hasSize(1);
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("package test");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"unresolved\"");
+      _builder.newLine();
+      _builder.append("metamodel \"unresolved\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest1 epackage unresolved {}");
+      _builder.newLine();
+      _builder.append("modifyEcore aTest2 epackage unresolved {}");
+      _builder.newLine();
+      final EdeltaProgram program = this.parseWithTestEcore(_builder);
+      final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
+      Assertions.<EPackage>assertThat(packages).hasSize(1);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testCopiedEPackagesWithReferences() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("package test");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"testecoreforreferences1\"");
-    _builder.newLine();
-    _builder.append("metamodel \"testecoreforreferences2\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest1 epackage testecoreforreferences1 {}");
-    _builder.newLine();
-    _builder.append("modifyEcore aTest2 epackage testecoreforreferences2 {}");
-    _builder.newLine();
-    final EdeltaProgram program = this.parseWithTestEcoresWithReferences(_builder);
-    final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
-    Assertions.<EPackage>assertThat(packages).hasSize(2);
-    final EPackage testecoreforreferences1 = this.<EPackage>getByName(packages, "testecoreforreferences1");
-    final EPackage testecoreforreferences2 = this.<EPackage>getByName(packages, "testecoreforreferences2");
-    final EClass person = this.getEClassByName(testecoreforreferences1, "Person");
-    final EClass workplace = this.getEClassByName(testecoreforreferences2, "WorkPlace");
-    Assert.assertSame(
-      this.getEReferenceByName(person, "works").getEOpposite(), 
-      this.getEReferenceByName(workplace, "persons"));
-    Assert.assertSame(
-      this.getEReferenceByName(person, "works"), 
-      this.getEReferenceByName(workplace, "persons").getEOpposite());
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("package test");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"testecoreforreferences1\"");
+      _builder.newLine();
+      _builder.append("metamodel \"testecoreforreferences2\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest1 epackage testecoreforreferences1 {}");
+      _builder.newLine();
+      _builder.append("modifyEcore aTest2 epackage testecoreforreferences2 {}");
+      _builder.newLine();
+      final EdeltaProgram program = this.parseWithTestEcoresWithReferences(_builder);
+      final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
+      Assertions.<EPackage>assertThat(packages).hasSize(2);
+      final EPackage testecoreforreferences1 = this.<EPackage>getByName(packages, "testecoreforreferences1");
+      final EPackage testecoreforreferences2 = this.<EPackage>getByName(packages, "testecoreforreferences2");
+      final EClass person = this.getEClassByName(testecoreforreferences1, "Person");
+      final EClass workplace = this.getEClassByName(testecoreforreferences2, "WorkPlace");
+      Assert.assertSame(
+        this.getEReferenceByName(person, "works").getEOpposite(), 
+        this.getEReferenceByName(workplace, "persons"));
+      Assert.assertSame(
+        this.getEReferenceByName(person, "works"), 
+        this.getEReferenceByName(workplace, "persons").getEOpposite());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testInvalidDirectSubPackageAreNotCopied() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("package test");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"mainpackage.mainsubpackage\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage mainsubpackage {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final EdeltaProgram program = this.parseWithTestEcoreWithSubPackage(_builder);
-    final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
-    Assertions.<EPackage>assertThat(packages).isEmpty();
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("package test");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"mainpackage.mainsubpackage\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage mainsubpackage {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      final EdeltaProgram program = this.parseWithTestEcoreWithSubPackage(_builder);
+      final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
+      Assertions.<EPackage>assertThat(packages).isEmpty();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testInstallDerivedStateDuringPreIndexingPhase() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("package test");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest1 epackage foo {}");
-    _builder.newLine();
-    final EdeltaProgram program = this.parseWithTestEcore(_builder);
-    Resource _eResource = program.eResource();
-    final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
-    Resource _eResource_1 = program.eResource();
-    this._testableEdeltaDerivedStateComputer.installDerivedState(((DerivedStateAwareResource) _eResource_1), true);
-    EObject _last = IterableExtensions.<EObject>last(resource.getContents());
-    Assert.assertEquals("test.__synthetic0", ((JvmGenericType) _last).getIdentifier());
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("package test");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest1 epackage foo {}");
+      _builder.newLine();
+      final EdeltaProgram program = this.parseWithTestEcore(_builder);
+      Resource _eResource = program.eResource();
+      final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
+      Resource _eResource_1 = program.eResource();
+      this._testableEdeltaDerivedStateComputer.installDerivedState(((DerivedStateAwareResource) _eResource_1), true);
+      EObject _last = IterableExtensions.<EObject>last(resource.getContents());
+      Assert.assertEquals("test.__synthetic0", ((JvmGenericType) _last).getIdentifier());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testDerivedStateForModifyEcoreWithMissingPackage() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("package test");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest");
-    _builder.newLine();
-    final EdeltaProgram program = this.parseWithTestEcore(_builder);
-    Resource _eResource = program.eResource();
-    final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
-    EObject _last = IterableExtensions.<EObject>last(resource.getContents());
-    Assert.assertEquals("test.__synthetic0", ((JvmGenericType) _last).getIdentifier());
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("package test");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest");
+      _builder.newLine();
+      final EdeltaProgram program = this.parseWithTestEcore(_builder);
+      Resource _eResource = program.eResource();
+      final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
+      EObject _last = IterableExtensions.<EObject>last(resource.getContents());
+      Assert.assertEquals("test.__synthetic0", ((JvmGenericType) _last).getIdentifier());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testDerivedStateIsCorrectlyDiscarded() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("package test");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest1 epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("addNewEClass(\"First\")");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final EdeltaProgram program = this.parseWithTestEcore(_builder);
-    Resource _eResource = program.eResource();
-    final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
-    Assert.assertEquals("First", this.getLastCopiedEPackageLastEClass(program).getName());
-    program.getModifyEcoreOperations().clear();
-    resource.discardDerivedState();
-    EObject _last = IterableExtensions.<EObject>last(resource.getContents());
-    Assert.assertEquals("test.__synthetic0", ((JvmGenericType) _last).getIdentifier());
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("package test");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest1 epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("addNewEClass(\"First\")");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      final EdeltaProgram program = this.parseWithTestEcore(_builder);
+      Resource _eResource = program.eResource();
+      final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
+      Assert.assertEquals("First", this.getLastCopiedEPackageLastEClass(program).getName());
+      program.getModifyEcoreOperations().clear();
+      resource.discardDerivedState();
+      EObject _last = IterableExtensions.<EObject>last(resource.getContents());
+      Assert.assertEquals("test.__synthetic0", ((JvmGenericType) _last).getIdentifier());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testDerivedStateIsCorrectlyDiscardedAndUnloaded() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("package test");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest1 epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("addNewEClass(\"First\")");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(First)");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final EdeltaProgram program = this.parseWithTestEcore(_builder);
-    Resource _eResource = program.eResource();
-    final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
-    final EClass derivedStateEClass = this.getLastCopiedEPackageLastEClass(program);
-    final ENamedElement eclassRef = this.getEdeltaEcoreReferenceExpression(IterableExtensions.<XExpression>last(this.getBlock(this.lastModifyEcoreOperation(program).getBody()).getExpressions())).getReference().getEnamedelement();
-    Assert.assertSame(derivedStateEClass, eclassRef);
-    Assert.assertEquals("First", derivedStateEClass.getName());
-    Assert.assertFalse("should be resolved now", eclassRef.eIsProxy());
-    program.getModifyEcoreOperations().remove(0);
-    resource.discardDerivedState();
-    Assert.assertSame(derivedStateEClass, eclassRef);
-    Assert.assertTrue("should be a proxy now", eclassRef.eIsProxy());
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("package test");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest1 epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("addNewEClass(\"First\")");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(First)");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      final EdeltaProgram program = this.parseWithTestEcore(_builder);
+      Resource _eResource = program.eResource();
+      final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
+      final EClass derivedStateEClass = this.getLastCopiedEPackageLastEClass(program);
+      final ENamedElement eclassRef = this.getEdeltaEcoreReferenceExpression(IterableExtensions.<XExpression>last(this.getBlock(this.lastModifyEcoreOperation(program).getBody()).getExpressions())).getReference().getEnamedelement();
+      Assert.assertSame(derivedStateEClass, eclassRef);
+      Assert.assertEquals("First", derivedStateEClass.getName());
+      Assert.assertFalse("should be resolved now", eclassRef.eIsProxy());
+      program.getModifyEcoreOperations().remove(0);
+      resource.discardDerivedState();
+      Assert.assertSame(derivedStateEClass, eclassRef);
+      Assert.assertTrue("should be a proxy now", eclassRef.eIsProxy());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testAdaptersAreRemovedFromDerivedEPackagesAfterUnloading() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("package test");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest1 epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("addNewEClass(\"First\")");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final EdeltaProgram program = this.parseWithTestEcore(_builder);
-    Resource _eResource = program.eResource();
-    final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
-    final EdeltaCopiedEPackagesMap nameToCopiedEPackageMap = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(resource);
-    Assert.assertFalse(resource.eAdapters().isEmpty());
-    Assert.assertFalse(nameToCopiedEPackageMap.isEmpty());
-    EList<Adapter> _eAdapters = IterableExtensions.<EPackage>head(nameToCopiedEPackageMap.values()).eAdapters();
-    AdapterImpl _adapterImpl = new AdapterImpl();
-    _eAdapters.add(_adapterImpl);
-    final Function1<EPackage, Boolean> _function = (EPackage it) -> {
-      boolean _isEmpty = it.eAdapters().isEmpty();
-      return Boolean.valueOf((!_isEmpty));
-    };
-    Assert.assertTrue(IterableExtensions.<EPackage>forall(nameToCopiedEPackageMap.values(), _function));
-    this._testableEdeltaDerivedStateComputer.unloadDerivedPackages(nameToCopiedEPackageMap);
-    Assert.assertFalse(nameToCopiedEPackageMap.isEmpty());
-    Assert.assertFalse(resource.eAdapters().isEmpty());
-    final Function1<EPackage, Boolean> _function_1 = (EPackage it) -> {
-      return Boolean.valueOf(it.eAdapters().isEmpty());
-    };
-    Assert.assertTrue(IterableExtensions.<EPackage>forall(nameToCopiedEPackageMap.values(), _function_1));
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("package test");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest1 epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("addNewEClass(\"First\")");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      final EdeltaProgram program = this.parseWithTestEcore(_builder);
+      Resource _eResource = program.eResource();
+      final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
+      final EdeltaCopiedEPackagesMap nameToCopiedEPackageMap = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(resource);
+      Assert.assertFalse(resource.eAdapters().isEmpty());
+      Assert.assertFalse(nameToCopiedEPackageMap.isEmpty());
+      EList<Adapter> _eAdapters = IterableExtensions.<EPackage>head(nameToCopiedEPackageMap.values()).eAdapters();
+      AdapterImpl _adapterImpl = new AdapterImpl();
+      _eAdapters.add(_adapterImpl);
+      final Function1<EPackage, Boolean> _function = (EPackage it) -> {
+        boolean _isEmpty = it.eAdapters().isEmpty();
+        return Boolean.valueOf((!_isEmpty));
+      };
+      Assert.assertTrue(IterableExtensions.<EPackage>forall(nameToCopiedEPackageMap.values(), _function));
+      this._testableEdeltaDerivedStateComputer.unloadDerivedPackages(nameToCopiedEPackageMap);
+      Assert.assertFalse(nameToCopiedEPackageMap.isEmpty());
+      Assert.assertFalse(resource.eAdapters().isEmpty());
+      final Function1<EPackage, Boolean> _function_1 = (EPackage it) -> {
+        return Boolean.valueOf(it.eAdapters().isEmpty());
+      };
+      Assert.assertTrue(IterableExtensions.<EPackage>forall(nameToCopiedEPackageMap.values(), _function_1));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testMapsAreClearedAfterDiscarding() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("package test");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest1 epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("addNewEClass(\"First\")");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final EdeltaProgram program = this.parseWithTestEcore(_builder);
-    Resource _eResource = program.eResource();
-    final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
-    final EdeltaCopiedEPackagesMap nameToCopiedEPackageMap = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(resource);
-    Assert.assertFalse(resource.eAdapters().isEmpty());
-    Assert.assertFalse(nameToCopiedEPackageMap.isEmpty());
-    program.getModifyEcoreOperations().clear();
-    resource.discardDerivedState();
-    Assert.assertTrue(nameToCopiedEPackageMap.isEmpty());
-    Assert.assertFalse(resource.eAdapters().isEmpty());
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("package test");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest1 epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("addNewEClass(\"First\")");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      final EdeltaProgram program = this.parseWithTestEcore(_builder);
+      Resource _eResource = program.eResource();
+      final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
+      final EdeltaCopiedEPackagesMap nameToCopiedEPackageMap = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(resource);
+      Assert.assertFalse(resource.eAdapters().isEmpty());
+      Assert.assertFalse(nameToCopiedEPackageMap.isEmpty());
+      program.getModifyEcoreOperations().clear();
+      resource.discardDerivedState();
+      Assert.assertTrue(nameToCopiedEPackageMap.isEmpty());
+      Assert.assertFalse(resource.eAdapters().isEmpty());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
@@ -373,142 +421,166 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   
   @Test
   public void testCopiedEPackageWithRenamedEClass() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("package test");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(foo.FooClass).name = \"Renamed\"");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final EdeltaProgram program = this.parseWithTestEcore(_builder);
-    final EClass derivedEClass = this.getLastCopiedEPackageFirstEClass(program);
-    Assert.assertEquals("Renamed", derivedEClass.getName());
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("package test");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(foo.FooClass).name = \"Renamed\"");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      final EdeltaProgram program = this.parseWithTestEcore(_builder);
+      final EClass derivedEClass = this.getLastCopiedEPackageFirstEClass(program);
+      Assert.assertEquals("Renamed", derivedEClass.getName());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testDerivedStateForCreatedEAttributeInChangeEClassWithNewName() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("package test");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(foo.FooClass) => [");
-    _builder.newLine();
-    _builder.append("\t\t");
-    _builder.append("name = \"Renamed\"");
-    _builder.newLine();
-    _builder.append("\t\t");
-    _builder.append("addNewEAttribute(\"newAttribute\", ecoreref(FooDataType))");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("]");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final EdeltaProgram program = this.parseWithTestEcore(_builder);
-    final EClass derivedEClass = this.getLastCopiedEPackageFirstEClass(program);
-    EStructuralFeature _last = IterableExtensions.<EStructuralFeature>last(derivedEClass.getEStructuralFeatures());
-    final EAttribute derivedEAttribute = ((EAttribute) _last);
-    Assert.assertEquals("newAttribute", derivedEAttribute.getName());
-    Assert.assertEquals("Renamed", derivedEAttribute.getEContainingClass().getName());
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("package test");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(foo.FooClass) => [");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("name = \"Renamed\"");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("addNewEAttribute(\"newAttribute\", ecoreref(FooDataType))");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("]");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      final EdeltaProgram program = this.parseWithTestEcore(_builder);
+      final EClass derivedEClass = this.getLastCopiedEPackageFirstEClass(program);
+      EStructuralFeature _last = IterableExtensions.<EStructuralFeature>last(derivedEClass.getEStructuralFeatures());
+      final EAttribute derivedEAttribute = ((EAttribute) _last);
+      Assert.assertEquals("newAttribute", derivedEAttribute.getName());
+      Assert.assertEquals("Renamed", derivedEAttribute.getEContainingClass().getName());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testInterpretedCreateEClassAndStealEAttribute() {
-    final EdeltaProgram program = this.parseWithTestEcore(this.inputs.createEClassStealingAttribute());
-    final EClass ec = this.getLastCopiedEPackageFirstEClass(program, "NewClass");
-    Assert.assertEquals("NewClass", ec.getName());
-    final EStructuralFeature attr = IterableExtensions.<EStructuralFeature>head(ec.getEStructuralFeatures());
-    Assert.assertEquals("myAttribute", attr.getName());
-    this.validationTestHelper.validate(program);
-    this.validationTestHelper.assertNoErrors(program);
-    final EdeltaEcoreQualifiedReference ecoreref = this.getEcoreRefInManipulationExpressionBlock(program);
-    ENamedElement _enamedelement = ecoreref.getQualification().getEnamedelement();
-    EClass eClass = ((EClass) _enamedelement);
-    ENamedElement _enamedelement_1 = ecoreref.getEnamedelement();
-    EAttribute eAttr = ((EAttribute) _enamedelement_1);
-    this.assertEClassContainsFeature(eClass, eAttr, false);
-    ENamedElement _originalEnamedelement = this._edeltaDerivedStateHelper.getOriginalEnamedelement(ecoreref.getQualification());
-    eClass = ((EClass) _originalEnamedelement);
-    ENamedElement _originalEnamedelement_1 = this._edeltaDerivedStateHelper.getOriginalEnamedelement(ecoreref);
-    eAttr = ((EAttribute) _originalEnamedelement_1);
-    this.assertEClassContainsFeature(eClass, eAttr, true);
+    try {
+      final EdeltaProgram program = this.parseWithTestEcore(this.inputs.createEClassStealingAttribute());
+      final EClass ec = this.getLastCopiedEPackageFirstEClass(program, "NewClass");
+      Assert.assertEquals("NewClass", ec.getName());
+      final EStructuralFeature attr = IterableExtensions.<EStructuralFeature>head(ec.getEStructuralFeatures());
+      Assert.assertEquals("myAttribute", attr.getName());
+      this.validationTestHelper.validate(program);
+      this.validationTestHelper.assertNoErrors(program);
+      final EdeltaEcoreQualifiedReference ecoreref = this.getEcoreRefInManipulationExpressionBlock(program);
+      ENamedElement _enamedelement = ecoreref.getQualification().getEnamedelement();
+      EClass eClass = ((EClass) _enamedelement);
+      ENamedElement _enamedelement_1 = ecoreref.getEnamedelement();
+      EAttribute eAttr = ((EAttribute) _enamedelement_1);
+      this.assertEClassContainsFeature(eClass, eAttr, false);
+      ENamedElement _originalEnamedelement = this._edeltaDerivedStateHelper.getOriginalEnamedelement(ecoreref.getQualification());
+      eClass = ((EClass) _originalEnamedelement);
+      ENamedElement _originalEnamedelement_1 = this._edeltaDerivedStateHelper.getOriginalEnamedelement(ecoreref);
+      eAttr = ((EAttribute) _originalEnamedelement_1);
+      this.assertEClassContainsFeature(eClass, eAttr, true);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testInterpretedRemovedEClassDoesNotTouchTheOriginalEcore() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("addNewEClass(\"NewClass\")");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(FooClass).EPackage.EClassifiers.remove(ecoreref(FooClass))");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final EdeltaProgram program = this.parseWithTestEcore(_builder);
-    final EClass derivedEClass = this.getLastCopiedEPackageLastEClass(program);
-    Assert.assertEquals("NewClass", derivedEClass.getName());
-    this.validationTestHelper.validate(program);
-    this.validationTestHelper.assertNoErrors(program);
-    final Function1<EClassifier, Boolean> _function = (EClassifier it) -> {
-      String _name = it.getName();
-      return Boolean.valueOf(Objects.equal(_name, "FooClass"));
-    };
-    Assert.assertNull(IterableExtensions.<EClassifier>findFirst(IterableExtensions.<EPackage>head(this.getCopiedEPackages(program)).getEClassifiers(), _function));
-    final Function1<EClassifier, Boolean> _function_1 = (EClassifier it) -> {
-      String _name = it.getName();
-      return Boolean.valueOf(Objects.equal(_name, "FooClass"));
-    };
-    Assert.assertNotNull(IterableExtensions.<EClassifier>findFirst(this.getEPackageByName(program, "foo").getEClassifiers(), _function_1));
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("addNewEClass(\"NewClass\")");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(FooClass).EPackage.EClassifiers.remove(ecoreref(FooClass))");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      final EdeltaProgram program = this.parseWithTestEcore(_builder);
+      final EClass derivedEClass = this.getLastCopiedEPackageLastEClass(program);
+      Assert.assertEquals("NewClass", derivedEClass.getName());
+      this.validationTestHelper.validate(program);
+      this.validationTestHelper.assertNoErrors(program);
+      final Function1<EClassifier, Boolean> _function = (EClassifier it) -> {
+        String _name = it.getName();
+        return Boolean.valueOf(Objects.equal(_name, "FooClass"));
+      };
+      Assert.assertNull(IterableExtensions.<EClassifier>findFirst(IterableExtensions.<EPackage>head(this.getCopiedEPackages(program)).getEClassifiers(), _function));
+      final Function1<EClassifier, Boolean> _function_1 = (EClassifier it) -> {
+        String _name = it.getName();
+        return Boolean.valueOf(Objects.equal(_name, "FooClass"));
+      };
+      Assert.assertNotNull(IterableExtensions.<EClassifier>findFirst(this.getEPackageByName(program, "foo").getEClassifiers(), _function_1));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testContentAdapter() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("addNewEClass(\"NewClass\")");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(FooClass).EPackage.EClassifiers.remove(ecoreref(FooClass))");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final EdeltaProgram program = this.parseWithTestEcore(_builder);
-    final ThrowableAssert.ThrowingCallable _function = () -> {
-      EClassifier _head = IterableExtensions.<EClassifier>head(IterableExtensions.<EPackage>head(program.getMetamodels()).getEClassifiers());
-      _head.setName("bar");
-    };
-    Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaInterpreterRuntimeException.class).hasMessageContaining("Unexpected notification");
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("addNewEClass(\"NewClass\")");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(FooClass).EPackage.EClassifiers.remove(ecoreref(FooClass))");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      final EdeltaProgram program = this.parseWithTestEcore(_builder);
+      final ThrowableAssert.ThrowingCallable _function = () -> {
+        EClassifier _head = IterableExtensions.<EClassifier>head(IterableExtensions.<EPackage>head(program.getMetamodels()).getEClassifiers());
+        _head.setName("bar");
+      };
+      Assertions.assertThatThrownBy(_function).isInstanceOf(EdeltaInterpreterRuntimeException.class).hasMessageContaining("Unexpected notification");
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testPersonListExampleModifyEcore() {
-    final EdeltaProgram prog = this.parseWithLoadedEcore((EdeltaAbstractTest.METAMODEL_PATH + EdeltaAbstractTest.PERSON_LIST_ECORE), 
-      this.inputs.personListExampleModifyEcore());
-    this.validationTestHelper.assertNoErrors(prog);
+    try {
+      final EdeltaProgram prog = this.parseWithLoadedEcore((EdeltaAbstractTest.METAMODEL_PATH + EdeltaAbstractTest.PERSON_LIST_ECORE), 
+        this.inputs.personListExampleModifyEcore());
+      this.validationTestHelper.assertNoErrors(prog);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   private EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(final EdeltaProgram program) {

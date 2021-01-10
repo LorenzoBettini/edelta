@@ -39,14 +39,14 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 		"ecoreref(), 'getENamedElement()'", // incomplete
 		"ecoreref(NonExistant), 'getENamedElement(\"\", \"\", \"\")'"
 	})
-	void testGetStringForEcoreReferenceExpression(final String input, final String expected) {
+	void testGetStringForEcoreReferenceExpression(final String input, final String expected) throws Exception {
 		assertEquals(expected,
 			edeltaCompilerUtil.getStringForEcoreReferenceExpression(
 					ecoreReferenceExpression(input)));
 	}
 
 	@Test
-	void testGetStringForEcoreReferenceExpressionEAttributeInSubPackage() {
+	void testGetStringForEcoreReferenceExpressionEAttributeInSubPackage() throws Exception {
 		var ecoreRefExp = 
 			lastEcoreReferenceExpression(
 				parseWithTestEcoreWithSubPackage(

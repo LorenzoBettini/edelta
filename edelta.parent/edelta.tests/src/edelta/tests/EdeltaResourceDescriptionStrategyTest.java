@@ -22,17 +22,17 @@ public class EdeltaResourceDescriptionStrategyTest extends EdeltaAbstractTest {
 	private ResourceDescriptionsProvider rdp;
 
 	@Test
-	public void testEmptyProgram() {
+	public void testEmptyProgram() throws Exception {
 		assertExportedEPackages("", "");
 	}
 
 	@Test
-	public void testSingleMetamodel() {
+	public void testSingleMetamodel() throws Exception {
 		assertExportedEPackages("metamodel \"ecore\"", "");
 	}
 
 	@Test
-	public void testReferenceToOurMetamodel() {
+	public void testReferenceToOurMetamodel() throws Exception {
 		assertExportedEPackages(
 			"metamodel \"ecore\"\n"
 			+ "metamodel \"foo\""
@@ -40,7 +40,7 @@ public class EdeltaResourceDescriptionStrategyTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	public void testCreateEClass() {
+	public void testCreateEClass() throws Exception {
 		// our copied packages must not be exported
 		assertExportedEPackages(
 			"metamodel \"ecore\"\n"
@@ -50,7 +50,7 @@ public class EdeltaResourceDescriptionStrategyTest extends EdeltaAbstractTest {
 		, "");
 	}
 
-	private void assertExportedEPackages(final CharSequence input, final CharSequence expected) {
+	private void assertExportedEPackages(final CharSequence input, final CharSequence expected) throws Exception {
 		var program = parseWithTestEcore(input);
 		validationTestHelper.validate(program);
 		assertEqualsStrings(expected,

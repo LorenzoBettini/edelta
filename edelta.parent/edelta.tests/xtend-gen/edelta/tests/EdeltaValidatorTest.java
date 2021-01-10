@@ -34,7 +34,11 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   
   @Test
   public void testCanReferToMetamodel() {
-    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this.inputs.referenceToMetamodel()));
+    try {
+      this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this.inputs.referenceToMetamodel()));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
@@ -48,12 +52,20 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   
   @Test
   public void testReferenceToCreatedEClass() {
-    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this.inputs.referenceToCreatedEClass()));
+    try {
+      this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this.inputs.referenceToCreatedEClass()));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testReferenceToCreatedEAttribute() {
-    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this.inputs.referenceToCreatedEAttributeRenamed()));
+    try {
+      this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this.inputs.referenceToCreatedEAttributeRenamed()));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
@@ -126,531 +138,603 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
   
   @Test
   public void testUnresolvedEcoreReference() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(NonExistant)");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(FooClass)");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    this.assertErrorsAsStrings(this.parseWithTestEcore(_builder), "NonExistant cannot be resolved.");
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(NonExistant)");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(FooClass)");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      this.assertErrorsAsStrings(this.parseWithTestEcore(_builder), "NonExistant cannot be resolved.");
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testNoDanglingReferencesAfterInterpretation() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(foo.FooClass).EPackage.EClassifiers.remove(ecoreref(foo.FooClass))");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(_builder));
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(foo.FooClass).EPackage.EClassifiers.remove(ecoreref(foo.FooClass))");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(_builder));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testCallMethodOnRenanedEClassInModifyEcore() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(foo.FooClass).name = \"RenamedClass\"");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(RenamedClass).getEAllStructuralFeatures");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final EdeltaProgram prog = this.parseWithTestEcore(_builder);
-    this.validationTestHelper.assertNoErrors(prog);
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(foo.FooClass).name = \"RenamedClass\"");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(RenamedClass).getEAllStructuralFeatures");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      final EdeltaProgram prog = this.parseWithTestEcore(_builder);
+      this.validationTestHelper.assertNoErrors(prog);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testCallMethodOnQualifiedRenanedEClassInModifyEcore() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(foo.FooClass).name = \"RenamedClass\"");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(foo.RenamedClass).getEAllStructuralFeatures");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final EdeltaProgram prog = this.parseWithTestEcore(_builder);
-    this.validationTestHelper.assertNoErrors(prog);
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(foo.FooClass).name = \"RenamedClass\"");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(foo.RenamedClass).getEAllStructuralFeatures");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      final EdeltaProgram prog = this.parseWithTestEcore(_builder);
+      this.validationTestHelper.assertNoErrors(prog);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testCallNonExistingMethodOnRenanedEClassInModifyEcore() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(foo.FooClass).name = \"RenamedClass\"");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(RenamedClass).nonExistant(\"an arg\")");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(RenamedClass).sugarSet = \"an arg\"");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("\"a string\".sugarSet = \"an arg\"");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final EdeltaProgram prog = this.parseWithTestEcore(_builder);
-    StringConcatenation _builder_1 = new StringConcatenation();
-    _builder_1.append("The method nonExistant(String) is undefined for the type EClass");
-    _builder_1.newLine();
-    _builder_1.append("The method sugarSet(String) is undefined for the type EClass");
-    _builder_1.newLine();
-    _builder_1.append("The method sugarSet(String) is undefined for the type String");
-    _builder_1.newLine();
-    this.assertErrorsAsStrings(prog, _builder_1);
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(foo.FooClass).name = \"RenamedClass\"");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(RenamedClass).nonExistant(\"an arg\")");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(RenamedClass).sugarSet = \"an arg\"");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("\"a string\".sugarSet = \"an arg\"");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      final EdeltaProgram prog = this.parseWithTestEcore(_builder);
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("The method nonExistant(String) is undefined for the type EClass");
+      _builder_1.newLine();
+      _builder_1.append("The method sugarSet(String) is undefined for the type EClass");
+      _builder_1.newLine();
+      _builder_1.append("The method sugarSet(String) is undefined for the type String");
+      _builder_1.newLine();
+      this.assertErrorsAsStrings(prog, _builder_1);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testReferenceToAddedAttributeofRenamedClassInModifyEcore() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(foo.FooClass).name = \"RenamedClass\"");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(RenamedClass).EStructuralFeatures.add(");
-    _builder.newLine();
-    _builder.append("\t\t");
-    _builder.append("newEAttribute(\"addedAttribute\", ecoreref(FooDataType)))");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(RenamedClass.addedAttribute)");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(_builder));
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(foo.FooClass).name = \"RenamedClass\"");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(RenamedClass).EStructuralFeatures.add(");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("newEAttribute(\"addedAttribute\", ecoreref(FooDataType)))");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(RenamedClass.addedAttribute)");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(_builder));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testReferenceToAddedAttributeofRenamedClassInModifyEcore2() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("import org.eclipse.emf.ecore.EClass");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(foo.FooClass).name = \"RenamedClass\"");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(RenamedClass).EStructuralFeatures += newEAttribute(\"added\", ecoreref(FooDataType))");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(RenamedClass.added)");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(_builder));
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("import org.eclipse.emf.ecore.EClass");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(foo.FooClass).name = \"RenamedClass\"");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(RenamedClass).EStructuralFeatures += newEAttribute(\"added\", ecoreref(FooDataType))");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(RenamedClass.added)");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(_builder));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testReferenceToRenamedClassInModifyEcore() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("import org.eclipse.emf.ecore.EClass");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(foo.FooClass).name = \"RenamedClass\"");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(foo.RenamedClass) => [abstract = true]");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(foo.RenamedClass).setAbstract(true)");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(foo.RenamedClass).abstract = true");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(_builder));
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("import org.eclipse.emf.ecore.EClass");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(foo.FooClass).name = \"RenamedClass\"");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(foo.RenamedClass) => [abstract = true]");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(foo.RenamedClass).setAbstract(true)");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(foo.RenamedClass).abstract = true");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(_builder));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testReferenceToUnknownEPackageInModifyEcore() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("import org.eclipse.emf.ecore.EClass");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    this.validationTestHelper.assertError(this.parseWithTestEcore(_builder), 
-      EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation(), 
-      Diagnostic.LINKING_DIAGNOSTIC, 
-      "foo cannot be resolved.");
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("import org.eclipse.emf.ecore.EClass");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      this.validationTestHelper.assertError(this.parseWithTestEcore(_builder), 
+        EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation(), 
+        Diagnostic.LINKING_DIAGNOSTIC, 
+        "foo cannot be resolved.");
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testValidLibMethodsInModifyEcore() {
-    this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this.inputs.modifyEcoreUsingLibMethods()));
+    try {
+      this.validationTestHelper.assertNoErrors(this.parseWithTestEcore(this.inputs.modifyEcoreUsingLibMethods()));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testDuplicateDeclarations() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("import java.util.List");
-    _builder.newLine();
-    _builder.append("import org.eclipse.emf.ecore.EPackage");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("def myFun(List<Integer> l) {}");
-    _builder.newLine();
-    _builder.append("def myFun(List<String> l) {}");
-    _builder.newLine();
-    _builder.append("def anotherFun(List<String> l) {} // OK, different params");
-    _builder.newLine();
-    _builder.append("def anotherDuplicate(EPackage p) {} // conflicts with modifyEcore");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {}");
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {}");
-    _builder.newLine();
-    _builder.append("modifyEcore anotherDuplicate epackage foo {} // implicit Java method param: EPackage");
-    _builder.newLine();
-    _builder.append("modifyEcore anotherFun epackage foo {} // OK, different params");
-    _builder.newLine();
-    final String input = _builder.toString();
-    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
-    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      this.validationTestHelper.assertError(it, 
-        EdeltaPackage.eINSTANCE.getEdeltaOperation(), 
-        EdeltaValidator.DUPLICATE_DECLARATION, 
-        input.indexOf("anotherDuplicate"), "anotherDuplicate".length(), 
-        "Duplicate definition \'anotherDuplicate\'");
-      this.validationTestHelper.assertError(it, 
-        EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation(), 
-        EdeltaValidator.DUPLICATE_DECLARATION, 
-        input.lastIndexOf("anotherDuplicate"), "anotherDuplicate".length(), 
-        "Duplicate definition \'anotherDuplicate\'");
-      StringConcatenation _builder_1 = new StringConcatenation();
-      _builder_1.append("Duplicate definition \'aTest\'");
-      _builder_1.newLine();
-      _builder_1.append("Duplicate definition \'aTest\'");
-      _builder_1.newLine();
-      _builder_1.append("Duplicate definition \'anotherDuplicate\'");
-      _builder_1.newLine();
-      _builder_1.append("Duplicate definition \'anotherDuplicate\'");
-      _builder_1.newLine();
-      _builder_1.append("Duplicate definition \'myFun\'");
-      _builder_1.newLine();
-      _builder_1.append("Duplicate definition \'myFun\'");
-      _builder_1.newLine();
-      this.assertErrorsAsStrings(it, _builder_1);
-    };
-    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("import java.util.List");
+      _builder.newLine();
+      _builder.append("import org.eclipse.emf.ecore.EPackage");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("def myFun(List<Integer> l) {}");
+      _builder.newLine();
+      _builder.append("def myFun(List<String> l) {}");
+      _builder.newLine();
+      _builder.append("def anotherFun(List<String> l) {} // OK, different params");
+      _builder.newLine();
+      _builder.append("def anotherDuplicate(EPackage p) {} // conflicts with modifyEcore");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {}");
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {}");
+      _builder.newLine();
+      _builder.append("modifyEcore anotherDuplicate epackage foo {} // implicit Java method param: EPackage");
+      _builder.newLine();
+      _builder.append("modifyEcore anotherFun epackage foo {} // OK, different params");
+      _builder.newLine();
+      final String input = _builder.toString();
+      EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+      final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+        this.validationTestHelper.assertError(it, 
+          EdeltaPackage.eINSTANCE.getEdeltaOperation(), 
+          EdeltaValidator.DUPLICATE_DECLARATION, 
+          input.indexOf("anotherDuplicate"), "anotherDuplicate".length(), 
+          "Duplicate definition \'anotherDuplicate\'");
+        this.validationTestHelper.assertError(it, 
+          EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation(), 
+          EdeltaValidator.DUPLICATE_DECLARATION, 
+          input.lastIndexOf("anotherDuplicate"), "anotherDuplicate".length(), 
+          "Duplicate definition \'anotherDuplicate\'");
+        StringConcatenation _builder_1 = new StringConcatenation();
+        _builder_1.append("Duplicate definition \'aTest\'");
+        _builder_1.newLine();
+        _builder_1.append("Duplicate definition \'aTest\'");
+        _builder_1.newLine();
+        _builder_1.append("Duplicate definition \'anotherDuplicate\'");
+        _builder_1.newLine();
+        _builder_1.append("Duplicate definition \'anotherDuplicate\'");
+        _builder_1.newLine();
+        _builder_1.append("Duplicate definition \'myFun\'");
+        _builder_1.newLine();
+        _builder_1.append("Duplicate definition \'myFun\'");
+        _builder_1.newLine();
+        this.assertErrorsAsStrings(it, _builder_1);
+      };
+      ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testDuplicateMetamodelImport() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.append("metamodel \"bar\"");
-    _builder.newLine();
-    _builder.append("metamodel \"nonexistent\"");
-    _builder.newLine();
-    _builder.append("metamodel \"nonexistent\" // also check unresolved imports");
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    final String input = _builder.toString();
-    EdeltaProgram _parseWithTestEcores = this.parseWithTestEcores(input);
-    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      this.validationTestHelper.assertError(it, 
-        EdeltaPackage.eINSTANCE.getEdeltaProgram(), 
-        EdeltaValidator.DUPLICATE_METAMODEL_IMPORT, 
-        input.lastIndexOf("\"nonexistent\""), "\"nonexistent\"".length(), 
-        "Duplicate metamodel import \"nonexistent\"");
-      this.validationTestHelper.assertError(it, 
-        EdeltaPackage.eINSTANCE.getEdeltaProgram(), 
-        EdeltaValidator.DUPLICATE_METAMODEL_IMPORT, 
-        input.lastIndexOf("\"foo\""), "\"foo\"".length(), 
-        "Duplicate metamodel import \"foo\"");
-    };
-    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcores, _function);
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.append("metamodel \"bar\"");
+      _builder.newLine();
+      _builder.append("metamodel \"nonexistent\"");
+      _builder.newLine();
+      _builder.append("metamodel \"nonexistent\" // also check unresolved imports");
+      _builder.newLine();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      final String input = _builder.toString();
+      EdeltaProgram _parseWithTestEcores = this.parseWithTestEcores(input);
+      final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+        this.validationTestHelper.assertError(it, 
+          EdeltaPackage.eINSTANCE.getEdeltaProgram(), 
+          EdeltaValidator.DUPLICATE_METAMODEL_IMPORT, 
+          input.lastIndexOf("\"nonexistent\""), "\"nonexistent\"".length(), 
+          "Duplicate metamodel import \"nonexistent\"");
+        this.validationTestHelper.assertError(it, 
+          EdeltaPackage.eINSTANCE.getEdeltaProgram(), 
+          EdeltaValidator.DUPLICATE_METAMODEL_IMPORT, 
+          input.lastIndexOf("\"foo\""), "\"foo\"".length(), 
+          "Duplicate metamodel import \"foo\"");
+      };
+      ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcores, _function);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testInvalidSubPackageImportedMetamodel() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("metamodel \"mainpackage.mainsubpackage\"");
-    _builder.newLine();
-    final String input = _builder.toString();
-    final int start = input.indexOf("\"");
-    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
-    EClass _edeltaProgram = EdeltaPackage.eINSTANCE.getEdeltaProgram();
-    int _lastIndexOf = input.lastIndexOf("\"");
-    int _minus = (_lastIndexOf - start);
-    int _plus = (_minus + 1);
-    this.validationTestHelper.assertError(_parseWithTestEcoreWithSubPackage, _edeltaProgram, 
-      EdeltaValidator.INVALID_SUBPACKAGE_IMPORT, start, _plus, 
-      "Invalid subpackage import \'mainsubpackage\'");
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"mainpackage.mainsubpackage\"");
+      _builder.newLine();
+      final String input = _builder.toString();
+      final int start = input.indexOf("\"");
+      EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
+      EClass _edeltaProgram = EdeltaPackage.eINSTANCE.getEdeltaProgram();
+      int _lastIndexOf = input.lastIndexOf("\"");
+      int _minus = (_lastIndexOf - start);
+      int _plus = (_minus + 1);
+      this.validationTestHelper.assertError(_parseWithTestEcoreWithSubPackage, _edeltaProgram, 
+        EdeltaValidator.INVALID_SUBPACKAGE_IMPORT, start, _plus, 
+        "Invalid subpackage import \'mainsubpackage\'");
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testInvalidModifyEcoreOfSubPackage() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("metamodel \"mainpackage.mainsubpackage\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage mainsubpackage {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final String input = _builder.toString();
-    final int start = input.lastIndexOf("mainsubpackage");
-    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
-    EClass _edeltaModifyEcoreOperation = EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation();
-    int _indexOf = input.indexOf(" {");
-    int _minus = (_indexOf - start);
-    this.validationTestHelper.assertError(_parseWithTestEcoreWithSubPackage, _edeltaModifyEcoreOperation, 
-      EdeltaValidator.INVALID_SUBPACKAGE_MODIFICATION, start, _minus, 
-      "Invalid direct subpackage modification \'mainsubpackage\'");
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"mainpackage.mainsubpackage\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage mainsubpackage {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      final String input = _builder.toString();
+      final int start = input.lastIndexOf("mainsubpackage");
+      EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(input);
+      EClass _edeltaModifyEcoreOperation = EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation();
+      int _indexOf = input.indexOf(" {");
+      int _minus = (_indexOf - start);
+      this.validationTestHelper.assertError(_parseWithTestEcoreWithSubPackage, _edeltaModifyEcoreOperation, 
+        EdeltaValidator.INVALID_SUBPACKAGE_MODIFICATION, start, _minus, 
+        "Invalid direct subpackage modification \'mainsubpackage\'");
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testTypeMismatchOfEcoreRefExp() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("import org.eclipse.emf.ecore.EClass");
-    _builder.newLine();
-    _builder.append("import org.eclipse.emf.ecore.EPackage");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(foo.FooClass).name = \"RenamedClass\"");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("val EClass c = ecoreref(RenamedClass) // OK after interpretation");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("val EPackage p = ecoreref(RenamedClass) // ERROR also after interpretation");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final String input = _builder.toString();
-    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
-    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      this.validationTestHelper.assertError(it, 
-        EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION, 
-        IssueCodes.INCOMPATIBLE_TYPES, 
-        input.lastIndexOf("ecoreref(RenamedClass)"), "ecoreref(RenamedClass)".length(), 
-        "Type mismatch: cannot convert from EClass to EPackage");
-      this.assertErrorsAsStrings(it, "Type mismatch: cannot convert from EClass to EPackage");
-    };
-    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("import org.eclipse.emf.ecore.EClass");
+      _builder.newLine();
+      _builder.append("import org.eclipse.emf.ecore.EPackage");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(foo.FooClass).name = \"RenamedClass\"");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("val EClass c = ecoreref(RenamedClass) // OK after interpretation");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("val EPackage p = ecoreref(RenamedClass) // ERROR also after interpretation");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      final String input = _builder.toString();
+      EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+      final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+        this.validationTestHelper.assertError(it, 
+          EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION, 
+          IssueCodes.INCOMPATIBLE_TYPES, 
+          input.lastIndexOf("ecoreref(RenamedClass)"), "ecoreref(RenamedClass)".length(), 
+          "Type mismatch: cannot convert from EClass to EPackage");
+        this.assertErrorsAsStrings(it, "Type mismatch: cannot convert from EClass to EPackage");
+      };
+      ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testAccessToNotYetExistingElement() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(ANewClass) // doesn\'t exist yet");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(NonExisting) // doesn\'t exist at all");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("addNewEClass(\"ANewClass\")");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(ANewClass) // this is OK");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final String input = _builder.toString();
-    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
-    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      this.validationTestHelper.assertError(it, 
-        EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
-        EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
-        input.indexOf("ANewClass"), 
-        "ANewClass".length(), 
-        "Element not yet available in this context: foo.ANewClass");
-      StringConcatenation _builder_1 = new StringConcatenation();
-      _builder_1.append("Element not yet available in this context: foo.ANewClass");
-      _builder_1.newLine();
-      _builder_1.append("NonExisting cannot be resolved.");
-      _builder_1.newLine();
-      this.assertErrorsAsStrings(it, _builder_1);
-    };
-    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(ANewClass) // doesn\'t exist yet");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(NonExisting) // doesn\'t exist at all");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("addNewEClass(\"ANewClass\")");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(ANewClass) // this is OK");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      final String input = _builder.toString();
+      EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+      final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+        this.validationTestHelper.assertError(it, 
+          EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
+          EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
+          input.indexOf("ANewClass"), 
+          "ANewClass".length(), 
+          "Element not yet available in this context: foo.ANewClass");
+        StringConcatenation _builder_1 = new StringConcatenation();
+        _builder_1.append("Element not yet available in this context: foo.ANewClass");
+        _builder_1.newLine();
+        _builder_1.append("NonExisting cannot be resolved.");
+        _builder_1.newLine();
+        this.assertErrorsAsStrings(it, _builder_1);
+      };
+      ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testAccessToNotYetExistingElementInComplexExpression() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("// doesn\'t exist yet");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(ANewClass).ESuperTypes = ");
-    _builder.newLine();
-    _builder.append("\t\t");
-    _builder.append("ecoreref(ANewSuperClass) // doesn\'t exist yet");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("addNewEClass(\"ANewClass\")");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("addNewEClass(\"ANewSuperClass\")");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(ANewClass) // this is OK");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(ANewSuperClass) // this is OK");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final String input = _builder.toString();
-    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
-    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      StringConcatenation _builder_1 = new StringConcatenation();
-      _builder_1.append("Element not yet available in this context: foo.ANewClass");
-      _builder_1.newLine();
-      _builder_1.append("Element not yet available in this context: foo.ANewSuperClass");
-      _builder_1.newLine();
-      _builder_1.append("The method ESuperTypes(EClass) is undefined for the type EClass");
-      _builder_1.newLine();
-      this.assertErrorsAsStrings(it, _builder_1);
-      this.validationTestHelper.assertError(it, 
-        EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
-        EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
-        input.indexOf("ANewClass"), 
-        "ANewClass".length(), 
-        "Element not yet available in this context: foo.ANewClass");
-      this.validationTestHelper.assertError(it, 
-        EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
-        EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
-        input.indexOf("ANewSuperClass"), 
-        "ANewSuperClass".length(), 
-        "Element not yet available in this context: foo.ANewSuperClass");
-    };
-    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("// doesn\'t exist yet");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(ANewClass).ESuperTypes = ");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("ecoreref(ANewSuperClass) // doesn\'t exist yet");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("addNewEClass(\"ANewClass\")");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("addNewEClass(\"ANewSuperClass\")");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(ANewClass) // this is OK");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(ANewSuperClass) // this is OK");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      final String input = _builder.toString();
+      EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+      final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+        StringConcatenation _builder_1 = new StringConcatenation();
+        _builder_1.append("Element not yet available in this context: foo.ANewClass");
+        _builder_1.newLine();
+        _builder_1.append("Element not yet available in this context: foo.ANewSuperClass");
+        _builder_1.newLine();
+        _builder_1.append("The method ESuperTypes(EClass) is undefined for the type EClass");
+        _builder_1.newLine();
+        this.assertErrorsAsStrings(it, _builder_1);
+        this.validationTestHelper.assertError(it, 
+          EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
+          EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
+          input.indexOf("ANewClass"), 
+          "ANewClass".length(), 
+          "Element not yet available in this context: foo.ANewClass");
+        this.validationTestHelper.assertError(it, 
+          EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
+          EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
+          input.indexOf("ANewSuperClass"), 
+          "ANewSuperClass".length(), 
+          "Element not yet available in this context: foo.ANewSuperClass");
+      };
+      ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
   public void testAccessToNotYetExistingElementInComplexExpression2() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("metamodel \"foo\"");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("modifyEcore aTest epackage foo {");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("// doesn\'t exist yet");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(ANewClass).ESuperTypes += ");
-    _builder.newLine();
-    _builder.append("\t\t");
-    _builder.append("ecoreref(ANewSuperClass) // doesn\'t exist yet");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("addNewEClass(\"ANewClass\")");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("addNewEClass(\"ANewSuperClass\")");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(ANewClass) // this is OK");
-    _builder.newLine();
-    _builder.append("\t");
-    _builder.append("ecoreref(ANewSuperClass) // this is OK");
-    _builder.newLine();
-    _builder.append("}");
-    _builder.newLine();
-    final String input = _builder.toString();
-    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
-    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      StringConcatenation _builder_1 = new StringConcatenation();
-      _builder_1.append("Element not yet available in this context: foo.ANewClass");
-      _builder_1.newLine();
-      _builder_1.append("Element not yet available in this context: foo.ANewSuperClass");
-      _builder_1.newLine();
-      this.assertErrorsAsStrings(it, _builder_1);
-      this.validationTestHelper.assertError(it, 
-        EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
-        EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
-        input.indexOf("ANewClass"), 
-        "ANewClass".length(), 
-        "Element not yet available in this context: foo.ANewClass");
-      this.validationTestHelper.assertError(it, 
-        EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
-        EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
-        input.indexOf("ANewSuperClass"), 
-        "ANewSuperClass".length(), 
-        "Element not yet available in this context: foo.ANewSuperClass");
-    };
-    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+    try {
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"foo\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("modifyEcore aTest epackage foo {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("// doesn\'t exist yet");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(ANewClass).ESuperTypes += ");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("ecoreref(ANewSuperClass) // doesn\'t exist yet");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("addNewEClass(\"ANewClass\")");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("addNewEClass(\"ANewSuperClass\")");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(ANewClass) // this is OK");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(ANewSuperClass) // this is OK");
+      _builder.newLine();
+      _builder.append("}");
+      _builder.newLine();
+      final String input = _builder.toString();
+      EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
+      final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
+        StringConcatenation _builder_1 = new StringConcatenation();
+        _builder_1.append("Element not yet available in this context: foo.ANewClass");
+        _builder_1.newLine();
+        _builder_1.append("Element not yet available in this context: foo.ANewSuperClass");
+        _builder_1.newLine();
+        this.assertErrorsAsStrings(it, _builder_1);
+        this.validationTestHelper.assertError(it, 
+          EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
+          EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
+          input.indexOf("ANewClass"), 
+          "ANewClass".length(), 
+          "Element not yet available in this context: foo.ANewClass");
+        this.validationTestHelper.assertError(it, 
+          EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE, 
+          EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT, 
+          input.indexOf("ANewSuperClass"), 
+          "ANewSuperClass".length(), 
+          "Element not yet available in this context: foo.ANewSuperClass");
+      };
+      ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
 }
