@@ -2,6 +2,7 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.navigation.EdeltaNavigationTargetHelper
+import edelta.tests.injectors.EdeltaInjectorProviderCustom
 import org.eclipse.emf.ecore.EcoreFactory
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
@@ -17,12 +18,12 @@ class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
 	@Inject EdeltaNavigationTargetHelper navigationTargetHelper
 
 	@Test
-	def void testNotEdeltaEcoreReference() {
+	def void testNotEdeltaEcoreReference() throws Exception {
 		assertThat(navigationTargetHelper.getTarget(EcoreFactory.eINSTANCE.createEClass))
 	}
 
 	@Test
-	def void testTargetInTheImportedMetamodel() {
+	def void testTargetInTheImportedMetamodel() throws Exception {
 		'''
 		metamodel "foo"
 		
@@ -39,7 +40,7 @@ class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testTargetAsXExpression() {
+	def void testTargetAsXExpression() throws Exception {
 		'''
 		metamodel "foo"
 		
@@ -57,7 +58,7 @@ class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testTargetOfForwardReference() {
+	def void testTargetOfForwardReference() throws Exception {
 		'''
 		metamodel "foo"
 		

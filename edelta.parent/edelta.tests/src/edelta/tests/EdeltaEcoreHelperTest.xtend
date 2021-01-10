@@ -1,6 +1,7 @@
 package edelta.tests
 
 import com.google.inject.Inject
+import edelta.tests.injectors.EdeltaInjectorProviderCustom
 import edelta.util.EdeltaEcoreHelper
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
@@ -15,7 +16,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	@Inject extension EdeltaEcoreHelper
 
 	@Test
-	def void testProgramENamedElements() {
+	def void testProgramENamedElements() throws Exception {
 		referencesToMetamodels.parseWithTestEcores.
 			getProgramENamedElements.
 			assertNamedElements(
@@ -37,7 +38,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testProgramENamedElementsWithCopiedEPackages() {
+	def void testProgramENamedElementsWithCopiedEPackages() throws Exception {
 		// note that the order is different w.r.t. the previous test
 		// since here we retrieve copied EPackage that are stored in a Map
 		referencesToMetamodelsWithCopiedEPackages.parseWithTestEcores.
@@ -61,7 +62,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testProgramENamedElementsWithSubPackages() {
+	def void testProgramENamedElementsWithSubPackages() throws Exception {
 		// MyClass with myClassAttribute
 		// is present in the package and in subpackages
 		// so it appears several times
@@ -92,7 +93,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testProgramWithCreatedEClassENamedElements() {
+	def void testProgramWithCreatedEClassENamedElements() throws Exception {
 		referenceToCreatedEClass.parseWithTestEcore => [
 			getProgramENamedElements.
 			assertNamedElements(
@@ -112,7 +113,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCreateSnapshotOfAccessibleElementsWithUnresolvedEPackage() {
+	def void testCreateSnapshotOfAccessibleElementsWithUnresolvedEPackage() throws Exception {
 		'''
 		metamodel "nonexisting"
 		'''.parseWithTestEcore => [
@@ -126,7 +127,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCreateSnapshotOfAccessibleElementsWithCreatedEClass() {
+	def void testCreateSnapshotOfAccessibleElementsWithCreatedEClass() throws Exception {
 		referenceToCreatedEClass.parseWithTestEcore => [
 			createSnapshotOfAccessibleElements.
 			assertAccessibleElements(
@@ -146,7 +147,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCreateSnapshotOfAccessibleElementsWithRemovedEClass() {
+	def void testCreateSnapshotOfAccessibleElementsWithRemovedEClass() throws Exception {
 		referenceToEClassRemoved.parseWithTestEcore => [
 			createSnapshotOfAccessibleElements.
 			assertAccessibleElements(
@@ -162,7 +163,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testGetCurrentAccessibleElementsWithCreatedEClass() {
+	def void testGetCurrentAccessibleElementsWithCreatedEClass() throws Exception {
 		referenceToCreatedEClass.parseWithTestEcore => [
 			getCurrentAccessibleElements.
 			assertAccessibleElements(
@@ -182,7 +183,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testEPackageENamedElements() {
+	def void testEPackageENamedElements() throws Exception {
 		referenceToMetamodel.parseWithTestEcore => [
 			getENamedElements(getEPackageByName("foo")).
 			assertNamedElements(
@@ -196,7 +197,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testEPackageENamedElementsWithSubPackages() {
+	def void testEPackageENamedElementsWithSubPackages() throws Exception {
 		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
 			getENamedElements(getEPackageByName("mainpackage")).
 			assertNamedElements(
@@ -212,7 +213,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testEPackageENamedElementsWithNewSubPackages() {
+	def void testEPackageENamedElementsWithNewSubPackages() throws Exception {
 		'''
 			metamodel "foo"
 			
@@ -232,7 +233,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testSubPackageEPackageENamedElementsWithSubPackages() {
+	def void testSubPackageEPackageENamedElementsWithSubPackages() throws Exception {
 		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
 			getENamedElements(getEPackageByName("mainpackage").ESubpackages.head).
 			assertNamedElements(
@@ -246,7 +247,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testSubSubPackageEPackageENamedElementsWithSubPackages() {
+	def void testSubSubPackageEPackageENamedElementsWithSubPackages() throws Exception {
 		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
 			getENamedElements(
 				getEPackageByName("mainpackage")
@@ -262,7 +263,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testEPackageENamedElementsWithCycleInSubPackages() {
+	def void testEPackageENamedElementsWithCycleInSubPackages() throws Exception {
 		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
 			val mainpackage = getEPackageByName("mainpackage")
 			val subsubpackage = mainpackage
@@ -282,7 +283,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testENamedElementsWithWithTheSameNameInSubPackages() {
+	def void testENamedElementsWithWithTheSameNameInSubPackages() throws Exception {
 		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
 			val mainpackage = getEPackageByName("mainpackage")
 			val subsubpackage = mainpackage
@@ -304,7 +305,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testEDataTypeENamedElements() {
+	def void testEDataTypeENamedElements() throws Exception {
 		referenceToMetamodel.parseWithTestEcore => [
 			getENamedElements(getEClassifierByName("foo", "FooDataType")).
 			assertNamedElements(
@@ -316,7 +317,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testENumENamedElements() {
+	def void testENumENamedElements() throws Exception {
 		referenceToMetamodel.parseWithTestEcore => [
 			getENamedElements(getEClassifierByName("foo", "FooEnum")).
 			assertNamedElements(
@@ -328,7 +329,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testENumENamedElementsWithCreatedEClass() {
+	def void testENumENamedElementsWithCreatedEClass() throws Exception {
 		referenceToCreatedEClass.parseWithTestEcore => [
 			getENamedElements(getEClassifierByName("foo", "FooEnum")).
 			assertNamedElements(
@@ -340,14 +341,14 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testNullENamedElements() {
+	def void testNullENamedElements() throws Exception {
 		referenceToMetamodel.parseWithTestEcore => [
 			Assert.assertTrue(getENamedElements(null).isEmpty)
 		]
 	}
 
 	@Test
-	def void testEClassENamedElements() {
+	def void testEClassENamedElements() throws Exception {
 		referenceToMetamodel.parseWithTestEcore => [
 			getENamedElements(getEClassifierByName("foo", "FooClass")).
 			assertNamedElements(
@@ -360,7 +361,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testEClassENamedElementsWithCreatedEClass() {
+	def void testEClassENamedElementsWithCreatedEClass() throws Exception {
 		referenceToCreatedEClass.parseWithTestEcore => [
 			getENamedElements(getEClassifierByName("foo", "FooClass")).
 			assertNamedElements(
@@ -373,7 +374,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testENamedElementsOfEPackage() {
+	def void testENamedElementsOfEPackage() throws Exception {
 		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
 			getENamedElements(getEPackageByName("mainpackage")).
 			assertNamedElements(
@@ -389,7 +390,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testENamedElementsOfEClass() {
+	def void testENamedElementsOfEClass() throws Exception {
 		referenceToMetamodel.parseWithTestEcore => [
 			getENamedElements(getEClassifierByName("foo", "FooClass")).
 			assertNamedElements(
@@ -402,7 +403,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testENamedElementsOfENum() {
+	def void testENamedElementsOfENum() throws Exception {
 		referenceToMetamodel.parseWithTestEcore => [
 			getENamedElements(getEClassifierByName("foo", "FooEnum")).
 			assertNamedElements(

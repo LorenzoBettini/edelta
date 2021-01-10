@@ -10,8 +10,10 @@ import edelta.interpreter.EdeltaInterpreterFactory
 import edelta.interpreter.EdeltaInterpreterRuntimeException
 import edelta.interpreter.EdeltaInterpreterWrapperException
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper
+import edelta.tests.additional.EdeltaEContentAdapter.EdeltaEContentAdapterException
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 import edelta.tests.additional.MyCustomException
+import edelta.tests.injectors.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter
 import edelta.validation.EdeltaValidator
 import java.util.List
 import org.eclipse.emf.ecore.EAttribute
@@ -26,7 +28,6 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
-import edelta.tests.additional.EdeltaEContentAdapter.EdeltaEContentAdapterException
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter)
@@ -47,7 +48,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void sanityTestCheck() {
+	def void sanityTestCheck() throws Exception {
 		// make sure we use the same interpreter implementation
 		// in fact the interpreter can create another interpreter using the factory
 		val interpreterFactory = injector.getInstance(EdeltaInterpreterFactory)
@@ -57,7 +58,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void makeSureModificationsToOriginalEPackageAreDetected() {
+	def void makeSureModificationsToOriginalEPackageAreDetected() throws Exception {
 		val prog = '''
 			metamodel "foo"
 			
@@ -71,7 +72,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCreateEClassAndCallLibMethod() {
+	def void testCreateEClassAndCallLibMethod() throws Exception {
 		'''
 			metamodel "foo"
 			
@@ -92,7 +93,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCreateEClassAndCallOperationThatThrows() {
+	def void testCreateEClassAndCallOperationThatThrows() throws Exception {
 		assertThatThrownBy['''
 				import org.eclipse.emf.ecore.EClass
 				import edelta.tests.additional.MyCustomException
@@ -116,7 +117,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testThrowNullPointerException() {
+	def void testThrowNullPointerException() throws Exception {
 		assertThatThrownBy['''
 				import org.eclipse.emf.ecore.EClass
 				import edelta.tests.additional.MyCustomException
@@ -141,7 +142,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 
 	@Test
-	def void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() {
+	def void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() throws Exception {
 		'''
 			metamodel "foo"
 			
@@ -160,7 +161,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCreateEClassAndCallOperationFromUseAsButNotFoundAtRuntime() {
+	def void testCreateEClassAndCallOperationFromUseAsButNotFoundAtRuntime() throws Exception {
 		// this is a simulation of what would happen if a type is resolved
 		// but the interpreter cannot load it with Class.forName
 		// because the ClassLoader cannot find it
@@ -182,7 +183,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCreateEClassAndCreateEAttribute() {
+	def void testCreateEClassAndCreateEAttribute() throws Exception {
 		'''
 			metamodel "foo"
 			
@@ -205,7 +206,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testRenameEClassAndCreateEAttributeAndCallOperationFromUseAs() {
+	def void testRenameEClassAndCreateEAttributeAndCallOperationFromUseAs() throws Exception {
 		'''
 			import edelta.tests.additional.MyCustomEdelta
 			
@@ -231,7 +232,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testEClassCreatedFromUseAs() {
+	def void testEClassCreatedFromUseAs() throws Exception {
 		useAsCustomEdeltaCreatingEClass
 		.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
 			val eClass = ePackage.lastEClass
@@ -243,7 +244,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testEClassCreatedFromUseAsAsExtension() {
+	def void testEClassCreatedFromUseAsAsExtension() throws Exception {
 		useAsCustomEdeltaAsExtensionCreatingEClass
 		.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
 			val eClass = ePackage.lastEClass
@@ -255,7 +256,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testEClassCreatedFromStatefulUseAs() {
+	def void testEClassCreatedFromStatefulUseAs() throws Exception {
 		useAsCustomStatefulEdeltaCreatingEClass
 		.assertAfterInterpretationOfEdeltaModifyEcoreOperation[ePackage |
 			val eClass = ePackage.lastEClass
@@ -267,7 +268,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testNullBody() {
+	def void testNullBody() throws Exception {
 		val input = '''
 			import org.eclipse.emf.ecore.EClass
 
@@ -284,7 +285,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testNullEcoreRefNamedElement() {
+	def void testNullEcoreRefNamedElement() throws Exception {
 		val input = '''
 			import org.eclipse.emf.ecore.EClass
 
@@ -302,7 +303,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testNullEcoreRef() {
+	def void testNullEcoreRef() throws Exception {
 		val input = '''
 			import org.eclipse.emf.ecore.EClass
 
@@ -320,7 +321,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testOperationWithErrorsDueToWrongParsing() {
+	def void testOperationWithErrorsDueToWrongParsing() throws Exception {
 		val input = '''
 			package test
 			
@@ -341,7 +342,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testUnresolvedEcoreReference() {
+	def void testUnresolvedEcoreReference() throws Exception {
 		val input = '''
 			import org.eclipse.emf.ecore.EClass
 
@@ -362,7 +363,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testUnresolvedEcoreReferenceMethodCall() {
+	def void testUnresolvedEcoreReferenceMethodCall() throws Exception {
 		val input = '''
 			import org.eclipse.emf.ecore.EClass
 
@@ -383,7 +384,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testUnresolvedEcoreReferenceMethodCall2() {
+	def void testUnresolvedEcoreReferenceMethodCall2() throws Exception {
 		val input = '''
 			import org.eclipse.emf.ecore.EClass
 
@@ -404,7 +405,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testUnresolvedEcoreReferenceMethodCall3() {
+	def void testUnresolvedEcoreReferenceMethodCall3() throws Exception {
 		val input = '''
 			import org.eclipse.emf.ecore.EClass
 
@@ -428,7 +429,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testUnresolvedEcoreReferenceQualified() {
+	def void testUnresolvedEcoreReferenceQualified() throws Exception {
 		val input = '''
 			import org.eclipse.emf.ecore.EClass
 
@@ -447,7 +448,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testModifyOperationCreateEClass() {
+	def void testModifyOperationCreateEClass() throws Exception {
 		val input = '''
 			package test
 			
@@ -468,7 +469,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testModifyEcoreAndCallOperation() {
+	def void testModifyEcoreAndCallOperation() throws Exception {
 		'''
 			import org.eclipse.emf.ecore.EClass
 			
@@ -494,7 +495,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testModifyEcoreRenameClassAndAddAttribute() {
+	def void testModifyEcoreRenameClassAndAddAttribute() throws Exception {
 		'''
 			import org.eclipse.emf.ecore.EClass
 			
@@ -523,7 +524,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testModifyEcoreRenameClassAndAddAttribute2() {
+	def void testModifyEcoreRenameClassAndAddAttribute2() throws Exception {
 		'''
 			import org.eclipse.emf.ecore.EClass
 			
@@ -545,7 +546,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testTimeoutWarning() {
+	def void testTimeoutWarning() throws Exception {
 		// in this test we really need the timeout
 		interpreter.interpreterTimeout = 2000;
 		val input = '''
@@ -585,7 +586,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testTimeoutWarningWhenCallingJavaCode() {
+	def void testTimeoutWarningWhenCallingJavaCode() throws Exception {
 		// in this test we really need the timeout
 		interpreter.interpreterTimeout = 2000;
 		val input = '''
@@ -618,7 +619,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testTimeoutWarningWithSeveralFiles() {
+	def void testTimeoutWarningWithSeveralFiles() throws Exception {
 		// in this test we really need the timeout
 		interpreter.interpreterTimeout = 2000;
 		val lib1 = '''
@@ -677,7 +678,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCreateEClassInSubPackage() {
+	def void testCreateEClassInSubPackage() throws Exception {
 		'''
 			metamodel "mainpackage"
 			
@@ -700,7 +701,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCreateEClassInSubSubPackage() {
+	def void testCreateEClassInSubSubPackage() throws Exception {
 		'''
 			metamodel "mainpackage"
 			
@@ -723,7 +724,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCreateEClassInNewSubPackage() {
+	def void testCreateEClassInNewSubPackage() throws Exception {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
 			
@@ -753,7 +754,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testComplexInterpretationWithRenamingAndSubPackages() {
+	def void testComplexInterpretationWithRenamingAndSubPackages() throws Exception {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
 			
@@ -789,7 +790,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testInterpreterOnSubPackageIsNotExecuted() {
+	def void testInterpreterOnSubPackageIsNotExecuted() throws Exception {
 		'''
 			metamodel "mainpackage.mainsubpackage"
 			
@@ -806,7 +807,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testModifyEcoreAndCallOperationFromExternalUseAs() {
+	def void testModifyEcoreAndCallOperationFromExternalUseAs() throws Exception {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		#['''
 			import org.eclipse.emf.ecore.EClass
@@ -841,7 +842,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testModifyEcoreAndCallOperationFromExternalUseAsExtension() {
+	def void testModifyEcoreAndCallOperationFromExternalUseAsExtension() throws Exception {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		#['''
 			import org.eclipse.emf.ecore.EClass
@@ -876,7 +877,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testModifyEcoreAndCallOperationFromExternalUseAsWithSeveralFiles() {
+	def void testModifyEcoreAndCallOperationFromExternalUseAsWithSeveralFiles() throws Exception {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		#[
 		'''
@@ -921,7 +922,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testModificationsOfMetamodelsAcrossSeveralFilesIntroducingDepOnAnotherMetamodel() {
+	def void testModificationsOfMetamodelsAcrossSeveralFilesIntroducingDepOnAnotherMetamodel() throws Exception {
 		val program = parseSeveralWithTestEcores(
 		#[
 		'''
@@ -971,7 +972,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			.containsExactlyInAnyOrder("foo", "bar")
 	}
 
-	@Test def void testRenameReferencesAcrossEPackages() {
+	@Test def void testRenameReferencesAcrossEPackages() throws Exception {
 		'''
 			package test
 
@@ -1004,7 +1005,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testRenameReferencesAcrossEPackagesModifyingOnePackageOnly() {
+	def void testRenameReferencesAcrossEPackagesModifyingOnePackageOnly() throws Exception {
 		'''
 			package test
 
@@ -1033,7 +1034,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testElementExpressionForCreatedEClassWithEdeltaAPI() {
+	@Test def void testElementExpressionForCreatedEClassWithEdeltaAPI() throws Exception {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
 			
@@ -1053,7 +1054,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testEcoreRefExpExpressionForCreatedEClassWithEdeltaAPI() {
+	@Test def void testEcoreRefExpExpressionForCreatedEClassWithEdeltaAPI() throws Exception {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
 			
@@ -1075,7 +1076,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testEcoreRefExpExpressionForCreatedEClassWithOperation() {
+	@Test def void testEcoreRefExpExpressionForCreatedEClassWithOperation() throws Exception {
 		'''
 			import org.eclipse.emf.ecore.EPackage
 			
@@ -1098,7 +1099,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testEcoreRefExpExpressionForCreatedEClassWithOperationInAnotherFile() {
+	@Test def void testEcoreRefExpExpressionForCreatedEClassWithOperationInAnotherFile() throws Exception {
 		parseSeveralWithTestEcore(
 		#[
 		'''
@@ -1128,7 +1129,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testEcoreRefExpForCreatedEClassRenamed() {
+	@Test def void testEcoreRefExpForCreatedEClassRenamed() throws Exception {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
 			
@@ -1155,7 +1156,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testEcoreRefExpForCreatedSubPackage() {
+	@Test def void testEcoreRefExpForCreatedSubPackage() throws Exception {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
 			
@@ -1193,7 +1194,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testEcoreRefExpForExistingEClass() {
+	@Test def void testEcoreRefExpForExistingEClass() throws Exception {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
 			
@@ -1213,7 +1214,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testEcoreRefExpForCreatedEClassRenamedInInitializer() {
+	@Test def void testEcoreRefExpForCreatedEClassRenamedInInitializer() throws Exception {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
 			
@@ -1243,7 +1244,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testEcoreRefExpForCreatedEClassRenamedInInitializer2() {
+	@Test def void testEcoreRefExpForCreatedEClassRenamedInInitializer2() throws Exception {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
 			
@@ -1272,7 +1273,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testElementExpressionMapForCreatedEClassWithEMFAPI() {
+	@Test def void testElementExpressionMapForCreatedEClassWithEMFAPI() throws Exception {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
 			
@@ -1296,7 +1297,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testElementExpressionMapForCreatedEClassWithDoubleArrow() {
+	@Test def void testElementExpressionMapForCreatedEClassWithDoubleArrow() throws Exception {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
 			
@@ -1321,7 +1322,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testElementExpressionMapForCreatedEClassWithoutName() {
+	@Test def void testElementExpressionMapForCreatedEClassWithoutName() throws Exception {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
 			
@@ -1341,7 +1342,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testElementExpressionMapForCreatedEClassWithMethodCall() {
+	@Test def void testElementExpressionMapForCreatedEClassWithMethodCall() throws Exception {
 		'''
 			import org.eclipse.emf.ecore.EcoreFactory
 			
@@ -1362,7 +1363,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToEClassRemoved() {
+	def void testReferenceToEClassRemoved() throws Exception {
 		val input = referenceToEClassRemoved.toString
 		input.parseWithTestEcore =>[
 			assertThatThrownBy[interpretProgram]
@@ -1379,7 +1380,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToEClassDeleted() {
+	def void testReferenceToEClassDeleted() throws Exception {
 		// EcoreUtil.delete sets to null also the ENamedElement of the ecoreref
 		// see https://github.com/LorenzoBettini/edelta/issues/271
 		val input = '''
@@ -1407,7 +1408,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToEClassRemovedInLoop() {
+	def void testReferenceToEClassRemovedInLoop() throws Exception {
 		val input = '''
 			metamodel "foo"
 			
@@ -1447,7 +1448,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToCreatedEClassRemoved() {
+	def void testReferenceToCreatedEClassRemoved() throws Exception {
 		val input = '''
 			metamodel "foo"
 			
@@ -1475,7 +1476,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToEClassRenamed() {
+	def void testReferenceToEClassRenamed() throws Exception {
 		val input = referenceToEClassRenamed.toString
 		input
 		.parseWithTestEcore => [
@@ -1492,7 +1493,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testReferenceToCreatedEClassRenamed() {
+	def void testReferenceToCreatedEClassRenamed() throws Exception {
 		val input = referenceToCreatedEClassRenamed.toString
 		input
 		.parseWithTestEcore => [
@@ -1509,7 +1510,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testShowErrorOnExistingEClass() {
+	def void testShowErrorOnExistingEClass() throws Exception {
 		val input = '''
 			metamodel "foo"
 			
@@ -1536,7 +1537,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testShowErrorOnCreatedEClass() {
+	def void testShowErrorOnCreatedEClass() throws Exception {
 		val input = '''
 			metamodel "foo"
 			
@@ -1564,7 +1565,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testShowErrorOnCreatedEClassGeneratedByOperation() {
+	def void testShowErrorOnCreatedEClassGeneratedByOperation() throws Exception {
 		val input = '''
 			import org.eclipse.emf.ecore.EPackage
 
@@ -1600,7 +1601,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testShowErrorOnCreatedEClassGeneratedByJavaOperation() {
+	def void testShowErrorOnCreatedEClassGeneratedByJavaOperation() throws Exception {
 		// see https://github.com/LorenzoBettini/edelta/issues/289
 		val input = '''
 			import edelta.tests.additional.MyCustomEdeltaShowingError
@@ -1630,7 +1631,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testIntroducedCycles() {
+	def void testIntroducedCycles() throws Exception {
 		val input = '''
 			metamodel "foo"
 			
@@ -1674,7 +1675,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testAccessToNotYetExistingElement() {
+	def void testAccessToNotYetExistingElement() throws Exception {
 		val input =
 		'''
 		metamodel "foo"
@@ -1707,7 +1708,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testAccessibleElements() {
+	def void testAccessibleElements() throws Exception {
 		val input =
 		'''
 		metamodel "foo"
@@ -1770,7 +1771,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testInvalidAmbiguousEcoreref() {
+	def void testInvalidAmbiguousEcoreref() throws Exception {
 		val input =
 		'''
 		metamodel "mainpackage"
@@ -1794,7 +1795,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testAmbiguousEcorerefAfterRemoval() {
+	def void testAmbiguousEcorerefAfterRemoval() throws Exception {
 		val input =
 		'''
 		metamodel "mainpackage"
@@ -1818,7 +1819,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testNonAmbiguousEcorerefAfterRemoval() {
+	def void testNonAmbiguousEcorerefAfterRemoval() throws Exception {
 		val input =
 		'''
 		import static org.eclipse.emf.ecore.util.EcoreUtil.remove
@@ -1847,7 +1848,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTypedInAssignment() {
+	def void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTypedInAssignment() throws Exception {
 		val input =
 		'''
 		import org.eclipse.emf.ecore.EAttribute
@@ -1882,7 +1883,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTypedInFeatureCall2() {
+	def void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTypedInFeatureCall2() throws Exception {
 		val input =
 		'''
 		import static org.eclipse.emf.ecore.util.EcoreUtil.remove
@@ -1921,7 +1922,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testInvalidAmbiguousEcorerefWithCreatedElements() {
+	def void testInvalidAmbiguousEcorerefWithCreatedElements() throws Exception {
 		val input =
 		'''
 		metamodel "mainpackage"
@@ -1947,7 +1948,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testNonAmbiguousEcorerefWithQualification() {
+	def void testNonAmbiguousEcorerefWithQualification() throws Exception {
 		val input =
 		'''
 		metamodel "mainpackage"
@@ -1968,7 +1969,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testNonAmbiguousEcoreref() {
+	def void testNonAmbiguousEcoreref() throws Exception {
 		val input =
 		'''
 		metamodel "mainpackage"
@@ -1988,7 +1989,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCallOperationThatCallsAnotherNonVoidOperation() {
+	def void testCallOperationThatCallsAnotherNonVoidOperation() throws Exception {
 		// see https://github.com/LorenzoBettini/edelta/issues/268
 		'''
 			metamodel "foo"
@@ -2024,7 +2025,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test def void testCallOperationThatCallsAnotherNonVoidOperationInAnotherFile() {
+	@Test def void testCallOperationThatCallsAnotherNonVoidOperationInAnotherFile() throws Exception {
 		// see https://github.com/LorenzoBettini/edelta/issues/268
 		parseSeveralWithTestEcore(
 		#[
@@ -2067,27 +2068,27 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
-	) {
+	) throws Exception {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, true, testExecutor)
 	}
 
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, boolean doValidate, (EPackage)=>void testExecutor
-	) {
+	) throws Exception {
 		val program = input.parseWithTestEcore
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor)
 	}
 
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		List<CharSequence> inputs, boolean doValidate, (EPackage)=>void testExecutor
-	) {
+	) throws Exception {
 		val program = parseSeveralWithTestEcore(inputs)
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor)
 	}
 
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		EdeltaProgram program, boolean doValidate, (EPackage)=>void testExecutor
-	) {
+	) throws Exception {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program) [
 			// validation after interpretation, since the interpreter
 			// can make new elements available during validation
@@ -2103,7 +2104,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		EdeltaProgram program,
 		(EPackage)=>void testExecutor
-	) {
+	) throws Exception {
 		val it = program.lastModifyEcoreOperation
 		interpreter.evaluateModifyEcoreOperations(program)
 		val packageName = it.epackage.name
@@ -2112,7 +2113,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		testExecutor.apply(epackage)
 	}
 
-	def private interpretProgram(EdeltaProgram program) {
+	def private interpretProgram(EdeltaProgram program) throws Exception {
 		interpreter.evaluateModifyEcoreOperations(program)
 		return derivedStateHelper
 			.getCopiedEPackagesMap(program.eResource)
@@ -2121,7 +2122,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	private def void assertEcoreRefExpElementMapsToXExpression(
 		EdeltaEcoreReference reference,
 		String expectedFeatureCallSimpleName
-	) {
+	) throws Exception {
 		val exp = derivedStateHelper
 			.getResponsibleExpression(reference)
 		assertNotNull(exp)

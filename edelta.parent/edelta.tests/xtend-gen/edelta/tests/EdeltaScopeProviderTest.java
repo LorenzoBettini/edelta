@@ -8,7 +8,7 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaPackage;
 import edelta.edelta.EdeltaProgram;
 import edelta.tests.EdeltaAbstractTest;
-import edelta.tests.EdeltaInjectorProviderCustom;
+import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.ENamedElement;
@@ -22,7 +22,6 @@ import org.eclipse.xtext.scoping.IScopeProvider;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.xbase.XExpression;
-import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
@@ -39,25 +38,21 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   private IScopeProvider _iScopeProvider;
   
   @Test
-  public void testSuperScope() {
-    try {
-      StringConcatenation _builder = new StringConcatenation();
-      _builder.append("modifyEcore aTest epackage foo {");
-      _builder.newLine();
-      _builder.append("\t");
-      _builder.append("this.");
-      _builder.newLine();
-      _builder.append("}");
-      _builder.newLine();
-      this._iScopeProvider.getScope(this.getBlockLastExpression(this.lastModifyEcoreOperation(this._parseHelper.parse(_builder)).getBody()), EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation_Body());
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
+  public void testSuperScope() throws Exception {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("this.");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    this._iScopeProvider.getScope(this.getBlockLastExpression(this.lastModifyEcoreOperation(this.parseHelper.parse(_builder)).getBody()), EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation_Body());
   }
   
   @Test
-  public void testScopeForMetamodel() {
-    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToMetamodel());
+  public void testScopeForMetamodel() throws Exception {
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this.inputs.referenceToMetamodel());
     EReference _edeltaProgram_Metamodels = EdeltaPackage.eINSTANCE.getEdeltaProgram_Metamodels();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("foo");
@@ -66,8 +61,8 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForMetamodels() {
-    EdeltaProgram _parseWithTestEcores = this.parseWithTestEcores(this._inputs.referencesToMetamodels());
+  public void testScopeForMetamodels() throws Exception {
+    EdeltaProgram _parseWithTestEcores = this.parseWithTestEcores(this.inputs.referencesToMetamodels());
     EReference _edeltaProgram_Metamodels = EdeltaPackage.eINSTANCE.getEdeltaProgram_Metamodels();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("foo");
@@ -78,8 +73,8 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForEnamedElementInProgram() {
-    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this._inputs.referenceToMetamodelWithCopiedEPackage());
+  public void testScopeForEnamedElementInProgram() throws Exception {
+    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this.inputs.referenceToMetamodelWithCopiedEPackage());
     EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("foo");
@@ -100,8 +95,8 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForEnamedElementWithSubPackageInProgram() {
-    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(this._inputs.referenceToMetamodelWithSubPackageWithCopiedEPackages());
+  public void testScopeForEnamedElementWithSubPackageInProgram() throws Exception {
+    EdeltaProgram _parseWithTestEcoreWithSubPackage = this.parseWithTestEcoreWithSubPackage(this.inputs.referenceToMetamodelWithSubPackageWithCopiedEPackages());
     EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("mainpackage");
@@ -142,7 +137,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForEnamedElementInEcoreReferenceExpressionWithSubPackages() {
+  public void testScopeForEnamedElementInEcoreReferenceExpressionWithSubPackages() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mainpackage\"");
     _builder.newLine();
@@ -195,7 +190,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForSubPackageInEcoreReferenceExpressionWithSubPackages() {
+  public void testScopeForSubPackageInEcoreReferenceExpressionWithSubPackages() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mainpackage\"");
     _builder.newLine();
@@ -220,7 +215,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForSubPackageEClassInEcoreReferenceExpressionWithSubPackages() {
+  public void testScopeForSubPackageEClassInEcoreReferenceExpressionWithSubPackages() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mainpackage\"");
     _builder.newLine();
@@ -243,7 +238,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForSubSubPackageInEcoreReferenceExpressionWithSubPackages() {
+  public void testScopeForSubSubPackageInEcoreReferenceExpressionWithSubPackages() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mainpackage\"");
     _builder.newLine();
@@ -264,7 +259,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForEnamedElementInEcoreReferenceExpression() {
+  public void testScopeForEnamedElementInEcoreReferenceExpression() throws Exception {
     EdeltaEcoreReference _reference = this.ecoreReferenceExpression("ecoreref(").getReference();
     EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
     StringConcatenation _builder = new StringConcatenation();
@@ -286,7 +281,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForEnamedElementInEcoreReferenceExpressionQualifiedPackage() {
+  public void testScopeForEnamedElementInEcoreReferenceExpressionQualifiedPackage() throws Exception {
     EdeltaEcoreReference _reference = this.ecoreReferenceExpression("ecoreref(foo.").getReference();
     EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
     StringConcatenation _builder = new StringConcatenation();
@@ -300,7 +295,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForEnamedElementInEcoreReferenceExpressionQualifiedEClass() {
+  public void testScopeForEnamedElementInEcoreReferenceExpressionQualifiedEClass() throws Exception {
     EdeltaEcoreReference _reference = this.ecoreReferenceExpression("ecoreref(foo.FooClass.").getReference();
     EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
     StringConcatenation _builder = new StringConcatenation();
@@ -312,7 +307,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForReferenceToCreatedEClassWithTheSameNameAsAnExistingEClass() {
+  public void testScopeForReferenceToCreatedEClassWithTheSameNameAsAnExistingEClass() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -336,7 +331,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForReferenceToCopiedEPackageEClassifierInModifyEcore() {
+  public void testScopeForReferenceToCopiedEPackageEClassifierInModifyEcore() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -358,7 +353,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForReferenceToOriginalEPackageEClassifierInOperation() {
+  public void testScopeForReferenceToOriginalEPackageEClassifierInOperation() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -380,7 +375,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForReferenceToCopiedEPackageEClassifierInOperationWhenTheresAModifyEcore() {
+  public void testScopeForReferenceToCopiedEPackageEClassifierInOperationWhenTheresAModifyEcore() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -412,8 +407,8 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForReferenceToCreatedEAttribute() {
-    EdeltaEcoreReference _reference = this.lastEcoreReferenceExpression(this.parseWithTestEcore(this._inputs.referenceToCreatedEAttributeSimple())).getReference();
+  public void testScopeForReferenceToCreatedEAttribute() throws Exception {
+    EdeltaEcoreReference _reference = this.lastEcoreReferenceExpression(this.parseWithTestEcore(this.inputs.referenceToCreatedEAttributeSimple())).getReference();
     EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("foo");
@@ -440,8 +435,8 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForReferenceToCreatedEAttributeChangingNameInBody() {
-    EdeltaEcoreReference _reference = this.lastEcoreReferenceExpression(this.parseWithTestEcore(this._inputs.referenceToCreatedEAttributeRenamed())).getReference();
+  public void testScopeForReferenceToCreatedEAttributeChangingNameInBody() throws Exception {
+    EdeltaEcoreReference _reference = this.lastEcoreReferenceExpression(this.parseWithTestEcore(this.inputs.referenceToCreatedEAttributeRenamed())).getReference();
     EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("foo");
@@ -466,7 +461,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForModifyEcore() {
+  public void testScopeForModifyEcore() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -486,7 +481,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForRenamedEClassInModifyEcore() {
+  public void testScopeForRenamedEClassInModifyEcore() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -515,7 +510,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForEnamedElementInEcoreReferenceExpressionReferringToRenamedEClassInModifyEcore() {
+  public void testScopeForEnamedElementInEcoreReferenceExpressionReferringToRenamedEClassInModifyEcore() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -542,7 +537,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testScopeForFeaturesOfRenamedEClassInModifyEcore() {
+  public void testScopeForFeaturesOfRenamedEClassInModifyEcore() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -577,7 +572,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testLinkForRenamedEClassInModifyEcore() {
+  public void testLinkForRenamedEClassInModifyEcore() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -593,7 +588,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     _builder.append("}");
     _builder.newLine();
     final EdeltaProgram prog = this.parseWithTestEcore(_builder);
-    this._validationTestHelper.assertNoErrors(prog);
+    this.validationTestHelper.assertNoErrors(prog);
     final EdeltaEcoreReference referred = this.getEdeltaEcoreReferenceExpression(this.getBlockLastExpression(this.lastModifyEcoreOperation(prog).getBody())).getReference();
     final EPackage copiedEPackage = IterableExtensions.<EPackage>head(this.getCopiedEPackages(prog));
     ENamedElement _enamedelement = referred.getEnamedelement();
@@ -603,7 +598,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testLinkForRenamedQualifiedEClassInModifyEcore() {
+  public void testLinkForRenamedQualifiedEClassInModifyEcore() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -619,7 +614,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     _builder.append("}");
     _builder.newLine();
     final EdeltaProgram prog = this.parseWithTestEcore(_builder);
-    this._validationTestHelper.assertNoErrors(prog);
+    this.validationTestHelper.assertNoErrors(prog);
     EdeltaEcoreReference _reference = this.getEdeltaEcoreReferenceExpression(this.getBlockLastExpression(this.lastModifyEcoreOperation(prog).getBody())).getReference();
     final EdeltaEcoreQualifiedReference referred = ((EdeltaEcoreQualifiedReference) _reference);
     final EPackage copiedEPackage = IterableExtensions.<EPackage>head(this.getCopiedEPackages(prog));

@@ -1,4 +1,4 @@
-package edelta.tests;
+package edelta.tests.injectors;
 
 import org.eclipse.xtext.ecore.EcoreSupportStandaloneSetup;
 
@@ -6,6 +6,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import edelta.EdeltaStandaloneSetup;
+import edelta.tests.EdeltaInjectorProvider;
 
 public class EdeltaInjectorProviderCustom extends EdeltaInjectorProvider {
 

@@ -1,8 +1,9 @@
-package edelta.tests;
+package edelta.tests.injectors;
 
 import org.eclipse.xtext.resource.IDerivedStateComputer;
 
 import edelta.EdeltaRuntimeModule;
+import edelta.tests.EdeltaInjectorProvider;
 import edelta.tests.additional.TestableEdeltaDerivedStateComputer;
 
 /**

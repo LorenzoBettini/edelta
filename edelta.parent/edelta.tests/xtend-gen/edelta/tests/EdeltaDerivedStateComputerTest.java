@@ -9,8 +9,8 @@ import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.tests.EdeltaAbstractTest;
-import edelta.tests.EdeltaInjectorProviderTestableDerivedStateComputer;
 import edelta.tests.additional.TestableEdeltaDerivedStateComputer;
+import edelta.tests.injectors.EdeltaInjectorProviderTestableDerivedStateComputer;
 import java.util.Collection;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
@@ -32,7 +32,6 @@ import org.eclipse.xtext.resource.DerivedStateAwareResource;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.xbase.XExpression;
-import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
@@ -53,7 +52,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   private EdeltaDerivedStateHelper _edeltaDerivedStateHelper;
   
   @Test
-  public void testCopiedEPackages() {
+  public void testCopiedEPackages() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
     _builder.newLine();
@@ -76,7 +75,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testCopiedEPackagesWithSingleModifyEcore() {
+  public void testCopiedEPackagesWithSingleModifyEcore() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
     _builder.newLine();
@@ -97,7 +96,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testCopiedEPackagesWhenDuplicateImports() {
+  public void testCopiedEPackagesWhenDuplicateImports() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
     _builder.newLine();
@@ -120,7 +119,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testCopiedEPackagesWhenUnresolvedPackages() {
+  public void testCopiedEPackagesWhenUnresolvedPackages() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
     _builder.newLine();
@@ -140,7 +139,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testCopiedEPackagesWithReferences() {
+  public void testCopiedEPackagesWithReferences() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
     _builder.newLine();
@@ -170,7 +169,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testInvalidDirectSubPackageAreNotCopied() {
+  public void testInvalidDirectSubPackageAreNotCopied() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
     _builder.newLine();
@@ -190,7 +189,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testInstallDerivedStateDuringPreIndexingPhase() {
+  public void testInstallDerivedStateDuringPreIndexingPhase() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
     _builder.newLine();
@@ -210,7 +209,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testDerivedStateForModifyEcoreWithMissingPackage() {
+  public void testDerivedStateForModifyEcoreWithMissingPackage() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
     _builder.newLine();
@@ -228,7 +227,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testDerivedStateIsCorrectlyDiscarded() {
+  public void testDerivedStateIsCorrectlyDiscarded() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
     _builder.newLine();
@@ -254,7 +253,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testDerivedStateIsCorrectlyDiscardedAndUnloaded() {
+  public void testDerivedStateIsCorrectlyDiscardedAndUnloaded() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
     _builder.newLine();
@@ -287,7 +286,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testAdaptersAreRemovedFromDerivedEPackagesAfterUnloading() {
+  public void testAdaptersAreRemovedFromDerivedEPackagesAfterUnloading() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
     _builder.newLine();
@@ -326,7 +325,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testMapsAreClearedAfterDiscarding() {
+  public void testMapsAreClearedAfterDiscarding() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
     _builder.newLine();
@@ -354,25 +353,21 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testSourceElementOfNull() {
+  public void testSourceElementOfNull() throws Exception {
     Assert.assertNull(this._testableEdeltaDerivedStateComputer.getPrimarySourceElement(null));
   }
   
   @Test
-  public void testSourceElementOfNotDerived() {
-    try {
-      StringConcatenation _builder = new StringConcatenation();
-      _builder.append("package test");
-      _builder.newLine();
-      Assert.assertNull(
-        this._testableEdeltaDerivedStateComputer.getPrimarySourceElement(this._parseHelper.parse(_builder)));
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
+  public void testSourceElementOfNotDerived() throws Exception {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("package test");
+    _builder.newLine();
+    Assert.assertNull(
+      this._testableEdeltaDerivedStateComputer.getPrimarySourceElement(this.parseHelper.parse(_builder)));
   }
   
   @Test
-  public void testCopiedEPackageWithRenamedEClass() {
+  public void testCopiedEPackageWithRenamedEClass() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
     _builder.newLine();
@@ -393,7 +388,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testDerivedStateForCreatedEAttributeInChangeEClassWithNewName() {
+  public void testDerivedStateForCreatedEAttributeInChangeEClassWithNewName() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
     _builder.newLine();
@@ -426,14 +421,14 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testInterpretedCreateEClassAndStealEAttribute() {
-    final EdeltaProgram program = this.parseWithTestEcore(this._inputs.createEClassStealingAttribute());
+  public void testInterpretedCreateEClassAndStealEAttribute() throws Exception {
+    final EdeltaProgram program = this.parseWithTestEcore(this.inputs.createEClassStealingAttribute());
     final EClass ec = this.getLastCopiedEPackageFirstEClass(program, "NewClass");
     Assert.assertEquals("NewClass", ec.getName());
     final EStructuralFeature attr = IterableExtensions.<EStructuralFeature>head(ec.getEStructuralFeatures());
     Assert.assertEquals("myAttribute", attr.getName());
-    this._validationTestHelper.validate(program);
-    this._validationTestHelper.assertNoErrors(program);
+    this.validationTestHelper.validate(program);
+    this.validationTestHelper.assertNoErrors(program);
     final EdeltaEcoreQualifiedReference ecoreref = this.getEcoreRefInManipulationExpressionBlock(program);
     ENamedElement _enamedelement = ecoreref.getQualification().getEnamedelement();
     EClass eClass = ((EClass) _enamedelement);
@@ -448,7 +443,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testInterpretedRemovedEClassDoesNotTouchTheOriginalEcore() {
+  public void testInterpretedRemovedEClassDoesNotTouchTheOriginalEcore() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -466,8 +461,8 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     final EdeltaProgram program = this.parseWithTestEcore(_builder);
     final EClass derivedEClass = this.getLastCopiedEPackageLastEClass(program);
     Assert.assertEquals("NewClass", derivedEClass.getName());
-    this._validationTestHelper.validate(program);
-    this._validationTestHelper.assertNoErrors(program);
+    this.validationTestHelper.validate(program);
+    this.validationTestHelper.assertNoErrors(program);
     final Function1<EClassifier, Boolean> _function = (EClassifier it) -> {
       String _name = it.getName();
       return Boolean.valueOf(Objects.equal(_name, "FooClass"));
@@ -481,7 +476,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testContentAdapter() {
+  public void testContentAdapter() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -505,17 +500,17 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testPersonListExampleModifyEcore() {
+  public void testPersonListExampleModifyEcore() throws Exception {
     final EdeltaProgram prog = this.parseWithLoadedEcore((EdeltaAbstractTest.METAMODEL_PATH + EdeltaAbstractTest.PERSON_LIST_ECORE), 
-      this._inputs.personListExampleModifyEcore());
-    this._validationTestHelper.assertNoErrors(prog);
+      this.inputs.personListExampleModifyEcore());
+    this.validationTestHelper.assertNoErrors(prog);
   }
   
-  private EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(final EdeltaProgram program) {
+  private EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(final EdeltaProgram program) throws Exception {
     return this.getEdeltaEcoreQualifiedReference(IterableExtensions.<EdeltaEcoreReferenceExpression>last(EcoreUtil2.<EdeltaEcoreReferenceExpression>getAllContentsOfType(this.lastModifyEcoreOperation(program).getBody(), EdeltaEcoreReferenceExpression.class)).getReference());
   }
   
-  private void assertEClassContainsFeature(final EClass c, final EStructuralFeature f, final boolean expected) {
+  private void assertEClassContainsFeature(final EClass c, final EStructuralFeature f, final boolean expected) throws Exception {
     Assert.assertEquals(Boolean.valueOf(expected), 
       Boolean.valueOf(c.getEStructuralFeatures().contains(f)));
   }

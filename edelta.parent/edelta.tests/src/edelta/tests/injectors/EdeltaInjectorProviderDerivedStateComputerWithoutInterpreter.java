@@ -1,10 +1,11 @@
-package edelta.tests;
+package edelta.tests.injectors;
 
 import org.eclipse.xtext.common.types.util.JavaReflectAccess;
 import org.eclipse.xtext.resource.IDerivedStateComputer;
 
 import edelta.EdeltaRuntimeModule;
 import edelta.interpreter.EdeltaInterpreter;
+import edelta.tests.EdeltaInjectorProvider;
 import edelta.tests.additional.EdeltaDerivedStateComputerWithoutInterpreter;
 import edelta.tests.additional.MockJavaReflectAccess;
 

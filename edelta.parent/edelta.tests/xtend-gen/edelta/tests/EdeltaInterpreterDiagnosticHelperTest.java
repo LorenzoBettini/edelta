@@ -5,7 +5,7 @@ import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreterDiagnosticHelper;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.tests.EdeltaAbstractTest;
-import edelta.tests.EdeltaInjectorProviderCustom;
+import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.testing.InjectWith;
@@ -29,7 +29,7 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
   private EdeltaDerivedStateHelper derivedStateHelper;
   
   @Test
-  public void testAddErrorWithCurrentExpression() {
+  public void testAddErrorWithCurrentExpression() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -47,7 +47,7 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
       final XExpression exp = this.getBlockLastExpression(this.lastModifyEcoreOperation(it).getBody());
       this.diagnosticHelper.setCurrentExpression(exp);
       this.diagnosticHelper.addError(null, "issueCode", "an error");
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         XbasePackage.Literals.XVARIABLE_DECLARATION, 
         "issueCode", 
         input.lastIndexOf("val s = null"), 
@@ -58,7 +58,7 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testAddErrorWithDifferentCorrespondingExpression() {
+  public void testAddErrorWithDifferentCorrespondingExpression() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -82,7 +82,7 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
       final XExpression currentExpression = this.getBlockLastExpression(this.lastModifyEcoreOperation(it).getBody());
       this.diagnosticHelper.setCurrentExpression(currentExpression);
       this.diagnosticHelper.addError(problematic, "issueCode", "an error");
-      this._validationTestHelper.assertError(it, 
+      this.validationTestHelper.assertError(it, 
         XbasePackage.Literals.XVARIABLE_DECLARATION, 
         "issueCode", 
         input.lastIndexOf("val s = null"), 
@@ -93,7 +93,7 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testAddWarningWithCurrentExpression() {
+  public void testAddWarningWithCurrentExpression() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -111,7 +111,7 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
       final XExpression exp = this.getBlockLastExpression(this.lastModifyEcoreOperation(it).getBody());
       this.diagnosticHelper.setCurrentExpression(exp);
       this.diagnosticHelper.addWarning(null, "issueCode", "a warning");
-      this._validationTestHelper.assertWarning(it, 
+      this.validationTestHelper.assertWarning(it, 
         XbasePackage.Literals.XVARIABLE_DECLARATION, 
         "issueCode", 
         input.lastIndexOf("val s = null"), 
@@ -122,7 +122,7 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testAddWarningWithDifferentCorrespondingExpression() {
+  public void testAddWarningWithDifferentCorrespondingExpression() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -146,7 +146,7 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
       final XExpression currentExpression = this.getBlockLastExpression(this.lastModifyEcoreOperation(it).getBody());
       this.diagnosticHelper.setCurrentExpression(currentExpression);
       this.diagnosticHelper.addWarning(problematic, "issueCode", "a warning");
-      this._validationTestHelper.assertWarning(it, 
+      this.validationTestHelper.assertWarning(it, 
         XbasePackage.Literals.XVARIABLE_DECLARATION, 
         "issueCode", 
         input.lastIndexOf("val s = null"), 

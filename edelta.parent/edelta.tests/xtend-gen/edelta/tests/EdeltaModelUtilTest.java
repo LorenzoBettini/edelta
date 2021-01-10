@@ -4,7 +4,7 @@ import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
 import edelta.tests.EdeltaAbstractTest;
-import edelta.tests.EdeltaInjectorProviderCustom;
+import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 import edelta.util.EdeltaModelUtil;
 import java.util.List;
 import org.assertj.core.api.Assertions;
@@ -33,7 +33,7 @@ import org.junit.runner.RunWith;
 @SuppressWarnings("all")
 public class EdeltaModelUtilTest extends EdeltaAbstractTest {
   @Test
-  public void testGetProgram() {
+  public void testGetProgram() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -48,7 +48,7 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testHasCycleInSuperPackageWithNoCycle() {
+  public void testHasCycleInSuperPackageWithNoCycle() throws Exception {
     final EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
     EPackage _createEPackage = ecoreFactory.createEPackage();
     final Procedure1<EPackage> _function = (EPackage it) -> {
@@ -69,7 +69,7 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testHasCycleInSuperPackageWithCycle() {
+  public void testHasCycleInSuperPackageWithCycle() throws Exception {
     final EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
     EPackage _createEPackage = ecoreFactory.createEPackage();
     final Procedure1<EPackage> _function = (EPackage it) -> {
@@ -92,7 +92,7 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testFindRootSuperPackage() {
+  public void testFindRootSuperPackage() throws Exception {
     final EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
     EPackage _createEPackage = ecoreFactory.createEPackage();
     final Procedure1<EPackage> _function = (EPackage it) -> {
@@ -113,7 +113,7 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testGetEcoreReferenceText() {
+  public void testGetEcoreReferenceText() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -149,7 +149,7 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testGetMetamodelImportText() {
+  public void testGetMetamodelImportText() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -174,7 +174,7 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testHasCycleInHierarchy() {
+  public void testHasCycleInHierarchy() throws Exception {
     final EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
     final EClass c1 = ecoreFactory.createEClass();
     Assertions.assertThat(EdeltaModelUtil.hasCycleInHierarchy(c1)).isFalse();
@@ -199,7 +199,7 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testGetContainingBlockXExpression() {
+  public void testGetContainingBlockXExpression() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();

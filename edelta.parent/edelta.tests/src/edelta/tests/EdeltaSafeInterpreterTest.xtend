@@ -7,6 +7,7 @@ import edelta.interpreter.EdeltaInterpreterFactory
 import edelta.interpreter.EdeltaInterpreterRuntimeException
 import edelta.interpreter.EdeltaSafeInterpreter
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper
+import edelta.tests.injectors.EdeltaInjectorProviderDerivedStateComputerWithoutSafeInterpreter
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
@@ -36,7 +37,7 @@ class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void sanityTestCheck() {
+	def void sanityTestCheck() throws Exception {
 		// make sure we use the same interpreter implementation
 		// in fact the interpreter can create another interpreter using the factory
 		val interpreterFactory = injector.getInstance(EdeltaInterpreterFactory)
@@ -46,7 +47,7 @@ class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCorrectInterpretation() {
+	def void testCorrectInterpretation() throws Exception {
 		val input = '''
 			package test
 			
@@ -65,7 +66,7 @@ class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testOperationWithErrorsDueToWrongParsing() {
+	def void testOperationWithErrorsDueToWrongParsing() throws Exception {
 		// differently from EdeltaInterpreterTest,
 		// IllegalArgumentException is swallowed
 		val input = '''
@@ -87,7 +88,7 @@ class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() {
+	def void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() throws Exception {
 		// differently from EdeltaInterpreterTest,
 		// IllegalStateException is swallowed
 		'''
@@ -108,7 +109,7 @@ class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test(expected=EdeltaInterpreterRuntimeException)
-	def void testEdeltaInterpreterRuntimeExceptionIsThrown() {
+	def void testEdeltaInterpreterRuntimeExceptionIsThrown() throws Exception {
 		'''
 			import org.eclipse.emf.ecore.EClass
 			import edelta.interpreter.EdeltaInterpreterRuntimeException
@@ -130,7 +131,7 @@ class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testCreateEClassAndCallOperationThatThrows() {
+	def void testCreateEClassAndCallOperationThatThrows() throws Exception {
 		// differently from EdeltaInterpreterTest,
 		// MyCustomException is swallowed
 		'''
@@ -156,7 +157,7 @@ class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	def void testThrowNullPointerException() {
+	def void testThrowNullPointerException() throws Exception {
 		// differently from EdeltaInterpreterTest,
 		// NullPointerException is swallowed
 		'''
@@ -184,7 +185,7 @@ class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		EdeltaProgram program,
 		(EPackage)=>void testExecutor
-	) {
+	) throws Exception {
 		val it = program.lastModifyEcoreOperation
 		interpreter.evaluateModifyEcoreOperations(program)
 		val packageName = it.epackage.name

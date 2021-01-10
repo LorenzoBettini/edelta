@@ -9,7 +9,7 @@ import edelta.edelta.EdeltaProgram;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.scoping.EdeltaOriginalENamedElementRecorder;
 import edelta.tests.EdeltaAbstractTest;
-import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
+import edelta.tests.injectors.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EPackage;
@@ -38,7 +38,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
   private EdeltaDerivedStateHelper _edeltaDerivedStateHelper;
   
   @Test
-  public void testNull() {
+  public void testNull() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -50,7 +50,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
   }
   
   @Test
-  public void testNullENamedElement() {
+  public void testNullENamedElement() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -64,14 +64,14 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
   }
   
   @Test
-  public void testUnresolvedENamedElement() {
+  public void testUnresolvedENamedElement() throws Exception {
     final EdeltaEcoreReference ref = this.ecoreReferenceExpression("ecoreref(NonExistant)").getReference();
     this._edeltaOriginalENamedElementRecorder.recordOriginalENamedElement(ref);
     Assert.assertNull(this._edeltaDerivedStateHelper.getOriginalEnamedelement(ref));
   }
   
   @Test
-  public void testEClassifierDirectReference() {
+  public void testEClassifierDirectReference() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -94,7 +94,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
   }
   
   @Test
-  public void testSubPackageDirectReference() {
+  public void testSubPackageDirectReference() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mainpackage\"");
     _builder.newLine();
@@ -117,7 +117,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
   }
   
   @Test
-  public void testSubPackageEClassDirectReference() {
+  public void testSubPackageEClassDirectReference() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mainpackage\"");
     _builder.newLine();
@@ -141,7 +141,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
   }
   
   @Test
-  public void testSubSubPackageEClassQualifiedReference() {
+  public void testSubSubPackageEClassQualifiedReference() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"mainpackage\"");
     _builder.newLine();
@@ -165,7 +165,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
   }
   
   @Test
-  public void testEClassifierQualifiedReference() {
+  public void testEClassifierQualifiedReference() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -190,7 +190,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
   }
   
   @Test
-  public void testCreatedEClassifierDirectReference() {
+  public void testCreatedEClassifierDirectReference() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -215,7 +215,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
   }
   
   @Test
-  public void testCreatedEClassifierQualifiedReference() {
+  public void testCreatedEClassifierQualifiedReference() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -242,7 +242,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
   }
   
   @Test
-  public void testEStrucutralFeatureDirectReference() {
+  public void testEStrucutralFeatureDirectReference() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -265,7 +265,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
   }
   
   @Test
-  public void testEStrucutralFeatureQualifiedReference() {
+  public void testEStrucutralFeatureQualifiedReference() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -290,7 +290,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
   }
   
   @Test
-  public void testEStrucutralFeatureFullyQualifiedReference() {
+  public void testEStrucutralFeatureFullyQualifiedReference() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -318,7 +318,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
   }
   
   @Test
-  public void testEEnumLiteraDirectReference() {
+  public void testEEnumLiteraDirectReference() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
