@@ -334,6 +334,15 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.eclipse.xtend</groupId>
+          <artifactId>xtend-maven-plugin</artifactId>
+          <configuration>
+            <!-- required since we don't specify maven.compiler.source/target
+              https://github.com/LorenzoBettini/edelta/issues/300 -->
+            <javaSourceVersion>11</javaSourceVersion>
+          </configuration>
+        </plugin>
+        <plugin>
           <!-- We don't use it, since we have edelta-maven-plugin, we leave it here
             just for historical reasons ;) -->
           <groupId>org.eclipse.xtext</groupId>
