@@ -337,8 +337,9 @@
           <groupId>org.eclipse.xtend</groupId>
           <artifactId>xtend-maven-plugin</artifactId>
           <configuration>
-            <!-- required since we don't specify maven.compiler.source/target
-              https://github.com/LorenzoBettini/edelta/issues/300 -->
+            <!-- That is not required with maven.compiler.source/target set to 11
+              but it's required if we switch to a newer version of Java
+              that is not yet handled by Xtend -->
             <javaSourceVersion>11</javaSourceVersion>
           </configuration>
         </plugin>
