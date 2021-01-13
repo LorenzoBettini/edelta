@@ -30,12 +30,5 @@
 <unit id="de.itemis.xtext.antlr.feature.feature.group" version="2.1.1.v201405091103"/>
 <repository location="https://download.itemis.com/updates/releases/2.1.1/"/>
 </location>
-<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.junit.jupiter.api" version="0.0.0"/>
-<unit id="org.junit.jupiter.engine" version="0.0.0"/>
-<unit id="org.junit.jupiter.params" version="0.0.0"/>
-<unit id="org.opentest4j" version="0.0.0"/>
-<repository location="https://download.eclipse.org/tools/orbit/downloads/2020-09/"/>
-</location>
 </locations>
 </target>

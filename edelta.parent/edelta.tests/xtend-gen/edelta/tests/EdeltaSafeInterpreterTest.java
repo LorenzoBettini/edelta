@@ -10,14 +10,13 @@ import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.interpreter.EdeltaSafeInterpreter;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.tests.EdeltaAbstractTest;
-import edelta.tests.EdeltaInjectorProviderDerivedStateComputerWithoutSafeInterpreter;
+import edelta.tests.injectors.EdeltaInjectorProviderDerivedStateComputerWithoutSafeInterpreter;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
-import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Assert;
 import org.junit.Before;
@@ -43,18 +42,14 @@ public class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void sanityTestCheck() {
-    try {
-      final EdeltaInterpreterFactory interpreterFactory = this.injector.<EdeltaInterpreterFactory>getInstance(EdeltaInterpreterFactory.class);
-      final EdeltaInterpreter anotherInterprter = interpreterFactory.create(this._parseHelper.parse("").eResource());
-      Assertions.assertThat(anotherInterprter.getClass()).isSameAs(this.interpreter.getClass());
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
+  public void sanityTestCheck() throws Exception {
+    final EdeltaInterpreterFactory interpreterFactory = this.injector.<EdeltaInterpreterFactory>getInstance(EdeltaInterpreterFactory.class);
+    final EdeltaInterpreter anotherInterprter = interpreterFactory.create(this.parseHelper.parse("").eResource());
+    Assertions.assertThat(anotherInterprter.getClass()).isSameAs(this.interpreter.getClass());
   }
   
   @Test
-  public void testCorrectInterpretation() {
+  public void testCorrectInterpretation() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
     _builder.newLine();
@@ -78,7 +73,7 @@ public class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testOperationWithErrorsDueToWrongParsing() {
+  public void testOperationWithErrorsDueToWrongParsing() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("package test");
     _builder.newLine();
@@ -105,7 +100,7 @@ public class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() {
+  public void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -131,7 +126,7 @@ public class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test(expected = EdeltaInterpreterRuntimeException.class)
-  public void testEdeltaInterpreterRuntimeExceptionIsThrown() {
+  public void testEdeltaInterpreterRuntimeExceptionIsThrown() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import org.eclipse.emf.ecore.EClass");
     _builder.newLine();
@@ -162,7 +157,7 @@ public class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testCreateEClassAndCallOperationThatThrows() {
+  public void testCreateEClassAndCallOperationThatThrows() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import org.eclipse.emf.ecore.EClass");
     _builder.newLine();
@@ -199,7 +194,7 @@ public class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testThrowNullPointerException() {
+  public void testThrowNullPointerException() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import org.eclipse.emf.ecore.EClass");
     _builder.newLine();
@@ -235,7 +230,7 @@ public class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(this.parseWithTestEcore(_builder), _function);
   }
   
-  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaProgram program, final Procedure1<? super EPackage> testExecutor) {
+  private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaProgram program, final Procedure1<? super EPackage> testExecutor) throws Exception {
     final EdeltaModifyEcoreOperation it = this.lastModifyEcoreOperation(program);
     this.interpreter.evaluateModifyEcoreOperations(program);
     final String packageName = it.getEpackage().getName();

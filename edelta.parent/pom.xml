@@ -21,7 +21,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
-    <maven.compiler.release>11</maven.compiler.release>
     <jacoco-version>0.8.6</jacoco-version>
     <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
 
@@ -335,6 +334,16 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.eclipse.xtend</groupId>
+          <artifactId>xtend-maven-plugin</artifactId>
+          <configuration>
+            <!-- That is not required with maven.compiler.source/target set to 11
+              but it's required if we switch to a newer version of Java
+              that is not yet handled by Xtend -->
+            <javaSourceVersion>11</javaSourceVersion>
+          </configuration>
+        </plugin>
+        <plugin>
           <!-- We don't use it, since we have edelta-maven-plugin, we leave it here
             just for historical reasons ;) -->
           <groupId>org.eclipse.xtext</groupId>
@@ -383,6 +392,13 @@
               </goals>
             </execution>
           </executions>
+          <configuration>
+            <!-- That is not required with maven.compiler.source/target set to 11
+              but it's required if we switch to a newer version of Java
+              that is not yet handled by Xbase -->
+            <compilerSourceLevel>11</compilerSourceLevel>
+            <compilerTargetLevel>11</compilerTargetLevel>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.jacoco</groupId>

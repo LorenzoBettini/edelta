@@ -54,6 +54,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <xtext-version>${xtextVersion}</xtext-version>
+    <tycho-version>2.2.0-SNAPSHOT</tycho-version>
   </properties>
 
   <dependencyManagement>
@@ -127,6 +128,13 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>tycho-snapshots</id>
+      <url>https://repo.eclipse.org/content/repositories/tycho-snapshots/</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <profiles>
     <profile>

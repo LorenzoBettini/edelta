@@ -1,8 +1,9 @@
-package edelta.tests;
+package edelta.tests.injectors;
 
 import org.eclipse.xtext.common.types.util.JavaReflectAccess;
 
 import edelta.EdeltaRuntimeModule;
+import edelta.tests.EdeltaInjectorProvider;
 import edelta.tests.additional.MockJavaReflectAccess;
 
 public class EdeltaInjectorProviderForJavaReflectAccess extends EdeltaInjectorProviderCustom {

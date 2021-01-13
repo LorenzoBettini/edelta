@@ -2,6 +2,7 @@ package edelta.tests
 
 import com.google.common.base.Joiner
 import com.google.inject.Inject
+import edelta.tests.injectors.EdeltaInjectorProviderTestableDerivedStateComputer
 import edelta.testutils.EdeltaTestUtils
 import java.util.List
 import org.eclipse.emf.ecore.resource.ResourceSet

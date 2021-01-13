@@ -5,7 +5,7 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
 import edelta.navigation.EdeltaNavigationTargetHelper;
 import edelta.tests.EdeltaAbstractTest;
-import edelta.tests.EdeltaInjectorProviderCustom;
+import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;
@@ -29,12 +29,12 @@ public class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
   private EdeltaNavigationTargetHelper navigationTargetHelper;
   
   @Test
-  public void testNotEdeltaEcoreReference() {
+  public void testNotEdeltaEcoreReference() throws Exception {
     Assertions.<EObject>assertThat(this.navigationTargetHelper.getTarget(EcoreFactory.eINSTANCE.createEClass()));
   }
   
   @Test
-  public void testTargetInTheImportedMetamodel() {
+  public void testTargetInTheImportedMetamodel() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -57,7 +57,7 @@ public class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testTargetAsXExpression() {
+  public void testTargetAsXExpression() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
@@ -83,7 +83,7 @@ public class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
   }
   
   @Test
-  public void testTargetOfForwardReference() {
+  public void testTargetOfForwardReference() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"foo\"");
     _builder.newLine();
