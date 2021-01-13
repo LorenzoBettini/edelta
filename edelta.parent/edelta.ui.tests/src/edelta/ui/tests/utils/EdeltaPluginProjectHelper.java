@@ -1,30 +1,30 @@
-package edelta.ui.tests.utils
+package edelta.ui.tests.utils;
 
-import com.google.inject.Inject
-import org.eclipse.ui.PlatformUI
+import java.util.List;
 
-import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
+
+import com.google.inject.Inject;
 
 /**
  * Utility class for creating an Edelta Plug-in project for testing.
  * 
  * @author Lorenzo Bettini
- * 
  */
-class EdeltaPluginProjectHelper {
+public class EdeltaPluginProjectHelper {
+	@Inject
+	private PluginProjectHelper pluginProjectHelper;
 
-	@Inject PluginProjectHelper pluginProjectHelper
+	public static final String PROJECT_NAME = "customPluginProject";
 
-	val public static PROJECT_NAME = "customPluginProject"
-
-	def createEdeltaPluginProject(String projectName, String...dependencies) {
-		val pluginJavaProject = pluginProjectHelper.createJavaPluginProject(
-			projectName,
-			(#["edelta.lib"]+dependencies).toList,
-			#["model"]
-		)
-		createFile(projectName+"/model/My.ecore",
-			'''
+	public IJavaProject createEdeltaPluginProject(final String projectName) throws Exception {
+		final IJavaProject pluginJavaProject = pluginProjectHelper.createJavaPluginProject(projectName,
+				List.of("edelta.lib"),
+				List.of("model"));
+		IResourcesSetupUtil.createFile(projectName + "/model/My.ecore",
+			"""
 			<?xml version="1.0" encoding="UTF-8"?>
 			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="mypackage" nsURI="http://my.package.org" nsPrefix="mypackage">
@@ -42,20 +42,20 @@ class EdeltaPluginProjectHelper {
 			    <eStructuralFeatures xsi:type="ecore:EReference" name="myDerivedReference" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"/>
 			  </eClassifiers>
 			</ecore:EPackage>
-			'''
-		)
-		return pluginJavaProject
+			"""
+		);
+		return pluginJavaProject;
 	}
 
-	def static void closeWelcomePage() {
-		if (PlatformUI.getWorkbench().getIntroManager().getIntro() !== null) {
-			PlatformUI.getWorkbench().getIntroManager().closeIntro(
-					PlatformUI.getWorkbench().getIntroManager().getIntro());
+	public static void closeWelcomePage() {
+		var introManager = PlatformUI.getWorkbench().getIntroManager();
+		var intro = introManager.getIntro();
+		if (intro != null) {
+			introManager.closeIntro(intro);
 		}
 	}
 
-	def static void closeEditors() {
+	public static void closeEditors() {
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().closeAllEditors(false);
 	}
-
 }

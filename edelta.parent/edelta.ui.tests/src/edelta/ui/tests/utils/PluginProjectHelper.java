@@ -24,7 +24,6 @@ import org.eclipse.xtext.ui.XtextProjectHelper;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.ui.util.PluginProjectFactory;
 import org.eclipse.xtext.xbase.lib.Exceptions;
-import org.junit.Assert;
 
 import com.google.inject.Inject;
 
@@ -67,7 +66,7 @@ public class PluginProjectHelper {
 
 	public void assertNoErrors() throws CoreException {
 		final Iterable<IMarker> markers = getErrorMarkers();
-		Assert.assertEquals(
+		assertEquals(
 			("unexpected errors:\n" + 
 				join(map(markers, it -> {
 					try {

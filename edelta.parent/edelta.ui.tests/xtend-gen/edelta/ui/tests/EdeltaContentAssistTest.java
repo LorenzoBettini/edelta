@@ -63,11 +63,15 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   
   @BeforeClass
   public static void setUp() {
-    EdeltaPluginProjectHelper.closeWelcomePage();
-    final Injector injector = EdeltaActivator.getInstance().getInjector(EdeltaActivator.EDELTA_EDELTA);
-    final EdeltaPluginProjectHelper projectHelper = injector.<EdeltaPluginProjectHelper>getInstance(EdeltaPluginProjectHelper.class);
-    EdeltaContentAssistTest.pluginJavaProject = projectHelper.createEdeltaPluginProject(EdeltaPluginProjectHelper.PROJECT_NAME);
-    IResourcesSetupUtil.waitForBuild();
+    try {
+      EdeltaPluginProjectHelper.closeWelcomePage();
+      final Injector injector = EdeltaActivator.getInstance().getInjector(EdeltaActivator.EDELTA_EDELTA);
+      final EdeltaPluginProjectHelper projectHelper = injector.<EdeltaPluginProjectHelper>getInstance(EdeltaPluginProjectHelper.class);
+      EdeltaContentAssistTest.pluginJavaProject = projectHelper.createEdeltaPluginProject(EdeltaPluginProjectHelper.PROJECT_NAME);
+      IResourcesSetupUtil.waitForBuild();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @AfterClass

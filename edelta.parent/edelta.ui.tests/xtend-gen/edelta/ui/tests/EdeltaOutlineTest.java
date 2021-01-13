@@ -35,7 +35,11 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
   
   @Override
   protected IJavaProject createjavaProject(final String projectName) throws CoreException {
-    return this.edeltaProjectHelper.createEdeltaPluginProject(AbstractOutlineTest.TEST_PROJECT);
+    try {
+      return this.edeltaProjectHelper.createEdeltaPluginProject(AbstractOutlineTest.TEST_PROJECT);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
