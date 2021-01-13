@@ -19,6 +19,8 @@
     <assertj-version>3.14.0</assertj-version>
     <mockito-version>3.2.4</mockito-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
     <jacoco-version>0.8.6</jacoco-version>
     <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
 
@@ -335,8 +337,9 @@
           <groupId>org.eclipse.xtend</groupId>
           <artifactId>xtend-maven-plugin</artifactId>
           <configuration>
-            <!-- required since we don't specify maven.compiler.source/target
-              https://github.com/LorenzoBettini/edelta/issues/300 -->
+            <!-- That is not required with maven.compiler.source/target set to 11
+              but it's required if we switch to a newer version of Java
+              that is not yet handled by Xtend -->
             <javaSourceVersion>11</javaSourceVersion>
           </configuration>
         </plugin>
@@ -390,8 +393,9 @@
             </execution>
           </executions>
           <configuration>
-            <!-- required since we don't use maven.compiler.source/target
-              https://github.com/LorenzoBettini/edelta/issues/300 -->
+            <!-- That is not required with maven.compiler.source/target set to 11
+              but it's required if we switch to a newer version of Java
+              that is not yet handled by Xbase -->
             <compilerSourceLevel>11</compilerSourceLevel>
             <compilerTargetLevel>11</compilerTargetLevel>
           </configuration>
