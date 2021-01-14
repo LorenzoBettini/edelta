@@ -112,9 +112,9 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_resolveDuplicateFeaturesInSubclasses() throws IOException {
-		loadModelFile("resolveDuplicateFeaturesInSubclasses", "TestEcore.ecore");
-		resolver.resolveDuplicateFeaturesInSubclasses(resolver.getEPackage("p"));
+	public void test_resolveDuplicatedFeaturesInSubclasses() throws IOException {
+		loadModelFile("resolveDuplicatedFeaturesInSubclasses", "TestEcore.ecore");
+		resolver.resolveDuplicatedFeaturesInSubclasses(resolver.getEPackage("p"));
 		resolver.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFile();
 	}

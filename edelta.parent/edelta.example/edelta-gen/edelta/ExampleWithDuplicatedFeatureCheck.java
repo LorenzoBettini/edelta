@@ -11,14 +11,14 @@ import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
-public class ExampleWithDuplicateFeatureCheck extends AbstractEdelta {
+public class ExampleWithDuplicatedFeatureCheck extends AbstractEdelta {
   private EdeltaBadSmellsChecker checker;
   
-  public ExampleWithDuplicateFeatureCheck() {
+  public ExampleWithDuplicatedFeatureCheck() {
     checker = new EdeltaBadSmellsChecker(this);
   }
   
-  public ExampleWithDuplicateFeatureCheck(final AbstractEdelta other) {
+  public ExampleWithDuplicatedFeatureCheck(final AbstractEdelta other) {
     super(other);
     checker = new EdeltaBadSmellsChecker(other);
   }
@@ -41,7 +41,7 @@ public class ExampleWithDuplicateFeatureCheck extends AbstractEdelta {
   }
   
   public void checks(final EPackage it) {
-    this.checker.checkDuplicateFeatures(it);
+    this.checker.checkDuplicatedFeatures(it);
   }
   
   @Override

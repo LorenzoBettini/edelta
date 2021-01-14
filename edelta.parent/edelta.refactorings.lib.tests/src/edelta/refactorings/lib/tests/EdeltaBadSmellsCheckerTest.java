@@ -33,19 +33,19 @@ public class EdeltaBadSmellsCheckerTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_checkDuplicateFeatures_whenNoDuplicates() {
+	public void test_checkDuplicatedFeatures_whenNoDuplicates() {
 		final EPackage p = createEPackage("p", pack -> {
 			addNewEClass(pack, "C1",
 				c -> addNewEAttribute(c, "A1", stringDataType));
 			addNewEClass(pack, "C2",
 				c -> addNewEAttribute(c, "A1", intDataType));
 		});
-		checker.checkDuplicateFeatures(p);
+		checker.checkDuplicatedFeatures(p);
 		assertThat(appender.getResult()).isEmpty();
 	}
 
 	@Test
-	public void test_checkDuplicateFeatures_withDuplicates() {
+	public void test_checkDuplicatedFeatures_withDuplicates() {
 		final EPackage p = createEPackage("pack", pack -> {
 			addNewEClass(pack, "C1",
 				c -> addNewEAttribute(c, "A1", stringDataType));
@@ -54,7 +54,7 @@ public class EdeltaBadSmellsCheckerTest extends AbstractTest {
 			addNewEClass(pack, "C3",
 				c -> addNewEAttribute(c, "A1", stringDataType));
 		});
-		checker.checkDuplicateFeatures(p);
+		checker.checkDuplicatedFeatures(p);
 		assertThat(appender.getResult())
 			.isEqualTo(
 			"WARN: pack.C1.A1: pack.C1.A1, duplicate features: pack.C2.A1, pack.C3.A1\n"

@@ -24,5 +24,5 @@ modifyEcore someChanges epackage myecoreforvalidation {
 }
 
 modifyEcore checks epackage myecoreforvalidation {
-	checker.checkDuplicateFeatures(it)
+	checker.checkDuplicatedFeatures(it)
 }

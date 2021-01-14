@@ -15,7 +15,7 @@ use EdeltaBadSmellsFinder as finder
  * @param ePackage
  */
 def resolveDuplicatedFeatures(EPackage ePackage) {
-	finder.findDuplicateFeatures(ePackage)
+	finder.findDuplicatedFeatures(ePackage)
 		.values
 		.forEach[refactorings.extractSuperclass(it)]
 }
@@ -68,8 +68,8 @@ def resolveAbstractSubclassesOfConcreteSuperclasses(EPackage ePackage) {
 		.forEach[makeConcrete]
 }
 
-def resolveDuplicateFeaturesInSubclasses(EPackage ePackage) {
-	finder.findDuplicateFeaturesInSubclasses(ePackage)
+def resolveDuplicatedFeaturesInSubclasses(EPackage ePackage) {
+	finder.findDuplicatedFeaturesInSubclasses(ePackage)
 		.forEach[superClass, duplicates|
 			duplicates.forEach[key, values|
 				refactorings.pullUpFeatures(superClass, values)

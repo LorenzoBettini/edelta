@@ -44,7 +44,7 @@ public class EdeltaBadSmellsResolver extends AbstractEdelta {
     final Consumer<List<EStructuralFeature>> _function = (List<EStructuralFeature> it) -> {
       this.refactorings.extractSuperclass(it);
     };
-    this.finder.findDuplicateFeatures(ePackage).values().forEach(_function);
+    this.finder.findDuplicatedFeatures(ePackage).values().forEach(_function);
   }
   
   /**
@@ -107,13 +107,13 @@ public class EdeltaBadSmellsResolver extends AbstractEdelta {
     this.finder.findAbstractSubclassesOfConcreteSuperclasses(ePackage).forEach(_function);
   }
   
-  public void resolveDuplicateFeaturesInSubclasses(final EPackage ePackage) {
+  public void resolveDuplicatedFeaturesInSubclasses(final EPackage ePackage) {
     final BiConsumer<EClass, Map<EStructuralFeature, List<EStructuralFeature>>> _function = (EClass superClass, Map<EStructuralFeature, List<EStructuralFeature>> duplicates) -> {
       final BiConsumer<EStructuralFeature, List<EStructuralFeature>> _function_1 = (EStructuralFeature key, List<EStructuralFeature> values) -> {
         this.refactorings.pullUpFeatures(superClass, values);
       };
       duplicates.forEach(_function_1);
     };
-    this.finder.findDuplicateFeaturesInSubclasses(ePackage).forEach(_function);
+    this.finder.findDuplicatedFeaturesInSubclasses(ePackage).forEach(_function);
   }
 }

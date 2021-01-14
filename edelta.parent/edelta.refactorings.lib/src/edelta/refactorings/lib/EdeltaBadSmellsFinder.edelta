@@ -40,8 +40,8 @@ package edelta.refactorings.lib
  * 
  * @param ePackage
  */
-def findDuplicateFeatures(EPackage ePackage) {
-	return findDuplicateFeaturesCustom(
+def findDuplicatedFeatures(EPackage ePackage) {
+	return findDuplicatedFeaturesCustom(
 		ePackage,
 		[existing, current|
 			new EdeltaFeatureEqualityHelper().equals(existing, current)
@@ -55,9 +55,9 @@ def findDuplicateFeatures(EPackage ePackage) {
  * @param ePackage
  * @param matcher
  */
- def findDuplicateFeaturesCustom(EPackage ePackage, BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
+ def findDuplicatedFeaturesCustom(EPackage ePackage, BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
 	val allFeatures = ePackage.allEStructuralFeatures.toList
-	val result = findDuplicateFeaturesInCollection(allFeatures, matcher)
+	val result = findDuplicatedFeaturesInCollection(allFeatures, matcher)
 	result.entrySet.forEach[
 	 	logInfo[
 			"Duplicate features: " +
@@ -98,7 +98,7 @@ def findDuplicateFeatures(EPackage ePackage) {
  * @param features
  * @param matcher
  */
-def findDuplicateFeaturesInCollection(Collection<EStructuralFeature> features, BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
+def findDuplicatedFeaturesInCollection(Collection<EStructuralFeature> features, BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
 	val map = <EStructuralFeature, List<EStructuralFeature>>newLinkedHashMap
 	for (f : features) {
 		val existing = map.entrySet.findFirst[matcher.test(it.key, f)]
@@ -118,16 +118,16 @@ def findDuplicateFeaturesInCollection(Collection<EStructuralFeature> features, B
  * 
  * Returns a map where the key is the class with more than one direct subclass
  * with duplicate features; the value is another map as returned by
- * {@link #findDuplicateFeaturesInCollection(Collection, BiPredicate)}
+ * {@link #findDuplicatedFeaturesInCollection(Collection, BiPredicate)}
  */
-def findDuplicateFeaturesInSubclasses(EPackage ePackage) {
+def findDuplicatedFeaturesInSubclasses(EPackage ePackage) {
 	val map = newLinkedHashMap
 	for (c : ePackage.allEClasses) {
 		val directSubclasses = c.directSubclasses
 		val numOfSubclasses = directSubclasses.size
 		if (numOfSubclasses > 1) {
 			val candidates =
-				findDuplicateFeaturesInCollection(
+				findDuplicatedFeaturesInCollection(
 					directSubclasses.map[EStructuralFeatures].flatten.toList,
 					[existing, current|
 						new EdeltaFeatureEqualityHelper().equals(existing, current)

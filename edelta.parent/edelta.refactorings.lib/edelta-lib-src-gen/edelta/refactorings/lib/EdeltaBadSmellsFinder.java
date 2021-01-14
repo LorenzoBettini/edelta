@@ -66,11 +66,11 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
    * 
    * @param ePackage
    */
-  public Map<EStructuralFeature, List<EStructuralFeature>> findDuplicateFeatures(final EPackage ePackage) {
+  public Map<EStructuralFeature, List<EStructuralFeature>> findDuplicatedFeatures(final EPackage ePackage) {
     final BiPredicate<EStructuralFeature, EStructuralFeature> _function = (EStructuralFeature existing, EStructuralFeature current) -> {
       return new EdeltaFeatureEqualityHelper().equals(existing, current);
     };
-    return this.findDuplicateFeaturesCustom(ePackage, _function);
+    return this.findDuplicatedFeaturesCustom(ePackage, _function);
   }
   
   /**
@@ -79,9 +79,9 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
    * @param ePackage
    * @param matcher
    */
-  public Map<EStructuralFeature, List<EStructuralFeature>> findDuplicateFeaturesCustom(final EPackage ePackage, final BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
+  public Map<EStructuralFeature, List<EStructuralFeature>> findDuplicatedFeaturesCustom(final EPackage ePackage, final BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
     final List<EStructuralFeature> allFeatures = IterableExtensions.<EStructuralFeature>toList(this.allEStructuralFeatures(ePackage));
-    final Map<EStructuralFeature, List<EStructuralFeature>> result = this.findDuplicateFeaturesInCollection(allFeatures, matcher);
+    final Map<EStructuralFeature, List<EStructuralFeature>> result = this.findDuplicatedFeaturesInCollection(allFeatures, matcher);
     final Consumer<Map.Entry<EStructuralFeature, List<EStructuralFeature>>> _function = (Map.Entry<EStructuralFeature, List<EStructuralFeature>> it) -> {
       final Supplier<String> _function_1 = () -> {
         final Function1<EStructuralFeature, String> _function_2 = (EStructuralFeature it_1) -> {
@@ -127,7 +127,7 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
    * @param features
    * @param matcher
    */
-  public Map<EStructuralFeature, List<EStructuralFeature>> findDuplicateFeaturesInCollection(final Collection<EStructuralFeature> features, final BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
+  public Map<EStructuralFeature, List<EStructuralFeature>> findDuplicatedFeaturesInCollection(final Collection<EStructuralFeature> features, final BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
     final LinkedHashMap<EStructuralFeature, List<EStructuralFeature>> map = CollectionLiterals.<EStructuralFeature, List<EStructuralFeature>>newLinkedHashMap();
     for (final EStructuralFeature f : features) {
       {
@@ -156,9 +156,9 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
    * 
    * Returns a map where the key is the class with more than one direct subclass
    * with duplicate features; the value is another map as returned by
-   * {@link #findDuplicateFeaturesInCollection(Collection, BiPredicate)}
+   * {@link #findDuplicatedFeaturesInCollection(Collection, BiPredicate)}
    */
-  public LinkedHashMap<EClass, Map<EStructuralFeature, List<EStructuralFeature>>> findDuplicateFeaturesInSubclasses(final EPackage ePackage) {
+  public LinkedHashMap<EClass, Map<EStructuralFeature, List<EStructuralFeature>>> findDuplicatedFeaturesInSubclasses(final EPackage ePackage) {
     final LinkedHashMap<EClass, Map<EStructuralFeature, List<EStructuralFeature>>> map = CollectionLiterals.<EClass, Map<EStructuralFeature, List<EStructuralFeature>>>newLinkedHashMap();
     List<EClass> _allEClasses = EdeltaLibrary.allEClasses(ePackage);
     for (final EClass c : _allEClasses) {
@@ -172,7 +172,7 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
           final BiPredicate<EStructuralFeature, EStructuralFeature> _function_1 = (EStructuralFeature existing, EStructuralFeature current) -> {
             return new EdeltaFeatureEqualityHelper().equals(existing, current);
           };
-          final Map<EStructuralFeature, List<EStructuralFeature>> candidates = this.findDuplicateFeaturesInCollection(
+          final Map<EStructuralFeature, List<EStructuralFeature>> candidates = this.findDuplicatedFeaturesInCollection(
             IterableExtensions.<EStructuralFeature>toList(Iterables.<EStructuralFeature>concat(IterableExtensions.<EClass, EList<EStructuralFeature>>map(directSubclasses, _function))), _function_1);
           final Function2<EStructuralFeature, List<EStructuralFeature>, Boolean> _function_2 = (EStructuralFeature key, List<EStructuralFeature> values) -> {
             int _size = values.size();

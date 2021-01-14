@@ -34,7 +34,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_findDuplicateFeatures_whenNoDuplicates() {
+	public void test_findDuplicatedFeatures_whenNoDuplicates() {
 		final EPackage p = createEPackage("p", pack -> {
 			addNewEClass(pack, "C1", c -> {
 				addNewEAttribute(c, "a1", stringDataType);
@@ -43,11 +43,11 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 				addNewEAttribute(c, "a1", intDataType);
 			});
 		});
-		assertThat(finder.findDuplicateFeatures(p)).isEmpty();
+		assertThat(finder.findDuplicatedFeatures(p)).isEmpty();
 	}
 
 	@Test
-	public void test_findDuplicateFeatures_withDuplicates() {
+	public void test_findDuplicatedFeatures_withDuplicates() {
 		final EPackage p = createEPackage("p", pack -> {
 			addNewEClass(pack, "C1", c -> {
 				addNewEAttribute(c, "a1", stringDataType);
@@ -56,7 +56,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 				addNewEAttribute(c, "a1", stringDataType);
 			});
 		});
-		final var result = finder.findDuplicateFeatures(p);
+		final var result = finder.findDuplicatedFeatures(p);
 		assertThat(result)
 			.containsExactly(entry(
 					findEStructuralFeature(p, "C1", "a1"),
@@ -67,7 +67,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_findDuplicateFeatures_withDifferingAttributesByLowerBound() {
+	public void test_findDuplicatedFeatures_withDifferingAttributesByLowerBound() {
 		final EPackage p = createEPackage("p", pack -> {
 			addNewEClass(pack, "C1", c -> {
 				addNewEAttribute(c, "a1", stringDataType, a -> {
@@ -80,11 +80,11 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 				});
 			});
 		});
-		assertThat(finder.findDuplicateFeatures(p)).isEmpty();
+		assertThat(finder.findDuplicatedFeatures(p)).isEmpty();
 	}
 
 	@Test
-	public void test_findDuplicateFeatures_withDifferingContainment() {
+	public void test_findDuplicatedFeatures_withDifferingContainment() {
 		final EPackage p = createEPackage("p", pack -> {
 			addNewEClass(pack, "C1", c -> {
 				addNewContainmentEReference(c, "r1", eClassReference);
@@ -93,11 +93,11 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 				addNewEReference(c, "r1", eClassReference);
 			});
 		});
-		assertThat(finder.findDuplicateFeatures(p)).isEmpty();
+		assertThat(finder.findDuplicatedFeatures(p)).isEmpty();
 	}
 
 	@Test
-	public void test_findDuplicateFeatures_withCustomEqualityPredicate() {
+	public void test_findDuplicatedFeatures_withCustomEqualityPredicate() {
 		final EPackage p = createEPackage("p", pack -> {
 			addNewEClass(pack, "C1", c -> {
 				addNewEAttribute(c, "a1", stringDataType, a -> {
@@ -112,7 +112,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 		});
 		// only check name and type, thus the different lowerBound is ignored
 		// during the comparison.
-		final var result = finder.findDuplicateFeaturesCustom(p,
+		final var result = finder.findDuplicatedFeaturesCustom(p,
 			(f1, f2) -> 
 				Objects.equal(f1.getName(), f2.getName())
 						&& Objects.equal(f1.getEType(), f2.getEType()));
@@ -301,7 +301,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_findDuplicateFeaturesInSubclasses() {
+	public void test_findDuplicatedFeaturesInSubclasses() {
 		final EPackage p = createEPackage("p", pack -> {
 			EClass superclassWithDuplicatesInSubclasses = addNewEClass(pack,
 					"SuperClassWithDuplicatesInSubclasses");
@@ -324,7 +324,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 				addNewEAttribute(c, "A1", intDataType); // this is not a duplicate
 			});
 		});
-		assertThat(finder.findDuplicateFeaturesInSubclasses(p))
+		assertThat(finder.findDuplicatedFeaturesInSubclasses(p))
 			.containsExactly(entry(
 				findEClass(p, "SuperClassWithDuplicatesInSubclasses"),
 				Map.of(
