@@ -324,7 +324,6 @@
               <version>${project.version}</version>
             </artifact>
           </target>
-          <pomDependencies>ignore</pomDependencies>
         </configuration>
       </plugin>
     </plugins>
