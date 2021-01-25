@@ -27,7 +27,7 @@ jobs:
           ~/.m2
           ~/.sonar/cache
           !**/*edelta*
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml', '**/*.yml', '**/*.target') }}
         restore-keys: ${{ runner.os }}-m2-
     - name: Build with Maven and SonarCloud
       run: >
