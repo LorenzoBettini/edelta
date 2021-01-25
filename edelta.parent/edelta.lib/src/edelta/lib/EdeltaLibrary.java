@@ -538,16 +538,6 @@ public class EdeltaLibrary {
 	}
 
 	/**
-	 * Makes this feature required as a single-valued (lower = upper = 1)
-	 * 
-	 * @param feature
-	 */
-	public static void makeSingleRequired(EStructuralFeature feature) {
-		feature.setLowerBound(1);
-		feature.setUpperBound(1);
-	}
-
-	/**
 	 * Makes this {@link EClass} abstract
 	 * 
 	 * @param feature
@@ -563,5 +553,42 @@ public class EdeltaLibrary {
 	 */
 	public static void makeConcrete(EClass cl) {
 		cl.setAbstract(false);
+	}
+
+	/**
+	 * Makes this feature required as a single-valued (lower = upper = 1)
+	 * 
+	 * @param feature
+	 */
+	public static void makeSingleRequired(EStructuralFeature feature) {
+		makeRequired(feature);
+		makeSingle(feature);
+	}
+
+	/**
+	 * Makes this feature single (upper = 1)
+	 * 
+	 * @param feature
+	 */
+	public static void makeSingle(EStructuralFeature feature) {
+		feature.setUpperBound(1);
+	}
+
+	/**
+	 * Makes this feature required (lower = 1)
+	 * 
+	 * @param feature
+	 */
+	public static void makeRequired(EStructuralFeature feature) {
+		feature.setLowerBound(1);
+	}
+
+	/**
+	 * Makes this feature multiple (upper = -1)
+	 * 
+	 * @param feature
+	 */
+	public static void makeMultiple(EStructuralFeature feature) {
+		feature.setUpperBound(-1);
 	}
 }

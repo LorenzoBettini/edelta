@@ -816,6 +816,39 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
+	public void test_makeSingle() {
+		EStructuralFeature feature = ecoreFactory.createEReference();
+		feature.setLowerBound(0);
+		feature.setUpperBound(2);
+		EdeltaLibrary.makeSingle(feature);
+		assertThat(feature)
+			.returns(0, ETypedElement::getLowerBound)
+			.returns(1, ETypedElement::getUpperBound);
+	}
+
+	@Test
+	public void test_makeMultiple() {
+		EStructuralFeature feature = ecoreFactory.createEReference();
+		feature.setLowerBound(1);
+		feature.setUpperBound(1);
+		EdeltaLibrary.makeMultiple(feature);
+		assertThat(feature)
+			.returns(1, ETypedElement::getLowerBound)
+			.returns(-1, ETypedElement::getUpperBound);
+	}
+
+	@Test
+	public void test_makeRequired() {
+		EStructuralFeature feature = ecoreFactory.createEReference();
+		feature.setLowerBound(0);
+		feature.setUpperBound(2);
+		EdeltaLibrary.makeRequired(feature);
+		assertThat(feature)
+			.returns(1, ETypedElement::getLowerBound)
+			.returns(2, ETypedElement::getUpperBound);
+	}
+
+	@Test
 	public void test_makeSingleRequired() {
 		EStructuralFeature feature = ecoreFactory.createEReference();
 		feature.setLowerBound(0);
