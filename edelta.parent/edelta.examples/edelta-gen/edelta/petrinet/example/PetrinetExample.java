@@ -28,15 +28,15 @@ public class PetrinetExample extends AbstractEdelta {
   
   public EAttribute addWeightAttribute(final EClass c) {
     final Consumer<EAttribute> _function = (EAttribute it) -> {
-      it.setLowerBound(1);
+      EdeltaLibrary.makeRequired(it);
     };
     return EdeltaLibrary.addNewEAttribute(c, "weight", getEDataType("ecore", "EInt"), _function);
   }
   
   public void modifyNet(final EPackage it) {
     getEClass("petrinet", "Net").setName("Petrinet");
-    getEReference("petrinet", "Petrinet", "places").setLowerBound(1);
-    getEReference("petrinet", "Petrinet", "transitions").setLowerBound(1);
+    EdeltaLibrary.makeRequired(getEReference("petrinet", "Petrinet", "places"));
+    EdeltaLibrary.makeRequired(getEReference("petrinet", "Petrinet", "transitions"));
   }
   
   public void introducePTArc(final EPackage it) {

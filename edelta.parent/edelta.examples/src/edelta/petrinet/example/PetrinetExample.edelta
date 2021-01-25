@@ -14,14 +14,14 @@ use EdeltaRefactorings as refactorings
 
 def addWeightAttribute(EClass c) {
 	c.addNewEAttribute("weight", ecoreref(EInt)) [
-		lowerBound = 1
+		makeRequired // lowerBound = 1
 	]
 }
 
 modifyEcore modifyNet epackage petrinet {
 	ecoreref(Net).name = "Petrinet"
-	ecoreref(Petrinet.places).lowerBound = 1
-	ecoreref(Petrinet.transitions).lowerBound = 1
+	ecoreref(Petrinet.places).makeRequired
+	ecoreref(Petrinet.transitions).makeRequired
 }
 
 modifyEcore introducePTArc epackage petrinet {
