@@ -1,11 +1,8 @@
 package edelta.ui.tests;
 
-import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*;
+import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.createFile;
 
 import org.assertj.core.api.Assertions;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.xtext.testing.InjectWith;
@@ -21,6 +18,7 @@ import com.google.inject.Inject;
 
 import edelta.ui.internal.EdeltaActivator;
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper;
+import edelta.ui.tests.utils.EdeltaWorkbenchUtils;
 
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
@@ -67,18 +65,7 @@ public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 			TEST_PROJECT + "/src/Test.edelta",
 			program
 		);
-		// we need to wait for build twice when we run all the UI tests
-		// don't call waitForBuild because in case of an exception
-		// we want the full stack trace:
-		// this test seems to flaky in the CI
-		try {
-			ResourcesPlugin
-				.getWorkspace()
-				.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
-		} catch (CoreException e) {
-			e.printStackTrace();
-			throw e;
-		}
+		EdeltaWorkbenchUtils.waitForBuildWithRetries();
 		editor = openEditor(file);
 		outlinePage = editor.getAdapter(OutlinePage.class);
 		Assertions.assertThat(outlinePage).isNotNull();
