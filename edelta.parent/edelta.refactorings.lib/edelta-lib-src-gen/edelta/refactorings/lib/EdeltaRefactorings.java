@@ -240,7 +240,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
   public EReference makeContainmentBidirectional(final EReference reference) {
     EReference _xblockexpression = null;
     {
-      reference.setContainment(true);
+      EdeltaLibrary.makeContainment(reference);
       final EClass owner = reference.getEContainingClass();
       final EClass referredType = reference.getEReferenceType();
       EReference _addMandatoryReference = this.addMandatoryReference(referredType, this.fromTypeToFeatureName(owner), owner);
@@ -324,7 +324,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final EClass owner = reference.getEContainingClass();
     final EReference referenceToTarget = this.findSingleReferenceNotOfType(cl, owner);
     reference.setEType(referenceToTarget.getEType());
-    reference.setContainment(false);
+    EdeltaLibrary.dropContainment(reference);
     final EReference opposite = referenceToTarget.getEOpposite();
     if ((opposite != null)) {
       EdeltaLibrary.makeBidirectional(reference, opposite);

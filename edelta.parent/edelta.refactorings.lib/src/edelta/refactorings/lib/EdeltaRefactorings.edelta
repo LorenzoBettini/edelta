@@ -195,7 +195,7 @@ def extractClass(String name, Collection<EStructuralFeature> features,
  * @param reference
  */
 def makeContainmentBidirectional(EReference reference) {
-	reference.containment = true
+	reference.makeContainment
 	val owner = reference.EContainingClass
 	val referredType = reference.EReferenceType
 	referredType.addMandatoryReference(owner.fromTypeToFeatureName, owner) => [
@@ -281,7 +281,7 @@ def classToReference(EClass cl) : EReference {
 	val referenceToTarget = cl.findSingleReferenceNotOfType(owner)
 	// reference will now refer to referenceToTarget's type ("C" above)
 	reference.EType = referenceToTarget.EType
-	reference.containment = false
+	reference.dropContainment
 	val opposite = referenceToTarget.EOpposite
 	if (opposite !== null) { // "b2" above
 		makeBidirectional(reference, opposite)
