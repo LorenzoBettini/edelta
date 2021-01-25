@@ -860,6 +860,22 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
+	public void test_makeContainment() {
+		var reference = ecoreFactory.createEReference();
+		reference.setContainment(false);
+		EdeltaLibrary.makeContainment(reference);
+		assertThat(reference.isContainment()).isTrue();
+	}
+
+	@Test
+	public void test_dropContainment() {
+		var reference = ecoreFactory.createEReference();
+		reference.setContainment(true);
+		EdeltaLibrary.dropContainment(reference);
+		assertThat(reference.isContainment()).isFalse();
+	}
+
+	@Test
 	public void test_makeAbstract() {
 		var c = ecoreFactory.createEClass();
 		c.setAbstract(false);

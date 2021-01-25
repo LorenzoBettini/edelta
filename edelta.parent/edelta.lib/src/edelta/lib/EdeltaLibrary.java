@@ -591,4 +591,22 @@ public class EdeltaLibrary {
 	public static void makeMultiple(EStructuralFeature feature) {
 		feature.setUpperBound(-1);
 	}
+
+	/**
+	 * Makes this reference a containment reference.
+	 * 
+	 * @param reference
+	 */
+	public static void makeContainment(EReference reference) {
+		reference.setContainment(true);
+	}
+
+	/**
+	 * Makes this reference a non-containment reference.
+	 * 
+	 * @param reference
+	 */
+	public static void dropContainment(EReference reference) {
+		reference.setContainment(false);
+	}
 }
