@@ -29,12 +29,12 @@ public class EdeltaJvmModelHelper {
 	private IJvmModelAssociations jvmModelAssociations;
 
 	public JvmGenericType findJvmGenericType(EdeltaProgram program) {
-		return head(filter(jvmModelAssociations.getJvmElements(program), JvmGenericType.class));
+		return firstByType(jvmModelAssociations.getJvmElements(program), JvmGenericType.class);
 	}
 
 	public EdeltaProgram findEdeltaProgram(JvmTypeReference typeRef) {
-		return head(filter(
-				jvmModelAssociations.getSourceElements(typeRef.getType()), EdeltaProgram.class));
+		return firstByType(
+				jvmModelAssociations.getSourceElements(typeRef.getType()), EdeltaProgram.class);
 	}
 
 	public JvmOperation findJvmOperation(JvmGenericType jvmGenericType, String methodName) {
@@ -44,10 +44,14 @@ public class EdeltaJvmModelHelper {
 	}
 
 	public EdeltaUseAs findEdeltaUseAs(JvmField jvmField) {
-		return head(filter(jvmModelAssociations.getSourceElements(jvmField), EdeltaUseAs.class));
+		return firstByType(jvmModelAssociations.getSourceElements(jvmField), EdeltaUseAs.class);
 	}
 
 	public EdeltaOperation findEdeltaOperation(JvmOperation operation) {
 		return (EdeltaOperation) head(jvmModelAssociations.getSourceElements(operation));
+	}
+
+	private static <T> T firstByType(final Iterable<?> unfiltered, final Class<T> desiredType) {
+		return head(filter(unfiltered, desiredType));
 	}
 }
