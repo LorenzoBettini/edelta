@@ -48,6 +48,16 @@ public class EdeltaBadSmellsResolver extends AbstractEdelta {
   }
   
   /**
+   * Removes the dead classifiers.
+   */
+  public void resolveDeadClassifiers(final EPackage ePackage) {
+    final Predicate<EClassifier> _function = (EClassifier it) -> {
+      return true;
+    };
+    this.resolveDeadClassifiers(ePackage, _function);
+  }
+  
+  /**
    * Removes the dead classifiers by first checking the passed
    * predicate.
    */

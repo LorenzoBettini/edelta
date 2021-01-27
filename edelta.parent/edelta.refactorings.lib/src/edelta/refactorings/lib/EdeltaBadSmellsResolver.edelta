@@ -21,6 +21,13 @@ def resolveDuplicatedFeatures(EPackage ePackage) {
 }
 
 /**
+ * Removes the dead classifiers.
+ */
+def resolveDeadClassifiers(EPackage ePackage) {
+	resolveDeadClassifiers(ePackage, [true])
+}
+
+/**
  * Removes the dead classifiers by first checking the passed
  * predicate.
  */
