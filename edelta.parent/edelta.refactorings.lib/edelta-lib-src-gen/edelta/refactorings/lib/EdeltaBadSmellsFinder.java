@@ -281,26 +281,26 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
   }
   
   /**
-   * Whether {@link #doesNotReferToClassifiers(EClassifier)} and
+   * Whether {@link #doesNotReferToClasses(EClassifier)} and
    * {@link #isNotReferredByClassifiers(EClassifier)}
    */
   public boolean isDeadClassifier(final EClassifier cl) {
-    if ((this.doesNotReferToClassifiers(cl) && this.isNotReferredByClassifiers(cl))) {
+    final boolean result = (this.doesNotReferToClasses(cl) && this.isNotReferredByClassifiers(cl));
+    if (result) {
       final Supplier<String> _function = () -> {
         String _eObjectRepr = EdeltaLibrary.getEObjectRepr(cl);
         return ("Dead classifier: " + _eObjectRepr);
       };
       this.logInfo(_function);
-      return true;
     }
-    return false;
+    return result;
   }
   
   /**
-   * Whether the passed EClassifier does not refer to any EClassifier
+   * Whether the passed EClassifier does not refer to any EClass
    */
-  public boolean doesNotReferToClassifiers(final EClassifier c) {
-    return IterableExtensions.isEmpty(Iterables.<EClassifier>filter(EcoreUtil.CrossReferencer.find(CollectionLiterals.<EClassifier>newArrayList(c)).keySet(), EClassifier.class));
+  public boolean doesNotReferToClasses(final EClassifier c) {
+    return IterableExtensions.isEmpty(Iterables.<EClass>filter(EcoreUtil.CrossReferencer.find(CollectionLiterals.<EClassifier>newArrayList(c)).keySet(), EClass.class));
   }
   
   /**

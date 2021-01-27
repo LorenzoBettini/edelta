@@ -200,7 +200,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_doesNotReferToClassifiers() {
+	public void test_doesNotReferToClasses() {
 		var otherPackage = createEPackage("otherPackage");
 		var used1 = addNewEClass(otherPackage, "Used1");
 		var p = createEPackage("p", pack -> {
@@ -209,22 +209,28 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 				addNewEReference(c, "used1", used1);
 			});
 		});
-		assertThat(finder.doesNotReferToClassifiers(head(EClasses(p))))
-				.isFalse();
+		assertThat(finder.doesNotReferToClasses(head(EClasses(p))))
+			.isFalse();
 		var hasNoReference = addNewEClass(p, "HasNoReference");
-		assertThat(finder.doesNotReferToClassifiers(hasNoReference))
+		assertThat(finder.doesNotReferToClasses(hasNoReference))
 			.isTrue();
 		var onlyReferToSelf = addNewEClass(p, "OnlyReferToSelf", c -> {
 			// has a reference to self
 			addNewEReference(c, "mySelf", c);
 		});
 		// self references are considered
-		assertThat(finder.doesNotReferToClassifiers(onlyReferToSelf))
+		assertThat(finder.doesNotReferToClasses(onlyReferToSelf))
 			.isFalse();
 		var withSuperClass = addNewSubclass(used1, "WithSuperClass");
 		// superclasses are considered
-		assertThat(finder.doesNotReferToClassifiers(withSuperClass))
+		assertThat(finder.doesNotReferToClasses(withSuperClass))
 			.isFalse();
+		var onlyWithAtttributes = addNewEClass(p, "OnlyWithAttributes", c -> {
+			addNewEAttribute(c, "name", stringDataType);
+		});
+		// attributes, i.e., EDataType, are not considered
+		assertThat(finder.doesNotReferToClasses(onlyWithAtttributes))
+			.isTrue();
 	}
 
 	@Test

@@ -219,23 +219,23 @@ def findDeadClassifiers(EPackage ePackage) {
 }
 
 /**
- * Whether {@link #doesNotReferToClassifiers(EClassifier)} and
+ * Whether {@link #doesNotReferToClasses(EClassifier)} and
  * {@link #isNotReferredByClassifiers(EClassifier)}
  */
 def isDeadClassifier(EClassifier cl) {
-	if(cl.doesNotReferToClassifiers && cl.isNotReferredByClassifiers){
+	val result = (cl.doesNotReferToClasses && cl.isNotReferredByClassifiers)
+	if (result)
 		logInfo["Dead classifier: " + getEObjectRepr(cl)]
-		return true;
-	}
+	return result;
 }
 
 /**
- * Whether the passed EClassifier does not refer to any EClassifier
+ * Whether the passed EClassifier does not refer to any EClass
  */
-def doesNotReferToClassifiers(EClassifier c) {
+def doesNotReferToClasses(EClassifier c) {
 	CrossReferencer.find(newArrayList(c))
 		.keySet
-		.filter(EClassifier)
+		.filter(EClass)
 		.empty
 }
 
