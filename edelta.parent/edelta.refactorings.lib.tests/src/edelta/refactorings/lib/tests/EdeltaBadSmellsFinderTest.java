@@ -200,7 +200,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_hasNoReferenceDifferentFromSelf() {
+	public void test_doesNotReferToClassifiers() {
 		var otherPackage = createEPackage("otherPackage");
 		var used1 = addNewEClass(otherPackage, "Used1");
 		var p = createEPackage("p", pack -> {
@@ -209,21 +209,22 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 				addNewEReference(c, "used1", used1);
 			});
 		});
-		assertThat(finder.hasNoReferenceDifferentFromSelf(head(EClasses(p))))
+		assertThat(finder.doesNotReferToClassifiers(head(EClasses(p))))
 				.isFalse();
 		var hasNoReference = addNewEClass(p, "HasNoReference");
-		assertThat(finder.hasNoReferenceDifferentFromSelf(hasNoReference))
+		assertThat(finder.doesNotReferToClassifiers(hasNoReference))
 			.isTrue();
 		var onlyReferToSelf = addNewEClass(p, "OnlyReferToSelf", c -> {
 			// has a reference to self
 			addNewEReference(c, "mySelf", c);
 		});
-		assertThat(finder.hasNoReferenceDifferentFromSelf(onlyReferToSelf))
-			.isTrue();
+		// self references are considered
+		assertThat(finder.doesNotReferToClassifiers(onlyReferToSelf))
+			.isFalse();
 	}
 
 	@Test
-	public void test_isNotReferencedByOthers() {
+	public void test_isNotReferredByClassifiers() {
 		var p1 = createEPackage("p1");
 		var referenced = addNewEClass(p1, "Referenced");
 		var baseClass = addNewEClass(p1, "BaseClass");
@@ -232,19 +233,19 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 			addNewEReference(c, "aRef", referenced);
 		});
 		addNewSubclass(baseClass, "DerivedClass");
-		assertThat(finder.isNotReferencedByOthers(notReferenced))
+		assertThat(finder.isNotReferredByClassifiers(notReferenced))
 			.isTrue();
-		assertThat(finder.isNotReferencedByOthers(referenced))
+		assertThat(finder.isNotReferredByClassifiers(referenced))
 			.isFalse();
 		// if there's a derived class, the base class is referenced
-		assertThat(finder.isNotReferencedByOthers(baseClass))
+		assertThat(finder.isNotReferredByClassifiers(baseClass))
 			.isFalse();
 		var selfReferenced = addNewEClass(p1, "SelfReferenced", c -> {
 			addNewEReference(c, "mySelf", c);
 		});
-		// self references are not considered
-		assertThat(finder.isNotReferencedByOthers(selfReferenced))
-			.isTrue();
+		// self references are considered
+		assertThat(finder.isNotReferredByClassifiers(selfReferenced))
+			.isFalse();
 		// create a resource set with cross reference
 		var p2 = createEPackage("p2", pack -> {
 			addNewEClass(pack, "UsesNotReferencedInP1", c -> {
@@ -260,7 +261,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 		resourceSet.getResources().add(p2Resource);
 		// now it is referenced by a class in another package
 		// in the same resource set
-		assertThat(finder.isNotReferencedByOthers(notReferenced))
+		assertThat(finder.isNotReferredByClassifiers(notReferenced))
 			.isFalse();
 	}
 

@@ -219,34 +219,31 @@ def findDeadClassifiers(EPackage ePackage) {
 }
 
 /**
- * Whether {@link #hasNoReferenceDifferentFromSelf(EClassifier)} and
- * {@link #isNotReferencedByOthers(EClassifier)}
+ * Whether {@link #doesNotReferToClassifiers(EClassifier)} and
+ * {@link #isNotReferredByClassifiers(EClassifier)}
  */
 def isDeadClassifier(EClassifier cl) {
-	if(cl.hasNoReferenceDifferentFromSelf && cl.isNotReferencedByOthers){
+	if(cl.doesNotReferToClassifiers && cl.isNotReferredByClassifiers){
 		logInfo["Dead classifier: " + getEObjectRepr(cl)]
 		return true;
 	}
 }
 
 /**
- * Whether the passed EClassifier does not refer anything
- * (not considering a self reference).
+ * Whether the passed EClassifier does not refer to any EClassifier
  */
-def hasNoReferenceDifferentFromSelf(EClassifier c) {
+def doesNotReferToClassifiers(EClassifier c) {
 	CrossReferencer.find(newArrayList(c))
 		.keySet
 		.filter(EClassifier)
-		.filter[it !== c]
 		.empty
 }
 
 /**
- * Whether the passed EClassifier is not referenced by others.
+ * Whether the passed EClassifier is not referred by EClassifiers.
  */
-def isNotReferencedByOthers(EClassifier cl) {
+def isNotReferredByClassifiers(EClassifier cl) {
 	UsageCrossReferencer.find(cl, cl.packagesToInspect)
-		.filter[!EcoreUtil.isAncestor(cl, EObject)]
 		.empty
 }
 
@@ -261,7 +258,7 @@ def findClassificationByHierarchy(EPackage ePackage)
 		.filter[
 			ESuperTypes.size == 1 &&
 			EStructuralFeatures.empty &&
-			isNotReferencedByOthers
+			isNotReferredByClassifiers
 		]
 		.groupBy[ESuperTypes.head]
 		.filter[base, subclasses|subclasses.size > 1]
