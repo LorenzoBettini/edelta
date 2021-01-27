@@ -282,10 +282,10 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
   
   /**
    * Whether {@link #hasNoReferenceDifferentFromSelf(EClassifier)} and
-   * {@link #isNotReferenced(EClassifier)}
+   * {@link #isNotReferencedByOthers(EClassifier)}
    */
   public boolean isDeadClassifier(final EClassifier cl) {
-    if ((this.hasNoReferenceDifferentFromSelf(cl) && this.isNotReferenced(cl))) {
+    if ((this.hasNoReferenceDifferentFromSelf(cl) && this.isNotReferencedByOthers(cl))) {
       final Supplier<String> _function = () -> {
         String _eObjectRepr = EdeltaLibrary.getEObjectRepr(cl);
         return ("Dead classifier: " + _eObjectRepr);
@@ -308,10 +308,14 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
   }
   
   /**
-   * Whether the passed EClassifier is not referenced.
+   * Whether the passed EClassifier is not referenced by others.
    */
-  public boolean isNotReferenced(final EClassifier cl) {
-    return EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()).isEmpty();
+  public boolean isNotReferencedByOthers(final EClassifier cl) {
+    final Function1<EStructuralFeature.Setting, Boolean> _function = (EStructuralFeature.Setting it) -> {
+      boolean _isAncestor = EcoreUtil.isAncestor(cl, it.getEObject());
+      return Boolean.valueOf((!_isAncestor));
+    };
+    return IterableExtensions.isEmpty(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()), _function));
   }
   
   /**
@@ -323,7 +327,7 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
     final Function1<EClass, Boolean> _function = (EClass it) -> {
       return Boolean.valueOf((((it.getESuperTypes().size() == 1) && 
         it.getEStructuralFeatures().isEmpty()) && 
-        this.isNotReferenced(it)));
+        this.isNotReferencedByOthers(it)));
     };
     final Function1<EClass, EClass> _function_1 = (EClass it) -> {
       return IterableExtensions.<EClass>head(it.getESuperTypes());

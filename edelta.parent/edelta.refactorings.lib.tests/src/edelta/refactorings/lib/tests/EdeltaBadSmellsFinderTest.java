@@ -204,16 +204,28 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_isNotReferenced() {
+	public void test_isNotReferencedByOthers() {
 		var p = createEPackage("p");
 		var referenced = addNewEClass(p, "Referenced");
-		var notReferenced = addNewEClass(p, "NotReferenced", c -> {
+		var baseClass = addNewEClass(p, "BaseClass");
+		var notReferenced = addNewEClass(p, "NotReferenced");
+		addNewEClass(p, "Referring", c -> {
 			addNewEReference(c, "aRef", referenced);
 		});
-		assertThat(finder.isNotReferenced(notReferenced))
+		addNewSubclass(baseClass, "DerivedClass");
+		assertThat(finder.isNotReferencedByOthers(notReferenced))
 			.isTrue();
-		assertThat(finder.isNotReferenced(referenced))
+		assertThat(finder.isNotReferencedByOthers(referenced))
 			.isFalse();
+		// if there's a derived class, the base class is referenced
+		assertThat(finder.isNotReferencedByOthers(baseClass))
+			.isFalse();
+		var selfReferenced = addNewEClass(p, "SelfReferenced", c -> {
+			addNewEReference(c, "mySelf", c);
+		});
+		// self references are not considered
+		assertThat(finder.isNotReferencedByOthers(selfReferenced))
+			.isTrue();
 	}
 
 	@Test
