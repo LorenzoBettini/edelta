@@ -3,13 +3,11 @@
  */
 package edelta.lib.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.eclipse.emf.ecore.EcorePackage.Literals.*;
 
 import org.eclipse.emf.ecore.EAttribute;
@@ -26,6 +24,9 @@ import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.impl.BasicEObjectImpl;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil.EqualityHelper;
 import org.junit.Test;
 
@@ -900,5 +901,68 @@ public class EdeltaLibraryTest {
 		client.getESuperTypes().add(referred);
 		assertThat(client.getEPackage()).isSameAs(ePackage);
 		assertThat(referred.getEPackage()).isNull();
+	}
+
+	@Test
+	public void test_packagesToInspectWhenNoContainingPackage() {
+		var c = ecoreFactory.createEClass();
+		var packages = EdeltaLibrary.packagesToInspect(c);
+		assertThat(packages).isEmpty();
+	}
+
+	@Test
+	public void test_packagesToInspectWhenPackageNotInResource() {
+		var c = ecoreFactory.createEClass();
+		var p = ecoreFactory.createEPackage();
+		p.getEClassifiers().add(c);
+		var packages = EdeltaLibrary.packagesToInspect(c);
+		assertThat(packages).containsExactly(p);
+	}
+
+	@Test
+	public void test_packagesToInspectWhenPackageNotInResourceSet() {
+		var c = ecoreFactory.createEClass();
+		var p = ecoreFactory.createEPackage();
+		var resource = new ResourceImpl();
+		resource.getContents().add(p);
+		p.getEClassifiers().add(c);
+		var packages = EdeltaLibrary.packagesToInspect(c);
+		assertThat(packages).containsExactly(p);
+	}
+
+	@Test
+	public void test_packagesToInspectWhenPackageInResourceSet() {
+		var c = ecoreFactory.createEClass();
+		var p = ecoreFactory.createEPackage();
+		var resource = new ResourceImpl();
+		resource.getContents().add(p);
+		p.getEClassifiers().add(c);
+		var resourceSet = new ResourceSetImpl();
+		resourceSet.getResources().add(resource);
+		var anotherResource = new ResourceImpl();
+		resourceSet.getResources().add(anotherResource);
+		var anotherPackage = ecoreFactory.createEPackage();
+		anotherResource.getContents().add(anotherPackage);
+		var packages = EdeltaLibrary.packagesToInspect(c);
+		assertThat(packages).containsExactlyInAnyOrder(p, anotherPackage);
+	}
+
+	@Test
+	public void test_packagesToInspectSkipsEcorePackage() {
+		var c = ecoreFactory.createEClass();
+		var p = ecoreFactory.createEPackage();
+		var resource = new ResourceImpl();
+		resource.getContents().add(p);
+		p.getEClassifiers().add(c);
+		var resourceSet = new ResourceSetImpl();
+		resourceSet.getResources().add(resource);
+		var anotherResource = new ResourceImpl();
+		resourceSet.getResources().add(anotherResource);
+		var anotherPackage = ecoreFactory.createEPackage();
+		anotherResource.getContents().add(anotherPackage);
+		Resource ecorePackageResource = EcorePackage.eINSTANCE.eResource();
+		resourceSet.getResources().add(ecorePackageResource);
+		var packages = EdeltaLibrary.packagesToInspect(c);
+		assertThat(packages).containsExactlyInAnyOrder(p, anotherPackage);
 	}
 }

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -23,6 +24,9 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
+import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 
@@ -608,5 +612,41 @@ public class EdeltaLibrary {
 	 */
 	public static void dropContainment(EReference reference) {
 		reference.setContainment(false);
+	}
+
+	/**
+	 * Given an {@link EClassifier} it returns a {@link Collection} of
+	 * {@link EPackage} that can be inspected, for example, to search for
+	 * references. It always returns a collection. In case the classifier is not
+	 * contained in any package the returned collection is null. If the package is
+	 * not contained in a {@link Resource} then the collection contains only the
+	 * package. Otherwise it collects all the packages in all resources in the
+	 * {@link ResourceSet} (if there is one). The {@link EcorePackage} is never
+	 * part of the returned collection.
+	 * 
+	 * @param e
+	 * @return
+	 */
+	public static Collection<EPackage> packagesToInspect(EClassifier e) {
+		var ePackage = e.getEPackage();
+		if (ePackage == null)
+			return Collections.emptyList();
+		var resource = ePackage.eResource();
+		if (resource == null)
+			return Collections.singleton(ePackage);
+		var resourceSet = resource.getResourceSet();
+		if (resourceSet == null)
+			return filterEPackages(resource.getContents().stream());
+		var flatContents = resourceSet.getResources().stream()
+			.flatMap(r -> r.getContents().stream());
+		return filterEPackages(flatContents);
+	}
+
+	private static List<EPackage> filterEPackages(Stream<EObject> objectsStream) {
+		return objectsStream
+				.filter(EPackage.class::isInstance)
+				.map(EPackage.class::cast)
+				.filter(p -> !EcorePackage.eNS_URI.equals(p.getNsURI()))
+				.collect(Collectors.toList());
 	}
 }
