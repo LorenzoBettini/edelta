@@ -2,7 +2,7 @@
 <ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="p2" nsURI="http://edelta.it/TestEcoreReferring" nsPrefix="p2">
   <eClassifiers xsi:type="ecore:EClass" name="UsesUnused1">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ref" eType="ecore:EClass TestEcore.ecore#//Unused1"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ref" eType="ecore:EClass TestEcoreReferred.ecore#//Unused1"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="UsesUnused2" eSuperTypes="TestEcore.ecore#//Unused2"/>
+  <eClassifiers xsi:type="ecore:EClass" name="UsesUnused2" eSuperTypes="TestEcoreReferred.ecore#//Unused2"/>
 </ecore:EPackage>

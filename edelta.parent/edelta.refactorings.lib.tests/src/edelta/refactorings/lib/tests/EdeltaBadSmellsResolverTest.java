@@ -85,7 +85,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 		// one class in the other ecore extends Unused2,
 		// which is then not considered dead classifier
 		loadModelFiles("resolveDeadClassifiersParallel",
-				"TestEcore.ecore", "TestEcoreReferring.ecore");
+				"TestEcoreReferred.ecore", "TestEcoreReferring.ecore");
 		resolver.resolveDeadClassifiers(resolver.getEPackage("p"),
 			it -> true);
 		resolver.saveModifiedEcores(AbstractTest.MODIFIED);
