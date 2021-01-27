@@ -221,6 +221,10 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 		// self references are considered
 		assertThat(finder.doesNotReferToClassifiers(onlyReferToSelf))
 			.isFalse();
+		var withSuperClass = addNewSubclass(used1, "WithSuperClass");
+		// superclasses are considered
+		assertThat(finder.doesNotReferToClassifiers(withSuperClass))
+			.isFalse();
 	}
 
 	@Test
