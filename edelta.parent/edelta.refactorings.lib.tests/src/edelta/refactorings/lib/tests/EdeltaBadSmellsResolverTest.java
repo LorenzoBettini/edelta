@@ -1,6 +1,7 @@
 package edelta.refactorings.lib.tests;
 
 import static edelta.lib.EdeltaLibrary.addNewAbstractEClass;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
 
@@ -12,6 +13,7 @@ import org.eclipse.emf.ecore.EPackage;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.Objects;
 
 import edelta.lib.AbstractEdelta;
@@ -23,27 +25,31 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 
 	private String testModelDirectory;
 
-	private String testModelFile;
+	private List<String> testModelFiles;
 
 	@Before
 	public void setup() {
 		resolver = new EdeltaBadSmellsResolver();
 	}
 
-	private void loadModelFile(final String testModelDirectory, final String testModelFile) {
+	private void loadModelFiles(String testModelDirectory, String... testModelFiles) {
 		this.testModelDirectory = testModelDirectory;
-		this.testModelFile = testModelFile;
-		resolver
-			.loadEcoreFile(AbstractTest.TESTECORES +
-				testModelDirectory + "/" + testModelFile);
+		this.testModelFiles = asList(testModelFiles);
+		for (String testModelFile : testModelFiles) {
+			resolver
+				.loadEcoreFile(AbstractTest.TESTECORES +
+					testModelDirectory + "/" + testModelFile);
+		}
 	}
 
-	private void assertModifiedFile() throws IOException {
+	private void assertModifiedFiles() throws IOException {
 		// no need to explicitly validate:
 		// if the ecore file is saved then it is valid
-		EdeltaTestUtils.assertFilesAreEquals(
-			AbstractTest.EXPECTATIONS + testModelDirectory + "/" + testModelFile,
-			AbstractTest.MODIFIED + testModelFile);
+		for (String testModelFile : testModelFiles) {
+			EdeltaTestUtils.assertFilesAreEquals(
+					AbstractTest.EXPECTATIONS + testModelDirectory + "/" + testModelFile,
+					AbstractTest.MODIFIED + testModelFile);
+		}
 	}
 
 	@Test
@@ -55,43 +61,59 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 
 	@Test
 	public void test_resolveDuplicatedFeatures() throws IOException {
-		loadModelFile("resolveDuplicatedFeatures", "TestEcore.ecore");
+		loadModelFiles("resolveDuplicatedFeatures", "TestEcore.ecore");
 		resolver.resolveDuplicatedFeatures(resolver.getEPackage("p"));
 		resolver.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFile();
+		assertModifiedFiles();
 	}
 
 	@Test
 	public void test_resolveDeadClassifiers() throws IOException {
-		loadModelFile("resolveDeadClassifiers", "TestEcore.ecore");
+		loadModelFiles("resolveDeadClassifiers", "TestEcore.ecore");
+		// specifies to remove only Unused2 even if there are other
+		// dead classifiers
 		resolver.resolveDeadClassifiers(resolver.getEPackage("p"),
 			it -> Objects.equals(it.getName(), "Unused2"));
 		resolver.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFile();
+		assertModifiedFiles();
+	}
+
+	@Test
+	public void test_resolveDeadClassifiersParallel() throws IOException {
+		// one class in the other ecore has a reference to Unused1,
+		// which is then not considered dead classifier
+		// one class in the other ecore extends Unused2,
+		// which is then not considered dead classifier
+		loadModelFiles("resolveDeadClassifiersParallel",
+				"TestEcore.ecore", "TestEcoreReferring.ecore");
+		resolver.resolveDeadClassifiers(resolver.getEPackage("p"),
+			it -> true);
+		resolver.saveModifiedEcores(AbstractTest.MODIFIED);
+		assertModifiedFiles();
 	}
 
 	@Test
 	public void test_resolveRedundantContainers() throws IOException {
-		loadModelFile("resolveRedundantContainers", "TestEcore.ecore");
+		loadModelFiles("resolveRedundantContainers", "TestEcore.ecore");
 		resolver.resolveRedundantContainers(resolver.getEPackage("p"));
 		resolver.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFile();
+		assertModifiedFiles();
 	}
 
 	@Test
 	public void test_resolveClassificationByHierarchy() throws IOException {
-		loadModelFile("resolveClassificationByHierarchy", "TestEcore.ecore");
+		loadModelFiles("resolveClassificationByHierarchy", "TestEcore.ecore");
 		resolver.resolveClassificationByHierarchy(resolver.getEPackage("p"));
 		resolver.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFile();
+		assertModifiedFiles();
 	}
 
 	@Test
 	public void test_resolveConcreteAbstractMetaclass() throws IOException {
-		loadModelFile("resolveConcreteAbstractMetaclass", "TestEcore.ecore");
+		loadModelFiles("resolveConcreteAbstractMetaclass", "TestEcore.ecore");
 		resolver.resolveConcreteAbstractMetaclass(resolver.getEPackage("p"));
 		resolver.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFile();
+		assertModifiedFiles();
 	}
 
 	@Test
@@ -105,17 +127,17 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 
 	@Test
 	public void test_resolveAbstractSubclassesOfConcreteSuperclasses() throws IOException {
-		loadModelFile("resolveAbstractSubclassesOfConcreteSuperclasses", "TestEcore.ecore");
+		loadModelFiles("resolveAbstractSubclassesOfConcreteSuperclasses", "TestEcore.ecore");
 		resolver.resolveAbstractSubclassesOfConcreteSuperclasses(resolver.getEPackage("p"));
 		resolver.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFile();
+		assertModifiedFiles();
 	}
 
 	@Test
 	public void test_resolveDuplicatedFeaturesInSubclasses() throws IOException {
-		loadModelFile("resolveDuplicatedFeaturesInSubclasses", "TestEcore.ecore");
+		loadModelFiles("resolveDuplicatedFeaturesInSubclasses", "TestEcore.ecore");
 		resolver.resolveDuplicatedFeaturesInSubclasses(resolver.getEPackage("p"));
 		resolver.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFile();
+		assertModifiedFiles();
 	}
 }
