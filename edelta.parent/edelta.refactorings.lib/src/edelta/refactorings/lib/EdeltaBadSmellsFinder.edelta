@@ -10,6 +10,7 @@ import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.EcorePackage
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.emf.ecore.util.EcoreUtil.CrossReferencer
+import org.eclipse.emf.ecore.util.EcoreUtil.UsageCrossReferencer
 
 package edelta.refactorings.lib
 
@@ -218,35 +219,33 @@ def findDeadClassifiers(EPackage ePackage) {
 }
 
 /**
- * Whether {@link #hasNoReferenceInThisPackage(EClassifier)} and
+ * Whether {@link #hasNoReferenceDifferentFromSelf(EClassifier)} and
  * {@link #isNotReferenced(EClassifier)}
  */
 def isDeadClassifier(EClassifier cl) {
-	if(cl.hasNoReferenceInThisPackage && cl.isNotReferenced){
+	if(cl.hasNoReferenceDifferentFromSelf && cl.isNotReferenced){
 		logInfo["Dead classifier: " + getEObjectRepr(cl)]
 		return true;
 	}
 }
 
 /**
- * Whether the passed EClassifier does not refer to anything in its
- * EPackage.
+ * Whether the passed EClassifier does not refer anything
+ * (not considering a self reference).
  */
-def hasNoReferenceInThisPackage(EClassifier c) {
-	val thisPackage = c.EPackage
+def hasNoReferenceDifferentFromSelf(EClassifier c) {
 	CrossReferencer.find(newArrayList(c))
 		.keySet
 		.filter(EClassifier)
-		.filter[EPackage === thisPackage]
+		.filter[it !== c]
 		.empty
 }
 
 /**
- * Whether the passed EClassifier is not referenced in its
- * EPackage.
+ * Whether the passed EClassifier is not referenced.
  */
 def isNotReferenced(EClassifier cl) {
-	EcoreUtil.UsageCrossReferencer.find(cl, cl.EPackage).empty
+	UsageCrossReferencer.find(cl, cl.EPackage).empty
 }
 
 /**

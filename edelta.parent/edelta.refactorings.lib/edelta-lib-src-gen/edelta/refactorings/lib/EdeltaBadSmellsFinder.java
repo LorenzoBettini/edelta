@@ -281,11 +281,11 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
   }
   
   /**
-   * Whether {@link #hasNoReferenceInThisPackage(EClassifier)} and
+   * Whether {@link #hasNoReferenceDifferentFromSelf(EClassifier)} and
    * {@link #isNotReferenced(EClassifier)}
    */
   public boolean isDeadClassifier(final EClassifier cl) {
-    if ((this.hasNoReferenceInThisPackage(cl) && this.isNotReferenced(cl))) {
+    if ((this.hasNoReferenceDifferentFromSelf(cl) && this.isNotReferenced(cl))) {
       final Supplier<String> _function = () -> {
         String _eObjectRepr = EdeltaLibrary.getEObjectRepr(cl);
         return ("Dead classifier: " + _eObjectRepr);
@@ -297,25 +297,18 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
   }
   
   /**
-   * Whether the passed EClassifier does not refer to anything in its
-   * EPackage.
+   * Whether the passed EClassifier does not refer anything
+   * (not considering a self reference).
    */
-  public boolean hasNoReferenceInThisPackage(final EClassifier c) {
-    boolean _xblockexpression = false;
-    {
-      final EPackage thisPackage = c.getEPackage();
-      final Function1<EClassifier, Boolean> _function = (EClassifier it) -> {
-        EPackage _ePackage = it.getEPackage();
-        return Boolean.valueOf((_ePackage == thisPackage));
-      };
-      _xblockexpression = IterableExtensions.isEmpty(IterableExtensions.<EClassifier>filter(Iterables.<EClassifier>filter(EcoreUtil.CrossReferencer.find(CollectionLiterals.<EClassifier>newArrayList(c)).keySet(), EClassifier.class), _function));
-    }
-    return _xblockexpression;
+  public boolean hasNoReferenceDifferentFromSelf(final EClassifier c) {
+    final Function1<EClassifier, Boolean> _function = (EClassifier it) -> {
+      return Boolean.valueOf((it != c));
+    };
+    return IterableExtensions.isEmpty(IterableExtensions.<EClassifier>filter(Iterables.<EClassifier>filter(EcoreUtil.CrossReferencer.find(CollectionLiterals.<EClassifier>newArrayList(c)).keySet(), EClassifier.class), _function));
   }
   
   /**
-   * Whether the passed EClassifier is not referenced in its
-   * EPackage.
+   * Whether the passed EClassifier is not referenced.
    */
   public boolean isNotReferenced(final EClassifier cl) {
     return EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()).isEmpty();

@@ -181,17 +181,39 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_hasNoReferenceInThisPackage() {
-		final EPackage otherPackage = createEPackage("otherPackage");
-		final EClass used1 = addNewEClass(otherPackage, "Used1");
-		final EPackage p = createEPackage("p", pack -> {
+	public void test_hasNoReferenceDifferentFromSelf() {
+		var otherPackage = createEPackage("otherPackage");
+		var used1 = addNewEClass(otherPackage, "Used1");
+		var p = createEPackage("p", pack -> {
 			addNewEClass(pack, "HasNoReferenceInThisPackage", c -> {
 				// has a reference to a class in a different package
 				addNewEReference(c, "used1", used1);
 			});
 		});
-		assertThat(finder.hasNoReferenceInThisPackage(head(EClasses(p))))
-				.isTrue();
+		assertThat(finder.hasNoReferenceDifferentFromSelf(head(EClasses(p))))
+				.isFalse();
+		var hasNoReference = addNewEClass(p, "HasNoReference");
+		assertThat(finder.hasNoReferenceDifferentFromSelf(hasNoReference))
+			.isTrue();
+		var onlyReferToSelf = addNewEClass(p, "OnlyReferToSelf", c -> {
+			// has a reference to self
+			addNewEReference(c, "mySelf", c);
+		});
+		assertThat(finder.hasNoReferenceDifferentFromSelf(onlyReferToSelf))
+			.isTrue();
+	}
+
+	@Test
+	public void test_isNotReferenced() {
+		var p = createEPackage("p");
+		var referenced = addNewEClass(p, "Referenced");
+		var notReferenced = addNewEClass(p, "NotReferenced", c -> {
+			addNewEReference(c, "aRef", referenced);
+		});
+		assertThat(finder.isNotReferenced(notReferenced))
+			.isTrue();
+		assertThat(finder.isNotReferenced(referenced))
+			.isFalse();
 	}
 
 	@Test
