@@ -245,7 +245,7 @@ def hasNoReferenceDifferentFromSelf(EClassifier c) {
  * Whether the passed EClassifier is not referenced by others.
  */
 def isNotReferencedByOthers(EClassifier cl) {
-	UsageCrossReferencer.find(cl, cl.EPackage)
+	UsageCrossReferencer.find(cl, cl.packagesToInspect)
 		.filter[!EcoreUtil.isAncestor(cl, EObject)]
 		.empty
 }

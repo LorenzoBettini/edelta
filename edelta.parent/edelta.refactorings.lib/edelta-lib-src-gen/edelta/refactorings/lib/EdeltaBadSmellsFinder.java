@@ -315,7 +315,7 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
       boolean _isAncestor = EcoreUtil.isAncestor(cl, it.getEObject());
       return Boolean.valueOf((!_isAncestor));
     };
-    return IterableExtensions.isEmpty(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()), _function));
+    return IterableExtensions.isEmpty(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, EdeltaLibrary.packagesToInspect(cl)), _function));
   }
   
   /**

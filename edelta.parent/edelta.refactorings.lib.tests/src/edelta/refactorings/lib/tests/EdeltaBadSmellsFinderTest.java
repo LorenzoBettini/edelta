@@ -14,6 +14,8 @@ import java.util.Map;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.xtext.xbase.lib.Pair;
 import org.junit.Before;
 import org.junit.Test;
@@ -167,7 +169,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 
 	@Test
 	public void test_findDeadClassifiers() {
-		final EPackage p = createEPackage("p", pack -> {
+		var p1 = createEPackage("p1", pack -> {
 			addNewEClass(pack, "Unused1");
 			EClass used1 = addNewEClass(pack, "Used1");
 			EClass used2 = addNewEClass(pack, "Used2");
@@ -176,8 +178,25 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 				addNewEReference(c, "used2", used2);
 			});
 		});
-		assertThat(finder.findDeadClassifiers(p))
-			.containsExactly(findEClass(p, "Unused1"));
+		assertThat(finder.findDeadClassifiers(p1))
+			.containsExactly(findEClass(p1, "Unused1"));
+		// create a resource set with cross reference
+		var p2 = createEPackage("p2", pack -> {
+			addNewEClass(pack, "UsesUnused1", c -> {
+				addNewEReference(c, "unused1FromP1", (EClass) p1.getEClassifier("Unused1"));
+			});
+		});
+		var resourceSet = new ResourceSetImpl();
+		var p1Resource = new ResourceImpl();
+		p1Resource.getContents().add(p1);
+		resourceSet.getResources().add(p1Resource);
+		var p2Resource = new ResourceImpl();
+		p2Resource.getContents().add(p2);
+		resourceSet.getResources().add(p2Resource);
+		// now Unused1 is referenced by a class in another package
+		// in the same resource set
+		assertThat(finder.findDeadClassifiers(p1))
+			.isEmpty();
 	}
 
 	@Test
@@ -205,11 +224,11 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 
 	@Test
 	public void test_isNotReferencedByOthers() {
-		var p = createEPackage("p");
-		var referenced = addNewEClass(p, "Referenced");
-		var baseClass = addNewEClass(p, "BaseClass");
-		var notReferenced = addNewEClass(p, "NotReferenced");
-		addNewEClass(p, "Referring", c -> {
+		var p1 = createEPackage("p1");
+		var referenced = addNewEClass(p1, "Referenced");
+		var baseClass = addNewEClass(p1, "BaseClass");
+		var notReferenced = addNewEClass(p1, "NotReferenced");
+		addNewEClass(p1, "Referring", c -> {
 			addNewEReference(c, "aRef", referenced);
 		});
 		addNewSubclass(baseClass, "DerivedClass");
@@ -220,12 +239,29 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 		// if there's a derived class, the base class is referenced
 		assertThat(finder.isNotReferencedByOthers(baseClass))
 			.isFalse();
-		var selfReferenced = addNewEClass(p, "SelfReferenced", c -> {
+		var selfReferenced = addNewEClass(p1, "SelfReferenced", c -> {
 			addNewEReference(c, "mySelf", c);
 		});
 		// self references are not considered
 		assertThat(finder.isNotReferencedByOthers(selfReferenced))
 			.isTrue();
+		// create a resource set with cross reference
+		var p2 = createEPackage("p2", pack -> {
+			addNewEClass(pack, "UsesNotReferencedInP1", c -> {
+				addNewEReference(c, "usesNotReferencedInP1", (EClass) p1.getEClassifier("NotReferenced"));
+			});
+		});
+		var resourceSet = new ResourceSetImpl();
+		var p1Resource = new ResourceImpl();
+		p1Resource.getContents().add(p1);
+		resourceSet.getResources().add(p1Resource);
+		var p2Resource = new ResourceImpl();
+		p2Resource.getContents().add(p2);
+		resourceSet.getResources().add(p2Resource);
+		// now it is referenced by a class in another package
+		// in the same resource set
+		assertThat(finder.isNotReferencedByOthers(notReferenced))
+			.isFalse();
 	}
 
 	@Test

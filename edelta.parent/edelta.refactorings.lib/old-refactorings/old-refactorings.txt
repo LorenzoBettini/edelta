@@ -143,4 +143,14 @@ def redundantContainerToEOpposite(Iterable<Pair<EReference, EReference>> redunda
 	}
 }
 
-
+def isNotReferencedByOthers(EClassifier cl) {
+	val find = UsageCrossReferencer.find(cl, cl.packagesToInspect)
+	for (s : find) {
+		println(getEObjectRepr(s.EObject) + " in " + getEObjectRepr(s.EObject.eContainer))
+		println(getEObjectRepr(s.EStructuralFeature))
+	}
+	find
+		.filter[!EcoreUtil.isAncestor(cl, EObject)]
+		.empty
+}
+			.filter[!EcoreUtil.isAncestor(cl, EObject)]
