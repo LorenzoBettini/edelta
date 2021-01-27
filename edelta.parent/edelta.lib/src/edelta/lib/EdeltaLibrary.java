@@ -28,9 +28,6 @@ import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.xtext.xbase.lib.IterableExtensions;
-
-import com.google.common.collect.Iterables;
 
 /**
  * Library functions to be reused in Edelta programs.
@@ -383,8 +380,8 @@ public class EdeltaLibrary {
 	public static List<EClass> allEClasses(EPackage ePackage) {
 		if (ePackage == null)
 			return Collections.emptyList();
-		return IterableExtensions.toList(
-			Iterables.filter(ePackage.getEClassifiers(), EClass.class));
+		return filterByType(ePackage.getEClassifiers().stream(), EClass.class)
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -643,10 +640,14 @@ public class EdeltaLibrary {
 	}
 
 	private static List<EPackage> filterEPackages(Stream<EObject> objectsStream) {
-		return objectsStream
-				.filter(EPackage.class::isInstance)
-				.map(EPackage.class::cast)
+		return filterByType(objectsStream, EPackage.class)
 				.filter(p -> !EcorePackage.eNS_URI.equals(p.getNsURI()))
 				.collect(Collectors.toList());
+	}
+
+	private static <T, R> Stream<R> filterByType(Stream<T> stream, Class<R> desiredType) {
+		return stream
+				.filter(desiredType::isInstance)
+				.map(desiredType::cast);
 	}
 }
