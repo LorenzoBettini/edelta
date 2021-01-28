@@ -79,6 +79,15 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 	}
 
 	@Test
+	public void test_resolveDeadClassifiersAlwaysTrue() throws IOException {
+		loadModelFiles("resolveDeadClassifiersAlwaysTrue", "TestEcore.ecore");
+		// all classifiers considered dead classifiers will be removed
+		resolver.resolveDeadClassifiers(resolver.getEPackage("p"));
+		resolver.saveModifiedEcores(AbstractTest.MODIFIED);
+		assertModifiedFiles();
+	}
+
+	@Test
 	public void test_resolveDeadClassifiersParallel() throws IOException {
 		// one class in the other ecore has a reference to Unused1,
 		// which is then not considered dead classifier
