@@ -417,11 +417,18 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	void test_extractClassWithAttributesContainedInDifferentClasses() throws IOException {
 		withInputModel("extractClassWithAttributesContainedInDifferentClasses", "PersonList.ecore");
 		loadModelFile();
-		refactorings.extractClass("Address",
+		var thrown = assertThrowsIAE(() -> refactorings.extractClass("Address",
 			asList(
 				refactorings.getEAttribute("PersonList", "Person", "street"),
 				refactorings.getEAttribute("PersonList", "Person2", "street")),
-			"address");
+			"address"));
+		assertThat(thrown.getMessage())
+			.isEqualTo(
+			"Multiple containing classes:\n"
+			+ "  PersonList.Person:\n"
+			+ "    PersonList.Person.street\n"
+			+ "  PersonList.Person2:\n"
+			+ "    PersonList.Person2.street");
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFileIsSameAsOriginal();
 		assertThat(appender.getResult().trim())
@@ -669,8 +676,8 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			+ "");
 	}
 
-	private static void assertThrowsIAE(Executable executable) {
-		assertThrows(IllegalArgumentException.class,
+	private static IllegalArgumentException assertThrowsIAE(Executable executable) {
+		return assertThrows(IllegalArgumentException.class,
 			executable);
 	}
 }

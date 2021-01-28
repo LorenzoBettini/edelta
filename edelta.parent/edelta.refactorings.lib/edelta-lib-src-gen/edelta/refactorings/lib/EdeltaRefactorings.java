@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -201,32 +202,17 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @return the extracted metaclass
    */
   public EClass extractClass(final String name, final Collection<EStructuralFeature> features, final String newReferenceName) {
-    final Function1<EStructuralFeature, EClass> _function = (EStructuralFeature it) -> {
-      return it.getEContainingClass();
-    };
-    final Set<EClass> owners = IterableExtensions.<EClass>toSet(IterableExtensions.<EStructuralFeature, EClass>map(features, _function));
-    boolean _isEmpty = owners.isEmpty();
+    boolean _isEmpty = features.isEmpty();
     if (_isEmpty) {
       return null;
     }
-    int _size = owners.size();
-    boolean _greaterThan = (_size > 1);
-    if (_greaterThan) {
-      final Consumer<EClass> _function_1 = (EClass owner) -> {
-        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(owner);
-        String _plus = ("Extracted features must belong to the same class: " + _eObjectRepr);
-        this.showError(owner, _plus);
-      };
-      owners.forEach(_function_1);
-      return null;
-    }
-    final EClass owner = IterableExtensions.<EClass>head(owners);
+    final EClass owner = this.findSingleOwner(features);
     final EClass extracted = EdeltaLibrary.addNewEClass(owner.getEPackage(), name);
     EReference _addMandatoryReference = this.addMandatoryReference(owner, newReferenceName, extracted);
-    final Procedure1<EReference> _function_2 = (EReference it) -> {
+    final Procedure1<EReference> _function = (EReference it) -> {
       this.makeContainmentBidirectional(it);
     };
-    ObjectExtensions.<EReference>operator_doubleArrow(_addMandatoryReference, _function_2);
+    ObjectExtensions.<EReference>operator_doubleArrow(_addMandatoryReference, _function);
     EdeltaLibrary.moveAllTo(features, extracted);
     return extracted;
   }
@@ -670,6 +656,36 @@ public class EdeltaRefactorings extends AbstractEdelta {
       throw new IllegalArgumentException(message_1);
     }
     return IterableExtensions.<EReference>head(otherReferences);
+  }
+  
+  /**
+   * Finds and returns the single containing class of the passed features.
+   * If there's more than one containing class throws an IllegalArgumentException.
+   */
+  public EClass findSingleOwner(final Collection<EStructuralFeature> features) {
+    final Function1<EStructuralFeature, EClass> _function = (EStructuralFeature it) -> {
+      return it.getEContainingClass();
+    };
+    final Map<EClass, List<EStructuralFeature>> owners = IterableExtensions.<EClass, EStructuralFeature>groupBy(features, _function);
+    int _size = owners.size();
+    boolean _greaterThan = (_size > 1);
+    if (_greaterThan) {
+      final Function1<Map.Entry<EClass, List<EStructuralFeature>>, String> _function_1 = (Map.Entry<EClass, List<EStructuralFeature>> it) -> {
+        final String reprForClass = EdeltaLibrary.getEObjectRepr(it.getKey());
+        this.showError(it.getKey(), 
+          ("Extracted features must belong to the same class: " + reprForClass));
+        final Function1<EStructuralFeature, String> _function_2 = (EStructuralFeature it_1) -> {
+          String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it_1);
+          return ("    " + _eObjectRepr);
+        };
+        String _join = IterableExtensions.join(ListExtensions.<EStructuralFeature, String>map(it.getValue(), _function_2), "\n");
+        return ((("  " + reprForClass) + ":\n") + _join);
+      };
+      String _join = IterableExtensions.join(IterableExtensions.<Map.Entry<EClass, List<EStructuralFeature>>, String>map(owners.entrySet(), _function_1), "\n");
+      final String message = ("Multiple containing classes:\n" + _join);
+      throw new IllegalArgumentException(message);
+    }
+    return IterableExtensions.<EStructuralFeature>head(features).getEContainingClass();
   }
   
   /**

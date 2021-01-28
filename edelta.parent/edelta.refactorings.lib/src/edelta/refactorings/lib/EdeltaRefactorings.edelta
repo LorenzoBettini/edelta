@@ -167,19 +167,9 @@ def subclassesToEnum(String name, Collection<EClass> subclasses) : EAttribute {
  */
 def extractClass(String name, Collection<EStructuralFeature> features,
 			String newReferenceName) {
-	val owners = features.map[EContainingClass].toSet
-	if (owners.empty)
+	if (features.empty) 
 		return null // TODO: error?
-	if (owners.size > 1) {
-		owners.forEach[owner|
-			showError(owner,
-				"Extracted features must belong to the same class: " +
-				getEObjectRepr(owner)
-			)
-		]
-		return null
-	}
-	val owner = owners.head
+	val owner = findSingleOwner(features)
 	val extracted = owner.EPackage.addNewEClass(name)
 	owner.addMandatoryReference(newReferenceName, extracted) => [
 		makeContainmentBidirectional
@@ -542,6 +532,27 @@ def findSingleReferenceNotOfType(EClass cl, EClass type) {
 		throw new IllegalArgumentException(message)
 	}
 	return otherReferences.head
+}
+
+/**
+ * Finds and returns the single containing class of the passed features.
+ * If there's more than one containing class throws an IllegalArgumentException.
+ */
+def findSingleOwner(Collection<EStructuralFeature> features) {
+	val owners = features.groupBy[EContainingClass]
+	if (owners.size > 1) {
+		val message = "Multiple containing classes:\n" +
+			owners.entrySet.map[
+				val reprForClass = getEObjectRepr(key)
+				showError(key,
+					"Extracted features must belong to the same class: " +
+					reprForClass)
+				return "  " + reprForClass + ":\n" +
+					value.map["    " + getEObjectRepr(it)].join("\n")
+			].join("\n")
+		throw new IllegalArgumentException(message)
+	}
+	return features.head.EContainingClass
 }
 
 /**
