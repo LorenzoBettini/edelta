@@ -372,16 +372,20 @@ public class EdeltaLibrary {
 
 	/**
 	 * Returns a list of all the {@link EClass}es of the specified
-	 * {@link EPackage}.
+	 * {@link EPackage} and of the packages in the same {@link Resource}
+	 * and {@link ResourceSet}.
 	 * 
 	 * @param ePackage
 	 * @return an empty list if the ePackage is null
+	 * @see #packagesToInspect(EClassifier)
 	 */
 	public static List<EClass> allEClasses(EPackage ePackage) {
 		if (ePackage == null)
 			return Collections.emptyList();
-		return filterByType(ePackage.getEClassifiers().stream(), EClass.class)
-				.collect(Collectors.toList());
+		return filterByType(
+			packagesToInspect(ePackage).stream().flatMap(p -> p.getEClassifiers().stream()),
+				EClass.class)
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -613,7 +617,7 @@ public class EdeltaLibrary {
 
 	/**
 	 * Given an {@link EClassifier} it returns a {@link Collection} of
-	 * {@link EPackage} that can be inspected, for example, to search for
+	 * {@link EPackage}s that can be inspected, for example, to search for
 	 * references. It always returns a collection. In case the classifier is not
 	 * contained in any package the returned collection is null. If the package is
 	 * not contained in a {@link Resource} then the collection contains only the
@@ -628,6 +632,22 @@ public class EdeltaLibrary {
 		var ePackage = e.getEPackage();
 		if (ePackage == null)
 			return Collections.emptyList();
+		return packagesToInspect(ePackage);
+	}
+
+	/**
+	 * Given an {@link EPackage} it returns a {@link Collection} of
+	 * {@link EPackage}s that can be inspected, for example, to search for
+	 * references. It always returns a collection. If the package is
+	 * not contained in a {@link Resource} then the collection contains only the
+	 * package. Otherwise it collects all the packages in all resources in the
+	 * {@link ResourceSet} (if there is one). The {@link EcorePackage} is never
+	 * part of the returned collection.
+	 * 
+	 * @param ePackage
+	 * @return
+	 */
+	public static Collection<EPackage> packagesToInspect(EPackage ePackage) {
 		var resource = ePackage.eResource();
 		if (resource == null)
 			return Collections.singleton(ePackage);

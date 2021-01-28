@@ -553,6 +553,60 @@ public class EdeltaLibraryTest {
 	}
 
 	@Test
+	public void test_removeElementInResourceSet() {
+		// the references to be removed are in another package
+		// in the same resource set.
+		var resourceSet = new ResourceSetImpl();
+
+		var p1 = ecoreFactory.createEPackage();
+		var resource1 = new ResourceImpl();
+		resource1.getContents().add(p1);
+		resourceSet.getResources().add(resource1);
+		var superClass = ecoreFactory.createEClass();
+		p1.getEClassifiers().add(superClass);
+
+		var p2 = ecoreFactory.createEPackage();
+		var resource2 = new ResourceImpl();
+		resource2.getContents().add(p2);
+		resourceSet.getResources().add(resource2);
+		var subClass = ecoreFactory.createEClass();
+		p2.getEClassifiers().add(subClass);
+		subClass.getESuperTypes().add(superClass);
+		EReference referenceToSuperClass = ecoreFactory.createEReference();
+		referenceToSuperClass.setEType(superClass);
+		EReference referenceToSubClass = ecoreFactory.createEReference();
+		referenceToSubClass.setEType(subClass);
+		EReference opposite = ecoreFactory.createEReference();
+		opposite.setEOpposite(referenceToSubClass);
+		referenceToSubClass.setEOpposite(opposite);
+		subClass.getEStructuralFeatures().add(referenceToSubClass);
+		subClass.getEStructuralFeatures().add(opposite);
+		subClass.getEStructuralFeatures().add(referenceToSuperClass);
+		assertThat(subClass.getESuperTypes()).containsExactly(superClass);
+		EdeltaLibrary.removeElement(superClass);
+		// references to the removed class should be removed as well
+		assertThat(subClass.getESuperTypes()).isEmpty();
+		assertThat(subClass.getEStructuralFeatures())
+			.containsOnly(referenceToSubClass, opposite);
+		// the opposite reference should be set to null as well
+		EdeltaLibrary.removeElement(referenceToSubClass);
+		assertThat(subClass.getEStructuralFeatures())
+			.containsOnly(opposite);
+		assertThat(opposite.getEOpposite()).isNull();
+		// try to remove something simpler
+		EAttribute attribute = ecoreFactory.createEAttribute();
+		subClass.getEStructuralFeatures().add(attribute);
+		EdeltaLibrary.removeElement(attribute);
+		assertThat(subClass.getEStructuralFeatures())
+			.containsOnly(opposite);
+		// try to remove an EClass and its contents
+		attribute = ecoreFactory.createEAttribute();
+		subClass.getEStructuralFeatures().add(attribute);
+		EdeltaLibrary.removeElement(subClass);
+		assertThat(subClass.getEStructuralFeatures()).isEmpty();
+	}
+
+	@Test
 	public void test_allEClasses() {
 		assertThat(EdeltaLibrary.allEClasses(null)).isEmpty();
 		EPackage ePackage = ecoreFactory.createEPackage();
@@ -562,6 +616,32 @@ public class EdeltaLibraryTest {
 		ePackage.getEClassifiers().add(dataType);
 		assertThat(EdeltaLibrary.allEClasses(ePackage))
 			.containsOnly(eClass);
+	}
+
+	@Test
+	public void test_allEClassesInResourceSet() {
+		var p1 = ecoreFactory.createEPackage();
+		var eClass1 = ecoreFactory.createEClass();
+		var dataType = ecoreFactory.createEDataType();
+		p1.getEClassifiers().add(eClass1);
+		p1.getEClassifiers().add(dataType);
+
+		var p2 = ecoreFactory.createEPackage();
+		var eClass2 = ecoreFactory.createEClass();
+		p2.getEClassifiers().add(eClass2);
+
+		var resource1 = new ResourceImpl();
+		resource1.getContents().add(p1);
+
+		var resource2 = new ResourceImpl();
+		resource2.getContents().add(p2);
+		
+		var resourceSet = new ResourceSetImpl();
+		resourceSet.getResources().add(resource1);
+		resourceSet.getResources().add(resource2);
+
+		assertThat(EdeltaLibrary.allEClasses(p1))
+			.containsExactlyInAnyOrder(eClass1, eClass2);
 	}
 
 	@Test
