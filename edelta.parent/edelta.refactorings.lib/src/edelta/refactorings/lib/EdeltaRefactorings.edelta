@@ -159,19 +159,22 @@ def subclassesToEnum(String name, Collection<EClass> subclasses) : EAttribute {
 }
 
 /**
+ * Extracts the specified features into a new class with the given name.
+ * The features must belong to the same class.
+ * In the containing class a containiment required reference to
+ * the extracted class will be created (its name will be the name
+ * of the extracted class with the first letter lowercase).
+ * 
  * @param name the name for the extracted class
  * @param features the features to extract
- * @param newReferenceName the new name for the reference from the owner class to the
- * extracted class
  * @return the extracted metaclass
  */
-def extractClass(String name, Collection<EStructuralFeature> features,
-			String newReferenceName) {
+def extractClass(String name, Collection<EStructuralFeature> features) {
 	if (features.empty) 
 		return null // TODO: error?
 	val owner = findSingleOwner(features)
 	val extracted = owner.EPackage.addNewEClass(name)
-	owner.addMandatoryReference(newReferenceName, extracted) => [
+	owner.addMandatoryReference(name.toFirstLower, extracted) => [
 		makeContainmentBidirectional
 	]
 	features.moveAllTo(extracted)

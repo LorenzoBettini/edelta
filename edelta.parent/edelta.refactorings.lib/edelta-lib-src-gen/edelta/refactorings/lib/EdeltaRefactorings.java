@@ -195,20 +195,24 @@ public class EdeltaRefactorings extends AbstractEdelta {
   }
   
   /**
+   * Extracts the specified features into a new class with the given name.
+   * The features must belong to the same class.
+   * In the containing class a containiment required reference to
+   * the extracted class will be created (its name will be the name
+   * of the extracted class with the first letter lowercase).
+   * 
    * @param name the name for the extracted class
    * @param features the features to extract
-   * @param newReferenceName the new name for the reference from the owner class to the
-   * extracted class
    * @return the extracted metaclass
    */
-  public EClass extractClass(final String name, final Collection<EStructuralFeature> features, final String newReferenceName) {
+  public EClass extractClass(final String name, final Collection<EStructuralFeature> features) {
     boolean _isEmpty = features.isEmpty();
     if (_isEmpty) {
       return null;
     }
     final EClass owner = this.findSingleOwner(features);
     final EClass extracted = EdeltaLibrary.addNewEClass(owner.getEPackage(), name);
-    EReference _addMandatoryReference = this.addMandatoryReference(owner, newReferenceName, extracted);
+    EReference _addMandatoryReference = this.addMandatoryReference(owner, StringExtensions.toFirstLower(name), extracted);
     final Procedure1<EReference> _function = (EReference it) -> {
       this.makeContainmentBidirectional(it);
     };

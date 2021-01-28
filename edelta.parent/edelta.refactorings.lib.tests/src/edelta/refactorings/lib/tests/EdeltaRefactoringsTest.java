@@ -407,8 +407,8 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		refactorings.extractClass("Address",
 			asList(
 				refactorings.getEAttribute("PersonList", "Person", "street"),
-				refactorings.getEAttribute("PersonList", "Person", "houseNumber")),
-			"address");
+				refactorings.getEAttribute("PersonList", "Person", "houseNumber"))
+			);
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFile();
 	}
@@ -420,8 +420,8 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		var thrown = assertThrowsIAE(() -> refactorings.extractClass("Address",
 			asList(
 				refactorings.getEAttribute("PersonList", "Person", "street"),
-				refactorings.getEAttribute("PersonList", "Person2", "street")),
-			"address"));
+				refactorings.getEAttribute("PersonList", "Person2", "street"))
+			));
 		assertThat(thrown.getMessage())
 			.isEqualTo(
 			"Multiple containing classes:\n"
@@ -439,9 +439,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 
 	@Test
 	void test_extractClassWithAttributesEmpty() {
-		final EClass result = refactorings.extractClass("Address",
-			emptyList(),
-			"address");
+		var result = refactorings.extractClass("Address", emptyList());
 		assertThat(result).isNull();
 	}
 
