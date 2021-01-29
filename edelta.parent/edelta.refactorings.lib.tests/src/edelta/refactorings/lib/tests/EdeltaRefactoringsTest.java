@@ -515,6 +515,21 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
+	void test_classToReferenceWhenClassIsReferredMoreThanOnceParallel() {
+		withInputModels("classToReferenceWronglyReferredParallel",
+				"TestEcore.ecore", "TestEcoreReferring.ecore");
+		loadModelFiles();
+		assertThrowsIAE(() -> refactorings.classToReference(
+				refactorings.getEClass("p", "C")));
+		assertThat(appender.getResult())
+			.isEqualTo(
+			"ERROR: p.C: The EClass is referred by more than one container:\n"
+			+ "  p.C1.r1\n"
+			+ "  p2.C2.r2\n"
+			+ "");
+	}
+
+	@Test
 	void test_classToReferenceWithMissingTarget() {
 		withInputModels("classToReferenceUnidirectional", "PersonList.ecore");
 		loadModelFiles();

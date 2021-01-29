@@ -618,7 +618,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final Function1<EStructuralFeature.Setting, EObject> _function_1 = (EStructuralFeature.Setting it) -> {
       return it.getEObject();
     };
-    return Iterables.<EReference>filter(IterableExtensions.<EStructuralFeature.Setting, EObject>map(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()), _function), _function_1), EReference.class);
+    return Iterables.<EReference>filter(IterableExtensions.<EStructuralFeature.Setting, EObject>map(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, EdeltaLibrary.packagesToInspect(cl)), _function), _function_1), EReference.class);
   }
   
   /**

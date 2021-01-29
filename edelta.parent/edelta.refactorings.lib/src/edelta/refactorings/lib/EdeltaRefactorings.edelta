@@ -504,7 +504,7 @@ def findSingleContainmentReferenceToThisClass(EClass cl) {
  */
 def findReferencesToThisClass(EClass cl) {
 	EcoreUtil.UsageCrossReferencer
-		.find(cl, cl.EPackage)
+		.find(cl, cl.packagesToInspect)
 		.filter[EStructuralFeature == ecoreref(eReferenceType)]
 		.map[EObject]
 		.filter(EReference)
