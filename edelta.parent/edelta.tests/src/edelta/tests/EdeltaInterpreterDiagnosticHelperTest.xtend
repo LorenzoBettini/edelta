@@ -2,7 +2,6 @@ package edelta.tests
 
 import com.google.inject.Inject
 import edelta.interpreter.EdeltaInterpreterDiagnosticHelper
-import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.tests.injectors.EdeltaInjectorProviderCustom
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
@@ -16,8 +15,6 @@ import static org.eclipse.xtext.xbase.XbasePackage.Literals.*
 class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
 
 	@Inject EdeltaInterpreterDiagnosticHelper diagnosticHelper
-
-	@Inject EdeltaDerivedStateHelper derivedStateHelper
 
 	@Test def void testAddErrorWithCurrentExpression() throws Exception {
 		val input = '''

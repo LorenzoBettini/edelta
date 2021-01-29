@@ -7,7 +7,6 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
-import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.additional.TestableEdeltaDerivedStateComputer;
 import edelta.tests.injectors.EdeltaInjectorProviderTestableDerivedStateComputer;
@@ -47,10 +46,6 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
   @Extension
   private TestableEdeltaDerivedStateComputer _testableEdeltaDerivedStateComputer;
   
-  @Inject
-  @Extension
-  private EdeltaDerivedStateHelper _edeltaDerivedStateHelper;
-  
   @Test
   public void testCopiedEPackages() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
@@ -67,7 +62,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     _builder.append("modifyEcore aTest2 epackage bar {}");
     _builder.newLine();
     final EdeltaProgram program = this.parseWithTestEcores(_builder);
-    final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
+    final Collection<EPackage> packages = this.derivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
     final Function1<EPackage, String> _function = (EPackage it) -> {
       return it.getName();
     };
@@ -88,7 +83,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     _builder.append("modifyEcore aTest1 epackage foo {}");
     _builder.newLine();
     final EdeltaProgram program = this.parseWithTestEcores(_builder);
-    final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
+    final Collection<EPackage> packages = this.derivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
     final Function1<EPackage, String> _function = (EPackage it) -> {
       return it.getName();
     };
@@ -111,7 +106,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     _builder.append("modifyEcore aTest2 epackage foo {}");
     _builder.newLine();
     final EdeltaProgram program = this.parseWithTestEcore(_builder);
-    final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
+    final Collection<EPackage> packages = this.derivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
     final Function1<EPackage, String> _function = (EPackage it) -> {
       return it.getName();
     };
@@ -134,7 +129,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     _builder.append("modifyEcore aTest2 epackage unresolved {}");
     _builder.newLine();
     final EdeltaProgram program = this.parseWithTestEcore(_builder);
-    final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
+    final Collection<EPackage> packages = this.derivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
     Assertions.<EPackage>assertThat(packages).hasSize(1);
   }
   
@@ -154,7 +149,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     _builder.append("modifyEcore aTest2 epackage testecoreforreferences2 {}");
     _builder.newLine();
     final EdeltaProgram program = this.parseWithTestEcoresWithReferences(_builder);
-    final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
+    final Collection<EPackage> packages = this.derivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
     Assertions.<EPackage>assertThat(packages).hasSize(2);
     final EPackage testecoreforreferences1 = this.<EPackage>getByName(packages, "testecoreforreferences1");
     final EPackage testecoreforreferences2 = this.<EPackage>getByName(packages, "testecoreforreferences2");
@@ -184,7 +179,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     _builder.append("}");
     _builder.newLine();
     final EdeltaProgram program = this.parseWithTestEcoreWithSubPackage(_builder);
-    final Collection<EPackage> packages = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
+    final Collection<EPackage> packages = this.derivedStateHelper.getCopiedEPackagesMap(program.eResource()).values();
     Assertions.<EPackage>assertThat(packages).isEmpty();
   }
   
@@ -304,7 +299,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     final EdeltaProgram program = this.parseWithTestEcore(_builder);
     Resource _eResource = program.eResource();
     final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
-    final EdeltaCopiedEPackagesMap nameToCopiedEPackageMap = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(resource);
+    final EdeltaCopiedEPackagesMap nameToCopiedEPackageMap = this.derivedStateHelper.getCopiedEPackagesMap(resource);
     Assert.assertFalse(resource.eAdapters().isEmpty());
     Assert.assertFalse(nameToCopiedEPackageMap.isEmpty());
     EList<Adapter> _eAdapters = IterableExtensions.<EPackage>head(nameToCopiedEPackageMap.values()).eAdapters();
@@ -343,7 +338,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     final EdeltaProgram program = this.parseWithTestEcore(_builder);
     Resource _eResource = program.eResource();
     final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
-    final EdeltaCopiedEPackagesMap nameToCopiedEPackageMap = this._edeltaDerivedStateHelper.getCopiedEPackagesMap(resource);
+    final EdeltaCopiedEPackagesMap nameToCopiedEPackageMap = this.derivedStateHelper.getCopiedEPackagesMap(resource);
     Assert.assertFalse(resource.eAdapters().isEmpty());
     Assert.assertFalse(nameToCopiedEPackageMap.isEmpty());
     program.getModifyEcoreOperations().clear();
@@ -435,9 +430,9 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     ENamedElement _enamedelement_1 = ecoreref.getEnamedelement();
     EAttribute eAttr = ((EAttribute) _enamedelement_1);
     this.assertEClassContainsFeature(eClass, eAttr, false);
-    ENamedElement _originalEnamedelement = this._edeltaDerivedStateHelper.getOriginalEnamedelement(ecoreref.getQualification());
+    ENamedElement _originalEnamedelement = this.derivedStateHelper.getOriginalEnamedelement(ecoreref.getQualification());
     eClass = ((EClass) _originalEnamedelement);
-    ENamedElement _originalEnamedelement_1 = this._edeltaDerivedStateHelper.getOriginalEnamedelement(ecoreref);
+    ENamedElement _originalEnamedelement_1 = this.derivedStateHelper.getOriginalEnamedelement(ecoreref);
     eAttr = ((EAttribute) _originalEnamedelement_1);
     this.assertEClassContainsFeature(eClass, eAttr, true);
   }

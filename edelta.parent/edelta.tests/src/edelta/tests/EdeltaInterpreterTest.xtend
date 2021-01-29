@@ -9,7 +9,6 @@ import edelta.interpreter.EdeltaInterpreter
 import edelta.interpreter.EdeltaInterpreterFactory
 import edelta.interpreter.EdeltaInterpreterRuntimeException
 import edelta.interpreter.EdeltaInterpreterWrapperException
-import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.tests.additional.EdeltaEContentAdapter.EdeltaEContentAdapterException
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 import edelta.tests.additional.MyCustomException
@@ -36,8 +35,6 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	@Inject EdeltaInterpreter interpreter
 
 	@Inject Injector injector
-
-	@Inject EdeltaDerivedStateHelper derivedStateHelper
 
 	@Before
 	def void setupInterpreter() {

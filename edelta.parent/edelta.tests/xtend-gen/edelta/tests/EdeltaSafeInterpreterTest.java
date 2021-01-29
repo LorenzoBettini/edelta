@@ -8,7 +8,6 @@ import edelta.interpreter.EdeltaInterpreter;
 import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.interpreter.EdeltaSafeInterpreter;
-import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.injectors.EdeltaInjectorProviderDerivedStateComputerWithoutSafeInterpreter;
 import org.assertj.core.api.Assertions;
@@ -32,9 +31,6 @@ public class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
   
   @Inject
   private Injector injector;
-  
-  @Inject
-  private EdeltaDerivedStateHelper derivedStateHelper;
   
   @Before
   public void setupInterpreter() {

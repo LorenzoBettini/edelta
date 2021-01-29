@@ -15,7 +15,6 @@ import edelta.interpreter.EdeltaInterpreterWrapperException;
 import edelta.resource.derivedstate.EdeltaAccessibleElement;
 import edelta.resource.derivedstate.EdeltaAccessibleElements;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
-import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 import edelta.resource.derivedstate.EdeltaUnresolvedEcoreReferences;
 import edelta.tests.EdeltaAbstractTest;
@@ -62,9 +61,6 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   
   @Inject
   private Injector injector;
-  
-  @Inject
-  private EdeltaDerivedStateHelper derivedStateHelper;
   
   @Before
   public void setupInterpreter() {
