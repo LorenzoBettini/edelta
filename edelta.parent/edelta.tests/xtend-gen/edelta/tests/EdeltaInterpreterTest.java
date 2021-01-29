@@ -15,7 +15,6 @@ import edelta.interpreter.EdeltaInterpreterWrapperException;
 import edelta.resource.derivedstate.EdeltaAccessibleElement;
 import edelta.resource.derivedstate.EdeltaAccessibleElements;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
-import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 import edelta.resource.derivedstate.EdeltaUnresolvedEcoreReferences;
 import edelta.tests.EdeltaAbstractTest;
@@ -63,8 +62,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   @Inject
   private Injector injector;
   
-  @Inject
-  private EdeltaDerivedStateHelper derivedStateHelper;
+  private EdeltaProgram currentProgram;
   
   @Before
   public void setupInterpreter() {
@@ -893,7 +891,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
         Assert.assertEquals(Boolean.valueOf(false), Boolean.valueOf(it.isAbstract()));
         final String offendingString = "Thread.sleep(1000)";
         final int initialIndex = input.lastIndexOf(offendingString);
-        this.validationTestHelper.assertWarning(it, 
+        this.validationTestHelper.assertWarning(this.currentProgram, 
           XbasePackage.eINSTANCE.getXMemberFeatureCall(), 
           EdeltaValidator.INTERPRETER_TIMEOUT, initialIndex, offendingString.length(), 
           "Timeout while interpreting");
@@ -936,7 +934,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
         Assert.assertEquals(Boolean.valueOf(false), Boolean.valueOf(it.isAbstract()));
         final String offendingString = "op(EClassifiers.last as EClass)";
         final int initialIndex = input.lastIndexOf(offendingString);
-        this.validationTestHelper.assertWarning(it, 
+        this.validationTestHelper.assertWarning(this.currentProgram, 
           XbasePackage.eINSTANCE.getXFeatureCall(), 
           EdeltaValidator.INTERPRETER_TIMEOUT, initialIndex, offendingString.length(), 
           "Timeout while interpreting");
@@ -1027,7 +1025,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
         Assert.assertEquals(Boolean.valueOf(false), Boolean.valueOf(it.isAbstract()));
         final String offendingString = "op(EClassifiers.last as EClass)";
         final int initialIndex = input.lastIndexOf(offendingString);
-        this.validationTestHelper.assertWarning(it, 
+        this.validationTestHelper.assertWarning(this.currentProgram, 
           XbasePackage.eINSTANCE.getXFeatureCall(), 
           EdeltaValidator.INTERPRETER_TIMEOUT, initialIndex, offendingString.length(), 
           "Timeout while interpreting");
@@ -3330,6 +3328,59 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseSeveralWithTestEcore, _function);
   }
   
+  @Test
+  public void testAccessToResourceSet() throws Exception {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EPackage");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// access the ResourceSet");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// but during the interpration we use a sandbox ResourceSet");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// so that the interpreted code can access only copied EPackages");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("val rs = eResource.getResourceSet");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// remove all EClass in any EPackage with name \"FooClass\"");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// this must not touch the original EPackages");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("rs.resources");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append(".map[contents]");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append(".flatten");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append(".filter(EPackage)");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append(".forEach[EClassifiers.removeIf[name == \"FooClass\"]]");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
+      final EClassifier fooClass = derivedEPackage.getEClassifier("FooClass");
+      Assert.assertNull(fooClass);
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, true, _function);
+  }
+  
   private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final Procedure1<? super EPackage> testExecutor) throws Exception {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, true, testExecutor);
   }
@@ -3355,6 +3406,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaProgram program, final Procedure1<? super EPackage> testExecutor) throws Exception {
+    this.currentProgram = program;
     final EdeltaModifyEcoreOperation it = this.lastModifyEcoreOperation(program);
     this.interpreter.evaluateModifyEcoreOperations(program);
     final String packageName = it.getEpackage().getName();

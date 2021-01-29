@@ -6,7 +6,6 @@ import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreterFactory
 import edelta.interpreter.EdeltaInterpreterRuntimeException
 import edelta.interpreter.EdeltaSafeInterpreter
-import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.tests.injectors.EdeltaInjectorProviderDerivedStateComputerWithoutSafeInterpreter
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.testing.InjectWith
@@ -25,8 +24,6 @@ class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
 	@Inject EdeltaSafeInterpreter interpreter
 
 	@Inject Injector injector
-
-	@Inject EdeltaDerivedStateHelper derivedStateHelper
 
 	@Before
 	def void setupInterpreter() {
