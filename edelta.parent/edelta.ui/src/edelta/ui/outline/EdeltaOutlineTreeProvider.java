@@ -7,7 +7,6 @@ import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider;
 import org.eclipse.xtext.ui.editor.outline.impl.EObjectNode;
@@ -84,12 +83,7 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 			var eObjectNode = new EObjectNode(modelElement, parentNode, image, text, isLeaf) {
 				@Override
 				public <T> T readOnly(IUnitOfWork<T, EObject> work) {
-					return getDocument().tryReadOnly(new IUnitOfWork<T, XtextResource>() {
-						@Override
-						public T exec(XtextResource state) throws Exception {
-							return work.exec(modelElement);
-						}
-					});
+					return getDocument().tryReadOnly(state -> work.exec(modelElement));
 				}
 			};
 			if (modelElement instanceof ENamedElement) {
