@@ -2063,6 +2063,32 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test(expected = EdeltaInterpreterWrapperException) // TODO: this must not happen
+	def void testAccessToResourceSet() throws Exception {
+		// see https://github.com/LorenzoBettini/edelta/issues/310
+		'''
+			import org.eclipse.emf.ecore.EPackage
+			
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				// access the ResourceSet
+				val rs = eResource.getResourceSet
+				// remove all EClass in any EPackage with name "FooClass"
+				// this must not touch the original EPackages
+				rs.resources
+					.map[contents]
+					.flatten
+					.filter(EPackage)
+					.forEach[EClassifiers.removeIf[name == "FooClass"]]
+			}
+		'''.
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(true) [ derivedEPackage |
+			val fooClass = derivedEPackage.getEClassifier("FooClass")
+			assertNull(fooClass)
+		]
+	}
+
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) throws Exception {

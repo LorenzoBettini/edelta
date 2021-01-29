@@ -3326,6 +3326,53 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseSeveralWithTestEcore, _function);
   }
   
+  @Test(expected = EdeltaInterpreterWrapperException.class)
+  public void testAccessToResourceSet() throws Exception {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("import org.eclipse.emf.ecore.EPackage");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("metamodel \"foo\"");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("modifyEcore aTest epackage foo {");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// access the ResourceSet");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("val rs = eResource.getResourceSet");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// remove all EClass in any EPackage with name \"FooClass\"");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// this must not touch the original EPackages");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("rs.resources");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append(".map[contents]");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append(".flatten");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append(".filter(EPackage)");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append(".forEach[EClassifiers.removeIf[name == \"FooClass\"]]");
+    _builder.newLine();
+    _builder.append("}");
+    _builder.newLine();
+    final Procedure1<EPackage> _function = (EPackage derivedEPackage) -> {
+      final EClassifier fooClass = derivedEPackage.getEClassifier("FooClass");
+      Assert.assertNull(fooClass);
+    };
+    this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(_builder, true, _function);
+  }
+  
   private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input, final Procedure1<? super EPackage> testExecutor) throws Exception {
     this.assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, true, testExecutor);
   }
