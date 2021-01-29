@@ -2067,8 +2067,9 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testAccessToResourceSet() throws Exception {
-		// our content adapter used in these tests makes sure that
-		// even by using the ResourceSet the program can only access
+		// our content adapter used in these tests detects attempts
+		// to modify the original EPackages.
+		// Even by using the ResourceSet the program can only access
 		// copied EPackages and not the original ones
 		// see https://github.com/LorenzoBettini/edelta/issues/310
 		'''
@@ -2078,6 +2079,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			
 			modifyEcore aTest epackage foo {
 				// access the ResourceSet
+				// but during the interpration we use a sandbox ResourceSet
+				// so that the interpreted code can access only copied EPackages
 				val rs = eResource.getResourceSet
 				// remove all EClass in any EPackage with name "FooClass"
 				// this must not touch the original EPackages

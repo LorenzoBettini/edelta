@@ -3343,6 +3343,12 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     _builder.append("// access the ResourceSet");
     _builder.newLine();
     _builder.append("\t");
+    _builder.append("// but during the interpration we use a sandbox ResourceSet");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("// so that the interpreted code can access only copied EPackages");
+    _builder.newLine();
+    _builder.append("\t");
     _builder.append("val rs = eResource.getResourceSet");
     _builder.newLine();
     _builder.append("\t");
