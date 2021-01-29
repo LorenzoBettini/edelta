@@ -62,6 +62,8 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   @Inject
   private Injector injector;
   
+  private EdeltaProgram currentProgram;
+  
   @Before
   public void setupInterpreter() {
     this.interpreter.setInterpreterTimeout(1200000);
@@ -889,7 +891,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
         Assert.assertEquals(Boolean.valueOf(false), Boolean.valueOf(it.isAbstract()));
         final String offendingString = "Thread.sleep(1000)";
         final int initialIndex = input.lastIndexOf(offendingString);
-        this.validationTestHelper.assertWarning(it, 
+        this.validationTestHelper.assertWarning(this.currentProgram, 
           XbasePackage.eINSTANCE.getXMemberFeatureCall(), 
           EdeltaValidator.INTERPRETER_TIMEOUT, initialIndex, offendingString.length(), 
           "Timeout while interpreting");
@@ -932,7 +934,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
         Assert.assertEquals(Boolean.valueOf(false), Boolean.valueOf(it.isAbstract()));
         final String offendingString = "op(EClassifiers.last as EClass)";
         final int initialIndex = input.lastIndexOf(offendingString);
-        this.validationTestHelper.assertWarning(it, 
+        this.validationTestHelper.assertWarning(this.currentProgram, 
           XbasePackage.eINSTANCE.getXFeatureCall(), 
           EdeltaValidator.INTERPRETER_TIMEOUT, initialIndex, offendingString.length(), 
           "Timeout while interpreting");
@@ -1023,7 +1025,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
         Assert.assertEquals(Boolean.valueOf(false), Boolean.valueOf(it.isAbstract()));
         final String offendingString = "op(EClassifiers.last as EClass)";
         final int initialIndex = input.lastIndexOf(offendingString);
-        this.validationTestHelper.assertWarning(it, 
+        this.validationTestHelper.assertWarning(this.currentProgram, 
           XbasePackage.eINSTANCE.getXFeatureCall(), 
           EdeltaValidator.INTERPRETER_TIMEOUT, initialIndex, offendingString.length(), 
           "Timeout while interpreting");
@@ -3326,7 +3328,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseSeveralWithTestEcore, _function);
   }
   
-  @Test(expected = EdeltaInterpreterWrapperException.class)
+  @Test
   public void testAccessToResourceSet() throws Exception {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("import org.eclipse.emf.ecore.EPackage");
@@ -3398,6 +3400,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
   }
   
   private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaProgram program, final Procedure1<? super EPackage> testExecutor) throws Exception {
+    this.currentProgram = program;
     final EdeltaModifyEcoreOperation it = this.lastModifyEcoreOperation(program);
     this.interpreter.evaluateModifyEcoreOperations(program);
     final String packageName = it.getEpackage().getName();

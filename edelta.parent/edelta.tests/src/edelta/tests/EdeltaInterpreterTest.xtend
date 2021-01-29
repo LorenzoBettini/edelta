@@ -36,6 +36,8 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Inject Injector injector
 
+	var EdeltaProgram currentProgram
+
 	@Before
 	def void setupInterpreter() {
 		// for standard tests we disable the timeout
@@ -572,7 +574,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				assertEquals(false, abstract)
 				val offendingString = "Thread.sleep(1000)"
 				val initialIndex = input.lastIndexOf(offendingString)
-				assertWarning(
+				currentProgram.assertWarning(
 					XbasePackage.eINSTANCE.XMemberFeatureCall,
 					EdeltaValidator.INTERPRETER_TIMEOUT,
 					initialIndex, offendingString.length,
@@ -605,7 +607,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				assertEquals(false, abstract)
 				val offendingString = "op(EClassifiers.last as EClass)"
 				val initialIndex = input.lastIndexOf(offendingString)
-				assertWarning(
+				currentProgram.assertWarning(
 					XbasePackage.eINSTANCE.XFeatureCall,
 					EdeltaValidator.INTERPRETER_TIMEOUT,
 					initialIndex, offendingString.length,
@@ -664,7 +666,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				assertEquals(false, abstract)
 				val offendingString = "op(EClassifiers.last as EClass)"
 				val initialIndex = input.lastIndexOf(offendingString)
-				assertWarning(
+				currentProgram.assertWarning(
 					XbasePackage.eINSTANCE.XFeatureCall,
 					EdeltaValidator.INTERPRETER_TIMEOUT,
 					initialIndex, offendingString.length,
@@ -2063,8 +2065,11 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
-	@Test(expected = EdeltaInterpreterWrapperException) // TODO: this must not happen
+	@Test
 	def void testAccessToResourceSet() throws Exception {
+		// our content adapter used in these tests makes sure that
+		// even by using the ResourceSet the program can only access
+		// copied EPackages and not the original ones
 		// see https://github.com/LorenzoBettini/edelta/issues/310
 		'''
 			import org.eclipse.emf.ecore.EPackage
@@ -2128,6 +2133,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		EdeltaProgram program,
 		(EPackage)=>void testExecutor
 	) throws Exception {
+		currentProgram = program
 		val it = program.lastModifyEcoreOperation
 		interpreter.evaluateModifyEcoreOperations(program)
 		val packageName = it.epackage.name
