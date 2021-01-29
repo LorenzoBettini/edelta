@@ -86,8 +86,22 @@ public class EdeltaDerivedStateHelper {
 			.collect(toList());
 		final var copiedEPackagesMap = getCopiedEPackagesMap(resource);
 		var copies = EdeltaEcoreUtil.copyEPackages(packages);
-		copiedEPackagesMap.storeCopies(copies);
+		for (var copy : copies) {
+			copiedEPackagesMap.computeIfAbsent(copy.getName(), key -> copy);
+		}
+		// we must add the copied EPackages to the resource
+		addToProgramResource(resource, copiedEPackagesMap);
 		return copiedEPackagesMap;
+	}
+
+	/**
+	 * Adds the copied {@link EPackage}s to the {@link Resource} of the program
+	 * 
+	 * @param resource
+	 * @param copiedEPackagesMap
+	 */
+	public void addToProgramResource(final Resource resource, final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
+		resource.getContents().addAll(copiedEPackagesMap.values());
 	}
 
 	public EdeltaEcoreReferenceState getEcoreReferenceState(EdeltaEcoreReference edeltaEcoreReference) {

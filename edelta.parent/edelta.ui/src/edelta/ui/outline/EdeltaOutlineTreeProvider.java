@@ -76,11 +76,10 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 			var elementForSignificantTestRegion = modelElement;
 			/*
 			 * custom implementation of readOnly: the default one tries to retrieve the
-			 * EObject using the URI and then loading the corresponding resource, but our
-			 * EPackages are stored in a separate in memory ResourceSet in the derived state.
-			 * In our case, we simply return the modelElement for the passed work.
-			 * readOnly is used for example by node.getChildren.
-			 * (see EdeltaOutlineWithEditorLinker).
+			 * EObject using the URI and then loading the corresponding resource, but for
+			 * copied EPackages we simply return the modelElement for the passed work.
+			 * readOnly is used for example by node.getChildren. (see
+			 * EdeltaOutlineWithEditorLinker).
 			 */
 			var eObjectNode = new EObjectNode(modelElement, parentNode, image, text, isLeaf) {
 				@Override
@@ -96,7 +95,7 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 			if (modelElement instanceof ENamedElement) {
 				// try to associate the node to the responsible XExpression
 				XExpression expression = derivedStateHelper.
-						getLastResponsibleExpression(currentProgram, (ENamedElement) modelElement);
+					getLastResponsibleExpression(currentProgram, (ENamedElement) modelElement);
 				if (expression != null) {
 					elementForSignificantTestRegion = expression;
 				}

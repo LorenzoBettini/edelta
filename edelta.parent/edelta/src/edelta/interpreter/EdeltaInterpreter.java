@@ -22,6 +22,8 @@ import java.util.Map;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.xtext.common.types.JvmField;
 import org.eclipse.xtext.common.types.JvmFormalParameter;
 import org.eclipse.xtext.common.types.JvmIdentifiableElement;
@@ -143,13 +145,20 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		listener = new EdeltaInterpreterResourceListener(cache, eResource,
 				derivedStateHelper,
 				diagnosticHelper);
+		var sandboxResourceSet = new ResourceSetImpl();
 		try {
+			for (var copiedEPackage : copiedEPackages) {
+				var sandBoxResource = new ResourceImpl();
+				sandboxResourceSet.getResources().add(sandBoxResource);
+				sandBoxResource.getContents().add(copiedEPackage);
+			}
 			addResourceListener(copiedEPackages);
 			for (final var op : filteredOperations) {
 				evaluateModifyEcoreOperation(op, copiedEPackagesMap);
 			}
 		} finally {
 			removeResourceListener(copiedEPackages);
+			derivedStateHelper.addToProgramResource(eResource, copiedEPackagesMap);
 		}
 	}
 
