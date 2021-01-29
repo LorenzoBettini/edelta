@@ -22,6 +22,8 @@ import java.util.Map;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.xtext.common.types.JvmField;
@@ -145,21 +147,51 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		listener = new EdeltaInterpreterResourceListener(cache, eResource,
 				derivedStateHelper,
 				diagnosticHelper);
-		var sandboxResourceSet = new ResourceSetImpl();
+		var sandboxResourceSet = createSandboxResourceSet(copiedEPackages);
 		try {
-			for (var copiedEPackage : copiedEPackages) {
-				var sandBoxResource = new ResourceImpl();
-				sandboxResourceSet.getResources().add(sandBoxResource);
-				sandBoxResource.getContents().add(copiedEPackage);
-			}
 			addResourceListener(copiedEPackages);
 			for (final var op : filteredOperations) {
 				evaluateModifyEcoreOperation(op, copiedEPackagesMap);
 			}
 		} finally {
 			removeResourceListener(copiedEPackages);
-			derivedStateHelper.addToProgramResource(eResource, copiedEPackagesMap);
+			releaseSandboxResourceSet(sandboxResourceSet, eResource, copiedEPackagesMap);
 		}
+	}
+
+	/**
+	 * The copied {@link EPackage}s are stored in {@link Resource}s and in a
+	 * {@link ResourceSet}, temporarily for the interpretation time (otherwise
+	 * they're stored in the same resource of the current program) so that during
+	 * the interpretation we cannot try to access other contents (they cannot access
+	 * the original EPackage for instance). This way, the interpreted code's access
+	 * to EPackages is restricted to this sandbox (the resource set).
+	 * 
+	 * @param copiedEPackages
+	 * @return
+	 */
+	private ResourceSet createSandboxResourceSet(final Collection<EPackage> copiedEPackages) {
+		var sandboxResourceSet = new ResourceSetImpl();
+		for (var copiedEPackage : copiedEPackages) {
+			var sandBoxResource = new ResourceImpl();
+			sandboxResourceSet.getResources().add(sandBoxResource);
+			sandBoxResource.getContents().add(copiedEPackage);
+		}
+		return sandboxResourceSet;
+	}
+
+	/**
+	 * The sandbox {@link ResourceSet} is cleared after putting back the copied
+	 * {@link EPackage}s into the program's {@link Resource}.
+	 * 
+	 * @param sandboxResourceSet
+	 * @param eResource
+	 * @param copiedEPackagesMap
+	 */
+	private void releaseSandboxResourceSet(ResourceSet sandboxResourceSet, final Resource eResource,
+			final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
+		derivedStateHelper.addToProgramResource(eResource, copiedEPackagesMap);
+		sandboxResourceSet.getResources().clear();
 	}
 
 	private EdeltaInterpreterEdeltaImpl createThisObject(final Collection<EPackage> copiedEPackages) {
