@@ -606,7 +606,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
   
   /**
    * Finds all the EReferences to the given EClass in the
-   * EClass' package
+   * EClass' package's resource set.
    * 
    * @param cl
    */
