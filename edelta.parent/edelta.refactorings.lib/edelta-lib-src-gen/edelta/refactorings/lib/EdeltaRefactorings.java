@@ -204,9 +204,9 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * 
    * @param name the name for the extracted class
    * @param features the features to extract
-   * @return the extracted metaclass
+   * @return the added EReference to the extracted metaclass
    */
-  public EClass extractClass(final String name, final Collection<EStructuralFeature> features) {
+  public EReference extractClass(final String name, final Collection<EStructuralFeature> features) {
     boolean _isEmpty = features.isEmpty();
     if (_isEmpty) {
       return null;
@@ -217,9 +217,9 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final Procedure1<EReference> _function = (EReference it) -> {
       this.makeContainmentBidirectional(it);
     };
-    ObjectExtensions.<EReference>operator_doubleArrow(_addMandatoryReference, _function);
+    final EReference reference = ObjectExtensions.<EReference>operator_doubleArrow(_addMandatoryReference, _function);
     EdeltaLibrary.moveAllTo(features, extracted);
-    return extracted;
+    return reference;
   }
   
   /**
