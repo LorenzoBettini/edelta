@@ -20,6 +20,7 @@ import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
@@ -572,53 +573,78 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * Finds the single containment EReference to the given EClass in the
    * EClass' package, performing validation (that is,
    * no reference is found, or more than one) checks and in case
-   * show errors and throws an IllegalArgumentException
+   * show errors and throws an IllegalArgumentException.
    * 
    * @param cl
    */
   public EReference findSingleContainmentReferenceToThisClass(final EClass cl) {
     final Iterable<EReference> references = this.findReferencesToThisClass(cl);
-    boolean _isEmpty = IterableExtensions.isEmpty(references);
-    if (_isEmpty) {
-      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(cl);
-      final String message = ("The EClass is not referred: " + _eObjectRepr);
+    final Function1<EReference, Boolean> _function = (EReference it) -> {
+      return Boolean.valueOf(it.isContainment());
+    };
+    int _size = IterableExtensions.size(IterableExtensions.<EReference>filter(references, _function));
+    boolean _greaterThan = (_size > 1);
+    if (_greaterThan) {
+      final Function1<EReference, String> _function_1 = (EReference it) -> {
+        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it);
+        return ("  " + _eObjectRepr);
+      };
+      String _join = IterableExtensions.join(IterableExtensions.<EReference, String>map(references, _function_1), "\n");
+      final String message = ("The EClass is referred by more than one container:\n" + _join);
       this.showError(cl, message);
       throw new IllegalArgumentException(message);
-    } else {
-      final Function1<EReference, Boolean> _function = (EReference it) -> {
-        return Boolean.valueOf(it.isContainment());
-      };
-      int _size = IterableExtensions.size(IterableExtensions.<EReference>filter(references, _function));
-      boolean _greaterThan = (_size > 1);
-      if (_greaterThan) {
-        final Function1<EReference, String> _function_1 = (EReference it) -> {
-          String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(it);
-          return ("  " + _eObjectRepr_1);
-        };
-        String _join = IterableExtensions.join(IterableExtensions.<EReference, String>map(references, _function_1), "\n");
-        final String message_1 = ("The EClass is referred by more than one container:\n" + _join);
-        this.showError(cl, message_1);
-        throw new IllegalArgumentException(message_1);
-      }
     }
     return IterableExtensions.<EReference>head(references);
   }
   
   /**
    * Finds all the EReferences to the given EClass in the
-   * EClass' package's resource set.
+   * EClass' package's resource set. If no such references are
+   * found it throws an IllegalArgumentException.
    * 
    * @param cl
    */
   public Iterable<EReference> findReferencesToThisClass(final EClass cl) {
-    final Function1<EStructuralFeature.Setting, Boolean> _function = (EStructuralFeature.Setting it) -> {
-      EStructuralFeature _eStructuralFeature = it.getEStructuralFeature();
-      return Boolean.valueOf(Objects.equal(_eStructuralFeature, getEReference("ecore", "EReference", "eReferenceType")));
-    };
-    final Function1<EStructuralFeature.Setting, EObject> _function_1 = (EStructuralFeature.Setting it) -> {
+    final Iterable<EReference> references = this.allReferencesToThisClass(cl);
+    boolean _isEmpty = IterableExtensions.isEmpty(references);
+    if (_isEmpty) {
+      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(cl);
+      final String message = ("The EClass is not referred: " + _eObjectRepr);
+      this.showError(cl, message);
+      throw new IllegalArgumentException(message);
+    }
+    return references;
+  }
+  
+  /**
+   * Returns all the EReferences to the given EClass in the
+   * EClass' package's resource set.
+   * 
+   * @param cl
+   */
+  public Iterable<EReference> allReferencesToThisClass(final EClass cl) {
+    final Function1<EStructuralFeature.Setting, EObject> _function = (EStructuralFeature.Setting it) -> {
       return it.getEObject();
     };
-    return Iterables.<EReference>filter(IterableExtensions.<EStructuralFeature.Setting, EObject>map(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, EdeltaLibrary.packagesToInspect(cl)), _function), _function_1), EReference.class);
+    return Iterables.<EReference>filter(ListExtensions.<EStructuralFeature.Setting, EObject>map(this.allUsagesOfThisClass(cl), _function), EReference.class);
+  }
+  
+  /**
+   * Returns all the usages of the given EClass in the
+   * EClass' package's resource set.
+   * 
+   * @param cl
+   */
+  public List<EStructuralFeature.Setting> allUsagesOfThisClass(final EClass cl) {
+    final Function1<EStructuralFeature.Setting, Boolean> _function = (EStructuralFeature.Setting it) -> {
+      EObject _eObject = it.getEObject();
+      return Boolean.valueOf((_eObject instanceof ENamedElement));
+    };
+    final Function1<EStructuralFeature.Setting, Boolean> _function_1 = (EStructuralFeature.Setting it) -> {
+      boolean _isDerived = it.getEStructuralFeature().isDerived();
+      return Boolean.valueOf((!_isDerived));
+    };
+    return IterableExtensions.<EStructuralFeature.Setting>toList(IterableExtensions.<EStructuralFeature.Setting>filter(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, EdeltaLibrary.packagesToInspect(cl)), _function), _function_1));
   }
   
   /**

@@ -11,6 +11,7 @@ import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.util.EcoreUtil
+import org.eclipse.emf.ecore.ENamedElement
 
 package edelta.refactorings.lib
 
@@ -477,17 +478,13 @@ def checkNoFeatures(Collection<EClass> classes) {
  * Finds the single containment EReference to the given EClass in the
  * EClass' package, performing validation (that is,
  * no reference is found, or more than one) checks and in case
- * show errors and throws an IllegalArgumentException
+ * show errors and throws an IllegalArgumentException.
  * 
  * @param cl
  */
 def findSingleContainmentReferenceToThisClass(EClass cl) {
 	val references = findReferencesToThisClass(cl)
-	if (references.isEmpty) {
-		val message = "The EClass is not referred: " + getEObjectRepr(cl)
-		showError(cl, message)
-		throw new IllegalArgumentException(message)
-	} else if (references.filter[containment].size > 1) {
+	if (references.filter[containment].size > 1) {
 		val message = "The EClass is referred by more than one container:\n" +
 					references.map["  " + getEObjectRepr(it)].join("\n")
 		showError(cl, message)
@@ -498,16 +495,45 @@ def findSingleContainmentReferenceToThisClass(EClass cl) {
 
 /**
  * Finds all the EReferences to the given EClass in the
- * EClass' package's resource set.
+ * EClass' package's resource set. If no such references are
+ * found it throws an IllegalArgumentException.
  * 
  * @param cl
  */
 def findReferencesToThisClass(EClass cl) {
-	EcoreUtil.UsageCrossReferencer
-		.find(cl, cl.packagesToInspect)
-		.filter[EStructuralFeature == ecoreref(eReferenceType)]
+	val references = allReferencesToThisClass(cl)
+	if (references.isEmpty) {
+		val message = "The EClass is not referred: " + getEObjectRepr(cl)
+		showError(cl, message)
+		throw new IllegalArgumentException(message)
+	}
+	return references
+}
+
+/**
+ * Returns all the EReferences to the given EClass in the
+ * EClass' package's resource set.
+ * 
+ * @param cl
+ */
+def allReferencesToThisClass(EClass cl) {
+	allUsagesOfThisClass(cl)
 		.map[EObject]
 		.filter(EReference)
+}
+
+/**
+ * Returns all the usages of the given EClass in the
+ * EClass' package's resource set.
+ * 
+ * @param cl
+ */
+def allUsagesOfThisClass(EClass cl) {
+	EcoreUtil.UsageCrossReferencer
+		.find(cl, cl.packagesToInspect)
+		.filter[EObject instanceof ENamedElement] // skip EGenericType
+		.filter[!EStructuralFeature.derived] // skip derived features
+		.toList
 }
 
 /**

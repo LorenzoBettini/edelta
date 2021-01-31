@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EAttribute;
@@ -28,6 +29,8 @@ import edelta.lib.AbstractEdelta;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 import edelta.testutils.EdeltaTestUtils;
+
+import static edelta.lib.EdeltaLibrary.*;
 
 class EdeltaRefactoringsTest extends AbstractTest {
 	private EdeltaRefactorings refactorings;
@@ -690,6 +693,27 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			"ERROR: PersonList.Student.name: Not a direct subclass of destination: PersonList.Student\n"
 			+ "ERROR: PersonList.Employee.name: Not a direct subclass of destination: PersonList.Employee\n"
 			+ "");
+	}
+
+	@Test
+	void test_allUsagesOfThisClass() {
+		var p = createEPackage("p");
+		var classForUsages = addNewEClass(p, "C");
+		addNewSubclass(classForUsages, "SubClass");
+		addNewEClass(p, "UsesC", c ->
+			addNewEReference(c, "refToC", classForUsages));
+		var usages = refactorings.allUsagesOfThisClass(classForUsages);
+		var repr = usages.stream().map(s ->
+				getEObjectRepr(s.getEObject()) + "\n" +
+				"  " +
+				getEObjectRepr(s.getEStructuralFeature()))
+			.collect(Collectors.joining("\n"));
+		assertThat(repr)
+			.isEqualTo(
+			"p.SubClass\n"
+			+ "  ecore.EClass.eSuperTypes\n"
+			+ "p.UsesC.refToC\n"
+			+ "  ecore.ETypedElement.eType");
 	}
 
 	private static IllegalArgumentException assertThrowsIAE(Executable executable) {
