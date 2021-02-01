@@ -477,6 +477,26 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
+	void test_inlineClassWithAttributesWronglyUsedByOthersParallel() throws IOException {
+		withInputModels("inlineClassWithAttributesWronglyUsedByOthersParallel",
+				"PersonList.ecore", "PersonListReferring.ecore");
+		loadModelFiles();
+		assertThrowsIAE(() ->
+			refactorings.inlineClass(refactorings.getEClass("PersonList", "Address")));
+		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		assertModifiedFilesAreSameAsOriginal();
+		assertThat(appender.getResult().trim())
+			.isEqualTo(
+			"ERROR: PersonList.Address: The EClass is used by more than one element:\n"
+			+ "  PersonList.Person.address\n"
+			+ "    ecore.ETypedElement.eType\n"
+			+ "  PersonListReferring.UsesAddress.address\n"
+			+ "    ecore.ETypedElement.eType\n"
+			+ "  PersonListReferring.ExtendsAddress\n"
+			+ "    ecore.EClass.eSuperTypes");
+	}
+
+	@Test
 	void test_inlineClass_IsOppositeOf_extractClass() throws IOException {
 		withInputModels("extractClassWithAttributes", "PersonList.ecore");
 		assertOppositeRefactorings(
@@ -769,6 +789,58 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			+ "  ecore.EClass.eSuperTypes\n"
 			+ "p.UsesC.refToC\n"
 			+ "  ecore.ETypedElement.eType");
+	}
+
+	@Test
+	void test_findSingleUsageOfThisClass() {
+		var p = createEPackage("p");
+		var classForUsages = addNewEClass(p, "C");
+
+		// not used at all
+		assertThrowsIAE(() -> refactorings.findSingleUsageOfThisClass(classForUsages));
+
+		// just one usage OK
+		var subClass = addNewSubclass(classForUsages, "SubClass");
+		assertThat(refactorings.findSingleUsageOfThisClass(classForUsages))
+			.isSameAs(subClass);
+
+		// too many usages
+		addNewEClass(p, "UsesC", c ->
+			addNewEReference(c, "refToC", classForUsages));
+		assertThrowsIAE(() -> refactorings.findSingleUsageOfThisClass(classForUsages));
+		assertThat(appender.getResult())
+			.isEqualTo(
+			"ERROR: p.C: The EClass is not used: p.C\n"
+			+ "ERROR: p.C: The EClass is used by more than one element:\n"
+			+ "  p.SubClass\n"
+			+ "    ecore.EClass.eSuperTypes\n"
+			+ "  p.UsesC.refToC\n"
+			+ "    ecore.ETypedElement.eType\n"
+			+ "");
+	}
+
+	@Test
+	void test_getAsContainmentReference() {
+		var p = createEPackage("p");
+		var classForUsages = addNewEClass(p, "C");
+
+		// not an EReference
+		assertThrowsIAE(() -> refactorings.getAsContainmentReference(classForUsages));
+
+		// not a containment reference
+		var ref = addNewEReference(classForUsages, "refToC", null);
+		assertThrowsIAE(() -> refactorings.getAsContainmentReference(ref));
+
+		// OK
+		var containmentRef = addNewContainmentEReference(classForUsages, "contRefToC", null);
+		assertThat(refactorings.getAsContainmentReference(containmentRef))
+			.isSameAs(containmentRef);
+
+		assertThat(appender.getResult())
+			.isEqualTo(
+			"ERROR: p.C: Not a reference: p.C\n"
+			+ "ERROR: p.C.refToC: Not a containment reference: p.C.refToC\n"
+			+ "");
 	}
 
 	private static IllegalArgumentException assertThrowsIAE(Executable executable) {

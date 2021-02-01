@@ -12,6 +12,7 @@ import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.emf.ecore.ENamedElement
+import org.eclipse.emf.ecore.EObject
 
 package edelta.refactorings.lib
 
@@ -191,7 +192,8 @@ def extractClass(String name, Collection<EStructuralFeature> features) {
  * @return the features of the original class
  */
 def inlineClass(EClass cl) {
-	val ref = findSingleContainmentReferenceToThisClass(cl)
+	val ref = getAsContainmentReference
+		(findSingleUsageOfThisClass(cl))
 	val featuresToInline = cl.EStructuralFeatures
 		.filter[it !== ref.EOpposite] // skip the possible back reference
 		.toList
@@ -494,7 +496,7 @@ def checkNoFeatures(Collection<EClass> classes) {
 
 /**
  * Finds the single containment EReference to the given EClass in the
- * EClass' package, performing validation (that is,
+ * EClass' package's resource set, performing validation (that is,
  * no reference is found, or more than one) checks and in case
  * show errors and throws an IllegalArgumentException.
  * 
@@ -538,6 +540,54 @@ def allReferencesToThisClass(EClass cl) {
 	allUsagesOfThisClass(cl)
 		.map[EObject]
 		.filter(EReference)
+}
+
+/**
+ * Finds the single usage the given EClass in the
+ * EClass' package's resource set, performing validation (that is,
+ * no usage is found, or more than one) checks and in case
+ * show errors and throws an IllegalArgumentException.
+ * 
+ * @param cl
+ */
+def findSingleUsageOfThisClass(EClass cl) {
+	val usages = allUsagesOfThisClass(cl)
+	if (usages.isEmpty) {
+		val message = "The EClass is not used: " + getEObjectRepr(cl)
+		showError(cl, message)
+		throw new IllegalArgumentException(message)
+	}
+	if (usages.size > 1) {
+		val message = "The EClass is used by more than one element:\n" +
+					usages.map[
+						"  " + getEObjectRepr(EObject) + "\n" +
+						"    " + getEObjectRepr(EStructuralFeature)
+					].join("\n")
+		showError(cl, message)
+		throw new IllegalArgumentException(message)
+	}
+	return usages.head.EObject
+}
+
+/**
+ * Makes sure that the passed EObject represent a containment EReference
+ * otherwise shows an error and throws an IllegalArgumentException
+ * 
+ * @param o
+ * @return the containment EReference if it is a containment reference
+ */
+def getAsContainmentReference(EObject o) {
+	if (o instanceof EReference) {
+		if (!o.containment) {
+			val message = "Not a containment reference: " + getEObjectRepr(o)
+			showError(o, message)
+			throw new IllegalArgumentException(message)
+		}
+		return o
+	}
+	val message = "Not a reference: " + getEObjectRepr(o)
+	showError(o as ENamedElement, message)
+	throw new IllegalArgumentException(message)
 }
 
 /**

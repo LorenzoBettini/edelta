@@ -231,7 +231,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @return the features of the original class
    */
   public List<EStructuralFeature> inlineClass(final EClass cl) {
-    final EReference ref = this.findSingleContainmentReferenceToThisClass(cl);
+    final EReference ref = this.getAsContainmentReference(this.findSingleUsageOfThisClass(cl));
     final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
       EReference _eOpposite = ref.getEOpposite();
       return Boolean.valueOf((it != _eOpposite));
@@ -591,7 +591,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
   
   /**
    * Finds the single containment EReference to the given EClass in the
-   * EClass' package, performing validation (that is,
+   * EClass' package's resource set, performing validation (that is,
    * no reference is found, or more than one) checks and in case
    * show errors and throws an IllegalArgumentException.
    * 
@@ -647,6 +647,68 @@ public class EdeltaRefactorings extends AbstractEdelta {
       return it.getEObject();
     };
     return Iterables.<EReference>filter(ListExtensions.<EStructuralFeature.Setting, EObject>map(this.allUsagesOfThisClass(cl), _function), EReference.class);
+  }
+  
+  /**
+   * Finds the single usage the given EClass in the
+   * EClass' package's resource set, performing validation (that is,
+   * no usage is found, or more than one) checks and in case
+   * show errors and throws an IllegalArgumentException.
+   * 
+   * @param cl
+   */
+  public EObject findSingleUsageOfThisClass(final EClass cl) {
+    final List<EStructuralFeature.Setting> usages = this.allUsagesOfThisClass(cl);
+    boolean _isEmpty = usages.isEmpty();
+    if (_isEmpty) {
+      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(cl);
+      final String message = ("The EClass is not used: " + _eObjectRepr);
+      this.showError(cl, message);
+      throw new IllegalArgumentException(message);
+    }
+    int _size = usages.size();
+    boolean _greaterThan = (_size > 1);
+    if (_greaterThan) {
+      final Function1<EStructuralFeature.Setting, String> _function = (EStructuralFeature.Setting it) -> {
+        String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(it.getEObject());
+        String _plus = ("  " + _eObjectRepr_1);
+        String _plus_1 = (_plus + "\n");
+        String _plus_2 = (_plus_1 + 
+          "    ");
+        String _eObjectRepr_2 = EdeltaLibrary.getEObjectRepr(it.getEStructuralFeature());
+        return (_plus_2 + _eObjectRepr_2);
+      };
+      String _join = IterableExtensions.join(ListExtensions.<EStructuralFeature.Setting, String>map(usages, _function), "\n");
+      final String message_1 = ("The EClass is used by more than one element:\n" + _join);
+      this.showError(cl, message_1);
+      throw new IllegalArgumentException(message_1);
+    }
+    return IterableExtensions.<EStructuralFeature.Setting>head(usages).getEObject();
+  }
+  
+  /**
+   * Makes sure that the passed EObject represent a containment EReference
+   * otherwise shows an error and throws an IllegalArgumentException
+   * 
+   * @param o
+   * @return the containment EReference if it is a containment reference
+   */
+  public EReference getAsContainmentReference(final EObject o) {
+    if ((o instanceof EReference)) {
+      boolean _isContainment = ((EReference)o).isContainment();
+      boolean _not = (!_isContainment);
+      if (_not) {
+        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(o);
+        final String message = ("Not a containment reference: " + _eObjectRepr);
+        this.showError(((ENamedElement)o), message);
+        throw new IllegalArgumentException(message);
+      }
+      return ((EReference)o);
+    }
+    String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(o);
+    final String message_1 = ("Not a reference: " + _eObjectRepr_1);
+    this.showError(((ENamedElement) o), message_1);
+    throw new IllegalArgumentException(message_1);
   }
   
   /**
