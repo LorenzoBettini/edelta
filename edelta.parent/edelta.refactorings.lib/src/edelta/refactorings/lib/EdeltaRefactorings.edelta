@@ -174,6 +174,8 @@ def subclassesToEnum(String name, Collection<EClass> subclasses) : EAttribute {
 def extractClass(String name, Collection<EStructuralFeature> features) {
 	if (features.empty) 
 		return null // TODO: error?
+	checkNoBidirectionalReferences(features,
+		"Cannot extract bidirectinal references")
 	val owner = findSingleOwner(features)
 	val extracted = owner.EPackage.addNewEClass(name)
 	val reference = owner.addMandatoryReference(name.toFirstLower, extracted) => [
@@ -414,6 +416,26 @@ def checkNotContainment(EReference reference, String errorMessage) {
 	if (reference.containment) {
 		val message = errorMessage + ": " + getEObjectRepr(reference)
 		showError(reference, message)
+		throw new IllegalArgumentException(message)
+	}
+}
+
+/**
+ * Makes sure that the passed collection does not have EReferences
+ * with an EOpposite. Otherwise shows an error (using
+ * also the passed errorMessage) with the details of the bidirectional references and
+ * throws an IllegalArgumentException
+ */
+def checkNoBidirectionalReferences(Collection<EStructuralFeature> features,
+		String errorMessage
+) {
+	val bidirectionalReferences = features
+		.filter(EReference)
+		.filter[EOpposite !== null]
+	if (!bidirectionalReferences.empty) {
+		val message = errorMessage + ":\n" +
+			bidirectionalReferences.map["  " + EObjectRepr].join("\n")
+		showError(bidirectionalReferences.head, message)
 		throw new IllegalArgumentException(message)
 	}
 }

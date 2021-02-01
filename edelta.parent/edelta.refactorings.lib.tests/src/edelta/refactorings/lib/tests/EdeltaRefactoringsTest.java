@@ -481,12 +481,37 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertModifiedFiles();
 	}
 
+	@Test
+	void test_extractClassWithReferencesBidirectional() throws IOException {
+		withInputModels("extractClassWithReferencesBidirectional", "PersonList.ecore");
+		loadModelFiles();
+		assertThrowsIAE(() -> refactorings.extractClass("WorkAddress",
+			asList(
+				refactorings.getEAttribute("PersonList", "Person", "street"),
+				refactorings.getEReference("PersonList", "Person", "workplace"),
+				refactorings.getEAttribute("PersonList", "Person", "houseNumber"))
+			));
+		assertThat(appender.getResult().trim())
+			.isEqualTo(
+			"ERROR: PersonList.Person.workplace: Cannot extract bidirectinal references:\n"
+			+ "  PersonList.Person.workplace");
+
+	}
 
 	@Test
 	void test_inlineClassWithAttributes() throws IOException {
 		withInputModels("inlineClassWithAttributes", "PersonList.ecore");
 		loadModelFiles();
 		refactorings.inlineClass(refactorings.getEClass("PersonList", "Address"));
+		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		assertModifiedFiles();
+	}
+
+	@Test
+	void test_inlineClassWithReferences() throws IOException {
+		withInputModels("inlineClassWithReferences", "PersonList.ecore");
+		loadModelFiles();
+		refactorings.inlineClass(refactorings.getEClass("PersonList", "WorkAddress"));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFiles();
 	}
@@ -509,6 +534,21 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			+ "    ecore.ETypedElement.eType\n"
 			+ "  PersonListReferring.ExtendsAddress\n"
 			+ "    ecore.EClass.eSuperTypes");
+	}
+
+	@Test
+	void test_inlineClassWithReferencesBidirectional() throws IOException {
+		withInputModels("inlineClassWithReferencesBidirectional", "PersonList.ecore");
+		loadModelFiles();
+		assertThrowsIAE(() ->
+			refactorings.inlineClass(refactorings.getEClass("PersonList", "WorkAddress")));
+		assertThat(appender.getResult().trim())
+			.isEqualTo(
+			"ERROR: PersonList.WorkAddress: The EClass is used by more than one element:\n"
+			+ "  PersonList.Person.workAddress\n"
+			+ "    ecore.ETypedElement.eType\n"
+			+ "  PersonList.WorkPlace.address\n"
+			+ "    ecore.ETypedElement.eType");
 	}
 
 	@Test

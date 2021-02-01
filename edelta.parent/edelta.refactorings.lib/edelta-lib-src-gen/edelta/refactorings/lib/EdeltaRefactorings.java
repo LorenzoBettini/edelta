@@ -211,6 +211,8 @@ public class EdeltaRefactorings extends AbstractEdelta {
     if (_isEmpty) {
       return null;
     }
+    this.checkNoBidirectionalReferences(features, 
+      "Cannot extract bidirectinal references");
     final EClass owner = this.findSingleOwner(features);
     final EClass extracted = EdeltaLibrary.addNewEClass(owner.getEPackage(), name);
     EReference _addMandatoryReference = this.addMandatoryReference(owner, StringExtensions.toFirstLower(name), extracted);
@@ -474,6 +476,32 @@ public class EdeltaRefactorings extends AbstractEdelta {
       String _eObjectRepr = EdeltaLibrary.getEObjectRepr(reference);
       final String message = ((errorMessage + ": ") + _eObjectRepr);
       this.showError(reference, message);
+      throw new IllegalArgumentException(message);
+    }
+  }
+  
+  /**
+   * Makes sure that the passed collection does not have EReferences
+   * with an EOpposite. Otherwise shows an error (using
+   * also the passed errorMessage) with the details of the bidirectional references and
+   * throws an IllegalArgumentException
+   */
+  public void checkNoBidirectionalReferences(final Collection<EStructuralFeature> features, final String errorMessage) {
+    final Function1<EReference, Boolean> _function = (EReference it) -> {
+      EReference _eOpposite = it.getEOpposite();
+      return Boolean.valueOf((_eOpposite != null));
+    };
+    final Iterable<EReference> bidirectionalReferences = IterableExtensions.<EReference>filter(Iterables.<EReference>filter(features, EReference.class), _function);
+    boolean _isEmpty = IterableExtensions.isEmpty(bidirectionalReferences);
+    boolean _not = (!_isEmpty);
+    if (_not) {
+      final Function1<EReference, String> _function_1 = (EReference it) -> {
+        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it);
+        return ("  " + _eObjectRepr);
+      };
+      String _join = IterableExtensions.join(IterableExtensions.<EReference, String>map(bidirectionalReferences, _function_1), "\n");
+      final String message = ((errorMessage + ":\n") + _join);
+      this.showError(IterableExtensions.<EReference>head(bidirectionalReferences), message);
       throw new IllegalArgumentException(message);
     }
   }
