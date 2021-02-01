@@ -7,12 +7,13 @@ import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EStructuralFeature
-import org.eclipse.emf.ecore.EcorePackage
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.emf.ecore.util.EcoreUtil.CrossReferencer
 import org.eclipse.emf.ecore.util.EcoreUtil.UsageCrossReferencer
 
 package edelta.refactorings.lib
+
+metamodel "ecore"
 
 /**
  * Finds all the features that are structurally equal
@@ -294,14 +295,14 @@ def findConcreteAbstractMetaclasses(EPackage ePackage) {
 def hasSubclasses(EClass cl) {
 	!EcoreUtil.UsageCrossReferencer
 		.find(cl, cl.EPackage)
-		.filter[EStructuralFeature === EcorePackage.eINSTANCE.EClass_ESuperTypes]
+		.filter[EStructuralFeature === ecoreref(eSuperTypes)]
 		.empty
 }
 
 def directSubclasses(EClass cl) {
 	EcoreUtil.UsageCrossReferencer
 		.find(cl, cl.EPackage)
-		.filter[EStructuralFeature === EcorePackage.eINSTANCE.EClass_ESuperTypes]
+		.filter[EStructuralFeature === ecoreref(eSuperTypes)]
 		.map[EObject as EClass]
 }
 

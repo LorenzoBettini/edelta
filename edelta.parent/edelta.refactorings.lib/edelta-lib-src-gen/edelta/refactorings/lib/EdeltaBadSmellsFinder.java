@@ -19,7 +19,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
@@ -372,8 +371,7 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
   public boolean hasSubclasses(final EClass cl) {
     final Function1<EStructuralFeature.Setting, Boolean> _function = (EStructuralFeature.Setting it) -> {
       EStructuralFeature _eStructuralFeature = it.getEStructuralFeature();
-      EReference _eClass_ESuperTypes = EcorePackage.eINSTANCE.getEClass_ESuperTypes();
-      return Boolean.valueOf((_eStructuralFeature == _eClass_ESuperTypes));
+      return Boolean.valueOf((_eStructuralFeature == getEReference("ecore", "EClass", "eSuperTypes")));
     };
     boolean _isEmpty = IterableExtensions.isEmpty(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()), _function));
     return (!_isEmpty);
@@ -382,8 +380,7 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
   public Iterable<EClass> directSubclasses(final EClass cl) {
     final Function1<EStructuralFeature.Setting, Boolean> _function = (EStructuralFeature.Setting it) -> {
       EStructuralFeature _eStructuralFeature = it.getEStructuralFeature();
-      EReference _eClass_ESuperTypes = EcorePackage.eINSTANCE.getEClass_ESuperTypes();
-      return Boolean.valueOf((_eStructuralFeature == _eClass_ESuperTypes));
+      return Boolean.valueOf((_eStructuralFeature == getEReference("ecore", "EClass", "eSuperTypes")));
     };
     final Function1<EStructuralFeature.Setting, EClass> _function_1 = (EStructuralFeature.Setting it) -> {
       EObject _eObject = it.getEObject();
@@ -435,5 +432,10 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
     };
     classes.forEach(_function_1);
     return classes;
+  }
+  
+  @Override
+  public void performSanityChecks() throws Exception {
+    ensureEPackageIsLoaded("ecore");
   }
 }
