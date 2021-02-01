@@ -29,10 +29,11 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_ConstructorArgument() {
+	public void test_ConstructorArgument() throws Exception {
 		finder = new EdeltaBadSmellsFinder(new AbstractEdelta() {
 		});
 		assertThat(finder).isNotNull();
+		finder.performSanityChecks();
 	}
 
 	@Test
