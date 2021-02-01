@@ -24,7 +24,6 @@ import org.eclipse.xtext.xbase.XbasePackage;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -263,21 +262,21 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testModifiedElementsIsUpdatedWhenNameIsChanged() {
-		var currentExpression = Mockito.<XExpression>mock(XExpression.class);
+		var currentExpression = mock(XExpression.class);
 		listener.setCurrentExpression(currentExpression);
-		var element = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEClass();
-		ePackage.getEClassifiers().add(element);
+		var element = ePackage.getEClassifiers().get(0);
+		// change the name
+		element.setName("Modified");
 		assertThat(modifiedElements)
 			.containsExactlyInAnyOrder(element, ePackage);
 	}
 
 	@Test
 	public void testModifiedElementsIsUpdatedWhenElementIsAdded() {
-		var currentExpression = Mockito.<XExpression>mock(XExpression.class);
+		var currentExpression = mock(XExpression.class);
 		listener.setCurrentExpression(currentExpression);
-		var element = ePackage.getEClassifiers().get(0);
-		// change the name
-		element.setName("Modified");
+		var element = EdeltaInterpreterResourceListenerTest.ecoreFactory.createEClass();
+		ePackage.getEClassifiers().add(element);
 		assertThat(modifiedElements)
 			.containsExactlyInAnyOrder(element, ePackage);
 	}
