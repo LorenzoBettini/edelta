@@ -382,6 +382,28 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	}
 
 	@Test
+	public void test_directSubclassesInResourceSet() {
+		final EPackage p1 = createEPackage("p1");
+		var superclass = addNewEClass(p1, "ASuperclass");
+		final EPackage p2 = createEPackage("p2");
+		var subclass1 = addNewEClass(p2, "ASubclass1");
+		addESuperType(subclass1, superclass);
+		addNewSubclass(superclass, "ASubclass2");
+		var resourceSet = new ResourceSetImpl();
+		var p1Resource = new ResourceImpl();
+		p1Resource.getContents().add(p1);
+		resourceSet.getResources().add(p1Resource);
+		var p2Resource = new ResourceImpl();
+		p2Resource.getContents().add(p2);
+		resourceSet.getResources().add(p2Resource);
+		assertThat(
+			map(
+				finder.directSubclasses(superclass),
+				ENamedElement::getName))
+			.containsExactlyInAnyOrder("ASubclass1", "ASubclass2");
+	}
+
+	@Test
 	public void test_findDuplicatedFeaturesInSubclasses() {
 		final EPackage p = createEPackage("p", pack -> {
 			EClass superclassWithDuplicatesInSubclasses = addNewEClass(pack,

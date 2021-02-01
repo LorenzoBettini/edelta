@@ -369,11 +369,7 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
   }
   
   public boolean hasSubclasses(final EClass cl) {
-    final Function1<EStructuralFeature.Setting, Boolean> _function = (EStructuralFeature.Setting it) -> {
-      EStructuralFeature _eStructuralFeature = it.getEStructuralFeature();
-      return Boolean.valueOf((_eStructuralFeature == getEReference("ecore", "EClass", "eSuperTypes")));
-    };
-    boolean _isEmpty = IterableExtensions.isEmpty(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()), _function));
+    boolean _isEmpty = IterableExtensions.isEmpty(this.directSubclasses(cl));
     return (!_isEmpty);
   }
   
@@ -386,7 +382,7 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
       EObject _eObject = it.getEObject();
       return ((EClass) _eObject);
     };
-    return IterableExtensions.<EStructuralFeature.Setting, EClass>map(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()), _function), _function_1);
+    return IterableExtensions.<EStructuralFeature.Setting, EClass>map(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, EdeltaLibrary.packagesToInspect(cl)), _function), _function_1);
   }
   
   /**

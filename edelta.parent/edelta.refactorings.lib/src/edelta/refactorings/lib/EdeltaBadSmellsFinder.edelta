@@ -293,15 +293,12 @@ def findConcreteAbstractMetaclasses(EPackage ePackage) {
 }
 
 def hasSubclasses(EClass cl) {
-	!EcoreUtil.UsageCrossReferencer
-		.find(cl, cl.EPackage)
-		.filter[EStructuralFeature === ecoreref(eSuperTypes)]
-		.empty
+	!cl.directSubclasses.empty
 }
 
 def directSubclasses(EClass cl) {
 	EcoreUtil.UsageCrossReferencer
-		.find(cl, cl.EPackage)
+		.find(cl, cl.packagesToInspect)
 		.filter[EStructuralFeature === ecoreref(eSuperTypes)]
 		.map[EObject as EClass]
 }
