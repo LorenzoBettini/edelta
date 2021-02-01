@@ -295,6 +295,46 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   @Test
+  public void testUnqualifiedEcoreReferenceInOperation() {
+    try {
+      ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"mypackage\"");
+      _builder.newLine();
+      _builder.append("def anOp() {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(");
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("MyBaseClass");
+      _builder_1.newLine();
+      _builder_1.append("MyClass");
+      _builder_1.newLine();
+      _builder_1.append("MyDataType");
+      _builder_1.newLine();
+      _builder_1.append("MyDerivedClass");
+      _builder_1.newLine();
+      _builder_1.append("myAttribute");
+      _builder_1.newLine();
+      _builder_1.append("myBaseAttribute");
+      _builder_1.newLine();
+      _builder_1.append("myBaseReference");
+      _builder_1.newLine();
+      _builder_1.append("myDerivedAttribute");
+      _builder_1.newLine();
+      _builder_1.append("myDerivedReference");
+      _builder_1.newLine();
+      _builder_1.append("myReference");
+      _builder_1.newLine();
+      _builder_1.append("mypackage");
+      _builder_1.newLine();
+      _newBuilder.append(_builder.toString()).assertText(this.fromLinesOfStringsToStringArray(_builder_1));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
   @Flaky
   public void testUnqualifiedEcoreReferenceWithPrefix() {
     try {
@@ -323,6 +363,33 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   
   @Test
   @Flaky
+  public void testUnqualifiedEcoreReferenceWithPrefixInOperation() {
+    try {
+      ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"mypackage\"");
+      _builder.newLine();
+      _builder.append("def anOp() {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(myd");
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("MyDataType");
+      _builder_1.newLine();
+      _builder_1.append("MyDerivedClass");
+      _builder_1.newLine();
+      _builder_1.append("myDerivedAttribute");
+      _builder_1.newLine();
+      _builder_1.append("myDerivedReference");
+      _builder_1.newLine();
+      _newBuilder.append(_builder.toString()).assertText(this.fromLinesOfStringsToStringArray(_builder_1));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
+  @Flaky
   public void testQualifiedEcoreReference() {
     try {
       ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
@@ -330,6 +397,24 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
       _builder.append("metamodel \"mypackage\"");
       _builder.newLine();
       _builder.append("modifyEcore aTest epackage mypackage {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(MyClass.");
+      _newBuilder.append(_builder.toString()).assertText("myAttribute", "myReference");
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
+  @Flaky
+  public void testQualifiedEcoreReferenceInOperation() {
+    try {
+      ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"mypackage\"");
+      _builder.newLine();
+      _builder.append("def anOp() {");
       _builder.newLine();
       _builder.append("\t");
       _builder.append("ecoreref(MyClass.");

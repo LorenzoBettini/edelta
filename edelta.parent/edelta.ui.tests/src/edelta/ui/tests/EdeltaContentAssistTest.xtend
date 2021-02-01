@@ -179,6 +179,26 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 				'''.fromLinesOfStringsToStringArray)
 	}
 
+	@Test def void testUnqualifiedEcoreReferenceInOperation() {
+		newBuilder.append('''
+			metamodel "mypackage"
+			def anOp() {
+				ecoreref(''').
+			assertText('''
+				MyBaseClass
+				MyClass
+				MyDataType
+				MyDerivedClass
+				myAttribute
+				myBaseAttribute
+				myBaseReference
+				myDerivedAttribute
+				myDerivedReference
+				myReference
+				mypackage
+				'''.fromLinesOfStringsToStringArray)
+	}
+
 	@Test @Flaky
 	def void testUnqualifiedEcoreReferenceWithPrefix() {
 		newBuilder.append('''
@@ -194,10 +214,33 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
+	def void testUnqualifiedEcoreReferenceWithPrefixInOperation() {
+		newBuilder.append('''
+			metamodel "mypackage"
+			def anOp() {
+				ecoreref(myd''').
+			assertText('''
+				MyDataType
+				MyDerivedClass
+				myDerivedAttribute
+				myDerivedReference
+				'''.fromLinesOfStringsToStringArray)
+	}
+
+	@Test @Flaky
 	def void testQualifiedEcoreReference() {
 		newBuilder.append('''
 			metamodel "mypackage"
 			modifyEcore aTest epackage mypackage {
+				ecoreref(MyClass.''').
+			assertText('myAttribute', 'myReference')
+	}
+
+	@Test @Flaky
+	def void testQualifiedEcoreReferenceInOperation() {
+		newBuilder.append('''
+			metamodel "mypackage"
+			def anOp() {
 				ecoreref(MyClass.''').
 			assertText('myAttribute', 'myReference')
 	}

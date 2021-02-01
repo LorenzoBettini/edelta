@@ -28,6 +28,7 @@ import com.google.inject.Inject;
 
 import edelta.edelta.EdeltaEcoreQualifiedReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
+import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaPackage;
 import edelta.resource.derivedstate.EdeltaAccessibleElements;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
@@ -119,6 +120,11 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 	public void completeEdeltaEcoreDirectReference_Enamedelement(EObject model,
 			Assignment assignment, ContentAssistContext context,
 			ICompletionProposalAcceptor acceptor) {
+		if (notInsideModifyEcore(model)) {
+			super.completeEdeltaEcoreDirectReference_Enamedelement(
+					model, assignment, context, acceptor);
+			return;
+		}
 		final var accessibleElements = getAccessibleElements(model);
 		final var countByName = accessibleElements.stream()
 			.collect(groupingBy(e -> e.getElement().getName(),
@@ -148,6 +154,11 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 	@Override
 	public void completeEdeltaEcoreReference_Enamedelement(EObject model, Assignment assignment,
 			ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		if (notInsideModifyEcore(model)) {
+			super.completeEdeltaEcoreReference_Enamedelement(
+					model, assignment, context, acceptor);
+			return;
+		}
 		final var accessibleElements = getAccessibleElements(model);
 		final var qualification = ((EdeltaEcoreQualifiedReference) model)
 			.getQualification();
@@ -159,6 +170,10 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 				createENamedElementProposals(model, context, acceptor,
 					Scopes.scopeFor(
 						ecoreHelper.getENamedElements(e.getElement()))));
+	}
+
+	private boolean notInsideModifyEcore(EObject model) {
+		return getContainerOfType(model, EdeltaModifyEcoreOperation.class) == null;
 	}
 
 	private EdeltaAccessibleElements getAccessibleElements(EObject model) {
