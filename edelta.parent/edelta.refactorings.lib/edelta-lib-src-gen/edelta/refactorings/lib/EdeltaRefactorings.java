@@ -233,7 +233,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @return the features of the original class
    */
   public List<EStructuralFeature> inlineClass(final EClass cl) {
-    final EReference ref = this.getAsContainmentReference(this.findSingleUsageOfThisClass(cl));
+    final EReference ref = this.findSingleContainmentReferenceToThisClass(cl);
     final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
       EReference _eOpposite = ref.getEOpposite();
       return Boolean.valueOf((it != _eOpposite));
@@ -333,7 +333,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * the EReference originally of type cl ("b1" above)
    */
   public EReference classToReference(final EClass cl) {
-    final EReference reference = this.findSingleContainmentReferenceToThisClass(cl);
+    final EReference reference = this.findSingleContainmentAmongReferencesToThisClass(cl);
     final EClass owner = reference.getEContainingClass();
     final EReference referenceToTarget = this.findSingleReferenceNotOfType(cl, owner);
     reference.setEType(referenceToTarget.getEType());
@@ -618,14 +618,17 @@ public class EdeltaRefactorings extends AbstractEdelta {
   }
   
   /**
-   * Finds the single containment EReference to the given EClass in the
+   * Finds, among all references to the given EClass, the single containment reference in the
    * EClass' package's resource set, performing validation (that is,
-   * no reference is found, or more than one) checks and in case
+   * no reference is found, or more than one containment reference is found) checks and in case
    * show errors and throws an IllegalArgumentException.
+   * 
+   * Note that several references to the class are allowed: the important thing
+   * is that exactly one is a containment reference.
    * 
    * @param cl
    */
-  public EReference findSingleContainmentReferenceToThisClass(final EClass cl) {
+  public EReference findSingleContainmentAmongReferencesToThisClass(final EClass cl) {
     final Iterable<EReference> references = this.findReferencesToThisClass(cl);
     final Function1<EReference, Boolean> _function = (EReference it) -> {
       return Boolean.valueOf(it.isContainment());
@@ -675,6 +678,19 @@ public class EdeltaRefactorings extends AbstractEdelta {
       return it.getEObject();
     };
     return Iterables.<EReference>filter(ListExtensions.<EStructuralFeature.Setting, EObject>map(this.allUsagesOfThisClass(cl), _function), EReference.class);
+  }
+  
+  /**
+   * Finds the single usage of this class and it must be a
+   * containment reference. Otherwise it show errors and throws an IllegalArgumentException.
+   * 
+   * Note that several references to the class are allowed: the important thing
+   * is that exactly one is a containment reference.
+   * 
+   * @param cl
+   */
+  public EReference findSingleContainmentReferenceToThisClass(final EClass cl) {
+    return this.getAsContainmentReference(this.findSingleUsageOfThisClass(cl));
   }
   
   /**

@@ -194,8 +194,7 @@ def extractClass(String name, Collection<EStructuralFeature> features) {
  * @return the features of the original class
  */
 def inlineClass(EClass cl) {
-	val ref = getAsContainmentReference
-		(findSingleUsageOfThisClass(cl))
+	val ref = findSingleContainmentReferenceToThisClass(cl)
 	val featuresToInline = cl.EStructuralFeatures
 		.filter[it !== ref.EOpposite] // skip the possible back reference
 		.toList
@@ -288,7 +287,7 @@ def referenceToClass(String name, EReference reference) {
  */
 def classToReference(EClass cl) : EReference {
 	// search for a single EReference that has type cl ("b1" above)
-	val reference = findSingleContainmentReferenceToThisClass(cl)
+	val reference = findSingleContainmentAmongReferencesToThisClass(cl)
 	// "A" above
 	val owner = reference.EContainingClass
 	// search for a single EReference ("c" above) in cl that has not type owner
@@ -517,14 +516,17 @@ def checkNoFeatures(Collection<EClass> classes) {
 }
 
 /**
- * Finds the single containment EReference to the given EClass in the
+ * Finds, among all references to the given EClass, the single containment reference in the
  * EClass' package's resource set, performing validation (that is,
- * no reference is found, or more than one) checks and in case
+ * no reference is found, or more than one containment reference is found) checks and in case
  * show errors and throws an IllegalArgumentException.
+ * 
+ * Note that several references to the class are allowed: the important thing
+ * is that exactly one is a containment reference.
  * 
  * @param cl
  */
-def findSingleContainmentReferenceToThisClass(EClass cl) {
+def findSingleContainmentAmongReferencesToThisClass(EClass cl) {
 	val references = findReferencesToThisClass(cl)
 	if (references.filter[containment].size > 1) {
 		val message = "The EClass is referred by more than one container:\n" +
@@ -562,6 +564,20 @@ def allReferencesToThisClass(EClass cl) {
 	allUsagesOfThisClass(cl)
 		.map[EObject]
 		.filter(EReference)
+}
+
+/**
+ * Finds the single usage of this class and it must be a
+ * containment reference. Otherwise it show errors and throws an IllegalArgumentException.
+ * 
+ * Note that several references to the class are allowed: the important thing
+ * is that exactly one is a containment reference.
+ * 
+ * @param cl
+ */
+def findSingleContainmentReferenceToThisClass(EClass cl) {
+	return getAsContainmentReference
+		(findSingleUsageOfThisClass(cl))
 }
 
 /**
