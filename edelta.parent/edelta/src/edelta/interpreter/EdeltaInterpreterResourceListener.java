@@ -2,6 +2,7 @@ package edelta.interpreter;
 
 import static org.eclipse.emf.ecore.EcorePackage.Literals.*;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.emf.common.notify.Notification;
@@ -100,6 +101,8 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 			final var enamedElement = (ENamedElement) element;
 			if (modifiedElements.add(enamedElement))
 				updateModifiedElements(enamedElement.eContainer());
+		} else if (element instanceof Collection<?>) {
+			((Collection<?>)element).stream().forEach(this::updateModifiedElements);
 		}
 	}
 

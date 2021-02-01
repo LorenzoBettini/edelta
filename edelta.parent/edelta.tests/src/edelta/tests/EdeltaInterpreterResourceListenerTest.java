@@ -292,8 +292,7 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 		var f2 = ecoreFactory.createEReference();
 		element.getEStructuralFeatures().addAll(Arrays.asList(f1, f2));
 		assertThat(modifiedElements)
-			.containsExactlyInAnyOrder(element, ePackage);
-		// TODO: should contain also f1 and f2
+			.containsExactlyInAnyOrder(element, ePackage, f1, f2);
 	}
 
 	@Test
