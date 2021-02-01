@@ -468,6 +468,21 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
+	void test_extractClassWithReferences() throws IOException {
+		withInputModels("extractClassWithReferences", "PersonList.ecore");
+		loadModelFiles();
+		refactorings.extractClass("WorkAddress",
+			asList(
+				refactorings.getEAttribute("PersonList", "Person", "street"),
+				refactorings.getEReference("PersonList", "Person", "workplace"),
+				refactorings.getEAttribute("PersonList", "Person", "houseNumber"))
+			);
+		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		assertModifiedFiles();
+	}
+
+
+	@Test
 	void test_inlineClassWithAttributes() throws IOException {
 		withInputModels("inlineClassWithAttributes", "PersonList.ecore");
 		loadModelFiles();
