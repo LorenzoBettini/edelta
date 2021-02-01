@@ -381,6 +381,24 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
+	void test_subclassesToEnumSubclassesWrongSubclassesParallel() throws IOException {
+		withInputModels("subclassesToEnumSubclassesWrongSubclassesParallel",
+				"PersonList.ecore", "PersonListReferring.ecore");
+		loadModelFiles();
+		var personList = refactorings.getEPackage("PersonList");
+		var female = (EClass) personList.getEClassifier("Female");
+		assertThrowsIAE(() -> refactorings.subclassesToEnum("Gender",
+				asList(female)));
+		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		assertModifiedFilesAreSameAsOriginal();
+		assertThat(appender.getResult().trim())
+			.isEqualTo(
+			"ERROR: PersonList.Person: The class has additional subclasses:\n"
+			+ "  PersonList.Male\n"
+			+ "  PersonListReferring.FemaleEmployee");
+	}
+
+	@Test
 	void test_enumToSubclasses_IsOppositeOf_subclassesToEnum() throws IOException {
 		withInputModels("enumToSubclasses", "PersonList.ecore");
 		assertOppositeRefactorings(

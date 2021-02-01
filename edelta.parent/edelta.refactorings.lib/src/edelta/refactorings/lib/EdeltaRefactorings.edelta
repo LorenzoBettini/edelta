@@ -634,8 +634,7 @@ def getSingleDirectSuperclass(Collection<EClass> subclasses) : EClass {
 }
 
 def directSubclasses(EClass cl) {
-	EcoreUtil.UsageCrossReferencer
-		.find(cl, cl.EPackage)
+	allUsagesOfThisClass(cl)
 		.filter[EStructuralFeature == ecoreref(eSuperTypes)]
 		.map[EObject as EClass]
 }

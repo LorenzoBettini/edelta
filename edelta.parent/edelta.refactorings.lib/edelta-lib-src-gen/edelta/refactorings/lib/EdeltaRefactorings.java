@@ -810,7 +810,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
       EObject _eObject = it.getEObject();
       return ((EClass) _eObject);
     };
-    return IterableExtensions.<EStructuralFeature.Setting, EClass>map(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()), _function), _function_1);
+    return IterableExtensions.<EStructuralFeature.Setting, EClass>map(IterableExtensions.<EStructuralFeature.Setting>filter(this.allUsagesOfThisClass(cl), _function), _function_1);
   }
   
   @Override
