@@ -34,7 +34,6 @@ import edelta.interpreter.EdeltaInterpreterDiagnostic;
 import edelta.interpreter.EdeltaInterpreterDiagnosticHelper;
 import edelta.interpreter.EdeltaInterpreterResourceListener;
 import edelta.lib.EdeltaLibrary;
-import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 import edelta.resource.derivedstate.EdeltaModifiedElements;
 import edelta.validation.EdeltaValidator;
@@ -58,9 +57,6 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 
 	@Inject
 	private EdeltaInterpreterDiagnosticHelper diagnosticHelper;
-
-	@Inject
-	private EdeltaDerivedStateHelper derivedStateHelper;
 
 	private EdeltaInterpreterResourceListener listener;
 

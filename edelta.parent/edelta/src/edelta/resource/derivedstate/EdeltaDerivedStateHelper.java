@@ -6,6 +6,7 @@ import static org.eclipse.xtext.EcoreUtil2.getContainerOfType;
 import java.util.Objects;
 
 import org.eclipse.emf.ecore.ENamedElement;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -89,8 +90,18 @@ public class EdeltaDerivedStateHelper {
 			copiedEPackagesMap.computeIfAbsent(copy.getName(), key -> copy);
 		}
 		// we must add the copied EPackages to the resource
-		resource.getContents().addAll(copiedEPackagesMap.values());
+		addToProgramResource(resource, copiedEPackagesMap);
 		return copiedEPackagesMap;
+	}
+
+	/**
+	 * Adds the copied {@link EPackage}s to the {@link Resource} of the program
+	 * 
+	 * @param resource
+	 * @param copiedEPackagesMap
+	 */
+	public void addToProgramResource(final Resource resource, final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
+		resource.getContents().addAll(copiedEPackagesMap.values());
 	}
 
 	public EdeltaEcoreReferenceState getEcoreReferenceState(EdeltaEcoreReference edeltaEcoreReference) {
@@ -159,8 +170,7 @@ public class EdeltaDerivedStateHelper {
 
 	/**
 	 * Returns the last {@link XExpression} that created/changed the name of the
-	 * {@link ENamedElement}, assuming the element is part of the resource of the
-	 * current program, that is, it has been created/modified in the program.
+	 * {@link ENamedElement}.
 	 * 
 	 * For example, given
 	 * 
@@ -175,11 +185,13 @@ public class EdeltaDerivedStateHelper {
 	 * For <tt>NewClass</tt> and <tt>Renamed</tt> returns
 	 * <tt>ecoreref(NewClass).name = "Renamed"</tt>.
 	 * 
+	 * @param programContext A part of the Edelta program, needed to retrieve
+	 * the Resource where the derived state is stored.
 	 * @param enamedElement
 	 * @return
 	 */
-	public XExpression getLastResponsibleExpression(ENamedElement enamedElement) {
-		return getEnamedElementXExpressionMap(enamedElement.eResource())
+	public XExpression getLastResponsibleExpression(EObject programContext, ENamedElement enamedElement) {
+		return getEnamedElementXExpressionMap(programContext.eResource())
 				.get(enamedElement);
 	}
 

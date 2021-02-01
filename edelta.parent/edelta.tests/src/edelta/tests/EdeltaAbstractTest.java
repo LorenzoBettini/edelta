@@ -50,6 +50,7 @@ import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.resource.derivedstate.EdeltaAccessibleElements;
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.tests.input.Inputs;
 
 public abstract class EdeltaAbstractTest {
@@ -67,6 +68,10 @@ public abstract class EdeltaAbstractTest {
 	@Inject
 	@Extension
 	protected IJvmModelAssociations jvmModelAssociations;
+
+	@Inject
+	@Extension
+	protected EdeltaDerivedStateHelper derivedStateHelper;
 
 	@Extension
 	protected Inputs inputs = new Inputs();
@@ -375,7 +380,7 @@ public abstract class EdeltaAbstractTest {
 	}
 
 	protected Iterable<EPackage> getCopiedEPackages(EObject context) {
-		return Iterables.<EPackage>filter(context.eResource().getContents(), EPackage.class);
+		return derivedStateHelper.getCopiedEPackagesMap(context.eResource()).values();
 	}
 
 	protected EClassifier getEClassiferByName(EPackage p, String nameToSearch) {

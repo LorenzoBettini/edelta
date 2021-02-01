@@ -134,7 +134,8 @@ public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider
 				var containingBlock = (XBlockExpression) expToMove.eContainer();
 				// the expression that creates the element referred by the forward reference
 				var responsibleExpression =
-					derivedStateHelper.getLastResponsibleExpression(forwardEcoreRef.getEnamedelement());
+					derivedStateHelper
+					.getLastResponsibleExpression(element, forwardEcoreRef.getEnamedelement());
 				var responsibleExpressionBlockExp = getContainingBlockXExpression(responsibleExpression);
 				// the block where we want to move our expression containing the forward reference
 				var destBlock = (XBlockExpression) responsibleExpression.eContainer();

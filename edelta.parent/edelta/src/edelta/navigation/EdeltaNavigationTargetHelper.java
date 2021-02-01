@@ -37,7 +37,7 @@ public class EdeltaNavigationTargetHelper {
 			}
 			// last resort, in case of a forward reference
 			return derivedStateHelper
-				.getLastResponsibleExpression(ecoreReference.getEnamedelement());
+				.getLastResponsibleExpression(obj, ecoreReference.getEnamedelement());
 		}
 		return null;
 	}
