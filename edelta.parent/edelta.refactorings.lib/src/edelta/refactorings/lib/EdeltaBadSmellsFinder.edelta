@@ -7,11 +7,13 @@ import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EStructuralFeature
-import org.eclipse.emf.ecore.EcorePackage
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.emf.ecore.util.EcoreUtil.CrossReferencer
+import org.eclipse.emf.ecore.util.EcoreUtil.UsageCrossReferencer
 
 package edelta.refactorings.lib
+
+metamodel "ecore"
 
 /**
  * Finds all the features that are structurally equal
@@ -218,35 +220,32 @@ def findDeadClassifiers(EPackage ePackage) {
 }
 
 /**
- * Whether {@link #hasNoReferenceInThisPackage(EClassifier)} and
- * {@link #isNotReferenced(EClassifier)}
+ * Whether {@link #doesNotReferToClasses(EClassifier)} and
+ * {@link #isNotReferredByClassifiers(EClassifier)}
  */
 def isDeadClassifier(EClassifier cl) {
-	if(cl.hasNoReferenceInThisPackage && cl.isNotReferenced){
+	val result = (cl.doesNotReferToClasses && cl.isNotReferredByClassifiers)
+	if (result)
 		logInfo["Dead classifier: " + getEObjectRepr(cl)]
-		return true;
-	}
+	return result;
 }
 
 /**
- * Whether the passed EClassifier does not refer to anything in its
- * EPackage.
+ * Whether the passed EClassifier does not refer to any EClass
  */
-def hasNoReferenceInThisPackage(EClassifier c) {
-	val thisPackage = c.EPackage
+def doesNotReferToClasses(EClassifier c) {
 	CrossReferencer.find(newArrayList(c))
 		.keySet
-		.filter(EClassifier)
-		.filter[EPackage === thisPackage]
+		.filter(EClass)
 		.empty
 }
 
 /**
- * Whether the passed EClassifier is not referenced in its
- * EPackage.
+ * Whether the passed EClassifier is not referred by EClassifiers.
  */
-def isNotReferenced(EClassifier cl) {
-	EcoreUtil.UsageCrossReferencer.find(cl, cl.EPackage).empty
+def isNotReferredByClassifiers(EClassifier cl) {
+	UsageCrossReferencer.find(cl, cl.packagesToInspect)
+		.empty
 }
 
 /**
@@ -260,7 +259,7 @@ def findClassificationByHierarchy(EPackage ePackage)
 		.filter[
 			ESuperTypes.size == 1 &&
 			EStructuralFeatures.empty &&
-			isNotReferenced
+			isNotReferredByClassifiers
 		]
 		.groupBy[ESuperTypes.head]
 		.filter[base, subclasses|subclasses.size > 1]
@@ -294,16 +293,13 @@ def findConcreteAbstractMetaclasses(EPackage ePackage) {
 }
 
 def hasSubclasses(EClass cl) {
-	!EcoreUtil.UsageCrossReferencer
-		.find(cl, cl.EPackage)
-		.filter[EStructuralFeature === EcorePackage.eINSTANCE.EClass_ESuperTypes]
-		.empty
+	!cl.directSubclasses.empty
 }
 
 def directSubclasses(EClass cl) {
 	EcoreUtil.UsageCrossReferencer
-		.find(cl, cl.EPackage)
-		.filter[EStructuralFeature === EcorePackage.eINSTANCE.EClass_ESuperTypes]
+		.find(cl, cl.packagesToInspect)
+		.filter[EStructuralFeature === ecoreref(eSuperTypes)]
 		.map[EObject as EClass]
 }
 

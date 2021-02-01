@@ -143,4 +143,45 @@ def redundantContainerToEOpposite(Iterable<Pair<EReference, EReference>> redunda
 	}
 }
 
+def isNotReferencedByOthers(EClassifier cl) {
+	val find = UsageCrossReferencer.find(cl, cl.packagesToInspect)
+	for (s : find) {
+		println(getEObjectRepr(s.EObject) + " in " + getEObjectRepr(s.EObject.eContainer))
+		println(getEObjectRepr(s.EStructuralFeature))
+	}
+	find
+		.filter[!EcoreUtil.isAncestor(cl, EObject)]
+		.empty
+}
 
+/**
+ * Whether {@link #hasNoReferenceDifferentFromSelf(EClassifier)} and
+ * {@link #isNotReferencedByOthers(EClassifier)}
+ */
+def isDeadClassifier(EClassifier cl) {
+	if(cl.hasNoReferenceDifferentFromSelf && cl.isNotReferencedByOthers){
+		logInfo["Dead classifier: " + getEObjectRepr(cl)]
+		return true;
+	}
+}
+
+/**
+ * Whether the passed EClassifier does not refer anything
+ * (not considering a self reference).
+ */
+def hasNoReferenceDifferentFromSelf(EClassifier c) {
+	CrossReferencer.find(newArrayList(c))
+		.keySet
+		.filter(EClassifier)
+		.filter[it !== c]
+		.empty
+}
+
+/**
+ * Whether the passed EClassifier is not referenced by others.
+ */
+def isNotReferencedByOthers(EClassifier cl) {
+	UsageCrossReferencer.find(cl, cl.packagesToInspect)
+		.filter[!EcoreUtil.isAncestor(cl, EObject)]
+		.empty
+}

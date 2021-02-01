@@ -5,7 +5,6 @@ import edelta.edelta.EdeltaEcoreQualifiedReference
 import edelta.edelta.EdeltaEcoreReferenceExpression
 import edelta.edelta.EdeltaProgram
 import edelta.interpreter.EdeltaInterpreterRuntimeException
-import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.tests.additional.TestableEdeltaDerivedStateComputer
 import edelta.tests.injectors.EdeltaInjectorProviderTestableDerivedStateComputer
 import org.eclipse.emf.common.notify.impl.AdapterImpl
@@ -30,7 +29,6 @@ import static extension org.junit.Assert.*
 class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 
 	@Inject extension TestableEdeltaDerivedStateComputer
-	@Inject extension EdeltaDerivedStateHelper
 
 	@Test
 	def void testCopiedEPackages() throws Exception {

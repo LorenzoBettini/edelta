@@ -9,7 +9,6 @@ import edelta.interpreter.EdeltaInterpreter
 import edelta.interpreter.EdeltaInterpreterFactory
 import edelta.interpreter.EdeltaInterpreterRuntimeException
 import edelta.interpreter.EdeltaInterpreterWrapperException
-import edelta.resource.derivedstate.EdeltaDerivedStateHelper
 import edelta.tests.additional.EdeltaEContentAdapter.EdeltaEContentAdapterException
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 import edelta.tests.additional.MyCustomException
@@ -37,7 +36,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Inject Injector injector
 
-	@Inject EdeltaDerivedStateHelper derivedStateHelper
+	var EdeltaProgram currentProgram
 
 	@Before
 	def void setupInterpreter() {
@@ -575,7 +574,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				assertEquals(false, abstract)
 				val offendingString = "Thread.sleep(1000)"
 				val initialIndex = input.lastIndexOf(offendingString)
-				assertWarning(
+				currentProgram.assertWarning(
 					XbasePackage.eINSTANCE.XMemberFeatureCall,
 					EdeltaValidator.INTERPRETER_TIMEOUT,
 					initialIndex, offendingString.length,
@@ -608,7 +607,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				assertEquals(false, abstract)
 				val offendingString = "op(EClassifiers.last as EClass)"
 				val initialIndex = input.lastIndexOf(offendingString)
-				assertWarning(
+				currentProgram.assertWarning(
 					XbasePackage.eINSTANCE.XFeatureCall,
 					EdeltaValidator.INTERPRETER_TIMEOUT,
 					initialIndex, offendingString.length,
@@ -667,7 +666,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				assertEquals(false, abstract)
 				val offendingString = "op(EClassifiers.last as EClass)"
 				val initialIndex = input.lastIndexOf(offendingString)
-				assertWarning(
+				currentProgram.assertWarning(
 					XbasePackage.eINSTANCE.XFeatureCall,
 					EdeltaValidator.INTERPRETER_TIMEOUT,
 					initialIndex, offendingString.length,
@@ -2066,6 +2065,38 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		]
 	}
 
+	@Test
+	def void testAccessToResourceSet() throws Exception {
+		// our content adapter used in these tests detects attempts
+		// to modify the original EPackages.
+		// Even by using the ResourceSet the program can only access
+		// copied EPackages and not the original ones
+		// see https://github.com/LorenzoBettini/edelta/issues/310
+		'''
+			import org.eclipse.emf.ecore.EPackage
+			
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				// access the ResourceSet
+				// but during the interpration we use a sandbox ResourceSet
+				// so that the interpreted code can access only copied EPackages
+				val rs = eResource.getResourceSet
+				// remove all EClass in any EPackage with name "FooClass"
+				// this must not touch the original EPackages
+				rs.resources
+					.map[contents]
+					.flatten
+					.filter(EPackage)
+					.forEach[EClassifiers.removeIf[name == "FooClass"]]
+			}
+		'''.
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(true) [ derivedEPackage |
+			val fooClass = derivedEPackage.getEClassifier("FooClass")
+			assertNull(fooClass)
+		]
+	}
+
 	def private assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 		CharSequence input, (EPackage)=>void testExecutor
 	) throws Exception {
@@ -2105,6 +2136,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		EdeltaProgram program,
 		(EPackage)=>void testExecutor
 	) throws Exception {
+		currentProgram = program
 		val it = program.lastModifyEcoreOperation
 		interpreter.evaluateModifyEcoreOperations(program)
 		val packageName = it.epackage.name

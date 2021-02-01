@@ -19,7 +19,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
@@ -281,44 +280,33 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
   }
   
   /**
-   * Whether {@link #hasNoReferenceInThisPackage(EClassifier)} and
-   * {@link #isNotReferenced(EClassifier)}
+   * Whether {@link #doesNotReferToClasses(EClassifier)} and
+   * {@link #isNotReferredByClassifiers(EClassifier)}
    */
   public boolean isDeadClassifier(final EClassifier cl) {
-    if ((this.hasNoReferenceInThisPackage(cl) && this.isNotReferenced(cl))) {
+    final boolean result = (this.doesNotReferToClasses(cl) && this.isNotReferredByClassifiers(cl));
+    if (result) {
       final Supplier<String> _function = () -> {
         String _eObjectRepr = EdeltaLibrary.getEObjectRepr(cl);
         return ("Dead classifier: " + _eObjectRepr);
       };
       this.logInfo(_function);
-      return true;
     }
-    return false;
+    return result;
   }
   
   /**
-   * Whether the passed EClassifier does not refer to anything in its
-   * EPackage.
+   * Whether the passed EClassifier does not refer to any EClass
    */
-  public boolean hasNoReferenceInThisPackage(final EClassifier c) {
-    boolean _xblockexpression = false;
-    {
-      final EPackage thisPackage = c.getEPackage();
-      final Function1<EClassifier, Boolean> _function = (EClassifier it) -> {
-        EPackage _ePackage = it.getEPackage();
-        return Boolean.valueOf((_ePackage == thisPackage));
-      };
-      _xblockexpression = IterableExtensions.isEmpty(IterableExtensions.<EClassifier>filter(Iterables.<EClassifier>filter(EcoreUtil.CrossReferencer.find(CollectionLiterals.<EClassifier>newArrayList(c)).keySet(), EClassifier.class), _function));
-    }
-    return _xblockexpression;
+  public boolean doesNotReferToClasses(final EClassifier c) {
+    return IterableExtensions.isEmpty(Iterables.<EClass>filter(EcoreUtil.CrossReferencer.find(CollectionLiterals.<EClassifier>newArrayList(c)).keySet(), EClass.class));
   }
   
   /**
-   * Whether the passed EClassifier is not referenced in its
-   * EPackage.
+   * Whether the passed EClassifier is not referred by EClassifiers.
    */
-  public boolean isNotReferenced(final EClassifier cl) {
-    return EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()).isEmpty();
+  public boolean isNotReferredByClassifiers(final EClassifier cl) {
+    return EcoreUtil.UsageCrossReferencer.find(cl, EdeltaLibrary.packagesToInspect(cl)).isEmpty();
   }
   
   /**
@@ -330,7 +318,7 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
     final Function1<EClass, Boolean> _function = (EClass it) -> {
       return Boolean.valueOf((((it.getESuperTypes().size() == 1) && 
         it.getEStructuralFeatures().isEmpty()) && 
-        this.isNotReferenced(it)));
+        this.isNotReferredByClassifiers(it)));
     };
     final Function1<EClass, EClass> _function_1 = (EClass it) -> {
       return IterableExtensions.<EClass>head(it.getESuperTypes());
@@ -381,26 +369,20 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
   }
   
   public boolean hasSubclasses(final EClass cl) {
-    final Function1<EStructuralFeature.Setting, Boolean> _function = (EStructuralFeature.Setting it) -> {
-      EStructuralFeature _eStructuralFeature = it.getEStructuralFeature();
-      EReference _eClass_ESuperTypes = EcorePackage.eINSTANCE.getEClass_ESuperTypes();
-      return Boolean.valueOf((_eStructuralFeature == _eClass_ESuperTypes));
-    };
-    boolean _isEmpty = IterableExtensions.isEmpty(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()), _function));
+    boolean _isEmpty = IterableExtensions.isEmpty(this.directSubclasses(cl));
     return (!_isEmpty);
   }
   
   public Iterable<EClass> directSubclasses(final EClass cl) {
     final Function1<EStructuralFeature.Setting, Boolean> _function = (EStructuralFeature.Setting it) -> {
       EStructuralFeature _eStructuralFeature = it.getEStructuralFeature();
-      EReference _eClass_ESuperTypes = EcorePackage.eINSTANCE.getEClass_ESuperTypes();
-      return Boolean.valueOf((_eStructuralFeature == _eClass_ESuperTypes));
+      return Boolean.valueOf((_eStructuralFeature == getEReference("ecore", "EClass", "eSuperTypes")));
     };
     final Function1<EStructuralFeature.Setting, EClass> _function_1 = (EStructuralFeature.Setting it) -> {
       EObject _eObject = it.getEObject();
       return ((EClass) _eObject);
     };
-    return IterableExtensions.<EStructuralFeature.Setting, EClass>map(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, cl.getEPackage()), _function), _function_1);
+    return IterableExtensions.<EStructuralFeature.Setting, EClass>map(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, EdeltaLibrary.packagesToInspect(cl)), _function), _function_1);
   }
   
   /**
@@ -446,5 +428,10 @@ public class EdeltaBadSmellsFinder extends AbstractEdelta {
     };
     classes.forEach(_function_1);
     return classes;
+  }
+  
+  @Override
+  public void performSanityChecks() throws Exception {
+    ensureEPackageIsLoaded("ecore");
   }
 }

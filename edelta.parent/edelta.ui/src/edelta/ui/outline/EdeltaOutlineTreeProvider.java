@@ -5,10 +5,12 @@ package edelta.ui.outline;
 
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider;
 import org.eclipse.xtext.ui.editor.outline.impl.EObjectNode;
+import org.eclipse.xtext.util.concurrent.IUnitOfWork;
 import org.eclipse.xtext.xbase.XExpression;
 
 import com.google.inject.Inject;
@@ -27,7 +29,14 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	@Inject
 	private EdeltaDerivedStateHelper derivedStateHelper;
 
+	/**
+	 * This is needed to access the derived state when creating nodes for
+	 * Ecore elements, which are stored in a different Resource.
+	 */
+	private EdeltaProgram currentProgram;
+
 	protected void _createChildren(final IOutlineNode parentNode, final EdeltaProgram p) { // NOSONAR OutlineTreeProvider in Xtext is based on some redefined methods starting with _
+		currentProgram = p;
 		for (final var o : p.getOperations()) {
 			this.createNode(parentNode, o);
 		}
@@ -61,15 +70,34 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	@Override
 	protected EObjectNode createEObjectNode(IOutlineNode parentNode, EObject modelElement, Image image, Object text,
 			boolean isLeaf) {
-		final var eObjectNode = super.createEObjectNode(parentNode, modelElement, image, text, isLeaf);
-		if (modelElement instanceof ENamedElement) {
-			// try to associate the node to the responsible XExpression
-			XExpression expression = derivedStateHelper.
-				getLastResponsibleExpression((ENamedElement) modelElement);
-			if (expression != null)
-				eObjectNode.setShortTextRegion(
-					locationInFileProvider.getSignificantTextRegion(expression));
+		// cannot simply check ENamedElement: EGenericType is not an ENamedElement
+		if (modelElement.eClass().getEPackage() == EcorePackage.eINSTANCE) {
+			var elementForSignificantTestRegion = modelElement;
+			/*
+			 * custom implementation of readOnly: the default one tries to retrieve the
+			 * EObject using the URI and then loading the corresponding resource, but for
+			 * copied EPackages we simply return the modelElement for the passed work.
+			 * readOnly is used for example by node.getChildren. (see
+			 * EdeltaOutlineWithEditorLinker).
+			 */
+			var eObjectNode = new EObjectNode(modelElement, parentNode, image, text, isLeaf) {
+				@Override
+				public <T> T readOnly(IUnitOfWork<T, EObject> work) {
+					return getDocument().tryReadOnly(state -> work.exec(modelElement));
+				}
+			};
+			if (modelElement instanceof ENamedElement) {
+				// try to associate the node to the responsible XExpression
+				XExpression expression = derivedStateHelper.
+					getLastResponsibleExpression(currentProgram, (ENamedElement) modelElement);
+				if (expression != null) {
+					elementForSignificantTestRegion = expression;
+				}
+			}
+			eObjectNode.setShortTextRegion(
+				locationInFileProvider.getSignificantTextRegion(elementForSignificantTestRegion));
+			return eObjectNode;
 		}
-		return eObjectNode;
+		return super.createEObjectNode(parentNode, modelElement, image, text, isLeaf);
 	}
 }

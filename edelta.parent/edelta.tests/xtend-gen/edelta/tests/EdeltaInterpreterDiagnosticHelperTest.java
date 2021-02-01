@@ -3,7 +3,6 @@ package edelta.tests;
 import com.google.inject.Inject;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreterDiagnosticHelper;
-import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 import org.eclipse.emf.ecore.EPackage;
@@ -24,9 +23,6 @@ import org.junit.runner.RunWith;
 public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
   @Inject
   private EdeltaInterpreterDiagnosticHelper diagnosticHelper;
-  
-  @Inject
-  private EdeltaDerivedStateHelper derivedStateHelper;
   
   @Test
   public void testAddErrorWithCurrentExpression() throws Exception {

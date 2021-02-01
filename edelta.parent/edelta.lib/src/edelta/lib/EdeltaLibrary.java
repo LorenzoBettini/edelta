@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -23,10 +24,10 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
+import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.xtext.xbase.lib.IterableExtensions;
-
-import com.google.common.collect.Iterables;
 
 /**
  * Library functions to be reused in Edelta programs.
@@ -371,16 +372,20 @@ public class EdeltaLibrary {
 
 	/**
 	 * Returns a list of all the {@link EClass}es of the specified
-	 * {@link EPackage}.
+	 * {@link EPackage} and of the packages in the same {@link Resource}
+	 * and {@link ResourceSet}.
 	 * 
 	 * @param ePackage
 	 * @return an empty list if the ePackage is null
+	 * @see #packagesToInspect(EClassifier)
 	 */
 	public static List<EClass> allEClasses(EPackage ePackage) {
 		if (ePackage == null)
 			return Collections.emptyList();
-		return IterableExtensions.toList(
-			Iterables.filter(ePackage.getEClassifiers(), EClass.class));
+		return filterByType(
+			packagesToInspect(ePackage).stream().flatMap(p -> p.getEClassifiers().stream()),
+				EClass.class)
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -608,5 +613,61 @@ public class EdeltaLibrary {
 	 */
 	public static void dropContainment(EReference reference) {
 		reference.setContainment(false);
+	}
+
+	/**
+	 * Given an {@link EClassifier} it returns a {@link Collection} of
+	 * {@link EPackage}s that can be inspected, for example, to search for
+	 * references. It always returns a collection. In case the classifier is not
+	 * contained in any package the returned collection is null. If the package is
+	 * not contained in a {@link Resource} then the collection contains only the
+	 * package. Otherwise it collects all the packages in all resources in the
+	 * {@link ResourceSet} (if there is one). The {@link EcorePackage} is never
+	 * part of the returned collection.
+	 * 
+	 * @param e
+	 * @return
+	 */
+	public static Collection<EPackage> packagesToInspect(EClassifier e) {
+		var ePackage = e.getEPackage();
+		if (ePackage == null)
+			return Collections.emptyList();
+		return packagesToInspect(ePackage);
+	}
+
+	/**
+	 * Given an {@link EPackage} it returns a {@link Collection} of
+	 * {@link EPackage}s that can be inspected, for example, to search for
+	 * references. It always returns a collection. If the package is
+	 * not contained in a {@link Resource} then the collection contains only the
+	 * package. Otherwise it collects all the packages in all resources in the
+	 * {@link ResourceSet} (if there is one). The {@link EcorePackage} is never
+	 * part of the returned collection.
+	 * 
+	 * @param ePackage
+	 * @return
+	 */
+	public static Collection<EPackage> packagesToInspect(EPackage ePackage) {
+		var resource = ePackage.eResource();
+		if (resource == null)
+			return Collections.singleton(ePackage);
+		var resourceSet = resource.getResourceSet();
+		if (resourceSet == null)
+			return filterEPackages(resource.getContents().stream());
+		var flatContents = resourceSet.getResources().stream()
+			.flatMap(r -> r.getContents().stream());
+		return filterEPackages(flatContents);
+	}
+
+	private static List<EPackage> filterEPackages(Stream<EObject> objectsStream) {
+		return filterByType(objectsStream, EPackage.class)
+				.filter(p -> !EcorePackage.eNS_URI.equals(p.getNsURI()))
+				.collect(Collectors.toList());
+	}
+
+	private static <T, R> Stream<R> filterByType(Stream<T> stream, Class<R> desiredType) {
+		return stream
+				.filter(desiredType::isInstance)
+				.map(desiredType::cast);
 	}
 }

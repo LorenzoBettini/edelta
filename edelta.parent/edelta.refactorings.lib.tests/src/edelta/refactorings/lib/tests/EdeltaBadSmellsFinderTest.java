@@ -14,6 +14,8 @@ import java.util.Map;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.xtext.xbase.lib.Pair;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,10 +29,11 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	}
 
 	@Test
-	public void test_ConstructorArgument() {
+	public void test_ConstructorArgument() throws Exception {
 		finder = new EdeltaBadSmellsFinder(new AbstractEdelta() {
 		});
 		assertThat(finder).isNotNull();
+		finder.performSanityChecks();
 	}
 
 	@Test
@@ -167,7 +170,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 
 	@Test
 	public void test_findDeadClassifiers() {
-		final EPackage p = createEPackage("p", pack -> {
+		var p1 = createEPackage("p1", pack -> {
 			addNewEClass(pack, "Unused1");
 			EClass used1 = addNewEClass(pack, "Used1");
 			EClass used2 = addNewEClass(pack, "Used2");
@@ -176,22 +179,101 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 				addNewEReference(c, "used2", used2);
 			});
 		});
-		assertThat(finder.findDeadClassifiers(p))
-			.containsExactly(findEClass(p, "Unused1"));
+		assertThat(finder.findDeadClassifiers(p1))
+			.containsExactly(findEClass(p1, "Unused1"));
+		// create a resource set with cross reference
+		var p2 = createEPackage("p2", pack -> {
+			addNewEClass(pack, "UsesUnused1", c -> {
+				addNewEReference(c, "unused1FromP1", (EClass) p1.getEClassifier("Unused1"));
+			});
+		});
+		var resourceSet = new ResourceSetImpl();
+		var p1Resource = new ResourceImpl();
+		p1Resource.getContents().add(p1);
+		resourceSet.getResources().add(p1Resource);
+		var p2Resource = new ResourceImpl();
+		p2Resource.getContents().add(p2);
+		resourceSet.getResources().add(p2Resource);
+		// now Unused1 is referenced by a class in another package
+		// in the same resource set
+		assertThat(finder.findDeadClassifiers(p1))
+			.isEmpty();
 	}
 
 	@Test
-	public void test_hasNoReferenceInThisPackage() {
-		final EPackage otherPackage = createEPackage("otherPackage");
-		final EClass used1 = addNewEClass(otherPackage, "Used1");
-		final EPackage p = createEPackage("p", pack -> {
+	public void test_doesNotReferToClasses() {
+		var otherPackage = createEPackage("otherPackage");
+		var used1 = addNewEClass(otherPackage, "Used1");
+		var p = createEPackage("p", pack -> {
 			addNewEClass(pack, "HasNoReferenceInThisPackage", c -> {
 				// has a reference to a class in a different package
 				addNewEReference(c, "used1", used1);
 			});
 		});
-		assertThat(finder.hasNoReferenceInThisPackage(head(EClasses(p))))
-				.isTrue();
+		assertThat(finder.doesNotReferToClasses(head(EClasses(p))))
+			.isFalse();
+		var hasNoReference = addNewEClass(p, "HasNoReference");
+		assertThat(finder.doesNotReferToClasses(hasNoReference))
+			.isTrue();
+		var onlyReferToSelf = addNewEClass(p, "OnlyReferToSelf", c -> {
+			// has a reference to self
+			addNewEReference(c, "mySelf", c);
+		});
+		// self references are considered
+		assertThat(finder.doesNotReferToClasses(onlyReferToSelf))
+			.isFalse();
+		var withSuperClass = addNewSubclass(used1, "WithSuperClass");
+		// superclasses are considered
+		assertThat(finder.doesNotReferToClasses(withSuperClass))
+			.isFalse();
+		var onlyWithAtttributes = addNewEClass(p, "OnlyWithAttributes", c -> {
+			addNewEAttribute(c, "name", stringDataType);
+		});
+		// attributes, i.e., EDataType, are not considered
+		assertThat(finder.doesNotReferToClasses(onlyWithAtttributes))
+			.isTrue();
+	}
+
+	@Test
+	public void test_isNotReferredByClassifiers() {
+		var p1 = createEPackage("p1");
+		var referenced = addNewEClass(p1, "Referenced");
+		var baseClass = addNewEClass(p1, "BaseClass");
+		var notReferenced = addNewEClass(p1, "NotReferenced");
+		addNewEClass(p1, "Referring", c -> {
+			addNewEReference(c, "aRef", referenced);
+		});
+		addNewSubclass(baseClass, "DerivedClass");
+		assertThat(finder.isNotReferredByClassifiers(notReferenced))
+			.isTrue();
+		assertThat(finder.isNotReferredByClassifiers(referenced))
+			.isFalse();
+		// if there's a derived class, the base class is referenced
+		assertThat(finder.isNotReferredByClassifiers(baseClass))
+			.isFalse();
+		var selfReferenced = addNewEClass(p1, "SelfReferenced", c -> {
+			addNewEReference(c, "mySelf", c);
+		});
+		// self references are considered
+		assertThat(finder.isNotReferredByClassifiers(selfReferenced))
+			.isFalse();
+		// create a resource set with cross reference
+		var p2 = createEPackage("p2", pack -> {
+			addNewEClass(pack, "UsesNotReferencedInP1", c -> {
+				addNewEReference(c, "usesNotReferencedInP1", (EClass) p1.getEClassifier("NotReferenced"));
+			});
+		});
+		var resourceSet = new ResourceSetImpl();
+		var p1Resource = new ResourceImpl();
+		p1Resource.getContents().add(p1);
+		resourceSet.getResources().add(p1Resource);
+		var p2Resource = new ResourceImpl();
+		p2Resource.getContents().add(p2);
+		resourceSet.getResources().add(p2Resource);
+		// now it is referenced by a class in another package
+		// in the same resource set
+		assertThat(finder.isNotReferredByClassifiers(notReferenced))
+			.isFalse();
 	}
 
 	@Test
@@ -298,6 +380,28 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 				ENamedElement::getName))
 			.containsExactlyInAnyOrder("ASubclass1Subclass");
 		assertThat(finder.directSubclasses(findEClass(p, "ASubclass1Subclass"))).isEmpty();
+	}
+
+	@Test
+	public void test_directSubclassesInResourceSet() {
+		final EPackage p1 = createEPackage("p1");
+		var superclass = addNewEClass(p1, "ASuperclass");
+		final EPackage p2 = createEPackage("p2");
+		var subclass1 = addNewEClass(p2, "ASubclass1");
+		addESuperType(subclass1, superclass);
+		addNewSubclass(superclass, "ASubclass2");
+		var resourceSet = new ResourceSetImpl();
+		var p1Resource = new ResourceImpl();
+		p1Resource.getContents().add(p1);
+		resourceSet.getResources().add(p1Resource);
+		var p2Resource = new ResourceImpl();
+		p2Resource.getContents().add(p2);
+		resourceSet.getResources().add(p2Resource);
+		assertThat(
+			map(
+				finder.directSubclasses(superclass),
+				ENamedElement::getName))
+			.containsExactlyInAnyOrder("ASubclass1", "ASubclass2");
 	}
 
 	@Test
