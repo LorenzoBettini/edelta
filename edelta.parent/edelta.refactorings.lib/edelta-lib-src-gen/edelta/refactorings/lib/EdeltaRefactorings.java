@@ -223,6 +223,26 @@ public class EdeltaRefactorings extends AbstractEdelta {
   }
   
   /**
+   * Inlines the features of the specified class into the single class
+   * that has a containment reference to the specified class.
+   * The specified class will then be removed.
+   * 
+   * @param cl
+   * @return the features of the original class
+   */
+  public List<EStructuralFeature> inlineClass(final EClass cl) {
+    final EReference ref = this.findSingleContainmentReferenceToThisClass(cl);
+    final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
+      EReference _eOpposite = ref.getEOpposite();
+      return Boolean.valueOf((it != _eOpposite));
+    };
+    final List<EStructuralFeature> featuresToInline = IterableExtensions.<EStructuralFeature>toList(IterableExtensions.<EStructuralFeature>filter(cl.getEStructuralFeatures(), _function));
+    EdeltaLibrary.moveAllTo(featuresToInline, ref.getEContainingClass());
+    EdeltaLibrary.removeElement(cl);
+    return featuresToInline;
+  }
+  
+  /**
    * Makes the EReference, which is assumed to be already part of an EClass,
    * a single required containment reference, adds to the referred
    * type, which is assumed to be set, an opposite required single reference.

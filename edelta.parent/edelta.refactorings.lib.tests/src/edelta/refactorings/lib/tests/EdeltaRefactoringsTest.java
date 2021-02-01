@@ -467,6 +467,43 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertThat(result).isNull();
 	}
 
+	@Test
+	void test_inlineClassWithAttributes() throws IOException {
+		withInputModels("inlineClassWithAttributes", "PersonList.ecore");
+		loadModelFiles();
+		refactorings.inlineClass(refactorings.getEClass("PersonList", "Address"));
+		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		assertModifiedFiles();
+	}
+
+	@Test
+	void test_inlineClass_IsOppositeOf_extractClass() throws IOException {
+		withInputModels("extractClassWithAttributes", "PersonList.ecore");
+		assertOppositeRefactorings(
+			() -> refactorings.extractClass("Address",
+					asList(
+							refactorings.getEAttribute("PersonList", "Person", "street"),
+							refactorings.getEAttribute("PersonList", "Person", "houseNumber"))
+						),
+			() -> refactorings.inlineClass(refactorings.getEClass("PersonList", "Address"))
+		);
+		assertLogIsEmpty();
+	}
+
+	@Test
+	void test_inlineClass_IsOppositeOf_extractClass2() throws IOException {
+		withInputModels("inlineClassWithAttributes", "PersonList.ecore");
+		assertOppositeRefactorings(
+			() -> refactorings.inlineClass(refactorings.getEClass("PersonList", "Address")),
+			() -> refactorings.extractClass("Address",
+					asList(
+							refactorings.getEAttribute("PersonList", "Person", "street"),
+							refactorings.getEAttribute("PersonList", "Person", "houseNumber"))
+					)
+		);
+		assertLogIsEmpty();
+	}
+
 	@ParameterizedTest
 	@ValueSource(strings = {
 		"referenceToClassBidirectional",

@@ -183,6 +183,24 @@ def extractClass(String name, Collection<EStructuralFeature> features) {
 }
 
 /**
+ * Inlines the features of the specified class into the single class
+ * that has a containment reference to the specified class.
+ * The specified class will then be removed.
+ * 
+ * @param cl
+ * @return the features of the original class
+ */
+def inlineClass(EClass cl) {
+	val ref = findSingleContainmentReferenceToThisClass(cl)
+	val featuresToInline = cl.EStructuralFeatures
+		.filter[it !== ref.EOpposite] // skip the possible back reference
+		.toList
+	featuresToInline.moveAllTo(ref.EContainingClass)
+	removeElement(cl)
+	return featuresToInline
+}
+
+/**
  * Makes the EReference, which is assumed to be already part of an EClass,
  * a single required containment reference, adds to the referred
  * type, which is assumed to be set, an opposite required single reference.
