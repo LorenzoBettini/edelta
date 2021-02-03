@@ -672,12 +672,13 @@ public class EdeltaLibrary {
 	 */
 	public static Collection<EPackage> usedPackages(EPackage ePackage) {
 		Map<EObject, Collection<Setting>> map = EcoreUtil.CrossReferencer.find(List.of(ePackage));
-		return filterByType(map.keySet().stream(), EClassifier.class)
-				.map(EClassifier::getEPackage)
-				.filter(Objects::nonNull)
-				.filter(notEcore())
-				.filter(p -> !Objects.equals(ePackage, p))
-				.collect(Collectors.toSet());
+		// the keys are the EObjects that are used by elements of this package
+		return filterByType(map.keySet().stream(), EClassifier.class) // only the used EClassifiers...
+			.map(EClassifier::getEPackage) // ...to get their packages
+			.filter(Objects::nonNull) // safety condition
+			.filter(notEcore()) // skip the Ecore.ecore
+			.filter(p -> !Objects.equals(ePackage, p)) // different from our package
+			.collect(Collectors.toSet()); // just one occurrence of each used package
 	}
 
 	private static List<EPackage> filterEPackages(Stream<EObject> objectsStream) {
