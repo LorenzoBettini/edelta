@@ -855,6 +855,79 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
     }
   }
   
+  @Test
+  @Flaky
+  public void testForAmbiguousReferencesFullyQualifiedNameIsProposedInOperation() {
+    try {
+      this.createMySubPackagesEcore();
+      IResourcesSetupUtil.waitForBuild();
+      ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"mainpackage\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("def anOp() {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(My");
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("MySubPackageClass");
+      _builder_1.newLine();
+      _builder_1.append("mainpackage.MyClass");
+      _builder_1.newLine();
+      _builder_1.append("mainpackage.MyClass.myAttribute");
+      _builder_1.newLine();
+      _builder_1.append("mainpackage.MyClass.myReference");
+      _builder_1.newLine();
+      _builder_1.append("mainpackage.subpackage.MyClass");
+      _builder_1.newLine();
+      _builder_1.append("mainpackage.subpackage.MyClass.myAttribute");
+      _builder_1.newLine();
+      _builder_1.append("mainpackage.subpackage.MyClass.myReference");
+      _builder_1.newLine();
+      _builder_1.append("mainpackage.subpackage.subsubpackage.MyClass");
+      _builder_1.newLine();
+      _builder_1.append("mainpackage.subpackage.subsubpackage.MyClass.myAttribute");
+      _builder_1.newLine();
+      _builder_1.append("mainpackage.subpackage.subsubpackage.MyClass.myReference");
+      _builder_1.newLine();
+      _newBuilder.append(_builder.toString()).assertText(
+        this.fromLinesOfStringsToStringArray(_builder_1));
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  @Test
+  @Flaky
+  public void testForAmbiguousReferencesFullyQualifiedNameIsReplacedInOperation() {
+    try {
+      this.createMySubPackagesEcore();
+      IResourcesSetupUtil.waitForBuild();
+      ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
+      StringConcatenation _builder = new StringConcatenation();
+      _builder.append("metamodel \"mainpackage\"");
+      _builder.newLine();
+      _builder.newLine();
+      _builder.append("def anOp() {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ecoreref(My");
+      ContentAssistProcessorTestBuilder _applyProposal = _newBuilder.append(_builder.toString()).applyProposal("mainpackage.subpackage.MyClass.myAttribute");
+      StringConcatenation _builder_1 = new StringConcatenation();
+      _builder_1.append("metamodel \"mainpackage\"");
+      _builder_1.newLine();
+      _builder_1.newLine();
+      _builder_1.append("def anOp() {");
+      _builder_1.newLine();
+      _builder_1.append("\t");
+      _builder_1.append("ecoreref(mainpackage.subpackage.MyClass.myAttribute");
+      _applyProposal.expectContent(_builder_1.toString());
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
   private String[] fromLinesOfStringsToStringArray(final CharSequence strings) {
     return strings.toString().replaceAll("\r", "").split("\n");
   }

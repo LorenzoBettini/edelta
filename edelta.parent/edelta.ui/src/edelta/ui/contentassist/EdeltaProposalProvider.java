@@ -20,6 +20,7 @@ import org.eclipse.xtext.scoping.impl.SimpleScope;
 import org.eclipse.xtext.ui.editor.contentassist.ConfigurableCompletionProposal;
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext;
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor;
+import org.eclipse.xtext.util.IResourceScopeCache;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
@@ -49,6 +50,9 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 
 	@Inject
 	private EdeltaEcoreHelper ecoreHelper;
+
+	@Inject
+	private IResourceScopeCache cache;
 
 	protected class EdeltaProposalCreator extends XbaseProposalCreator {
 
@@ -120,12 +124,15 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 	public void completeEdeltaEcoreDirectReference_Enamedelement(EObject model,
 			Assignment assignment, ContentAssistContext context,
 			ICompletionProposalAcceptor acceptor) {
+		EdeltaAccessibleElements accessibleElements;
 		if (notInsideModifyEcore(model)) {
-			super.completeEdeltaEcoreDirectReference_Enamedelement(
-					model, assignment, context, acceptor);
-			return;
+			accessibleElements = 
+				cache.get("getOriginalMetamodelsAccessibleElements", model.eResource(),
+					() -> ecoreHelper.fromEPackagesToAccessibleElements(
+						EdeltaModelUtil.getProgram(model).getMetamodels()));
+		} else {
+			accessibleElements = getAccessibleElements(model);
 		}
-		final var accessibleElements = getAccessibleElements(model);
 		final var countByName = accessibleElements.stream()
 			.collect(groupingBy(e -> e.getElement().getName(),
 						counting()));

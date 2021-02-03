@@ -488,6 +488,47 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 				ecoreref(mainpackage.subpackage.MyClass.myAttribute''')
 	}
 
+	@Test @Flaky
+	def void testForAmbiguousReferencesFullyQualifiedNameIsProposedInOperation() {
+		createMySubPackagesEcore()
+		waitForBuild // required to index the new ecore file
+		newBuilder.append('''
+			metamodel "mainpackage"
+			
+			def anOp() {
+				ecoreref(My''')
+			.assertText(
+				'''
+				MySubPackageClass
+				mainpackage.MyClass
+				mainpackage.MyClass.myAttribute
+				mainpackage.MyClass.myReference
+				mainpackage.subpackage.MyClass
+				mainpackage.subpackage.MyClass.myAttribute
+				mainpackage.subpackage.MyClass.myReference
+				mainpackage.subpackage.subsubpackage.MyClass
+				mainpackage.subpackage.subsubpackage.MyClass.myAttribute
+				mainpackage.subpackage.subsubpackage.MyClass.myReference
+				'''.fromLinesOfStringsToStringArray)
+	}
+
+	@Test @Flaky
+	def void testForAmbiguousReferencesFullyQualifiedNameIsReplacedInOperation() {
+		createMySubPackagesEcore()
+		waitForBuild // required to index the new ecore file
+		newBuilder.append('''
+			metamodel "mainpackage"
+			
+			def anOp() {
+				ecoreref(My''')
+			.applyProposal("mainpackage.subpackage.MyClass.myAttribute")
+			.expectContent('''
+			metamodel "mainpackage"
+			
+			def anOp() {
+				ecoreref(mainpackage.subpackage.MyClass.myAttribute''')
+	}
+
 	def private fromLinesOfStringsToStringArray(CharSequence strings) {
 		strings.toString.replaceAll("\r", "").split("\n")
 	}
