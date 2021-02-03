@@ -495,7 +495,6 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			.isEqualTo(
 			"ERROR: PersonList.Person.workplace: Cannot extract bidirectinal references:\n"
 			+ "  PersonList.Person.workplace");
-
 	}
 
 	@Test
@@ -503,6 +502,17 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		withInputModels("inlineClassWithAttributes", "PersonList.ecore");
 		loadModelFiles();
 		refactorings.inlineClass(refactorings.getEClass("PersonList", "Address"));
+		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		assertModifiedFiles();
+	}
+
+	@Test
+	void test_inlineClassPrefix() throws IOException {
+		withInputModels("inlineClassPrefix", "PersonList.ecore");
+		loadModelFiles();
+		refactorings.inlineClass(
+			refactorings.getEClass("PersonList", "Address"),
+			"address_");
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFiles();
 	}

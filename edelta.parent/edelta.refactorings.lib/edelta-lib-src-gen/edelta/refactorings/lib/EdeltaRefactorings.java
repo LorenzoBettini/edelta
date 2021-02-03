@@ -233,12 +233,31 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @return the features of the original class
    */
   public List<EStructuralFeature> inlineClass(final EClass cl) {
+    return this.inlineClass(cl, "");
+  }
+  
+  /**
+   * Inlines the features of the specified class into the single class
+   * that has a containment reference to the specified class.
+   * The specified class will then be removed.
+   * 
+   * @param cl
+   * @param prefix the prefix for the names of the inlined features
+   * @return the features of the original class
+   */
+  public List<EStructuralFeature> inlineClass(final EClass cl, final String prefix) {
     final EReference ref = this.findSingleContainmentReferenceToThisClass(cl);
     final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
       EReference _eOpposite = ref.getEOpposite();
       return Boolean.valueOf((it != _eOpposite));
     };
     final List<EStructuralFeature> featuresToInline = IterableExtensions.<EStructuralFeature>toList(IterableExtensions.<EStructuralFeature>filter(cl.getEStructuralFeatures(), _function));
+    final Consumer<EStructuralFeature> _function_1 = (EStructuralFeature it) -> {
+      String _name = it.getName();
+      String _plus = (prefix + _name);
+      it.setName(_plus);
+    };
+    featuresToInline.forEach(_function_1);
     EdeltaLibrary.moveAllTo(featuresToInline, ref.getEContainingClass());
     EdeltaLibrary.removeElement(cl);
     return featuresToInline;
