@@ -7,8 +7,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,6 +26,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -659,10 +663,31 @@ public class EdeltaLibrary {
 		return filterEPackages(flatContents);
 	}
 
+	/**
+	 * Returns the collection of the {@link EPackage}s used by the passed
+	 * {@link EPackage}.
+	 * 
+	 * @param ePackage
+	 * @return
+	 */
+	public static Collection<EPackage> usedPackages(EPackage ePackage) {
+		Map<EObject, Collection<Setting>> map = EcoreUtil.CrossReferencer.find(List.of(ePackage));
+		return filterByType(map.keySet().stream(), EClassifier.class)
+				.map(EClassifier::getEPackage)
+				.filter(Objects::nonNull)
+				.filter(notEcore())
+				.filter(p -> !Objects.equals(ePackage, p))
+				.collect(Collectors.toSet());
+	}
+
 	private static List<EPackage> filterEPackages(Stream<EObject> objectsStream) {
 		return filterByType(objectsStream, EPackage.class)
-				.filter(p -> !EcorePackage.eNS_URI.equals(p.getNsURI()))
+				.filter(notEcore())
 				.collect(Collectors.toList());
+	}
+
+	private static Predicate<? super EPackage> notEcore() {
+		return p -> !EcorePackage.eNS_URI.equals(p.getNsURI());
 	}
 
 	private static <T, R> Stream<R> filterByType(Stream<T> stream, Class<R> desiredType) {

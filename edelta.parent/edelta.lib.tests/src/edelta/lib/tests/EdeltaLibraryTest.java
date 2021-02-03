@@ -30,6 +30,7 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil.EqualityHelper;
 import org.junit.Test;
 
+import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaLibrary;
 
 /**
@@ -1044,5 +1045,21 @@ public class EdeltaLibraryTest {
 		resourceSet.getResources().add(ecorePackageResource);
 		var packages = EdeltaLibrary.packagesToInspect(c);
 		assertThat(packages).containsExactlyInAnyOrder(p, anotherPackage);
+	}
+
+	@Test
+	public void test_usedPackages() {
+		var edelta = new AbstractEdelta() {
+		};
+		edelta.loadEcoreFile("testecores/TestEcoreForUsages1.ecore");
+		edelta.loadEcoreFile("testecores/TestEcoreForUsages2.ecore");
+		var package1 = edelta.getEPackage("testecoreforusages1");
+		var package2 = edelta.getEPackage("testecoreforusages2");
+		assertThat(package1).isNotNull();
+		assertThat(package2).isNotNull();
+		assertThat(EdeltaLibrary.usedPackages(package1))
+			.containsExactlyInAnyOrder(package2);
+		assertThat(EdeltaLibrary.usedPackages(package2))
+			.containsExactlyInAnyOrder(package1);
 	}
 }
