@@ -1053,13 +1053,23 @@ public class EdeltaLibraryTest {
 		};
 		edelta.loadEcoreFile("testecores/TestEcoreForUsages1.ecore");
 		edelta.loadEcoreFile("testecores/TestEcoreForUsages2.ecore");
+		edelta.loadEcoreFile("testecores/TestEcoreForUsages3.ecore");
+		edelta.loadEcoreFile("testecores/TestEcoreForUsages4.ecore");
 		var package1 = edelta.getEPackage("testecoreforusages1");
 		var package2 = edelta.getEPackage("testecoreforusages2");
+		var package3 = edelta.getEPackage("testecoreforusages3");
+		var package4 = edelta.getEPackage("testecoreforusages4");
 		assertThat(package1).isNotNull();
 		assertThat(package2).isNotNull();
+		assertThat(package3).isNotNull();
+		assertThat(package4).isNotNull();
 		assertThat(EdeltaLibrary.usedPackages(package1))
 			.containsExactlyInAnyOrder(package2);
 		assertThat(EdeltaLibrary.usedPackages(package2))
 			.containsExactlyInAnyOrder(package1);
+		assertThat(EdeltaLibrary.usedPackages(package3))
+			.containsExactlyInAnyOrder(package2);
+		assertThat(EdeltaLibrary.usedPackages(package4))
+			.containsExactlyInAnyOrder(package2, package1);
 	}
 }
