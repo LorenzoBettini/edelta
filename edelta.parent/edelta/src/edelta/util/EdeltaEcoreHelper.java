@@ -82,7 +82,14 @@ public class EdeltaEcoreHelper {
 			() -> fromEPackagesToAccessibleElements(getCurrentEPackagesToProcess(context)));
 	}
 
-	private EdeltaAccessibleElements fromEPackagesToAccessibleElements(final Collection<EPackage> epackages) {
+	/**
+	 * Returns {@link EdeltaAccessibleElements} using the passed copied
+	 * {@link EPackage}s.
+	 * 
+	 * @param epackages
+	 * @return
+	 */
+	public EdeltaAccessibleElements fromEPackagesToAccessibleElements(final Collection<EPackage> epackages) {
 		return epackages.stream()
 			.flatMap(this::getAllENamedElements)
 			.map(it -> new EdeltaAccessibleElement(it,
