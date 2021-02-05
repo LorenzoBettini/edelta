@@ -547,6 +547,20 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
+	void test_inlineClassWithAttributesWronglyMulti() throws IOException {
+		withInputModels("inlineClassWithAttributesWronglyMulti",
+				"PersonList.ecore");
+		loadModelFiles();
+		assertThrowsIAE(() ->
+			refactorings.inlineClass(refactorings.getEClass("PersonList", "Address")));
+		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		assertModifiedFilesAreSameAsOriginal();
+		assertThat(appender.getResult().trim())
+			.isEqualTo(
+			"ERROR: PersonList.Person.addresses: Cannot inline in a 'many' reference: PersonList.Person.addresses");
+	}
+
+	@Test
 	void test_inlineClassWithReferencesBidirectional() throws IOException {
 		withInputModels("inlineClassWithReferencesBidirectional", "PersonList.ecore");
 		loadModelFiles();

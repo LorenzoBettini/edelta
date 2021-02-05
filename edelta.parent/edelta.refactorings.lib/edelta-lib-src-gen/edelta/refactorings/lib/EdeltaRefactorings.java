@@ -25,6 +25,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
@@ -247,6 +248,8 @@ public class EdeltaRefactorings extends AbstractEdelta {
    */
   public List<EStructuralFeature> inlineClass(final EClass cl, final String prefix) {
     final EReference ref = this.findSingleContainmentReferenceToThisClass(cl);
+    this.checkNotMany(ref, 
+      "Cannot inline in a \'many\' reference");
     final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
       EReference _eOpposite = ref.getEOpposite();
       return Boolean.valueOf((it != _eOpposite));
@@ -483,7 +486,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
   /**
    * Makes sure that this is not a containment reference,
    * otherwise it shows an error message
-   * with the details of the differences and throws an IllegalArgumentException.
+   * and throws an IllegalArgumentException.
    * 
    * @param reference the reference that must not be a containment reference
    * @param errorMessage the message to show in case the reference
@@ -495,6 +498,24 @@ public class EdeltaRefactorings extends AbstractEdelta {
       String _eObjectRepr = EdeltaLibrary.getEObjectRepr(reference);
       final String message = ((errorMessage + ": ") + _eObjectRepr);
       this.showError(reference, message);
+      throw new IllegalArgumentException(message);
+    }
+  }
+  
+  /**
+   * Makes sure that this is not a multi element (upperBound > 1),
+   * otherwise it shows an error message
+   * and throws an IllegalArgumentException.
+   * 
+   * @param element the element that must not be multi
+   * @param errorMessage the message to show in case the check fails
+   */
+  public void checkNotMany(final ETypedElement element, final String errorMessage) {
+    boolean _isMany = element.isMany();
+    if (_isMany) {
+      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(element);
+      final String message = ((errorMessage + ": ") + _eObjectRepr);
+      this.showError(element, message);
       throw new IllegalArgumentException(message);
     }
   }
