@@ -16,7 +16,7 @@ node {
      mavenProfiles = "-Pbuild-ide,release-ide-composite,deploy-ide-composite"
      hasToDeploye = true
    } else {
-     mavenProfiles = "-Pjacoco,build-ide,test-ide"
+     mavenProfiles = "-Pjacoco,test-ide"
      ideTests = true
    }
    properties([

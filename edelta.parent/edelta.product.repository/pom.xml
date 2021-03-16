@@ -13,6 +13,35 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-p2-director-plugin</artifactId>
+          <version>${tycho-version}</version>
+          <executions>
+            <execution>
+              <id>materialize-products</id>
+              <goals>
+                <goal>materialize-products</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>archive-products</id>
+              <goals>
+                <goal>archive-products</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <products>
+              <product>
+                <id>edelta.eclipse.ide.product</id>
+                <archiveFileName>edelta-ide-${unqualifiedVersion}-${buildQualifier}</archiveFileName>
+                <!-- The path where the installed product shall be stored in the archive -->
+                <rootFolder>edelta</rootFolder>
+              </product>
+            </products>
+          </configuration>
+        </plugin>
+        <plugin>
           <groupId>org.eclipse.m2e</groupId>
           <artifactId>lifecycle-mapping</artifactId>
           <version>1.0.0</version>
@@ -49,41 +78,15 @@
   <profiles>
     <profile>
       <!-- Just to test locally the building of a product -->
-      <id>build-ide</id>
+      <id>test-ide</id>
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
-
       <build>
         <plugins>
           <plugin>
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>tycho-p2-director-plugin</artifactId>
-            <version>${tycho-version}</version>
-            <executions>
-              <execution>
-                <id>materialize-products</id>
-                <goals>
-                  <goal>materialize-products</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>archive-products</id>
-                <goals>
-                  <goal>archive-products</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <products>
-                <product>
-                  <id>edelta.eclipse.ide.product</id>
-                  <archiveFileName>edelta-ide-${unqualifiedVersion}-${buildQualifier}</archiveFileName>
-                  <!-- The path where the installed product shall be stored in the archive -->
-                  <rootFolder>edelta</rootFolder>
-                </product>
-              </products>
-            </configuration>
           </plugin>
         </plugins>
       </build>
@@ -93,7 +96,6 @@
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
-
       <build>
         <plugins>
           <plugin>
@@ -104,7 +106,6 @@
               <finalName>${project.artifactId}-${qualifiedVersion}</finalName>
             </configuration>
           </plugin>
-
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
@@ -122,7 +123,6 @@
               </execution>
             </executions>
           </plugin>
-
           <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
             <version>${maven-antrun-plugin.version}</version>
@@ -142,7 +142,6 @@
                   <goal>run</goal>
                 </goals>
               </execution>
-
               <execution>
                 <!-- Deploy p2 repository, p2 composite updated metadata 
                   but not zipped p2 repository -->
@@ -161,7 +160,6 @@
               </execution>
             </executions>
           </plugin>
-
           <plugin>
             <groupId>org.eclipse.tycho.extras</groupId>
             <artifactId>tycho-eclipserun-plugin</artifactId>
@@ -285,37 +283,11 @@
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
-
       <build>
         <plugins>
           <plugin>
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>tycho-p2-director-plugin</artifactId>
-            <version>${tycho-version}</version>
-            <executions>
-              <execution>
-                <id>materialize-products</id>
-                <goals>
-                  <goal>materialize-products</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>archive-products</id>
-                <goals>
-                  <goal>archive-products</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <products>
-                <product>
-                  <id>edelta.eclipse.ide.product</id>
-                  <archiveFileName>edelta-ide-${unqualifiedVersion}-${buildQualifier}</archiveFileName>
-                  <!-- The path where the installed product shall be stored in the archive -->
-                  <rootFolder>edelta</rootFolder>
-                </product>
-              </products>
-            </configuration>
           </plugin>
           <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
@@ -344,7 +316,4 @@
       </build>
     </profile>
   </profiles>
-
-  <dependencies>
-  </dependencies>
 </project>

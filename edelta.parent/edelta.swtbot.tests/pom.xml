@@ -73,7 +73,7 @@
       </build>
     </profile>
     <profile>
-      <!-- requires a built product, e.g., activate the profile build-ide as well -->
+      <!-- requires a built product -->
       <id>test-ide</id>
       <activation>
         <activeByDefault>false</activeByDefault>
