@@ -15,7 +15,7 @@
   <description>An Xtext DSL for EMF metamodels refactoring and migration.</description>
 
   <properties>
-    <eclipseVersion>2020-12</eclipseVersion>
+    <eclipse-version>2020-12</eclipse-version>
     <assertj-version>3.14.0</assertj-version>
     <mockito-version>3.2.4</mockito-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -82,34 +82,16 @@
     <!-- pass "-n" to perform a trial run with no changes made -->
     <dryrun/>
 
-    <!-- properties for deploying the composite update site and zipped products 
-      on Bintray -->
-
-    <!-- for deployment on bintray -->
-    <!-- The name of your own Bintray repository -->
-    <bintray.repo>edelta</bintray.repo>
-    <!-- The name of your own Bintray repository's package for releases -->
-    <bintray.package>releases</bintray.package>
+    <!-- properties for deploying the composite update site
+      on GitHub Pages -->
+    <github-update-repo>git@github.com:LorenzoBettini/edelta-releases.git</github-update-repo>
+    <github-local-clone>${project.build.directory}/checkout</github-local-clone>
+    <releases-directory>${github-local-clone}/releases</releases-directory>
+    <current-release-directory>${releases-directory}/${qualifiedVersion}</current-release-directory>
     <!-- The label for the Composite sites -->
     <site.label>Edelta Site</site.label>
 
-    <!-- If the Bintray repository is owned by someone different from your 
-      user, then specify the bintray.owner explicitly -->
-    <bintray.owner>${bintray.user}</bintray.owner>
-    <!-- Define bintray.user and bintray.apikey in some secret place, like 
-      .m2/settings.xml -->
-
-    <!-- Default values for remote directories -->
-    <bintray.base.path/>
-    <bintray.releases.path>${bintray.base.path}releases</bintray.releases.path>
-    <bintray.composite.path>${bintray.base.path}updates</bintray.composite.path>
-    <bintray.zip.path>${bintray.base.path}zipped</bintray.zip.path>
-    <bintray.products.path>${bintray.base.path}products</bintray.products.path>
-    <!-- note that the following must be consistent with the path schema 
-      used to publish child composite repositories and actual released p2 repositories -->
-    <child.repository.path.prefix>../../releases/</child.repository.path.prefix>
-
-    <!-- for deployment on Sourceforge -->
+    <!-- for deployment of Eclipse products on Sourceforge -->
     <remote.dir>lbettini@frs.sourceforge.net:/home/frs/project/edelta</remote.dir>
   </properties>
 
@@ -205,6 +187,25 @@
         <skipTests>true</skipTests>
       </properties>
       <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <artifactId>maven-install-plugin</artifactId>
+              <executions>
+                <execution>
+                  <id>default-install</id>
+                  <phase>none</phase>
+                </execution>
+              </executions>
+            </plugin>
+            <plugin>
+              <artifactId>maven-deploy-plugin</artifactId>
+              <configuration>
+                <skip>true</skip>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
         <plugins>
           <plugin>
             <groupId>org.eclipse.tycho.extras</groupId>
@@ -236,18 +237,17 @@
       </build>
     </profile>
     <profile>
+      <!-- This assumes that release-composite is enabled as well -->
       <id>release-snapshots</id>
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
       <properties>
-        <bintray.package>snapshots</bintray.package>
-        <bintray.base.path>snapshots/</bintray.base.path>
-        <site.label>Edelta Snapshot Site</site.label>
+        <github-update-repo>git@github.com:LorenzoBettini/edelta-snapshots.git</github-update-repo>
       </properties>
     </profile>
     <profile>
-      <!-- requires a built product, e.g., activate the profile build-ide as well -->
+      <!-- Builds products and test with SWTBot -->
       <id>test-ide</id>
       <activation>
         <activeByDefault>false</activeByDefault>
@@ -329,6 +329,16 @@
     </plugins>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.eclipse.tycho.extras</groupId>
+          <artifactId>tycho-eclipserun-plugin</artifactId>
+          <version>${tycho-version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.2.0</version>
+        </plugin>
         <plugin>
           <groupId>org.eclipse.xtend</groupId>
           <artifactId>xtend-maven-plugin</artifactId>

@@ -244,7 +244,7 @@
                     <args>-DbuildQualifier=${buildQualifier}</args>
                     <args>-DparsedVersion.majorVersion=${parsedVersion.majorVersion}</args>
                     <args>-DparsedVersion.minorVersion=${parsedVersion.minorVersion}</args>
-                    <args>-Dchild.repo="http://download.eclipse.org/releases/${eclipseVersion}/"</args>
+                    <args>-Dchild.repo="http://download.eclipse.org/releases/${eclipse-version}/"</args>
                   </applicationsArgs>
                 </configuration>
               </execution>
