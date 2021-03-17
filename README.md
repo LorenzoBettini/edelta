@@ -12,13 +12,15 @@ An Xtext DSL for EMF metamodels refactoring and migration
 
 Edelta requires Java 11.
 
-### Eclipse update site
+### Eclipse update site (new URL)
 
 Copy the following URL and paste it into your Eclipse "Install New Software" dialog ("Help" => "Install New Software..."), wait for the list of available features to show and select the latest version of "Edelta Feature". (The URL is NOT meant to be opened with a browser)
 
-https://dl.bintray.com/lorenzobettini/edelta/updates/
+https://lorenzobettini.github.io/edelta-releases/
 
 IMPORTANT: Edelta requires Xtext, if this is not already installed, all dependencies will be automatically installed from this update site, which is self-contained.
+
+WARNING: the previous update site hosted on bintray will disappear soon, so please make sure you update your existing Eclipse distribution where you were already using Edelta.
 
 ### Pre-configured Eclipse distributions with Edelta installed, for several architectures.
 
@@ -26,11 +28,11 @@ Download a complete Eclipse distribution with Edelta installed; choose the one f
 
 **WARNING** If you downloaded one of Edelta Eclipse distributions earlier than version 0.3.x you won't be able to update it; please download a brand new Edelta Eclipse distribution with version at least 0.3.x (issue [#13](https://github.com/LorenzoBettini/edelta/issues/13)).
 
-### Development Snapshots
+### Development Snapshots (new URL)
 
 These are temporary development snapshots, which might be unstable (Note: the snapshots update site always includes the releases update site):
 
-https://dl.bintray.com/lorenzobettini/edelta/snapshots/updates/
+https://lorenzobettini.github.io/edelta-snapshots/
 
 ### Maven artifacts
 
