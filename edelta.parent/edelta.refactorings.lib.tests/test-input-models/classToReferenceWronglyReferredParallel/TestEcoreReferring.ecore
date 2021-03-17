@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="p2" nsURI="http://edelta.it/TestEcoreReferring" nsPrefix="p2">
+  <eClassifiers xsi:type="ecore:EClass" name="C2">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="r2" eType="ecore:EClass TestEcore.ecore#//C"
+        containment="true"/>
+  </eClassifiers>
+</ecore:EPackage>

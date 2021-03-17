@@ -179,6 +179,26 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 				'''.fromLinesOfStringsToStringArray)
 	}
 
+	@Test def void testUnqualifiedEcoreReferenceInOperation() {
+		newBuilder.append('''
+			metamodel "mypackage"
+			def anOp() {
+				ecoreref(''').
+			assertText('''
+				MyBaseClass
+				MyClass
+				MyDataType
+				MyDerivedClass
+				myAttribute
+				myBaseAttribute
+				myBaseReference
+				myDerivedAttribute
+				myDerivedReference
+				myReference
+				mypackage
+				'''.fromLinesOfStringsToStringArray)
+	}
+
 	@Test @Flaky
 	def void testUnqualifiedEcoreReferenceWithPrefix() {
 		newBuilder.append('''
@@ -194,10 +214,33 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
+	def void testUnqualifiedEcoreReferenceWithPrefixInOperation() {
+		newBuilder.append('''
+			metamodel "mypackage"
+			def anOp() {
+				ecoreref(myd''').
+			assertText('''
+				MyDataType
+				MyDerivedClass
+				myDerivedAttribute
+				myDerivedReference
+				'''.fromLinesOfStringsToStringArray)
+	}
+
+	@Test @Flaky
 	def void testQualifiedEcoreReference() {
 		newBuilder.append('''
 			metamodel "mypackage"
 			modifyEcore aTest epackage mypackage {
+				ecoreref(MyClass.''').
+			assertText('myAttribute', 'myReference')
+	}
+
+	@Test @Flaky
+	def void testQualifiedEcoreReferenceInOperation() {
+		newBuilder.append('''
+			metamodel "mypackage"
+			def anOp() {
 				ecoreref(MyClass.''').
 			assertText('myAttribute', 'myReference')
 	}
@@ -442,6 +485,47 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			metamodel "mainpackage"
 			
 			modifyEcore aTest epackage mainpackage {
+				ecoreref(mainpackage.subpackage.MyClass.myAttribute''')
+	}
+
+	@Test @Flaky
+	def void testForAmbiguousReferencesFullyQualifiedNameIsProposedInOperation() {
+		createMySubPackagesEcore()
+		waitForBuild // required to index the new ecore file
+		newBuilder.append('''
+			metamodel "mainpackage"
+			
+			def anOp() {
+				ecoreref(My''')
+			.assertText(
+				'''
+				MySubPackageClass
+				mainpackage.MyClass
+				mainpackage.MyClass.myAttribute
+				mainpackage.MyClass.myReference
+				mainpackage.subpackage.MyClass
+				mainpackage.subpackage.MyClass.myAttribute
+				mainpackage.subpackage.MyClass.myReference
+				mainpackage.subpackage.subsubpackage.MyClass
+				mainpackage.subpackage.subsubpackage.MyClass.myAttribute
+				mainpackage.subpackage.subsubpackage.MyClass.myReference
+				'''.fromLinesOfStringsToStringArray)
+	}
+
+	@Test @Flaky
+	def void testForAmbiguousReferencesFullyQualifiedNameIsReplacedInOperation() {
+		createMySubPackagesEcore()
+		waitForBuild // required to index the new ecore file
+		newBuilder.append('''
+			metamodel "mainpackage"
+			
+			def anOp() {
+				ecoreref(My''')
+			.applyProposal("mainpackage.subpackage.MyClass.myAttribute")
+			.expectContent('''
+			metamodel "mainpackage"
+			
+			def anOp() {
 				ecoreref(mainpackage.subpackage.MyClass.myAttribute''')
 	}
 

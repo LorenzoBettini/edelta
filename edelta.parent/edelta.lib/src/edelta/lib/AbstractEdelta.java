@@ -307,8 +307,4 @@ public abstract class AbstractEdelta {
 		return eenum.getEEnumLiteral(enumLiteralName);
 	}
 
-	public void removeEClassifier(String packageName, String name) {
-		EdeltaEcoreUtil.removeEClassifier(getEClassifier(packageName, name));
-	}
-
 }

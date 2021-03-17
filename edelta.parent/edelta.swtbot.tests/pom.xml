@@ -73,7 +73,7 @@
       </build>
     </profile>
     <profile>
-      <!-- requires a built product, e.g., activate the profile build-ide as well -->
+      <!-- requires a built product -->
       <id>test-ide</id>
       <activation>
         <activeByDefault>false</activeByDefault>
@@ -125,7 +125,7 @@
                   <artifactItems>
                     <artifactItem>
                       <groupId>${project.groupId}</groupId>
-                      <artifactId>edelta.product.repository</artifactId>
+                      <artifactId>edelta.repository</artifactId>
                       <version>${project.version}</version>
                       <type>zip</type>
                       <classifier>${tycho.env.osgi.os}.${tycho.env.osgi.ws}.${tycho.env.osgi.arch}</classifier>

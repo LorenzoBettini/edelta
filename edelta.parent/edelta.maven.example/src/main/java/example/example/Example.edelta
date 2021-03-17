@@ -17,7 +17,7 @@ def createSubClassOfMyEClass(String name) {
 modifyEcore aModification epackage myecore {
 	addNewEClass("MyNewClass") [
 		// using 'extension' from EdeltaRefactorings
-		addMandatoryAttr("ANewAttribute", ecoreref(EString))
+		addMandatoryAttribute("ANewAttribute", ecoreref(EString))
 		// corresponds to refactorings.addMandatoryAttr(it, "ANewAttribute", ecoreref(EString))
 		ecoreref(ANewAttribute).EType = ecoreref(EInt)
 	]

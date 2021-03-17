@@ -1,133 +1,401 @@
+import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder
+import java.util.Collection
 import java.util.List
-import java.util.Map
+import java.util.function.Predicate
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.util.EcoreUtil
-import org.eclipse.xtext.xbase.lib.Pair
+import org.eclipse.emf.ecore.ENamedElement
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.ETypedElement
 
 package edelta.refactorings.lib
 
-def addMandatoryAttr(EClass eClass, String attrname, EDataType dataType): EAttribute {
-	return eClass.addNewEAttribute(attrname, dataType) [
-		lowerBound = 1;
+metamodel "ecore"
+
+def addMandatoryAttribute(EClass eClass, String attributeName, EDataType dataType): EAttribute {
+	return eClass.addNewEAttribute(attributeName, dataType) [
+		makeSingleRequired
 	]
 }
 
-def mergeReferences(String newReferenceName, EClass newReferenceType, List<EReference> refs): EReference {
-	refs.removeFeaturesFromContainingClass
-	return newEReference(newReferenceName, newReferenceType)
+def addMandatoryReference(EClass eClass, String referenceName, EClass type): EReference {
+	return eClass.addNewEReference(referenceName, type) [
+		makeSingleRequired
+	]
 }
 
-def mergeAttributes(String newAttrName, EDataType newAttributeType, List<EAttribute> attrs) : EAttribute {
-	attrs.removeFeaturesFromContainingClass
-	return newEAttribute(newAttrName, newAttributeType)
+/**
+ * Merges the given features into a single new feature in the containing class.
+ * The features must be compatible (same containing class, same type, same cardinality, etc).
+ * 
+ * @param newFeatureName
+ * @param features
+ * @return the new feature added to the containing class of the features
+ */
+def mergeFeatures(String newFeatureName, Collection<EStructuralFeature> features) : EStructuralFeature {
+	val diffFinder = new EdeltaFeatureDifferenceFinder().ignoringName
+	checkNoDifferences(features, diffFinder, "The two features cannot be merged")
+	val feature = features.head
+	val owner = feature.EContainingClass
+	val copy = feature.copyToAs(owner, newFeatureName)
+	removeAllElements(features)
+	return copy
 }
 
-def removeFeaturesFromContainingClass(List<? extends EStructuralFeature> features) {
-	features
-		.forEach[EContainingClass.EStructuralFeatures -= it]
+/**
+ * Merges the given features into the single given existing feature in the containing class.
+ * The features must be compatible (same containing class, same type, same cardinality, etc)
+ * and their types must be subtypes of the specified feature.
+ * 
+ * @param feature the features will be merged into this feature
+ * @param features
+ */
+def mergeFeatures(EStructuralFeature feature, Collection<EStructuralFeature> features) : EStructuralFeature {
+	val diffFinder = new EdeltaFeatureDifferenceFinder()
+		.ignoringName
+		.ignoringType
+	checkCompliant(feature, features)
+	checkNoDifferences(#[feature] + features, diffFinder,
+		"The two features cannot be merged")
+	removeAllElements(features)
+	return feature
 }
 
-def introduceSubclasses(EClass containingclass, EAttribute attr, EEnum enumType) {
-	containingclass.abstract = true;
-	for (subc : enumType.ELiterals) {
-		containingclass.EPackage.addNewEClass(subc.literal) [
-			addESuperType(containingclass)
-		];
-		containingclass.EStructuralFeatures -= attr;
+/**
+ * Merges the given features into a single new feature, with the given type, in the containing class.
+ * The features must be compatible (same containing class, same type, same cardinality, etc)
+ * and their types must be subtypes of the specified type.
+ * 
+ * @param newFeatureName
+ * @param type
+ * @param features
+ */
+def mergeFeatures(String newFeatureName, EClassifier type, Collection<EStructuralFeature> features) : EStructuralFeature {
+	val feature = features.head
+	val owner = feature.EContainingClass
+	val copy = feature.copyToAs(owner, newFeatureName, type)
+	mergeFeatures(copy, features)
+	return copy
+}
+
+/**
+ * Given an EAttribute, expected to have an EEnum type, creates a subclass of
+ * the containing class for each value of the referred EEnum
+ * (each subclass is given a name corresponding to the the EEnumLiteral,
+ * all lowercase but the first letter, for example, given the literal
+ * "LITERAL1", the subclass is given the name "Literal1").
+ * The attribute will then be removed and so will the EEnum.
+ * The original containing EClass is made abstract.
+ * 
+ * @param attr
+ * @return the collection of created subclasses
+ */
+def enumToSubclasses(EAttribute attr) : Collection<EClass> {
+	val type = attr.EAttributeType
+	if (type instanceof EEnum) {
+		val createdSubclasses = newArrayList
+		val owner = attr.EContainingClass
+		val ePackage = owner.EPackage
+		owner.makeAbstract
+		for (subc : type.ELiterals) {
+			val subclassName = ensureEClassifierNameIsUnique
+				(ePackage, subc.literal.toLowerCase.toFirstUpper)
+			createdSubclasses += ePackage.addNewEClass(subclassName) [
+				addESuperType(owner)
+			]
+		}
+		removeElement(type) // will also remove the attribute
+		return createdSubclasses
+	} else {
+		showError(attr,
+			"Not an EEnum: " + getEObjectRepr(type)
+		)
+		return null
 	}
 }
 
 /**
- * @param superclass where to pull up a single instance of the passed attributes
- * @param the attributes that are expected to be the same; the first element will be
- * pulled up in the superclass
+ * Given a collection of subclasses, which are expected to be direct subclasses of
+ * an EClass, say superclass, generates an EEnum (in the superclass' package)
+ * with the specified name, representing the inheritance relation,
+ * with an EEnumLiteral for each subclass (the name is the name
+ * of the subclass in uppercase); the subclasses are removed, and
+ * an attributed is added to the superclass with the created EEnum as type
+ * (the name is the name of the EEnum, first letter lowercase).
+ * 
+ * For example, given the name "BaseType" and the collection of classes
+ * {"Derived1", "Derived2"} subclasses of the superclass "Base",
+ * it creates the EEnum "BaseType" with literals "DERIVED1", "DERIVED2",
+ * (the values will be incremental numbers starting from 0,
+ * according to the order of the subclasses in the collection)
+ * it adds to "Base" the EAttribute "baseType" of type "BaseType".
+ * The EClasses "Derived1" and "Derived2" are removed from the package.
+ * 
+ * @param name the name for the created EEnum
+ * @param subclasses
+ * @return the created EAttribute
  */
-def extractIntoSuperclass(EClass superclass, List<EAttribute> attrs){
-	val extracted_attr = attrs.head;
-	// print(extracted_attr.name);
-	// already created from outside in the right package
-	// extracted_attr.EContainingClass.EPackage.EClassifiers+=superclass;
-	for (attr : attrs) {
-		attr.EContainingClass => [
-			// set supertype of the EClass of the attribute
-			addESuperType(superclass)
-			// and then remove the attribute from the original EClass
-			EStructuralFeatures -= attr
+def subclassesToEnum(String name, Collection<EClass> subclasses) : EAttribute {
+	checkNoFeatures(subclasses)
+	val superclass = getSingleDirectSuperclass(subclasses)
+	val ePackage = superclass.EPackage
+	val enum = ePackage.addNewEEnum(name) [
+		subclasses.forEach[subClass, index |
+			val enumLiteralName = ensureEClassifierNameIsUnique
+				(ePackage, subClass.name.toUpperCase)
+			addNewEEnumLiteral(enumLiteralName) => [
+				value = index
+			]
 		]
-	}
-
-	superclass.EStructuralFeatures += extracted_attr;
+	]
+	val attribute = superclass.addNewEAttribute(enum.fromTypeToFeatureName, enum)
+	superclass.makeConcrete
+	removeAllElements(subclasses)
+	return attribute
 }
 
 /**
- * @param extractedClass the created EClass created representing the extracted metaclass
- * @param f 
- * @param inReferenceName
- * @param outReferenceName
+ * Extracts the specified features into a new class with the given name.
+ * The features must belong to the same class.
+ * In the containing class a containiment required reference to
+ * the extracted class will be created (its name will be the name
+ * of the extracted class with the first letter lowercase).
+ * 
+ * @param name the name for the extracted class
+ * @param features the features to extract
+ * @return the added EReference to the extracted metaclass
  */
-def extractMetaClass(EClass extractedClass, EReference f, String inReferenceName, String outReferenceName) : void {
-	val ref_in = newEReference(inReferenceName, extractedClass) [
-		lowerBound = f.EOpposite.lowerBound;
-		upperBound = 1;
-		// f.EOpposite.upperBound;
-	];
+def extractClass(String name, Collection<EStructuralFeature> features) {
+	if (features.empty) 
+		return null // TODO: error?
+	checkNoBidirectionalReferences(features,
+		"Cannot extract bidirectinal references")
+	val owner = findSingleOwner(features)
+	val extracted = owner.EPackage.addNewEClass(name)
+	val reference = owner.addMandatoryReference(name.toFirstLower, extracted) => [
+		makeContainmentBidirectional
+	]
+	features.moveAllTo(extracted)
+	return reference
+}
 
-	val old_ref = newEReference(f.name, f.EReferenceType) [
-		lowerBound = 1;
-		upperBound = 1;
-		EOpposite = ref_in;
-	];
+/**
+ * Inlines the features of the specified class into the single class
+ * that has a containment reference to the specified class.
+ * The specified class will then be removed.
+ * 
+ * @param cl
+ * @return the features of the original class
+ */
+def inlineClass(EClass cl) {
+	inlineClass(cl, "")
+}
 
-	extractedClass.addEReference(old_ref);
-	ref_in.EOpposite = old_ref;
-	f.EOpposite.lowerBound = 1;
-	f.EOpposite.upperBound = 1;
+/**
+ * Inlines the features of the specified class into the single class
+ * that has a containment reference to the specified class.
+ * The specified class will then be removed.
+ * 
+ * @param cl
+ * @param prefix the prefix for the names of the inlined features
+ * @return the features of the original class
+ */
+def inlineClass(EClass cl, String prefix) {
+	val ref = findSingleContainmentReferenceToThisClass(cl)
+	checkNotMany(ref,
+		"Cannot inline in a 'many' reference")
+	val featuresToInline = cl.EStructuralFeatures
+		.filter[it !== ref.EOpposite] // skip the possible back reference
+		.toList
+	featuresToInline.forEach[name = prefix + name]
+	featuresToInline.moveAllTo(ref.EContainingClass)
+	removeElement(cl)
+	return featuresToInline
+}
 
-	extractedClass.addEReference(f.EOpposite);
+/**
+ * Makes the EReference, which is assumed to be already part of an EClass,
+ * a single required containment reference, adds to the referred
+ * type, which is assumed to be set, an opposite required single reference.
+ * @param reference
+ */
+def makeContainmentBidirectional(EReference reference) {
+	reference.makeContainment
+	val owner = reference.EContainingClass
+	val referredType = reference.EReferenceType
+	referredType.addMandatoryReference(owner.fromTypeToFeatureName, owner) => [
+		makeBidirectional(reference)
+	]
+}
 
-	// already created from outside in the right package
-	// f.EContainingClass.EPackage.EClassifiers+=extracted_class;
-	f.EReferenceType.addEReference(ref_in);
-	f.EType = extractedClass;
-	f.containment = true;
-	f.name = outReferenceName;
+/**
+ * Replaces an EReference with an EClass (with the given name, the same package
+ * as the package of the reference's containing class),
+ * updating possible opposite reference,
+ * so that a relation can be extended with additional features.
+ * The original reference will be made a containment reference,
+ * (its other properties will not be changed)
+ * to the added EClass (and made bidirectional).
+ * 
+ * For example, given
+ * <pre>
+ *    b2    b1
+ * A <-------> C
+ * </pre>
+ * 
+ * (where the opposite "b2" might not be present)
+ * if we pass "b1" and the name "B", then the result will be
+ * 
+ * <pre>
+ *    a     b1    b2    c
+ * A <-------> B <------> C
+ * </pre>
+ * 
+ * where "b1" will be a containment reference.
+ * Note the names inferred for the new additional opposite references.
+ * 
+ * @param name the name for the extracted class
+ * @param reference the reference to turn into a reference to the extracted class
+ * @return the extracted class
+ */
+def referenceToClass(String name, EReference reference) {
+	checkNotContainment(reference,
+			"Cannot apply referenceToClass on containment reference")
+	val ePackage = reference.EContainingClass.EPackage
+	val extracted = ePackage.addNewEClass(name)
+	val extractedRef = extracted.addMandatoryReference(
+		reference.EType.fromTypeToFeatureName, reference.EReferenceType)
+	val eOpposite = reference.EOpposite
+	if (eOpposite !== null) {
+		eOpposite.makeBidirectional(extractedRef)
+	}
+	reference.EType = extracted
+	reference.makeContainmentBidirectional
+	return extracted
+}
+
+/**
+ * Given an EClass, which is meant to represent a relation,
+ * removes such a class, transforming the relation into an EReference.
+ * 
+ * For example, given
+ * <pre>
+ *    a     b1    b2    c
+ * A <-------> B <------> C
+ * </pre>
+ * 
+ * (where the opposites "a" and "b2" might not be present)
+ * if we pass "B", then the result will be
+ * <pre>
+ *    b2    b1
+ * A <-------> C
+ * </pre>
+ * 
+ * @param cl
+ * @return the EReference that now represents the relation, that is,
+ * the EReference originally of type cl ("b1" above)
+ */
+def classToReference(EClass cl) : EReference {
+	// search for a single EReference that has type cl ("b1" above)
+	val reference = findSingleContainmentAmongReferencesToThisClass(cl)
+	// "A" above
+	val owner = reference.EContainingClass
+	// search for a single EReference ("c" above) in cl that has not type owner
+	// (the one with type owner, if exists, would be the EOpposite
+	// of reference, which we are not interested in, "a" above)
+	val referenceToTarget = cl.findSingleReferenceNotOfType(owner)
+	// reference will now refer to referenceToTarget's type ("C" above)
+	reference.EType = referenceToTarget.EType
+	reference.dropContainment
+	val opposite = referenceToTarget.EOpposite
+	if (opposite !== null) { // "b2" above
+		makeBidirectional(reference, opposite)
+	}
+	removeElement(cl)
+	return reference
 }
 
 /**
  * Given a non empty list of {@link EStructuralFeature}, which are known to
  * appear in several classes as duplicates, extracts a new common superclass,
  * with the duplicate feature,
- * adds the extracted superclass to the classes with the duplicate
- * feature and removes the duplicate feature from each class.
+ * adds the extracted class as the superclass of the classes with the duplicate
+ * feature and removes the duplicate feature from such each class.
+ * 
+ * The name of the extracted class is the name of the feature, with the first
+ * letter capitalized and the "Element" suffix (example, if the feature is
+ * "name" the extracted class will be called "NameElement").
+ * An additional number can be
+ * added as a suffix to avoid name clashes with existing classes.
  * 
  * @param duplicates
  */
-def extractSuperclass(List<? extends EStructuralFeature> duplicates){
+def extractSuperclass(List<? extends EStructuralFeature> duplicates) {
 	val feature = duplicates.head;
 	val containingEPackage = feature.EContainingClass.EPackage
 	val superClassName =
 		ensureEClassifierNameIsUnique(containingEPackage,
 			feature.name.toFirstUpper + "Element")
 
-	val superclass = containingEPackage.addNewEClass(superClassName) [
-		abstract = true;
-		addEStructuralFeature(EcoreUtil.copy(feature))
-	]
+	extractSuperclass(superClassName, duplicates)
+}
 
-	for (duplicate : duplicates) {
-		duplicate.EContainingClass => [
-			// set supertype of the EClass of the feature
-			addESuperType(superclass)
-			// and then remove the feature from the original EClass
-			EStructuralFeatures -= duplicate
+/**
+ * Given a non empty list of {@link EStructuralFeature}, which are known to
+ * appear in several classes as duplicates, extracts a new common superclass,
+ * with the given name, with the duplicate feature,
+ * adds the extracted class as the superclass of the classes with the duplicate
+ * feature and removes the duplicate feature from such each class.
+ * 
+ * @param name
+ * @param duplicates
+ */
+def extractSuperclass(String name, List<? extends EStructuralFeature> duplicates) {
+	val feature = duplicates.head;
+	val containingEPackage = feature.EContainingClass.EPackage
+
+	containingEPackage.addNewEClass(name) [
+		makeAbstract
+		duplicates
+			.map[EContainingClass]
+			.forEach[c | c.addESuperType(it)]
+		pullUpFeatures(duplicates)
+	]
+}
+
+/**
+ * Given a non empty list of {@link EStructuralFeature}, which are known to
+ * appear in several subclasses as duplicates, pulls them up in
+ * the given common superclass
+ * (and removes the duplicate feature from each subclass).
+ * 
+ * @param dest
+ * @param duplicates
+ */
+def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates) {
+	val diffFinder = new EdeltaFeatureDifferenceFinder().ignoringContainingClass
+	checkNoDifferences(duplicates, diffFinder, "The two features are not equal")
+
+	val wrongFeatures = duplicates
+		.filter[!EContainingClass.ESuperTypes.contains(dest)]
+	if (!wrongFeatures.empty) {
+		wrongFeatures.forEach[
+			showError(it,
+				"Not a direct subclass of destination: " +
+					getEObjectRepr(EContainingClass)
+			)
 		]
+		return
 	}
+	duplicates.head.copyTo(dest)
+	removeAllElements(duplicates)
 }
 
 /**
@@ -147,67 +415,366 @@ def ensureEClassifierNameIsUnique(EPackage ePackage, String proposedName) {
 	return className
 }
 
+def fromTypeToFeatureName(EClassifier type) {
+	type.name.toFirstLower
+}
+
 /**
- * Fix all the passed redundant containers (in the shape of pairs)
- * by setting the eOpposite property.
+ * Makes sure that this is not a containment reference,
+ * otherwise it shows an error message
+ * and throws an IllegalArgumentException.
  * 
- * That is, given the pair r1 -> r2, then r2 is set as the opposite
- * reference of r1 and viceversa.
+ * @param reference the reference that must not be a containment reference
+ * @param errorMessage the message to show in case the reference
+ * is a containment reference
  */
-def redundantContainerToEOpposite(Iterable<Pair<EReference, EReference>> redundantContainers) {
-	for (redundant : redundantContainers) {
-		redundant.key.EOpposite = redundant.value
-		redundant.value.EOpposite = redundant.key
+def checkNotContainment(EReference reference, String errorMessage) {
+	if (reference.containment) {
+		val message = errorMessage + ": " + getEObjectRepr(reference)
+		showError(reference, message)
+		throw new IllegalArgumentException(message)
 	}
 }
 
 /**
- * Given a map with key an EClass and value a list of its subclasses,
- * generates an EEnum (in the EClass' package) representing the inheritance relation
- * (the name is the name of the key EClass with "Type" suffix),
- * with an EEnumLiteral for each subclass (the name is the name
- * of the subclass in uppercase); the subclasses are removed, and the
- * key EClass is added an EAttribute with the created EEnum as type
- * (the name is the name of the EEnum, first letter lowercase with "Type"
- * suffix).
+ * Makes sure that this is not a multi element (upperBound > 1),
+ * otherwise it shows an error message
+ * and throws an IllegalArgumentException.
  * 
- * For example, give "Base" -> {"Derived1", "Derived2" } as input
- * it creates the EEnum "BaseType" with literals "DERIVED1", "DERIVED2",
- * it adds to "Base" the EAttribute "baseType" of type "BaseType".
- * The EClasses "Derived1" and "Derived2" are removed from the package.
+ * @param element the element that must not be multi
+ * @param errorMessage the message to show in case the check fails
  */
-def classificationByHierarchyToEnum(Map<EClass, List<EClass>> classificationsByHierarchy) {
-	classificationsByHierarchy
-		.forEach[superClass, subClasses|
-			val ePackage = superClass.EPackage
-			val enumName = ensureEClassifierNameIsUnique
-				(ePackage, superClass.name + "Type")
-			val enum = ePackage.addNewEEnum(enumName) [
-				subClasses.forEach[
-					subClass, index |
-					val enumLiteralName = ensureEClassifierNameIsUnique
-						(ePackage, subClass.name.toUpperCase)
-					addNewEEnumLiteral(enumLiteralName) => [
-						value = index+1
-					]
-				]
-			]
-			superClass.addNewEAttribute(superClass.name.toLowerCase + "Type", enum)
-			EcoreUtil.removeAll(subClasses)
+def checkNotMany(ETypedElement element, String errorMessage) {
+	if (element.isMany) {
+		val message = errorMessage + ": " + getEObjectRepr(element)
+		showError(element, message)
+		throw new IllegalArgumentException(message)
+	}
+}
+
+/**
+ * Makes sure that the passed collection does not have EReferences
+ * with an EOpposite. Otherwise shows an error (using
+ * also the passed errorMessage) with the details of the bidirectional references and
+ * throws an IllegalArgumentException
+ */
+def checkNoBidirectionalReferences(Collection<EStructuralFeature> features,
+		String errorMessage
+) {
+	val bidirectionalReferences = features
+		.filter(EReference)
+		.filter[EOpposite !== null]
+	if (!bidirectionalReferences.empty) {
+		val message = errorMessage + ":\n" +
+			bidirectionalReferences.map["  " + EObjectRepr].join("\n")
+		showError(bidirectionalReferences.head, message)
+		throw new IllegalArgumentException(message)
+	}
+}
+
+/**
+ * Makes sure that there are no differences in the passed features,
+ * using the specified differenceFinder, otherwise it shows an error message
+ * with the details of the differences and throws an IllegalArgumentException.
+ * 
+ * @param features
+ * @param differenceFinder
+ * @param errorMessage
+ * @return true if there are no differences
+ */
+def checkNoDifferences(Iterable<? extends EStructuralFeature> features,
+	EdeltaFeatureDifferenceFinder differenceFinder,
+	String errorMessage) {
+	val feature = features.head
+	val different = features
+		.findFirst[feature !== it && !differenceFinder.equals(feature, it)]
+	if (different !== null) {
+		val message = errorMessage + ":\n" +
+					differenceFinder.differenceDetails
+		showError(different, message)
+		throw new IllegalArgumentException(message)
+	}
+}
+
+/**
+ * Makes sure that the features have types that are subtypes of the
+ * specified feature, if not, shows
+ * error information and throws an IllegalArgumentException.
+ * 
+ * @param feature
+ * @param features
+ */
+def checkCompliant(EStructuralFeature feature, Collection<? extends EStructuralFeature> features) {
+	val Predicate<EStructuralFeature> compliance = if (feature instanceof EReference) {
+		[other |
+			if (other instanceof EReference)
+				feature.EReferenceType.isSuperTypeOf(other.EReferenceType)
+			else
+				false // attribute's type is surely not compliant
 		]
+	} else {
+		[other | feature.EType === other.EType]
+	}
+	val nonCompliant = features.filter[!compliance.test(it)]
+	if (!nonCompliant.empty) {
+		val message =
+			"features not compliant with type " + getEObjectRepr(feature.EType) + ":\n" +
+				nonCompliant
+					.map["  " + getEObjectRepr(it) + ": " + getEObjectRepr(EType)].join("\n")
+		showError(feature, message)
+		throw new IllegalArgumentException(message)
+	}
 }
 
 /**
- * Turns the given EClasses to abstract
+ * Makes sure the passed EClasses have no features, if not, shows
+ * error information and throws an IllegalArgumentException.
+ * 
+ * @param classes
  */
-def concreteBaseMetaclassToAbstract(Iterable<EClass> concreteAbstractMetaclasses) {
-	concreteAbstractMetaclasses.forEach[abstract = true]
+def checkNoFeatures(Collection<EClass> classes) {
+	val classesWithFeatures = classes.filter[c |
+		val features = c.EStructuralFeatures
+		val empty = features.empty
+		if (!empty) {
+			showError(c,
+				"Not an empty class: " + getEObjectRepr(c) + ":\n" +
+					features.map["  " + EObjectRepr].join("\n")
+			)
+		}
+		return !empty
+	].toList
+	if (!classesWithFeatures.empty)
+		throw new IllegalArgumentException("Classes not empty")
 }
 
 /**
- * Turns the given EClasses to NON abstract
+ * Finds, among all references to the given EClass, the single containment reference in the
+ * EClass' package's resource set, performing validation (that is,
+ * no reference is found, or more than one containment reference is found) checks and in case
+ * show errors and throws an IllegalArgumentException.
+ * 
+ * Note that several references to the class are allowed: the important thing
+ * is that exactly one is a containment reference.
+ * 
+ * @param cl
  */
-def abstractBaseMetaclassToConcrete(Iterable<EClass> abstractConcreteMetaclasses) {
-	abstractConcreteMetaclasses.forEach[abstract = false]
+def findSingleContainmentAmongReferencesToThisClass(EClass cl) {
+	val references = findReferencesToThisClass(cl)
+	if (references.filter[containment].size > 1) {
+		val message = "The EClass is referred by more than one container:\n" +
+					references.map["  " + getEObjectRepr(it)].join("\n")
+		showError(cl, message)
+		throw new IllegalArgumentException(message)
+	}
+	return references.head
+}
+
+/**
+ * Finds all the EReferences to the given EClass in the
+ * EClass' package's resource set. If no such references are
+ * found it throws an IllegalArgumentException.
+ * 
+ * @param cl
+ */
+def findReferencesToThisClass(EClass cl) {
+	val references = allReferencesToThisClass(cl)
+	if (references.isEmpty) {
+		val message = "The EClass is not referred: " + getEObjectRepr(cl)
+		showError(cl, message)
+		throw new IllegalArgumentException(message)
+	}
+	return references
+}
+
+/**
+ * Returns all the EReferences to the given EClass in the
+ * EClass' package's resource set.
+ * 
+ * @param cl
+ */
+def allReferencesToThisClass(EClass cl) {
+	allUsagesOfThisClass(cl)
+		.map[EObject]
+		.filter(EReference)
+}
+
+/**
+ * Finds the single usage of this class and it must be a
+ * containment reference. Otherwise it show errors and throws an IllegalArgumentException.
+ * 
+ * Note that several references to the class are allowed: the important thing
+ * is that exactly one is a containment reference.
+ * 
+ * @param cl
+ */
+def findSingleContainmentReferenceToThisClass(EClass cl) {
+	return getAsContainmentReference
+		(findSingleUsageOfThisClass(cl))
+}
+
+/**
+ * Finds the single usage the given EClass in the
+ * EClass' package's resource set, performing validation (that is,
+ * no usage is found, or more than one) checks and in case
+ * show errors and throws an IllegalArgumentException.
+ * 
+ * @param cl
+ */
+def findSingleUsageOfThisClass(EClass cl) {
+	val usages = allUsagesOfThisClass(cl)
+	if (usages.isEmpty) {
+		val message = "The EClass is not used: " + getEObjectRepr(cl)
+		showError(cl, message)
+		throw new IllegalArgumentException(message)
+	}
+	if (usages.size > 1) {
+		val message = "The EClass is used by more than one element:\n" +
+					usages.map[
+						"  " + getEObjectRepr(EObject) + "\n" +
+						"    " + getEObjectRepr(EStructuralFeature)
+					].join("\n")
+		showError(cl, message)
+		throw new IllegalArgumentException(message)
+	}
+	return usages.head.EObject
+}
+
+/**
+ * Makes sure that the passed EObject represent a containment EReference
+ * otherwise shows an error and throws an IllegalArgumentException
+ * 
+ * @param o
+ * @return the containment EReference if it is a containment reference
+ */
+def getAsContainmentReference(EObject o) {
+	if (o instanceof EReference) {
+		if (!o.containment) {
+			val message = "Not a containment reference: " + getEObjectRepr(o)
+			showError(o, message)
+			throw new IllegalArgumentException(message)
+		}
+		return o
+	}
+	val message = "Not a reference: " + getEObjectRepr(o)
+	showError(o as ENamedElement, message)
+	throw new IllegalArgumentException(message)
+}
+
+/**
+ * Returns all the usages of the given EClass in the
+ * EClass' package's resource set.
+ * 
+ * @param cl
+ */
+def allUsagesOfThisClass(EClass cl) {
+	EcoreUtil.UsageCrossReferencer
+		.find(cl, cl.packagesToInspect)
+		.filter[EObject instanceof ENamedElement] // skip EGenericType
+		.filter[!EStructuralFeature.derived] // skip derived features
+		.toList
+}
+
+/**
+ * Finds the single EReference, in the EReferences of the given EClass,
+ * with a type different from the given type, performing validation (that is,
+ * no reference is found, or more than one) checks and in case
+ * show errors and throws an IllegalArgumentException
+ * 
+ * @param cl
+ * @param target
+ */
+def findSingleReferenceNotOfType(EClass cl, EClass type) {
+	val otherReferences = cl.EReferences
+		.filter[EType !== type]
+		.toList
+	if (otherReferences.empty) {
+		val message = "No references not of type " + getEObjectRepr(type)
+		showError(cl, message)
+		throw new IllegalArgumentException(message)
+	}
+	if (otherReferences.size > 1) {
+		val message = "Too many references not of type " + getEObjectRepr(type) +
+			":\n" + otherReferences.map["  " + getEObjectRepr(it)].join("\n")
+		showError(cl, message)
+		throw new IllegalArgumentException(message)
+	}
+	return otherReferences.head
+}
+
+/**
+ * Finds and returns the single containing class of the passed features.
+ * If there's more than one containing class throws an IllegalArgumentException.
+ */
+def findSingleOwner(Collection<EStructuralFeature> features) {
+	val owners = features.groupBy[EContainingClass]
+	if (owners.size > 1) {
+		val message = "Multiple containing classes:\n" +
+			owners.entrySet.map[
+				val reprForClass = getEObjectRepr(key)
+				showError(key,
+					"Extracted features must belong to the same class: " +
+					reprForClass)
+				return "  " + reprForClass + ":\n" +
+					value.map["    " + getEObjectRepr(it)].join("\n")
+			].join("\n")
+		throw new IllegalArgumentException(message)
+	}
+	return features.head.EContainingClass
+}
+
+/**
+ * Checks that the passed subclasses have all exactly one superclass
+ * and that it is the same and returns that as a result. It also checks
+ * that such a common superclass has no further subclasses.
+ * 
+ * In case of failure, besides reporting errors, it throws an
+ * IllegalArgumentException.
+ */
+def getSingleDirectSuperclass(Collection<EClass> subclasses) : EClass {
+	val invalid = subclasses.filter[
+		ESuperTypes.size != 1
+	]
+	if (!invalid.empty) {
+		invalid.forEach[
+			val superclasses = ESuperTypes
+			showError(it,
+				"Expected one superclass: " + EObjectRepr + " instead of:\n" +
+				if (superclasses.empty)
+					"  empty"
+				else
+					superclasses.map["  " + EObjectRepr].join("\n")
+			)
+		]
+		throw new IllegalArgumentException("Wrong superclasses")
+	}
+	// now all subclasses are known to have exactly one superclass
+	val result = subclasses.head.ESuperTypes.head
+	val differences = subclasses
+		.filter[ESuperTypes.head !== result]
+	if (!differences.empty) {
+		differences.forEach[
+			val message = "Wrong superclass of " + EObjectRepr + ":\n"+
+							"  Expected: " + getEObjectRepr(result) + "\n" +
+							"  Actual  : " + getEObjectRepr(ESuperTypes.head)
+			showError(it, message)
+		]
+		throw new IllegalArgumentException("Wrong superclasses")
+	}
+	val additionalSubclasses = directSubclasses(result).toSet
+	additionalSubclasses.removeAll(subclasses.toSet)
+	if (!additionalSubclasses.empty) {
+		val message = "The class has additional subclasses:\n" +
+					additionalSubclasses.map["  " + EObjectRepr].join("\n")
+		showError(result, message)
+		throw new IllegalArgumentException(message)
+	}
+	return result
+}
+
+def directSubclasses(EClass cl) {
+	allUsagesOfThisClass(cl)
+		.filter[EStructuralFeature == ecoreref(eSuperTypes)]
+		.map[EObject as EClass]
 }
 

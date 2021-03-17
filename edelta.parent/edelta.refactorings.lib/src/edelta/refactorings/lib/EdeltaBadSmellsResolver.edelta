@@ -15,9 +15,16 @@ use EdeltaBadSmellsFinder as finder
  * @param ePackage
  */
 def resolveDuplicatedFeatures(EPackage ePackage) {
-	finder.findDuplicateFeatures(ePackage)
+	finder.findDuplicatedFeatures(ePackage)
 		.values
 		.forEach[refactorings.extractSuperclass(it)]
+}
+
+/**
+ * Removes the dead classifiers.
+ */
+def resolveDeadClassifiers(EPackage ePackage) {
+	resolveDeadClassifiers(ePackage, [true])
 }
 
 /**
@@ -37,29 +44,43 @@ def resolveDeadClassifiers(EPackage ePackage, Predicate<EClassifier> shouldRemov
  * Applies redundantContainerToEOpposite to redundant containers
  */
 def resolveRedundantContainers(EPackage ePackage) {
-	refactorings.redundantContainerToEOpposite(
-		finder.findRedundantContainers(ePackage)
-	)
+	val findRedundantContainers = finder.findRedundantContainers(ePackage)
+	findRedundantContainers.forEach[
+		makeBidirectional(key, value)
+	]
 }
 
 /**
- * Applies classificationByHierarchyToEnum to findClassificationByHierarchy
+ * Applies subclassesToEnum to findClassificationByHierarchy
  */
 def resolveClassificationByHierarchy(EPackage ePackage) {
-	refactorings.classificationByHierarchyToEnum(
-		finder.findClassificationByHierarchy(ePackage)
-	)
+	val findClassificationByHierarchy = finder.findClassificationByHierarchy(ePackage)
+	findClassificationByHierarchy.entrySet.forEach[
+		refactorings.subclassesToEnum(key.name + "Type", value)
+	]
 }
 
 def resolveConcreteAbstractMetaclass(EPackage ePackage) {
-	refactorings.concreteBaseMetaclassToAbstract(
-		finder.findConcreteAbstractMetaclasses(ePackage)
-	)
+	finder.findConcreteAbstractMetaclasses(ePackage)
+		.forEach[makeAbstract]
 }
 
 def resolveAbstractConcreteMetaclass(EPackage ePackage) {
-	refactorings.abstractBaseMetaclassToConcrete(
-		finder.findAbstractConcreteMetaclasses(ePackage)
-	)
+	finder.findAbstractConcreteMetaclasses(ePackage)
+		.forEach[makeConcrete]
+}
+
+def resolveAbstractSubclassesOfConcreteSuperclasses(EPackage ePackage) {
+	finder.findAbstractSubclassesOfConcreteSuperclasses(ePackage)
+		.forEach[makeConcrete]
+}
+
+def resolveDuplicatedFeaturesInSubclasses(EPackage ePackage) {
+	finder.findDuplicatedFeaturesInSubclasses(ePackage)
+		.forEach[superClass, duplicates|
+			duplicates.forEach[key, values|
+				refactorings.pullUpFeatures(superClass, values)
+			]
+		]
 }
 

@@ -300,42 +300,29 @@ class Inputs {
 		use EdeltaRefactorings as extension refactorings
 		
 		modifyEcore improvePerson epackage PersonList {
-			ecoreref(PersonList.Person) => [
-				// since 'refactorings' is an 'extension'
-				// we use its method as an extension method
-				introduceSubclasses(
-					ecoreref(Person.gender),
-					ecoreref(Gender)
-				)
-				addEAttribute(
-					refactorings.mergeAttributes("name",
-						ecoreref(Person.firstname).EAttributeType,
-						#[ecoreref(Person.firstname), ecoreref(Person.lastname)]
-					)
-				)
-			]
+			// since 'refactorings' is an 'extension'
+			// we use its method as an extension method
+			ecoreref(Person.gender).enumToSubclasses()
+			refactorings.mergeFeatures("name",
+				#[ecoreref(Person.firstname), ecoreref(Person.lastname)])
 		}
 		
 		modifyEcore introducePlace epackage PersonList {
-			addNewEClass("Place") [
-				abstract = true
-				extractIntoSuperclass(#[ecoreref(LivingPlace.address), ecoreref(WorkPlace.address)])
-			]
+			extractSuperclass("Place",
+				#[ecoreref(LivingPlace.address), ecoreref(WorkPlace.address)])
 		}
 		
 		modifyEcore introduceWorkingPosition epackage PersonList {
-			addNewEClass("WorkingPosition") [
+			referenceToClass("WorkingPosition", ecoreref(Person.works)) => [
 				addNewEAttribute("description", ecoreref(EString))
-				extractMetaClass(ecoreref(Person.works), "position", "works")
 			]
+			ecoreref(WorkPlace.persons).name = "position"
 		}
 		
 		modifyEcore improveList epackage PersonList {
-			ecoreref(PersonList.List).addEReference(
-				refactorings.mergeReferences("places",
-					ecoreref(Place),
-					#[ecoreref(List.wplaces), ecoreref(List.lplaces)]
-				)
+			refactorings.mergeFeatures("places",
+				ecoreref(Place),
+				#[ecoreref(List.wplaces), ecoreref(List.lplaces)]
 			)
 		}
 		

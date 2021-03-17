@@ -86,7 +86,7 @@ public class EdeltaEPackageManager {
 		return resourceSet.getResources().
 			stream().
 			map(resource -> resource.getContents().get(0)).
-			filter(o -> o instanceof EPackage).
+			filter(EPackage.class::isInstance).
 			map(EPackage.class::cast).
 			filter(p -> p.getName().equals(packageName)).
 			findAny().
