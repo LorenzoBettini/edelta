@@ -244,6 +244,7 @@
       </activation>
       <properties>
         <github-update-repo>git@github.com:LorenzoBettini/edelta-snapshots.git</github-update-repo>
+        <site.label>Edelta Snapshot Site</site.label>
       </properties>
     </profile>
     <profile>
