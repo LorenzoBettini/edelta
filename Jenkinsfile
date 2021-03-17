@@ -13,7 +13,7 @@ node {
      hasToDeploye = true
      isSnapshot = true
    } else if (env.JOB_NAME.endsWith("release")) {
-     mavenProfiles = "-Pbuild-ide,release-ide-composite,deploy-ide-composite"
+     mavenProfiles = "-Prelease-composite,release-ide"
      hasToDeploye = true
    } else {
      mavenProfiles = "-Pjacoco,test-ide"

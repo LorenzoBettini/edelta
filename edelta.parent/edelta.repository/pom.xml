@@ -334,7 +334,7 @@
       </build>
     </profile>
     <profile>
-      <id>deploy-ide-composite</id>
+      <id>release-ide</id>
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>

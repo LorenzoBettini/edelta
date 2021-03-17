@@ -139,7 +139,7 @@
       </modules>
     </profile>
     <profile>
-      <id>release-composite</id>
+      <id>release-composite</id> <!-- release composite update site on GitHub Pages -->
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
@@ -178,7 +178,7 @@
       </build>
     </profile>
     <profile>
-      <id>release-ide-composite</id>
+      <id>release-ide</id> <!-- release IDE products on Sourceforge -->
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
@@ -205,34 +205,6 @@
             </plugin>
           </plugins>
         </pluginManagement>
-        <plugins>
-          <plugin>
-            <groupId>org.eclipse.tycho.extras</groupId>
-            <artifactId>tycho-pack200b-plugin</artifactId>
-            <version>${tycho-version}</version>
-            <executions>
-              <execution>
-                <id>pack200-pack</id>
-                <goals>
-                  <goal>pack</goal>
-                </goals>
-                <phase>package</phase>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.eclipse.tycho</groupId>
-            <artifactId>tycho-p2-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-p2-metadata</id>
-              </execution>
-            </executions>
-            <configuration>
-              <defaultP2Metadata>false</defaultP2Metadata>
-            </configuration>
-          </plugin>
-        </plugins>
       </build>
     </profile>
     <profile>
