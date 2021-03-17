@@ -8,15 +8,18 @@ node {
    if (env.JOB_NAME.endsWith("release-site")) {
      mavenProfiles = "-Prelease-composite"
      hasToDeploye = true
+     mavenArguments = "clean deploy"
    } else if (env.JOB_NAME.endsWith("release-snapshot")) {
      mavenProfiles = "-Prelease-composite,release-snapshots"
      hasToDeploye = true
      isSnapshot = true
+     mavenArguments = "clean deploy"
    } else if (env.JOB_NAME.endsWith("release")) {
-     mavenProfiles = "-Pbuild-ide,release-ide-composite,deploy-ide-composite"
+     mavenProfiles = "-Prelease-composite,release-ide"
      hasToDeploye = true
+     mavenArguments = "clean deploy"
    } else {
-     mavenProfiles = "-Pjacoco,build-ide,test-ide"
+     mavenProfiles = "-Pjacoco,test-ide"
      ideTests = true
    }
    properties([

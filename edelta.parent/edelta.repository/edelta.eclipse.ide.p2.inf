@@ -1,0 +1,2 @@
+instructions.configure=org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:https${#58}//lorenzobettini.github.io/edelta-releases/,type:0,name:Edelta,enabled:true); \
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:https${#58}//lorenzobettini.github.io/edelta-releases/,type:1,name:Edelta,enabled:true);

@@ -13,6 +13,35 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-p2-director-plugin</artifactId>
+          <version>${tycho-version}</version>
+          <executions>
+            <execution>
+              <id>materialize-products</id>
+              <goals>
+                <goal>materialize-products</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>archive-products</id>
+              <goals>
+                <goal>archive-products</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <products>
+              <product>
+                <id>edelta.eclipse.ide.product</id>
+                <archiveFileName>edelta-ide-${unqualifiedVersion}-${buildQualifier}</archiveFileName>
+                <!-- The path where the installed product shall be stored in the archive -->
+                <rootFolder>edelta</rootFolder>
+              </product>
+            </products>
+          </configuration>
+        </plugin>
+        <plugin>
           <groupId>org.eclipse.m2e</groupId>
           <artifactId>lifecycle-mapping</artifactId>
           <version>1.0.0</version>
@@ -58,11 +87,25 @@
 
   <profiles>
     <profile>
+      <!-- Just to test locally the building of a product -->
+      <id>test-ide</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-p2-director-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
       <id>release-composite</id>
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
-
       <build>
         <plugins>
           <plugin>
@@ -82,55 +125,108 @@
               </execution>
             </executions>
           </plugin>
-
           <plugin>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <version>${maven-antrun-plugin.version}</version>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <configuration>
+              <executable>git</executable>
+            </configuration>
             <executions>
               <execution>
-                <!-- Retrieve possibly existing remote composite metadata -->
-                <id>update-local-repository</id>
+                <id>git-clone</id>
                 <phase>prepare-package</phase>
-                <configuration>
-                  <target>
-                    <ant antfile="${ant-files-path}/bintray.ant"
-                      target="get-composite-metadata">
-                    </ant>
-                  </target>
-                </configuration>
                 <goals>
-                  <goal>run</goal>
+                  <goal>exec</goal>
                 </goals>
+                <configuration>
+                  <arguments>
+                    <argument>clone</argument>
+                    <argument>--depth=1</argument>
+                    <argument>-b</argument>
+                    <argument>master</argument>
+                    <argument>${github-update-repo}</argument>
+                    <argument>${github-local-clone}</argument>
+                  </arguments>
+                </configuration>
               </execution>
               <execution>
-                <!-- Deploy p2 repository, p2 composite updated metadata 
-                  but no zipped p2 repository -->
-                <id>deploy-repository</id>
+                <id>git-add</id>
                 <phase>verify</phase>
-                <configuration>
-                  <target>
-                    <ant antfile="${ant-files-path}/bintray.ant"
-                      target="push-to-bintray-no-zip">
-                    </ant>
-                  </target>
-                </configuration>
                 <goals>
-                  <goal>run</goal>
+                  <goal>exec</goal>
                 </goals>
+                <configuration>
+                  <arguments>
+                    <argument>-C</argument>
+                    <argument>${github-local-clone}</argument>
+                    <argument>add</argument>
+                    <argument>-A</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+              <execution>
+                <id>git-commit</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <arguments>
+                    <argument>-C</argument>
+                    <argument>${github-local-clone}</argument>
+                    <argument>commit</argument>
+                    <argument>-m</argument>
+                    <argument>Release ${qualifiedVersion}</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+              <execution>
+                <id>git-push</id>
+                <phase>deploy</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <arguments>
+                    <argument>-C</argument>
+                    <argument>${github-local-clone}</argument>
+                    <argument>push</argument>
+                    <argument>origin</argument>
+                    <argument>master</argument>
+                  </arguments>
+                </configuration>
               </execution>
             </executions>
           </plugin>
-
+          <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy-repository</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${current-release-directory}</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>${project.build.directory}/repository</directory>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
           <plugin>
             <groupId>org.eclipse.tycho.extras</groupId>
             <artifactId>tycho-eclipserun-plugin</artifactId>
-            <version>${tycho-version}</version>
             <configuration>
               <repositories>
                 <repository>
-                  <id>mars</id>
+                  <id>${eclipse-version}</id>
                   <layout>p2</layout>
-                  <url>http://download.eclipse.org/releases/oxygen</url>
+                  <url>https://download.eclipse.org/releases/${eclipse-version}</url>
                 </repository>
               </repositories>
               <dependencies>
@@ -177,12 +273,12 @@
                     <args>${ant-files-path}/packaging-p2composite.ant</args>
                     <args>p2.composite.add.external</args>
                     <args>-Dsite.label="${site.label}"</args>
-                    <args>-Dcomposite.base.dir=${project.build.directory}</args>
+                    <args>-Dcomposite.base.dir=${github-local-clone}</args>
                     <args>-DunqualifiedVersion=${unqualifiedVersion}</args>
                     <args>-DbuildQualifier=${buildQualifier}</args>
                     <args>-DparsedVersion.majorVersion=${parsedVersion.majorVersion}</args>
                     <args>-DparsedVersion.minorVersion=${parsedVersion.minorVersion}</args>
-                    <args>-Dchild.repo="http://download.eclipse.org/modeling/tmf/xtext/updates/releases/${xtextVersion}/"</args>
+                    <args>-Dchild.repo="https://download.eclipse.org/modeling/tmf/xtext/updates/releases/${xtextVersion}/"</args>
                   </applicationsArgs>
                 </configuration>
               </execution>
@@ -200,12 +296,12 @@
                     <args>${ant-files-path}/packaging-p2composite.ant</args>
                     <args>p2.composite.add.external</args>
                     <args>-Dsite.label="${site.label}"</args>
-                    <args>-Dcomposite.base.dir=${project.build.directory}</args>
+                    <args>-Dcomposite.base.dir=${github-local-clone}</args>
                     <args>-DunqualifiedVersion=${unqualifiedVersion}</args>
                     <args>-DbuildQualifier=${buildQualifier}</args>
                     <args>-DparsedVersion.majorVersion=${parsedVersion.majorVersion}</args>
                     <args>-DparsedVersion.minorVersion=${parsedVersion.minorVersion}</args>
-                    <args>-Dchild.repo="http://download.eclipse.org/releases/${eclipseVersion}/"</args>
+                    <args>-Dchild.repo="https://download.eclipse.org/releases/${eclipse-version}/"</args>
                   </applicationsArgs>
                 </configuration>
               </execution>
@@ -224,12 +320,11 @@
                     <args>${ant-files-path}/packaging-p2composite.ant</args>
                     <args>p2.composite.add</args>
                     <args>-Dsite.label="${site.label}"</args>
-                    <args>-Dcomposite.base.dir=${project.build.directory}</args>
+                    <args>-Dcomposite.base.dir=${github-local-clone}</args>
                     <args>-DunqualifiedVersion=${unqualifiedVersion}</args>
                     <args>-DbuildQualifier=${buildQualifier}</args>
                     <args>-DparsedVersion.majorVersion=${parsedVersion.majorVersion}</args>
                     <args>-DparsedVersion.minorVersion=${parsedVersion.minorVersion}</args>
-                    <args>-Dchild.repository.path.prefix="${child.repository.path.prefix}"</args>
                   </applicationsArgs>
                 </configuration>
               </execution>
@@ -238,8 +333,42 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>release-ide</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-p2-director-plugin</artifactId>
+          </plugin>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>${maven-antrun-plugin.version}</version>
+            <!-- copying zipped products -->
+            <executions>
+              <execution>
+                <id>deploy-ides</id>
+                <phase>deploy</phase>
+                <configuration>
+                  <target>
+                    <ant antfile="${ant-files-path}/rsync.ant" 
+                          target="rsync-copy-dir-contents">
+                      <property name="rsync.remote.dir" value="${remote.dir}/products/${unqualifiedVersion}/"/>
+                      <property name="rsync.local.dir" value="${project.build.directory}/products/"/>
+                    </ant>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
-
-  <dependencies>
-  </dependencies>
 </project>
