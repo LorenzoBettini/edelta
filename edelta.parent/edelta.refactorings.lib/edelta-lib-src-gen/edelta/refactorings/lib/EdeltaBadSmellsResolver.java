@@ -1,15 +1,21 @@
 package edelta.refactorings.lib;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaLibrary;
 import edelta.refactorings.lib.EdeltaBadSmellsFinder;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.xtext.xbase.lib.Pair;
 
 @SuppressWarnings("all")
 public class EdeltaBadSmellsResolver extends AbstractEdelta {
@@ -38,7 +44,17 @@ public class EdeltaBadSmellsResolver extends AbstractEdelta {
     final Consumer<List<EStructuralFeature>> _function = (List<EStructuralFeature> it) -> {
       this.refactorings.extractSuperclass(it);
     };
-    this.finder.findDuplicateFeatures(ePackage).values().forEach(_function);
+    this.finder.findDuplicatedFeatures(ePackage).values().forEach(_function);
+  }
+  
+  /**
+   * Removes the dead classifiers.
+   */
+  public void resolveDeadClassifiers(final EPackage ePackage) {
+    final Predicate<EClassifier> _function = (EClassifier it) -> {
+      return true;
+    };
+    this.resolveDeadClassifiers(ePackage, _function);
   }
   
   /**
@@ -60,25 +76,54 @@ public class EdeltaBadSmellsResolver extends AbstractEdelta {
    * Applies redundantContainerToEOpposite to redundant containers
    */
   public void resolveRedundantContainers(final EPackage ePackage) {
-    this.refactorings.redundantContainerToEOpposite(
-      this.finder.findRedundantContainers(ePackage));
+    final Iterable<Pair<EReference, EReference>> findRedundantContainers = this.finder.findRedundantContainers(ePackage);
+    final Consumer<Pair<EReference, EReference>> _function = (Pair<EReference, EReference> it) -> {
+      EdeltaLibrary.makeBidirectional(it.getKey(), it.getValue());
+    };
+    findRedundantContainers.forEach(_function);
   }
   
   /**
-   * Applies classificationByHierarchyToEnum to findClassificationByHierarchy
+   * Applies subclassesToEnum to findClassificationByHierarchy
    */
   public void resolveClassificationByHierarchy(final EPackage ePackage) {
-    this.refactorings.classificationByHierarchyToEnum(
-      this.finder.findClassificationByHierarchy(ePackage));
+    final Map<EClass, List<EClass>> findClassificationByHierarchy = this.finder.findClassificationByHierarchy(ePackage);
+    final Consumer<Map.Entry<EClass, List<EClass>>> _function = (Map.Entry<EClass, List<EClass>> it) -> {
+      String _name = it.getKey().getName();
+      String _plus = (_name + "Type");
+      this.refactorings.subclassesToEnum(_plus, it.getValue());
+    };
+    findClassificationByHierarchy.entrySet().forEach(_function);
   }
   
   public void resolveConcreteAbstractMetaclass(final EPackage ePackage) {
-    this.refactorings.concreteBaseMetaclassToAbstract(
-      this.finder.findConcreteAbstractMetaclasses(ePackage));
+    final Consumer<EClass> _function = (EClass it) -> {
+      EdeltaLibrary.makeAbstract(it);
+    };
+    this.finder.findConcreteAbstractMetaclasses(ePackage).forEach(_function);
   }
   
   public void resolveAbstractConcreteMetaclass(final EPackage ePackage) {
-    this.refactorings.abstractBaseMetaclassToConcrete(
-      this.finder.findAbstractConcreteMetaclasses(ePackage));
+    final Consumer<EClass> _function = (EClass it) -> {
+      EdeltaLibrary.makeConcrete(it);
+    };
+    this.finder.findAbstractConcreteMetaclasses(ePackage).forEach(_function);
+  }
+  
+  public void resolveAbstractSubclassesOfConcreteSuperclasses(final EPackage ePackage) {
+    final Consumer<EClass> _function = (EClass it) -> {
+      EdeltaLibrary.makeConcrete(it);
+    };
+    this.finder.findAbstractSubclassesOfConcreteSuperclasses(ePackage).forEach(_function);
+  }
+  
+  public void resolveDuplicatedFeaturesInSubclasses(final EPackage ePackage) {
+    final BiConsumer<EClass, Map<EStructuralFeature, List<EStructuralFeature>>> _function = (EClass superClass, Map<EStructuralFeature, List<EStructuralFeature>> duplicates) -> {
+      final BiConsumer<EStructuralFeature, List<EStructuralFeature>> _function_1 = (EStructuralFeature key, List<EStructuralFeature> values) -> {
+        this.refactorings.pullUpFeatures(superClass, values);
+      };
+      duplicates.forEach(_function_1);
+    };
+    this.finder.findDuplicatedFeaturesInSubclasses(ePackage).forEach(_function);
   }
 }

@@ -1,17 +1,19 @@
-import edelta.refactorings.lib.helper.EstructuralFeatureEqualityHelper
+import edelta.refactorings.lib.helper.EdeltaFeatureEqualityHelper
+import java.util.Collection
 import java.util.List
+import java.util.Map
 import java.util.function.BiPredicate
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.EStructuralFeature
-import org.eclipse.emf.ecore.EcorePackage
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.emf.ecore.util.EcoreUtil.CrossReferencer
-import java.util.Collection
-import java.util.Map
+import org.eclipse.emf.ecore.util.EcoreUtil.UsageCrossReferencer
 
 package edelta.refactorings.lib
+
+metamodel "ecore"
 
 /**
  * Finds all the features that are structurally equal
@@ -40,11 +42,11 @@ package edelta.refactorings.lib
  * 
  * @param ePackage
  */
-def findDuplicateFeatures(EPackage ePackage) {
-	return findDuplicateFeaturesCustom(
+def findDuplicatedFeatures(EPackage ePackage) {
+	return findDuplicatedFeaturesCustom(
 		ePackage,
 		[existing, current|
-			new EstructuralFeatureEqualityHelper().equals(existing, current)
+			new EdeltaFeatureEqualityHelper().equals(existing, current)
 		]
 	)
 }
@@ -55,9 +57,9 @@ def findDuplicateFeatures(EPackage ePackage) {
  * @param ePackage
  * @param matcher
  */
- def findDuplicateFeaturesCustom(EPackage ePackage, BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
+ def findDuplicatedFeaturesCustom(EPackage ePackage, BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
 	val allFeatures = ePackage.allEStructuralFeatures.toList
-	val result = findDuplicateFeaturesInCollection(allFeatures, matcher)
+	val result = findDuplicatedFeaturesInCollection(allFeatures, matcher)
 	result.entrySet.forEach[
 	 	logInfo[
 			"Duplicate features: " +
@@ -98,7 +100,7 @@ def findDuplicateFeatures(EPackage ePackage) {
  * @param features
  * @param matcher
  */
-def findDuplicateFeaturesInCollection(Collection<EStructuralFeature> features, BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
+def findDuplicatedFeaturesInCollection(Collection<EStructuralFeature> features, BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
 	val map = <EStructuralFeature, List<EStructuralFeature>>newLinkedHashMap
 	for (f : features) {
 		val existing = map.entrySet.findFirst[matcher.test(it.key, f)]
@@ -113,28 +115,29 @@ def findDuplicateFeaturesInCollection(Collection<EStructuralFeature> features, B
 }
 
 /**
- * If a class has more than one subclass, it finds duplicate features in all
- * of its subclasses.
+ * If a class has more than one direct subclass, it finds duplicate features in all
+ * of its direct subclasses.
  * 
- * Returns a map where the key is the class with more than one subclasses
+ * Returns a map where the key is the class with more than one direct subclass
  * with duplicate features; the value is another map as returned by
- * {@link #findDuplicateFeaturesInCollection(Collection, BiPredicate)}
+ * {@link #findDuplicatedFeaturesInCollection(Collection, BiPredicate)}
  */
-def findDuplicateFeaturesInSubclasses(EPackage ePackage) {
+def findDuplicatedFeaturesInSubclasses(EPackage ePackage) {
 	val map = newLinkedHashMap
 	for (c : ePackage.allEClasses) {
 		val directSubclasses = c.directSubclasses
 		val numOfSubclasses = directSubclasses.size
 		if (numOfSubclasses > 1) {
 			val candidates =
-				findDuplicateFeaturesInCollection(
+				findDuplicatedFeaturesInCollection(
 					directSubclasses.map[EStructuralFeatures].flatten.toList,
 					[existing, current|
-						new EstructuralFeatureEqualityHelper().equals(existing, current)
+						new EdeltaFeatureEqualityHelper().equals(existing, current)
 					]
 				)
 			// only entries with a mapped list of size = num of subclasses are duplicates
-			val duplicates = candidates.filter[p1, p2| p2.size == numOfSubclasses]
+			val duplicates = candidates
+				.filter[key, values | values.size == numOfSubclasses]
 			if (!duplicates.empty) {
 				map.put(c, duplicates)
 				duplicates.entrySet.forEach[
@@ -154,10 +157,6 @@ def allEStructuralFeatures(EPackage ePackage) {
 		allEClasses.
 		map[EStructuralFeatures].
 		flatten
-}
-
-def allEClasses(EPackage ePackage) {
-	ePackage.EClassifiers.filter(EClass)
 }
 
 /**
@@ -221,35 +220,32 @@ def findDeadClassifiers(EPackage ePackage) {
 }
 
 /**
- * Whether {@link #hasNoReferenceInThisPackage(EClassifier)} and
- * {@link #isNotReferenced(EClassifier)}
+ * Whether {@link #doesNotReferToClasses(EClassifier)} and
+ * {@link #isNotReferredByClassifiers(EClassifier)}
  */
 def isDeadClassifier(EClassifier cl) {
-	if(cl.hasNoReferenceInThisPackage && cl.isNotReferenced){
+	val result = (cl.doesNotReferToClasses && cl.isNotReferredByClassifiers)
+	if (result)
 		logInfo["Dead classifier: " + getEObjectRepr(cl)]
-		return true;
-	}
+	return result;
 }
 
 /**
- * Whether the passed EClassifier does not refer to anything in its
- * EPackage.
+ * Whether the passed EClassifier does not refer to any EClass
  */
-def hasNoReferenceInThisPackage(EClassifier c) {
-	val thisPackage = c.EPackage
+def doesNotReferToClasses(EClassifier c) {
 	CrossReferencer.find(newArrayList(c))
 		.keySet
-		.filter(EClassifier)
-		.filter[EPackage === thisPackage]
+		.filter(EClass)
 		.empty
 }
 
 /**
- * Whether the passed EClassifier is not referenced in its
- * EPackage.
+ * Whether the passed EClassifier is not referred by EClassifiers.
  */
-def isNotReferenced(EClassifier cl) {
-	EcoreUtil.UsageCrossReferencer.find(cl, cl.EPackage).empty
+def isNotReferredByClassifiers(EClassifier cl) {
+	UsageCrossReferencer.find(cl, cl.packagesToInspect)
+		.empty
 }
 
 /**
@@ -263,7 +259,7 @@ def findClassificationByHierarchy(EPackage ePackage)
 		.filter[
 			ESuperTypes.size == 1 &&
 			EStructuralFeatures.empty &&
-			isNotReferenced
+			isNotReferredByClassifiers
 		]
 		.groupBy[ESuperTypes.head]
 		.filter[base, subclasses|subclasses.size > 1]
@@ -293,20 +289,17 @@ def findConcreteAbstractMetaclasses(EPackage ePackage) {
 	classes.forEach[
 		logInfo["Concrete abstract class: " + getEObjectRepr(it)]
 	]
-	return classes;	
+	return classes;
 }
 
 def hasSubclasses(EClass cl) {
-	!EcoreUtil.UsageCrossReferencer
-		.find(cl, cl.EPackage)
-		.filter[EStructuralFeature === EcorePackage.eINSTANCE.EClass_ESuperTypes]
-		.empty
+	!cl.directSubclasses.empty
 }
 
 def directSubclasses(EClass cl) {
 	EcoreUtil.UsageCrossReferencer
-		.find(cl, cl.EPackage)
-		.filter[EStructuralFeature === EcorePackage.eINSTANCE.EClass_ESuperTypes]
+		.find(cl, cl.packagesToInspect)
+		.filter[EStructuralFeature === ecoreref(eSuperTypes)]
 		.map[EObject as EClass]
 }
 
@@ -324,13 +317,13 @@ def findAbstractConcreteMetaclasses(EPackage ePackage) {
 	classes.forEach[
 		logInfo["Abstract concrete class: " + getEObjectRepr(it)]
 	]
-	return classes;	
+	return classes;
 }
 
 /**
- * Finds classes that are abstract though they have concrete superclasses.
+ * Finds classes that are abstract though they have only concrete superclasses.
  */
-def findAbstractSubclassesOfConcreteSuperclass(EPackage ePackage) {
+def findAbstractSubclassesOfConcreteSuperclasses(EPackage ePackage) {
 	val classes= ePackage.allEClasses
 		.filter[
 			cl |
@@ -341,6 +334,6 @@ def findAbstractSubclassesOfConcreteSuperclass(EPackage ePackage) {
 	classes.forEach[
 		logInfo["Abstract class with concrete superclasses: " + getEObjectRepr(it)]
 	]
-	return classes;	
+	return classes;
 }
 

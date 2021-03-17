@@ -11,9 +11,9 @@ use EdeltaBadSmellsFinder as finder
  * 
  * @param ePackage
  */
-def checkDuplicateFeatures(EPackage ePackage) {
+def checkDuplicatedFeatures(EPackage ePackage) {
 	finder
-		.findDuplicateFeatures(ePackage)
+		.findDuplicatedFeatures(ePackage)
 		.entrySet // key: a duplicate feature, value: all duplicates
 		.forEach[entry|
 			val duplicates = entry.value

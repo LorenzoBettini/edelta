@@ -34,7 +34,7 @@ public class Example extends AbstractEdelta {
   
   public void aModification(final EPackage it) {
     final Consumer<EClass> _function = (EClass it_1) -> {
-      this.refactorings.addMandatoryAttr(it_1, "ANewAttribute", getEDataType("ecore", "EString"));
+      this.refactorings.addMandatoryAttribute(it_1, "ANewAttribute", getEDataType("ecore", "EString"));
       getEAttribute("myecore", "MyNewClass", "ANewAttribute").setEType(getEDataType("ecore", "EInt"));
     };
     EdeltaLibrary.addNewEClass(it, "MyNewClass", _function);

@@ -31,7 +31,7 @@ public class EdeltaBadSmellsChecker extends AbstractEdelta {
    * 
    * @param ePackage
    */
-  public void checkDuplicateFeatures(final EPackage ePackage) {
+  public void checkDuplicatedFeatures(final EPackage ePackage) {
     final Consumer<Map.Entry<EStructuralFeature, List<EStructuralFeature>>> _function = (Map.Entry<EStructuralFeature, List<EStructuralFeature>> entry) -> {
       final List<EStructuralFeature> duplicates = entry.getValue();
       final Consumer<EStructuralFeature> _function_1 = (EStructuralFeature currentDuplicate) -> {
@@ -50,6 +50,6 @@ public class EdeltaBadSmellsChecker extends AbstractEdelta {
       };
       duplicates.forEach(_function_1);
     };
-    this.finder.findDuplicateFeatures(ePackage).entrySet().forEach(_function);
+    this.finder.findDuplicatedFeatures(ePackage).entrySet().forEach(_function);
   }
 }

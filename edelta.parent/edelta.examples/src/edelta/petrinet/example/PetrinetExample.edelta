@@ -14,36 +14,43 @@ use EdeltaRefactorings as refactorings
 
 def addWeightAttribute(EClass c) {
 	c.addNewEAttribute("weight", ecoreref(EInt)) [
-		lowerBound = 1
+		makeRequired // lowerBound = 1
 	]
 }
 
 modifyEcore modifyNet epackage petrinet {
 	ecoreref(Net).name = "Petrinet"
-	ecoreref(Petrinet.places).lowerBound = 1
-	ecoreref(Petrinet.transitions).lowerBound = 1
+	ecoreref(Petrinet.places).makeRequired
+	ecoreref(Petrinet.transitions).makeRequired
 }
 
 modifyEcore introducePTArc epackage petrinet {
-	addNewEClass("PTArc") [
-		refactorings.extractMetaClass(it, ecoreref(Place.dst), 'in', 'out')
+//	refactorings.extractMetaClass("PTArc", ecoreref(Place.dst), 'out', 'in') => [
+//		addWeightAttribute
+//	]
+	refactorings.referenceToClass("PTArc", ecoreref(Place.dst)) => [
 		addWeightAttribute
 	]
+	ecoreref(Place.dst).name = "out"
+	ecoreref(Transition.src).name = "in"
+	ecoreref(PTArc.transition).name = "dst"
+	ecoreref(PTArc.place).name = "src"
 }
 
 modifyEcore introduceTPArc epackage petrinet {
-	addNewEClass("TPArc") [
-		refactorings.extractMetaClass(it, ecoreref(Transition.dst), 'in', 'out')
+//	refactorings.extractMetaClass("TPArc", ecoreref(Transition.dst), 'out', 'in') => [
+//		addWeightAttribute
+//	]
+	refactorings.referenceToClass("TPArc", ecoreref(Transition.dst)) => [
 		addWeightAttribute
 	]
+	ecoreref(Place.src).name = "in"
+	ecoreref(Transition.dst).name = "out"
+	ecoreref(TPArc.transition).name = "src"
+	ecoreref(TPArc.place).name = "dst"
 }
 
 modifyEcore introduceAbstractArc epackage petrinet {
-	addNewEClass("Arc") [
-		abstract = true
-		refactorings.extractIntoSuperclass(
-			it,
-			#[ecoreref(PTArc.weight), ecoreref(TPArc.weight)]
-		);
-	]
+	refactorings.extractSuperclass("Arc",
+		#[ecoreref(PTArc.weight), ecoreref(TPArc.weight)])
 }

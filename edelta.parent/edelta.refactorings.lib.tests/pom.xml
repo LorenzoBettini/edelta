@@ -14,17 +14,7 @@
   <properties>
     <!-- Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=397015 -->
     <sonar.sources></sonar.sources>
-    <sonar.tests>xtend-gen</sonar.tests>
-    <!-- All tests are written in Xtend -->
+    <sonar.tests>src</sonar.tests>
   </properties>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.xtend</groupId>
-        <artifactId>xtend-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
 
 </project>
