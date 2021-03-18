@@ -33,6 +33,7 @@
         <executions>
           <execution>
             <id>mwe2Launcher</id>
+            <phase>generate-sources</phase>
             <configuration>
               <arguments>
                 <argument>/${project.basedir}/src/edelta/GenerateEdelta.mwe2</argument>
