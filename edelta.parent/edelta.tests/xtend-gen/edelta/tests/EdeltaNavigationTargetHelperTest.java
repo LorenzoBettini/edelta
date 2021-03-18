@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
 import edelta.navigation.EdeltaNavigationTargetHelper;
-import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EClassifier;

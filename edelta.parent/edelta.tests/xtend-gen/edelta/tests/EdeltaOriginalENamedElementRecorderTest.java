@@ -7,7 +7,6 @@ import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaFactory;
 import edelta.edelta.EdeltaProgram;
 import edelta.scoping.EdeltaOriginalENamedElementRecorder;
-import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.injectors.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EEnumLiteral;

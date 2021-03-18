@@ -2,7 +2,6 @@ package edelta.ui.tests;
 
 import com.google.inject.Inject;
 import edelta.ui.internal.EdeltaActivator;
-import edelta.ui.tests.EdeltaUiInjectorProvider;
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;

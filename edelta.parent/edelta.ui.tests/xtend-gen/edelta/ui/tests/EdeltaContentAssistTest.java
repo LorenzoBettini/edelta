@@ -2,7 +2,6 @@ package edelta.ui.tests;
 
 import com.google.inject.Injector;
 import edelta.ui.internal.EdeltaActivator;
-import edelta.ui.tests.EdeltaUiInjectorProvider;
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper;
 import java.io.BufferedReader;
 import java.io.InputStream;

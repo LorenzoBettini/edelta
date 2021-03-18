@@ -3,7 +3,6 @@ package edelta.tests;
 import edelta.edelta.EdeltaPackage;
 import edelta.edelta.EdeltaProgram;
 import edelta.lib.AbstractEdelta;
-import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 import edelta.validation.EdeltaValidator;
 import org.eclipse.emf.ecore.EClass;

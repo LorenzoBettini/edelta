@@ -17,7 +17,6 @@ import edelta.resource.derivedstate.EdeltaAccessibleElements;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 import edelta.resource.derivedstate.EdeltaUnresolvedEcoreReferences;
-import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.additional.EdeltaEContentAdapter;
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime;
 import edelta.tests.additional.MyCustomException;

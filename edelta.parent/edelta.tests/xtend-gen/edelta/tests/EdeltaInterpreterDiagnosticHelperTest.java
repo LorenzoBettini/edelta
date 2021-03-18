@@ -3,7 +3,6 @@ package edelta.tests;
 import com.google.inject.Inject;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreterDiagnosticHelper;
-import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtend2.lib.StringConcatenation;

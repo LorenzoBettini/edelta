@@ -8,7 +8,6 @@ import edelta.interpreter.EdeltaInterpreter;
 import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.interpreter.EdeltaSafeInterpreter;
-import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.injectors.EdeltaInjectorProviderDerivedStateComputerWithoutSafeInterpreter;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EClass;
