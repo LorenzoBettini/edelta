@@ -2,7 +2,6 @@ package edelta.refactorings.lib;
 
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaLibrary;
-import edelta.refactorings.lib.EdeltaBadSmellsFinder;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
