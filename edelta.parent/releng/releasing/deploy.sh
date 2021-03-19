@@ -1,3 +1,3 @@
 ./mvnw -f edelta.parent/pom.xml \
-    "-P!development" \
+    '-P!development' \
     -Psonatype-oss-release clean deploy
