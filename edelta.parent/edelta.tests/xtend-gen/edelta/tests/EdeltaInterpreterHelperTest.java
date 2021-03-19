@@ -7,7 +7,6 @@ import edelta.edelta.EdeltaUseAs;
 import edelta.interpreter.EdeltaInterpreterHelper;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.lib.AbstractEdelta;
-import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.additional.MyCustomEdelta;
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime;
 import edelta.tests.injectors.EdeltaInjectorProviderForJavaReflectAccess;

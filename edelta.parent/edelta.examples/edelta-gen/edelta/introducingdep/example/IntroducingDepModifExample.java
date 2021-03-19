@@ -1,6 +1,5 @@
 package edelta.introducingdep.example;
 
-import edelta.introducingdep.example.IntroducingDepOpExample;
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaLibrary;
 import java.util.function.Consumer;

@@ -7,7 +7,6 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
-import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.additional.TestableEdeltaDerivedStateComputer;
 import edelta.tests.injectors.EdeltaInjectorProviderTestableDerivedStateComputer;
 import java.util.Collection;
