@@ -2,7 +2,7 @@
     '-P!development' \
 	versions:set \
 	-DgenerateBackupPoms=false \
-	-DremoveSnapshot=true
+	-DremoveSnapshot=true \
 && \
 ./mvnw -f edelta.parent/pom.xml '-P!development' \
     org.eclipse.tycho:tycho-versions-plugin:update-eclipse-metadata
