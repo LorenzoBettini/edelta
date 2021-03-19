@@ -3,7 +3,6 @@ package edelta.tests;
 import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
-import edelta.tests.EdeltaAbstractTest;
 import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 import edelta.util.EdeltaModelUtil;
 import java.util.List;

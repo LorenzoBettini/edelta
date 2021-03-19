@@ -1,6 +1,5 @@
 package com.example;
 
-import com.example.ExampleReusableFunctions;
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaLibrary;
 import edelta.refactorings.lib.EdeltaRefactorings;

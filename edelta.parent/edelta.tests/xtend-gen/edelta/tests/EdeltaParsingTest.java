@@ -5,8 +5,6 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaPackage;
 import edelta.edelta.EdeltaProgram;
 import edelta.edelta.EdeltaUseAs;
-import edelta.tests.EdeltaAbstractTest;
-import edelta.tests.EdeltaInjectorProvider;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.nodemodel.INode;

@@ -1,7 +1,6 @@
 package edelta.ui.tests;
 
 import com.google.inject.Inject;
-import edelta.ui.tests.EdeltaUiInjectorProvider;
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.emf.ecore.EObject;
