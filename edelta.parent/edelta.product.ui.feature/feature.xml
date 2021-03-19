@@ -2,7 +2,7 @@
 <feature
       id="edelta.product.ui.feature"
       label="Edelta IDE External Components"
-      version="2.3.2.qualifier"
+      version="2.4.0.qualifier"
       provider-name="Lorenzo Bettini">
 
    <requires>
