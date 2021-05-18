@@ -352,8 +352,6 @@
           <version>${jacoco-version}</version>
           <configuration>
             <excludes>
-              <!-- EMF model Java classes -->
-              <exclude>**/edelta/edelta/**/*.class</exclude>
               <!-- Antlr generated Java classes -->
               <exclude>**/antlr/**/*.class</exclude>
               <!-- We don't have a custom serializer -->
@@ -369,8 +367,6 @@
               <exclude>**/internal/*.class</exclude>
               <exclude>**/*ProjectTemplateProvider.class</exclude>
               <exclude>**/*ProjectTemplate.class</exclude>
-              <exclude>**/EdeltaMaven*.class</exclude>
-              <exclude>**/HelpMojo*.class</exclude>
             </excludes>
           </configuration>
           <executions>
