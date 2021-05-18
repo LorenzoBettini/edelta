@@ -10,6 +10,11 @@
   <artifactId>edelta</artifactId>
   <packaging>eclipse-plugin</packaging>
 
+  <properties>
+    <!-- required to run MWE2 -->
+    <mwe2-file>src/edelta/GenerateEdelta.mwe2</mwe2-file>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>io.github.lorenzobettini.edelta</groupId>
@@ -34,13 +39,6 @@
           <execution>
             <id>mwe2Launcher</id>
             <phase>generate-sources</phase>
-            <configuration>
-              <arguments>
-                <argument>/${project.basedir}/src/edelta/GenerateEdelta.mwe2</argument>
-                <argument>-p</argument>
-                <argument>rootPath=/${project.basedir}/..</argument>
-              </arguments>
-            </configuration>
           </execution>
         </executions>
       </plugin>
