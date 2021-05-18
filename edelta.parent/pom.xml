@@ -21,7 +21,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
-    <jacoco-version>0.8.6</jacoco-version>
+    <jacoco-version>0.8.7</jacoco-version>
 
     <mwe2.skip>false</mwe2.skip>
     <xtend.skip>false</xtend.skip>
