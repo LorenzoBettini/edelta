@@ -32,14 +32,27 @@ public class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
   
   private final String TEST_PROJECT = "edelta.ui.tests.project";
   
+  /**
+   * Avoids deleting project
+   */
   @Override
   public void setUp() {
     try {
-      super.setUp();
       this.project = ProjectImportUtil.importProject(this.TEST_PROJECT);
+      IResourcesSetupUtil.waitForBuild();
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
+  }
+  
+  /**
+   * Avoids deleting project
+   */
+  @Override
+  public void tearDown() {
+    this.waitForEventProcessing();
+    AbstractWorkbenchTest.closeEditors();
+    this.waitForEventProcessing();
   }
   
   @Test

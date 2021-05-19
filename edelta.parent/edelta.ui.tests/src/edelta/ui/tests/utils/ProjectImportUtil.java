@@ -54,16 +54,19 @@ public class ProjectImportUtil {
 	 */
 	public static IProject importProject(String projectName)
 			throws CoreException, InvocationTargetException, InterruptedException {
+		IProject project = getProjectFromWorkspace(projectName);
+		if (project.isAccessible())
+			return project;
 		File currDir = new File(".");
 		String path = currDir.getAbsolutePath();
 		String projectToImportPath = path + "/../" + projectName;
-		IProject project = importProject(new File(projectToImportPath), projectName);
+		project = importProject(new File(projectToImportPath), projectName);
 		project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 		return project;
 	}
 
 	private static IProject importProject(final File projectPath, final String projectName) throws CoreException, InvocationTargetException, InterruptedException {
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		IProject project = getProjectFromWorkspace(projectName);
 		ImportOperation importOperation = new ImportOperation(
 				project.getFullPath(), // relative to the workspace
 				projectPath, // absolute path
@@ -73,5 +76,9 @@ public class ProjectImportUtil {
 		importOperation.setCreateContainerStructure(false);
 		importOperation.run(new NullProgressMonitor());
 		return project;
+	}
+
+	private static IProject getProjectFromWorkspace(final String projectName) {
+		return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 	}
 }

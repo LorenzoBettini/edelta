@@ -27,9 +27,21 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 
 	val TEST_PROJECT = "edelta.ui.tests.project"
 
+	/**
+	 * Avoids deleting project
+	 */
 	override void setUp() {
-		super.setUp
 		project = ProjectImportUtil.importProject(TEST_PROJECT)
+		waitForBuild
+	}
+
+	/**
+	 * Avoids deleting project
+	 */
+	override void tearDown() {
+		waitForEventProcessing();
+		closeEditors();
+		waitForEventProcessing();
 	}
 
 	@Test @Flaky
