@@ -4,7 +4,6 @@ import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.createFile;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.jface.viewers.TreeSelection;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.ui.editor.XtextEditor;
@@ -124,7 +123,7 @@ public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 			} catch (InterruptedException e) {
 				System.err.println("Interrupted while waiting for selection");
 			}
-			executeAsyncDisplayJobs();
+			waitForEventProcessing();
 			var selection = (TreeSelection) outlinePage.getTreeViewer().getSelection();
 			if (!selection.isEmpty())
 				return selection;
@@ -133,8 +132,4 @@ public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 		return null;
 	}
 
-	private void executeAsyncDisplayJobs() {
-		while(Display.getCurrent().readAndDispatch()) {
-		}
-	}
 }
