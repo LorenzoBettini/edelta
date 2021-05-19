@@ -20,7 +20,6 @@ import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.editor.XtextEditor
 import org.eclipse.xtext.ui.editor.utils.EditorUtils
 import org.eclipse.xtext.ui.testing.AbstractContentAssistTest
-import org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil
 import org.eclipse.xtext.util.Strings
 import org.junit.After
 import org.junit.AfterClass
@@ -48,8 +47,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	@BeforeClass
 	def static void setUp() {
 		closeWelcomePage
-		ProjectImportUtil.importProject(PROJECT_NAME)
-		pluginJavaProject = JavaProjectSetupUtil.findJavaProject(PROJECT_NAME)
+		pluginJavaProject = ProjectImportUtil.importJavaProject(PROJECT_NAME)
 		waitForBuild
 	}
 

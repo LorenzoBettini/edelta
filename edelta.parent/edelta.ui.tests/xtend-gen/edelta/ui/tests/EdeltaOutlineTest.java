@@ -10,7 +10,6 @@ import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.ui.testing.AbstractOutlineTest;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
-import org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.InputOutput;
 import org.junit.BeforeClass;
@@ -38,13 +37,9 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
   @Override
   protected IJavaProject createjavaProject(final String projectName) throws CoreException {
     try {
-      IJavaProject _xblockexpression = null;
-      {
-        ProjectImportUtil.importProject(AbstractOutlineTest.TEST_PROJECT);
-        IResourcesSetupUtil.waitForBuild();
-        _xblockexpression = JavaProjectSetupUtil.findJavaProject(AbstractOutlineTest.TEST_PROJECT);
-      }
-      return _xblockexpression;
+      final IJavaProject javaProject = ProjectImportUtil.importJavaProject(AbstractOutlineTest.TEST_PROJECT);
+      IResourcesSetupUtil.waitForBuild();
+      return javaProject;
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }

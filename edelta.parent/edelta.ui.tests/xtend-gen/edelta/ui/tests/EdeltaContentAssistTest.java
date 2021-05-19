@@ -28,7 +28,6 @@ import org.eclipse.xtext.ui.editor.utils.EditorUtils;
 import org.eclipse.xtext.ui.testing.AbstractContentAssistTest;
 import org.eclipse.xtext.ui.testing.ContentAssistProcessorTestBuilder;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
-import org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil;
 import org.eclipse.xtext.util.Strings;
 import org.eclipse.xtext.util.concurrent.IUnitOfWork;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
@@ -67,8 +66,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   public static void setUp() {
     try {
       EdeltaPluginProjectHelper.closeWelcomePage();
-      ProjectImportUtil.importProject(EdeltaContentAssistTest.PROJECT_NAME);
-      EdeltaContentAssistTest.pluginJavaProject = JavaProjectSetupUtil.findJavaProject(EdeltaContentAssistTest.PROJECT_NAME);
+      EdeltaContentAssistTest.pluginJavaProject = ProjectImportUtil.importJavaProject(EdeltaContentAssistTest.PROJECT_NAME);
       IResourcesSetupUtil.waitForBuild();
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);

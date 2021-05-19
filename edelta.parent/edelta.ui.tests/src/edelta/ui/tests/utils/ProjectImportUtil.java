@@ -8,6 +8,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.wizards.datatransfer.FileSystemStructureProvider;
 import org.eclipse.ui.wizards.datatransfer.ImportOperation;
@@ -24,19 +26,37 @@ public class ProjectImportUtil {
 	/**
 	 * Imports an existing project into the running workspace for SWTBot tests.
 	 * 
-	 * IMPORTANT: projects to be imported are expected to be located in the
-	 * "../" + projectName folder.
+	 * IMPORTANT: projects to be imported are expected to be located in the "../" +
+	 * projectName folder.
 	 * 
 	 * @param projectName
 	 * @return
 	 * @throws CoreException
-	 * @throws InterruptedException 
-	 * @throws InvocationTargetException 
+	 * @throws InterruptedException
+	 * @throws InvocationTargetException
 	 */
-	public static IProject importProject(String projectName) throws CoreException, InvocationTargetException, InterruptedException {
+	public static IJavaProject importJavaProject(String projectName)
+			throws CoreException, InvocationTargetException, InterruptedException {
+		return JavaCore.create(importProject(projectName));
+	}
+
+	/**
+	 * Imports an existing project into the running workspace for SWTBot tests.
+	 * 
+	 * IMPORTANT: projects to be imported are expected to be located in the "../" +
+	 * projectName folder.
+	 * 
+	 * @param projectName
+	 * @return
+	 * @throws CoreException
+	 * @throws InterruptedException
+	 * @throws InvocationTargetException
+	 */
+	public static IProject importProject(String projectName)
+			throws CoreException, InvocationTargetException, InterruptedException {
 		File currDir = new File(".");
 		String path = currDir.getAbsolutePath();
-		String projectToImportPath = path + "/../" +  projectName;
+		String projectToImportPath = path + "/../" + projectName;
 		IProject project = importProject(new File(projectToImportPath), projectName);
 		project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 		return project;

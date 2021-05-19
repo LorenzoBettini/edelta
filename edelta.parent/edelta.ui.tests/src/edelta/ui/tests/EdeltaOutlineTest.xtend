@@ -7,14 +7,13 @@ import org.eclipse.xtext.testing.Flaky
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.testing.AbstractOutlineTest
-import org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil
+import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil
 import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
-import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaUiInjectorProvider)
@@ -34,9 +33,9 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 
 	override protected createjavaProject(String projectName) throws CoreException {
 		// we use a Plug-in project so that types are resolved (e.g., EClass)
-		ProjectImportUtil.importProject(TEST_PROJECT)
+		val javaProject = ProjectImportUtil.importJavaProject(TEST_PROJECT)
 		IResourcesSetupUtil.waitForBuild
-		JavaProjectSetupUtil.findJavaProject(TEST_PROJECT)
+		return javaProject
 	}
 
 	@Test
