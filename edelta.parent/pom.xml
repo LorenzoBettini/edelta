@@ -21,7 +21,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
-    <jacoco-version>0.8.7</jacoco-version>
 
     <mwe2.skip>false</mwe2.skip>
     <xtend.skip>false</xtend.skip>
@@ -202,25 +201,6 @@
       </modules>
     </profile>
     <profile>
-      <id>jacoco</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>org.eclipse.xtend</groupId>
-              <artifactId>xtend-maven-plugin</artifactId>
-              <configuration>
-                <xtendAsPrimaryDebugSource>true</xtendAsPrimaryDebugSource>
-              </configuration>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
-    </profile>
-    <profile>
       <id>sonatype-oss-release</id>
       <activation>
         <activeByDefault>false</activeByDefault>
@@ -345,37 +325,6 @@
             <compilerSourceLevel>11</compilerSourceLevel>
             <compilerTargetLevel>11</compilerTargetLevel>
           </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.jacoco</groupId>
-          <artifactId>jacoco-maven-plugin</artifactId>
-          <version>${jacoco-version}</version>
-          <configuration>
-            <excludes>
-              <!-- Antlr generated Java classes -->
-              <exclude>**/antlr/**/*.class</exclude>
-              <!-- We don't have a custom serializer -->
-              <exclude>**/serializer/*.class</exclude>
-              <!-- generated files -->
-              <exclude>**/*Abstract*RuntimeModule.class</exclude>
-              <exclude>**/*StandaloneSetup*.class</exclude>
-              <exclude>**/*Abstract*Validator.class</exclude>
-              <exclude>**/*GrammarAccess*.class</exclude>
-              <exclude>**/*Abstract*UiModule.class</exclude>
-              <exclude>**/**ExecutableExtensionFactory.class</exclude>
-              <exclude>**/*Abstract*ProposalProvider.class</exclude>
-              <exclude>**/internal/*.class</exclude>
-              <exclude>**/*ProjectTemplateProvider.class</exclude>
-              <exclude>**/*ProjectTemplate.class</exclude>
-            </excludes>
-          </configuration>
-          <executions>
-            <execution>
-              <goals>
-                <goal>prepare-agent</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
         <!--This plugin's configuration is used to store Eclipse m2e settings only. 
           It has no influence on the Maven build itself. -->

@@ -14,15 +14,11 @@
   <profiles>
     <profile>
       <id>jacoco</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
       <build>
         <plugins>
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>${jacoco-version}</version>
             <configuration>
               <excludes combine.children="append">
                 <exclude>**/edelta/edelta/**/*.class</exclude>

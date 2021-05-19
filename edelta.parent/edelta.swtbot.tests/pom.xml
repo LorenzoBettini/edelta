@@ -17,6 +17,8 @@
     <test-work-directory>${project.build.directory}/work/edelta</test-work-directory>
     <additionalTestArguments>-Dorg.eclipse.swtbot.search.timeout=20000</additionalTestArguments>
     <systemProperties>-Dedelta.interpreter.timeout=30000</systemProperties>
+    <!-- excludes JaCoCo for SWTBot tests -->
+    <coverageTestArguments></coverageTestArguments>
     <!-- Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=397015 -->
     <sonar.sources></sonar.sources>
     <sonar.tests>src</sonar.tests>
