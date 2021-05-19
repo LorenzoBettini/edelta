@@ -1,27 +1,32 @@
 package edelta.ui.tests
 
-import com.google.inject.Inject
 import edelta.ui.internal.EdeltaActivator
-import edelta.ui.tests.utils.EdeltaPluginProjectHelper
+import edelta.ui.tests.utils.ProjectImportUtil
 import org.eclipse.core.runtime.CoreException
 import org.eclipse.xtext.testing.Flaky
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.testing.AbstractOutlineTest
+import org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil
+import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
+import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaUiInjectorProvider)
 class EdeltaOutlineTest extends AbstractOutlineTest {
 
-	@Inject EdeltaPluginProjectHelper edeltaProjectHelper
-
 	@Rule
 	public Flaky.Rule testRule = new Flaky.Rule();
+
+	@BeforeClass
+	def static void setTestProjectName() {
+		TEST_PROJECT = "edelta.ui.tests.project"
+	}
 
 	override protected getEditorId() {
 		EdeltaActivator.EDELTA_EDELTA
@@ -29,7 +34,9 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 
 	override protected createjavaProject(String projectName) throws CoreException {
 		// we use a Plug-in project so that types are resolved (e.g., EClass)
-		edeltaProjectHelper.createEdeltaPluginProject(TEST_PROJECT)
+		ProjectImportUtil.importProject(TEST_PROJECT)
+		IResourcesSetupUtil.waitForBuild
+		JavaProjectSetupUtil.findJavaProject(TEST_PROJECT)
 	}
 
 	@Test

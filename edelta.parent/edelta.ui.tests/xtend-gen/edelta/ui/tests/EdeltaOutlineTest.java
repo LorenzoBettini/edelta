@@ -1,8 +1,7 @@
 package edelta.ui.tests;
 
-import com.google.inject.Inject;
 import edelta.ui.internal.EdeltaActivator;
-import edelta.ui.tests.utils.EdeltaPluginProjectHelper;
+import edelta.ui.tests.utils.ProjectImportUtil;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.xtend2.lib.StringConcatenation;
@@ -11,8 +10,10 @@ import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.ui.testing.AbstractOutlineTest;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
+import org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.InputOutput;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,11 +22,13 @@ import org.junit.runner.RunWith;
 @InjectWith(EdeltaUiInjectorProvider.class)
 @SuppressWarnings("all")
 public class EdeltaOutlineTest extends AbstractOutlineTest {
-  @Inject
-  private EdeltaPluginProjectHelper edeltaProjectHelper;
-  
   @Rule
   public Flaky.Rule testRule = new Flaky.Rule();
+  
+  @BeforeClass
+  public static void setTestProjectName() {
+    AbstractOutlineTest.TEST_PROJECT = "edelta.ui.tests.project";
+  }
   
   @Override
   protected String getEditorId() {
@@ -34,7 +37,17 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
   
   @Override
   protected IJavaProject createjavaProject(final String projectName) throws CoreException {
-    return this.edeltaProjectHelper.createEdeltaPluginProject(AbstractOutlineTest.TEST_PROJECT);
+    try {
+      IJavaProject _xblockexpression = null;
+      {
+        ProjectImportUtil.importProject(AbstractOutlineTest.TEST_PROJECT);
+        IResourcesSetupUtil.waitForBuild();
+        _xblockexpression = JavaProjectSetupUtil.findJavaProject(AbstractOutlineTest.TEST_PROJECT);
+      }
+      return _xblockexpression;
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @Test
