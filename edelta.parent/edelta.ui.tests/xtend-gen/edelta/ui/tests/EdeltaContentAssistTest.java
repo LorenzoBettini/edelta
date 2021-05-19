@@ -10,8 +10,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.ui.IEditorPart;
@@ -75,13 +73,6 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   
   @AfterClass
   public static void tearDown() {
-    try {
-      IProject _project = EdeltaContentAssistTest.pluginJavaProject.getProject();
-      NullProgressMonitor _nullProgressMonitor = new NullProgressMonitor();
-      _project.delete(true, _nullProgressMonitor);
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
   }
   
   @After
@@ -932,7 +923,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   private String[] fromLinesOfStringsToStringArray(final CharSequence strings) {
-    return strings.toString().replaceAll("\r", "").split("\n");
+    return strings.toString().replace("\r", "").split("\n");
   }
   
   private void testContentAssistant(final CharSequence text, final List<String> expectedProposals) {

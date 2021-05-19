@@ -8,7 +8,6 @@ import java.io.InputStreamReader
 import java.util.List
 import java.util.stream.Collectors
 import org.eclipse.core.resources.IFile
-import org.eclipse.core.runtime.NullProgressMonitor
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.jdt.core.IJavaProject
 import org.eclipse.ui.IEditorPart
@@ -53,7 +52,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	@AfterClass
 	def static void tearDown() {
-		pluginJavaProject.project.delete(true, new NullProgressMonitor)
+		// just to make sure the project is not deleted
 	}
 
 	@After
@@ -529,7 +528,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	def private fromLinesOfStringsToStringArray(CharSequence strings) {
-		strings.toString.replaceAll("\r", "").split("\n")
+		strings.toString.replace("\r", "").split("\n")
 	}
 
 	private def void testContentAssistant(CharSequence text, List<String> expectedProposals) {
