@@ -1,8 +1,8 @@
 package edelta.ui.tests;
 
 import com.google.inject.Inject;
-import edelta.ui.tests.utils.EdeltaPluginProjectHelper;
 import edelta.ui.tests.utils.PluginProjectHelper;
+import edelta.ui.tests.utils.ProjectImportUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -27,19 +27,16 @@ public class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
   @Inject
   private PluginProjectHelper projectHelper;
   
-  @Inject
-  private EdeltaPluginProjectHelper edeltaProjectHelper;
-  
   @Rule
   public Flaky.Rule testRule = new Flaky.Rule();
   
-  private final String TEST_PROJECT = "mytestproject";
+  private final String TEST_PROJECT = "edelta.ui.tests.project";
   
   @Override
   public void setUp() {
     try {
       super.setUp();
-      this.project = this.edeltaProjectHelper.createEdeltaPluginProject(this.TEST_PROJECT).getProject();
+      this.project = ProjectImportUtil.importProject(this.TEST_PROJECT);
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }

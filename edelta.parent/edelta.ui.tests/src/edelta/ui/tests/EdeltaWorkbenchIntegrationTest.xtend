@@ -1,13 +1,14 @@
 package edelta.ui.tests
 
 import com.google.inject.Inject
-import edelta.ui.tests.utils.EdeltaPluginProjectHelper
 import edelta.ui.tests.utils.PluginProjectHelper
+import edelta.ui.tests.utils.ProjectImportUtil
 import org.eclipse.core.resources.IProject
 import org.eclipse.xtext.testing.Flaky
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest
+import org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,16 +23,14 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 
 	@Inject PluginProjectHelper projectHelper
 
-	@Inject EdeltaPluginProjectHelper edeltaProjectHelper
-
 	@Rule
 	public Flaky.Rule testRule = new Flaky.Rule();
 
-	val TEST_PROJECT = "mytestproject"
+	val TEST_PROJECT = "edelta.ui.tests.project"
 
 	override void setUp() {
 		super.setUp
-		project = edeltaProjectHelper.createEdeltaPluginProject(TEST_PROJECT).project
+		project = ProjectImportUtil.importProject(TEST_PROJECT)
 	}
 
 	@Test @Flaky
