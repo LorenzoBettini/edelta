@@ -1,7 +1,7 @@
 package edelta.ui.tests
 
 import edelta.ui.internal.EdeltaActivator
-import edelta.ui.tests.utils.EdeltaPluginProjectHelper
+import edelta.ui.tests.utils.ProjectImportUtil
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -20,6 +20,8 @@ import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.editor.XtextEditor
 import org.eclipse.xtext.ui.editor.utils.EditorUtils
 import org.eclipse.xtext.ui.testing.AbstractContentAssistTest
+import org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil
+import org.eclipse.xtext.util.Strings
 import org.junit.After
 import org.junit.AfterClass
 import org.junit.BeforeClass
@@ -29,13 +31,13 @@ import org.junit.runner.RunWith
 
 import static edelta.ui.tests.utils.EdeltaPluginProjectHelper.*
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
-import org.eclipse.xtext.util.Strings
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaUiInjectorProvider)
 class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	static IJavaProject pluginJavaProject
+	static String PROJECT_NAME = "edelta.ui.tests.project"
 
 	@Rule
 	public Flaky.Rule testRule = new Flaky.Rule();
@@ -46,9 +48,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	@BeforeClass
 	def static void setUp() {
 		closeWelcomePage
-		val injector = EdeltaActivator.getInstance().getInjector(EdeltaActivator.EDELTA_EDELTA);
-		val projectHelper = injector.getInstance(EdeltaPluginProjectHelper)
-		pluginJavaProject = projectHelper.createEdeltaPluginProject(PROJECT_NAME)
+		ProjectImportUtil.importProject(PROJECT_NAME)
+		pluginJavaProject = JavaProjectSetupUtil.findJavaProject(PROJECT_NAME)
 		waitForBuild
 	}
 

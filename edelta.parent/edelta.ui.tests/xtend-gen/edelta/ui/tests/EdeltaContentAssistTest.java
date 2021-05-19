@@ -1,8 +1,8 @@
 package edelta.ui.tests;
 
-import com.google.inject.Injector;
 import edelta.ui.internal.EdeltaActivator;
 import edelta.ui.tests.utils.EdeltaPluginProjectHelper;
+import edelta.ui.tests.utils.ProjectImportUtil;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,6 +28,7 @@ import org.eclipse.xtext.ui.editor.utils.EditorUtils;
 import org.eclipse.xtext.ui.testing.AbstractContentAssistTest;
 import org.eclipse.xtext.ui.testing.ContentAssistProcessorTestBuilder;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
+import org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil;
 import org.eclipse.xtext.util.Strings;
 import org.eclipse.xtext.util.concurrent.IUnitOfWork;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
@@ -48,6 +49,8 @@ import org.junit.runner.RunWith;
 public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   private static IJavaProject pluginJavaProject;
   
+  private static String PROJECT_NAME = "edelta.ui.tests.project";
+  
   @Rule
   public Flaky.Rule testRule = new Flaky.Rule();
   
@@ -62,11 +65,14 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   
   @BeforeClass
   public static void setUp() {
-    EdeltaPluginProjectHelper.closeWelcomePage();
-    final Injector injector = EdeltaActivator.getInstance().getInjector(EdeltaActivator.EDELTA_EDELTA);
-    final EdeltaPluginProjectHelper projectHelper = injector.<EdeltaPluginProjectHelper>getInstance(EdeltaPluginProjectHelper.class);
-    EdeltaContentAssistTest.pluginJavaProject = projectHelper.createEdeltaPluginProject(EdeltaPluginProjectHelper.PROJECT_NAME);
-    IResourcesSetupUtil.waitForBuild();
+    try {
+      EdeltaPluginProjectHelper.closeWelcomePage();
+      ProjectImportUtil.importProject(EdeltaContentAssistTest.PROJECT_NAME);
+      EdeltaContentAssistTest.pluginJavaProject = JavaProjectSetupUtil.findJavaProject(EdeltaContentAssistTest.PROJECT_NAME);
+      IResourcesSetupUtil.waitForBuild();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @AfterClass
@@ -101,7 +107,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
       final String result = new BufferedReader(_inputStreamReader).lines().collect(Collectors.joining(Strings.newLine()));
       final XtextEditor editor = this.openEditor(
         IResourcesSetupUtil.createFile(
-          (EdeltaPluginProjectHelper.PROJECT_NAME + "/src/Test.edelta"), result));
+          (EdeltaContentAssistTest.PROJECT_NAME + "/src/Test.edelta"), result));
       final IUnitOfWork<XtextResource, XtextResource> _function = (XtextResource it) -> {
         return it;
       };
@@ -238,7 +244,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
       _builder.newLine();
       _builder.append("</ecore:EPackage>");
       _builder.newLine();
-      return IResourcesSetupUtil.createFile((EdeltaPluginProjectHelper.PROJECT_NAME + "/model/MySubPackages.ecore"), _builder.toString());
+      return IResourcesSetupUtil.createFile((EdeltaContentAssistTest.PROJECT_NAME + "/model/MySubPackages.ecore"), _builder.toString());
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
