@@ -9,6 +9,7 @@ import org.eclipse.xtext.testing.Flaky;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.ui.testing.AbstractOutlineTest;
+import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.InputOutput;
@@ -27,6 +28,28 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
   @BeforeClass
   public static void setTestProjectName() {
     AbstractOutlineTest.TEST_PROJECT = "edelta.ui.tests.project";
+  }
+  
+  /**
+   * Avoids deleting project
+   */
+  @Override
+  public void setUp() {
+    try {
+      this.createjavaProject(AbstractOutlineTest.TEST_PROJECT);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  /**
+   * Avoids deleting project
+   */
+  @Override
+  public void tearDown() {
+    this.waitForEventProcessing();
+    AbstractWorkbenchTest.closeEditors();
+    this.waitForEventProcessing();
   }
   
   @Override

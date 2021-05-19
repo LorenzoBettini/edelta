@@ -27,6 +27,22 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 		TEST_PROJECT = "edelta.ui.tests.project"
 	}
 
+	/**
+	 * Avoids deleting project
+	 */
+	override void setUp() {
+		createjavaProject(TEST_PROJECT);
+	}
+
+	/**
+	 * Avoids deleting project
+	 */
+	override void tearDown() {
+		waitForEventProcessing();
+		closeEditors();
+		waitForEventProcessing();
+	}
+
 	override protected getEditorId() {
 		EdeltaActivator.EDELTA_EDELTA
 	}
