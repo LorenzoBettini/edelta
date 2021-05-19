@@ -11,7 +11,7 @@
   <parent>
     <groupId>io.github.lorenzobettini.xtextutils</groupId>
     <artifactId>xtext-tycho-parent</artifactId>
-    <version>0.5.0</version>
+    <version>0.6.0</version>
     <relativePath></relativePath>
   </parent>
   <packaging>pom</packaging>
@@ -54,7 +54,6 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <xtext-version>${xtextVersion}</xtext-version>
-    <tycho-version>2.2.0</tycho-version>
   </properties>
 
   <dependencyManagement>

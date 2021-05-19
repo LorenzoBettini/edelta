@@ -15,7 +15,6 @@
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-p2-director-plugin</artifactId>
-          <version>${tycho-version}</version>
           <executions>
             <execution>
               <id>materialize-products</id>
@@ -77,7 +76,6 @@
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-p2-repository-plugin</artifactId>
-        <version>${tycho-version}</version>
         <configuration>
           <finalName>${project.artifactId}-${qualifiedVersion}</finalName>
         </configuration>
@@ -346,7 +344,6 @@
           </plugin>
           <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
-            <version>${maven-antrun-plugin.version}</version>
             <!-- copying zipped products -->
             <executions>
               <execution>

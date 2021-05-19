@@ -21,8 +21,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
-    <jacoco-version>0.8.6</jacoco-version>
-    <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
 
     <mwe2.skip>false</mwe2.skip>
     <xtend.skip>false</xtend.skip>
@@ -150,36 +148,6 @@
       <properties>
         <skipTests>true</skipTests>
       </properties>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.eclipse.tycho.extras</groupId>
-            <artifactId>tycho-pack200b-plugin</artifactId>
-            <version>${tycho-version}</version>
-            <executions>
-              <execution>
-                <id>pack200-pack</id>
-                <goals>
-                  <goal>pack</goal>
-                </goals>
-                <phase>package</phase>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.eclipse.tycho</groupId>
-            <artifactId>tycho-p2-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-p2-metadata</id>
-              </execution>
-            </executions>
-            <configuration>
-              <defaultP2Metadata>false</defaultP2Metadata>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
     </profile>
     <profile>
       <id>release-ide</id> <!-- release IDE products on Sourceforge -->
@@ -231,25 +199,6 @@
       <modules>
         <module>edelta.swtbot.tests</module>
       </modules>
-    </profile>
-    <profile>
-      <id>jacoco</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>org.eclipse.xtend</groupId>
-              <artifactId>xtend-maven-plugin</artifactId>
-              <configuration>
-                <xtendAsPrimaryDebugSource>true</xtendAsPrimaryDebugSource>
-              </configuration>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
     </profile>
     <profile>
       <id>sonatype-oss-release</id>
@@ -305,11 +254,6 @@
     </plugins>
     <pluginManagement>
       <plugins>
-        <plugin>
-          <groupId>org.eclipse.tycho.extras</groupId>
-          <artifactId>tycho-eclipserun-plugin</artifactId>
-          <version>${tycho-version}</version>
-        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
@@ -381,41 +325,6 @@
             <compilerSourceLevel>11</compilerSourceLevel>
             <compilerTargetLevel>11</compilerTargetLevel>
           </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.jacoco</groupId>
-          <artifactId>jacoco-maven-plugin</artifactId>
-          <version>${jacoco-version}</version>
-          <configuration>
-            <excludes>
-              <!-- EMF model Java classes -->
-              <exclude>**/edelta/edelta/**/*.class</exclude>
-              <!-- Antlr generated Java classes -->
-              <exclude>**/antlr/**/*.class</exclude>
-              <!-- We don't have a custom serializer -->
-              <exclude>**/serializer/*.class</exclude>
-              <!-- generated files -->
-              <exclude>**/*Abstract*RuntimeModule.class</exclude>
-              <exclude>**/*StandaloneSetup*.class</exclude>
-              <exclude>**/*Abstract*Validator.class</exclude>
-              <exclude>**/*GrammarAccess*.class</exclude>
-              <exclude>**/*Abstract*UiModule.class</exclude>
-              <exclude>**/**ExecutableExtensionFactory.class</exclude>
-              <exclude>**/*Abstract*ProposalProvider.class</exclude>
-              <exclude>**/internal/*.class</exclude>
-              <exclude>**/*ProjectTemplateProvider.class</exclude>
-              <exclude>**/*ProjectTemplate.class</exclude>
-              <exclude>**/EdeltaMaven*.class</exclude>
-              <exclude>**/HelpMojo*.class</exclude>
-            </excludes>
-          </configuration>
-          <executions>
-            <execution>
-              <goals>
-                <goal>prepare-agent</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
         <!--This plugin's configuration is used to store Eclipse m2e settings only. 
           It has no influence on the Maven build itself. -->
