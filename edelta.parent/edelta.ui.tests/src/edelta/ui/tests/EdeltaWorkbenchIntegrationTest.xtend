@@ -8,7 +8,6 @@ import org.eclipse.xtext.testing.Flaky
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest
-import org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,9 +46,6 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 			}
 			'''
 		)
-		// we need to wait for build twice when we run all the UI tests
-		waitForBuild
-		projectHelper.assertNoErrors
 		waitForBuild
 		projectHelper.assertNoErrors
 		assertSrcGenFolderFile("foo", "Test.java")
@@ -69,8 +65,6 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 			}
 			'''
 		)
-		// we need to wait for build twice when we run all the UI tests
-		waitForBuild
 		waitForBuild
 		projectHelper.assertErrors(
 		'''Foo cannot be resolved.'''
@@ -91,9 +85,6 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 			}
 			'''
 		)
-		// we need to wait for build twice when we run all the UI tests
-		waitForBuild
-		projectHelper.assertNoErrors
 		waitForBuild
 		projectHelper.assertNoErrors
 		createFile(
@@ -108,9 +99,6 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 			}
 			'''
 		)
-		// we need to wait for build twice when we run all the UI tests
-		waitForBuild
-		projectHelper.assertNoErrors
 		waitForBuild
 		projectHelper.assertNoErrors
 		assertSrcGenFolderFile("foo", "Test.java")

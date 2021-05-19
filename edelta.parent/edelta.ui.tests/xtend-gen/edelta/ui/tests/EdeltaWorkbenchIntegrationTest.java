@@ -64,8 +64,6 @@ public class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
         (this.TEST_PROJECT + "/src/Test.edelta"), _builder.toString());
       IResourcesSetupUtil.waitForBuild();
       this.projectHelper.assertNoErrors();
-      IResourcesSetupUtil.waitForBuild();
-      this.projectHelper.assertNoErrors();
       this.assertSrcGenFolderFile("foo", "Test.java");
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
@@ -92,7 +90,6 @@ public class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
       _builder.newLine();
       IResourcesSetupUtil.createFile(
         (this.TEST_PROJECT + "/src/Test.edelta"), _builder.toString());
-      IResourcesSetupUtil.waitForBuild();
       IResourcesSetupUtil.waitForBuild();
       StringConcatenation _builder_1 = new StringConcatenation();
       _builder_1.append("Foo cannot be resolved.");
@@ -124,8 +121,6 @@ public class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
         (this.TEST_PROJECT + "/src/Test.edelta"), _builder.toString());
       IResourcesSetupUtil.waitForBuild();
       this.projectHelper.assertNoErrors();
-      IResourcesSetupUtil.waitForBuild();
-      this.projectHelper.assertNoErrors();
       StringConcatenation _builder_1 = new StringConcatenation();
       _builder_1.append("package foo");
       _builder_1.newLine();
@@ -142,8 +137,6 @@ public class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
       _builder_1.newLine();
       IResourcesSetupUtil.createFile(
         (this.TEST_PROJECT + "/src/Test2.edelta"), _builder_1.toString());
-      IResourcesSetupUtil.waitForBuild();
-      this.projectHelper.assertNoErrors();
       IResourcesSetupUtil.waitForBuild();
       this.projectHelper.assertNoErrors();
       this.assertSrcGenFolderFile("foo", "Test.java");
