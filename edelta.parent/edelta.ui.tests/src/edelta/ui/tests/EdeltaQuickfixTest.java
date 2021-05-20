@@ -1,8 +1,11 @@
 package edelta.ui.tests;
 
+import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.testing.Flaky;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
+import org.eclipse.xtext.ui.editor.model.IXtextDocument;
+import org.eclipse.xtext.ui.editor.model.XtextDocument;
 import org.eclipse.xtext.ui.testing.AbstractQuickfixTest;
 import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
@@ -12,6 +15,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import edelta.ui.tests.utils.CarriageReturnAwareXtextDocument;
 import edelta.ui.tests.utils.ProjectImportUtil;
 import edelta.validation.EdeltaValidator;
 
@@ -63,6 +67,18 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
 	@Override
 	protected String getFileName() {
 		return "src/" + super.getFileName();
+	}
+
+	/**
+	 * Returns a {@link CarriageReturnAwareXtextDocument}.
+	 */
+	@Override
+	protected IXtextDocument getDocument(String model) {
+		XtextResource xtextResource = getXtextResource(model);
+		XtextDocument document = injector.getInstance(CarriageReturnAwareXtextDocument.class);
+		document.set(model);
+		document.setInput(xtextResource);
+		return document;
 	}
 
 	@Test
