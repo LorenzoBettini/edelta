@@ -1,7 +1,6 @@
 package edelta.ui.tests
 
-import com.google.inject.Inject
-import edelta.ui.tests.utils.EdeltaPluginProjectHelper
+import edelta.ui.tests.utils.ProjectImportUtil
 import edelta.validation.EdeltaValidator
 import org.eclipse.xtext.testing.Flaky
 import org.eclipse.xtext.testing.InjectWith
@@ -11,34 +10,28 @@ import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.BeforeClass
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaUiInjectorProvider)
 class EdeltaQuickfixTest extends AbstractQuickfixTest {
 
-	@Inject EdeltaPluginProjectHelper projectHelper
+	static val TEST_PROJECT = "edelta.ui.tests.project"
 
 	@Rule
 	public Flaky.Rule testRule = new Flaky.Rule();
 
-	override protected getFileName() {
-		/*
-		 * Better to put Edelta file in a source folder
-		 */
-		"src/" + super.getFileName()
-	}
-
-	override void setUp() {
-		super.setUp
+	@BeforeClass
+	def static void importProject() {
 		/*
 		 * Edelta requires a plug-in project to run the interpreter
 		 * with edelta.lib as dependency
 		 */
-		projectHelper.createEdeltaPluginProject(projectName)
+		ProjectImportUtil.importProject(TEST_PROJECT)
 
 		IResourcesSetupUtil
 			.createFile(
-				projectName,
+				TEST_PROJECT,
 				"src/MySubPackages", "ecore",
 				'''
 				<?xml version="1.0" encoding="UTF-8"?>
@@ -64,6 +57,35 @@ class EdeltaQuickfixTest extends AbstractQuickfixTest {
 				</ecore:EPackage>
 				'''
 			)
+
+		IResourcesSetupUtil.waitForBuild
+	}
+
+	/**
+	 * Avoids deleting project
+	 */
+	override void setUp() {
+
+	}
+
+	/**
+	 * Avoids deleting project
+	 */
+	override void tearDown() {
+		waitForEventProcessing();
+		closeEditors();
+		waitForEventProcessing();
+	}
+
+	override protected getProjectName() {
+		TEST_PROJECT
+	}
+
+	override protected getFileName() {
+		/*
+		 * Better to put Edelta file in a source folder
+		 */
+		"src/" + super.getFileName()
 	}
 
 	@Test @Flaky

@@ -1,16 +1,17 @@
 package edelta.ui.tests;
 
-import com.google.inject.Inject;
-import edelta.ui.tests.utils.EdeltaPluginProjectHelper;
+import edelta.ui.tests.utils.ProjectImportUtil;
 import edelta.validation.EdeltaValidator;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.testing.Flaky;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.ui.testing.AbstractQuickfixTest;
+import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.InputOutput;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,24 +20,15 @@ import org.junit.runner.RunWith;
 @InjectWith(EdeltaUiInjectorProvider.class)
 @SuppressWarnings("all")
 public class EdeltaQuickfixTest extends AbstractQuickfixTest {
-  @Inject
-  private EdeltaPluginProjectHelper projectHelper;
+  private static final String TEST_PROJECT = "edelta.ui.tests.project";
   
   @Rule
   public Flaky.Rule testRule = new Flaky.Rule();
   
-  @Override
-  protected String getFileName() {
-    String _fileName = super.getFileName();
-    return ("src/" + _fileName);
-  }
-  
-  @Override
-  public void setUp() {
+  @BeforeClass
+  public static void importProject() {
     try {
-      super.setUp();
-      this.projectHelper.createEdeltaPluginProject(this.getProjectName());
-      String _projectName = this.getProjectName();
+      ProjectImportUtil.importProject(EdeltaQuickfixTest.TEST_PROJECT);
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
       _builder.newLine();
@@ -98,11 +90,41 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
       _builder.newLine();
       _builder.append("</ecore:EPackage>");
       _builder.newLine();
-      IResourcesSetupUtil.createFile(_projectName, 
+      IResourcesSetupUtil.createFile(
+        EdeltaQuickfixTest.TEST_PROJECT, 
         "src/MySubPackages", "ecore", _builder.toString());
+      IResourcesSetupUtil.waitForBuild();
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
+  }
+  
+  /**
+   * Avoids deleting project
+   */
+  @Override
+  public void setUp() {
+  }
+  
+  /**
+   * Avoids deleting project
+   */
+  @Override
+  public void tearDown() {
+    this.waitForEventProcessing();
+    AbstractWorkbenchTest.closeEditors();
+    this.waitForEventProcessing();
+  }
+  
+  @Override
+  protected String getProjectName() {
+    return EdeltaQuickfixTest.TEST_PROJECT;
+  }
+  
+  @Override
+  protected String getFileName() {
+    String _fileName = super.getFileName();
+    return ("src/" + _fileName);
   }
   
   @Test
