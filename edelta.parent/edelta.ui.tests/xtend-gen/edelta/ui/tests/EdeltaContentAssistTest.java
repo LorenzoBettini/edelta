@@ -1,8 +1,7 @@
 package edelta.ui.tests;
 
-import com.google.inject.Injector;
 import edelta.ui.internal.EdeltaActivator;
-import edelta.ui.tests.utils.EdeltaPluginProjectHelper;
+import edelta.ui.tests.utils.ProjectImportUtil;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,8 +9,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.ui.IEditorPart;
@@ -42,11 +39,19 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * The tests rely on the ecore files in:
+ * /edelta.ui.tests.project/model/
+ * 
+ * @author Lorenzo Bettini
+ */
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
 @SuppressWarnings("all")
 public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   private static IJavaProject pluginJavaProject;
+  
+  private static String PROJECT_NAME = "edelta.ui.tests.project";
   
   @Rule
   public Flaky.Rule testRule = new Flaky.Rule();
@@ -62,22 +67,16 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   
   @BeforeClass
   public static void setUp() {
-    EdeltaPluginProjectHelper.closeWelcomePage();
-    final Injector injector = EdeltaActivator.getInstance().getInjector(EdeltaActivator.EDELTA_EDELTA);
-    final EdeltaPluginProjectHelper projectHelper = injector.<EdeltaPluginProjectHelper>getInstance(EdeltaPluginProjectHelper.class);
-    EdeltaContentAssistTest.pluginJavaProject = projectHelper.createEdeltaPluginProject(EdeltaPluginProjectHelper.PROJECT_NAME);
-    IResourcesSetupUtil.waitForBuild();
+    try {
+      EdeltaContentAssistTest.pluginJavaProject = ProjectImportUtil.importJavaProject(EdeltaContentAssistTest.PROJECT_NAME);
+      IResourcesSetupUtil.waitForBuild();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   @AfterClass
   public static void tearDown() {
-    try {
-      IProject _project = EdeltaContentAssistTest.pluginJavaProject.getProject();
-      NullProgressMonitor _nullProgressMonitor = new NullProgressMonitor();
-      _project.delete(true, _nullProgressMonitor);
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
   }
   
   @After
@@ -101,7 +100,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
       final String result = new BufferedReader(_inputStreamReader).lines().collect(Collectors.joining(Strings.newLine()));
       final XtextEditor editor = this.openEditor(
         IResourcesSetupUtil.createFile(
-          (EdeltaPluginProjectHelper.PROJECT_NAME + "/src/Test.edelta"), result));
+          (EdeltaContentAssistTest.PROJECT_NAME + "/src/Test.edelta"), result));
       final IUnitOfWork<XtextResource, XtextResource> _function = (XtextResource it) -> {
         return it;
       };
@@ -151,8 +150,6 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   @Test
   public void testMetamodelsInThePresenceOfSubpackages() {
     try {
-      this.createMySubPackagesEcore();
-      IResourcesSetupUtil.waitForBuild();
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("\"annotation\"");
       _builder.newLine();
@@ -170,75 +167,6 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
       _builder.newLine();
       this.newBuilder().append("metamodel ").assertText(
         this.fromLinesOfStringsToStringArray(_builder));
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
-  }
-  
-  private IFile createMySubPackagesEcore() {
-    try {
-      StringConcatenation _builder = new StringConcatenation();
-      _builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-      _builder.newLine();
-      _builder.append("<ecore:EPackage xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
-      _builder.newLine();
-      _builder.append("    ");
-      _builder.append("xmlns:ecore=\"http://www.eclipse.org/emf/2002/Ecore\" name=\"mainpackage\" nsURI=\"http://my.mainpackage.org\" nsPrefix=\"mainpackage\">");
-      _builder.newLine();
-      _builder.append("  ");
-      _builder.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"MyClass\">");
-      _builder.newLine();
-      _builder.append("    ");
-      _builder.append("<eStructuralFeatures xsi:type=\"ecore:EAttribute\" name=\"myAttribute\" eType=\"ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString\"/>");
-      _builder.newLine();
-      _builder.append("    ");
-      _builder.append("<eStructuralFeatures xsi:type=\"ecore:EReference\" name=\"myReference\" eType=\"ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject\"/>");
-      _builder.newLine();
-      _builder.append("  ");
-      _builder.append("</eClassifiers>");
-      _builder.newLine();
-      _builder.append("  ");
-      _builder.append("<eSubpackages name=\"subpackage\" nsURI=\"http://mysubpackage\" nsPrefix=\"subpackage\">");
-      _builder.newLine();
-      _builder.append("    ");
-      _builder.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"MySubPackageClass\"/>");
-      _builder.newLine();
-      _builder.append("    ");
-      _builder.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"MyClass\">");
-      _builder.newLine();
-      _builder.append("      ");
-      _builder.append("<eStructuralFeatures xsi:type=\"ecore:EAttribute\" name=\"myAttribute\" eType=\"ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString\"/>");
-      _builder.newLine();
-      _builder.append("      ");
-      _builder.append("<eStructuralFeatures xsi:type=\"ecore:EReference\" name=\"myReference\" eType=\"ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject\"/>");
-      _builder.newLine();
-      _builder.append("    ");
-      _builder.append("</eClassifiers>");
-      _builder.newLine();
-      _builder.append("    ");
-      _builder.append("<eSubpackages name=\"subsubpackage\" nsURI=\"http://mysubsubpackage\" nsPrefix=\"subsubpackage\">");
-      _builder.newLine();
-      _builder.append("      ");
-      _builder.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"MyClass\">");
-      _builder.newLine();
-      _builder.append("        ");
-      _builder.append("<eStructuralFeatures xsi:type=\"ecore:EAttribute\" name=\"myAttribute\" eType=\"ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString\"/>");
-      _builder.newLine();
-      _builder.append("        ");
-      _builder.append("<eStructuralFeatures xsi:type=\"ecore:EReference\" name=\"myReference\" eType=\"ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject\"/>");
-      _builder.newLine();
-      _builder.append("      ");
-      _builder.append("</eClassifiers>");
-      _builder.newLine();
-      _builder.append("    ");
-      _builder.append("</eSubpackages>");
-      _builder.newLine();
-      _builder.append("  ");
-      _builder.append("</eSubpackages>");
-      _builder.newLine();
-      _builder.append("</ecore:EPackage>");
-      _builder.newLine();
-      return IResourcesSetupUtil.createFile((EdeltaPluginProjectHelper.PROJECT_NAME + "/model/MySubPackages.ecore"), _builder.toString());
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -785,8 +713,6 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   @Flaky
   public void testForAmbiguousReferencesFullyQualifiedNameIsProposed() {
     try {
-      this.createMySubPackagesEcore();
-      IResourcesSetupUtil.waitForBuild();
       ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("metamodel \"mainpackage\"");
@@ -828,8 +754,6 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   @Flaky
   public void testForAmbiguousReferencesFullyQualifiedNameIsReplaced() {
     try {
-      this.createMySubPackagesEcore();
-      IResourcesSetupUtil.waitForBuild();
       ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("metamodel \"mainpackage\"");
@@ -858,8 +782,6 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   @Flaky
   public void testForAmbiguousReferencesFullyQualifiedNameIsProposedInOperation() {
     try {
-      this.createMySubPackagesEcore();
-      IResourcesSetupUtil.waitForBuild();
       ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("metamodel \"mainpackage\"");
@@ -901,8 +823,6 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   @Flaky
   public void testForAmbiguousReferencesFullyQualifiedNameIsReplacedInOperation() {
     try {
-      this.createMySubPackagesEcore();
-      IResourcesSetupUtil.waitForBuild();
       ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("metamodel \"mainpackage\"");
@@ -928,7 +848,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   }
   
   private String[] fromLinesOfStringsToStringArray(final CharSequence strings) {
-    return strings.toString().replaceAll("\r", "").split("\n");
+    return strings.toString().replace("\r", "").split("\n");
   }
   
   private void testContentAssistant(final CharSequence text, final List<String> expectedProposals) {

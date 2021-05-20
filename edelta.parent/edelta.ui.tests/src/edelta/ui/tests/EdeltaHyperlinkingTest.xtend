@@ -1,14 +1,15 @@
 package edelta.ui.tests
 
-import com.google.inject.Inject
-import edelta.ui.tests.utils.EdeltaPluginProjectHelper
+import edelta.ui.tests.utils.ProjectImportUtil
 import org.eclipse.core.resources.IFile
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.editor.XtextEditor
 import org.eclipse.xtext.ui.editor.hyperlinking.XtextHyperlink
 import org.eclipse.xtext.ui.testing.AbstractHyperlinkingTest
+import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil
 import org.eclipse.xtext.xbase.XAbstractFeatureCall
+import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -16,24 +17,45 @@ import org.junit.runner.RunWith
 @InjectWith(EdeltaUiInjectorProvider)
 class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 
-	@Inject EdeltaPluginProjectHelper projectHelper
+	static val TEST_PROJECT = "edelta.ui.tests.project"
 
 	XtextEditor xtextEditor
+
+	@BeforeClass
+	def static void importProject() {
+		/*
+		 * Edelta requires a plug-in project to run the interpreter
+		 * with edelta.lib as dependency
+		 */
+		ProjectImportUtil.importProject(TEST_PROJECT)
+		IResourcesSetupUtil.waitForBuild
+	}
+
+	/**
+	 * Avoids deleting project
+	 */
+	override void setUp() {
+
+	}
+
+	/**
+	 * Avoids deleting project
+	 */
+	override void tearDown() {
+		waitForEventProcessing();
+		closeEditors();
+		waitForEventProcessing();
+	}
+
+	override protected getProjectName() {
+		TEST_PROJECT
+	}
 
 	override protected getFileName() {
 		/*
 		 * Better to put Edelta file in a source folder
 		 */
 		"src/" + super.getFileName()
-	}
-
-	override void setUp() {
-		super.setUp
-		/*
-		 * Edelta requires a plug-in project to run the interpreter
-		 * with edelta.lib as dependency
-		 */
-		projectHelper.createEdeltaPluginProject(projectName)
 	}
 
 	override protected openInEditor(IFile dslFile) {

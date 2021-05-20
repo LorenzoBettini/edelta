@@ -1,14 +1,13 @@
 package edelta.ui.tests
 
 import edelta.ui.internal.EdeltaActivator
-import edelta.ui.tests.utils.EdeltaPluginProjectHelper
+import edelta.ui.tests.utils.ProjectImportUtil
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.util.List
 import java.util.stream.Collectors
 import org.eclipse.core.resources.IFile
-import org.eclipse.core.runtime.NullProgressMonitor
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.jdt.core.IJavaProject
 import org.eclipse.ui.IEditorPart
@@ -20,6 +19,7 @@ import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.editor.XtextEditor
 import org.eclipse.xtext.ui.editor.utils.EditorUtils
 import org.eclipse.xtext.ui.testing.AbstractContentAssistTest
+import org.eclipse.xtext.util.Strings
 import org.junit.After
 import org.junit.AfterClass
 import org.junit.BeforeClass
@@ -27,15 +27,20 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import static edelta.ui.tests.utils.EdeltaPluginProjectHelper.*
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
-import org.eclipse.xtext.util.Strings
 
+/**
+ * The tests rely on the ecore files in:
+ * /edelta.ui.tests.project/model/
+ * 
+ * @author Lorenzo Bettini
+ */
 @RunWith(XtextRunner)
 @InjectWith(EdeltaUiInjectorProvider)
 class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	static IJavaProject pluginJavaProject
+	static String PROJECT_NAME = "edelta.ui.tests.project"
 
 	@Rule
 	public Flaky.Rule testRule = new Flaky.Rule();
@@ -45,16 +50,13 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	@BeforeClass
 	def static void setUp() {
-		closeWelcomePage
-		val injector = EdeltaActivator.getInstance().getInjector(EdeltaActivator.EDELTA_EDELTA);
-		val projectHelper = injector.getInstance(EdeltaPluginProjectHelper)
-		pluginJavaProject = projectHelper.createEdeltaPluginProject(PROJECT_NAME)
+		pluginJavaProject = ProjectImportUtil.importJavaProject(PROJECT_NAME)
 		waitForBuild
 	}
 
 	@AfterClass
 	def static void tearDown() {
-		pluginJavaProject.project.delete(true, new NullProgressMonitor)
+		// just to make sure the project is not deleted
 	}
 
 	@After
@@ -109,8 +111,6 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test def void testMetamodelsInThePresenceOfSubpackages() {
-		createMySubPackagesEcore()
-		waitForBuild // required to index the new ecore file
 		// mainpackage.subpackage and mainpackage.subpackage.subsubpackage
 		// must not be proposed, since they are subpackages,
 		// which cannot be directly imported
@@ -127,33 +127,6 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 				'''.fromLinesOfStringsToStringArray)
 	}
 
-	private def IFile createMySubPackagesEcore() {
-		createFile(PROJECT_NAME+"/model/MySubPackages.ecore",
-			'''
-			<?xml version="1.0" encoding="UTF-8"?>
-			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="mainpackage" nsURI="http://my.mainpackage.org" nsPrefix="mainpackage">
-			  <eClassifiers xsi:type="ecore:EClass" name="MyClass">
-			    <eStructuralFeatures xsi:type="ecore:EAttribute" name="myAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-			    <eStructuralFeatures xsi:type="ecore:EReference" name="myReference" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"/>
-			  </eClassifiers>
-			  <eSubpackages name="subpackage" nsURI="http://mysubpackage" nsPrefix="subpackage">
-			    <eClassifiers xsi:type="ecore:EClass" name="MySubPackageClass"/>
-			    <eClassifiers xsi:type="ecore:EClass" name="MyClass">
-			      <eStructuralFeatures xsi:type="ecore:EAttribute" name="myAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-			      <eStructuralFeatures xsi:type="ecore:EReference" name="myReference" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"/>
-			    </eClassifiers>
-			    <eSubpackages name="subsubpackage" nsURI="http://mysubsubpackage" nsPrefix="subsubpackage">
-			      <eClassifiers xsi:type="ecore:EClass" name="MyClass">
-			        <eStructuralFeatures xsi:type="ecore:EAttribute" name="myAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-			        <eStructuralFeatures xsi:type="ecore:EReference" name="myReference" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"/>
-			      </eClassifiers>
-			    </eSubpackages>
-			  </eSubpackages>
-			</ecore:EPackage>
-			'''
-		)
-	}
 
 	@Test def void testNoNSURIProposalMetamodels() {
 		newBuilder.append("metamodel <|>").assertNoProposalAtCursor('"http://my.package.org"')
@@ -449,8 +422,6 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	@Test @Flaky
 	def void testForAmbiguousReferencesFullyQualifiedNameIsProposed() {
-		createMySubPackagesEcore()
-		waitForBuild // required to index the new ecore file
 		newBuilder.append('''
 			metamodel "mainpackage"
 			
@@ -473,8 +444,6 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	@Test @Flaky
 	def void testForAmbiguousReferencesFullyQualifiedNameIsReplaced() {
-		createMySubPackagesEcore()
-		waitForBuild // required to index the new ecore file
 		newBuilder.append('''
 			metamodel "mainpackage"
 			
@@ -490,8 +459,6 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	@Test @Flaky
 	def void testForAmbiguousReferencesFullyQualifiedNameIsProposedInOperation() {
-		createMySubPackagesEcore()
-		waitForBuild // required to index the new ecore file
 		newBuilder.append('''
 			metamodel "mainpackage"
 			
@@ -514,8 +481,6 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	@Test @Flaky
 	def void testForAmbiguousReferencesFullyQualifiedNameIsReplacedInOperation() {
-		createMySubPackagesEcore()
-		waitForBuild // required to index the new ecore file
 		newBuilder.append('''
 			metamodel "mainpackage"
 			
@@ -530,7 +495,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	def private fromLinesOfStringsToStringArray(CharSequence strings) {
-		strings.toString.replaceAll("\r", "").split("\n")
+		strings.toString.replace("\r", "").split("\n")
 	}
 
 	private def void testContentAssistant(CharSequence text, List<String> expectedProposals) {
