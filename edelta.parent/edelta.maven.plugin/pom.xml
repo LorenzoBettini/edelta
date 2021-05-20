@@ -198,12 +198,9 @@
   <profiles>
     <profile>
       <id>jacoco</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
       <build>
         <plugins>
-          <!-- configured in <pluginManagement> -->
+          <!-- configured in <pluginManagement> of xtext-build-utils parent -->
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>

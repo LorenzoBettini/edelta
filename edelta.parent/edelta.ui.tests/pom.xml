@@ -73,13 +73,6 @@
           </dependency-resolution>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-surefire-plugin</artifactId>
-        <configuration>
-          <useUIHarness>true</useUIHarness>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
 
