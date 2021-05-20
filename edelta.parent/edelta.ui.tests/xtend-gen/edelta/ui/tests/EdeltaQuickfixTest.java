@@ -16,6 +16,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * The tests rely on the ecore file:
+ * /edelta.ui.tests.project/model/MySubPackages.ecore
+ * 
+ * @author Lorenzo Bettini
+ */
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
 @SuppressWarnings("all")
@@ -29,70 +35,6 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
   public static void importProject() {
     try {
       ProjectImportUtil.importProject(EdeltaQuickfixTest.TEST_PROJECT);
-      StringConcatenation _builder = new StringConcatenation();
-      _builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-      _builder.newLine();
-      _builder.append("<ecore:EPackage xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
-      _builder.newLine();
-      _builder.append("    ");
-      _builder.append("xmlns:ecore=\"http://www.eclipse.org/emf/2002/Ecore\" name=\"mainpackage\" nsURI=\"http://my.mainpackage.org\" nsPrefix=\"mainpackage\">");
-      _builder.newLine();
-      _builder.append("  ");
-      _builder.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"MyClass\">");
-      _builder.newLine();
-      _builder.append("    ");
-      _builder.append("<eStructuralFeatures xsi:type=\"ecore:EAttribute\" name=\"myAttribute\" eType=\"ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString\"/>");
-      _builder.newLine();
-      _builder.append("    ");
-      _builder.append("<eStructuralFeatures xsi:type=\"ecore:EReference\" name=\"myReference\" eType=\"ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject\"/>");
-      _builder.newLine();
-      _builder.append("  ");
-      _builder.append("</eClassifiers>");
-      _builder.newLine();
-      _builder.append("  ");
-      _builder.append("<eSubpackages name=\"subpackage\" nsURI=\"http://mysubpackage\" nsPrefix=\"subpackage\">");
-      _builder.newLine();
-      _builder.append("    ");
-      _builder.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"MySubPackageClass\"/>");
-      _builder.newLine();
-      _builder.append("    ");
-      _builder.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"MyClass\">");
-      _builder.newLine();
-      _builder.append("      ");
-      _builder.append("<eStructuralFeatures xsi:type=\"ecore:EAttribute\" name=\"myAttribute\" eType=\"ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString\"/>");
-      _builder.newLine();
-      _builder.append("      ");
-      _builder.append("<eStructuralFeatures xsi:type=\"ecore:EReference\" name=\"myReference\" eType=\"ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject\"/>");
-      _builder.newLine();
-      _builder.append("    ");
-      _builder.append("</eClassifiers>");
-      _builder.newLine();
-      _builder.append("    ");
-      _builder.append("<eSubpackages name=\"subsubpackage\" nsURI=\"http://mysubsubpackage\" nsPrefix=\"subsubpackage\">");
-      _builder.newLine();
-      _builder.append("      ");
-      _builder.append("<eClassifiers xsi:type=\"ecore:EClass\" name=\"MyClass\">");
-      _builder.newLine();
-      _builder.append("        ");
-      _builder.append("<eStructuralFeatures xsi:type=\"ecore:EAttribute\" name=\"myAttribute\" eType=\"ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString\"/>");
-      _builder.newLine();
-      _builder.append("        ");
-      _builder.append("<eStructuralFeatures xsi:type=\"ecore:EReference\" name=\"myReference\" eType=\"ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject\"/>");
-      _builder.newLine();
-      _builder.append("      ");
-      _builder.append("</eClassifiers>");
-      _builder.newLine();
-      _builder.append("    ");
-      _builder.append("</eSubpackages>");
-      _builder.newLine();
-      _builder.append("  ");
-      _builder.append("</eSubpackages>");
-      _builder.newLine();
-      _builder.append("</ecore:EPackage>");
-      _builder.newLine();
-      IResourcesSetupUtil.createFile(
-        EdeltaQuickfixTest.TEST_PROJECT, 
-        "src/MySubPackages", "ecore", _builder.toString());
       IResourcesSetupUtil.waitForBuild();
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
