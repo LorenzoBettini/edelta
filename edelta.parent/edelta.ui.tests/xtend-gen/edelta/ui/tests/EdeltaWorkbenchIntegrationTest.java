@@ -29,12 +29,12 @@ public class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest 
   @Rule
   public Flaky.Rule testRule = new Flaky.Rule();
   
-  private final String TEST_PROJECT = "edelta.ui.tests.project";
+  private static final String TEST_PROJECT = "edelta.ui.tests.project";
   
   @Override
   public void setUp() {
     try {
-      this.project = ProjectImportUtil.importProject(this.TEST_PROJECT);
+      this.project = ProjectImportUtil.importProject(EdeltaWorkbenchIntegrationTest.TEST_PROJECT);
       IResourcesSetupUtil.waitForBuild();
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
@@ -60,7 +60,7 @@ public class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest 
       _builder.append("}");
       _builder.newLine();
       IResourcesSetupUtil.createFile(
-        (this.TEST_PROJECT + "/src/Test.edelta"), _builder.toString());
+        (EdeltaWorkbenchIntegrationTest.TEST_PROJECT + "/src/Test.edelta"), _builder.toString());
       IResourcesSetupUtil.waitForBuild();
       this.projectHelper.assertNoErrors();
       this.assertSrcGenFolderFile("foo", "Test.java");
@@ -88,7 +88,7 @@ public class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest 
       _builder.append("}");
       _builder.newLine();
       IResourcesSetupUtil.createFile(
-        (this.TEST_PROJECT + "/src/Test.edelta"), _builder.toString());
+        (EdeltaWorkbenchIntegrationTest.TEST_PROJECT + "/src/Test.edelta"), _builder.toString());
       IResourcesSetupUtil.waitForBuild();
       StringConcatenation _builder_1 = new StringConcatenation();
       _builder_1.append("Foo cannot be resolved.");
@@ -117,7 +117,7 @@ public class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest 
       _builder.append("}");
       _builder.newLine();
       IResourcesSetupUtil.createFile(
-        (this.TEST_PROJECT + "/src/Test.edelta"), _builder.toString());
+        (EdeltaWorkbenchIntegrationTest.TEST_PROJECT + "/src/Test.edelta"), _builder.toString());
       IResourcesSetupUtil.waitForBuild();
       this.projectHelper.assertNoErrors();
       StringConcatenation _builder_1 = new StringConcatenation();
@@ -135,7 +135,7 @@ public class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest 
       _builder_1.append("}");
       _builder_1.newLine();
       IResourcesSetupUtil.createFile(
-        (this.TEST_PROJECT + "/src/Test2.edelta"), _builder_1.toString());
+        (EdeltaWorkbenchIntegrationTest.TEST_PROJECT + "/src/Test2.edelta"), _builder_1.toString());
       IResourcesSetupUtil.waitForBuild();
       this.projectHelper.assertNoErrors();
       this.assertSrcGenFolderFile("foo", "Test.java");

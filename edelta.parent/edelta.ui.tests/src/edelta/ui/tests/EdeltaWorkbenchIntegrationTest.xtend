@@ -24,7 +24,7 @@ class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest {
 	@Rule
 	public Flaky.Rule testRule = new Flaky.Rule();
 
-	val TEST_PROJECT = "edelta.ui.tests.project"
+	static val TEST_PROJECT = "edelta.ui.tests.project"
 
 	override void setUp() {
 		project = ProjectImportUtil.importProject(TEST_PROJECT)
