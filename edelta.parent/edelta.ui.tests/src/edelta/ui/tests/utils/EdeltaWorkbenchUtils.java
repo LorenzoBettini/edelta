@@ -4,6 +4,7 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.ui.PlatformUI;
 
 public class EdeltaWorkbenchUtils {
 
@@ -34,6 +35,14 @@ public class EdeltaWorkbenchUtils {
 				} else
 					throw e;
 			}
+		}
+	}
+
+	public static void closeWelcomePage() {
+		var introManager = PlatformUI.getWorkbench().getIntroManager();
+		var intro = introManager.getIntro();
+		if (intro != null) {
+			introManager.closeIntro(intro);
 		}
 	}
 }

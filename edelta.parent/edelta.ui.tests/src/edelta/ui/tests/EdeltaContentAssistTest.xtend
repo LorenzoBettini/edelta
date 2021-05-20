@@ -28,6 +28,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
+import edelta.ui.tests.utils.EdeltaWorkbenchUtils
 
 /**
  * The tests rely on the ecore files in:
@@ -50,6 +51,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	@BeforeClass
 	def static void setUp() {
+		EdeltaWorkbenchUtils.closeWelcomePage
 		pluginJavaProject = ProjectImportUtil.importJavaProject(PROJECT_NAME)
 		waitForBuild
 	}
@@ -79,11 +81,13 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		val result = new BufferedReader(new InputStreamReader(inputStream)).
 			lines().collect(Collectors.joining(Strings.newLine()));
 		// IMPORTANT: use Strings.newLine to avoid problems with missing \r in Windows
+		val createdFile = createFile(
+			PROJECT_NAME+"/src/Test.edelta",
+			result
+		)
+		waitForBuild
 		val editor = openEditor(
-			createFile(
-				PROJECT_NAME+"/src/Test.edelta",
-				result
-			)
+			createdFile
 		)
 		return editor.document.readOnly[it]
 	}
