@@ -13,15 +13,21 @@ import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * This test requires an empty workspace
+ * 
+ * @author Lorenzo Bettini
+ */
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
 @SuppressWarnings("all")
 public class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest {
-  private IProject project;
+  private static IProject project;
   
   @Inject
   private PluginProjectHelper projectHelper;
@@ -31,10 +37,11 @@ public class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest 
   
   private static final String TEST_PROJECT = "edelta.ui.tests.project";
   
-  @Override
-  public void setUp() {
+  @BeforeClass
+  public static void importTestProject() {
     try {
-      this.project = ProjectImportUtil.importProject(EdeltaWorkbenchIntegrationTest.TEST_PROJECT);
+      IResourcesSetupUtil.cleanWorkspace();
+      EdeltaWorkbenchIntegrationTest.project = ProjectImportUtil.importProject(EdeltaWorkbenchIntegrationTest.TEST_PROJECT);
       IResourcesSetupUtil.waitForBuild();
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
@@ -147,7 +154,7 @@ public class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest 
   
   private void assertSrcGenFolderFile(final String expectedSubDir, final String expectedFile) {
     final String expectedSrcGenFolderSubDir = ("edelta-gen/" + expectedSubDir);
-    final IFolder srcGenFolder = this.project.getFolder(expectedSrcGenFolderSubDir);
+    final IFolder srcGenFolder = EdeltaWorkbenchIntegrationTest.project.getFolder(expectedSrcGenFolderSubDir);
     Assert.assertTrue((expectedSrcGenFolderSubDir + " does not exist"), srcGenFolder.exists());
     final IFile genfile = srcGenFolder.getFile(expectedFile);
     Assert.assertTrue((expectedFile + " does not exist"), genfile.exists());

@@ -12,12 +12,19 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
+import org.junit.BeforeClass
 
+/**
+ * This test requires an empty workspace
+ * 
+ * @author Lorenzo Bettini
+ *
+ */
 @RunWith(XtextRunner)
 @InjectWith(EdeltaUiInjectorProvider)
 class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest {
 
-	var IProject project
+	var static IProject project
 
 	@Inject PluginProjectHelper projectHelper
 
@@ -26,7 +33,9 @@ class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest {
 
 	static val TEST_PROJECT = "edelta.ui.tests.project"
 
-	override void setUp() {
+	@BeforeClass
+	def static void importTestProject() {
+		cleanWorkspace
 		project = ProjectImportUtil.importProject(TEST_PROJECT)
 		waitForBuild
 	}

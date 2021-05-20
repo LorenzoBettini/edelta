@@ -23,6 +23,12 @@ import com.google.inject.Provider;
 import edelta.ui.tests.utils.EdeltaTestableNewProjectWizard;
 import edelta.ui.tests.utils.PluginProjectHelper;
 
+/**
+ * This test requires an empty workspace
+ * 
+ * @author Lorenzo Bettini
+ *
+ */
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
 public class EdeltaNewProjectWizardTest extends AbstractWorkbenchTest {
@@ -90,7 +96,9 @@ public class EdeltaNewProjectWizardTest extends AbstractWorkbenchTest {
 		wizard.init(PlatformUI.getWorkbench(), new StructuredSelection());
 		System.out.println("Using wizard...");
 		createAndFinishWizardDialog(wizard);
-		final IProject project = IResourcesSetupUtil.root().getProject(EdeltaTestableNewProjectWizard.TEST_PROJECT);
+		final IProject project =
+			IResourcesSetupUtil.root()
+				.getProject(EdeltaTestableNewProjectWizard.TEST_PROJECT);
 		Assert.assertTrue(project.exists());
 		System.out.println("Waiting for build...");
 		IResourcesSetupUtil.waitForBuild();
