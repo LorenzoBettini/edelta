@@ -1,7 +1,6 @@
 package edelta.ui.tests;
 
 import edelta.ui.internal.EdeltaActivator;
-import edelta.ui.tests.utils.EdeltaPluginProjectHelper;
 import edelta.ui.tests.utils.ProjectImportUtil;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -69,7 +68,6 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   @BeforeClass
   public static void setUp() {
     try {
-      EdeltaPluginProjectHelper.closeWelcomePage();
       EdeltaContentAssistTest.pluginJavaProject = ProjectImportUtil.importJavaProject(EdeltaContentAssistTest.PROJECT_NAME);
       IResourcesSetupUtil.waitForBuild();
     } catch (Throwable _e) {

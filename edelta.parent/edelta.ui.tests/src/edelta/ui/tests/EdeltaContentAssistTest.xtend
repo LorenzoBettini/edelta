@@ -27,7 +27,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import static edelta.ui.tests.utils.EdeltaPluginProjectHelper.*
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
 
 /**
@@ -51,7 +50,6 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	@BeforeClass
 	def static void setUp() {
-		closeWelcomePage
 		pluginJavaProject = ProjectImportUtil.importJavaProject(PROJECT_NAME)
 		waitForBuild
 	}
