@@ -1,7 +1,9 @@
 package edelta.ui.tests;
 
 import static edelta.ui.tests.utils.ProjectImportUtil.importProject;
-import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*;
+import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.cleanWorkspace;
+import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.createFile;
+import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.waitForBuild;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.xtext.testing.Flaky;
@@ -11,8 +13,6 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import com.google.inject.Inject;
 
 import edelta.ui.tests.utils.PluginProjectHelper;
 
@@ -24,9 +24,6 @@ import edelta.ui.tests.utils.PluginProjectHelper;
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
 public class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest {
-	@Inject
-	private PluginProjectHelper projectHelper;
-
 	@Rule
 	public Flaky.Rule testRule = new Flaky.Rule();
 
@@ -54,7 +51,7 @@ public class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest 
 			+ "    ecoreref(MyClass)\n"
 			+ "}");
 		waitForBuild();
-		projectHelper.assertNoErrors();
+		PluginProjectHelper.assertNoErrors();
 		assertSrcGenFolderFile("foo", "Test.java");
 	}
 
@@ -71,7 +68,7 @@ public class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest 
 			+ "    ecoreref(Foo)\n"
 			+ "}");
 		waitForBuild();
-		projectHelper.assertErrors("Foo cannot be resolved.");
+		PluginProjectHelper.assertErrors("Foo cannot be resolved.");
 	}
 
 	@Test
@@ -92,7 +89,7 @@ public class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest 
 			TEST_PROJECT + "/src/Test2.edelta",
 			contents);
 		waitForBuild();
-		projectHelper.assertNoErrors();
+		PluginProjectHelper.assertNoErrors();
 		assertSrcGenFolderFile("foo", "Test.java");
 		assertSrcGenFolderFile("foo", "Test2.java");
 	}

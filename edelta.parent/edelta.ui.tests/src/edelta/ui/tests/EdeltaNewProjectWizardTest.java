@@ -33,9 +33,6 @@ import edelta.ui.tests.utils.PluginProjectHelper;
 @InjectWith(EdeltaUiInjectorProvider.class)
 public class EdeltaNewProjectWizardTest extends AbstractWorkbenchTest {
 	@Inject
-	private PluginProjectHelper projectHelper;
-
-	@Inject
 	private Provider<EdeltaTestableNewProjectWizard> wizardProvider;
 
 	@Rule
@@ -102,7 +99,7 @@ public class EdeltaNewProjectWizardTest extends AbstractWorkbenchTest {
 		Assert.assertTrue(project.exists());
 		System.out.println("Waiting for build...");
 		IResourcesSetupUtil.waitForBuild();
-		projectHelper.assertNoErrors();
+		PluginProjectHelper.assertNoErrors();
 		System.out.println("No errors in project, OK!");
 	}
 }
