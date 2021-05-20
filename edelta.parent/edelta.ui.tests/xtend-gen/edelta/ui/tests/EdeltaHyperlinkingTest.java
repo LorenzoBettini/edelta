@@ -1,7 +1,6 @@
 package edelta.ui.tests;
 
-import com.google.inject.Inject;
-import edelta.ui.tests.utils.EdeltaPluginProjectHelper;
+import edelta.ui.tests.utils.ProjectImportUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -13,9 +12,12 @@ import org.eclipse.xtext.ui.editor.XtextEditor;
 import org.eclipse.xtext.ui.editor.hyperlinking.XtextHyperlink;
 import org.eclipse.xtext.ui.editor.model.IXtextDocument;
 import org.eclipse.xtext.ui.testing.AbstractHyperlinkingTest;
+import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest;
+import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.util.concurrent.IUnitOfWork;
 import org.eclipse.xtext.xbase.XAbstractFeatureCall;
 import org.eclipse.xtext.xbase.lib.Exceptions;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -23,25 +25,46 @@ import org.junit.runner.RunWith;
 @InjectWith(EdeltaUiInjectorProvider.class)
 @SuppressWarnings("all")
 public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
-  @Inject
-  private EdeltaPluginProjectHelper projectHelper;
+  private static final String TEST_PROJECT = "edelta.ui.tests.project";
   
   private XtextEditor xtextEditor;
+  
+  @BeforeClass
+  public static void importProject() {
+    try {
+      ProjectImportUtil.importProject(EdeltaHyperlinkingTest.TEST_PROJECT);
+      IResourcesSetupUtil.waitForBuild();
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  /**
+   * Avoids deleting project
+   */
+  @Override
+  public void setUp() {
+  }
+  
+  /**
+   * Avoids deleting project
+   */
+  @Override
+  public void tearDown() {
+    this.waitForEventProcessing();
+    AbstractWorkbenchTest.closeEditors();
+    this.waitForEventProcessing();
+  }
+  
+  @Override
+  protected String getProjectName() {
+    return EdeltaHyperlinkingTest.TEST_PROJECT;
+  }
   
   @Override
   protected String getFileName() {
     String _fileName = super.getFileName();
     return ("src/" + _fileName);
-  }
-  
-  @Override
-  public void setUp() {
-    try {
-      super.setUp();
-      this.projectHelper.createEdeltaPluginProject(this.getProjectName());
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
   }
   
   @Override

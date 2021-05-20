@@ -1,8 +1,7 @@
 package edelta.ui.tests;
 
-import com.google.inject.Inject;
 import edelta.ui.internal.EdeltaActivator;
-import edelta.ui.tests.utils.EdeltaPluginProjectHelper;
+import edelta.ui.tests.utils.ProjectImportUtil;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.xtend2.lib.StringConcatenation;
@@ -10,9 +9,11 @@ import org.eclipse.xtext.testing.Flaky;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.ui.testing.AbstractOutlineTest;
+import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.InputOutput;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,11 +22,35 @@ import org.junit.runner.RunWith;
 @InjectWith(EdeltaUiInjectorProvider.class)
 @SuppressWarnings("all")
 public class EdeltaOutlineTest extends AbstractOutlineTest {
-  @Inject
-  private EdeltaPluginProjectHelper edeltaProjectHelper;
-  
   @Rule
   public Flaky.Rule testRule = new Flaky.Rule();
+  
+  @BeforeClass
+  public static void setTestProjectName() {
+    AbstractOutlineTest.TEST_PROJECT = "edelta.ui.tests.project";
+  }
+  
+  /**
+   * Avoids deleting project
+   */
+  @Override
+  public void setUp() {
+    try {
+      this.createjavaProject(AbstractOutlineTest.TEST_PROJECT);
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
+  /**
+   * Avoids deleting project
+   */
+  @Override
+  public void tearDown() {
+    this.waitForEventProcessing();
+    AbstractWorkbenchTest.closeEditors();
+    this.waitForEventProcessing();
+  }
   
   @Override
   protected String getEditorId() {
@@ -35,7 +60,9 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
   @Override
   protected IJavaProject createjavaProject(final String projectName) throws CoreException {
     try {
-      return this.edeltaProjectHelper.createEdeltaPluginProject(AbstractOutlineTest.TEST_PROJECT);
+      final IJavaProject javaProject = ProjectImportUtil.importJavaProject(AbstractOutlineTest.TEST_PROJECT);
+      IResourcesSetupUtil.waitForBuild();
+      return javaProject;
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }

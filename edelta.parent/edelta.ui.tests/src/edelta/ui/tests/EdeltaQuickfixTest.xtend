@@ -1,7 +1,6 @@
 package edelta.ui.tests
 
-import com.google.inject.Inject
-import edelta.ui.tests.utils.EdeltaPluginProjectHelper
+import edelta.ui.tests.utils.ProjectImportUtil
 import edelta.validation.EdeltaValidator
 import org.eclipse.xtext.testing.Flaky
 import org.eclipse.xtext.testing.InjectWith
@@ -11,59 +10,58 @@ import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.BeforeClass
 
+/**
+ * The tests rely on the ecore file:
+ * /edelta.ui.tests.project/model/MySubPackages.ecore
+ * 
+ * @author Lorenzo Bettini
+ */
 @RunWith(XtextRunner)
 @InjectWith(EdeltaUiInjectorProvider)
 class EdeltaQuickfixTest extends AbstractQuickfixTest {
 
-	@Inject EdeltaPluginProjectHelper projectHelper
+	static val TEST_PROJECT = "edelta.ui.tests.project"
 
 	@Rule
 	public Flaky.Rule testRule = new Flaky.Rule();
+
+	@BeforeClass
+	def static void importProject() {
+		/*
+		 * Edelta requires a plug-in project to run the interpreter
+		 * with edelta.lib as dependency
+		 */
+		ProjectImportUtil.importProject(TEST_PROJECT)
+		IResourcesSetupUtil.waitForBuild
+	}
+
+	/**
+	 * Avoids deleting project
+	 */
+	override void setUp() {
+
+	}
+
+	/**
+	 * Avoids deleting project
+	 */
+	override void tearDown() {
+		waitForEventProcessing();
+		closeEditors();
+		waitForEventProcessing();
+	}
+
+	override protected getProjectName() {
+		TEST_PROJECT
+	}
 
 	override protected getFileName() {
 		/*
 		 * Better to put Edelta file in a source folder
 		 */
 		"src/" + super.getFileName()
-	}
-
-	override void setUp() {
-		super.setUp
-		/*
-		 * Edelta requires a plug-in project to run the interpreter
-		 * with edelta.lib as dependency
-		 */
-		projectHelper.createEdeltaPluginProject(projectName)
-
-		IResourcesSetupUtil
-			.createFile(
-				projectName,
-				"src/MySubPackages", "ecore",
-				'''
-				<?xml version="1.0" encoding="UTF-8"?>
-				<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-				    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="mainpackage" nsURI="http://my.mainpackage.org" nsPrefix="mainpackage">
-				  <eClassifiers xsi:type="ecore:EClass" name="MyClass">
-				    <eStructuralFeatures xsi:type="ecore:EAttribute" name="myAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-				    <eStructuralFeatures xsi:type="ecore:EReference" name="myReference" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"/>
-				  </eClassifiers>
-				  <eSubpackages name="subpackage" nsURI="http://mysubpackage" nsPrefix="subpackage">
-				    <eClassifiers xsi:type="ecore:EClass" name="MySubPackageClass"/>
-				    <eClassifiers xsi:type="ecore:EClass" name="MyClass">
-				      <eStructuralFeatures xsi:type="ecore:EAttribute" name="myAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-				      <eStructuralFeatures xsi:type="ecore:EReference" name="myReference" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"/>
-				    </eClassifiers>
-				    <eSubpackages name="subsubpackage" nsURI="http://mysubsubpackage" nsPrefix="subsubpackage">
-				      <eClassifiers xsi:type="ecore:EClass" name="MyClass">
-				        <eStructuralFeatures xsi:type="ecore:EAttribute" name="myAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-				        <eStructuralFeatures xsi:type="ecore:EReference" name="myReference" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"/>
-				      </eClassifiers>
-				    </eSubpackages>
-				  </eSubpackages>
-				</ecore:EPackage>
-				'''
-			)
 	}
 
 	@Test @Flaky
