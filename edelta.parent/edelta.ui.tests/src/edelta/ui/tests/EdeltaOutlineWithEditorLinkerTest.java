@@ -2,7 +2,11 @@ package edelta.ui.tests;
 
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.createFile;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.assertj.core.api.Assertions;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
@@ -10,25 +14,21 @@ import org.eclipse.xtext.ui.editor.XtextEditor;
 import org.eclipse.xtext.ui.editor.outline.impl.EObjectNode;
 import org.eclipse.xtext.ui.editor.outline.impl.OutlinePage;
 import org.eclipse.xtext.ui.testing.AbstractEditorTest;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.google.inject.Inject;
-
 import edelta.ui.internal.EdeltaActivator;
-import edelta.ui.tests.utils.EdeltaPluginProjectHelper;
 import edelta.ui.tests.utils.EdeltaWorkbenchUtils;
+import edelta.ui.tests.utils.ProjectImportUtil;
 
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
 public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 
-	@Inject
-	private EdeltaPluginProjectHelper edeltaProjectHelper;
+	private static final String TEST_PROJECT = "edelta.ui.tests.project";
 
-	private static final String TEST_PROJECT = "mytestproject";
-
-	private String program = 
+	private static String program = 
 	"package foo\n" + 
 	"\n" + 
 	"metamodel \"mypackage\"\n" + 
@@ -50,24 +50,42 @@ public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 
 	private OutlinePage outlinePage;
 
+	private static IFile file;
+
 	@Override
 	protected String getEditorId() {
 		return EdeltaActivator.EDELTA_EDELTA;
 	}
 
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-		edeltaProjectHelper.createEdeltaPluginProject(TEST_PROJECT);
-		var file = createFile(
+	@BeforeClass
+	public static void setupTestProject() throws InvocationTargetException, CoreException, InterruptedException {
+		ProjectImportUtil.importJavaProject(TEST_PROJECT);
+		file = createFile(
 			TEST_PROJECT + "/src/Test.edelta",
 			program
 		);
 		EdeltaWorkbenchUtils.waitForBuildWithRetries();
+	}
+
+	/**
+	 * Avoids deleting project
+	 */
+	@Override
+	public void setUp() throws Exception {
 		editor = openEditor(file);
 		outlinePage = editor.getAdapter(OutlinePage.class);
 		Assertions.assertThat(outlinePage).isNotNull();
 		editor.setFocus();
+	}
+
+	/**
+	 * Avoids deleting project
+	 */
+	@Override
+	public void tearDown() {
+		waitForEventProcessing();
+		closeEditors();
+		waitForEventProcessing();
 	}
 
 	@Test
