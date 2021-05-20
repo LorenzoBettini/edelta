@@ -1,6 +1,7 @@
 package edelta.ui.tests;
 
 import edelta.ui.internal.EdeltaActivator;
+import edelta.ui.tests.utils.EdeltaWorkbenchUtils;
 import edelta.ui.tests.utils.ProjectImportUtil;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -68,6 +69,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
   @BeforeClass
   public static void setUp() {
     try {
+      EdeltaWorkbenchUtils.closeWelcomePage();
       EdeltaContentAssistTest.pluginJavaProject = ProjectImportUtil.importJavaProject(EdeltaContentAssistTest.PROJECT_NAME);
       IResourcesSetupUtil.waitForBuild();
     } catch (Throwable _e) {
@@ -98,9 +100,10 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
     try {
       InputStreamReader _inputStreamReader = new InputStreamReader(inputStream);
       final String result = new BufferedReader(_inputStreamReader).lines().collect(Collectors.joining(Strings.newLine()));
-      final XtextEditor editor = this.openEditor(
-        IResourcesSetupUtil.createFile(
-          (EdeltaContentAssistTest.PROJECT_NAME + "/src/Test.edelta"), result));
+      final IFile createdFile = IResourcesSetupUtil.createFile(
+        (EdeltaContentAssistTest.PROJECT_NAME + "/src/Test.edelta"), result);
+      IResourcesSetupUtil.waitForBuild();
+      final XtextEditor editor = this.openEditor(createdFile);
       final IUnitOfWork<XtextResource, XtextResource> _function = (XtextResource it) -> {
         return it;
       };
