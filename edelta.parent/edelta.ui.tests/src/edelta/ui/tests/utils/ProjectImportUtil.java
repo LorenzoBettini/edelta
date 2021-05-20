@@ -57,6 +57,7 @@ public class ProjectImportUtil {
 		IProject project = getProjectFromWorkspace(projectName);
 		if (project.isAccessible())
 			return project;
+		System.out.println("*** IMPORTING PROJECT: " + projectName);
 		File currDir = new File(".");
 		String path = currDir.getAbsolutePath();
 		String projectToImportPath = path + "/../" + projectName;

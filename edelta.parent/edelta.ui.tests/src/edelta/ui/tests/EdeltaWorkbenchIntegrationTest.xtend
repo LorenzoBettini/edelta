@@ -7,7 +7,6 @@ import org.eclipse.core.resources.IProject
 import org.eclipse.xtext.testing.Flaky
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
-import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,7 +15,7 @@ import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaUiInjectorProvider)
-class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
+class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest {
 
 	var IProject project
 
@@ -27,21 +26,9 @@ class EdeltaWorkbenchIntegrationTest extends AbstractWorkbenchTest {
 
 	val TEST_PROJECT = "edelta.ui.tests.project"
 
-	/**
-	 * Avoids deleting project
-	 */
 	override void setUp() {
 		project = ProjectImportUtil.importProject(TEST_PROJECT)
 		waitForBuild
-	}
-
-	/**
-	 * Avoids deleting project
-	 */
-	override void tearDown() {
-		waitForEventProcessing();
-		closeEditors();
-		waitForEventProcessing();
 	}
 
 	@Test @Flaky

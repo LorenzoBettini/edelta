@@ -13,7 +13,6 @@ import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.ui.editor.XtextEditor;
 import org.eclipse.xtext.ui.editor.outline.impl.EObjectNode;
 import org.eclipse.xtext.ui.editor.outline.impl.OutlinePage;
-import org.eclipse.xtext.ui.testing.AbstractEditorTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +23,7 @@ import edelta.ui.tests.utils.ProjectImportUtil;
 
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
-public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
+public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest {
 
 	private static final String TEST_PROJECT = "edelta.ui.tests.project";
 
@@ -76,16 +75,6 @@ public class EdeltaOutlineWithEditorLinkerTest extends AbstractEditorTest {
 		outlinePage = editor.getAdapter(OutlinePage.class);
 		Assertions.assertThat(outlinePage).isNotNull();
 		editor.setFocus();
-	}
-
-	/**
-	 * Avoids deleting project
-	 */
-	@Override
-	public void tearDown() {
-		waitForEventProcessing();
-		closeEditors();
-		waitForEventProcessing();
 	}
 
 	@Test
