@@ -25,17 +25,11 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 		try (var stream = Files.walk(Paths.get(path))) {
 			var resources = stream
 				.filter(
-					file -> {
-						return !Files.isDirectory(file);
-					})
+					file -> !Files.isDirectory(file))
 				.filter(
-					file -> {
-						return file.toString().endsWith(".ecore");
-					})
+					file -> file.toString().endsWith(".ecore"))
 				.map(file -> 
-					{
-						return loadEcoreFile(file.toString());
-					})
+					loadEcoreFile(file.toString()))
 				.collect(Collectors.toList());
 			var packages = resources.stream()
 				.map(r -> (EPackage) r.getContents().get(0))
@@ -85,9 +79,7 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 				.findFirst()
 				.ifPresentOrElse(
 					d -> d.setBidirectional(true),
-					() -> {
-						createDependency(repository, metamodel, usedMetamodel);
-					});
+					() -> createDependency(repository, metamodel, usedMetamodel));
 			analyzeEPackage(repository, used, seen);
 		}
 	}
