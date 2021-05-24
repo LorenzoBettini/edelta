@@ -31,7 +31,7 @@ public class EdeltaHyperlinkinHelper extends XbaseHyperLinkHelper {
 
 	@Override
 	protected void createHyperlinksTo(XtextResource resource, INode node, EObject target, IHyperlinkAcceptor acceptor) {
-		EObject semanticObj = findActualSemanticObjectFor(node);
+		var semanticObj = findActualSemanticObjectFor(node);
 		final var effectiveTarget = navigationTargetHelper.getTarget(semanticObj);
 		if (effectiveTarget != null) {
 			super.createHyperlinksTo(resource, node, effectiveTarget, acceptor);
