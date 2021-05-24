@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="GraphMM" nsURI="http://cs.gssi.it/graph" nsPrefix="graph">
+  <eClassifiers xsi:type="ecore:EClass" name="Repository" eSuperTypes="#//Graph"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Node" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="path" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="highlighted" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Edge" abstract="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Model" eSuperTypes="#//Node"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Dependency" eSuperTypes="#//Edge">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="src" lowerBound="1" eType="#//Node"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="trg" lowerBound="1" eType="#//Node"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="bidirectional" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Graph" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="nodes" upperBound="-1"
+        eType="#//Node" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="edges" upperBound="-1"
+        eType="#//Edge" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Metamodel" eSuperTypes="#//Node">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nsURI" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Conformance" eSuperTypes="#//Edge">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="metamodel" lowerBound="1"
+        eType="#//Metamodel"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="model" lowerBound="1" eType="#//Model"/>
+  </eClassifiers>
+</ecore:EPackage>
