@@ -2,6 +2,7 @@ package edelta.dependency.analyzer;
 
 import org.eclipse.emf.ecore.EPackage;
 
+import GraphMM.Dependency;
 import GraphMM.GraphMMFactory;
 import GraphMM.Metamodel;
 import GraphMM.Repository;
@@ -13,21 +14,36 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 	private static final GraphMMFactory graphFactory = GraphMMFactory.eINSTANCE;
 
 	public Repository analyzeEPackage(EPackage ePackage) {
-		var usedPackages = EdeltaLibrary.usedPackages(ePackage);
 		var repository = graphFactory.createRepository();
-		var metamodel = createGraphMetamodel(repository, ePackage);
-		for (var used : usedPackages) {
-			var usedMetamodel = createGraphMetamodel(repository, used);
-			createDependency(repository, metamodel, usedMetamodel);
-		}
+		analyzeEPackage(repository, ePackage);
 		return repository;
 	}
 
-	private void createDependency(Repository repository, Metamodel source, Metamodel target) {
+	private void analyzeEPackage(Repository repository, EPackage ePackage) {
+		var metamodel = createGraphMetamodelHighlighted(repository, ePackage);
+		var usedPackages = EdeltaLibrary.usedPackages(ePackage);
+		for (var used : usedPackages) {
+			var usedMetamodel = createGraphMetamodel(repository, used);
+			var dependency = createDependency(repository, metamodel, usedMetamodel);
+			var secondLevel = EdeltaLibrary.usedPackages(used);
+			if (secondLevel.contains(ePackage)) {
+				dependency.setBidirectional(true);
+			}
+		}
+	}
+
+	private Metamodel createGraphMetamodelHighlighted(Repository repository, EPackage ePackage) {
+		var metamodel = createGraphMetamodel(repository, ePackage);
+		metamodel.setHighlighted(true);
+		return metamodel;
+	}
+
+	private Dependency createDependency(Repository repository, Metamodel source, Metamodel target) {
 		var dependency = graphFactory.createDependency();
 		dependency.setSrc(source);
 		dependency.setTrg(target);
 		repository.getEdges().add(dependency);
+		return dependency;
 	}
 
 	private Metamodel createGraphMetamodel(Repository repository, EPackage ePackage) {
