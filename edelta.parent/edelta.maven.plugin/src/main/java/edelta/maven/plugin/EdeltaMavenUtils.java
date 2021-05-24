@@ -17,7 +17,7 @@ public class EdeltaMavenUtils {
 	}
 
 	public static File createTempDir(String tmpClassDirectory) {
-		File tmpDir = new File(tmpClassDirectory);
+		var tmpDir = new File(tmpClassDirectory);
 		if (!tmpDir.mkdirs() && !tmpDir.exists()) {
 			throw new IllegalArgumentException("Couldn't create directory '" + tmpClassDirectory + "'.");
 		}
