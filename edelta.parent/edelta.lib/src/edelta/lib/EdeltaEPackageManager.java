@@ -66,7 +66,7 @@ public class EdeltaEPackageManager {
 		// make sure we have a complete file URI,
 		// otherwise the saved modified ecore will contain
 		// wrong references (i.e., with the prefixed relative path)
-		URI uri = URI.createFileURI(Paths.get(path).toAbsolutePath().toString());
+		var uri = URI.createFileURI(Paths.get(path).toAbsolutePath().toString());
 		// Demand load resource for this file.
 		LOG.info("Loading " + path + " (URI: " + uri + ")");
 		ecoreToResourceMap.put(path, resourceSet.getResource(uri, true));
