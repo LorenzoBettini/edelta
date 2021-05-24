@@ -55,6 +55,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <xtextVersion>2.26.0-SNAPSHOT</xtextVersion>
     <xtext-version>${xtextVersion}</xtext-version>
+    <mwe2Version>2.12.2-SNAPSHOT</mwe2Version>
   </properties>
 
   <dependencyManagement>
@@ -193,6 +194,11 @@
       <name>xtext-web-repository</name>
       <url>https://ci.eclipse.org/xtext/job/xtext-web/job/cd_guice501/lastSuccessfulBuild/artifact/build/maven-repository/</url>
     </repository>
+    <repository>
+      <id>xtext-mwe-repository</id>
+      <name>xtext-mwe-repository</name>
+      <url>https://ci.eclipse.org/mwe/job/mwe2/job/cd_mweGuice5Experimentb/lastSuccessfulBuild/artifact/git-repo/my-local-snapshots-dir/</url>
+    </repository>
   </repositories>
   <pluginRepositories>
     <pluginRepository>
@@ -260,6 +266,13 @@
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
+    </pluginRepository>
+    <pluginRepository>
+      <id>xtext-mwe-plugin-repository</id>
+      <name>xtext-mwe-plugin-repository</name>
+      <url>https://ci.eclipse.org/mwe/job/mwe2/job/cd_mweGuice5Experimentb/lastSuccessfulBuild/artifact/git-repo/my-local-snapshots-dir/</url>
+      <releases><enabled>false</enabled></releases>
+      <snapshots><enabled>true</enabled></snapshots>
     </pluginRepository>
   </pluginRepositories>
 
