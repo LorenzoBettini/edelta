@@ -5,6 +5,7 @@ package edelta.lib.tests;
 
 import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -25,6 +26,7 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.util.Wrapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,8 +90,10 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testLoadEcoreFile() { // NOSONAR just make sure it runs
-		loadTestEcore(MY_ECORE);
+	public void testLoadEcoreFile() {
+		var loadTestEcore = loadTestEcore(MY_ECORE);
+		assertThat(((EPackage) loadTestEcore.getContents().get(0)).getName())
+			.isEqualTo(MYPACKAGE);
 	}
 
 	@Test(expected=WrappedException.class)
@@ -347,8 +351,8 @@ public class EdeltaTest {
 		cleanDirectory(MODIFIED);
 	}
 
-	private void loadTestEcore(String ecoreFile) {
-		edelta.loadEcoreFile(TESTECORES+ecoreFile);
+	private Resource loadTestEcore(String ecoreFile) {
+		return edelta.loadEcoreFile(TESTECORES+ecoreFile);
 	}
 
 	private void assertEAttribute(EAttribute f, String expectedName) {
