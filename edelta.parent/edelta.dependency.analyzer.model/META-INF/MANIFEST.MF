@@ -1,9 +1,16 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: edelta.dependency.analyzer.model
-Bundle-SymbolicName: edelta.dependency.analyzer.model; singleton:=true
+Bundle-Name: %pluginName
+Bundle-SymbolicName: edelta.dependency.analyzer.model;singleton:=true
 Bundle-Version: 2.4.0.qualifier
-Require-Bundle: org.eclipse.emf.ecore
+Bundle-ClassPath: .
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.emf.ecore;visibility:=reexport
+Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: edelta.dependency.analyzer.model
 Bundle-RequiredExecutionEnvironment: JavaSE-11
-Bundle-Vendor: Lorenzo Bettini
+Export-Package: GraphMM,
+ GraphMM.impl,
+ GraphMM.util
+Bundle-Vendor: %providerName
+Bundle-Localization: plugin
