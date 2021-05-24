@@ -39,7 +39,7 @@ public class EdeltaOriginalENamedElementRecorder {
 			return;
 		}
 		final var enamedElement = edeltaEcoreReference.getEnamedelement();
-		this.derivedStateHelper
+		derivedStateHelper
 			.getEcoreReferenceState(edeltaEcoreReference)
 			.setOriginalEnamedelement
 				(retrieveOriginalElement(enamedElement, edeltaEcoreReference));

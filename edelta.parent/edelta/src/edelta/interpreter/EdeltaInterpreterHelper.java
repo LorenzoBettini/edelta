@@ -9,7 +9,6 @@ import static java.util.stream.Collectors.toList;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import org.eclipse.xtext.common.types.JvmTypeReference;
 import org.eclipse.xtext.common.types.util.JavaReflectAccess;
 
 import com.google.inject.Singleton;
@@ -32,7 +31,7 @@ public class EdeltaInterpreterHelper {
 	};
 
 	public AbstractEdelta safeInstantiate(JavaReflectAccess javaReflectAccess, EdeltaUseAs useAs, AbstractEdelta other) {
-		JvmTypeReference typeRef = useAs.getType();
+		var typeRef = useAs.getType();
 		if (typeRef == null) {
 			return defaultInstance;
 		}

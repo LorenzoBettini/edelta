@@ -55,17 +55,17 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 			EdeltaInterpreterDiagnosticHelper diagnosticHelper) {
 		this.cache = cache;
 		this.resource = resource;
-		this.enamedElementXExpressionMap = derivedStateHelper.getEnamedElementXExpressionMap(resource);
-		this.modifiedElements = derivedStateHelper.getModifiedElements(resource);
+		enamedElementXExpressionMap = derivedStateHelper.getEnamedElementXExpressionMap(resource);
+		modifiedElements = derivedStateHelper.getModifiedElements(resource);
 		this.diagnosticHelper = diagnosticHelper;
 	}
 
 	@Override
 	public void notifyChanged(Notification notification) {
 		super.notifyChanged(notification);
-		final Object feature = notification.getFeature();
-		final Object notifier = notification.getNotifier();
-		final Object newValue = notification.getNewValue();
+		final var feature = notification.getFeature();
+		final var notifier = notification.getNotifier();
+		final var newValue = notification.getNewValue();
 		if (feature == ENAMED_ELEMENT__NAME) {
 			enamedElementXExpressionMap.put(
 				(ENamedElement) notifier,
@@ -108,7 +108,7 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 
 	private void checkCycles(final Object feature, final Object newValue) {
 		if (feature == EPACKAGE__ESUBPACKAGES) {
-			EPackage subPackage = (EPackage) newValue;
+			var subPackage = (EPackage) newValue;
 			if (EdeltaModelUtil.hasCycleInSuperPackage(subPackage)) {
 				diagnosticHelper.addError(subPackage, EdeltaValidator.EPACKAGE_CYCLE,
 					"Cycle in superpackage/subpackage: " +
@@ -120,7 +120,7 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 					.remove(subPackage);
 			}
 		} else if (feature == ECLASS__ESUPER_TYPES) {
-			EClass eClass = (EClass) newValue;
+			var eClass = (EClass) newValue;
 			if (EdeltaModelUtil.hasCycleInHierarchy(eClass)) {
 				diagnosticHelper.addError(eClass, EdeltaValidator.ECLASS_CYCLE,
 					"Cycle in inheritance hierarchy: " +
