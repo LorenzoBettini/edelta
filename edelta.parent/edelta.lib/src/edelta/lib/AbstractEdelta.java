@@ -3,7 +3,6 @@ package edelta.lib;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
@@ -160,11 +159,11 @@ public abstract class AbstractEdelta {
 	 */
 	public void saveModifiedEcores(String outputPath) throws IOException {
 		for (Entry<String, Resource> entry : packageManager.getResourceMapEntrySet()) {
-			Path p = Paths.get(entry.getKey());
-			final String fileName = p.getFileName().toString();
+			var p = Paths.get(entry.getKey());
+			final var fileName = p.getFileName().toString();
 			LOG.info("Saving " + outputPath + "/" + fileName);
-			File newFile = new File(outputPath, fileName);
-			FileOutputStream fos = new FileOutputStream(newFile);
+			var newFile = new File(outputPath, fileName);
+			var fos = new FileOutputStream(newFile);
 			entry.getValue().save(fos, null);
 			fos.flush();
 			fos.close();
@@ -225,11 +224,11 @@ public abstract class AbstractEdelta {
 	 * @return the found {@link EPackage} or null
 	 */
 	public EPackage getEPackage(String packageName) {
-		String[] packageNames = packageName.split("\\.");
-		EPackage currentPackage = getEPackageFromPackageManager(packageNames[0]);
-		int packageNameIndex = 1;
+		var packageNames = packageName.split("\\.");
+		var currentPackage = getEPackageFromPackageManager(packageNames[0]);
+		var packageNameIndex = 1;
 		while (currentPackage != null && packageNameIndex < packageNames.length) {
-			String currentPackageName = packageNames[packageNameIndex];
+			var currentPackageName = packageNames[packageNameIndex];
 			currentPackage = currentPackage.getESubpackages().stream()
 					.filter(p -> currentPackageName.equals(p.getName()))
 					.findFirst()
@@ -244,7 +243,7 @@ public abstract class AbstractEdelta {
 	}
 
 	public EClassifier getEClassifier(String packageName, String classifierName) {
-		EPackage p = getEPackage(packageName);
+		var p = getEPackage(packageName);
 		if (p == null) {
 			return null;
 		}
@@ -252,7 +251,7 @@ public abstract class AbstractEdelta {
 	}
 
 	public EClass getEClass(String packageName, String className) {
-		EClassifier c = getEClassifier(packageName, className);
+		var c = getEClassifier(packageName, className);
 		if (c instanceof EClass) {
 			return (EClass) c;
 		}
@@ -260,7 +259,7 @@ public abstract class AbstractEdelta {
 	}
 
 	public EDataType getEDataType(String packageName, String datatypeName) {
-		EClassifier c = getEClassifier(packageName, datatypeName);
+		var c = getEClassifier(packageName, datatypeName);
 		if (c instanceof EDataType) {
 			return (EDataType) c;
 		}
@@ -268,7 +267,7 @@ public abstract class AbstractEdelta {
 	}
 
 	public EEnum getEEnum(String packageName, String enumName) {
-		EClassifier c = getEClassifier(packageName, enumName);
+		var c = getEClassifier(packageName, enumName);
 		if (c instanceof EEnum) {
 			return (EEnum) c;
 		}
@@ -276,7 +275,7 @@ public abstract class AbstractEdelta {
 	}
 
 	public EStructuralFeature getEStructuralFeature(String packageName, String className, String featureName) {
-		EClass c = getEClass(packageName, className);
+		var c = getEClass(packageName, className);
 		if (c == null) {
 			return null;
 		}
@@ -284,7 +283,7 @@ public abstract class AbstractEdelta {
 	}
 
 	public EAttribute getEAttribute(String packageName, String className, String attributeName) {
-		EStructuralFeature f = getEStructuralFeature(packageName, className, attributeName);
+		var f = getEStructuralFeature(packageName, className, attributeName);
 		if (f instanceof EAttribute) {
 			return (EAttribute) f;
 		}
@@ -292,7 +291,7 @@ public abstract class AbstractEdelta {
 	}
 
 	public EReference getEReference(String packageName, String className, String referenceName) {
-		EStructuralFeature f = getEStructuralFeature(packageName, className, referenceName);
+		var f = getEStructuralFeature(packageName, className, referenceName);
 		if (f instanceof EReference) {
 			return (EReference) f;
 		}
@@ -300,7 +299,7 @@ public abstract class AbstractEdelta {
 	}
 
 	public EEnumLiteral getEEnumLiteral(String packageName, String enumName, String enumLiteralName) {
-		EEnum eenum = getEEnum(packageName, enumName);
+		var eenum = getEEnum(packageName, enumName);
 		if (eenum == null) {
 			return null;
 		}
