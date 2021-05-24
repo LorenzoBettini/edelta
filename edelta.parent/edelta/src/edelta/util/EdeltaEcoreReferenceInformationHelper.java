@@ -2,9 +2,7 @@ package edelta.util;
 
 import static edelta.util.EdeltaModelUtil.hasCycleInSuperPackage;
 
-import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
-import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
@@ -15,7 +13,6 @@ import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver;
 
 import com.google.inject.Inject;
 
-import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.resource.derivedstate.EdeltaEcoreReferenceState;
@@ -38,8 +35,8 @@ public class EdeltaEcoreReferenceInformationHelper {
 
 	public EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation getOrComputeInformation(
 			final EdeltaEcoreReferenceExpression exp) {
-		final EdeltaEcoreReference reference = exp.getReference();
-		final EdeltaEcoreReferenceState ecoreReferenceState =
+		final var reference = exp.getReference();
+		final var ecoreReferenceState =
 			derivedStateHelper.getEcoreReferenceState(reference);
 		var existing = ecoreReferenceState.getInformation();
 		if (existing != null) {
@@ -69,7 +66,7 @@ public class EdeltaEcoreReferenceInformationHelper {
 
 			@Override
 			public Void caseEEnumLiteral(final EEnumLiteral object) {
-				final EEnum eEnum = object.getEEnum();
+				final var eEnum = object.getEEnum();
 				info.setEPackageName(EdeltaEcoreReferenceInformationHelper.this
 						.nameOrEmpty(EdeltaEcoreReferenceInformationHelper.this.getEPackageOrNull(eEnum)));
 				info.setEClassifierName(EdeltaEcoreReferenceInformationHelper.this.nameOrEmpty(eEnum));
@@ -82,7 +79,7 @@ public class EdeltaEcoreReferenceInformationHelper {
 			 */
 			@Override
 			public Void caseEStructuralFeature(final EStructuralFeature object) {
-				final EClass c = object.getEContainingClass();
+				final var c = object.getEContainingClass();
 				info.setEPackageName(EdeltaEcoreReferenceInformationHelper.this
 						.nameOrEmpty(EdeltaEcoreReferenceInformationHelper.this.getEPackageOrNull(c)));
 				info.setEClassifierName(EdeltaEcoreReferenceInformationHelper.this.nameOrEmpty(c));

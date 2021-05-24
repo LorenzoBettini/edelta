@@ -16,7 +16,7 @@ public class EdeltaOutputConfigurationProvider extends OutputConfigurationProvid
 
 	@Override
 	public Set<OutputConfiguration> getOutputConfigurations() {
-		OutputConfiguration defaultOutput = new OutputConfiguration(IFileSystemAccess.DEFAULT_OUTPUT);
+		var defaultOutput = new OutputConfiguration(IFileSystemAccess.DEFAULT_OUTPUT);
 		defaultOutput.setDescription("Output Folder for generated Java files");
 		defaultOutput.setOutputDirectory("./edelta-gen");
 		defaultOutput.setOverrideExistingResources(true);

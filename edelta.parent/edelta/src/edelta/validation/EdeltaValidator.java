@@ -109,7 +109,7 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 
 	@Check
 	public void checkProgram(EdeltaProgram p) {
-		int metamodelIndex = 0;
+		var metamodelIndex = 0;
 		HashSet<String> metamodelImportSet = newHashSet();
 		for (var metamodel : p.getMetamodels()) {
 			var rootPackage = EdeltaModelUtil.findRootSuperPackage(metamodel);
@@ -135,7 +135,7 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 			metamodelImportSet.add(metamodelImport);
 			metamodelIndex++;
 		}
-		JvmGenericType javaClass = head(
+		var javaClass = head(
 			filter(jvmModelAssociations.getJvmElements(p), JvmGenericType.class).iterator());
 		var methods = overrideHelper.getResolvedFeatures(javaClass)
 				.getDeclaredOperations();

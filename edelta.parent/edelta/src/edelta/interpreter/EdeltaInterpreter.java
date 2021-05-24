@@ -19,7 +19,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -40,6 +39,7 @@ import org.eclipse.xtext.util.Strings;
 import org.eclipse.xtext.xbase.XAbstractFeatureCall;
 import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
+import org.eclipse.xtext.xbase.XReturnExpression;
 import org.eclipse.xtext.xbase.XbasePackage;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationResult;
@@ -58,7 +58,6 @@ import edelta.edelta.EdeltaOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
-import edelta.lib.AbstractEdelta;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.util.EdeltaEcoreHelper;
@@ -135,7 +134,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	}
 
 	public void evaluateModifyEcoreOperations(final EdeltaProgram program) {
-		this.currentProgram = program;
+		currentProgram = program;
 		final var eResource = program.eResource();
 		final var copiedEPackagesMap = derivedStateHelper
 				.getCopiedEPackagesMap(eResource);
@@ -195,7 +194,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	}
 
 	private EdeltaInterpreterEdeltaImpl createThisObject(final Collection<EPackage> copiedEPackages) {
-		EdeltaInterpreterEdeltaImpl edeltaImpl =
+		var edeltaImpl =
 			new EdeltaInterpreterEdeltaImpl(copiedEPackages);
 		edeltaImpl.setIssuePresenter(new EdeltaInterpreterIssuePresenter(diagnosticHelper));
 		return edeltaImpl;
@@ -344,7 +343,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			ecoreReferenceExpression,
 			(methodName, args) -> {
 				Object result = null;
-				final JvmOperation op = edeltaJvmModelHelper
+				final var op = edeltaJvmModelHelper
 					.findJvmOperation(
 						edeltaJvmModelHelper.findJvmGenericType(currentProgram),
 						methodName);
@@ -393,9 +392,9 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		final var ecoreReference = ecoreReferenceExpression.getReference();
 		// qualified references are not considered since they cannot be ambiguous
 		if (ecoreReference instanceof EdeltaEcoreDirectReference) {
-			String refText = EdeltaModelUtil.getEcoreReferenceText(ecoreReference);
+			var refText = EdeltaModelUtil.getEcoreReferenceText(ecoreReference);
 			// qualification '.' is the boundary for searching for matches
-			String toSearch = "." + refText;
+			var toSearch = "." + refText;
 			final var matching = ecoreHelper.getCurrentAccessibleElements(ecoreReferenceExpression)
 				.stream()
 				.filter(e -> e.getQualifiedName().toString().endsWith(toSearch))
@@ -416,7 +415,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 						-1,
 						matchingNames.toArray(new String[0])));
 			} else if (matching.size() == 1) {
-				ENamedElement newCandidate = matching.get(0).getElement();
+				var newCandidate = matching.get(0).getElement();
 				if (newCandidate != ecoreReference.getEnamedelement())
 					ecoreReference.setEnamedelement(newCandidate);
 			}
@@ -463,7 +462,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			addNotAvailableAnymoreError(ecoreReferenceExpression, ecoreReferenceText);
 		} else {
 			// the effective qualified name of the EObject
-			String currentQualifiedName = qualifiedNameProvider
+			var currentQualifiedName = qualifiedNameProvider
 				.getFullyQualifiedName((EObject) result).toString();
 			// rely on the reference string in the Edelta program,
 			// which is different in case the EObject has been renamed
@@ -508,16 +507,16 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	@Override
 	protected Object featureCallField(final JvmField jvmField, final Object receiver) {
-		final EdeltaUseAs useAs = edeltaJvmModelHelper.findEdeltaUseAs(jvmField);
+		final var useAs = edeltaJvmModelHelper.findEdeltaUseAs(jvmField);
 		if (useAs != null) {
-			EdeltaProgram useAsTypeProgram = edeltaJvmModelHelper.findEdeltaProgram(useAs.getType());
+			var useAsTypeProgram = edeltaJvmModelHelper.findEdeltaProgram(useAs.getType());
 			// it refers to an external edelta program
 			if (useAsTypeProgram != null)
 				return useAsTypeProgram;
 			// it refers to a Java implementation
 			return useAsFields.computeIfAbsent(useAs,
 				it -> {
-					AbstractEdelta runtimeEdelta = edeltaInterpreterHelper.safeInstantiate(
+					var runtimeEdelta = edeltaInterpreterHelper.safeInstantiate(
 						getJavaReflectAccess(), useAs, thisObject);
 					runtimeEdelta.setIssuePresenter(
 						new EdeltaInterpreterIssuePresenter(diagnosticHelper));
