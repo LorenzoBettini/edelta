@@ -54,19 +54,19 @@ public class EdeltaLabelProvider extends XbaseWithAnnotationsLabelProvider {
 	}
 
 	public Object text(final EdeltaOperation m) {
-		return this.text(this.inferredJavaMethod(m));
+		return this.text(inferredJavaMethod(m));
 	}
 
 	public ImageDescriptor image(final EdeltaOperation m) {
-		return this.imageDescriptor(this.inferredJavaMethod(m));
+		return imageDescriptor(inferredJavaMethod(m));
 	}
 
 	public Object text(final EdeltaModifyEcoreOperation m) {
-		return this.text(this.inferredJavaMethod(m));
+		return this.text(inferredJavaMethod(m));
 	}
 
 	public ImageDescriptor image(final EdeltaModifyEcoreOperation m) {
-		return this.imageDescriptor(this.inferredJavaMethod(m));
+		return imageDescriptor(inferredJavaMethod(m));
 	}
 
 	public Object text(final ENamedElement e) {

@@ -29,7 +29,7 @@ public class EdeltaMavenLog4JConfigurator extends MavenLog4JConfigurator {
 			if (event.getMessage() == null) {
 				return;
 			}
-			Throwable throwable = getThrowable(event);
+			var throwable = getThrowable(event);
 			if (throwable != null) {
 				if (Level.DEBUG == event.getLevel()) {
 					log.debug((CharSequence) event.getMessage(), throwable);
@@ -53,6 +53,7 @@ public class EdeltaMavenLog4JConfigurator extends MavenLog4JConfigurator {
 			}
 		}
 
+		@Override
 		public void close() {
 			// nothing to do
 		}
@@ -61,6 +62,7 @@ public class EdeltaMavenLog4JConfigurator extends MavenLog4JConfigurator {
 			return event.getThrowableInformation() != null ? event.getThrowableInformation().getThrowable() : null;
 		}
 
+		@Override
 		public boolean requiresLayout() {
 			return false;
 		}

@@ -48,7 +48,7 @@ public class EdeltaModelUtil {
 
 	public static boolean hasCycleInSuperPackage(EPackage ePackage) {
 		Set<EPackage> seen = new HashSet<>();
-		EPackage superPackage = ePackage.getESuperPackage();
+		var superPackage = ePackage.getESuperPackage();
 		while (superPackage != null) {
 			if (seen.contains(superPackage))
 				return true;
@@ -67,7 +67,7 @@ public class EdeltaModelUtil {
 	 * @return
 	 */
 	public static EPackage findRootSuperPackage(EPackage ePackage) {
-		EPackage superPackage = ePackage.getESuperPackage();
+		var superPackage = ePackage.getESuperPackage();
 		if (superPackage == null)
 			return null;
 		while (superPackage.getESuperPackage() != null) {
@@ -111,7 +111,7 @@ public class EdeltaModelUtil {
 	 * @return
 	 */
 	public static XExpression getContainingBlockXExpression(XExpression exp) {
-		XExpression blockExp = exp;
+		var blockExp = exp;
 		var container = blockExp.eContainer();
 		while (!(container instanceof XBlockExpression)) {
 			blockExp = (XExpression) container;

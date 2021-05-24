@@ -5,10 +5,7 @@ package edelta.ui.quickfix;
 
 import static edelta.util.EdeltaModelUtil.getContainingBlockXExpression;
 
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.xtext.nodemodel.INode;
-import org.eclipse.xtext.ui.editor.model.edit.IModificationContext;
 import org.eclipse.xtext.ui.editor.quickfix.Fix;
 import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor;
 import org.eclipse.xtext.validation.Issue;
@@ -38,7 +35,7 @@ public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider
 
 	@Fix(EdeltaValidator.INVALID_SUBPACKAGE_IMPORT)
 	public void importRootPackage(final Issue issue, final IssueResolutionAcceptor acceptor) {
-		final String rootPackageName = issue.getData()[0];
+		final var rootPackageName = issue.getData()[0];
 		acceptor.accept(
 			issue,
 			"Import root EPackage",
@@ -54,7 +51,7 @@ public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider
 
 	@Fix(EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT)
 	public void useRenamedElement(final Issue issue, final IssueResolutionAcceptor acceptor) {
-		final String renamed = issue.getData()[0];
+		final var renamed = issue.getData()[0];
 		acceptor.accept(
 			issue,
 			"Use renamed element",
@@ -70,7 +67,7 @@ public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider
 
 	@Fix(EdeltaValidator.AMBIGUOUS_REFERENCE)
 	public void fixEcoreRefAmbiguity(final Issue issue, final IssueResolutionAcceptor acceptor) {
-		final String[] alternatives = issue.getData();
+		final var alternatives = issue.getData();
 		for (String alternative : alternatives) {
 			acceptor.accept(
 				issue,
@@ -88,22 +85,22 @@ public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider
 
 	@Fix(EdeltaValidator.DUPLICATE_METAMODEL_IMPORT)
 	public void removeDuplicateMetamodelImport(final Issue issue, final IssueResolutionAcceptor acceptor) {
-		final int importToRemove = Integer.parseInt(issue.getData()[0]);
+		final var importToRemove = Integer.parseInt(issue.getData()[0]);
 		acceptor.accept(
 			issue,
 			"Remove duplicate metamodel import",
 			"Remove duplicate metamodel import",
 			"EPackage.gif",
-			(EObject element, IModificationContext context) -> {
-				INode node = EdeltaModelUtil.getMetamodelImportNodes
+			(var element, var context) -> {
+				var node = EdeltaModelUtil.getMetamodelImportNodes
 					((EdeltaProgram) element).get(importToRemove);
 				// the node corresponding to the keyword 'metamodel'
-				INode metamodelNode = node.getPreviousSibling().getPreviousSibling();
-				int offset = metamodelNode.getOffset();
+				var metamodelNode = node.getPreviousSibling().getPreviousSibling();
+				var offset = metamodelNode.getOffset();
 				// also remove newline, in an OS independent way
-				int endOfLineLength = context.getXtextDocument()
+				var endOfLineLength = context.getXtextDocument()
 					.getLineDelimiter(node.getEndLine()).length();
-				int length = node.getTotalEndOffset() - offset +
+				var length = node.getTotalEndOffset() - offset +
 					endOfLineLength;
 				context.getXtextDocument().replace(offset, length, "");
 			}
@@ -126,7 +123,7 @@ public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider
 			"Move to the right position",
 			"Move to the right position",
 			E_OBJECT_GIF,
-			(EObject element, IModificationContext context) -> {
+			(var element, var context) -> {
 				var forwardEcoreRef = (EdeltaEcoreReference) element;
 				// the expression to move
 				var expToMove = getContainingBlockXExpression(forwardEcoreRef);

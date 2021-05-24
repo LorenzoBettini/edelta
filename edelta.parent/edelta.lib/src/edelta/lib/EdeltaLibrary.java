@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -26,7 +25,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -57,7 +55,7 @@ public class EdeltaLibrary {
 	}
 
 	public static EClass newEClass(String name, Consumer<EClass> initializer) {
-		EClass c = ecoreFactory.createEClass();
+		var c = ecoreFactory.createEClass();
 		c.setName(name);
 		safeRunInitializer(initializer, c);
 		return c;
@@ -68,7 +66,7 @@ public class EdeltaLibrary {
 	}
 
 	public static EAttribute newEAttribute(String name, EDataType dataType, Consumer<EAttribute> initializer) {
-		EAttribute e = ecoreFactory.createEAttribute();
+		var e = ecoreFactory.createEAttribute();
 		e.setName(name);
 		e.setEType(dataType);
 		safeRunInitializer(initializer, e);
@@ -80,7 +78,7 @@ public class EdeltaLibrary {
 	}
 
 	public static EReference newEReference(String name, EClass referenceType, Consumer<EReference> initializer) {
-		EReference e = ecoreFactory.createEReference();
+		var e = ecoreFactory.createEReference();
 		e.setName(name);
 		e.setEType(referenceType);
 		safeRunInitializer(initializer, e);
@@ -92,7 +90,7 @@ public class EdeltaLibrary {
 	}
 
 	public static EDataType newEDataType(String name, String instanceTypeName, Consumer<EDataType> initializer) {
-		EDataType e = ecoreFactory.createEDataType();
+		var e = ecoreFactory.createEDataType();
 		e.setName(name);
 		e.setInstanceTypeName(instanceTypeName);
 		safeRunInitializer(initializer, e);
@@ -104,7 +102,7 @@ public class EdeltaLibrary {
 	}
 
 	public static EEnum newEEnum(String name, Consumer<EEnum> initializer) {
-		EEnum e = ecoreFactory.createEEnum();
+		var e = ecoreFactory.createEEnum();
 		e.setName(name);
 		safeRunInitializer(initializer, e);
 		return e;
@@ -115,7 +113,7 @@ public class EdeltaLibrary {
 	}
 
 	public static EEnumLiteral newEEnumLiteral(String name, Consumer<EEnumLiteral> initializer) {
-		EEnumLiteral e = ecoreFactory.createEEnumLiteral();
+		var e = ecoreFactory.createEEnumLiteral();
 		e.setName(name);
 		safeRunInitializer(initializer, e);
 		return e;
@@ -142,8 +140,8 @@ public class EdeltaLibrary {
 	 */
 	public static String getEObjectRepr(EObject e) {
 		Set<EObject> seen = new HashSet<>();
-		StringBuilder builder = new StringBuilder();
-		EObject current = e;
+		var builder = new StringBuilder();
+		var current = e;
 		while (current != null) {
 			if (builder.length() > 0)
 				builder.insert(0, ".");
@@ -177,7 +175,7 @@ public class EdeltaLibrary {
 	}
 
 	public static EClass addNewEClass(EPackage ePackage, String name, Consumer<EClass> initializer) {
-		EClass c = ecoreFactory.createEClass();
+		var c = ecoreFactory.createEClass();
 		c.setName(name);
 		addEClass(ePackage, c);
 		safeRunInitializer(initializer, c);
@@ -204,7 +202,7 @@ public class EdeltaLibrary {
 	}
 
 	public static EEnum addNewEEnum(EPackage ePackage, String name, Consumer<EEnum> initializer) {
-		EEnum e = ecoreFactory.createEEnum();
+		var e = ecoreFactory.createEEnum();
 		e.setName(name);
 		addEEnum(ePackage, e);
 		safeRunInitializer(initializer, e);
@@ -220,7 +218,7 @@ public class EdeltaLibrary {
 	}
 
 	public static EEnumLiteral addNewEEnumLiteral(EEnum eEnum, String name, Consumer<EEnumLiteral> initializer) {
-		EEnumLiteral e = ecoreFactory.createEEnumLiteral();
+		var e = ecoreFactory.createEEnumLiteral();
 		e.setName(name);
 		addEEnumLiteral(eEnum, e);
 		safeRunInitializer(initializer, e);
@@ -236,7 +234,7 @@ public class EdeltaLibrary {
 	}
 
 	public static EDataType addNewEDataType(EPackage ePackage, String name, String instanceTypeName, Consumer<EDataType> initializer) {
-		EDataType e = ecoreFactory.createEDataType();
+		var e = ecoreFactory.createEDataType();
 		e.setName(name);
 		e.setInstanceTypeName(instanceTypeName);
 		addEDataType(ePackage, e);
@@ -253,7 +251,7 @@ public class EdeltaLibrary {
 	}
 
 	public static EAttribute addNewEAttribute(EClass eClass, String name, EDataType dataType, Consumer<EAttribute> initializer) {
-		EAttribute e = ecoreFactory.createEAttribute();
+		var e = ecoreFactory.createEAttribute();
 		e.setName(name);
 		e.setEType(dataType);
 		addEAttribute(eClass, e);
@@ -270,7 +268,7 @@ public class EdeltaLibrary {
 	}
 
 	public static EReference addNewEReference(EClass eClass, String name, EClass referenceType, Consumer<EReference> initializer) {
-		EReference e = ecoreFactory.createEReference();
+		var e = ecoreFactory.createEReference();
 		e.setName(name);
 		e.setEType(referenceType);
 		addEReference(eClass, e);
@@ -314,7 +312,7 @@ public class EdeltaLibrary {
 
 	public static EPackage addNewESubpackage(EPackage superPackage, String name, String nsPrefix, String nsURI,
 			Consumer<EPackage> initializer) {
-		EPackage newSubpackage = ecoreFactory.createEPackage();
+		var newSubpackage = ecoreFactory.createEPackage();
 		newSubpackage.setName(name);
 		newSubpackage.setNsPrefix(nsPrefix);
 		newSubpackage.setNsURI(nsURI);
@@ -354,7 +352,7 @@ public class EdeltaLibrary {
 
 	private static void removeFutureDanglingReferences(EObject element) {
 		if (element instanceof EClassifier) {
-			EClassifier classifier = (EClassifier) element;
+			var classifier = (EClassifier) element;
 			// first remove possible references to this classifier as type
 			final var allEClasses = allEClasses(classifier.getEPackage());
 			final var featuresToRemove = allEClasses.stream()
@@ -367,7 +365,7 @@ public class EdeltaLibrary {
 				eClass.getESuperTypes().remove(classifier);
 			}
 		} else if (element instanceof EReference) {
-			EReference reference = (EReference) element;
+			var reference = (EReference) element;
 			if (reference.getEOpposite() != null)
 				reference.getEOpposite().setEOpposite(null);
 		}
@@ -402,7 +400,7 @@ public class EdeltaLibrary {
 	 * @see EcoreUtil#copy(EObject)
 	 */
 	public static EStructuralFeature copyTo(EStructuralFeature feature, EClass eClassDest) {
-		EStructuralFeature copy = EcoreUtil.copy(feature);
+		var copy = EcoreUtil.copy(feature);
 		eClassDest.getEStructuralFeatures().add(copy);
 		return copy;
 	}
@@ -418,7 +416,7 @@ public class EdeltaLibrary {
 	 * @see EcoreUtil#copy(EObject)
 	 */
 	public static EStructuralFeature copyToAs(EStructuralFeature feature, EClass eClassDest, String name) {
-		EStructuralFeature copy = EcoreUtil.copy(feature);
+		var copy = EcoreUtil.copy(feature);
 		copy.setName(name);
 		eClassDest.getEStructuralFeatures().add(copy);
 		return copy;
@@ -438,7 +436,7 @@ public class EdeltaLibrary {
 	 */
 	public static EStructuralFeature copyToAs(EStructuralFeature feature, EClass eClassDest, String name,
 			EClassifier type) {
-		EStructuralFeature copy = EcoreUtil.copy(feature);
+		var copy = EcoreUtil.copy(feature);
 		copy.setName(name);
 		copy.setEType(type);
 		eClassDest.getEStructuralFeatures().add(copy);
@@ -671,7 +669,7 @@ public class EdeltaLibrary {
 	 * @return
 	 */
 	public static Collection<EPackage> usedPackages(EPackage ePackage) {
-		Map<EObject, Collection<Setting>> map = EcoreUtil.CrossReferencer.find(List.of(ePackage));
+		var map = EcoreUtil.CrossReferencer.find(List.of(ePackage));
 		// the keys are the EObjects that are used by elements of this package
 		return filterByType(map.keySet().stream(), EClassifier.class) // only the used EClassifiers...
 			.map(EClassifier::getEPackage) // ...to get their packages

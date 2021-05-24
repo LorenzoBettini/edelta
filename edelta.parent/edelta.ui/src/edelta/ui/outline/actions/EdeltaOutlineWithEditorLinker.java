@@ -28,7 +28,7 @@ public class EdeltaOutlineWithEditorLinker extends OutlineWithEditorLinker {
 	protected IOutlineNode findBestNode(IOutlineNode input, ITextRegion selectedTextRegion) {
 		final var findBestNode = super.findBestNode(input, selectedTextRegion);
 		if (findBestNode instanceof EObjectNode) {
-			EObjectNode eObjectNode = (EObjectNode) findBestNode;
+			var eObjectNode = (EObjectNode) findBestNode;
 			if (eObjectNode.getEClass() == EDELTA_MODIFY_ECORE_OPERATION) {
 				/* since XExpressions are not shown in the outline, when we select
 				 * such an expression, by default the containing modifyEcore node is
@@ -48,7 +48,7 @@ public class EdeltaOutlineWithEditorLinker extends OutlineWithEditorLinker {
 	private IOutlineNode findENamedElementNode(IOutlineNode node, ITextRegion selectedTextRegion) {
 		for (var child : node.getChildren()) {
 			// at this point we are sure it's an EObjectNode
-			EObjectNode eObjectNode = (EObjectNode) child;
+			var eObjectNode = (EObjectNode) child;
 			// our Outline nodes for Ecore elements are already associated with the
 			// text region of the corresponding responsible XExpression
 			final var recursiveFind = findENamedElementNode(child, selectedTextRegion);

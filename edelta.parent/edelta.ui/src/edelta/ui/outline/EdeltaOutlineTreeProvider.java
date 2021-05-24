@@ -11,7 +11,6 @@ import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider;
 import org.eclipse.xtext.ui.editor.outline.impl.EObjectNode;
 import org.eclipse.xtext.util.concurrent.IUnitOfWork;
-import org.eclipse.xtext.xbase.XExpression;
 
 import com.google.inject.Inject;
 
@@ -38,23 +37,23 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	protected void _createChildren(final IOutlineNode parentNode, final EdeltaProgram p) { // NOSONAR OutlineTreeProvider in Xtext is based on some redefined methods starting with _
 		currentProgram = p;
 		for (final var o : p.getOperations()) {
-			this.createNode(parentNode, o);
+			createNode(parentNode, o);
 		}
 		final var modifyEcoreOperations = p.getModifyEcoreOperations();
 		if (modifyEcoreOperations.isEmpty()) {
 			return;
 		}
 		for (final var o : modifyEcoreOperations) {
-			this.createNode(parentNode, o);
+			createNode(parentNode, o);
 		}
 		final var eResource = p.eResource();
 		final var modifiedElements = derivedStateHelper.getModifiedElements(eResource);
-		for (final var ePackage : this.derivedStateHelper.getCopiedEPackagesMap(eResource).values()) {
+		for (final var ePackage : derivedStateHelper.getCopiedEPackagesMap(eResource).values()) {
 			// the cool thing is that we don't need to provide
 			// customization in the label provider for EPackage and EClass
 			// since Xtext defaults to the .edit plugin :)
 			if (modifiedElements.contains(ePackage))
-				this.createNode(parentNode, ePackage);
+				createNode(parentNode, ePackage);
 			// only show EPackage with some modifications
 		}
 	}
@@ -88,7 +87,7 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 			};
 			if (modelElement instanceof ENamedElement) {
 				// try to associate the node to the responsible XExpression
-				XExpression expression = derivedStateHelper.
+				var expression = derivedStateHelper.
 					getLastResponsibleExpression(currentProgram, (ENamedElement) modelElement);
 				if (expression != null) {
 					elementForSignificantTestRegion = expression;

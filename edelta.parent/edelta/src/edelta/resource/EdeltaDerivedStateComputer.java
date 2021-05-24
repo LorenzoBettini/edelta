@@ -38,7 +38,7 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 	@Override
 	public void installDerivedState(final DerivedStateAwareResource resource, final boolean preIndexingPhase) {
 		super.installDerivedState(resource, preIndexingPhase);
-		final EdeltaProgram program = (EdeltaProgram) resource.getContents().get(0);
+		final var program = (EdeltaProgram) resource.getContents().get(0);
 		if ((!preIndexingPhase)) {
 			final var modifyEcoreOperations = interpreterHelper
 					.filterOperations(program.getModifyEcoreOperations());

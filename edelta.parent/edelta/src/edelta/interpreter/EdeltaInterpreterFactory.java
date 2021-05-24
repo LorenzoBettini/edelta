@@ -26,7 +26,7 @@ public class EdeltaInterpreterFactory {
 	private EdeltaInterpreterConfigurator configurator;
 
 	public EdeltaInterpreter create(Resource resource) {
-		EdeltaInterpreter interpreter = provider.get();
+		var interpreter = provider.get();
 		configurator.configureInterpreter(interpreter, resource);
 		return interpreter;
 	}

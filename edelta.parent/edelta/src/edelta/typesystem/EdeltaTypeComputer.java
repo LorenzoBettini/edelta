@@ -7,9 +7,7 @@ import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.annotations.typesystem.XbaseWithAnnotationsTypeComputer;
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputationState;
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeExpectation;
-import org.eclipse.xtext.xbase.typesystem.references.LightweightTypeReference;
 
-import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 
 /**
@@ -30,7 +28,7 @@ public class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 
 	public void computeTypesOfEdeltaEcoreReferenceExpression(final EdeltaEcoreReferenceExpression e,
 			final ITypeComputationState state) {
-		EdeltaEcoreReference reference = e.getReference();
+		var reference = e.getReference();
 		ENamedElement enamedelement = null;
 		if (reference != null) {
 			enamedelement = reference.getEnamedelement();
@@ -43,9 +41,9 @@ public class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 			final ITypeExpectation expectation =
 				findFirst(state.getExpectations(), it -> it.getExpectedType() != null);
 			if (expectation != null) {
-				final LightweightTypeReference atLeast =
+				final var atLeast =
 						getRawTypeForName(ENamedElement.class, state);
-				final LightweightTypeReference expectedType = expectation.getExpectedType();
+				final var expectedType = expectation.getExpectedType();
 				if (atLeast.isAssignableFrom(expectedType)) {
 					state.acceptActualType(expectedType);
 					return;

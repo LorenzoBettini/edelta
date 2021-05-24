@@ -7,7 +7,6 @@ import static edelta.maven.plugin.EdeltaMavenUtils.emptyStringFilter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -19,10 +18,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.xtext.builder.standalone.ILanguageConfiguration;
-import org.eclipse.xtext.builder.standalone.LanguageAccess;
 import org.eclipse.xtext.builder.standalone.LanguageAccessFactory;
 import org.eclipse.xtext.builder.standalone.StandaloneBuilder;
-import org.eclipse.xtext.builder.standalone.compiler.CompilerConfiguration;
 import org.eclipse.xtext.builder.standalone.compiler.IJavaCompiler;
 import org.eclipse.xtext.ecore.EcoreSupport;
 import org.eclipse.xtext.maven.Language;
@@ -32,7 +29,6 @@ import org.eclipse.xtext.xbase.lib.IterableExtensions;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
-import com.google.inject.Injector;
 
 import edelta.EdeltaStandaloneSetup;
 
@@ -118,6 +114,7 @@ public class EdeltaMojo extends AbstractMojo {
 	@Parameter
 	private String classPathLookupFilter;
 
+	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (Boolean.TRUE.equals(skip)) {
 			getLog().info("skipped.");
@@ -130,9 +127,9 @@ public class EdeltaMojo extends AbstractMojo {
 	}
 
 	protected void internalExecute() throws MojoExecutionException {
-		Map<String, LanguageAccess> languages = new LanguageAccessFactory().createLanguageAccess(getLanguages(), this.getClass().getClassLoader());
-		Injector injector = Guice.createInjector(new MavenStandaloneBuilderModule());
-		StandaloneBuilder builder = injector.getInstance(StandaloneBuilder.class);
+		var languages = new LanguageAccessFactory().createLanguageAccess(getLanguages(), this.getClass().getClassLoader());
+		var injector = Guice.createInjector(new MavenStandaloneBuilderModule());
+		var builder = injector.getInstance(StandaloneBuilder.class);
 		builder.setBaseDir(project.getBasedir().getAbsolutePath());
 		builder.setLanguages(languages);
 		builder.setEncoding(encoding);
@@ -145,7 +142,7 @@ public class EdeltaMojo extends AbstractMojo {
 		builder.setDebugLog(getLog().isDebugEnabled());
 		configureCompiler(builder.getCompiler());
 		logState();
-		boolean errorDetected = !builder.launch();
+		var errorDetected = !builder.launch();
 		if (errorDetected && Boolean.TRUE.equals(failOnValidationError)) {
 			throw new MojoExecutionException("Execution failed due to a severe validation error.");
 		}
@@ -153,12 +150,12 @@ public class EdeltaMojo extends AbstractMojo {
 
 	private List<? extends ILanguageConfiguration> getLanguages() {
 		List<ILanguageConfiguration> languages = new ArrayList<>(2);
-		Language ecoreSupport = new Language();
+		var ecoreSupport = new Language();
 		ecoreSupport.setSetup(EcoreSupport.class.getName());
 		languages.add(ecoreSupport);
-		Language edeltaLangConfig = new Language();
+		var edeltaLangConfig = new Language();
 		edeltaLangConfig.setSetup(EdeltaStandaloneSetup.class.getName());
-		OutputConfiguration edeltaOutputConfig = new OutputConfiguration();
+		var edeltaOutputConfig = new OutputConfiguration();
 		edeltaOutputConfig.setOutputDirectory(outputDirectory);
 		edeltaLangConfig.setOutputConfigurations(Lists.newArrayList(edeltaOutputConfig));
 		languages.add(edeltaLangConfig);
@@ -167,14 +164,14 @@ public class EdeltaMojo extends AbstractMojo {
 
 	private Set<String> getClasspathElements() {
 		Set<String> elements = newLinkedHashSet();
-		elements.addAll(this.classpathElements);
+		elements.addAll(classpathElements);
 		elements.remove(project.getBuild().getOutputDirectory());
 		elements.remove(project.getBuild().getTestOutputDirectory());
 		return newLinkedHashSet(filter(elements, emptyStringFilter()));
 	}
 
 	private void configureCompiler(IJavaCompiler compiler) {
-		CompilerConfiguration conf = compiler.getConfiguration();
+		var conf = compiler.getConfiguration();
 		conf.setSourceLevel(compilerSourceLevel);
 		conf.setTargetLevel(compilerTargetLevel);
 		conf.setVerbose(getLog().isDebugEnabled());

@@ -1,10 +1,7 @@
 package edelta.interpreter;
 
-import java.util.List;
-
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
 import org.eclipse.xtext.xbase.XExpression;
@@ -45,7 +42,7 @@ public class EdeltaInterpreterDiagnosticHelper {
 			correspondingExpression = derivedStateHelper
 				.getLastResponsibleExpression(currentExpression, (ENamedElement) problematicObject);
 		}
-		final List<Diagnostic> issues = 
+		final var issues = 
 			severity == Severity.WARNING ? eResource.getWarnings() : eResource.getErrors();
 		issues.add(
 			new EObjectDiagnosticImpl(severity,
