@@ -34,11 +34,12 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 			var packages = resources.stream()
 				.map(r -> (EPackage) r.getContents().get(0))
 				.collect(Collectors.toList());
-			EPackage packageToAnalyze = packages.stream()
+			var packageToAnalyze = packages.stream()
 				.filter(p -> packageName.equals(p.getName()))
 				.findFirst()
 				.orElseThrow(
-					() -> new IllegalArgumentException("No EPackage with name: " + packageName));
+					() -> new IllegalArgumentException
+						("No EPackage with name: " + packageName));
 			packages.remove(packageToAnalyze);
 			return analyzeEPackages(packageToAnalyze, packages);
 		}
