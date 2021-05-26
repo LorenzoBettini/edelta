@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -68,8 +69,12 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 	private Collection<EPackage> getEPackages(List<Resource> resources) {
 		return resources.stream()
 			.map(r -> (EPackage) r.getContents().get(0))
-			.sorted(comparing(EPackage::getNsURI)) // we must be deterministic
+			.sorted(ePackageComparator()) // we must be deterministic
 			.collect(Collectors.toList());
+	}
+
+	private Comparator<EPackage> ePackageComparator() {
+		return comparing(EPackage::getNsURI);
 	}
 
 	private List<Resource> loadEcoreFiles(Stream<Path> stream) {
@@ -111,7 +116,7 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 			return;
 		seen.add(current);
 		var metamodel = createGraphMetamodel(repository, current);
-		var usedPackages = EdeltaLibrary.usedPackages(current);
+		var usedPackages = usedPackages(current);
 		for (var used : usedPackages) {
 			var usedMetamodel = createGraphMetamodel(repository, used);
 			findOppositeDependency(repository, current, used)
@@ -120,6 +125,13 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 					() -> createDependency(repository, metamodel, usedMetamodel));
 			analyzeEPackage(repository, used, seen);
 		}
+	}
+
+	private Collection<EPackage> usedPackages(EPackage ePackage) {
+		return EdeltaLibrary.usedPackages(ePackage)
+				.stream()
+				.sorted(ePackageComparator()) // we must be deterministic
+				.collect(Collectors.toList());
 	}
 
 	private Metamodel createGraphMetamodelHighlighted(Repository repository, EPackage ePackage) {
