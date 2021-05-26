@@ -101,7 +101,7 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 		var usedPackages = EdeltaLibrary.usedPackages(current);
 		for (var used : usedPackages) {
 			var usedMetamodel = createGraphMetamodel(repository, used);
-			findDependencyWithTarget(repository, current)
+			findOppositeDependency(repository, current, used)
 				.ifPresentOrElse(
 					d -> d.setBidirectional(true),
 					() -> createDependency(repository, metamodel, usedMetamodel));
@@ -135,11 +135,22 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 		return metamodel;
 	}
 
-	private Optional<Dependency> findDependencyWithTarget(Repository repository, EPackage current) {
+	/**
+	 * Whether there already exists a dependency from target to source (that is,
+	 * the opposite dependency that will then have to be set as bidirectional).
+	 * 
+	 * @param repository
+	 * @param src
+	 * @param trg
+	 * @return
+	 */
+	private Optional<Dependency> findOppositeDependency(Repository repository, EPackage src, EPackage trg) {
 		return repository.getEdges().stream()
 			.filter(Dependency.class::isInstance)
 			.map(Dependency.class::cast)
-			.filter(d -> ((Metamodel) d.getTrg()).getNsURI().equals(current.getNsURI()))
+			.filter(d ->
+				((Metamodel) d.getTrg()).getNsURI().equals(src.getNsURI()) &&
+				((Metamodel) d.getSrc()).getNsURI().equals(trg.getNsURI()))
 			.findFirst();
 	}
 

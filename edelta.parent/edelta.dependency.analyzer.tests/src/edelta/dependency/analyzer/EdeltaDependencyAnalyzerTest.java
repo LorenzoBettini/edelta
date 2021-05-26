@@ -142,6 +142,42 @@ public class EdeltaDependencyAnalyzerTest {
 		dependencies
 			.extracting(Dependency::isBidirectional)
 			.containsExactly(true);
+	}
+
+	@Test
+	public void testTransitiveTargetDependency() throws IOException {
+		var analyzer = new EdeltaDependencyAnalizer();
+		// package3 -> package2 <-> package1
+		var repository = analyzer.analyzeEPackage(TESTECORES + "/transitive/", "testecoreforusages3");
+		var package1 = analyzer.getEPackage("testecoreforusages1");
+		var package2 = analyzer.getEPackage("testecoreforusages2");
+		var package3 = analyzer.getEPackage("testecoreforusages3");
+		assertThat(package1).isNotNull();
+		assertThat(package2).isNotNull();
+		assertThat(package3).isNotNull();
+		var metamodels = assertThat(repository.getNodes())
+			.asInstanceOf(InstanceOfAssertFactories.list(Metamodel.class));
+		metamodels
+			.extracting(Metamodel::getName)
+			.containsExactly(package3.getName(), package2.getName(), package1.getName());
+		metamodels
+			.extracting(Metamodel::getNsURI)
+			.containsExactly(package3.getNsURI(), package2.getNsURI(), package1.getNsURI());
+		metamodels
+			.extracting(Metamodel::isHighlighted)
+			.containsExactly(true, false, false);
+		var dependencies = assertThat(repository.getEdges())
+			.asInstanceOf(InstanceOfAssertFactories.list(Dependency.class));
+		// p3 -> p2, p2 -> p1
+		dependencies
+			.extracting(d -> d.getSrc().getName())
+			.containsExactly(package3.getName(), package2.getName());
+		dependencies
+			.extracting(d -> d.getTrg().getName())
+			.containsExactly(package2.getName(), package1.getName());
+		dependencies
+			.extracting(Dependency::isBidirectional)
+			.containsExactly(false, true);
 //		assertThat(EdeltaLibrary.usedPackages(package1))
 //			.containsExactlyInAnyOrder(package2);
 //		assertThat(EdeltaLibrary.usedPackages(package2))
