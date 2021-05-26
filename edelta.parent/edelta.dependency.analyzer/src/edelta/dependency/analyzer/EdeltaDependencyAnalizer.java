@@ -2,6 +2,8 @@ package edelta.dependency.analyzer;
 
 import static java.util.Comparator.comparing;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,11 +16,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.log4j.Logger;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 
 import GraphMM.Dependency;
 import GraphMM.GraphMMFactory;
+import GraphMM.GraphMMPackage;
 import GraphMM.Metamodel;
 import GraphMM.Repository;
 import edelta.lib.AbstractEdelta;
@@ -27,6 +34,8 @@ import edelta.lib.EdeltaLibrary;
 public class EdeltaDependencyAnalizer extends AbstractEdelta {
 
 	private static final GraphMMFactory graphFactory = GraphMMFactory.eINSTANCE;
+
+	private static final Logger LOG = Logger.getLogger(EdeltaDependencyAnalizer.class);
 
 	/**
 	 * Analyzes the dependencies of the specified {@link EPackage} (by name) together
@@ -164,6 +173,33 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 		dependency.setTrg(target);
 		repository.getEdges().add(dependency);
 		return dependency;
+	}
+
+	public void saveRepository(Repository repository, String outputPath, String fileName) throws IOException {
+		// Create a resource set to hold the resources.
+		var resourceSet = new ResourceSetImpl();
+		
+		// Register the appropriate resource factory to handle all file extensions.
+		resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put
+			(Resource.Factory.Registry.DEFAULT_EXTENSION, 
+			 new XMIResourceFactoryImpl());
+
+		// Register the package to ensure it is available during loading.
+		resourceSet.getPackageRegistry().put
+			(GraphMMPackage.eNS_URI, 
+			 GraphMMPackage.eINSTANCE);
+
+		LOG.info("Saving " + outputPath + "/" + fileName);
+
+		var newFile = new File(outputPath, fileName);
+		newFile.getParentFile().mkdirs();
+		var fos = new FileOutputStream(newFile);
+
+		var resource = resourceSet.createResource(URI.createURI("http:///My.graphmm"));
+		resource.getContents().add(repository);
+		resource.save(fos, null);
+		fos.flush();
+		fos.close();
 	}
 
 }

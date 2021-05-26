@@ -10,10 +10,13 @@ import org.junit.Test;
 
 import GraphMM.Dependency;
 import GraphMM.Metamodel;
+import edelta.testutils.EdeltaTestUtils;
 
 public class EdeltaDependencyAnalyzerTest {
 
 	private static final String TESTECORES = "testecores";
+	private static final String OUTPUT = "output";
+	private static final String EXPECTATIONS = "expectations";
 
 	@Test
 	public void testUnidirectionalDependency() {
@@ -197,5 +200,18 @@ public class EdeltaDependencyAnalyzerTest {
 		dependencies
 			.extracting(Dependency::isBidirectional)
 			.containsExactly(false, true, false);
+	}
+
+	@Test
+	public void testSaveRepository() throws IOException {
+		var analyzer = new EdeltaDependencyAnalizer();
+		// package4 -> package2, package1 (package2 <-> package1)
+		var repository = analyzer.analyzeEPackage(
+			TESTECORES + "/twodependencies/", "testecoreforusages4");
+		analyzer.saveRepository(
+			repository, OUTPUT + "/twodependencies", "dependencies.graphmm");
+		EdeltaTestUtils.assertFilesAreEquals(
+			EXPECTATIONS + "/twodependencies/dependencies.graphmm",
+			OUTPUT + "/twodependencies/dependencies.graphmm");
 	}
 }
