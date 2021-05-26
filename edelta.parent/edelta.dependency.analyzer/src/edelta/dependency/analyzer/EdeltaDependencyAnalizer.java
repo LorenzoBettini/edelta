@@ -25,6 +25,15 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 
 	private static final GraphMMFactory graphFactory = GraphMMFactory.eINSTANCE;
 
+	/**
+	 * Analyzes the dependencies of the specified {@link EPackage} (by name) together
+	 * with all the other {@link EPackage}s found in the specified path.
+	 * 
+	 * @param path
+	 * @param packageName
+	 * @return
+	 * @throws IOException
+	 */
 	public Repository analyzeEPackage(String path, String packageName) throws IOException {
 		try (var stream = Files.walk(Paths.get(path))) {
 			var resources = loadEcoreFiles(stream);
@@ -67,6 +76,12 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 		return repository;
 	}
 
+	/**
+	 * Analyzes the dependencies of the specified {@link EPackage}.
+	 * 
+	 * @param ePackage
+	 * @return
+	 */
 	public Repository analyzeMainEPackage(EPackage ePackage) {
 		return analyzeMainEPackage(ePackage, new HashSet<>());
 	}
