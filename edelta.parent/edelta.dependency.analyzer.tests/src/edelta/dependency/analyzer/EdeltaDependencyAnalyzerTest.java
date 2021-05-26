@@ -25,8 +25,8 @@ public class EdeltaDependencyAnalyzerTest {
 		assertThat(package1).isNotNull();
 		assertThat(package2).isNotNull();
 		// package1 uses package2
-		var p1Repository = analyzer.analyzeMainEPackage(package1);
-		var metamodels = assertThat(p1Repository.getNodes())
+		var repository = analyzer.analyzeMainEPackage(package1);
+		var metamodels = assertThat(repository.getNodes())
 			.asInstanceOf(InstanceOfAssertFactories.list(Metamodel.class));
 		metamodels
 			.extracting(Metamodel::getName)
@@ -37,7 +37,7 @@ public class EdeltaDependencyAnalyzerTest {
 		metamodels
 			.extracting(Metamodel::isHighlighted)
 			.containsExactly(true, false);
-		var dependencies = assertThat(p1Repository.getEdges())
+		var dependencies = assertThat(repository.getEdges())
 			.asInstanceOf(InstanceOfAssertFactories.list(Dependency.class));
 		dependencies
 			.extracting(d -> d.getSrc().getName())
@@ -48,14 +48,6 @@ public class EdeltaDependencyAnalyzerTest {
 		dependencies
 			.extracting(Dependency::isBidirectional)
 			.containsExactly(false);
-//		assertThat(EdeltaLibrary.usedPackages(package1))
-//			.containsExactlyInAnyOrder(package2);
-//		assertThat(EdeltaLibrary.usedPackages(package2))
-//			.containsExactlyInAnyOrder(package1);
-//		assertThat(EdeltaLibrary.usedPackages(package3))
-//			.containsExactlyInAnyOrder(package2);
-//		assertThat(EdeltaLibrary.usedPackages(package4))
-//			.containsExactlyInAnyOrder(package2, package1);
 	}
 
 	@Test
@@ -70,13 +62,13 @@ public class EdeltaDependencyAnalyzerTest {
 	@Test
 	public void testHighlightedTargetDependency() throws IOException {
 		var analyzer = new EdeltaDependencyAnalizer();
-		// package1 uses package2
-		var p1Repository = analyzer.analyzeEPackage(TESTECORES + "/unidirectional/", "testecoreforusages2");
+		// package1 -> package2
+		var repository = analyzer.analyzeEPackage(TESTECORES + "/unidirectional/", "testecoreforusages2");
 		var package1 = analyzer.getEPackage("testecoreforusages1");
 		var package2 = analyzer.getEPackage("testecoreforusages2");
 		assertThat(package1).isNotNull();
 		assertThat(package2).isNotNull();
-		var metamodels = assertThat(p1Repository.getNodes())
+		var metamodels = assertThat(repository.getNodes())
 			.asInstanceOf(InstanceOfAssertFactories.list(Metamodel.class));
 		metamodels
 			.extracting(Metamodel::getName)
@@ -87,7 +79,7 @@ public class EdeltaDependencyAnalyzerTest {
 		metamodels
 			.extracting(Metamodel::isHighlighted)
 			.containsExactly(true, false);
-		var dependencies = assertThat(p1Repository.getEdges())
+		var dependencies = assertThat(repository.getEdges())
 			.asInstanceOf(InstanceOfAssertFactories.list(Dependency.class));
 		dependencies
 			.extracting(d -> d.getSrc().getName())
@@ -98,14 +90,6 @@ public class EdeltaDependencyAnalyzerTest {
 		dependencies
 			.extracting(Dependency::isBidirectional)
 			.containsExactly(false);
-//		assertThat(EdeltaLibrary.usedPackages(package1))
-//			.containsExactlyInAnyOrder(package2);
-//		assertThat(EdeltaLibrary.usedPackages(package2))
-//			.containsExactlyInAnyOrder(package1);
-//		assertThat(EdeltaLibrary.usedPackages(package3))
-//			.containsExactlyInAnyOrder(package2);
-//		assertThat(EdeltaLibrary.usedPackages(package4))
-//			.containsExactlyInAnyOrder(package2, package1);
 	}
 
 	@Test
@@ -117,10 +101,9 @@ public class EdeltaDependencyAnalyzerTest {
 		var package2 = analyzer.getEPackage("testecoreforusages2");
 		assertThat(package1).isNotNull();
 		assertThat(package2).isNotNull();
-		// package1 uses package2
-		// package2 uses package1
-		var p1Repository = analyzer.analyzeMainEPackage(package1);
-		var metamodels = assertThat(p1Repository.getNodes())
+		// package1 <-> package2
+		var repository = analyzer.analyzeMainEPackage(package1);
+		var metamodels = assertThat(repository.getNodes())
 			.asInstanceOf(InstanceOfAssertFactories.list(Metamodel.class));
 		metamodels
 			.extracting(Metamodel::getName)
@@ -131,7 +114,7 @@ public class EdeltaDependencyAnalyzerTest {
 		metamodels
 			.extracting(Metamodel::isHighlighted)
 			.containsExactly(true, false);
-		var dependencies = assertThat(p1Repository.getEdges())
+		var dependencies = assertThat(repository.getEdges())
 			.asInstanceOf(InstanceOfAssertFactories.list(Dependency.class));
 		dependencies
 			.extracting(d -> d.getSrc().getName())
@@ -178,13 +161,41 @@ public class EdeltaDependencyAnalyzerTest {
 		dependencies
 			.extracting(Dependency::isBidirectional)
 			.containsExactly(false, true);
-//		assertThat(EdeltaLibrary.usedPackages(package1))
-//			.containsExactlyInAnyOrder(package2);
-//		assertThat(EdeltaLibrary.usedPackages(package2))
-//			.containsExactlyInAnyOrder(package1);
-//		assertThat(EdeltaLibrary.usedPackages(package3))
-//			.containsExactlyInAnyOrder(package2);
-//		assertThat(EdeltaLibrary.usedPackages(package4))
-//			.containsExactlyInAnyOrder(package2, package1);
+	}
+
+	@Test
+	public void testTwoDependencies() throws IOException {
+		var analyzer = new EdeltaDependencyAnalizer();
+		// package4 -> package2, package1 (package2 <-> package1)
+		var repository = analyzer.analyzeEPackage(TESTECORES + "/twodependencies/", "testecoreforusages4");
+		var package1 = analyzer.getEPackage("testecoreforusages1");
+		var package2 = analyzer.getEPackage("testecoreforusages2");
+		var package4 = analyzer.getEPackage("testecoreforusages4");
+		assertThat(package1).isNotNull();
+		assertThat(package2).isNotNull();
+		assertThat(package4).isNotNull();
+		var metamodels = assertThat(repository.getNodes())
+			.asInstanceOf(InstanceOfAssertFactories.list(Metamodel.class));
+		metamodels
+			.extracting(Metamodel::getName)
+			.containsExactly(package4.getName(), package1.getName(), package2.getName());
+		metamodels
+			.extracting(Metamodel::getNsURI)
+			.containsExactly(package4.getNsURI(), package1.getNsURI(), package2.getNsURI());
+		metamodels
+			.extracting(Metamodel::isHighlighted)
+			.containsExactly(true, false, false);
+		var dependencies = assertThat(repository.getEdges())
+			.asInstanceOf(InstanceOfAssertFactories.list(Dependency.class));
+		// p4 -> p1, p2 (and p1 <-> p2)
+		dependencies
+			.extracting(d -> d.getSrc().getName())
+			.containsExactly(package4.getName(), package1.getName(), package4.getName());
+		dependencies
+			.extracting(d -> d.getTrg().getName())
+			.containsExactly(package1.getName(), package2.getName(), package2.getName());
+		dependencies
+			.extracting(Dependency::isBidirectional)
+			.containsExactly(false, true, false);
 	}
 }

@@ -1,9 +1,12 @@
 package edelta.dependency.analyzer;
 
+import static java.util.Comparator.comparing;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +47,7 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 		}
 	}
 
-	private EPackage getEPackageByName(List<EPackage> packages, String packageName) {
+	private EPackage getEPackageByName(Collection<EPackage> packages, String packageName) {
 		return packages.stream()
 			.filter(p -> packageName.equals(p.getName()))
 			.findFirst()
@@ -53,9 +56,10 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 					("No EPackage with name: " + packageName));
 	}
 
-	private List<EPackage> getEPackages(List<Resource> resources) {
+	private Collection<EPackage> getEPackages(List<Resource> resources) {
 		return resources.stream()
 			.map(r -> (EPackage) r.getContents().get(0))
+			.sorted(comparing(EPackage::getNsURI)) // we must be deterministic
 			.collect(Collectors.toList());
 	}
 
@@ -67,7 +71,7 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 			.collect(Collectors.toList());
 	}
 
-	private Repository analyzeEPackages(EPackage ePackage, List<EPackage> packages) {
+	private Repository analyzeEPackages(EPackage ePackage, Collection<EPackage> packages) {
 		var seen = new HashSet<EPackage>();
 		var repository = analyzeMainEPackage(ePackage, seen);
 		for (var p : packages) {
