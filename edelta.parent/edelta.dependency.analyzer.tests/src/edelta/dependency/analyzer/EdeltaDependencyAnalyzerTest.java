@@ -203,7 +203,7 @@ public class EdeltaDependencyAnalyzerTest {
 	}
 
 	@Test
-	public void testSaveRepository() throws IOException {
+	public void testSaveRepositoryTwoDependencies() throws IOException {
 		var analyzer = new EdeltaDependencyAnalizer();
 		// package4 -> package2, package1 (package2 <-> package1)
 		var repository = analyzer.analyzeEPackage(
@@ -213,5 +213,20 @@ public class EdeltaDependencyAnalyzerTest {
 		EdeltaTestUtils.assertFilesAreEquals(
 			EXPECTATIONS + "/twodependencies/dependencies.graphmm",
 			OUTPUT + "/twodependencies/dependencies.graphmm");
+	}
+
+	@Test
+	public void testSaveRepositoryIndependentDependencies() throws IOException {
+		var analyzer = new EdeltaDependencyAnalizer();
+		// package4 -> package1, package2
+		// package3 -> package2 -> package1,
+		// (package2 <-> package1)
+		var repository = analyzer.analyzeEPackage(
+				TESTECORES + "/independentdependencies/", "testecoreforusages4");
+		analyzer.saveRepository(
+				repository, OUTPUT + "/independentdependencies", "dependencies.graphmm");
+		EdeltaTestUtils.assertFilesAreEquals(
+				EXPECTATIONS + "/independentdependencies/dependencies.graphmm",
+				OUTPUT + "/independentdependencies/dependencies.graphmm");
 	}
 }
