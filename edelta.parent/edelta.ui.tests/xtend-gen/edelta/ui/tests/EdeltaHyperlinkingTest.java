@@ -29,6 +29,10 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
   
   private XtextEditor xtextEditor;
   
+  /**
+   * Edelta requires a plug-in project to run the interpreter
+   * with edelta.lib as dependency
+   */
   @BeforeClass
   public static void importProject() {
     try {
@@ -61,6 +65,9 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
     return EdeltaHyperlinkingTest.TEST_PROJECT;
   }
   
+  /**
+   * Better to put Edelta file in a source folder
+   */
   @Override
   protected String getFileName() {
     String _fileName = super.getFileName();
@@ -75,31 +82,24 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
   
   /**
    * If we link to an XExpression its qualified name is null,
-   * and this leads to a NPE
+   * and this leads to a NPE.
+   * 
+   * Don't use resourceSetProvider, because Java types would not be resolved
+   * resourceSetProvider.get(project)
    */
   @Override
   protected String _target(final XtextHyperlink hyperlink) {
-    String _xblockexpression = null;
-    {
-      final IXtextDocument document = this.xtextDocumentUtil.getXtextDocument(this.xtextEditor.getInternalSourceViewer());
-      final IUnitOfWork<XtextResource, XtextResource> _function = (XtextResource it) -> {
-        return it;
-      };
-      final XtextResource resource = document.<XtextResource>readOnly(_function);
-      final ResourceSet resourceSet = resource.getResourceSet();
-      final EObject eObject = resourceSet.getEObject(hyperlink.getURI(), true);
-      String _switchResult = null;
-      boolean _matched = false;
-      if (eObject instanceof XAbstractFeatureCall) {
-        _matched=true;
-        _switchResult = ((XAbstractFeatureCall)eObject).getFeature().getSimpleName();
-      }
-      if (!_matched) {
-        _switchResult = this.qualifiedNameProvider.getFullyQualifiedName(eObject).toString();
-      }
-      _xblockexpression = _switchResult;
+    final IXtextDocument document = this.xtextDocumentUtil.getXtextDocument(this.xtextEditor.getInternalSourceViewer());
+    final IUnitOfWork<XtextResource, XtextResource> _function = (XtextResource it) -> {
+      return it;
+    };
+    final XtextResource resource = document.<XtextResource>readOnly(_function);
+    final ResourceSet resourceSet = resource.getResourceSet();
+    final EObject eObject = resourceSet.getEObject(hyperlink.getURI(), true);
+    if ((eObject instanceof XAbstractFeatureCall)) {
+      return ((XAbstractFeatureCall)eObject).getFeature().getSimpleName();
     }
-    return _xblockexpression;
+    return this.qualifiedNameProvider.getFullyQualifiedName(eObject).toString();
   }
   
   @Test
@@ -111,12 +111,8 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
     _builder.append("modifyEcore aTest epackage mypackage {");
     _builder.newLine();
     _builder.append("\t");
-    _builder.append("ecoreref(");
-    _builder.append(this.c, "\t");
-    _builder.append("MyClass");
-    _builder.append(this.c, "\t");
-    _builder.append(")");
-    _builder.newLineIfNotEmpty();
+    _builder.append("ecoreref(<|>MyClass<|>)");
+    _builder.newLine();
     _builder.append("}");
     _builder.newLine();
     this.hasHyperlinkTo(_builder, "mypackage.MyClass");
@@ -131,12 +127,8 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
     _builder.append("modifyEcore aTest epackage mypackage {");
     _builder.newLine();
     _builder.append("\t");
-    _builder.append("ecoreref(");
-    _builder.append(this.c, "\t");
-    _builder.append("mypackage");
-    _builder.append(this.c, "\t");
-    _builder.append(".MyClass)");
-    _builder.newLineIfNotEmpty();
+    _builder.append("ecoreref(<|>mypackage<|>.MyClass)");
+    _builder.newLine();
     _builder.append("}");
     _builder.newLine();
     this.hasHyperlinkTo(_builder, "mypackage");
@@ -148,12 +140,8 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
     _builder.append("metamodel \"mypackage\"");
     _builder.newLine();
     _builder.newLine();
-    _builder.append("modifyEcore aTest epackage ");
-    _builder.append(this.c);
-    _builder.append("mypackage");
-    _builder.append(this.c);
-    _builder.append(" {");
-    _builder.newLineIfNotEmpty();
+    _builder.append("modifyEcore aTest epackage <|>mypackage<|> {");
+    _builder.newLine();
     _builder.append("}");
     _builder.newLine();
     this.hasHyperlinkTo(_builder, "mypackage");
@@ -171,12 +159,8 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
     _builder.append("addNewEClass(\"NewClass\")");
     _builder.newLine();
     _builder.append("\t");
-    _builder.append("ecoreref(");
-    _builder.append(this.c, "\t");
-    _builder.append("NewClass");
-    _builder.append(this.c, "\t");
-    _builder.append(")");
-    _builder.newLineIfNotEmpty();
+    _builder.append("ecoreref(<|>NewClass<|>)");
+    _builder.newLine();
     _builder.append("}");
     _builder.newLine();
     this.hasHyperlinkTo(_builder, "addNewEClass");
@@ -194,12 +178,8 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
     _builder.append("ecoreref(MyClass).name = \"Renamed\"");
     _builder.newLine();
     _builder.append("\t");
-    _builder.append("ecoreref(");
-    _builder.append(this.c, "\t");
-    _builder.append("Renamed");
-    _builder.append(this.c, "\t");
-    _builder.append(")");
-    _builder.newLineIfNotEmpty();
+    _builder.append("ecoreref(<|>Renamed<|>)");
+    _builder.newLine();
     _builder.append("}");
     _builder.newLine();
     this.hasHyperlinkTo(_builder, "setName");
@@ -214,12 +194,8 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
     _builder.append("modifyEcore aTest epackage mypackage {");
     _builder.newLine();
     _builder.append("\t");
-    _builder.append("ecoreref(");
-    _builder.append(this.c, "\t");
-    _builder.append("NewClass");
-    _builder.append(this.c, "\t");
-    _builder.append(")");
-    _builder.newLineIfNotEmpty();
+    _builder.append("ecoreref(<|>NewClass<|>)");
+    _builder.newLine();
     _builder.append("\t");
     _builder.append("addNewEClass(\"NewClass\")");
     _builder.newLine();

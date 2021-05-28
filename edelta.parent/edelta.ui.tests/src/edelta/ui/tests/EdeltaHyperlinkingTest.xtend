@@ -21,12 +21,12 @@ class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 
 	XtextEditor xtextEditor
 
+	/**
+	 * Edelta requires a plug-in project to run the interpreter
+	 * with edelta.lib as dependency
+	 */
 	@BeforeClass
 	def static void importProject() {
-		/*
-		 * Edelta requires a plug-in project to run the interpreter
-		 * with edelta.lib as dependency
-		 */
 		ProjectImportUtil.importProject(TEST_PROJECT)
 		IResourcesSetupUtil.waitForBuild
 	}
@@ -51,10 +51,10 @@ class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 		TEST_PROJECT
 	}
 
+	/**
+	 * Better to put Edelta file in a source folder
+	 */
 	override protected getFileName() {
-		/*
-		 * Better to put Edelta file in a source folder
-		 */
 		"src/" + super.getFileName()
 	}
 
@@ -65,19 +65,20 @@ class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 
 	/**
 	 * If we link to an XExpression its qualified name is null,
-	 * and this leads to a NPE
+	 * and this leads to a NPE.
+	 * 
+	 * Don't use resourceSetProvider, because Java types would not be resolved 
+	 * resourceSetProvider.get(project)
 	 */
 	override protected _target(XtextHyperlink hyperlink) {
-		// don't use resourceSetProvider, because Java types would not be resolved
-		// resourceSetProvider.get(project)
 		val document = xtextDocumentUtil.getXtextDocument(xtextEditor.internalSourceViewer)
 		val resource = document.readOnly[it]
 		val resourceSet = resource.resourceSet
 		val eObject = resourceSet.getEObject(hyperlink.URI, true)
-		switch (eObject) {
-			XAbstractFeatureCall: eObject.feature.simpleName
-			default: qualifiedNameProvider.getFullyQualifiedName(eObject).toString
-		}
+		if (eObject instanceof XAbstractFeatureCall) {
+			return eObject.feature.simpleName
+		} 
+		return qualifiedNameProvider.getFullyQualifiedName(eObject).toString
 	}
 
 	@Test def hyperlinkOnExistingEClass() {
@@ -85,7 +86,7 @@ class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 			metamodel "mypackage"
 			
 			modifyEcore aTest epackage mypackage {
-				ecoreref(«c»MyClass«c»)
+				ecoreref(<|>MyClass<|>)
 			}
 		'''.hasHyperlinkTo("mypackage.MyClass")
 	}
@@ -95,7 +96,7 @@ class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 			metamodel "mypackage"
 			
 			modifyEcore aTest epackage mypackage {
-				ecoreref(«c»mypackage«c».MyClass)
+				ecoreref(<|>mypackage<|>.MyClass)
 			}
 		'''.hasHyperlinkTo("mypackage")
 	}
@@ -104,7 +105,7 @@ class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 		'''
 			metamodel "mypackage"
 			
-			modifyEcore aTest epackage «c»mypackage«c» {
+			modifyEcore aTest epackage <|>mypackage<|> {
 			}
 		'''.hasHyperlinkTo("mypackage")
 	}
@@ -115,7 +116,7 @@ class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 			
 			modifyEcore aTest epackage mypackage {
 				addNewEClass("NewClass")
-				ecoreref(«c»NewClass«c»)
+				ecoreref(<|>NewClass<|>)
 			}
 		'''.hasHyperlinkTo("addNewEClass")
 	}
@@ -126,7 +127,7 @@ class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 			
 			modifyEcore aTest epackage mypackage {
 				ecoreref(MyClass).name = "Renamed"
-				ecoreref(«c»Renamed«c»)
+				ecoreref(<|>Renamed<|>)
 			}
 		'''.hasHyperlinkTo("setName")
 	}
@@ -136,7 +137,7 @@ class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 			metamodel "mypackage"
 			
 			modifyEcore aTest epackage mypackage {
-				ecoreref(«c»NewClass«c»)
+				ecoreref(<|>NewClass<|>)
 				addNewEClass("NewClass")
 			}
 		'''.hasHyperlinkTo("addNewEClass")
