@@ -29,6 +29,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
+import org.eclipse.core.runtime.CoreException
 
 /**
  * The tests rely on the ecore files in:
@@ -47,7 +48,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	public Flaky.Rule testRule = new Flaky.Rule();
 
 	@BeforeClass
-	def static void setUp() {
+	def static void setUp() throws CoreException {
 		EdeltaWorkbenchUtils.closeWelcomePage
 		pluginJavaProject = ProjectImportUtil.importJavaProject(PROJECT_NAME)
 		waitForBuild
@@ -94,12 +95,12 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		return editor.document.readOnly[it]
 	}
 
-	def protected XtextEditor openEditor(IFile file) {
+	def protected XtextEditor openEditor(IFile file) throws Exception {
 		val openEditor = openEditor(file, EdeltaActivator.EDELTA_EDELTA);
 		return EditorUtils.getXtextEditor(openEditor);
 	}
 
-	def private IEditorPart openEditor(IFile file, String editorId) {
+	def private IEditorPart openEditor(IFile file, String editorId) throws Exception {
 		return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
 				new FileEditorInput(file), editorId);
 	}
@@ -108,11 +109,11 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().closeAllEditors(false);
 	}
 
-	@Test def void testMetamodelsEcore() {
+	@Test def void testMetamodelsEcore() throws Exception {
 		newBuilder.append("metamodel ").assertProposal('"ecore"')
 	}
 
-	@Test def void testMetamodelsLocalToProject() {
+	@Test def void testMetamodelsLocalToProject() throws Exception {
 		newBuilder.append("metamodel ").assertProposal('"mypackage"')
 	}
 
@@ -121,7 +122,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	 * must not be proposed, since they are subpackages,
 	 * which cannot be directly imported
 	 */
-	@Test def void testMetamodelsInThePresenceOfSubpackages() {
+	@Test def void testMetamodelsInThePresenceOfSubpackages() throws Exception {
 		newBuilder.append('metamodel ')
 			.assertText(
 				'''
@@ -136,11 +137,11 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 
-	@Test def void testNoNSURIProposalMetamodels() {
+	@Test def void testNoNSURIProposalMetamodels() throws Exception {
 		newBuilder.append("metamodel <|>").assertNoProposalAtCursor('"http://my.package.org"')
 	}
 
-	@Test def void testUnqualifiedEcoreReference() {
+	@Test def void testUnqualifiedEcoreReference() throws Exception {
 		newBuilder.append('''
 			metamodel "mypackage"
 			modifyEcore aTest epackage mypackage { 
@@ -160,7 +161,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 				'''.fromLinesOfStringsToStringArray)
 	}
 
-	@Test def void testUnqualifiedEcoreReferenceInOperation() {
+	@Test def void testUnqualifiedEcoreReferenceInOperation() throws Exception {
 		newBuilder.append('''
 			metamodel "mypackage"
 			def anOp() {
@@ -181,7 +182,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testUnqualifiedEcoreReferenceWithPrefix() {
+	def void testUnqualifiedEcoreReferenceWithPrefix() throws Exception {
 		newBuilder.append('''
 			metamodel "mypackage"
 			modifyEcore aTest epackage mypackage { 
@@ -195,7 +196,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testUnqualifiedEcoreReferenceWithPrefixInOperation() {
+	def void testUnqualifiedEcoreReferenceWithPrefixInOperation() throws Exception {
 		newBuilder.append('''
 			metamodel "mypackage"
 			def anOp() {
@@ -209,7 +210,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testQualifiedEcoreReference() {
+	def void testQualifiedEcoreReference() throws Exception {
 		newBuilder.append('''
 			metamodel "mypackage"
 			modifyEcore aTest epackage mypackage {
@@ -218,7 +219,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testQualifiedEcoreReferenceInOperation() {
+	def void testQualifiedEcoreReferenceInOperation() throws Exception {
 		newBuilder.append('''
 			metamodel "mypackage"
 			def anOp() {
@@ -227,7 +228,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testEClassifierAfterCreatingAnEClass() {
+	def void testEClassifierAfterCreatingAnEClass() throws Exception {
 		newBuilder.append('''
 			metamodel "mypackage"
 			
@@ -238,7 +239,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testEClassifierAfterRenamingAnEClass() {
+	def void testEClassifierAfterRenamingAnEClass() throws Exception {
 		newBuilder.append('''
 			metamodel "mypackage"
 			
@@ -249,7 +250,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testCreatedEAttributeDuringInterpretationIsProposed() {
+	def void testCreatedEAttributeDuringInterpretationIsProposed() throws Exception {
 		println("*** Executing testCreatedEAttributeDuringInterpretationIsProposed...")
 		newBuilder.append('''
 			import org.eclipse.emf.ecore.EClass
@@ -270,7 +271,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testUnqualifiedEcoreReferenceBeforeRemovalOfEClass() {
+	def void testUnqualifiedEcoreReferenceBeforeRemovalOfEClass() throws Exception {
 		'''
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
@@ -296,7 +297,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testQualifiedEcoreReferenceBeforeRemovalOfEClass() {
+	def void testQualifiedEcoreReferenceBeforeRemovalOfEClass() throws Exception {
 		'''
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
@@ -308,7 +309,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testQualifiedEcoreReferenceBeforeRemovalOfEStructuralFeature() {
+	def void testQualifiedEcoreReferenceBeforeRemovalOfEStructuralFeature() throws Exception {
 		'''
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
@@ -320,7 +321,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testQualifiedEcoreReferenceBeforeAdditionOfEStructuralFeature() {
+	def void testQualifiedEcoreReferenceBeforeAdditionOfEStructuralFeature() throws Exception {
 		'''
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
@@ -332,7 +333,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testUnqualifiedEcoreReferenceAfterRemoval() {
+	def void testUnqualifiedEcoreReferenceAfterRemoval() throws Exception {
 		newBuilder.append('''
 			metamodel "mypackage"
 			modifyEcore aTest epackage mypackage { 
@@ -353,7 +354,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testQualifiedEcoreReferenceAfterRemovalOfEStructuralFeature() {
+	def void testQualifiedEcoreReferenceAfterRemovalOfEStructuralFeature() throws Exception {
 		newBuilder.append('''
 			metamodel "mypackage"
 			modifyEcore aTest epackage mypackage { 
@@ -366,7 +367,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testQualifiedEcoreReferenceAfterAdditionOfEStructuralFeature() {
+	def void testQualifiedEcoreReferenceAfterAdditionOfEStructuralFeature() throws Exception {
 		'''
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
@@ -378,7 +379,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testUnqualifiedEcoreReferenceBeforeRename() {
+	def void testUnqualifiedEcoreReferenceBeforeRename() throws Exception {
 		'''
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
@@ -404,7 +405,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testUnqualifiedEcoreReferenceAfterRename() {
+	def void testUnqualifiedEcoreReferenceAfterRename() throws Exception {
 		newBuilder.append('''
 			metamodel "mypackage"
 			modifyEcore aTest epackage mypackage { 
@@ -429,7 +430,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testForAmbiguousReferencesFullyQualifiedNameIsProposed() {
+	def void testForAmbiguousReferencesFullyQualifiedNameIsProposed() throws Exception {
 		newBuilder.append('''
 			metamodel "mainpackage"
 			
@@ -451,7 +452,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testForAmbiguousReferencesFullyQualifiedNameIsReplaced() {
+	def void testForAmbiguousReferencesFullyQualifiedNameIsReplaced() throws Exception {
 		newBuilder.append('''
 			metamodel "mainpackage"
 			
@@ -466,7 +467,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testForAmbiguousReferencesFullyQualifiedNameIsProposedInOperation() {
+	def void testForAmbiguousReferencesFullyQualifiedNameIsProposedInOperation() throws Exception {
 		newBuilder.append('''
 			metamodel "mainpackage"
 			
@@ -488,7 +489,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	@Test @Flaky
-	def void testForAmbiguousReferencesFullyQualifiedNameIsReplacedInOperation() {
+	def void testForAmbiguousReferencesFullyQualifiedNameIsReplacedInOperation() throws Exception {
 		newBuilder.append('''
 			metamodel "mainpackage"
 			
@@ -506,7 +507,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		strings.toString.replace("\r", "").split("\n")
 	}
 
-	private def void testContentAssistant(CharSequence text, List<String> expectedProposals) {
+	private def void testContentAssistant(CharSequence text, List<String> expectedProposals) throws Exception {
 		val cursorPosition = text.toString.indexOf("<|>")
 		val content = text.toString.replace("<|>", "")
 
