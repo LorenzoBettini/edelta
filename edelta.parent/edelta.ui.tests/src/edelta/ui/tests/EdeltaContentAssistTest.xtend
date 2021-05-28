@@ -1,6 +1,7 @@
 package edelta.ui.tests
 
 import edelta.ui.internal.EdeltaActivator
+import edelta.ui.tests.utils.EdeltaWorkbenchUtils
 import edelta.ui.tests.utils.ProjectImportUtil
 import java.io.BufferedReader
 import java.io.InputStream
@@ -28,7 +29,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
-import edelta.ui.tests.utils.EdeltaWorkbenchUtils
 
 /**
  * The tests rely on the ecore files in:
@@ -46,9 +46,6 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	@Rule
 	public Flaky.Rule testRule = new Flaky.Rule();
 
-	// cursor position marker
-	val cursor = '''<|>'''
-
 	@BeforeClass
 	def static void setUp() {
 		EdeltaWorkbenchUtils.closeWelcomePage
@@ -56,16 +53,20 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		waitForBuild
 	}
 
+	/**
+	 * just to make sure the project is not deleted
+	 */
 	@AfterClass
 	def static void tearDown() {
-		// just to make sure the project is not deleted
 	}
 
+	/**
+	 * we need to close existing editors since we use the
+	 * resource of the open editor to test the content assist
+	 * so we must make sure we always use a freshly opened editor
+	 */
 	@After
 	def void after() {
-		// we need to close existing editors since we use the
-		// resource of the open editor to test the content assist
-		// so we must make sure we always use a freshly opened editor
 		closeEditors
 	}
 
@@ -75,12 +76,13 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	/**
 	 * We need a real resource otherwise the Ecores are not found
-	 * (they are collected using visible containers)
+	 * (they are collected using visible containers).
+	 * 
+	 * IMPORTANT: use Strings.newLine to avoid problems with missing \r in Windows
 	 */
 	override getResourceFor(InputStream inputStream) {
 		val result = new BufferedReader(new InputStreamReader(inputStream)).
 			lines().collect(Collectors.joining(Strings.newLine()));
-		// IMPORTANT: use Strings.newLine to avoid problems with missing \r in Windows
 		val createdFile = createFile(
 			PROJECT_NAME+"/src/Test.edelta",
 			result
@@ -114,10 +116,12 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		newBuilder.append("metamodel ").assertProposal('"mypackage"')
 	}
 
+	/**
+	 * mainpackage.subpackage and mainpackage.subpackage.subsubpackage
+	 * must not be proposed, since they are subpackages,
+	 * which cannot be directly imported
+	 */
 	@Test def void testMetamodelsInThePresenceOfSubpackages() {
-		// mainpackage.subpackage and mainpackage.subpackage.subsubpackage
-		// must not be proposed, since they are subpackages,
-		// which cannot be directly imported
 		newBuilder.append('metamodel ')
 			.assertText(
 				'''
@@ -270,7 +274,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		'''
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
-			ecoreref(«cursor»);
+			ecoreref(<|>);
 			EClassifiers -= ecoreref(MyClass)
 		}'''.
 			testContentAssistant(
@@ -296,10 +300,10 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		'''
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
-			ecoreref(MyClass.«cursor»);
+			ecoreref(MyClass.<|>);
 			EClassifiers -= ecoreref(MyClass)
 		}'''.
-			testContentAssistant(#['myAttribute', 'myReference'])
+			testContentAssistant(List.of('myAttribute', 'myReference'))
 		// MyClass is still present in that context so its features are proposed
 	}
 
@@ -308,10 +312,10 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		'''
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
-			ecoreref(MyClass.«cursor»);
+			ecoreref(MyClass.<|>);
 			ecoreref(MyClass).EStructuralFeatures -= ecoreref(myReference)
 		}'''.
-			testContentAssistant(#['myAttribute', 'myReference'])
+			testContentAssistant(List.of('myAttribute', 'myReference'))
 		// myReference is still present in that context so it is proposed
 	}
 
@@ -320,10 +324,10 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		'''
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
-			ecoreref(MyClass.«cursor»);
+			ecoreref(MyClass.<|>);
 			ecoreref(MyClass).addNewEAttribute("myNewAttribute", null)
 		}'''.
-			testContentAssistant(#['myAttribute', 'myReference'])
+			testContentAssistant(List.of('myAttribute', 'myReference'))
 		// myNewAttribute is not yet present in that context so it is not proposed
 	}
 
@@ -367,9 +371,9 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
 			ecoreref(MyClass).addNewEAttribute("myNewAttribute", null)
-			ecoreref(MyClass.«cursor»);
+			ecoreref(MyClass.<|>);
 		}'''.
-			testContentAssistant(#['myAttribute', 'myReference', "myNewAttribute"])
+			testContentAssistant(List.of('myAttribute', 'myReference', "myNewAttribute"))
 		// myNewAttribute is now present in that context so it is proposed
 	}
 
@@ -378,7 +382,7 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 		'''
 		metamodel "mypackage"
 		modifyEcore aTest epackage mypackage {
-			ecoreref(«cursor»)
+			ecoreref(<|>)
 			ecoreref(MyBaseClass).name = "Renamed"
 		}'''.
 			testContentAssistant(
@@ -503,8 +507,8 @@ class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	private def void testContentAssistant(CharSequence text, List<String> expectedProposals) {
-		val cursorPosition = text.toString.indexOf(cursor)
-		val content = text.toString.replace(cursor, "")
+		val cursorPosition = text.toString.indexOf("<|>")
+		val content = text.toString.replace("<|>", "")
 
 		newBuilder.append(content).
 		assertTextAtCursorPosition(cursorPosition, expectedProposals)
