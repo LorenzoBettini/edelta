@@ -124,6 +124,7 @@
       </activation>
       <modules>
         <module>edelta.dependency.analyzer.model</module>
+        <module>edelta.dependency.analyzer.model.edit</module>
         <module>edelta.dependency.analyzer</module>
         <module>edelta.dependency.analyzer.tests</module>
         <module>edelta.testutils</module>
