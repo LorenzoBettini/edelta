@@ -21,7 +21,6 @@ import org.eclipse.xtext.ui.editor.XtextEditor;
 import org.eclipse.xtext.ui.editor.utils.EditorUtils;
 import org.eclipse.xtext.ui.testing.AbstractContentAssistTest;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
-import org.eclipse.xtext.util.Strings;
 import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.junit.After;
@@ -88,14 +87,15 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	 * We need a real resource otherwise the Ecores are not found (they are
 	 * collected using visible containers).
 	 * 
-	 * IMPORTANT: use Strings.newLine to avoid problems with missing \r in Windows
+	 * IMPORTANT: use "\n" and NOT Strings.newLine because Java text blocks
+	 * do not contain "\r" (not even in Windows)
 	 */
 	@Override
 	public XtextResource getResourceFor(InputStream inputStream) {
 		try {
 			var result = new BufferedReader
 				(new InputStreamReader(inputStream)).lines()
-					.collect(Collectors.joining(Strings.newLine()));
+					.collect(Collectors.joining("\n"));
 			var createdFile = IResourcesSetupUtil
 				.createFile((PROJECT_NAME + "/src/Test.edelta"), result);
 			IResourcesSetupUtil.waitForBuild();
