@@ -55,8 +55,8 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 	}
 
 	@Test
-	def void testOutlineWithNoContents() {
-		''''''.assertAllLabels(
+	def void testOutlineWithNoContents() throws Exception {
+		"".assertAllLabels(
 		'''
 		test
 		'''
@@ -64,7 +64,7 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 	}
 
 	@Test
-	def void testOutlineWithOperation() {
+	def void testOutlineWithOperation() throws Exception {
 		'''
 		def createClass(String name) {
 			newEClass(name)
@@ -78,11 +78,8 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 	}
 
 	@Test @Flaky
-	def void testOutlineWithCreateEClassInModifyEcore() {
-		println("*** Executing testOutlineWithCreateEClassInModifyEcore...")
-		// wait for build so that ecores are indexed
-		// and then found by the test programs
-		waitForBuild
+	def void testOutlineWithCreateEClassInModifyEcore() throws Exception {
+		System.out.println("*** Executing testOutlineWithCreateEClassInModifyEcore...")
 
 		'''
 		import org.eclipse.emf.ecore.EClass
@@ -106,7 +103,17 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 		  myNewAttribute(EClass, String) : boolean
 		  aModification(EPackage) : void
 		  mypackage
-		    «allOtherContents»
+		    MyClass
+		      myAttribute : EString
+		      myReference : EObject
+		    MyDataType [java.lang.String]
+		    MyBaseClass
+		      myBaseAttribute : EString
+		      myBaseReference : EObject
+		    MyDerivedClass -> MyBaseClass
+		      myDerivedAttribute : EString
+		      myDerivedReference : EObject
+		      MyBaseClass
 		    A
 		      foo : MyDataType
 		'''
@@ -114,8 +121,8 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 	}
 
 	@Test @Flaky
-	def void testOutlineWithCreateEClassInModifyEcoreAndInterpretedNewAttributeWithUseAs() {
-		println("*** Executing testOutlineWithCreateEClassInModifyEcoreAndInterpretedNewAttributeWithUseAs...")
+	def void testOutlineWithCreateEClassInModifyEcoreAndInterpretedNewAttributeWithUseAs() throws Exception {
+		System.out.println("*** Executing testOutlineWithCreateEClassInModifyEcoreAndInterpretedNewAttributeWithUseAs...")
 		createFile(
 			TEST_PROJECT + "/src/Refactorings.edelta",
 			'''
@@ -153,7 +160,17 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 		com.example
 		  aModification(EPackage) : void
 		  mypackage
-		    «allOtherContents»
+		    MyClass
+		      myAttribute : EString
+		      myReference : EObject
+		    MyDataType [java.lang.String]
+		    MyBaseClass
+		      myBaseAttribute : EString
+		      myBaseReference : EObject
+		    MyDerivedClass -> MyBaseClass
+		      myDerivedAttribute : EString
+		      myDerivedReference : EObject
+		      MyBaseClass
 		    A
 		      foo : MyDataType
 		'''
@@ -161,11 +178,8 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 	}
 
 	@Test @Flaky
-	def void testOutlineWithRemovedElementsInModifyEcore() {
-		println("*** Executing testOutlineWithRemovedElementsInModifyEcore...")
-		// wait for build so that ecores are indexed
-		// and then found by the test programs
-		waitForBuild
+	def void testOutlineWithRemovedElementsInModifyEcore() throws Exception {
+		System.out.println("*** Executing testOutlineWithRemovedElementsInModifyEcore...")
 
 		'''
 		import org.eclipse.emf.ecore.EClass
@@ -191,11 +205,8 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 	}
 
 	@Test @Flaky
-	def void testOutlineWhenNoElementIsModifiedThenTheEPackageIsNotShown() {
-		println("*** Executing testOutlineWhenNoElementIsModified...")
-		// wait for build so that ecores are indexed
-		// and then found by the test programs
-		waitForBuild
+	def void testOutlineWhenNoElementIsModifiedThenTheEPackageIsNotShown() throws Exception {
+		System.out.println("*** Executing testOutlineWhenNoElementIsModified...")
 
 		'''
 		metamodel "mypackage"
@@ -211,19 +222,4 @@ class EdeltaOutlineTest extends AbstractOutlineTest {
 		)
 	}
 
-
-	def private allOtherContents()
-	'''
-	    MyClass
-	      myAttribute : EString
-	      myReference : EObject
-	    MyDataType [java.lang.String]
-	    MyBaseClass
-	      myBaseAttribute : EString
-	      myBaseReference : EObject
-	    MyDerivedClass -> MyBaseClass
-	      myDerivedAttribute : EString
-	      myDerivedReference : EObject
-	      MyBaseClass
-	'''
 }
