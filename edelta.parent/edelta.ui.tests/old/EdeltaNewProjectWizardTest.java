@@ -24,6 +24,8 @@ import edelta.ui.tests.utils.EdeltaTestableNewProjectWizard;
 import edelta.ui.tests.utils.PluginProjectHelper;
 
 /**
+ * THIS IS TESTED BY SWTBOT TESTS
+ * 
  * This test requires an empty workspace
  * 
  * @author Lorenzo Bettini
