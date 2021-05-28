@@ -27,11 +27,13 @@ public interface Graph extends EObject {
 	/**
 	 * Returns the value of the '<em><b>Nodes</b></em>' containment reference list.
 	 * The list contents are of type {@link GraphMM.Node}.
+	 * It is bidirectional and its opposite is '{@link GraphMM.Node#getGraph <em>Graph</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Nodes</em>' containment reference list.
 	 * @see GraphMM.GraphMMPackage#getGraph_Nodes()
-	 * @model containment="true"
+	 * @see GraphMM.Node#getGraph
+	 * @model opposite="graph" containment="true"
 	 * @generated
 	 */
 	EList<Node> getNodes();

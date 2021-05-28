@@ -2,15 +2,19 @@
  */
 package GraphMM.impl;
 
+import GraphMM.Graph;
 import GraphMM.GraphMMPackage;
 import GraphMM.Node;
 
 import org.eclipse.emf.common.notify.Notification;
 
+import org.eclipse.emf.common.notify.NotificationChain;
 import org.eclipse.emf.ecore.EClass;
 
+import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 
 /**
  * <!-- begin-user-doc -->
@@ -23,6 +27,8 @@ import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
  *   <li>{@link GraphMM.impl.NodeImpl#getPath <em>Path</em>}</li>
  *   <li>{@link GraphMM.impl.NodeImpl#getName <em>Name</em>}</li>
  *   <li>{@link GraphMM.impl.NodeImpl#isHighlighted <em>Highlighted</em>}</li>
+ *   <li>{@link GraphMM.impl.NodeImpl#getGraph <em>Graph</em>}</li>
+ *   <li>{@link GraphMM.impl.NodeImpl#isVirtual <em>Virtual</em>}</li>
  * </ul>
  *
  * @generated
@@ -87,6 +93,26 @@ public abstract class NodeImpl extends MinimalEObjectImpl.Container implements N
 	 * @ordered
 	 */
 	protected boolean highlighted = HIGHLIGHTED_EDEFAULT;
+
+	/**
+	 * The default value of the '{@link #isVirtual() <em>Virtual</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #isVirtual()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final boolean VIRTUAL_EDEFAULT = false;
+
+	/**
+	 * The cached value of the '{@link #isVirtual() <em>Virtual</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #isVirtual()
+	 * @generated
+	 * @ordered
+	 */
+	protected boolean virtual = VIRTUAL_EDEFAULT;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -175,6 +201,112 @@ public abstract class NodeImpl extends MinimalEObjectImpl.Container implements N
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public Graph getGraph() {
+		if (eContainerFeatureID() != GraphMMPackage.NODE__GRAPH) return null;
+		return (Graph)eInternalContainer();
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public NotificationChain basicSetGraph(Graph newGraph, NotificationChain msgs) {
+		msgs = eBasicSetContainer((InternalEObject)newGraph, GraphMMPackage.NODE__GRAPH, msgs);
+		return msgs;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public void setGraph(Graph newGraph) {
+		if (newGraph != eInternalContainer() || (eContainerFeatureID() != GraphMMPackage.NODE__GRAPH && newGraph != null)) {
+			if (EcoreUtil.isAncestor(this, newGraph))
+				throw new IllegalArgumentException("Recursive containment not allowed for " + toString());
+			NotificationChain msgs = null;
+			if (eInternalContainer() != null)
+				msgs = eBasicRemoveFromContainer(msgs);
+			if (newGraph != null)
+				msgs = ((InternalEObject)newGraph).eInverseAdd(this, GraphMMPackage.GRAPH__NODES, Graph.class, msgs);
+			msgs = basicSetGraph(newGraph, msgs);
+			if (msgs != null) msgs.dispatch();
+		}
+		else if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, GraphMMPackage.NODE__GRAPH, newGraph, newGraph));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public boolean isVirtual() {
+		return virtual;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public void setVirtual(boolean newVirtual) {
+		boolean oldVirtual = virtual;
+		virtual = newVirtual;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, GraphMMPackage.NODE__VIRTUAL, oldVirtual, virtual));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public NotificationChain eInverseAdd(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
+		switch (featureID) {
+			case GraphMMPackage.NODE__GRAPH:
+				if (eInternalContainer() != null)
+					msgs = eBasicRemoveFromContainer(msgs);
+				return basicSetGraph((Graph)otherEnd, msgs);
+		}
+		return super.eInverseAdd(otherEnd, featureID, msgs);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
+		switch (featureID) {
+			case GraphMMPackage.NODE__GRAPH:
+				return basicSetGraph(null, msgs);
+		}
+		return super.eInverseRemove(otherEnd, featureID, msgs);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public NotificationChain eBasicRemoveFromContainerFeature(NotificationChain msgs) {
+		switch (eContainerFeatureID()) {
+			case GraphMMPackage.NODE__GRAPH:
+				return eInternalContainer().eInverseRemove(this, GraphMMPackage.GRAPH__NODES, Graph.class, msgs);
+		}
+		return super.eBasicRemoveFromContainerFeature(msgs);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
@@ -184,6 +316,10 @@ public abstract class NodeImpl extends MinimalEObjectImpl.Container implements N
 				return getName();
 			case GraphMMPackage.NODE__HIGHLIGHTED:
 				return isHighlighted();
+			case GraphMMPackage.NODE__GRAPH:
+				return getGraph();
+			case GraphMMPackage.NODE__VIRTUAL:
+				return isVirtual();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -204,6 +340,12 @@ public abstract class NodeImpl extends MinimalEObjectImpl.Container implements N
 				return;
 			case GraphMMPackage.NODE__HIGHLIGHTED:
 				setHighlighted((Boolean)newValue);
+				return;
+			case GraphMMPackage.NODE__GRAPH:
+				setGraph((Graph)newValue);
+				return;
+			case GraphMMPackage.NODE__VIRTUAL:
+				setVirtual((Boolean)newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -226,6 +368,12 @@ public abstract class NodeImpl extends MinimalEObjectImpl.Container implements N
 			case GraphMMPackage.NODE__HIGHLIGHTED:
 				setHighlighted(HIGHLIGHTED_EDEFAULT);
 				return;
+			case GraphMMPackage.NODE__GRAPH:
+				setGraph((Graph)null);
+				return;
+			case GraphMMPackage.NODE__VIRTUAL:
+				setVirtual(VIRTUAL_EDEFAULT);
+				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -244,6 +392,10 @@ public abstract class NodeImpl extends MinimalEObjectImpl.Container implements N
 				return NAME_EDEFAULT == null ? name != null : !NAME_EDEFAULT.equals(name);
 			case GraphMMPackage.NODE__HIGHLIGHTED:
 				return highlighted != HIGHLIGHTED_EDEFAULT;
+			case GraphMMPackage.NODE__GRAPH:
+				return getGraph() != null;
+			case GraphMMPackage.NODE__VIRTUAL:
+				return virtual != VIRTUAL_EDEFAULT;
 		}
 		return super.eIsSet(featureID);
 	}
@@ -264,6 +416,8 @@ public abstract class NodeImpl extends MinimalEObjectImpl.Container implements N
 		result.append(name);
 		result.append(", highlighted: ");
 		result.append(highlighted);
+		result.append(", virtual: ");
+		result.append(virtual);
 		result.append(')');
 		return result.toString();
 	}

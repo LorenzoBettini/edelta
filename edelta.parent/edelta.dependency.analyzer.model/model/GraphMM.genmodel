@@ -11,6 +11,8 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute GraphMM.ecore#//Node/path"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute GraphMM.ecore#//Node/name"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute GraphMM.ecore#//Node/highlighted"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference GraphMM.ecore#//Node/graph"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute GraphMM.ecore#//Node/virtual"/>
     </genClasses>
     <genClasses image="false" ecoreClass="GraphMM.ecore#//Edge"/>
     <genClasses ecoreClass="GraphMM.ecore#//Model"/>

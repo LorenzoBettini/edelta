@@ -186,13 +186,31 @@ public interface GraphMMPackage extends EPackage {
 	int NODE__HIGHLIGHTED = 2;
 
 	/**
+	 * The feature id for the '<em><b>Graph</b></em>' container reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int NODE__GRAPH = 3;
+
+	/**
+	 * The feature id for the '<em><b>Virtual</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int NODE__VIRTUAL = 4;
+
+	/**
 	 * The number of structural features of the '<em>Node</em>' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int NODE_FEATURE_COUNT = 3;
+	int NODE_FEATURE_COUNT = 5;
 
 	/**
 	 * The number of operations of the '<em>Node</em>' class.
@@ -267,6 +285,24 @@ public interface GraphMMPackage extends EPackage {
 	 * @ordered
 	 */
 	int MODEL__HIGHLIGHTED = NODE__HIGHLIGHTED;
+
+	/**
+	 * The feature id for the '<em><b>Graph</b></em>' container reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODEL__GRAPH = NODE__GRAPH;
+
+	/**
+	 * The feature id for the '<em><b>Virtual</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODEL__VIRTUAL = NODE__VIRTUAL;
 
 	/**
 	 * The number of structural features of the '<em>Model</em>' class.
@@ -377,6 +413,24 @@ public interface GraphMMPackage extends EPackage {
 	 * @ordered
 	 */
 	int METAMODEL__HIGHLIGHTED = NODE__HIGHLIGHTED;
+
+	/**
+	 * The feature id for the '<em><b>Graph</b></em>' container reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int METAMODEL__GRAPH = NODE__GRAPH;
+
+	/**
+	 * The feature id for the '<em><b>Virtual</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int METAMODEL__VIRTUAL = NODE__VIRTUAL;
 
 	/**
 	 * The feature id for the '<em><b>Ns URI</b></em>' attribute.
@@ -504,6 +558,28 @@ public interface GraphMMPackage extends EPackage {
 	 * @generated
 	 */
 	EAttribute getNode_Highlighted();
+
+	/**
+	 * Returns the meta object for the container reference '{@link GraphMM.Node#getGraph <em>Graph</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the container reference '<em>Graph</em>'.
+	 * @see GraphMM.Node#getGraph()
+	 * @see #getNode()
+	 * @generated
+	 */
+	EReference getNode_Graph();
+
+	/**
+	 * Returns the meta object for the attribute '{@link GraphMM.Node#isVirtual <em>Virtual</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Virtual</em>'.
+	 * @see GraphMM.Node#isVirtual()
+	 * @see #getNode()
+	 * @generated
+	 */
+	EAttribute getNode_Virtual();
 
 	/**
 	 * Returns the meta object for class '{@link GraphMM.Edge <em>Edge</em>}'.
@@ -719,6 +795,22 @@ public interface GraphMMPackage extends EPackage {
 		 * @generated
 		 */
 		EAttribute NODE__HIGHLIGHTED = eINSTANCE.getNode_Highlighted();
+
+		/**
+		 * The meta object literal for the '<em><b>Graph</b></em>' container reference feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EReference NODE__GRAPH = eINSTANCE.getNode_Graph();
+
+		/**
+		 * The meta object literal for the '<em><b>Virtual</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute NODE__VIRTUAL = eINSTANCE.getNode_Virtual();
 
 		/**
 		 * The meta object literal for the '{@link GraphMM.impl.EdgeImpl <em>Edge</em>}' class.
