@@ -7,6 +7,8 @@ import org.eclipse.xtext.ui.wizard.IExtendedProjectInfo;
 import org.eclipse.xtext.ui.wizard.template.TemplateNewProjectWizard;
 
 /**
+ * THIS IS TESTED BY SWTBOT TESTS
+ * 
  * Manually set the project name (usually set in the dialog text edit)
  * 
  * @author Lorenzo Bettini
