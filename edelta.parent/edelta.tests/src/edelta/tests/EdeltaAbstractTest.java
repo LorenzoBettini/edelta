@@ -494,6 +494,14 @@ public abstract class EdeltaAbstractTest {
 		return (EdeltaEcoreReferenceExpression) getBlockLastExpression(lastModifyEcoreOperation(p).getBody());
 	}
 
+	protected EdeltaEcoreReferenceExpression getFirstOfAllEcoreReferenceExpressions(EdeltaProgram p) {
+		return head(getAllEcoreReferenceExpressions(p));
+	}
+
+	protected EdeltaEcoreReferenceExpression getLastOfAllEcoreReferenceExpressions(EdeltaProgram p) {
+		return last(getAllEcoreReferenceExpressions(p));
+	}
+
 	protected List<EdeltaEcoreReferenceExpression> getAllEcoreReferenceExpressions(EdeltaProgram p) {
 		return getAllContentsOfType(p, EdeltaEcoreReferenceExpression.class);
 	}
