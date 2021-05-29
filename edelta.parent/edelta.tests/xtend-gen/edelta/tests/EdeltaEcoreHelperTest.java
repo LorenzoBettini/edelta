@@ -132,29 +132,25 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
   
   @Test
   public void testProgramWithCreatedEClassENamedElements() throws Exception {
-    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this.inputs.referenceToCreatedEClass());
-    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      Iterable<ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(it);
-      StringConcatenation _builder = new StringConcatenation();
-      _builder.append("foo");
-      _builder.newLine();
-      _builder.append("FooClass");
-      _builder.newLine();
-      _builder.append("myAttribute");
-      _builder.newLine();
-      _builder.append("myReference");
-      _builder.newLine();
-      _builder.append("FooDataType");
-      _builder.newLine();
-      _builder.append("FooEnum");
-      _builder.newLine();
-      _builder.append("FooEnumLiteral");
-      _builder.newLine();
-      _builder.append("NewClass");
-      _builder.newLine();
-      this.assertNamedElements(_programENamedElements, _builder);
-    };
-    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+    Iterable<ENamedElement> _programENamedElements = this._edeltaEcoreHelper.getProgramENamedElements(this.parseWithTestEcore(this.inputs.referenceToCreatedEClass()));
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("foo");
+    _builder.newLine();
+    _builder.append("FooClass");
+    _builder.newLine();
+    _builder.append("myAttribute");
+    _builder.newLine();
+    _builder.append("myReference");
+    _builder.newLine();
+    _builder.append("FooDataType");
+    _builder.newLine();
+    _builder.append("FooEnum");
+    _builder.newLine();
+    _builder.append("FooEnumLiteral");
+    _builder.newLine();
+    _builder.append("NewClass");
+    _builder.newLine();
+    this.assertNamedElements(_programENamedElements, _builder);
   }
   
   @Test
@@ -162,87 +158,71 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("metamodel \"nonexisting\"");
     _builder.newLine();
-    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
-    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      EdeltaAccessibleElements _createSnapshotOfAccessibleElements = this._edeltaEcoreHelper.createSnapshotOfAccessibleElements(it);
-      StringConcatenation _builder_1 = new StringConcatenation();
-      _builder_1.newLine();
-      this.assertAccessibleElements(_createSnapshotOfAccessibleElements, _builder_1);
-    };
-    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+    EdeltaAccessibleElements _createSnapshotOfAccessibleElements = this._edeltaEcoreHelper.createSnapshotOfAccessibleElements(this.parseWithTestEcore(_builder));
+    StringConcatenation _builder_1 = new StringConcatenation();
+    _builder_1.newLine();
+    this.assertAccessibleElements(_createSnapshotOfAccessibleElements, _builder_1);
   }
   
   @Test
   public void testCreateSnapshotOfAccessibleElementsWithCreatedEClass() throws Exception {
-    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this.inputs.referenceToCreatedEClass());
-    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      EdeltaAccessibleElements _createSnapshotOfAccessibleElements = this._edeltaEcoreHelper.createSnapshotOfAccessibleElements(it);
-      StringConcatenation _builder = new StringConcatenation();
-      _builder.append("foo");
-      _builder.newLine();
-      _builder.append("foo.FooClass");
-      _builder.newLine();
-      _builder.append("foo.FooClass.myAttribute");
-      _builder.newLine();
-      _builder.append("foo.FooClass.myReference");
-      _builder.newLine();
-      _builder.append("foo.FooDataType");
-      _builder.newLine();
-      _builder.append("foo.FooEnum");
-      _builder.newLine();
-      _builder.append("foo.FooEnum.FooEnumLiteral");
-      _builder.newLine();
-      _builder.append("foo.NewClass");
-      _builder.newLine();
-      this.assertAccessibleElements(_createSnapshotOfAccessibleElements, _builder);
-    };
-    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+    EdeltaAccessibleElements _createSnapshotOfAccessibleElements = this._edeltaEcoreHelper.createSnapshotOfAccessibleElements(this.parseWithTestEcore(this.inputs.referenceToCreatedEClass()));
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("foo");
+    _builder.newLine();
+    _builder.append("foo.FooClass");
+    _builder.newLine();
+    _builder.append("foo.FooClass.myAttribute");
+    _builder.newLine();
+    _builder.append("foo.FooClass.myReference");
+    _builder.newLine();
+    _builder.append("foo.FooDataType");
+    _builder.newLine();
+    _builder.append("foo.FooEnum");
+    _builder.newLine();
+    _builder.append("foo.FooEnum.FooEnumLiteral");
+    _builder.newLine();
+    _builder.append("foo.NewClass");
+    _builder.newLine();
+    this.assertAccessibleElements(_createSnapshotOfAccessibleElements, _builder);
   }
   
   @Test
   public void testCreateSnapshotOfAccessibleElementsWithRemovedEClass() throws Exception {
-    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this.inputs.referenceToEClassRemoved());
-    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      EdeltaAccessibleElements _createSnapshotOfAccessibleElements = this._edeltaEcoreHelper.createSnapshotOfAccessibleElements(it);
-      StringConcatenation _builder = new StringConcatenation();
-      _builder.append("foo");
-      _builder.newLine();
-      _builder.append("foo.FooDataType");
-      _builder.newLine();
-      _builder.append("foo.FooEnum");
-      _builder.newLine();
-      _builder.append("foo.FooEnum.FooEnumLiteral");
-      _builder.newLine();
-      this.assertAccessibleElements(_createSnapshotOfAccessibleElements, _builder);
-    };
-    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+    EdeltaAccessibleElements _createSnapshotOfAccessibleElements = this._edeltaEcoreHelper.createSnapshotOfAccessibleElements(this.parseWithTestEcore(this.inputs.referenceToEClassRemoved()));
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("foo");
+    _builder.newLine();
+    _builder.append("foo.FooDataType");
+    _builder.newLine();
+    _builder.append("foo.FooEnum");
+    _builder.newLine();
+    _builder.append("foo.FooEnum.FooEnumLiteral");
+    _builder.newLine();
+    this.assertAccessibleElements(_createSnapshotOfAccessibleElements, _builder);
   }
   
   @Test
   public void testGetCurrentAccessibleElementsWithCreatedEClass() throws Exception {
-    EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(this.inputs.referenceToCreatedEClass());
-    final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      EdeltaAccessibleElements _currentAccessibleElements = this._edeltaEcoreHelper.getCurrentAccessibleElements(it);
-      StringConcatenation _builder = new StringConcatenation();
-      _builder.append("foo");
-      _builder.newLine();
-      _builder.append("foo.FooClass");
-      _builder.newLine();
-      _builder.append("foo.FooClass.myAttribute");
-      _builder.newLine();
-      _builder.append("foo.FooClass.myReference");
-      _builder.newLine();
-      _builder.append("foo.FooDataType");
-      _builder.newLine();
-      _builder.append("foo.FooEnum");
-      _builder.newLine();
-      _builder.append("foo.FooEnum.FooEnumLiteral");
-      _builder.newLine();
-      _builder.append("foo.NewClass");
-      _builder.newLine();
-      this.assertAccessibleElements(_currentAccessibleElements, _builder);
-    };
-    ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
+    EdeltaAccessibleElements _currentAccessibleElements = this._edeltaEcoreHelper.getCurrentAccessibleElements(this.parseWithTestEcore(this.inputs.referenceToCreatedEClass()));
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("foo");
+    _builder.newLine();
+    _builder.append("foo.FooClass");
+    _builder.newLine();
+    _builder.append("foo.FooClass.myAttribute");
+    _builder.newLine();
+    _builder.append("foo.FooClass.myReference");
+    _builder.newLine();
+    _builder.append("foo.FooDataType");
+    _builder.newLine();
+    _builder.append("foo.FooEnum");
+    _builder.newLine();
+    _builder.append("foo.FooEnum.FooEnumLiteral");
+    _builder.newLine();
+    _builder.append("foo.NewClass");
+    _builder.newLine();
+    this.assertAccessibleElements(_currentAccessibleElements, _builder);
   }
   
   @Test
