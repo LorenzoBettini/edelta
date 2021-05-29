@@ -6,6 +6,7 @@ import edelta.edelta.EdeltaProgram;
 import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 import edelta.util.EdeltaModelUtil;
 import java.util.List;
+import java.util.function.Consumer;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
@@ -48,20 +49,17 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
   
   @Test
   public void testHasCycleInSuperPackageWithNoCycle() throws Exception {
-    final EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
-    EPackage _createEPackage = ecoreFactory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
+    final Consumer<EPackage> _function = (EPackage it) -> {
       EList<EPackage> _eSubpackages = it.getESubpackages();
-      EPackage _createEPackage_1 = ecoreFactory.createEPackage();
-      final Procedure1<EPackage> _function_1 = (EPackage it_1) -> {
+      final Consumer<EPackage> _function_1 = (EPackage it_1) -> {
         EList<EPackage> _eSubpackages_1 = it_1.getESubpackages();
-        EPackage _createEPackage_2 = ecoreFactory.createEPackage();
-        _eSubpackages_1.add(_createEPackage_2);
+        EPackage _createEPackage = this.createEPackage("p3");
+        _eSubpackages_1.add(_createEPackage);
       };
-      EPackage _doubleArrow = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage_1, _function_1);
-      _eSubpackages.add(_doubleArrow);
+      EPackage _createEPackage = this.createEPackage("p2", _function_1);
+      _eSubpackages.add(_createEPackage);
     };
-    final EPackage ePackage = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
+    final EPackage ePackage = this.createEPackage("p", _function);
     Assert.assertFalse(
       EdeltaModelUtil.hasCycleInSuperPackage(
         IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>head(ePackage.getESubpackages()).getESubpackages())));
@@ -69,20 +67,17 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
   
   @Test
   public void testHasCycleInSuperPackageWithCycle() throws Exception {
-    final EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
-    EPackage _createEPackage = ecoreFactory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
+    final Consumer<EPackage> _function = (EPackage it) -> {
       EList<EPackage> _eSubpackages = it.getESubpackages();
-      EPackage _createEPackage_1 = ecoreFactory.createEPackage();
-      final Procedure1<EPackage> _function_1 = (EPackage it_1) -> {
+      final Consumer<EPackage> _function_1 = (EPackage it_1) -> {
         EList<EPackage> _eSubpackages_1 = it_1.getESubpackages();
-        EPackage _createEPackage_2 = ecoreFactory.createEPackage();
-        _eSubpackages_1.add(_createEPackage_2);
+        EPackage _createEPackage = this.createEPackage("p3");
+        _eSubpackages_1.add(_createEPackage);
       };
-      EPackage _doubleArrow = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage_1, _function_1);
-      _eSubpackages.add(_doubleArrow);
+      EPackage _createEPackage = this.createEPackage("p2", _function_1);
+      _eSubpackages.add(_createEPackage);
     };
-    final EPackage ePackage = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
+    final EPackage ePackage = this.createEPackage("p", _function);
     final EPackage subSubPackage = IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>head(ePackage.getESubpackages()).getESubpackages());
     EList<EPackage> _eSubpackages = subSubPackage.getESubpackages();
     _eSubpackages.add(ePackage);
@@ -92,20 +87,17 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
   
   @Test
   public void testFindRootSuperPackage() throws Exception {
-    final EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
-    EPackage _createEPackage = ecoreFactory.createEPackage();
-    final Procedure1<EPackage> _function = (EPackage it) -> {
+    final Consumer<EPackage> _function = (EPackage it) -> {
       EList<EPackage> _eSubpackages = it.getESubpackages();
-      EPackage _createEPackage_1 = ecoreFactory.createEPackage();
-      final Procedure1<EPackage> _function_1 = (EPackage it_1) -> {
+      final Consumer<EPackage> _function_1 = (EPackage it_1) -> {
         EList<EPackage> _eSubpackages_1 = it_1.getESubpackages();
-        EPackage _createEPackage_2 = ecoreFactory.createEPackage();
-        _eSubpackages_1.add(_createEPackage_2);
+        EPackage _createEPackage = this.createEPackage("p3");
+        _eSubpackages_1.add(_createEPackage);
       };
-      EPackage _doubleArrow = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage_1, _function_1);
-      _eSubpackages.add(_doubleArrow);
+      EPackage _createEPackage = this.createEPackage("p2", _function_1);
+      _eSubpackages.add(_createEPackage);
     };
-    final EPackage rootPackage = ObjectExtensions.<EPackage>operator_doubleArrow(_createEPackage, _function);
+    final EPackage rootPackage = this.createEPackage("p", _function);
     Assertions.<EPackage>assertThat(EdeltaModelUtil.findRootSuperPackage(IterableExtensions.<EPackage>head(IterableExtensions.<EPackage>head(rootPackage.getESubpackages()).getESubpackages()))).isSameAs(rootPackage);
     Assertions.<EPackage>assertThat(EdeltaModelUtil.findRootSuperPackage(IterableExtensions.<EPackage>head(rootPackage.getESubpackages()))).isSameAs(rootPackage);
     Assertions.<EPackage>assertThat(EdeltaModelUtil.findRootSuperPackage(rootPackage)).isNull();
@@ -242,7 +234,7 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
       ecoreRef = ecoreRefs.get(3);
       XExpression _get = mainBlock.getExpressions().get(3);
       Assertions.<XExpression>assertThat(EdeltaModelUtil.getContainingBlockXExpression(ecoreRef)).isSameAs(
-        IterableExtensions.<XExpression>head(this.getBlock(((XIfExpression) _get).getThen()).getExpressions()));
+        this.getBlockFirstExpression(((XIfExpression) _get).getThen()));
     };
     ObjectExtensions.<EdeltaProgram>operator_doubleArrow(_parseWithTestEcore, _function);
   }
