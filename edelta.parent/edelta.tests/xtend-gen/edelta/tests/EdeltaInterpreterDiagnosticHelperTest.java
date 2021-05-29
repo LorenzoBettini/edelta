@@ -39,7 +39,7 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
     final String input = _builder.toString();
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      final XExpression exp = this.getBlockLastExpression(this.lastModifyEcoreOperation(it).getBody());
+      final XExpression exp = this.getLastModifyEcoreOperationLastExpression(it);
       this.diagnosticHelper.setCurrentExpression(exp);
       this.diagnosticHelper.addError(null, "issueCode", "an error");
       this.validationTestHelper.assertError(it, 
@@ -72,9 +72,9 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       final EPackage problematic = IterableExtensions.<EPackage>last(this.getCopiedEPackages(it));
-      final XExpression correspondingExpression = this.getBlockFirstExpression(this.lastModifyEcoreOperation(it).getBody());
+      final XExpression correspondingExpression = this.getLastModifyEcoreOperationFirstExpression(it);
       this.derivedStateHelper.getEnamedElementXExpressionMap(it.eResource()).put(problematic, correspondingExpression);
-      final XExpression currentExpression = this.getBlockLastExpression(this.lastModifyEcoreOperation(it).getBody());
+      final XExpression currentExpression = this.getLastModifyEcoreOperationLastExpression(it);
       this.diagnosticHelper.setCurrentExpression(currentExpression);
       this.diagnosticHelper.addError(problematic, "issueCode", "an error");
       this.validationTestHelper.assertError(it, 
@@ -103,7 +103,7 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
     final String input = _builder.toString();
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      final XExpression exp = this.getBlockLastExpression(this.lastModifyEcoreOperation(it).getBody());
+      final XExpression exp = this.getLastModifyEcoreOperationLastExpression(it);
       this.diagnosticHelper.setCurrentExpression(exp);
       this.diagnosticHelper.addWarning(null, "issueCode", "a warning");
       this.validationTestHelper.assertWarning(it, 
@@ -136,9 +136,9 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       final EPackage problematic = IterableExtensions.<EPackage>last(this.getCopiedEPackages(it));
-      final XExpression correspondingExpression = this.getBlockFirstExpression(this.lastModifyEcoreOperation(it).getBody());
+      final XExpression correspondingExpression = this.getLastModifyEcoreOperationFirstExpression(it);
       this.derivedStateHelper.getEnamedElementXExpressionMap(it.eResource()).put(problematic, correspondingExpression);
-      final XExpression currentExpression = this.getBlockLastExpression(this.lastModifyEcoreOperation(it).getBody());
+      final XExpression currentExpression = this.getLastModifyEcoreOperationLastExpression(it);
       this.diagnosticHelper.setCurrentExpression(currentExpression);
       this.diagnosticHelper.addWarning(problematic, "issueCode", "a warning");
       this.validationTestHelper.assertWarning(it, 

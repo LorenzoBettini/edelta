@@ -209,7 +209,7 @@ class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		parseWithTestEcore
 		val resource = program.eResource as DerivedStateAwareResource
 		val derivedStateEClass = program.lastCopiedEPackageLastEClass
-		val eclassRef = program.lastModifyEcoreOperation.body.block.expressions.last.
+		val eclassRef = program.lastModifyEcoreOperationLastExpression.
 			edeltaEcoreReferenceExpression.reference.enamedelement
 		assertSame(derivedStateEClass, eclassRef)
 		assertEquals("First", derivedStateEClass.name)

@@ -322,8 +322,8 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     _builder.append("}");
     _builder.newLine();
     final EdeltaProgram prog = this.parseWithTestEcore(_builder);
-    XExpression _blockLastExpression = this.getBlockLastExpression(this.lastModifyEcoreOperation(prog).getBody());
-    final EdeltaEcoreReferenceExpression eclassExp = ((EdeltaEcoreReferenceExpression) _blockLastExpression);
+    XExpression _lastModifyEcoreOperationLastExpression = this.getLastModifyEcoreOperationLastExpression(prog);
+    final EdeltaEcoreReferenceExpression eclassExp = ((EdeltaEcoreReferenceExpression) _lastModifyEcoreOperationLastExpression);
     Assert.assertSame(
       this.getFirstEClass(IterableExtensions.<EPackage>head(this.getCopiedEPackages(prog))), 
       eclassExp.getReference().getEnamedelement());
@@ -343,8 +343,8 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     _builder.append("}");
     _builder.newLine();
     final EdeltaProgram prog = this.parseWithTestEcore(_builder);
-    XExpression _blockLastExpression = this.getBlockLastExpression(this.lastModifyEcoreOperation(prog).getBody());
-    final EdeltaEcoreReferenceExpression eclassExp = ((EdeltaEcoreReferenceExpression) _blockLastExpression);
+    XExpression _lastModifyEcoreOperationLastExpression = this.getLastModifyEcoreOperationLastExpression(prog);
+    final EdeltaEcoreReferenceExpression eclassExp = ((EdeltaEcoreReferenceExpression) _lastModifyEcoreOperationLastExpression);
     ENamedElement _enamedelement = eclassExp.getReference().getEnamedelement();
     final EDataType dataType = ((EDataType) _enamedelement);
     Assert.assertSame(
@@ -496,7 +496,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    EdeltaEcoreReference _reference = this.getEdeltaEcoreReferenceExpression(this.getBlockLastExpression(this.lastModifyEcoreOperation(this.parseWithTestEcore(_builder)).getBody())).getReference();
+    EdeltaEcoreReference _reference = this.getEdeltaEcoreReferenceExpression(this.getLastModifyEcoreOperationLastExpression(this.parseWithTestEcore(_builder))).getReference();
     EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
     StringConcatenation _builder_1 = new StringConcatenation();
     _builder_1.append("RenamedClass");
@@ -525,7 +525,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    EdeltaEcoreReference _reference = this.getEdeltaEcoreReferenceExpression(this.getBlockLastExpression(this.lastModifyEcoreOperation(this.parseWithTestEcore(_builder)).getBody())).getReference();
+    EdeltaEcoreReference _reference = this.getEdeltaEcoreReferenceExpression(this.getLastModifyEcoreOperationLastExpression(this.parseWithTestEcore(_builder))).getReference();
     EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
     StringConcatenation _builder_1 = new StringConcatenation();
     _builder_1.append("myAttribute");
@@ -558,7 +558,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    EdeltaEcoreReference _reference = this.getEdeltaEcoreReferenceExpression(this.getBlockLastExpression(this.lastModifyEcoreOperation(this.parseWithTestEcore(_builder)).getBody())).getReference();
+    EdeltaEcoreReference _reference = this.getEdeltaEcoreReferenceExpression(this.getLastModifyEcoreOperationLastExpression(this.parseWithTestEcore(_builder))).getReference();
     EReference _edeltaEcoreReference_Enamedelement = EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
     StringConcatenation _builder_1 = new StringConcatenation();
     _builder_1.append("myAttribute");
@@ -588,7 +588,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     _builder.newLine();
     final EdeltaProgram prog = this.parseWithTestEcore(_builder);
     this.validationTestHelper.assertNoErrors(prog);
-    final EdeltaEcoreReference referred = this.getEdeltaEcoreReferenceExpression(this.getBlockLastExpression(this.lastModifyEcoreOperation(prog).getBody())).getReference();
+    final EdeltaEcoreReference referred = this.getEdeltaEcoreReferenceExpression(this.getLastModifyEcoreOperationLastExpression(prog)).getReference();
     final EPackage copiedEPackage = IterableExtensions.<EPackage>head(this.getCopiedEPackages(prog));
     ENamedElement _enamedelement = referred.getEnamedelement();
     Assert.assertSame(
@@ -614,7 +614,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
     _builder.newLine();
     final EdeltaProgram prog = this.parseWithTestEcore(_builder);
     this.validationTestHelper.assertNoErrors(prog);
-    EdeltaEcoreReference _reference = this.getEdeltaEcoreReferenceExpression(this.getBlockLastExpression(this.lastModifyEcoreOperation(prog).getBody())).getReference();
+    EdeltaEcoreReference _reference = this.getEdeltaEcoreReferenceExpression(this.getLastModifyEcoreOperationLastExpression(prog)).getReference();
     final EdeltaEcoreQualifiedReference referred = ((EdeltaEcoreQualifiedReference) _reference);
     final EPackage copiedEPackage = IterableExtensions.<EPackage>head(this.getCopiedEPackages(prog));
     ENamedElement _enamedelement = referred.getEnamedelement();

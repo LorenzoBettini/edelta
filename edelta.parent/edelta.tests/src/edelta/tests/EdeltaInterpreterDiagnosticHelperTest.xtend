@@ -25,7 +25,7 @@ class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
 		}
 		'''
 		input.parseWithTestEcore => [
-			val exp = lastModifyEcoreOperation.body.blockLastExpression
+			val exp = lastModifyEcoreOperationLastExpression
 			diagnosticHelper.setCurrentExpression(exp)
 			diagnosticHelper.addError(null, "issueCode", "an error")
 			assertError(
@@ -52,10 +52,10 @@ class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
 			// the problematic object
 			val problematic = copiedEPackages.last
 			// associate it to the first expression in the derived state
-			val correspondingExpression = lastModifyEcoreOperation.body.blockFirstExpression
+			val correspondingExpression = lastModifyEcoreOperationFirstExpression
 			derivedStateHelper.getEnamedElementXExpressionMap(eResource)
 				.put(problematic, correspondingExpression)
-			val currentExpression = lastModifyEcoreOperation.body.blockLastExpression
+			val currentExpression = lastModifyEcoreOperationLastExpression
 			diagnosticHelper.setCurrentExpression(currentExpression)
 			diagnosticHelper.addError(problematic, "issueCode", "an error")
 			// the error is associated to the associated expression to problematic object
@@ -79,7 +79,7 @@ class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
 		}
 		'''
 		input.parseWithTestEcore => [
-			val exp = lastModifyEcoreOperation.body.blockLastExpression
+			val exp = lastModifyEcoreOperationLastExpression
 			diagnosticHelper.setCurrentExpression(exp)
 			diagnosticHelper.addWarning(null, "issueCode", "a warning")
 			assertWarning(
@@ -106,10 +106,10 @@ class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
 			// the problematic object
 			val problematic = copiedEPackages.last
 			// associate it to the first expression in the derived state
-			val correspondingExpression = lastModifyEcoreOperation.body.blockFirstExpression
+			val correspondingExpression = lastModifyEcoreOperationFirstExpression
 			derivedStateHelper.getEnamedElementXExpressionMap(eResource)
 				.put(problematic, correspondingExpression)
-			val currentExpression = lastModifyEcoreOperation.body.blockLastExpression
+			val currentExpression = lastModifyEcoreOperationLastExpression
 			diagnosticHelper.setCurrentExpression(currentExpression)
 			diagnosticHelper.addWarning(problematic, "issueCode", "a warning")
 			// the warning is associated to the associated expression to problematic object
