@@ -1067,7 +1067,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			}
 		'''.parseWithTestEcore => [
 			interpretProgram
-			allEcoreReferenceExpressions.last => [
+			getLastOfAllEcoreReferenceExpressions => [
 				// ecoreref(NewClass) -> addNewEClass
 				assertEcoreRefExpElementMapsToXExpression
 					(reference, "addNewEClass")
@@ -1090,7 +1090,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			}
 		'''.parseWithTestEcore => [
 			interpretProgram
-			allEcoreReferenceExpressions.last => [
+			getLastOfAllEcoreReferenceExpressions => [
 				// ecoreref(NewClass) -> addNewEClass
 				assertEcoreRefExpElementMapsToXExpression
 					(reference, "addNewEClass")
@@ -1120,7 +1120,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		'''
 		]) => [
 			interpretProgram
-			allEcoreReferenceExpressions.last => [
+			getLastOfAllEcoreReferenceExpressions => [
 				// ecoreref(NewClass) -> create
 				assertEcoreRefExpElementMapsToXExpression
 					(reference, "create")
@@ -1204,8 +1204,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			}
 		'''.parseWithTestEcore => [
 			interpretProgram
-			val ecoreRefs = allEcoreReferenceExpressions
-			ecoreRefs.head => [
+			firstOfAllEcoreReferenceExpressions => [
 				val exp = derivedStateHelper
 					.getResponsibleExpression(reference)
 				assertNull(exp)
@@ -1838,7 +1837,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			// mainpackage.mainsubpackage.MyClass
 			val mainSubPackageClass =
 				map.values.head.ESubpackages.head.lastEClass
-			val lastEcoreRef = allEcoreReferenceExpressions.last.reference
+			val lastEcoreRef = lastOfAllEcoreReferenceExpressions.reference
 			assertNotNull(lastEcoreRef.enamedelement)
 			// the non ambiguous ecoreref should be correctly linked
 			// to the only available element in that context

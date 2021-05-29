@@ -1,7 +1,6 @@
 package edelta.tests;
 
 import com.google.inject.Inject;
-import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
 import edelta.navigation.EdeltaNavigationTargetHelper;
 import edelta.tests.injectors.EdeltaInjectorProviderCustom;
@@ -47,7 +46,7 @@ public class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
     _builder.newLine();
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      final EObject target = this.navigationTargetHelper.getTarget(IterableExtensions.<EdeltaEcoreReferenceExpression>head(this.getAllEcoreReferenceExpressions(it)).getReference());
+      final EObject target = this.navigationTargetHelper.getTarget(this.getFirstOfAllEcoreReferenceExpressions(it).getReference());
       final EClassifier original = this.getEClassiferByName(IterableExtensions.<EPackage>head(it.getMetamodels()), "FooClass");
       Assertions.<EObject>assertThat(target).isNotNull();
       Assertions.<EObject>assertThat(target).isSameAs(original);
@@ -73,7 +72,7 @@ public class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
     _builder.newLine();
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      final EObject target = this.navigationTargetHelper.getTarget(IterableExtensions.<EdeltaEcoreReferenceExpression>head(this.getAllEcoreReferenceExpressions(it)).getReference());
+      final EObject target = this.navigationTargetHelper.getTarget(this.getFirstOfAllEcoreReferenceExpressions(it).getReference());
       final XExpression exp = this.getLastModifyEcoreOperationFirstExpression(it);
       Assertions.<EObject>assertThat(target).isNotNull();
       Assertions.<EObject>assertThat(target).isSameAs(exp);
@@ -99,7 +98,7 @@ public class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
     _builder.newLine();
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      final EObject target = this.navigationTargetHelper.getTarget(IterableExtensions.<EdeltaEcoreReferenceExpression>head(this.getAllEcoreReferenceExpressions(it)).getReference());
+      final EObject target = this.navigationTargetHelper.getTarget(this.getFirstOfAllEcoreReferenceExpressions(it).getReference());
       final XExpression exp = this.getLastModifyEcoreOperationLastExpression(it);
       Assertions.<EObject>assertThat(target).isNotNull();
       Assertions.<EObject>assertThat(target).isSameAs(exp);
