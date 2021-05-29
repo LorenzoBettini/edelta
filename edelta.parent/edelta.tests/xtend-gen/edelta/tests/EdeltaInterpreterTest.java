@@ -2704,7 +2704,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
         Assertions.assertThat(ecoreref1.getEnamedelement().eIsProxy()).isFalse();
         Assertions.assertThat(ecoreref2.getEnamedelement().eIsProxy()).isTrue();
         final EdeltaENamedElementXExpressionMap map = this.derivedStateHelper.getEnamedElementXExpressionMap(it.eResource());
-        Assertions.<XExpression>assertThat(map.get(ecoreref1.getEnamedelement())).isNotNull().isSameAs(this.getBlock(this.lastModifyEcoreOperation(it).getBody()).getExpressions().get(2));
+        Assertions.<XExpression>assertThat(map.get(ecoreref1.getEnamedelement())).isNotNull().isSameAs(this.getLastModifyEcoreOperationBlock(it).getExpressions().get(2));
       } catch (Throwable _e) {
         throw Exceptions.sneakyThrow(_e);
       }

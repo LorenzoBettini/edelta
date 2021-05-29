@@ -1702,7 +1702,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			// that is not available in the current context
 			assertThat(map.get(ecoreref1.enamedelement))
 				.isNotNull
-				.isSameAs(lastModifyEcoreOperation.body.block.expressions.get(2))
+				.isSameAs(lastModifyEcoreOperationBlock.expressions.get(2))
 		]
 	}
 

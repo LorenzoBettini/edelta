@@ -86,7 +86,7 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 			}
 		'''
 		.parseWithTestEcore
-		.lastModifyEcoreOperation.body.block
+		.lastModifyEcoreOperationBlock
 		.expressions => [
 			assertEquals("FooClass",
 				getEcoreReferenceText(get(0).edeltaEcoreReference))
@@ -156,7 +156,7 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 			}
 		'''
 		input.parseWithTestEcore => [
-			val mainBlock = lastModifyEcoreOperation.body.block
+			val mainBlock = lastModifyEcoreOperationBlock
 			val ecoreRefs = allEcoreReferenceExpressions.map[reference]
 			var ecoreRef = ecoreRefs.get(0)
 			assertThat(getContainingBlockXExpression(ecoreRef))

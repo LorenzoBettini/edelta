@@ -51,7 +51,7 @@ class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
 		'''.parseWithTestEcore => [
 			val target =
 				navigationTargetHelper.getTarget(allEcoreReferenceExpressions.head.reference)
-			val exp = lastModifyEcoreOperation.body.block.expressions.head
+			val exp = lastModifyEcoreOperationFirstExpression
 			assertThat(target).isNotNull
 			assertThat(target).isSameAs(exp)
 		]
@@ -69,7 +69,7 @@ class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
 		'''.parseWithTestEcore => [
 			val target =
 				navigationTargetHelper.getTarget(allEcoreReferenceExpressions.head.reference)
-			val exp = lastModifyEcoreOperation.body.block.expressions.last
+			val exp = lastModifyEcoreOperationLastExpression
 			assertThat(target).isNotNull
 			assertThat(target).isSameAs(exp)
 		]

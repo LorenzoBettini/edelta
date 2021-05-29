@@ -353,6 +353,18 @@ public abstract class EdeltaAbstractTest {
 		return findFirst(namedElements, it -> Objects.equal(it.getName(), nameToSearch));
 	}
 
+	protected XExpression getLastModifyEcoreOperationLastExpression(EdeltaProgram p) {
+		return getBlockLastExpression(lastModifyEcoreOperation(p).getBody());
+	}
+
+	protected XExpression getLastModifyEcoreOperationFirstExpression(EdeltaProgram p) {
+		return getBlockFirstExpression(lastModifyEcoreOperation(p).getBody());
+	}
+
+	protected XBlockExpression getLastModifyEcoreOperationBlock(EdeltaProgram p) {
+		return getBlock(lastModifyEcoreOperation(p).getBody());
+	}
+
 	protected EdeltaModifyEcoreOperation lastModifyEcoreOperation(EdeltaProgram p) {
 		return last(p.getModifyEcoreOperations());
 	}
@@ -432,11 +444,11 @@ public abstract class EdeltaAbstractTest {
 	}
 
 	protected XExpression getBlockLastExpression(XExpression e) {
-		return last(((XBlockExpression) e).getExpressions());
+		return last(getBlock(e).getExpressions());
 	}
 
 	protected XExpression getBlockFirstExpression(XExpression e) {
-		return head(((XBlockExpression) e).getExpressions());
+		return head(getBlock(e).getExpressions());
 	}
 
 	protected XBlockExpression getBlock(XExpression e) {

@@ -133,7 +133,7 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
     _builder.newLine();
     _builder.append("}");
     _builder.newLine();
-    EList<XExpression> _expressions = this.getBlock(this.lastModifyEcoreOperation(this.parseWithTestEcore(_builder)).getBody()).getExpressions();
+    EList<XExpression> _expressions = this.getLastModifyEcoreOperationBlock(this.parseWithTestEcore(_builder)).getExpressions();
     final Procedure1<EList<XExpression>> _function = (EList<XExpression> it) -> {
       Assert.assertEquals("FooClass", 
         EdeltaModelUtil.getEcoreReferenceText(this.getEdeltaEcoreReference(it.get(0))));
@@ -228,7 +228,7 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
     final String input = _builder.toString();
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(input);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
-      final XBlockExpression mainBlock = this.getBlock(this.lastModifyEcoreOperation(it).getBody());
+      final XBlockExpression mainBlock = this.getLastModifyEcoreOperationBlock(it);
       final Function1<EdeltaEcoreReferenceExpression, EdeltaEcoreReference> _function_1 = (EdeltaEcoreReferenceExpression it_1) -> {
         return it_1.getReference();
       };

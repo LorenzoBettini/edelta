@@ -29,7 +29,6 @@ import org.eclipse.xtext.common.types.JvmGenericType;
 import org.eclipse.xtext.resource.DerivedStateAwareResource;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
-import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
@@ -269,7 +268,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
     Resource _eResource = program.eResource();
     final DerivedStateAwareResource resource = ((DerivedStateAwareResource) _eResource);
     final EClass derivedStateEClass = this.getLastCopiedEPackageLastEClass(program);
-    final ENamedElement eclassRef = this.getEdeltaEcoreReferenceExpression(IterableExtensions.<XExpression>last(this.getBlock(this.lastModifyEcoreOperation(program).getBody()).getExpressions())).getReference().getEnamedelement();
+    final ENamedElement eclassRef = this.getEdeltaEcoreReferenceExpression(this.getLastModifyEcoreOperationLastExpression(program)).getReference().getEnamedelement();
     Assert.assertSame(derivedStateEClass, eclassRef);
     Assert.assertEquals("First", derivedStateEClass.getName());
     Assert.assertFalse("should be resolved now", eclassRef.eIsProxy());

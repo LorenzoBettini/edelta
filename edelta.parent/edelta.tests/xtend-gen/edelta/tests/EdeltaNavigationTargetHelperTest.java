@@ -74,7 +74,7 @@ public class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       final EObject target = this.navigationTargetHelper.getTarget(IterableExtensions.<EdeltaEcoreReferenceExpression>head(this.getAllEcoreReferenceExpressions(it)).getReference());
-      final XExpression exp = IterableExtensions.<XExpression>head(this.getBlock(this.lastModifyEcoreOperation(it).getBody()).getExpressions());
+      final XExpression exp = this.getLastModifyEcoreOperationFirstExpression(it);
       Assertions.<EObject>assertThat(target).isNotNull();
       Assertions.<EObject>assertThat(target).isSameAs(exp);
     };
@@ -100,7 +100,7 @@ public class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
     EdeltaProgram _parseWithTestEcore = this.parseWithTestEcore(_builder);
     final Procedure1<EdeltaProgram> _function = (EdeltaProgram it) -> {
       final EObject target = this.navigationTargetHelper.getTarget(IterableExtensions.<EdeltaEcoreReferenceExpression>head(this.getAllEcoreReferenceExpressions(it)).getReference());
-      final XExpression exp = IterableExtensions.<XExpression>last(this.getBlock(this.lastModifyEcoreOperation(it).getBody()).getExpressions());
+      final XExpression exp = this.getLastModifyEcoreOperationLastExpression(it);
       Assertions.<EObject>assertThat(target).isNotNull();
       Assertions.<EObject>assertThat(target).isSameAs(exp);
     };
