@@ -126,11 +126,7 @@ class EdeltaParsingTest extends EdeltaAbstractTest {
 	def private getEcoreReferenceExpression(CharSequence ecoreRefArg) throws Exception {
 		textForEcoreRef(ecoreRefArg)
 			.parse
-			.lastModifyEcoreOperation
-			.body
-			.block
-			.expressions
-			.last
+			.lastModifyEcoreOperationLastExpression
 			.edeltaEcoreReferenceExpression
 	}
 

@@ -11,7 +11,6 @@ import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
-import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
@@ -154,7 +153,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
   }
   
   private EdeltaEcoreReferenceExpression getEcoreReferenceExpression(final CharSequence ecoreRefArg) throws Exception {
-    return this.getEdeltaEcoreReferenceExpression(IterableExtensions.<XExpression>last(this.getBlock(this.lastModifyEcoreOperation(this.parseHelper.parse(this.textForEcoreRef(ecoreRefArg))).getBody()).getExpressions()));
+    return this.getEdeltaEcoreReferenceExpression(this.getLastModifyEcoreOperationLastExpression(this.parseHelper.parse(this.textForEcoreRef(ecoreRefArg))));
   }
   
   private CharSequence textForEcoreRef(final CharSequence ecoreRefArg) throws Exception {

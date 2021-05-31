@@ -240,7 +240,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			}
 		'''.parseWithTestEcore
 		val eclassExp = prog
-			.lastModifyEcoreOperation.body.blockLastExpression as EdeltaEcoreReferenceExpression
+			.lastModifyEcoreOperationLastExpression as EdeltaEcoreReferenceExpression
 		assertSame(
 			// the one copied
 			prog.copiedEPackages.head.firstEClass,
@@ -259,7 +259,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		'''.
 			parseWithTestEcore
 		val eclassExp = prog
-			.lastModifyEcoreOperation.body.blockLastExpression as EdeltaEcoreReferenceExpression
+			.lastModifyEcoreOperationLastExpression as EdeltaEcoreReferenceExpression
 		val dataType = eclassExp.reference.enamedelement as EDataType
 		// must be a reference to the copied EPackage's datatype
 		assertSame(
@@ -378,7 +378,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			ecoreref(foo.FooClass).name = "RenamedClass"
 			ecoreref(foo.RenamedClass)
 		}
-		'''.parseWithTestEcore.lastModifyEcoreOperation.body.blockLastExpression.
+		'''.parseWithTestEcore.lastModifyEcoreOperationLastExpression.
 			edeltaEcoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
@@ -398,7 +398,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			ecoreref(foo.FooClass).name = "RenamedClass"
 			ecoreref(foo.RenamedClass.)
 		}
-		'''.parseWithTestEcore.lastModifyEcoreOperation.body.blockLastExpression.
+		'''.parseWithTestEcore.lastModifyEcoreOperationLastExpression.
 			edeltaEcoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
@@ -420,7 +420,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 				newEAttribute("addedAttribute", ecoreref(FooDataType))
 			ecoreref(RenamedClass.)
 		}
-		'''.parseWithTestEcore.lastModifyEcoreOperation.body.blockLastExpression.
+		'''.parseWithTestEcore.lastModifyEcoreOperationLastExpression.
 			edeltaEcoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
 			'''
@@ -443,7 +443,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		}
 		'''.parseWithTestEcore
 		prog.assertNoErrors
-		val referred = prog.lastModifyEcoreOperation.body.blockLastExpression.
+		val referred = prog.lastModifyEcoreOperationLastExpression.
 			edeltaEcoreReferenceExpression.reference
 		val copiedEPackage = prog.copiedEPackages.head
 		assertSame(
@@ -465,7 +465,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		}
 		'''.parseWithTestEcore
 		prog.assertNoErrors
-		val referred = prog.lastModifyEcoreOperation.body.blockLastExpression.
+		val referred = prog.lastModifyEcoreOperationLastExpression.
 			edeltaEcoreReferenceExpression.reference as EdeltaEcoreQualifiedReference
 		val copiedEPackage = prog.copiedEPackages.head
 		assertSame(
