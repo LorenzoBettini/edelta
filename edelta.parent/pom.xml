@@ -49,9 +49,22 @@
       **/serializer/**,
     </sonar.exclusions>
 
+    <!-- Exclude Xtend generated files from code coverage:
+      we cover the original Xtend files, using xtendAsPrimaryDebugSource
+      inherited from the xtext-build-utils parent -->
     <sonar.coverage.exclusions>
       **/EdeltaMaven*.java,
+      **/xtend-gen/**/*.java,
     </sonar.coverage.exclusions>
+
+    <!-- To make SonarQube detect JUnit tests in generated Java code from Xtend -->
+    <sonar.scm.exclusions.disabled>true</sonar.scm.exclusions.disabled>
+
+    <!-- in the model inferrer we have a few lines of duplicated code that
+      makes it more readable -->
+    <sonar.cpd.exclusions>
+      **/xtend-gen/**/*JvmModelInferrer.java,
+    </sonar.cpd.exclusions>
 
     <!-- see http://sonarqube.15.x6.nabble.com/sonar-issue-ignore-multicriteria-td5021722.html 
       and http://stackoverflow.com/questions/21825469/configure-sonar-sonar-issue-ignore-multicriteria-through-maven 
@@ -254,6 +267,9 @@
     </plugins>
     <pluginManagement>
       <plugins>
+        <!-- Remove when
+          https://github.com/LorenzoBettini/xtext-build-utils/issues/47
+          is fixed -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
