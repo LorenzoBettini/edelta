@@ -49,8 +49,12 @@
       **/serializer/**,
     </sonar.exclusions>
 
+    <!-- Exclude Xtend generated files from code coverage:
+      we cover the original Xtend files, using xtendAsPrimaryDebugSource
+      inherited from the xtext-build-utils parent -->
     <sonar.coverage.exclusions>
       **/EdeltaMaven*.java,
+      **/xtend-gen/**/*.java,
     </sonar.coverage.exclusions>
 
     <!-- To make SonarQube detect JUnit tests in generated Java code from Xtend -->
