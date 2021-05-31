@@ -29,10 +29,9 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testHasCycleInSuperPackageWithNoCycle() throws Exception {
-		val ecoreFactory = EcoreFactory.eINSTANCE
-		val ePackage = ecoreFactory.createEPackage() => [
-			ESubpackages += ecoreFactory.createEPackage() => [
-				ESubpackages += ecoreFactory.createEPackage()
+		val ePackage = createEPackage("p") [
+			ESubpackages += createEPackage("p2") [
+				ESubpackages += createEPackage("p3")
 			]
 		]
 		assertFalse(hasCycleInSuperPackage(
@@ -42,10 +41,9 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testHasCycleInSuperPackageWithCycle() throws Exception {
-		val ecoreFactory = EcoreFactory.eINSTANCE
-		val ePackage = ecoreFactory.createEPackage() => [
-			ESubpackages += ecoreFactory.createEPackage() => [
-				ESubpackages += ecoreFactory.createEPackage()
+		val ePackage = createEPackage("p") [
+			ESubpackages += createEPackage("p2") [
+				ESubpackages += createEPackage("p3")
 			]
 		]
 		
@@ -59,10 +57,9 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testFindRootSuperPackage() throws Exception {
-		val ecoreFactory = EcoreFactory.eINSTANCE
-		val rootPackage = ecoreFactory.createEPackage() => [
-			ESubpackages += ecoreFactory.createEPackage() => [
-				ESubpackages += ecoreFactory.createEPackage()
+		val rootPackage = createEPackage("p") [
+			ESubpackages += createEPackage("p2") [
+				ESubpackages += createEPackage("p3")
 			]
 		]
 		assertThat(findRootSuperPackage(rootPackage.ESubpackages.head.ESubpackages.head))
@@ -86,7 +83,7 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 			}
 		'''
 		.parseWithTestEcore
-		.lastModifyEcoreOperation.body.block
+		.lastModifyEcoreOperationBlock
 		.expressions => [
 			assertEquals("FooClass",
 				getEcoreReferenceText(get(0).edeltaEcoreReference))
@@ -156,7 +153,7 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 			}
 		'''
 		input.parseWithTestEcore => [
-			val mainBlock = lastModifyEcoreOperation.body.block
+			val mainBlock = lastModifyEcoreOperationBlock
 			val ecoreRefs = allEcoreReferenceExpressions.map[reference]
 			var ecoreRef = ecoreRefs.get(0)
 			assertThat(getContainingBlockXExpression(ecoreRef))
@@ -171,7 +168,7 @@ class EdeltaModelUtilTest extends EdeltaAbstractTest {
 			assertThat(getContainingBlockXExpression(ecoreRef))
 				.isSameAs(
 					(mainBlock.expressions.get(3) as XIfExpression)
-						.then.block.expressions.head
+						.then.blockFirstExpression
 				)
 		]
 	}

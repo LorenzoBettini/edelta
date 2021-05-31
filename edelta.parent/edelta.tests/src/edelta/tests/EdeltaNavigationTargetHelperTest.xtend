@@ -32,7 +32,8 @@ class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
 		}
 		'''.parseWithTestEcore => [
 			val target =
-				navigationTargetHelper.getTarget(allEcoreReferenceExpressions.head.reference)
+				navigationTargetHelper
+					.getTarget(getFirstOfAllEcoreReferenceExpressions.reference)
 			val original = metamodels.head.getEClassiferByName("FooClass")
 			assertThat(target).isNotNull
 			assertThat(target).isSameAs(original)
@@ -50,8 +51,9 @@ class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
 		}
 		'''.parseWithTestEcore => [
 			val target =
-				navigationTargetHelper.getTarget(allEcoreReferenceExpressions.head.reference)
-			val exp = lastModifyEcoreOperation.body.block.expressions.head
+				navigationTargetHelper
+					.getTarget(getFirstOfAllEcoreReferenceExpressions.reference)
+			val exp = lastModifyEcoreOperationFirstExpression
 			assertThat(target).isNotNull
 			assertThat(target).isSameAs(exp)
 		]
@@ -68,8 +70,9 @@ class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
 		}
 		'''.parseWithTestEcore => [
 			val target =
-				navigationTargetHelper.getTarget(allEcoreReferenceExpressions.head.reference)
-			val exp = lastModifyEcoreOperation.body.block.expressions.last
+				navigationTargetHelper
+					.getTarget(getFirstOfAllEcoreReferenceExpressions.reference)
+			val exp = lastModifyEcoreOperationLastExpression
 			assertThat(target).isNotNull
 			assertThat(target).isSameAs(exp)
 		]

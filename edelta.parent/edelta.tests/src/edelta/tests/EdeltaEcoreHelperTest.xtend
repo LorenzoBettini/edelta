@@ -94,7 +94,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testProgramWithCreatedEClassENamedElements() throws Exception {
-		referenceToCreatedEClass.parseWithTestEcore => [
+		referenceToCreatedEClass.parseWithTestEcore.
 			getProgramENamedElements.
 			assertNamedElements(
 				'''
@@ -109,26 +109,24 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				'''
 			)
 		// NewClass is the one created in the program
-		]
 	}
 
 	@Test
 	def void testCreateSnapshotOfAccessibleElementsWithUnresolvedEPackage() throws Exception {
 		'''
 		metamodel "nonexisting"
-		'''.parseWithTestEcore => [
+		'''.parseWithTestEcore.
 			createSnapshotOfAccessibleElements.
 			assertAccessibleElements(
 				'''
 
 				'''
 			)
-		]
 	}
 
 	@Test
 	def void testCreateSnapshotOfAccessibleElementsWithCreatedEClass() throws Exception {
-		referenceToCreatedEClass.parseWithTestEcore => [
+		referenceToCreatedEClass.parseWithTestEcore.
 			createSnapshotOfAccessibleElements.
 			assertAccessibleElements(
 				'''
@@ -143,12 +141,11 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				'''
 			)
 		// NewClass is the one created in the program
-		]
 	}
 
 	@Test
 	def void testCreateSnapshotOfAccessibleElementsWithRemovedEClass() throws Exception {
-		referenceToEClassRemoved.parseWithTestEcore => [
+		referenceToEClassRemoved.parseWithTestEcore.
 			createSnapshotOfAccessibleElements.
 			assertAccessibleElements(
 				'''
@@ -159,12 +156,11 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				'''
 				// FooClass has been removed
 			)
-		]
 	}
 
 	@Test
 	def void testGetCurrentAccessibleElementsWithCreatedEClass() throws Exception {
-		referenceToCreatedEClass.parseWithTestEcore => [
+		referenceToCreatedEClass.parseWithTestEcore.
 			getCurrentAccessibleElements.
 			assertAccessibleElements(
 				'''
@@ -179,7 +175,6 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				'''
 			)
 		// NewClass is the one created in the program
-		]
 	}
 
 	@Test
