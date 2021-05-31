@@ -15,8 +15,6 @@
     <!-- Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=397015 -->
     <sonar.sources></sonar.sources>
     <sonar.tests>src,xtend-gen</sonar.tests>
-    <!-- To make SonarQube detect JUnit tests in generated Java code from Xtend -->
-    <sonar.scm.exclusions.disabled>true</sonar.scm.exclusions.disabled>
   </properties>
 
 </project>
