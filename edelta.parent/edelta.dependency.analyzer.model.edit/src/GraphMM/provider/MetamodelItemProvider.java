@@ -3,11 +3,13 @@
 package GraphMM.provider;
 
 
+import GraphMM.Dependency;
 import GraphMM.GraphMMPackage;
 import GraphMM.Metamodel;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.Notification;
@@ -87,14 +89,13 @@ public class MetamodelItemProvider extends NodeItemProvider {
 	 * This returns the label text for the adapted class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @generated
+	 * @generated NOT
 	 */
 	@Override
 	public String getText(Object object) {
-		String label = ((Metamodel)object).getName();
-		return label == null || label.length() == 0 ?
-			getString("_UI_Metamodel_type") :
-			getString("_UI_Metamodel_type") + " " + label;
+		var metamodel = (Metamodel)object;
+		String label = metamodel.getName() + " (" + metamodel.getNsURI() + ")";
+		return getString("_UI_Metamodel_type") + " " + label;
 	}
 
 
@@ -129,4 +130,16 @@ public class MetamodelItemProvider extends NodeItemProvider {
 		super.collectNewChildDescriptors(newChildDescriptors, object);
 	}
 
+	/**
+	 * Shows the dependencies involving this Metamodel
+	 */
+	@Override
+	public Collection<?> getChildren(Object object) {
+		var metamodel = (Metamodel) object;
+		return metamodel.getGraph().getEdges().stream()
+			.filter(Dependency.class::isInstance)
+			.map(Dependency.class::cast)
+			.filter(d -> d.getSrc() == metamodel || d.getTrg() == metamodel)
+			.collect(Collectors.toList());
+	}
 }

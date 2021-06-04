@@ -5,6 +5,7 @@ package GraphMM.provider;
 
 import GraphMM.Dependency;
 import GraphMM.GraphMMPackage;
+import GraphMM.Metamodel;
 
 import java.util.Collection;
 import java.util.List;
@@ -133,11 +134,18 @@ public class DependencyItemProvider extends EdgeItemProvider {
 	 * This returns the label text for the adapted class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @generated
+	 * @generated NOT
 	 */
 	@Override
 	public String getText(Object object) {
-		Dependency dependency = (Dependency)object;
+		var dependency = (Dependency)object;
+		if (dependency.getSrc() instanceof Metamodel &&
+			dependency.getTrg() instanceof Metamodel) {
+			return getString("_UI_Dependency_type") + " " +
+				((Metamodel) dependency.getSrc()).getName() +
+				(dependency.isBidirectional() ? " <-> " : " -> ") +
+				((Metamodel) dependency.getTrg()).getName();
+		}
 		return getString("_UI_Dependency_type") + " " + dependency.isBidirectional();
 	}
 
