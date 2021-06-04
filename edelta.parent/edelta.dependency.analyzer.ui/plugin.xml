@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="edelta.dependency.analyzer.ui.commands.category"
+            name="Edelta">
+      </category>
+      <command
+            categoryId="edelta.dependency.analyzer.ui.commands.category"
+            id="edelta.dependency.analyzer.ui.commands.sampleCommand"
+            name="Analyze Ecore Files">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="edelta.dependency.analyzer.ui.handlers.SampleHandler"
+            commandId="edelta.dependency.analyzer.ui.commands.sampleCommand">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="edelta.dependency.analyzer.ui.commands.sampleCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+6">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="true"
+            locationURI="popup:org.eclipse.ui.popup.any">
+         <menu
+               id="edelta.dependency.analyzer.ui.menus.sampleMenu"
+               label="Edelta"
+               mnemonic="E">
+            <command
+                  commandId="edelta.dependency.analyzer.ui.commands.sampleCommand"
+                  id="edelta.dependency.analyzer.ui.menus.sampleCommand"
+                  mnemonic="S">
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+
+</plugin>

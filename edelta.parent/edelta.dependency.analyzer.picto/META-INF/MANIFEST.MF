@@ -6,7 +6,7 @@ Bundle-Version: 2.4.0.qualifier
 Bundle-Activator: edelta.dependency.analyzer.picto.Activator
 Bundle-Vendor: Ludovico Iovino
 Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.epsilon.picto;bundle-version="2.3.0"
+ org.eclipse.epsilon.picto;bundle-version="2.3.0";visibility:=reexport
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Automatic-Module-Name: edelta.dependency.analyzer.picto
 Bundle-ActivationPolicy: lazy

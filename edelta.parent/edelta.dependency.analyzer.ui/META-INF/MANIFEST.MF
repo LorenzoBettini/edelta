@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Edelta Dependency Analyzer Ui
+Bundle-SymbolicName: edelta.dependency.analyzer.ui;singleton:=true
+Bundle-Version: 2.4.0.qualifier
+Bundle-Activator: edelta.dependency.analyzer.ui.Activator
+Bundle-Vendor: Lorenzo Bettini
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ edelta.dependency.analyzer,
+ org.eclipse.core.resources,
+ org.eclipse.ui.ide,
+ org.eclipse.xtext.util,
+ edelta.dependency.analyzer.picto
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Automatic-Module-Name: edelta.dependency.analyzer.ui
+Bundle-ActivationPolicy: lazy
