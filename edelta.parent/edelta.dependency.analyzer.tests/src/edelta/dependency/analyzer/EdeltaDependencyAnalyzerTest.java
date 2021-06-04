@@ -229,4 +229,19 @@ public class EdeltaDependencyAnalyzerTest {
 				EXPECTATIONS + "/independentdependencies/dependencies.graphmm",
 				OUTPUT + "/independentdependencies/dependencies.graphmm");
 	}
+
+	@Test
+	public void testAnalyzeDirectory() throws IOException {
+		var analyzer = new EdeltaDependencyAnalizer();
+		// package4 -> package1, package2
+		// package3 -> package2 -> package1,
+		// (package2 <-> package1)
+		var repository = analyzer.analyzeEPackage(
+				TESTECORES + "/independentdependencies/TestEcoreForUsages4.ecore");
+		analyzer.saveRepository(
+				repository, OUTPUT + "/independentdependencies", "dependencies.graphmm");
+		EdeltaTestUtils.assertFilesAreEquals(
+				EXPECTATIONS + "/independentdependencies/dependencies.graphmm",
+				OUTPUT + "/independentdependencies/dependencies.graphmm");
+	}
 }

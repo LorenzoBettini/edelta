@@ -39,6 +39,21 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 	private static final Logger LOG = Logger.getLogger(EdeltaDependencyAnalizer.class);
 
 	/**
+	 * Analyzes the dependencies of the specified Ecore file together
+	 * with all the other {@link EPackage}s found in the specified path.
+	 * 
+	 * @param ecoreFile
+	 * @return
+	 * @throws IOException
+	 */
+	public Repository analyzeEPackage(String ecoreFile) throws IOException {
+		var loaded = loadEcoreFile(ecoreFile);
+		var packageToAnalyze = getEPackage(loaded);
+		String path = new File(ecoreFile).getParent();
+		return analyzeEPackage(path, packageToAnalyze.getName());
+	}
+
+	/**
 	 * Analyzes the dependencies of the specified {@link EPackage} (by name) together
 	 * with all the other {@link EPackage}s found in the specified path.
 	 * 
@@ -68,9 +83,13 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 
 	private Collection<EPackage> getEPackages(List<Resource> resources) {
 		return resources.stream()
-			.map(r -> (EPackage) r.getContents().get(0))
+			.map(this::getEPackage)
 			.sorted(ePackageComparator()) // we must be deterministic
 			.collect(Collectors.toList());
+	}
+
+	private EPackage getEPackage(Resource r) {
+		return (EPackage) r.getContents().get(0);
 	}
 
 	private Comparator<EPackage> ePackageComparator() {
