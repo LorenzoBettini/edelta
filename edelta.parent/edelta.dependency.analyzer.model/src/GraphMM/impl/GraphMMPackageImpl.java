@@ -149,6 +149,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getRepository() {
 		return repositoryEClass;
 	}
@@ -158,6 +159,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getNode() {
 		return nodeEClass;
 	}
@@ -167,6 +169,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getNode_Path() {
 		return (EAttribute)nodeEClass.getEStructuralFeatures().get(0);
 	}
@@ -176,6 +179,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getNode_Name() {
 		return (EAttribute)nodeEClass.getEStructuralFeatures().get(1);
 	}
@@ -185,6 +189,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getNode_Highlighted() {
 		return (EAttribute)nodeEClass.getEStructuralFeatures().get(2);
 	}
@@ -194,6 +199,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getNode_Graph() {
 		return (EReference)nodeEClass.getEStructuralFeatures().get(3);
 	}
@@ -203,6 +209,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getNode_Virtual() {
 		return (EAttribute)nodeEClass.getEStructuralFeatures().get(4);
 	}
@@ -212,6 +219,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getEdge() {
 		return edgeEClass;
 	}
@@ -221,6 +229,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getModel() {
 		return modelEClass;
 	}
@@ -230,6 +239,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getDependency() {
 		return dependencyEClass;
 	}
@@ -239,6 +249,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getDependency_Src() {
 		return (EReference)dependencyEClass.getEStructuralFeatures().get(0);
 	}
@@ -248,6 +259,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getDependency_Trg() {
 		return (EReference)dependencyEClass.getEStructuralFeatures().get(1);
 	}
@@ -257,6 +269,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getDependency_Bidirectional() {
 		return (EAttribute)dependencyEClass.getEStructuralFeatures().get(2);
 	}
@@ -266,6 +279,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getGraph() {
 		return graphEClass;
 	}
@@ -275,6 +289,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getGraph_Nodes() {
 		return (EReference)graphEClass.getEStructuralFeatures().get(0);
 	}
@@ -284,6 +299,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getGraph_Edges() {
 		return (EReference)graphEClass.getEStructuralFeatures().get(1);
 	}
@@ -293,6 +309,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getMetamodel() {
 		return metamodelEClass;
 	}
@@ -302,6 +319,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getMetamodel_NsURI() {
 		return (EAttribute)metamodelEClass.getEStructuralFeatures().get(0);
 	}
@@ -311,6 +329,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getConformance() {
 		return conformanceEClass;
 	}
@@ -320,6 +339,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getConformance_Metamodel() {
 		return (EReference)conformanceEClass.getEStructuralFeatures().get(0);
 	}
@@ -329,6 +349,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getConformance_Model() {
 		return (EReference)conformanceEClass.getEStructuralFeatures().get(1);
 	}
@@ -338,6 +359,7 @@ public class GraphMMPackageImpl extends EPackageImpl implements GraphMMPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GraphMMFactory getGraphMMFactory() {
 		return (GraphMMFactory)getEFactoryInstance();
 	}

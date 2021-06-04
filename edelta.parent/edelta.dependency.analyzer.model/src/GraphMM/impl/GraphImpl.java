@@ -81,6 +81,7 @@ public abstract class GraphImpl extends MinimalEObjectImpl.Container implements 
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EList<Node> getNodes() {
 		if (nodes == null) {
 			nodes = new EObjectContainmentWithInverseEList<Node>(Node.class, this, GraphMMPackage.GRAPH__NODES, GraphMMPackage.NODE__GRAPH);
@@ -93,6 +94,7 @@ public abstract class GraphImpl extends MinimalEObjectImpl.Container implements 
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EList<Edge> getEdges() {
 		if (edges == null) {
 			edges = new EObjectContainmentEList<Edge>(Edge.class, this, GraphMMPackage.GRAPH__EDGES);

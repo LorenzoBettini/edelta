@@ -138,6 +138,7 @@ public abstract class NodeImpl extends MinimalEObjectImpl.Container implements N
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getPath() {
 		return path;
 	}
@@ -147,6 +148,7 @@ public abstract class NodeImpl extends MinimalEObjectImpl.Container implements N
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setPath(String newPath) {
 		String oldPath = path;
 		path = newPath;
@@ -159,6 +161,7 @@ public abstract class NodeImpl extends MinimalEObjectImpl.Container implements N
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -168,6 +171,7 @@ public abstract class NodeImpl extends MinimalEObjectImpl.Container implements N
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setName(String newName) {
 		String oldName = name;
 		name = newName;
@@ -180,6 +184,7 @@ public abstract class NodeImpl extends MinimalEObjectImpl.Container implements N
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isHighlighted() {
 		return highlighted;
 	}
@@ -189,6 +194,7 @@ public abstract class NodeImpl extends MinimalEObjectImpl.Container implements N
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setHighlighted(boolean newHighlighted) {
 		boolean oldHighlighted = highlighted;
 		highlighted = newHighlighted;
@@ -201,6 +207,7 @@ public abstract class NodeImpl extends MinimalEObjectImpl.Container implements N
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Graph getGraph() {
 		if (eContainerFeatureID() != GraphMMPackage.NODE__GRAPH) return null;
 		return (Graph)eInternalContainer();
@@ -221,6 +228,7 @@ public abstract class NodeImpl extends MinimalEObjectImpl.Container implements N
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setGraph(Graph newGraph) {
 		if (newGraph != eInternalContainer() || (eContainerFeatureID() != GraphMMPackage.NODE__GRAPH && newGraph != null)) {
 			if (EcoreUtil.isAncestor(this, newGraph))
@@ -242,6 +250,7 @@ public abstract class NodeImpl extends MinimalEObjectImpl.Container implements N
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isVirtual() {
 		return virtual;
 	}
@@ -251,6 +260,7 @@ public abstract class NodeImpl extends MinimalEObjectImpl.Container implements N
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setVirtual(boolean newVirtual) {
 		boolean oldVirtual = virtual;
 		virtual = newVirtual;

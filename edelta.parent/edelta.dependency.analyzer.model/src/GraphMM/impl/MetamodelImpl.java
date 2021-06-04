@@ -69,6 +69,7 @@ public class MetamodelImpl extends NodeImpl implements Metamodel {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getNsURI() {
 		return nsURI;
 	}
@@ -78,6 +79,7 @@ public class MetamodelImpl extends NodeImpl implements Metamodel {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setNsURI(String newNsURI) {
 		String oldNsURI = nsURI;
 		nsURI = newNsURI;

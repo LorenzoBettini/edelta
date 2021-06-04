@@ -71,6 +71,7 @@ public class GraphMMFactoryImpl extends EFactoryImpl implements GraphMMFactory {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Repository createRepository() {
 		RepositoryImpl repository = new RepositoryImpl();
 		return repository;
@@ -81,6 +82,7 @@ public class GraphMMFactoryImpl extends EFactoryImpl implements GraphMMFactory {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Model createModel() {
 		ModelImpl model = new ModelImpl();
 		return model;
@@ -91,6 +93,7 @@ public class GraphMMFactoryImpl extends EFactoryImpl implements GraphMMFactory {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Dependency createDependency() {
 		DependencyImpl dependency = new DependencyImpl();
 		return dependency;
@@ -101,6 +104,7 @@ public class GraphMMFactoryImpl extends EFactoryImpl implements GraphMMFactory {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Metamodel createMetamodel() {
 		MetamodelImpl metamodel = new MetamodelImpl();
 		return metamodel;
@@ -111,6 +115,7 @@ public class GraphMMFactoryImpl extends EFactoryImpl implements GraphMMFactory {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Conformance createConformance() {
 		ConformanceImpl conformance = new ConformanceImpl();
 		return conformance;
@@ -121,6 +126,7 @@ public class GraphMMFactoryImpl extends EFactoryImpl implements GraphMMFactory {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public GraphMMPackage getGraphMMPackage() {
 		return (GraphMMPackage)getEPackage();
 	}

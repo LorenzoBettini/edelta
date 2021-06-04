@@ -93,6 +93,7 @@ public class DependencyImpl extends EdgeImpl implements Dependency {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Node getSrc() {
 		if (src != null && src.eIsProxy()) {
 			InternalEObject oldSrc = (InternalEObject)src;
@@ -119,6 +120,7 @@ public class DependencyImpl extends EdgeImpl implements Dependency {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setSrc(Node newSrc) {
 		Node oldSrc = src;
 		src = newSrc;
@@ -131,6 +133,7 @@ public class DependencyImpl extends EdgeImpl implements Dependency {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Node getTrg() {
 		if (trg != null && trg.eIsProxy()) {
 			InternalEObject oldTrg = (InternalEObject)trg;
@@ -157,6 +160,7 @@ public class DependencyImpl extends EdgeImpl implements Dependency {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setTrg(Node newTrg) {
 		Node oldTrg = trg;
 		trg = newTrg;
@@ -169,6 +173,7 @@ public class DependencyImpl extends EdgeImpl implements Dependency {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public boolean isBidirectional() {
 		return bidirectional;
 	}
@@ -178,6 +183,7 @@ public class DependencyImpl extends EdgeImpl implements Dependency {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setBidirectional(boolean newBidirectional) {
 		boolean oldBidirectional = bidirectional;
 		bidirectional = newBidirectional;

@@ -73,6 +73,7 @@ public class ConformanceImpl extends EdgeImpl implements Conformance {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Metamodel getMetamodel() {
 		if (metamodel != null && metamodel.eIsProxy()) {
 			InternalEObject oldMetamodel = (InternalEObject)metamodel;
@@ -99,6 +100,7 @@ public class ConformanceImpl extends EdgeImpl implements Conformance {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setMetamodel(Metamodel newMetamodel) {
 		Metamodel oldMetamodel = metamodel;
 		metamodel = newMetamodel;
@@ -111,6 +113,7 @@ public class ConformanceImpl extends EdgeImpl implements Conformance {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Model getModel() {
 		if (model != null && model.eIsProxy()) {
 			InternalEObject oldModel = (InternalEObject)model;
@@ -137,6 +140,7 @@ public class ConformanceImpl extends EdgeImpl implements Conformance {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setModel(Model newModel) {
 		Model oldModel = model;
 		model = newModel;
