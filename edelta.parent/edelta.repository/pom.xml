@@ -470,7 +470,6 @@ metadata.repository.factory.order=content.xml.xz,content.xml,\!
                     <args>${sites}</args>
                     <args>-installIUs</args>
                     <args>${features}</args>
-                    <!-- <args>-verifyOnly</args> -->
                   </applicationsArgs>
                 </configuration>
                 <goals>
