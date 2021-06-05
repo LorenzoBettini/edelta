@@ -8,6 +8,6 @@
    </feature>
    <category-def name="main" label="Edelta 2.4.x"/>
    <category-def name="main.source" label="Edelta 2.4.x (Sources)"/>
-   <repository-reference location="http://download.eclipse.org/modeling/tmf/xtext/updates/releases/${xtextVersion}/" enabled="true" />
-   <repository-reference location="http://download.eclipse.org/releases/${eclipse-version}/" enabled="true" />
+   <repository-reference location="https://download.eclipse.org/modeling/tmf/xtext/updates/releases/${xtextVersion}/" enabled="true" />
+   <repository-reference location="https://download.eclipse.org/releases/${eclipse-version}/" enabled="true" />
 </site>
