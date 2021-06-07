@@ -19,11 +19,11 @@ import org.eclipse.xtext.util.StringInputStream;
 
 import edelta.dependency.analyzer.EdeltaDependencyAnalizer;
 
-public class SampleHandler extends AbstractHandler {
+public class EdeltaRunDependencyAnalysisHandler extends AbstractHandler {
 
 	private static final String PICTO_FILE_CONTENTS = "<?nsuri picto?>\n"
 			+ "<picto\n"
-			+ "	transformation=\"platform:/plugin/edelta.dependency.analyzer.picto/picto/ecosystem2graphd3.egx\">\n"
+			+ "  transformation=\"platform:/plugin/edelta.dependency.analyzer.picto/picto/ecosystem2graphd3.egx\">\n"
 			+ "</picto>\n";
 
 	@Override
@@ -36,8 +36,6 @@ public class SampleHandler extends AbstractHandler {
 			var edeltaDependencyAnalizer = new EdeltaDependencyAnalizer();
 			var project = workspaceFile.getProject();
 			var projectPath = project.getLocation().toFile().getAbsolutePath();
-			System.out.println(path);
-			System.out.println(projectPath);
 			try {
 				var repository = edeltaDependencyAnalizer.analyzeEPackage(path);
 				var parentDirectoryName = fileSystemFile.getParentFile().getName();
@@ -60,8 +58,6 @@ public class SampleHandler extends AbstractHandler {
 			}
 			
 		}
-//		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-//		MessageDialog.openInformation(window.getShell(), "Edelta Dependency Analyzer Ui", "Hello, Eclipse world");
 		return null;
 	}
 }

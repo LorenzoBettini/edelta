@@ -16,7 +16,7 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="edelta.dependency.analyzer.ui.handlers.SampleHandler"
+            class="edelta.dependency.analyzer.ui.handlers.EdeltaRunDependencyAnalysisHandler"
             commandId="edelta.dependency.analyzer.ui.commands.sampleCommand">
       </handler>
    </extension>
