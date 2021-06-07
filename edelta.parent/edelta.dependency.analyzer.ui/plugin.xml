@@ -32,7 +32,6 @@
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
-            allPopups="true"
             locationURI="popup:org.eclipse.ui.popup.any">
          <menu
                id="edelta.dependency.analyzer.ui.menus.sampleMenu"
@@ -43,8 +42,33 @@
                   id="edelta.dependency.analyzer.ui.menus.sampleCommand"
                   mnemonic="S">
             </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeMenuSelection">
+                  <reference
+                        definitionId="edelta.dependency.analyzer.ui.ecoreFile">
+                  </reference>
+               </with>
+            </visibleWhen>
          </menu>
       </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.definitions">
+      <definition
+            id="edelta.dependency.analyzer.ui.ecoreFile">
+         <iterate
+               ifEmpty="false">
+            <adapt
+                  type="org.eclipse.core.resources.IFile">
+               <test
+                     property="org.eclipse.core.resources.name"
+                     value="*.ecore">
+               </test>
+            </adapt>
+         </iterate>
+      </definition>
    </extension>
 
 </plugin>
