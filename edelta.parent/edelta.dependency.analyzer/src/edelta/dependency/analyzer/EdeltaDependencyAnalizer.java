@@ -32,6 +32,12 @@ import GraphMM.Repository;
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaLibrary;
 
+/**
+ * Analyzes the dependencies of {@link EPackage}s and creates a {@link Repository}.
+ * 
+ * @author Lorenzo Bettini
+ *
+ */
 public class EdeltaDependencyAnalizer extends AbstractEdelta {
 
 	private static final GraphMMFactory graphFactory = GraphMMFactory.eINSTANCE;
