@@ -11,7 +11,7 @@
 
    <requires>
       <import feature="org.eclipse.epsilon.emf.feature" version="2.3.0"/>
-      <import plugin="org.eclipse.epsilon.picto" version="2.3.0"/>
+      <import feature="org.eclipse.epsilon.picto.feature" version="2.3.0"/>
    </requires>
 
    <plugin
