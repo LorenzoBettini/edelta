@@ -208,6 +208,7 @@
       <properties>
         <github-update-repo>git@github.com:LorenzoBettini/edelta-snapshots.git</github-update-repo>
         <site.label>Edelta Snapshot Site</site.label>
+        <remote.dir>lbettini@frs.sourceforge.net:/home/frs/project/edelta/snapshots</remote.dir>
       </properties>
     </profile>
     <profile>
