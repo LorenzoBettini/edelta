@@ -45,6 +45,8 @@
       <feature id="edelta.product.ui.feature"/>
       <feature id="edelta.feature" installMode="root"/>
       <feature id="edelta.feature.source" installMode="root"/>
+      <feature id="edelta.dependency.analyzer.feature" installMode="root"/>
+      <feature id="edelta.dependency.analyzer.feature.source" installMode="root"/>
    </features>
 
    <configurations>
