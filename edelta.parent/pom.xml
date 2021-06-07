@@ -140,6 +140,8 @@
         <module>edelta.dependency.analyzer.model.edit</module>
         <module>edelta.dependency.analyzer</module>
         <module>edelta.dependency.analyzer.tests</module>
+        <module>edelta.dependency.analyzer.picto</module>
+        <module>edelta.dependency.analyzer.ui</module>
         <module>edelta.testutils</module>
         <module>edelta.testing.libraries</module>
         <module>edelta.lib.tests</module>
