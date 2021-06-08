@@ -1,11 +1,9 @@
 package edelta.swtbot.tests;
 
-import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.cleanWorkspace;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.root;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.waitForBuild;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -17,9 +15,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
-import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.eclipse.ui.PlatformUI;
@@ -148,35 +144,6 @@ public abstract class EdeltaAbstractSwtbotTest {
 			}
 		}
 		return buffer.toString();
-	}
-
-	protected void createProject() {
-		createProjectAndAssertCreated(TEST_PROJECT);
-	}
-
-	protected void createProjectAndAssertCreated(String projectName) {
-		bot.menu("File").menu("New").menu("Project...").click();
-
-		SWTBotShell shell = bot.shell("New Project");
-		shell.activate();
-		SWTBotTreeItem categoryNode = bot.tree().expandNode(CATEGORY_NAME);
-		categoryNode.select("Edelta Project");
-		bot.button("Next >").click();
-
-		bot.textWithLabel("Project name:").setText(TEST_PROJECT);
-
-		bot.button("Finish").click();
-
-		// creation of a project might require some time
-		bot.waitUntil(shellCloses(shell), SWTBotPreferences.TIMEOUT);
-		assertProjectCreated(projectName);
-
-		System.out.println("Waiting for build...");
-		waitForBuild();
-	}
-
-	protected void assertProjectCreated(String projectName) {
-		assertTrue("Project doesn't exist: " + projectName, isProjectCreated(projectName));
 	}
 
 }
