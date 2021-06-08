@@ -10,9 +10,4 @@
   <artifactId>edelta.dependency.analyzer.ui</artifactId>
   <packaging>eclipse-plugin</packaging>
 
-  <properties>
-    <!-- Avoid sonar analysis -->
-    <sonar.sources></sonar.sources>
-  </properties>
-
 </project>
