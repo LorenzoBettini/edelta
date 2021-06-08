@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="Subscription" nsURI="http://cs.gssi.it/subscriptions" nsPrefix="Subscription">
+  <eClassifiers xsi:type="ecore:EClass" name="Subscriptions">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="subscriptions" upperBound="-1"
+        eType="#//Subscription" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Subscription">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="person" lowerBound="1"
+        eType="ecore:EClass PersonsMM.ecore#//Person"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="card" lowerBound="1" eType="ecore:EClass PersonsMM.ecore#//CreditCard"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="account" lowerBound="1"
+        eType="ecore:EClass WebApp.ecore#//Account"/>
+  </eClassifiers>
+</ecore:EPackage>
