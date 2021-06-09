@@ -12,7 +12,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.xtext.util,
  edelta.dependency.analyzer.picto,
- org.eclipse.core.expressions
+ org.eclipse.core.expressions,
+ edelta.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Automatic-Module-Name: edelta.dependency.analyzer.ui
 Bundle-ActivationPolicy: lazy

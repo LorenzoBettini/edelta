@@ -12,12 +12,24 @@
             id="edelta.dependency.analyzer.ui.commands.analyzeCommand"
             name="Analyze Ecore Files">
       </command>
+      <command
+            categoryId="edelta.dependency.analyzer.ui.commands.category"
+            id="edelta.dependency.analyzer.ui.commands.generateTemplateCommand"
+            name="Generate Edelta Template File">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
             class="edelta.dependency.analyzer.ui.handlers.EdeltaRunDependencyAnalysisHandler"
             commandId="edelta.dependency.analyzer.ui.commands.analyzeCommand">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="edelta.dependency.analyzer.ui.handlers.EdeltaTemplateGeneratorHandler"
+            commandId="edelta.dependency.analyzer.ui.commands.generateTemplateCommand">
       </handler>
    </extension>
    <extension
@@ -40,7 +52,12 @@
             <command
                   commandId="edelta.dependency.analyzer.ui.commands.analyzeCommand"
                   id="edelta.dependency.analyzer.ui.menus.analyzeCommand"
-                  mnemonic="S">
+                  mnemonic="A">
+            </command>
+            <command
+                  commandId="edelta.dependency.analyzer.ui.commands.generateTemplateCommand"
+                  id="edelta.dependency.analyzer.ui.menus.generateTemplateCommand"
+                  mnemonic="A">
             </command>
             <visibleWhen
                   checkEnabled="false">
