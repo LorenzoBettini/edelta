@@ -7,7 +7,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.xtext.util.StringInputStream;
@@ -27,14 +27,20 @@ import edelta.ui.internal.EdeltaActivator;
  */
 public class EdeltaTemplateGeneratorHandler extends AbstractHandler {
 
+	private static final int MONITOR_CHILD_WORK = 20;
+	private static final int MONITOR_WORK = 100;
+
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		EdeltaDependencyAnalyzerUiUtils.executeOnIFileSelection(event, workspaceFile -> {
+		EdeltaDependencyAnalyzerUiUtils.executeOnIFileSelection(event, (workspaceFile, monitor) -> {
+			var subMonitor = SubMonitor.convert(monitor, "Generate Template File", MONITOR_WORK);
+			subMonitor.beginTask("Analyze Ecores", MONITOR_CHILD_WORK);
 			var fileSystemFile = workspaceFile.getLocation().toFile();
 			var path = fileSystemFile.getAbsolutePath();
 			var edeltaDependencyAnalizer = new EdeltaDependencyAnalizer();
 			var repository = edeltaDependencyAnalizer.analyzeEPackage(path);
 			var dependencies = EdeltaDependencyAnalyzerUtils.computeMetamodelDependencies(repository);
+			subMonitor.worked(MONITOR_CHILD_WORK);
 
 			var project = workspaceFile.getProject();
 			var outputPath = "src";
@@ -44,17 +50,18 @@ public class EdeltaTemplateGeneratorHandler extends AbstractHandler {
 				+ "Template.edelta";
 
 			var generatedFile = project.getFile(outputPath + "/" + generatedEdeltaFileName);
-			generatedFile.delete(true, new NullProgressMonitor());
+			generatedFile.delete(true, subMonitor.newChild(MONITOR_CHILD_WORK));
 			var contents = edeltaFileContents(dependencies);
 			try (InputStream stream = new StringInputStream(contents, generatedFile.getCharset(true))) {
-				generatedFile.create(stream, true, new NullProgressMonitor());
+				generatedFile.create(stream, true, subMonitor.newChild(MONITOR_CHILD_WORK));
 			}
 
-			project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+			project.refreshLocal(IResource.DEPTH_INFINITE, subMonitor.newChild(MONITOR_CHILD_WORK));
 
 			var page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 			page.openEditor(new FileEditorInput(generatedFile),
 					EdeltaActivator.EDELTA_EDELTA);
+			subMonitor.done();
 		});
 		return null;
 	}

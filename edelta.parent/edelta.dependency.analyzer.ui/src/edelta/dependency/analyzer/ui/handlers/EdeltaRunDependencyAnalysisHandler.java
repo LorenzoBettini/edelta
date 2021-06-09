@@ -6,7 +6,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.epsilon.picto.PictoView;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
@@ -27,17 +27,23 @@ import edelta.dependency.analyzer.ui.internal.EdeltaDependencyAnalyzerUiUtils;
  */
 public class EdeltaRunDependencyAnalysisHandler extends AbstractHandler {
 
+	private static final int MONITOR_CHILD_WORK = 20;
+	private static final int MONITOR_WORK = 100;
+
 	private static final String PICTO_FILE_CONTENTS = "<?nsuri picto?>\n" + "<picto\n"
 			+ "  transformation=\"platform:/plugin/edelta.dependency.analyzer.picto/picto/ecosystem2graphd3.egx\">\n"
 			+ "</picto>\n";
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		EdeltaDependencyAnalyzerUiUtils.executeOnIFileSelection(event, workspaceFile -> {
+		EdeltaDependencyAnalyzerUiUtils.executeOnIFileSelection(event, (workspaceFile, monitor) -> {
+			var subMonitor = SubMonitor.convert(monitor, "Dependency Analysis", MONITOR_WORK);
+			subMonitor.beginTask("Analyze Ecores", MONITOR_CHILD_WORK);
 			var fileSystemFile = workspaceFile.getLocation().toFile();
 			var path = fileSystemFile.getAbsolutePath();
 			var edeltaDependencyAnalizer = new EdeltaDependencyAnalizer();
 			var repository = edeltaDependencyAnalizer.analyzeEPackage(path);
+			subMonitor.worked(MONITOR_CHILD_WORK);
 
 			var project = workspaceFile.getProject();
 			var projectPath = project.getLocation().toFile().getAbsolutePath();
@@ -46,13 +52,13 @@ public class EdeltaRunDependencyAnalysisHandler extends AbstractHandler {
 			var generatedModelName = workspaceFile.getName() + ".graphmm";
 			edeltaDependencyAnalizer.saveRepository(repository, projectPath + outputPath, generatedModelName);
 
-			project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+			project.refreshLocal(IResource.DEPTH_INFINITE, subMonitor.newChild(MONITOR_CHILD_WORK));
 
 			var generatedFile = project.getFile(outputPath + "/" + generatedModelName);
 			var generatedPictoFile = project.getFile(outputPath + "/" + generatedModelName + ".picto");
-			generatedPictoFile.delete(true, new NullProgressMonitor());
+			generatedPictoFile.delete(true, subMonitor.newChild(MONITOR_CHILD_WORK));
 			try (InputStream stream = new StringInputStream(PICTO_FILE_CONTENTS, generatedPictoFile.getCharset(true))) {
-				generatedPictoFile.create(stream, true, new NullProgressMonitor());
+				generatedPictoFile.create(stream, true, subMonitor.newChild(MONITOR_CHILD_WORK));
 			}
 
 			var page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
@@ -60,6 +66,7 @@ public class EdeltaRunDependencyAnalysisHandler extends AbstractHandler {
 					"org.eclipse.emf.ecore.presentation.ReflectiveEditorID");
 
 			page.showView(PictoView.ID);
+			subMonitor.done();
 		});
 		return null;
 	}
