@@ -14,6 +14,7 @@ import org.eclipse.xtext.util.StringInputStream;
 
 import edelta.dependency.analyzer.EdeltaDependencyAnalizer;
 import edelta.dependency.analyzer.EdeltaDependencyAnalyzerUtils;
+import edelta.dependency.analyzer.EdeltaMetamodelDependencies;
 import edelta.dependency.analyzer.ui.internal.EdeltaDependencyAnalyzerUiUtils;
 import edelta.ui.internal.EdeltaActivator;
 
@@ -44,13 +45,7 @@ public class EdeltaTemplateGeneratorHandler extends AbstractHandler {
 
 			var generatedFile = project.getFile(outputPath + "/" + generatedEdeltaFileName);
 			generatedFile.delete(true, new NullProgressMonitor());
-			var contents = "// This is just an initial edelta file:\n" +
-					"// make sure you rename it before editing it\n" +
-					"// since it will be removed on the next run.\n\n";
-			contents += "metamodel \"" + dependencies.getHighlighted().getName() + "\"\n";
-			contents += dependencies.getDependencies().stream()
-					.map(d -> "metamodel \"" + d.getName() + "\"")
-					.collect(Collectors.joining("\n"));
+			var contents = edeltaFileContents(dependencies);
 			try (InputStream stream = new StringInputStream(contents, generatedFile.getCharset(true))) {
 				generatedFile.create(stream, true, new NullProgressMonitor());
 			}
@@ -62,5 +57,17 @@ public class EdeltaTemplateGeneratorHandler extends AbstractHandler {
 					EdeltaActivator.EDELTA_EDELTA);
 		});
 		return null;
+	}
+
+	private String edeltaFileContents(EdeltaMetamodelDependencies dependencies) {
+		var stringBuilder = new StringBuilder();
+		stringBuilder.append("// This is just an initial edelta file:\n");
+		stringBuilder.append("// make sure you rename it before editing it\n");
+		stringBuilder.append("// since it will be removed on the next run.\n\n");
+		stringBuilder.append("metamodel \"" + dependencies.getHighlighted().getName() + "\"\n");
+		stringBuilder.append(dependencies.getDependencies().stream()
+				.map(d -> "metamodel \"" + d.getName() + "\"")
+				.collect(Collectors.joining("\n")));
+		return stringBuilder.toString();
 	}
 }
