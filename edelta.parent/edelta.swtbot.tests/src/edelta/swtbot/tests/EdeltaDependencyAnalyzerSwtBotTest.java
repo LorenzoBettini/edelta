@@ -17,7 +17,9 @@ import edelta.swtbot.tests.utils.ProjectImportUtil;
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class EdeltaDependencyAnalyzerSwtBotTest extends EdeltaAbstractSwtbotTest {
 
-	private static String TEST_PROJECT = "edelta.dependency.analyzer.swtbot.tests.project";
+	private static final String TEST_PROJECT = "edelta.dependency.analyzer.swtbot.tests.project";
+	private static final String PERSONS_MM_ECORE = "PersonsMM.ecore";
+	private static final String PERSONS_MM_ECORE_GRAPHMM = "PersonsMM.ecore.graphmm";
 
 	@BeforeClass
 	public static void importTestProject() throws Exception {
@@ -30,12 +32,13 @@ public class EdeltaDependencyAnalyzerSwtBotTest extends EdeltaAbstractSwtbotTest
 		assertErrorsInProject(0);
 		getProjectTreeItem(TEST_PROJECT)
 			.expand()
-			.expandNode("model", "PersonsMM.ecore").select()
+			.expandNode("model", PERSONS_MM_ECORE).select()
 			.contextMenu("Edelta").menu("Analyze Ecore Files").click();
-		bot.editorByTitle("PersonsMM.ecore.graphmm");
+		bot.editorByTitle(PERSONS_MM_ECORE_GRAPHMM);
 		getProjectTreeItem(TEST_PROJECT)
 			.expand()
-			.expandNode("analysis", "results", "model", "PersonsMM.ecore.graphmm");
+			.expandNode("analysis", "results", "model", PERSONS_MM_ECORE_GRAPHMM);
+		bot.viewByPartName("Picto");
 	}
 
 }
