@@ -1,4 +1,4 @@
-package edelta.dependency.analyzer.ui;
+package edelta.dependency.analyzer.ui.internal;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
