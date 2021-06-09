@@ -12,13 +12,22 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.xtext.util.StringInputStream;
 
+import GraphMM.Repository;
 import edelta.dependency.analyzer.EdeltaDependencyAnalizer;
 import edelta.dependency.analyzer.ui.internal.EdeltaDependencyAnalyzerUiUtils;
 
+/**
+ * Runs the dependency analysis on the selected ecore file and the other ecore
+ * files in the same directory, creates the {@link Repository} model, saves it,
+ * generates the corresponding picto file and opens the EMF editor and Picto
+ * view.
+ * 
+ * @author Lorenzo Bettini
+ *
+ */
 public class EdeltaRunDependencyAnalysisHandler extends AbstractHandler {
 
-	private static final String PICTO_FILE_CONTENTS = "<?nsuri picto?>\n"
-			+ "<picto\n"
+	private static final String PICTO_FILE_CONTENTS = "<?nsuri picto?>\n" + "<picto\n"
 			+ "  transformation=\"platform:/plugin/edelta.dependency.analyzer.picto/picto/ecosystem2graphd3.egx\">\n"
 			+ "</picto>\n";
 
@@ -28,23 +37,28 @@ public class EdeltaRunDependencyAnalysisHandler extends AbstractHandler {
 			var fileSystemFile = workspaceFile.getLocation().toFile();
 			var path = fileSystemFile.getAbsolutePath();
 			var edeltaDependencyAnalizer = new EdeltaDependencyAnalizer();
+			var repository = edeltaDependencyAnalizer.analyzeEPackage(path);
+
 			var project = workspaceFile.getProject();
 			var projectPath = project.getLocation().toFile().getAbsolutePath();
-			var repository = edeltaDependencyAnalizer.analyzeEPackage(path);
 			var parentDirectoryName = fileSystemFile.getParentFile().getName();
 			var outputPath = "/analysis/results/" + parentDirectoryName;
 			var generatedModelName = workspaceFile.getName() + ".graphmm";
-			edeltaDependencyAnalizer.saveRepository(repository,
-				projectPath + outputPath, generatedModelName);
+			edeltaDependencyAnalizer.saveRepository(repository, projectPath + outputPath, generatedModelName);
+
 			project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+
 			var generatedFile = project.getFile(outputPath + "/" + generatedModelName);
 			var generatedPictoFile = project.getFile(outputPath + "/" + generatedModelName + ".picto");
 			generatedPictoFile.delete(true, new NullProgressMonitor());
 			try (InputStream stream = new StringInputStream(PICTO_FILE_CONTENTS, generatedPictoFile.getCharset(true))) {
 				generatedPictoFile.create(stream, true, new NullProgressMonitor());
 			}
+
 			var page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-			page.openEditor(new FileEditorInput(generatedFile), "org.eclipse.emf.ecore.presentation.ReflectiveEditorID");
+			page.openEditor(new FileEditorInput(generatedFile),
+					"org.eclipse.emf.ecore.presentation.ReflectiveEditorID");
+
 			page.showView(PictoView.ID);
 		});
 		return null;
