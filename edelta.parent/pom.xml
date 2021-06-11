@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.github.lorenzobettini.edelta</groupId>
     <artifactId>edelta.bom</artifactId>
-    <version>2.5.0-SNAPSHOT</version>
+    <version>2.6.0-SNAPSHOT</version>
     <relativePath>edelta.bom</relativePath>
   </parent>
   <artifactId>edelta.parent</artifactId>
@@ -267,14 +267,6 @@
     </plugins>
     <pluginManagement>
       <plugins>
-        <!-- Remove when
-          https://github.com/LorenzoBettini/xtext-build-utils/issues/47
-          is fixed -->
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>3.2.0</version>
-        </plugin>
         <plugin>
           <groupId>org.eclipse.xtend</groupId>
           <artifactId>xtend-maven-plugin</artifactId>
