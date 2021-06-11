@@ -136,6 +136,13 @@
         </property>
       </activation>
       <modules>
+        <module>edelta.dependency.analyzer.model</module>
+        <module>edelta.dependency.analyzer.model.edit</module>
+        <module>edelta.dependency.analyzer</module>
+        <module>edelta.dependency.analyzer.tests</module>
+        <module>edelta.dependency.analyzer.picto</module>
+        <module>edelta.dependency.analyzer.ui</module>
+        <module>edelta.dependency.analyzer.feature</module>
         <module>edelta.testutils</module>
         <module>edelta.testing.libraries</module>
         <module>edelta.lib.tests</module>
@@ -201,6 +208,7 @@
       <properties>
         <github-update-repo>git@github.com:LorenzoBettini/edelta-snapshots.git</github-update-repo>
         <site.label>Edelta Snapshot Site</site.label>
+        <remote.dir>lbettini@frs.sourceforge.net:/home/frs/project/edelta/snapshots</remote.dir>
       </properties>
     </profile>
     <profile>

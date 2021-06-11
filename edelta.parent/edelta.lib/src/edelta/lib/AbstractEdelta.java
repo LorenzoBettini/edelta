@@ -142,8 +142,8 @@ public abstract class AbstractEdelta {
 		}
 	}
 
-	public void loadEcoreFile(String path) {
-		packageManager.loadEcoreFile(path);
+	public Resource loadEcoreFile(String path) {
+		return packageManager.loadEcoreFile(path);
 	}
 
 	/**

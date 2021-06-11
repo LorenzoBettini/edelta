@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ASCII"?>
+<graph:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:graph="http://cs.gssi.it/graph">
+  <nodes xsi:type="graph:Metamodel" name="testecoreforusages4" highlighted="true" nsURI="http://my.testecoreforusages4.org"/>
+  <nodes xsi:type="graph:Metamodel" name="testecoreforusages1" nsURI="http://my.testecoreforusages1.org"/>
+  <nodes xsi:type="graph:Metamodel" name="testecoreforusages2" nsURI="http://my.testecoreforusages2.org"/>
+  <nodes xsi:type="graph:Metamodel" name="testecoreforusages3" nsURI="http://my.testecoreforusages3.org"/>
+  <edges xsi:type="graph:Dependency" src="//@nodes.0" trg="//@nodes.1"/>
+  <edges xsi:type="graph:Dependency" src="//@nodes.1" trg="//@nodes.2" bidirectional="true"/>
+  <edges xsi:type="graph:Dependency" src="//@nodes.0" trg="//@nodes.2"/>
+  <edges xsi:type="graph:Dependency" src="//@nodes.3" trg="//@nodes.2"/>
+</graph:Repository>

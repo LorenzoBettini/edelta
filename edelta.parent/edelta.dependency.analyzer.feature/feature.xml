@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="edelta.dependency.analyzer.feature"
+      label="Edelta Dependency Analyzer Feature "
+      version="2.6.0.qualifier"
+      provider-name="Lorenzo Bettini">
+
+   <includes
+         id="edelta.feature"
+         version="0.0.0"/>
+
+   <requires>
+      <import feature="org.eclipse.epsilon.emf.feature" version="2.3.0"/>
+      <import feature="org.eclipse.epsilon.picto.feature" version="2.3.0"/>
+   </requires>
+
+   <plugin
+         id="edelta.dependency.analyzer"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edelta.dependency.analyzer.model"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edelta.dependency.analyzer.model.edit"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edelta.dependency.analyzer.picto"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edelta.dependency.analyzer.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
