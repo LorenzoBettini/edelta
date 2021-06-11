@@ -1,0 +1,44 @@
+var metamodelext = Sequence{".ecore"};
+var modelext = Sequence{".model",".xmi"};
+
+operation Quantifiable internalPath():String{
+return self.eClass.name.concat("s");
+}
+
+operation Any isMetamodel(){
+for (extension in metamodelext) { 
+	if(self.name.isDefined() and self.name.endsWith(extension)){
+		return true;
+	}	
+}
+return false;
+}
+
+operation Any isModel(){
+for (extension in modelext) { 
+	if(self.name.isDefined() and self.name.endsWith(extension)){
+		return true;
+	}	
+}
+return false;
+}
+
+
+
+operation QualityEcosystemDef getMaxValues( artifacttype: String){
+var qualityvalues = new Sequence();
+var evalstoget = self.evaluations.select(eval|eval.subject.eClass.name=artifacttype);
+for (qa in evalstoget.qa.asSet()) { 
+var keyval = new Map<String,Real>; 
+keyval.put("qa",qa.name);
+keyval.put("best",qa.best);
+	for (eval in evalstoget.select(ev|ev.qa.name=qa.name)) {
+
+		keyval.put("max",evalstoget.select(e|e.qa.name=qa.name).actualizedvalue.max());
+		
+	}
+	
+	qualityvalues.add(keyval);
+}
+return qualityvalues;
+}

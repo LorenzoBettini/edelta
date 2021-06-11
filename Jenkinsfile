@@ -10,7 +10,7 @@ node {
      hasToDeploye = true
      mavenArguments = "clean deploy"
    } else if (env.JOB_NAME.endsWith("release-snapshot")) {
-     mavenProfiles = "-Prelease-composite,release-snapshots"
+     mavenProfiles = "-Prelease-composite,release-snapshots,release-ide"
      hasToDeploye = true
      isSnapshot = true
      mavenArguments = "clean deploy"

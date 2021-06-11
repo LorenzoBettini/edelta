@@ -1,0 +1,48 @@
+import "helper.eol"; 
+pre{
+var emfTool = new Native("org.eclipse.epsilon.emc.emf.tools.EmfTool");
+}
+
+rule Repo2Graphviz
+    transform repo : GraphMM::Repository {
+
+    template : "ecosystem2graphd3.egl"
+    
+
+    parameters : Map{
+        "path" = Sequence{ "Repository"},
+        "icon" = "diagram-ffffff",
+        "format" = "html",
+        "nodes" = repo.nodes,
+     
+        "edges" =repo.edges
+    }
+}
+
+rule SingleArtifact
+ 
+	transform node : GraphMM::Metamodel{
+
+	template : "ecosystem2graphd3.egl"
+
+	parameters : Map{
+		"path" = Sequence{"Repository",node.name},
+		"icon" = "diagram-c0c0c0",
+		"format" = "html",
+		"layers" = Sequence {
+		},
+		"subject" = node,
+		
+        "nodes" =  node.getConnected(),
+       
+        "edges" = node.graph.edges.select(e|e.src==node or e.trg==node)
+       
+	}
+	
+}
+
+operation Node getConnected(): Set(Artifact){
+var ecosystem = self.graph;
+return ecosystem.nodes.select(a|ecosystem.edges.select(rel| emfTool.EcoreUtil.equals(rel.src,a) or emfTool.EcoreUtil.equals(rel.trg,a)).select(r|emfTool.EcoreUtil.equals(r.src,self) or emfTool.EcoreUtil.equals(r.trg,self)).size()>0);
+}
+

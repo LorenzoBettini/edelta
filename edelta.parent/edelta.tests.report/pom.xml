@@ -67,6 +67,18 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>edelta.dependency.analyzer</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edelta.dependency.analyzer.ui</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>edelta.lib.tests</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
@@ -92,6 +104,12 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>edelta.refactorings.lib.tests</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edelta.dependency.analyzer.tests</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>

@@ -61,15 +61,18 @@ public class EdeltaEPackageManager {
 	/**
 	 * Loads the ecore file specified in the path
 	 * @param path
+	 * @return the loaded {@link Resource}
 	 */
-	public void loadEcoreFile(String path) {
+	public Resource loadEcoreFile(String path) {
 		// make sure we have a complete file URI,
 		// otherwise the saved modified ecore will contain
 		// wrong references (i.e., with the prefixed relative path)
 		var uri = URI.createFileURI(Paths.get(path).toAbsolutePath().toString());
 		// Demand load resource for this file.
 		LOG.info("Loading " + path + " (URI: " + uri + ")");
-		ecoreToResourceMap.put(path, resourceSet.getResource(uri, true));
+		var resource = resourceSet.getResource(uri, true);
+		ecoreToResourceMap.put(path, resource);
+		return resource;
 	}
 
 	/**
