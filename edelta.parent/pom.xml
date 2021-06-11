@@ -267,14 +267,6 @@
     </plugins>
     <pluginManagement>
       <plugins>
-        <!-- Remove when
-          https://github.com/LorenzoBettini/xtext-build-utils/issues/47
-          is fixed -->
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>3.2.0</version>
-        </plugin>
         <plugin>
           <groupId>org.eclipse.xtend</groupId>
           <artifactId>xtend-maven-plugin</artifactId>
