@@ -34,9 +34,9 @@ public class EdeltaTemplateGeneratorSwtBotTest extends EdeltaAbstractSwtbotTest 
 			.expand()
 			.expandNode("model", PERSONS_MM_ECORE).select()
 			.contextMenu("Edelta").menu("Generate Edelta Template File").click();
-		bot.editorByTitle(PERSONS_MM_TEMPLATE_EDELTA);
 		waitForBuild();
 		assertErrorsInProject(0);
+		bot.editorByTitle(PERSONS_MM_TEMPLATE_EDELTA);
 	}
 
 }
