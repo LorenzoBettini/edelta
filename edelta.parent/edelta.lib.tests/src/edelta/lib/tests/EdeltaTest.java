@@ -273,19 +273,22 @@ public class EdeltaTest {
 
 	@Test
 	public void testSaveModifiedEcoresInNonExistingDirectory() throws IOException {
+		var nested = NEW_MODIFIED + "/nested";
+		deleteDirectory(nested);
 		deleteDirectory(NEW_MODIFIED);
 		try {
 			loadTestEcore(MY_ECORE);
 			loadTestEcore(MY2_ECORE);
 			wipeModifiedDirectoryContents();
-			edelta.saveModifiedEcores(NEW_MODIFIED);
+			edelta.saveModifiedEcores(nested);
 			// we did not modify anything so the generated files and the
 			// original ones must be the same
 			assertFilesAreEquals(
-					TESTECORES+"/"+MY_ECORE, NEW_MODIFIED+"/"+MY_ECORE);
+				TESTECORES + "/" + MY_ECORE, nested + "/" + MY_ECORE);
 			assertFilesAreEquals(
-					TESTECORES+"/"+MY2_ECORE, NEW_MODIFIED+"/"+MY2_ECORE);
+				TESTECORES + "/" + MY2_ECORE, nested + "/" + MY2_ECORE);
 		} finally {
+			deleteDirectory(nested);
 			deleteDirectory(NEW_MODIFIED);
 		}
 	}
