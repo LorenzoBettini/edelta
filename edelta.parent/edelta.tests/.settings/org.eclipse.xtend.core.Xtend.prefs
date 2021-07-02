@@ -5,3 +5,5 @@ eclipse.preferences.version=1
 outlet.DEFAULT_OUTPUT.hideLocalSyntheticVariables=true
 outlet.DEFAULT_OUTPUT.installDslAsPrimarySource=false
 outlet.DEFAULT_OUTPUT.userOutputPerSourceFolder=true
+targetJavaVersion=JAVA11
+useJavaCompilerCompliance=false

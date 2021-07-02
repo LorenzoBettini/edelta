@@ -27,23 +27,24 @@ public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest 
 
 	private static final String TEST_PROJECT = "edelta.ui.tests.project";
 
-	private static String program = 
-	"package foo\n" + 
-	"\n" + 
-	"metamodel \"mypackage\"\n" + 
-	"\n" + 
-	"def anOp() {\n" + 
-	"}\n" + 
-	"\n" + 
-	"modifyEcore aTest epackage mypackage {\n" + 
-	"	addNewEClass(\"MyNewClass\") [\n" + 
-	"		addNewEAttribute(\"MyNewAttribute\", null)\n" + 
-	"	]\n" + 
-	"	ecoreref(MyClass)\n" + 
-	"	ecoreref(MyDerivedClass) => [\n" + 
-	"		addNewEAttribute(\"MyNewDerivedClassAttribute\", null)\n" + 
-	"	]\n" + 
-	"}";
+	private static String program = """
+			package foo
+			
+			metamodel "mypackage"
+			
+			def anOp() {
+			}
+			
+			modifyEcore aTest epackage mypackage {
+				addNewEClass("MyNewClass") [
+					addNewEAttribute("MyNewAttribute", null)
+				]
+				ecoreref(MyClass)
+				ecoreref(MyDerivedClass) => [
+					addNewEAttribute("MyNewDerivedClassAttribute", null)
+				]
+			}
+			""";
 
 	private XtextEditor editor;
 

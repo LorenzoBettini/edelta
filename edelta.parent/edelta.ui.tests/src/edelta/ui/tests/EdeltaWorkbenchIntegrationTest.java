@@ -43,13 +43,15 @@ public class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest 
 	public void testValidProject() throws Exception {
 		createFile(
 			TEST_PROJECT + "/src/Test.edelta",
-			"package foo\n"
-			+ "\n"
-			+ "metamodel \"mypackage\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage mypackage {\n"
-			+ "    ecoreref(MyClass)\n"
-			+ "}");
+			"""
+			package foo
+			
+			metamodel "mypackage"
+			
+			modifyEcore aTest epackage mypackage {
+				ecoreref(MyClass)
+			}
+			""");
 		waitForBuild();
 		PluginProjectHelper.assertNoErrors();
 		assertSrcGenFolderFile("foo", "Test.java");
@@ -60,13 +62,15 @@ public class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest 
 	public void testInvalidProject() throws Exception {
 		createFile(
 			TEST_PROJECT + "/src/Test.edelta",
-			"package foo\n"
-			+ "\n"
-			+ "metamodel \"mypackage\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage mypackage {\n"
-			+ "    ecoreref(Foo)\n"
-			+ "}");
+			"""
+			package foo
+			
+			metamodel "mypackage"
+			
+			modifyEcore aTest epackage mypackage {
+				ecoreref(Foo)
+			}
+			""");
 		waitForBuild();
 		PluginProjectHelper.assertErrors("Foo cannot be resolved.");
 	}
@@ -75,13 +79,15 @@ public class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest 
 	@Flaky
 	public void testDerivedStateEPackagesDontInterfereWithOtherEdeltaFiles() throws Exception {
 		var contents =
-			"package foo\n"
-			+ "\n"
-			+ "metamodel \"mypackage\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage mypackage {\n"
-			+ "    addNewEClass(\"NewClass\")\n"
-			+ "}";
+			"""
+			package foo
+			
+			metamodel "mypackage"
+			
+			modifyEcore aTest epackage mypackage {
+				addNewEClass("NewClass")
+			}
+			""";
 		createFile(
 			TEST_PROJECT + "/src/Test.edelta",
 			contents);
