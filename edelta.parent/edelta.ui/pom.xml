@@ -5,14 +5,9 @@
   <parent>
     <groupId>io.github.lorenzobettini.edelta</groupId>
     <artifactId>edelta.parent</artifactId>
-    <version>2.6.0-SNAPSHOT</version>
+    <version>2.6.1-SNAPSHOT</version>
   </parent>
   <artifactId>edelta.ui</artifactId>
   <packaging>eclipse-plugin</packaging>
-
-  <properties>
-    <!-- Otherwise Sonar will scan xtend-gen both as source and as test -->
-    <sonar.tests></sonar.tests>
-  </properties>
 
 </project>

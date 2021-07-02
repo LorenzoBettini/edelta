@@ -163,6 +163,7 @@ public abstract class AbstractEdelta {
 			final var fileName = p.getFileName().toString();
 			LOG.info("Saving " + outputPath + "/" + fileName);
 			var newFile = new File(outputPath, fileName);
+			newFile.getParentFile().mkdirs();
 			var fos = new FileOutputStream(newFile);
 			entry.getValue().save(fos, null);
 			fos.flush();
