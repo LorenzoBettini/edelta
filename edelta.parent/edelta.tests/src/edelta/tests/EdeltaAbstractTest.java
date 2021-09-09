@@ -95,7 +95,7 @@ public abstract class EdeltaAbstractTest {
 	 * program corresponding to the last input source.
 	 * @throws Exception 
 	 */
-	protected EdeltaProgram parseSeveralWithTestEcore(List<CharSequence> inputs) throws Exception {
+	protected EdeltaProgram parseSeveralWithTestEcore(List<? extends CharSequence> inputs) throws Exception {
 		return parseSeveralInputs(inputs, resourceSetWithTestEcore());
 	}
 
@@ -108,7 +108,7 @@ public abstract class EdeltaAbstractTest {
 		return parseSeveralInputs(inputs, resourceSetWithTestEcores());
 	}
 
-	protected EdeltaProgram parseSeveralInputs(List<CharSequence> inputs, ResourceSet rs) throws Exception {
+	protected EdeltaProgram parseSeveralInputs(List<? extends CharSequence> inputs, ResourceSet rs) throws Exception {
 		EdeltaProgram program = null;
 		for (CharSequence input : inputs) {
 			program = parseHelper.parse(input, rs);
