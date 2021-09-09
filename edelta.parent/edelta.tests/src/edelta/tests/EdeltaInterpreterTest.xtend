@@ -1672,6 +1672,59 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	def void testShowErrorOnCreatedEClassGeneratedByExternalOperation2() throws Exception {
+		// see https://github.com/LorenzoBettini/edelta/issues/384
+		// like the previous one, but with one more level of indirection
+		val inputs = #[
+		'''
+			import org.eclipse.emf.ecore.EPackage
+
+			metamodel "foo"
+			
+			def myCheckInternal(EPackage it) {
+				val found = EClassifiers.findFirst[
+					name == "NewClass"
+				]
+				if (found !== null)
+					showError(
+						found,
+						"Found class " + found.name)
+			}
+		''',
+		'''
+			import org.eclipse.emf.ecore.EPackage
+
+			use edelta.__synthetic0 as extension my
+			
+			def myCheck(EPackage it) {
+				myCheckInternal
+			}
+		''',
+		'''
+			metamodel "foo"
+			
+			use edelta.__synthetic1 as extension my
+			
+			modifyEcore aTest epackage foo {
+				addNewEClass("NewClass")
+				myCheck()
+			}
+		'''
+		]
+		parseSeveralWithTestEcore(inputs) => [
+			interpretProgram
+			assertError(
+				XbasePackage.eINSTANCE.XFeatureCall,
+				EdeltaValidator.LIVE_VALIDATION_ERROR,
+				inputs.last.lastIndexOf('addNewEClass("NewClass")'),
+				'addNewEClass("NewClass")'.length,
+				"Found class NewClass"
+			)
+			assertErrorsAsStrings("Found class NewClass")
+		]
+	}
+
+	@Test
 	def void testIntroducedCycles() throws Exception {
 		val input = '''
 			metamodel "foo"
