@@ -1630,7 +1630,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testShowErrorOnCreatedEClassGeneratedByExternalOperation() throws Exception {
-		// see https://github.com/LorenzoBettini/edelta/issues/384
+		// see https://github.com/LorenzoBettini/edelta/issues/348
 		val inputs = #[
 		'''
 			import org.eclipse.emf.ecore.EPackage
@@ -1673,7 +1673,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testShowErrorOnCreatedEClassGeneratedByExternalOperation2() throws Exception {
-		// see https://github.com/LorenzoBettini/edelta/issues/384
+		// see https://github.com/LorenzoBettini/edelta/issues/348
 		// like the previous one, but with one more level of indirection
 		val inputs = #[
 		'''
