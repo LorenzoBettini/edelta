@@ -451,6 +451,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
+			import edelta.lib.EdeltaIssuePresenter;
 			import edelta.tests.additional.MyCustomEdelta;
 			import org.eclipse.emf.ecore.EPackage;
 			
@@ -460,6 +461,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public MyFile0() {
 			    my = new MyCustomEdelta(this);
+			  }
+			  
+			  @Override
+			  public void setIssuePresenter(final EdeltaIssuePresenter issuePresenter) {
+			    super.setIssuePresenter(issuePresenter);
+			    my.setIssuePresenter(issuePresenter);
 			  }
 			  
 			  public MyFile0(final AbstractEdelta other) {
@@ -493,6 +500,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
+			import edelta.lib.EdeltaIssuePresenter;
 			import edelta.tests.additional.MyCustomEdelta;
 			import org.eclipse.emf.ecore.EPackage;
 			import org.eclipse.xtext.xbase.lib.Extension;
@@ -504,6 +512,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public MyFile0() {
 			    my = new MyCustomEdelta(this);
+			  }
+			  
+			  @Override
+			  public void setIssuePresenter(final EdeltaIssuePresenter issuePresenter) {
+			    super.setIssuePresenter(issuePresenter);
+			    my.setIssuePresenter(issuePresenter);
 			  }
 			  
 			  public MyFile0(final AbstractEdelta other) {
@@ -547,6 +561,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
+			import edelta.lib.EdeltaIssuePresenter;
 			import edelta.tests.additional.MyCustomEdelta;
 			import org.eclipse.emf.ecore.EPackage;
 			
@@ -557,6 +572,13 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			     = new MyCustomEdelta(this);
 			    my = new (this);
+			  }
+			  
+			  @Override
+			  public void setIssuePresenter(final EdeltaIssuePresenter issuePresenter) {
+			    super.setIssuePresenter(issuePresenter);
+			    .setIssuePresenter(issuePresenter);
+			    my.setIssuePresenter(issuePresenter);
 			  }
 			  
 			  public MyFile0(final AbstractEdelta other) {
@@ -1601,6 +1623,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				package test3;
 				
 				import edelta.lib.AbstractEdelta;
+				import edelta.lib.EdeltaIssuePresenter;
 				import org.eclipse.emf.ecore.EPackage;
 				import org.eclipse.xtext.xbase.lib.Extension;
 				import test2.MyFile1;
@@ -1612,6 +1635,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				  
 				  public MyFile2() {
 				    my = new MyFile1(this);
+				  }
+				  
+				  @Override
+				  public void setIssuePresenter(final EdeltaIssuePresenter issuePresenter) {
+				    super.setIssuePresenter(issuePresenter);
+				    my.setIssuePresenter(issuePresenter);
 				  }
 				  
 				  public MyFile2(final AbstractEdelta other) {
@@ -1796,12 +1825,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				}
 			}]
 		)
-		// TODO
-		// should contain also
-		// "Adding attribute with prefix"
-		// "Adding reference with prefix
 		assertThat(collectedWarnings)
-			.containsExactly("Modifying SimpleClass")
+			.containsExactly(
+				"Modifying SimpleClass",
+				"Adding attribute with prefix",
+				"Adding reference with prefix"
+			)
 	}
 
 	@Test
@@ -1949,6 +1978,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta.personlist.example;
 			
 			import edelta.lib.AbstractEdelta;
+			import edelta.lib.EdeltaIssuePresenter;
 			import edelta.lib.EdeltaLibrary;
 			import edelta.refactorings.lib.EdeltaRefactorings;
 			import java.util.Collections;
@@ -1967,6 +1997,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public Example() {
 			    refactorings = new EdeltaRefactorings(this);
+			  }
+			  
+			  @Override
+			  public void setIssuePresenter(final EdeltaIssuePresenter issuePresenter) {
+			    super.setIssuePresenter(issuePresenter);
+			    refactorings.setIssuePresenter(issuePresenter);
 			  }
 			  
 			  public Example(final AbstractEdelta other) {
