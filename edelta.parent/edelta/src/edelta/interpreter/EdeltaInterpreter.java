@@ -98,7 +98,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	private EdeltaEcoreHelper ecoreHelper;
 
 	private int interpreterTimeout =
-		Integer.parseInt(System.getProperty("edelta.interpreter.timeout", "20000000"));
+		Integer.parseInt(System.getProperty("edelta.interpreter.timeout", "5000"));
 
 	private static final QualifiedName IT_QUALIFIED_NAME = QualifiedName.create("it");
 
