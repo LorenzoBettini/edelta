@@ -1,6 +1,7 @@
 package edelta.refactorings.lib;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.EdeltaLibrary;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,12 @@ public class EdeltaBadSmellsChecker extends AbstractEdelta {
   
   public EdeltaBadSmellsChecker() {
     finder = new EdeltaBadSmellsFinder(this);
+  }
+  
+  @Override
+  public void setIssuePresenter(final EdeltaIssuePresenter issuePresenter) {
+    super.setIssuePresenter(issuePresenter);
+    finder.setIssuePresenter(issuePresenter);
   }
   
   public EdeltaBadSmellsChecker(final AbstractEdelta other) {

@@ -14,6 +14,7 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
+import edelta.lib.EdeltaIssuePresenter
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -59,7 +60,8 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 		val className = program.fullyQualifiedName
 		acceptor.accept(program.toClass(className)) [
 			superTypes += AbstractEdelta.typeRef
-			for (u : program.useAsClauses) {
+			val useAsClauses = program.useAsClauses
+			for (u : useAsClauses) {
 				members += u.toField(u.name, u.type) [
 					if (u.isExtension)
 						annotations += annotationRef(Extension)
@@ -67,11 +69,26 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 			}
 			members += program.toConstructor[
 				body = '''
-				«FOR u : program.useAsClauses»
+				«FOR u : useAsClauses»
 				«u.name» = new «u.type»(this);
 				«ENDFOR»
 				'''
 			]
+			if (!useAsClauses.isEmpty) {
+				members += program.toMethod("setIssuePresenter", Void.TYPE.typeRef) [
+					visibility = JvmVisibility.PUBLIC
+					annotations += Override.annotationRef
+					parameters += program.toParameter("issuePresenter",
+						EdeltaIssuePresenter.typeRef
+					)
+					body = '''
+						super.setIssuePresenter(issuePresenter);
+						«FOR u : useAsClauses»
+						«u.name».setIssuePresenter(issuePresenter);
+						«ENDFOR»
+					'''
+				]
+			}
 			members += program.toConstructor[
 				parameters += program.toParameter("other", AbstractEdelta.typeRef)
 				body = '''

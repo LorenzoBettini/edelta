@@ -1,6 +1,7 @@
 package edelta.petrinet.example;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.EdeltaLibrary;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.Collections;
@@ -19,6 +20,12 @@ public class PetrinetExample extends AbstractEdelta {
   
   public PetrinetExample() {
     refactorings = new EdeltaRefactorings(this);
+  }
+  
+  @Override
+  public void setIssuePresenter(final EdeltaIssuePresenter issuePresenter) {
+    super.setIssuePresenter(issuePresenter);
+    refactorings.setIssuePresenter(issuePresenter);
   }
   
   public PetrinetExample(final AbstractEdelta other) {
