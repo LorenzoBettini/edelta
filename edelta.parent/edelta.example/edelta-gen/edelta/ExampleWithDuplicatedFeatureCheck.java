@@ -1,6 +1,7 @@
 package edelta;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.EdeltaLibrary;
 import edelta.refactorings.lib.EdeltaBadSmellsChecker;
 import java.util.function.Consumer;
@@ -16,6 +17,12 @@ public class ExampleWithDuplicatedFeatureCheck extends AbstractEdelta {
   
   public ExampleWithDuplicatedFeatureCheck() {
     checker = new EdeltaBadSmellsChecker(this);
+  }
+  
+  @Override
+  public void setIssuePresenter(final EdeltaIssuePresenter issuePresenter) {
+    super.setIssuePresenter(issuePresenter);
+    checker.setIssuePresenter(issuePresenter);
   }
   
   public ExampleWithDuplicatedFeatureCheck(final AbstractEdelta other) {
