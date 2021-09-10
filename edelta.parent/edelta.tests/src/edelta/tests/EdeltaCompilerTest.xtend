@@ -1723,6 +1723,9 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				package test1
 				
 				def enrichWithReference(EClass c, String prefix) : void {
+					showWarning(
+						c,
+						"Adding reference with " + prefix)
 					c.addNewEReference(prefix + "Ref",
 						EcorePackage.eINSTANCE.EObject)
 				}
@@ -1737,6 +1740,9 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				use test1.MyFile0 as extension my
 
 				def enrichWithAttribute(EClass c, String prefix) : void {
+					showWarning(
+						c,
+						"Adding attribute with " + prefix)
 					c.addNewEAttribute(prefix + "Attr",
 						EcorePackage.eINSTANCE.EString)
 					c.enrichWithReference(prefix)
@@ -1790,6 +1796,10 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				}
 			}]
 		)
+		// TODO
+		// should contain also
+		// "Adding attribute with prefix"
+		// "Adding reference with prefix
 		assertThat(collectedWarnings)
 			.containsExactly("Modifying SimpleClass")
 	}
