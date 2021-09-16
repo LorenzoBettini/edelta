@@ -3,7 +3,7 @@ Automatic-Module-Name: edelta.ui.tests.project
 Bundle-ManifestVersion: 2
 Bundle-Name: edelta.dependency.analyzer.swtbot.tests.project
 Bundle-Vendor: Lorenzo Bettini
-Bundle-Version: 2.6.3.qualifier
+Bundle-Version: 2.6.4.qualifier
 Bundle-SymbolicName: edelta.dependency.analyzer.swtbot.tests.project;singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: edelta.lib
