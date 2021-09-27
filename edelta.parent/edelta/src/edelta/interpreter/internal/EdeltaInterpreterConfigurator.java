@@ -3,21 +3,13 @@
  */
 package edelta.interpreter.internal;
 
-import static com.google.common.collect.Sets.newHashSet;
-
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Set;
 
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.xtext.resource.XtextResourceSet;
 
 import com.google.inject.Inject;
@@ -43,49 +35,13 @@ public class EdeltaInterpreterConfigurator {
 			if (context instanceof IJavaProject) {
 				try {
 					final IJavaProject jp = (IJavaProject) context;
-					// String[] runtimeClassPath =
-					// JavaRuntime.computeDefaultRuntimeClassPath(jp);
-					// URL[] urls = new URL[runtimeClassPath.length];
-					// for (int i = 0; i < urls.length; i++) {
-					// urls[i] = new URL(runtimeClassPath[i]);
-					// }
-					// cl = new URLClassLoader(urls);
-					IClasspathEntry[] classpath = jp.getResolvedClasspath(true);
-					final IWorkspaceRoot root = jp.getProject().getWorkspace().getRoot();
-					Set<URL> urls = newHashSet();
-					for (int i = 0; i < classpath.length; i++) {
-						final IClasspathEntry entry = classpath[i];
-						if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-							IPath outputLocation = entry.getOutputLocation();
-							if (outputLocation == null) {
-								outputLocation = jp.getOutputLocation();
-							}
-							IFolder folder = root.getFolder(outputLocation);
-							if (folder.exists()) {
-								urls.add(new URL(folder.getRawLocationURI().toASCIIString() + "/"));
-							}
-						} else if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT) {
-							IPath outputLocation = entry.getOutputLocation();
-							if (outputLocation == null) {
-								IProject project = (IProject) root.getProject(entry.getPath().toString());
-								IJavaProject javaProject = JavaCore.create(project);
-								if (javaProject != null)
-									outputLocation = javaProject.getOutputLocation();
-							}
-							if (outputLocation != null) {
-								IFolder folder = root.getFolder(outputLocation);
-								if (folder.exists()) {
-									urls.add(new URL(folder.getRawLocationURI().toASCIIString() + "/"));
-								}
-							} else {
-								urls.add(entry.getPath().toFile().toURI().toURL());
-							}
-						} else {
-							urls.add(entry.getPath().toFile().toURI().toURL());
-						}
+					String[] runtimeClassPath = JavaRuntime.computeDefaultRuntimeClassPath(jp);
+					URL[] urls = new URL[runtimeClassPath.length];
+					for (int i = 0; i < urls.length; i++) {
+						urls[i] = new URL(runtimeClassPath[i]);
 					}
 					URLClassLoader cl = new URLClassLoader(
-							urls.toArray(new URL[urls.size()]),
+							urls,
 							parentClassLoader);
 					interpreter.setClassLoader(cl);
 				} catch (Exception e) {
