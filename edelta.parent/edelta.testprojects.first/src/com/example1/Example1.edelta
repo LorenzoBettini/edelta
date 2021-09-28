@@ -1,0 +1,47 @@
+// IMPORTANT: ecores must be in a source directory
+// otherwise you can't refer to them
+
+package com.example1
+
+// import existing metamodels
+metamodel "myecore1"
+metamodel "ecore" // this one should usually be there
+
+// you can define reusable functions...
+
+/*
+ * Reusable function to create a new EClass with the
+ * specified name, setting MyEClass as its superclass
+ * @param name
+ */
+def myReusableCreateSubclassOfMyEClass(String name) {
+	newEClass(name) => [
+		// refer to Ecore elements with ecoreref
+		ESuperTypes += ecoreref(MyEClass)
+	]
+}
+
+// ...and then modification blocks
+// look at the "Outline" view, which immediately shows the modified EPackages
+
+// specify modifications of an EPackage
+modifyEcore someModifications epackage myecore1 {
+	// the currently modified package is available
+	// through the implicit parameter 'it', similar to 'this'	
+
+	// use the standard Edelta library functions
+	addNewEClass("NewClass") [
+		// initialize it in a lambda block
+		// where the new class is available through the implicit parameter 'it'
+		addNewEAttribute("myStringAttribute", ecoreref(EString))
+		// references to Ecore elements can be fully qualified
+		addNewEReference("myReference", ecoreref(myecore1.MyEClass)) [
+			// initialization as above
+			// the current element is available through the implicit parameter 'it'
+			// use syntactic sugar for setters
+			upperBound = -1;
+			containment = true;
+			lowerBound = 0
+		]
+	]
+}

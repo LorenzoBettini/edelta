@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="myecore2" nsURI="http://www.eclipse.org/emf/2002/Myecore2" nsPrefix="myecore2">
+  <eClassifiers xsi:type="ecore:EClass" name="MyEClass">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="astring" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="MyENum">
+    <eLiterals name="FirstEnumLiteral"/>
+    <eLiterals name="SecondEnumLiteral" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MyOtherEClass"/>
+  <eClassifiers xsi:type="ecore:EClass" name="NewClass">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="myStringAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="myReference" upperBound="-1"
+        eType="#//MyEClass" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ASubclassOfMyEClass" eSuperTypes="file:/media/bettini/common/workspaces/runtime-Edelta-dev/edelta.testprojects.second/../edelta.testprojects.first/model/My1.ecore#//MyEClass"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AnotherSubclassOfMyEClass" eSuperTypes="file:/media/bettini/common/workspaces/runtime-Edelta-dev/edelta.testprojects.second/../edelta.testprojects.first/model/My1.ecore#//MyEClass #//NewClass"/>
+</ecore:EPackage>
