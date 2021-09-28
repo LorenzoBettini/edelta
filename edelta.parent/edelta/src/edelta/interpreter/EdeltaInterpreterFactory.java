@@ -8,11 +8,8 @@ import org.eclipse.emf.ecore.resource.Resource;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import edelta.interpreter.internal.EdeltaInterpreterConfigurator;
-
 /**
- * Creates an {@link IEdeltaInterpreter} and configures it with
- * {@link EdeltaInterpreterConfigurator}.
+ * Creates an {@link EdeltaInterpreter}.
  * 
  * @author Lorenzo Bettini
  *
@@ -22,12 +19,15 @@ public class EdeltaInterpreterFactory {
 	@Inject
 	private Provider<EdeltaInterpreter> provider;
 
-	@Inject
-	private EdeltaInterpreterConfigurator configurator;
-
+	/**
+	 * The {@link Resource} can be used to retrieve important information, like the
+	 * Java project in the UI.
+	 * 
+	 * @param resource can be used to retrieve important information, like the Java
+	 *                 project in the UI.
+	 * @return
+	 */
 	public EdeltaInterpreter create(Resource resource) {
-		var interpreter = provider.get();
-		configurator.configureInterpreter(interpreter, resource);
-		return interpreter;
+		return provider.get();
 	}
 }

@@ -13,7 +13,8 @@ Require-Bundle: edelta,
  org.eclipse.ui.editors;bundle-version="3.5.0",
  org.eclipse.ui.ide;bundle-version="3.5.0",
  org.eclipse.xtext.xbase.lib;bundle-version="2.13.0",
- org.eclipse.xtext.common.types.ui,org.eclipse.xtend.lib;bundle-version="2.14.0";resolution:=optional,
+ org.eclipse.xtext.common.types.ui,
+ org.eclipse.xtend.lib;bundle-version="2.14.0";resolution:=optional,
  org.eclipse.ui,
  org.eclipse.xtext.xbase.ui,
  org.eclipse.compare,
@@ -23,7 +24,8 @@ Require-Bundle: edelta,
  org.eclipse.core.resources,
  org.eclipse.jdt.core,
  org.eclipse.pde.core,
- org.eclipse.ui.forms
+ org.eclipse.ui.forms,
+ org.eclipse.jdt.launching
 Import-Package: org.apache.log4j
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: edelta.ui.contentassist,
