@@ -23,6 +23,11 @@ import org.junit.runner.RunWith
 import static edelta.testutils.EdeltaTestUtils.*
 
 import static extension org.junit.Assert.*
+import static org.assertj.core.api.Assertions.*
+import edelta.lib.AbstractEdelta
+import java.util.function.Consumer
+import edelta.lib.EdeltaIssuePresenter
+import org.eclipse.emf.ecore.ENamedElement
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
@@ -446,6 +451,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
+			import edelta.lib.EdeltaIssuePresenter;
 			import edelta.tests.additional.MyCustomEdelta;
 			import org.eclipse.emf.ecore.EPackage;
 			
@@ -455,6 +461,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public MyFile0() {
 			    my = new MyCustomEdelta(this);
+			  }
+			  
+			  @Override
+			  public void setIssuePresenter(final EdeltaIssuePresenter issuePresenter) {
+			    super.setIssuePresenter(issuePresenter);
+			    my.setIssuePresenter(issuePresenter);
 			  }
 			  
 			  public MyFile0(final AbstractEdelta other) {
@@ -488,6 +500,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
+			import edelta.lib.EdeltaIssuePresenter;
 			import edelta.tests.additional.MyCustomEdelta;
 			import org.eclipse.emf.ecore.EPackage;
 			import org.eclipse.xtext.xbase.lib.Extension;
@@ -499,6 +512,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public MyFile0() {
 			    my = new MyCustomEdelta(this);
+			  }
+			  
+			  @Override
+			  public void setIssuePresenter(final EdeltaIssuePresenter issuePresenter) {
+			    super.setIssuePresenter(issuePresenter);
+			    my.setIssuePresenter(issuePresenter);
 			  }
 			  
 			  public MyFile0(final AbstractEdelta other) {
@@ -542,6 +561,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
+			import edelta.lib.EdeltaIssuePresenter;
 			import edelta.tests.additional.MyCustomEdelta;
 			import org.eclipse.emf.ecore.EPackage;
 			
@@ -552,6 +572,13 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			     = new MyCustomEdelta(this);
 			    my = new (this);
+			  }
+			  
+			  @Override
+			  public void setIssuePresenter(final EdeltaIssuePresenter issuePresenter) {
+			    super.setIssuePresenter(issuePresenter);
+			    .setIssuePresenter(issuePresenter);
+			    my.setIssuePresenter(issuePresenter);
 			  }
 			  
 			  public MyFile0(final AbstractEdelta other) {
@@ -1596,6 +1623,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				package test3;
 				
 				import edelta.lib.AbstractEdelta;
+				import edelta.lib.EdeltaIssuePresenter;
 				import org.eclipse.emf.ecore.EPackage;
 				import org.eclipse.xtext.xbase.lib.Extension;
 				import test2.MyFile1;
@@ -1607,6 +1635,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				  
 				  public MyFile2() {
 				    my = new MyFile1(this);
+				  }
+				  
+				  @Override
+				  public void setIssuePresenter(final EdeltaIssuePresenter issuePresenter) {
+				    super.setIssuePresenter(issuePresenter);
+				    my.setIssuePresenter(issuePresenter);
 				  }
 				  
 				  public MyFile2(final AbstractEdelta other) {
@@ -1702,6 +1736,101 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			],
 			true
 		)
+	}
+
+	@Test
+	def void testExecutionOfSeveralFilesWithUseAsAndIssuePresenter() {
+		// see https://github.com/LorenzoBettini/edelta/issues/348
+		val collectedWarnings = newArrayList
+		checkCompiledCodeExecutionWithSeveralFiles(
+			#[SIMPLE_ECORE],
+			#[
+			'''
+				import org.eclipse.emf.ecore.EClass
+				import org.eclipse.emf.ecore.EcorePackage
+
+				package test1
+				
+				def enrichWithReference(EClass c, String prefix) : void {
+					showWarning(
+						c,
+						"Adding reference with " + prefix)
+					c.addNewEReference(prefix + "Ref",
+						EcorePackage.eINSTANCE.EObject)
+				}
+			''',
+			'''
+				import org.eclipse.emf.ecore.EClass
+				import org.eclipse.emf.ecore.EcorePackage
+				import test1.MyFile0
+
+				package test2
+				
+				use test1.MyFile0 as extension my
+
+				def enrichWithAttribute(EClass c, String prefix) : void {
+					showWarning(
+						c,
+						"Adding attribute with " + prefix)
+					c.addNewEAttribute(prefix + "Attr",
+						EcorePackage.eINSTANCE.EString)
+					c.enrichWithReference(prefix)
+				}
+			''',
+			'''
+				import org.eclipse.emf.ecore.EClass
+				import test2.MyFile1
+				
+				package test3
+				
+				metamodel "simple"
+				
+				use test2.MyFile1 as extension my
+				
+				modifyEcore aModificationTest epackage simple {
+					val simpleClass = ecoreref(SimpleClass)
+					showWarning(
+						simpleClass,
+						"Modifying " + simpleClass.name)
+					ecoreref(SimpleClass)
+						.enrichWithAttribute("prefix")
+					// attribute and reference are added by the calls
+					// to external operations!
+					ecoreref(prefixAttr).changeable = true
+					ecoreref(prefixRef).containment = true
+				}
+			'''],
+			"test3.MyFile2",
+			#[
+				SIMPLE_ECORE ->
+				'''
+				<?xml version="1.0" encoding="UTF-8"?>
+				<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="simple" nsURI="http://www.simple" nsPrefix="simple">
+				  <eClassifiers xsi:type="ecore:EClass" name="SimpleClass">
+				    <eStructuralFeatures xsi:type="ecore:EAttribute" name="prefixAttr" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+				    <eStructuralFeatures xsi:type="ecore:EReference" name="prefixRef" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"
+				        containment="true"/>
+				  </eClassifiers>
+				</ecore:EPackage>
+				'''
+			],
+			true,
+			[issuePresenter = new EdeltaIssuePresenter() {
+				override showError(ENamedElement problematicObject, String message) {
+					
+				}
+				override showWarning(ENamedElement problematicObject, String message) {
+					collectedWarnings += message
+				}
+			}]
+		)
+		assertThat(collectedWarnings)
+			.containsExactly(
+				"Modifying SimpleClass",
+				"Adding attribute with prefix",
+				"Adding reference with prefix"
+			)
 	}
 
 	@Test
@@ -1849,6 +1978,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta.personlist.example;
 			
 			import edelta.lib.AbstractEdelta;
+			import edelta.lib.EdeltaIssuePresenter;
 			import edelta.lib.EdeltaLibrary;
 			import edelta.refactorings.lib.EdeltaRefactorings;
 			import java.util.Collections;
@@ -1867,6 +1997,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public Example() {
 			    refactorings = new EdeltaRefactorings(this);
+			  }
+			  
+			  @Override
+			  public void setIssuePresenter(final EdeltaIssuePresenter issuePresenter) {
+			    super.setIssuePresenter(issuePresenter);
+			    refactorings.setIssuePresenter(issuePresenter);
 			  }
 			  
 			  public Example(final AbstractEdelta other) {
@@ -2049,7 +2185,9 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				assertGeneratedJavaCodeCompiles
 			}
 			val genClass = compiledClass
-			checkExecutionAndAssertExpectedModifiedEcores(genClass, ecoreNames, expectedModifiedEcores)
+			checkExecutionAndAssertExpectedModifiedEcores(genClass,
+				ecoreNames, expectedModifiedEcores, []
+			)
 		]
 	}
 
@@ -2058,6 +2196,18 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			String classToExecute,
 			List<Pair<CharSequence, CharSequence>> expectedModifiedEcores,
 			boolean checkValidationErrors) {
+		checkCompiledCodeExecutionWithSeveralFiles(ecoreNames,
+			inputs, classToExecute, expectedModifiedEcores, checkValidationErrors,
+			[]
+		)
+	}
+
+	def private checkCompiledCodeExecutionWithSeveralFiles(List<String> ecoreNames,
+			List<CharSequence> inputs,
+			String classToExecute,
+			List<Pair<CharSequence, CharSequence>> expectedModifiedEcores,
+			boolean checkValidationErrors,
+			Consumer<AbstractEdelta> instanceConsumer) {
 		wipeModifiedDirectoryContents
 		val rs = createResourceSetWithEcoresAndSeveralInputs(ecoreNames, inputs)
 		rs.compile [
@@ -2068,12 +2218,19 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				assertGeneratedJavaCodeCompiles
 			}
 			val genClass = getCompiledClass(classToExecute)
-			checkExecutionAndAssertExpectedModifiedEcores(genClass, ecoreNames, expectedModifiedEcores)
+			checkExecutionAndAssertExpectedModifiedEcores(genClass,
+				ecoreNames, expectedModifiedEcores, instanceConsumer
+			)
 		]
 	}
 
-	private def void checkExecutionAndAssertExpectedModifiedEcores(Class<?> genClass, List<String> ecoreNames, List<Pair<CharSequence, CharSequence>> expectedModifiedEcores) {
+	private def void checkExecutionAndAssertExpectedModifiedEcores(Class<?> genClass,
+		List<String> ecoreNames, List<Pair<CharSequence, CharSequence>> expectedModifiedEcores,
+		Consumer<AbstractEdelta> instanceConsumer
+	) {
 		val edeltaObj = genClass.getDeclaredConstructor().newInstance()
+			as AbstractEdelta
+		instanceConsumer.accept(edeltaObj)
 		// load ecore files
 		for (ecoreName : ecoreNames) {
 			edeltaObj.invoke("loadEcoreFile", #[METAMODEL_PATH + ecoreName])

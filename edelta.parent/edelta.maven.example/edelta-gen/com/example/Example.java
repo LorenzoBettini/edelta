@@ -1,6 +1,7 @@
 package com.example;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.EdeltaLibrary;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.function.Consumer;
@@ -19,6 +20,13 @@ public class Example extends AbstractEdelta {
   public Example() {
     refactorings = new EdeltaRefactorings(this);
     myfunctions = new ExampleReusableFunctions(this);
+  }
+  
+  @Override
+  public void setIssuePresenter(final EdeltaIssuePresenter issuePresenter) {
+    super.setIssuePresenter(issuePresenter);
+    refactorings.setIssuePresenter(issuePresenter);
+    myfunctions.setIssuePresenter(issuePresenter);
   }
   
   public Example(final AbstractEdelta other) {

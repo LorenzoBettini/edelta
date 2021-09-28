@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Edelta Testing Libraries
 Bundle-SymbolicName: edelta.testing.libraries
-Bundle-Version: 2.6.2.qualifier
+Bundle-Version: 2.6.4.qualifier
 Bundle-Vendor: Lorenzo Bettini
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Automatic-Module-Name: edelta.lib

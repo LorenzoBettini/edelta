@@ -18,6 +18,7 @@ import edelta.compiler.EdeltaGeneratorConfigProvider;
 import edelta.compiler.EdeltaOutputConfigurationProvider;
 import edelta.compiler.EdeltaXbaseCompiler;
 import edelta.interpreter.EdeltaInterpreter;
+import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaSafeInterpreter;
 import edelta.resource.EdeltaDerivedStateComputer;
 import edelta.resource.EdeltaResourceDescriptionStrategy;
@@ -31,6 +32,11 @@ import edelta.validation.EdeltaDiagnosticConverter;
  * Equinox extension registry.
  */
 public class EdeltaRuntimeModule extends AbstractEdeltaRuntimeModule {
+
+	public Class<? extends EdeltaInterpreterFactory> bindEdeltaInterpreterFactory() {
+		return EdeltaInterpreterFactory.class;
+	}
+
 	@Override
 	public Class<? extends IQualifiedNameProvider> bindIQualifiedNameProvider() {
 		return EdeltaQualifiedNameProvider.class;

@@ -54,17 +54,7 @@ public abstract class AbstractEdelta {
 
 	private Logger logger = Logger.getLogger(getClass());
 
-	private EdeltaIssuePresenter issuePresenter = new EdeltaIssuePresenter() {
-		@Override
-		public void showWarning(ENamedElement problematicObject, String message) {
-			// nop
-		}
-
-		@Override
-		public void showError(ENamedElement problematicObject, String message) {
-			// nop
-		}
-	};
+	private EdeltaIssuePresenter issuePresenter = new EdeltaNopIssuePresenter();
 
 	protected AbstractEdelta() {
 		packageManager = new EdeltaEPackageManager();

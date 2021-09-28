@@ -1,6 +1,7 @@
 package edelta.refactorings.lib.tests;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaNopIssuePresenter;
 import edelta.refactorings.lib.EdeltaBadSmellsChecker;
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 
@@ -23,6 +24,7 @@ public class EdeltaBadSmellsCheckerTest extends AbstractTest {
 		appender = new InMemoryLoggerAppender();
 		appender.setLineSeparator("\n");
 		checker.getLogger().addAppender(appender);
+		checker.setIssuePresenter(new EdeltaNopIssuePresenter());
 	}
 
 	@Test

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaNopIssuePresenter;
 import edelta.refactorings.lib.EdeltaBadSmellsResolver;
 import edelta.testutils.EdeltaTestUtils;
 
@@ -30,6 +31,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 	@Before
 	public void setup() {
 		resolver = new EdeltaBadSmellsResolver();
+		resolver.setIssuePresenter(new EdeltaNopIssuePresenter());
 	}
 
 	private void loadModelFiles(String testModelDirectory, String... testModelFiles) {

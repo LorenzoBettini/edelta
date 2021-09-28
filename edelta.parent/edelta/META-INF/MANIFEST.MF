@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: edelta
 Bundle-Vendor: Lorenzo Bettini
-Bundle-Version: 2.6.2.qualifier
+Bundle-Version: 2.6.4.qualifier
 Bundle-SymbolicName: edelta; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.xtext,
@@ -15,7 +15,6 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.xtext.util,
  org.eclipse.emf.common,
  edelta.lib;visibility:=reexport,
- org.eclipse.jdt.core,
  org.eclipse.core.resources,
  org.objectweb.asm;bundle-version="9.0.0";resolution:=optional
 Bundle-RequiredExecutionEnvironment: JavaSE-11
