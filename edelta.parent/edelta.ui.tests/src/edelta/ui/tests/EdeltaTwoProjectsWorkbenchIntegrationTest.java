@@ -5,7 +5,6 @@ import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.xtext.testing.Flaky;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.junit.BeforeClass;
@@ -28,14 +27,13 @@ public class EdeltaTwoProjectsWorkbenchIntegrationTest extends CustomAbstractWor
 	private static String SECOND_PROJECT = "edelta.testprojects.second";
 
 	@BeforeClass
-	public static void importTestProject() throws Exception {
+	public static void clean() throws Exception {
 		cleanWorkspace();
 		waitForBuild();
 	}
 
 	@Test
-	@Flaky
-	public void testValidProject() throws Exception {
+	public void testDependentProjects() throws Exception {
 		var project1 = importProject(EdeltaTwoProjectsWorkbenchIntegrationTest.FIRST_PROJECT);
 		var project2 = importProject(EdeltaTwoProjectsWorkbenchIntegrationTest.SECOND_PROJECT);
 		cleanup(project1);
