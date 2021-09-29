@@ -387,18 +387,7 @@ def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates) {
 		new EdeltaFeatureDifferenceFinder().ignoringContainingClass,
 		"The two features are not equal"
 	)
-
-	val wrongFeatures = duplicates
-		.filter[!EContainingClass.ESuperTypes.contains(dest)]
-	if (!wrongFeatures.empty) {
-		wrongFeatures.forEach[
-			showError(it,
-				"Not a direct subclass of destination: " +
-					getEObjectRepr(EContainingClass)
-			)
-		]
-		return
-	}
+	checkAllDirectSubclasses(dest, duplicates.map[EContainingClass])
 	duplicates.head.copyTo(dest)
 	removeAllElements(duplicates)
 }
@@ -498,6 +487,27 @@ def checkNoDifferences(Iterable<? extends EStructuralFeature> features,
 					differenceFinder.differenceDetails
 		showError(different, message)
 		throw new IllegalArgumentException(message)
+	}
+}
+
+/**
+ * Makes sure that all the passed classes are direct subclasses of
+ * the passed class.
+ * 
+ * @param superClass
+ * @param classes
+ */
+def checkAllDirectSubclasses(EClass superClass, Collection<EClass> classes) {
+	val nonDirectSubclasses = classes
+		.filter[!ESuperTypes.contains(superClass)]
+	if (!nonDirectSubclasses.empty) {
+		nonDirectSubclasses.forEach[
+			showError(it,
+				"Not a direct subclass of: " +
+					getEObjectRepr(superClass)
+			)
+		]
+		throw new IllegalArgumentException("Not all direct subclasses")
 	}
 }
 

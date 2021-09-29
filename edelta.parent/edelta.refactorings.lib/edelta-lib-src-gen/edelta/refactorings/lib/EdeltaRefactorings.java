@@ -441,22 +441,10 @@ public class EdeltaRefactorings extends AbstractEdelta {
     this.checkNoDifferences(duplicates, 
       new EdeltaFeatureDifferenceFinder().ignoringContainingClass(), 
       "The two features are not equal");
-    final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
-      boolean _contains = it.getEContainingClass().getESuperTypes().contains(dest);
-      return Boolean.valueOf((!_contains));
+    final Function1<EStructuralFeature, EClass> _function = (EStructuralFeature it) -> {
+      return it.getEContainingClass();
     };
-    final Iterable<? extends EStructuralFeature> wrongFeatures = IterableExtensions.filter(duplicates, _function);
-    boolean _isEmpty = IterableExtensions.isEmpty(wrongFeatures);
-    boolean _not = (!_isEmpty);
-    if (_not) {
-      final Consumer<EStructuralFeature> _function_1 = (EStructuralFeature it) -> {
-        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it.getEContainingClass());
-        String _plus = ("Not a direct subclass of destination: " + _eObjectRepr);
-        this.showError(it, _plus);
-      };
-      wrongFeatures.forEach(_function_1);
-      return;
-    }
+    this.checkAllDirectSubclasses(dest, ListExtensions.map(duplicates, _function));
     EdeltaLibrary.copyTo(IterableExtensions.head(duplicates), dest);
     EdeltaLibrary.removeAllElements(duplicates);
   }
@@ -569,6 +557,32 @@ public class EdeltaRefactorings extends AbstractEdelta {
       final String message = ((errorMessage + ":\n") + _differenceDetails);
       this.showError(different, message);
       throw new IllegalArgumentException(message);
+    }
+  }
+  
+  /**
+   * Makes sure that all the passed classes are direct subclasses of
+   * the passed class.
+   * 
+   * @param superClass
+   * @param classes
+   */
+  public void checkAllDirectSubclasses(final EClass superClass, final Collection<EClass> classes) {
+    final Function1<EClass, Boolean> _function = (EClass it) -> {
+      boolean _contains = it.getESuperTypes().contains(superClass);
+      return Boolean.valueOf((!_contains));
+    };
+    final Iterable<EClass> nonDirectSubclasses = IterableExtensions.<EClass>filter(classes, _function);
+    boolean _isEmpty = IterableExtensions.isEmpty(nonDirectSubclasses);
+    boolean _not = (!_isEmpty);
+    if (_not) {
+      final Consumer<EClass> _function_1 = (EClass it) -> {
+        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(superClass);
+        String _plus = ("Not a direct subclass of: " + _eObjectRepr);
+        this.showError(it, _plus);
+      };
+      nonDirectSubclasses.forEach(_function_1);
+      throw new IllegalArgumentException("Not all direct subclasses");
     }
   }
   

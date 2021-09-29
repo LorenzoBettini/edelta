@@ -836,16 +836,16 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		final EClass student = refactorings.getEClass("PersonList", "Student");
 		final EClass employee = refactorings.getEClass("PersonList", "Employee");
-		refactorings.pullUpFeatures(person,
+		assertThrowsIAE(() -> refactorings.pullUpFeatures(person,
 			asList(
 				student.getEStructuralFeature("name"),
-				employee.getEStructuralFeature("name")));
+				employee.getEStructuralFeature("name"))));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult())
 			.isEqualTo(
-			"ERROR: PersonList.Student.name: Not a direct subclass of destination: PersonList.Student\n"
-			+ "ERROR: PersonList.Employee.name: Not a direct subclass of destination: PersonList.Employee\n"
+			"ERROR: PersonList.Student: Not a direct subclass of: PersonList.Person\n"
+			+ "ERROR: PersonList.Employee: Not a direct subclass of: PersonList.Person\n"
 			+ "");
 	}
 
