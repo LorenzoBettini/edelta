@@ -69,8 +69,9 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @return the new feature added to the containing class of the features
    */
   public EStructuralFeature mergeFeatures(final String newFeatureName, final Collection<EStructuralFeature> features) {
-    final EdeltaFeatureDifferenceFinder diffFinder = new EdeltaFeatureDifferenceFinder().ignoringName();
-    this.checkNoDifferences(features, diffFinder, "The two features cannot be merged");
+    this.checkNoDifferences(features, 
+      new EdeltaFeatureDifferenceFinder().ignoringName(), 
+      "The two features cannot be merged");
     final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
     final EClass owner = feature.getEContainingClass();
     final EStructuralFeature copy = EdeltaLibrary.copyToAs(feature, owner, newFeatureName);
@@ -87,10 +88,10 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @param features
    */
   public EStructuralFeature mergeFeatures(final EStructuralFeature feature, final Collection<EStructuralFeature> features) {
-    final EdeltaFeatureDifferenceFinder diffFinder = new EdeltaFeatureDifferenceFinder().ignoringName().ignoringType();
     this.checkCompliant(feature, features);
     Iterable<EStructuralFeature> _plus = Iterables.<EStructuralFeature>concat(Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(feature)), features);
-    this.checkNoDifferences(_plus, diffFinder, 
+    this.checkNoDifferences(_plus, 
+      new EdeltaFeatureDifferenceFinder().ignoringName().ignoringType(), 
       "The two features cannot be merged");
     EdeltaLibrary.removeAllElements(features);
     return feature;
@@ -437,8 +438,9 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @param duplicates
    */
   public void pullUpFeatures(final EClass dest, final List<? extends EStructuralFeature> duplicates) {
-    final EdeltaFeatureDifferenceFinder diffFinder = new EdeltaFeatureDifferenceFinder().ignoringContainingClass();
-    this.checkNoDifferences(duplicates, diffFinder, "The two features are not equal");
+    this.checkNoDifferences(duplicates, 
+      new EdeltaFeatureDifferenceFinder().ignoringContainingClass(), 
+      "The two features are not equal");
     final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
       boolean _contains = it.getEContainingClass().getESuperTypes().contains(dest);
       return Boolean.valueOf((!_contains));
