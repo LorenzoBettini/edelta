@@ -72,12 +72,6 @@ public class EdeltaTest {
 		public void ensureEPackageIsLoaded(String packageName) throws EdeltaPackageNotLoadedException {
 			super.ensureEPackageIsLoaded(packageName);
 		}
-
-		@Override
-		public void runInitializers() {
-			super.runInitializers();
-		}
-
 	}
 
 	protected TestableEdelta edelta;
