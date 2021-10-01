@@ -40,7 +40,7 @@ public abstract class AbstractEdelta {
 
 	private Logger logger = Logger.getLogger(getClass());
 
-	private EdeltaIssuePresenter issuePresenter = new EdeltaNopIssuePresenter();
+	private EdeltaIssuePresenter issuePresenter = EdeltaNopIssuePresenter.INSTANCE;
 
 	protected AbstractEdelta() {
 		packageManager = new EdeltaEPackageManager();

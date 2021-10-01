@@ -24,7 +24,7 @@ public class EdeltaBadSmellsCheckerTest extends AbstractTest {
 		appender = new InMemoryLoggerAppender();
 		appender.setLineSeparator("\n");
 		checker.getLogger().addAppender(appender);
-		checker.setIssuePresenter(new EdeltaNopIssuePresenter());
+		checker.setIssuePresenter(EdeltaNopIssuePresenter.INSTANCE);
 	}
 
 	@Test
