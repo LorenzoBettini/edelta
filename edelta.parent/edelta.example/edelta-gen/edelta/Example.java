@@ -1,7 +1,6 @@
 package edelta;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaIssuePresenter;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.xbase.lib.Extension;
@@ -15,12 +14,6 @@ public class Example extends AbstractEdelta {
   
   public Example() {
     myfunctions = new ExampleReusableFunctions(this);
-  }
-  
-  @Override
-  public void setIssuePresenter(final EdeltaIssuePresenter issuePresenter) {
-    super.setIssuePresenter(issuePresenter);
-    myfunctions.setIssuePresenter(issuePresenter);
   }
   
   public Example(final AbstractEdelta other) {
