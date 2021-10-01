@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
@@ -345,9 +346,11 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testSetIssuePresenterIsPropagatedToChildren() {
+	public void testSetIssuePresenterPropagatesToChildren() {
 		var issuePresenter = mock(EdeltaIssuePresenter.class);
 		AbstractEdelta child = new AbstractEdelta(edelta) {
+		};
+		AbstractEdelta grandchild = new AbstractEdelta(child) {
 		};
 		edelta.setIssuePresenter(issuePresenter);
 		EPackage problematicObject = EcoreFactory.eINSTANCE.createEPackage();
@@ -356,6 +359,30 @@ public class EdeltaTest {
 		child.showWarning(problematicObject, "a warning");
 		verify(issuePresenter).showError(problematicObject, "an error");
 		verify(issuePresenter).showWarning(problematicObject, "a warning");
+		grandchild.showError(problematicObject, "an error");
+		grandchild.showWarning(problematicObject, "a warning");
+		verify(issuePresenter, times(2)).showError(problematicObject, "an error");
+		verify(issuePresenter, times(2)).showWarning(problematicObject, "a warning");
+	}
+
+	@Test
+	public void testIssuePresenterIsPropagatedToChildrenByConstructor() {
+		var issuePresenter = mock(EdeltaIssuePresenter.class);
+		edelta.setIssuePresenter(issuePresenter);
+		AbstractEdelta child = new AbstractEdelta(edelta) {
+		};
+		AbstractEdelta grandchild = new AbstractEdelta(child) {
+		};
+		EPackage problematicObject = EcoreFactory.eINSTANCE.createEPackage();
+		problematicObject.setName("anEPackage");
+		child.showError(problematicObject, "an error");
+		child.showWarning(problematicObject, "a warning");
+		verify(issuePresenter).showError(problematicObject, "an error");
+		verify(issuePresenter).showWarning(problematicObject, "a warning");
+		grandchild.showError(problematicObject, "an error");
+		grandchild.showWarning(problematicObject, "a warning");
+		verify(issuePresenter, times(2)).showError(problematicObject, "an error");
+		verify(issuePresenter, times(2)).showWarning(problematicObject, "a warning");
 	}
 
 	@Test

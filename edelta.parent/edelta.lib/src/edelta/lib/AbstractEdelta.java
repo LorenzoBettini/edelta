@@ -59,6 +59,7 @@ public abstract class AbstractEdelta {
 	protected AbstractEdelta(AbstractEdelta other) {
 		this(other.packageManager);
 		other.children.add(this);
+		setIssuePresenter(other.issuePresenter);
 	}
 
 	/**
