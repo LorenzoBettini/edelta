@@ -10,6 +10,12 @@ import org.eclipse.emf.ecore.ENamedElement;
  *
  */
 public final class EdeltaNopIssuePresenter implements EdeltaIssuePresenter {
+	public static final EdeltaIssuePresenter INSTANCE = new EdeltaNopIssuePresenter();
+
+	private EdeltaNopIssuePresenter() {
+		// just use the singleton INSTANCE
+	}
+
 	@Override
 	public void showWarning(ENamedElement problematicObject, String message) {
 		// nop

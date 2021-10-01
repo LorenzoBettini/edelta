@@ -31,7 +31,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 	@Before
 	public void setup() {
 		resolver = new EdeltaBadSmellsResolver();
-		resolver.setIssuePresenter(new EdeltaNopIssuePresenter());
+		resolver.setIssuePresenter(EdeltaNopIssuePresenter.INSTANCE);
 	}
 
 	private void loadModelFiles(String testModelDirectory, String... testModelFiles) {
