@@ -345,6 +345,20 @@ public class EdeltaTest {
 	}
 
 	@Test
+	public void testSetIssuePresenterIsPropagatedToChildren() {
+		var issuePresenter = mock(EdeltaIssuePresenter.class);
+		AbstractEdelta child = new AbstractEdelta(edelta) {
+		};
+		edelta.setIssuePresenter(issuePresenter);
+		EPackage problematicObject = EcoreFactory.eINSTANCE.createEPackage();
+		problematicObject.setName("anEPackage");
+		child.showError(problematicObject, "an error");
+		child.showWarning(problematicObject, "a warning");
+		verify(issuePresenter).showError(problematicObject, "an error");
+		verify(issuePresenter).showWarning(problematicObject, "a warning");
+	}
+
+	@Test
 	public void testGetSubPackage() {
 		loadTestEcore(MY_SUBPACKAGES_ECORE);
 		assertNull(edelta.getEPackage(MY_SUBPACKAGE));

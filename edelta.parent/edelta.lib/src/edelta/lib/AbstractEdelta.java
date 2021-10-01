@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
 
@@ -42,17 +44,21 @@ public abstract class AbstractEdelta {
 
 	private EdeltaIssuePresenter issuePresenter = EdeltaNopIssuePresenter.INSTANCE;
 
+	private Collection<AbstractEdelta> children = new ArrayList<>();
+
 	protected AbstractEdelta() {
 		packageManager = new EdeltaEPackageManager();
 	}
 
 	/**
-	 * Reuses the {@link EdeltaEPackageManager} from the other object.
+	 * Reuses the {@link EdeltaEPackageManager} from the other object
+	 * and also keeps track of updating the children of the other objects.
 	 * 
 	 * @param other
 	 */
 	protected AbstractEdelta(AbstractEdelta other) {
 		this(other.packageManager);
+		other.children.add(this);
 	}
 
 	/**
@@ -146,8 +152,15 @@ public abstract class AbstractEdelta {
 		this.logger = logger;
 	}
 
+	/**
+	 * This also propagates the passed {@link EdeltaIssuePresenter} to the
+	 * children (that is, the used Edelta libraries).
+	 * 
+	 * @param issuePresenter
+	 */
 	public void setIssuePresenter(EdeltaIssuePresenter issuePresenter) {
 		this.issuePresenter = issuePresenter;
+		children.forEach(c -> c.setIssuePresenter(issuePresenter));
 	}
 
 	public void logError(Supplier<String> messageSupplier) {
