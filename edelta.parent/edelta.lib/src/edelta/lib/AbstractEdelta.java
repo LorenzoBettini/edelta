@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
 
@@ -39,18 +37,6 @@ public abstract class AbstractEdelta {
 	 * For loading ecores and all other runtime {@link EPackage} management.
 	 */
 	private EdeltaEPackageManager packageManager;
-
-	/**
-	 * Initializers for EClassifiers which will be executed later, after
-	 * all EClassifiers have been created.
-	 */
-	private List<Runnable> eClassifierInitializers = new LinkedList<>();
-
-	/**
-	 * Initializers for EStructuralFeatures which will be executed later, after
-	 * all EStructuralFeatures have been created.
-	 */
-	private List<Runnable> eStructuralFeaturesInitializers = new LinkedList<>();
 
 	private Logger logger = Logger.getLogger(getClass());
 
@@ -87,7 +73,6 @@ public abstract class AbstractEdelta {
 	public void execute() throws Exception {
 		performSanityChecks();
 		doExecute();
-		runInitializers();
 	}
 
 	/**
@@ -109,14 +94,6 @@ public abstract class AbstractEdelta {
 	 */
 	protected void doExecute() throws Exception { // NOSONAR we can't predict a specific exception
 		// to be implemented by the generated code
-	}
-
-	/**
-	 * Executes the initializers previously saved.
-	 */
-	protected void runInitializers() {
-		eClassifierInitializers.forEach(Runnable::run);
-		eStructuralFeaturesInitializers.forEach(Runnable::run);
 	}
 
 	/**
