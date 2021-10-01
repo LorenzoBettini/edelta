@@ -515,10 +515,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				return useAsTypeProgram;
 			// it refers to a Java implementation
 			return useAsFields.computeIfAbsent(useAs,
-				it -> {
-					return edeltaInterpreterHelper.safeInstantiate(
-						getJavaReflectAccess(), useAs, thisObject);
-				});
+				it -> edeltaInterpreterHelper.safeInstantiate(
+					getJavaReflectAccess(), useAs, thisObject));
 		}
 		return super.featureCallField(jvmField, receiver);
 	}
