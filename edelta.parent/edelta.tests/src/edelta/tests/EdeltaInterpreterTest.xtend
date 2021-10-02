@@ -953,6 +953,9 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				
 				// now modify the bar's class
 				ecoreref(FooClass).ESuperTypes.head.abstract = true
+				
+				// modify again the imported metamodel
+				ecoreref(FooClass).name = "Renamed"
 			}
 		'''])
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, true)
@@ -962,6 +965,7 @@ class EdeltaInterpreterTest extends EdeltaAbstractTest {
 					containsExactly("BarClass")
 				assertThat(ESuperTypes.head.isAbstract)
 					.isTrue
+				assertEquals("Renamed", name)
 			]
 		]
 		// verify that also the EPackage of the other file is now
