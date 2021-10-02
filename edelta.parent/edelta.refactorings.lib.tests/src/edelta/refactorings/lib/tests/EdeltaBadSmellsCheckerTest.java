@@ -1,10 +1,5 @@
 package edelta.refactorings.lib.tests;
 
-import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaNopIssuePresenter;
-import edelta.refactorings.lib.EdeltaBadSmellsChecker;
-import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
-
 import static edelta.lib.EdeltaLibrary.addNewEAttribute;
 import static edelta.lib.EdeltaLibrary.addNewEClass;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,6 +7,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.eclipse.emf.ecore.EPackage;
 import org.junit.Before;
 import org.junit.Test;
+
+import edelta.lib.AbstractEdelta;
+import edelta.refactorings.lib.EdeltaBadSmellsChecker;
+import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 
 public class EdeltaBadSmellsCheckerTest extends AbstractTest {
 	private EdeltaBadSmellsChecker checker;
@@ -24,7 +23,6 @@ public class EdeltaBadSmellsCheckerTest extends AbstractTest {
 		appender = new InMemoryLoggerAppender();
 		appender.setLineSeparator("\n");
 		checker.getLogger().addAppender(appender);
-		checker.setIssuePresenter(EdeltaNopIssuePresenter.INSTANCE);
 	}
 
 	@Test
