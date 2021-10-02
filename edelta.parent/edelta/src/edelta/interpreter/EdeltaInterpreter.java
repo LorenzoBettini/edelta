@@ -139,7 +139,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		final var copiedEPackagesMap = derivedStateHelper
 				.getCopiedEPackagesMap(eResource);
 		final var copiedEPackages = copiedEPackagesMap.values();
-		thisObject = createThisObject(copiedEPackages);
+		thisObject = createThisObject(copiedEPackagesMap);
 		useAsFields = newHashMap();
 		var filteredOperations =
 			edeltaInterpreterHelper.filterOperations(program.getModifyEcoreOperations());
@@ -193,9 +193,9 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		sandboxResourceSet.getResources().clear();
 	}
 
-	private EdeltaInterpreterEdeltaImpl createThisObject(final Collection<EPackage> copiedEPackages) {
+	private EdeltaInterpreterEdeltaImpl createThisObject(final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		var edeltaImpl =
-			new EdeltaInterpreterEdeltaImpl(copiedEPackages);
+			new EdeltaInterpreterEdeltaImpl(copiedEPackagesMap);
 		edeltaImpl.setIssuePresenter(new EdeltaInterpreterIssuePresenter(diagnosticHelper));
 		return edeltaImpl;
 	}
@@ -579,15 +579,15 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				// First copy the other program's imported metamodels into
 				// the current program's derived state
 				final var eResource = currentProgram.eResource();
-				final var copiedEPackagesMap = derivedStateHelper
+				// update copied packages with possible new ones from
+				// the containing program
+				derivedStateHelper
 						.copyEPackages(containingProgram, eResource);
-				// This object is also recreated with possible new copied packages
-				thisObject = createThisObject(copiedEPackagesMap.values());
 
 				var newInterpreter =
 						edeltaInterpreterFactory.create(containingProgram.eResource());
 				newInterpreter.currentProgram = containingProgram;
-				newInterpreter.thisObject = thisObject;
+				newInterpreter.thisObject = new EdeltaInterpreterEdeltaImpl(thisObject);
 				// it is crucial to share the diagnosticHelper where the
 				// currentExpression is correctly set to avoid a NP2
 				// see testExecutionOfSeveralFilesWithUseAsAndIssuePresenter

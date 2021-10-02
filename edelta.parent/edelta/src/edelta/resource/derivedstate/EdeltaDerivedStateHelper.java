@@ -64,10 +64,9 @@ public class EdeltaDerivedStateHelper {
 	 * resource.
 	 * 
 	 * @param program
-	 * @return
 	 */
-	public EdeltaCopiedEPackagesMap copyEPackages(EdeltaProgram program) {
-		return copyEPackages(program, program.eResource());
+	public void copyEPackages(EdeltaProgram program) {
+		copyEPackages(program, program.eResource());
 	}
 
 	/**

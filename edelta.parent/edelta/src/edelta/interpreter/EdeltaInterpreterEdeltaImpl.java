@@ -1,14 +1,10 @@
 package edelta.interpreter;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import org.eclipse.emf.ecore.EPackage;
 
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaEPackageManager;
+import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 
 /**
  * Used by the {@link EdeltaInterpreter} to return {@link EPackage} instances.
@@ -19,25 +15,27 @@ import edelta.lib.EdeltaEPackageManager;
 public class EdeltaInterpreterEdeltaImpl extends AbstractEdelta {
 
 	/**
-	 * Uses the passed {@link EPackage}s to create an {@link EdeltaEPackageManager};
-	 * if an {@link EPackage} appears several times in the list, only the first
-	 * occurrence will be taken into consideration.
+	 * Uses the passed {@link EdeltaCopiedEPackagesMap} to create an
+	 * {@link EdeltaEPackageManager} that implements
+	 * {@link EdeltaEPackageManager#getEPackage(String)} by simply delegating to the
+	 * passed map. Note that the passed map will be shared, so that updates to that
+	 * map are automatically used.
 	 * 
-	 * @param copiedEPackages
+	 * @param copiedEPackagesMap
 	 */
-	public EdeltaInterpreterEdeltaImpl(Collection<EPackage> copiedEPackages) {
+	public EdeltaInterpreterEdeltaImpl(final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		super(new EdeltaEPackageManager() {
-			private Map<String, EPackage> packageMap = copiedEPackages.stream().collect(
-					Collectors.toMap(
-							EPackage::getName,
-							Function.identity(),
-							(existingValue, newValue) -> existingValue));
-
 			@Override
 			public EPackage getEPackage(String packageName) {
-				return packageMap.get(packageName);
+				return copiedEPackagesMap.get(packageName);
 			}
 		});
 	}
 
+	/**
+	 * @param other
+	 */
+	public EdeltaInterpreterEdeltaImpl(AbstractEdelta other) {
+		super(other);
+	}
 }
