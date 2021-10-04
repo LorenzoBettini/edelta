@@ -77,9 +77,8 @@ public class EdeltaDerivedStateHelper {
 	 * 
 	 * @param program
 	 * @param resource
-	 * @return
 	 */
-	public EdeltaCopiedEPackagesMap copyEPackages(EdeltaProgram program, final Resource resource) {
+	public void copyEPackages(EdeltaProgram program, final Resource resource) {
 		final var packages = program.getMetamodels().stream()
 			.distinct()
 			.collect(toList());
@@ -90,7 +89,6 @@ public class EdeltaDerivedStateHelper {
 		}
 		// we must add the copied EPackages to the resource
 		addToProgramResource(resource, copiedEPackagesMap);
-		return copiedEPackagesMap;
 	}
 
 	/**
