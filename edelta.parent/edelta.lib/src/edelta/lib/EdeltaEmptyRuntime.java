@@ -24,4 +24,11 @@ public class EdeltaEmptyRuntime extends AbstractEdelta {
 		super(other);
 	}
 
+	/**
+	 * @param packageManager
+	 */
+	public EdeltaEmptyRuntime(EdeltaEPackageManager packageManager) {
+		super(packageManager);
+	}
+
 }

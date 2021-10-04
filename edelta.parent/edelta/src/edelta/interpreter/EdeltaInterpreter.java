@@ -206,15 +206,14 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	 * @param copiedEPackagesMap
 	 */
 	private AbstractEdelta createThisObject(final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
-		var edeltaImpl =
-			new AbstractEdelta(new EdeltaEPackageManager() {
+		var edeltaRuntime = new EdeltaEmptyRuntime(new EdeltaEPackageManager() {
 				@Override
 				public EPackage getEPackage(String packageName) {
 					return copiedEPackagesMap.get(packageName);
 				}
-			}) {};
-		edeltaImpl.setIssuePresenter(new EdeltaInterpreterIssuePresenter(diagnosticHelper));
-		return edeltaImpl;
+			});
+		edeltaRuntime.setIssuePresenter(new EdeltaInterpreterIssuePresenter(diagnosticHelper));
+		return edeltaRuntime;
 	}
 
 	private void removeResourceListener(final Collection<EPackage> copiedEPackages) {

@@ -35,6 +35,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaEPackageManager;
 import edelta.lib.EdeltaEmptyRuntime;
 import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.exception.EdeltaPackageNotLoadedException;
@@ -68,6 +69,10 @@ public class EdeltaTest {
 
 		public TestableEdelta(AbstractEdelta other) {
 			super(other);
+		}
+
+		public TestableEdelta(EdeltaEPackageManager packageManager) {
+			super(packageManager);
 		}
 
 		@Override
@@ -137,6 +142,20 @@ public class EdeltaTest {
 		assertNotNull(ePackage);
 		assertNotNull(edelta.getEPackage(MYOTHERPACKAGE));
 		assertNull(edelta.getEPackage("foo"));
+	}
+
+	@Test
+	public void testGetEPackageWithExplicitPackageManager() {
+		edelta = new TestableEdelta(new EdeltaEPackageManager() {
+			@Override
+			public EPackage getEPackage(String packageName) {
+				if (packageName.equals("toFind"))
+					return EcoreFactory.eINSTANCE.createEPackage();
+				return super.getEPackage(packageName);
+			}
+		});
+		assertNotNull(edelta.getEPackage("toFind"));
+		assertNull(edelta.getEPackage("somethingElse"));
 	}
 
 	@Test
