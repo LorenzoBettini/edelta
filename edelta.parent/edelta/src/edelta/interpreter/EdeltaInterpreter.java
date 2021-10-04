@@ -58,6 +58,9 @@ import edelta.edelta.EdeltaOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
+import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaEPackageManager;
+import edelta.lib.EdeltaEmptyRuntime;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.util.EdeltaEcoreHelper;
@@ -105,7 +108,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	/**
 	 * Represents the "this" during the interpretation.
 	 */
-	private EdeltaInterpreterEdeltaImpl thisObject;
+	private AbstractEdelta thisObject;
 
 	private Map<EdeltaUseAs, Object> useAsFields;
 
@@ -139,7 +142,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		final var copiedEPackagesMap = derivedStateHelper
 				.getCopiedEPackagesMap(eResource);
 		final var copiedEPackages = copiedEPackagesMap.values();
-		thisObject = createThisObject(copiedEPackages);
+		thisObject = createThisObject(copiedEPackagesMap);
 		useAsFields = newHashMap();
 		var filteredOperations =
 			edeltaInterpreterHelper.filterOperations(program.getModifyEcoreOperations());
@@ -193,11 +196,30 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		sandboxResourceSet.getResources().clear();
 	}
 
-	private EdeltaInterpreterEdeltaImpl createThisObject(final Collection<EPackage> copiedEPackages) {
-		var edeltaImpl =
-			new EdeltaInterpreterEdeltaImpl(copiedEPackages);
-		edeltaImpl.setIssuePresenter(new EdeltaInterpreterIssuePresenter(diagnosticHelper));
-		return edeltaImpl;
+	/**
+	 * Uses the passed {@link EdeltaCopiedEPackagesMap} to create an
+	 * {@link EdeltaEPackageManager} that implements
+	 * {@link EdeltaEPackageManager#getEPackage(String)} by simply delegating to the
+	 * passed map. Note that the passed map will be shared, so that updates to that
+	 * map are automatically used.
+	 * 
+	 * This simulates what the final generated code would do with real loaded ecore
+	 * files, but, instead, it uses the copied EPackages in memory.
+	 * 
+	 * Moreover, it uses an {@link EdeltaInterpreterIssuePresenter}, so that we
+	 * catch possible reported warnings and errors to create markers on the fly.
+	 * 
+	 * @param copiedEPackagesMap
+	 */
+	private AbstractEdelta createThisObject(final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
+		var edeltaRuntime = new EdeltaEmptyRuntime(new EdeltaEPackageManager() {
+				@Override
+				public EPackage getEPackage(String packageName) {
+					return copiedEPackagesMap.get(packageName);
+				}
+			});
+		edeltaRuntime.setIssuePresenter(new EdeltaInterpreterIssuePresenter(diagnosticHelper));
+		return edeltaRuntime;
 	}
 
 	private void removeResourceListener(final Collection<EPackage> copiedEPackages) {
@@ -513,15 +535,13 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			// it refers to an external edelta program
 			if (useAsTypeProgram != null)
 				return useAsTypeProgram;
-			// it refers to a Java implementation
+			// it refers to a Java implementation, instantiated by reflection.
+			// Note that since we pass thisObject, the instantiated implementation
+			// will share the same package manager (see creatThisObject) and
+			// the same issue representer.
 			return useAsFields.computeIfAbsent(useAs,
-				it -> {
-					var runtimeEdelta = edeltaInterpreterHelper.safeInstantiate(
-						getJavaReflectAccess(), useAs, thisObject);
-					runtimeEdelta.setIssuePresenter(
-						new EdeltaInterpreterIssuePresenter(diagnosticHelper));
-					return runtimeEdelta;
-				});
+				it -> edeltaInterpreterHelper.safeInstantiate(
+					getJavaReflectAccess(), useAs, thisObject));
 		}
 		return super.featureCallField(jvmField, receiver);
 	}
@@ -584,15 +604,18 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				// First copy the other program's imported metamodels into
 				// the current program's derived state
 				final var eResource = currentProgram.eResource();
-				final var copiedEPackagesMap = derivedStateHelper
+				// update copied packages with possible new ones from
+				// the containing program
+				derivedStateHelper
 						.copyEPackages(containingProgram, eResource);
-				// This object is also recreated with possible new copied packages
-				thisObject = createThisObject(copiedEPackagesMap.values());
 
 				var newInterpreter =
 						edeltaInterpreterFactory.create(containingProgram.eResource());
 				newInterpreter.currentProgram = containingProgram;
-				newInterpreter.thisObject = thisObject;
+				// since we pass thisObject, the new interpreter will share
+				// the same package manager (see creatThisObject) and
+				// the same issue representer.
+				newInterpreter.thisObject = new EdeltaEmptyRuntime(thisObject);
 				// it is crucial to share the diagnosticHelper where the
 				// currentExpression is correctly set to avoid a NP2
 				// see testExecutionOfSeveralFilesWithUseAsAndIssuePresenter

@@ -1,5 +1,10 @@
 package edelta.refactorings.lib.tests;
 
+import static edelta.lib.EdeltaLibrary.addNewContainmentEReference;
+import static edelta.lib.EdeltaLibrary.addNewEClass;
+import static edelta.lib.EdeltaLibrary.addNewEReference;
+import static edelta.lib.EdeltaLibrary.addNewSubclass;
+import static edelta.lib.EdeltaLibrary.getEObjectRepr;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,12 +30,10 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaEmptyRuntime;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 import edelta.testutils.EdeltaTestUtils;
-
-import static edelta.lib.EdeltaLibrary.*;
 
 class EdeltaRefactoringsTest extends AbstractTest {
 	private EdeltaRefactorings refactorings;
@@ -108,8 +111,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 
 	@Test
 	void test_ConstructorArgument() {
-		refactorings = new EdeltaRefactorings(new AbstractEdelta() {
-		});
+		refactorings = new EdeltaRefactorings(new EdeltaEmptyRuntime());
 		final EClass c = this.createEClassWithoutPackage("C1");
 		refactorings.addMandatoryAttribute(c, "test", this.stringDataType);
 		final EAttribute attr = head(c.getEAttributes());
@@ -836,16 +838,16 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		final EClass student = refactorings.getEClass("PersonList", "Student");
 		final EClass employee = refactorings.getEClass("PersonList", "Employee");
-		refactorings.pullUpFeatures(person,
+		assertThrowsIAE(() -> refactorings.pullUpFeatures(person,
 			asList(
 				student.getEStructuralFeature("name"),
-				employee.getEStructuralFeature("name")));
+				employee.getEStructuralFeature("name"))));
 		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult())
 			.isEqualTo(
-			"ERROR: PersonList.Student.name: Not a direct subclass of destination: PersonList.Student\n"
-			+ "ERROR: PersonList.Employee.name: Not a direct subclass of destination: PersonList.Employee\n"
+			"ERROR: PersonList.Student: Not a direct subclass of: PersonList.Person\n"
+			+ "ERROR: PersonList.Employee: Not a direct subclass of: PersonList.Person\n"
 			+ "");
 	}
 

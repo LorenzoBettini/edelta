@@ -3,12 +3,14 @@
  */
 package edelta.lib.tests;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.emf.ecore.EcorePackage.Literals.EOBJECT;
+import static org.eclipse.emf.ecore.EcorePackage.Literals.ESTRING;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 import java.util.Arrays;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.eclipse.emf.ecore.EcorePackage.Literals.*;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -30,7 +32,7 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil.EqualityHelper;
 import org.junit.Test;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaEmptyRuntime;
 import edelta.lib.EdeltaLibrary;
 
 /**
@@ -1049,8 +1051,7 @@ public class EdeltaLibraryTest {
 
 	@Test
 	public void test_usedPackages() {
-		var edelta = new AbstractEdelta() {
-		};
+		var edelta = new EdeltaEmptyRuntime();
 		edelta.loadEcoreFile("testecores/TestEcoreForUsages1.ecore");
 		edelta.loadEcoreFile("testecores/TestEcoreForUsages2.ecore");
 		edelta.loadEcoreFile("testecores/TestEcoreForUsages3.ecore");

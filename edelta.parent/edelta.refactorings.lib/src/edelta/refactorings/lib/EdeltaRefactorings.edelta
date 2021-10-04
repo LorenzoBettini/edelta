@@ -40,8 +40,11 @@ def addMandatoryReference(EClass eClass, String referenceName, EClass type): ERe
  * @return the new feature added to the containing class of the features
  */
 def mergeFeatures(String newFeatureName, Collection<EStructuralFeature> features) : EStructuralFeature {
-	val diffFinder = new EdeltaFeatureDifferenceFinder().ignoringName
-	checkNoDifferences(features, diffFinder, "The two features cannot be merged")
+	checkNoDifferences(
+		features,
+		new EdeltaFeatureDifferenceFinder().ignoringName,
+		"The two features cannot be merged"
+	)
 	val feature = features.head
 	val owner = feature.EContainingClass
 	val copy = feature.copyToAs(owner, newFeatureName)
@@ -58,11 +61,10 @@ def mergeFeatures(String newFeatureName, Collection<EStructuralFeature> features
  * @param features
  */
 def mergeFeatures(EStructuralFeature feature, Collection<EStructuralFeature> features) : EStructuralFeature {
-	val diffFinder = new EdeltaFeatureDifferenceFinder()
-		.ignoringName
-		.ignoringType
 	checkCompliant(feature, features)
-	checkNoDifferences(#[feature] + features, diffFinder,
+	checkNoDifferences(#[feature] + features,
+		new EdeltaFeatureDifferenceFinder()
+			.ignoringName.ignoringType,
 		"The two features cannot be merged")
 	removeAllElements(features)
 	return feature
@@ -380,20 +382,12 @@ def extractSuperclass(String name, List<? extends EStructuralFeature> duplicates
  * @param duplicates
  */
 def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates) {
-	val diffFinder = new EdeltaFeatureDifferenceFinder().ignoringContainingClass
-	checkNoDifferences(duplicates, diffFinder, "The two features are not equal")
-
-	val wrongFeatures = duplicates
-		.filter[!EContainingClass.ESuperTypes.contains(dest)]
-	if (!wrongFeatures.empty) {
-		wrongFeatures.forEach[
-			showError(it,
-				"Not a direct subclass of destination: " +
-					getEObjectRepr(EContainingClass)
-			)
-		]
-		return
-	}
+	checkNoDifferences(
+		duplicates,
+		new EdeltaFeatureDifferenceFinder().ignoringContainingClass,
+		"The two features are not equal"
+	)
+	checkAllDirectSubclasses(dest, duplicates.map[EContainingClass])
 	duplicates.head.copyTo(dest)
 	removeAllElements(duplicates)
 }
@@ -493,6 +487,27 @@ def checkNoDifferences(Iterable<? extends EStructuralFeature> features,
 					differenceFinder.differenceDetails
 		showError(different, message)
 		throw new IllegalArgumentException(message)
+	}
+}
+
+/**
+ * Makes sure that all the passed classes are direct subclasses of
+ * the passed class.
+ * 
+ * @param superClass
+ * @param classes
+ */
+def checkAllDirectSubclasses(EClass superClass, Collection<EClass> classes) {
+	val nonDirectSubclasses = classes
+		.filter[!ESuperTypes.contains(superClass)]
+	if (!nonDirectSubclasses.empty) {
+		nonDirectSubclasses.forEach[
+			showError(it,
+				"Not a direct subclass of: " +
+					getEObjectRepr(superClass)
+			)
+		]
+		throw new IllegalArgumentException("Not all direct subclasses")
 	}
 }
 
