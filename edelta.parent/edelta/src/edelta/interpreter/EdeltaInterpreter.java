@@ -58,6 +58,8 @@ import edelta.edelta.EdeltaOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
+import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaEmptyRuntime;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.util.EdeltaEcoreHelper;
@@ -105,7 +107,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	/**
 	 * Represents the "this" during the interpretation.
 	 */
-	private EdeltaInterpreterEdeltaImpl thisObject;
+	private AbstractEdelta thisObject;
 
 	private Map<EdeltaUseAs, Object> useAsFields;
 
@@ -587,7 +589,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				var newInterpreter =
 						edeltaInterpreterFactory.create(containingProgram.eResource());
 				newInterpreter.currentProgram = containingProgram;
-				newInterpreter.thisObject = new EdeltaInterpreterEdeltaImpl(thisObject);
+				newInterpreter.thisObject = new EdeltaEmptyRuntime(thisObject);
 				// it is crucial to share the diagnosticHelper where the
 				// currentExpression is correctly set to avoid a NP2
 				// see testExecutionOfSeveralFilesWithUseAsAndIssuePresenter
