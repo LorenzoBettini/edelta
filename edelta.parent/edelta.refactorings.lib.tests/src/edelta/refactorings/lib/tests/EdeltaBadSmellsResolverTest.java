@@ -15,7 +15,7 @@ import org.eclipse.emf.ecore.EPackage;
 import org.junit.Before;
 import org.junit.Test;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaEmptyRuntime;
 import edelta.refactorings.lib.EdeltaBadSmellsResolver;
 import edelta.testutils.EdeltaTestUtils;
 
@@ -53,8 +53,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 
 	@Test
 	public void test_ConstructorArgument() {
-		resolver = new EdeltaBadSmellsResolver(new AbstractEdelta() {
-		});
+		resolver = new EdeltaBadSmellsResolver(new EdeltaEmptyRuntime());
 		assertThat(resolver).isNotNull();
 	}
 

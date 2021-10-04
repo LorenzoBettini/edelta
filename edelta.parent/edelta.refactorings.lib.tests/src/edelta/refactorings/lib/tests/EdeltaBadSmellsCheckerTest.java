@@ -8,7 +8,7 @@ import org.eclipse.emf.ecore.EPackage;
 import org.junit.Before;
 import org.junit.Test;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaEmptyRuntime;
 import edelta.refactorings.lib.EdeltaBadSmellsChecker;
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 
@@ -27,8 +27,7 @@ public class EdeltaBadSmellsCheckerTest extends AbstractTest {
 
 	@Test
 	public void test_ConstructorArgument() {
-		checker = new EdeltaBadSmellsChecker(new AbstractEdelta() {
-		});
+		checker = new EdeltaBadSmellsChecker(new EdeltaEmptyRuntime());
 		assertThat(checker).isNotNull();
 	}
 

@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaUseAs;
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaEmptyRuntime;
 
 /**
  * Helper class for the EdeltaInterpreter.
@@ -26,9 +27,7 @@ import edelta.lib.AbstractEdelta;
 @Singleton
 public class EdeltaInterpreterHelper {
 
-	private static AbstractEdelta defaultInstance = new AbstractEdelta() {
-		
-	};
+	private static AbstractEdelta defaultInstance = new EdeltaEmptyRuntime();
 
 	public AbstractEdelta safeInstantiate(JavaReflectAccess javaReflectAccess, EdeltaUseAs useAs, AbstractEdelta other) {
 		var typeRef = useAs.getType();
