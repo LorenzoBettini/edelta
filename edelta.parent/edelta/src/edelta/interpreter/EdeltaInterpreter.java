@@ -203,6 +203,12 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	 * passed map. Note that the passed map will be shared, so that updates to that
 	 * map are automatically used.
 	 * 
+	 * This simulates what the final generated code would do with real loaded ecore
+	 * files, but, instead, it uses the copied EPackages in memory.
+	 * 
+	 * Moreover, it uses an {@link EdeltaInterpreterIssuePresenter}, so that we
+	 * catch possible reported warnings and errors to create markers on the fly.
+	 * 
 	 * @param copiedEPackagesMap
 	 */
 	private AbstractEdelta createThisObject(final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
@@ -529,7 +535,10 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			// it refers to an external edelta program
 			if (useAsTypeProgram != null)
 				return useAsTypeProgram;
-			// it refers to a Java implementation
+			// it refers to a Java implementation, instantiated by reflection.
+			// Note that since we pass thisObject, the instantiated implementation
+			// will share the same package manager (see creatThisObject) and
+			// the same issue representer.
 			return useAsFields.computeIfAbsent(useAs,
 				it -> edeltaInterpreterHelper.safeInstantiate(
 					getJavaReflectAccess(), useAs, thisObject));
@@ -603,6 +612,9 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				var newInterpreter =
 						edeltaInterpreterFactory.create(containingProgram.eResource());
 				newInterpreter.currentProgram = containingProgram;
+				// since we pass thisObject, the new interpreter will share
+				// the same package manager (see creatThisObject) and
+				// the same issue representer.
 				newInterpreter.thisObject = new EdeltaEmptyRuntime(thisObject);
 				// it is crucial to share the diagnosticHelper where the
 				// currentExpression is correctly set to avoid a NP2
