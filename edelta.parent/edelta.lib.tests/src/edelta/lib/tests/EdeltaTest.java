@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
@@ -34,6 +35,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaEPackageManager;
+import edelta.lib.EdeltaEmptyRuntime;
 import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
@@ -58,7 +61,7 @@ public class EdeltaTest {
 	private static final String MY_SUBSUBPACKAGE = "subsubpackage";
 	private static final String TESTECORES = "testecores/";
 
-	public static class TestableEdelta extends AbstractEdelta {
+	public static class TestableEdelta extends EdeltaEmptyRuntime {
 
 		public TestableEdelta() {
 			super();
@@ -66,6 +69,10 @@ public class EdeltaTest {
 
 		public TestableEdelta(AbstractEdelta other) {
 			super(other);
+		}
+
+		public TestableEdelta(EdeltaEPackageManager packageManager) {
+			super(packageManager);
 		}
 
 		@Override
@@ -135,6 +142,20 @@ public class EdeltaTest {
 		assertNotNull(ePackage);
 		assertNotNull(edelta.getEPackage(MYOTHERPACKAGE));
 		assertNull(edelta.getEPackage("foo"));
+	}
+
+	@Test
+	public void testGetEPackageWithExplicitPackageManager() {
+		edelta = new TestableEdelta(new EdeltaEPackageManager() {
+			@Override
+			public EPackage getEPackage(String packageName) {
+				if (packageName.equals("toFind"))
+					return EcoreFactory.eINSTANCE.createEPackage();
+				return super.getEPackage(packageName);
+			}
+		});
+		assertNotNull(edelta.getEPackage("toFind"));
+		assertNull(edelta.getEPackage("somethingElse"));
 	}
 
 	@Test
@@ -342,6 +363,42 @@ public class EdeltaTest {
 		edelta.showWarning(problematicObject, "a warning");
 		verify(issuePresenter).showError(problematicObject, "an error");
 		verify(issuePresenter).showWarning(problematicObject, "a warning");
+	}
+
+	@Test
+	public void testSetIssuePresenterPropagatesToChildren() {
+		var issuePresenter = mock(EdeltaIssuePresenter.class);
+		AbstractEdelta child = new EdeltaEmptyRuntime(edelta);
+		AbstractEdelta grandchild = new EdeltaEmptyRuntime(child);
+		edelta.setIssuePresenter(issuePresenter);
+		EPackage problematicObject = EcoreFactory.eINSTANCE.createEPackage();
+		problematicObject.setName("anEPackage");
+		child.showError(problematicObject, "an error");
+		child.showWarning(problematicObject, "a warning");
+		verify(issuePresenter).showError(problematicObject, "an error");
+		verify(issuePresenter).showWarning(problematicObject, "a warning");
+		grandchild.showError(problematicObject, "an error");
+		grandchild.showWarning(problematicObject, "a warning");
+		verify(issuePresenter, times(2)).showError(problematicObject, "an error");
+		verify(issuePresenter, times(2)).showWarning(problematicObject, "a warning");
+	}
+
+	@Test
+	public void testIssuePresenterIsPropagatedToChildrenByConstructor() {
+		var issuePresenter = mock(EdeltaIssuePresenter.class);
+		edelta.setIssuePresenter(issuePresenter);
+		AbstractEdelta child = new EdeltaEmptyRuntime(edelta);
+		AbstractEdelta grandchild = new EdeltaEmptyRuntime(child);
+		EPackage problematicObject = EcoreFactory.eINSTANCE.createEPackage();
+		problematicObject.setName("anEPackage");
+		child.showError(problematicObject, "an error");
+		child.showWarning(problematicObject, "a warning");
+		verify(issuePresenter).showError(problematicObject, "an error");
+		verify(issuePresenter).showWarning(problematicObject, "a warning");
+		grandchild.showError(problematicObject, "an error");
+		grandchild.showWarning(problematicObject, "a warning");
+		verify(issuePresenter, times(2)).showError(problematicObject, "an error");
+		verify(issuePresenter, times(2)).showWarning(problematicObject, "a warning");
 	}
 
 	@Test

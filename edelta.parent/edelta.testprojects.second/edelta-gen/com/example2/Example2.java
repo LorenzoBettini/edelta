@@ -2,7 +2,6 @@ package com.example2;
 
 import com.example1.Example1;
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.EdeltaLibrary;
 import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
@@ -18,12 +17,6 @@ public class Example2 extends AbstractEdelta {
   
   public Example2() {
     example1 = new Example1(this);
-  }
-  
-  @Override
-  public void setIssuePresenter(final EdeltaIssuePresenter issuePresenter) {
-    super.setIssuePresenter(issuePresenter);
-    example1.setIssuePresenter(issuePresenter);
   }
   
   public Example2(final AbstractEdelta other) {

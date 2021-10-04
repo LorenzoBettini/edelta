@@ -1,7 +1,6 @@
 package edelta.introducingdep.example;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.EdeltaLibrary;
 import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EClass;
@@ -17,12 +16,6 @@ public class IntroducingDepModifExample extends AbstractEdelta {
   
   public IntroducingDepModifExample() {
     operations = new IntroducingDepOpExample(this);
-  }
-  
-  @Override
-  public void setIssuePresenter(final EdeltaIssuePresenter issuePresenter) {
-    super.setIssuePresenter(issuePresenter);
-    operations.setIssuePresenter(issuePresenter);
   }
   
   public IntroducingDepModifExample(final AbstractEdelta other) {

@@ -1,13 +1,18 @@
 package edelta.refactorings.lib.tests;
 
-import com.google.common.base.Objects;
-import edelta.lib.AbstractEdelta;
-import edelta.refactorings.lib.EdeltaBadSmellsFinder;
-
-import static edelta.lib.EdeltaLibrary.*;
+import static edelta.lib.EdeltaLibrary.addESuperType;
+import static edelta.lib.EdeltaLibrary.addNewAbstractEClass;
+import static edelta.lib.EdeltaLibrary.addNewContainmentEReference;
+import static edelta.lib.EdeltaLibrary.addNewEAttribute;
+import static edelta.lib.EdeltaLibrary.addNewEClass;
+import static edelta.lib.EdeltaLibrary.addNewEReference;
+import static edelta.lib.EdeltaLibrary.addNewSubclass;
 import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.*;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.last;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.map;
 
 import java.util.Map;
 
@@ -20,6 +25,11 @@ import org.eclipse.xtext.xbase.lib.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.base.Objects;
+
+import edelta.lib.EdeltaEmptyRuntime;
+import edelta.refactorings.lib.EdeltaBadSmellsFinder;
+
 public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	private EdeltaBadSmellsFinder finder;
 
@@ -30,8 +40,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 
 	@Test
 	public void test_ConstructorArgument() throws Exception {
-		finder = new EdeltaBadSmellsFinder(new AbstractEdelta() {
-		});
+		finder = new EdeltaBadSmellsFinder(new EdeltaEmptyRuntime());
 		assertThat(finder).isNotNull();
 		finder.performSanityChecks();
 	}

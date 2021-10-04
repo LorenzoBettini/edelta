@@ -6,6 +6,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EClass;
@@ -13,11 +15,7 @@ import org.eclipse.emf.ecore.EPackage;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
-import java.util.Objects;
-
-import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaNopIssuePresenter;
+import edelta.lib.EdeltaEmptyRuntime;
 import edelta.refactorings.lib.EdeltaBadSmellsResolver;
 import edelta.testutils.EdeltaTestUtils;
 
@@ -31,7 +29,6 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 	@Before
 	public void setup() {
 		resolver = new EdeltaBadSmellsResolver();
-		resolver.setIssuePresenter(EdeltaNopIssuePresenter.INSTANCE);
 	}
 
 	private void loadModelFiles(String testModelDirectory, String... testModelFiles) {
@@ -56,8 +53,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 
 	@Test
 	public void test_ConstructorArgument() {
-		resolver = new EdeltaBadSmellsResolver(new AbstractEdelta() {
-		});
+		resolver = new EdeltaBadSmellsResolver(new EdeltaEmptyRuntime());
 		assertThat(resolver).isNotNull();
 	}
 

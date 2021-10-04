@@ -1,7 +1,6 @@
 package edelta.personlist.example;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.EdeltaLibrary;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.Collections;
@@ -20,12 +19,6 @@ public class PersonListExample extends AbstractEdelta {
   
   public PersonListExample() {
     refactorings = new EdeltaRefactorings(this);
-  }
-  
-  @Override
-  public void setIssuePresenter(final EdeltaIssuePresenter issuePresenter) {
-    super.setIssuePresenter(issuePresenter);
-    refactorings.setIssuePresenter(issuePresenter);
   }
   
   public PersonListExample(final AbstractEdelta other) {
