@@ -59,6 +59,7 @@ import edelta.edelta.EdeltaProgram;
 import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaEPackageManager;
 import edelta.lib.EdeltaEmptyRuntime;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
@@ -195,9 +196,23 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		sandboxResourceSet.getResources().clear();
 	}
 
-	private EdeltaInterpreterEdeltaImpl createThisObject(final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
+	/**
+	 * Uses the passed {@link EdeltaCopiedEPackagesMap} to create an
+	 * {@link EdeltaEPackageManager} that implements
+	 * {@link EdeltaEPackageManager#getEPackage(String)} by simply delegating to the
+	 * passed map. Note that the passed map will be shared, so that updates to that
+	 * map are automatically used.
+	 * 
+	 * @param copiedEPackagesMap
+	 */
+	private AbstractEdelta createThisObject(final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		var edeltaImpl =
-			new EdeltaInterpreterEdeltaImpl(copiedEPackagesMap);
+			new AbstractEdelta(new EdeltaEPackageManager() {
+				@Override
+				public EPackage getEPackage(String packageName) {
+					return copiedEPackagesMap.get(packageName);
+				}
+			}) {};
 		edeltaImpl.setIssuePresenter(new EdeltaInterpreterIssuePresenter(diagnosticHelper));
 		return edeltaImpl;
 	}
