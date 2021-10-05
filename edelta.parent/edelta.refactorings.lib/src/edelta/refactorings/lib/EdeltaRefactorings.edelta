@@ -381,7 +381,7 @@ def extractSuperclass(String name, List<? extends EStructuralFeature> duplicates
  * @param dest
  * @param duplicates
  */
-def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates) {
+def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates) : void {
 	checkNoDifferences(
 		duplicates,
 		new EdeltaFeatureDifferenceFinder().ignoringContainingClass,
