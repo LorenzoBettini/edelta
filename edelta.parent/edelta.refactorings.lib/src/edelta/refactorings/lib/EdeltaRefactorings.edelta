@@ -346,7 +346,7 @@ def extractSuperclass(List<? extends EStructuralFeature> duplicates) {
 		ensureEClassifierNameIsUnique(containingEPackage,
 			feature.name.toFirstUpper + "Element")
 
-	extractSuperclass(superClassName, duplicates)
+	return extractSuperclass(superClassName, duplicates)
 }
 
 /**
@@ -363,7 +363,7 @@ def extractSuperclass(String name, List<? extends EStructuralFeature> duplicates
 	val feature = duplicates.head;
 	val containingEPackage = feature.EContainingClass.EPackage
 
-	containingEPackage.addNewEClass(name) [
+	return containingEPackage.addNewEClass(name) [
 		makeAbstract
 		duplicates
 			.map[EContainingClass]
