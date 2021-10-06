@@ -385,16 +385,12 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @param duplicates
    */
   public EClass extractSuperclass(final List<? extends EStructuralFeature> duplicates) {
-    EClass _xblockexpression = null;
-    {
-      final EStructuralFeature feature = IterableExtensions.head(duplicates);
-      final EPackage containingEPackage = feature.getEContainingClass().getEPackage();
-      String _firstUpper = StringExtensions.toFirstUpper(feature.getName());
-      String _plus = (_firstUpper + "Element");
-      final String superClassName = this.ensureEClassifierNameIsUnique(containingEPackage, _plus);
-      _xblockexpression = this.extractSuperclass(superClassName, duplicates);
-    }
-    return _xblockexpression;
+    final EStructuralFeature feature = IterableExtensions.head(duplicates);
+    final EPackage containingEPackage = feature.getEContainingClass().getEPackage();
+    String _firstUpper = StringExtensions.toFirstUpper(feature.getName());
+    String _plus = (_firstUpper + "Element");
+    final String superClassName = this.ensureEClassifierNameIsUnique(containingEPackage, _plus);
+    return this.extractSuperclass(superClassName, duplicates);
   }
   
   /**
@@ -408,24 +404,20 @@ public class EdeltaRefactorings extends AbstractEdelta {
    * @param duplicates
    */
   public EClass extractSuperclass(final String name, final List<? extends EStructuralFeature> duplicates) {
-    EClass _xblockexpression = null;
-    {
-      final EStructuralFeature feature = IterableExtensions.head(duplicates);
-      final EPackage containingEPackage = feature.getEContainingClass().getEPackage();
-      final Consumer<EClass> _function = (EClass it) -> {
-        EdeltaLibrary.makeAbstract(it);
-        final Function1<EStructuralFeature, EClass> _function_1 = (EStructuralFeature it_1) -> {
-          return it_1.getEContainingClass();
-        };
-        final Consumer<EClass> _function_2 = (EClass c) -> {
-          EdeltaLibrary.addESuperType(c, it);
-        };
-        ListExtensions.map(duplicates, _function_1).forEach(_function_2);
-        this.pullUpFeatures(it, duplicates);
+    final EStructuralFeature feature = IterableExtensions.head(duplicates);
+    final EPackage containingEPackage = feature.getEContainingClass().getEPackage();
+    final Consumer<EClass> _function = (EClass it) -> {
+      EdeltaLibrary.makeAbstract(it);
+      final Function1<EStructuralFeature, EClass> _function_1 = (EStructuralFeature it_1) -> {
+        return it_1.getEContainingClass();
       };
-      _xblockexpression = EdeltaLibrary.addNewEClass(containingEPackage, name, _function);
-    }
-    return _xblockexpression;
+      final Consumer<EClass> _function_2 = (EClass c) -> {
+        EdeltaLibrary.addESuperType(c, it);
+      };
+      ListExtensions.map(duplicates, _function_1).forEach(_function_2);
+      this.pullUpFeatures(it, duplicates);
+    };
+    return EdeltaLibrary.addNewEClass(containingEPackage, name, _function);
   }
   
   /**
