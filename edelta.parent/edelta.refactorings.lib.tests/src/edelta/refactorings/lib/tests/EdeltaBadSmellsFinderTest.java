@@ -27,7 +27,7 @@ import org.junit.Test;
 
 import com.google.common.base.Objects;
 
-import edelta.lib.EdeltaEmptyRuntime;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.refactorings.lib.EdeltaBadSmellsFinder;
 
 public class EdeltaBadSmellsFinderTest extends AbstractTest {
@@ -40,7 +40,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 
 	@Test
 	public void test_ConstructorArgument() throws Exception {
-		finder = new EdeltaBadSmellsFinder(new EdeltaEmptyRuntime());
+		finder = new EdeltaBadSmellsFinder(new EdeltaDefaultRuntime());
 		assertThat(finder).isNotNull();
 		finder.performSanityChecks();
 	}

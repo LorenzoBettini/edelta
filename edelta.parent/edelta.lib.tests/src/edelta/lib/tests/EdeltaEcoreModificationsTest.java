@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaEcoreUtil;
-import edelta.lib.EdeltaEmptyRuntime;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaLibrary;
 
 /**
@@ -52,7 +52,7 @@ public class EdeltaEcoreModificationsTest {
 
 	@Before
 	public void init() {
-		edelta = new EdeltaEmptyRuntime();
+		edelta = new EdeltaDefaultRuntime();
 	}
 
 	@Test

@@ -11,23 +11,23 @@ package edelta.lib;
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaEmptyRuntime extends AbstractEdelta {
+public class EdeltaDefaultRuntime extends AbstractEdelta {
 
-	public EdeltaEmptyRuntime() {
+	public EdeltaDefaultRuntime() {
 		super();
 	}
 
 	/**
 	 * @param other
 	 */
-	public EdeltaEmptyRuntime(AbstractEdelta other) {
+	public EdeltaDefaultRuntime(AbstractEdelta other) {
 		super(other);
 	}
 
 	/**
 	 * @param packageManager
 	 */
-	public EdeltaEmptyRuntime(EdeltaEPackageManager packageManager) {
+	public EdeltaDefaultRuntime(EdeltaEPackageManager packageManager) {
 		super(packageManager);
 	}
 

@@ -36,7 +36,7 @@ import org.junit.Test;
 
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaEPackageManager;
-import edelta.lib.EdeltaEmptyRuntime;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
@@ -61,7 +61,7 @@ public class EdeltaTest {
 	private static final String MY_SUBSUBPACKAGE = "subsubpackage";
 	private static final String TESTECORES = "testecores/";
 
-	public static class TestableEdelta extends EdeltaEmptyRuntime {
+	public static class TestableEdelta extends EdeltaDefaultRuntime {
 
 		public TestableEdelta() {
 			super();
@@ -368,8 +368,8 @@ public class EdeltaTest {
 	@Test
 	public void testSetIssuePresenterPropagatesToChildren() {
 		var issuePresenter = mock(EdeltaIssuePresenter.class);
-		AbstractEdelta child = new EdeltaEmptyRuntime(edelta);
-		AbstractEdelta grandchild = new EdeltaEmptyRuntime(child);
+		AbstractEdelta child = new EdeltaDefaultRuntime(edelta);
+		AbstractEdelta grandchild = new EdeltaDefaultRuntime(child);
 		edelta.setIssuePresenter(issuePresenter);
 		EPackage problematicObject = EcoreFactory.eINSTANCE.createEPackage();
 		problematicObject.setName("anEPackage");
@@ -387,8 +387,8 @@ public class EdeltaTest {
 	public void testIssuePresenterIsPropagatedToChildrenByConstructor() {
 		var issuePresenter = mock(EdeltaIssuePresenter.class);
 		edelta.setIssuePresenter(issuePresenter);
-		AbstractEdelta child = new EdeltaEmptyRuntime(edelta);
-		AbstractEdelta grandchild = new EdeltaEmptyRuntime(child);
+		AbstractEdelta child = new EdeltaDefaultRuntime(edelta);
+		AbstractEdelta grandchild = new EdeltaDefaultRuntime(child);
 		EPackage problematicObject = EcoreFactory.eINSTANCE.createEPackage();
 		problematicObject.setName("anEPackage");
 		child.showError(problematicObject, "an error");

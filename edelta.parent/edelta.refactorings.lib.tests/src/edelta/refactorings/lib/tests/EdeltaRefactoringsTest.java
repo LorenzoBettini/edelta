@@ -30,7 +30,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import edelta.lib.EdeltaEmptyRuntime;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 import edelta.testutils.EdeltaTestUtils;
@@ -111,7 +111,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 
 	@Test
 	void test_ConstructorArgument() {
-		refactorings = new EdeltaRefactorings(new EdeltaEmptyRuntime());
+		refactorings = new EdeltaRefactorings(new EdeltaDefaultRuntime());
 		final EClass c = this.createEClassWithoutPackage("C1");
 		refactorings.addMandatoryAttribute(c, "test", this.stringDataType);
 		final EAttribute attr = head(c.getEAttributes());

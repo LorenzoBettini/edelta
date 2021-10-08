@@ -32,7 +32,7 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil.EqualityHelper;
 import org.junit.Test;
 
-import edelta.lib.EdeltaEmptyRuntime;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaLibrary;
 
 /**
@@ -1051,7 +1051,7 @@ public class EdeltaLibraryTest {
 
 	@Test
 	public void test_usedPackages() {
-		var edelta = new EdeltaEmptyRuntime();
+		var edelta = new EdeltaDefaultRuntime();
 		edelta.loadEcoreFile("testecores/TestEcoreForUsages1.ecore");
 		edelta.loadEcoreFile("testecores/TestEcoreForUsages2.ecore");
 		edelta.loadEcoreFile("testecores/TestEcoreForUsages3.ecore");
