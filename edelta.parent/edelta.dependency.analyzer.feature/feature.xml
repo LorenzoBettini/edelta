@@ -2,7 +2,7 @@
 <feature
       id="edelta.dependency.analyzer.feature"
       label="Edelta Dependency Analyzer Feature "
-      version="2.6.4.qualifier"
+      version="2.6.5.qualifier"
       provider-name="Lorenzo Bettini">
 
    <includes

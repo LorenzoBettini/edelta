@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.github.lorenzobettini.edelta</groupId>
     <artifactId>edelta.parent</artifactId>
-    <version>2.6.4-SNAPSHOT</version>
+    <version>2.6.5-SNAPSHOT</version>
   </parent>
   <artifactId>edelta.dependency.analyzer.feature</artifactId>
   <packaging>eclipse-feature</packaging>

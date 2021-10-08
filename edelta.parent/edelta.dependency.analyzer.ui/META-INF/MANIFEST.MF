@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Edelta Dependency Analyzer Ui
 Bundle-SymbolicName: edelta.dependency.analyzer.ui;singleton:=true
-Bundle-Version: 2.6.4.qualifier
+Bundle-Version: 2.6.5.qualifier
 Bundle-Activator: edelta.dependency.analyzer.ui.internal.Activator
 Bundle-Vendor: Lorenzo Bettini
 Require-Bundle: org.eclipse.ui,
