@@ -37,11 +37,11 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaLibrary {
+public class EdeltaUtils {
 
 	private static EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
 
-	private EdeltaLibrary() {
+	private EdeltaUtils() {
 	}
 
 	private static <T extends ENamedElement> void safeRunInitializer(Consumer<T> initializer, T e) {
@@ -343,10 +343,10 @@ public class EdeltaLibrary {
 	 * implementation to {@link EcoreUtil#deleteAll(Collection, boolean)}.
 	 * 
 	 * @param elements
-	 * @see EdeltaLibrary#removeElement(ENamedElement)
+	 * @see EdeltaUtils#removeElement(ENamedElement)
 	 */
 	public static void removeAllElements(Collection<? extends EObject> elements) {
-		elements.stream().forEach(EdeltaLibrary::removeFutureDanglingReferences);
+		elements.stream().forEach(EdeltaUtils::removeFutureDanglingReferences);
 		EcoreUtil.removeAll(elements);
 	}
 

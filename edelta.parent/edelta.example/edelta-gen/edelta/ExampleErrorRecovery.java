@@ -1,7 +1,7 @@
 package edelta;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaLibrary;
+import edelta.lib.EdeltaUtils;
 import org.eclipse.emf.ecore.EPackage;
 
 @SuppressWarnings("all")
@@ -15,7 +15,7 @@ public class ExampleErrorRecovery extends AbstractEdelta {
   }
   
   public void creation(final EPackage it) {
-    EdeltaLibrary.addNewEClass(it, "NewClass");
+    EdeltaUtils.addNewEClass(it, "NewClass");
     getEClass("myecore", "NewClass").setAbstract(true);
   }
   

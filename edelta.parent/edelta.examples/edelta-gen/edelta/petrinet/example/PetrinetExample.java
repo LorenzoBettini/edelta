@@ -1,7 +1,7 @@
 package edelta.petrinet.example;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaLibrary;
+import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.Collections;
 import java.util.function.Consumer;
@@ -28,15 +28,15 @@ public class PetrinetExample extends AbstractEdelta {
   
   public EAttribute addWeightAttribute(final EClass c) {
     final Consumer<EAttribute> _function = (EAttribute it) -> {
-      EdeltaLibrary.makeRequired(it);
+      EdeltaUtils.makeRequired(it);
     };
-    return EdeltaLibrary.addNewEAttribute(c, "weight", getEDataType("ecore", "EInt"), _function);
+    return EdeltaUtils.addNewEAttribute(c, "weight", getEDataType("ecore", "EInt"), _function);
   }
   
   public void modifyNet(final EPackage it) {
     getEClass("petrinet", "Net").setName("Petrinet");
-    EdeltaLibrary.makeRequired(getEReference("petrinet", "Petrinet", "places"));
-    EdeltaLibrary.makeRequired(getEReference("petrinet", "Petrinet", "transitions"));
+    EdeltaUtils.makeRequired(getEReference("petrinet", "Petrinet", "places"));
+    EdeltaUtils.makeRequired(getEReference("petrinet", "Petrinet", "transitions"));
   }
   
   public void introducePTArc(final EPackage it) {

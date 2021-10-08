@@ -1,7 +1,7 @@
 package edelta.personlist.example;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaLibrary;
+import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.Collections;
 import org.eclipse.emf.ecore.EClass;
@@ -40,7 +40,7 @@ public class PersonListExample extends AbstractEdelta {
   public void introduceWorkingPosition(final EPackage it) {
     EClass _referenceToClass = this.refactorings.referenceToClass("WorkingPosition", getEReference("PersonList", "Person", "works"));
     final Procedure1<EClass> _function = (EClass it_1) -> {
-      EdeltaLibrary.addNewEAttribute(it_1, "description", getEDataType("ecore", "EString"));
+      EdeltaUtils.addNewEAttribute(it_1, "description", getEDataType("ecore", "EString"));
     };
     ObjectExtensions.<EClass>operator_doubleArrow(_referenceToClass, _function);
     getEReference("PersonList", "WorkPlace", "persons").setName("position");

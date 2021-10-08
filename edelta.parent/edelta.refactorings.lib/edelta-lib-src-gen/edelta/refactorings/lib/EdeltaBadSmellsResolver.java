@@ -1,7 +1,7 @@
 package edelta.refactorings.lib;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaLibrary;
+import edelta.lib.EdeltaUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -76,7 +76,7 @@ public class EdeltaBadSmellsResolver extends AbstractEdelta {
   public void resolveRedundantContainers(final EPackage ePackage) {
     final Iterable<Pair<EReference, EReference>> findRedundantContainers = this.finder.findRedundantContainers(ePackage);
     final Consumer<Pair<EReference, EReference>> _function = (Pair<EReference, EReference> it) -> {
-      EdeltaLibrary.makeBidirectional(it.getKey(), it.getValue());
+      EdeltaUtils.makeBidirectional(it.getKey(), it.getValue());
     };
     findRedundantContainers.forEach(_function);
   }
@@ -96,21 +96,21 @@ public class EdeltaBadSmellsResolver extends AbstractEdelta {
   
   public void resolveConcreteAbstractMetaclass(final EPackage ePackage) {
     final Consumer<EClass> _function = (EClass it) -> {
-      EdeltaLibrary.makeAbstract(it);
+      EdeltaUtils.makeAbstract(it);
     };
     this.finder.findConcreteAbstractMetaclasses(ePackage).forEach(_function);
   }
   
   public void resolveAbstractConcreteMetaclass(final EPackage ePackage) {
     final Consumer<EClass> _function = (EClass it) -> {
-      EdeltaLibrary.makeConcrete(it);
+      EdeltaUtils.makeConcrete(it);
     };
     this.finder.findAbstractConcreteMetaclasses(ePackage).forEach(_function);
   }
   
   public void resolveAbstractSubclassesOfConcreteSuperclasses(final EPackage ePackage) {
     final Consumer<EClass> _function = (EClass it) -> {
-      EdeltaLibrary.makeConcrete(it);
+      EdeltaUtils.makeConcrete(it);
     };
     this.finder.findAbstractSubclassesOfConcreteSuperclasses(ePackage).forEach(_function);
   }

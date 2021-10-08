@@ -1,6 +1,6 @@
 package edelta.tests;
 
-import static edelta.lib.EdeltaLibrary.*;
+import static edelta.lib.EdeltaUtils.*;
 import static java.util.Arrays.asList;
 import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.*;

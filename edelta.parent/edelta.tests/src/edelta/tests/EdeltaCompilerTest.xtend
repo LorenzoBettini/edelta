@@ -173,7 +173,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package foo;
 			
 			import edelta.lib.AbstractEdelta;
-			import edelta.lib.EdeltaLibrary;
+			import edelta.lib.EdeltaUtils;
 			import org.eclipse.emf.ecore.EClass;
 			
 			@SuppressWarnings("all")
@@ -201,7 +201,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package foo;
 			
 			import edelta.lib.AbstractEdelta;
-			import edelta.lib.EdeltaLibrary;
+			import edelta.lib.EdeltaUtils;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.common.util.EList;
 			import org.eclipse.emf.ecore.EClass;
@@ -353,7 +353,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
-			import edelta.lib.EdeltaLibrary;
+			import edelta.lib.EdeltaUtils;
 			import org.eclipse.emf.ecore.EPackage;
 			
 			@SuppressWarnings("all")
@@ -401,7 +401,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
-			import edelta.lib.EdeltaLibrary;
+			import edelta.lib.EdeltaUtils;
 			import org.eclipse.emf.ecore.EPackage;
 			
 			@SuppressWarnings("all")
@@ -665,7 +665,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
-			import edelta.lib.EdeltaLibrary;
+			import edelta.lib.EdeltaUtils;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.common.util.EList;
 			import org.eclipse.emf.ecore.EClass;
@@ -724,7 +724,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
-			import edelta.lib.EdeltaLibrary;
+			import edelta.lib.EdeltaUtils;
 			import org.eclipse.emf.common.util.EList;
 			import org.eclipse.emf.ecore.EAttribute;
 			import org.eclipse.emf.ecore.EClass;
@@ -804,7 +804,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
-			import edelta.lib.EdeltaLibrary;
+			import edelta.lib.EdeltaUtils;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.ecore.EClass;
 			import org.eclipse.emf.ecore.EPackage;
@@ -896,7 +896,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
-			import edelta.lib.EdeltaLibrary;
+			import edelta.lib.EdeltaUtils;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.ecore.EAttribute;
 			import org.eclipse.emf.ecore.EClass;
@@ -1077,7 +1077,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
-			import edelta.lib.EdeltaLibrary;
+			import edelta.lib.EdeltaUtils;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.common.util.EList;
 			import org.eclipse.emf.ecore.EAttribute;
@@ -1832,7 +1832,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
-			import edelta.lib.EdeltaLibrary;
+			import edelta.lib.EdeltaUtils;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.common.util.EList;
 			import org.eclipse.emf.ecore.EClass;
@@ -1899,7 +1899,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta;
 			
 			import edelta.lib.AbstractEdelta;
-			import edelta.lib.EdeltaLibrary;
+			import edelta.lib.EdeltaUtils;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.ecore.EClass;
 			import org.eclipse.emf.ecore.EPackage;
@@ -1949,7 +1949,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package edelta.personlist.example;
 			
 			import edelta.lib.AbstractEdelta;
-			import edelta.lib.EdeltaLibrary;
+			import edelta.lib.EdeltaUtils;
 			import edelta.refactorings.lib.EdeltaRefactorings;
 			import java.util.Collections;
 			import org.eclipse.emf.ecore.EClass;

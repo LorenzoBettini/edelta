@@ -1,6 +1,6 @@
 package edelta.refactorings.lib.tests;
 
-import static edelta.lib.EdeltaLibrary.addNewAbstractEClass;
+import static edelta.lib.EdeltaUtils.addNewAbstractEClass;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;

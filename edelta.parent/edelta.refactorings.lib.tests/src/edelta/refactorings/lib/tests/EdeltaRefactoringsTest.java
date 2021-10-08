@@ -1,10 +1,10 @@
 package edelta.refactorings.lib.tests;
 
-import static edelta.lib.EdeltaLibrary.addNewContainmentEReference;
-import static edelta.lib.EdeltaLibrary.addNewEClass;
-import static edelta.lib.EdeltaLibrary.addNewEReference;
-import static edelta.lib.EdeltaLibrary.addNewSubclass;
-import static edelta.lib.EdeltaLibrary.getEObjectRepr;
+import static edelta.lib.EdeltaUtils.addNewContainmentEReference;
+import static edelta.lib.EdeltaUtils.addNewEClass;
+import static edelta.lib.EdeltaUtils.addNewEReference;
+import static edelta.lib.EdeltaUtils.addNewSubclass;
+import static edelta.lib.EdeltaUtils.getEObjectRepr;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
