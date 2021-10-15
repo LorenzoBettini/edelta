@@ -1,6 +1,7 @@
 package edelta.refactorings.lib;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaUtils;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.xbase.lib.Pair;
 
 @SuppressWarnings("all")
-public class EdeltaBadSmellsResolver extends AbstractEdelta {
+public class EdeltaBadSmellsResolver extends EdeltaDefaultRuntime {
   private EdeltaRefactorings refactorings;
   
   private EdeltaBadSmellsFinder finder;

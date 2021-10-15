@@ -1,10 +1,11 @@
 package edelta;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.refactorings.lib.EdeltaRefactorings;
 
 @SuppressWarnings("all")
-public class AnotherExample extends AbstractEdelta {
+public class AnotherExample extends EdeltaDefaultRuntime {
   private Example example;
   
   private EdeltaRefactorings std;

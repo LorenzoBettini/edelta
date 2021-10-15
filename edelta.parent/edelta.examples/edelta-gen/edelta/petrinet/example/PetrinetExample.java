@@ -1,6 +1,7 @@
 package edelta.petrinet.example;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.Collections;
@@ -14,7 +15,7 @@ import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
-public class PetrinetExample extends AbstractEdelta {
+public class PetrinetExample extends EdeltaDefaultRuntime {
   private EdeltaRefactorings refactorings;
   
   public PetrinetExample() {
@@ -30,7 +31,7 @@ public class PetrinetExample extends AbstractEdelta {
     final Consumer<EAttribute> _function = (EAttribute it) -> {
       EdeltaUtils.makeRequired(it);
     };
-    return EdeltaUtils.addNewEAttribute(c, "weight", getEDataType("ecore", "EInt"), _function);
+    return this.stdLib.addNewEAttribute(c, "weight", getEDataType("ecore", "EInt"), _function);
   }
   
   public void modifyNet(final EPackage it) {

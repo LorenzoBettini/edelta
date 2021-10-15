@@ -1,6 +1,7 @@
 package edelta;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaDefaultRuntime;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.xbase.lib.Extension;
@@ -8,7 +9,7 @@ import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
-public class Example extends AbstractEdelta {
+public class Example extends EdeltaDefaultRuntime {
   @Extension
   private ExampleReusableFunctions myfunctions;
   

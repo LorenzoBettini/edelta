@@ -1,11 +1,12 @@
 package edelta;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaDefaultRuntime;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 
 @SuppressWarnings("all")
-public class ExampleAcrossEPackages extends AbstractEdelta {
+public class ExampleAcrossEPackages extends EdeltaDefaultRuntime {
   public ExampleAcrossEPackages() {
     
   }
