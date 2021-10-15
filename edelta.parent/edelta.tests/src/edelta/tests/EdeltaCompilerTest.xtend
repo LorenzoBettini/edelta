@@ -363,7 +363,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
-			import edelta.lib.EdeltaUtils;
 			import org.eclipse.emf.ecore.EPackage;
 			
 			@SuppressWarnings("all")
@@ -377,7 +376,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  }
 			  
 			  public void aTest(final EPackage it) {
-			    EdeltaUtils.addNewEClass(it, "NewClass");
+			    this.stdLib.addNewEClass(it, "NewClass");
 			  }
 			  
 			  public void anotherTest(final EPackage it) {
@@ -412,7 +411,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
-			import edelta.lib.EdeltaUtils;
 			import org.eclipse.emf.ecore.EPackage;
 			
 			@SuppressWarnings("all")
@@ -426,7 +424,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  }
 			  
 			  public void creation(final EPackage it) {
-			    EdeltaUtils.addNewEClass(it, "NewClass");
+			    this.stdLib.addNewEClass(it, "NewClass");
 			  }
 			  
 			  public void renaming(final EPackage it) {
@@ -821,7 +819,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
-			import edelta.lib.EdeltaUtils;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.ecore.EClass;
 			import org.eclipse.emf.ecore.EPackage;
@@ -838,9 +835,9 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public void aTest(final EPackage it) {
 			    final Consumer<EClass> _function = (EClass it_1) -> {
-			      EdeltaUtils.addEAttribute(it_1, getEAttribute("foo", "FooClass", "myAttribute"));
+			      this.stdLib.addEAttribute(it_1, getEAttribute("foo", "FooClass", "myAttribute"));
 			    };
-			    EdeltaUtils.addNewEClass(it, "NewClass", _function);
+			    this.stdLib.addNewEClass(it, "NewClass", _function);
 			  }
 			  
 			  @Override
@@ -915,7 +912,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
-			import edelta.lib.EdeltaUtils;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.ecore.EAttribute;
 			import org.eclipse.emf.ecore.EClass;
@@ -939,21 +935,21 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			      final Consumer<EAttribute> _function_1 = (EAttribute it_2) -> {
 			        it_2.setLowerBound(1);
 			      };
-			      EdeltaUtils.addNewEAttribute(it_1, "ANewAttribute", getEDataType("foo", "FooDataType"), _function_1);
+			      this.stdLib.addNewEAttribute(it_1, "ANewAttribute", getEDataType("foo", "FooDataType"), _function_1);
 			      final Consumer<EReference> _function_2 = (EReference it_2) -> {
 			        it_2.setLowerBound(1);
 			      };
-			      EdeltaUtils.addNewEReference(it_1, "ANewReference", getEClass("foo", "FooClass"), _function_2);
+			      this.stdLib.addNewEReference(it_1, "ANewReference", getEClass("foo", "FooClass"), _function_2);
 			    };
-			    EdeltaUtils.addNewEClass(it, "ANewClass", _function);
+			    this.stdLib.addNewEClass(it, "ANewClass", _function);
 			    final Consumer<EEnum> _function_1 = (EEnum it_1) -> {
 			      final Consumer<EEnumLiteral> _function_2 = (EEnumLiteral it_2) -> {
 			        it_2.setValue(10);
 			      };
-			      EdeltaUtils.addNewEEnumLiteral(it_1, "ANewEnumLiteral", _function_2);
+			      this.stdLib.addNewEEnumLiteral(it_1, "ANewEnumLiteral", _function_2);
 			    };
-			    EdeltaUtils.addNewEEnum(it, "ANewEnum", _function_1);
-			    EdeltaUtils.addNewEDataType(it, "ANewDataType", "java.lang.String");
+			    this.stdLib.addNewEEnum(it, "ANewEnum", _function_1);
+			    this.stdLib.addNewEDataType(it, "ANewDataType", "java.lang.String");
 			    getEClass("foo", "ANewClass");
 			    getEAttribute("foo", "ANewClass", "ANewAttribute");
 			    getEReference("foo", "ANewClass", "ANewReference");
@@ -1121,17 +1117,17 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public void modifyFoo(final EPackage it) {
 			    final Consumer<EPackage> _function = (EPackage it_1) -> {
 			      final Consumer<EPackage> _function_1 = (EPackage it_2) -> {
-			        EdeltaUtils.addNewEClass(it_2, "ANestedSubPackageClass");
+			        this.stdLib.addNewEClass(it_2, "ANestedSubPackageClass");
 			      };
-			      EdeltaUtils.addNewESubpackage(it_1, "anestedsubpackage", "aprefix2", "aURI2", _function_1);
+			      this.stdLib.addNewESubpackage(it_1, "anestedsubpackage", "aprefix2", "aURI2", _function_1);
 			    };
-			    EdeltaUtils.addNewESubpackage(it, "anewsubpackage", "aprefix", "aURI", _function);
+			    this.stdLib.addNewESubpackage(it, "anewsubpackage", "aprefix", "aURI", _function);
 			    final Consumer<EClass> _function_1 = (EClass it_1) -> {
 			      EList<EStructuralFeature> _eStructuralFeatures = it_1.getEStructuralFeatures();
 			      EReference _newEReference = EdeltaUtils.newEReference("newTestRef", getEClass("foo.anewsubpackage.anestedsubpackage", "ANestedSubPackageClass"));
 			      _eStructuralFeatures.add(_newEReference);
 			    };
-			    EdeltaUtils.addNewEClass(getEPackage("foo.anewsubpackage"), "NewClass", _function_1);
+			    this.stdLib.addNewEClass(getEPackage("foo.anewsubpackage"), "NewClass", _function_1);
 			    getEClass("foo.anewsubpackage", "NewClass").setName("RenamedClass");
 			    EList<EStructuralFeature> _eStructuralFeatures = getEClass("foo.anewsubpackage", "RenamedClass").getEStructuralFeatures();
 			    EAttribute _newEAttribute = EdeltaUtils.newEAttribute("added", getEDataType("foo", "FooDataType"));
@@ -1858,7 +1854,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
-			import edelta.lib.EdeltaUtils;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.common.util.EList;
 			import org.eclipse.emf.ecore.EClass;
@@ -1878,13 +1873,13 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public void aTest(final EPackage it) {
 			    final Consumer<EClass> _function = (EClass it_1) -> {
-			      EdeltaUtils.addNewEAttribute(it_1, "created", null);
+			      this.stdLib.addNewEAttribute(it_1, "created", null);
 			    };
-			    EdeltaUtils.addNewEClass(it, "ANewClass", _function);
+			    this.stdLib.addNewEClass(it, "ANewClass", _function);
 			    final Consumer<EClass> _function_1 = (EClass it_1) -> {
-			      EdeltaUtils.addNewEReference(it_1, "created", null);
+			      this.stdLib.addNewEReference(it_1, "created", null);
 			    };
-			    EdeltaUtils.addNewEClass(it, "AnotherNewClass", _function_1);
+			    this.stdLib.addNewEClass(it, "AnotherNewClass", _function_1);
 			    EList<EClassifier> _eClassifiers = it.getEClassifiers();
 			    _eClassifiers.remove(getEClass("mainpackage", "ANewClass"));
 			    final EReference r = getEReference("mainpackage", "AnotherNewClass", "created");
@@ -1926,7 +1921,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
-			import edelta.lib.EdeltaUtils;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.ecore.EClass;
 			import org.eclipse.emf.ecore.EPackage;
@@ -1946,7 +1940,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			      getEClass("foo", "NewClass").setAbstract(true);
 			      getEClass("foo", "NewClass").setName("Renamed");
 			    };
-			    EdeltaUtils.addNewEClass(it, "NewClass", _function);
+			    this.stdLib.addNewEClass(it, "NewClass", _function);
 			    getEClass("foo", "Renamed");
 			  }
 			  
@@ -1977,7 +1971,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
-			import edelta.lib.EdeltaUtils;
 			import edelta.refactorings.lib.EdeltaRefactorings;
 			import java.util.Collections;
 			import org.eclipse.emf.ecore.EClass;
@@ -2016,7 +2009,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public void introduceWorkingPosition(final EPackage it) {
 			    EClass _referenceToClass = this.refactorings.referenceToClass("WorkingPosition", getEReference("PersonList", "Person", "works"));
 			    final Procedure1<EClass> _function = (EClass it_1) -> {
-			      EdeltaUtils.addNewEAttribute(it_1, "description", getEDataType("ecore", "EString"));
+			      this.stdLib.addNewEAttribute(it_1, "description", getEDataType("ecore", "EString"));
 			    };
 			    ObjectExtensions.<EClass>operator_doubleArrow(_referenceToClass, _function);
 			    getEReference("PersonList", "WorkPlace", "persons").setName("position");

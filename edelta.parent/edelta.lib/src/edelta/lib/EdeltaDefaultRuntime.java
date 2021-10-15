@@ -16,8 +16,12 @@ import org.eclipse.xtext.xbase.lib.Extension;
  */
 public class EdeltaDefaultRuntime extends AbstractEdelta {
 
+	/**
+	 * This is protected since it provides transparent access to the
+	 * {@link EdeltaStandardLibrary} to source code of the DSL.
+	 */
 	@Extension
-	private EdeltaStandardLibrary stdLib;
+	protected EdeltaStandardLibrary stdLib;
 
 	public EdeltaDefaultRuntime() {
 		super();
