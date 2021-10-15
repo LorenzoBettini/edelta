@@ -7,6 +7,7 @@ import com.google.inject.Inject
 import edelta.compiler.EdeltaCompilerUtil
 import edelta.edelta.EdeltaProgram
 import edelta.lib.AbstractEdelta
+import edelta.lib.EdeltaDefaultRuntime
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.common.types.JvmDeclaredType
 import org.eclipse.xtext.common.types.JvmVisibility
@@ -58,7 +59,7 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 	def dispatch void infer(EdeltaProgram program, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		val className = program.fullyQualifiedName
 		acceptor.accept(program.toClass(className)) [
-			superTypes += AbstractEdelta.typeRef
+			superTypes += EdeltaDefaultRuntime.typeRef
 			val useAsClauses = program.useAsClauses
 			for (u : useAsClauses) {
 				members += u.toField(u.name, u.type) [
