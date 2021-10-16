@@ -42,7 +42,18 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 	}
 
 	public void addEStructuralFeature(EClass eClass, EStructuralFeature eStructuralFeature) {
-		eClass.getEStructuralFeatures().add(eStructuralFeature);
+		var eStructuralFeatures = eClass.getEStructuralFeatures();
+		var existing = eClass.getEStructuralFeature(eStructuralFeature.getName());
+		if (existing != null) {
+			var errorMessage = getEObjectRepr(eClass) +
+					" already contains " +
+					existing.eClass().getName() +
+					" " +
+					getEObjectRepr(existing);
+			showError(eStructuralFeature, errorMessage);
+			throw new IllegalArgumentException(errorMessage);
+		}
+		eStructuralFeatures.add(eStructuralFeature);
 	}
 
 	private void addEClassifier(EPackage ePackage, EClassifier eClassifier) {

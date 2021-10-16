@@ -257,6 +257,24 @@ public class EdeltaStandardLibraryTest {
 	}
 
 	@Test
+	public void test_addEAttribute_alreadExisting() {
+		var ePackage = ecoreFactory.createEPackage();
+		ePackage.setName("TestPackage");
+		var eClass = ecoreFactory.createEClass();
+		eClass.setName("TestClass");
+		lib.addEClass(ePackage, eClass);
+		var eAttribute = ecoreFactory.createEAttribute();
+		eAttribute.setName("TestAttribute");
+		lib.addEAttribute(eClass, eAttribute);
+		var eAttribute1 = ecoreFactory.createEAttribute();
+		eAttribute1.setName("TestAttribute");
+		assertThrowsIAE(
+			() -> lib.addEAttribute(eClass, eAttribute1),
+			eAttribute1,
+			"TestPackage.TestClass already contains EAttribute TestPackage.TestClass.TestAttribute");
+	}
+
+	@Test
 	public void test_addNewEAttribute() {
 		EClass eClass = ecoreFactory.createEClass();
 		EAttribute eAttribute =
