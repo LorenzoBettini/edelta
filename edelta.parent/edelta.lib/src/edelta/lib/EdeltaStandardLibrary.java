@@ -47,31 +47,28 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 	public void addEStructuralFeature(EClass eClass, EStructuralFeature eStructuralFeature) {
 		var eStructuralFeatures = eClass.getEStructuralFeatures();
 		var existing = eClass.getEStructuralFeature(eStructuralFeature.getName());
-		if (existing != null) {
-			var errorMessage = getEObjectRepr(eClass) +
-					" already contains " +
-					existing.eClass().getName() +
-					" " +
-					getEObjectRepr(existing);
-			showError(eStructuralFeature, errorMessage);
-			throw new IllegalArgumentException(errorMessage);
-		}
+		checkAlreadyExistingWithTheSameName(eClass, eStructuralFeature, existing);
 		eStructuralFeatures.add(eStructuralFeature);
 	}
 
 	private void addEClassifier(EPackage ePackage, EClassifier eClassifier) {
 		var eClassifiers = ePackage.getEClassifiers();
 		var existing = ePackage.getEClassifier(eClassifier.getName());
+		checkAlreadyExistingWithTheSameName(ePackage, eClassifier, existing);
+		eClassifiers.add(eClassifier);
+	}
+
+	private <C extends ENamedElement, E extends ENamedElement> void
+			checkAlreadyExistingWithTheSameName(C container, E toAdd, E existing) {
 		if (existing != null) {
-			var errorMessage = getEObjectRepr(ePackage) +
+			var errorMessage = getEObjectRepr(container) +
 					" already contains " +
 					existing.eClass().getName() +
 					" " +
 					getEObjectRepr(existing);
-			showError(eClassifier, errorMessage);
+			showError(toAdd, errorMessage);
 			throw new IllegalArgumentException(errorMessage);
 		}
-		eClassifiers.add(eClassifier);
 	}
 
 	public void addEClass(EPackage ePackage, EClass eClass) {
@@ -120,15 +117,7 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 	public void addEEnumLiteral(EEnum eEnum, EEnumLiteral eEnumLiteral) {
 		var eLiterals = eEnum.getELiterals();
 		var existing = eEnum.getEEnumLiteral(eEnumLiteral.getName());
-		if (existing != null) {
-			var errorMessage = getEObjectRepr(eEnum) +
-					" already contains " +
-					existing.eClass().getName() +
-					" " +
-					getEObjectRepr(existing);
-			showError(eEnumLiteral, errorMessage);
-			throw new IllegalArgumentException(errorMessage);
-		}
+		checkAlreadyExistingWithTheSameName(eEnum, eEnumLiteral, existing);
 		eLiterals.add(eEnumLiteral);
 	}
 
