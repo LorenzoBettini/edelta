@@ -326,6 +326,22 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 		eClassDest.getEStructuralFeatures().addAll(features);
 	}
 
+	/**
+	 * Creates a new EOpposite of the passed reference (dropping possibly
+	 * existing one), with the correct type (that is, the result of
+	 * {@link EReference#getEContainingClass()} and adding it as a reference in
+	 * the specified target {@link EClass}.
+	 * 
+	 * @param reference
+	 * @param name
+	 * @return the created EOpposite reference
+	 */
+	public EReference createOpposite(EReference reference, String name, EClass target) {
+		return addNewEReference(target, name, reference.getEContainingClass(),
+			newRef -> EdeltaUtils.makeBidirectional(newRef, reference)
+		);
+	}
+
 	private <T extends ENamedElement> void safeRunInitializer(Consumer<T> initializer, T e) {
 		if (initializer != null) {
 			initializer.accept(e);
