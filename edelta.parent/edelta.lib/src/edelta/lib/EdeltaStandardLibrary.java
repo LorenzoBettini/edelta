@@ -5,6 +5,7 @@ package edelta.lib;
 
 import static edelta.lib.EdeltaUtils.getEObjectRepr;
 
+import java.util.Collection;
 import java.util.function.Consumer;
 
 import org.eclipse.emf.ecore.EAttribute;
@@ -14,10 +15,12 @@ import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.ENamedElement;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 
 /**
  * Standard library methods, for example, for adding, copying, moving
@@ -235,6 +238,93 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 		superPackage.getESubpackages().add(newSubpackage);
 		safeRunInitializer(initializer, newSubpackage);
 		return newSubpackage;
+	}
+
+	/**
+	 * Copies the specified {@link EStructuralFeature} into the specified
+	 * {@link EClass}, using {@link EcoreUtil#copy(EObject)}.
+	 * 
+	 * @param feature
+	 * @param eClassDest
+	 * @return the copied feature
+	 * @see EcoreUtil#copy(EObject)
+	 */
+	public EStructuralFeature copyTo(EStructuralFeature feature, EClass eClassDest) {
+		var copy = EcoreUtil.copy(feature);
+		eClassDest.getEStructuralFeatures().add(copy);
+		return copy;
+	}
+
+	/**
+	 * Copies the specified {@link EStructuralFeature} into the specified
+	 * {@link EClass}, using {@link EcoreUtil#copy(EObject)}, but changing its name.
+	 * 
+	 * @param feature
+	 * @param eClassDest
+	 * @param name
+	 * @return the copied feature
+	 * @see EcoreUtil#copy(EObject)
+	 */
+	public EStructuralFeature copyToAs(EStructuralFeature feature, EClass eClassDest, String name) {
+		var copy = EcoreUtil.copy(feature);
+		copy.setName(name);
+		eClassDest.getEStructuralFeatures().add(copy);
+		return copy;
+	}
+
+	/**
+	 * Copies the specified {@link EStructuralFeature} into the specified
+	 * {@link EClass}, using {@link EcoreUtil#copy(EObject)}, but changing its name
+	 * and type.
+	 * 
+	 * @param feature
+	 * @param eClassDest
+	 * @param name
+	 * @param type
+	 * @return the copied feature
+	 * @see EcoreUtil#copy(EObject)
+	 */
+	public EStructuralFeature copyToAs(EStructuralFeature feature, EClass eClassDest, String name,
+			EClassifier type) {
+		var copy = EcoreUtil.copy(feature);
+		copy.setName(name);
+		copy.setEType(type);
+		eClassDest.getEStructuralFeatures().add(copy);
+		return copy;
+	}
+
+	/**
+	 * Copies the specified {@link EStructuralFeature}s into the specified
+	 * {@link EClass}, using {@link EcoreUtil#copyAll(Collection)}.
+	 * 
+	 * @param features
+	 * @param eClassDest
+	 * @see EcoreUtil#copyAll(Collection)
+	 */
+	public void copyAllTo(Collection<EStructuralFeature> features, EClass eClassDest) {
+		eClassDest.getEStructuralFeatures().addAll(EcoreUtil.copyAll(features));
+	}
+
+	/**
+	 * Moves the specified {@link EStructuralFeature} into the specified
+	 * {@link EClass}.
+	 * 
+	 * @param feature
+	 * @param eClassDest
+	 */
+	public void moveTo(EStructuralFeature feature, EClass eClassDest) {
+		eClassDest.getEStructuralFeatures().add(feature);
+	}
+
+	/**
+	 * Moves the specified {@link EStructuralFeature}s into the specified
+	 * {@link EClass}.
+	 * 
+	 * @param features
+	 * @param eClassDest
+	 */
+	public void moveAllTo(Collection<EStructuralFeature> features, EClass eClassDest) {
+		eClassDest.getEStructuralFeatures().addAll(features);
 	}
 
 	private <T extends ENamedElement> void safeRunInitializer(Consumer<T> initializer, T e) {

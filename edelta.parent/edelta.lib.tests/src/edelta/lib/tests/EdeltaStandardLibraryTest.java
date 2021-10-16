@@ -14,6 +14,8 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.util.Arrays;
+
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EDataType;
@@ -22,8 +24,11 @@ import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.util.EcoreUtil.EqualityHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -460,6 +465,132 @@ public class EdeltaStandardLibraryTest {
 			.returns("nsURI", EPackage::getNsURI);
 		assertThat(superPackage.getESubpackages()).containsOnly(subPackage);
 		assertThat(subPackage.getESuperPackage()).isSameAs(superPackage);
+	}
+
+	@Test
+	public void test_copyTo() {
+		EClass eClassSrc = ecoreFactory.createEClass();
+		EClass eClassDest = ecoreFactory.createEClass();
+		EStructuralFeature feature = ecoreFactory.createEAttribute();
+		eClassSrc.getEStructuralFeatures().add(feature);
+		// before
+		assertThat(eClassDest.getEStructuralFeatures()).isEmpty();
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.contains(feature);
+		var copy = lib.copyTo(feature, eClassDest);
+		// after
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.contains(feature);
+		assertThat(eClassDest.getEStructuralFeatures())
+			.hasSize(1)
+			.containsOnly(copy);
+	}
+
+	@Test
+	public void test_copyToAs() {
+		EClass eClassSrc = ecoreFactory.createEClass();
+		EClass eClassDest = ecoreFactory.createEClass();
+		EStructuralFeature feature = ecoreFactory.createEAttribute();
+		eClassSrc.getEStructuralFeatures().add(feature);
+		feature.setName("originalName");
+		// before
+		assertThat(eClassDest.getEStructuralFeatures()).isEmpty();
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.contains(feature);
+		var copy = lib.copyToAs(feature, eClassDest, "newName");
+		// after
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.containsOnly(feature)
+			.first()
+			.returns("originalName", ENamedElement::getName);
+		assertThat(eClassDest.getEStructuralFeatures())
+			.containsOnly(copy)
+			.first()
+			.returns("newName", ENamedElement::getName);
+	}
+
+	@Test
+	public void test_copyToAsWithType() {
+		EClass eClassSrc = ecoreFactory.createEClass();
+		EClass eClassDest = ecoreFactory.createEClass();
+		EStructuralFeature feature = ecoreFactory.createEAttribute();
+		eClassSrc.getEStructuralFeatures().add(feature);
+		feature.setName("originalName");
+		// before
+		assertThat(eClassDest.getEStructuralFeatures()).isEmpty();
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.contains(feature);
+		var copy = lib.copyToAs(feature, eClassDest, "newName",
+				EOBJECT);
+		// after
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.containsOnly(feature)
+			.first()
+			.returns("originalName", ENamedElement::getName)
+			.returns(null, ETypedElement::getEType);
+		assertThat(eClassDest.getEStructuralFeatures())
+			.containsOnly(copy)
+			.first()
+			.returns("newName", ENamedElement::getName)
+			.returns(EOBJECT, ETypedElement::getEType);
+	}
+
+	@Test
+	public void test_copyAllTo() {
+		EClass eClassSrc = ecoreFactory.createEClass();
+		EClass eClassDest = ecoreFactory.createEClass();
+		EStructuralFeature feature1 = ecoreFactory.createEAttribute();
+		eClassSrc.getEStructuralFeatures().add(feature1);
+		EStructuralFeature feature2 = ecoreFactory.createEReference();
+		eClassSrc.getEStructuralFeatures().add(feature2);
+		// before
+		assertThat(eClassDest.getEStructuralFeatures()).isEmpty();
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.contains(feature1, feature2);
+		lib.copyAllTo(Arrays.asList(feature1, feature2), eClassDest);
+		// after
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.contains(feature1, feature2);
+		assertThat(eClassDest.getEStructuralFeatures())
+			.hasSize(2)
+			.allMatch(f -> new EqualityHelper().equals(f, feature1)
+						|| new EqualityHelper().equals(f, feature2));
+	}
+
+	@Test
+	public void test_moveTo() {
+		EClass eClassSrc = ecoreFactory.createEClass();
+		EClass eClassDest = ecoreFactory.createEClass();
+		EStructuralFeature feature = ecoreFactory.createEAttribute();
+		eClassSrc.getEStructuralFeatures().add(feature);
+		// before
+		assertThat(eClassDest.getEStructuralFeatures()).isEmpty();
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.contains(feature);
+		lib.moveTo(feature, eClassDest);
+		// after
+		assertThat(eClassSrc.getEStructuralFeatures()).isEmpty();
+		assertThat(eClassDest.getEStructuralFeatures())
+			.contains(feature);
+	}
+
+	@Test
+	public void test_moveAllTo() {
+		EClass eClassSrc = ecoreFactory.createEClass();
+		EClass eClassDest = ecoreFactory.createEClass();
+		EStructuralFeature feature1 = ecoreFactory.createEAttribute();
+		eClassSrc.getEStructuralFeatures().add(feature1);
+		EStructuralFeature feature2 = ecoreFactory.createEReference();
+		eClassSrc.getEStructuralFeatures().add(feature2);
+		// before
+		assertThat(eClassDest.getEStructuralFeatures()).isEmpty();
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.contains(feature1, feature2);
+		lib.moveAllTo(Arrays.asList(feature1, feature2), eClassDest);
+		// after
+		assertThat(eClassSrc.getEStructuralFeatures()).isEmpty();
+		assertThat(eClassDest.getEStructuralFeatures())
+			.contains(feature1, feature2);
 	}
 
 	private Resource loadTestEcore(String ecoreFile) {
