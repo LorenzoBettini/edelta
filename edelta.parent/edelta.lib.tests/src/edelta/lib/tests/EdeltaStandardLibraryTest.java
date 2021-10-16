@@ -10,19 +10,26 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.EdeltaStandardLibrary;
 
 /**
@@ -41,7 +48,16 @@ public class EdeltaStandardLibraryTest {
 
 	private static EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
 
-	private EdeltaStandardLibrary lib = new EdeltaStandardLibrary();
+	private EdeltaStandardLibrary lib;
+
+	private EdeltaIssuePresenter issuePresenter;
+
+	@Before
+	public void setup() {
+		issuePresenter = mock(EdeltaIssuePresenter.class);
+		lib = new EdeltaStandardLibrary();
+		lib.setIssuePresenter(issuePresenter);
+	}
 
 	@Test
 	public void testGetEPackageWithOtherEdelta() {
@@ -66,6 +82,21 @@ public class EdeltaStandardLibraryTest {
 		lib.addEClass(ePackage, eClass);
 		assertSame(eClass,
 				ePackage.getEClassifiers().get(0));
+	}
+
+	@Test
+	public void test_addEClass_alreadExisting() {
+		var ePackage = ecoreFactory.createEPackage();
+		ePackage.setName("TestPackage");
+		var eClass = ecoreFactory.createEClass();
+		eClass.setName("TestClass");
+		lib.addEClass(ePackage, eClass);
+		var eClass1 = ecoreFactory.createEClass();
+		eClass1.setName("TestClass");
+		assertThrowsIAE(
+			() -> lib.addEClass(ePackage, eClass1),
+			eClass1,
+			"TestPackage already contains EClass TestPackage.TestClass");
 	}
 
 	@Test
@@ -399,5 +430,15 @@ public class EdeltaStandardLibraryTest {
 
 	private Resource loadTestEcore(String ecoreFile) {
 		return lib.loadEcoreFile(TESTECORES+ecoreFile);
+	}
+
+	private IllegalArgumentException assertThrowsIAE(ThrowingRunnable executable,
+			ENamedElement element,
+			String expectedError) {
+		var assertThrows = assertThrows(IllegalArgumentException.class,
+					executable);
+		assertEquals(expectedError, assertThrows.getMessage());
+		verify(issuePresenter).showError(element, expectedError);
+		return assertThrows;
 	}
 }

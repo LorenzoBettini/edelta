@@ -3,6 +3,8 @@
  */
 package edelta.lib;
 
+import static edelta.lib.EdeltaUtils.getEObjectRepr;
+
 import java.util.function.Consumer;
 
 import org.eclipse.emf.ecore.EAttribute;
@@ -44,7 +46,18 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 	}
 
 	private void addEClassifier(EPackage ePackage, EClassifier eClassifier) {
-		ePackage.getEClassifiers().add(eClassifier);
+		var eClassifiers = ePackage.getEClassifiers();
+		var existing = ePackage.getEClassifier(eClassifier.getName());
+		if (existing != null) {
+			var errorMessage = getEObjectRepr(ePackage) +
+					" already contains " +
+					existing.eClass().getName() +
+					" " +
+					getEObjectRepr(existing);
+			showError(eClassifier, errorMessage);
+			throw new IllegalArgumentException(errorMessage);
+		}
+		eClassifiers.add(eClassifier);
 	}
 
 	public void addEClass(EPackage ePackage, EClass eClass) {
