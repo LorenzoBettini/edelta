@@ -188,6 +188,22 @@ public class EdeltaStandardLibraryTest {
 	}
 
 	@Test
+	public void test_addEEnumLiteral_alreadyExisting() {
+		var eEnum = ecoreFactory.createEEnum();
+		eEnum.setName("TestEnum");
+		var eEnumLiteral = ecoreFactory.createEEnumLiteral();
+		eEnumLiteral.setName("TestLiteral");
+		lib.addEEnumLiteral(eEnum, eEnumLiteral);
+		assertSame(eEnumLiteral,
+				eEnum.getELiterals().get(0));
+		var eEnumLiteral1 = ecoreFactory.createEEnumLiteral();
+		eEnumLiteral1.setName("TestLiteral");
+		assertThrowsIAE(() -> lib.addEEnumLiteral(eEnum, eEnumLiteral1),
+			eEnumLiteral1,
+			"TestEnum already contains EEnumLiteral TestEnum.TestLiteral");
+	}
+
+	@Test
 	public void test_addNewEEnumLiteral() {
 		EEnum eEnum = ecoreFactory.createEEnum();
 		EEnumLiteral eEnumLiteral =

@@ -115,7 +115,18 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 	}
 
 	public void addEEnumLiteral(EEnum eEnum, EEnumLiteral eEnumLiteral) {
-		eEnum.getELiterals().add(eEnumLiteral);
+		var eLiterals = eEnum.getELiterals();
+		var existing = eEnum.getEEnumLiteral(eEnumLiteral.getName());
+		if (existing != null) {
+			var errorMessage = getEObjectRepr(eEnum) +
+					" already contains " +
+					existing.eClass().getName() +
+					" " +
+					getEObjectRepr(existing);
+			showError(eEnumLiteral, errorMessage);
+			throw new IllegalArgumentException(errorMessage);
+		}
+		eLiterals.add(eEnumLiteral);
 	}
 
 	public EEnumLiteral addNewEEnumLiteral(EEnum eEnum, String name) {
