@@ -11,10 +11,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -487,6 +489,28 @@ public class EdeltaStandardLibraryTest {
 	}
 
 	@Test
+	public void test_copyTo_alreadyExisting() {
+		EClass eClassSrc = ecoreFactory.createEClass();
+		eClassSrc.setName("Src");
+		EStructuralFeature feature = ecoreFactory.createEAttribute();
+		feature.setName("Attr");
+		eClassSrc.getEStructuralFeatures().add(feature);
+		EClass eClassDest = ecoreFactory.createEClass();
+		eClassDest.setName("Dest");
+		EStructuralFeature existing = ecoreFactory.createEAttribute();
+		existing.setName("Attr");
+		eClassDest.getEStructuralFeatures().add(existing);
+		// before
+		assertThat(eClassDest.getEStructuralFeatures())
+			.contains(existing);
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.contains(feature);
+		assertThrowsIAE(() -> lib.copyTo(feature, eClassDest),
+			"Attr",
+			"Dest already contains EAttribute Dest.Attr");
+	}
+
+	@Test
 	public void test_copyToAs() {
 		EClass eClassSrc = ecoreFactory.createEClass();
 		EClass eClassDest = ecoreFactory.createEClass();
@@ -558,6 +582,28 @@ public class EdeltaStandardLibraryTest {
 	}
 
 	@Test
+	public void test_copyAllTo_alreadyExisting() {
+		EClass eClassSrc = ecoreFactory.createEClass();
+		eClassSrc.setName("Src");
+		EStructuralFeature feature = ecoreFactory.createEAttribute();
+		feature.setName("Attr");
+		eClassSrc.getEStructuralFeatures().add(feature);
+		EClass eClassDest = ecoreFactory.createEClass();
+		eClassDest.setName("Dest");
+		EStructuralFeature existing = ecoreFactory.createEAttribute();
+		existing.setName("Attr");
+		eClassDest.getEStructuralFeatures().add(existing);
+		// before
+		assertThat(eClassDest.getEStructuralFeatures())
+			.contains(existing);
+		assertThat(eClassSrc.getEStructuralFeatures())
+			.contains(feature);
+		assertThrowsIAE(() -> lib.copyAllTo(List.of(feature), eClassDest),
+			"Attr",
+			"Dest already contains EAttribute Dest.Attr");
+	}
+
+	@Test
 	public void test_moveTo() {
 		EClass eClassSrc = ecoreFactory.createEClass();
 		EClass eClassDest = ecoreFactory.createEClass();
@@ -600,10 +646,18 @@ public class EdeltaStandardLibraryTest {
 	private IllegalArgumentException assertThrowsIAE(ThrowingRunnable executable,
 			ENamedElement element,
 			String expectedError) {
+		return assertThrowsIAE(executable, element.getName(), expectedError);
+	}
+
+	private IllegalArgumentException assertThrowsIAE(ThrowingRunnable executable,
+			String elementName,
+			String expectedError) {
 		var assertThrows = assertThrows(IllegalArgumentException.class,
-					executable);
+				executable);
 		assertEquals(expectedError, assertThrows.getMessage());
-		verify(issuePresenter).showError(element, expectedError);
+		verify(issuePresenter).showError(
+			argThat(a -> a.getName().equals(elementName)),
+			argThat(a -> a.equals(expectedError)));
 		return assertThrows;
 	}
 }

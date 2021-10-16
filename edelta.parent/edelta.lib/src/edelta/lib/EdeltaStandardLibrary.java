@@ -240,7 +240,7 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 	 */
 	public EStructuralFeature copyTo(EStructuralFeature feature, EClass eClassDest) {
 		var copy = EcoreUtil.copy(feature);
-		eClassDest.getEStructuralFeatures().add(copy);
+		addEStructuralFeature(eClassDest, copy);
 		return copy;
 	}
 
@@ -257,7 +257,7 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 	public EStructuralFeature copyToAs(EStructuralFeature feature, EClass eClassDest, String name) {
 		var copy = EcoreUtil.copy(feature);
 		copy.setName(name);
-		eClassDest.getEStructuralFeatures().add(copy);
+		addEStructuralFeature(eClassDest, copy);
 		return copy;
 	}
 
@@ -278,7 +278,7 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 		var copy = EcoreUtil.copy(feature);
 		copy.setName(name);
 		copy.setEType(type);
-		eClassDest.getEStructuralFeatures().add(copy);
+		addEStructuralFeature(eClassDest, copy);
 		return copy;
 	}
 
@@ -291,7 +291,16 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 	 * @see EcoreUtil#copyAll(Collection)
 	 */
 	public void copyAllTo(Collection<EStructuralFeature> features, EClass eClassDest) {
-		eClassDest.getEStructuralFeatures().addAll(EcoreUtil.copyAll(features));
+		var elements = EcoreUtil.copyAll(features);
+		checkAlreadyExistingWithTheSameName(eClassDest, elements);
+		eClassDest.getEStructuralFeatures().addAll(elements);
+	}
+
+	private void checkAlreadyExistingWithTheSameName(EClass eClassDest, Collection<EStructuralFeature> elements) {
+		for (var element : elements) {
+			var existing = eClassDest.getEStructuralFeature(element.getName());
+			checkAlreadyExistingWithTheSameName(eClassDest, element, existing);
+		}
 	}
 
 	/**
@@ -302,7 +311,7 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 	 * @param eClassDest
 	 */
 	public void moveTo(EStructuralFeature feature, EClass eClassDest) {
-		eClassDest.getEStructuralFeatures().add(feature);
+		addEStructuralFeature(eClassDest, feature);
 	}
 
 	/**
@@ -313,6 +322,7 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 	 * @param eClassDest
 	 */
 	public void moveAllTo(Collection<EStructuralFeature> features, EClass eClassDest) {
+		checkAlreadyExistingWithTheSameName(eClassDest, features);
 		eClassDest.getEStructuralFeatures().addAll(features);
 	}
 
