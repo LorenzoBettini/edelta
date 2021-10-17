@@ -75,7 +75,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       "The two features cannot be merged");
     final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
     final EClass owner = feature.getEContainingClass();
-    final EStructuralFeature copy = EdeltaUtils.copyToAs(feature, owner, newFeatureName);
+    final EStructuralFeature copy = this.stdLib.copyToAs(feature, owner, newFeatureName);
     EdeltaUtils.removeAllElements(features);
     return copy;
   }
@@ -110,7 +110,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   public EStructuralFeature mergeFeatures(final String newFeatureName, final EClassifier type, final Collection<EStructuralFeature> features) {
     final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
     final EClass owner = feature.getEContainingClass();
-    final EStructuralFeature copy = EdeltaUtils.copyToAs(feature, owner, newFeatureName, type);
+    final EStructuralFeature copy = this.stdLib.copyToAs(feature, owner, newFeatureName, type);
     this.mergeFeatures(copy, features);
     return copy;
   }
@@ -223,7 +223,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       this.makeContainmentBidirectional(it);
     };
     final EReference reference = ObjectExtensions.<EReference>operator_doubleArrow(_addMandatoryReference, _function);
-    EdeltaUtils.moveAllTo(features, extracted);
+    this.stdLib.moveAllTo(features, extracted);
     return reference;
   }
   
@@ -263,7 +263,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       it.setName(_plus);
     };
     featuresToInline.forEach(_function_1);
-    EdeltaUtils.moveAllTo(featuresToInline, ref.getEContainingClass());
+    this.stdLib.moveAllTo(featuresToInline, ref.getEContainingClass());
     EdeltaUtils.removeElement(cl);
     return featuresToInline;
   }
@@ -438,7 +438,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       return it.getEContainingClass();
     };
     this.checkAllDirectSubclasses(dest, ListExtensions.map(duplicates, _function));
-    EdeltaUtils.copyTo(IterableExtensions.head(duplicates), dest);
+    this.stdLib.copyTo(IterableExtensions.head(duplicates), dest);
     EdeltaUtils.removeAllElements(duplicates);
   }
   
