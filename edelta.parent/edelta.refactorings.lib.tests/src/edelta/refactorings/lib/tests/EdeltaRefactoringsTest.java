@@ -24,6 +24,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -51,6 +52,22 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		appender.setLineSeparator("\n");
 		refactorings.getLogger().addAppender(appender);
 		refactorings.performSanityChecks();
+	}
+
+	/**
+	 * This should be commented out when we want to copy the generated modified
+	 * Ecore into the test-output-expectations directory, typically, the first time
+	 * we write a new test.
+	 * 
+	 * We need to clean the modified directory when tests are stable, so that
+	 * modified Ecore with validation errors do not fill the project with error
+	 * markers.
+	 * 
+	 * @throws IOException
+	 */
+	@AfterEach
+	void cleanModifiedOutputDirectory() throws IOException {
+		EdeltaTestUtils.cleanDirectory(AbstractTest.MODIFIED);
 	}
 
 	private void withInputModels(String testModelDirectory, String... testModelFiles) {
