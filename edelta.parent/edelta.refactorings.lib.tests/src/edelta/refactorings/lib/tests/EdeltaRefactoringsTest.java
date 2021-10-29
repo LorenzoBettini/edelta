@@ -1,9 +1,5 @@
 package edelta.refactorings.lib.tests;
 
-import static edelta.lib.EdeltaUtils.addNewContainmentEReference;
-import static edelta.lib.EdeltaUtils.addNewEClass;
-import static edelta.lib.EdeltaUtils.addNewEReference;
-import static edelta.lib.EdeltaUtils.addNewSubclass;
 import static edelta.lib.EdeltaUtils.getEObjectRepr;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -871,10 +867,10 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_allUsagesOfThisClass() {
 		var p = createEPackage("p");
-		var classForUsages = addNewEClass(p, "C");
-		addNewSubclass(classForUsages, "SubClass");
-		addNewEClass(p, "UsesC", c ->
-			addNewEReference(c, "refToC", classForUsages));
+		var classForUsages = stdLib.addNewEClass(p, "C");
+		stdLib.addNewSubclass(classForUsages, "SubClass");
+		stdLib.addNewEClass(p, "UsesC", c ->
+			stdLib.addNewEReference(c, "refToC", classForUsages));
 		var usages = refactorings.allUsagesOfThisClass(classForUsages);
 		var repr = usages.stream().map(s ->
 				getEObjectRepr(s.getEObject()) + "\n" +
@@ -892,19 +888,19 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_findSingleUsageOfThisClass() {
 		var p = createEPackage("p");
-		var classForUsages = addNewEClass(p, "C");
+		var classForUsages = stdLib.addNewEClass(p, "C");
 
 		// not used at all
 		assertThrowsIAE(() -> refactorings.findSingleUsageOfThisClass(classForUsages));
 
 		// just one usage OK
-		var subClass = addNewSubclass(classForUsages, "SubClass");
+		var subClass = stdLib.addNewSubclass(classForUsages, "SubClass");
 		assertThat(refactorings.findSingleUsageOfThisClass(classForUsages))
 			.isSameAs(subClass);
 
 		// too many usages
-		addNewEClass(p, "UsesC", c ->
-			addNewEReference(c, "refToC", classForUsages));
+		stdLib.addNewEClass(p, "UsesC", c ->
+			stdLib.addNewEReference(c, "refToC", classForUsages));
 		assertThrowsIAE(() -> refactorings.findSingleUsageOfThisClass(classForUsages));
 		assertThat(appender.getResult())
 			.isEqualTo(
@@ -920,17 +916,17 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_getAsContainmentReference() {
 		var p = createEPackage("p");
-		var classForUsages = addNewEClass(p, "C");
+		var classForUsages = stdLib.addNewEClass(p, "C");
 
 		// not an EReference
 		assertThrowsIAE(() -> refactorings.getAsContainmentReference(classForUsages));
 
 		// not a containment reference
-		var ref = addNewEReference(classForUsages, "refToC", null);
+		var ref = stdLib.addNewEReference(classForUsages, "refToC", null);
 		assertThrowsIAE(() -> refactorings.getAsContainmentReference(ref));
 
 		// OK
-		var containmentRef = addNewContainmentEReference(classForUsages, "contRefToC", null);
+		var containmentRef = stdLib.addNewContainmentEReference(classForUsages, "contRefToC", null);
 		assertThat(refactorings.getAsContainmentReference(containmentRef))
 			.isSameAs(containmentRef);
 

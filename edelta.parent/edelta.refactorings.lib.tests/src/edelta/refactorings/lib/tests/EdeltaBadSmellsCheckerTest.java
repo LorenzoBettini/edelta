@@ -1,7 +1,5 @@
 package edelta.refactorings.lib.tests;
 
-import static edelta.lib.EdeltaUtils.addNewEAttribute;
-import static edelta.lib.EdeltaUtils.addNewEClass;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.eclipse.emf.ecore.EPackage;
@@ -34,10 +32,10 @@ public class EdeltaBadSmellsCheckerTest extends AbstractTest {
 	@Test
 	public void test_checkDuplicatedFeatures_whenNoDuplicates() {
 		final EPackage p = createEPackage("p", pack -> {
-			addNewEClass(pack, "C1",
-				c -> addNewEAttribute(c, "A1", stringDataType));
-			addNewEClass(pack, "C2",
-				c -> addNewEAttribute(c, "A1", intDataType));
+			stdLib.addNewEClass(pack, "C1",
+				c -> stdLib.addNewEAttribute(c, "A1", stringDataType));
+			stdLib.addNewEClass(pack, "C2",
+				c -> stdLib.addNewEAttribute(c, "A1", intDataType));
 		});
 		checker.checkDuplicatedFeatures(p);
 		assertThat(appender.getResult()).isEmpty();
@@ -46,12 +44,12 @@ public class EdeltaBadSmellsCheckerTest extends AbstractTest {
 	@Test
 	public void test_checkDuplicatedFeatures_withDuplicates() {
 		final EPackage p = createEPackage("pack", pack -> {
-			addNewEClass(pack, "C1",
-				c -> addNewEAttribute(c, "A1", stringDataType));
-			addNewEClass(pack, "C2",
-				c -> addNewEAttribute(c, "A1", stringDataType));
-			addNewEClass(pack, "C3",
-				c -> addNewEAttribute(c, "A1", stringDataType));
+			stdLib.addNewEClass(pack, "C1",
+				c -> stdLib.addNewEAttribute(c, "A1", stringDataType));
+			stdLib.addNewEClass(pack, "C2",
+				c -> stdLib.addNewEAttribute(c, "A1", stringDataType));
+			stdLib.addNewEClass(pack, "C3",
+				c -> stdLib.addNewEAttribute(c, "A1", stringDataType));
 		});
 		checker.checkDuplicatedFeatures(p);
 		assertThat(appender.getResult())

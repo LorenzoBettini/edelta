@@ -1,9 +1,14 @@
 package edelta.tests;
 
-import static edelta.lib.EdeltaUtils.*;
 import static java.util.Arrays.asList;
 import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.*;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.filter;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.findFirst;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.join;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.last;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.map;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.sort;
 import static org.eclipse.xtext.xbase.lib.ListExtensions.map;
 import static org.junit.Assert.assertEquals;
 
@@ -49,6 +54,7 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
 import edelta.edelta.EdeltaProgram;
+import edelta.lib.EdeltaStandardLibrary;
 import edelta.resource.derivedstate.EdeltaAccessibleElements;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.tests.input.Inputs;
@@ -72,6 +78,9 @@ public abstract class EdeltaAbstractTest {
 	@Inject
 	@Extension
 	protected EdeltaDerivedStateHelper derivedStateHelper;
+
+	@Extension
+	protected EdeltaStandardLibrary stdLib = new EdeltaStandardLibrary();
 
 	@Extension
 	protected Inputs inputs = new Inputs();
@@ -221,25 +230,25 @@ public abstract class EdeltaAbstractTest {
 	 */
 	protected EPackage EPackageForTests() {
 		return createEPackage("foo", "foo", "http://foo", p -> {
-			addNewEClass(p, "FooClass", c -> {
-				addNewEAttribute(c, "myAttribute", null);
-				addNewEReference(c, "myReference", null);
+			stdLib.addNewEClass(p, "FooClass", c -> {
+				stdLib.addNewEAttribute(c, "myAttribute", null);
+				stdLib.addNewEReference(c, "myReference", null);
 				createEOperation(c, "myOp");
 			});
-			addNewEDataType(p, "FooDataType", null);
-			addNewEEnum(p, "FooEnum", e -> {
-				addNewEEnumLiteral(e, "FooEnumLiteral");
+			stdLib.addNewEDataType(p, "FooDataType", null);
+			stdLib.addNewEEnum(p, "FooEnum", e -> {
+				stdLib.addNewEEnumLiteral(e, "FooEnumLiteral");
 			});
 		});
 	}
 
 	protected EPackage EPackageForTests2() {
 		return createEPackage("bar", "bar", "http://bar", p -> {
-			addNewEClass(p, "BarClass", c -> {
-				addNewEAttribute(c, "myAttribute", null);
-				addNewEReference(c, "myReference", null);
+			stdLib.addNewEClass(p, "BarClass", c -> {
+				stdLib.addNewEAttribute(c, "myAttribute", null);
+				stdLib.addNewEReference(c, "myReference", null);
 			});
-			addNewEDataType(p, "BarDataType", null);
+			stdLib.addNewEDataType(p, "BarDataType", null);
 		});
 	}
 
@@ -248,18 +257,18 @@ public abstract class EdeltaAbstractTest {
 			"testecoreforreferences1", "testecoreforreferences1",
 			"http://my.testecoreforreferences1",
 			p -> {
-				addNewEClass(p, "Person", c -> {
-					addNewEAttribute(c, "name", null);
-					addNewEReference(c, "works", null);
+				stdLib.addNewEClass(p, "Person", c -> {
+					stdLib.addNewEAttribute(c, "name", null);
+					stdLib.addNewEReference(c, "works", null);
 				});
 			});
 		var p2 = createEPackage(
 			"testecoreforreferences2", "testecoreforreferences2",
 			"http://my.testecoreforreferences2",
 			p -> {
-				addNewEClass(p, "WorkPlace", c -> {
-					addNewEAttribute(c, "address", null);
-					addNewEReference(c, "persons", null, r -> {
+				stdLib.addNewEClass(p, "WorkPlace", c -> {
+					stdLib.addNewEAttribute(c, "address", null);
+					stdLib.addNewEReference(c, "persons", null, r -> {
 						r.setUpperBound(-1);
 					});
 				});
@@ -273,32 +282,32 @@ public abstract class EdeltaAbstractTest {
 
 	protected EPackage EPackageWithSubPackageForTests() {
 		return createEPackage("mainpackage", "mainpackage", "http://mainpackage", p -> {
-			addNewEClass(p, "MainFooClass", c -> {
-				addNewEAttribute(c, "myAttribute", null);
-				addNewEReference(c, "myReference", null);
+			stdLib.addNewEClass(p, "MainFooClass", c -> {
+				stdLib.addNewEAttribute(c, "myAttribute", null);
+				stdLib.addNewEReference(c, "myReference", null);
 			});
-			addNewEDataType(p, "MainFooDataType", null);
-			addNewEEnum(p, "MainFooEnum", e -> {
-				addNewEEnumLiteral(e, "FooEnumLiteral");
+			stdLib.addNewEDataType(p, "MainFooDataType", null);
+			stdLib.addNewEEnum(p, "MainFooEnum", e -> {
+				stdLib.addNewEEnumLiteral(e, "FooEnumLiteral");
 			});
 			// this is present also in subpackages with the same name
-			addNewEClass(p, "MyClass", c -> {
-				addNewEAttribute(c, "myClassAttribute", null);
+			stdLib.addNewEClass(p, "MyClass", c -> {
+				stdLib.addNewEAttribute(c, "myClassAttribute", null);
 			});
-			addNewESubpackage(p, "mainsubpackage", "mainsubpackage", "http://mainsubpackage",
+			stdLib.addNewESubpackage(p, "mainsubpackage", "mainsubpackage", "http://mainsubpackage",
 				p1 -> {
-					addNewEClass(p1, "MainSubPackageFooClass", c -> {
-						addNewEAttribute(c, "mySubPackageAttribute", null);
-						addNewEReference(c, "mySubPackageReference", null);
+					stdLib.addNewEClass(p1, "MainSubPackageFooClass", c -> {
+						stdLib.addNewEAttribute(c, "mySubPackageAttribute", null);
+						stdLib.addNewEReference(c, "mySubPackageReference", null);
 					});
 					// this is present also in subpackages with the same name
-					addNewEClass(p1, "MyClass", c -> {
-						addNewEAttribute(c, "myClassAttribute", null);
+					stdLib.addNewEClass(p1, "MyClass", c -> {
+						stdLib.addNewEAttribute(c, "myClassAttribute", null);
 					});
-					addNewESubpackage(p1, "subsubpackage", "subsubpackage", "http://subsubpackage",
+					stdLib.addNewESubpackage(p1, "subsubpackage", "subsubpackage", "http://subsubpackage",
 						p2 -> {
 							// this is present also in subpackages with the same name
-							addNewEClass(p2, "MyClass");
+							stdLib.addNewEClass(p2, "MyClass");
 						});
 				});
 		});

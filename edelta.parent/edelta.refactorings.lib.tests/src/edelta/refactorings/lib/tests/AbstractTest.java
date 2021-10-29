@@ -16,6 +16,7 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 
+import edelta.lib.EdeltaStandardLibrary;
 import edelta.lib.EdeltaUtils;
 
 public abstract class AbstractTest {
@@ -32,6 +33,8 @@ public abstract class AbstractTest {
 	protected static final String TESTECORES = "test-input-models/";
 
 	protected static final String EXPECTATIONS = "test-output-expectations/";
+
+	protected EdeltaStandardLibrary stdLib = new EdeltaStandardLibrary();
 
 	protected EPackage createEPackage(final String name) {
 		EPackage p = this.factory.createEPackage();
