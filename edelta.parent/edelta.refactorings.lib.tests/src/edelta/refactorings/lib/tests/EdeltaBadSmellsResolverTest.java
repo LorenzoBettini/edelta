@@ -12,6 +12,7 @@ import java.util.Objects;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -30,6 +31,23 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 	public void setup() {
 		resolver = new EdeltaBadSmellsResolver();
 	}
+
+	/**
+	 * This should be commented out when we want to copy the generated modified
+	 * Ecore into the test-output-expectations directory, typically, the first time
+	 * we write a new test.
+	 * 
+	 * We need to clean the modified directory when tests are stable, so that
+	 * modified Ecore with validation errors do not fill the project with error
+	 * markers.
+	 * 
+	 * @throws IOException
+	 */
+	@After
+	public void cleanModifiedOutputDirectory() throws IOException {
+		EdeltaTestUtils.cleanDirectory(AbstractTest.MODIFIED);
+	}
+
 
 	private void loadModelFiles(String testModelDirectory, String... testModelFiles) {
 		this.testModelDirectory = testModelDirectory;
