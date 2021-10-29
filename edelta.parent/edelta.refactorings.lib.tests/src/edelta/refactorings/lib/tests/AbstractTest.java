@@ -16,7 +16,7 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 
-import edelta.lib.EdeltaLibrary;
+import edelta.lib.EdeltaUtils;
 
 public abstract class AbstractTest {
 	protected EcoreFactory factory = EcoreFactory.eINSTANCE;
@@ -90,7 +90,7 @@ public abstract class AbstractTest {
 
 	protected EStructuralFeature findEStructuralFeature(final EPackage p, final String className,
 			final String featureName) {
-		return EdeltaLibrary.allEClasses(p).stream()
+		return EdeltaUtils.allEClasses(p).stream()
 				.filter(c -> c.getName().equals(className))
 				.findFirst()
 				.map(c -> c.getEStructuralFeature(featureName))

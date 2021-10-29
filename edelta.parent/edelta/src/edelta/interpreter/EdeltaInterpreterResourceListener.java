@@ -18,7 +18,7 @@ import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
 import org.eclipse.xtext.xbase.XExpression;
 
 import edelta.edelta.EdeltaEcoreReferenceExpression;
-import edelta.lib.EdeltaLibrary;
+import edelta.lib.EdeltaUtils;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 import edelta.resource.derivedstate.EdeltaModifiedElements;
@@ -112,7 +112,7 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 			if (EdeltaModelUtil.hasCycleInSuperPackage(subPackage)) {
 				diagnosticHelper.addError(subPackage, EdeltaValidator.EPACKAGE_CYCLE,
 					"Cycle in superpackage/subpackage: " +
-						EdeltaLibrary.getEObjectRepr(subPackage));
+						EdeltaUtils.getEObjectRepr(subPackage));
 				// break the cycle to avoid problems due to
 				// loop in containment (in other Xtext components, e.g., scoping)
 				subPackage.getESuperPackage()
@@ -124,7 +124,7 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 			if (EdeltaModelUtil.hasCycleInHierarchy(eClass)) {
 				diagnosticHelper.addError(eClass, EdeltaValidator.ECLASS_CYCLE,
 					"Cycle in inheritance hierarchy: " +
-						EdeltaLibrary.getEObjectRepr(eClass));
+						EdeltaUtils.getEObjectRepr(eClass));
 			}
 		}
 	}

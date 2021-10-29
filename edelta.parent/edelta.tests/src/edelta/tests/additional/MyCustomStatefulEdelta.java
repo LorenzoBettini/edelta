@@ -4,7 +4,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EcorePackage;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaLibrary;
+import edelta.lib.EdeltaUtils;
 import edelta.tests.input.Inputs;
 
 /**
@@ -26,11 +26,11 @@ public class MyCustomStatefulEdelta extends AbstractEdelta {
 	}
 
 	public EClass createANewEClass() {
-		return EdeltaLibrary.addNewEClass(getEPackage("foo"), "ANewClass" + (++counter));
+		return EdeltaUtils.addNewEClass(getEPackage("foo"), "ANewClass" + (++counter));
 	}
 
 	public void createANewEAttribute(EClass c) {
-		EdeltaLibrary.addNewEAttribute(c, "aNewAttr" + (++counter),
+		EdeltaUtils.addNewEAttribute(c, "aNewAttr" + (++counter),
 				EcorePackage.eINSTANCE.getEString());
 	}
 

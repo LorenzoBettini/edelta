@@ -12,7 +12,7 @@ import org.junit.Test;
 import com.example.Example;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaEmptyRuntime;
+import edelta.lib.EdeltaDefaultRuntime;
 
 /**
  * Unit test for simple App.
@@ -31,7 +31,7 @@ public class AppTest {
 		edelta.saveModifiedEcores("modified");
 
 		// load the modified file
-		AbstractEdelta verifier = new EdeltaEmptyRuntime();
+		AbstractEdelta verifier = new EdeltaDefaultRuntime();
 		verifier.loadEcoreFile("modified/My.ecore");
 		// verify the structure of the modified ecore
 		EPackage ePackage = verifier.getEPackage("myecore");

@@ -1,6 +1,6 @@
 package edelta.refactorings.lib.helper.tests;
 
-import static edelta.lib.EdeltaLibrary.*;
+import static edelta.lib.EdeltaUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.emf.ecore.EcorePackage.Literals.*;
 

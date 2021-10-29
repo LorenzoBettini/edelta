@@ -1,14 +1,14 @@
 package edelta.refactorings.lib.tests;
 
-import static edelta.lib.EdeltaLibrary.addNewEAttribute;
-import static edelta.lib.EdeltaLibrary.addNewEClass;
+import static edelta.lib.EdeltaUtils.addNewEAttribute;
+import static edelta.lib.EdeltaUtils.addNewEClass;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.eclipse.emf.ecore.EPackage;
 import org.junit.Before;
 import org.junit.Test;
 
-import edelta.lib.EdeltaEmptyRuntime;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.refactorings.lib.EdeltaBadSmellsChecker;
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 
@@ -27,7 +27,7 @@ public class EdeltaBadSmellsCheckerTest extends AbstractTest {
 
 	@Test
 	public void test_ConstructorArgument() {
-		checker = new EdeltaBadSmellsChecker(new EdeltaEmptyRuntime());
+		checker = new EdeltaBadSmellsChecker(new EdeltaDefaultRuntime());
 		assertThat(checker).isNotNull();
 	}
 

@@ -16,7 +16,7 @@ import org.junit.runner.RunWith
 
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
-import edelta.lib.EdeltaEmptyRuntime
+import edelta.lib.EdeltaDefaultRuntime
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderForJavaReflectAccess)
@@ -38,7 +38,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 
 	@Before
 	def void setup() {
-		other = new EdeltaEmptyRuntime()
+		other = new EdeltaDefaultRuntime()
 	}
 
 	@Test

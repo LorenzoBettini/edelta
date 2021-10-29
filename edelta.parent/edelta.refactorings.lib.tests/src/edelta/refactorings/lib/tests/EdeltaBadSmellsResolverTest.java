@@ -1,6 +1,6 @@
 package edelta.refactorings.lib.tests;
 
-import static edelta.lib.EdeltaLibrary.addNewAbstractEClass;
+import static edelta.lib.EdeltaUtils.addNewAbstractEClass;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
@@ -16,7 +16,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edelta.lib.EdeltaEmptyRuntime;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.refactorings.lib.EdeltaBadSmellsResolver;
 import edelta.testutils.EdeltaTestUtils;
 
@@ -71,7 +71,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 
 	@Test
 	public void test_ConstructorArgument() {
-		resolver = new EdeltaBadSmellsResolver(new EdeltaEmptyRuntime());
+		resolver = new EdeltaBadSmellsResolver(new EdeltaDefaultRuntime());
 		assertThat(resolver).isNotNull();
 	}
 

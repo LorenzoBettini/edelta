@@ -1,6 +1,6 @@
 package edelta.tests;
 
-import static edelta.lib.EdeltaLibrary.addNewEClass;
+import static edelta.lib.EdeltaUtils.addNewEClass;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -34,7 +34,7 @@ import edelta.edelta.EdeltaFactory;
 import edelta.interpreter.EdeltaInterpreterDiagnostic;
 import edelta.interpreter.EdeltaInterpreterDiagnosticHelper;
 import edelta.interpreter.EdeltaInterpreterResourceListener;
-import edelta.lib.EdeltaLibrary;
+import edelta.lib.EdeltaUtils;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 import edelta.resource.derivedstate.EdeltaModifiedElements;
 import edelta.validation.EdeltaValidator;
@@ -246,9 +246,9 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 		var currentExpression = XbaseFactory.eINSTANCE.createXAssignment();
 		resource.getContents().add(currentExpression);
 		diagnosticHelper.setCurrentExpression(currentExpression);
-		var c1 = EdeltaLibrary.addNewEClass(ePackage, "c1");
-		var c2 = EdeltaLibrary.addNewEClass(ePackage, "c2");
-		var c3 = EdeltaLibrary.addNewEClass(ePackage, "c3");
+		var c1 = EdeltaUtils.addNewEClass(ePackage, "c1");
+		var c2 = EdeltaUtils.addNewEClass(ePackage, "c2");
+		var c3 = EdeltaUtils.addNewEClass(ePackage, "c3");
 		c3.getESuperTypes().add(c2);
 		validationTestHelper.assertNoIssues(resource);
 		c2.getESuperTypes().add(c1);

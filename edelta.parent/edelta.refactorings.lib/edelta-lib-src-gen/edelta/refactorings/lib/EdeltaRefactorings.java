@@ -3,7 +3,7 @@ package edelta.refactorings.lib;
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaLibrary;
+import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,16 +48,16 @@ public class EdeltaRefactorings extends AbstractEdelta {
   
   public EAttribute addMandatoryAttribute(final EClass eClass, final String attributeName, final EDataType dataType) {
     final Consumer<EAttribute> _function = (EAttribute it) -> {
-      EdeltaLibrary.makeSingleRequired(it);
+      EdeltaUtils.makeSingleRequired(it);
     };
-    return EdeltaLibrary.addNewEAttribute(eClass, attributeName, dataType, _function);
+    return EdeltaUtils.addNewEAttribute(eClass, attributeName, dataType, _function);
   }
   
   public EReference addMandatoryReference(final EClass eClass, final String referenceName, final EClass type) {
     final Consumer<EReference> _function = (EReference it) -> {
-      EdeltaLibrary.makeSingleRequired(it);
+      EdeltaUtils.makeSingleRequired(it);
     };
-    return EdeltaLibrary.addNewEReference(eClass, referenceName, type, _function);
+    return EdeltaUtils.addNewEReference(eClass, referenceName, type, _function);
   }
   
   /**
@@ -74,8 +74,8 @@ public class EdeltaRefactorings extends AbstractEdelta {
       "The two features cannot be merged");
     final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
     final EClass owner = feature.getEContainingClass();
-    final EStructuralFeature copy = EdeltaLibrary.copyToAs(feature, owner, newFeatureName);
-    EdeltaLibrary.removeAllElements(features);
+    final EStructuralFeature copy = EdeltaUtils.copyToAs(feature, owner, newFeatureName);
+    EdeltaUtils.removeAllElements(features);
     return copy;
   }
   
@@ -93,7 +93,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     this.checkNoDifferences(_plus, 
       new EdeltaFeatureDifferenceFinder().ignoringName().ignoringType(), 
       "The two features cannot be merged");
-    EdeltaLibrary.removeAllElements(features);
+    EdeltaUtils.removeAllElements(features);
     return feature;
   }
   
@@ -109,7 +109,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
   public EStructuralFeature mergeFeatures(final String newFeatureName, final EClassifier type, final Collection<EStructuralFeature> features) {
     final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
     final EClass owner = feature.getEContainingClass();
-    final EStructuralFeature copy = EdeltaLibrary.copyToAs(feature, owner, newFeatureName, type);
+    final EStructuralFeature copy = EdeltaUtils.copyToAs(feature, owner, newFeatureName, type);
     this.mergeFeatures(copy, features);
     return copy;
   }
@@ -132,22 +132,22 @@ public class EdeltaRefactorings extends AbstractEdelta {
       final ArrayList<EClass> createdSubclasses = CollectionLiterals.<EClass>newArrayList();
       final EClass owner = attr.getEContainingClass();
       final EPackage ePackage = owner.getEPackage();
-      EdeltaLibrary.makeAbstract(owner);
+      EdeltaUtils.makeAbstract(owner);
       EList<EEnumLiteral> _eLiterals = ((EEnum)type).getELiterals();
       for (final EEnumLiteral subc : _eLiterals) {
         {
           final String subclassName = this.ensureEClassifierNameIsUnique(ePackage, StringExtensions.toFirstUpper(subc.getLiteral().toLowerCase()));
           final Consumer<EClass> _function = (EClass it) -> {
-            EdeltaLibrary.addESuperType(it, owner);
+            EdeltaUtils.addESuperType(it, owner);
           };
-          EClass _addNewEClass = EdeltaLibrary.addNewEClass(ePackage, subclassName, _function);
+          EClass _addNewEClass = EdeltaUtils.addNewEClass(ePackage, subclassName, _function);
           createdSubclasses.add(_addNewEClass);
         }
       }
-      EdeltaLibrary.removeElement(type);
+      EdeltaUtils.removeElement(type);
       return createdSubclasses;
     } else {
-      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(type);
+      String _eObjectRepr = EdeltaUtils.getEObjectRepr(type);
       String _plus = ("Not an EEnum: " + _eObjectRepr);
       this.showError(attr, _plus);
       return null;
@@ -182,7 +182,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final Consumer<EEnum> _function = (EEnum it) -> {
       final Procedure2<EClass, Integer> _function_1 = (EClass subClass, Integer index) -> {
         final String enumLiteralName = this.ensureEClassifierNameIsUnique(ePackage, subClass.getName().toUpperCase());
-        EEnumLiteral _addNewEEnumLiteral = EdeltaLibrary.addNewEEnumLiteral(it, enumLiteralName);
+        EEnumLiteral _addNewEEnumLiteral = EdeltaUtils.addNewEEnumLiteral(it, enumLiteralName);
         final Procedure1<EEnumLiteral> _function_2 = (EEnumLiteral it_1) -> {
           it_1.setValue((index).intValue());
         };
@@ -190,10 +190,10 @@ public class EdeltaRefactorings extends AbstractEdelta {
       };
       IterableExtensions.<EClass>forEach(subclasses, _function_1);
     };
-    final EEnum enum_ = EdeltaLibrary.addNewEEnum(ePackage, name, _function);
-    final EAttribute attribute = EdeltaLibrary.addNewEAttribute(superclass, this.fromTypeToFeatureName(enum_), enum_);
-    EdeltaLibrary.makeConcrete(superclass);
-    EdeltaLibrary.removeAllElements(subclasses);
+    final EEnum enum_ = EdeltaUtils.addNewEEnum(ePackage, name, _function);
+    final EAttribute attribute = EdeltaUtils.addNewEAttribute(superclass, this.fromTypeToFeatureName(enum_), enum_);
+    EdeltaUtils.makeConcrete(superclass);
+    EdeltaUtils.removeAllElements(subclasses);
     return attribute;
   }
   
@@ -216,13 +216,13 @@ public class EdeltaRefactorings extends AbstractEdelta {
     this.checkNoBidirectionalReferences(features, 
       "Cannot extract bidirectinal references");
     final EClass owner = this.findSingleOwner(features);
-    final EClass extracted = EdeltaLibrary.addNewEClass(owner.getEPackage(), name);
+    final EClass extracted = EdeltaUtils.addNewEClass(owner.getEPackage(), name);
     EReference _addMandatoryReference = this.addMandatoryReference(owner, StringExtensions.toFirstLower(name), extracted);
     final Procedure1<EReference> _function = (EReference it) -> {
       this.makeContainmentBidirectional(it);
     };
     final EReference reference = ObjectExtensions.<EReference>operator_doubleArrow(_addMandatoryReference, _function);
-    EdeltaLibrary.moveAllTo(features, extracted);
+    EdeltaUtils.moveAllTo(features, extracted);
     return reference;
   }
   
@@ -262,8 +262,8 @@ public class EdeltaRefactorings extends AbstractEdelta {
       it.setName(_plus);
     };
     featuresToInline.forEach(_function_1);
-    EdeltaLibrary.moveAllTo(featuresToInline, ref.getEContainingClass());
-    EdeltaLibrary.removeElement(cl);
+    EdeltaUtils.moveAllTo(featuresToInline, ref.getEContainingClass());
+    EdeltaUtils.removeElement(cl);
     return featuresToInline;
   }
   
@@ -276,12 +276,12 @@ public class EdeltaRefactorings extends AbstractEdelta {
   public EReference makeContainmentBidirectional(final EReference reference) {
     EReference _xblockexpression = null;
     {
-      EdeltaLibrary.makeContainment(reference);
+      EdeltaUtils.makeContainment(reference);
       final EClass owner = reference.getEContainingClass();
       final EClass referredType = reference.getEReferenceType();
       EReference _addMandatoryReference = this.addMandatoryReference(referredType, this.fromTypeToFeatureName(owner), owner);
       final Procedure1<EReference> _function = (EReference it) -> {
-        EdeltaLibrary.makeBidirectional(it, reference);
+        EdeltaUtils.makeBidirectional(it, reference);
       };
       _xblockexpression = ObjectExtensions.<EReference>operator_doubleArrow(_addMandatoryReference, _function);
     }
@@ -322,12 +322,12 @@ public class EdeltaRefactorings extends AbstractEdelta {
     this.checkNotContainment(reference, 
       "Cannot apply referenceToClass on containment reference");
     final EPackage ePackage = reference.getEContainingClass().getEPackage();
-    final EClass extracted = EdeltaLibrary.addNewEClass(ePackage, name);
+    final EClass extracted = EdeltaUtils.addNewEClass(ePackage, name);
     final EReference extractedRef = this.addMandatoryReference(extracted, 
       this.fromTypeToFeatureName(reference.getEType()), reference.getEReferenceType());
     final EReference eOpposite = reference.getEOpposite();
     if ((eOpposite != null)) {
-      EdeltaLibrary.makeBidirectional(eOpposite, extractedRef);
+      EdeltaUtils.makeBidirectional(eOpposite, extractedRef);
     }
     reference.setEType(extracted);
     this.makeContainmentBidirectional(reference);
@@ -360,12 +360,12 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final EClass owner = reference.getEContainingClass();
     final EReference referenceToTarget = this.findSingleReferenceNotOfType(cl, owner);
     reference.setEType(referenceToTarget.getEType());
-    EdeltaLibrary.dropContainment(reference);
+    EdeltaUtils.dropContainment(reference);
     final EReference opposite = referenceToTarget.getEOpposite();
     if ((opposite != null)) {
-      EdeltaLibrary.makeBidirectional(reference, opposite);
+      EdeltaUtils.makeBidirectional(reference, opposite);
     }
-    EdeltaLibrary.removeElement(cl);
+    EdeltaUtils.removeElement(cl);
     return reference;
   }
   
@@ -407,17 +407,17 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final EStructuralFeature feature = IterableExtensions.head(duplicates);
     final EPackage containingEPackage = feature.getEContainingClass().getEPackage();
     final Consumer<EClass> _function = (EClass it) -> {
-      EdeltaLibrary.makeAbstract(it);
+      EdeltaUtils.makeAbstract(it);
       final Function1<EStructuralFeature, EClass> _function_1 = (EStructuralFeature it_1) -> {
         return it_1.getEContainingClass();
       };
       final Consumer<EClass> _function_2 = (EClass c) -> {
-        EdeltaLibrary.addESuperType(c, it);
+        EdeltaUtils.addESuperType(c, it);
       };
       ListExtensions.map(duplicates, _function_1).forEach(_function_2);
       this.pullUpFeatures(it, duplicates);
     };
-    return EdeltaLibrary.addNewEClass(containingEPackage, name, _function);
+    return EdeltaUtils.addNewEClass(containingEPackage, name, _function);
   }
   
   /**
@@ -437,8 +437,8 @@ public class EdeltaRefactorings extends AbstractEdelta {
       return it.getEContainingClass();
     };
     this.checkAllDirectSubclasses(dest, ListExtensions.map(duplicates, _function));
-    EdeltaLibrary.copyTo(IterableExtensions.head(duplicates), dest);
-    EdeltaLibrary.removeAllElements(duplicates);
+    EdeltaUtils.copyTo(IterableExtensions.head(duplicates), dest);
+    EdeltaUtils.removeAllElements(duplicates);
   }
   
   /**
@@ -477,7 +477,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
   public void checkNotContainment(final EReference reference, final String errorMessage) {
     boolean _isContainment = reference.isContainment();
     if (_isContainment) {
-      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(reference);
+      String _eObjectRepr = EdeltaUtils.getEObjectRepr(reference);
       final String message = ((errorMessage + ": ") + _eObjectRepr);
       this.showError(reference, message);
       throw new IllegalArgumentException(message);
@@ -495,7 +495,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
   public void checkNotMany(final ETypedElement element, final String errorMessage) {
     boolean _isMany = element.isMany();
     if (_isMany) {
-      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(element);
+      String _eObjectRepr = EdeltaUtils.getEObjectRepr(element);
       final String message = ((errorMessage + ": ") + _eObjectRepr);
       this.showError(element, message);
       throw new IllegalArgumentException(message);
@@ -518,7 +518,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     boolean _not = (!_isEmpty);
     if (_not) {
       final Function1<EReference, String> _function_1 = (EReference it) -> {
-        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it);
+        String _eObjectRepr = EdeltaUtils.getEObjectRepr(it);
         return ("  " + _eObjectRepr);
       };
       String _join = IterableExtensions.join(IterableExtensions.<EReference, String>map(bidirectionalReferences, _function_1), "\n");
@@ -569,7 +569,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     boolean _not = (!_isEmpty);
     if (_not) {
       final Consumer<EClass> _function_1 = (EClass it) -> {
-        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(superClass);
+        String _eObjectRepr = EdeltaUtils.getEObjectRepr(superClass);
         String _plus = ("Not a direct subclass of: " + _eObjectRepr);
         this.showError(it, _plus);
       };
@@ -616,14 +616,14 @@ public class EdeltaRefactorings extends AbstractEdelta {
     boolean _isEmpty = IterableExtensions.isEmpty(nonCompliant);
     boolean _not = (!_isEmpty);
     if (_not) {
-      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(feature.getEType());
+      String _eObjectRepr = EdeltaUtils.getEObjectRepr(feature.getEType());
       String _plus = ("features not compliant with type " + _eObjectRepr);
       String _plus_1 = (_plus + ":\n");
       final Function1<EStructuralFeature, String> _function_3 = (EStructuralFeature it) -> {
-        String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(it);
+        String _eObjectRepr_1 = EdeltaUtils.getEObjectRepr(it);
         String _plus_2 = ("  " + _eObjectRepr_1);
         String _plus_3 = (_plus_2 + ": ");
-        String _eObjectRepr_2 = EdeltaLibrary.getEObjectRepr(it.getEType());
+        String _eObjectRepr_2 = EdeltaUtils.getEObjectRepr(it.getEType());
         return (_plus_3 + _eObjectRepr_2);
       };
       String _join = IterableExtensions.join(IterableExtensions.map(nonCompliant, _function_3), "\n");
@@ -644,11 +644,11 @@ public class EdeltaRefactorings extends AbstractEdelta {
       final EList<EStructuralFeature> features = c.getEStructuralFeatures();
       final boolean empty = features.isEmpty();
       if ((!empty)) {
-        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(c);
+        String _eObjectRepr = EdeltaUtils.getEObjectRepr(c);
         String _plus = ("Not an empty class: " + _eObjectRepr);
         String _plus_1 = (_plus + ":\n");
         final Function1<EStructuralFeature, String> _function_1 = (EStructuralFeature it) -> {
-          String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(it);
+          String _eObjectRepr_1 = EdeltaUtils.getEObjectRepr(it);
           return ("  " + _eObjectRepr_1);
         };
         String _join = IterableExtensions.join(ListExtensions.<EStructuralFeature, String>map(features, _function_1), "\n");
@@ -685,7 +685,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     boolean _greaterThan = (_size > 1);
     if (_greaterThan) {
       final Function1<EReference, String> _function_1 = (EReference it) -> {
-        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it);
+        String _eObjectRepr = EdeltaUtils.getEObjectRepr(it);
         return ("  " + _eObjectRepr);
       };
       String _join = IterableExtensions.join(IterableExtensions.<EReference, String>map(references, _function_1), "\n");
@@ -707,7 +707,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final Iterable<EReference> references = this.allReferencesToThisClass(cl);
     boolean _isEmpty = IterableExtensions.isEmpty(references);
     if (_isEmpty) {
-      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(cl);
+      String _eObjectRepr = EdeltaUtils.getEObjectRepr(cl);
       final String message = ("The EClass is not referred: " + _eObjectRepr);
       this.showError(cl, message);
       throw new IllegalArgumentException(message);
@@ -753,7 +753,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final List<EStructuralFeature.Setting> usages = this.allUsagesOfThisClass(cl);
     boolean _isEmpty = usages.isEmpty();
     if (_isEmpty) {
-      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(cl);
+      String _eObjectRepr = EdeltaUtils.getEObjectRepr(cl);
       final String message = ("The EClass is not used: " + _eObjectRepr);
       this.showError(cl, message);
       throw new IllegalArgumentException(message);
@@ -762,12 +762,12 @@ public class EdeltaRefactorings extends AbstractEdelta {
     boolean _greaterThan = (_size > 1);
     if (_greaterThan) {
       final Function1<EStructuralFeature.Setting, String> _function = (EStructuralFeature.Setting it) -> {
-        String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(it.getEObject());
+        String _eObjectRepr_1 = EdeltaUtils.getEObjectRepr(it.getEObject());
         String _plus = ("  " + _eObjectRepr_1);
         String _plus_1 = (_plus + "\n");
         String _plus_2 = (_plus_1 + 
           "    ");
-        String _eObjectRepr_2 = EdeltaLibrary.getEObjectRepr(it.getEStructuralFeature());
+        String _eObjectRepr_2 = EdeltaUtils.getEObjectRepr(it.getEStructuralFeature());
         return (_plus_2 + _eObjectRepr_2);
       };
       String _join = IterableExtensions.join(ListExtensions.<EStructuralFeature.Setting, String>map(usages, _function), "\n");
@@ -790,14 +790,14 @@ public class EdeltaRefactorings extends AbstractEdelta {
       boolean _isContainment = ((EReference)o).isContainment();
       boolean _not = (!_isContainment);
       if (_not) {
-        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(o);
+        String _eObjectRepr = EdeltaUtils.getEObjectRepr(o);
         final String message = ("Not a containment reference: " + _eObjectRepr);
         this.showError(((ENamedElement)o), message);
         throw new IllegalArgumentException(message);
       }
       return ((EReference)o);
     }
-    String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(o);
+    String _eObjectRepr_1 = EdeltaUtils.getEObjectRepr(o);
     final String message_1 = ("Not a reference: " + _eObjectRepr_1);
     this.showError(((ENamedElement) o), message_1);
     throw new IllegalArgumentException(message_1);
@@ -818,7 +818,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
       boolean _isDerived = it.getEStructuralFeature().isDerived();
       return Boolean.valueOf((!_isDerived));
     };
-    return IterableExtensions.<EStructuralFeature.Setting>toList(IterableExtensions.<EStructuralFeature.Setting>filter(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, EdeltaLibrary.packagesToInspect(cl)), _function), _function_1));
+    return IterableExtensions.<EStructuralFeature.Setting>toList(IterableExtensions.<EStructuralFeature.Setting>filter(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, EdeltaUtils.packagesToInspect(cl)), _function), _function_1));
   }
   
   /**
@@ -838,7 +838,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final List<EReference> otherReferences = IterableExtensions.<EReference>toList(IterableExtensions.<EReference>filter(cl.getEReferences(), _function));
     boolean _isEmpty = otherReferences.isEmpty();
     if (_isEmpty) {
-      String _eObjectRepr = EdeltaLibrary.getEObjectRepr(type);
+      String _eObjectRepr = EdeltaUtils.getEObjectRepr(type);
       final String message = ("No references not of type " + _eObjectRepr);
       this.showError(cl, message);
       throw new IllegalArgumentException(message);
@@ -846,12 +846,12 @@ public class EdeltaRefactorings extends AbstractEdelta {
     int _size = otherReferences.size();
     boolean _greaterThan = (_size > 1);
     if (_greaterThan) {
-      String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(type);
+      String _eObjectRepr_1 = EdeltaUtils.getEObjectRepr(type);
       String _plus = ("Too many references not of type " + _eObjectRepr_1);
       String _plus_1 = (_plus + 
         ":\n");
       final Function1<EReference, String> _function_1 = (EReference it) -> {
-        String _eObjectRepr_2 = EdeltaLibrary.getEObjectRepr(it);
+        String _eObjectRepr_2 = EdeltaUtils.getEObjectRepr(it);
         return ("  " + _eObjectRepr_2);
       };
       String _join = IterableExtensions.join(ListExtensions.<EReference, String>map(otherReferences, _function_1), "\n");
@@ -875,11 +875,11 @@ public class EdeltaRefactorings extends AbstractEdelta {
     boolean _greaterThan = (_size > 1);
     if (_greaterThan) {
       final Function1<Map.Entry<EClass, List<EStructuralFeature>>, String> _function_1 = (Map.Entry<EClass, List<EStructuralFeature>> it) -> {
-        final String reprForClass = EdeltaLibrary.getEObjectRepr(it.getKey());
+        final String reprForClass = EdeltaUtils.getEObjectRepr(it.getKey());
         this.showError(it.getKey(), 
           ("Extracted features must belong to the same class: " + reprForClass));
         final Function1<EStructuralFeature, String> _function_2 = (EStructuralFeature it_1) -> {
-          String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it_1);
+          String _eObjectRepr = EdeltaUtils.getEObjectRepr(it_1);
           return ("    " + _eObjectRepr);
         };
         String _join = IterableExtensions.join(ListExtensions.<EStructuralFeature, String>map(it.getValue(), _function_2), "\n");
@@ -911,7 +911,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     if (_not) {
       final Consumer<EClass> _function_1 = (EClass it) -> {
         final EList<EClass> superclasses = it.getESuperTypes();
-        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it);
+        String _eObjectRepr = EdeltaUtils.getEObjectRepr(it);
         String _plus = ("Expected one superclass: " + _eObjectRepr);
         String _plus_1 = (_plus + " instead of:\n");
         String _xifexpression = null;
@@ -920,7 +920,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
           _xifexpression = "  empty";
         } else {
           final Function1<EClass, String> _function_2 = (EClass it_1) -> {
-            String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(it_1);
+            String _eObjectRepr_1 = EdeltaUtils.getEObjectRepr(it_1);
             return ("  " + _eObjectRepr_1);
           };
           _xifexpression = IterableExtensions.join(ListExtensions.<EClass, String>map(superclasses, _function_2), "\n");
@@ -941,17 +941,17 @@ public class EdeltaRefactorings extends AbstractEdelta {
     boolean _not_1 = (!_isEmpty_1);
     if (_not_1) {
       final Consumer<EClass> _function_3 = (EClass it) -> {
-        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it);
+        String _eObjectRepr = EdeltaUtils.getEObjectRepr(it);
         String _plus = ("Wrong superclass of " + _eObjectRepr);
         String _plus_1 = (_plus + ":\n");
         String _plus_2 = (_plus_1 + 
           "  Expected: ");
-        String _eObjectRepr_1 = EdeltaLibrary.getEObjectRepr(result);
+        String _eObjectRepr_1 = EdeltaUtils.getEObjectRepr(result);
         String _plus_3 = (_plus_2 + _eObjectRepr_1);
         String _plus_4 = (_plus_3 + "\n");
         String _plus_5 = (_plus_4 + 
           "  Actual  : ");
-        String _eObjectRepr_2 = EdeltaLibrary.getEObjectRepr(IterableExtensions.<EClass>head(it.getESuperTypes()));
+        String _eObjectRepr_2 = EdeltaUtils.getEObjectRepr(IterableExtensions.<EClass>head(it.getESuperTypes()));
         final String message = (_plus_5 + _eObjectRepr_2);
         this.showError(it, message);
       };
@@ -964,7 +964,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     boolean _not_2 = (!_isEmpty_2);
     if (_not_2) {
       final Function1<EClass, String> _function_4 = (EClass it) -> {
-        String _eObjectRepr = EdeltaLibrary.getEObjectRepr(it);
+        String _eObjectRepr = EdeltaUtils.getEObjectRepr(it);
         return ("  " + _eObjectRepr);
       };
       String _join = IterableExtensions.join(IterableExtensions.<EClass, String>map(additionalSubclasses, _function_4), "\n");

@@ -60,7 +60,7 @@ import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaEPackageManager;
-import edelta.lib.EdeltaEmptyRuntime;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.util.EdeltaEcoreHelper;
@@ -212,7 +212,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	 * @param copiedEPackagesMap
 	 */
 	private AbstractEdelta createThisObject(final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
-		var edeltaRuntime = new EdeltaEmptyRuntime(new EdeltaEPackageManager() {
+		var edeltaRuntime = new EdeltaDefaultRuntime(new EdeltaEPackageManager() {
 				@Override
 				public EPackage getEPackage(String packageName) {
 					return copiedEPackagesMap.get(packageName);
@@ -615,7 +615,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				// since we pass thisObject, the new interpreter will share
 				// the same package manager (see creatThisObject) and
 				// the same issue representer.
-				newInterpreter.thisObject = new EdeltaEmptyRuntime(thisObject);
+				newInterpreter.thisObject = new EdeltaDefaultRuntime(thisObject);
 				// it is crucial to share the diagnosticHelper where the
 				// currentExpression is correctly set to avoid a NP2
 				// see testExecutionOfSeveralFilesWithUseAsAndIssuePresenter

@@ -1,7 +1,7 @@
 package com.example;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaLibrary;
+import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EClass;
@@ -36,8 +36,8 @@ public class Example extends AbstractEdelta {
       this.refactorings.addMandatoryAttribute(it_1, "ANewAttribute", getEDataType("ecore", "EString"));
       getEAttribute("myecore", "MyNewClass", "ANewAttribute").setEType(getEDataType("ecore", "EInt"));
     };
-    EdeltaLibrary.addNewEClass(it, "MyNewClass", _function);
-    EdeltaLibrary.addEClass(it, this.createSubClassOfMyEClass("ANewDerivedEClass"));
+    EdeltaUtils.addNewEClass(it, "MyNewClass", _function);
+    EdeltaUtils.addEClass(it, this.createSubClassOfMyEClass("ANewDerivedEClass"));
     getEClass("myecore", "ANewDerivedEClass").setAbstract(true);
   }
   
