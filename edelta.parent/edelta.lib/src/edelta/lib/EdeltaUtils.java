@@ -162,21 +162,6 @@ public class EdeltaUtils {
 		subClass.getESuperTypes().remove(superClass);
 	}
 
-	public static EPackage addNewESubpackage(EPackage superPackage, String name, String nsPrefix, String nsURI) {
-		return addNewESubpackage(superPackage, name, nsPrefix, nsURI, null);
-	}
-
-	public static EPackage addNewESubpackage(EPackage superPackage, String name, String nsPrefix, String nsURI,
-			Consumer<EPackage> initializer) {
-		var newSubpackage = ecoreFactory.createEPackage();
-		newSubpackage.setName(name);
-		newSubpackage.setNsPrefix(nsPrefix);
-		newSubpackage.setNsURI(nsURI);
-		superPackage.getESubpackages().add(newSubpackage);
-		safeRunInitializer(initializer, newSubpackage);
-		return newSubpackage;
-	}
-
 	/**
 	 * Removes the {@link ENamedElement} and recursively its contents; it also makes
 	 * sure that no dangling references are left in the Ecore model: if we remove an

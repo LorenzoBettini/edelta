@@ -144,33 +144,6 @@ public class EdeltaUtilsTest {
 	}
 
 	@Test
-	public void test_addNewESubpackage() {
-		EPackage superPackage = ecoreFactory.createEPackage();
-		EPackage subPackage =
-			EdeltaUtils.addNewESubpackage(superPackage, "newSubpackage", "prefix", "nsURI");
-		assertThat(subPackage)
-			.returns("newSubpackage", EPackage::getName)
-			.returns("prefix", EPackage::getNsPrefix)
-			.returns("nsURI", EPackage::getNsURI);
-		assertThat(superPackage.getESubpackages()).containsOnly(subPackage);
-		assertThat(subPackage.getESuperPackage()).isSameAs(superPackage);
-	}
-
-	@Test
-	public void test_addNewESubpackageWithInitializer() {
-		EPackage superPackage = ecoreFactory.createEPackage();
-		EPackage subPackage =
-			EdeltaUtils.addNewESubpackage(superPackage, "newSubpackage", "prefix", "nsURI",
-				(EPackage p) -> p.setName("changed"));
-		assertThat(subPackage)
-			.returns("changed", EPackage::getName)
-			.returns("prefix", EPackage::getNsPrefix)
-			.returns("nsURI", EPackage::getNsURI);
-		assertThat(superPackage.getESubpackages()).containsOnly(subPackage);
-		assertThat(subPackage.getESuperPackage()).isSameAs(superPackage);
-	}
-
-	@Test
 	public void testGetEObjectRepr() {
 		assertEquals("ecore.EClass.eSuperTypes",
 			EdeltaUtils.getEObjectRepr(EcorePackage.eINSTANCE.getEClass_ESuperTypes()));
