@@ -1,18 +1,25 @@
 package edelta.refactorings.lib.helper.tests;
 
-import static edelta.lib.EdeltaUtils.*;
+import static edelta.lib.EdeltaUtils.newEAttribute;
+import static edelta.lib.EdeltaUtils.newEClass;
+import static edelta.lib.EdeltaUtils.newEReference;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.emf.ecore.EcorePackage.Literals.*;
+import static org.eclipse.emf.ecore.EcorePackage.Literals.ECLASS;
+import static org.eclipse.emf.ecore.EcorePackage.Literals.ENAMED_ELEMENT__NAME;
+import static org.eclipse.emf.ecore.EcorePackage.Literals.ESTRING;
+import static org.eclipse.emf.ecore.EcorePackage.Literals.ESTRUCTURAL_FEATURE__ECONTAINING_CLASS;
 
 import org.eclipse.emf.ecore.EClass;
 import org.junit.Test;
 
+import edelta.lib.EdeltaStandardLibrary;
 import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder;
 
 public class EdeltaFeatureDifferenceFinderTest {
 
 	private static EClass aType1 = newEClass("aType1");
 	private static EClass aType2 = newEClass("aType2");
+	private EdeltaStandardLibrary stdLib = new EdeltaStandardLibrary();
 
 	@Test
 	public void whenTwoFeaturesAreEqual() {
@@ -36,8 +43,8 @@ public class EdeltaFeatureDifferenceFinderTest {
 	public void whenTwoFeaturesAreEqualIgnoringFeature() {
 		var feature1 = newEReference("r1", ECLASS, f -> f.setLowerBound(1));
 		var feature2 = newEReference("r1", ECLASS, f -> f.setLowerBound(1));
-		newEClass("C1", c -> addEReference(c, feature1));
-		newEClass("C2", c -> addEReference(c, feature2));
+		newEClass("C1", c -> stdLib.addEReference(c, feature1));
+		newEClass("C2", c -> stdLib.addEReference(c, feature2));
 		var differenceFinder = new EdeltaFeatureDifferenceFinder()
 			.ignoring(ESTRUCTURAL_FEATURE__ECONTAINING_CLASS);
 		assertThat(differenceFinder.equals(feature1, feature2))
@@ -48,8 +55,8 @@ public class EdeltaFeatureDifferenceFinderTest {
 	public void whenTwoFeaturesAreEqualIgnoringFeatures() {
 		var feature1 = newEReference("r1", ECLASS, f -> f.setLowerBound(1));
 		var feature2 = newEReference("r2", ECLASS, f -> f.setLowerBound(1));
-		newEClass("C1", c -> addEReference(c, feature1));
-		newEClass("C2", c -> addEReference(c, feature2));
+		newEClass("C1", c -> stdLib.addEReference(c, feature1));
+		newEClass("C2", c -> stdLib.addEReference(c, feature2));
 		var differenceFinder = new EdeltaFeatureDifferenceFinder()
 			.ignoring(ESTRUCTURAL_FEATURE__ECONTAINING_CLASS)
 			.ignoring(ENAMED_ELEMENT__NAME);
@@ -71,8 +78,8 @@ public class EdeltaFeatureDifferenceFinderTest {
 	public void whenTwoFeaturesAreEqualIgnoringContainingClass() {
 		var feature1 = newEReference("r1", ECLASS, f -> f.setLowerBound(1));
 		var feature2 = newEReference("r1", ECLASS, f -> f.setLowerBound(1));
-		newEClass("C1", c -> addEReference(c, feature1));
-		newEClass("C2", c -> addEReference(c, feature2));
+		newEClass("C1", c -> stdLib.addEReference(c, feature1));
+		newEClass("C2", c -> stdLib.addEReference(c, feature2));
 		var differenceFinder = new EdeltaFeatureDifferenceFinder()
 			.ignoringContainingClass();
 		assertThat(differenceFinder.equals(feature1, feature2))
@@ -93,8 +100,8 @@ public class EdeltaFeatureDifferenceFinderTest {
 	public void whenTwoFeaturesHaveDifferentLowerBoundWithDifferenceDetails() {
 		var feature1 = newEReference("r1", ECLASS, f -> f.setLowerBound(1));
 		var feature2 = newEReference("r1", ECLASS, f -> f.setLowerBound(2));
-		newEClass("C1", c -> addEReference(c, feature1));
-		newEClass("C2", c -> addEReference(c, feature2));
+		newEClass("C1", c -> stdLib.addEReference(c, feature1));
+		newEClass("C2", c -> stdLib.addEReference(c, feature2));
 		var differenceFinder = new EdeltaFeatureDifferenceFinder();
 		assertThat(differenceFinder.equals(feature1, feature2))
 			.isFalse();
@@ -110,8 +117,8 @@ public class EdeltaFeatureDifferenceFinderTest {
 	public void whenTwoFeaturesHaveDifferentNameAndContainingClassWithDifferenceDetails() {
 		var feature1 = newEReference("r1", ECLASS, f -> f.setLowerBound(1));
 		var feature2 = newEReference("r1", ECLASS, f -> f.setLowerBound(1));
-		newEClass("C1", c -> addEReference(c, feature1));
-		newEClass("C2", c -> addEReference(c, feature2));
+		newEClass("C1", c -> stdLib.addEReference(c, feature1));
+		newEClass("C2", c -> stdLib.addEReference(c, feature2));
 		var differenceFinder = new EdeltaFeatureDifferenceFinder();
 		assertThat(differenceFinder.equals(feature1, feature2))
 			.isFalse();

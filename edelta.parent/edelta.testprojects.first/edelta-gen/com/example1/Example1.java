@@ -1,6 +1,7 @@
 package com.example1;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaUtils;
 import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
@@ -11,7 +12,7 @@ import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
-public class Example1 extends AbstractEdelta {
+public class Example1 extends EdeltaDefaultRuntime {
   public Example1() {
     
   }
@@ -36,15 +37,15 @@ public class Example1 extends AbstractEdelta {
   
   public void someModifications(final EPackage it) {
     final Consumer<EClass> _function = (EClass it_1) -> {
-      EdeltaUtils.addNewEAttribute(it_1, "myStringAttribute", getEDataType("ecore", "EString"));
+      this.stdLib.addNewEAttribute(it_1, "myStringAttribute", getEDataType("ecore", "EString"));
       final Consumer<EReference> _function_1 = (EReference it_2) -> {
         it_2.setUpperBound((-1));
         it_2.setContainment(true);
         it_2.setLowerBound(0);
       };
-      EdeltaUtils.addNewEReference(it_1, "myReference", getEClass("myecore1", "MyEClass"), _function_1);
+      this.stdLib.addNewEReference(it_1, "myReference", getEClass("myecore1", "MyEClass"), _function_1);
     };
-    EdeltaUtils.addNewEClass(it, "NewClass", _function);
+    this.stdLib.addNewEClass(it, "NewClass", _function);
   }
   
   @Override

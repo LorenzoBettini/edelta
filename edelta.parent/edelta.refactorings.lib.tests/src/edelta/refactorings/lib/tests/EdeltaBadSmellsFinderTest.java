@@ -1,12 +1,5 @@
 package edelta.refactorings.lib.tests;
 
-import static edelta.lib.EdeltaUtils.addESuperType;
-import static edelta.lib.EdeltaUtils.addNewAbstractEClass;
-import static edelta.lib.EdeltaUtils.addNewContainmentEReference;
-import static edelta.lib.EdeltaUtils.addNewEAttribute;
-import static edelta.lib.EdeltaUtils.addNewEClass;
-import static edelta.lib.EdeltaUtils.addNewEReference;
-import static edelta.lib.EdeltaUtils.addNewSubclass;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
@@ -48,11 +41,11 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test
 	public void test_findDuplicatedFeatures_whenNoDuplicates() {
 		final EPackage p = createEPackage("p", pack -> {
-			addNewEClass(pack, "C1", c -> {
-				addNewEAttribute(c, "a1", stringDataType);
+			stdLib.addNewEClass(pack, "C1", c -> {
+				stdLib.addNewEAttribute(c, "a1", stringDataType);
 			});
-			addNewEClass(pack, "C2", c -> {
-				addNewEAttribute(c, "a1", intDataType);
+			stdLib.addNewEClass(pack, "C2", c -> {
+				stdLib.addNewEAttribute(c, "a1", intDataType);
 			});
 		});
 		assertThat(finder.findDuplicatedFeatures(p)).isEmpty();
@@ -61,11 +54,11 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test
 	public void test_findDuplicatedFeatures_withDuplicates() {
 		final EPackage p = createEPackage("p", pack -> {
-			addNewEClass(pack, "C1", c -> {
-				addNewEAttribute(c, "a1", stringDataType);
+			stdLib.addNewEClass(pack, "C1", c -> {
+				stdLib.addNewEAttribute(c, "a1", stringDataType);
 			});
-			addNewEClass(pack, "C2", c -> {
-				addNewEAttribute(c, "a1", stringDataType);
+			stdLib.addNewEClass(pack, "C2", c -> {
+				stdLib.addNewEAttribute(c, "a1", stringDataType);
 			});
 		});
 		final var result = finder.findDuplicatedFeatures(p);
@@ -81,13 +74,13 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test
 	public void test_findDuplicatedFeatures_withDifferingAttributesByLowerBound() {
 		final EPackage p = createEPackage("p", pack -> {
-			addNewEClass(pack, "C1", c -> {
-				addNewEAttribute(c, "a1", stringDataType, a -> {
+			stdLib.addNewEClass(pack, "C1", c -> {
+				stdLib.addNewEAttribute(c, "a1", stringDataType, a -> {
 					a.setLowerBound(1);
 				});
 			});
-			addNewEClass(pack, "C2", c -> {
-				addNewEAttribute(c, "a1", stringDataType, a -> {
+			stdLib.addNewEClass(pack, "C2", c -> {
+				stdLib.addNewEAttribute(c, "a1", stringDataType, a -> {
 					a.setLowerBound(2);
 				});
 			});
@@ -98,11 +91,11 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test
 	public void test_findDuplicatedFeatures_withDifferingContainment() {
 		final EPackage p = createEPackage("p", pack -> {
-			addNewEClass(pack, "C1", c -> {
-				addNewContainmentEReference(c, "r1", eClassReference);
+			stdLib.addNewEClass(pack, "C1", c -> {
+				stdLib.addNewContainmentEReference(c, "r1", eClassReference);
 			});
-			addNewEClass(pack, "C2", c -> {
-				addNewEReference(c, "r1", eClassReference);
+			stdLib.addNewEClass(pack, "C2", c -> {
+				stdLib.addNewEReference(c, "r1", eClassReference);
 			});
 		});
 		assertThat(finder.findDuplicatedFeatures(p)).isEmpty();
@@ -111,13 +104,13 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test
 	public void test_findDuplicatedFeatures_withCustomEqualityPredicate() {
 		final EPackage p = createEPackage("p", pack -> {
-			addNewEClass(pack, "C1", c -> {
-				addNewEAttribute(c, "a1", stringDataType, a -> {
+			stdLib.addNewEClass(pack, "C1", c -> {
+				stdLib.addNewEAttribute(c, "a1", stringDataType, a -> {
 					a.setLowerBound(1);
 				});
 			});
-			addNewEClass(pack, "C2", c -> {
-				addNewEAttribute(c, "a1", stringDataType, a -> {
+			stdLib.addNewEClass(pack, "C2", c -> {
+				stdLib.addNewEAttribute(c, "a1", stringDataType, a -> {
 					a.setLowerBound(2);
 				});
 			});
@@ -140,33 +133,33 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test
 	public void test_findRedundantContainers() {
 		final EPackage p = createEPackage("p", pack -> {
-			EClass containedWithRedundant = addNewEClass(pack, "ContainedWithRedundant");
-			EClass containedWithOpposite = addNewEClass(pack, "ContainedWithOpposite");
-			EClass containedWithContained = addNewEClass(pack, "ContainedWithContained");
-			EClass containedWithOptional = addNewEClass(pack, "ContainedWithOptional");
-			EClass anotherClass = addNewEClass(pack, "AnotherClass");
-			EClass containedWithUnrelated = addNewEClass(pack, "Unrelated");
-			EClass container = addNewEClass(pack, "Container", c -> {
-				addNewContainmentEReference(c, "containedWithRedundant", containedWithRedundant);
-				addNewContainmentEReference(c, "containedWithUnrelated", containedWithUnrelated);
-				addNewContainmentEReference(c, "containedWithOpposite", containedWithOpposite);
-				addNewContainmentEReference(c, "containedWithOptional", containedWithOptional);
+			EClass containedWithRedundant = stdLib.addNewEClass(pack, "ContainedWithRedundant");
+			EClass containedWithOpposite = stdLib.addNewEClass(pack, "ContainedWithOpposite");
+			EClass containedWithContained = stdLib.addNewEClass(pack, "ContainedWithContained");
+			EClass containedWithOptional = stdLib.addNewEClass(pack, "ContainedWithOptional");
+			EClass anotherClass = stdLib.addNewEClass(pack, "AnotherClass");
+			EClass containedWithUnrelated = stdLib.addNewEClass(pack, "Unrelated");
+			EClass container = stdLib.addNewEClass(pack, "Container", c -> {
+				stdLib.addNewContainmentEReference(c, "containedWithRedundant", containedWithRedundant);
+				stdLib.addNewContainmentEReference(c, "containedWithUnrelated", containedWithUnrelated);
+				stdLib.addNewContainmentEReference(c, "containedWithOpposite", containedWithOpposite);
+				stdLib.addNewContainmentEReference(c, "containedWithOptional", containedWithOptional);
 			});
-			addNewEReference(containedWithRedundant, "redundant", container, r -> {
+			stdLib.addNewEReference(containedWithRedundant, "redundant", container, r -> {
 				r.setLowerBound(1);
 			});
-			addNewEReference(containedWithUnrelated, "unrelated", anotherClass, r -> {
+			stdLib.addNewEReference(containedWithUnrelated, "unrelated", anotherClass, r -> {
 				r.setLowerBound(1);
 			});
-			addNewEReference(containedWithOpposite, "correctWithOpposite", container, r -> {
+			stdLib.addNewEReference(containedWithOpposite, "correctWithOpposite", container, r -> {
 				r.setLowerBound(1);
 				r.setEOpposite(last(container.getEReferences()));
 			});
 			// this is correct since it's another containment relation
-			addNewContainmentEReference(containedWithContained, "correctWithContainment", container,
+			stdLib.addNewContainmentEReference(containedWithContained, "correctWithContainment", container,
 				r -> r.setLowerBound(1));
 			// this is correct since it's not required
-			addNewEReference(containedWithOptional, "correctNotRequired", container);
+			stdLib.addNewEReference(containedWithOptional, "correctNotRequired", container);
 		});
 		// we expect the pair
 		// redundant -> containedWithRedundant
@@ -180,20 +173,20 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test
 	public void test_findDeadClassifiers() {
 		var p1 = createEPackage("p1", pack -> {
-			addNewEClass(pack, "Unused1");
-			EClass used1 = addNewEClass(pack, "Used1");
-			EClass used2 = addNewEClass(pack, "Used2");
-			addNewEClass(pack, "Unused2", c -> {
-				addNewContainmentEReference(c, "used1", used1);
-				addNewEReference(c, "used2", used2);
+			stdLib.addNewEClass(pack, "Unused1");
+			EClass used1 = stdLib.addNewEClass(pack, "Used1");
+			EClass used2 = stdLib.addNewEClass(pack, "Used2");
+			stdLib.addNewEClass(pack, "Unused2", c -> {
+				stdLib.addNewContainmentEReference(c, "used1", used1);
+				stdLib.addNewEReference(c, "used2", used2);
 			});
 		});
 		assertThat(finder.findDeadClassifiers(p1))
 			.containsExactly(findEClass(p1, "Unused1"));
 		// create a resource set with cross reference
 		var p2 = createEPackage("p2", pack -> {
-			addNewEClass(pack, "UsesUnused1", c -> {
-				addNewEReference(c, "unused1FromP1", (EClass) p1.getEClassifier("Unused1"));
+			stdLib.addNewEClass(pack, "UsesUnused1", c -> {
+				stdLib.addNewEReference(c, "unused1FromP1", (EClass) p1.getEClassifier("Unused1"));
 			});
 		});
 		var resourceSet = new ResourceSetImpl();
@@ -212,31 +205,31 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test
 	public void test_doesNotReferToClasses() {
 		var otherPackage = createEPackage("otherPackage");
-		var used1 = addNewEClass(otherPackage, "Used1");
+		var used1 = stdLib.addNewEClass(otherPackage, "Used1");
 		var p = createEPackage("p", pack -> {
-			addNewEClass(pack, "HasNoReferenceInThisPackage", c -> {
+			stdLib.addNewEClass(pack, "HasNoReferenceInThisPackage", c -> {
 				// has a reference to a class in a different package
-				addNewEReference(c, "used1", used1);
+				stdLib.addNewEReference(c, "used1", used1);
 			});
 		});
 		assertThat(finder.doesNotReferToClasses(head(EClasses(p))))
 			.isFalse();
-		var hasNoReference = addNewEClass(p, "HasNoReference");
+		var hasNoReference = stdLib.addNewEClass(p, "HasNoReference");
 		assertThat(finder.doesNotReferToClasses(hasNoReference))
 			.isTrue();
-		var onlyReferToSelf = addNewEClass(p, "OnlyReferToSelf", c -> {
+		var onlyReferToSelf = stdLib.addNewEClass(p, "OnlyReferToSelf", c -> {
 			// has a reference to self
-			addNewEReference(c, "mySelf", c);
+			stdLib.addNewEReference(c, "mySelf", c);
 		});
 		// self references are considered
 		assertThat(finder.doesNotReferToClasses(onlyReferToSelf))
 			.isFalse();
-		var withSuperClass = addNewSubclass(used1, "WithSuperClass");
+		var withSuperClass = stdLib.addNewSubclass(used1, "WithSuperClass");
 		// superclasses are considered
 		assertThat(finder.doesNotReferToClasses(withSuperClass))
 			.isFalse();
-		var onlyWithAtttributes = addNewEClass(p, "OnlyWithAttributes", c -> {
-			addNewEAttribute(c, "name", stringDataType);
+		var onlyWithAtttributes = stdLib.addNewEClass(p, "OnlyWithAttributes", c -> {
+			stdLib.addNewEAttribute(c, "name", stringDataType);
 		});
 		// attributes, i.e., EDataType, are not considered
 		assertThat(finder.doesNotReferToClasses(onlyWithAtttributes))
@@ -246,13 +239,13 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test
 	public void test_isNotReferredByClassifiers() {
 		var p1 = createEPackage("p1");
-		var referenced = addNewEClass(p1, "Referenced");
-		var baseClass = addNewEClass(p1, "BaseClass");
-		var notReferenced = addNewEClass(p1, "NotReferenced");
-		addNewEClass(p1, "Referring", c -> {
-			addNewEReference(c, "aRef", referenced);
+		var referenced = stdLib.addNewEClass(p1, "Referenced");
+		var baseClass = stdLib.addNewEClass(p1, "BaseClass");
+		var notReferenced = stdLib.addNewEClass(p1, "NotReferenced");
+		stdLib.addNewEClass(p1, "Referring", c -> {
+			stdLib.addNewEReference(c, "aRef", referenced);
 		});
-		addNewSubclass(baseClass, "DerivedClass");
+		stdLib.addNewSubclass(baseClass, "DerivedClass");
 		assertThat(finder.isNotReferredByClassifiers(notReferenced))
 			.isTrue();
 		assertThat(finder.isNotReferredByClassifiers(referenced))
@@ -260,16 +253,16 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 		// if there's a derived class, the base class is referenced
 		assertThat(finder.isNotReferredByClassifiers(baseClass))
 			.isFalse();
-		var selfReferenced = addNewEClass(p1, "SelfReferenced", c -> {
-			addNewEReference(c, "mySelf", c);
+		var selfReferenced = stdLib.addNewEClass(p1, "SelfReferenced", c -> {
+			stdLib.addNewEReference(c, "mySelf", c);
 		});
 		// self references are considered
 		assertThat(finder.isNotReferredByClassifiers(selfReferenced))
 			.isFalse();
 		// create a resource set with cross reference
 		var p2 = createEPackage("p2", pack -> {
-			addNewEClass(pack, "UsesNotReferencedInP1", c -> {
-				addNewEReference(c, "usesNotReferencedInP1", (EClass) p1.getEClassifier("NotReferenced"));
+			stdLib.addNewEClass(pack, "UsesNotReferencedInP1", c -> {
+				stdLib.addNewEReference(c, "usesNotReferencedInP1", (EClass) p1.getEClassifier("NotReferenced"));
 			});
 		});
 		var resourceSet = new ResourceSetImpl();
@@ -288,20 +281,20 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test
 	public void test_findClassificationByHierarchy() {
 		final EPackage p = createEPackage("p", pack -> {
-			final EClass base = addNewEClass(pack, "Base");
-			addNewSubclass(base, "Derived1");
-			addNewSubclass(base, "Derived2");
+			final EClass base = stdLib.addNewEClass(pack, "Base");
+			stdLib.addNewSubclass(base, "Derived1");
+			stdLib.addNewSubclass(base, "Derived2");
 			// not in result because has features
-			addNewSubclass(base, "DerivedOK", c -> {
-				addNewEAttribute(c, "anAttribute", stringDataType);
+			stdLib.addNewSubclass(base, "DerivedOK", c -> {
+				stdLib.addNewEAttribute(c, "anAttribute", stringDataType);
 			});
 			// not in result because it's referred by aRef
-			final EClass referenced = addNewSubclass(base, "DerivedOK2");
-			final EClass another = addNewEClass(pack, "Another", c -> {
-				addNewEReference(c, "aRef", referenced);
+			final EClass referenced = stdLib.addNewSubclass(base, "DerivedOK2");
+			final EClass another = stdLib.addNewEClass(pack, "Another", c -> {
+				stdLib.addNewEReference(c, "aRef", referenced);
 			});
 			// not in result because has several superclasses
-			addNewSubclass(base, "DerivedOK3", c -> {
+			stdLib.addNewSubclass(base, "DerivedOK3", c -> {
 				c.getESuperTypes().add(another);
 			});
 		});
@@ -316,8 +309,8 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test
 	public void test_findClassificationByHierarchy_withOneSubclass() {
 		final EPackage p = createEPackage("p", pack -> {
-			addNewEClass(pack, "Base", c -> {
-				addNewSubclass(c, "Derived1");
+			stdLib.addNewEClass(pack, "Base", c -> {
+				stdLib.addNewSubclass(c, "Derived1");
 			});
 		});
 		assertThat(finder.findClassificationByHierarchy(p)).isEmpty();
@@ -326,13 +319,13 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test
 	public void test_findConcreteAbstractMetaclasses() {
 		final EPackage p = createEPackage("p", pack -> {
-			EClass base = addNewEClass(pack, "ConcreteAbstractMetaclass");
-			EClass other = addNewAbstractEClass(pack, "CorrectAbstractMetaclass");
-			EClass referred = addNewEClass(pack, "NonBaseClass");
-			addNewSubclass(base, "Derived1");
-			addNewSubclass(other, "Derived2");
-			addNewEClass(pack, "Another", c -> {
-				addNewEReference(c, "aRef", referred);
+			EClass base = stdLib.addNewEClass(pack, "ConcreteAbstractMetaclass");
+			EClass other = stdLib.addNewAbstractEClass(pack, "CorrectAbstractMetaclass");
+			EClass referred = stdLib.addNewEClass(pack, "NonBaseClass");
+			stdLib.addNewSubclass(base, "Derived1");
+			stdLib.addNewSubclass(other, "Derived2");
+			stdLib.addNewEClass(pack, "Another", c -> {
+				stdLib.addNewEReference(c, "aRef", referred);
 			});
 		});
 		assertThat(finder.findConcreteAbstractMetaclasses(p))
@@ -342,9 +335,9 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test
 	public void test_findAbstractConcreteMetaclasses() {
 		final EPackage p = createEPackage("p", pack -> {
-			addNewAbstractEClass(pack, "AbstractConcreteMetaclass");
-			addNewAbstractEClass(pack, "AbstractMetaclass", c -> {
-				addNewSubclass(c, "Derived1");
+			stdLib.addNewAbstractEClass(pack, "AbstractConcreteMetaclass");
+			stdLib.addNewAbstractEClass(pack, "AbstractMetaclass", c -> {
+				stdLib.addNewSubclass(c, "Derived1");
 			});
 		});
 		assertThat(finder.findAbstractConcreteMetaclasses(p))
@@ -354,14 +347,14 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test
 	public void test_findAbstractSubclassesOfConcreteSuperclasses() {
 		final EPackage p = createEPackage("p", pack -> {
-			EClass abstractSuperclass = addNewAbstractEClass(pack, "AbstractSuperclass");
-			EClass concreteSuperclass1 = addNewEClass(pack, "ConcreteSuperclass1");
-			EClass concreteSuperclass2 = addNewEClass(pack, "ConcreteSuperclass2");
-			addNewAbstractEClass(pack, "WithoutSmell", c -> {
+			EClass abstractSuperclass = stdLib.addNewAbstractEClass(pack, "AbstractSuperclass");
+			EClass concreteSuperclass1 = stdLib.addNewEClass(pack, "ConcreteSuperclass1");
+			EClass concreteSuperclass2 = stdLib.addNewEClass(pack, "ConcreteSuperclass2");
+			stdLib.addNewAbstractEClass(pack, "WithoutSmell", c -> {
 				c.getESuperTypes().addAll(
 					asList(concreteSuperclass1, abstractSuperclass));
 			});
-			addNewAbstractEClass(pack, "WithSmell", c -> {
+			stdLib.addNewAbstractEClass(pack, "WithSmell", c -> {
 				c.getESuperTypes().addAll(
 					asList(concreteSuperclass1, concreteSuperclass2));
 			});
@@ -373,10 +366,10 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test
 	public void test_directSubclasses() {
 		final EPackage p = createEPackage("p", pack -> {
-			EClass superclass = addNewEClass(pack, "ASuperclass");
-			EClass subclass1 = addNewSubclass(superclass, "ASubclass1");
-			addNewSubclass(subclass1, "ASubclass1Subclass");
-			addNewSubclass(superclass, "ASubclass2");
+			EClass superclass = stdLib.addNewEClass(pack, "ASuperclass");
+			EClass subclass1 = stdLib.addNewSubclass(superclass, "ASubclass1");
+			stdLib.addNewSubclass(subclass1, "ASubclass1Subclass");
+			stdLib.addNewSubclass(superclass, "ASubclass2");
 		});
 		assertThat(
 			map(
@@ -394,11 +387,11 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test
 	public void test_directSubclassesInResourceSet() {
 		final EPackage p1 = createEPackage("p1");
-		var superclass = addNewEClass(p1, "ASuperclass");
+		var superclass = stdLib.addNewEClass(p1, "ASuperclass");
 		final EPackage p2 = createEPackage("p2");
-		var subclass1 = addNewEClass(p2, "ASubclass1");
-		addESuperType(subclass1, superclass);
-		addNewSubclass(superclass, "ASubclass2");
+		var subclass1 = stdLib.addNewEClass(p2, "ASubclass1");
+		stdLib.addESuperType(subclass1, superclass);
+		stdLib.addNewSubclass(superclass, "ASubclass2");
 		var resourceSet = new ResourceSetImpl();
 		var p1Resource = new ResourceImpl();
 		p1Resource.getContents().add(p1);
@@ -416,25 +409,25 @@ public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	@Test
 	public void test_findDuplicatedFeaturesInSubclasses() {
 		final EPackage p = createEPackage("p", pack -> {
-			EClass superclassWithDuplicatesInSubclasses = addNewEClass(pack,
+			EClass superclassWithDuplicatesInSubclasses = stdLib.addNewEClass(pack,
 					"SuperClassWithDuplicatesInSubclasses");
-			addNewSubclass(superclassWithDuplicatesInSubclasses, "C1", c -> {
-				addNewEAttribute(c, "A1", stringDataType);
+			stdLib.addNewSubclass(superclassWithDuplicatesInSubclasses, "C1", c -> {
+				stdLib.addNewEAttribute(c, "A1", stringDataType);
 			});
-			addNewSubclass(superclassWithDuplicatesInSubclasses, "C2", c -> {
-				addNewEAttribute(c, "A1", stringDataType);
+			stdLib.addNewSubclass(superclassWithDuplicatesInSubclasses, "C2", c -> {
+				stdLib.addNewEAttribute(c, "A1", stringDataType);
 			});
-			EClass superclassWithoutDuplicatesInAllSubclasses = addNewEClass(pack,
+			EClass superclassWithoutDuplicatesInAllSubclasses = stdLib.addNewEClass(pack,
 					"SuperClassWithoutDuplicatesInAllSubclasses");
-			addNewSubclass(superclassWithoutDuplicatesInAllSubclasses, "D1", c -> {
-				addNewEAttribute(c, "A1", stringDataType);
+			stdLib.addNewSubclass(superclassWithoutDuplicatesInAllSubclasses, "D1", c -> {
+				stdLib.addNewEAttribute(c, "A1", stringDataType);
 			});
-			addNewSubclass(superclassWithoutDuplicatesInAllSubclasses, "D2", c -> {
-				addNewEAttribute(c, "A1", stringDataType);
+			stdLib.addNewSubclass(superclassWithoutDuplicatesInAllSubclasses, "D2", c -> {
+				stdLib.addNewEAttribute(c, "A1", stringDataType);
 			});
 			// all subclasses must have the duplicate
-			addNewSubclass(superclassWithoutDuplicatesInAllSubclasses, "D3", c -> {
-				addNewEAttribute(c, "A1", intDataType); // this is not a duplicate
+			stdLib.addNewSubclass(superclassWithoutDuplicatesInAllSubclasses, "D3", c -> {
+				stdLib.addNewEAttribute(c, "A1", intDataType); // this is not a duplicate
 			});
 		});
 		assertThat(finder.findDuplicatedFeaturesInSubclasses(p))

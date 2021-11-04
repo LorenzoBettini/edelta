@@ -1,11 +1,11 @@
 package edelta;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaUtils;
+import edelta.lib.EdeltaDefaultRuntime;
 import org.eclipse.emf.ecore.EClass;
 
 @SuppressWarnings("all")
-public class ExampleReusableFunctions extends AbstractEdelta {
+public class ExampleReusableFunctions extends EdeltaDefaultRuntime {
   public ExampleReusableFunctions() {
     
   }
@@ -15,7 +15,7 @@ public class ExampleReusableFunctions extends AbstractEdelta {
   }
   
   public EClass createANewClassInMyEcore(final String name) {
-    return EdeltaUtils.addNewEClass(getEPackage("myecore"), name);
+    return this.stdLib.addNewEClass(getEPackage("myecore"), name);
   }
   
   @Override

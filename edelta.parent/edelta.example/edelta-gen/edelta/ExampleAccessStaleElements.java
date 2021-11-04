@@ -1,13 +1,13 @@
 package edelta;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaUtils;
+import edelta.lib.EdeltaDefaultRuntime;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
 
 @SuppressWarnings("all")
-public class ExampleAccessStaleElements extends AbstractEdelta {
+public class ExampleAccessStaleElements extends EdeltaDefaultRuntime {
   public ExampleAccessStaleElements() {
     
   }
@@ -17,8 +17,8 @@ public class ExampleAccessStaleElements extends AbstractEdelta {
   }
   
   public void creation(final EPackage it) {
-    EdeltaUtils.addNewEClass(it, "NewClass");
-    EdeltaUtils.addNewEClass(it, "AnotherNewClass");
+    this.stdLib.addNewEClass(it, "NewClass");
+    this.stdLib.addNewEClass(it, "AnotherNewClass");
   }
   
   public void renaming(final EPackage it) {

@@ -3,6 +3,7 @@ package edelta.refactorings.lib;
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder;
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure2;
 import org.eclipse.xtext.xbase.lib.StringExtensions;
 
 @SuppressWarnings("all")
-public class EdeltaRefactorings extends AbstractEdelta {
+public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   public EdeltaRefactorings() {
     
   }
@@ -50,14 +51,14 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final Consumer<EAttribute> _function = (EAttribute it) -> {
       EdeltaUtils.makeSingleRequired(it);
     };
-    return EdeltaUtils.addNewEAttribute(eClass, attributeName, dataType, _function);
+    return this.stdLib.addNewEAttribute(eClass, attributeName, dataType, _function);
   }
   
   public EReference addMandatoryReference(final EClass eClass, final String referenceName, final EClass type) {
     final Consumer<EReference> _function = (EReference it) -> {
       EdeltaUtils.makeSingleRequired(it);
     };
-    return EdeltaUtils.addNewEReference(eClass, referenceName, type, _function);
+    return this.stdLib.addNewEReference(eClass, referenceName, type, _function);
   }
   
   /**
@@ -74,7 +75,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
       "The two features cannot be merged");
     final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
     final EClass owner = feature.getEContainingClass();
-    final EStructuralFeature copy = EdeltaUtils.copyToAs(feature, owner, newFeatureName);
+    final EStructuralFeature copy = this.stdLib.copyToAs(feature, owner, newFeatureName);
     EdeltaUtils.removeAllElements(features);
     return copy;
   }
@@ -109,7 +110,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
   public EStructuralFeature mergeFeatures(final String newFeatureName, final EClassifier type, final Collection<EStructuralFeature> features) {
     final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
     final EClass owner = feature.getEContainingClass();
-    final EStructuralFeature copy = EdeltaUtils.copyToAs(feature, owner, newFeatureName, type);
+    final EStructuralFeature copy = this.stdLib.copyToAs(feature, owner, newFeatureName, type);
     this.mergeFeatures(copy, features);
     return copy;
   }
@@ -138,9 +139,9 @@ public class EdeltaRefactorings extends AbstractEdelta {
         {
           final String subclassName = this.ensureEClassifierNameIsUnique(ePackage, StringExtensions.toFirstUpper(subc.getLiteral().toLowerCase()));
           final Consumer<EClass> _function = (EClass it) -> {
-            EdeltaUtils.addESuperType(it, owner);
+            this.stdLib.addESuperType(it, owner);
           };
-          EClass _addNewEClass = EdeltaUtils.addNewEClass(ePackage, subclassName, _function);
+          EClass _addNewEClass = this.stdLib.addNewEClass(ePackage, subclassName, _function);
           createdSubclasses.add(_addNewEClass);
         }
       }
@@ -182,7 +183,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     final Consumer<EEnum> _function = (EEnum it) -> {
       final Procedure2<EClass, Integer> _function_1 = (EClass subClass, Integer index) -> {
         final String enumLiteralName = this.ensureEClassifierNameIsUnique(ePackage, subClass.getName().toUpperCase());
-        EEnumLiteral _addNewEEnumLiteral = EdeltaUtils.addNewEEnumLiteral(it, enumLiteralName);
+        EEnumLiteral _addNewEEnumLiteral = this.stdLib.addNewEEnumLiteral(it, enumLiteralName);
         final Procedure1<EEnumLiteral> _function_2 = (EEnumLiteral it_1) -> {
           it_1.setValue((index).intValue());
         };
@@ -190,8 +191,8 @@ public class EdeltaRefactorings extends AbstractEdelta {
       };
       IterableExtensions.<EClass>forEach(subclasses, _function_1);
     };
-    final EEnum enum_ = EdeltaUtils.addNewEEnum(ePackage, name, _function);
-    final EAttribute attribute = EdeltaUtils.addNewEAttribute(superclass, this.fromTypeToFeatureName(enum_), enum_);
+    final EEnum enum_ = this.stdLib.addNewEEnum(ePackage, name, _function);
+    final EAttribute attribute = this.stdLib.addNewEAttribute(superclass, this.fromTypeToFeatureName(enum_), enum_);
     EdeltaUtils.makeConcrete(superclass);
     EdeltaUtils.removeAllElements(subclasses);
     return attribute;
@@ -216,13 +217,13 @@ public class EdeltaRefactorings extends AbstractEdelta {
     this.checkNoBidirectionalReferences(features, 
       "Cannot extract bidirectinal references");
     final EClass owner = this.findSingleOwner(features);
-    final EClass extracted = EdeltaUtils.addNewEClass(owner.getEPackage(), name);
+    final EClass extracted = this.stdLib.addNewEClass(owner.getEPackage(), name);
     EReference _addMandatoryReference = this.addMandatoryReference(owner, StringExtensions.toFirstLower(name), extracted);
     final Procedure1<EReference> _function = (EReference it) -> {
       this.makeContainmentBidirectional(it);
     };
     final EReference reference = ObjectExtensions.<EReference>operator_doubleArrow(_addMandatoryReference, _function);
-    EdeltaUtils.moveAllTo(features, extracted);
+    this.stdLib.moveAllTo(features, extracted);
     return reference;
   }
   
@@ -262,7 +263,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
       it.setName(_plus);
     };
     featuresToInline.forEach(_function_1);
-    EdeltaUtils.moveAllTo(featuresToInline, ref.getEContainingClass());
+    this.stdLib.moveAllTo(featuresToInline, ref.getEContainingClass());
     EdeltaUtils.removeElement(cl);
     return featuresToInline;
   }
@@ -322,7 +323,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
     this.checkNotContainment(reference, 
       "Cannot apply referenceToClass on containment reference");
     final EPackage ePackage = reference.getEContainingClass().getEPackage();
-    final EClass extracted = EdeltaUtils.addNewEClass(ePackage, name);
+    final EClass extracted = this.stdLib.addNewEClass(ePackage, name);
     final EReference extractedRef = this.addMandatoryReference(extracted, 
       this.fromTypeToFeatureName(reference.getEType()), reference.getEReferenceType());
     final EReference eOpposite = reference.getEOpposite();
@@ -412,12 +413,12 @@ public class EdeltaRefactorings extends AbstractEdelta {
         return it_1.getEContainingClass();
       };
       final Consumer<EClass> _function_2 = (EClass c) -> {
-        EdeltaUtils.addESuperType(c, it);
+        this.stdLib.addESuperType(c, it);
       };
       ListExtensions.map(duplicates, _function_1).forEach(_function_2);
       this.pullUpFeatures(it, duplicates);
     };
-    return EdeltaUtils.addNewEClass(containingEPackage, name, _function);
+    return this.stdLib.addNewEClass(containingEPackage, name, _function);
   }
   
   /**
@@ -437,7 +438,7 @@ public class EdeltaRefactorings extends AbstractEdelta {
       return it.getEContainingClass();
     };
     this.checkAllDirectSubclasses(dest, ListExtensions.map(duplicates, _function));
-    EdeltaUtils.copyTo(IterableExtensions.head(duplicates), dest);
+    this.stdLib.copyTo(IterableExtensions.head(duplicates), dest);
     EdeltaUtils.removeAllElements(duplicates);
   }
   

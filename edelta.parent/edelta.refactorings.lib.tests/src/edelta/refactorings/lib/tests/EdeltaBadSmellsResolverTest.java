@@ -1,6 +1,5 @@
 package edelta.refactorings.lib.tests;
 
-import static edelta.lib.EdeltaUtils.addNewAbstractEClass;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
@@ -143,7 +142,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 	@Test
 	public void test_resolveAbstractConcreteMetaclass() {
 		final EPackage p = createEPackage("p",
-			pack -> addNewAbstractEClass(pack, "AbstractConcreteMetaclass"));
+			pack -> stdLib.addNewAbstractEClass(pack, "AbstractConcreteMetaclass"));
 		final EClass c = head(EClasses(p));
 		resolver.resolveAbstractConcreteMetaclass(p);
 		Assertions.assertThat(c.isAbstract()).isFalse();

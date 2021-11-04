@@ -6,7 +6,7 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcorePackage;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaUtils;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.tests.input.Inputs;
 
 /**
@@ -15,7 +15,7 @@ import edelta.tests.input.Inputs;
  * @author Lorenzo Bettini
  *
  */
-public class MyCustomEdelta extends AbstractEdelta {
+public class MyCustomEdelta extends EdeltaDefaultRuntime {
 
 	public MyCustomEdelta() {
 	}
@@ -29,11 +29,11 @@ public class MyCustomEdelta extends AbstractEdelta {
 	}
 
 	public EClass createANewEClass() {
-		return EdeltaUtils.addNewEClass(getEPackage("foo"), "ANewClass");
+		return stdLib.addNewEClass(getEPackage("foo"), "ANewClass");
 	}
 
 	public void createANewEAttribute(EClass c) {
-		EdeltaUtils.addNewEAttribute(c, "aNewAttr", EcorePackage.eINSTANCE.getEString());
+		stdLib.addNewEAttribute(c, "aNewAttr", EcorePackage.eINSTANCE.getEString());
 	}
 
 	public void setAttributeBounds(EAttribute a, int low, int upper) {

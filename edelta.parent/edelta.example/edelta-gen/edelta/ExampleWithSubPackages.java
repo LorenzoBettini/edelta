@@ -1,13 +1,13 @@
 package edelta;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaUtils;
+import edelta.lib.EdeltaDefaultRuntime;
 import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 
 @SuppressWarnings("all")
-public class ExampleWithSubPackages extends AbstractEdelta {
+public class ExampleWithSubPackages extends EdeltaDefaultRuntime {
   public ExampleWithSubPackages() {
     
   }
@@ -18,10 +18,10 @@ public class ExampleWithSubPackages extends AbstractEdelta {
   
   public void SomeChanges(final EPackage it) {
     final Consumer<EClass> _function = (EClass it_1) -> {
-      EdeltaUtils.addNewEReference(it_1, "refToMainPackageClass", 
+      this.stdLib.addNewEReference(it_1, "refToMainPackageClass", 
         getEClass("mainpackage", "MyClass"));
     };
-    EdeltaUtils.addNewEClass(getEPackage("mainpackage.subpackage"), "AddedToSubPackage", _function);
+    this.stdLib.addNewEClass(getEPackage("mainpackage.subpackage"), "AddedToSubPackage", _function);
   }
   
   @Override

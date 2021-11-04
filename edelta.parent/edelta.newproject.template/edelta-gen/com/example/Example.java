@@ -1,6 +1,7 @@
 package com.example;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaUtils;
 import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
@@ -13,7 +14,7 @@ import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
-public class Example extends AbstractEdelta {
+public class Example extends EdeltaDefaultRuntime {
   public Example() {
     
   }
@@ -38,15 +39,15 @@ public class Example extends AbstractEdelta {
   
   public void someModifications(final EPackage it) {
     final Consumer<EClass> _function = (EClass it_1) -> {
-      EdeltaUtils.addNewEAttribute(it_1, "myStringAttribute", getEDataType("ecore", "EString"));
+      this.stdLib.addNewEAttribute(it_1, "myStringAttribute", getEDataType("ecore", "EString"));
       final Consumer<EReference> _function_1 = (EReference it_2) -> {
         it_2.setUpperBound((-1));
         it_2.setContainment(true);
         it_2.setLowerBound(0);
       };
-      EdeltaUtils.addNewEReference(it_1, "myReference", getEClass("myecore", "MyEClass"), _function_1);
+      this.stdLib.addNewEReference(it_1, "myReference", getEClass("myecore", "MyEClass"), _function_1);
     };
-    EdeltaUtils.addNewEClass(it, "NewClass", _function);
+    this.stdLib.addNewEClass(it, "NewClass", _function);
     EList<EEnumLiteral> _eLiterals = getEEnum("myecore", "MyENum").getELiterals();
     EEnumLiteral _createEEnumLiteral = EcoreFactory.eINSTANCE.createEEnumLiteral();
     final Procedure1<EEnumLiteral> _function_1 = (EEnumLiteral it_1) -> {
@@ -58,20 +59,20 @@ public class Example extends AbstractEdelta {
     final Consumer<EEnumLiteral> _function_2 = (EEnumLiteral it_1) -> {
       it_1.setValue(4);
     };
-    EdeltaUtils.addNewEEnumLiteral(getEEnum("myecore", "MyENum"), "AnotherNewEnumLiteral", _function_2);
+    this.stdLib.addNewEEnumLiteral(getEEnum("myecore", "MyENum"), "AnotherNewEnumLiteral", _function_2);
   }
   
   public void otherModifications(final EPackage it) {
-    EdeltaUtils.addEClass(it, this.myReusableCreateSubclassOfMyEClass("ASubclassOfMyEClass"));
+    this.stdLib.addEClass(it, this.myReusableCreateSubclassOfMyEClass("ASubclassOfMyEClass"));
     EClass _myReusableCreateSubclassOfMyEClass = this.myReusableCreateSubclassOfMyEClass("AnotherSubclassOfMyEClass");
     final Procedure1<EClass> _function = (EClass it_1) -> {
       EList<EClass> _eSuperTypes = it_1.getESuperTypes();
       _eSuperTypes.add(getEClass("myecore", "NewClass"));
     };
     EClass _doubleArrow = ObjectExtensions.<EClass>operator_doubleArrow(_myReusableCreateSubclassOfMyEClass, _function);
-    EdeltaUtils.addEClass(it, _doubleArrow);
+    this.stdLib.addEClass(it, _doubleArrow);
     getEClass("myecore", "MyOtherEClass").setName("RenamedClass");
-    EdeltaUtils.addNewEAttribute(getEClass("myecore", "RenamedClass"), "addedNow", getEDataType("ecore", "EInt"));
+    this.stdLib.addNewEAttribute(getEClass("myecore", "RenamedClass"), "addedNow", getEDataType("ecore", "EInt"));
   }
   
   @Override

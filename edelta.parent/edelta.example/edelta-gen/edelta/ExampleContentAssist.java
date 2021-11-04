@@ -1,13 +1,13 @@
 package edelta;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaUtils;
+import edelta.lib.EdeltaDefaultRuntime;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
 
 @SuppressWarnings("all")
-public class ExampleContentAssist extends AbstractEdelta {
+public class ExampleContentAssist extends EdeltaDefaultRuntime {
   public ExampleContentAssist() {
     
   }
@@ -20,13 +20,13 @@ public class ExampleContentAssist extends AbstractEdelta {
     getEClass("myecore", "MyEClass");
     getEAttribute("myecore", "MyEClass", "astring");
     getEEnum("myecore", "MyEEnum");
-    EdeltaUtils.addNewEClass(it, "NewClass");
+    this.stdLib.addNewEClass(it, "NewClass");
     getEClass("myecore", "NewClass");
     EList<EClassifier> _eClassifiers = it.getEClassifiers();
     _eClassifiers.remove(getEClass("myecore", "MyEClass"));
     getEClass("myecore", "NewClass");
     getEEnum("myecore", "MyEEnum");
-    EdeltaUtils.addNewEEnumLiteral(getEEnum("myecore", "MyEEnum"), "second");
+    this.stdLib.addNewEEnumLiteral(getEEnum("myecore", "MyEEnum"), "second");
     getEEnum("myecore", "MyEEnum").setName("RenamedEnum");
     getEEnum("myecore", "RenamedEnum");
   }

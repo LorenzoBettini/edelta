@@ -2,6 +2,7 @@ package edelta.refactorings.lib;
 
 import com.google.common.collect.Iterables;
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.helper.EdeltaFeatureEqualityHelper;
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ import org.eclipse.xtext.xbase.lib.MapExtensions;
 import org.eclipse.xtext.xbase.lib.Pair;
 
 @SuppressWarnings("all")
-public class EdeltaBadSmellsFinder extends AbstractEdelta {
+public class EdeltaBadSmellsFinder extends EdeltaDefaultRuntime {
   public EdeltaBadSmellsFinder() {
     
   }
