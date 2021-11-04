@@ -3,7 +3,7 @@ Automatic-Module-Name: edelta.testprojects.first
 Bundle-ManifestVersion: 2
 Bundle-Name: edelta.testprojects.first
 Bundle-Vendor: My Company
-Bundle-Version: 2.6.5.qualifier
+Bundle-Version: 2.6.6.qualifier
 Bundle-SymbolicName: edelta.testprojects.first; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: edelta.lib
