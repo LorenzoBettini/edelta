@@ -87,11 +87,11 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 		return c;
 	}
 
-	public EClass addNewEClassAsSibling(EClass sibling, String name) {
+	public EClass addNewEClassAsSibling(EClassifier sibling, String name) {
 		return addNewEClassAsSibling(sibling, name, null);
 	}
 
-	public EClass addNewEClassAsSibling(EClass sibling, String name, Consumer<EClass> initializer) {
+	public EClass addNewEClassAsSibling(EClassifier sibling, String name, Consumer<EClass> initializer) {
 		return addNewEClass(sibling.getEPackage(), name, initializer);
 	}
 
@@ -120,6 +120,14 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 		addEEnum(ePackage, e);
 		safeRunInitializer(initializer, e);
 		return e;
+	}
+
+	public EEnum addNewEEnumAsSibling(EClassifier sibling, String name) {
+		return addNewEEnumAsSibling(sibling, name, null);
+	}
+
+	public EEnum addNewEEnumAsSibling(EClassifier sibling, String name, Consumer<EEnum> initializer) {
+		return addNewEEnum(sibling.getEPackage(), name, initializer);
 	}
 
 	public void addEEnumLiteral(EEnum eEnum, EEnumLiteral eEnumLiteral) {

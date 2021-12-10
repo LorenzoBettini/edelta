@@ -212,6 +212,32 @@ public class EdeltaStandardLibraryTest {
 	}
 
 	@Test
+	public void test_addNewEEnumAsSibling() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		var sibling = ecoreFactory.createEEnum();
+		ePackage.getEClassifiers().add(sibling);
+		EEnum eEnum = lib.addNewEEnumAsSibling(sibling, "test");
+		assertEquals("test", eEnum.getName());
+		assertSame(eEnum,
+			ePackage.getEClassifiers().get(1));
+	}
+
+	@Test
+	public void test_addNewEEnumAsSiblingWithInitializer() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		var sibling = ecoreFactory.createEEnum();
+		ePackage.getEClassifiers().add(sibling);
+		EEnum eEnum = lib.addNewEEnumAsSibling(sibling, "test",
+				cl -> {
+					assertNotNull(cl.getEPackage());
+					cl.setName("changed");
+				});
+		assertEquals("changed", eEnum.getName());
+		assertSame(eEnum,
+				ePackage.getEClassifiers().get(1));
+	}
+
+	@Test
 	public void test_addEEnumLiteral() {
 		EEnum eEnum = ecoreFactory.createEEnum();
 		EEnumLiteral eEnumLiteral = ecoreFactory.createEEnumLiteral();
