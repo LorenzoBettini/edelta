@@ -506,6 +506,38 @@ public class EdeltaStandardLibraryTest {
 	}
 
 	@Test
+	public void test_addNewEReferenceAsSibling() {
+		EClass eClass = ecoreFactory.createEClass();
+		var sibling = ecoreFactory.createEAttribute();
+		eClass.getEStructuralFeatures().add(sibling);
+		EReference eReference =
+				lib.addNewEReferenceAsSibling(sibling, "test", EOBJECT);
+		assertEquals("test", eReference.getName());
+		assertEquals(EOBJECT, eReference.getEType());
+		assertEquals(EOBJECT, eReference.getEReferenceType());
+		assertSame(eReference,
+				eClass.getEStructuralFeatures().get(1));
+	}
+
+	@Test
+	public void test_addNewEReferenceAsSiblingWithInitializer() {
+		EClass eClass = ecoreFactory.createEClass();
+		var sibling = ecoreFactory.createEAttribute();
+		eClass.getEStructuralFeatures().add(sibling);
+		EReference eReference =
+			lib.addNewEReferenceAsSibling(sibling, "test", EOBJECT,
+				ref -> {
+					assertNotNull(ref.getEContainingClass());
+					ref.setName("changed");
+				});
+		assertEquals("changed", eReference.getName());
+		assertEquals(EOBJECT, eReference.getEType());
+		assertEquals(EOBJECT, eReference.getEReferenceType());
+		assertSame(eReference,
+				eClass.getEStructuralFeatures().get(1));
+	}
+
+	@Test
 	public void test_addNewContainmentEReference() {
 		EClass eClass = ecoreFactory.createEClass();
 		EReference eReference =
