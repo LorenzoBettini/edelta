@@ -149,6 +149,14 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 		return e;
 	}
 
+	public EEnumLiteral addNewEEnumLiteralAsSibling(EEnumLiteral sibling, String name) {
+		return addNewEEnumLiteralAsSibling(sibling, name, null);
+	}
+
+	public EEnumLiteral addNewEEnumLiteralAsSibling(EEnumLiteral sibling, String name, Consumer<EEnumLiteral> initializer) {
+		return addNewEEnumLiteral(sibling.getEEnum(), name, initializer);
+	}
+
 	public void addEDataType(EPackage ePackage, EDataType eDataType) {
 		addEClassifier(ePackage, eDataType);
 	}
