@@ -350,6 +350,38 @@ public class EdeltaStandardLibraryTest {
 	}
 
 	@Test
+	public void test_addNewEDataTypeAsSibling() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		var sibling = ecoreFactory.createEClass();
+		ePackage.getEClassifiers().add(sibling);
+		EDataType eDataType = lib.addNewEDataTypeAsSibling(sibling, "test", "java.lang.String");
+		assertEquals("test", eDataType.getName());
+		assertSame(eDataType,
+			ePackage.getEClassifiers().get(1));
+		assertEquals("java.lang.String", eDataType.getInstanceTypeName());
+		assertEquals("java.lang.String", eDataType.getInstanceClassName());
+		assertEquals(String.class, eDataType.getInstanceClass());
+	}
+
+	@Test
+	public void test_addNewEDataTypeAsSiblingWithInitializer() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		var sibling = ecoreFactory.createEClass();
+		ePackage.getEClassifiers().add(sibling);
+		EDataType eDataType = lib.addNewEDataTypeAsSibling(sibling, "test", "java.lang.String",
+				cl -> {
+					assertNotNull(cl.getEPackage());
+					cl.setName("changed");
+				});
+		assertEquals("changed", eDataType.getName());
+		assertSame(eDataType,
+			ePackage.getEClassifiers().get(1));
+		assertEquals("java.lang.String", eDataType.getInstanceTypeName());
+		assertEquals("java.lang.String", eDataType.getInstanceClassName());
+		assertEquals(String.class, eDataType.getInstanceClass());
+	}
+
+	@Test
 	public void test_addEAttribute() {
 		EClass eClass = ecoreFactory.createEClass();
 		EAttribute eAttribute = ecoreFactory.createEAttribute();
