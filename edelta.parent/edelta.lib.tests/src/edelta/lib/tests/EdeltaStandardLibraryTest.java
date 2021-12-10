@@ -129,6 +129,32 @@ public class EdeltaStandardLibraryTest {
 	}
 
 	@Test
+	public void test_addNewEClassAsSibling() {
+		var ePackage = ecoreFactory.createEPackage();
+		var sibling = ecoreFactory.createEClass();
+		ePackage.getEClassifiers().add(sibling);
+		var eClass = lib.addNewEClassAsSibling(sibling, "test");
+		assertEquals("test", eClass.getName());
+		assertSame(eClass,
+			ePackage.getEClassifiers().get(1));
+	}
+
+	@Test
+	public void test_addNewEClassAsSiblingWithInitializer() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		var sibling = ecoreFactory.createEClass();
+		ePackage.getEClassifiers().add(sibling);
+		var eClass = lib.addNewEClassAsSibling(sibling, "test",
+				cl -> {
+					assertNotNull(cl.getEPackage());
+					cl.setName("changed");
+				});
+		assertEquals("changed", eClass.getName());
+		assertSame(eClass,
+				ePackage.getEClassifiers().get(1));
+	}
+
+	@Test
 	public void test_addNewAbstractEClass() {
 		EPackage ePackage = ecoreFactory.createEPackage();
 		EClass eClass = lib.addNewAbstractEClass(ePackage, "test");

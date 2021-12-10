@@ -87,6 +87,14 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 		return c;
 	}
 
+	public EClass addNewEClassAsSibling(EClass sibling, String name) {
+		return addNewEClassAsSibling(sibling, name, null);
+	}
+
+	public EClass addNewEClassAsSibling(EClass sibling, String name, Consumer<EClass> initializer) {
+		return addNewEClass(sibling.getEPackage(), name, initializer);
+	}
+
 	public EClass addNewAbstractEClass(EPackage ePackage, String name) {
 		return addNewAbstractEClass(ePackage, name, null);
 	}
