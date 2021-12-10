@@ -199,6 +199,14 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 		return e;
 	}
 
+	public EAttribute addNewEAttributeAsSibling(EStructuralFeature sibling, String name, EDataType dataType) {
+		return addNewEAttributeAsSibling(sibling, name, dataType, null);
+	}
+
+	public EAttribute addNewEAttributeAsSibling(EStructuralFeature sibling, String name, EDataType dataType, Consumer<EAttribute> initializer) {
+		return addNewEAttribute(sibling.getEContainingClass(), name, dataType, initializer);
+	}
+
 	public void addEReference(EClass eClass, EReference eReference) {
 		addEStructuralFeature(eClass, eReference);
 	}
