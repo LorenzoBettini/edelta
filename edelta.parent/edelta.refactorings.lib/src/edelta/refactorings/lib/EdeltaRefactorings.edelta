@@ -7,13 +7,12 @@ import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
 import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EEnum
-import org.eclipse.emf.ecore.EPackage
-import org.eclipse.emf.ecore.EReference
-import org.eclipse.emf.ecore.EStructuralFeature
-import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EReference
+import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.ETypedElement
+import org.eclipse.emf.ecore.util.EcoreUtil
 
 package edelta.refactorings.lib
 
@@ -104,12 +103,11 @@ def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 	if (type instanceof EEnum) {
 		val createdSubclasses = newArrayList
 		val owner = attr.EContainingClass
-		val ePackage = owner.EPackage
 		owner.makeAbstract
 		for (subc : type.ELiterals) {
 			val subclassName = ensureEClassifierNameIsUnique
-				(ePackage, subc.literal.toLowerCase.toFirstUpper)
-			createdSubclasses += ePackage.addNewEClass(subclassName) [
+				(owner, subc.literal.toLowerCase.toFirstUpper)
+			createdSubclasses += owner.addNewEClassAsSibling(subclassName) [
 				addESuperType(owner)
 			]
 		}
@@ -147,11 +145,10 @@ def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 def subclassesToEnum(String name, Collection<EClass> subclasses) : EAttribute {
 	checkNoFeatures(subclasses)
 	val superclass = getSingleDirectSuperclass(subclasses)
-	val ePackage = superclass.EPackage
-	val enum = ePackage.addNewEEnum(name) [
+	val enum = superclass.addNewEEnumAsSibling(name) [
 		subclasses.forEach[subClass, index |
 			val enumLiteralName = ensureEClassifierNameIsUnique
-				(ePackage, subClass.name.toUpperCase)
+				(superclass, subClass.name.toUpperCase)
 			addNewEEnumLiteral(enumLiteralName) => [
 				value = index
 			]
@@ -341,9 +338,8 @@ def classToReference(EClass cl) : EReference {
  */
 def extractSuperclass(List<? extends EStructuralFeature> duplicates) {
 	val feature = duplicates.head;
-	val containingEPackage = feature.EContainingClass.EPackage
 	val superClassName =
-		ensureEClassifierNameIsUnique(containingEPackage,
+		ensureEClassifierNameIsUnique(feature,
 			feature.name.toFirstUpper + "Element")
 
 	return extractSuperclass(superClassName, duplicates)
@@ -392,12 +388,13 @@ def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates) :
 }
 
 /**
- * Ensures that the proposed classifier name is unique within the specified
- * package; if not, it appends an incremental index until the name
+ * Ensures that the proposed classifier name is unique within the containing package of
+ * the passed context; if not, it appends an incremental index until the name
  * is actually unique
  */
-def ensureEClassifierNameIsUnique(EPackage ePackage, String proposedName) {
+def ensureEClassifierNameIsUnique(ENamedElement context, String proposedName) {
 	var className = proposedName
+	var ePackage = context.EContainingPackage
 	val currentEClassifiersNames =
 		ePackage.EClassifiers.map[name].sort
 	var counter = 1
