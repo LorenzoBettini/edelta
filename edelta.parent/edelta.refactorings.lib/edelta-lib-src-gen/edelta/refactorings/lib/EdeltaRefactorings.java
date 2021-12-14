@@ -217,7 +217,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     this.checkNoBidirectionalReferences(features, 
       "Cannot extract bidirectinal references");
     final EClass owner = this.findSingleOwner(features);
-    final EClass extracted = this.stdLib.addNewEClass(owner.getEPackage(), name);
+    final EClass extracted = this.stdLib.addNewEClassAsSibling(owner, name);
     EReference _addMandatoryReference = this.addMandatoryReference(owner, StringExtensions.toFirstLower(name), extracted);
     final Procedure1<EReference> _function = (EReference it) -> {
       this.makeContainmentBidirectional(it);
@@ -406,7 +406,6 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    */
   public EClass extractSuperclass(final String name, final List<? extends EStructuralFeature> duplicates) {
     final EStructuralFeature feature = IterableExtensions.head(duplicates);
-    final EPackage containingEPackage = feature.getEContainingClass().getEPackage();
     final Consumer<EClass> _function = (EClass it) -> {
       EdeltaUtils.makeAbstract(it);
       final Function1<EStructuralFeature, EClass> _function_1 = (EStructuralFeature it_1) -> {
@@ -418,7 +417,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       ListExtensions.map(duplicates, _function_1).forEach(_function_2);
       this.pullUpFeatures(it, duplicates);
     };
-    return this.stdLib.addNewEClass(containingEPackage, name, _function);
+    return this.stdLib.addNewEClassAsSibling(feature.getEContainingClass(), name, _function);
   }
   
   /**

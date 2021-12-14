@@ -180,7 +180,7 @@ def extractClass(String name, Collection<EStructuralFeature> features) {
 	checkNoBidirectionalReferences(features,
 		"Cannot extract bidirectinal references")
 	val owner = findSingleOwner(features)
-	val extracted = owner.EPackage.addNewEClass(name)
+	val extracted = owner.addNewEClassAsSibling(name)
 	val reference = owner.addMandatoryReference(name.toFirstLower, extracted) => [
 		makeContainmentBidirectional
 	]
@@ -361,9 +361,8 @@ def extractSuperclass(List<? extends EStructuralFeature> duplicates) {
  */
 def extractSuperclass(String name, List<? extends EStructuralFeature> duplicates) {
 	val feature = duplicates.head;
-	val containingEPackage = feature.EContainingClass.EPackage
 
-	return containingEPackage.addNewEClass(name) [
+	return feature.EContainingClass.addNewEClassAsSibling(name) [
 		makeAbstract
 		duplicates
 			.map[EContainingClass]
