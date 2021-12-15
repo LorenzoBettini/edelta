@@ -26,8 +26,8 @@ import org.junit.Test;
 
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaEcoreUtil;
-import edelta.lib.EdeltaEmptyRuntime;
-import edelta.lib.EdeltaLibrary;
+import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaUtils;
 
 /**
  * Tests manipulations of Ecore models.
@@ -52,7 +52,7 @@ public class EdeltaEcoreModificationsTest {
 
 	@Before
 	public void init() {
-		edelta = new EdeltaEmptyRuntime();
+		edelta = new EdeltaDefaultRuntime();
 	}
 
 	@Test
@@ -79,7 +79,7 @@ public class EdeltaEcoreModificationsTest {
 		// modify the ecore model by removing MyBaseClass
 		// this will also remove existing references, so the model
 		// is still valid
-		EdeltaLibrary.removeElement(
+		EdeltaUtils.removeElement(
 			edelta.getEClassifier(MYPACKAGE, "MyBaseClass"));
 		wipeModifiedDirectoryContents();
 		edelta.saveModifiedEcores(MODIFIED);
@@ -96,7 +96,7 @@ public class EdeltaEcoreModificationsTest {
 		// modify the ecore model by removing MyClass
 		// this will also remove existing references, so the model
 		// is still valid
-		EdeltaLibrary.removeElement(
+		EdeltaUtils.removeElement(
 				edelta.getEClassifier(MYPACKAGE, "MyClass"));
 		wipeModifiedDirectoryContents();
 		edelta.saveModifiedEcores(MODIFIED);
@@ -115,7 +115,7 @@ public class EdeltaEcoreModificationsTest {
 			edelta.getEClassifier(MYPACKAGE, "MyBaseClass"),
 			edelta.getEClass(MYPACKAGE, "MyDerivedClass").getESuperTypes().get(0));
 		// modify the ecore model by removing MyBaseClass
-		EdeltaLibrary.removeElement(
+		EdeltaUtils.removeElement(
 			edelta.getEClassifier(MYPACKAGE, "MyBaseClass"));
 		// check that MyDerivedClass is not its subclass anymore
 		assertEquals(0, edelta.getEClass(MYPACKAGE, "MyDerivedClass").getESuperTypes().size());

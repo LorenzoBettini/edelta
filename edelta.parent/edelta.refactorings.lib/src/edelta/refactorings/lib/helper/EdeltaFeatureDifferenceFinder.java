@@ -3,7 +3,7 @@
  */
 package edelta.refactorings.lib.helper;
 
-import static edelta.lib.EdeltaLibrary.getEObjectRepr;
+import static edelta.lib.EdeltaUtils.getEObjectRepr;
 import static org.eclipse.emf.ecore.EcorePackage.Literals.*;
 
 import java.util.ArrayList;

@@ -1,14 +1,14 @@
 package edelta;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaLibrary;
+import edelta.lib.EdeltaDefaultRuntime;
 import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
 
 @SuppressWarnings("all")
-public class ExampleAccessModifiedElements extends AbstractEdelta {
+public class ExampleAccessModifiedElements extends EdeltaDefaultRuntime {
   public ExampleAccessModifiedElements() {
     
   }
@@ -18,7 +18,7 @@ public class ExampleAccessModifiedElements extends AbstractEdelta {
   }
   
   public void creation(final EPackage it) {
-    EdeltaLibrary.addNewEClass(it, "NewClass");
+    this.stdLib.addNewEClass(it, "NewClass");
   }
   
   public void renaming(final EPackage it) {
@@ -26,9 +26,9 @@ public class ExampleAccessModifiedElements extends AbstractEdelta {
     getEClass("myecore", "NewClass").setName("Renamed");
     getEClass("myecore", "Renamed");
     final Consumer<EPackage> _function = (EPackage it_1) -> {
-      EdeltaLibrary.addEClass(it_1, getEClass("myecore", "Renamed"));
+      this.stdLib.addEClass(it_1, getEClass("myecore", "Renamed"));
     };
-    EdeltaLibrary.addNewESubpackage(it, "mysubpackage", 
+    this.stdLib.addNewESubpackage(it, "mysubpackage", 
       "mysubpackage", 
       "http://mysubpackage", _function);
     getEClass("myecore.mysubpackage", "Renamed");

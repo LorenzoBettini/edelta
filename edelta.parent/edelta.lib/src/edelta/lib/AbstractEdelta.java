@@ -188,12 +188,12 @@ public abstract class AbstractEdelta {
 	}
 
 	public void showError(ENamedElement problematicObject, String message) {
-		logError(() -> EdeltaLibrary.getEObjectRepr(problematicObject) + ": " + message);
+		logError(() -> EdeltaUtils.getEObjectRepr(problematicObject) + ": " + message);
 		issuePresenter.showError(problematicObject, message);
 	}
 
 	public void showWarning(ENamedElement problematicObject, String message) {
-		logWarn(() -> EdeltaLibrary.getEObjectRepr(problematicObject) + ": " + message);
+		logWarn(() -> EdeltaUtils.getEObjectRepr(problematicObject) + ": " + message);
 		issuePresenter.showWarning(problematicObject, message);
 	}
 

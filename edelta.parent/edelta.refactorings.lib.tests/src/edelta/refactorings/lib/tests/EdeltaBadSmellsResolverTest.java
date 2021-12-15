@@ -1,6 +1,5 @@
 package edelta.refactorings.lib.tests;
 
-import static edelta.lib.EdeltaLibrary.addNewAbstractEClass;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
@@ -12,10 +11,11 @@ import java.util.Objects;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edelta.lib.EdeltaEmptyRuntime;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.refactorings.lib.EdeltaBadSmellsResolver;
 import edelta.testutils.EdeltaTestUtils;
 
@@ -30,6 +30,23 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 	public void setup() {
 		resolver = new EdeltaBadSmellsResolver();
 	}
+
+	/**
+	 * This should be commented out when we want to copy the generated modified
+	 * Ecore into the test-output-expectations directory, typically, the first time
+	 * we write a new test.
+	 * 
+	 * We need to clean the modified directory when tests are stable, so that
+	 * modified Ecore with validation errors do not fill the project with error
+	 * markers.
+	 * 
+	 * @throws IOException
+	 */
+	@After
+	public void cleanModifiedOutputDirectory() throws IOException {
+		EdeltaTestUtils.cleanDirectory(AbstractTest.MODIFIED);
+	}
+
 
 	private void loadModelFiles(String testModelDirectory, String... testModelFiles) {
 		this.testModelDirectory = testModelDirectory;
@@ -53,7 +70,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 
 	@Test
 	public void test_ConstructorArgument() {
-		resolver = new EdeltaBadSmellsResolver(new EdeltaEmptyRuntime());
+		resolver = new EdeltaBadSmellsResolver(new EdeltaDefaultRuntime());
 		assertThat(resolver).isNotNull();
 	}
 
@@ -125,7 +142,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 	@Test
 	public void test_resolveAbstractConcreteMetaclass() {
 		final EPackage p = createEPackage("p",
-			pack -> addNewAbstractEClass(pack, "AbstractConcreteMetaclass"));
+			pack -> stdLib.addNewAbstractEClass(pack, "AbstractConcreteMetaclass"));
 		final EClass c = head(EClasses(p));
 		resolver.resolveAbstractConcreteMetaclass(p);
 		Assertions.assertThat(c.isAbstract()).isFalse();

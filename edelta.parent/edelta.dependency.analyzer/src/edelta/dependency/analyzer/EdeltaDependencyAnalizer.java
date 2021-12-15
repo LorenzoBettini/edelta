@@ -30,7 +30,7 @@ import GraphMM.GraphMMPackage;
 import GraphMM.Metamodel;
 import GraphMM.Repository;
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaLibrary;
+import edelta.lib.EdeltaUtils;
 
 /**
  * Analyzes the dependencies of {@link EPackage}s and creates a {@link Repository}.
@@ -153,7 +153,7 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 	}
 
 	private Collection<EPackage> usedPackages(EPackage ePackage) {
-		return EdeltaLibrary.usedPackages(ePackage)
+		return EdeltaUtils.usedPackages(ePackage)
 				.stream()
 				.sorted(ePackageComparator()) // we must be deterministic
 				.collect(Collectors.toList());

@@ -1,12 +1,13 @@
 package com.example;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaLibrary;
+import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaUtils;
 import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EClass;
 
 @SuppressWarnings("all")
-public class ExampleReusableFunctions extends AbstractEdelta {
+public class ExampleReusableFunctions extends EdeltaDefaultRuntime {
   public ExampleReusableFunctions() {
     
   }
@@ -17,9 +18,9 @@ public class ExampleReusableFunctions extends AbstractEdelta {
   
   public EClass createClassWithSubClass(final String name, final EClass superClass) {
     final Consumer<EClass> _function = (EClass it) -> {
-      EdeltaLibrary.addESuperType(it, superClass);
+      this.stdLib.addESuperType(it, superClass);
     };
-    return EdeltaLibrary.newEClass(name, _function);
+    return EdeltaUtils.newEClass(name, _function);
   }
   
   @Override

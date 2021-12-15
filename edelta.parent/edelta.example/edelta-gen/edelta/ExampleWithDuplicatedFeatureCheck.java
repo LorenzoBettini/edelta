@@ -1,7 +1,7 @@
 package edelta;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaLibrary;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.refactorings.lib.EdeltaBadSmellsChecker;
 import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EAttribute;
@@ -11,7 +11,7 @@ import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
-public class ExampleWithDuplicatedFeatureCheck extends AbstractEdelta {
+public class ExampleWithDuplicatedFeatureCheck extends EdeltaDefaultRuntime {
   private EdeltaBadSmellsChecker checker;
   
   public ExampleWithDuplicatedFeatureCheck() {
@@ -29,12 +29,12 @@ public class ExampleWithDuplicatedFeatureCheck extends AbstractEdelta {
       final Consumer<EAttribute> _function_1 = (EAttribute it_2) -> {
         it_2.setLowerBound(1);
       };
-      EdeltaLibrary.addNewEAttribute(it_1, "afield", getEDataType("ecore", "EString"), _function_1);
+      this.stdLib.addNewEAttribute(it_1, "afield", getEDataType("ecore", "EString"), _function_1);
     };
     ObjectExtensions.<EClass>operator_doubleArrow(
       getEClass("myecoreforvalidation", "MyEClass"), _function);
     final Procedure1<EClass> _function_1 = (EClass it_1) -> {
-      EdeltaLibrary.addNewEAttribute(it_1, "afield", getEDataType("ecore", "EString"));
+      this.stdLib.addNewEAttribute(it_1, "afield", getEDataType("ecore", "EString"));
     };
     ObjectExtensions.<EClass>operator_doubleArrow(
       getEClass("myecoreforvalidation", "myOtherEClass"), _function_1);

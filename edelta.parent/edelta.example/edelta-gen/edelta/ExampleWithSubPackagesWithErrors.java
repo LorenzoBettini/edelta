@@ -1,9 +1,10 @@
 package edelta;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaDefaultRuntime;
 
 @SuppressWarnings("all")
-public class ExampleWithSubPackagesWithErrors extends AbstractEdelta {
+public class ExampleWithSubPackagesWithErrors extends EdeltaDefaultRuntime {
   public ExampleWithSubPackagesWithErrors() {
     
   }

@@ -1,10 +1,6 @@
 package edelta.refactorings.lib.tests;
 
-import static edelta.lib.EdeltaLibrary.addNewContainmentEReference;
-import static edelta.lib.EdeltaLibrary.addNewEClass;
-import static edelta.lib.EdeltaLibrary.addNewEReference;
-import static edelta.lib.EdeltaLibrary.addNewSubclass;
-import static edelta.lib.EdeltaLibrary.getEObjectRepr;
+import static edelta.lib.EdeltaUtils.getEObjectRepr;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,13 +20,14 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import edelta.lib.EdeltaEmptyRuntime;
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 import edelta.testutils.EdeltaTestUtils;
@@ -51,6 +48,22 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		appender.setLineSeparator("\n");
 		refactorings.getLogger().addAppender(appender);
 		refactorings.performSanityChecks();
+	}
+
+	/**
+	 * This should be commented out when we want to copy the generated modified
+	 * Ecore into the test-output-expectations directory, typically, the first time
+	 * we write a new test.
+	 * 
+	 * We need to clean the modified directory when tests are stable, so that
+	 * modified Ecore with validation errors do not fill the project with error
+	 * markers.
+	 * 
+	 * @throws IOException
+	 */
+	@AfterEach
+	void cleanModifiedOutputDirectory() throws IOException {
+		EdeltaTestUtils.cleanDirectory(AbstractTest.MODIFIED);
 	}
 
 	private void withInputModels(String testModelDirectory, String... testModelFiles) {
@@ -111,7 +124,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 
 	@Test
 	void test_ConstructorArgument() {
-		refactorings = new EdeltaRefactorings(new EdeltaEmptyRuntime());
+		refactorings = new EdeltaRefactorings(new EdeltaDefaultRuntime());
 		final EClass c = this.createEClassWithoutPackage("C1");
 		refactorings.addMandatoryAttribute(c, "test", this.stringDataType);
 		final EAttribute attr = head(c.getEAttributes());
@@ -854,10 +867,10 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_allUsagesOfThisClass() {
 		var p = createEPackage("p");
-		var classForUsages = addNewEClass(p, "C");
-		addNewSubclass(classForUsages, "SubClass");
-		addNewEClass(p, "UsesC", c ->
-			addNewEReference(c, "refToC", classForUsages));
+		var classForUsages = stdLib.addNewEClass(p, "C");
+		stdLib.addNewSubclass(classForUsages, "SubClass");
+		stdLib.addNewEClass(p, "UsesC", c ->
+			stdLib.addNewEReference(c, "refToC", classForUsages));
 		var usages = refactorings.allUsagesOfThisClass(classForUsages);
 		var repr = usages.stream().map(s ->
 				getEObjectRepr(s.getEObject()) + "\n" +
@@ -875,19 +888,19 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_findSingleUsageOfThisClass() {
 		var p = createEPackage("p");
-		var classForUsages = addNewEClass(p, "C");
+		var classForUsages = stdLib.addNewEClass(p, "C");
 
 		// not used at all
 		assertThrowsIAE(() -> refactorings.findSingleUsageOfThisClass(classForUsages));
 
 		// just one usage OK
-		var subClass = addNewSubclass(classForUsages, "SubClass");
+		var subClass = stdLib.addNewSubclass(classForUsages, "SubClass");
 		assertThat(refactorings.findSingleUsageOfThisClass(classForUsages))
 			.isSameAs(subClass);
 
 		// too many usages
-		addNewEClass(p, "UsesC", c ->
-			addNewEReference(c, "refToC", classForUsages));
+		stdLib.addNewEClass(p, "UsesC", c ->
+			stdLib.addNewEReference(c, "refToC", classForUsages));
 		assertThrowsIAE(() -> refactorings.findSingleUsageOfThisClass(classForUsages));
 		assertThat(appender.getResult())
 			.isEqualTo(
@@ -903,17 +916,17 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_getAsContainmentReference() {
 		var p = createEPackage("p");
-		var classForUsages = addNewEClass(p, "C");
+		var classForUsages = stdLib.addNewEClass(p, "C");
 
 		// not an EReference
 		assertThrowsIAE(() -> refactorings.getAsContainmentReference(classForUsages));
 
 		// not a containment reference
-		var ref = addNewEReference(classForUsages, "refToC", null);
+		var ref = stdLib.addNewEReference(classForUsages, "refToC", null);
 		assertThrowsIAE(() -> refactorings.getAsContainmentReference(ref));
 
 		// OK
-		var containmentRef = addNewContainmentEReference(classForUsages, "contRefToC", null);
+		var containmentRef = stdLib.addNewContainmentEReference(classForUsages, "contRefToC", null);
 		assertThat(refactorings.getAsContainmentReference(containmentRef))
 			.isSameAs(containmentRef);
 

@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.github.lorenzobettini.edelta</groupId>
     <artifactId>edelta.bom</artifactId>
-    <version>2.6.4-SNAPSHOT</version>
+    <version>2.6.6-SNAPSHOT</version>
     <relativePath>edelta.bom</relativePath>
   </parent>
   <artifactId>edelta.parent</artifactId>
@@ -15,7 +15,7 @@
   <description>An Xtext DSL for EMF metamodels refactoring and migration.</description>
 
   <properties>
-    <eclipse-version>2021-09</eclipse-version>
+    <eclipse-version>2021-12</eclipse-version>
     <assertj-version>3.20.2</assertj-version>
     <mockito-version>3.12.4</mockito-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
