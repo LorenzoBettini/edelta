@@ -508,7 +508,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			));
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
-			"ERROR: PersonList.Person.workplace: Cannot extract bidirectinal references:\n"
+			"ERROR: PersonList.Person.workplace: Cannot extract bidirectional references:\n"
 			+ "  PersonList.Person.workplace");
 	}
 

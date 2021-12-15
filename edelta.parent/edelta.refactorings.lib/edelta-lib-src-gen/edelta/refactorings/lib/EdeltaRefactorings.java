@@ -132,17 +132,16 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     if ((type instanceof EEnum)) {
       final ArrayList<EClass> createdSubclasses = CollectionLiterals.<EClass>newArrayList();
       final EClass owner = attr.getEContainingClass();
-      final EPackage ePackage = owner.getEPackage();
       EdeltaUtils.makeAbstract(owner);
       EList<EEnumLiteral> _eLiterals = ((EEnum)type).getELiterals();
       for (final EEnumLiteral subc : _eLiterals) {
         {
-          final String subclassName = this.ensureEClassifierNameIsUnique(ePackage, StringExtensions.toFirstUpper(subc.getLiteral().toLowerCase()));
+          final String subclassName = this.ensureEClassifierNameIsUnique(owner, StringExtensions.toFirstUpper(subc.getLiteral().toLowerCase()));
           final Consumer<EClass> _function = (EClass it) -> {
             this.stdLib.addESuperType(it, owner);
           };
-          EClass _addNewEClass = this.stdLib.addNewEClass(ePackage, subclassName, _function);
-          createdSubclasses.add(_addNewEClass);
+          EClass _addNewEClassAsSibling = this.stdLib.addNewEClassAsSibling(owner, subclassName, _function);
+          createdSubclasses.add(_addNewEClassAsSibling);
         }
       }
       EdeltaUtils.removeElement(type);
@@ -179,10 +178,9 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   public EAttribute subclassesToEnum(final String name, final Collection<EClass> subclasses) {
     this.checkNoFeatures(subclasses);
     final EClass superclass = this.getSingleDirectSuperclass(subclasses);
-    final EPackage ePackage = superclass.getEPackage();
     final Consumer<EEnum> _function = (EEnum it) -> {
       final Procedure2<EClass, Integer> _function_1 = (EClass subClass, Integer index) -> {
-        final String enumLiteralName = this.ensureEClassifierNameIsUnique(ePackage, subClass.getName().toUpperCase());
+        final String enumLiteralName = this.ensureEClassifierNameIsUnique(superclass, subClass.getName().toUpperCase());
         EEnumLiteral _addNewEEnumLiteral = this.stdLib.addNewEEnumLiteral(it, enumLiteralName);
         final Procedure1<EEnumLiteral> _function_2 = (EEnumLiteral it_1) -> {
           it_1.setValue((index).intValue());
@@ -191,7 +189,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       };
       IterableExtensions.<EClass>forEach(subclasses, _function_1);
     };
-    final EEnum enum_ = this.stdLib.addNewEEnum(ePackage, name, _function);
+    final EEnum enum_ = this.stdLib.addNewEEnumAsSibling(superclass, name, _function);
     final EAttribute attribute = this.stdLib.addNewEAttribute(superclass, this.fromTypeToFeatureName(enum_), enum_);
     EdeltaUtils.makeConcrete(superclass);
     EdeltaUtils.removeAllElements(subclasses);
@@ -201,7 +199,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   /**
    * Extracts the specified features into a new class with the given name.
    * The features must belong to the same class.
-   * In the containing class a containiment required reference to
+   * In the containing class a containment required reference to
    * the extracted class will be created (its name will be the name
    * of the extracted class with the first letter lowercase).
    * 
@@ -215,9 +213,9 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       return null;
     }
     this.checkNoBidirectionalReferences(features, 
-      "Cannot extract bidirectinal references");
+      "Cannot extract bidirectional references");
     final EClass owner = this.findSingleOwner(features);
-    final EClass extracted = this.stdLib.addNewEClass(owner.getEPackage(), name);
+    final EClass extracted = this.stdLib.addNewEClassAsSibling(owner, name);
     EReference _addMandatoryReference = this.addMandatoryReference(owner, StringExtensions.toFirstLower(name), extracted);
     final Procedure1<EReference> _function = (EReference it) -> {
       this.makeContainmentBidirectional(it);
@@ -387,10 +385,9 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    */
   public EClass extractSuperclass(final List<? extends EStructuralFeature> duplicates) {
     final EStructuralFeature feature = IterableExtensions.head(duplicates);
-    final EPackage containingEPackage = feature.getEContainingClass().getEPackage();
     String _firstUpper = StringExtensions.toFirstUpper(feature.getName());
     String _plus = (_firstUpper + "Element");
-    final String superClassName = this.ensureEClassifierNameIsUnique(containingEPackage, _plus);
+    final String superClassName = this.ensureEClassifierNameIsUnique(feature, _plus);
     return this.extractSuperclass(superClassName, duplicates);
   }
   
@@ -406,7 +403,6 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    */
   public EClass extractSuperclass(final String name, final List<? extends EStructuralFeature> duplicates) {
     final EStructuralFeature feature = IterableExtensions.head(duplicates);
-    final EPackage containingEPackage = feature.getEContainingClass().getEPackage();
     final Consumer<EClass> _function = (EClass it) -> {
       EdeltaUtils.makeAbstract(it);
       final Function1<EStructuralFeature, EClass> _function_1 = (EStructuralFeature it_1) -> {
@@ -418,7 +414,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       ListExtensions.map(duplicates, _function_1).forEach(_function_2);
       this.pullUpFeatures(it, duplicates);
     };
-    return this.stdLib.addNewEClass(containingEPackage, name, _function);
+    return this.stdLib.addNewEClassAsSibling(feature.getEContainingClass(), name, _function);
   }
   
   /**
@@ -443,12 +439,13 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   }
   
   /**
-   * Ensures that the proposed classifier name is unique within the specified
-   * package; if not, it appends an incremental index until the name
+   * Ensures that the proposed classifier name is unique within the containing package of
+   * the passed context; if not, it appends an incremental index until the name
    * is actually unique
    */
-  public String ensureEClassifierNameIsUnique(final EPackage ePackage, final String proposedName) {
+  public String ensureEClassifierNameIsUnique(final ENamedElement context, final String proposedName) {
     String className = proposedName;
+    EPackage ePackage = EdeltaUtils.getEContainingPackage(context);
     final Function1<EClassifier, String> _function = (EClassifier it) -> {
       return it.getName();
     };

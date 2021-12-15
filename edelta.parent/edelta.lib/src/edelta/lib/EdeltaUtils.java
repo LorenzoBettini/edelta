@@ -432,4 +432,35 @@ public class EdeltaUtils {
 				.filter(desiredType::isInstance)
 				.map(desiredType::cast);
 	}
+
+	/**
+	 * Returns the closest containing {@link EPackage}. If the given object is an
+	 * {@link EPackage}, then the object itself will be returned. If no container
+	 * object is of {@link EPackage}, then {@code null} will be returned.
+	 * 
+	 * @param ele
+	 * @return
+	 */
+	public static EPackage getEContainingPackage(ENamedElement ele) {
+		return getContainerOfType(ele, EPackage.class);
+	}
+
+	/**
+	 * Returns the closest {@link EObject#eContainer() container object} of the
+	 * requested type. If the given object is an instance of the requested type,
+	 * then the object itself will be returned. If no container object is of the
+	 * requested type, then {@code null} will be returned.
+	 * 
+	 * @param <T>
+	 * @param ele
+	 * @param type
+	 * @return
+	 */
+	public static <T extends ENamedElement> T getContainerOfType(ENamedElement ele, Class<T> type) {
+		for (EObject e = ele; e != null; e = e.eContainer())
+			if (type.isInstance(e))
+				return type.cast(e);
+
+		return null;
+	}
 }
