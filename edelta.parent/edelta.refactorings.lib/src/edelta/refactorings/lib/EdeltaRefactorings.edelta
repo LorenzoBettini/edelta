@@ -163,7 +163,7 @@ def subclassesToEnum(String name, Collection<EClass> subclasses) : EAttribute {
 /**
  * Extracts the specified features into a new class with the given name.
  * The features must belong to the same class.
- * In the containing class a containiment required reference to
+ * In the containing class a containment required reference to
  * the extracted class will be created (its name will be the name
  * of the extracted class with the first letter lowercase).
  * 
@@ -175,7 +175,7 @@ def extractClass(String name, Collection<EStructuralFeature> features) {
 	if (features.empty) 
 		return null // TODO: error?
 	checkNoBidirectionalReferences(features,
-		"Cannot extract bidirectinal references")
+		"Cannot extract bidirectional references")
 	val owner = findSingleOwner(features)
 	val extracted = owner.addNewEClassAsSibling(name)
 	val reference = owner.addMandatoryReference(name.toFirstLower, extracted) => [

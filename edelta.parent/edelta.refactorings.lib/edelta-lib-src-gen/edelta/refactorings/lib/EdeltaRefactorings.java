@@ -199,7 +199,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   /**
    * Extracts the specified features into a new class with the given name.
    * The features must belong to the same class.
-   * In the containing class a containiment required reference to
+   * In the containing class a containment required reference to
    * the extracted class will be created (its name will be the name
    * of the extracted class with the first letter lowercase).
    * 
@@ -213,7 +213,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       return null;
     }
     this.checkNoBidirectionalReferences(features, 
-      "Cannot extract bidirectinal references");
+      "Cannot extract bidirectional references");
     final EClass owner = this.findSingleOwner(features);
     final EClass extracted = this.stdLib.addNewEClassAsSibling(owner, name);
     EReference _addMandatoryReference = this.addMandatoryReference(owner, StringExtensions.toFirstLower(name), extracted);
