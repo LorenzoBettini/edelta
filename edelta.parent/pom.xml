@@ -229,15 +229,12 @@
       <build>
         <plugins>
           <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+          </plugin>
+          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <!-- MJAVADOC-620 – Maven Javadoc Plugin fails to resolve the dependencies 
-              when used with Java 11 -->
-            <version>3.2.0</version>
-            <configuration>
-              <detectOfflineLinks>false</detectOfflineLinks>
-              <source>8</source>
-            </configuration>
           </plugin>
           <plugin>
             <groupId>org.eclipse.tycho</groupId>
@@ -287,6 +284,20 @@
     </plugins>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <configuration>
+            <detectOfflineLinks>false</detectOfflineLinks>
+            <!-- https://issues.apache.org/jira/browse/MJAVADOC-620
+             [ERROR] RuntimeException: Error while generating Javadoc:
+             Unable to derive module descriptor for
+             .m2/repository/p2/osgi/bundle/org.eclipse.equinox.launcher.cocoa.macosx.x86_64/1.2.400.v20211117-0650/org.eclipse.equinox.launcher.cocoa.macosx.x86_64-1.2.400.v20211117-0650.jar
+             Caused by: java.lang.IllegalArgumentException: org.eclipse.equinox.launcher.cocoa.macosx.x86.64: Invalid module name: '64' is not a Java identifier
+             -->
+            <source>8</source>
+          </configuration>
+        </plugin>
         <plugin>
           <groupId>org.eclipse.xtend</groupId>
           <artifactId>xtend-maven-plugin</artifactId>
