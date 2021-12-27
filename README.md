@@ -24,7 +24,7 @@ WARNING: the previous update site hosted on bintray will disappear soon, so plea
 
 ### Pre-configured Eclipse distributions with Edelta installed, for several architectures.
 
-Download a complete Eclipse distribution with Edelta installed; choose the one for your OS and architecture: https://sourceforge.net/projects/edelta/files/products
+Download a complete Eclipse distribution with Edelta installed; choose the one for your OS and architecture (since version 2.8.0, we also provide a version for the `aarch64` architecture, for Linux and macOS): https://sourceforge.net/projects/edelta/files/products
 
 **WARNING** If you downloaded one of Edelta Eclipse distributions earlier than version 0.3.x you won't be able to update it; please download a brand new Edelta Eclipse distribution with version at least 0.3.x (issue [#13](https://github.com/LorenzoBettini/edelta/issues/13)).
 
