@@ -20,7 +20,7 @@ https://lorenzobettini.github.io/edelta-releases/
 
 IMPORTANT: Edelta requires Xtext, if this is not already installed, all dependencies will be automatically installed from this update site, which is self-contained.
 
-WARNING: the previous update site hosted on bintray will disappear soon, so please make sure you update your existing Eclipse distribution where you were already using Edelta.
+WARNING: the previous update site hosted on bintray does not exist anymore, so please make sure you update your existing Eclipse distribution where you were already using Edelta.
 
 ### Pre-configured Eclipse distributions with Edelta installed, for several architectures.
 
