@@ -94,6 +94,12 @@
       plugins are used -->
     <ant-files-path>${project.basedir}/../releng/releasing</ant-files-path>
 
+    <!-- You can use the create_local_target.ant in the target platform project
+      to create a local.target pointing to a local mirror (which must
+      be created in advance, see, e.g.,
+      https://github.com/LorenzoBettini/tycho-mirror-example
+      Then, pass -Dtarget-file-name=local.target
+      to resolve the target platform using the local mirrro -->
     <target-file-name>edelta.target.target</target-file-name>
 
     <!-- pass "-n" to perform a trial run with no changes made -->
