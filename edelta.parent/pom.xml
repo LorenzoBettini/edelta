@@ -94,6 +94,8 @@
       plugins are used -->
     <ant-files-path>${project.basedir}/../releng/releasing</ant-files-path>
 
+    <target-file-name>edelta.target.target</target-file-name>
+
     <!-- pass "-n" to perform a trial run with no changes made -->
     <dryrun/>
 
@@ -262,7 +264,7 @@
         <configuration>
           <target>
             <file>
-              ${project.basedir}/../edelta.target/edelta.target.target
+              ${project.basedir}/../edelta.target/${target-file-name}
             </file>
           </target>
           <environments combine.children="append">
