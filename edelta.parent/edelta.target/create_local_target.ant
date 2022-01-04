@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="CreateLocalTargetDefinitionFile" basedir="." default="create-target-file">
+
+	<!--
+		Replaces all the repository location elements of a .target file with
+		a location pointing to a local file system directory where the
+		mirror has to be already created
+	-->
+	<property name="local.target" value="local.target" />
+	<property name="orig.target" location="./edelta.target.target" />
+	<property name="local.mirror.path.input" location="${user.home}/eclipse-mirrors" />
+	<property name="local.mirror.url.input" value="file:${local.mirror.path}" />
+
+	<macrodef name="replace_win_slashes">
+		<attribute name="property.to.process" />
+		<attribute name="output.property" />
+		<sequential>
+			<loadresource property="@{output.property}">
+				<string value="@{property.to.process}" />
+				<filterchain>
+					<replaceregex pattern="\\" replace="/" flags="gi" />
+				</filterchain>
+			</loadresource>
+			<echo message="property.to.process: @{property.to.process}" />
+			<echo message="output.property    : ${@{output.property}}" />
+		</sequential>
+	</macrodef>
+
+	<replace_win_slashes property.to.process="${local.mirror.path.input}" output.property="local.mirror.path" />
+	<replace_win_slashes property.to.process="${local.mirror.url.input}" output.property="local.mirror.url" />
+
+	<target name="copy-target-file" description="Copy the .target definition file into the local.target">
+		<echo message="local.target: ${local.target}" />
+		<echo message="orig.target : ${orig.target}" />
+
+		<copy file="${orig.target}" tofile="${local.target}" overwrite="true" verbose="true" />
+	</target>
+
+
+	<target name="create-target-file" depends="copy-target-file" description="Creates a .target file from the original one, pointing to a local mirror">
+		<echo message="local.mirror.path: ${local.mirror.path}" />
+		<echo message="local.mirror.url : ${local.mirror.url}" />
+
+		<replaceregexp>
+			<regexp pattern="target name=&quot;(\S+)&quot;(\.*)" />
+			<substitution expression="target name=&quot;local&quot;\2" />
+			<fileset id="path.target" dir=".">
+				<include name="${local.target}" />
+			</fileset>
+		</replaceregexp>
+
+		<replaceregexp byline="true">
+			<regexp pattern="&lt;repository location=&quot;(\S+)&quot;(\.*)/&gt;" />
+			<substitution expression="&lt;repository location=&quot;${local.mirror.url}&quot;\2/&gt;" />
+			<fileset id="path.target" dir=".">
+				<include name="${local.target}" />
+			</fileset>
+		</replaceregexp>
+	</target>
+
+</project>
