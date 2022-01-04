@@ -261,11 +261,9 @@
         <artifactId>target-platform-configuration</artifactId>
         <configuration>
           <target>
-            <artifact>
-              <groupId>io.github.lorenzobettini.edelta</groupId>
-              <artifactId>edelta.target</artifactId>
-              <version>${project.version}</version>
-            </artifact>
+            <file>
+              ${project.basedir}/../edelta.target/edelta.target.target
+            </file>
           </target>
           <environments combine.children="append">
             <environment>
