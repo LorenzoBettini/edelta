@@ -2,31 +2,20 @@ package edelta.lib.learning.tests;
 
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
-import static edelta.testutils.EdeltaTestUtils.loadFile;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
-import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
-import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edelta.lib.EdeltaDefaultRuntime;
-import edelta.testutils.EdeltaTestUtils;
 
 public class EcoreCopierTest {
 
@@ -40,6 +29,7 @@ public class EcoreCopierTest {
 	EdeltaDefaultRuntime runtimeForModified;
 
 	static class TestCopier extends Copier {
+		private static final long serialVersionUID = 1L;
 		private Collection<EPackage> packages;
 
 		public TestCopier(Collection<EPackage> packages) {
@@ -116,6 +106,8 @@ public class EcoreCopierTest {
 
 		// must use redefine the targets for the modified ecore
 		var copier = new TestCopier(modifiedEcore) {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			protected EClass getTarget(EClass eClass) {
 				if (eClass.getName().equals("MyRoot")) {
