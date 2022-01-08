@@ -6,9 +6,13 @@ import static edelta.testutils.EdeltaTestUtils.loadFile;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -34,6 +38,28 @@ public class EcoreCopierTest {
 
 	EdeltaDefaultRuntime runtimeForOriginal;
 	EdeltaDefaultRuntime runtimeForModified;
+
+	static class TestCopier extends Copier {
+		private Collection<EPackage> packages;
+
+		public TestCopier(Collection<EPackage> packages) {
+			this.packages = packages;
+		}
+
+		public TestCopier(Resource resource) {
+			this(List.of((EPackage) resource.getContents().get(0)));
+		}
+
+		@Override
+		protected EClass getTarget(EClass eClass) {
+			return packages.stream()
+					.map(p -> p.getEClassifier(eClass.getName()))
+					.filter(EClass.class::isInstance)
+					.findFirst()
+					.map(EClass.class::cast)
+					.orElse(null);
+		}
+	}
 
 	@BeforeClass
 	public static void clearOutput() throws IOException {
@@ -61,19 +87,43 @@ public class EcoreCopierTest {
 	@Test
 	public void testCopyUnchanged() throws IOException {
 		var originalEcore = runtimeForOriginal.loadEcoreFile(TESTDATA + "renamed/" + ORIGINAL + "My.ecore");
+		var modifiedEcore = runtimeForModified.loadEcoreFile(TESTDATA + "renamed/" + ORIGINAL + "My.ecore");
 
 		// this is actually XMI
 		var original = runtimeForOriginal.loadEcoreFile(TESTDATA + "renamed/" + ORIGINAL + "MyRoot.xmi");
+		var modified = runtimeForModified.loadEcoreFile(TESTDATA + "renamed/" + ORIGINAL + "MyRoot.xmi");
 
-		var copier = new EcoreUtil.Copier();
+		var copier = new TestCopier(modifiedEcore);
 		var root = original.getContents().get(0);
 		var copy = copier.copy(root);
-		original.getContents().clear();
-		original.getContents().add(copy);
+		modified.getContents().clear();
+		modified.getContents().add(copy);
 
-		runtimeForModified.saveModifiedEcores(OUTPUT + "renamed/");
+		runtimeForModified.saveModifiedEcores(OUTPUT);
+		assertFilesAreEquals(
+			EXPECTATIONS + "unchanged/" +"MyRoot.xmi",
+			OUTPUT + "MyRoot.xmi");
+	}
+
+	@Test
+	public void testCopyChanged() throws IOException {
+		var originalEcore = runtimeForOriginal.loadEcoreFile(TESTDATA + "renamed/" + ORIGINAL + "My.ecore");
+		var modifiedEcore = runtimeForModified.loadEcoreFile(TESTDATA + "renamed/" + MODIFIED + "My.ecore");
+
+		// this is actually XMI
+		var original = runtimeForOriginal.loadEcoreFile(TESTDATA + "renamed/" + ORIGINAL + "MyRoot.xmi");
+		var modified = runtimeForModified.loadEcoreFile(TESTDATA + "renamed/" + MODIFIED + "MyRoot.xmi");
+
+		// must use redefine the targets for the modified ecore
+		var copier = new TestCopier(modifiedEcore);
+		var root = original.getContents().get(0);
+		var copy = copier.copy(root);
+		modified.getContents().clear();
+		modified.getContents().add(copy);
+
+		runtimeForModified.saveModifiedEcores(OUTPUT);
 		assertFilesAreEquals(
 			EXPECTATIONS + "renamed/" +"MyRoot.xmi",
-			OUTPUT + "renamed/" + "MyRoot.xmi");
+			OUTPUT + "MyRoot.xmi");
 	}
 }
