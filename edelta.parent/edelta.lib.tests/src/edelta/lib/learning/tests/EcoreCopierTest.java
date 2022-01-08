@@ -115,7 +115,16 @@ public class EcoreCopierTest {
 		var modified = runtimeForModified.loadEcoreFile(TESTDATA + "renamed/" + MODIFIED + "MyRoot.xmi");
 
 		// must use redefine the targets for the modified ecore
-		var copier = new TestCopier(modifiedEcore);
+		var copier = new TestCopier(modifiedEcore) {
+			@Override
+			protected EClass getTarget(EClass eClass) {
+				if (eClass.getName().equals("MyRoot")) {
+					return runtimeForModified.getEClass(
+						"mypackage", "MyRootRenamed");
+				}
+				return super.getTarget(eClass);
+			}
+		};
 		var root = original.getContents().get(0);
 		var copy = copier.copy(root);
 		modified.getContents().clear();
