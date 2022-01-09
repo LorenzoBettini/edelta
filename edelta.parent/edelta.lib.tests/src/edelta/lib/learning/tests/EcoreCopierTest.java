@@ -90,12 +90,14 @@ public class EcoreCopierTest {
 		var copier = new TestCopier(modifiedEcore);
 		copyIntoModified(copier, original, modified);
 		copyIntoModified(copier, original2, modified2);
+		copier.copyReferences();
 
 		var subdir = "unchanged/";
 		var output = OUTPUT + subdir;
 		runtimeForModified.saveModifiedEcores(output);
 		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
 		assertGeneratedFiles(subdir, output, "MyClass.xmi");
+		assertGeneratedFiles(subdir, output, "My.ecore");
 	}
 
 	@Test
@@ -130,12 +132,14 @@ public class EcoreCopierTest {
 		};
 		copyIntoModified(copier, original, modified);
 		copyIntoModified(copier, original2, modified2);
+		copier.copyReferences();
 
 		var subdir = "renamedClass/";
 		var output = OUTPUT + subdir;
 		runtimeForModified.saveModifiedEcores(output);
 		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
 		assertGeneratedFiles(subdir, output, "MyClass.xmi");
+		assertGeneratedFiles(subdir, output, "My.ecore");
 	}
 
 	private void assertGeneratedFiles(String subdir, String output, String fileName) throws IOException {
