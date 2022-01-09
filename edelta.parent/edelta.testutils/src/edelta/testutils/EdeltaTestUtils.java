@@ -23,6 +23,22 @@ public class EdeltaTestUtils {
 	}
 
 	/**
+	 * Removes all contents of the specified directory and of the first level
+	 * possible subdirectories, skipping ".gitignore" and possible further
+	 * subdirectories.
+	 * 
+	 * @param directory
+	 * @throws IOException
+	 */
+	public static void cleanDirectoryAndFirstSubdirectories(String directory) throws IOException {
+		File dir = new File(directory);
+		for (File file : dir.listFiles())
+			if (file.isDirectory())
+				cleanDirectory(directory + "/" + file.getName());
+		cleanDirectory(directory);
+	}
+
+	/**
 	 * Removes all contents of the specified directory, skipping ".gitignore"
 	 * and possible subdirectories.
 	 * 
