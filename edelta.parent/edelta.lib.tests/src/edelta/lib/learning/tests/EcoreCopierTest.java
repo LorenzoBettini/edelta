@@ -74,20 +74,19 @@ public class EcoreCopierTest {
 
 		// this is actually XMI
 		var original = runtimeForOriginal.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "MyRoot.xmi");
+		var original2 = runtimeForOriginal.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "MyClass.xmi");
 		var modified = runtimeForModified.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "MyRoot.xmi");
+		var modified2 = runtimeForModified.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "MyClass.xmi");
 
 		var copier = new TestCopier(modifiedEcore);
-		var root = original.getContents().get(0);
-		var copy = copier.copy(root);
-		modified.getContents().clear();
-		modified.getContents().add(copy);
+		copyIntoModified(copier, original, modified);
+		copyIntoModified(copier, original2, modified2);
 
 		var subdir = "unchanged/";
 		var output = OUTPUT + subdir;
 		runtimeForModified.saveModifiedEcores(output);
-		assertFilesAreEquals(
-			EXPECTATIONS + subdir +"MyRoot.xmi",
-			output + "MyRoot.xmi");
+		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
+		assertGeneratedFiles(subdir, output, "MyClass.xmi");
 	}
 
 	@Test
@@ -112,17 +111,24 @@ public class EcoreCopierTest {
 				return super.getTarget(eClass);
 			}
 		};
-		var root = original.getContents().get(0);
-		var copy = copier.copy(root);
-		modified.getContents().clear();
-		modified.getContents().add(copy);
+		copyIntoModified(copier, original, modified);
 
 		var subdir = "renamedClass/";
 		var output = OUTPUT + subdir;
 		runtimeForModified.saveModifiedEcores(output);
-		assertFilesAreEquals(
-			EXPECTATIONS + subdir +"MyRoot.xmi",
-			output + "MyRoot.xmi");
+		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
+	}
 
+	private void assertGeneratedFiles(String subdir, String output, String fileName) throws IOException {
+		assertFilesAreEquals(
+			EXPECTATIONS + subdir + fileName,
+			output + fileName);
+	}
+
+	private void copyIntoModified(TestCopier copier, Resource original, Resource modified) {
+		var root = original.getContents().get(0);
+		var copy = copier.copy(root);
+		modified.getContents().clear();
+		modified.getContents().add(copy);
 	}
 }
