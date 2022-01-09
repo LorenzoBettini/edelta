@@ -1,7 +1,7 @@
 package edelta.lib.learning.tests;
 
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
-import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
+import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirectories;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -53,25 +53,13 @@ public class EcoreCopierTest {
 
 	@BeforeClass
 	public static void clearOutput() throws IOException {
-		cleanDirectory(OUTPUT);
+		cleanDirectoryAndFirstSubdirectories(OUTPUT);
 	}
 
 	@Before
 	public void setup() {
 		runtimeForOriginal = new EdeltaDefaultRuntime();
 		runtimeForModified = new EdeltaDefaultRuntime();
-	}
-
-	@Test
-	public void testSaveXMI() throws IOException {
-		var originalEcore = runtimeForOriginal.loadEcoreFile(TESTDATA + "renamed/" + ORIGINAL + "My.ecore");
-		var modifiedEcore = runtimeForModified.loadEcoreFile(TESTDATA + "renamed/" + MODIFIED + "My.ecore");
-
-		// this is actually XMI
-		var original = runtimeForOriginal.loadEcoreFile(TESTDATA + "renamed/" + ORIGINAL + "MyRoot.xmi");
-		var modified = runtimeForModified.loadEcoreFile(TESTDATA + "renamed/" + MODIFIED + "MyRoot.xmi");
-
-		runtimeForModified.saveModifiedEcores(OUTPUT);
 	}
 
 	@Test
@@ -89,10 +77,12 @@ public class EcoreCopierTest {
 		modified.getContents().clear();
 		modified.getContents().add(copy);
 
-		runtimeForModified.saveModifiedEcores(OUTPUT);
+		var subdir = "unchanged/";
+		var output = OUTPUT + subdir;
+		runtimeForModified.saveModifiedEcores(output);
 		assertFilesAreEquals(
-			EXPECTATIONS + "unchanged/" +"MyRoot.xmi",
-			OUTPUT + "MyRoot.xmi");
+			EXPECTATIONS + subdir +"MyRoot.xmi",
+			output + "MyRoot.xmi");
 	}
 
 	@Test
@@ -122,9 +112,12 @@ public class EcoreCopierTest {
 		modified.getContents().clear();
 		modified.getContents().add(copy);
 
-		runtimeForModified.saveModifiedEcores(OUTPUT);
+		var subdir = "renamed/";
+		var output = OUTPUT + subdir;
+		runtimeForModified.saveModifiedEcores(output);
 		assertFilesAreEquals(
-			EXPECTATIONS + "renamed/" +"MyRoot.xmi",
-			OUTPUT + "MyRoot.xmi");
+			EXPECTATIONS + subdir +"MyRoot.xmi",
+			output + "MyRoot.xmi");
+
 	}
 }
