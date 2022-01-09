@@ -6,6 +6,7 @@ import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirector
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.emf.ecore.EClass;
@@ -55,7 +56,7 @@ public class EcoreCopierTest {
 				.orElse(null);
 		}
 
-		private Optional<EClass> getEClassByName(EClass eClass) {
+		protected Optional<EClass> getEClassByName(EClass eClass) {
 			return packages.stream()
 					.map(p -> p.getEClassifier(eClass.getName()))
 					.filter(EClass.class::isInstance)
@@ -104,27 +105,37 @@ public class EcoreCopierTest {
 
 		// this is actually XMI
 		var original = runtimeForOriginal.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "MyRoot.xmi");
+		var original2 = runtimeForOriginal.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "MyClass.xmi");
 		var modified = runtimeForModified.loadEcoreFile(TESTDATA + "renamedClass/" + MODIFIED + "MyRoot.xmi");
+		var modified2 = runtimeForModified.loadEcoreFile(TESTDATA + "renamedClass/" + MODIFIED + "MyClass.xmi");
 
-		// must use redefine the targets for the modified ecore
+		// must redefine the targets for the modified ecore
 		var copier = new TestCopier(modifiedEcore) {
 			private static final long serialVersionUID = 1L;
+			private Map<String, EClass> map = 
+				Map.of(
+					"MyRoot", runtimeForModified.getEClass(
+							"mypackage", "MyRootRenamed"),
+					"MyClass", runtimeForModified.getEClass(
+							"mypackage", "MyClassRenamed")
+					);
 
 			@Override
-			protected EClass getTarget(EClass eClass) {
-				if (eClass.getName().equals("MyRoot")) {
-					return runtimeForModified.getEClass(
-						"mypackage", "MyRootRenamed");
-				}
-				return super.getTarget(eClass);
+			protected Optional<EClass> getEClassByName(EClass eClass) {
+				var result = map.get(eClass.getName());
+				if (result != null)
+					return Optional.of(result);
+				return super.getEClassByName(eClass);
 			}
 		};
 		copyIntoModified(copier, original, modified);
+		copyIntoModified(copier, original2, modified2);
 
 		var subdir = "renamedClass/";
 		var output = OUTPUT + subdir;
 		runtimeForModified.saveModifiedEcores(output);
 		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
+		assertGeneratedFiles(subdir, output, "MyClass.xmi");
 	}
 
 	private void assertGeneratedFiles(String subdir, String output, String fileName) throws IOException {
