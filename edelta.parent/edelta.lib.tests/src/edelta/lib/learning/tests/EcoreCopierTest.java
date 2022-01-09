@@ -10,6 +10,7 @@ import java.util.Optional;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
 import org.junit.Before;
@@ -45,6 +46,13 @@ public class EcoreCopierTest {
 		protected EClass getTarget(EClass eClass) {
 			return getEClassByName(eClass)
 					.orElse(null);
+		}
+
+		@Override
+		protected EStructuralFeature getTarget(EStructuralFeature feature) {
+			return getEClassByName(feature.getEContainingClass())
+				.map(c -> c.getEStructuralFeature(feature.getName()))
+				.orElse(null);
 		}
 
 		private Optional<EClass> getEClassByName(EClass eClass) {
