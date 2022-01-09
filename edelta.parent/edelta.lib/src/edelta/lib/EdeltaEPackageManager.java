@@ -16,8 +16,10 @@ import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 
 /**
  * Loads ecore files and corresponding {@link EPackage} elements.
@@ -50,7 +52,16 @@ public class EdeltaEPackageManager {
 			new EcoreResourceFactoryImpl());
 		resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put
 			(Resource.Factory.Registry.DEFAULT_EXTENSION, 
-			new XMIResourceFactoryImpl());
+			new XMIResourceFactoryImpl() {
+				@Override
+				public Resource createResource(URI uri) {
+					var resource = new XMIResourceImpl(uri);
+					// this simulates the behavior of the
+					// "Sample Reflective Ecore Model Editor" when saving
+					resource.getDefaultSaveOptions().put(XMLResource.OPTION_LINE_WIDTH, 10);
+					return resource;
+				}
+			});
 
 		// Register the Ecore package to ensure it is available during loading.
 		resourceSet.getPackageRegistry().put
