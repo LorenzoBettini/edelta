@@ -158,6 +158,16 @@ public class EdeltaUtils {
 		return builder.toString();
 	}
 
+	/**
+	 * See {@link #getEObjectRepr(EObject)}
+	 * 
+	 * @param e
+	 * @return
+	 */
+	public static String getFullyQualifiedName(ENamedElement e) {
+		return getEObjectRepr(e);
+	}
+
 	public static void removeESuperType(EClass subClass, EClass superClass) {
 		subClass.getESuperTypes().remove(superClass);
 	}

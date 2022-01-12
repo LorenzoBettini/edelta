@@ -180,6 +180,12 @@ public class EdeltaUtilsTest {
 	}
 
 	@Test
+	public void test_getFullyQualifiedName() {
+		assertEquals("ecore.EClass.eSuperTypes",
+			EdeltaUtils.getFullyQualifiedName(EcorePackage.eINSTANCE.getEClass_ESuperTypes()));
+	}
+
+	@Test
 	public void test_removeElement() {
 		EPackage ePackage = ecoreFactory.createEPackage();
 		EClass superClass = ecoreFactory.createEClass();
