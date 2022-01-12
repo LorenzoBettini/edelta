@@ -82,21 +82,22 @@ public class EcoreCopierTest {
 
 	@Test
 	public void testCopyUnchanged() throws IOException {
-		runtimeForOriginal.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "My.ecore");
-		var modifiedEcore = runtimeForModified.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "My.ecore");
+		var subdir = "unchanged/";
+		// in this case we load the same models with twice in different resource sets
+		runtimeForOriginal.loadEcoreFile(TESTDATA + subdir + "My.ecore");
+		var modifiedEcore = runtimeForModified.loadEcoreFile(TESTDATA + subdir + "My.ecore");
 
 		// this is actually XMI
-		var original = runtimeForOriginal.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "MyRoot.xmi");
-		var original2 = runtimeForOriginal.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "MyClass.xmi");
-		var modified = runtimeForModified.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "MyRoot.xmi");
-		var modified2 = runtimeForModified.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "MyClass.xmi");
+		var original = runtimeForOriginal.loadEcoreFile(TESTDATA + subdir + "MyRoot.xmi");
+		var original2 = runtimeForOriginal.loadEcoreFile(TESTDATA + subdir + "MyClass.xmi");
+		var modified = runtimeForModified.loadEcoreFile(TESTDATA + subdir + "MyRoot.xmi");
+		var modified2 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + "MyClass.xmi");
 
 		var copier = new TestCopier(modifiedEcore);
 		copyIntoModified(copier, original, modified);
 		copyIntoModified(copier, original2, modified2);
 		copier.copyReferences();
 
-		var subdir = "unchanged/";
 		var output = OUTPUT + subdir;
 		runtimeForModified.saveModifiedEcores(output);
 		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
