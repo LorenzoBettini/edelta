@@ -52,8 +52,12 @@ public class EcoreCopierTest {
 		@Override
 		protected EStructuralFeature getTarget(EStructuralFeature feature) {
 			return getEClassByName(feature.getEContainingClass())
-				.map(c -> c.getEStructuralFeature(feature.getName()))
+				.flatMap(c -> getEStructuralFeatureByName(c, feature))
 				.orElse(null);
+		}
+
+		protected Optional<EStructuralFeature> getEStructuralFeatureByName(EClass c, EStructuralFeature feature) {
+			return Optional.ofNullable(c.getEStructuralFeature(feature.getName()));
 		}
 
 		protected Optional<EClass> getEClassByName(EClass eClass) {
@@ -101,15 +105,16 @@ public class EcoreCopierTest {
 	}
 
 	@Test
-	public void testCopyChanged() throws IOException {
-		runtimeForOriginal.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "My.ecore");
-		var modifiedEcore = runtimeForModified.loadEcoreFile(TESTDATA + "renamedClass/" + MODIFIED + "My.ecore");
+	public void testCopyRenamedClass() throws IOException {
+		var subdir = "renamedClass/";
+		runtimeForOriginal.loadEcoreFile(TESTDATA + subdir + ORIGINAL + "My.ecore");
+		var modifiedEcore = runtimeForModified.loadEcoreFile(TESTDATA + subdir + MODIFIED + "My.ecore");
 
 		// this is actually XMI
-		var original = runtimeForOriginal.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "MyRoot.xmi");
-		var original2 = runtimeForOriginal.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "MyClass.xmi");
-		var modified = runtimeForModified.loadEcoreFile(TESTDATA + "renamedClass/" + MODIFIED + "MyRoot.xmi");
-		var modified2 = runtimeForModified.loadEcoreFile(TESTDATA + "renamedClass/" + MODIFIED + "MyClass.xmi");
+		var original = runtimeForOriginal.loadEcoreFile(TESTDATA + subdir + ORIGINAL + "MyRoot.xmi");
+		var original2 = runtimeForOriginal.loadEcoreFile(TESTDATA + subdir + ORIGINAL + "MyClass.xmi");
+		var modified = runtimeForModified.loadEcoreFile(TESTDATA + subdir + MODIFIED + "MyRoot.xmi");
+		var modified2 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + MODIFIED + "MyClass.xmi");
 
 		// must redefine the targets for the modified ecore
 		var copier = new TestCopier(modifiedEcore) {
@@ -134,7 +139,41 @@ public class EcoreCopierTest {
 		copyIntoModified(copier, original2, modified2);
 		copier.copyReferences();
 
-		var subdir = "renamedClass/";
+		var output = OUTPUT + subdir;
+		runtimeForModified.saveModifiedEcores(output);
+		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
+		assertGeneratedFiles(subdir, output, "MyClass.xmi");
+		assertGeneratedFiles(subdir, output, "My.ecore");
+	}
+
+	@Test
+	public void testCopyRenamedFeature() throws IOException {
+		var subdir = "renamedFeature/";
+		runtimeForOriginal.loadEcoreFile(TESTDATA + subdir + ORIGINAL + "My.ecore");
+		var modifiedEcore = runtimeForModified.loadEcoreFile(TESTDATA + subdir + MODIFIED + "My.ecore");
+
+		// this is actually XMI
+		var original = runtimeForOriginal.loadEcoreFile(TESTDATA + subdir + ORIGINAL + "MyRoot.xmi");
+		var original2 = runtimeForOriginal.loadEcoreFile(TESTDATA + subdir + ORIGINAL + "MyClass.xmi");
+		var modified = runtimeForModified.loadEcoreFile(TESTDATA + subdir + MODIFIED + "MyRoot.xmi");
+		var modified2 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + MODIFIED + "MyClass.xmi");
+
+		// must redefine the targets for the modified ecore
+		var copier = new TestCopier(modifiedEcore) {
+			private static final long serialVersionUID = 1L;
+			
+			@Override
+			protected Optional<EStructuralFeature> getEStructuralFeatureByName(EClass c, EStructuralFeature feature) {
+				var name = feature.getName();
+				if (name.equals("myContents") || name.equals("myReferences"))
+					return Optional.ofNullable(c.getEStructuralFeature(name + "Renamed"));
+				return super.getEStructuralFeatureByName(c, feature);
+			}
+		};
+		copyIntoModified(copier, original, modified);
+		copyIntoModified(copier, original2, modified2);
+		copier.copyReferences();
+
 		var output = OUTPUT + subdir;
 		runtimeForModified.saveModifiedEcores(output);
 		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
