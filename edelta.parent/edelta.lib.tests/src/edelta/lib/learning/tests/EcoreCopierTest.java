@@ -148,6 +148,15 @@ public class EcoreCopierTest {
 			output + fileName);
 	}
 
+	/**
+	 * The modified resource is pre-populated with the contents of the testdata
+	 * directory but it will be completely cleared and replaced with the copy taken
+	 * from the original resource.
+	 * 
+	 * @param copier
+	 * @param original
+	 * @param modified
+	 */
 	private void copyIntoModified(TestCopier copier, Resource original, Resource modified) {
 		var root = original.getContents().get(0);
 		var copy = copier.copy(root);
