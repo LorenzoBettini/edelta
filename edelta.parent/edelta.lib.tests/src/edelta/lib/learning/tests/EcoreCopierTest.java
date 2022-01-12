@@ -78,7 +78,7 @@ public class EcoreCopierTest {
 
 	@Test
 	public void testCopyUnchanged() throws IOException {
-		var originalEcore = runtimeForOriginal.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "My.ecore");
+		runtimeForOriginal.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "My.ecore");
 		var modifiedEcore = runtimeForModified.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "My.ecore");
 
 		// this is actually XMI
@@ -102,7 +102,7 @@ public class EcoreCopierTest {
 
 	@Test
 	public void testCopyChanged() throws IOException {
-		var originalEcore = runtimeForOriginal.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "My.ecore");
+		runtimeForOriginal.loadEcoreFile(TESTDATA + "renamedClass/" + ORIGINAL + "My.ecore");
 		var modifiedEcore = runtimeForModified.loadEcoreFile(TESTDATA + "renamedClass/" + MODIFIED + "My.ecore");
 
 		// this is actually XMI
