@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -45,25 +46,26 @@ public class EcoreCopierTest {
 	static class EdeltaEmfCopier extends Copier {
 		private static final long serialVersionUID = 1L;
 
-		public static class ModelMigrator<T extends ENamedElement> {
-			private Predicate<T> predicate;
-			private Function<T, T> function;
+		public static class ModelMigrator {
+			private Predicate<EObject> predicate;
+			private Function<EObject, EObject> function;
 
-			public ModelMigrator(Predicate<T> predicate, Function<T, T> function) {
-				this.predicate = predicate;
-				this.function = function;
+			@SuppressWarnings("unchecked")
+			public <T extends EObject> ModelMigrator(Predicate<T> predicate, Function<T, T> function) {
+				this.predicate = (Predicate<EObject>) predicate;
+				this.function = (Function<EObject, EObject>) function;
 			}
 
-			public boolean canApply(T arg) {
+			public boolean canApply(EObject arg) {
 				return predicate.test(arg);
 			}
 
-			public T apply(T arg) {
+			public EObject apply(EObject arg) {
 				return function.apply(arg);
 			}
 
-			public static <T extends ENamedElement> ModelMigrator<T> migrateById(String id, Supplier<T> targetSupplier) {
-				return new ModelMigrator<T>(
+			public static ModelMigrator migrateById(String id, Supplier<EObject> targetSupplier) {
+				return new ModelMigrator(
 					e -> EdeltaUtils.getFullyQualifiedName(e).equals(id),
 					e -> targetSupplier.get()
 				);
@@ -72,9 +74,7 @@ public class EcoreCopierTest {
 
 		private Collection<EPackage> packages;
 
-		private Collection<ModelMigrator<EClass>> classMigrators = new ArrayList<>();
-
-		private Collection<ModelMigrator<EStructuralFeature>> featureMigrators = new ArrayList<>();
+		private Collection<ModelMigrator> migrators = new ArrayList<>();
 
 		public EdeltaEmfCopier(Collection<EPackage> packages) {
 			this.packages = packages;
@@ -84,12 +84,12 @@ public class EcoreCopierTest {
 			this(List.of((EPackage) resource.getContents().get(0)));
 		}
 
-		public void addEClassMigrator(ModelMigrator<EClass> classMigrator) {
-			classMigrators.add(classMigrator);
+		public <T extends EObject> void addMigrator(Predicate<T> predicate, Function<T, T> function) {
+			addMigrator(new ModelMigrator(predicate, function));
 		}
 
-		public void addEStructuralFeatureMigrator(ModelMigrator<EStructuralFeature> featureMigrator) {
-			featureMigrators.add(featureMigrator);
+		public void addMigrator(ModelMigrator migrator) {
+			migrators.add(migrator);
 		}
 
 		@Override
@@ -99,10 +99,11 @@ public class EcoreCopierTest {
 		}
 
 		protected Optional<EClass> getTargetEClass(EClass eClass) {
-			return classMigrators.stream()
+			var map = migrators.stream()
 				.filter(m -> m.canApply(eClass))
+				.map(m -> m.apply(eClass));
+			return EdeltaUtils.filterByType(map, EClass.class)
 				.findFirst()
-				.map(m -> m.apply(eClass))
 				.or(() -> getEClassByName(eClass));
 		}
 
@@ -113,10 +114,11 @@ public class EcoreCopierTest {
 		}
 
 		protected Optional<EStructuralFeature> getTargetEStructuralFeature(EStructuralFeature feature) {
-			return featureMigrators.stream()
+			var map = migrators.stream()
 				.filter(m -> m.canApply(feature))
+				.map(m -> m.apply(feature));
+			return EdeltaUtils.filterByType(map, EStructuralFeature.class)
 				.findFirst()
-				.map(m -> m.apply(feature))
 				.or(() -> getTargetEClass(feature.getEContainingClass())
 						.flatMap(c -> getEStructuralFeatureByName(c, feature)));
 		}
@@ -183,17 +185,16 @@ public class EcoreCopierTest {
 		var modified2 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + MODIFIED + "MyClass.xmi");
 
 		var copier = new EdeltaEmfCopier(modifiedEcore);
-		copier.addEClassMigrator(
+		copier.addMigrator(
 			EdeltaEmfCopier.ModelMigrator.migrateById(
 				"mypackage.MyRoot",
 					() -> runtimeForModified.getEClass(
 							"mypackage", "MyRootRenamed"))
 		);
-		copier.addEClassMigrator(
-			new EdeltaEmfCopier.ModelMigrator<>(
-				c -> c.getName().equals("MyClass"),
-				c -> runtimeForModified.getEClass(
-						"mypackage", "MyClassRenamed"))
+		copier.addMigrator(
+			(ENamedElement c) -> c.getName().equals("MyClass"),
+			c -> runtimeForModified.getEClass(
+					"mypackage", "MyClassRenamed")
 		);
 		copyIntoModified(copier, original, modified);
 		copyIntoModified(copier, original2, modified2);
@@ -219,17 +220,15 @@ public class EcoreCopierTest {
 		var modified2 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + MODIFIED + "MyClass.xmi");
 
 		var copier = new EdeltaEmfCopier(modifiedEcore);
-		copier.addEStructuralFeatureMigrator(
-			new EdeltaEmfCopier.ModelMigrator<>(
-				f -> {
-					var name = f.getName();
-					return name.equals("myContents");
-				},
-				f -> runtimeForModified.getEStructuralFeature(
-						"mypackage", "MyRoot", f.getName() + "Renamed")
-			)
+		copier.addMigrator(
+			(ENamedElement f) -> {
+				var name = f.getName();
+				return name.equals("myContents");
+			},
+			f -> runtimeForModified.getEStructuralFeature(
+					"mypackage", "MyRoot", f.getName() + "Renamed")
 		);
-		copier.addEStructuralFeatureMigrator(
+		copier.addMigrator(
 			EdeltaEmfCopier.ModelMigrator.migrateById(
 				"mypackage.MyRoot.myReferences",
 				() -> runtimeForModified.getEStructuralFeature(

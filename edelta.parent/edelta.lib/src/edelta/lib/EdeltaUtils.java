@@ -164,7 +164,7 @@ public class EdeltaUtils {
 	 * @param e
 	 * @return
 	 */
-	public static String getFullyQualifiedName(ENamedElement e) {
+	public static String getFullyQualifiedName(EObject e) {
 		return getEObjectRepr(e);
 	}
 
@@ -437,7 +437,7 @@ public class EdeltaUtils {
 		return p -> !EcorePackage.eNS_URI.equals(p.getNsURI());
 	}
 
-	private static <T, R> Stream<R> filterByType(Stream<T> stream, Class<R> desiredType) {
+	public static <T, R> Stream<R> filterByType(Stream<T> stream, Class<R> desiredType) {
 		return stream
 				.filter(desiredType::isInstance)
 				.map(desiredType::cast);
