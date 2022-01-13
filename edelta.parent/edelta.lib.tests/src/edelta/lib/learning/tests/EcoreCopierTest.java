@@ -84,7 +84,7 @@ public class EcoreCopierTest {
 			this(List.of((EPackage) resource.getContents().get(0)));
 		}
 
-		public <T extends EObject> void addMigrator(Predicate<T> predicate, Function<T, T> function) {
+		public void addMigrator(Predicate<ENamedElement> predicate, Function<ENamedElement, ENamedElement> function) {
 			addMigrator(new ModelMigrator(predicate, function));
 		}
 
@@ -192,7 +192,7 @@ public class EcoreCopierTest {
 							"mypackage", "MyRootRenamed"))
 		);
 		copier.addMigrator(
-			(ENamedElement c) -> c.getName().equals("MyClass"),
+			c -> c.getName().equals("MyClass"),
 			c -> runtimeForModified.getEClass(
 					"mypackage", "MyClassRenamed")
 		);
@@ -221,7 +221,7 @@ public class EcoreCopierTest {
 
 		var copier = new EdeltaEmfCopier(modifiedEcore);
 		copier.addMigrator(
-			(ENamedElement f) -> {
+			f -> {
 				var name = f.getName();
 				return name.equals("myContents");
 			},
