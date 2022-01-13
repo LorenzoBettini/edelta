@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
@@ -22,6 +23,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaUtils;
 
 public class EcoreCopierTest {
 
@@ -58,6 +60,13 @@ public class EcoreCopierTest {
 
 			public T apply(T arg) {
 				return function.apply(arg);
+			}
+
+			public static <T extends ENamedElement> ModelMigrator<T> migrateById(String id, Supplier<T> targetSupplier) {
+				return new ModelMigrator<T>(
+					e -> EdeltaUtils.getFullyQualifiedName(e).equals(id),
+					e -> targetSupplier.get()
+				);
 			}
 		}
 
@@ -175,9 +184,9 @@ public class EcoreCopierTest {
 
 		var copier = new EdeltaEmfCopier(modifiedEcore);
 		copier.addEClassMigrator(
-			new EdeltaEmfCopier.ModelMigrator<>(
-				c -> c.getName().equals("MyRoot"),
-					c -> runtimeForModified.getEClass(
+			EdeltaEmfCopier.ModelMigrator.migrateById(
+				"mypackage.MyRoot",
+					() -> runtimeForModified.getEClass(
 							"mypackage", "MyRootRenamed"))
 		);
 		copier.addEClassMigrator(
@@ -214,10 +223,17 @@ public class EcoreCopierTest {
 			new EdeltaEmfCopier.ModelMigrator<>(
 				f -> {
 					var name = f.getName();
-					return name.equals("myContents") || name.equals("myReferences");
+					return name.equals("myContents");
 				},
 				f -> runtimeForModified.getEStructuralFeature(
 						"mypackage", "MyRoot", f.getName() + "Renamed")
+			)
+		);
+		copier.addEStructuralFeatureMigrator(
+			EdeltaEmfCopier.ModelMigrator.migrateById(
+				"mypackage.MyRoot.myReferences",
+				() -> runtimeForModified.getEStructuralFeature(
+						"mypackage", "MyRoot", "myReferencesRenamed")
 			)
 		);
 		copyIntoModified(copier, original, modified);
