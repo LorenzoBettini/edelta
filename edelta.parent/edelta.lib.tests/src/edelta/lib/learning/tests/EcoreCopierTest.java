@@ -90,18 +90,16 @@ public class EcoreCopierTest {
 
 		public void addEClassMigrator(Predicate<EClass> predicate, Function<EClass, EClass> function) {
 			addMigrator(
-				new ModelMigrator(
-					o -> EClass.class.isAssignableFrom(o.getClass())
-							&& predicate.test((EClass) o),
-					t -> function.apply((EClass) t)));
+				o -> EClass.class.isAssignableFrom(o.getClass())
+						&& predicate.test((EClass) o),
+				t -> function.apply((EClass) t));
 		}
 
 		public void addEStructuralFeatureMigrator(Predicate<EStructuralFeature> predicate, Function<EStructuralFeature, EStructuralFeature> function) {
 			addMigrator(
-				new ModelMigrator(
-					o -> EStructuralFeature.class.isAssignableFrom(o.getClass())
-							&& predicate.test((EStructuralFeature) o),
-					t -> function.apply((EStructuralFeature) t)));
+				o -> EStructuralFeature.class.isAssignableFrom(o.getClass())
+						&& predicate.test((EStructuralFeature) o),
+				t -> function.apply((EStructuralFeature) t));
 		}
 
 		public void addMigrator(ModelMigrator migrator) {
