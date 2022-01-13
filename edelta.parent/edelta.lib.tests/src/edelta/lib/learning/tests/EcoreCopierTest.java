@@ -185,6 +185,21 @@ public class EcoreCopierTest {
 		var modified2 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + MODIFIED + "MyClass.xmi");
 
 		var copier = new EdeltaEmfCopier(modifiedEcore);
+		// this one is wrong since it returns an EStructuralFeature
+		// but the copier should discard it
+		copier.addMigrator(
+			EdeltaEmfCopier.ModelMigrator.migrateById(
+				"mypackage.MyRoot.myReferences",
+					() -> runtimeForModified.getEClass(
+							"mypackage", "MyRootRenamed"))
+		);
+		// this one is wrong since it returns null
+		// but the copier should discard it
+		copier.addMigrator(
+			EdeltaEmfCopier.ModelMigrator.migrateById(
+				"mypackage.MyRoot",
+					() -> null)
+		);
 		copier.addMigrator(
 			EdeltaEmfCopier.ModelMigrator.migrateById(
 				"mypackage.MyRoot",
