@@ -31,15 +31,21 @@ public class EcoreCopierTest {
 	EdeltaDefaultRuntime runtimeForOriginal;
 	EdeltaDefaultRuntime runtimeForModified;
 
-	static class TestCopier extends Copier {
+	/**
+	 * A candidate for the copier used for model migration.
+	 * 
+	 * @author bettini
+	 *
+	 */
+	static class EdeltaEmfCopier extends Copier {
 		private static final long serialVersionUID = 1L;
 		private Collection<EPackage> packages;
 
-		public TestCopier(Collection<EPackage> packages) {
+		public EdeltaEmfCopier(Collection<EPackage> packages) {
 			this.packages = packages;
 		}
 
-		public TestCopier(Resource resource) {
+		public EdeltaEmfCopier(Resource resource) {
 			this(List.of((EPackage) resource.getContents().get(0)));
 		}
 
@@ -93,7 +99,7 @@ public class EcoreCopierTest {
 		var modified = runtimeForModified.loadEcoreFile(TESTDATA + subdir + "MyRoot.xmi");
 		var modified2 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + "MyClass.xmi");
 
-		var copier = new TestCopier(modifiedEcore);
+		var copier = new EdeltaEmfCopier(modifiedEcore);
 		copyIntoModified(copier, original, modified);
 		copyIntoModified(copier, original2, modified2);
 		copier.copyReferences();
@@ -118,7 +124,7 @@ public class EcoreCopierTest {
 		var modified2 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + MODIFIED + "MyClass.xmi");
 
 		// must redefine the targets for the modified ecore
-		var copier = new TestCopier(modifiedEcore) {
+		var copier = new EdeltaEmfCopier(modifiedEcore) {
 			private static final long serialVersionUID = 1L;
 			private Map<String, EClass> map = 
 				Map.of(
@@ -160,7 +166,7 @@ public class EcoreCopierTest {
 		var modified2 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + MODIFIED + "MyClass.xmi");
 
 		// must redefine the targets for the modified ecore
-		var copier = new TestCopier(modifiedEcore) {
+		var copier = new EdeltaEmfCopier(modifiedEcore) {
 			private static final long serialVersionUID = 1L;
 			
 			@Override
@@ -197,7 +203,7 @@ public class EcoreCopierTest {
 	 * @param original
 	 * @param modified
 	 */
-	private void copyIntoModified(TestCopier copier, Resource original, Resource modified) {
+	private void copyIntoModified(EdeltaEmfCopier copier, Resource original, Resource modified) {
 		var root = original.getContents().get(0);
 		var copy = copier.copy(root);
 		modified.getContents().clear();
