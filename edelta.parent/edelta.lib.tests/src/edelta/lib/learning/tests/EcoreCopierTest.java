@@ -88,6 +88,22 @@ public class EcoreCopierTest {
 			addMigrator(new ModelMigrator(predicate, function));
 		}
 
+		public void addEClassMigrator(Predicate<EClass> predicate, Function<EClass, EClass> function) {
+			addMigrator(
+				new ModelMigrator(
+					o -> EClass.class.isAssignableFrom(o.getClass())
+							&& predicate.test((EClass) o),
+					t -> function.apply((EClass) t)));
+		}
+
+		public void addEStructuralFeatureMigrator(Predicate<EStructuralFeature> predicate, Function<EStructuralFeature, EStructuralFeature> function) {
+			addMigrator(
+				new ModelMigrator(
+					o -> EStructuralFeature.class.isAssignableFrom(o.getClass())
+							&& predicate.test((EStructuralFeature) o),
+					t -> function.apply((EStructuralFeature) t)));
+		}
+
 		public void addMigrator(ModelMigrator migrator) {
 			migrators.add(migrator);
 		}
@@ -200,13 +216,25 @@ public class EcoreCopierTest {
 				"mypackage.MyRoot",
 					() -> null)
 		);
+		// this one is wrong since it returns null
+		// but the copier should discard it
+		copier.addMigrator(
+			c -> c.getName().equals("MyClass"),
+			c -> null
+		);
 		copier.addMigrator(
 			EdeltaEmfCopier.ModelMigrator.migrateById(
 				"mypackage.MyRoot",
 					() -> runtimeForModified.getEClass(
 							"mypackage", "MyRootRenamed"))
 		);
-		copier.addMigrator(
+		// this will not match
+		copier.addEClassMigrator(
+			c -> c.getName().equals("Non Existent"),
+			c -> runtimeForModified.getEClass(
+					"mypackage", "MyClassRenamed")
+		);
+		copier.addEClassMigrator(
 			c -> c.getName().equals("MyClass"),
 			c -> runtimeForModified.getEClass(
 					"mypackage", "MyClassRenamed")
@@ -235,7 +263,7 @@ public class EcoreCopierTest {
 		var modified2 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + MODIFIED + "MyClass.xmi");
 
 		var copier = new EdeltaEmfCopier(modifiedEcore);
-		copier.addMigrator(
+		copier.addEStructuralFeatureMigrator(
 			f -> {
 				var name = f.getName();
 				return name.equals("myContents");
