@@ -1,12 +1,8 @@
 package edelta.lib;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map.Entry;
 import java.util.function.Supplier;
 
 import org.apache.log4j.Level;
@@ -33,8 +29,6 @@ import edelta.lib.exception.EdeltaPackageNotLoadedException;
  *
  */
 public abstract class AbstractEdelta {
-
-	private static final Logger LOG = Logger.getLogger(AbstractEdelta.class);
 
 	/**
 	 * For loading ecores and all other runtime {@link EPackage} management.
@@ -129,21 +123,12 @@ public abstract class AbstractEdelta {
 	 * specified outputPath and the original loaded Ecore
 	 * file names.
 	 * 
+	 * @see EdeltaEPackageManager#saveEcores(String)
 	 * @param outputPath
 	 * @throws IOException 
 	 */
 	public void saveModifiedEcores(String outputPath) throws IOException {
-		for (Entry<String, Resource> entry : packageManager.getResourceMapEntrySet()) {
-			var p = Paths.get(entry.getKey());
-			final var fileName = p.getFileName().toString();
-			LOG.info("Saving " + outputPath + "/" + fileName);
-			var newFile = new File(outputPath, fileName);
-			newFile.getParentFile().mkdirs();
-			var fos = new FileOutputStream(newFile);
-			entry.getValue().save(fos, null);
-			fos.flush();
-			fos.close();
-		}
+		packageManager.saveEcores(outputPath);
 	}
 
 	public Logger getLogger() {
