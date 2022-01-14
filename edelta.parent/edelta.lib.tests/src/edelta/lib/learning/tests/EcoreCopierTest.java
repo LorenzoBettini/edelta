@@ -2,15 +2,19 @@ package edelta.lib.learning.tests;
 
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirectories;
+import static java.util.Collections.singletonList;
+import static java.util.Comparator.comparing;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
@@ -80,8 +84,26 @@ public class EcoreCopierTest {
 			this.packages = packages;
 		}
 
-		public EdeltaEmfCopier(Resource resource) {
-			this(List.of((EPackage) resource.getContents().get(0)));
+		public static EdeltaEmfCopier createFromResources(Collection<Resource> resources) {
+			return new EdeltaEmfCopier(getEPackages(resources));
+		}
+
+		/**
+		 * TODO: extract into EdeltaUtils, since it's used also in
+		 * EdeltaDependencyAnalyzer
+		 * 
+		 * @param resources
+		 * @return
+		 */
+		private static Collection<EPackage> getEPackages(Collection<Resource> resources) {
+			return resources.stream()
+				.map(r -> (EPackage) r.getContents().get(0))
+				.sorted(ePackageComparator()) // we must be deterministic
+				.collect(Collectors.toList());
+		}
+
+		private static Comparator<EPackage> ePackageComparator() {
+			return comparing(EPackage::getNsURI);
 		}
 
 		public void addMigrator(Predicate<ENamedElement> predicate, Function<ENamedElement, ENamedElement> function) {
@@ -142,11 +164,16 @@ public class EcoreCopierTest {
 		}
 
 		protected Optional<EClass> getEClassByName(EClass eClass) {
-			return packages.stream()
+			return getEPackageByName(eClass.getEPackage())
 					.map(p -> p.getEClassifier(eClass.getName()))
 					.filter(EClass.class::isInstance)
-					.findFirst()
 					.map(EClass.class::cast);
+		}
+
+		protected Optional<EPackage> getEPackageByName(EPackage ePackage) {
+			return packages.stream()
+					.filter(p -> p.getName().equals(ePackage.getName()))
+					.findFirst();
 		}
 	}
 
@@ -174,7 +201,7 @@ public class EcoreCopierTest {
 		var modified = runtimeForModified.loadEcoreFile(TESTDATA + subdir + "MyRoot.xmi");
 		var modified2 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + "MyClass.xmi");
 
-		var copier = new EdeltaEmfCopier(modifiedEcore);
+		var copier = EdeltaEmfCopier.createFromResources(singletonList(modifiedEcore));
 		copyIntoModified(copier, original, modified);
 		copyIntoModified(copier, original2, modified2);
 		copier.copyReferences();
@@ -184,6 +211,43 @@ public class EcoreCopierTest {
 		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
 		assertGeneratedFiles(subdir, output, "MyClass.xmi");
 		assertGeneratedFiles(subdir, output, "My.ecore");
+	}
+
+	@Test
+	public void testCopyUnchangedClassesWithTheSameNameInDifferentPackages() throws IOException {
+		var subdir = "classesWithTheSameName/";
+		// in this case we load the same models with twice in different resource sets
+		runtimeForOriginal.loadEcoreFile(TESTDATA + subdir + "My1.ecore");
+		runtimeForOriginal.loadEcoreFile(TESTDATA + subdir + "My2.ecore");
+		var modifiedEcore1 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + "My1.ecore");
+		var modifiedEcore2 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + "My2.ecore");
+
+		// this is actually XMI
+		var root1 = runtimeForOriginal.loadEcoreFile(TESTDATA + subdir + "MyRoot1.xmi");
+		var class1 = runtimeForOriginal.loadEcoreFile(TESTDATA + subdir + "MyClass1.xmi");
+		var root2 = runtimeForOriginal.loadEcoreFile(TESTDATA + subdir + "MyRoot2.xmi");
+		var class2 = runtimeForOriginal.loadEcoreFile(TESTDATA + subdir + "MyClass2.xmi");
+		var modifiedRoot1 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + "MyRoot1.xmi");
+		var modifiedClass1 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + "MyClass1.xmi");
+		var modifiedRoot2 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + "MyRoot2.xmi");
+		var modifiedClass2 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + "MyClass2.xmi");
+
+		var copier = EdeltaEmfCopier.createFromResources
+				(List.of(modifiedEcore1, modifiedEcore2));
+		copyIntoModified(copier, root1, modifiedRoot1);
+		copyIntoModified(copier, class1, modifiedClass1);
+		copyIntoModified(copier, root2, modifiedRoot2);
+		copyIntoModified(copier, class2, modifiedClass2);
+		copier.copyReferences();
+
+		var output = OUTPUT + subdir;
+		runtimeForModified.saveModifiedEcores(output);
+		assertGeneratedFiles(subdir, output, "MyRoot1.xmi");
+		assertGeneratedFiles(subdir, output, "MyClass1.xmi");
+		assertGeneratedFiles(subdir, output, "MyRoot2.xmi");
+		assertGeneratedFiles(subdir, output, "MyClass2.xmi");
+		assertGeneratedFiles(subdir, output, "My1.ecore");
+		assertGeneratedFiles(subdir, output, "My2.ecore");
 	}
 
 	@Test
@@ -198,7 +262,7 @@ public class EcoreCopierTest {
 		var modified = runtimeForModified.loadEcoreFile(TESTDATA + subdir + MODIFIED + "MyRoot.xmi");
 		var modified2 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + MODIFIED + "MyClass.xmi");
 
-		var copier = new EdeltaEmfCopier(modifiedEcore);
+		var copier = EdeltaEmfCopier.createFromResources(singletonList(modifiedEcore));
 		// this one is wrong since it returns an EStructuralFeature
 		// but the copier should discard it
 		copier.addMigrator(
@@ -260,7 +324,7 @@ public class EcoreCopierTest {
 		var modified = runtimeForModified.loadEcoreFile(TESTDATA + subdir + MODIFIED + "MyRoot.xmi");
 		var modified2 = runtimeForModified.loadEcoreFile(TESTDATA + subdir + MODIFIED + "MyClass.xmi");
 
-		var copier = new EdeltaEmfCopier(modifiedEcore);
+		var copier = EdeltaEmfCopier.createFromResources(singletonList(modifiedEcore));
 		copier.addEStructuralFeatureMigrator(
 			f -> {
 				var name = f.getName();
