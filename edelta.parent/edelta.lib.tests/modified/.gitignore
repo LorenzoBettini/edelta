@@ -1,2 +1,2 @@
-*.ecore
+*
 !.gitignore

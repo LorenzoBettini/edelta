@@ -7,10 +7,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
@@ -38,7 +37,13 @@ public class EdeltaEPackageManager {
 	 * Here we store the association between the Ecore file name and the
 	 * corresponding loaded Resource.
 	 */
-	private HashMap<String, Resource> ecoreToResourceMap = new LinkedHashMap<>();
+	private Map<String, Resource> ecoreToResourceMap = new LinkedHashMap<>();
+
+	/**
+	 * Here we store the association between the model file name and the
+	 * corresponding loaded Resource.
+	 */
+	private Map<String, Resource> modelToResourceMap = new LinkedHashMap<>();
 
 	/**
 	 * Here we store all the Ecores used by the Edelta
@@ -78,14 +83,18 @@ public class EdeltaEPackageManager {
 	 * @return the loaded {@link Resource}
 	 */
 	public Resource loadEcoreFile(String path) {
+		return loadResource(path, ecoreToResourceMap);
+	}
+
+	private Resource loadResource(String path, Map<String, Resource> resourceMap) {
 		// make sure we have a complete file URI,
-		// otherwise the saved modified ecore will contain
+		// otherwise the saved modified files will contain
 		// wrong references (i.e., with the prefixed relative path)
 		var uri = URI.createFileURI(Paths.get(path).toAbsolutePath().toString());
 		// Demand load resource for this file.
 		LOG.info("Loading " + path + " (URI: " + uri + ")");
 		var resource = resourceSet.getResource(uri, true);
-		ecoreToResourceMap.put(path, resource);
+		resourceMap.put(path, resource);
 		return resource;
 	}
 
@@ -110,15 +119,11 @@ public class EdeltaEPackageManager {
 			orElse(null);
 	}
 
-	private Set<Entry<String, Resource>> getResourceMapEntrySet() {
-		return ecoreToResourceMap.entrySet();
-	}
-
 	/**
 	 * Saves the modified EPackages as Ecore files in the specified
 	 * output path.
 	 * 
-	 * The final path of the generated Ecore files is made of the
+	 * The final path of the modified Ecore files is made of the
 	 * specified outputPath and the original loaded Ecore
 	 * file names.
 	 * 
@@ -126,7 +131,11 @@ public class EdeltaEPackageManager {
 	 * @throws IOException 
 	 */
 	public void saveEcores(String outputPath) throws IOException {
-		for (Entry<String, Resource> entry : getResourceMapEntrySet()) {
+		saveResources(outputPath, ecoreToResourceMap);
+	}
+
+	private void saveResources(String outputPath, Map<String, Resource> resourceMap) throws IOException {
+		for (Entry<String, Resource> entry : resourceMap.entrySet()) {
 			var p = Paths.get(entry.getKey());
 			final var fileName = p.getFileName().toString();
 			LOG.info("Saving " + outputPath + "/" + fileName);
@@ -137,5 +146,29 @@ public class EdeltaEPackageManager {
 			fos.flush();
 			fos.close();
 		}
+	}
+
+	/**
+	 * Loads the XMI model file specified in the path
+	 * @param path
+	 * @return the loaded {@link Resource}
+	 */
+	public Resource loadModelFile(String path) {
+		return loadResource(path, modelToResourceMap);
+	}
+
+	/**
+	 * Saves the modified models into files in the specified
+	 * output path.
+	 * 
+	 * The final path of the modified files is made of the
+	 * specified outputPath and the original loaded model
+	 * file names.
+	 * 
+	 * @param outputPath
+	 * @throws IOException 
+	 */
+	public void saveModels(String outputPath) throws IOException {
+		saveResources(outputPath, modelToResourceMap);
 	}
 }
