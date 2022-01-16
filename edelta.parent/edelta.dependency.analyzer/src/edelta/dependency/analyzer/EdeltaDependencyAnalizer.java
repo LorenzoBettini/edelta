@@ -1,7 +1,5 @@
 package edelta.dependency.analyzer;
 
-import static java.util.Comparator.comparing;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +27,7 @@ import GraphMM.GraphMMPackage;
 import GraphMM.Metamodel;
 import GraphMM.Repository;
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaResourceUtils;
 import edelta.lib.EdeltaUtils;
 
 /**
@@ -54,7 +52,7 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 	 */
 	public Repository analyzeEPackage(String ecoreFile) throws IOException {
 		var loaded = loadEcoreFile(ecoreFile);
-		var packageToAnalyze = getEPackage(loaded);
+		var packageToAnalyze = EdeltaResourceUtils.getEPackage(loaded);
 		String path = new File(ecoreFile).getParent();
 		return analyzeEPackage(path, packageToAnalyze.getName());
 	}
@@ -71,7 +69,7 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 	public Repository analyzeEPackage(String path, String packageName) throws IOException {
 		try (var stream = Files.walk(Paths.get(path))) {
 			var resources = loadEcoreFiles(stream);
-			var packages = getEPackages(resources);
+			var packages = EdeltaResourceUtils.getEPackages(resources);
 			var packageToAnalyze = getEPackageByName(packages, packageName);
 			packages.remove(packageToAnalyze);
 			return analyzeEPackages(packageToAnalyze, packages);
@@ -85,21 +83,6 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 			.orElseThrow(
 				() -> new IllegalArgumentException
 					("No EPackage with name: " + packageName));
-	}
-
-	private Collection<EPackage> getEPackages(List<Resource> resources) {
-		return resources.stream()
-			.map(this::getEPackage)
-			.sorted(ePackageComparator()) // we must be deterministic
-			.collect(Collectors.toList());
-	}
-
-	private EPackage getEPackage(Resource r) {
-		return (EPackage) r.getContents().get(0);
-	}
-
-	private Comparator<EPackage> ePackageComparator() {
-		return comparing(EPackage::getNsURI);
 	}
 
 	private List<Resource> loadEcoreFiles(Stream<Path> stream) {
@@ -155,7 +138,7 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 	private Collection<EPackage> usedPackages(EPackage ePackage) {
 		return EdeltaUtils.usedPackages(ePackage)
 				.stream()
-				.sorted(ePackageComparator()) // we must be deterministic
+				.sorted(EdeltaResourceUtils.ePackageComparator()) // we must be deterministic
 				.collect(Collectors.toList());
 	}
 
