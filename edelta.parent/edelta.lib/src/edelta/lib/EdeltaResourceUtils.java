@@ -25,6 +25,13 @@ public class EdeltaResourceUtils {
 		// empty constructor never to be called
 	}
 
+	/**
+	 * Returns all the {@link EPackage} instances found as first element
+	 * of the given {@link Resource}s.
+	 * 
+	 * @param resources
+	 * @return
+	 */
 	public static Collection<EPackage> getEPackages(Collection<Resource> resources) {
 		return resources.stream()
 			.map(EdeltaResourceUtils::getEPackage)
@@ -33,6 +40,14 @@ public class EdeltaResourceUtils {
 			.collect(Collectors.toList());
 	}
 
+	/**
+	 * Return the first element of the {@link Resource} as an {@link EPackage} or
+	 * null otherwise (for example, the resource is empty or the first element is
+	 * not an {@link EPackage}),
+	 * 
+	 * @param r
+	 * @return
+	 */
 	public static EPackage getEPackage(Resource r) {
 		var contents = r.getContents();
 		if (contents.isEmpty())
