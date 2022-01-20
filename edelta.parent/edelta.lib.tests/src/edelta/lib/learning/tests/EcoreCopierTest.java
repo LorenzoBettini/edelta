@@ -4,6 +4,7 @@ import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirectories;
 import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaResourceUtils;
 import edelta.lib.EdeltaUtils;
 
 public class EcoreCopierTest {
@@ -188,10 +190,26 @@ public class EcoreCopierTest {
 		runtimeForModified = new EdeltaDefaultRuntime();
 	}
 
+	/**
+	 * This shows that renaming a class directly in the original
+	 * package also affects immediately the loaded models.
+	 */
+	@Test
+	public void testManualRenaming() {
+		var subdir = "unchanged/";
+		var originalPackage = EdeltaResourceUtils.getEPackage(
+				runtimeForOriginal.loadEcoreFile(TESTDATA + subdir + "My.ecore"));
+		var originalModelResource = runtimeForOriginal.loadEcoreFile(TESTDATA + subdir + "MyClass.xmi");
+		var eObject = originalModelResource.getContents().get(0);
+		assertEquals("MyClass", eObject.eClass().getName());
+		originalPackage.getEClassifier("MyClass").setName("Changed");
+		assertEquals("Changed", eObject.eClass().getName());
+	}
+
 	@Test
 	public void testCopyUnchanged() throws IOException {
 		var subdir = "unchanged/";
-		// in this case we load the same models with twice in different resource sets
+		// in this case we load the same models twice in different resource sets
 		runtimeForOriginal.loadEcoreFile(TESTDATA + subdir + "My.ecore");
 		var modifiedEcore = runtimeForModified.loadEcoreFile(TESTDATA + subdir + "My.ecore");
 
