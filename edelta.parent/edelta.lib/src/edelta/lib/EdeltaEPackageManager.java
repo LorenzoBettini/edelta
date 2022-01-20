@@ -18,6 +18,7 @@ import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
@@ -87,10 +88,7 @@ public class EdeltaEPackageManager {
 	}
 
 	private Resource loadResource(String path, Map<String, Resource> resourceMap) {
-		// make sure we have a complete file URI,
-		// otherwise the saved modified files will contain
-		// wrong references (i.e., with the prefixed relative path)
-		var uri = URI.createFileURI(Paths.get(path).toAbsolutePath().toString());
+		var uri = createAbsoluteFileURI(path);
 		// Demand load resource for this file.
 		LOG.info("Loading " + path + " (URI: " + uri + ")");
 		var resource = resourceSet.getResource(uri, true);
@@ -167,5 +165,35 @@ public class EdeltaEPackageManager {
 	 */
 	public void saveModels(String outputPath) throws IOException {
 		saveResources(outputPath, modelResourceMap);
+	}
+
+	/**
+	 * Create a new {@link XMIResource} in the {@link ResourceSet}, using the passed
+	 * resource as a "prototype": it takes all its options and encoding.
+	 * 
+	 * @param path
+	 * @param prototypeResource
+	 * @return
+	 */
+	public Resource createModelResource(String path, XMIResource prototypeResource) {
+		var uri = createAbsoluteFileURI(path);
+		LOG.info("Creating " + path + " (URI: " + uri + ")");
+		var resource = (XMIResource) resourceSet.createResource(uri);
+		resource.getDefaultLoadOptions().putAll(prototypeResource.getDefaultLoadOptions());
+		resource.getDefaultSaveOptions().putAll(prototypeResource.getDefaultSaveOptions());
+		resource.setEncoding(prototypeResource.getEncoding());
+		modelResourceMap.put(path, resource);
+		return resource;
+	}
+
+	/**
+	 * make sure we have a complete file URI, otherwise the saved modified files
+	 * will contain wrong references (i.e., with the prefixed relative path)
+	 * 
+	 * @param path
+	 * @return
+	 */
+	private URI createAbsoluteFileURI(String path) {
+		return URI.createFileURI(Paths.get(path).toAbsolutePath().toString());
 	}
 }
