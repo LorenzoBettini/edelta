@@ -58,6 +58,11 @@ public class EdeltaResourceUtils {
 		return (EPackage) first;
 	}
 
+	/**
+	 * Compares the {@link EPackage} by their {@link EPackage#getNsURI()}.
+	 * 
+	 * @return
+	 */
 	public static Comparator<EPackage> ePackageComparator() {
 		return comparing(EPackage::getNsURI);
 	}
