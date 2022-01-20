@@ -109,14 +109,11 @@ public class EdeltaEPackageManager {
 		if (EcorePackage.eNAME.equals(packageName)) {
 			return EcorePackage.eINSTANCE;
 		}
-		return resourceSet.getResources().
-			stream().
-			map(resource -> resource.getContents().get(0)).
-			filter(EPackage.class::isInstance).
-			map(EPackage.class::cast).
-			filter(p -> p.getName().equals(packageName)).
-			findAny().
-			orElse(null);
+		return EdeltaResourceUtils.getEPackages(ecoreToResourceMap.values())
+			.stream()
+			.filter(p -> p.getName().equals(packageName))
+			.findFirst()
+			.orElse(null);
 	}
 
 	/**
