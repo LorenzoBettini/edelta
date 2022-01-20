@@ -5,6 +5,7 @@ package edelta.lib.tests;
 
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirectories;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 
@@ -157,5 +158,17 @@ public class EdeltaEPackageManagerTest {
 		assertFilesAreEquals(
 				EXPECTATIONS+"/"+subdir+"/"+MY_ROOT,
 				output+"/"+MY_ROOT);
+	}
+
+	@Test
+	public void testGetModelResourceMap() {
+		packageManager.loadEcoreFile(TESTDATA+UNCHANGED+MY_ECORE);
+		packageManager.loadModelFile(TESTDATA+UNCHANGED+MY_CLASS);
+		packageManager.loadModelFile(TESTDATA+UNCHANGED+MY_ROOT);
+		var map = packageManager.getModelResourceMap();
+		assertThat(map.keySet())
+			.containsExactlyInAnyOrder(
+					TESTDATA+UNCHANGED+MY_CLASS,
+					TESTDATA+UNCHANGED+MY_ROOT);
 	}
 }

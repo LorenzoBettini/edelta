@@ -196,4 +196,8 @@ public class EdeltaEPackageManager {
 	private URI createAbsoluteFileURI(String path) {
 		return URI.createFileURI(Paths.get(path).toAbsolutePath().toString());
 	}
+
+	public Map<String, Resource> getModelResourceMap() {
+		return modelResourceMap;
+	}
 }
