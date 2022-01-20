@@ -34,16 +34,16 @@ public class EdeltaEPackageManager {
 	private static final Logger LOG = Logger.getLogger(EdeltaEPackageManager.class);
 
 	/**
-	 * Here we store the association between the Ecore file name and the
+	 * Here we store the association between the Ecore path and the
 	 * corresponding loaded Resource.
 	 */
-	private Map<String, Resource> ecoreToResourceMap = new LinkedHashMap<>();
+	private Map<String, Resource> ecoreResourceMap = new LinkedHashMap<>();
 
 	/**
-	 * Here we store the association between the model file name and the
+	 * Here we store the association between the model path and the
 	 * corresponding loaded Resource.
 	 */
-	private Map<String, Resource> modelToResourceMap = new LinkedHashMap<>();
+	private Map<String, Resource> modelResourceMap = new LinkedHashMap<>();
 
 	/**
 	 * Here we store all the Ecores and models used by the Edelta
@@ -83,7 +83,7 @@ public class EdeltaEPackageManager {
 	 * @return the loaded {@link Resource}
 	 */
 	public Resource loadEcoreFile(String path) {
-		return loadResource(path, ecoreToResourceMap);
+		return loadResource(path, ecoreResourceMap);
 	}
 
 	private Resource loadResource(String path, Map<String, Resource> resourceMap) {
@@ -109,7 +109,7 @@ public class EdeltaEPackageManager {
 		if (EcorePackage.eNAME.equals(packageName)) {
 			return EcorePackage.eINSTANCE;
 		}
-		return EdeltaResourceUtils.getEPackages(ecoreToResourceMap.values())
+		return EdeltaResourceUtils.getEPackages(ecoreResourceMap.values())
 			.stream()
 			.filter(p -> p.getName().equals(packageName))
 			.findFirst()
@@ -128,7 +128,7 @@ public class EdeltaEPackageManager {
 	 * @throws IOException 
 	 */
 	public void saveEcores(String outputPath) throws IOException {
-		saveResources(outputPath, ecoreToResourceMap);
+		saveResources(outputPath, ecoreResourceMap);
 	}
 
 	private void saveResources(String outputPath, Map<String, Resource> resourceMap) throws IOException {
@@ -151,7 +151,7 @@ public class EdeltaEPackageManager {
 	 * @return the loaded {@link Resource}
 	 */
 	public Resource loadModelFile(String path) {
-		return loadResource(path, modelToResourceMap);
+		return loadResource(path, modelResourceMap);
 	}
 
 	/**
@@ -166,6 +166,6 @@ public class EdeltaEPackageManager {
 	 * @throws IOException 
 	 */
 	public void saveModels(String outputPath) throws IOException {
-		saveResources(outputPath, modelToResourceMap);
+		saveResources(outputPath, modelResourceMap);
 	}
 }
