@@ -7,6 +7,7 @@ import static java.util.Comparator.comparing;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EPackage;
@@ -27,12 +28,19 @@ public class EdeltaResourceUtils {
 	public static Collection<EPackage> getEPackages(Collection<Resource> resources) {
 		return resources.stream()
 			.map(EdeltaResourceUtils::getEPackage)
+			.filter(Objects::nonNull)
 			.sorted(ePackageComparator()) // we must be deterministic
 			.collect(Collectors.toList());
 	}
 
 	public static EPackage getEPackage(Resource r) {
-		return (EPackage) r.getContents().get(0);
+		var contents = r.getContents();
+		if (contents.isEmpty())
+			return null;
+		var first = contents.get(0);
+		if (!(first instanceof EPackage))
+			return null;
+		return (EPackage) first;
 	}
 
 	public static Comparator<EPackage> ePackageComparator() {

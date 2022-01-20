@@ -34,7 +34,10 @@ public class EdeltaResourceUtilsTest {
 	public void testGetEPackage() {
 		var r1 = packageManager.loadEcoreFile(MODELS + "My.ecore");
 		var r2 = packageManager.loadEcoreFile(MODELS + "My2.ecore");
-		var packages = EdeltaResourceUtils.getEPackages(List.of(r1, r2));
+		var toEmpty = packageManager.loadEcoreFile(MODELS + "Empty.ecore");
+		toEmpty.getContents().clear();
+		var notEcore = packageManager.loadEcoreFile(MODELS + "MyClass.xmi");
+		var packages = EdeltaResourceUtils.getEPackages(List.of(r1, r2, toEmpty, notEcore));
 		Assertions.assertThat(packages)
 			.extracting(ENamedElement::getName)
 			.containsExactly("mypackage", "myotherpackage");
