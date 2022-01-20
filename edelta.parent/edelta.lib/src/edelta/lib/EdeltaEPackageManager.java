@@ -46,7 +46,7 @@ public class EdeltaEPackageManager {
 	private Map<String, Resource> modelToResourceMap = new LinkedHashMap<>();
 
 	/**
-	 * Here we store all the Ecores used by the Edelta
+	 * Here we store all the Ecores and models used by the Edelta
 	 */
 	private ResourceSet resourceSet = new ResourceSetImpl();
 
