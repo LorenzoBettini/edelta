@@ -7,6 +7,7 @@ import static java.util.Comparator.comparing;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -24,6 +25,7 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
+import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,7 +36,6 @@ import edelta.lib.EdeltaUtils;
 
 public class EcoreCopierTest {
 
-	private static final String MODIFIED = "modified/";
 	private static final String ORIGINAL = "original/";
 	private static final String TESTDATA = "testdata/";
 	private static final String OUTPUT = "output/";
@@ -209,20 +210,16 @@ public class EcoreCopierTest {
 	@Test
 	public void testCopyUnchanged() throws IOException {
 		var subdir = "unchanged/";
-		// in this case we load the same models twice in different resource sets
-		packageManagerOriginal.loadEcoreFile(TESTDATA + subdir + "My.ecore");
-		var modifiedEcore = packageManagerModified.loadEcoreFile(TESTDATA + subdir + "My.ecore");
+		var basedir = TESTDATA + subdir;
+		packageManagerOriginal.loadEcoreFile(basedir + "My.ecore");
+		var modifiedEcore = packageManagerModified.loadEcoreFile(basedir + "My.ecore");
 
-		// this is actually XMI
-		var original = packageManagerOriginal.loadModelFile(TESTDATA + subdir + "MyRoot.xmi");
-		var original2 = packageManagerOriginal.loadModelFile(TESTDATA + subdir + "MyClass.xmi");
-		var modified = packageManagerModified.loadModelFile(TESTDATA + subdir + "MyRoot.xmi");
-		var modified2 = packageManagerModified.loadModelFile(TESTDATA + subdir + "MyClass.xmi");
+		// models are loaded only in the original package manager
+		packageManagerOriginal.loadModelFile(basedir + "MyRoot.xmi");
+		packageManagerOriginal.loadModelFile(basedir + "MyClass.xmi");
 
 		var copier = EdeltaEmfCopier.createFromResources(singletonList(modifiedEcore));
-		copyIntoModified(copier, original, modified);
-		copyIntoModified(copier, original2, modified2);
-		copier.copyReferences();
+		copyModels(copier, basedir);
 
 		var output = OUTPUT + subdir;
 		packageManagerModified.saveEcores(output);
@@ -235,29 +232,20 @@ public class EcoreCopierTest {
 	@Test
 	public void testCopyUnchangedClassesWithTheSameNameInDifferentPackages() throws IOException {
 		var subdir = "classesWithTheSameName/";
-		// in this case we load the same models with twice in different resource sets
-		packageManagerOriginal.loadEcoreFile(TESTDATA + subdir + "My1.ecore");
-		packageManagerOriginal.loadEcoreFile(TESTDATA + subdir + "My2.ecore");
-		var modifiedEcore1 = packageManagerModified.loadEcoreFile(TESTDATA + subdir + "My1.ecore");
-		var modifiedEcore2 = packageManagerModified.loadEcoreFile(TESTDATA + subdir + "My2.ecore");
+		var basedir = TESTDATA + subdir;
+		packageManagerOriginal.loadEcoreFile(basedir + "My1.ecore");
+		packageManagerOriginal.loadEcoreFile(basedir + "My2.ecore");
+		var modifiedEcore1 = packageManagerModified.loadEcoreFile(basedir + "My1.ecore");
+		var modifiedEcore2 = packageManagerModified.loadEcoreFile(basedir + "My2.ecore");
 
-		// this is actually XMI
-		var root1 = packageManagerOriginal.loadModelFile(TESTDATA + subdir + "MyRoot1.xmi");
-		var class1 = packageManagerOriginal.loadModelFile(TESTDATA + subdir + "MyClass1.xmi");
-		var root2 = packageManagerOriginal.loadModelFile(TESTDATA + subdir + "MyRoot2.xmi");
-		var class2 = packageManagerOriginal.loadModelFile(TESTDATA + subdir + "MyClass2.xmi");
-		var modifiedRoot1 = packageManagerModified.loadModelFile(TESTDATA + subdir + "MyRoot1.xmi");
-		var modifiedClass1 = packageManagerModified.loadModelFile(TESTDATA + subdir + "MyClass1.xmi");
-		var modifiedRoot2 = packageManagerModified.loadModelFile(TESTDATA + subdir + "MyRoot2.xmi");
-		var modifiedClass2 = packageManagerModified.loadModelFile(TESTDATA + subdir + "MyClass2.xmi");
+		packageManagerOriginal.loadModelFile(basedir + "MyRoot1.xmi");
+		packageManagerOriginal.loadModelFile(basedir + "MyClass1.xmi");
+		packageManagerOriginal.loadModelFile(basedir + "MyRoot2.xmi");
+		packageManagerOriginal.loadModelFile(basedir + "MyClass2.xmi");
 
 		var copier = EdeltaEmfCopier.createFromResources
 				(List.of(modifiedEcore1, modifiedEcore2));
-		copyIntoModified(copier, root1, modifiedRoot1);
-		copyIntoModified(copier, class1, modifiedClass1);
-		copyIntoModified(copier, root2, modifiedRoot2);
-		copyIntoModified(copier, class2, modifiedClass2);
-		copier.copyReferences();
+		copyModels(copier, basedir);
 
 		var output = OUTPUT + subdir;
 		packageManagerModified.saveEcores(output);
@@ -273,14 +261,12 @@ public class EcoreCopierTest {
 	@Test
 	public void testCopyRenamedClass() throws IOException {
 		var subdir = "renamedClass/";
-		packageManagerOriginal.loadEcoreFile(TESTDATA + subdir + ORIGINAL + "My.ecore");
-		var modifiedEcore = packageManagerModified.loadEcoreFile(TESTDATA + subdir + MODIFIED + "My.ecore");
+		var basedir = TESTDATA + subdir;
+		packageManagerOriginal.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
+		var modifiedEcore = packageManagerModified.loadEcoreFile(basedir + "My.ecore");
 
-		// this is actually XMI
-		var original = packageManagerOriginal.loadModelFile(TESTDATA + subdir + ORIGINAL + "MyRoot.xmi");
-		var original2 = packageManagerOriginal.loadModelFile(TESTDATA + subdir + ORIGINAL + "MyClass.xmi");
-		var modified = packageManagerModified.loadModelFile(TESTDATA + subdir + MODIFIED + "MyRoot.xmi");
-		var modified2 = packageManagerModified.loadModelFile(TESTDATA + subdir + MODIFIED + "MyClass.xmi");
+		packageManagerOriginal.loadModelFile(basedir + ORIGINAL + "MyRoot.xmi");
+		packageManagerOriginal.loadModelFile(basedir + ORIGINAL + "MyClass.xmi");
 
 		var copier = EdeltaEmfCopier.createFromResources(singletonList(modifiedEcore));
 		// this one is wrong since it returns an EStructuralFeature
@@ -321,9 +307,7 @@ public class EcoreCopierTest {
 			c -> (EClass) packageManagerModified.getEPackage(
 					"mypackage").getEClassifier("MyClassRenamed")
 		);
-		copyIntoModified(copier, original, modified);
-		copyIntoModified(copier, original2, modified2);
-		copier.copyReferences();
+		copyModels(copier, basedir);
 
 		var output = OUTPUT + subdir;
 		packageManagerModified.saveEcores(output);
@@ -336,14 +320,12 @@ public class EcoreCopierTest {
 	@Test
 	public void testCopyRenamedFeature() throws IOException {
 		var subdir = "renamedFeature/";
-		packageManagerOriginal.loadEcoreFile(TESTDATA + subdir + ORIGINAL + "My.ecore");
-		var modifiedEcore = packageManagerModified.loadEcoreFile(TESTDATA + subdir + MODIFIED + "My.ecore");
+		var basedir = TESTDATA + subdir;
+		packageManagerOriginal.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
+		var modifiedEcore = packageManagerModified.loadEcoreFile(basedir + "My.ecore");
 
-		// this is actually XMI
-		var original = packageManagerOriginal.loadModelFile(TESTDATA + subdir + ORIGINAL + "MyRoot.xmi");
-		var original2 = packageManagerOriginal.loadModelFile(TESTDATA + subdir + ORIGINAL + "MyClass.xmi");
-		var modified = packageManagerModified.loadModelFile(TESTDATA + subdir + MODIFIED + "MyRoot.xmi");
-		var modified2 = packageManagerModified.loadModelFile(TESTDATA + subdir + MODIFIED + "MyClass.xmi");
+		packageManagerOriginal.loadModelFile(basedir + ORIGINAL + "MyRoot.xmi");
+		packageManagerOriginal.loadModelFile(basedir + ORIGINAL + "MyClass.xmi");
 
 		var copier = EdeltaEmfCopier.createFromResources(singletonList(modifiedEcore));
 		copier.addEStructuralFeatureMigrator(
@@ -363,9 +345,7 @@ public class EcoreCopierTest {
 						.getEStructuralFeature("myReferencesRenamed")
 			)
 		);
-		copyIntoModified(copier, original, modified);
-		copyIntoModified(copier, original2, modified2);
-		copier.copyReferences();
+		copyModels(copier, basedir);
 
 		var output = OUTPUT + subdir;
 		packageManagerModified.saveEcores(output);
@@ -382,18 +362,28 @@ public class EcoreCopierTest {
 	}
 
 	/**
-	 * The modified resource is pre-populated with the contents of the testdata
-	 * directory but it will be completely cleared and replaced with the copy taken
-	 * from the original resource.
+	 * This simulates what the final model migration should do.
+	 * 
+	 * IMPORTANT: the original Ecores and models must be in a subdirectory
+	 * of the directory that stores the modified Ecores.
+	 * 
+	 * It is crucial to strip the original path and use the baseDir
+	 * to create the new {@link Resource} URI, so that, upon saving,
+	 * the schema location is computed correctly.
 	 * 
 	 * @param copier
-	 * @param original
-	 * @param modified
 	 */
-	private void copyIntoModified(EdeltaEmfCopier copier, Resource original, Resource modified) {
-		var root = original.getContents().get(0);
-		var copy = copier.copy(root);
-		modified.getContents().clear();
-		modified.getContents().add(copy);
+	private void copyModels(EdeltaEmfCopier copier, String baseDir) {
+		var map = packageManagerOriginal.getModelResourceMap();
+		for (var entry : map.entrySet()) {
+			var originalResource = (XMIResource) entry.getValue();
+			var p = Paths.get(entry.getKey());
+			final var fileName = p.getFileName().toString();
+			var newResource = packageManagerModified.createModelResource
+				(baseDir + fileName, originalResource);
+			var root = originalResource.getContents().get(0);
+			newResource.getContents().add(copier.copy(root));
+		}
+		copier.copyReferences();
 	}
 }
