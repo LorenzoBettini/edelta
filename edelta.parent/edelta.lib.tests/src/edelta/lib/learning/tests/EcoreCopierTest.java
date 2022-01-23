@@ -233,16 +233,17 @@ public class EcoreCopierTest {
 	public void testCopyMutualReferencesUnchanged() throws IOException {
 		var subdir = "mutualReferencesUnchanged/";
 		var basedir = TESTDATA + subdir;
-		packageManagerOriginal.loadEcoreFile(basedir + "TestEcoreForReferences1.ecore");
-		packageManagerOriginal.loadEcoreFile(basedir + "TestEcoreForReferences2.ecore");
+		packageManagerOriginal.loadEcoreFile(basedir + "PersonForReferences.ecore");
+		packageManagerOriginal.loadEcoreFile(basedir + "WorkPlaceForReferences.ecore");
 		var modifiedEcore1 = packageManagerModified
-				.loadEcoreFile(basedir + "TestEcoreForReferences1.ecore");
+				.loadEcoreFile(basedir + "PersonForReferences.ecore");
 		var modifiedEcore2 = packageManagerModified
-				.loadEcoreFile(basedir + "TestEcoreForReferences2.ecore");
+				.loadEcoreFile(basedir + "WorkPlaceForReferences.ecore");
 
 		// models are loaded only in the original package manager
-		packageManagerOriginal.loadModelFile(basedir + "Person.xmi");
-		packageManagerOriginal.loadModelFile(basedir + "WorkPlace.xmi");
+		packageManagerOriginal.loadModelFile(basedir + "Person1.xmi");
+		packageManagerOriginal.loadModelFile(basedir + "Person2.xmi");
+		packageManagerOriginal.loadModelFile(basedir + "WorkPlace1.xmi");
 
 		var copier = EdeltaEmfCopier
 			.createFromResources(
@@ -252,10 +253,11 @@ public class EcoreCopierTest {
 		var output = OUTPUT + subdir;
 		packageManagerModified.saveEcores(output);
 		packageManagerModified.saveModels(output);
-		assertGeneratedFiles(subdir, output, "Person.xmi");
-		assertGeneratedFiles(subdir, output, "WorkPlace.xmi");
-		assertGeneratedFiles(subdir, output, "TestEcoreForReferences1.ecore");
-		assertGeneratedFiles(subdir, output, "TestEcoreForReferences2.ecore");
+		assertGeneratedFiles(subdir, output, "Person1.xmi");
+		assertGeneratedFiles(subdir, output, "Person2.xmi");
+		assertGeneratedFiles(subdir, output, "WorkPlace1.xmi");
+		assertGeneratedFiles(subdir, output, "PersonForReferences.ecore");
+		assertGeneratedFiles(subdir, output, "WorkPlaceForReferences.ecore");
 	}
 
 	@Test

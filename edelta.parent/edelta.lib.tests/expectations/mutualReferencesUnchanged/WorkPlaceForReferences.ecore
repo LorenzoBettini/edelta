@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="testecoreforreferences2" nsURI="http://my.testecoreforreferences2.org"
-    nsPrefix="testecoreforreferences2">
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="WorkPlaceForReferences" nsURI="http://my.workplaceforreferences.org"
+    nsPrefix="workplaceforreferences">
   <eClassifiers xsi:type="ecore:EClass" name="WorkPlace">
     <eStructuralFeatures xsi:type="ecore:EReference" name="persons" upperBound="-1"
-        eType="ecore:EClass TestEcoreForReferences1.ecore#//Person" eOpposite="TestEcoreForReferences1.ecore#//Person/works"/>
+        eType="ecore:EClass PersonForReferences.ecore#//Person" eOpposite="PersonForReferences.ecore#//Person/works"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="address" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
 </ecore:EPackage>
