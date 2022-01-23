@@ -36,8 +36,10 @@ public class EdeltaResourceDescriptionStrategyTest extends EdeltaAbstractTest {
 	@Test
 	public void testReferenceToOurMetamodel() throws Exception {
 		assertExportedEPackages(
-			"metamodel \"ecore\"\n"
-			+ "metamodel \"foo\""
+			"""
+				metamodel "ecore"
+				metamodel "foo"
+			"""
 		, "");
 	}
 
@@ -45,10 +47,12 @@ public class EdeltaResourceDescriptionStrategyTest extends EdeltaAbstractTest {
 	public void testCreateEClass() throws Exception {
 		// our copied packages must not be exported
 		assertExportedEPackages(
-			"metamodel \"ecore\"\n"
-			+ "metamodel \"foo\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage foo {}"
+			"""
+				metamodel "ecore"
+				metamodel "foo"
+				
+				modifyEcore aTest epackage foo {}
+			"""
 		, "");
 	}
 
