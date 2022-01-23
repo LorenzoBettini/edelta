@@ -20,11 +20,11 @@ https://lorenzobettini.github.io/edelta-releases/
 
 IMPORTANT: Edelta requires Xtext, if this is not already installed, all dependencies will be automatically installed from this update site, which is self-contained.
 
-WARNING: the previous update site hosted on bintray will disappear soon, so please make sure you update your existing Eclipse distribution where you were already using Edelta.
+WARNING: the previous update site hosted on bintray does not exist anymore, so please make sure you update your existing Eclipse distribution where you were already using Edelta.
 
 ### Pre-configured Eclipse distributions with Edelta installed, for several architectures.
 
-Download a complete Eclipse distribution with Edelta installed; choose the one for your OS and architecture: https://sourceforge.net/projects/edelta/files/products
+Download a complete Eclipse distribution with Edelta installed; choose the one for your OS and architecture (since version 2.8.0, we also provide a version for the `aarch64` architecture, for Linux and macOS): https://sourceforge.net/projects/edelta/files/products
 
 **WARNING** If you downloaded one of Edelta Eclipse distributions earlier than version 0.3.x you won't be able to update it; please download a brand new Edelta Eclipse distribution with version at least 0.3.x (issue [#13](https://github.com/LorenzoBettini/edelta/issues/13)).
 

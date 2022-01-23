@@ -129,6 +129,32 @@ public class EdeltaStandardLibraryTest {
 	}
 
 	@Test
+	public void test_addNewEClassAsSibling() {
+		var ePackage = ecoreFactory.createEPackage();
+		var sibling = ecoreFactory.createEClass();
+		ePackage.getEClassifiers().add(sibling);
+		var eClass = lib.addNewEClassAsSibling(sibling, "test");
+		assertEquals("test", eClass.getName());
+		assertSame(eClass,
+			ePackage.getEClassifiers().get(1));
+	}
+
+	@Test
+	public void test_addNewEClassAsSiblingWithInitializer() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		var sibling = ecoreFactory.createEClass();
+		ePackage.getEClassifiers().add(sibling);
+		var eClass = lib.addNewEClassAsSibling(sibling, "test",
+				cl -> {
+					assertNotNull(cl.getEPackage());
+					cl.setName("changed");
+				});
+		assertEquals("changed", eClass.getName());
+		assertSame(eClass,
+				ePackage.getEClassifiers().get(1));
+	}
+
+	@Test
 	public void test_addNewAbstractEClass() {
 		EPackage ePackage = ecoreFactory.createEPackage();
 		EClass eClass = lib.addNewAbstractEClass(ePackage, "test");
@@ -186,6 +212,32 @@ public class EdeltaStandardLibraryTest {
 	}
 
 	@Test
+	public void test_addNewEEnumAsSibling() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		var sibling = ecoreFactory.createEEnum();
+		ePackage.getEClassifiers().add(sibling);
+		EEnum eEnum = lib.addNewEEnumAsSibling(sibling, "test");
+		assertEquals("test", eEnum.getName());
+		assertSame(eEnum,
+			ePackage.getEClassifiers().get(1));
+	}
+
+	@Test
+	public void test_addNewEEnumAsSiblingWithInitializer() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		var sibling = ecoreFactory.createEEnum();
+		ePackage.getEClassifiers().add(sibling);
+		EEnum eEnum = lib.addNewEEnumAsSibling(sibling, "test",
+				cl -> {
+					assertNotNull(cl.getEPackage());
+					cl.setName("changed");
+				});
+		assertEquals("changed", eEnum.getName());
+		assertSame(eEnum,
+				ePackage.getEClassifiers().get(1));
+	}
+
+	@Test
 	public void test_addEEnumLiteral() {
 		EEnum eEnum = ecoreFactory.createEEnum();
 		EEnumLiteral eEnumLiteral = ecoreFactory.createEEnumLiteral();
@@ -234,6 +286,33 @@ public class EdeltaStandardLibraryTest {
 	}
 
 	@Test
+	public void test_addNewEEnumLiteralAsSibling() {
+		EEnum eEnum = ecoreFactory.createEEnum();
+		var sibling = ecoreFactory.createEEnumLiteral();
+		eEnum.getELiterals().add(sibling);
+		EEnumLiteral eEnumLiteral =
+				lib.addNewEEnumLiteralAsSibling(sibling, "test");
+		assertEquals("test", eEnumLiteral.getName());
+		assertSame(eEnumLiteral,
+				eEnum.getELiterals().get(1));
+	}
+
+	@Test
+	public void test_addNewEEnumLiteralAsSiblingWithInitializer() {
+		EEnum eEnum = ecoreFactory.createEEnum();
+		var sibling = ecoreFactory.createEEnumLiteral();
+		eEnum.getELiterals().add(sibling);
+		EEnumLiteral eEnumLiteral = lib.addNewEEnumLiteralAsSibling(sibling, "test",
+				lit -> {
+					assertNotNull(lit.getEEnum());
+					lit.setName("changed");
+				});
+		assertEquals("changed", eEnumLiteral.getName());
+		assertSame(eEnumLiteral,
+				eEnum.getELiterals().get(1));
+	}
+
+	@Test
 	public void test_addEDataType() {
 		EPackage ePackage = ecoreFactory.createEPackage();
 		EDataType eEnum = ecoreFactory.createEDataType();
@@ -265,6 +344,38 @@ public class EdeltaStandardLibraryTest {
 		assertEquals("changed", eDataType.getName());
 		assertSame(eDataType,
 			ePackage.getEClassifiers().get(0));
+		assertEquals("java.lang.String", eDataType.getInstanceTypeName());
+		assertEquals("java.lang.String", eDataType.getInstanceClassName());
+		assertEquals(String.class, eDataType.getInstanceClass());
+	}
+
+	@Test
+	public void test_addNewEDataTypeAsSibling() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		var sibling = ecoreFactory.createEClass();
+		ePackage.getEClassifiers().add(sibling);
+		EDataType eDataType = lib.addNewEDataTypeAsSibling(sibling, "test", "java.lang.String");
+		assertEquals("test", eDataType.getName());
+		assertSame(eDataType,
+			ePackage.getEClassifiers().get(1));
+		assertEquals("java.lang.String", eDataType.getInstanceTypeName());
+		assertEquals("java.lang.String", eDataType.getInstanceClassName());
+		assertEquals(String.class, eDataType.getInstanceClass());
+	}
+
+	@Test
+	public void test_addNewEDataTypeAsSiblingWithInitializer() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		var sibling = ecoreFactory.createEClass();
+		ePackage.getEClassifiers().add(sibling);
+		EDataType eDataType = lib.addNewEDataTypeAsSibling(sibling, "test", "java.lang.String",
+				cl -> {
+					assertNotNull(cl.getEPackage());
+					cl.setName("changed");
+				});
+		assertEquals("changed", eDataType.getName());
+		assertSame(eDataType,
+			ePackage.getEClassifiers().get(1));
 		assertEquals("java.lang.String", eDataType.getInstanceTypeName());
 		assertEquals("java.lang.String", eDataType.getInstanceClassName());
 		assertEquals(String.class, eDataType.getInstanceClass());
@@ -326,6 +437,38 @@ public class EdeltaStandardLibraryTest {
 	}
 
 	@Test
+	public void test_addNewEAttributeAsSibling() {
+		EClass eClass = ecoreFactory.createEClass();
+		var sibling = ecoreFactory.createEAttribute();
+		eClass.getEStructuralFeatures().add(sibling);
+		EAttribute eAttribute =
+				lib.addNewEAttributeAsSibling(sibling, "test", ESTRING);
+		assertEquals("test", eAttribute.getName());
+		assertEquals(ESTRING, eAttribute.getEType());
+		assertEquals(ESTRING, eAttribute.getEAttributeType());
+		assertSame(eAttribute,
+				eClass.getEStructuralFeatures().get(1));
+	}
+
+	@Test
+	public void test_addNewEAttributeAsSiblingWithInitializer() {
+		EClass eClass = ecoreFactory.createEClass();
+		var sibling = ecoreFactory.createEAttribute();
+		eClass.getEStructuralFeatures().add(sibling);
+		EAttribute eAttribute =
+			lib.addNewEAttributeAsSibling(sibling, "test", ESTRING,
+				attr -> {
+					assertNotNull(attr.getEContainingClass());
+					attr.setName("changed");
+				});
+		assertEquals("changed", eAttribute.getName());
+		assertEquals(ESTRING, eAttribute.getEType());
+		assertEquals(ESTRING, eAttribute.getEAttributeType());
+		assertSame(eAttribute,
+				eClass.getEStructuralFeatures().get(1));
+	}
+
+	@Test
 	public void test_addEReference() {
 		EClass eClass = ecoreFactory.createEClass();
 		EReference eReference = ecoreFactory.createEReference();
@@ -360,6 +503,38 @@ public class EdeltaStandardLibraryTest {
 		assertEquals(EOBJECT, eReference.getEReferenceType());
 		assertSame(eReference,
 				eClass.getEStructuralFeatures().get(0));
+	}
+
+	@Test
+	public void test_addNewEReferenceAsSibling() {
+		EClass eClass = ecoreFactory.createEClass();
+		var sibling = ecoreFactory.createEAttribute();
+		eClass.getEStructuralFeatures().add(sibling);
+		EReference eReference =
+				lib.addNewEReferenceAsSibling(sibling, "test", EOBJECT);
+		assertEquals("test", eReference.getName());
+		assertEquals(EOBJECT, eReference.getEType());
+		assertEquals(EOBJECT, eReference.getEReferenceType());
+		assertSame(eReference,
+				eClass.getEStructuralFeatures().get(1));
+	}
+
+	@Test
+	public void test_addNewEReferenceAsSiblingWithInitializer() {
+		EClass eClass = ecoreFactory.createEClass();
+		var sibling = ecoreFactory.createEAttribute();
+		eClass.getEStructuralFeatures().add(sibling);
+		EReference eReference =
+			lib.addNewEReferenceAsSibling(sibling, "test", EOBJECT,
+				ref -> {
+					assertNotNull(ref.getEContainingClass());
+					ref.setName("changed");
+				});
+		assertEquals("changed", eReference.getName());
+		assertEquals(EOBJECT, eReference.getEType());
+		assertEquals(EOBJECT, eReference.getEReferenceType());
+		assertSame(eReference,
+				eClass.getEStructuralFeatures().get(1));
 	}
 
 	@Test

@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.github.lorenzobettini.edelta</groupId>
     <artifactId>edelta.bom</artifactId>
-    <version>2.6.6-SNAPSHOT</version>
+    <version>2.8.0-SNAPSHOT</version>
     <relativePath>edelta.bom</relativePath>
   </parent>
   <artifactId>edelta.parent</artifactId>
@@ -16,7 +16,7 @@
 
   <properties>
     <eclipse-version>2021-12</eclipse-version>
-    <assertj-version>3.20.2</assertj-version>
+    <assertj-version>3.22.0</assertj-version>
     <mockito-version>3.12.4</mockito-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
@@ -93,6 +93,14 @@
       will always point to the directory of the pom where the pluginManagement's 
       plugins are used -->
     <ant-files-path>${project.basedir}/../releng/releasing</ant-files-path>
+
+    <!-- You can use the create_local_target.ant in the target platform project
+      to create a local.target pointing to a local mirror (which must
+      be created in advance, see, e.g.,
+      https://github.com/LorenzoBettini/tycho-mirror-example
+      Then, pass -Dtarget-file-name=local.target
+      to resolve the target platform using the local mirrro -->
+    <target-file-name>edelta.target.target</target-file-name>
 
     <!-- pass "-n" to perform a trial run with no changes made -->
     <dryrun/>
@@ -229,15 +237,12 @@
       <build>
         <plugins>
           <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+          </plugin>
+          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <!-- MJAVADOC-620 – Maven Javadoc Plugin fails to resolve the dependencies 
-              when used with Java 11 -->
-            <version>3.2.0</version>
-            <configuration>
-              <detectOfflineLinks>false</detectOfflineLinks>
-              <source>8</source>
-            </configuration>
           </plugin>
           <plugin>
             <groupId>org.eclipse.tycho</groupId>
@@ -264,17 +269,41 @@
         <artifactId>target-platform-configuration</artifactId>
         <configuration>
           <target>
-            <artifact>
-              <groupId>io.github.lorenzobettini.edelta</groupId>
-              <artifactId>edelta.target</artifactId>
-              <version>${project.version}</version>
-            </artifact>
+            <file>
+              ${project.basedir}/../edelta.target/${target-file-name}
+            </file>
           </target>
+          <environments combine.children="append">
+            <environment>
+              <os>macosx</os>
+              <ws>cocoa</ws>
+              <arch>aarch64</arch>
+            </environment>
+            <environment>
+              <os>linux</os>
+              <ws>gtk</ws>
+              <arch>aarch64</arch>
+            </environment>
+          </environments>
         </configuration>
       </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <configuration>
+            <detectOfflineLinks>false</detectOfflineLinks>
+            <!-- https://issues.apache.org/jira/browse/MJAVADOC-620
+             [ERROR] RuntimeException: Error while generating Javadoc:
+             Unable to derive module descriptor for
+             .m2/repository/p2/osgi/bundle/org.eclipse.equinox.launcher.cocoa.macosx.x86_64/1.2.400.v20211117-0650/org.eclipse.equinox.launcher.cocoa.macosx.x86_64-1.2.400.v20211117-0650.jar
+             Caused by: java.lang.IllegalArgumentException: org.eclipse.equinox.launcher.cocoa.macosx.x86.64: Invalid module name: '64' is not a Java identifier
+             -->
+            <source>8</source>
+          </configuration>
+        </plugin>
         <plugin>
           <groupId>org.eclipse.xtend</groupId>
           <artifactId>xtend-maven-plugin</artifactId>

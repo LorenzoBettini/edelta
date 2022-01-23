@@ -87,6 +87,14 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 		return c;
 	}
 
+	public EClass addNewEClassAsSibling(EClassifier sibling, String name) {
+		return addNewEClassAsSibling(sibling, name, null);
+	}
+
+	public EClass addNewEClassAsSibling(EClassifier sibling, String name, Consumer<EClass> initializer) {
+		return addNewEClass(sibling.getEPackage(), name, initializer);
+	}
+
 	public EClass addNewAbstractEClass(EPackage ePackage, String name) {
 		return addNewAbstractEClass(ePackage, name, null);
 	}
@@ -114,6 +122,14 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 		return e;
 	}
 
+	public EEnum addNewEEnumAsSibling(EClassifier sibling, String name) {
+		return addNewEEnumAsSibling(sibling, name, null);
+	}
+
+	public EEnum addNewEEnumAsSibling(EClassifier sibling, String name, Consumer<EEnum> initializer) {
+		return addNewEEnum(sibling.getEPackage(), name, initializer);
+	}
+
 	public void addEEnumLiteral(EEnum eEnum, EEnumLiteral eEnumLiteral) {
 		var eLiterals = eEnum.getELiterals();
 		var existing = eEnum.getEEnumLiteral(eEnumLiteral.getName());
@@ -133,6 +149,14 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 		return e;
 	}
 
+	public EEnumLiteral addNewEEnumLiteralAsSibling(EEnumLiteral sibling, String name) {
+		return addNewEEnumLiteralAsSibling(sibling, name, null);
+	}
+
+	public EEnumLiteral addNewEEnumLiteralAsSibling(EEnumLiteral sibling, String name, Consumer<EEnumLiteral> initializer) {
+		return addNewEEnumLiteral(sibling.getEEnum(), name, initializer);
+	}
+
 	public void addEDataType(EPackage ePackage, EDataType eDataType) {
 		addEClassifier(ePackage, eDataType);
 	}
@@ -148,6 +172,14 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 		addEDataType(ePackage, e);
 		safeRunInitializer(initializer, e);
 		return e;
+	}
+
+	public EDataType addNewEDataTypeAsSibling(EClassifier sibling, String name, String instanceTypeName) {
+		return addNewEDataTypeAsSibling(sibling, name, instanceTypeName, null);
+	}
+
+	public EDataType addNewEDataTypeAsSibling(EClassifier sibling, String name, String instanceTypeName, Consumer<EDataType> initializer) {
+		return addNewEDataType(sibling.getEPackage(), name, instanceTypeName, initializer);
 	}
 
 	public void addEAttribute(EClass eClass, EAttribute eAttribute) {
@@ -167,6 +199,14 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 		return e;
 	}
 
+	public EAttribute addNewEAttributeAsSibling(EStructuralFeature sibling, String name, EDataType dataType) {
+		return addNewEAttributeAsSibling(sibling, name, dataType, null);
+	}
+
+	public EAttribute addNewEAttributeAsSibling(EStructuralFeature sibling, String name, EDataType dataType, Consumer<EAttribute> initializer) {
+		return addNewEAttribute(sibling.getEContainingClass(), name, dataType, initializer);
+	}
+
 	public void addEReference(EClass eClass, EReference eReference) {
 		addEStructuralFeature(eClass, eReference);
 	}
@@ -182,6 +222,14 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 		addEReference(eClass, e);
 		safeRunInitializer(initializer, e);
 		return e;
+	}
+
+	public EReference addNewEReferenceAsSibling(EStructuralFeature sibling, String name, EClass referenceType) {
+		return addNewEReferenceAsSibling(sibling, name, referenceType, null);
+	}
+
+	public EReference addNewEReferenceAsSibling(EStructuralFeature sibling, String name, EClass referenceType, Consumer<EReference> initializer) {
+		return addNewEReference(sibling.getEContainingClass(), name, referenceType, initializer);
 	}
 
 	public EReference addNewContainmentEReference(EClass eClass, String name, EClass referenceType) {

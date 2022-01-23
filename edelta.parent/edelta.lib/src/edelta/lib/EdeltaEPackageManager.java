@@ -3,6 +3,9 @@
  */
 package edelta.lib;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -86,17 +89,39 @@ public class EdeltaEPackageManager {
 		if (EcorePackage.eNAME.equals(packageName)) {
 			return EcorePackage.eINSTANCE;
 		}
-		return resourceSet.getResources().
-			stream().
-			map(resource -> resource.getContents().get(0)).
-			filter(EPackage.class::isInstance).
-			map(EPackage.class::cast).
-			filter(p -> p.getName().equals(packageName)).
-			findAny().
-			orElse(null);
+		return EdeltaResourceUtils.getEPackages(ecoreToResourceMap.values())
+			.stream()
+			.filter(p -> p.getName().equals(packageName))
+			.findFirst()
+			.orElse(null);
 	}
 
-	public Set<Entry<String, Resource>> getResourceMapEntrySet() {
+	private Set<Entry<String, Resource>> getResourceMapEntrySet() {
 		return ecoreToResourceMap.entrySet();
+	}
+
+	/**
+	 * Saves the modified EPackages as Ecore files in the specified
+	 * output path.
+	 * 
+	 * The final path of the generated Ecore files is made of the
+	 * specified outputPath and the original loaded Ecore
+	 * file names.
+	 * 
+	 * @param outputPath
+	 * @throws IOException 
+	 */
+	public void saveEcores(String outputPath) throws IOException {
+		for (Entry<String, Resource> entry : getResourceMapEntrySet()) {
+			var p = Paths.get(entry.getKey());
+			final var fileName = p.getFileName().toString();
+			LOG.info("Saving " + outputPath + "/" + fileName);
+			var newFile = new File(outputPath, fileName);
+			newFile.getParentFile().mkdirs();
+			var fos = new FileOutputStream(newFile);
+			entry.getValue().save(fos, null);
+			fos.flush();
+			fos.close();
+		}
 	}
 }

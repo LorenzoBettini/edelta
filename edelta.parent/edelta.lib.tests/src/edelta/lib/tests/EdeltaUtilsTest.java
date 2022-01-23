@@ -37,7 +37,7 @@ import edelta.lib.EdeltaUtils;
  */
 public class EdeltaUtilsTest {
 
-	private EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
+	private static EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
 
 	@Test
 	public void testNewEClass() {
@@ -578,5 +578,24 @@ public class EdeltaUtilsTest {
 			.containsExactlyInAnyOrder(package2);
 		assertThat(EdeltaUtils.usedPackages(package4))
 			.containsExactlyInAnyOrder(package2, package1);
+	}
+
+	@Test
+	public void test_getEContainingPackage() {
+		var ePackage = ecoreFactory.createEPackage();
+		assertThat(EdeltaUtils.getEContainingPackage(ePackage))
+			.isSameAs(ePackage);
+		var eClass = ecoreFactory.createEClass();
+		assertThat(EdeltaUtils.getEContainingPackage(eClass))
+			.isNull();
+		ePackage.getEClassifiers().add(eClass);
+		assertThat(EdeltaUtils.getEContainingPackage(eClass))
+			.isSameAs(ePackage);
+		var feature = ecoreFactory.createEAttribute();
+		assertThat(EdeltaUtils.getEContainingPackage(feature))
+			.isNull();
+		eClass.getEStructuralFeatures().add(feature);
+		assertThat(EdeltaUtils.getEContainingPackage(feature))
+			.isSameAs(ePackage);
 	}
 }
