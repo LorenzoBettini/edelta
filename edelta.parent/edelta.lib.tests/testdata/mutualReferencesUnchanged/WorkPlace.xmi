@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testecoreforreferences2:WorkPlace
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:testecoreforreferences2="http://my.testecoreforreferences2.org"
+    xsi:schemaLocation="http://my.testecoreforreferences2.org TestEcoreForReferences2.ecore"
+    address="Test Address">
+  <persons href="Person.xmi#/"/>
+</testecoreforreferences2:WorkPlace>

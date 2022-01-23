@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testecoreforreferences1:Person xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:testecoreforreferences1="http://my.testecoreforreferences1.org" xsi:schemaLocation="http://my.testecoreforreferences1.org TestEcoreForReferences1.ecore" firstname="Test Firstname" lastname="Test Lastname">
+  <works href="WorkPlace.xmi#/"/>
+</testecoreforreferences1:Person>
