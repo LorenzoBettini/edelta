@@ -51,11 +51,12 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 		var ecoreRefExp = 
 			lastEcoreReferenceExpression(
 				parseWithTestEcoreWithSubPackage(
-				"metamodel \"mainpackage\"\n"
-				+ "\n"
-				+ "modifyEcore aTest epackage mainpackage {\n"
-				+ "    ecoreref(mySubPackageAttribute)\n"
-				+ "}"
+				"""
+					metamodel "mainpackage"
+					
+					modifyEcore aTest epackage mainpackage {
+					    ecoreref(mySubPackageAttribute)
+					}"""
 				));
 		assertEquals(
 			"getEAttribute(\"mainpackage.mainsubpackage\", \"MainSubPackageFooClass\", \"mySubPackageAttribute\")",
