@@ -330,13 +330,13 @@ public class EcoreCopierTest {
 		// this will not match
 		copier.addEClassMigrator(
 			c -> c.getName().equals("Non Existent"),
-			c -> (EClass) packageManagerModified.getEPackage(
-					"mypackage").getEClassifier("MyClassRenamed")
+			c -> getEClass(packageManagerModified,
+					"mypackage", "MyClassRenamed")
 		);
 		copier.addEClassMigrator(
 			c -> c.getName().equals("MyClass"),
-			c -> (EClass) packageManagerModified.getEPackage(
-					"mypackage").getEClassifier("MyClassRenamed")
+			c -> getEClass(packageManagerModified,
+					"mypackage", "MyClassRenamed")
 		);
 		copyModels(copier, basedir);
 
@@ -364,16 +364,14 @@ public class EcoreCopierTest {
 				var name = f.getName();
 				return name.equals("myContents");
 			},
-			f -> ((EClass) packageManagerModified.getEPackage(
-					"mypackage").getEClassifier("MyRoot"))
-					.getEStructuralFeature(f.getName() + "Renamed")
+			f -> getFeature(packageManagerModified,
+				"mypackage", "MyRoot", f.getName() + "Renamed")
 		);
 		copier.addMigrator(
 			EdeltaEmfCopier.ModelMigrator.migrateById(
 				"mypackage.MyRoot.myReferences",
-				() -> ((EClass) packageManagerModified.getEPackage(
-						"mypackage").getEClassifier("MyRoot"))
-						.getEStructuralFeature("myReferencesRenamed")
+				() -> getFeature(packageManagerModified,
+						"mypackage", "MyRoot", "myReferencesRenamed")
 			)
 		);
 		copyModels(copier, basedir);
@@ -384,6 +382,16 @@ public class EcoreCopierTest {
 		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
 		assertGeneratedFiles(subdir, output, "MyClass.xmi");
 		assertGeneratedFiles(subdir, output, "My.ecore");
+	}
+
+	private EStructuralFeature getFeature(EdeltaEPackageManager packageManager, String packageName, String className, String featureName) {
+		return getEClass(packageManager, packageName, className)
+				.getEStructuralFeature(featureName);
+	}
+
+	private EClass getEClass(EdeltaEPackageManager packageManager, String packageName, String className) {
+		return (EClass) packageManager.getEPackage(
+				packageName).getEClassifier(className);
 	}
 
 	private void assertGeneratedFiles(String subdir, String output, String fileName) throws IOException {
