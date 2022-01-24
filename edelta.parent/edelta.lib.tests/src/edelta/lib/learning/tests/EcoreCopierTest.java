@@ -3,20 +3,17 @@ package edelta.lib.learning.tests;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirectories;
 import static java.util.Collections.singletonList;
-import static java.util.Comparator.comparing;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EClass;
@@ -91,25 +88,7 @@ public class EcoreCopierTest {
 		}
 
 		public static EdeltaEmfCopier createFromResources(Collection<Resource> resources) {
-			return new EdeltaEmfCopier(getEPackages(resources));
-		}
-
-		/**
-		 * TODO: extract into EdeltaUtils, since it's used also in
-		 * EdeltaDependencyAnalyzer
-		 * 
-		 * @param resources
-		 * @return
-		 */
-		private static Collection<EPackage> getEPackages(Collection<Resource> resources) {
-			return resources.stream()
-				.map(r -> (EPackage) r.getContents().get(0))
-				.sorted(ePackageComparator()) // we must be deterministic
-				.collect(Collectors.toList());
-		}
-
-		private static Comparator<EPackage> ePackageComparator() {
-			return comparing(EPackage::getNsURI);
+			return new EdeltaEmfCopier(EdeltaResourceUtils.getEPackages(resources));
 		}
 
 		public void addMigrator(Predicate<ENamedElement> predicate, Function<ENamedElement, ENamedElement> function) {
