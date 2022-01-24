@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workplaceforreferences:WorkPlace
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:workplaceforreferences="http://my.workplaceforreferences.org"
+    xsi:schemaLocation="http://my.workplaceforreferences.org WorkPlaceForReferences.ecore"
+    address="Address 1">
+  <employees
+      href="Person1.xmi#/"/>
+  <employees
+      href="Person2.xmi#/"/>
+</workplaceforreferences:WorkPlace>

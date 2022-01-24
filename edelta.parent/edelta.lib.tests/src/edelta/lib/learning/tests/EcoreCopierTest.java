@@ -410,20 +410,8 @@ public class EcoreCopierTest {
 		// won't be resolved during the copy of the models.
 		EcoreUtil.resolveAll(modifiedEcore1.getResourceSet());
 
-		// this simulates the renameElement in our library
-		var refactoring = new Object() {
-			void renameElement(ENamedElement e, String newName) {
-				var originalId = EdeltaUtils.getFullyQualifiedName(e);
-				e.setName(newName);
-				copier.addMigrator(
-						EdeltaEmfCopier.ModelMigrator.migrateById(
-							originalId,
-							() -> e
-						));
-			}
-		};
-
-		refactoring.renameElement(
+		renameElement(
+				copier,
 				getEClass(packageManagerModified, "personforreferences", "Person"),
 				"PersonRenamed");
 
@@ -438,6 +426,76 @@ public class EcoreCopierTest {
 		assertGeneratedFiles(subdir, output, "WorkPlace1.xmi");
 		assertGeneratedFiles(subdir, output, "PersonForReferences.ecore");
 		assertGeneratedFiles(subdir, output, "WorkPlaceForReferences.ecore");
+	}
+
+	@Test
+	public void testCopyMutualReferencesRenamed2() throws IOException {
+		var subdir = "mutualReferencesUnchanged/";
+		var basedir = TESTDATA + subdir;
+		packageManagerOriginal.loadEcoreFile(basedir + "PersonForReferences.ecore");
+		packageManagerOriginal.loadEcoreFile(basedir + "WorkPlaceForReferences.ecore");
+		var modifiedEcore1 = packageManagerModified
+				.loadEcoreFile(basedir + "PersonForReferences.ecore");
+		var modifiedEcore2 = packageManagerModified
+				.loadEcoreFile(basedir + "WorkPlaceForReferences.ecore");
+
+		// models are loaded only in the original package manager
+		packageManagerOriginal.loadModelFile(basedir + "Person1.xmi");
+		packageManagerOriginal.loadModelFile(basedir + "Person2.xmi");
+		packageManagerOriginal.loadModelFile(basedir + "WorkPlace1.xmi");
+
+		var copier = EdeltaEmfCopier
+			.createFromResources(
+				List.of(modifiedEcore1, modifiedEcore2));
+
+		// it's crucial all cross references are resolved before
+		// performing any renaming, otherwise later the proxies (to the now renamed class)
+		// won't be resolved during the copy of the models.
+		EcoreUtil.resolveAll(modifiedEcore1.getResourceSet());
+
+		// execute this before...
+		renameElement(
+				copier,
+				getFeature(packageManagerModified, "personforreferences", "Person", "works"),
+				"workplace");
+		// renaming the class
+		renameElement(
+				copier,
+				getEClass(packageManagerModified, "personforreferences", "Person"),
+				"PersonRenamed");
+		renameElement(
+				copier,
+				getFeature(packageManagerModified, "WorkPlaceForReferences", "WorkPlace", "persons"),
+				"employees");
+
+		copyModels(copier, basedir);
+
+		subdir = "mutualReferencesRenamed2/";
+		var output = OUTPUT + subdir;
+		packageManagerModified.saveEcores(output);
+		packageManagerModified.saveModels(output);
+		assertGeneratedFiles(subdir, output, "Person1.xmi");
+		assertGeneratedFiles(subdir, output, "Person2.xmi");
+		assertGeneratedFiles(subdir, output, "WorkPlace1.xmi");
+		assertGeneratedFiles(subdir, output, "PersonForReferences.ecore");
+		assertGeneratedFiles(subdir, output, "WorkPlaceForReferences.ecore");
+	}
+
+	/**
+	 * This simulates the renameElement in our library
+	 * 
+	 * @param copier
+	 * @param e
+	 * @param newName
+	 */
+	private void renameElement(EdeltaEmfCopier copier, ENamedElement e, String newName) {
+		var originalId = EdeltaUtils.getFullyQualifiedName(e);
+		e.setName(newName);
+		copier.addMigrator(
+				EdeltaEmfCopier.ModelMigrator.migrateById(
+					originalId,
+					() -> e
+				));
 	}
 
 	private EStructuralFeature getFeature(EdeltaEPackageManager packageManager, String packageName, String className, String featureName) {
