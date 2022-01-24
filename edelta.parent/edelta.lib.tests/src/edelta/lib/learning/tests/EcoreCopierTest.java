@@ -18,11 +18,13 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
@@ -479,6 +481,27 @@ public class EcoreCopierTest {
 		assertGeneratedFiles(subdir, output, "WorkPlace1.xmi");
 		assertGeneratedFiles(subdir, output, "PersonForReferences.ecore");
 		assertGeneratedFiles(subdir, output, "WorkPlaceForReferences.ecore");
+	}
+
+	@Test
+	public void testChangedAttributeTypeWithoutProperMigration() {
+		var subdir = "changedAttributeType/";
+		var basedir = TESTDATA + subdir;
+		packageManagerOriginal.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
+		var modifiedEcore = packageManagerModified.loadEcoreFile(basedir + "My.ecore");
+
+		packageManagerOriginal.loadModelFile(basedir + ORIGINAL + "MyClass.xmi");
+
+		var copier = EdeltaEmfCopier.createFromResources(singletonList(modifiedEcore));
+
+		// actual refactoring
+		getFeature(packageManagerModified, "mypackage", "MyClass", "myAttribute")
+			.setEType(EcorePackage.eINSTANCE.getEInt());
+
+		Assertions.assertThatThrownBy(() -> copyModels(copier, basedir))
+			.isInstanceOf(ClassCastException.class)
+			.hasMessageContaining(
+				"The value of type 'class java.lang.String' must be of type 'class java.lang.Integer'");
 	}
 
 	/**
