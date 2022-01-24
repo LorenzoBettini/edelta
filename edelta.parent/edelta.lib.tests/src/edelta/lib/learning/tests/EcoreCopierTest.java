@@ -16,11 +16,13 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.assertj.core.api.Assertions;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -87,6 +89,8 @@ public class EcoreCopierTest {
 		private Collection<EPackage> packages;
 
 		private Collection<ModelMigrator<ENamedElement>> migrators = new ArrayList<>();
+
+		private Collection<ModelMigrator<Object>> valueMigrators = new ArrayList<>();
 
 		public EdeltaEmfCopier(Collection<EPackage> packages) {
 			this.packages = packages;
@@ -164,6 +168,26 @@ public class EcoreCopierTest {
 			return packages.stream()
 					.filter(p -> p.getName().equals(ePackage.getName()))
 					.findFirst();
+		}
+
+		public void addEAttributeMigrator(Predicate<EAttribute> predicate, Function<EObject, Object> function) {
+			valueMigrators.add(
+				new ModelMigrator<>(
+					o -> predicate.test((EAttribute) o),
+					function
+				)
+			);
+		}
+
+		@Override
+		protected void copyAttributeValue(EAttribute eAttribute, EObject eObject, Object value, Setting setting) {
+			var map = valueMigrators.stream()
+					.filter(m -> m.canApply(eAttribute))
+					.map(m -> m.apply(eObject));
+			var newValue = map
+				.findFirst()
+				.orElse(value);
+			super.copyAttributeValue(eAttribute, eObject, newValue, setting);
 		}
 	}
 
@@ -486,6 +510,40 @@ public class EcoreCopierTest {
 			.isInstanceOf(ClassCastException.class)
 			.hasMessageContaining(
 				"The value of type 'class java.lang.String' must be of type 'class java.lang.Integer'");
+	}
+
+	@Test
+	public void testChangedAttributeType() throws IOException {
+		var subdir = "changedAttributeType/";
+		var basedir = TESTDATA + subdir;
+		packageManagerOriginal.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
+		var modifiedEcore = packageManagerModified.loadEcoreFile(basedir + "My.ecore");
+
+		packageManagerOriginal.loadModelFile(basedir + ORIGINAL + "MyClass.xmi");
+
+		var copier = EdeltaEmfCopier.createFromResources(singletonList(modifiedEcore));
+
+		// actual refactoring
+		var attribute = getFeature(packageManagerModified, "mypackage", "MyClass", "myAttribute");
+		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
+
+		copier.addEAttributeMigrator(
+			a -> a.getName().equals("myAttribute"),
+			o -> 
+				// o is the old object,
+				// so we must use the original feature to retrieve the value to copy
+				// that is, don't use attribute, which is the one of the new package
+				Integer.parseInt(
+					o.eGet(o.eClass().getEStructuralFeature("myAttribute")).toString())
+		);
+
+		copyModels(copier, basedir);
+
+		var output = OUTPUT + subdir;
+		packageManagerModified.saveEcores(output);
+		packageManagerModified.saveModels(output);
+		assertGeneratedFiles(subdir, output, "MyClass.xmi");
+		assertGeneratedFiles(subdir, output, "My.ecore");
 	}
 
 	/**
