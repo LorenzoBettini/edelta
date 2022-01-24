@@ -53,26 +53,31 @@ public class EcoreCopierTest {
 	static class EdeltaEmfCopier extends Copier {
 		private static final long serialVersionUID = 1L;
 
-		public static class ModelMigrator {
+		/**
+		 * @author Lorenzo Bettini
+		 *
+		 * @param <R> the type of the returned value when applying the function
+		 */
+		public static class ModelMigrator<R> {
 			private Predicate<EObject> predicate;
-			private Function<EObject, EObject> function;
+			private Function<EObject, R> function;
 
 			@SuppressWarnings("unchecked")
-			public <T extends EObject> ModelMigrator(Predicate<T> predicate, Function<T, T> function) {
+			public <T extends EObject> ModelMigrator(Predicate<T> predicate, Function<T, R> function) {
 				this.predicate = (Predicate<EObject>) predicate;
-				this.function = (Function<EObject, EObject>) function;
+				this.function = (Function<EObject, R>) function;
 			}
 
 			public boolean canApply(EObject arg) {
 				return predicate.test(arg);
 			}
 
-			public EObject apply(EObject arg) {
+			public R apply(EObject arg) {
 				return function.apply(arg);
 			}
 
-			public static ModelMigrator migrateById(String id, Supplier<EObject> targetSupplier) {
-				return new ModelMigrator(
+			public static <R> ModelMigrator<R> migrateById(String id, Supplier<R> targetSupplier) {
+				return new ModelMigrator<R>(
 					e -> EdeltaUtils.getFullyQualifiedName(e).equals(id),
 					e -> targetSupplier.get()
 				);
@@ -81,7 +86,7 @@ public class EcoreCopierTest {
 
 		private Collection<EPackage> packages;
 
-		private Collection<ModelMigrator> migrators = new ArrayList<>();
+		private Collection<ModelMigrator<ENamedElement>> migrators = new ArrayList<>();
 
 		public EdeltaEmfCopier(Collection<EPackage> packages) {
 			this.packages = packages;
@@ -92,7 +97,7 @@ public class EcoreCopierTest {
 		}
 
 		public void addMigrator(Predicate<ENamedElement> predicate, Function<ENamedElement, ENamedElement> function) {
-			addMigrator(new ModelMigrator(predicate, function));
+			addMigrator(new ModelMigrator<>(predicate, function));
 		}
 
 		public void addEClassMigrator(Predicate<EClass> predicate, Function<EClass, EClass> function) {
@@ -109,7 +114,7 @@ public class EcoreCopierTest {
 				t -> function.apply((EStructuralFeature) t));
 		}
 
-		public void addMigrator(ModelMigrator migrator) {
+		public void addMigrator(ModelMigrator<ENamedElement> migrator) {
 			migrators.add(migrator);
 		}
 
