@@ -547,6 +547,51 @@ public class EcoreCopierTest {
 	}
 
 	/**
+	 * This performs the refactoring manual: first change name of the
+	 * attribute then change the type.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testChangedAttributeNameAndType() throws IOException {
+		var subdir = "changedAttributeType/";
+		var basedir = TESTDATA + subdir + ORIGINAL;
+		packageManagerOriginal.loadEcoreFile(basedir + "My.ecore");
+		var modifiedEcore = packageManagerModified.loadEcoreFile(basedir + "My.ecore");
+
+		packageManagerOriginal.loadModelFile(basedir + "MyClass.xmi");
+
+		var copier = EdeltaEmfCopier.createFromResources(singletonList(modifiedEcore));
+
+		// actual refactoring
+		var attribute = getFeature(packageManagerModified, "mypackage", "MyClass", "myAttribute");
+		// first rename
+		renameElement(copier, attribute, "newName");
+		// then change type
+		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
+
+		copier.addEAttributeMigrator(
+			// the predicate refers to the original name
+			a -> a.getName().equals("myAttribute"),
+			o -> 
+				// o is the old object,
+				// so we must use the original feature to retrieve the value to copy
+				// that is, don't use attribute, which is the one of the new package
+				Integer.parseInt(
+					o.eGet(o.eClass().getEStructuralFeature("myAttribute")).toString())
+		);
+
+		copyModels(copier, basedir);
+
+		subdir = "changedAttributeNameAndType/";;
+		var output = OUTPUT + subdir;
+		packageManagerModified.saveEcores(output);
+		packageManagerModified.saveModels(output);
+		assertGeneratedFiles(subdir, output, "MyClass.xmi");
+		assertGeneratedFiles(subdir, output, "My.ecore");
+	}
+
+	/**
 	 * This simulates the renameElement in our library
 	 * 
 	 * @param copier
