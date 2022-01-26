@@ -88,6 +88,13 @@ public class EcoreCopierTest {
 					e -> targetSupplier.get()
 				);
 			}
+
+			public static <R> ModelMigrator<R> migrateById(String id, Function<EObject, R> function) {
+				return new ModelMigrator<R>(
+					e -> EdeltaUtils.getFullyQualifiedName(e).equals(id),
+					e -> function.apply(e)
+				);
+			}
 		}
 
 		private Collection<EPackage> packages;
@@ -181,6 +188,10 @@ public class EcoreCopierTest {
 					function
 				)
 			);
+		}
+
+		public void addEAttributeMigrator(ModelMigrator<Object> migrator) {
+			valueMigrators.add(migrator);
 		}
 
 		@Override
@@ -713,10 +724,10 @@ public class EcoreCopierTest {
 		var originalId = EdeltaUtils.getFullyQualifiedName(e);
 		e.setName(newName);
 		copier.addMigrator(
-				EdeltaEmfCopier.ModelMigrator.migrateById(
-					originalId,
-					() -> e
-				));
+			EdeltaEmfCopier.ModelMigrator.migrateById(
+				originalId,
+				() -> e
+			));
 	}
 
 	/**
@@ -731,9 +742,10 @@ public class EcoreCopierTest {
 		var originalId = EdeltaUtils.getFullyQualifiedName(attribute);
 		attribute.setEType(type);
 		copier.addEAttributeMigrator(
-			a -> 
-				EdeltaUtils.getFullyQualifiedName(a).equals(originalId),
-			valueConverter
+			EdeltaEmfCopier.ModelMigrator.migrateById(
+				originalId,
+				valueConverter
+			)
 		);
 	}
 
