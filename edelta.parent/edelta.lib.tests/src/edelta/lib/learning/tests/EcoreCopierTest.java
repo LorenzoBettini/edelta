@@ -5,6 +5,8 @@ import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirector
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 
+import static org.eclipse.emf.ecore.EcorePackage.Literals.*;
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
@@ -182,8 +185,11 @@ public class EcoreCopierTest {
 
 		@Override
 		protected void copyAttributeValue(EAttribute eAttribute, EObject eObject, Object value, Setting setting) {
+			// we must getTarget(eAttribute) to canApply because the original
+			// predicate might have been created with a renamed attribute
+			// see testChangedAttributeNameAndType
 			var map = valueMigrators.stream()
-					.filter(m -> m.canApply(eAttribute))
+					.filter(m -> m.canApply(getTarget(eAttribute)))
 					.map(m -> m.apply(eObject));
 			var newValue = map
 				.findFirst()
@@ -526,14 +532,16 @@ public class EcoreCopierTest {
 
 		// actual refactoring
 		var attribute = getAttribute(packageManagerModified, "mypackage", "MyClass", "myAttribute");
-		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
 
-		changeAttributeType(copier, o -> 
-			// o is the old object,
-			// so we must use the original feature to retrieve the value to copy
-			// that is, don't use attribute, which is the one of the new package
-			Integer.parseInt(
-				o.eGet(o.eClass().getEStructuralFeature("myAttribute")).toString()));
+		changeAttributeType(copier,
+			attribute,
+			EINT,
+			o -> 
+				// o is the old object,
+				// so we must use the original feature to retrieve the value to copy
+				// that is, don't use attribute, which is the one of the new package
+				Integer.parseInt(
+					o.eGet(o.eClass().getEStructuralFeature("myAttribute")).toString()));
 
 		copyModels(copier, basedir);
 
@@ -557,17 +565,19 @@ public class EcoreCopierTest {
 
 		// actual refactoring
 		var attribute = getAttribute(packageManagerModified, "mypackage", "MyClass", "myAttribute");
-		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
 
-		changeAttributeType(copier, o -> 
-			// o is the old object,
-			// so we must use the original feature to retrieve the value to copy
-			// that is, don't use attribute, which is the one of the new package
-			((Collection<?>) o.eGet(o.eClass().getEStructuralFeature("myAttribute")))
-				.stream()
-				.map(Object::toString)
-				.map(Integer::parseInt)
-				.collect(Collectors.toList())
+		changeAttributeType(copier,
+			attribute,
+			EINT,
+			o -> 
+				// o is the old object,
+				// so we must use the original feature to retrieve the value to copy
+				// that is, don't use attribute, which is the one of the new package
+				((Collection<?>) o.eGet(o.eClass().getEStructuralFeature("myAttribute")))
+					.stream()
+					.map(Object::toString)
+					.map(Integer::parseInt)
+					.collect(Collectors.toList())
 		);
 
 		copyModels(copier, basedir);
@@ -601,14 +611,15 @@ public class EcoreCopierTest {
 		// first rename
 		renameElement(copier, attribute, "newName");
 		// then change type
-		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
-
-		changeAttributeType(copier, o -> 
-			// o is the old object,
-			// so we must use the original feature to retrieve the value to copy
-			// that is, don't use attribute, which is the one of the new package
-			Integer.parseInt(
-				o.eGet(o.eClass().getEStructuralFeature("myAttribute")).toString()));
+		changeAttributeType(copier,
+			attribute,
+			EINT,
+			o -> 
+				// o is the old object,
+				// so we must use the original feature to retrieve the value to copy
+				// that is, don't use attribute, which is the one of the new package
+				Integer.parseInt(
+					o.eGet(o.eClass().getEStructuralFeature("myAttribute")).toString()));
 
 		copyModels(copier, basedir);
 
@@ -641,11 +652,15 @@ public class EcoreCopierTest {
 	 * This simulates the changeAttributeType in our library
 	 * 
 	 * @param copier
+	 * @param attribute
+	 * @param type
 	 * @param valueConverter
 	 */
-	private void changeAttributeType(EdeltaEmfCopier copier, Function<EObject, Object> valueConverter) {
+	private void changeAttributeType(EdeltaEmfCopier copier, EAttribute attribute, EDataType type, Function<EObject, Object> valueConverter) {
+		var originalId = EdeltaUtils.getFullyQualifiedName(attribute);
+		attribute.setEType(type);
 		copier.addEAttributeMigrator(
-			a -> a.getName().equals("myAttribute"),
+			a -> EdeltaUtils.getFullyQualifiedName(a).equals(originalId),
 			valueConverter
 		);
 	}
