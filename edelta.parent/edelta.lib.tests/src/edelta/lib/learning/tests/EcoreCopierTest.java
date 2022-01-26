@@ -563,21 +563,49 @@ public class EcoreCopierTest {
 
 		var copier = EdeltaEmfCopier.createFromResources(singletonList(modifiedEcore));
 
-		// actual refactoring
-		var attribute = getAttribute(packageManagerModified, "mypackage", "MyClass", "myAttribute");
-
-		changeAttributeType(copier,
-			attribute,
-			EINT,
+		copier.addEAttributeMigrator(
+			a -> a.getName().equals("myAttribute"),
 			o -> 
-				// o is the old object,
-				// so we must use the original feature to retrieve the value to copy
-				// that is, don't use attribute, which is the one of the new package
-				((Collection<?>) o.eGet(o.eClass().getEStructuralFeature("myAttribute")))
-					.stream()
-					.map(Object::toString)
-					.map(Integer::parseInt)
-					.collect(Collectors.toList())
+			// o is the old object,
+			// so we must use the original feature to retrieve the value to copy
+			// that is, don't use attribute, which is the one of the new package
+			((Collection<?>) o.eGet(o.eClass().getEStructuralFeature("myAttribute")))
+				.stream()
+				.map(Object::toString)
+				.map(Integer::parseInt)
+				.collect(Collectors.toList())
+		);
+
+		copyModels(copier, basedir);
+
+		var output = OUTPUT + subdir;
+		packageManagerModified.saveEcores(output);
+		packageManagerModified.saveModels(output);
+		assertGeneratedFiles(subdir, output, "MyClass.xmi");
+		assertGeneratedFiles(subdir, output, "My.ecore");
+	}
+
+	@Test
+	public void testChangedMultiAttributeType2() throws IOException {
+		var subdir = "changedMultiAttributeType2/";
+		var basedir = TESTDATA + subdir;
+		packageManagerOriginal.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
+		var modifiedEcore = packageManagerModified.loadEcoreFile(basedir + "My.ecore");
+
+		packageManagerOriginal.loadModelFile(basedir + ORIGINAL + "MyClass.xmi");
+
+		var copier = EdeltaEmfCopier.createFromResources(singletonList(modifiedEcore));
+
+		copier.addEAttributeMigrator(
+			a -> a.getName().equals("myAttribute"),
+			o -> 
+			// o is the old object,
+			// so we must use the original feature to retrieve the value to copy
+			// that is, don't use attribute, which is the one of the new package
+			((Collection<?>) o.eGet(o.eClass().getEStructuralFeature("myAttribute")))
+				.stream()
+				.map(Object::toString)
+				.collect(Collectors.toList())
 		);
 
 		copyModels(copier, basedir);
