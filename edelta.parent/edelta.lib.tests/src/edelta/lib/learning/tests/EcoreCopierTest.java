@@ -504,7 +504,7 @@ public class EcoreCopierTest {
 		var copier = EdeltaEmfCopier.createFromResources(singletonList(modifiedEcore));
 
 		// actual refactoring
-		getFeature(packageManagerModified, "mypackage", "MyClass", "myAttribute")
+		getAttribute(packageManagerModified, "mypackage", "MyClass", "myAttribute")
 			.setEType(EcorePackage.eINSTANCE.getEInt());
 
 		Assertions.assertThatThrownBy(() -> copyModels(copier, basedir))
@@ -525,7 +525,7 @@ public class EcoreCopierTest {
 		var copier = EdeltaEmfCopier.createFromResources(singletonList(modifiedEcore));
 
 		// actual refactoring
-		var attribute = getFeature(packageManagerModified, "mypackage", "MyClass", "myAttribute");
+		var attribute = getAttribute(packageManagerModified, "mypackage", "MyClass", "myAttribute");
 		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
 
 		changeAttributeType(copier, o -> 
@@ -556,7 +556,7 @@ public class EcoreCopierTest {
 		var copier = EdeltaEmfCopier.createFromResources(singletonList(modifiedEcore));
 
 		// actual refactoring
-		var attribute = getFeature(packageManagerModified, "mypackage", "MyClass", "myAttribute");
+		var attribute = getAttribute(packageManagerModified, "mypackage", "MyClass", "myAttribute");
 		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
 
 		changeAttributeType(copier, o -> 
@@ -597,7 +597,7 @@ public class EcoreCopierTest {
 		var copier = EdeltaEmfCopier.createFromResources(singletonList(modifiedEcore));
 
 		// actual refactoring
-		var attribute = getFeature(packageManagerModified, "mypackage", "MyClass", "myAttribute");
+		var attribute = getAttribute(packageManagerModified, "mypackage", "MyClass", "myAttribute");
 		// first rename
 		renameElement(copier, attribute, "newName");
 		// then change type
@@ -641,13 +641,17 @@ public class EcoreCopierTest {
 	 * This simulates the changeAttributeType in our library
 	 * 
 	 * @param copier
-	 * @param valueConverter TODO
+	 * @param valueConverter
 	 */
 	private void changeAttributeType(EdeltaEmfCopier copier, Function<EObject, Object> valueConverter) {
 		copier.addEAttributeMigrator(
 			a -> a.getName().equals("myAttribute"),
 			valueConverter
 		);
+	}
+
+	private EAttribute getAttribute(EdeltaEPackageManager packageManager, String packageName, String className, String attributeName) {
+		return (EAttribute) getFeature(packageManager, packageName, className, attributeName);
 	}
 
 	private EStructuralFeature getFeature(EdeltaEPackageManager packageManager, String packageName, String className, String featureName) {
