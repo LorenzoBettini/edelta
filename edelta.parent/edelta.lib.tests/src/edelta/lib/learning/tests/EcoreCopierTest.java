@@ -188,9 +188,10 @@ public class EcoreCopierTest {
 			// we must getTarget(eAttribute) to canApply because the original
 			// predicate might have been created with a renamed attribute
 			// see testChangedAttributeNameAndType
+			var targetAttribute = getTarget(eAttribute);
 			var map = valueMigrators.stream()
-					.filter(m -> m.canApply(getTarget(eAttribute)))
-					.map(m -> m.apply(eObject));
+				.filter(m -> m.canApply(targetAttribute) || m.canApply(eAttribute))
+				.map(m -> m.apply(eObject));
 			var newValue = map
 				.findFirst()
 				.orElse(value);
@@ -618,7 +619,7 @@ public class EcoreCopierTest {
 	}
 
 	/**
-	 * This performs the refactoring manual: first change name of the
+	 * This performs the refactoring manual: first change the name of the
 	 * attribute then change the type.
 	 * 
 	 * @throws IOException
@@ -651,7 +652,49 @@ public class EcoreCopierTest {
 
 		copyModels(copier, basedir);
 
-		subdir = "changedAttributeNameAndType/";;
+		subdir = "changedAttributeNameAndType/";
+		var output = OUTPUT + subdir;
+		packageManagerModified.saveEcores(output);
+		packageManagerModified.saveModels(output);
+		assertGeneratedFiles(subdir, output, "MyClass.xmi");
+		assertGeneratedFiles(subdir, output, "My.ecore");
+	}
+
+	/**
+	 * This performs the refactoring manual: first change the type of the
+	 * attribute then change the name.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testChangedAttributeTypeAndName() throws IOException {
+		var subdir = "changedAttributeType/";
+		var basedir = TESTDATA + subdir + ORIGINAL;
+		packageManagerOriginal.loadEcoreFile(basedir + "My.ecore");
+		var modifiedEcore = packageManagerModified.loadEcoreFile(basedir + "My.ecore");
+
+		packageManagerOriginal.loadModelFile(basedir + "MyClass.xmi");
+
+		var copier = EdeltaEmfCopier.createFromResources(singletonList(modifiedEcore));
+
+		// actual refactoring
+		var attribute = getAttribute(packageManagerModified, "mypackage", "MyClass", "myAttribute");
+		// first change type
+		changeAttributeType(copier,
+			attribute,
+			EINT,
+			o -> 
+				// o is the old object,
+				// so we must use the original feature to retrieve the value to copy
+				// that is, don't use attribute, which is the one of the new package
+				Integer.parseInt(
+					o.eGet(o.eClass().getEStructuralFeature("myAttribute")).toString()));
+		// then rename
+		renameElement(copier, attribute, "newName");
+
+		copyModels(copier, basedir);
+
+		subdir = "changedAttributeTypeAndName/";
 		var output = OUTPUT + subdir;
 		packageManagerModified.saveEcores(output);
 		packageManagerModified.saveModels(output);
@@ -688,7 +731,8 @@ public class EcoreCopierTest {
 		var originalId = EdeltaUtils.getFullyQualifiedName(attribute);
 		attribute.setEType(type);
 		copier.addEAttributeMigrator(
-			a -> EdeltaUtils.getFullyQualifiedName(a).equals(originalId),
+			a -> 
+				EdeltaUtils.getFullyQualifiedName(a).equals(originalId),
 			valueConverter
 		);
 	}
