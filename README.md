@@ -28,6 +28,8 @@ Download a complete Eclipse distribution with Edelta installed; choose the one f
 
 **WARNING** If you downloaded one of Edelta Eclipse distributions earlier than version 0.3.x you won't be able to update it; please download a brand new Edelta Eclipse distribution with version at least 0.3.x (issue [#13](https://github.com/LorenzoBettini/edelta/issues/13)).
 
+**For macOS users**: depending on the version of your macOS, when you try to run the `edelta.app` you may run into an error that says "the application is damaged and can't be opened". This problem can be overcome by running the following command from the terminal (from the directory where the `edelta.app` is located): `xattr -c edelta.app`.
+
 ### Development Snapshots (new URL)
 
 These are temporary development snapshots, which might be unstable (Note: the snapshots update site always includes the releases update site):
