@@ -3,9 +3,8 @@ package edelta.lib.learning.tests;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirectories;
 import static java.util.Collections.singletonList;
+import static org.eclipse.emf.ecore.EcorePackage.Literals.EINT;
 import static org.junit.Assert.assertEquals;
-
-import static org.eclipse.emf.ecore.EcorePackage.Literals.*;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -711,6 +710,47 @@ public class EcoreCopierTest {
 		packageManagerModified.saveModels(output);
 		assertGeneratedFiles(subdir, output, "MyClass.xmi");
 		assertGeneratedFiles(subdir, output, "My.ecore");
+	}
+
+	@Test
+	public void testMergetAttributes() throws IOException {
+		var subdir = "mergeAttributes/";
+		var basedir = TESTDATA + subdir;
+		packageManagerOriginal.loadEcoreFile(basedir + "Person.ecore");
+		var modifiedEcore = packageManagerModified.loadEcoreFile(basedir + "Person.ecore");
+
+		packageManagerOriginal.loadModelFile(basedir + "Person.xmi");
+
+		var copier = EdeltaEmfCopier
+				.createFromResources(singletonList(modifiedEcore));
+
+		var firstName = getAttribute(packageManagerModified,
+				"person", "Person", "firstname");
+		var lastName = getAttribute(packageManagerModified,
+				"person", "Person", "lastname");
+		// refactoring
+		EcoreUtil.remove(lastName);
+		// rename the first attribute among the ones to merge
+		renameElement(copier, firstName, "fullName");
+		// specify the converter using firstname and lastname original values
+		copier.addEAttributeMigrator(
+			a -> a.getName().equals("fullName"),
+			o -> 
+			// o is the old object,
+			// so we must use the original feature to retrieve the value to copy
+			// that is, don't use attribute, which is the one of the new package
+			o.eGet(o.eClass().getEStructuralFeature("firstname")) +
+			" " +
+			o.eGet(o.eClass().getEStructuralFeature("lastname"))
+		);
+
+		copyModels(copier, basedir);
+
+		var output = OUTPUT + subdir;
+		packageManagerModified.saveEcores(output);
+		packageManagerModified.saveModels(output);
+		assertGeneratedFiles(subdir, output, "Person.xmi");
+		assertGeneratedFiles(subdir, output, "Person.ecore");
 	}
 
 	/**
