@@ -353,6 +353,29 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
+	public void testCopyMutualReferencesUnchanged() throws IOException {
+		var subdir = "mutualReferencesUnchanged/";
+		var basedir = TESTDATA + subdir;
+		originalModelManager.loadEcoreFile(basedir + "PersonForReferences.ecore");
+		originalModelManager.loadEcoreFile(basedir + "WorkPlaceForReferences.ecore");
+		originalModelManager.loadModelFile(basedir + "Person1.xmi");
+		originalModelManager.loadModelFile(basedir + "Person2.xmi");
+		originalModelManager.loadModelFile(basedir + "WorkPlace1.xmi");
+
+		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+		copyModels(modelMigrator, basedir);
+
+		var output = OUTPUT + subdir;
+		evolvingModelManager.saveEcores(output);
+		evolvingModelManager.saveModels(output);
+		assertGeneratedFiles(subdir, output, "Person1.xmi");
+		assertGeneratedFiles(subdir, output, "Person2.xmi");
+		assertGeneratedFiles(subdir, output, "WorkPlace1.xmi");
+		assertGeneratedFiles(subdir, output, "PersonForReferences.ecore");
+		assertGeneratedFiles(subdir, output, "WorkPlaceForReferences.ecore");
+	}
+
+	@Test
 	public void testRenamedClass() throws IOException {
 		var subdir = "unchanged/";
 		var basedir = TESTDATA + subdir;
