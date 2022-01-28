@@ -69,7 +69,10 @@ public class EdeltaModelMigratorTest {
 
 		@Override
 		protected EStructuralFeature getTarget(EStructuralFeature eStructuralFeature) {
-			return (EStructuralFeature) ecoreCopyMap.get(eStructuralFeature);
+			var target = ecoreCopyMap.get(eStructuralFeature);
+			if (target.eResource() == null)
+				return null;
+			return (EStructuralFeature) target;
 		}
 	}
 
@@ -498,7 +501,32 @@ public class EdeltaModelMigratorTest {
 		assertGeneratedFiles(subdir, output, "WorkPlace1.xmi");
 		assertGeneratedFiles(subdir, output, "PersonForReferences.ecore");
 		assertGeneratedFiles(subdir, output, "WorkPlaceForReferences.ecore");
+	}
 
+	@Test
+	public void testRemovedContainmentFeature() throws IOException {
+		var subdir = "unchanged/";
+		var basedir = TESTDATA + subdir;
+		originalModelManager.loadEcoreFile(basedir + "My.ecore");
+		originalModelManager.loadModelFile(basedir + "MyRoot.xmi");
+		originalModelManager.loadModelFile(basedir + "MyClass.xmi");
+
+		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+
+		// refactoring of Ecore
+		EcoreUtil.remove(getFeature(evolvingModelManager, 
+				"mypackage", "MyRoot", "myContents"));
+
+		// migration of models
+		copyModels(modelMigrator, basedir);
+
+		subdir = "removedContainmentFeature/";
+		var output = OUTPUT + subdir;
+		evolvingModelManager.saveEcores(output);
+		evolvingModelManager.saveModels(output);
+		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
+		assertGeneratedFiles(subdir, output, "MyClass.xmi");
+		assertGeneratedFiles(subdir, output, "My.ecore");
 	}
 
 	private EAttribute getAttribute(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
