@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
@@ -325,7 +326,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testManualRenaming() throws IOException {
+	public void testRenamedClass() throws IOException {
 		var subdir = "renamedClass/";
 		var basedir = TESTDATA + subdir;
 		originalModelManager.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
@@ -349,6 +350,49 @@ public class EdeltaModelMigratorTest {
 		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
 		assertGeneratedFiles(subdir, output, "MyClass.xmi");
 		assertGeneratedFiles(subdir, output, "My.ecore");
+	}
+
+	@Test
+	public void testRenamedFeature() throws IOException {
+		var subdir = "renamedFeature/";
+		var basedir = TESTDATA + subdir;
+		originalModelManager.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
+		originalModelManager.loadModelFile(basedir + ORIGINAL + "MyRoot.xmi");
+		originalModelManager.loadModelFile(basedir + ORIGINAL+ "MyClass.xmi");
+
+		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+
+		// refactoring of Ecore
+		getFeature(evolvingModelManager, 
+				"mypackage", "MyRoot", "myReferences")
+			.setName("myReferencesRenamed");
+		getFeature(evolvingModelManager, 
+				"mypackage", "MyRoot", "myContents")
+			.setName("myContentsRenamed");
+
+		// migration of models
+		copyModels(modelMigrator, basedir);
+
+		var output = OUTPUT + subdir;
+		evolvingModelManager.saveEcores(output);
+		evolvingModelManager.saveModels(output);
+		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
+		assertGeneratedFiles(subdir, output, "MyClass.xmi");
+		assertGeneratedFiles(subdir, output, "My.ecore");
+	}
+
+	private EAttribute getAttribute(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
+		return (EAttribute) getFeature(modelManager, packageName, className, attributeName);
+	}
+
+	private EStructuralFeature getFeature(EdeltaModelManager modelManager, String packageName, String className, String featureName) {
+		return getEClass(modelManager, packageName, className)
+				.getEStructuralFeature(featureName);
+	}
+
+	private EClass getEClass(EdeltaModelManager modelManager, String packageName, String className) {
+		return (EClass) modelManager.getEPackage(
+				packageName).getEClassifier(className);
 	}
 
 	private void assertGeneratedFiles(String subdir, String outputDir, String fileName) throws IOException {
