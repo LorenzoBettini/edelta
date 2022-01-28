@@ -35,6 +35,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edelta.lib.EdeltaResourceUtils;
+import edelta.lib.EdeltaUtils;
 import edelta.lib.learning.tests.EcoreCopierTest.EdeltaEmfCopier;
 
 public class EdeltaModelMigratorTest {
@@ -64,15 +65,22 @@ public class EdeltaModelMigratorTest {
 
 		@Override
 		protected EClass getTarget(EClass eClass) {
-			return (EClass) ecoreCopyMap.get(eClass);
+			var target = ecoreCopyMap.get(eClass);
+			if (isNotThereAnymore(target))
+				return null;
+			return (EClass) target;
 		}
 
 		@Override
 		protected EStructuralFeature getTarget(EStructuralFeature eStructuralFeature) {
 			var target = ecoreCopyMap.get(eStructuralFeature);
-			if (target.eResource() == null)
+			if (isNotThereAnymore(target))
 				return null;
 			return (EStructuralFeature) target;
+		}
+
+		private boolean isNotThereAnymore(EObject target) {
+			return target.eResource() == null;
 		}
 	}
 
@@ -540,13 +548,39 @@ public class EdeltaModelMigratorTest {
 		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
 
 		// refactoring of Ecore
-		EcoreUtil.remove(getFeature(evolvingModelManager, 
+		EdeltaUtils.removeElement(getFeature(evolvingModelManager, 
 				"mypackage", "MyRoot", "myReferences"));
 
 		// migration of models
 		copyModels(modelMigrator, basedir);
 
 		subdir = "removedNonContainmentFeature/";
+		var output = OUTPUT + subdir;
+		evolvingModelManager.saveEcores(output);
+		evolvingModelManager.saveModels(output);
+		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
+		assertGeneratedFiles(subdir, output, "MyClass.xmi");
+		assertGeneratedFiles(subdir, output, "My.ecore");
+	}
+
+	@Test
+	public void testRemovedNonReferredClass() throws IOException {
+		var subdir = "unchanged/";
+		var basedir = TESTDATA + subdir;
+		originalModelManager.loadEcoreFile(basedir + "My.ecore");
+		originalModelManager.loadModelFile(basedir + "MyRoot.xmi");
+		originalModelManager.loadModelFile(basedir + "MyClass.xmi");
+
+		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+
+		// refactoring of Ecore
+		EdeltaUtils.removeElement(getEClass(evolvingModelManager, 
+				"mypackage", "MyRoot"));
+
+		// migration of models
+		copyModels(modelMigrator, basedir);
+
+		subdir = "removedNonReferredClass/";
 		var output = OUTPUT + subdir;
 		evolvingModelManager.saveEcores(output);
 		evolvingModelManager.saveModels(output);
@@ -597,7 +631,9 @@ public class EdeltaModelMigratorTest {
 			var newResource = evolvingModelManager.createModelResource
 				(baseDir + fileName, originalResource);
 			var root = originalResource.getContents().get(0);
-			newResource.getContents().add(modelMigrator.copy(root));
+			var copy = modelMigrator.copy(root);
+			if (copy != null)
+				newResource.getContents().add(copy);
 		}
 		modelMigrator.copyReferences();
 	}
