@@ -529,6 +529,32 @@ public class EdeltaModelMigratorTest {
 		assertGeneratedFiles(subdir, output, "My.ecore");
 	}
 
+	@Test
+	public void testRemovedNonContainmentFeature() throws IOException {
+		var subdir = "unchanged/";
+		var basedir = TESTDATA + subdir;
+		originalModelManager.loadEcoreFile(basedir + "My.ecore");
+		originalModelManager.loadModelFile(basedir + "MyRoot.xmi");
+		originalModelManager.loadModelFile(basedir + "MyClass.xmi");
+
+		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+
+		// refactoring of Ecore
+		EcoreUtil.remove(getFeature(evolvingModelManager, 
+				"mypackage", "MyRoot", "myReferences"));
+
+		// migration of models
+		copyModels(modelMigrator, basedir);
+
+		subdir = "removedNonContainmentFeature/";
+		var output = OUTPUT + subdir;
+		evolvingModelManager.saveEcores(output);
+		evolvingModelManager.saveModels(output);
+		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
+		assertGeneratedFiles(subdir, output, "MyClass.xmi");
+		assertGeneratedFiles(subdir, output, "My.ecore");
+	}
+
 	private EAttribute getAttribute(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
 		return (EAttribute) getFeature(modelManager, packageName, className, attributeName);
 	}
