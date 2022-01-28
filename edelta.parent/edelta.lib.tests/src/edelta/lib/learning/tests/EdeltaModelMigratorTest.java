@@ -327,11 +327,11 @@ public class EdeltaModelMigratorTest {
 
 	@Test
 	public void testRenamedClass() throws IOException {
-		var subdir = "renamedClass/";
+		var subdir = "unchanged/";
 		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
-		originalModelManager.loadModelFile(basedir + ORIGINAL + "MyRoot.xmi");
-		originalModelManager.loadModelFile(basedir + ORIGINAL+ "MyClass.xmi");
+		originalModelManager.loadEcoreFile(basedir + "My.ecore");
+		originalModelManager.loadModelFile(basedir + "MyRoot.xmi");
+		originalModelManager.loadModelFile(basedir + "MyClass.xmi");
 
 		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
 
@@ -344,6 +344,7 @@ public class EdeltaModelMigratorTest {
 		// migration of models
 		copyModels(modelMigrator, basedir);
 
+		subdir = "renamedClass/";
 		var output = OUTPUT + subdir;
 		evolvingModelManager.saveEcores(output);
 		evolvingModelManager.saveModels(output);
@@ -354,11 +355,11 @@ public class EdeltaModelMigratorTest {
 
 	@Test
 	public void testRenamedFeature() throws IOException {
-		var subdir = "renamedFeature/";
+		var subdir = "unchanged/";
 		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
-		originalModelManager.loadModelFile(basedir + ORIGINAL + "MyRoot.xmi");
-		originalModelManager.loadModelFile(basedir + ORIGINAL+ "MyClass.xmi");
+		originalModelManager.loadEcoreFile(basedir + "My.ecore");
+		originalModelManager.loadModelFile(basedir + "MyRoot.xmi");
+		originalModelManager.loadModelFile(basedir + "MyClass.xmi");
 
 		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
 
@@ -373,6 +374,7 @@ public class EdeltaModelMigratorTest {
 		// migration of models
 		copyModels(modelMigrator, basedir);
 
+		subdir = "renamedFeature/";
 		var output = OUTPUT + subdir;
 		evolvingModelManager.saveEcores(output);
 		evolvingModelManager.saveModels(output);
