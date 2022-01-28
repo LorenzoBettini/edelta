@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -33,6 +34,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edelta.lib.EdeltaResourceUtils;
+import edelta.lib.learning.tests.EcoreCopierTest.EdeltaEmfCopier;
 
 public class EdeltaModelMigratorTest {
 
@@ -323,6 +325,31 @@ public class EdeltaModelMigratorTest {
 		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
 		assertGeneratedFiles(subdir, output, "MyClass.xmi");
 		assertGeneratedFiles(subdir, output, "My.ecore");
+	}
+
+	@Test
+	public void testCopyUnchangedClassesWithTheSameNameInDifferentPackages() throws IOException {
+		var subdir = "classesWithTheSameName/";
+		var basedir = TESTDATA + subdir;
+		originalModelManager.loadEcoreFile(basedir + "My1.ecore");
+		originalModelManager.loadEcoreFile(basedir + "My2.ecore");
+		originalModelManager.loadModelFile(basedir + "MyRoot1.xmi");
+		originalModelManager.loadModelFile(basedir + "MyClass1.xmi");
+		originalModelManager.loadModelFile(basedir + "MyRoot2.xmi");
+		originalModelManager.loadModelFile(basedir + "MyClass2.xmi");
+
+		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+		copyModels(modelMigrator, basedir);
+
+		var output = OUTPUT + subdir;
+		evolvingModelManager.saveEcores(output);
+		evolvingModelManager.saveModels(output);
+		assertGeneratedFiles(subdir, output, "MyRoot1.xmi");
+		assertGeneratedFiles(subdir, output, "MyClass1.xmi");
+		assertGeneratedFiles(subdir, output, "MyRoot2.xmi");
+		assertGeneratedFiles(subdir, output, "MyClass2.xmi");
+		assertGeneratedFiles(subdir, output, "My1.ecore");
+		assertGeneratedFiles(subdir, output, "My2.ecore");
 	}
 
 	@Test
