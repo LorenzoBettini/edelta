@@ -23,6 +23,7 @@ import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
 import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.emf.ecore.xmi.XMLResource;
@@ -431,6 +432,73 @@ public class EdeltaModelMigratorTest {
 		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
 		assertGeneratedFiles(subdir, output, "MyClass.xmi");
 		assertGeneratedFiles(subdir, output, "My.ecore");
+	}
+
+	@Test
+	public void testCopyMutualReferencesRenamed() throws IOException {
+		var subdir = "mutualReferencesUnchanged/";
+		var basedir = TESTDATA + subdir;
+		originalModelManager.loadEcoreFile(basedir + "PersonForReferences.ecore");
+		originalModelManager.loadEcoreFile(basedir + "WorkPlaceForReferences.ecore");
+		originalModelManager.loadModelFile(basedir + "Person1.xmi");
+		originalModelManager.loadModelFile(basedir + "Person2.xmi");
+		originalModelManager.loadModelFile(basedir + "WorkPlace1.xmi");
+
+		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+
+		// refactoring of Ecore
+		getEClass(evolvingModelManager, "personforreferences", "Person")
+			.setName("PersonRenamed");
+
+		// migration of models
+		copyModels(modelMigrator, basedir);
+
+		subdir = "mutualReferencesRenamed/";
+		var output = OUTPUT + subdir;
+		evolvingModelManager.saveEcores(output);
+		evolvingModelManager.saveModels(output);
+		assertGeneratedFiles(subdir, output, "Person1.xmi");
+		assertGeneratedFiles(subdir, output, "Person2.xmi");
+		assertGeneratedFiles(subdir, output, "WorkPlace1.xmi");
+		assertGeneratedFiles(subdir, output, "PersonForReferences.ecore");
+		assertGeneratedFiles(subdir, output, "WorkPlaceForReferences.ecore");
+	}
+
+	@Test
+	public void testCopyMutualReferencesRenamed2() throws IOException {
+		var subdir = "mutualReferencesUnchanged/";
+		var basedir = TESTDATA + subdir;
+		originalModelManager.loadEcoreFile(basedir + "PersonForReferences.ecore");
+		originalModelManager.loadEcoreFile(basedir + "WorkPlaceForReferences.ecore");
+		originalModelManager.loadModelFile(basedir + "Person1.xmi");
+		originalModelManager.loadModelFile(basedir + "Person2.xmi");
+		originalModelManager.loadModelFile(basedir + "WorkPlace1.xmi");
+
+		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+
+		// refactoring of Ecore
+		// rename the feature before...
+		getFeature(evolvingModelManager, "personforreferences", "Person", "works")
+			.setName("workplace");
+		// ...renaming the class
+		getEClass(evolvingModelManager, "personforreferences", "Person")
+			.setName("PersonRenamed");
+		getFeature(evolvingModelManager, "WorkPlaceForReferences", "WorkPlace", "persons")
+			.setName("employees");
+
+		// migration of models
+		copyModels(modelMigrator, basedir);
+
+		subdir = "mutualReferencesRenamed2/";
+		var output = OUTPUT + subdir;
+		evolvingModelManager.saveEcores(output);
+		evolvingModelManager.saveModels(output);
+		assertGeneratedFiles(subdir, output, "Person1.xmi");
+		assertGeneratedFiles(subdir, output, "Person2.xmi");
+		assertGeneratedFiles(subdir, output, "WorkPlace1.xmi");
+		assertGeneratedFiles(subdir, output, "PersonForReferences.ecore");
+		assertGeneratedFiles(subdir, output, "WorkPlaceForReferences.ecore");
+
 	}
 
 	private EAttribute getAttribute(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
