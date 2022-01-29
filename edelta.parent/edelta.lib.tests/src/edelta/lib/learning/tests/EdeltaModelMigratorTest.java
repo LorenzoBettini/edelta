@@ -771,6 +771,78 @@ public class EdeltaModelMigratorTest {
 		assertGeneratedFiles(subdir, output, "My.ecore");
 	}
 
+	@Test
+	public void testChangedAttributeNameAndType() throws IOException {
+		var subdir = "changedAttributeType/";
+		var basedir = TESTDATA + subdir;
+		originalModelManager.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
+		originalModelManager.loadModelFile(basedir + ORIGINAL + "MyClass.xmi");
+
+		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+
+		// actual refactoring
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
+		attribute.setName("newName");
+		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
+
+		// custom migration rule
+		modelMigrator.addEAttributeMigrator(
+			a ->
+				a == modelMigrator.original(attribute),
+			o -> 
+			// o is the old object,
+			// so we must use the original feature to retrieve the value to copy
+			// that is, don't use attribute, which is the one of the new package
+			Integer.parseInt(
+					o.eGet(modelMigrator.original(attribute)).toString())
+		);
+
+		copyModels(modelMigrator, basedir);
+
+		subdir = "changedAttributeNameAndType/";
+		var output = OUTPUT + subdir;
+		evolvingModelManager.saveEcores(output);
+		evolvingModelManager.saveModels(output);
+		assertGeneratedFiles(subdir, output, "MyClass.xmi");
+		assertGeneratedFiles(subdir, output, "My.ecore");
+	}
+
+	@Test
+	public void testChangedAttributeTypeAndName() throws IOException {
+		var subdir = "changedAttributeType/";
+		var basedir = TESTDATA + subdir;
+		originalModelManager.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
+		originalModelManager.loadModelFile(basedir + ORIGINAL + "MyClass.xmi");
+
+		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+
+		// actual refactoring
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
+		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
+
+		// custom migration rule
+		modelMigrator.addEAttributeMigrator(
+			a ->
+				a == modelMigrator.original(attribute),
+			o -> 
+			// o is the old object,
+			// so we must use the original feature to retrieve the value to copy
+			// that is, don't use attribute, which is the one of the new package
+			Integer.parseInt(
+					o.eGet(modelMigrator.original(attribute)).toString())
+		);
+		attribute.setName("newName");
+
+		copyModels(modelMigrator, basedir);
+
+		subdir = "changedAttributeTypeAndName/";
+		var output = OUTPUT + subdir;
+		evolvingModelManager.saveEcores(output);
+		evolvingModelManager.saveModels(output);
+		assertGeneratedFiles(subdir, output, "MyClass.xmi");
+		assertGeneratedFiles(subdir, output, "My.ecore");
+	}
+
 	private EAttribute getAttribute(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
 		return (EAttribute) getFeature(modelManager, packageName, className, attributeName);
 	}
