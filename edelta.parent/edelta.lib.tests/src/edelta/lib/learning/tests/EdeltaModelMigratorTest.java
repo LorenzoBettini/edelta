@@ -8,7 +8,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -36,7 +35,6 @@ import org.junit.Test;
 
 import edelta.lib.EdeltaResourceUtils;
 import edelta.lib.EdeltaUtils;
-import edelta.lib.learning.tests.EcoreCopierTest.EdeltaEmfCopier;
 
 public class EdeltaModelMigratorTest {
 
@@ -65,18 +63,21 @@ public class EdeltaModelMigratorTest {
 
 		@Override
 		protected EClass getTarget(EClass eClass) {
-			var target = ecoreCopyMap.get(eClass);
-			if (isNotThereAnymore(target))
-				return null;
-			return (EClass) target;
+			return getMapped(eClass);
 		}
 
 		@Override
 		protected EStructuralFeature getTarget(EStructuralFeature eStructuralFeature) {
-			var target = ecoreCopyMap.get(eStructuralFeature);
-			if (isNotThereAnymore(target))
+			return getMapped(eStructuralFeature);
+		}
+
+		private <T extends EObject> T getMapped(EObject o) {
+			var value = ecoreCopyMap.get(o);
+			if (isNotThereAnymore(value))
 				return null;
-			return (EStructuralFeature) target;
+			@SuppressWarnings("unchecked")
+			var mapped = (T) value;
+			return mapped;
 		}
 
 		private boolean isNotThereAnymore(EObject target) {
