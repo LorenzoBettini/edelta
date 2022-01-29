@@ -2,6 +2,7 @@ package edelta.lib.learning.tests;
 
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirectories;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.entry;
 
 import java.io.File;
@@ -47,6 +48,7 @@ import com.google.common.collect.HashBiMap;
 
 import edelta.lib.EdeltaResourceUtils;
 import edelta.lib.EdeltaUtils;
+import edelta.lib.learning.tests.EcoreCopierTest.EdeltaEmfCopier;
 
 public class EdeltaModelMigratorTest {
 
@@ -841,6 +843,45 @@ public class EdeltaModelMigratorTest {
 		evolvingModelManager.saveModels(output);
 		assertGeneratedFiles(subdir, output, "MyClass.xmi");
 		assertGeneratedFiles(subdir, output, "My.ecore");
+	}
+
+	@Test
+	public void testMergeAttributes() throws IOException {
+		var subdir = "mergeAttributes/";
+		var basedir = TESTDATA + subdir;
+		originalModelManager.loadEcoreFile(basedir + "Person.ecore");
+		originalModelManager.loadModelFile(basedir + "Person.xmi");
+
+		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+
+		var firstName = getAttribute(evolvingModelManager,
+				"person", "Person", "firstname");
+		var lastName = getAttribute(evolvingModelManager,
+				"person", "Person", "lastname");
+		// refactoring
+		EcoreUtil.remove(lastName);
+		// rename the first attribute among the ones to merge
+		firstName.setName("fullName");
+		// specify the converter using firstname and lastname original values
+		modelMigrator.addEAttributeMigrator(
+			a ->
+				a == modelMigrator.original(firstName),
+			o -> 
+			// o is the old object,
+			// so we must use the original feature to retrieve the value to copy
+			// that is, don't use attribute, which is the one of the new package
+			o.eGet(modelMigrator.original(firstName)) +
+			" " +
+			o.eGet(modelMigrator.original(lastName))
+		);
+
+		copyModels(modelMigrator, basedir);
+
+		var output = OUTPUT + subdir;
+		evolvingModelManager.saveEcores(output);
+		evolvingModelManager.saveModels(output);
+		assertGeneratedFiles(subdir, output, "Person.xmi");
+		assertGeneratedFiles(subdir, output, "Person.ecore");
 	}
 
 	private EAttribute getAttribute(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
