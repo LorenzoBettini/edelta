@@ -2,16 +2,24 @@ package edelta.lib.learning.tests;
 
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirectories;
+import static java.util.Collections.singletonList;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import org.apache.log4j.Logger;
+import org.assertj.core.api.Assertions;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -19,6 +27,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
@@ -35,6 +44,8 @@ import org.junit.Test;
 
 import edelta.lib.EdeltaResourceUtils;
 import edelta.lib.EdeltaUtils;
+import edelta.lib.learning.tests.EcoreCopierTest.EdeltaEmfCopier;
+import edelta.lib.learning.tests.EcoreCopierTest.EdeltaEmfCopier.ModelMigrator;
 
 public class EdeltaModelMigratorTest {
 
@@ -55,10 +66,46 @@ public class EdeltaModelMigratorTest {
 	static class EdeltaModelMigrator extends Copier {
 		private static final long serialVersionUID = 1L;
 
+		/**
+		 * @author Lorenzo Bettini
+		 *
+		 * @param <T1> the type of the {@link EObject} passed to the predicate
+		 * @param <T2> the type of the {@link EObject} passed to the function
+		 * @param <R> the type of the returned value when applying the function
+		 */
+		public static class ModelMigrationRule<T1 extends EObject, T2 extends EObject, R> {
+			private Predicate<T1> predicate;
+			private Function<T2, R> function;
+
+			public ModelMigrationRule(Predicate<T1> predicate, Function<T2, R> function) {
+				this.predicate = predicate;
+				this.function = function;
+			}
+
+			public boolean canApply(T1 arg) {
+				return predicate.test(arg);
+			}
+
+			public R apply(T2 arg) {
+				return function.apply(arg);
+			}
+		}
+
 		private Map<EObject, EObject> ecoreCopyMap;
+
+		private Collection<ModelMigrationRule<EAttribute, EObject, Object>> valueMigrators = new ArrayList<>();
 
 		public EdeltaModelMigrator(Map<EObject, EObject> ecoreCopyMap) {
 			this.ecoreCopyMap = ecoreCopyMap;
+		}
+
+		public void addEAttributeMigrator(Predicate<EAttribute> predicate, Function<EObject, Object> function) {
+			valueMigrators.add(
+				new ModelMigrationRule<>(
+					predicate,
+					function
+				)
+			);
 		}
 
 		@Override
@@ -71,13 +118,38 @@ public class EdeltaModelMigratorTest {
 			return getMapped(eStructuralFeature);
 		}
 
-		private <T extends EObject> T getMapped(EObject o) {
+		@Override
+		protected void copyAttributeValue(EAttribute eAttribute, EObject eObject, Object value, Setting setting) {
+			var map = valueMigrators.stream()
+				.filter(m -> m.canApply(eAttribute))
+				.map(m -> m.apply(eObject));
+			var newValue = map
+				.findFirst()
+				.orElse(value);
+			super.copyAttributeValue(eAttribute, eObject, newValue, setting);
+		}
+
+		private <T extends EObject> T getMapped(T o) {
 			var value = ecoreCopyMap.get(o);
-			if (isNotThereAnymore(value))
-				return null;
 			@SuppressWarnings("unchecked")
 			var mapped = (T) value;
+			if (isNotThereAnymore(mapped))
+				return null;
 			return mapped;
+		}
+
+		public <T extends EObject> T original(T o) {
+			return ecoreCopyMap.entrySet()
+				.stream()
+				.filter(entry -> Objects.equals(o, entry.getValue()))
+				.map(Map.Entry::getKey)
+				.findFirst()
+				.map(k -> {
+					@SuppressWarnings("unchecked")
+					var ret = (T) k;
+					return ret;
+				})
+				.orElse(null);
 		}
 
 		private boolean isNotThereAnymore(EObject target) {
@@ -523,7 +595,7 @@ public class EdeltaModelMigratorTest {
 		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
 
 		// refactoring of Ecore
-		EcoreUtil.remove(getFeature(evolvingModelManager, 
+		EcoreUtil.remove(getFeature(evolvingModelManager,
 				"mypackage", "MyRoot", "myContents"));
 
 		// migration of models
@@ -549,7 +621,7 @@ public class EdeltaModelMigratorTest {
 		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
 
 		// refactoring of Ecore
-		EdeltaUtils.removeElement(getFeature(evolvingModelManager, 
+		EdeltaUtils.removeElement(getFeature(evolvingModelManager,
 				"mypackage", "MyRoot", "myReferences"));
 
 		// migration of models
@@ -575,7 +647,7 @@ public class EdeltaModelMigratorTest {
 		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
 
 		// refactoring of Ecore
-		EdeltaUtils.removeElement(getEClass(evolvingModelManager, 
+		EdeltaUtils.removeElement(getEClass(evolvingModelManager,
 				"mypackage", "MyRoot"));
 
 		// migration of models
@@ -601,7 +673,7 @@ public class EdeltaModelMigratorTest {
 		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
 
 		// refactoring of Ecore
-		EdeltaUtils.removeElement(getEClass(evolvingModelManager, 
+		EdeltaUtils.removeElement(getEClass(evolvingModelManager,
 				"mypackage", "MyClass"));
 
 		// migration of models
@@ -612,6 +684,58 @@ public class EdeltaModelMigratorTest {
 		evolvingModelManager.saveEcores(output);
 		evolvingModelManager.saveModels(output);
 		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
+		assertGeneratedFiles(subdir, output, "MyClass.xmi");
+		assertGeneratedFiles(subdir, output, "My.ecore");
+	}
+
+	@Test
+	public void testChangedAttributeTypeWithoutProperMigration() {
+		var subdir = "changedAttributeType/";
+		var basedir = TESTDATA + subdir;
+		originalModelManager.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
+		originalModelManager.loadModelFile(basedir + ORIGINAL + "MyClass.xmi");
+
+		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+
+		// actual refactoring
+		getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute")
+			.setEType(EcorePackage.eINSTANCE.getEInt());
+
+		Assertions.assertThatThrownBy(() -> copyModels(modelMigrator, basedir))
+			.isInstanceOf(ClassCastException.class)
+			.hasMessageContaining(
+				"The value of type 'class java.lang.String' must be of type 'class java.lang.Integer'");
+	}
+
+	@Test
+	public void testChangedAttributeType() throws IOException {
+		var subdir = "changedAttributeType/";
+		var basedir = TESTDATA + subdir;
+		originalModelManager.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
+		originalModelManager.loadModelFile(basedir + ORIGINAL + "MyClass.xmi");
+
+		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+
+		// actual refactoring
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
+		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
+
+		modelMigrator.addEAttributeMigrator(
+			a ->
+				a == modelMigrator.original(attribute),
+			o -> 
+			// o is the old object,
+			// so we must use the original feature to retrieve the value to copy
+			// that is, don't use attribute, which is the one of the new package
+			Integer.parseInt(
+				o.eGet(modelMigrator.original(attribute)).toString())
+		);
+
+		copyModels(modelMigrator, basedir);
+
+		var output = OUTPUT + subdir;
+		evolvingModelManager.saveEcores(output);
+		evolvingModelManager.saveModels(output);
 		assertGeneratedFiles(subdir, output, "MyClass.xmi");
 		assertGeneratedFiles(subdir, output, "My.ecore");
 	}
