@@ -2,7 +2,7 @@ package edelta.lib.learning.tests;
 
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirectories;
-import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.entry;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,7 +16,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import org.apache.log4j.Logger;
 import org.assertj.core.api.Assertions;
@@ -26,8 +25,8 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.EStructuralFeature.Setting;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
@@ -42,10 +41,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+
 import edelta.lib.EdeltaResourceUtils;
 import edelta.lib.EdeltaUtils;
-import edelta.lib.learning.tests.EcoreCopierTest.EdeltaEmfCopier;
-import edelta.lib.learning.tests.EcoreCopierTest.EdeltaEmfCopier.ModelMigrator;
 
 public class EdeltaModelMigratorTest {
 
@@ -91,12 +91,12 @@ public class EdeltaModelMigratorTest {
 			}
 		}
 
-		private Map<EObject, EObject> ecoreCopyMap;
+		private BiMap<EObject, EObject> ecoreCopyMap;
 
 		private Collection<ModelMigrationRule<EAttribute, EObject, Object>> valueMigrators = new ArrayList<>();
 
 		public EdeltaModelMigrator(Map<EObject, EObject> ecoreCopyMap) {
-			this.ecoreCopyMap = ecoreCopyMap;
+			this.ecoreCopyMap = HashBiMap.create(ecoreCopyMap);
 		}
 
 		public void addEAttributeMigrator(Predicate<EAttribute> predicate, Function<EObject, Object> function) {
@@ -139,17 +139,9 @@ public class EdeltaModelMigratorTest {
 		}
 
 		public <T extends EObject> T original(T o) {
-			return ecoreCopyMap.entrySet()
-				.stream()
-				.filter(entry -> Objects.equals(o, entry.getValue()))
-				.map(Map.Entry::getKey)
-				.findFirst()
-				.map(k -> {
-					@SuppressWarnings("unchecked")
-					var ret = (T) k;
-					return ret;
-				})
-				.orElse(null);
+			@SuppressWarnings("unchecked")
+			var ret = (T) ecoreCopyMap.inverse().get(o);
+			return ret;
 		}
 
 		private boolean isNotThereAnymore(EObject target) {
