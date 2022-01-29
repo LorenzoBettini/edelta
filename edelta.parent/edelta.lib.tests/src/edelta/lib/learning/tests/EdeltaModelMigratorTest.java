@@ -2,8 +2,6 @@ package edelta.lib.learning.tests;
 
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirectories;
-import static java.util.Collections.singletonList;
-import static org.assertj.core.api.Assertions.entry;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,10 +9,11 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -48,7 +47,6 @@ import com.google.common.collect.HashBiMap;
 
 import edelta.lib.EdeltaResourceUtils;
 import edelta.lib.EdeltaUtils;
-import edelta.lib.learning.tests.EcoreCopierTest.EdeltaEmfCopier;
 
 public class EdeltaModelMigratorTest {
 
@@ -96,6 +94,13 @@ public class EdeltaModelMigratorTest {
 
 		private BiMap<EObject, EObject> ecoreCopyMap;
 
+		/**
+		 * This stores mappings from old elements to new elements added during the
+		 * evolution so they cannot be found in
+		 * {@link EdeltaModelMigrator#ecoreCopyMap}.
+		 */
+		private Map<EObject, EObject> newElementsMap = new HashMap<>();
+
 		private Collection<ModelMigrationRule<EAttribute, EObject, Object>> valueMigrators = new ArrayList<>();
 
 		public EdeltaModelMigrator(Map<EObject, EObject> ecoreCopyMap) {
@@ -109,6 +114,18 @@ public class EdeltaModelMigratorTest {
 					function
 				)
 			);
+		}
+
+		/**
+		 * Maps an element from the original metamodel to a new element in the new
+		 * metamodel ("new element" means that it was not there at all in the original
+		 * metamodel)
+		 * 
+		 * @param oldElement
+		 * @param newElement
+		 */
+		public <T extends EObject> void addNewElementMap(T oldElement, T newElement) {
+			newElementsMap.put(oldElement, newElement);
 		}
 
 		@Override
@@ -137,13 +154,19 @@ public class EdeltaModelMigratorTest {
 			@SuppressWarnings("unchecked")
 			var mapped = (T) value;
 			if (isNotThereAnymore(mapped))
-				return null;
+				return getFromNewElements(o);
 			return mapped;
 		}
 
 		public <T extends EObject> T original(T o) {
 			@SuppressWarnings("unchecked")
 			var ret = (T) ecoreCopyMap.inverse().get(o);
+			return ret;
+		}
+
+		private <T extends EObject> T getFromNewElements(T o) {
+			@SuppressWarnings("unchecked")
+			var ret = (T) newElementsMap.get(o);
 			return ret;
 		}
 
@@ -882,6 +905,48 @@ public class EdeltaModelMigratorTest {
 		evolvingModelManager.saveModels(output);
 		assertGeneratedFiles(subdir, output, "Person.xmi");
 		assertGeneratedFiles(subdir, output, "Person.ecore");
+	}
+
+	/**
+	 * Note that with pull up the migrated model is actually the same as the
+	 * original one, but we have to adjust some mappings to make the copy work,
+	 * because the value from the original object has to be put in an inherited
+	 * attribute in the copied object.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testPullUpFeatures() throws IOException {
+		var subdir = "pullUpFeatures/";
+		var basedir = TESTDATA + subdir;
+		originalModelManager.loadEcoreFile(basedir + "PersonList.ecore");
+		originalModelManager.loadModelFile(basedir + "List.xmi");
+
+		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+
+		var personClass = getEClass(evolvingModelManager,
+				"PersonList", "Person");
+		var studentName = getFeature(evolvingModelManager,
+				"PersonList", "Student", "name");
+		var employeeName = getFeature(evolvingModelManager,
+				"PersonList", "Employee", "name");
+		// refactoring
+		var pulledUpPersonName = EcoreUtil.copy(studentName);
+		personClass.getEStructuralFeatures().add(pulledUpPersonName);
+		EdeltaUtils.removeAllElements(List.of(studentName, employeeName));
+		// remember we must map the original metamodel element to the new one
+		modelMigrator.addNewElementMap(
+				modelMigrator.original(studentName), pulledUpPersonName);
+		modelMigrator.addNewElementMap(
+				modelMigrator.original(employeeName), pulledUpPersonName);
+
+		copyModels(modelMigrator, basedir);
+
+		var output = OUTPUT + subdir;
+		evolvingModelManager.saveEcores(output);
+		evolvingModelManager.saveModels(output);
+		assertGeneratedFiles(subdir, output, "List.xmi");
+		assertGeneratedFiles(subdir, output, "PersonList.ecore");
 	}
 
 	private EAttribute getAttribute(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
