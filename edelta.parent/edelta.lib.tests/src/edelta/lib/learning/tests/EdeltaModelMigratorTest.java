@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.assertj.core.api.Assertions;
@@ -712,6 +713,7 @@ public class EdeltaModelMigratorTest {
 		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
 		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
 
+		// custom migration rule
 		modelMigrator.addEAttributeMigrator(
 			a ->
 				a == modelMigrator.original(attribute),
@@ -721,6 +723,43 @@ public class EdeltaModelMigratorTest {
 			// that is, don't use attribute, which is the one of the new package
 			Integer.parseInt(
 				o.eGet(modelMigrator.original(attribute)).toString())
+		);
+
+		copyModels(modelMigrator, basedir);
+
+		var output = OUTPUT + subdir;
+		evolvingModelManager.saveEcores(output);
+		evolvingModelManager.saveModels(output);
+		assertGeneratedFiles(subdir, output, "MyClass.xmi");
+		assertGeneratedFiles(subdir, output, "My.ecore");
+	}
+
+	@Test
+	public void testChangedMultiAttributeType() throws IOException {
+		var subdir = "changedMultiAttributeType/";
+		var basedir = TESTDATA + subdir;
+		originalModelManager.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
+		originalModelManager.loadModelFile(basedir + ORIGINAL + "MyClass.xmi");
+
+		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+
+		// actual refactoring
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
+		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
+
+		// custom migration rule
+		modelMigrator.addEAttributeMigrator(
+			a ->
+				a == modelMigrator.original(attribute),
+			o -> 
+			// o is the old object,
+			// so we must use the original feature to retrieve the value to copy
+			// that is, don't use attribute, which is the one of the new package
+			((Collection<?>) o.eGet(modelMigrator.original(attribute)))
+				.stream()
+				.map(Object::toString)
+				.map(Integer::parseInt)
+				.collect(Collectors.toList())
 		);
 
 		copyModels(modelMigrator, basedir);
