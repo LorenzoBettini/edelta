@@ -124,7 +124,7 @@ public class EdeltaModelMigratorTest {
 		 * @param oldElement
 		 * @param newElement
 		 */
-		public <T extends EObject> void addNewElementMap(T oldElement, T newElement) {
+		public <T extends EObject> void addNewElementMapping(T oldElement, T newElement) {
 			newElementsMap.put(oldElement, newElement);
 		}
 
@@ -935,9 +935,9 @@ public class EdeltaModelMigratorTest {
 		personClass.getEStructuralFeatures().add(pulledUpPersonName);
 		EdeltaUtils.removeAllElements(List.of(studentName, employeeName));
 		// remember we must map the original metamodel element to the new one
-		modelMigrator.addNewElementMap(
+		modelMigrator.addNewElementMapping(
 				modelMigrator.original(studentName), pulledUpPersonName);
-		modelMigrator.addNewElementMap(
+		modelMigrator.addNewElementMapping(
 				modelMigrator.original(employeeName), pulledUpPersonName);
 
 		copyModels(modelMigrator, basedir);
