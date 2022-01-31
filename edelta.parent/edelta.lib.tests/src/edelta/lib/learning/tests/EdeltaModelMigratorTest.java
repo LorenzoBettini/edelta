@@ -978,6 +978,41 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
+	public void testPullUpReferences() throws IOException {
+		var subdir = "pullUpReferences/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personClass = getEClass(evolvingModelManager,
+				"PersonList", "Person");
+		var studentAddress = getFeature(evolvingModelManager,
+				"PersonList", "Student", "address");
+		var employeeAddress = getFeature(evolvingModelManager,
+				"PersonList", "Employee", "address");
+		// refactoring
+		var pulledUpPersonAddress = EcoreUtil.copy(studentAddress);
+		personClass.getEStructuralFeatures().add(pulledUpPersonAddress);
+		EdeltaUtils.removeAllElements(List.of(studentAddress, employeeAddress));
+		// remember we must map the original metamodel element to the new one
+		modelMigrator.addNewElementMapping(
+				modelMigrator.original(studentAddress), pulledUpPersonAddress);
+		modelMigrator.addNewElementMapping(
+				modelMigrator.original(employeeAddress), pulledUpPersonAddress);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
 	public void testPushDownFeatures() throws IOException {
 		var subdir = "pushDownFeatures/";
 
@@ -1046,7 +1081,7 @@ public class EdeltaModelMigratorTest {
 				outputDir + fileName);
 		} catch (IOException e) {
 			e.printStackTrace();
-			fail(e.getMessage());
+			fail(e.getClass().getName() + ": " + e.getMessage());
 		}
 	}
 
