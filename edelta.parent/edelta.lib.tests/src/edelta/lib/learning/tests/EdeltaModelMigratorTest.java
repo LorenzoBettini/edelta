@@ -2,6 +2,8 @@ package edelta.lib.learning.tests;
 
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirectories;
+import static java.util.List.of;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -51,7 +53,6 @@ import edelta.lib.EdeltaUtils;
 
 public class EdeltaModelMigratorTest {
 
-	private static final String ORIGINAL = "original/";
 	private static final String TESTDATA = "testdata/";
 	private static final String OUTPUT = "output/";
 	private static final String EXPECTATIONS = "expectations/";
@@ -435,82 +436,105 @@ public class EdeltaModelMigratorTest {
 		evolvingModelManager = new EdeltaModelManager();
 	}
 
+	private EdeltaModelMigrator setupMigrator(
+			String subdir,
+			Collection<String> ecoreFiles,
+			Collection<String> modelFiles
+		) {
+		var basedir = TESTDATA + subdir;
+		ecoreFiles
+			.forEach(fileName -> originalModelManager.loadEcoreFile(basedir + fileName));
+		modelFiles
+			.forEach(fileName -> originalModelManager.loadModelFile(basedir + fileName));
+		var modelMigrator =
+			new EdeltaModelMigrator(
+				evolvingModelManager.copyEcores(originalModelManager, basedir));
+		return modelMigrator;
+	}
+
+	private void copyModelsSaveAndAssertOutputs(
+			EdeltaModelMigrator modelMigrator,
+			String origdir,
+			String outputdir,
+			Collection<String> ecoreFiles,
+			Collection<String> modelFiles
+		) throws IOException {
+		var basedir = TESTDATA + origdir;
+		copyModels(modelMigrator, basedir);
+		var output = OUTPUT + outputdir;
+		evolvingModelManager.saveEcores(output);
+		evolvingModelManager.saveModels(output);
+		ecoreFiles.forEach
+			(fileName -> assertGeneratedFiles(outputdir, output, fileName));
+		modelFiles.forEach
+			(fileName -> assertGeneratedFiles(outputdir, output, fileName));
+	}
+
 	@Test
 	public void testCopyUnchanged() throws IOException {
 		var subdir = "unchanged/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + "My.ecore");
-		originalModelManager.loadModelFile(basedir + "MyRoot.xmi");
-		originalModelManager.loadModelFile(basedir + "MyClass.xmi");
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
-		copyModels(modelMigrator, basedir);
-
-		var output = OUTPUT + subdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
-		assertGeneratedFiles(subdir, output, "MyClass.xmi");
-		assertGeneratedFiles(subdir, output, "My.ecore");
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
 	}
 
 	@Test
 	public void testCopyUnchangedClassesWithTheSameNameInDifferentPackages() throws IOException {
 		var subdir = "classesWithTheSameName/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + "My1.ecore");
-		originalModelManager.loadEcoreFile(basedir + "My2.ecore");
-		originalModelManager.loadModelFile(basedir + "MyRoot1.xmi");
-		originalModelManager.loadModelFile(basedir + "MyClass1.xmi");
-		originalModelManager.loadModelFile(basedir + "MyRoot2.xmi");
-		originalModelManager.loadModelFile(basedir + "MyClass2.xmi");
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
-		copyModels(modelMigrator, basedir);
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My1.ecore", "My2.ecore"),
+			of("MyRoot1.xmi", "MyClass1.xmi", "MyRoot2.xmi", "MyClass2.xmi")
+		);
 
-		var output = OUTPUT + subdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		assertGeneratedFiles(subdir, output, "MyRoot1.xmi");
-		assertGeneratedFiles(subdir, output, "MyClass1.xmi");
-		assertGeneratedFiles(subdir, output, "MyRoot2.xmi");
-		assertGeneratedFiles(subdir, output, "MyClass2.xmi");
-		assertGeneratedFiles(subdir, output, "My1.ecore");
-		assertGeneratedFiles(subdir, output, "My2.ecore");
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My1.ecore", "My2.ecore"),
+			of("MyRoot1.xmi", "MyClass1.xmi", "MyRoot2.xmi", "MyClass2.xmi")
+		);
 	}
 
 	@Test
 	public void testCopyMutualReferencesUnchanged() throws IOException {
 		var subdir = "mutualReferencesUnchanged/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + "PersonForReferences.ecore");
-		originalModelManager.loadEcoreFile(basedir + "WorkPlaceForReferences.ecore");
-		originalModelManager.loadModelFile(basedir + "Person1.xmi");
-		originalModelManager.loadModelFile(basedir + "Person2.xmi");
-		originalModelManager.loadModelFile(basedir + "WorkPlace1.xmi");
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
-		copyModels(modelMigrator, basedir);
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonForReferences.ecore", "WorkPlaceForReferences.ecore"),
+			of("Person1.xmi", "Person2.xmi", "WorkPlace1.xmi")
+		);
 
-		var output = OUTPUT + subdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		assertGeneratedFiles(subdir, output, "Person1.xmi");
-		assertGeneratedFiles(subdir, output, "Person2.xmi");
-		assertGeneratedFiles(subdir, output, "WorkPlace1.xmi");
-		assertGeneratedFiles(subdir, output, "PersonForReferences.ecore");
-		assertGeneratedFiles(subdir, output, "WorkPlaceForReferences.ecore");
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonForReferences.ecore", "WorkPlaceForReferences.ecore"),
+			of("Person1.xmi", "Person2.xmi", "WorkPlace1.xmi")
+		);
 	}
 
 	@Test
 	public void testRenamedClass() throws IOException {
 		var subdir = "unchanged/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + "My.ecore");
-		originalModelManager.loadModelFile(basedir + "MyRoot.xmi");
-		originalModelManager.loadModelFile(basedir + "MyClass.xmi");
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
 
 		// refactoring of Ecore
 		evolvingModelManager.getEPackage("mypackage").getEClassifier("MyClass")
@@ -518,27 +542,24 @@ public class EdeltaModelMigratorTest {
 		evolvingModelManager.getEPackage("mypackage").getEClassifier("MyRoot")
 			.setName("MyRootRenamed");
 
-		// migration of models
-		copyModels(modelMigrator, basedir);
-
-		subdir = "renamedClass/";
-		var output = OUTPUT + subdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
-		assertGeneratedFiles(subdir, output, "MyClass.xmi");
-		assertGeneratedFiles(subdir, output, "My.ecore");
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"renamedClass/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
 	}
 
 	@Test
 	public void testRenamedFeature() throws IOException {
 		var subdir = "unchanged/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + "My.ecore");
-		originalModelManager.loadModelFile(basedir + "MyRoot.xmi");
-		originalModelManager.loadModelFile(basedir + "MyClass.xmi");
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
 
 		// refactoring of Ecore
 		getFeature(evolvingModelManager, 
@@ -548,59 +569,47 @@ public class EdeltaModelMigratorTest {
 				"mypackage", "MyRoot", "myContents")
 			.setName("myContentsRenamed");
 
-		// migration of models
-		copyModels(modelMigrator, basedir);
-
-		subdir = "renamedFeature/";
-		var output = OUTPUT + subdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
-		assertGeneratedFiles(subdir, output, "MyClass.xmi");
-		assertGeneratedFiles(subdir, output, "My.ecore");
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"renamedFeature/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
 	}
 
 	@Test
 	public void testCopyMutualReferencesRenamed() throws IOException {
 		var subdir = "mutualReferencesUnchanged/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + "PersonForReferences.ecore");
-		originalModelManager.loadEcoreFile(basedir + "WorkPlaceForReferences.ecore");
-		originalModelManager.loadModelFile(basedir + "Person1.xmi");
-		originalModelManager.loadModelFile(basedir + "Person2.xmi");
-		originalModelManager.loadModelFile(basedir + "WorkPlace1.xmi");
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonForReferences.ecore", "WorkPlaceForReferences.ecore"),
+			of("Person1.xmi", "Person2.xmi", "WorkPlace1.xmi")
+		);
 
 		// refactoring of Ecore
 		getEClass(evolvingModelManager, "personforreferences", "Person")
 			.setName("PersonRenamed");
 
-		// migration of models
-		copyModels(modelMigrator, basedir);
-
-		subdir = "mutualReferencesRenamed/";
-		var output = OUTPUT + subdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		assertGeneratedFiles(subdir, output, "Person1.xmi");
-		assertGeneratedFiles(subdir, output, "Person2.xmi");
-		assertGeneratedFiles(subdir, output, "WorkPlace1.xmi");
-		assertGeneratedFiles(subdir, output, "PersonForReferences.ecore");
-		assertGeneratedFiles(subdir, output, "WorkPlaceForReferences.ecore");
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"mutualReferencesRenamed/",
+			of("PersonForReferences.ecore", "WorkPlaceForReferences.ecore"),
+			of("Person1.xmi", "Person2.xmi", "WorkPlace1.xmi")
+		);
 	}
 
 	@Test
 	public void testCopyMutualReferencesRenamed2() throws IOException {
 		var subdir = "mutualReferencesUnchanged/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + "PersonForReferences.ecore");
-		originalModelManager.loadEcoreFile(basedir + "WorkPlaceForReferences.ecore");
-		originalModelManager.loadModelFile(basedir + "Person1.xmi");
-		originalModelManager.loadModelFile(basedir + "Person2.xmi");
-		originalModelManager.loadModelFile(basedir + "WorkPlace1.xmi");
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonForReferences.ecore", "WorkPlaceForReferences.ecore"),
+			of("Person1.xmi", "Person2.xmi", "WorkPlace1.xmi")
+		);
 
 		// refactoring of Ecore
 		// rename the feature before...
@@ -612,151 +621,143 @@ public class EdeltaModelMigratorTest {
 		getFeature(evolvingModelManager, "WorkPlaceForReferences", "WorkPlace", "persons")
 			.setName("employees");
 
-		// migration of models
-		copyModels(modelMigrator, basedir);
-
-		subdir = "mutualReferencesRenamed2/";
-		var output = OUTPUT + subdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		assertGeneratedFiles(subdir, output, "Person1.xmi");
-		assertGeneratedFiles(subdir, output, "Person2.xmi");
-		assertGeneratedFiles(subdir, output, "WorkPlace1.xmi");
-		assertGeneratedFiles(subdir, output, "PersonForReferences.ecore");
-		assertGeneratedFiles(subdir, output, "WorkPlaceForReferences.ecore");
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"mutualReferencesRenamed2/",
+			of("PersonForReferences.ecore", "WorkPlaceForReferences.ecore"),
+			of("Person1.xmi", "Person2.xmi", "WorkPlace1.xmi")
+		);
 	}
 
 	@Test
 	public void testRemovedContainmentFeature() throws IOException {
 		var subdir = "unchanged/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + "My.ecore");
-		originalModelManager.loadModelFile(basedir + "MyRoot.xmi");
-		originalModelManager.loadModelFile(basedir + "MyClass.xmi");
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
 
 		// refactoring of Ecore
 		EcoreUtil.remove(getFeature(evolvingModelManager,
 				"mypackage", "MyRoot", "myContents"));
 
-		// migration of models
-		copyModels(modelMigrator, basedir);
-
-		subdir = "removedContainmentFeature/";
-		var output = OUTPUT + subdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
-		assertGeneratedFiles(subdir, output, "MyClass.xmi");
-		assertGeneratedFiles(subdir, output, "My.ecore");
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"removedContainmentFeature/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
 	}
 
 	@Test
 	public void testRemovedNonContainmentFeature() throws IOException {
 		var subdir = "unchanged/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + "My.ecore");
-		originalModelManager.loadModelFile(basedir + "MyRoot.xmi");
-		originalModelManager.loadModelFile(basedir + "MyClass.xmi");
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
 
 		// refactoring of Ecore
 		EdeltaUtils.removeElement(getFeature(evolvingModelManager,
 				"mypackage", "MyRoot", "myReferences"));
 
-		// migration of models
-		copyModels(modelMigrator, basedir);
-
-		subdir = "removedNonContainmentFeature/";
-		var output = OUTPUT + subdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
-		assertGeneratedFiles(subdir, output, "MyClass.xmi");
-		assertGeneratedFiles(subdir, output, "My.ecore");
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"removedNonContainmentFeature/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
 	}
 
 	@Test
 	public void testRemovedNonReferredClass() throws IOException {
 		var subdir = "unchanged/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + "My.ecore");
-		originalModelManager.loadModelFile(basedir + "MyRoot.xmi");
-		originalModelManager.loadModelFile(basedir + "MyClass.xmi");
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
 
 		// refactoring of Ecore
 		EdeltaUtils.removeElement(getEClass(evolvingModelManager,
 				"mypackage", "MyRoot"));
 
-		// migration of models
-		copyModels(modelMigrator, basedir);
-
-		subdir = "removedNonReferredClass/";
-		var output = OUTPUT + subdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
-		assertGeneratedFiles(subdir, output, "MyClass.xmi");
-		assertGeneratedFiles(subdir, output, "My.ecore");
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"removedNonReferredClass/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
 	}
 
 	@Test
 	public void testRemovedReferredClass() throws IOException {
 		var subdir = "unchanged/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + "My.ecore");
-		originalModelManager.loadModelFile(basedir + "MyRoot.xmi");
-		originalModelManager.loadModelFile(basedir + "MyClass.xmi");
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
 
 		// refactoring of Ecore
 		EdeltaUtils.removeElement(getEClass(evolvingModelManager,
 				"mypackage", "MyClass"));
 
-		// migration of models
-		copyModels(modelMigrator, basedir);
-
-		subdir = "removedReferredClass/";
-		var output = OUTPUT + subdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		assertGeneratedFiles(subdir, output, "MyRoot.xmi");
-		assertGeneratedFiles(subdir, output, "MyClass.xmi");
-		assertGeneratedFiles(subdir, output, "My.ecore");
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"removedReferredClass/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
 	}
 
 	@Test
 	public void testChangedAttributeTypeWithoutProperMigration() {
 		var subdir = "changedAttributeType/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
-		originalModelManager.loadModelFile(basedir + ORIGINAL + "MyClass.xmi");
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
 
 		// actual refactoring
 		getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute")
 			.setEType(EcorePackage.eINSTANCE.getEInt());
 
-		Assertions.assertThatThrownBy(() -> copyModels(modelMigrator, basedir))
-			.isInstanceOf(ClassCastException.class)
-			.hasMessageContaining(
-				"The value of type 'class java.lang.String' must be of type 'class java.lang.Integer'");
+		Assertions.assertThatThrownBy(() -> // NOSONAR
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"should not get here/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		))
+		.isInstanceOf(ClassCastException.class)
+		.hasMessageContaining(
+			"The value of type 'class java.lang.String' must be of type 'class java.lang.Integer'");
 	}
 
 	@Test
 	public void testChangedAttributeType() throws IOException {
 		var subdir = "changedAttributeType/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
-		originalModelManager.loadModelFile(basedir + ORIGINAL + "MyClass.xmi");
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
 
 		// actual refactoring
 		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
@@ -774,23 +775,24 @@ public class EdeltaModelMigratorTest {
 				o.eGet(modelMigrator.original(attribute)).toString())
 		);
 
-		copyModels(modelMigrator, basedir);
-
-		var output = OUTPUT + subdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		assertGeneratedFiles(subdir, output, "MyClass.xmi");
-		assertGeneratedFiles(subdir, output, "My.ecore");
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
 	}
 
 	@Test
 	public void testChangedMultiAttributeType() throws IOException {
 		var subdir = "changedMultiAttributeType/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
-		originalModelManager.loadModelFile(basedir + ORIGINAL + "MyClass.xmi");
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
 
 		// actual refactoring
 		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
@@ -811,23 +813,24 @@ public class EdeltaModelMigratorTest {
 				.collect(Collectors.toList())
 		);
 
-		copyModels(modelMigrator, basedir);
-
-		var output = OUTPUT + subdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		assertGeneratedFiles(subdir, output, "MyClass.xmi");
-		assertGeneratedFiles(subdir, output, "My.ecore");
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
 	}
 
 	@Test
 	public void testChangedAttributeNameAndType() throws IOException {
 		var subdir = "changedAttributeType/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
-		originalModelManager.loadModelFile(basedir + ORIGINAL + "MyClass.xmi");
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
 
 		// actual refactoring
 		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
@@ -846,24 +849,24 @@ public class EdeltaModelMigratorTest {
 					o.eGet(modelMigrator.original(attribute)).toString())
 		);
 
-		copyModels(modelMigrator, basedir);
-
-		subdir = "changedAttributeNameAndType/";
-		var output = OUTPUT + subdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		assertGeneratedFiles(subdir, output, "MyClass.xmi");
-		assertGeneratedFiles(subdir, output, "My.ecore");
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedAttributeNameAndType/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
 	}
 
 	@Test
 	public void testChangedAttributeTypeAndName() throws IOException {
 		var subdir = "changedAttributeType/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + ORIGINAL + "My.ecore");
-		originalModelManager.loadModelFile(basedir + ORIGINAL + "MyClass.xmi");
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
 
 		// actual refactoring
 		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
@@ -882,24 +885,24 @@ public class EdeltaModelMigratorTest {
 		);
 		attribute.setName("newName");
 
-		copyModels(modelMigrator, basedir);
-
-		subdir = "changedAttributeTypeAndName/";
-		var output = OUTPUT + subdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		assertGeneratedFiles(subdir, output, "MyClass.xmi");
-		assertGeneratedFiles(subdir, output, "My.ecore");
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedAttributeTypeAndName/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
 	}
 
 	@Test
 	public void testMergeAttributes() throws IOException {
 		var subdir = "mergeAttributes/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + "Person.ecore");
-		originalModelManager.loadModelFile(basedir + "Person.xmi");
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("Person.ecore"),
+			of("Person.xmi")
+		);
 
 		var firstName = getAttribute(evolvingModelManager,
 				"person", "Person", "firstname");
@@ -922,13 +925,13 @@ public class EdeltaModelMigratorTest {
 			o.eGet(modelMigrator.original(lastName))
 		);
 
-		copyModels(modelMigrator, basedir);
-
-		var output = OUTPUT + subdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		assertGeneratedFiles(subdir, output, "Person.xmi");
-		assertGeneratedFiles(subdir, output, "Person.ecore");
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("Person.ecore"),
+			of("Person.xmi")
+		);
 	}
 
 	/**
@@ -942,11 +945,12 @@ public class EdeltaModelMigratorTest {
 	@Test
 	public void testPullUpFeatures() throws IOException {
 		var subdir = "pullUpFeatures/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + "PersonList.ecore");
-		originalModelManager.loadModelFile(basedir + "List.xmi");
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
 
 		var personClass = getEClass(evolvingModelManager,
 				"PersonList", "Person");
@@ -964,23 +968,24 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.addNewElementMapping(
 				modelMigrator.original(employeeName), pulledUpPersonName);
 
-		copyModels(modelMigrator, basedir);
-
-		var output = OUTPUT + subdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		assertGeneratedFiles(subdir, output, "List.xmi");
-		assertGeneratedFiles(subdir, output, "PersonList.ecore");
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
 	}
 
 	@Test
 	public void testPushDownFeatures() throws IOException {
 		var subdir = "pushDownFeatures/";
-		var basedir = TESTDATA + subdir;
-		originalModelManager.loadEcoreFile(basedir + "PersonList.ecore");
-		originalModelManager.loadModelFile(basedir + "List.xmi");
 
-		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
 
 		var personClass = getEClass(evolvingModelManager,
 				"PersonList", "Person");
@@ -1011,13 +1016,13 @@ public class EdeltaModelMigratorTest {
 				return pushedDownEmployeeName;
 			});
 
-		copyModels(modelMigrator, basedir);
-
-		var output = OUTPUT + subdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		assertGeneratedFiles(subdir, output, "List.xmi");
-		assertGeneratedFiles(subdir, output, "PersonList.ecore");
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
 	}
 
 	private EAttribute getAttribute(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
@@ -1034,10 +1039,15 @@ public class EdeltaModelMigratorTest {
 				packageName).getEClassifier(className);
 	}
 
-	private void assertGeneratedFiles(String subdir, String outputDir, String fileName) throws IOException {
-		assertFilesAreEquals(
-			EXPECTATIONS + subdir + fileName,
-			outputDir + fileName);
+	private void assertGeneratedFiles(String subdir, String outputDir, String fileName) {
+		try {
+			assertFilesAreEquals(
+				EXPECTATIONS + subdir + fileName,
+				outputDir + fileName);
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 	}
 
 	/**

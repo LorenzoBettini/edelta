@@ -3,13 +3,13 @@
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="mypackage" nsURI="http://my.package.org" nsPrefix="mypackage">
   <eClassifiers xsi:type="ecore:EClass" name="MyClass">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="myAttribute" upperBound="-1"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="myOtherAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MyRoot">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="myReferences" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="myReferencesRenamed" upperBound="-1"
         eType="#//MyClass"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="myContents" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="myContentsRenamed" upperBound="-1"
         eType="#//MyClass" containment="true"/>
   </eClassifiers>
 </ecore:EPackage>
