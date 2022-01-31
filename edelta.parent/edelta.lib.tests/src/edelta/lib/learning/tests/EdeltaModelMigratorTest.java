@@ -28,6 +28,7 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
@@ -103,12 +104,23 @@ public class EdeltaModelMigratorTest {
 
 		private Collection<ModelMigrationRule<EAttribute, EObject, Object>> valueMigrators = new ArrayList<>();
 
+		private Collection<ModelMigrationRule<EStructuralFeature, EObject, EStructuralFeature>> featureMigrators = new ArrayList<>();
+
 		public EdeltaModelMigrator(Map<EObject, EObject> ecoreCopyMap) {
 			this.ecoreCopyMap = HashBiMap.create(ecoreCopyMap);
 		}
 
 		public void addEAttributeMigrator(Predicate<EAttribute> predicate, Function<EObject, Object> function) {
 			valueMigrators.add(
+				new ModelMigrationRule<>(
+					predicate,
+					function
+				)
+			);
+		}
+
+		public void addFeatureMigrator(Predicate<EStructuralFeature> predicate, Function<EObject, EStructuralFeature> function) {
+			featureMigrators.add(
 				new ModelMigrationRule<>(
 					predicate,
 					function
@@ -136,6 +148,18 @@ public class EdeltaModelMigratorTest {
 		@Override
 		protected EStructuralFeature getTarget(EStructuralFeature eStructuralFeature) {
 			return getMapped(eStructuralFeature);
+		}
+
+		@Override
+		protected Setting getTarget(EStructuralFeature eStructuralFeature, EObject eObject, EObject copyEObject) {
+			EStructuralFeature targetEStructuralFeature = featureMigrators.stream()
+				.filter(m -> m.canApply(eStructuralFeature))
+				.map(m -> m.apply(eObject))
+				.findFirst()
+				.orElse(null);
+			return targetEStructuralFeature == null ?
+				super.getTarget(eStructuralFeature, eObject, copyEObject)
+				: ((InternalEObject) copyEObject).eSetting(targetEStructuralFeature);
 		}
 
 		@Override
@@ -171,7 +195,7 @@ public class EdeltaModelMigratorTest {
 		}
 
 		private boolean isNotThereAnymore(EObject target) {
-			return target.eResource() == null;
+			return target != null && target.eResource() == null;
 		}
 	}
 
@@ -939,6 +963,53 @@ public class EdeltaModelMigratorTest {
 				modelMigrator.original(studentName), pulledUpPersonName);
 		modelMigrator.addNewElementMapping(
 				modelMigrator.original(employeeName), pulledUpPersonName);
+
+		copyModels(modelMigrator, basedir);
+
+		var output = OUTPUT + subdir;
+		evolvingModelManager.saveEcores(output);
+		evolvingModelManager.saveModels(output);
+		assertGeneratedFiles(subdir, output, "List.xmi");
+		assertGeneratedFiles(subdir, output, "PersonList.ecore");
+	}
+
+	@Test
+	public void testPushDownFeatures() throws IOException {
+		var subdir = "pushDownFeatures/";
+		var basedir = TESTDATA + subdir;
+		originalModelManager.loadEcoreFile(basedir + "PersonList.ecore");
+		originalModelManager.loadModelFile(basedir + "List.xmi");
+
+		var modelMigrator = new EdeltaModelMigrator(evolvingModelManager.copyEcores(originalModelManager, basedir));
+
+		var personClass = getEClass(evolvingModelManager,
+				"PersonList", "Person");
+		var personName = personClass.getEStructuralFeature("name");
+		var studentClass = getEClass(evolvingModelManager,
+				"PersonList", "Student");
+		var employeeClass = getEClass(evolvingModelManager,
+				"PersonList", "Employee");
+		// refactoring
+		var pushedDownStudentName = EcoreUtil.copy(personName);
+		var pushedDownEmployeeName = EcoreUtil.copy(personName);
+		studentClass.getEStructuralFeatures().add(pushedDownStudentName);
+		// we add it in the very first position just to have exactly the
+		// same Ecore model as the starting one of pullUpFeatures
+		// but just for testing purposes: we verify that the output is
+		// exactly the same as the original model of pullUpFeatures
+		employeeClass.getEStructuralFeatures().add(0, pushedDownEmployeeName);
+		EdeltaUtils.removeElement(personName);
+		// remember we must compare to the original metamodel element
+		modelMigrator.addFeatureMigrator(
+			f -> // the feature of the original metamodel
+				f == modelMigrator.original(personName),
+			o -> { // the object of the original model
+				// the result depends on the EClass of the original
+				// object being copied
+				if (o.eClass() == modelMigrator.original(studentClass))
+					return pushedDownStudentName;
+				return pushedDownEmployeeName;
+			});
 
 		copyModels(modelMigrator, basedir);
 
