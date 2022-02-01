@@ -938,6 +938,31 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testReplaceWithCopyTwice() throws IOException {
+		var subdir = "unchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myClassStringAttribute");
+		var copied = replaceWithCopy(modelMigrator, attribute, "myAttributeRenamed");
+		replaceWithCopy(modelMigrator, copied, "myAttributeRenamedTwice");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"replaceWithCopyTwice/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
 	/**
 	 * Note that with pull up the migrated model is actually the same as the
 	 * original one, but we have to adjust some mappings to make the copy work,
@@ -1121,7 +1146,7 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.copyReferences();
 	}
 
-	private void replaceWithCopy(EdeltaModelMigrator modelMigrator, EAttribute attribute, String newName) {
+	private EAttribute replaceWithCopy(EdeltaModelMigrator modelMigrator, EAttribute attribute, String newName) {
 		var copy = EcoreUtil.copy(attribute);
 		copy.setName(newName);
 		var containingClass = attribute.getEContainingClass();
@@ -1131,6 +1156,7 @@ public class EdeltaModelMigratorTest {
 			f ->
 				f == modelMigrator.original(attribute),
 			o -> copy);
+		return copy;
 	}
 
 	private void pullUp(EdeltaModelMigrator modelMigrator,
