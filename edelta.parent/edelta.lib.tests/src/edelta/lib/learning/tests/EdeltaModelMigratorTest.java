@@ -959,14 +959,9 @@ public class EdeltaModelMigratorTest {
 		var employeeName = getFeature(evolvingModelManager,
 				"PersonList", "Employee", "name");
 		// refactoring
-		var pulledUpPersonName = EcoreUtil.copy(studentName);
-		personClass.getEStructuralFeatures().add(pulledUpPersonName);
-		EdeltaUtils.removeAllElements(List.of(studentName, employeeName));
-		// remember we must map the original metamodel element to the new one
-		modelMigrator.addNewElementMapping(
-				modelMigrator.original(studentName), pulledUpPersonName);
-		modelMigrator.addNewElementMapping(
-				modelMigrator.original(employeeName), pulledUpPersonName);
+		pullUp(modelMigrator,
+				personClass,
+				List.of(studentName, employeeName));
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
@@ -994,14 +989,9 @@ public class EdeltaModelMigratorTest {
 		var employeeAddress = getFeature(evolvingModelManager,
 				"PersonList", "Employee", "address");
 		// refactoring
-		var pulledUpPersonAddress = EcoreUtil.copy(studentAddress);
-		personClass.getEStructuralFeatures().add(pulledUpPersonAddress);
-		EdeltaUtils.removeAllElements(List.of(studentAddress, employeeAddress));
-		// remember we must map the original metamodel element to the new one
-		modelMigrator.addNewElementMapping(
-				modelMigrator.original(studentAddress), pulledUpPersonAddress);
-		modelMigrator.addNewElementMapping(
-				modelMigrator.original(employeeAddress), pulledUpPersonAddress);
+		pullUp(modelMigrator,
+				personClass,
+				List.of(studentAddress, employeeAddress));
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
@@ -1112,5 +1102,18 @@ public class EdeltaModelMigratorTest {
 				newResource.getContents().add(copy);
 		}
 		modelMigrator.copyReferences();
+	}
+
+	private void pullUp(EdeltaModelMigrator modelMigrator,
+			EClass superClass, Collection<EStructuralFeature> features) {
+		var first = features.iterator().next();
+		var pulledUp = EcoreUtil.copy(first);
+		superClass.getEStructuralFeatures().add(pulledUp);
+		EdeltaUtils.removeAllElements(features);
+		// remember we must map the original metamodel element to the new one
+		for (var feature : features) {
+			modelMigrator.addNewElementMapping(
+					modelMigrator.original(feature), pulledUp);
+		}
 	}
 }
