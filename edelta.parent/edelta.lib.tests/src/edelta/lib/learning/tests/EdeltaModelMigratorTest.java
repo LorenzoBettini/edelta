@@ -96,6 +96,12 @@ public class EdeltaModelMigratorTest {
 
 		private BiMap<EObject, EObject> ecoreCopyMap;
 
+		/**
+		 * This stores mappings from new elements to old elements added during the
+		 * evolution (for example, with a copy) to keep track of the chain of origins.
+		 */
+		private Map<EObject, EObject> associations = new HashMap<>();
+
 		private Collection<ModelMigrationRule<EAttribute, EObject, Object>> valueMigrators = new ArrayList<>();
 
 		private Collection<ModelMigrationRule<EStructuralFeature, EObject, EStructuralFeature>> featureMigrators = new ArrayList<>();
@@ -137,6 +143,7 @@ public class EdeltaModelMigratorTest {
 			EStructuralFeature targetEStructuralFeature = featureMigrators.stream()
 				.filter(m -> m.canApply(eStructuralFeature))
 				.map(m -> m.apply(eObject))
+				.filter(this::isStillThere)
 				.findFirst()
 				.orElse(null);
 			return targetEStructuralFeature == null ?
@@ -171,11 +178,28 @@ public class EdeltaModelMigratorTest {
 		public <T extends EObject> T original(T o) {
 			@SuppressWarnings("unchecked")
 			var ret = (T) ecoreCopyMap.inverse().get(o);
+			if (ret == null) {
+				// try to walk up the chain of associations
+				var associated = associations.get(o);
+				if (associated != null) {
+					@SuppressWarnings("unchecked")
+					var original = (T) original(associated);
+					return original;
+				}
+			}
 			return ret;
+		}
+
+		private boolean isStillThere(EObject target) {
+			return !isNotThereAnymore(target);
 		}
 
 		private boolean isNotThereAnymore(EObject target) {
 			return target != null && target.eResource() == null;
+		}
+
+		public void associate(EObject copy, EObject original) {
+			associations.put(copy, original);
 		}
 	}
 
@@ -1148,13 +1172,14 @@ public class EdeltaModelMigratorTest {
 
 	private EAttribute replaceWithCopy(EdeltaModelMigrator modelMigrator, EAttribute attribute, String newName) {
 		var copy = EcoreUtil.copy(attribute);
+		modelMigrator.associate(copy, attribute);
 		copy.setName(newName);
 		var containingClass = attribute.getEContainingClass();
 		EdeltaUtils.removeElement(attribute);
 		containingClass.getEStructuralFeatures().add(copy);
 		modelMigrator.addFeatureMigrator(
 			f ->
-				f == modelMigrator.original(attribute),
+				f == modelMigrator.original(copy),
 			o -> copy);
 		return copy;
 	}
