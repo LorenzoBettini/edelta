@@ -1171,8 +1171,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	private EAttribute replaceWithCopy(EdeltaModelMigrator modelMigrator, EAttribute attribute, String newName) {
-		var copy = EcoreUtil.copy(attribute);
-		modelMigrator.associate(copy, attribute);
+		var copy = createCopy(modelMigrator, attribute);
 		copy.setName(newName);
 		var containingClass = attribute.getEContainingClass();
 		EdeltaUtils.removeElement(attribute);
@@ -1181,6 +1180,12 @@ public class EdeltaModelMigratorTest {
 			f ->
 				f == modelMigrator.original(copy),
 			o -> copy);
+		return copy;
+	}
+
+	private <T extends EObject> T createCopy(EdeltaModelMigrator modelMigrator, T o) {
+		var copy = EcoreUtil.copy(o);
+		modelMigrator.associate(copy, o);
 		return copy;
 	}
 
