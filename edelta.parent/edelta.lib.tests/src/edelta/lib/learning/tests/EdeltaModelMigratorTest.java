@@ -174,6 +174,10 @@ public class EdeltaModelMigratorTest {
 			super.copyAttributeValue(eAttribute, eObject, newValue, setting);
 		}
 
+		public <T extends EObject> T evolved(T o) {
+			return getMapped(o);
+		}
+
 		private <T extends EObject> T getMapped(T o) {
 			var value = ecoreCopyMap.get(o);
 			@SuppressWarnings("unchecked")
@@ -1050,26 +1054,9 @@ public class EdeltaModelMigratorTest {
 		var employeeClass = getEClass(evolvingModelManager,
 				"PersonList", "Employee");
 		// refactoring
-		var pushedDownStudentName = EcoreUtil.copy(personName);
-		var pushedDownEmployeeName = EcoreUtil.copy(personName);
-		studentClass.getEStructuralFeatures().add(pushedDownStudentName);
-		// we add it in the very first position just to have exactly the
-		// same Ecore model as the starting one of pullUpFeatures
-		// but just for testing purposes: we verify that the output is
-		// exactly the same as the original model of pullUpFeatures
-		employeeClass.getEStructuralFeatures().add(0, pushedDownEmployeeName);
-		EdeltaUtils.removeElement(personName);
-		// remember we must compare to the original metamodel element
-		modelMigrator.addFeatureMigrator(
-			f -> // the feature of the original metamodel
-				f == modelMigrator.original(personName),
-			o -> { // the object of the original model
-				// the result depends on the EClass of the original
-				// object being copied
-				if (o.eClass() == modelMigrator.original(studentClass))
-					return pushedDownStudentName;
-				return pushedDownEmployeeName;
-			});
+		pushDown(modelMigrator,
+				personName,
+				List.of(studentClass, employeeClass));
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
@@ -1145,5 +1132,31 @@ public class EdeltaModelMigratorTest {
 			modelMigrator.addNewElementMapping(
 					modelMigrator.original(feature), pulledUp);
 		}
+	}
+
+	private void pushDown(EdeltaModelMigrator modelMigrator,
+			EStructuralFeature feature, Collection<EClass> subClasses) {
+		var pushedDownFeatures = new HashMap<EClass, EStructuralFeature>();
+		for (var subClass : subClasses) {
+			var pushedDown = EcoreUtil.copy(feature);
+			pushedDownFeatures.put(subClass, pushedDown);
+			// we add it in the very first position just to have exactly the
+			// same Ecore model as the starting one of pullUpFeatures
+			// but just for testing purposes: we verify that the output is
+			// exactly the same as the original model of pullUpFeatures
+			subClass.getEStructuralFeatures().add(0, pushedDown);
+		}
+		EdeltaUtils.removeElement(feature);
+		// remember we must compare to the original metamodel element
+		modelMigrator.addFeatureMigrator(
+			f -> // the feature of the original metamodel
+				f == modelMigrator.original(feature),
+			o -> { // the object of the original model
+				// the result depends on the EClass of the original
+				// object being copied, but the map was built
+				// using evolved classes
+				return pushedDownFeatures.get(modelMigrator.evolved(o.eClass()));
+			}
+		);
 	}
 }
