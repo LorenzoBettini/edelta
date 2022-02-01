@@ -96,13 +96,6 @@ public class EdeltaModelMigratorTest {
 
 		private BiMap<EObject, EObject> ecoreCopyMap;
 
-		/**
-		 * This stores mappings from old elements to new elements added during the
-		 * evolution so they cannot be found in
-		 * {@link EdeltaModelMigrator#ecoreCopyMap}.
-		 */
-		private Map<EObject, EObject> newElementsMap = new HashMap<>();
-
 		private Collection<ModelMigrationRule<EAttribute, EObject, Object>> valueMigrators = new ArrayList<>();
 
 		private Collection<ModelMigrationRule<EStructuralFeature, EObject, EStructuralFeature>> featureMigrators = new ArrayList<>();
@@ -127,18 +120,6 @@ public class EdeltaModelMigratorTest {
 					function
 				)
 			);
-		}
-
-		/**
-		 * Maps an element from the original metamodel to a new element in the new
-		 * metamodel ("new element" means that it was not there at all in the original
-		 * metamodel)
-		 * 
-		 * @param oldElement
-		 * @param newElement
-		 */
-		public <T extends EObject> void addNewElementMapping(T oldElement, T newElement) {
-			newElementsMap.put(oldElement, newElement);
 		}
 
 		@Override
@@ -183,19 +164,13 @@ public class EdeltaModelMigratorTest {
 			@SuppressWarnings("unchecked")
 			var mapped = (T) value;
 			if (isNotThereAnymore(mapped))
-				return getFromNewElements(o);
+				return null;
 			return mapped;
 		}
 
 		public <T extends EObject> T original(T o) {
 			@SuppressWarnings("unchecked")
 			var ret = (T) ecoreCopyMap.inverse().get(o);
-			return ret;
-		}
-
-		private <T extends EObject> T getFromNewElements(T o) {
-			@SuppressWarnings("unchecked")
-			var ret = (T) newElementsMap.get(o);
 			return ret;
 		}
 
@@ -1129,8 +1104,16 @@ public class EdeltaModelMigratorTest {
 		EdeltaUtils.removeAllElements(features);
 		// remember we must map the original metamodel element to the new one
 		for (var feature : features) {
-			modelMigrator.addNewElementMapping(
-					modelMigrator.original(feature), pulledUp);
+			modelMigrator.addFeatureMigrator(
+				f -> // the feature of the original metamodel
+					f == modelMigrator.original(feature),
+				o -> { // the object of the original model
+					// the result can be safely returned
+					// independently from the object's class, since the
+					// predicate already matched
+					return pulledUp;
+				}
+			);
 		}
 	}
 
