@@ -1067,6 +1067,41 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testPullUpAndPushDown() throws IOException {
+		var subdir = "pullUpFeatures/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personClass = getEClass(evolvingModelManager,
+				"PersonList", "Person");
+		var studentClass = getEClass(evolvingModelManager,
+				"PersonList", "Student");
+		var employeeClass = getEClass(evolvingModelManager,
+				"PersonList", "Employee");
+		var studentName = studentClass.getEStructuralFeature("name");
+		var employeeName = employeeClass.getEStructuralFeature("name");
+		// refactoring
+		var personName = pullUp(modelMigrator,
+				personClass,
+				List.of(studentName, employeeName));
+		pushDown(modelMigrator,
+				personName,
+				List.of(studentClass, employeeClass));
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private EAttribute getAttribute(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
 		return (EAttribute) getFeature(modelManager, packageName, className, attributeName);
 	}
@@ -1121,7 +1156,7 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.copyReferences();
 	}
 
-	private void pullUp(EdeltaModelMigrator modelMigrator,
+	private EStructuralFeature pullUp(EdeltaModelMigrator modelMigrator,
 			EClass superClass, Collection<EStructuralFeature> features) {
 		var first = features.iterator().next();
 		var pulledUp = EcoreUtil.copy(first);
@@ -1132,6 +1167,7 @@ public class EdeltaModelMigratorTest {
 			modelMigrator.addNewElementMapping(
 					modelMigrator.original(feature), pulledUp);
 		}
+		return pulledUp;
 	}
 
 	private void pushDown(EdeltaModelMigrator modelMigrator,
