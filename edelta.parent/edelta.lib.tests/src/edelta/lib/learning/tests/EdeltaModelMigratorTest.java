@@ -913,6 +913,31 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testReplaceWithCopy() throws IOException {
+		var subdir = "unchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myClassStringAttribute");
+
+		replaceWithCopy(modelMigrator, attribute, "myAttributeRenamed");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"replaceWithCopy/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
 	/**
 	 * Note that with pull up the migrated model is actually the same as the
 	 * original one, but we have to adjust some mappings to make the copy work,
@@ -1094,6 +1119,18 @@ public class EdeltaModelMigratorTest {
 				newResource.getContents().add(copy);
 		}
 		modelMigrator.copyReferences();
+	}
+
+	private void replaceWithCopy(EdeltaModelMigrator modelMigrator, EAttribute attribute, String newName) {
+		var copy = EcoreUtil.copy(attribute);
+		copy.setName(newName);
+		var containingClass = attribute.getEContainingClass();
+		EdeltaUtils.removeElement(attribute);
+		containingClass.getEStructuralFeatures().add(copy);
+		modelMigrator.addFeatureMigrator(
+			f ->
+				f == modelMigrator.original(attribute),
+			o -> copy);
 	}
 
 	private void pullUp(EdeltaModelMigrator modelMigrator,
