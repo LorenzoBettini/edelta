@@ -1192,7 +1192,7 @@ public class EdeltaModelMigratorTest {
 	private void pullUp(EdeltaModelMigrator modelMigrator,
 			EClass superClass, Collection<EStructuralFeature> features) {
 		var first = features.iterator().next();
-		var pulledUp = EcoreUtil.copy(first);
+		var pulledUp = createCopy(modelMigrator, first);
 		superClass.getEStructuralFeatures().add(pulledUp);
 		EdeltaUtils.removeAllElements(features);
 		// remember we must map the original metamodel element to the new one
@@ -1214,7 +1214,7 @@ public class EdeltaModelMigratorTest {
 			EStructuralFeature feature, Collection<EClass> subClasses) {
 		var pushedDownFeatures = new HashMap<EClass, EStructuralFeature>();
 		for (var subClass : subClasses) {
-			var pushedDown = EcoreUtil.copy(feature);
+			var pushedDown = createCopy(modelMigrator, feature);
 			pushedDownFeatures.put(subClass, pushedDown);
 			// we add it in the very first position just to have exactly the
 			// same Ecore model as the starting one of pullUpFeatures
