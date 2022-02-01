@@ -1003,6 +1003,36 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
+	public void testPullUpContainmentReferences() throws IOException {
+		var subdir = "pullUpContainmentReferences/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personClass = getEClass(evolvingModelManager,
+				"PersonList", "Person");
+		var studentAddress = getFeature(evolvingModelManager,
+				"PersonList", "Student", "address");
+		var employeeAddress = getFeature(evolvingModelManager,
+				"PersonList", "Employee", "address");
+		// refactoring
+		pullUp(modelMigrator,
+				personClass,
+				List.of(studentAddress, employeeAddress));
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
 	public void testPushDownFeatures() throws IOException {
 		var subdir = "pushDownFeatures/";
 
