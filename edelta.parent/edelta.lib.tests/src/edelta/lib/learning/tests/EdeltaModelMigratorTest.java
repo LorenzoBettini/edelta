@@ -182,7 +182,7 @@ public class EdeltaModelMigratorTest {
 			return mapped;
 		}
 
-		public <T extends EObject> T original(T o) {
+		private <T extends EObject> T original(T o) {
 			@SuppressWarnings("unchecked")
 			var ret = (T) ecoreCopyMap.inverse().get(o);
 			return ret;
