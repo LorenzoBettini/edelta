@@ -1301,23 +1301,20 @@ public class EdeltaModelMigratorTest {
 
 	private void pullUp(EdeltaModelMigrator modelMigrator,
 			EClass superClass, Collection<EStructuralFeature> features) {
-		var first = features.iterator().next();
-		var pulledUp = createCopy(modelMigrator, first);
+		var pulledUp = createSingleCopy(modelMigrator, features);
 		superClass.getEStructuralFeatures().add(pulledUp);
 		EdeltaUtils.removeAllElements(features);
 		// remember we must map the original metamodel element to the new one
-		for (var feature : features) {
-			modelMigrator.addFeatureMigrator(
-				f -> // the feature of the original metamodel
-					f == modelMigrator.original(feature),
-				o -> { // the object of the original model
-					// the result can be safely returned
-					// independently from the object's class, since the
-					// predicate already matched
-					return pulledUp;
-				}
-			);
-		}
+		modelMigrator.addFeatureMigrator(
+			f -> // the feature of the original metamodel
+				modelMigrator.isRelatedTo(f, pulledUp),
+			o -> { // the object of the original model
+				// the result can be safely returned
+				// independently from the object's class, since the
+				// predicate already matched
+				return pulledUp;
+			}
+		);
 	}
 
 	private void pushDown(EdeltaModelMigrator modelMigrator,
