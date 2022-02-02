@@ -223,9 +223,17 @@ public class EdeltaModelMigratorTest {
 				);
 		}
 
+		public <T extends ENamedElement> Predicate<T> relatesTo(T evolvedEcoreElements) {
+			return origEcoreElement -> isRelatedTo(origEcoreElement, evolvedEcoreElements);
+		}
+
 		public boolean isRelatedToAtLeastOneOf(ENamedElement origEcoreElement, Collection<? extends ENamedElement> evolvedEcoreElements) {
 			return evolvedEcoreElements.stream()
 				.anyMatch(e -> isRelatedTo(origEcoreElement, e));
+		}
+
+		public <T extends ENamedElement> Predicate<T> relatesToAtLeastOneOf(Collection<? extends T> evolvedEcoreElements) {
+			return origEcoreElement -> isRelatedToAtLeastOneOf(origEcoreElement, evolvedEcoreElements);
 		}
 	}
 
@@ -875,8 +883,7 @@ public class EdeltaModelMigratorTest {
 
 		// custom migration rule
 		modelMigrator.addEAttributeMigrator(
-			a ->
-				modelMigrator.isRelatedTo(a, attribute),
+			modelMigrator.relatesTo(attribute),
 			o -> {
 				// o is the old object,
 				// so we must use the original feature to retrieve the value to copy
@@ -1418,8 +1425,7 @@ public class EdeltaModelMigratorTest {
 		EdeltaUtils.removeElement(feature);
 		// remember we must compare to the original metamodel element
 		modelMigrator.addFeatureMigrator(
-			f -> // the feature of the original metamodel
-				modelMigrator.isRelatedToAtLeastOneOf(f, pushedDownFeatures.values()),
+			modelMigrator.relatesToAtLeastOneOf(pushedDownFeatures.values()),
 			o -> { // the object of the original model
 				// the result depends on the EClass of the original
 				// object being copied, but the map was built
