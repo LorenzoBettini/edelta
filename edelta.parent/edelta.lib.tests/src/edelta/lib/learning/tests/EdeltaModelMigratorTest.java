@@ -1268,6 +1268,40 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testPushDownAndPullUp() throws IOException {
+		var subdir = "pushDownFeatures/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personClass = getEClass(evolvingModelManager,
+				"PersonList", "Person");
+		var personName = personClass.getEStructuralFeature("name");
+		var studentClass = getEClass(evolvingModelManager,
+				"PersonList", "Student");
+		var employeeClass = getEClass(evolvingModelManager,
+				"PersonList", "Employee");
+		// refactoring
+		var features = pushDown(modelMigrator,
+				personName,
+				List.of(studentClass, employeeClass));
+		pullUp(modelMigrator,
+				personClass,
+				features);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"pushDownAndPullUp/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private EAttribute getAttribute(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
 		return (EAttribute) getFeature(modelManager, packageName, className, attributeName);
 	}
@@ -1369,7 +1403,7 @@ public class EdeltaModelMigratorTest {
 		return pulledUp;
 	}
 
-	private void pushDown(EdeltaModelMigrator modelMigrator,
+	private Collection<EStructuralFeature> pushDown(EdeltaModelMigrator modelMigrator,
 			EStructuralFeature feature, Collection<EClass> subClasses) {
 		var pushedDownFeatures = new HashMap<EClass, EStructuralFeature>();
 		for (var subClass : subClasses) {
@@ -1393,5 +1427,6 @@ public class EdeltaModelMigratorTest {
 				return pushedDownFeatures.get(modelMigrator.evolved(o.eClass()));
 			}
 		);
+		return pushedDownFeatures.values();
 	}
 }
