@@ -3,6 +3,9 @@ package edelta.lib.learning.tests;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirectories;
 import static java.util.List.of;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -11,7 +14,9 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,12 +24,14 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -101,6 +108,12 @@ public class EdeltaModelMigratorTest {
 		 * evolution (for example, with a copy) to keep track of the chain of origins.
 		 */
 		private Map<EObject, EObject> associations = new HashMap<>();
+
+		/**
+		 * This stores mappings from new elements to old elements added during the
+		 * evolution (for example, with a copy) to keep track of the chain of origins.
+		 */
+		private Map<EObject, Collection<EObject>> elementAssociations = new HashMap<>();
 
 		private Collection<ModelMigrationRule<EAttribute, EObject, Object>> valueMigrators = new ArrayList<>();
 
@@ -200,6 +213,34 @@ public class EdeltaModelMigratorTest {
 
 		public void associate(EObject copy, EObject original) {
 			associations.put(copy, original);
+		}
+
+		public void addAssociation(EObject copy, EObject original) {
+			elementAssociations.computeIfAbsent(copy, k -> new HashSet<>())
+				.add(original);
+		}
+
+		public Collection<EObject> originals(EObject o) {
+			return computeOriginals
+					(elementAssociations
+							.getOrDefault(o, Collections.emptyList()));
+		}
+
+		private Collection<EObject> computeOriginals(Collection<EObject> collection) {
+			return collection.stream()
+					.flatMap(o -> {
+						var originals = originals(o);
+						if (originals.isEmpty())
+							return Stream.of(o);
+						return originals.stream();
+					})
+					.collect(Collectors.toSet());
+		}
+
+		public boolean isRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
+			return originals(evolvedEcoreElement).stream()
+					.map(o -> original(o))
+					.anyMatch(o -> o == origEcoreElement);
 		}
 	}
 
@@ -953,6 +994,51 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
+	public void testElementAssociations() {
+		var subdir = "unchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		var origfeature1 = getAttribute(originalModelManager,
+				"mypackage", "MyClass", "myClassStringAttribute");
+		var origfeature2 = getFeature(originalModelManager,
+				"mypackage", "MyRoot", "myReferences");
+
+		var feature1 = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myClassStringAttribute");
+		var feature2 = getFeature(evolvingModelManager,
+				"mypackage", "MyRoot", "myReferences");
+		// createCopy also creates associations
+		var copyOfFeature1 = createCopy(modelMigrator, feature1);
+		var copyOfCopy = createCopy(modelMigrator, copyOfFeature1);
+
+		assertThat(modelMigrator.originals(copyOfFeature1))
+			.containsExactlyInAnyOrder(feature1);
+
+		assertThat(modelMigrator.originals(copyOfCopy))
+			.containsExactlyInAnyOrder(feature1);
+
+		assertTrue(modelMigrator.isRelatedTo(origfeature1, copyOfFeature1));
+		assertTrue(modelMigrator.isRelatedTo(origfeature1, copyOfCopy));
+		assertFalse(modelMigrator.isRelatedTo(origfeature2, copyOfFeature1));
+		assertFalse(modelMigrator.isRelatedTo(origfeature2, copyOfCopy));
+
+		// explicit associations
+		modelMigrator.addAssociation(copyOfCopy, feature2);
+
+		assertFalse(modelMigrator.isRelatedTo(origfeature2, copyOfFeature1));
+		// now this is true
+		assertTrue(modelMigrator.isRelatedTo(origfeature2, copyOfCopy));
+
+		assertThat(modelMigrator.originals(copyOfCopy))
+			.containsExactlyInAnyOrder(feature1, feature2);
+	}
+
+	@Test
 	public void testReplaceWithCopy() throws IOException {
 		var subdir = "unchanged/";
 
@@ -1201,6 +1287,7 @@ public class EdeltaModelMigratorTest {
 	private <T extends EObject> T createCopy(EdeltaModelMigrator modelMigrator, T o) {
 		var copy = EcoreUtil.copy(o);
 		modelMigrator.associate(copy, o);
+		modelMigrator.addAssociation(copy, o);
 		return copy;
 	}
 
