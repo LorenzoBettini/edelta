@@ -1016,12 +1016,13 @@ public class EdeltaModelMigratorTest {
 		// createCopy also creates associations
 		var copyOfFeature1 = createCopy(modelMigrator, feature1);
 		var copyOfCopy = createCopy(modelMigrator, copyOfFeature1);
+		var singleCopy = createSingleCopy(modelMigrator, List.of(feature1, feature2));
 
 		// make sure the copies are in the resource
 		evolvingModelManager.getEPackage("mypackage").getEClassifiers().add(
 			EdeltaUtils.newEClass("TestClass", c -> {
 				c.getEStructuralFeatures()
-					.addAll(List.of(copyOfFeature1, copyOfCopy));
+					.addAll(List.of(copyOfFeature1, copyOfCopy, singleCopy));
 			})
 		);
 
@@ -1049,6 +1050,11 @@ public class EdeltaModelMigratorTest {
 		// remove an element from its resource
 		EcoreUtil.remove(copyOfCopy);
 		assertFalse(modelMigrator.isRelatedTo(origfeature1, copyOfCopy));
+
+		assertThat(modelMigrator.originals(singleCopy))
+			.containsExactlyInAnyOrder(feature1, feature2);
+		assertTrue(modelMigrator.isRelatedTo(origfeature1, singleCopy));
+		assertTrue(modelMigrator.isRelatedTo(origfeature2, singleCopy));
 	}
 
 	@Test
@@ -1301,6 +1307,15 @@ public class EdeltaModelMigratorTest {
 		var copy = EcoreUtil.copy(o);
 		modelMigrator.associate(copy, o);
 		modelMigrator.addAssociation(copy, o);
+		return copy;
+	}
+
+	private <T extends EObject> T createSingleCopy(EdeltaModelMigrator modelMigrator, Collection<T> elements) {
+		var iterator = elements.iterator();
+		var copy = createCopy(modelMigrator, iterator.next());
+		while (iterator.hasNext()) {
+			modelMigrator.addAssociation(copy, iterator.next());
+		}
 		return copy;
 	}
 
