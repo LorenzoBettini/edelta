@@ -225,7 +225,7 @@ public class EdeltaModelMigratorTest {
 					.anyMatch(o -> o == origEcoreElement);
 		}
 
-		public boolean isRelatedToAtLeastOneOf(ENamedElement origEcoreElement, Collection<ENamedElement> evolvedEcoreElements) {
+		public boolean isRelatedToAtLeastOneOf(ENamedElement origEcoreElement, Collection<? extends ENamedElement> evolvedEcoreElements) {
 			return evolvedEcoreElements.stream()
 				.anyMatch(e -> isRelatedTo(origEcoreElement, e));
 		}
@@ -1344,7 +1344,7 @@ public class EdeltaModelMigratorTest {
 		// remember we must compare to the original metamodel element
 		modelMigrator.addFeatureMigrator(
 			f -> // the feature of the original metamodel
-				f == modelMigrator.original(feature),
+				modelMigrator.isRelatedToAtLeastOneOf(f, pushedDownFeatures.values()),
 			o -> { // the object of the original model
 				// the result depends on the EClass of the original
 				// object being copied, but the map was built
