@@ -763,19 +763,22 @@ public class EdeltaModelMigratorTest {
 		);
 
 		// actual refactoring
-		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
 		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
 
 		// custom migration rule
 		modelMigrator.addEAttributeMigrator(
 			a ->
 				a == modelMigrator.original(attribute),
-			o -> 
-			// o is the old object,
-			// so we must use the original feature to retrieve the value to copy
-			// that is, don't use attribute, which is the one of the new package
-			Integer.parseInt(
-				o.eGet(modelMigrator.original(attribute)).toString())
+			o -> {
+				// o is the old object,
+				// so we must use the original feature to retrieve the value to copy
+				// that is, don't use attribute, which is the one of the new package
+				var eClass = o.eClass();
+				return Integer.parseInt(
+					o.eGet(eClass.getEStructuralFeature(attributeName)).toString());
+			}
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -798,22 +801,25 @@ public class EdeltaModelMigratorTest {
 		);
 
 		// actual refactoring
-		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
 		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
 
 		// custom migration rule
 		modelMigrator.addEAttributeMigrator(
 			a ->
 				a == modelMigrator.original(attribute),
-			o -> 
-			// o is the old object,
-			// so we must use the original feature to retrieve the value to copy
-			// that is, don't use attribute, which is the one of the new package
-			((Collection<?>) o.eGet(modelMigrator.original(attribute)))
-				.stream()
-				.map(Object::toString)
-				.map(Integer::parseInt)
-				.collect(Collectors.toList())
+			o -> {
+				// o is the old object,
+				// so we must use the original feature to retrieve the value to copy
+				// that is, don't use attribute, which is the one of the new package
+				var eClass = o.eClass();
+				return ((Collection<?>) o.eGet(eClass.getEStructuralFeature(attributeName)))
+					.stream()
+					.map(Object::toString)
+					.map(Integer::parseInt)
+					.collect(Collectors.toList());
+			}
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -836,7 +842,8 @@ public class EdeltaModelMigratorTest {
 		);
 
 		// actual refactoring
-		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
 		attribute.setName("newName");
 		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
 
@@ -844,12 +851,14 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.addEAttributeMigrator(
 			a ->
 				a == modelMigrator.original(attribute),
-			o -> 
-			// o is the old object,
-			// so we must use the original feature to retrieve the value to copy
-			// that is, don't use attribute, which is the one of the new package
-			Integer.parseInt(
-					o.eGet(modelMigrator.original(attribute)).toString())
+			o -> {
+				// o is the old object,
+				// so we must use the original feature to retrieve the value to copy
+				// that is, don't use attribute, which is the one of the new package
+				var eClass = o.eClass();
+				return Integer.parseInt(
+					o.eGet(eClass.getEStructuralFeature(attributeName)).toString());
+			}
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -872,19 +881,22 @@ public class EdeltaModelMigratorTest {
 		);
 
 		// actual refactoring
-		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
 		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
 
 		// custom migration rule
 		modelMigrator.addEAttributeMigrator(
 			a ->
 				a == modelMigrator.original(attribute),
-			o -> 
-			// o is the old object,
-			// so we must use the original feature to retrieve the value to copy
-			// that is, don't use attribute, which is the one of the new package
-			Integer.parseInt(
-					o.eGet(modelMigrator.original(attribute)).toString())
+			o -> {
+				// o is the old object,
+				// so we must use the original feature to retrieve the value to copy
+				// that is, don't use attribute, which is the one of the new package
+				var eClass = o.eClass();
+				return Integer.parseInt(
+					o.eGet(eClass.getEStructuralFeature(attributeName)).toString());
+			}
 		);
 		attribute.setName("newName");
 
@@ -919,13 +931,16 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.addEAttributeMigrator(
 			a ->
 				a == modelMigrator.original(firstName),
-			o -> 
-			// o is the old object,
-			// so we must use the original feature to retrieve the value to copy
-			// that is, don't use attribute, which is the one of the new package
-			o.eGet(modelMigrator.original(firstName)) +
-			" " +
-			o.eGet(modelMigrator.original(lastName))
+			o -> {
+				// o is the old object,
+				// so we must use the original feature to retrieve the value to copy
+				// that is, don't use attribute, which is the one of the new package
+				var eClass = o.eClass();
+				return 
+					o.eGet(eClass.getEStructuralFeature("firstname")) +
+					" " +
+					o.eGet(eClass.getEStructuralFeature("lastname"));
+			}
 		);
 
 		copyModelsSaveAndAssertOutputs(
