@@ -182,12 +182,6 @@ public class EdeltaModelMigratorTest {
 			return mapped;
 		}
 
-		private <T extends EObject> T original(T o) {
-			@SuppressWarnings("unchecked")
-			var ret = (T) ecoreCopyMap.inverse().get(o);
-			return ret;
-		}
-
 		private boolean isStillThere(EObject target) {
 			return !isNotThereAnymore(target);
 		}
@@ -220,9 +214,13 @@ public class EdeltaModelMigratorTest {
 
 		public boolean isRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
 			return isStillThere(evolvedEcoreElement) &&
+				(
+				origEcoreElement == ecoreCopyMap.inverse().get(evolvedEcoreElement)
+				||
 				originals(evolvedEcoreElement).stream()
-					.map(o -> original(o))
-					.anyMatch(o -> o == origEcoreElement);
+					.map(o -> ecoreCopyMap.inverse().get(o))
+					.anyMatch(o -> o == origEcoreElement)
+				);
 		}
 
 		public boolean isRelatedToAtLeastOneOf(ENamedElement origEcoreElement, Collection<? extends ENamedElement> evolvedEcoreElements) {
@@ -798,7 +796,7 @@ public class EdeltaModelMigratorTest {
 		// custom migration rule
 		modelMigrator.addEAttributeMigrator(
 			a ->
-				a == modelMigrator.original(attribute),
+				modelMigrator.isRelatedTo(a, attribute),
 			o -> {
 				// o is the old object,
 				// so we must use the original feature to retrieve the value to copy
@@ -836,7 +834,7 @@ public class EdeltaModelMigratorTest {
 		// custom migration rule
 		modelMigrator.addEAttributeMigrator(
 			a ->
-				a == modelMigrator.original(attribute),
+				modelMigrator.isRelatedTo(a, attribute),
 			o -> {
 				// o is the old object,
 				// so we must use the original feature to retrieve the value to copy
@@ -878,7 +876,7 @@ public class EdeltaModelMigratorTest {
 		// custom migration rule
 		modelMigrator.addEAttributeMigrator(
 			a ->
-				a == modelMigrator.original(attribute),
+				modelMigrator.isRelatedTo(a, attribute),
 			o -> {
 				// o is the old object,
 				// so we must use the original feature to retrieve the value to copy
@@ -916,7 +914,7 @@ public class EdeltaModelMigratorTest {
 		// custom migration rule
 		modelMigrator.addEAttributeMigrator(
 			a ->
-				a == modelMigrator.original(attribute),
+				modelMigrator.isRelatedTo(a, attribute),
 			o -> {
 				// o is the old object,
 				// so we must use the original feature to retrieve the value to copy
@@ -958,7 +956,7 @@ public class EdeltaModelMigratorTest {
 		// specify the converter using firstname and lastname original values
 		modelMigrator.addEAttributeMigrator(
 			a ->
-				a == modelMigrator.original(firstName),
+				modelMigrator.isRelatedTo(a, firstName),
 			o -> {
 				// o is the old object,
 				// so we must use the original feature to retrieve the value to copy
