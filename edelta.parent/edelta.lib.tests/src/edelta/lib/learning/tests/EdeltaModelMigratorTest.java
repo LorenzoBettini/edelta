@@ -238,7 +238,8 @@ public class EdeltaModelMigratorTest {
 		}
 
 		public boolean isRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
-			return originals(evolvedEcoreElement).stream()
+			return isStillThere(evolvedEcoreElement) &&
+				originals(evolvedEcoreElement).stream()
 					.map(o -> original(o))
 					.anyMatch(o -> o == origEcoreElement);
 		}
@@ -1016,6 +1017,14 @@ public class EdeltaModelMigratorTest {
 		var copyOfFeature1 = createCopy(modelMigrator, feature1);
 		var copyOfCopy = createCopy(modelMigrator, copyOfFeature1);
 
+		// make sure the copies are in the resource
+		evolvingModelManager.getEPackage("mypackage").getEClassifiers().add(
+			EdeltaUtils.newEClass("TestClass", c -> {
+				c.getEStructuralFeatures()
+					.addAll(List.of(copyOfFeature1, copyOfCopy));
+			})
+		);
+
 		assertThat(modelMigrator.originals(copyOfFeature1))
 			.containsExactlyInAnyOrder(feature1);
 
@@ -1036,6 +1045,10 @@ public class EdeltaModelMigratorTest {
 
 		assertThat(modelMigrator.originals(copyOfCopy))
 			.containsExactlyInAnyOrder(feature1, feature2);
+
+		// remove an element from its resource
+		EcoreUtil.remove(copyOfCopy);
+		assertFalse(modelMigrator.isRelatedTo(origfeature1, copyOfCopy));
 	}
 
 	@Test
