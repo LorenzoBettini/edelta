@@ -997,6 +997,13 @@ public class EdeltaModelMigratorTest {
 				"mypackage", "MyClass", "myClassStringAttribute");
 		var feature2 = getFeature(evolvingModelManager,
 				"mypackage", "MyRoot", "myReferences");
+
+		// automatic existing associations
+		assertTrue(modelMigrator.isRelatedTo(origfeature1, feature1));
+		assertTrue(modelMigrator.isRelatedTo(origfeature2, feature2));
+		assertFalse(modelMigrator.isRelatedTo(origfeature2, feature1));
+		assertFalse(modelMigrator.isRelatedTo(origfeature1, feature2));
+
 		// createCopy also creates associations
 		var copyOfFeature1 = createCopy(modelMigrator, feature1);
 		var copyOfCopy = createCopy(modelMigrator, copyOfFeature1);
