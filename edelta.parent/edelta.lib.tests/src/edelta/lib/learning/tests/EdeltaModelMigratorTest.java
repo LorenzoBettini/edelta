@@ -224,6 +224,11 @@ public class EdeltaModelMigratorTest {
 					.map(o -> original(o))
 					.anyMatch(o -> o == origEcoreElement);
 		}
+
+		public boolean isRelatedToAtLeastOneOf(ENamedElement origEcoreElement, Collection<ENamedElement> evolvedEcoreElements) {
+			return evolvedEcoreElements.stream()
+				.anyMatch(e -> isRelatedTo(origEcoreElement, e));
+		}
 	}
 
 	/**
@@ -1018,6 +1023,9 @@ public class EdeltaModelMigratorTest {
 		assertFalse(modelMigrator.isRelatedTo(origfeature2, copyOfFeature1));
 		assertFalse(modelMigrator.isRelatedTo(origfeature2, copyOfCopy));
 
+		assertTrue(modelMigrator.isRelatedToAtLeastOneOf(origfeature1,
+				List.of(copyOfFeature1, copyOfCopy)));
+
 		// explicit associations
 		modelMigrator.addAssociation(copyOfCopy, feature2);
 
@@ -1031,6 +1039,9 @@ public class EdeltaModelMigratorTest {
 		// remove an element from its resource
 		EcoreUtil.remove(copyOfCopy);
 		assertFalse(modelMigrator.isRelatedTo(origfeature1, copyOfCopy));
+
+		assertTrue(modelMigrator.isRelatedToAtLeastOneOf(origfeature1,
+				List.of(copyOfCopy, copyOfFeature1)));
 
 		assertThat(modelMigrator.originals(singleCopy))
 			.containsExactlyInAnyOrder(feature1, feature2);
