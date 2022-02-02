@@ -104,13 +104,7 @@ public class EdeltaModelMigratorTest {
 		private BiMap<EObject, EObject> ecoreCopyMap;
 
 		/**
-		 * This stores mappings from new elements to old elements added during the
-		 * evolution (for example, with a copy) to keep track of the chain of origins.
-		 */
-		private Map<EObject, EObject> associations = new HashMap<>();
-
-		/**
-		 * This stores mappings from new elements to old elements added during the
+		 * This stores mappings from new elements to previous elements added during the
 		 * evolution (for example, with a copy) to keep track of the chain of origins.
 		 */
 		private Map<EObject, Collection<EObject>> elementAssociations = new HashMap<>();
@@ -191,15 +185,6 @@ public class EdeltaModelMigratorTest {
 		public <T extends EObject> T original(T o) {
 			@SuppressWarnings("unchecked")
 			var ret = (T) ecoreCopyMap.inverse().get(o);
-			if (ret == null) {
-				// try to walk up the chain of associations
-				var associated = associations.get(o);
-				if (associated != null) {
-					@SuppressWarnings("unchecked")
-					var original = (T) original(associated);
-					return original;
-				}
-			}
 			return ret;
 		}
 
@@ -209,10 +194,6 @@ public class EdeltaModelMigratorTest {
 
 		private boolean isNotThereAnymore(EObject target) {
 			return target != null && target.eResource() == null;
-		}
-
-		public void associate(EObject copy, EObject original) {
-			associations.put(copy, original);
 		}
 
 		public void addAssociation(EObject copy, EObject original) {
@@ -1298,14 +1279,13 @@ public class EdeltaModelMigratorTest {
 		containingClass.getEStructuralFeatures().add(copy);
 		modelMigrator.addFeatureMigrator(
 			f ->
-				f == modelMigrator.original(copy),
+				modelMigrator.isRelatedTo(f, copy),
 			o -> copy);
 		return copy;
 	}
 
 	private <T extends EObject> T createCopy(EdeltaModelMigrator modelMigrator, T o) {
 		var copy = EcoreUtil.copy(o);
-		modelMigrator.associate(copy, o);
 		modelMigrator.addAssociation(copy, o);
 		return copy;
 	}
