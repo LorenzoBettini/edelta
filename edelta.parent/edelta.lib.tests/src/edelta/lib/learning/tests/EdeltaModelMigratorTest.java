@@ -854,11 +854,7 @@ public class EdeltaModelMigratorTest {
 			a ->
 				modelMigrator.isRelatedTo(a, attribute),
 			(feature, o, oldValue) -> {
-				// o is the old object,
-				// so we must use the original feature to retrieve the value to copy
-				// that is, don't use attribute, which is the one of the new package
-				return Integer.parseInt(
-					o.eGet(feature).toString());
+				return Integer.parseInt(oldValue.toString());
 			}
 		);
 
@@ -931,11 +927,7 @@ public class EdeltaModelMigratorTest {
 			a ->
 				modelMigrator.isRelatedTo(a, attribute),
 			(feature, o, oldValue) -> {
-				// o is the old object,
-				// so we must use the original feature to retrieve the value to copy
-				// that is, don't use attribute, which is the one of the new package
-				var eClass = o.eClass();
-				return ((Collection<?>) o.eGet(eClass.getEStructuralFeature(attributeName)))
+				return ((Collection<?>) oldValue)
 					.stream()
 					.map(Object::toString)
 					.map(Integer::parseInt)
@@ -971,13 +963,10 @@ public class EdeltaModelMigratorTest {
 		// custom migration rule
 		modelMigrator.addEAttributeMigrator(
 			modelMigrator.relatesTo(attribute),
-			(feature, o, oldValue) -> {
-				// o is the old object,
-				// so we must use the original feature to retrieve the value to copy
-				// that is, don't use attribute, which is the one of the new package
-				var eClass = o.eClass();
+			(feature, oldObj, oldValue) -> {
+				var eClass = oldObj.eClass();
 				return Integer.parseInt(
-					o.eGet(eClass.getEStructuralFeature(attributeName)).toString());
+					oldObj.eGet(eClass.getEStructuralFeature(attributeName)).toString());
 			}
 		);
 
@@ -1057,7 +1046,7 @@ public class EdeltaModelMigratorTest {
 				// that is, don't use attribute, which is the one of the new package
 				var eClass = o.eClass();
 				return 
-					o.eGet(eClass.getEStructuralFeature("firstname")) +
+					o.eGet(feature) +
 					" " +
 					o.eGet(eClass.getEStructuralFeature("lastname"));
 			}
