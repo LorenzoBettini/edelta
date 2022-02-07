@@ -97,19 +97,18 @@ public class EdeltaModelMigratorTest {
 		/**
 		 * @author Lorenzo Bettini
 		 *
-		 * @param <T1> the type of the {@link EObject} passed to the predicate
-		 * @param <T2> the type of the {@link EObject} passed to the function
+		 * @param <T> the type of the {@link EObject} passed to the predicate
 		 * @param <R> the type of the returned value when applying the function
 		 */
-		public static class ModelMigrationFunctionRule<T1 extends EObject, T2 extends EObject, R> extends AbstractModelMigrationRule<T1> {
-			private Function<T2, R> function;
+		public static class ModelMigrationFunctionRule<T extends EObject, R> extends AbstractModelMigrationRule<T> {
+			private Function<EObject, R> function;
 
-			public ModelMigrationFunctionRule(Predicate<T1> predicate, Function<T2, R> function) {
+			public ModelMigrationFunctionRule(Predicate<T> predicate, Function<EObject, R> function) {
 				super(predicate);
 				this.function = function;
 			}
 
-			public R apply(T2 arg) {
+			public R apply(EObject arg) {
 				return function.apply(arg);
 			}
 		}
@@ -135,9 +134,9 @@ public class EdeltaModelMigratorTest {
 		 */
 		private Map<EObject, Collection<EObject>> elementAssociations = new HashMap<>();
 
-		private Collection<ModelMigrationFunctionRule<EAttribute, EObject, Object>> valueMigrators = new ArrayList<>();
+		private Collection<ModelMigrationFunctionRule<EAttribute, Object>> valueMigrators = new ArrayList<>();
 
-		private Collection<ModelMigrationFunctionRule<EStructuralFeature, EObject, EStructuralFeature>> featureMigrators = new ArrayList<>();
+		private Collection<ModelMigrationFunctionRule<EStructuralFeature, EStructuralFeature>> featureMigrators = new ArrayList<>();
 
 		private Collection<ModelMigrationCopyFeatureRule> copyRules = new ArrayList<>();
 
