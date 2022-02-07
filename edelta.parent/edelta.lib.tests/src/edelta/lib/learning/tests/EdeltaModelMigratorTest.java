@@ -21,7 +21,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -48,6 +47,7 @@ import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
+import org.eclipse.xtext.xbase.lib.Functions.Function3;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure3;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -98,18 +98,19 @@ public class EdeltaModelMigratorTest {
 		 * @author Lorenzo Bettini
 		 *
 		 * @param <T> the type of the {@link EObject} passed to the predicate
+		 * @param <T3> the type of the third argument passed to the function
 		 * @param <R> the type of the returned value when applying the function
 		 */
-		public static class ModelMigrationFunctionRule<T extends EObject, R> extends AbstractModelMigrationRule<T> {
-			private Function<EObject, R> function;
+		public static class ModelMigrationFunctionRule<T extends EObject, T3, R> extends AbstractModelMigrationRule<T> {
+			private Function3<T, EObject, T3, R> function;
 
-			public ModelMigrationFunctionRule(Predicate<T> predicate, Function<EObject, R> function) {
+			public ModelMigrationFunctionRule(Predicate<T> predicate, Function3<T, EObject, T3, R> function) {
 				super(predicate);
 				this.function = function;
 			}
 
-			public R apply(EObject arg) {
-				return function.apply(arg);
+			public R apply(T arg, EObject oldObj, T3 arg3) {
+				return function.apply(arg, oldObj, arg3);
 			}
 		}
 
@@ -134,9 +135,9 @@ public class EdeltaModelMigratorTest {
 		 */
 		private Map<EObject, Collection<EObject>> elementAssociations = new HashMap<>();
 
-		private Collection<ModelMigrationFunctionRule<EAttribute, Object>> valueMigrators = new ArrayList<>();
+		private Collection<ModelMigrationFunctionRule<EAttribute, Object, Object>> valueMigrators = new ArrayList<>();
 
-		private Collection<ModelMigrationFunctionRule<EStructuralFeature, EStructuralFeature>> featureMigrators = new ArrayList<>();
+		private Collection<ModelMigrationFunctionRule<EStructuralFeature, EObject, EStructuralFeature>> featureMigrators = new ArrayList<>();
 
 		private Collection<ModelMigrationCopyFeatureRule> copyRules = new ArrayList<>();
 
@@ -144,7 +145,7 @@ public class EdeltaModelMigratorTest {
 			this.ecoreCopyMap = HashBiMap.create(ecoreCopyMap);
 		}
 
-		public void addEAttributeMigrator(Predicate<EAttribute> predicate, Function<EObject, Object> function) {
+		public void addEAttributeMigrator(Predicate<EAttribute> predicate, Function3<EAttribute, EObject, Object, Object> function) {
 			valueMigrators.add(
 				new ModelMigrationFunctionRule<>(
 					predicate,
@@ -153,7 +154,7 @@ public class EdeltaModelMigratorTest {
 			);
 		}
 
-		public void addFeatureMigrator(Predicate<EStructuralFeature> predicate, Function<EObject, EStructuralFeature> function) {
+		public void addFeatureMigrator(Predicate<EStructuralFeature> predicate, Function3<EStructuralFeature, EObject, EObject, EStructuralFeature> function) {
 			featureMigrators.add(
 				new ModelMigrationFunctionRule<>(
 					predicate,
@@ -185,7 +186,7 @@ public class EdeltaModelMigratorTest {
 		protected Setting getTarget(EStructuralFeature eStructuralFeature, EObject eObject, EObject copyEObject) {
 			EStructuralFeature targetEStructuralFeature = featureMigrators.stream()
 				.filter(m -> m.canApply(eStructuralFeature))
-				.map(m -> m.apply(eObject))
+				.map(m -> m.apply(eStructuralFeature, eObject, copyEObject))
 				.filter(this::isStillThere)
 				.findFirst()
 				.orElse(null);
@@ -209,7 +210,7 @@ public class EdeltaModelMigratorTest {
 		protected void copyAttributeValue(EAttribute eAttribute, EObject eObject, Object value, Setting setting) {
 			var map = valueMigrators.stream()
 				.filter(m -> m.canApply(eAttribute))
-				.map(m -> m.apply(eObject));
+				.map(m -> m.apply(eAttribute, eObject, value));
 			var newValue = map
 				.findFirst()
 				.orElse(value);
@@ -852,13 +853,12 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.addEAttributeMigrator(
 			a ->
 				modelMigrator.isRelatedTo(a, attribute),
-			o -> {
+			(feature, o, oldValue) -> {
 				// o is the old object,
 				// so we must use the original feature to retrieve the value to copy
 				// that is, don't use attribute, which is the one of the new package
-				var eClass = o.eClass();
 				return Integer.parseInt(
-					o.eGet(eClass.getEStructuralFeature(attributeName)).toString());
+					o.eGet(feature).toString());
 			}
 		);
 
@@ -930,7 +930,7 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.addEAttributeMigrator(
 			a ->
 				modelMigrator.isRelatedTo(a, attribute),
-			o -> {
+			(feature, o, oldValue) -> {
 				// o is the old object,
 				// so we must use the original feature to retrieve the value to copy
 				// that is, don't use attribute, which is the one of the new package
@@ -971,7 +971,7 @@ public class EdeltaModelMigratorTest {
 		// custom migration rule
 		modelMigrator.addEAttributeMigrator(
 			modelMigrator.relatesTo(attribute),
-			o -> {
+			(feature, o, oldValue) -> {
 				// o is the old object,
 				// so we must use the original feature to retrieve the value to copy
 				// that is, don't use attribute, which is the one of the new package
@@ -1009,7 +1009,7 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.addEAttributeMigrator(
 			a ->
 				modelMigrator.isRelatedTo(a, attribute),
-			o -> {
+			(feature, o, oldValue) -> {
 				// o is the old object,
 				// so we must use the original feature to retrieve the value to copy
 				// that is, don't use attribute, which is the one of the new package
@@ -1051,7 +1051,7 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.addEAttributeMigrator(
 			a ->
 				modelMigrator.isRelatedTo(a, firstName),
-			o -> {
+			(feature, o, oldValue) -> {
 				// o is the old object,
 				// so we must use the original feature to retrieve the value to copy
 				// that is, don't use attribute, which is the one of the new package
@@ -1459,7 +1459,7 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.addFeatureMigrator(
 			f ->
 				modelMigrator.isRelatedTo(f, copy),
-			o -> copy);
+			(feature, o, oldValue) -> copy);
 		return copy;
 	}
 
@@ -1487,7 +1487,7 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.addFeatureMigrator(
 			f -> // the feature of the original metamodel
 				modelMigrator.isRelatedTo(f, pulledUp),
-			o -> { // the object of the original model
+			(feature, o, oldValue) -> { // the object of the original model
 				// the result can be safely returned
 				// independently from the object's class, since the
 				// predicate already matched
@@ -1498,10 +1498,10 @@ public class EdeltaModelMigratorTest {
 	}
 
 	private Collection<EStructuralFeature> pushDown(EdeltaModelMigrator modelMigrator,
-			EStructuralFeature feature, Collection<EClass> subClasses) {
+			EStructuralFeature featureToPush, Collection<EClass> subClasses) {
 		var pushedDownFeatures = new HashMap<EClass, EStructuralFeature>();
 		for (var subClass : subClasses) {
-			var pushedDown = createCopy(modelMigrator, feature);
+			var pushedDown = createCopy(modelMigrator, featureToPush);
 			pushedDownFeatures.put(subClass, pushedDown);
 			// we add it in the very first position just to have exactly the
 			// same Ecore model as the starting one of pullUpFeatures
@@ -1509,11 +1509,11 @@ public class EdeltaModelMigratorTest {
 			// exactly the same as the original model of pullUpFeatures
 			subClass.getEStructuralFeatures().add(0, pushedDown);
 		}
-		EdeltaUtils.removeElement(feature);
+		EdeltaUtils.removeElement(featureToPush);
 		// remember we must compare to the original metamodel element
 		modelMigrator.addFeatureMigrator(
 			modelMigrator.relatesToAtLeastOneOf(pushedDownFeatures.values()),
-			o -> { // the object of the original model
+			(feature, o, oldValue) -> { // the object of the original model
 				// the result depends on the EClass of the original
 				// object being copied, but the map was built
 				// using evolved classes
