@@ -837,7 +837,7 @@ public class EdeltaModelMigratorTest {
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("My.ecore"),
-			of("MyClass.xmi")
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
 		);
 
 		// actual refactoring
@@ -850,7 +850,12 @@ public class EdeltaModelMigratorTest {
 			a ->
 				modelMigrator.isRelatedTo(a, attribute),
 			(feature, o, oldValue) -> {
-				return Integer.parseInt(oldValue.toString());
+				// if we come here the old attribute was set
+				try {
+					return Integer.parseInt(oldValue.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
 			}
 		);
 
@@ -859,7 +864,7 @@ public class EdeltaModelMigratorTest {
 			subdir,
 			subdir,
 			of("My.ecore"),
-			of("MyClass.xmi")
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
 		);
 	}
 
