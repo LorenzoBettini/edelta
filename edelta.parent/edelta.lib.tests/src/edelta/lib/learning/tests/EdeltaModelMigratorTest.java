@@ -48,6 +48,7 @@ import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure3;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -113,6 +114,19 @@ public class EdeltaModelMigratorTest {
 			}
 		}
 
+		public static class ModelMigrationCopyFeatureRule extends AbstractModelMigrationRule<EStructuralFeature> {
+			private Procedure3<EStructuralFeature, EObject, EObject> procedure;
+
+			protected ModelMigrationCopyFeatureRule(Predicate<EStructuralFeature> predicate, Procedure3<EStructuralFeature, EObject, EObject> procedure) {
+				super(predicate);
+				this.procedure = procedure;
+			}
+
+			public void apply(EStructuralFeature feature, EObject oldObj, EObject newObj) {
+				procedure.apply(feature, oldObj, newObj);
+			}
+		}
+
 		private BiMap<EObject, EObject> ecoreCopyMap;
 
 		/**
@@ -124,6 +138,8 @@ public class EdeltaModelMigratorTest {
 		private Collection<ModelMigrationFunctionRule<EAttribute, EObject, Object>> valueMigrators = new ArrayList<>();
 
 		private Collection<ModelMigrationFunctionRule<EStructuralFeature, EObject, EStructuralFeature>> featureMigrators = new ArrayList<>();
+
+		private Collection<ModelMigrationCopyFeatureRule> copyRules = new ArrayList<>();
 
 		public EdeltaModelMigrator(Map<EObject, EObject> ecoreCopyMap) {
 			this.ecoreCopyMap = HashBiMap.create(ecoreCopyMap);
@@ -143,6 +159,15 @@ public class EdeltaModelMigratorTest {
 				new ModelMigrationFunctionRule<>(
 					predicate,
 					function
+				)
+			);
+		}
+
+		public void addCopyMigrator(Predicate<EStructuralFeature> predicate, Procedure3<EStructuralFeature, EObject, EObject> procedure) {
+			copyRules.add(
+				new ModelMigrationCopyFeatureRule(
+					predicate,
+					procedure
 				)
 			);
 		}
@@ -168,6 +193,17 @@ public class EdeltaModelMigratorTest {
 			return targetEStructuralFeature == null ?
 				super.getTarget(eStructuralFeature, eObject, copyEObject)
 				: ((InternalEObject) copyEObject).eSetting(targetEStructuralFeature);
+		}
+
+		@Override
+		protected void copyAttribute(EAttribute eAttribute, EObject eObject, EObject copyEObject) {
+			var first = copyRules.stream()
+				.filter(m -> m.canApply(eAttribute))
+				.findFirst();
+			first.ifPresentOrElse(
+				m -> m.apply(eAttribute, eObject, copyEObject),
+				() -> super.copyAttribute(eAttribute, eObject, copyEObject)
+			);
 		}
 
 		@Override
@@ -824,6 +860,46 @@ public class EdeltaModelMigratorTest {
 				var eClass = o.eClass();
 				return Integer.parseInt(
 					o.eGet(eClass.getEStructuralFeature(attributeName)).toString());
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testChangedAttributeTypeWithCopyRule() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
+
+		// custom migration rule
+		modelMigrator.addCopyMigrator(
+			a ->
+				modelMigrator.isRelatedTo(a, attribute),
+			(feature, oldObj, newObj) -> {
+				// feature is the feature of the original ecore
+				// oldObj is the original model's object,
+				// newObj is the copy, so it's the new model's object
+				// feature must be used to access th eold model's object's value
+				// attribute is from the evolved ecore
+				newObj.eSet(attribute,
+					Integer.parseInt(
+						oldObj.eGet(feature).toString()));
 			}
 		);
 
