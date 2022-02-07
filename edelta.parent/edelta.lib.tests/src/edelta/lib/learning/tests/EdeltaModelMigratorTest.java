@@ -217,10 +217,6 @@ public class EdeltaModelMigratorTest {
 			super.copyAttributeValue(eAttribute, eObject, newValue, setting);
 		}
 
-		public <T extends EObject> T evolved(T o) {
-			return getMapped(o);
-		}
-
 		private <T extends EObject> T getMapped(T o) {
 			var value = ecoreCopyMap.get(o);
 			@SuppressWarnings("unchecked")
@@ -1502,11 +1498,11 @@ public class EdeltaModelMigratorTest {
 		// remember we must compare to the original metamodel element
 		modelMigrator.addFeatureMigrator(
 			modelMigrator.relatesToAtLeastOneOf(pushedDownFeatures.values()),
-			(feature, o, oldValue) -> { // the object of the original model
+			(feature, oldObj, newObj) -> { // the object of the original model
 				// the result depends on the EClass of the original
 				// object being copied, but the map was built
 				// using evolved classes
-				return pushedDownFeatures.get(modelMigrator.evolved(o.eClass()));
+				return pushedDownFeatures.get(newObj.eClass());
 			}
 		);
 		return pushedDownFeatures.values();
