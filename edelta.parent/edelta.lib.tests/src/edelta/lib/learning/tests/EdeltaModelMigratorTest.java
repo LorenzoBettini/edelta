@@ -3,6 +3,9 @@ package edelta.lib.learning.tests;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirectories;
 import static java.util.List.of;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -11,7 +14,9 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,12 +24,14 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -97,11 +104,10 @@ public class EdeltaModelMigratorTest {
 		private BiMap<EObject, EObject> ecoreCopyMap;
 
 		/**
-		 * This stores mappings from old elements to new elements added during the
-		 * evolution so they cannot be found in
-		 * {@link EdeltaModelMigrator#ecoreCopyMap}.
+		 * This stores mappings from new elements to previous elements added during the
+		 * evolution (for example, with a copy) to keep track of the chain of origins.
 		 */
-		private Map<EObject, EObject> newElementsMap = new HashMap<>();
+		private Map<EObject, Collection<EObject>> elementAssociations = new HashMap<>();
 
 		private Collection<ModelMigrationRule<EAttribute, EObject, Object>> valueMigrators = new ArrayList<>();
 
@@ -129,18 +135,6 @@ public class EdeltaModelMigratorTest {
 			);
 		}
 
-		/**
-		 * Maps an element from the original metamodel to a new element in the new
-		 * metamodel ("new element" means that it was not there at all in the original
-		 * metamodel)
-		 * 
-		 * @param oldElement
-		 * @param newElement
-		 */
-		public <T extends EObject> void addNewElementMapping(T oldElement, T newElement) {
-			newElementsMap.put(oldElement, newElement);
-		}
-
 		@Override
 		protected EClass getTarget(EClass eClass) {
 			return getMapped(eClass);
@@ -156,6 +150,7 @@ public class EdeltaModelMigratorTest {
 			EStructuralFeature targetEStructuralFeature = featureMigrators.stream()
 				.filter(m -> m.canApply(eStructuralFeature))
 				.map(m -> m.apply(eObject))
+				.filter(this::isStillThere)
 				.findFirst()
 				.orElse(null);
 			return targetEStructuralFeature == null ?
@@ -183,24 +178,62 @@ public class EdeltaModelMigratorTest {
 			@SuppressWarnings("unchecked")
 			var mapped = (T) value;
 			if (isNotThereAnymore(mapped))
-				return getFromNewElements(o);
+				return null;
 			return mapped;
 		}
 
-		public <T extends EObject> T original(T o) {
-			@SuppressWarnings("unchecked")
-			var ret = (T) ecoreCopyMap.inverse().get(o);
-			return ret;
-		}
-
-		private <T extends EObject> T getFromNewElements(T o) {
-			@SuppressWarnings("unchecked")
-			var ret = (T) newElementsMap.get(o);
-			return ret;
+		private boolean isStillThere(EObject target) {
+			return !isNotThereAnymore(target);
 		}
 
 		private boolean isNotThereAnymore(EObject target) {
 			return target != null && target.eResource() == null;
+		}
+
+		public void addAssociation(EObject copy, EObject original) {
+			elementAssociations.computeIfAbsent(copy, k -> new HashSet<>())
+				.add(original);
+		}
+
+		public Collection<EObject> originals(EObject o) {
+			return computeOriginals
+					(elementAssociations
+							.getOrDefault(o, Collections.emptyList()));
+		}
+
+		private Collection<EObject> computeOriginals(Collection<EObject> collection) {
+			return collection.stream()
+					.flatMap(o -> {
+						var originals = originals(o);
+						if (originals.isEmpty())
+							return Stream.of(o);
+						return originals.stream();
+					})
+					.collect(Collectors.toSet());
+		}
+
+		public boolean isRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
+			return isStillThere(evolvedEcoreElement) &&
+				(
+				origEcoreElement == ecoreCopyMap.inverse().get(evolvedEcoreElement)
+				||
+				originals(evolvedEcoreElement).stream()
+					.map(o -> ecoreCopyMap.inverse().get(o))
+					.anyMatch(o -> o == origEcoreElement)
+				);
+		}
+
+		public <T extends ENamedElement> Predicate<T> relatesTo(T evolvedEcoreElements) {
+			return origEcoreElement -> isRelatedTo(origEcoreElement, evolvedEcoreElements);
+		}
+
+		public boolean isRelatedToAtLeastOneOf(ENamedElement origEcoreElement, Collection<? extends ENamedElement> evolvedEcoreElements) {
+			return evolvedEcoreElements.stream()
+				.anyMatch(e -> isRelatedTo(origEcoreElement, e));
+		}
+
+		public <T extends ENamedElement> Predicate<T> relatesToAtLeastOneOf(Collection<? extends T> evolvedEcoreElements) {
+			return origEcoreElement -> isRelatedToAtLeastOneOf(origEcoreElement, evolvedEcoreElements);
 		}
 	}
 
@@ -764,19 +797,22 @@ public class EdeltaModelMigratorTest {
 		);
 
 		// actual refactoring
-		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
 		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
 
 		// custom migration rule
 		modelMigrator.addEAttributeMigrator(
 			a ->
-				a == modelMigrator.original(attribute),
-			o -> 
-			// o is the old object,
-			// so we must use the original feature to retrieve the value to copy
-			// that is, don't use attribute, which is the one of the new package
-			Integer.parseInt(
-				o.eGet(modelMigrator.original(attribute)).toString())
+				modelMigrator.isRelatedTo(a, attribute),
+			o -> {
+				// o is the old object,
+				// so we must use the original feature to retrieve the value to copy
+				// that is, don't use attribute, which is the one of the new package
+				var eClass = o.eClass();
+				return Integer.parseInt(
+					o.eGet(eClass.getEStructuralFeature(attributeName)).toString());
+			}
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -799,22 +835,25 @@ public class EdeltaModelMigratorTest {
 		);
 
 		// actual refactoring
-		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
 		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
 
 		// custom migration rule
 		modelMigrator.addEAttributeMigrator(
 			a ->
-				a == modelMigrator.original(attribute),
-			o -> 
-			// o is the old object,
-			// so we must use the original feature to retrieve the value to copy
-			// that is, don't use attribute, which is the one of the new package
-			((Collection<?>) o.eGet(modelMigrator.original(attribute)))
-				.stream()
-				.map(Object::toString)
-				.map(Integer::parseInt)
-				.collect(Collectors.toList())
+				modelMigrator.isRelatedTo(a, attribute),
+			o -> {
+				// o is the old object,
+				// so we must use the original feature to retrieve the value to copy
+				// that is, don't use attribute, which is the one of the new package
+				var eClass = o.eClass();
+				return ((Collection<?>) o.eGet(eClass.getEStructuralFeature(attributeName)))
+					.stream()
+					.map(Object::toString)
+					.map(Integer::parseInt)
+					.collect(Collectors.toList());
+			}
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -837,20 +876,22 @@ public class EdeltaModelMigratorTest {
 		);
 
 		// actual refactoring
-		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
 		attribute.setName("newName");
 		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
 
 		// custom migration rule
 		modelMigrator.addEAttributeMigrator(
-			a ->
-				a == modelMigrator.original(attribute),
-			o -> 
-			// o is the old object,
-			// so we must use the original feature to retrieve the value to copy
-			// that is, don't use attribute, which is the one of the new package
-			Integer.parseInt(
-					o.eGet(modelMigrator.original(attribute)).toString())
+			modelMigrator.relatesTo(attribute),
+			o -> {
+				// o is the old object,
+				// so we must use the original feature to retrieve the value to copy
+				// that is, don't use attribute, which is the one of the new package
+				var eClass = o.eClass();
+				return Integer.parseInt(
+					o.eGet(eClass.getEStructuralFeature(attributeName)).toString());
+			}
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -873,19 +914,22 @@ public class EdeltaModelMigratorTest {
 		);
 
 		// actual refactoring
-		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
 		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
 
 		// custom migration rule
 		modelMigrator.addEAttributeMigrator(
 			a ->
-				a == modelMigrator.original(attribute),
-			o -> 
-			// o is the old object,
-			// so we must use the original feature to retrieve the value to copy
-			// that is, don't use attribute, which is the one of the new package
-			Integer.parseInt(
-					o.eGet(modelMigrator.original(attribute)).toString())
+				modelMigrator.isRelatedTo(a, attribute),
+			o -> {
+				// o is the old object,
+				// so we must use the original feature to retrieve the value to copy
+				// that is, don't use attribute, which is the one of the new package
+				var eClass = o.eClass();
+				return Integer.parseInt(
+					o.eGet(eClass.getEStructuralFeature(attributeName)).toString());
+			}
 		);
 		attribute.setName("newName");
 
@@ -919,14 +963,17 @@ public class EdeltaModelMigratorTest {
 		// specify the converter using firstname and lastname original values
 		modelMigrator.addEAttributeMigrator(
 			a ->
-				a == modelMigrator.original(firstName),
-			o -> 
-			// o is the old object,
-			// so we must use the original feature to retrieve the value to copy
-			// that is, don't use attribute, which is the one of the new package
-			o.eGet(modelMigrator.original(firstName)) +
-			" " +
-			o.eGet(modelMigrator.original(lastName))
+				modelMigrator.isRelatedTo(a, firstName),
+			o -> {
+				// o is the old object,
+				// so we must use the original feature to retrieve the value to copy
+				// that is, don't use attribute, which is the one of the new package
+				var eClass = o.eClass();
+				return 
+					o.eGet(eClass.getEStructuralFeature("firstname")) +
+					" " +
+					o.eGet(eClass.getEStructuralFeature("lastname"));
+			}
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -935,6 +982,132 @@ public class EdeltaModelMigratorTest {
 			subdir,
 			of("Person.ecore"),
 			of("Person.xmi")
+		);
+	}
+
+	@Test
+	public void testElementAssociations() {
+		var subdir = "unchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		var origfeature1 = getAttribute(originalModelManager,
+				"mypackage", "MyClass", "myClassStringAttribute");
+		var origfeature2 = getFeature(originalModelManager,
+				"mypackage", "MyRoot", "myReferences");
+
+		var feature1 = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myClassStringAttribute");
+		var feature2 = getFeature(evolvingModelManager,
+				"mypackage", "MyRoot", "myReferences");
+
+		// automatic existing associations
+		assertTrue(modelMigrator.isRelatedTo(origfeature1, feature1));
+		assertTrue(modelMigrator.isRelatedTo(origfeature2, feature2));
+		assertFalse(modelMigrator.isRelatedTo(origfeature2, feature1));
+		assertFalse(modelMigrator.isRelatedTo(origfeature1, feature2));
+
+		// createCopy also creates associations
+		var copyOfFeature1 = createCopy(modelMigrator, feature1);
+		var copyOfCopy = createCopy(modelMigrator, copyOfFeature1);
+		var singleCopy = createSingleCopy(modelMigrator, List.of(feature1, feature2));
+
+		// make sure the copies are in the resource
+		evolvingModelManager.getEPackage("mypackage").getEClassifiers().add(
+			EdeltaUtils.newEClass("TestClass", c -> {
+				c.getEStructuralFeatures()
+					.addAll(List.of(copyOfFeature1, copyOfCopy, singleCopy));
+			})
+		);
+
+		assertThat(modelMigrator.originals(copyOfFeature1))
+			.containsExactlyInAnyOrder(feature1);
+
+		assertThat(modelMigrator.originals(copyOfCopy))
+			.containsExactlyInAnyOrder(feature1);
+
+		assertTrue(modelMigrator.isRelatedTo(origfeature1, copyOfFeature1));
+		assertTrue(modelMigrator.isRelatedTo(origfeature1, copyOfCopy));
+		assertFalse(modelMigrator.isRelatedTo(origfeature2, copyOfFeature1));
+		assertFalse(modelMigrator.isRelatedTo(origfeature2, copyOfCopy));
+
+		assertTrue(modelMigrator.isRelatedToAtLeastOneOf(origfeature1,
+				List.of(copyOfFeature1, copyOfCopy)));
+
+		// explicit associations
+		modelMigrator.addAssociation(copyOfCopy, feature2);
+
+		assertFalse(modelMigrator.isRelatedTo(origfeature2, copyOfFeature1));
+		// now this is true
+		assertTrue(modelMigrator.isRelatedTo(origfeature2, copyOfCopy));
+
+		assertThat(modelMigrator.originals(copyOfCopy))
+			.containsExactlyInAnyOrder(feature1, feature2);
+
+		// remove an element from its resource
+		EcoreUtil.remove(copyOfCopy);
+		assertFalse(modelMigrator.isRelatedTo(origfeature1, copyOfCopy));
+
+		assertTrue(modelMigrator.isRelatedToAtLeastOneOf(origfeature1,
+				List.of(copyOfCopy, copyOfFeature1)));
+
+		assertThat(modelMigrator.originals(singleCopy))
+			.containsExactlyInAnyOrder(feature1, feature2);
+		assertTrue(modelMigrator.isRelatedTo(origfeature1, singleCopy));
+		assertTrue(modelMigrator.isRelatedTo(origfeature2, singleCopy));
+	}
+
+	@Test
+	public void testReplaceWithCopy() throws IOException {
+		var subdir = "unchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myClassStringAttribute");
+
+		replaceWithCopy(modelMigrator, attribute, "myAttributeRenamed");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"replaceWithCopy/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testReplaceWithCopyTwice() throws IOException {
+		var subdir = "unchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myClassStringAttribute");
+		var copied = replaceWithCopy(modelMigrator, attribute, "myAttributeRenamed");
+		replaceWithCopy(modelMigrator, copied, "myAttributeRenamedTwice");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"replaceWithCopyTwice/",
+			of("My.ecore"),
+			of("MyClass.xmi")
 		);
 	}
 
@@ -1067,6 +1240,75 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testPullUpAndPushDown() throws IOException {
+		var subdir = "pullUpFeatures/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personClass = getEClass(evolvingModelManager,
+				"PersonList", "Person");
+		var studentClass = getEClass(evolvingModelManager,
+				"PersonList", "Student");
+		var employeeClass = getEClass(evolvingModelManager,
+				"PersonList", "Employee");
+		var studentName = studentClass.getEStructuralFeature("name");
+		var employeeName = employeeClass.getEStructuralFeature("name");
+		// refactoring
+		var personName = pullUp(modelMigrator,
+				personClass,
+				List.of(studentName, employeeName));
+		pushDown(modelMigrator,
+				personName,
+				List.of(studentClass, employeeClass));
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"pullUpAndPushDown/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testPushDownAndPullUp() throws IOException {
+		var subdir = "pushDownFeatures/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personClass = getEClass(evolvingModelManager,
+				"PersonList", "Person");
+		var personName = personClass.getEStructuralFeature("name");
+		var studentClass = getEClass(evolvingModelManager,
+				"PersonList", "Student");
+		var employeeClass = getEClass(evolvingModelManager,
+				"PersonList", "Employee");
+		// refactoring
+		var features = pushDown(modelMigrator,
+				personName,
+				List.of(studentClass, employeeClass));
+		pullUp(modelMigrator,
+				personClass,
+				features);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"pushDownAndPullUp/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private EAttribute getAttribute(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
 		return (EAttribute) getFeature(modelManager, packageName, className, attributeName);
 	}
@@ -1121,24 +1363,58 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.copyReferences();
 	}
 
-	private void pullUp(EdeltaModelMigrator modelMigrator,
+	private EAttribute replaceWithCopy(EdeltaModelMigrator modelMigrator, EAttribute attribute, String newName) {
+		var copy = createCopy(modelMigrator, attribute);
+		copy.setName(newName);
+		var containingClass = attribute.getEContainingClass();
+		EdeltaUtils.removeElement(attribute);
+		containingClass.getEStructuralFeatures().add(copy);
+		modelMigrator.addFeatureMigrator(
+			f ->
+				modelMigrator.isRelatedTo(f, copy),
+			o -> copy);
+		return copy;
+	}
+
+	private <T extends EObject> T createCopy(EdeltaModelMigrator modelMigrator, T o) {
+		var copy = EcoreUtil.copy(o);
+		modelMigrator.addAssociation(copy, o);
+		return copy;
+	}
+
+	private <T extends EObject> T createSingleCopy(EdeltaModelMigrator modelMigrator, Collection<T> elements) {
+		var iterator = elements.iterator();
+		var copy = createCopy(modelMigrator, iterator.next());
+		while (iterator.hasNext()) {
+			modelMigrator.addAssociation(copy, iterator.next());
+		}
+		return copy;
+	}
+
+	private EStructuralFeature pullUp(EdeltaModelMigrator modelMigrator,
 			EClass superClass, Collection<EStructuralFeature> features) {
-		var first = features.iterator().next();
-		var pulledUp = EcoreUtil.copy(first);
+		var pulledUp = createSingleCopy(modelMigrator, features);
 		superClass.getEStructuralFeatures().add(pulledUp);
 		EdeltaUtils.removeAllElements(features);
 		// remember we must map the original metamodel element to the new one
-		for (var feature : features) {
-			modelMigrator.addNewElementMapping(
-					modelMigrator.original(feature), pulledUp);
-		}
+		modelMigrator.addFeatureMigrator(
+			f -> // the feature of the original metamodel
+				modelMigrator.isRelatedTo(f, pulledUp),
+			o -> { // the object of the original model
+				// the result can be safely returned
+				// independently from the object's class, since the
+				// predicate already matched
+				return pulledUp;
+			}
+		);
+		return pulledUp;
 	}
 
-	private void pushDown(EdeltaModelMigrator modelMigrator,
+	private Collection<EStructuralFeature> pushDown(EdeltaModelMigrator modelMigrator,
 			EStructuralFeature feature, Collection<EClass> subClasses) {
 		var pushedDownFeatures = new HashMap<EClass, EStructuralFeature>();
 		for (var subClass : subClasses) {
-			var pushedDown = EcoreUtil.copy(feature);
+			var pushedDown = createCopy(modelMigrator, feature);
 			pushedDownFeatures.put(subClass, pushedDown);
 			// we add it in the very first position just to have exactly the
 			// same Ecore model as the starting one of pullUpFeatures
@@ -1149,8 +1425,7 @@ public class EdeltaModelMigratorTest {
 		EdeltaUtils.removeElement(feature);
 		// remember we must compare to the original metamodel element
 		modelMigrator.addFeatureMigrator(
-			f -> // the feature of the original metamodel
-				f == modelMigrator.original(feature),
+			modelMigrator.relatesToAtLeastOneOf(pushedDownFeatures.values()),
 			o -> { // the object of the original model
 				// the result depends on the EClass of the original
 				// object being copied, but the map was built
@@ -1158,5 +1433,6 @@ public class EdeltaModelMigratorTest {
 				return pushedDownFeatures.get(modelMigrator.evolved(o.eClass()));
 			}
 		);
+		return pushedDownFeatures.values();
 	}
 }
