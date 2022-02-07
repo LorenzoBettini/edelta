@@ -79,21 +79,33 @@ public class EdeltaModelMigratorTest {
 		/**
 		 * @author Lorenzo Bettini
 		 *
+		 * @param <T> the type of the {@link EObject} passed to the predicate
+		 */
+		public static abstract class AbstractModelMigrationRule<T extends EObject> {
+			private Predicate<T> predicate;
+
+			protected AbstractModelMigrationRule(Predicate<T> predicate) {
+				this.predicate = predicate;
+			}
+
+			public boolean canApply(T arg) {
+				return predicate.test(arg);
+			}
+		}
+
+		/**
+		 * @author Lorenzo Bettini
+		 *
 		 * @param <T1> the type of the {@link EObject} passed to the predicate
 		 * @param <T2> the type of the {@link EObject} passed to the function
 		 * @param <R> the type of the returned value when applying the function
 		 */
-		public static class ModelMigrationRule<T1 extends EObject, T2 extends EObject, R> {
-			private Predicate<T1> predicate;
+		public static class ModelMigrationRule<T1 extends EObject, T2 extends EObject, R> extends AbstractModelMigrationRule<T1> {
 			private Function<T2, R> function;
 
 			public ModelMigrationRule(Predicate<T1> predicate, Function<T2, R> function) {
-				this.predicate = predicate;
+				super(predicate);
 				this.function = function;
-			}
-
-			public boolean canApply(T1 arg) {
-				return predicate.test(arg);
 			}
 
 			public R apply(T2 arg) {
