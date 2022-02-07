@@ -100,10 +100,10 @@ public class EdeltaModelMigratorTest {
 		 * @param <T2> the type of the {@link EObject} passed to the function
 		 * @param <R> the type of the returned value when applying the function
 		 */
-		public static class ModelMigrationRule<T1 extends EObject, T2 extends EObject, R> extends AbstractModelMigrationRule<T1> {
+		public static class ModelMigrationFunctionRule<T1 extends EObject, T2 extends EObject, R> extends AbstractModelMigrationRule<T1> {
 			private Function<T2, R> function;
 
-			public ModelMigrationRule(Predicate<T1> predicate, Function<T2, R> function) {
+			public ModelMigrationFunctionRule(Predicate<T1> predicate, Function<T2, R> function) {
 				super(predicate);
 				this.function = function;
 			}
@@ -121,9 +121,9 @@ public class EdeltaModelMigratorTest {
 		 */
 		private Map<EObject, Collection<EObject>> elementAssociations = new HashMap<>();
 
-		private Collection<ModelMigrationRule<EAttribute, EObject, Object>> valueMigrators = new ArrayList<>();
+		private Collection<ModelMigrationFunctionRule<EAttribute, EObject, Object>> valueMigrators = new ArrayList<>();
 
-		private Collection<ModelMigrationRule<EStructuralFeature, EObject, EStructuralFeature>> featureMigrators = new ArrayList<>();
+		private Collection<ModelMigrationFunctionRule<EStructuralFeature, EObject, EStructuralFeature>> featureMigrators = new ArrayList<>();
 
 		public EdeltaModelMigrator(Map<EObject, EObject> ecoreCopyMap) {
 			this.ecoreCopyMap = HashBiMap.create(ecoreCopyMap);
@@ -131,7 +131,7 @@ public class EdeltaModelMigratorTest {
 
 		public void addEAttributeMigrator(Predicate<EAttribute> predicate, Function<EObject, Object> function) {
 			valueMigrators.add(
-				new ModelMigrationRule<>(
+				new ModelMigrationFunctionRule<>(
 					predicate,
 					function
 				)
@@ -140,7 +140,7 @@ public class EdeltaModelMigratorTest {
 
 		public void addFeatureMigrator(Predicate<EStructuralFeature> predicate, Function<EObject, EStructuralFeature> function) {
 			featureMigrators.add(
-				new ModelMigrationRule<>(
+				new ModelMigrationFunctionRule<>(
 					predicate,
 					function
 				)
