@@ -1588,6 +1588,8 @@ public class EdeltaModelMigratorTest {
 	 */
 	private EClass referenceToClass(EdeltaModelMigrator modelMigrator,
 			EReference reference, String name) {
+		// checkNotContainment reference:
+		// "Cannot apply referenceToClass on containment reference"
 		var ePackage = reference.getEContainingClass().getEPackage();
 		var extracted = EdeltaUtils.newEClass(name);
 		ePackage.getEClassifiers().add(extracted);
@@ -1606,6 +1608,8 @@ public class EdeltaModelMigratorTest {
 				var oldValue = oldObj.eGet(feature);
 				if (oldValue == null)
 					return; // it wasn't set in the original model
+				// since this is NOT a containment reference
+				// the referred oldValue has already been copied
 				var copied = modelMigrator.get(oldValue);
 				var created = EcoreUtil.create(extracted);
 				created.eSet(extractedRef, copied);
