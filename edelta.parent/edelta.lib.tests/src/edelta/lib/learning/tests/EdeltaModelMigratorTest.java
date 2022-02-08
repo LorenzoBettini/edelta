@@ -33,6 +33,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.EcorePackage;
@@ -1386,8 +1387,38 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testReferenceToClass() throws IOException {
+		var subdir = "referenceToClassUnidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of() // "List.xmi"
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+
+		// TODO: handle model migration
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of() // "List.xmi"
+		);
+	}
+
 	private EAttribute getAttribute(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
 		return (EAttribute) getFeature(modelManager, packageName, className, attributeName);
+	}
+
+	private EReference getReference(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
+		return (EReference) getFeature(modelManager, packageName, className, attributeName);
 	}
 
 	private EStructuralFeature getFeature(EdeltaModelManager modelManager, String packageName, String className, String featureName) {
@@ -1511,5 +1542,52 @@ public class EdeltaModelMigratorTest {
 			}
 		);
 		return pushedDownFeatures.values();
+	}
+
+	/**
+	 * Replaces an EReference with an EClass (with the given name, the same package
+	 * as the package of the reference's containing class), updating possible
+	 * opposite reference, so that a relation can be extended with additional
+	 * features. The original reference will be made a containment reference, (its
+	 * other properties will not be changed) to the added EClass (and made
+	 * bidirectional).
+	 * 
+	 * For example, given
+	 * 
+	 * <pre>
+	 *    b2    b1
+	 * A <-------> C
+	 * </pre>
+	 * 
+	 * (where the opposite "b2" might not be present) if we pass "b1" and the name
+	 * "B", then the result will be
+	 * 
+	 * <pre>
+	 *    a     b1    b2    c
+	 * A <-------> B <------> C
+	 * </pre>
+	 * 
+	 * where "b1" will be a containment reference. Note the names inferred for the
+	 * new additional opposite references.
+	 * 
+	 * @param name      the name for the extracted class
+	 * @param reference the reference to turn into a reference to the extracted
+	 *                  class
+	 * @return the extracted class
+	 */
+	private EClass referenceToClass(EdeltaModelMigrator modelMigrator,
+			EReference reference, String name) {
+		var ePackage = reference.getEContainingClass().getEPackage();
+		var extracted = EdeltaUtils.newEClass(name);
+		ePackage.getEClassifiers().add(extracted);
+		var extractedRef = EdeltaUtils.newEReference(
+			reference.getEType().getName().toLowerCase(),
+			reference.getEReferenceType()
+		);
+		extractedRef.setLowerBound(1); // make it required
+		extracted.getEStructuralFeatures().add(extractedRef);
+		reference.setEType(extracted);
+		reference.setContainment(true);
+		return extracted;
 	}
 }
