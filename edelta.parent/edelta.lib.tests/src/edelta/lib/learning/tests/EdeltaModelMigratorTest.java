@@ -208,6 +208,17 @@ public class EdeltaModelMigratorTest {
 		}
 
 		@Override
+		protected void copyReference(EReference eReference, EObject eObject, EObject copyEObject) {
+			var first = copyRules.stream()
+				.filter(m -> m.canApply(eReference))
+				.findFirst();
+			first.ifPresentOrElse(
+				m -> m.apply(eReference, eObject, copyEObject),
+				() -> super.copyReference(eReference, eObject, copyEObject)
+			);
+		}
+
+		@Override
 		protected void copyAttributeValue(EAttribute eAttribute, EObject eObject, Object value, Setting setting) {
 			var map = valueMigrators.stream()
 				.filter(m -> m.canApply(eAttribute))
@@ -1394,7 +1405,7 @@ public class EdeltaModelMigratorTest {
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("PersonList.ecore"),
-			of() // "List.xmi"
+			of("List.xmi")
 		);
 
 		var personWorks = getReference(evolvingModelManager,
@@ -1409,7 +1420,7 @@ public class EdeltaModelMigratorTest {
 			subdir,
 			subdir,
 			of("PersonList.ecore"),
-			of() // "List.xmi"
+			of("List.xmi")
 		);
 	}
 
@@ -1588,6 +1599,19 @@ public class EdeltaModelMigratorTest {
 		extracted.getEStructuralFeatures().add(extractedRef);
 		reference.setEType(extracted);
 		reference.setContainment(true);
+		modelMigrator.addCopyMigrator(
+			f ->
+				modelMigrator.isRelatedTo(f, reference),
+			(feature, oldObj, newObj) -> { // the object of the original model
+				var oldValue = oldObj.eGet(feature);
+				if (oldValue == null)
+					return; // it wasn't set in the original model
+				var copied = modelMigrator.get(oldValue);
+				var created = EcoreUtil.create(extracted);
+				created.eSet(extractedRef, copied);
+				newObj.eSet(reference, created);
+			}
+		);
 		return extracted;
 	}
 }
