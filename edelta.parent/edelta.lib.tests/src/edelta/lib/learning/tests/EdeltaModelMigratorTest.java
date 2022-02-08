@@ -198,23 +198,23 @@ public class EdeltaModelMigratorTest {
 
 		@Override
 		protected void copyAttribute(EAttribute eAttribute, EObject eObject, EObject copyEObject) {
-			var first = copyRules.stream()
-				.filter(m -> m.canApply(eAttribute))
-				.findFirst();
-			first.ifPresentOrElse(
-				m -> m.apply(eAttribute, eObject, copyEObject),
-				() -> super.copyAttribute(eAttribute, eObject, copyEObject)
-			);
+			applyCopyRuleOrElse(eAttribute, eObject, copyEObject,
+				() -> super.copyAttribute(eAttribute, eObject, copyEObject));
 		}
 
 		@Override
 		protected void copyReference(EReference eReference, EObject eObject, EObject copyEObject) {
+			applyCopyRuleOrElse(eReference, eObject, copyEObject,
+				() -> super.copyReference(eReference, eObject, copyEObject));
+		}
+
+		private void applyCopyRuleOrElse(EStructuralFeature feature, EObject eObject, EObject copyEObject, Runnable runnable) {
 			var first = copyRules.stream()
-				.filter(m -> m.canApply(eReference))
+				.filter(m -> m.canApply(feature))
 				.findFirst();
 			first.ifPresentOrElse(
-				m -> m.apply(eReference, eObject, copyEObject),
-				() -> super.copyReference(eReference, eObject, copyEObject)
+				m -> m.apply(feature, eObject, copyEObject),
+				runnable
 			);
 		}
 
