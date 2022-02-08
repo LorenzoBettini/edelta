@@ -1595,14 +1595,11 @@ public class EdeltaModelMigratorTest {
 		var ePackage = reference.getEContainingClass().getEPackage();
 		var extracted = EdeltaUtils.newEClass(name);
 		ePackage.getEClassifiers().add(extracted);
-		var extractedRef = EdeltaUtils.newEReference(
+		var extractedRef = addMandatoryReference(extracted, 
 			fromTypeToFeatureName(reference.getEType()),
-			reference.getEReferenceType()
-		);
-		extractedRef.setLowerBound(1); // make it required
-		extracted.getEStructuralFeatures().add(extractedRef);
+			reference.getEReferenceType());
 		reference.setEType(extracted);
-		reference.setContainment(true);
+		makeContainmentBidirectional(reference);
 		modelMigrator.addCopyMigrator(
 			f ->
 				modelMigrator.isRelatedTo(f, reference),
@@ -1614,6 +1611,7 @@ public class EdeltaModelMigratorTest {
 				// the referred oldValue has already been copied
 				var copied = modelMigrator.get(oldValue);
 				var created = EcoreUtil.create(extracted);
+				// the bidirectionality is implied
 				created.eSet(extractedRef, copied);
 				newObj.eSet(reference, created);
 			}
@@ -1621,7 +1619,33 @@ public class EdeltaModelMigratorTest {
 		return extracted;
 	}
 
-	public String fromTypeToFeatureName(final EClassifier type) {
+	private String fromTypeToFeatureName(final EClassifier type) {
 		return StringExtensions.toFirstLower(type.getName());
 	}
+
+	/**
+	 * Makes the EReference, which is assumed to be already part of an EClass, a
+	 * single required containment reference, adds to the referred type, which is
+	 * assumed to be set, an opposite required single reference.
+	 * 
+	 * @param reference
+	 */
+	private EReference makeContainmentBidirectional(final EReference reference) {
+		EdeltaUtils.makeContainment(reference);
+		final EClass owner = reference.getEContainingClass();
+		final EClass referredType = reference.getEReferenceType();
+		EReference addedMandatoryReference = this.addMandatoryReference(referredType,
+				this.fromTypeToFeatureName(owner), owner);
+		EdeltaUtils.makeBidirectional(addedMandatoryReference, reference);
+		return addedMandatoryReference;
+	}
+
+	private EReference addMandatoryReference(final EClass eClass, final String referenceName, final EClass type) {
+		var reference = EdeltaUtils.newEReference(referenceName, type, it -> 
+			EdeltaUtils.makeSingleRequired(it)
+		);
+		eClass.getEStructuralFeatures().add(reference);
+		return reference;
+	}
+
 }
