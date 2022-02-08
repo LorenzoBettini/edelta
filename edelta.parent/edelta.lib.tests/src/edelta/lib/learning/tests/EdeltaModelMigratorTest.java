@@ -30,6 +30,7 @@ import org.assertj.core.api.Assertions;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
@@ -50,6 +51,7 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import org.eclipse.xtext.xbase.lib.Functions.Function3;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure3;
+import org.eclipse.xtext.xbase.lib.StringExtensions;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -1594,7 +1596,7 @@ public class EdeltaModelMigratorTest {
 		var extracted = EdeltaUtils.newEClass(name);
 		ePackage.getEClassifiers().add(extracted);
 		var extractedRef = EdeltaUtils.newEReference(
-			reference.getEType().getName().toLowerCase(),
+			fromTypeToFeatureName(reference.getEType()),
 			reference.getEReferenceType()
 		);
 		extractedRef.setLowerBound(1); // make it required
@@ -1617,5 +1619,9 @@ public class EdeltaModelMigratorTest {
 			}
 		);
 		return extracted;
+	}
+
+	public String fromTypeToFeatureName(final EClassifier type) {
+		return StringExtensions.toFirstLower(type.getName());
 	}
 }
