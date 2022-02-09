@@ -1407,7 +1407,7 @@ public class EdeltaModelMigratorTest {
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("PersonList.ecore"),
-			of() // "List.xmi"
+			of("List.xmi")
 		);
 
 		var personWorks = getReference(evolvingModelManager,
@@ -1426,7 +1426,7 @@ public class EdeltaModelMigratorTest {
 			subdir,
 			subdir,
 			of("PersonList.ecore"),
-			of() // "List.xmi"
+			of("List.xmi")
 		);
 	}
 
