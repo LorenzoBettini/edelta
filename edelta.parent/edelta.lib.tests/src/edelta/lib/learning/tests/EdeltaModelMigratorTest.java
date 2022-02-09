@@ -242,7 +242,7 @@ public class EdeltaModelMigratorTest {
 		}
 
 		private boolean isStillThere(EObject target) {
-			return !isNotThereAnymore(target);
+			return target != null && !isNotThereAnymore(target);
 		}
 
 		private boolean isNotThereAnymore(EObject target) {
@@ -1488,7 +1488,7 @@ public class EdeltaModelMigratorTest {
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("PersonList.ecore"),
-			of() // "List.xmi"
+			of("List.xmi")
 		);
 
 		var personWorks = getReference(evolvingModelManager,
@@ -1503,7 +1503,7 @@ public class EdeltaModelMigratorTest {
 			subdir,
 			subdir,
 			of("PersonList.ecore"),
-			of() // "List.xmi"
+			of("List.xmi")
 		);
 	}
 
@@ -1685,6 +1685,15 @@ public class EdeltaModelMigratorTest {
 		}
 		reference.setEType(extracted);
 		makeContainmentBidirectional(reference);
+		modelMigrator.addCopyMigrator(
+			f ->
+				modelMigrator.isRelatedTo(f, eOpposite),
+			(feature, oldObj, newObj) -> {
+				// the opposite reference now changed its type
+				// so we have to skip the copy or we'll have a ClassCastException
+				// the bidirectionality will be implied in the next migrator
+			}
+		);
 		modelMigrator.addCopyMigrator(
 			f ->
 				modelMigrator.isRelatedTo(f, reference),
