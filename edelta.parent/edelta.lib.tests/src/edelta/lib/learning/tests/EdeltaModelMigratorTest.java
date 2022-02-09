@@ -5,6 +5,7 @@ import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirector
 import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -1419,7 +1420,33 @@ public class EdeltaModelMigratorTest {
 		workPlace.getEStructuralFeatures().add(workPlacePerson);
 		EdeltaUtils.makeBidirectional(personWorks, workPlacePerson);
 
-		// TODO: handle model migration
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testMakeBidirectionalExisting() throws IOException {
+		var subdir = "makeBidirectionalExisting/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		var workPlacePerson = getReference(evolvingModelManager,
+				"PersonList", "WorkPlace", "person");
+		assertNotNull(workPlacePerson);
+		// this should not change anything
+		EdeltaUtils.makeBidirectional(personWorks, workPlacePerson);
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
