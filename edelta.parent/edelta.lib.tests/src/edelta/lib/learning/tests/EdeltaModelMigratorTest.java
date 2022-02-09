@@ -1401,13 +1401,37 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReferenceToClass() throws IOException {
+	public void testReferenceToClassUnidirectional() throws IOException {
 		var subdir = "referenceToClassUnidirectional/";
 
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testReferenceToClassBidirectional() throws IOException {
+		var subdir = "referenceToClassBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of() // "List.xmi"
 		);
 
 		var personWorks = getReference(evolvingModelManager,
@@ -1422,7 +1446,7 @@ public class EdeltaModelMigratorTest {
 			subdir,
 			subdir,
 			of("PersonList.ecore"),
-			of("List.xmi")
+			of() // "List.xmi"
 		);
 	}
 
@@ -1598,6 +1622,10 @@ public class EdeltaModelMigratorTest {
 		var extractedRef = addMandatoryReference(extracted, 
 			fromTypeToFeatureName(reference.getEType()),
 			reference.getEReferenceType());
+		final EReference eOpposite = reference.getEOpposite();
+		if ((eOpposite != null)) {
+			EdeltaUtils.makeBidirectional(eOpposite, extractedRef);
+		}
 		reference.setEType(extracted);
 		makeContainmentBidirectional(reference);
 		modelMigrator.addCopyMigrator(
