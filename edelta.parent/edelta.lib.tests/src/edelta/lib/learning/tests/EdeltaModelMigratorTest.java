@@ -1745,8 +1745,6 @@ public class EdeltaModelMigratorTest {
 		// refactoring
 		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
 
-		// TODO: handle model migration
-
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
