@@ -1755,6 +1755,30 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
+	public void testReferenceToClassBidirectional2() throws IOException {
+		var subdir = "referenceToClassBidirectional2/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
 	public void testMakeBidirectionalExisting() throws IOException {
 		var subdir = "makeBidirectionalExisting/";
 	
