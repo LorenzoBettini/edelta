@@ -1707,6 +1707,30 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
+	public void testReferenceToClassMultipleUnidirectional() throws IOException {
+		var subdir = "referenceToClassMultipleUnidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
 	public void testReferenceToClassBidirectional() throws IOException {
 		var subdir = "referenceToClassBidirectional/";
 
@@ -2008,17 +2032,33 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.addCopyMigrator(
 			f ->
 				modelMigrator.isRelatedTo(f, reference),
-			(feature, oldObj, newObj) -> { // the object of the original model
-				var oldValue = oldObj.eGet(feature);
-				if (oldValue == null)
-					return; // it wasn't set in the original model
-				// since this is NOT a containment reference
-				// the referred oldValue has already been copied
-				var copied = modelMigrator.get(oldValue);
-				var created = EcoreUtil.create(extracted);
-				// the bidirectionality is implied
-				created.eSet(extractedRef, copied);
-				newObj.eSet(reference, created);
+			(feature, oldObj, newObj) -> {
+				// feature: the feature of the original metamodel
+				// oldObj: the object of the original model
+				// newObj: the object of the new model, already created
+
+				// retrieve the original value, wrapped in a list
+				// so this works (transparently) for both single and multi feature
+				var oldValueOrValues =
+					EdeltaEcoreUtil.getValueForFeature(oldObj, feature);
+				// for each old value create a new object for the
+				// extracted class, by setting the reference's value
+				// with the copied value of that reference
+				var copies = oldValueOrValues.stream()
+					.map(oldValue -> {
+						// since this is NOT a containment reference
+						// the referred oldValue has already been copied
+						var copy = modelMigrator.get(oldValue);
+						var created = EcoreUtil.create(extracted);
+						// the bidirectionality is implied
+						created.eSet(extractedRef, copy);
+						return created;
+					})
+					.collect(Collectors.toList());
+				// in the new object set the value or values (transparently)
+				// with the created object (or objects, again, transparently)
+				EdeltaEcoreUtil.setValueForFeature(
+					newObj, reference, copies);
 			}
 		);
 		return extracted;
