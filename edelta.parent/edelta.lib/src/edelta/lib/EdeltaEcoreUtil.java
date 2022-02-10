@@ -102,4 +102,38 @@ public class EdeltaEcoreUtil {
 		}
 		return value;
 	}
+
+	/**
+	 * See {@link #wrapAsCollection(EObject, EStructuralFeature)}.
+	 * 
+	 * @param obj
+	 * @param feature
+	 * @return
+	 */
+	public static Collection<Object> getValueForFeature(EObject obj, EStructuralFeature feature) {
+		return wrapAsCollection(obj, feature);
+	}
+
+	/**
+	 * Calls {@link EObject#eSet(EStructuralFeature, Object)} after unwrapping the
+	 * passed value with {@link #unwrapCollection(Object, EStructuralFeature)}.
+	 * 
+	 * If the feature is a many feature, and the value is not a {@link Collection},
+	 * it will first turn it into a (possibly empty) collection using
+	 * {@link #wrapAsCollection(Object)}.
+	 * 
+	 * The idea is that it should always be safe to set the value for the feature of
+	 * the passed {@link EObject} by using this method.
+	 * 
+	 * @param obj
+	 * @param feature
+	 * @param value
+	 */
+	public static void setValueForFeature(EObject obj, EStructuralFeature feature, Object value) {
+		Object unwrapCollection = unwrapCollection(value, feature);
+		if (feature.isMany() && !(unwrapCollection instanceof Collection<?>)) {
+			unwrapCollection = wrapAsCollection(unwrapCollection);
+		}
+		obj.eSet(feature, unwrapCollection);
+	}
 }
