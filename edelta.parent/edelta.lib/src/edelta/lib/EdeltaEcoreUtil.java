@@ -50,9 +50,24 @@ public class EdeltaEcoreUtil {
 	 * @param feature
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public static Collection<Object> wrapAsCollection(EObject o, EStructuralFeature feature) {
 		var value = o.eGet(feature);
+		return wrapAsCollection(value);
+	}
+
+	/**
+	 * If the value is set it returns a singleton collection with that value,
+	 * otherwise it returns an empty collection. If it is a {@link Collection}, it
+	 * returns the collection value.
+	 * 
+	 * This way, it is possible to iterate to the result of uniformly without
+	 * checking for null values.
+	 * 
+	 * @param value
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static Collection<Object> wrapAsCollection(Object value) {
 		if (value instanceof Collection<?>)
 			return (Collection<Object>) value;
 		if (value != null)
