@@ -928,6 +928,40 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
+	public void testChangeAttributeTypeAlternative() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeTypeAlternative(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
 	public void testChangedAttributeTypeWithCopyRule() throws IOException {
 		var subdir = "changedAttributeType/";
 
@@ -982,6 +1016,40 @@ public class EdeltaModelMigratorTest {
 		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
 
 		changeAttributeType(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testChangedMultiAttributeTypeAlternative() throws IOException {
+		var subdir = "changedMultiAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeTypeAlternative(modelMigrator, attribute,
 			EcorePackage.eINSTANCE.getEInt(),
 			val -> {
 				try {
@@ -1471,34 +1539,6 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeBidirectionalExisting() throws IOException {
-		var subdir = "makeBidirectionalExisting/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		var workPlacePerson = getReference(evolvingModelManager,
-				"PersonList", "WorkPlace", "person");
-		assertNotNull(workPlacePerson);
-		// this should not change anything
-		EdeltaUtils.makeBidirectional(personWorks, workPlacePerson);
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
 	public void testReferenceToClassUnidirectional() throws IOException {
 		var subdir = "referenceToClassUnidirectional/";
 
@@ -1539,6 +1579,34 @@ public class EdeltaModelMigratorTest {
 
 		// TODO: handle model migration
 
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testMakeBidirectionalExisting() throws IOException {
+		var subdir = "makeBidirectionalExisting/";
+	
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		var workPlacePerson = getReference(evolvingModelManager,
+				"PersonList", "WorkPlace", "person");
+		assertNotNull(workPlacePerson);
+		// this should not change anything
+		EdeltaUtils.makeBidirectional(personWorks, workPlacePerson);
+	
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
@@ -1635,6 +1703,35 @@ public class EdeltaModelMigratorTest {
 			}
 		);
 	}
+
+	/**
+	 * Changes the type of the attribute and when migrating the model
+	 * it applies the passed lambda to transform the value or values
+	 * (transparently).
+	 * 
+	 * @param modelMigrator
+	 * @param attribute
+	 * @param type
+	 * @param singleValueTransformer
+	 */
+	private void changeAttributeTypeAlternative(EdeltaModelMigrator modelMigrator, EAttribute attribute,
+			EDataType type, Function<Object, Object> singleValueTransformer) {
+		attribute.setEType(type);
+		modelMigrator.addEAttributeMigrator(
+			a ->
+				modelMigrator.isRelatedTo(a, attribute),
+			(feature, oldObj, oldValue) ->
+				// if we come here the old attribute was set
+				EdeltaEcoreUtil.unwrapCollection(
+					EdeltaEcoreUtil.wrapAsCollection(oldValue)
+						.stream()
+						.map(singleValueTransformer)
+						.collect(Collectors.toList()),
+					attribute
+				)
+		);
+	}
+
 	private EAttribute replaceWithCopy(EdeltaModelMigrator modelMigrator, EAttribute attribute, String newName) {
 		var copy = createCopy(modelMigrator, attribute);
 		copy.setName(newName);
