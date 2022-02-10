@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,6 +33,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
@@ -60,6 +62,7 @@ import org.junit.Test;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
+import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaResourceUtils;
 import edelta.lib.EdeltaUtils;
 
@@ -846,7 +849,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedAttributeType() throws IOException {
+	public void testChangedAttributeTypeWithAttributeMigrator() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -866,8 +869,49 @@ public class EdeltaModelMigratorTest {
 				modelMigrator.isRelatedTo(a, attribute),
 			(feature, o, oldValue) -> {
 				// if we come here the old attribute was set
+				return EdeltaEcoreUtil.unwrapCollection(
+					EdeltaEcoreUtil.wrapAsCollection(oldValue)
+						.stream()
+						.map(val -> {
+							try {
+								return Integer.parseInt(val.toString());
+							} catch (NumberFormatException e) {
+								return -1;
+							}
+						})
+						.collect(Collectors.toList()),
+					feature);
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testChangeAttributeType() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeType(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
 				try {
-					return Integer.parseInt(oldValue.toString());
+					return Integer.parseInt(val.toString());
 				} catch (NumberFormatException e) {
 					return -1;
 				}
@@ -936,18 +980,15 @@ public class EdeltaModelMigratorTest {
 		// actual refactoring
 		var attributeName = "myAttribute";
 		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
-		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
 
-		// custom migration rule
-		modelMigrator.addEAttributeMigrator(
-			a ->
-				modelMigrator.isRelatedTo(a, attribute),
-			(feature, o, oldValue) -> {
-				return ((Collection<?>) oldValue)
-					.stream()
-					.map(Object::toString)
-					.map(Integer::parseInt)
-					.collect(Collectors.toList());
+		changeAttributeType(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
 			}
 		);
 
@@ -1565,6 +1606,35 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.copyReferences();
 	}
 
+	/**
+	 * Changes the type of the attribute and when migrating the model
+	 * it applies the passed lambda to transform the value or values
+	 * (transparently).
+	 * 
+	 * @param modelMigrator
+	 * @param attribute
+	 * @param type
+	 * @param singleValueTransformer
+	 */
+	private void changeAttributeType(EdeltaModelMigrator modelMigrator, EAttribute attribute,
+			EDataType type, Function<Object, Object> singleValueTransformer) {
+		attribute.setEType(type);
+		modelMigrator.addCopyMigrator(
+			a ->
+				modelMigrator.isRelatedTo(a, attribute),
+			(feature, oldObj, newObj) -> {
+				// if we come here the old attribute was set
+				EdeltaEcoreUtil.setValueForFeature(
+					newObj,
+					attribute,
+					EdeltaEcoreUtil.getValueForFeature(oldObj, feature)
+						.stream()
+						.map(singleValueTransformer)
+						.collect(Collectors.toList())
+				);
+			}
+		);
+	}
 	private EAttribute replaceWithCopy(EdeltaModelMigrator modelMigrator, EAttribute attribute, String newName) {
 		var copy = createCopy(modelMigrator, attribute);
 		copy.setName(newName);
