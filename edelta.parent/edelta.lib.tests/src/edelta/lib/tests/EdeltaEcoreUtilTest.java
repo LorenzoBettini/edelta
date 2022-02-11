@@ -21,7 +21,7 @@ public class EdeltaEcoreUtilTest {
 		Collection<Object> collection;
 
 		collection = EdeltaEcoreUtil.wrapAsCollection(
-				pack, EcorePackage.Literals.ENAMED_ELEMENT__NAME);
+				pack, EcorePackage.Literals.ENAMED_ELEMENT__NAME, -1);
 
 		assertThat(collection)
 			.isEmpty();
@@ -29,13 +29,13 @@ public class EdeltaEcoreUtilTest {
 		pack.setName("A name");
 
 		collection = EdeltaEcoreUtil.wrapAsCollection(
-				pack, EcorePackage.Literals.ENAMED_ELEMENT__NAME);
+				pack, EcorePackage.Literals.ENAMED_ELEMENT__NAME, -1);
 
 		assertThat(collection)
 			.containsExactly("A name");
 
 		collection = EdeltaEcoreUtil.wrapAsCollection(
-				pack, EcorePackage.Literals.EPACKAGE__ECLASSIFIERS);
+				pack, EcorePackage.Literals.EPACKAGE__ECLASSIFIERS, -1);
 
 		assertThat(collection)
 			.isSameAs(pack.getEClassifiers())
@@ -43,11 +43,25 @@ public class EdeltaEcoreUtilTest {
 
 		var c1 = EcoreFactory.eINSTANCE.createEClass();
 		var c2 = EcoreFactory.eINSTANCE.createEDataType();
-		pack.getEClassifiers().addAll(List.of(c1, c2));
+		var c3 = EcoreFactory.eINSTANCE.createEEnum();
+		pack.getEClassifiers().addAll(List.of(c1, c2, c3));
+
 		collection = EdeltaEcoreUtil.wrapAsCollection(
-				pack, EcorePackage.Literals.EPACKAGE__ECLASSIFIERS);
+				pack, EcorePackage.Literals.EPACKAGE__ECLASSIFIERS, -1);
 		assertThat(collection)
 			.isSameAs(pack.getEClassifiers())
+			.containsExactlyInAnyOrder(c1, c2, c3);
+
+		collection = EdeltaEcoreUtil.wrapAsCollection(
+				pack, EcorePackage.Literals.EPACKAGE__ECLASSIFIERS, 1);
+		assertThat(collection)
+			.isNotSameAs(pack.getEClassifiers())
+			.containsExactly(c1);
+
+		collection = EdeltaEcoreUtil.wrapAsCollection(
+				pack, EcorePackage.Literals.EPACKAGE__ECLASSIFIERS, 2);
+		assertThat(collection)
+			.isNotSameAs(pack.getEClassifiers())
 			.containsExactlyInAnyOrder(c1, c2);
 	}
 
@@ -108,7 +122,7 @@ public class EdeltaEcoreUtilTest {
 		Collection<Object> collection;
 
 		collection = EdeltaEcoreUtil.getValueForFeature(pack,
-				EcorePackage.Literals.ENAMED_ELEMENT__NAME);
+				EcorePackage.Literals.ENAMED_ELEMENT__NAME, -1);
 
 		assertThat(collection)
 			.isEmpty();
@@ -116,13 +130,13 @@ public class EdeltaEcoreUtilTest {
 		pack.setName("A name");
 	
 		collection = EdeltaEcoreUtil.getValueForFeature(
-				pack, EcorePackage.Literals.ENAMED_ELEMENT__NAME);
+				pack, EcorePackage.Literals.ENAMED_ELEMENT__NAME, -1);
 	
 		assertThat(collection)
 			.containsExactly("A name");
 	
 		collection = EdeltaEcoreUtil.getValueForFeature(
-				pack, EcorePackage.Literals.EPACKAGE__ECLASSIFIERS);
+				pack, EcorePackage.Literals.EPACKAGE__ECLASSIFIERS, -1);
 	
 		assertThat(collection)
 			.isSameAs(pack.getEClassifiers())
@@ -130,11 +144,25 @@ public class EdeltaEcoreUtilTest {
 	
 		var c1 = EcoreFactory.eINSTANCE.createEClass();
 		var c2 = EcoreFactory.eINSTANCE.createEDataType();
-		pack.getEClassifiers().addAll(List.of(c1, c2));
+		var c3 = EcoreFactory.eINSTANCE.createEEnum();
+		pack.getEClassifiers().addAll(List.of(c1, c2, c3));
+
 		collection = EdeltaEcoreUtil.getValueForFeature(
-				pack, EcorePackage.Literals.EPACKAGE__ECLASSIFIERS);
+				pack, EcorePackage.Literals.EPACKAGE__ECLASSIFIERS, -1);
 		assertThat(collection)
 			.isSameAs(pack.getEClassifiers())
+			.containsExactlyInAnyOrder(c1, c2, c3);
+
+		collection = EdeltaEcoreUtil.getValueForFeature(
+				pack, EcorePackage.Literals.EPACKAGE__ECLASSIFIERS, 1);
+		assertThat(collection)
+			.isNotSameAs(pack.getEClassifiers())
+			.containsExactlyInAnyOrder(c1);
+
+		collection = EdeltaEcoreUtil.getValueForFeature(
+				pack, EcorePackage.Literals.EPACKAGE__ECLASSIFIERS, 2);
+		assertThat(collection)
+			.isNotSameAs(pack.getEClassifiers())
 			.containsExactlyInAnyOrder(c1, c2);
 	}
 

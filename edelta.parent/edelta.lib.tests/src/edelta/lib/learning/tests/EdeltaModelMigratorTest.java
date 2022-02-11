@@ -885,7 +885,7 @@ public class EdeltaModelMigratorTest {
 			(feature, o, oldValue) -> {
 				// if we come here the old attribute was set
 				return EdeltaEcoreUtil.unwrapCollection(
-					EdeltaEcoreUtil.wrapAsCollection(oldValue)
+					EdeltaEcoreUtil.wrapAsCollection(oldValue, -1)
 						.stream()
 						.map(val -> {
 							try {
@@ -2029,7 +2029,7 @@ public class EdeltaModelMigratorTest {
 				EdeltaEcoreUtil.setValueForFeature(
 					newObj,
 					attribute,
-					EdeltaEcoreUtil.getValueForFeature(oldObj, feature)
+					EdeltaEcoreUtil.getValueForFeature(oldObj, feature, -1)
 						.stream()
 						.map(singleValueTransformer)
 						.collect(Collectors.toList())
@@ -2057,7 +2057,7 @@ public class EdeltaModelMigratorTest {
 			(feature, oldObj, oldValue) ->
 				// if we come here the old attribute was set
 				EdeltaEcoreUtil.unwrapCollection(
-					EdeltaEcoreUtil.wrapAsCollection(oldValue)
+					EdeltaEcoreUtil.wrapAsCollection(oldValue, -1)
 						.stream()
 						.map(singleValueTransformer)
 						.collect(Collectors.toList()),
@@ -2206,7 +2206,7 @@ public class EdeltaModelMigratorTest {
 				// retrieve the original value, wrapped in a list
 				// so this works (transparently) for both single and multi feature
 				var oldValueOrValues =
-					EdeltaEcoreUtil.getValueForFeature(oldObj, feature)
+					EdeltaEcoreUtil.getValueForFeature(oldObj, feature, -1)
 					.stream();
 
 				// discard possible extra values, in case the multiplicity has changed
