@@ -6,6 +6,7 @@ package edelta.lib;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
@@ -135,5 +136,27 @@ public class EdeltaEcoreUtil {
 			unwrapCollection = wrapAsCollection(unwrapCollection);
 		}
 		obj.eSet(feature, unwrapCollection);
+	}
+
+	/**
+	 * Given a collection of values, it returns a collection of extra values, that
+	 * is, in surplus, according to the upperbound of the passed feature.
+	 * 
+	 * For example, given the collection [a, b, c, d, e] if the upper bound of the
+	 * feature is 2, this will return [c, d, e]. If the feature has no upperbound
+	 * (that is, -1) it will return an empty collection.
+	 * 
+	 * @param values
+	 * @param feature
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static Collection<Object> getExtraValues(Collection<?> values, EStructuralFeature feature) {
+		var upperBound = feature.getUpperBound();
+		if (upperBound < 0)
+			return (Collection<Object>) values;
+		return (Collection<Object>) values.stream()
+			.skip(upperBound)
+			.collect(Collectors.toList());
 	}
 }
