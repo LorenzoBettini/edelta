@@ -2205,18 +2205,16 @@ public class EdeltaModelMigratorTest {
 
 				// retrieve the original value, wrapped in a list
 				// so this works (transparently) for both single and multi feature
-				var oldValueOrValues =
-					EdeltaEcoreUtil.getValueForFeature(oldObj, feature, -1)
-					.stream();
-
 				// discard possible extra values, in case the multiplicity has changed
-				if (reference.getUpperBound() > 0)
-					oldValueOrValues = oldValueOrValues.limit(reference.getUpperBound());
+				var oldValueOrValues =
+					EdeltaEcoreUtil
+						.getValueForFeature(oldObj, feature,
+								reference.getUpperBound());
 
 				// for each old value create a new object for the
 				// extracted class, by setting the reference's value
 				// with the copied value of that reference
-				var copies = oldValueOrValues
+				var copies = oldValueOrValues.stream()
 					.map(oldValue -> {
 						// since this is NOT a containment reference
 						// the referred oldValue has already been copied
