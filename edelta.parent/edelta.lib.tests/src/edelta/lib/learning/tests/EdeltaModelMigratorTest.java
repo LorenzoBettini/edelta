@@ -179,6 +179,21 @@ public class EdeltaModelMigratorTest {
 			);
 		}
 
+		/**
+		 * Skips the copy entirely for the feature of the original metamodel
+		 * related to the passed feature
+		 * 
+		 * @param feature the feature of the evolved metamodel
+		 */
+		public void addSkipCopyRulefor(EStructuralFeature feature) {
+			addCopyMigrator(
+				relatesTo(feature),
+				(f, oldObj, newObj) -> {
+					// skip the copy entirely
+				}
+			);
+		}
+
 		@Override
 		protected EClass getTarget(EClass eClass) {
 			return getMapped(eClass);
@@ -2042,15 +2057,15 @@ public class EdeltaModelMigratorTest {
 		}
 		reference.setEType(extracted);
 		makeContainmentBidirectional(reference);
-		modelMigrator.addCopyMigrator(
-			f ->
-				modelMigrator.isRelatedTo(f, eOpposite),
-			(feature, oldObj, newObj) -> {
-				// the opposite reference now changed its type
-				// so we have to skip the copy or we'll have a ClassCastException
-				// the bidirectionality will be implied in the next migrator
-			}
-		);
+
+		// the opposite reference now changed its type
+		// so we have to skip the copy or we'll have a ClassCastException
+		// the bidirectionality will be implied in the next migrator
+		modelMigrator.addSkipCopyRulefor(eOpposite);
+
+		// handle the migration of the reference that now has to refer
+		// to a new object (of the extracted class), or, transparently
+		// to a list of new objects in case of a multi reference
 		modelMigrator.addCopyMigrator(
 			f ->
 				modelMigrator.isRelatedTo(f, reference),
