@@ -1229,6 +1229,78 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
+	public void testChangedMultiAttributeTypeAndMultiplicityTo2() throws IOException {
+		var subdir = "changedMultiAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeType(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		attribute.setUpperBound(2);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedMultiAttributeTypeAndMultiplicityTo2/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testChangedMultiAttributeTypeAndMultiplicityTo2Alternative() throws IOException {
+		var subdir = "changedMultiAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeTypeAlternative(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		attribute.setUpperBound(2);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedMultiAttributeTypeAndMultiplicityTo2/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	@Test
 	public void testChangedAttributeNameAndType() throws IOException {
 		var subdir = "changedAttributeType/";
 
@@ -2029,7 +2101,9 @@ public class EdeltaModelMigratorTest {
 				EdeltaEcoreUtil.setValueForFeature(
 					newObj,
 					attribute,
-					EdeltaEcoreUtil.getValueForFeature(oldObj, feature, -1)
+					// use the upper bound of the destination attribute, since it might
+					// be different from the original one
+					EdeltaEcoreUtil.getValueForFeature(oldObj, feature, attribute.getUpperBound())
 						.stream()
 						.map(singleValueTransformer)
 						.collect(Collectors.toList())
@@ -2057,7 +2131,9 @@ public class EdeltaModelMigratorTest {
 			(feature, oldObj, oldValue) ->
 				// if we come here the old attribute was set
 				EdeltaEcoreUtil.unwrapCollection(
-					EdeltaEcoreUtil.wrapAsCollection(oldValue, -1)
+					// use the upper bound of the destination attribute, since it might
+					// be different from the original one
+					EdeltaEcoreUtil.wrapAsCollection(oldValue, attribute.getUpperBound())
 						.stream()
 						.map(singleValueTransformer)
 						.collect(Collectors.toList()),
