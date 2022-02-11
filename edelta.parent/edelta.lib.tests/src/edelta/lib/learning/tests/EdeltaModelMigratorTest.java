@@ -1770,8 +1770,8 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReferenceToClassBidirectional2() throws IOException {
-		var subdir = "referenceToClassBidirectional2/";
+	public void testreferenceToClassBidirectionalOppositeMultiple() throws IOException {
+		var subdir = "referenceToClassBidirectionalOppositeMultiple/";
 
 		var modelMigrator = setupMigrator(
 			subdir,
