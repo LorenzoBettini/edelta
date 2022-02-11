@@ -1770,8 +1770,32 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testreferenceToClassBidirectionalOppositeMultiple() throws IOException {
+	public void testReferenceToClassBidirectionalOppositeMultiple() throws IOException {
 		var subdir = "referenceToClassBidirectionalOppositeMultiple/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testReferenceToClassMultipleBidirectional() throws IOException {
+		var subdir = "referenceToClassMultipleBidirectional/";
 
 		var modelMigrator = setupMigrator(
 			subdir,
