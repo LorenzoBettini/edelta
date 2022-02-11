@@ -179,32 +179,4 @@ public class EdeltaEcoreUtilTest {
 		assertThat(pack.getEClassifiers())
 			.isEmpty();
 	}
-
-	@Test
-	public void testGetExtraValues() {
-		Collection<Object> extraValues;
-
-		var values = List.of(1, 2, 3);
-
-		extraValues = EdeltaEcoreUtil.getExtraValues(
-				values,
-				EcorePackage.Literals.EPACKAGE__ECLASSIFIERS);
-
-		assertThat(extraValues)
-			.containsExactly(1, 2, 3);
-
-		extraValues = EdeltaEcoreUtil.getExtraValues(
-				values,
-				EcorePackage.Literals.ENAMED_ELEMENT__NAME);
-
-		assertThat(extraValues)
-			.containsExactly(2, 3);
-
-		extraValues = EdeltaEcoreUtil.getExtraValues(
-				List.of(1),
-				EcorePackage.Literals.ECLASSIFIER__EPACKAGE);
-
-		assertThat(extraValues)
-			.isEmpty();;
-	}
 }
