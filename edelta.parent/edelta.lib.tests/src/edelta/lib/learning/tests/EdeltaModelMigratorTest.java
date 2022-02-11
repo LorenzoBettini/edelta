@@ -1817,6 +1817,111 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	/**
+	 * Changing from multi to single only the main reference after performing
+	 * referenceToClass does not make much sense, since in the evolved model we lose
+	 * some associations. This is just to make sure that nothing else bad happens
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleMain() throws IOException {
+		var subdir = "referenceToClassMultipleBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+		personWorks.setUpperBound(1);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"referenceToClassMultipleBidirectionalChangedIntoSingleMain/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	/**
+	 * Changing from multi to single only the opposite reference after performing
+	 * referenceToClass does not make much sense, since in the evolved model we lose
+	 * some associations. This is just to make sure that nothing else bad happens
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleOpposite() throws IOException {
+		var subdir = "referenceToClassMultipleBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		var extractedClass = referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+		// in the evolved model, the original personWorks.getEOpposite
+		// now is extractedClass.getEStructuralFeature(0).getEOpposite
+		((EReference) extractedClass.getEStructuralFeature(0))
+			.getEOpposite().setUpperBound(1);
+		// changing the opposite multi to single of course makes the model
+		// lose associations (the last Person that refers to a WorkingPosition wins)
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"referenceToClassMultipleBidirectionalChangedIntoSingleOpposite/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	/**
+	 * Changing from multi to single the two bidirectional references after performing
+	 * referenceToClass does not make much sense, since in the evolved model we lose
+	 * some associations. This is just to make sure that nothing else bad happens
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleBoth() throws IOException {
+		var subdir = "referenceToClassMultipleBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		var extractedClass = referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+		personWorks.setUpperBound(1);
+		// in the evolved model, the original personWorks.getEOpposite
+		// now is extractedClass.getEStructuralFeature(0).getEOpposite
+		((EReference) extractedClass.getEStructuralFeature(0))
+			.getEOpposite().setUpperBound(1);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"referenceToClassMultipleBidirectionalChangedIntoSingleBoth/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	@Test
 	public void testMakeBidirectionalExisting() throws IOException {
 		var subdir = "makeBidirectionalExisting/";
@@ -2076,7 +2181,7 @@ public class EdeltaModelMigratorTest {
 			fromTypeToFeatureName(reference.getEType()),
 			reference.getEReferenceType());
 		final EReference eOpposite = reference.getEOpposite();
-		if ((eOpposite != null)) {
+		if (eOpposite != null) {
 			EdeltaUtils.makeBidirectional(eOpposite, extractedRef);
 		}
 		reference.setEType(extracted);
@@ -2101,11 +2206,17 @@ public class EdeltaModelMigratorTest {
 				// retrieve the original value, wrapped in a list
 				// so this works (transparently) for both single and multi feature
 				var oldValueOrValues =
-					EdeltaEcoreUtil.getValueForFeature(oldObj, feature);
+					EdeltaEcoreUtil.getValueForFeature(oldObj, feature)
+					.stream();
+
+				// discard possible extra values, in case the multiplicity has changed
+				if (reference.getUpperBound() > 0)
+					oldValueOrValues = oldValueOrValues.limit(reference.getUpperBound());
+
 				// for each old value create a new object for the
 				// extracted class, by setting the reference's value
 				// with the copied value of that reference
-				var copies = oldValueOrValues.stream()
+				var copies = oldValueOrValues
 					.map(oldValue -> {
 						// since this is NOT a containment reference
 						// the referred oldValue has already been copied
