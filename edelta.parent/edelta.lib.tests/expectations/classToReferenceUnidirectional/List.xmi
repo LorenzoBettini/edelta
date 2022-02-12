@@ -6,9 +6,11 @@
     xmlns:person="http://cs.gssi.it/PersonMM"
     xsi:schemaLocation="http://cs.gssi.it/PersonMM PersonList.ecore">
   <members firstname="first"
-      lastname="person"/>
+      lastname="person"
+      works="//@wplaces.0"/>
   <members firstname="second"
-      lastname="person"/>
+      lastname="person"
+      works="//@wplaces.1"/>
   <members firstname="third"
       lastname="person"/>
   <wplaces address="address1"/>

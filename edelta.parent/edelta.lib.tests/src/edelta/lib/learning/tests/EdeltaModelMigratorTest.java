@@ -194,6 +194,19 @@ public class EdeltaModelMigratorTest {
 			);
 		}
 
+		/**
+		 * An object can be explicitly copied after a containment reference
+		 * became a non-containment reference, we must first check whether it
+		 * has already been copied.
+		 */
+		@Override
+		public EObject copy(EObject eObject) {
+			var alreadyCopied = get(eObject);
+			if (alreadyCopied != null)
+				return alreadyCopied;
+			return super.copy(eObject);
+		}
+
 		@Override
 		protected EClass getTarget(EClass eClass) {
 			return getMapped(eClass);
@@ -215,6 +228,12 @@ public class EdeltaModelMigratorTest {
 			return targetEStructuralFeature == null ?
 				super.getTarget(eStructuralFeature, eObject, copyEObject)
 				: ((InternalEObject) copyEObject).eSetting(targetEStructuralFeature);
+		}
+
+		@Override
+		protected void copyContainment(EReference eReference, EObject eObject, EObject copyEObject) {
+			applyCopyRuleOrElse(eReference, eObject, copyEObject,
+				() -> super.copyContainment(eReference, eObject, copyEObject));
 		}
 
 		@Override
@@ -2390,7 +2409,7 @@ public class EdeltaModelMigratorTest {
 	 * @return the EReference that now represents the relation, that is, the
 	 *         EReference originally of type cl ("b1" above)
 	 */
-	public EReference classToReference(EdeltaModelMigrator modelMigrator,
+	private EReference classToReference(EdeltaModelMigrator modelMigrator,
 			final EReference reference) {
 		// "A" above NOT USED
 		// final EClass owner = reference.getEContainingClass();
@@ -2410,6 +2429,33 @@ public class EdeltaModelMigratorTest {
 			EdeltaUtils.makeBidirectional(reference, opposite);
 		}
 		EdeltaUtils.removeElement(toRemove);
+		modelMigrator.addCopyMigrator(
+			f ->
+				modelMigrator.isRelatedTo(f, reference),
+			(feature, oldObj, newObj) -> {
+				// feature: the feature of the original metamodel
+				// oldObj: the object of the original model
+				// newObj: the object of the new model, already created
+
+				// the object of the class to remove
+				var objOfRemovedClass = (EObject) oldObj.eGet(feature);
+				if (objOfRemovedClass == null)
+					return;
+				var eClass = objOfRemovedClass.eClass();
+				// take the first, but it should be the reference
+				// not of type of the containing class of the feature? TODO
+				var oldReferred =
+					(EObject) objOfRemovedClass.eGet(eClass.getEStructuralFeatures().get(0));
+				// create the copy (our modelMigrator.copy checks whether
+				// an object has already been copied, so we avoid to copy
+				// the same object twice). We don't even have to care whether
+				// this will be part of a resource, since, as a contained
+				// object, it will be possibly copied later
+				var copyOfOldReferred = modelMigrator.copy(oldReferred);
+				// set the new reference value
+				newObj.eSet(reference, copyOfOldReferred);
+			}
+		);
 		return reference;
 	}
 
