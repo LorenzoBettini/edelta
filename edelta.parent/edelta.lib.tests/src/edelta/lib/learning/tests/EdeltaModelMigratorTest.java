@@ -2046,6 +2046,32 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testClassToReferenceUnidirectional() throws IOException {
+		var subdir = "classToReferenceUnidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		classToReference(modelMigrator, personWorks);
+
+		// TODO: handle model migration
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private EAttribute getAttribute(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
 		return (EAttribute) getFeature(modelManager, packageName, className, attributeName);
 	}
@@ -2336,6 +2362,55 @@ public class EdeltaModelMigratorTest {
 
 	private String fromTypeToFeatureName(final EClassifier type) {
 		return StringExtensions.toFirstLower(type.getName());
+	}
+
+	/**
+	 * SIMPLIFIED VERSION OF THE ACTUAL REFACTORING: directly pass the reference b1
+	 * to B instead of passing B
+	 * 
+	 * Given an EClass, which is meant to represent a relation, removes such a
+	 * class, transforming the relation into an EReference.
+	 * 
+	 * For example, given
+	 * 
+	 * <pre>
+	 *    a     b1    b2    c
+	 * A <-------> B <------> C
+	 * </pre>
+	 * 
+	 * (where the opposites "a" and "b2" might not be present) if we pass "B", then
+	 * the result will be
+	 * 
+	 * <pre>
+	 *    b2    b1
+	 * A <-------> C
+	 * </pre>
+	 * 
+	 * @param cl
+	 * @return the EReference that now represents the relation, that is, the
+	 *         EReference originally of type cl ("b1" above)
+	 */
+	public EReference classToReference(EdeltaModelMigrator modelMigrator,
+			final EReference reference) {
+		// "A" above NOT USED
+		// final EClass owner = reference.getEContainingClass();
+		// "B" above
+		final EClass toRemove = reference.getEReferenceType();
+		// ACTUAL REFACTORING:
+		// search for a single EReference ("c" above) in cl that has not type owner
+		// (the one with type owner, if exists, would be the EOpposite
+		// of reference, which we are not interested in, "a" above).
+		// SIMPLIFIED REFACTORING: assume it's the first one
+		final EReference referenceToTarget =
+				(EReference) toRemove.getEStructuralFeatures().get(0);
+		reference.setEType(referenceToTarget.getEType());
+		EdeltaUtils.dropContainment(reference);
+		final EReference opposite = referenceToTarget.getEOpposite();
+		if (opposite != null) {
+			EdeltaUtils.makeBidirectional(reference, opposite);
+		}
+		EdeltaUtils.removeElement(toRemove);
+		return reference;
 	}
 
 	/**
