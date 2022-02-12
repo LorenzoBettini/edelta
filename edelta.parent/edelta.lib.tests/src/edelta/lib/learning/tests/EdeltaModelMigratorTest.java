@@ -2128,7 +2128,29 @@ public class EdeltaModelMigratorTest {
 		// refactoring
 		classToReference(modelMigrator, personWorks);
 
-		// TODO: handle model migration
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testClassToReferenceBidirectionalDifferentOrder() throws IOException {
+		var subdir = "classToReferenceBidirectionalDifferentOrder/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		classToReference(modelMigrator, personWorks);
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
@@ -2483,17 +2505,15 @@ public class EdeltaModelMigratorTest {
 	 */
 	private EReference classToReference(EdeltaModelMigrator modelMigrator,
 			final EReference reference) {
-		// "A" above NOT USED
-		// final EClass owner = reference.getEContainingClass();
 		// "B" above
 		final EClass toRemove = reference.getEReferenceType();
-		// ACTUAL REFACTORING:
+		// "A" above NOT USED
+		final EClass owner = reference.getEContainingClass();
 		// search for a single EReference ("c" above) in cl that has not type owner
 		// (the one with type owner, if exists, would be the EOpposite
 		// of reference, which we are not interested in, "a" above).
-		// SIMPLIFIED REFACTORING: assume it's the first one
 		final EReference referenceToTarget =
-				(EReference) toRemove.getEStructuralFeatures().get(0);
+				findSingleReferenceNotOfType(toRemove, owner);
 		reference.setEType(referenceToTarget.getEType());
 		EdeltaUtils.dropContainment(reference);
 		final EReference opposite = referenceToTarget.getEOpposite();
@@ -2522,10 +2542,11 @@ public class EdeltaModelMigratorTest {
 						// the object of the class to remove
 						var objOfRemovedClass = (EObject) value;
 						var eClass = objOfRemovedClass.eClass();
-						// take the first, but it should be the reference
-						// not of type of the containing class of the feature? TODO
+						// the reference not of type of the containing class of the feature
+						var refToTarget = findSingleReferenceNotOfType(eClass, oldObj.eClass());
+						// the original referred object in the object to remove
 						var oldReferred =
-								(EObject) objOfRemovedClass.eGet(eClass.getEStructuralFeatures().get(0));
+								(EObject) objOfRemovedClass.eGet(refToTarget);
 						// create the copy (our modelMigrator.copy checks whether
 						// an object has already been copied, so we avoid to copy
 						// the same object twice). We don't even have to care whether
@@ -2569,4 +2590,21 @@ public class EdeltaModelMigratorTest {
 		return reference;
 	}
 
+	/**
+	 * SIMPLIFIED VERSION WITHOUT ERROR CHECKING
+	 * 
+	 * Finds the single EReference, in the EReferences of the given EClass, with a
+	 * type different from the given type, performing validation (that is, no
+	 * reference is found, or more than one) checks and in case show errors and
+	 * throws an IllegalArgumentException
+	 * 
+	 * @param cl
+	 * @param target
+	 */
+	private EReference findSingleReferenceNotOfType(final EClass cl, final EClass type) {
+		return cl.getEReferences().stream()
+				.filter(r -> r.getEType() != type)
+				.findFirst()
+				.orElse(null);
+	}
 }
