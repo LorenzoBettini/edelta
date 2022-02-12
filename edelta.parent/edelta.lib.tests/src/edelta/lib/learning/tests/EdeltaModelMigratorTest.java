@@ -2091,6 +2091,32 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testClassToReferenceBidirectional() throws IOException {
+		var subdir = "classToReferenceBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		classToReference(modelMigrator, personWorks);
+
+		// TODO: handle model migration
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private EAttribute getAttribute(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
 		return (EAttribute) getFeature(modelManager, packageName, className, attributeName);
 	}
