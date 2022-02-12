@@ -2507,7 +2507,7 @@ public class EdeltaModelMigratorTest {
 			final EReference reference) {
 		// "B" above
 		final EClass toRemove = reference.getEReferenceType();
-		// "A" above NOT USED
+		// "A" above
 		final EClass owner = reference.getEContainingClass();
 		// search for a single EReference ("c" above) in cl that has not type owner
 		// (the one with type owner, if exists, would be the EOpposite
