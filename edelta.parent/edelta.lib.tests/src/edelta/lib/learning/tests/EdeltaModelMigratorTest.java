@@ -2092,6 +2092,32 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
+	public void testClassToReferenceMultipleUnidirectional() throws IOException {
+		var subdir = "classToReferenceMultipleUnidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		classToReference(modelMigrator, personWorks);
+
+		// TODO: handle model migration
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
 	public void testClassToReferenceBidirectional() throws IOException {
 		var subdir = "classToReferenceBidirectional/";
 
@@ -2463,23 +2489,36 @@ public class EdeltaModelMigratorTest {
 				// oldObj: the object of the original model
 				// newObj: the object of the new model, already created
 
-				// the object of the class to remove
-				var objOfRemovedClass = (EObject) oldObj.eGet(feature);
-				if (objOfRemovedClass == null)
-					return;
-				var eClass = objOfRemovedClass.eClass();
-				// take the first, but it should be the reference
-				// not of type of the containing class of the feature? TODO
-				var oldReferred =
-					(EObject) objOfRemovedClass.eGet(eClass.getEStructuralFeatures().get(0));
-				// create the copy (our modelMigrator.copy checks whether
-				// an object has already been copied, so we avoid to copy
-				// the same object twice). We don't even have to care whether
-				// this will be part of a resource, since, as a contained
-				// object, it will be possibly copied later
-				var copyOfOldReferred = modelMigrator.copy(oldReferred);
-				// set the new reference value
-				newObj.eSet(reference, copyOfOldReferred);
+				// retrieve the original value, wrapped in a list
+				// so this works (transparently) for both single and multi feature
+				// discard possible extra values, in case the multiplicity has changed
+				var oldValueOrValues =
+					EdeltaEcoreUtil
+						.getValueForFeature(oldObj, feature,
+								reference.getUpperBound());
+
+				var copyOfOldReferred = oldValueOrValues.stream()
+					.map(value -> {
+						// the object of the class to remove
+						var objOfRemovedClass = (EObject) value;
+						var eClass = objOfRemovedClass.eClass();
+						// take the first, but it should be the reference
+						// not of type of the containing class of the feature? TODO
+						var oldReferred =
+								(EObject) objOfRemovedClass.eGet(eClass.getEStructuralFeatures().get(0));
+						// create the copy (our modelMigrator.copy checks whether
+						// an object has already been copied, so we avoid to copy
+						// the same object twice). We don't even have to care whether
+						// this will be part of a resource, since, as a contained
+						// object, it will be possibly copied later
+						return modelMigrator.copy(oldReferred);
+					})
+					.collect(Collectors.toList());
+
+				// in the new object set the value or values (transparently)
+				// with the created object (or objects, again, transparently)
+				EdeltaEcoreUtil.setValueForFeature(
+					newObj, reference, copyOfOldReferred);
 			}
 		);
 		return reference;
