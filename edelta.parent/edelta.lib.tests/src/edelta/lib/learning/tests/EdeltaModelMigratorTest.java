@@ -2185,6 +2185,36 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	/**
+	 * The inversion works for the metamodel but not for the model yet.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testClassToReferenceAndReferenceToClassUnidirectional() throws IOException {
+		var subdir = "classToReferenceUnidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of() // TODO model migration "List.xmi"
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		classToReference(modelMigrator, personWorks);
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"referenceToClassUnidirectional/",
+			of("PersonList.ecore"),
+			of() // TODO model migration "List.xmi"
+		);
+	}
+
 	private EAttribute getAttribute(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
 		return (EAttribute) getFeature(modelManager, packageName, className, attributeName);
 	}
