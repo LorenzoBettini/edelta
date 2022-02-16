@@ -8,5 +8,4 @@
     myOtherAttribute="a string">
   <myAttribute>123</myAttribute>
   <myAttribute>-1</myAttribute>
-  <myAttribute>456</myAttribute>
 </mypackage:MyClass>

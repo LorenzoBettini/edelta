@@ -5,6 +5,7 @@ import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirector
 import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -31,9 +32,12 @@ import org.assertj.core.api.Assertions;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.EcorePackage;
@@ -48,6 +52,9 @@ import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
+import org.eclipse.xtext.xbase.lib.Functions.Function3;
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure3;
+import org.eclipse.xtext.xbase.lib.StringExtensions;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -55,6 +62,7 @@ import org.junit.Test;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
+import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaResourceUtils;
 import edelta.lib.EdeltaUtils;
 
@@ -79,25 +87,50 @@ public class EdeltaModelMigratorTest {
 		/**
 		 * @author Lorenzo Bettini
 		 *
-		 * @param <T1> the type of the {@link EObject} passed to the predicate
-		 * @param <T2> the type of the {@link EObject} passed to the function
+		 * @param <T> the type of the {@link EObject} passed to the predicate
+		 */
+		public static abstract class AbstractModelMigrationRule<T extends EObject> {
+			private Predicate<T> predicate;
+
+			protected AbstractModelMigrationRule(Predicate<T> predicate) {
+				this.predicate = predicate;
+			}
+
+			public boolean canApply(T arg) {
+				return predicate.test(arg);
+			}
+		}
+
+		/**
+		 * @author Lorenzo Bettini
+		 *
+		 * @param <T> the type of the {@link EObject} passed to the predicate
+		 * @param <T3> the type of the third argument passed to the function
 		 * @param <R> the type of the returned value when applying the function
 		 */
-		public static class ModelMigrationRule<T1 extends EObject, T2 extends EObject, R> {
-			private Predicate<T1> predicate;
-			private Function<T2, R> function;
+		public static class ModelMigrationFunctionRule<T extends EObject, T3, R> extends AbstractModelMigrationRule<T> {
+			private Function3<T, EObject, T3, R> function;
 
-			public ModelMigrationRule(Predicate<T1> predicate, Function<T2, R> function) {
-				this.predicate = predicate;
+			public ModelMigrationFunctionRule(Predicate<T> predicate, Function3<T, EObject, T3, R> function) {
+				super(predicate);
 				this.function = function;
 			}
 
-			public boolean canApply(T1 arg) {
-				return predicate.test(arg);
+			public R apply(T arg, EObject oldObj, T3 arg3) {
+				return function.apply(arg, oldObj, arg3);
+			}
+		}
+
+		public static class ModelMigrationCopyFeatureRule extends AbstractModelMigrationRule<EStructuralFeature> {
+			private Procedure3<EStructuralFeature, EObject, EObject> procedure;
+
+			protected ModelMigrationCopyFeatureRule(Predicate<EStructuralFeature> predicate, Procedure3<EStructuralFeature, EObject, EObject> procedure) {
+				super(predicate);
+				this.procedure = procedure;
 			}
 
-			public R apply(T2 arg) {
-				return function.apply(arg);
+			public void apply(EStructuralFeature feature, EObject oldObj, EObject newObj) {
+				procedure.apply(feature, oldObj, newObj);
 			}
 		}
 
@@ -109,30 +142,69 @@ public class EdeltaModelMigratorTest {
 		 */
 		private Map<EObject, Collection<EObject>> elementAssociations = new HashMap<>();
 
-		private Collection<ModelMigrationRule<EAttribute, EObject, Object>> valueMigrators = new ArrayList<>();
+		private Collection<ModelMigrationFunctionRule<EAttribute, Object, Object>> valueMigrators = new ArrayList<>();
 
-		private Collection<ModelMigrationRule<EStructuralFeature, EObject, EStructuralFeature>> featureMigrators = new ArrayList<>();
+		private Collection<ModelMigrationFunctionRule<EStructuralFeature, EObject, EStructuralFeature>> featureMigrators = new ArrayList<>();
+
+		private Collection<ModelMigrationCopyFeatureRule> copyRules = new ArrayList<>();
 
 		public EdeltaModelMigrator(Map<EObject, EObject> ecoreCopyMap) {
 			this.ecoreCopyMap = HashBiMap.create(ecoreCopyMap);
 		}
 
-		public void addEAttributeMigrator(Predicate<EAttribute> predicate, Function<EObject, Object> function) {
+		public void addEAttributeMigrator(Predicate<EAttribute> predicate, Function3<EAttribute, EObject, Object, Object> function) {
 			valueMigrators.add(
-				new ModelMigrationRule<>(
+				new ModelMigrationFunctionRule<>(
 					predicate,
 					function
 				)
 			);
 		}
 
-		public void addFeatureMigrator(Predicate<EStructuralFeature> predicate, Function<EObject, EStructuralFeature> function) {
+		public void addFeatureMigrator(Predicate<EStructuralFeature> predicate, Function3<EStructuralFeature, EObject, EObject, EStructuralFeature> function) {
 			featureMigrators.add(
-				new ModelMigrationRule<>(
+				new ModelMigrationFunctionRule<>(
 					predicate,
 					function
 				)
 			);
+		}
+
+		public void addCopyMigrator(Predicate<EStructuralFeature> predicate, Procedure3<EStructuralFeature, EObject, EObject> procedure) {
+			copyRules.add(
+				new ModelMigrationCopyFeatureRule(
+					predicate,
+					procedure
+				)
+			);
+		}
+
+		/**
+		 * Skips the copy entirely for the feature of the original metamodel
+		 * related to the passed feature
+		 * 
+		 * @param feature the feature of the evolved metamodel
+		 */
+		public void addSkipCopyRulefor(EStructuralFeature feature) {
+			addCopyMigrator(
+				relatesTo(feature),
+				(f, oldObj, newObj) -> {
+					// skip the copy entirely
+				}
+			);
+		}
+
+		/**
+		 * An object can be explicitly copied after a containment reference
+		 * became a non-containment reference, we must first check whether it
+		 * has already been copied.
+		 */
+		@Override
+		public EObject copy(EObject eObject) {
+			var alreadyCopied = get(eObject);
+			if (alreadyCopied != null)
+				return alreadyCopied;
+			return super.copy(eObject);
 		}
 
 		@Override
@@ -149,7 +221,7 @@ public class EdeltaModelMigratorTest {
 		protected Setting getTarget(EStructuralFeature eStructuralFeature, EObject eObject, EObject copyEObject) {
 			EStructuralFeature targetEStructuralFeature = featureMigrators.stream()
 				.filter(m -> m.canApply(eStructuralFeature))
-				.map(m -> m.apply(eObject))
+				.map(m -> m.apply(eStructuralFeature, eObject, copyEObject))
 				.filter(this::isStillThere)
 				.findFirst()
 				.orElse(null);
@@ -159,18 +231,42 @@ public class EdeltaModelMigratorTest {
 		}
 
 		@Override
+		protected void copyContainment(EReference eReference, EObject eObject, EObject copyEObject) {
+			applyCopyRuleOrElse(eReference, eObject, copyEObject,
+				() -> super.copyContainment(eReference, eObject, copyEObject));
+		}
+
+		@Override
+		protected void copyAttribute(EAttribute eAttribute, EObject eObject, EObject copyEObject) {
+			applyCopyRuleOrElse(eAttribute, eObject, copyEObject,
+				() -> super.copyAttribute(eAttribute, eObject, copyEObject));
+		}
+
+		@Override
+		protected void copyReference(EReference eReference, EObject eObject, EObject copyEObject) {
+			applyCopyRuleOrElse(eReference, eObject, copyEObject,
+				() -> super.copyReference(eReference, eObject, copyEObject));
+		}
+
+		private void applyCopyRuleOrElse(EStructuralFeature feature, EObject eObject, EObject copyEObject, Runnable runnable) {
+			var first = copyRules.stream()
+				.filter(m -> m.canApply(feature))
+				.findFirst();
+			first.ifPresentOrElse(
+				m -> m.apply(feature, eObject, copyEObject),
+				runnable
+			);
+		}
+
+		@Override
 		protected void copyAttributeValue(EAttribute eAttribute, EObject eObject, Object value, Setting setting) {
 			var map = valueMigrators.stream()
 				.filter(m -> m.canApply(eAttribute))
-				.map(m -> m.apply(eObject));
+				.map(m -> m.apply(eAttribute, eObject, value));
 			var newValue = map
 				.findFirst()
 				.orElse(value);
 			super.copyAttributeValue(eAttribute, eObject, newValue, setting);
-		}
-
-		public <T extends EObject> T evolved(T o) {
-			return getMapped(o);
 		}
 
 		private <T extends EObject> T getMapped(T o) {
@@ -183,7 +279,7 @@ public class EdeltaModelMigratorTest {
 		}
 
 		private boolean isStillThere(EObject target) {
-			return !isNotThereAnymore(target);
+			return target != null && !isNotThereAnymore(target);
 		}
 
 		private boolean isNotThereAnymore(EObject target) {
@@ -787,7 +883,192 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedAttributeType() throws IOException {
+	public void testChangedAttributeTypeWithAttributeMigrator() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
+
+		// custom migration rule
+		modelMigrator.addEAttributeMigrator(
+			a ->
+				modelMigrator.isRelatedTo(a, attribute),
+			(feature, o, oldValue) -> {
+				// if we come here the old attribute was set
+				return EdeltaEcoreUtil.unwrapCollection(
+					EdeltaEcoreUtil.wrapAsCollection(oldValue, -1)
+						.stream()
+						.map(val -> {
+							try {
+								return Integer.parseInt(val.toString());
+							} catch (NumberFormatException e) {
+								return -1;
+							}
+						})
+						.collect(Collectors.toList()),
+					feature);
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testChangeAttributeType() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeType(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testChangeAttributeTypeAlternative() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeTypeAlternative(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testChangeAttributeTypeAndMutiplicity() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeType(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		attribute.setUpperBound(-1);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedAttributeTypeAndMultiplicity/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testChangeAttributeTypeAndMutiplicityAlternative() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeTypeAlternative(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		attribute.setUpperBound(-1);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedAttributeTypeAndMultiplicity/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testChangedAttributeTypeWithCopyRule() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -802,16 +1083,18 @@ public class EdeltaModelMigratorTest {
 		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
 
 		// custom migration rule
-		modelMigrator.addEAttributeMigrator(
+		modelMigrator.addCopyMigrator(
 			a ->
 				modelMigrator.isRelatedTo(a, attribute),
-			o -> {
-				// o is the old object,
-				// so we must use the original feature to retrieve the value to copy
-				// that is, don't use attribute, which is the one of the new package
-				var eClass = o.eClass();
-				return Integer.parseInt(
-					o.eGet(eClass.getEStructuralFeature(attributeName)).toString());
+			(feature, oldObj, newObj) -> {
+				// feature is the feature of the original ecore
+				// oldObj is the original model's object,
+				// newObj is the copy, so it's the new model's object
+				// feature must be used to access th eold model's object's value
+				// attribute is from the evolved ecore
+				newObj.eSet(attribute,
+					Integer.parseInt(
+						oldObj.eGet(feature).toString()));
 			}
 		);
 
@@ -837,22 +1120,15 @@ public class EdeltaModelMigratorTest {
 		// actual refactoring
 		var attributeName = "myAttribute";
 		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
-		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
 
-		// custom migration rule
-		modelMigrator.addEAttributeMigrator(
-			a ->
-				modelMigrator.isRelatedTo(a, attribute),
-			o -> {
-				// o is the old object,
-				// so we must use the original feature to retrieve the value to copy
-				// that is, don't use attribute, which is the one of the new package
-				var eClass = o.eClass();
-				return ((Collection<?>) o.eGet(eClass.getEStructuralFeature(attributeName)))
-					.stream()
-					.map(Object::toString)
-					.map(Integer::parseInt)
-					.collect(Collectors.toList());
+		changeAttributeType(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
 			}
 		);
 
@@ -860,6 +1136,184 @@ public class EdeltaModelMigratorTest {
 			modelMigrator,
 			subdir,
 			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testChangedMultiAttributeTypeAlternative() throws IOException {
+		var subdir = "changedMultiAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeTypeAlternative(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testChangedMultiAttributeTypeAndMultiplicity() throws IOException {
+		var subdir = "changedMultiAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeType(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		attribute.setUpperBound(1);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedMultiAttributeTypeAndMultiplicity/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testChangedMultiAttributeTypeAndMultiplicityAlternative() throws IOException {
+		var subdir = "changedMultiAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeTypeAlternative(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		attribute.setUpperBound(1);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedMultiAttributeTypeAndMultiplicity/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testChangedMultiAttributeTypeAndMultiplicityTo2() throws IOException {
+		var subdir = "changedMultiAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeType(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		attribute.setUpperBound(2);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedMultiAttributeTypeAndMultiplicityTo2/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testChangedMultiAttributeTypeAndMultiplicityTo2Alternative() throws IOException {
+		var subdir = "changedMultiAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeTypeAlternative(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		attribute.setUpperBound(2);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedMultiAttributeTypeAndMultiplicityTo2/",
 			of("My.ecore"),
 			of("MyClass.xmi")
 		);
@@ -884,13 +1338,10 @@ public class EdeltaModelMigratorTest {
 		// custom migration rule
 		modelMigrator.addEAttributeMigrator(
 			modelMigrator.relatesTo(attribute),
-			o -> {
-				// o is the old object,
-				// so we must use the original feature to retrieve the value to copy
-				// that is, don't use attribute, which is the one of the new package
-				var eClass = o.eClass();
+			(feature, oldObj, oldValue) -> {
+				var eClass = oldObj.eClass();
 				return Integer.parseInt(
-					o.eGet(eClass.getEStructuralFeature(attributeName)).toString());
+					oldObj.eGet(eClass.getEStructuralFeature(attributeName)).toString());
 			}
 		);
 
@@ -922,7 +1373,7 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.addEAttributeMigrator(
 			a ->
 				modelMigrator.isRelatedTo(a, attribute),
-			o -> {
+			(feature, o, oldValue) -> {
 				// o is the old object,
 				// so we must use the original feature to retrieve the value to copy
 				// that is, don't use attribute, which is the one of the new package
@@ -964,13 +1415,13 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.addEAttributeMigrator(
 			a ->
 				modelMigrator.isRelatedTo(a, firstName),
-			o -> {
+			(feature, o, oldValue) -> {
 				// o is the old object,
 				// so we must use the original feature to retrieve the value to copy
 				// that is, don't use attribute, which is the one of the new package
 				var eClass = o.eClass();
 				return 
-					o.eGet(eClass.getEStructuralFeature("firstname")) +
+					o.eGet(feature) +
 					" " +
 					o.eGet(eClass.getEStructuralFeature("lastname"));
 			}
@@ -1309,8 +1760,467 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testMakeBidirectional() throws IOException {
+		var subdir = "makeBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		var workPlace = getEClass(evolvingModelManager,
+				"PersonList", "WorkPlace");
+		// refactoring
+		var workPlacePerson = EdeltaUtils.newEReference("person", null);
+		workPlace.getEStructuralFeatures().add(workPlacePerson);
+		EdeltaUtils.makeBidirectional(personWorks, workPlacePerson);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testReferenceToClassUnidirectional() throws IOException {
+		var subdir = "referenceToClassUnidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testReferenceToClassMultipleUnidirectional() throws IOException {
+		var subdir = "referenceToClassMultipleUnidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testReferenceToClassBidirectional() throws IOException {
+		var subdir = "referenceToClassBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testReferenceToClassBidirectionalDifferentOrder() throws IOException {
+		var subdir = "referenceToClassBidirectionalDifferentOrder/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testReferenceToClassBidirectionalOppositeMultiple() throws IOException {
+		var subdir = "referenceToClassBidirectionalOppositeMultiple/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testReferenceToClassMultipleBidirectional() throws IOException {
+		var subdir = "referenceToClassMultipleBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	/**
+	 * Changing from multi to single only the main reference after performing
+	 * referenceToClass does not make much sense, since in the evolved model we lose
+	 * some associations. This is just to make sure that nothing else bad happens
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleMain() throws IOException {
+		var subdir = "referenceToClassMultipleBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+		personWorks.setUpperBound(1);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"referenceToClassMultipleBidirectionalChangedIntoSingleMain/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	/**
+	 * Changing from multi to single only the opposite reference after performing
+	 * referenceToClass does not make much sense, since in the evolved model we lose
+	 * some associations. This is just to make sure that nothing else bad happens
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleOpposite() throws IOException {
+		var subdir = "referenceToClassMultipleBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		var extractedClass = referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+		// in the evolved model, the original personWorks.getEOpposite
+		// now is extractedClass.getEStructuralFeature(0).getEOpposite
+		((EReference) extractedClass.getEStructuralFeature(0))
+			.getEOpposite().setUpperBound(1);
+		// changing the opposite multi to single of course makes the model
+		// lose associations (the last Person that refers to a WorkingPosition wins)
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"referenceToClassMultipleBidirectionalChangedIntoSingleOpposite/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	/**
+	 * Changing from multi to single the two bidirectional references after performing
+	 * referenceToClass does not make much sense, since in the evolved model we lose
+	 * some associations. This is just to make sure that nothing else bad happens
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleBoth() throws IOException {
+		var subdir = "referenceToClassMultipleBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		var extractedClass = referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+		personWorks.setUpperBound(1);
+		// in the evolved model, the original personWorks.getEOpposite
+		// now is extractedClass.getEStructuralFeature(0).getEOpposite
+		((EReference) extractedClass.getEStructuralFeature(0))
+			.getEOpposite().setUpperBound(1);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"referenceToClassMultipleBidirectionalChangedIntoSingleBoth/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testMakeBidirectionalExisting() throws IOException {
+		var subdir = "makeBidirectionalExisting/";
+	
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		var workPlacePerson = getReference(evolvingModelManager,
+				"PersonList", "WorkPlace", "person");
+		assertNotNull(workPlacePerson);
+		// this should not change anything
+		EdeltaUtils.makeBidirectional(personWorks, workPlacePerson);
+	
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testClassToReferenceUnidirectional() throws IOException {
+		var subdir = "classToReferenceUnidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		classToReference(modelMigrator, personWorks);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testClassToReferenceMultipleUnidirectional() throws IOException {
+		var subdir = "classToReferenceMultipleUnidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		classToReference(modelMigrator, personWorks);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testClassToReferenceBidirectional() throws IOException {
+		var subdir = "classToReferenceBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		classToReference(modelMigrator, personWorks);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testClassToReferenceBidirectionalDifferentOrder() throws IOException {
+		var subdir = "classToReferenceBidirectionalDifferentOrder/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		classToReference(modelMigrator, personWorks);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testClassToReferenceMultipleBidirectional() throws IOException {
+		var subdir = "classToReferenceMultipleBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		classToReference(modelMigrator, personWorks);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	/**
+	 * The inversion works for the metamodel but not for the model yet.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testClassToReferenceAndReferenceToClassUnidirectional() throws IOException {
+		var subdir = "classToReferenceUnidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of() // TODO model migration "List.xmi"
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		classToReference(modelMigrator, personWorks);
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"referenceToClassUnidirectional/",
+			of("PersonList.ecore"),
+			of() // TODO model migration "List.xmi"
+		);
+	}
+
 	private EAttribute getAttribute(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
 		return (EAttribute) getFeature(modelManager, packageName, className, attributeName);
+	}
+
+	private EReference getReference(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
+		return (EReference) getFeature(modelManager, packageName, className, attributeName);
 	}
 
 	private EStructuralFeature getFeature(EdeltaModelManager modelManager, String packageName, String className, String featureName) {
@@ -1363,6 +2273,68 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.copyReferences();
 	}
 
+	/**
+	 * Changes the type of the attribute and when migrating the model
+	 * it applies the passed lambda to transform the value or values
+	 * (transparently).
+	 * 
+	 * @param modelMigrator
+	 * @param attribute
+	 * @param type
+	 * @param singleValueTransformer
+	 */
+	private void changeAttributeType(EdeltaModelMigrator modelMigrator, EAttribute attribute,
+			EDataType type, Function<Object, Object> singleValueTransformer) {
+		attribute.setEType(type);
+		modelMigrator.addCopyMigrator(
+			a ->
+				modelMigrator.isRelatedTo(a, attribute),
+			(feature, oldObj, newObj) -> {
+				// if we come here the old attribute was set
+				EdeltaEcoreUtil.setValueForFeature(
+					newObj,
+					attribute,
+					// use the upper bound of the destination attribute, since it might
+					// be different from the original one
+					EdeltaEcoreUtil.getValueForFeature(oldObj, feature, attribute.getUpperBound())
+						.stream()
+						.map(singleValueTransformer)
+						.collect(Collectors.toList())
+				);
+			}
+		);
+	}
+
+	/**
+	 * Changes the type of the attribute and when migrating the model
+	 * it applies the passed lambda to transform the value or values
+	 * (transparently).
+	 * 
+	 * @param modelMigrator
+	 * @param attribute
+	 * @param type
+	 * @param singleValueTransformer
+	 */
+	private void changeAttributeTypeAlternative(EdeltaModelMigrator modelMigrator, EAttribute attribute,
+			EDataType type, Function<Object, Object> singleValueTransformer) {
+		attribute.setEType(type);
+		modelMigrator.addEAttributeMigrator(
+			a ->
+				modelMigrator.isRelatedTo(a, attribute),
+			(feature, oldObj, oldValue) ->
+				// if we come here the old attribute was set
+				EdeltaEcoreUtil.unwrapCollection(
+					// use the upper bound of the destination attribute, since it might
+					// be different from the original one
+					EdeltaEcoreUtil.wrapAsCollection(oldValue, attribute.getUpperBound())
+						.stream()
+						.map(singleValueTransformer)
+						.collect(Collectors.toList()),
+					attribute
+				)
+		);
+	}
+
 	private EAttribute replaceWithCopy(EdeltaModelMigrator modelMigrator, EAttribute attribute, String newName) {
 		var copy = createCopy(modelMigrator, attribute);
 		copy.setName(newName);
@@ -1372,7 +2344,7 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.addFeatureMigrator(
 			f ->
 				modelMigrator.isRelatedTo(f, copy),
-			o -> copy);
+			(feature, o, oldValue) -> copy);
 		return copy;
 	}
 
@@ -1400,7 +2372,7 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.addFeatureMigrator(
 			f -> // the feature of the original metamodel
 				modelMigrator.isRelatedTo(f, pulledUp),
-			o -> { // the object of the original model
+			(feature, o, oldValue) -> { // the object of the original model
 				// the result can be safely returned
 				// independently from the object's class, since the
 				// predicate already matched
@@ -1411,10 +2383,10 @@ public class EdeltaModelMigratorTest {
 	}
 
 	private Collection<EStructuralFeature> pushDown(EdeltaModelMigrator modelMigrator,
-			EStructuralFeature feature, Collection<EClass> subClasses) {
+			EStructuralFeature featureToPush, Collection<EClass> subClasses) {
 		var pushedDownFeatures = new HashMap<EClass, EStructuralFeature>();
 		for (var subClass : subClasses) {
-			var pushedDown = createCopy(modelMigrator, feature);
+			var pushedDown = createCopy(modelMigrator, featureToPush);
 			pushedDownFeatures.put(subClass, pushedDown);
 			// we add it in the very first position just to have exactly the
 			// same Ecore model as the starting one of pullUpFeatures
@@ -1422,17 +2394,247 @@ public class EdeltaModelMigratorTest {
 			// exactly the same as the original model of pullUpFeatures
 			subClass.getEStructuralFeatures().add(0, pushedDown);
 		}
-		EdeltaUtils.removeElement(feature);
+		EdeltaUtils.removeElement(featureToPush);
 		// remember we must compare to the original metamodel element
 		modelMigrator.addFeatureMigrator(
 			modelMigrator.relatesToAtLeastOneOf(pushedDownFeatures.values()),
-			o -> { // the object of the original model
+			(feature, oldObj, newObj) -> { // the object of the original model
 				// the result depends on the EClass of the original
 				// object being copied, but the map was built
 				// using evolved classes
-				return pushedDownFeatures.get(modelMigrator.evolved(o.eClass()));
+				return pushedDownFeatures.get(newObj.eClass());
 			}
 		);
 		return pushedDownFeatures.values();
+	}
+
+	/**
+	 * Replaces an EReference with an EClass (with the given name, the same package
+	 * as the package of the reference's containing class), updating possible
+	 * opposite reference, so that a relation can be extended with additional
+	 * features. The original reference will be made a containment reference, (its
+	 * other properties will not be changed) to the added EClass (and made
+	 * bidirectional).
+	 * 
+	 * For example, given
+	 * 
+	 * <pre>
+	 *    b2    b1
+	 * A <-------> C
+	 * </pre>
+	 * 
+	 * (where the opposite "b2" might not be present) if we pass "b1" and the name
+	 * "B", then the result will be
+	 * 
+	 * <pre>
+	 *    a     b1    b2    c
+	 * A <-------> B <------> C
+	 * </pre>
+	 * 
+	 * where "b1" will be a containment reference. Note the names inferred for the
+	 * new additional opposite references.
+	 * 
+	 * @param name      the name for the extracted class
+	 * @param reference the reference to turn into a reference to the extracted
+	 *                  class
+	 * @return the extracted class
+	 */
+	private EClass referenceToClass(EdeltaModelMigrator modelMigrator,
+			EReference reference, String name) {
+		// checkNotContainment reference:
+		// "Cannot apply referenceToClass on containment reference"
+		var ePackage = reference.getEContainingClass().getEPackage();
+		var extracted = EdeltaUtils.newEClass(name);
+		ePackage.getEClassifiers().add(extracted);
+		var extractedRef = addMandatoryReference(extracted, 
+			fromTypeToFeatureName(reference.getEType()),
+			reference.getEReferenceType());
+		final EReference eOpposite = reference.getEOpposite();
+		if (eOpposite != null) {
+			EdeltaUtils.makeBidirectional(eOpposite, extractedRef);
+		}
+		reference.setEType(extracted);
+		makeContainmentBidirectional(reference);
+
+		// the opposite reference now changed its type
+		// so we have to skip the copy or we'll have a ClassCastException
+		// the bidirectionality will be implied in the next migrator
+		modelMigrator.addSkipCopyRulefor(eOpposite);
+
+		// handle the migration of the reference that now has to refer
+		// to a new object (of the extracted class), or, transparently
+		// to a list of new objects in case of a multi reference
+		modelMigrator.addCopyMigrator(
+			f ->
+				modelMigrator.isRelatedTo(f, reference),
+			(feature, oldObj, newObj) -> {
+				// feature: the feature of the original metamodel
+				// oldObj: the object of the original model
+				// newObj: the object of the new model, already created
+
+				// retrieve the original value, wrapped in a list
+				// so this works (transparently) for both single and multi feature
+				// discard possible extra values, in case the multiplicity has changed
+				var oldValueOrValues =
+					EdeltaEcoreUtil
+						.getValueForFeature(oldObj, feature,
+								reference.getUpperBound());
+
+				// for each old value create a new object for the
+				// extracted class, by setting the reference's value
+				// with the copied value of that reference
+				var copies = oldValueOrValues.stream()
+					.map(oldValue -> {
+						// since this is NOT a containment reference
+						// the referred oldValue has already been copied
+						var copy = modelMigrator.get(oldValue);
+						var created = EcoreUtil.create(extracted);
+						// the bidirectionality is implied
+						created.eSet(extractedRef, copy);
+						return created;
+					})
+					.collect(Collectors.toList());
+				// in the new object set the value or values (transparently)
+				// with the created object (or objects, again, transparently)
+				EdeltaEcoreUtil.setValueForFeature(
+					newObj, reference, copies);
+			}
+		);
+		return extracted;
+	}
+
+	private String fromTypeToFeatureName(final EClassifier type) {
+		return StringExtensions.toFirstLower(type.getName());
+	}
+
+	/**
+	 * SIMPLIFIED VERSION OF THE ACTUAL REFACTORING: directly pass the reference b1
+	 * to B instead of passing B
+	 * 
+	 * Given an EClass, which is meant to represent a relation, removes such a
+	 * class, transforming the relation into an EReference.
+	 * 
+	 * For example, given
+	 * 
+	 * <pre>
+	 *    a     b1    b2    c
+	 * A <-------> B <------> C
+	 * </pre>
+	 * 
+	 * (where the opposites "a" and "b2" might not be present) if we pass "B", then
+	 * the result will be
+	 * 
+	 * <pre>
+	 *    b2    b1
+	 * A <-------> C
+	 * </pre>
+	 * 
+	 * @param cl
+	 * @return the EReference that now represents the relation, that is, the
+	 *         EReference originally of type cl ("b1" above)
+	 */
+	private EReference classToReference(EdeltaModelMigrator modelMigrator,
+			final EReference reference) {
+		// "B" above
+		final EClass toRemove = reference.getEReferenceType();
+		// "A" above
+		final EClass owner = reference.getEContainingClass();
+		// search for a single EReference ("c" above) in cl that has not type owner
+		// (the one with type owner, if exists, would be the EOpposite
+		// of reference, which we are not interested in, "a" above).
+		final EReference referenceToTarget =
+				findSingleReferenceNotOfType(toRemove, owner);
+		reference.setEType(referenceToTarget.getEType());
+		EdeltaUtils.dropContainment(reference);
+		final EReference opposite = referenceToTarget.getEOpposite();
+		if (opposite != null) {
+			EdeltaUtils.makeBidirectional(reference, opposite);
+		}
+		EdeltaUtils.removeElement(toRemove);
+		modelMigrator.addCopyMigrator(
+			f ->
+				modelMigrator.isRelatedTo(f, reference),
+			(feature, oldObj, newObj) -> {
+				// feature: the feature of the original metamodel
+				// oldObj: the object of the original model
+				// newObj: the object of the new model, already created
+
+				// retrieve the original value, wrapped in a list
+				// so this works (transparently) for both single and multi feature
+				// discard possible extra values, in case the multiplicity has changed
+				var oldValueOrValues =
+					EdeltaEcoreUtil
+						.getValueForFeature(oldObj, feature,
+								reference.getUpperBound());
+
+				var copyOfOldReferred = oldValueOrValues.stream()
+					.map(value -> {
+						// the object of the class to remove
+						var objOfRemovedClass = (EObject) value;
+						var eClass = objOfRemovedClass.eClass();
+						// the reference not of type of the containing class of the feature
+						var refToTarget = findSingleReferenceNotOfType(eClass, oldObj.eClass());
+						// the original referred object in the object to remove
+						var oldReferred =
+								(EObject) objOfRemovedClass.eGet(refToTarget);
+						// create the copy (our modelMigrator.copy checks whether
+						// an object has already been copied, so we avoid to copy
+						// the same object twice). We don't even have to care whether
+						// this will be part of a resource, since, as a contained
+						// object, it will be possibly copied later
+						return modelMigrator.copy(oldReferred);
+					})
+					.collect(Collectors.toList());
+
+				// in the new object set the value or values (transparently)
+				// with the created object (or objects, again, transparently)
+				EdeltaEcoreUtil.setValueForFeature(
+					newObj, reference, copyOfOldReferred);
+			}
+		);
+		return reference;
+	}
+
+	/**
+	 * Makes the EReference, which is assumed to be already part of an EClass, a
+	 * single required containment reference, adds to the referred type, which is
+	 * assumed to be set, an opposite required single reference.
+	 * 
+	 * @param reference
+	 */
+	private EReference makeContainmentBidirectional(final EReference reference) {
+		EdeltaUtils.makeContainment(reference);
+		final EClass owner = reference.getEContainingClass();
+		final EClass referredType = reference.getEReferenceType();
+		EReference addedMandatoryReference = this.addMandatoryReference(referredType,
+				this.fromTypeToFeatureName(owner), owner);
+		EdeltaUtils.makeBidirectional(addedMandatoryReference, reference);
+		return addedMandatoryReference;
+	}
+
+	private EReference addMandatoryReference(final EClass eClass, final String referenceName, final EClass type) {
+		var reference = EdeltaUtils.newEReference(referenceName, type, it -> 
+			EdeltaUtils.makeSingleRequired(it)
+		);
+		eClass.getEStructuralFeatures().add(reference);
+		return reference;
+	}
+
+	/**
+	 * SIMPLIFIED VERSION WITHOUT ERROR CHECKING
+	 * 
+	 * Finds the single EReference, in the EReferences of the given EClass, with a
+	 * type different from the given type, performing validation (that is, no
+	 * reference is found, or more than one) checks and in case show errors and
+	 * throws an IllegalArgumentException
+	 * 
+	 * @param cl
+	 * @param target
+	 */
+	private EReference findSingleReferenceNotOfType(final EClass cl, final EClass type) {
+		return cl.getEReferences().stream()
+				.filter(r -> r.getEType() != type)
+				.findFirst()
+				.orElse(null);
 	}
 }
