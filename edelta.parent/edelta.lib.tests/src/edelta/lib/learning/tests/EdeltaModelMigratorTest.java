@@ -123,12 +123,26 @@ public class EdeltaModelMigratorTest {
 				};
 			};
 			copyModels(customCopier, basedir, originalModelManager, evolvingModelManager);
+			updateMigrationContext();
+		}
+
+		private void updateMigrationContext() {
+			// here we copy the Ecores and models that have been migrated
 			var backup = new EdeltaModelManager();
+			// first create a copy of the evolved ecores
+			// map: orig -> copy
+			// orig are the evolved ecores, copy are the backup Ecores
 			var map = backup.copyEcores(evolvingModelManager, basedir);
+			// now create a copy of the evolved models
+			// we have to use our custom Copier because that will correctly
+			// create copies of models referring to the backup ecores
 			copyModels(new EdeltaModelCopier(map), basedir, evolvingModelManager, backup);
+			// now we need an inverted map, because the backup is meant to become the
+			// new originals, for the next model migrations
 			mapOfCopiedEcores = HashBiMap.create(map).inverse();
 			modelCopier = new EdeltaModelCopier(mapOfCopiedEcores);
 			evolvingModelManager.clearModels();
+			// the original model manager is updated with the copies we have just created
 			originalModelManager = backup;
 		}
 
