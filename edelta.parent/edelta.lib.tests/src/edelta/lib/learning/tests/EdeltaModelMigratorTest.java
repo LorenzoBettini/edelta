@@ -16,14 +16,17 @@ import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
 import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.emf.ecore.xmi.XMLResource;
@@ -38,6 +41,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import edelta.lib.EdeltaResourceUtils;
+import edelta.lib.EdeltaUtils;
 
 public class EdeltaModelMigratorTest {
 
@@ -417,6 +421,240 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testCopyUnchangedClassesWithTheSameNameInDifferentPackages() throws IOException {
+		var subdir = "classesWithTheSameName/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My1.ecore", "My2.ecore"),
+			of("MyRoot1.xmi", "MyClass1.xmi", "MyRoot2.xmi", "MyClass2.xmi")
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My1.ecore", "My2.ecore"),
+			of("MyRoot1.xmi", "MyClass1.xmi", "MyRoot2.xmi", "MyClass2.xmi")
+		);
+	}
+
+	@Test
+	public void testCopyMutualReferencesUnchanged() throws IOException {
+		var subdir = "mutualReferencesUnchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonForReferences.ecore", "WorkPlaceForReferences.ecore"),
+			of("Person1.xmi", "Person2.xmi", "WorkPlace1.xmi")
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonForReferences.ecore", "WorkPlaceForReferences.ecore"),
+			of("Person1.xmi", "Person2.xmi", "WorkPlace1.xmi")
+		);
+	}
+
+	@Test
+	public void testRenamedClass() throws IOException {
+		var subdir = "unchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+
+		// refactoring of Ecore
+		evolvingModelManager.getEPackage("mypackage").getEClassifier("MyClass")
+			.setName("MyClassRenamed");
+		evolvingModelManager.getEPackage("mypackage").getEClassifier("MyRoot")
+			.setName("MyRootRenamed");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"renamedClass/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testRenamedFeature() throws IOException {
+		var subdir = "unchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+
+		// refactoring of Ecore
+		getFeature(evolvingModelManager, 
+				"mypackage", "MyRoot", "myReferences")
+			.setName("myReferencesRenamed");
+		getFeature(evolvingModelManager, 
+				"mypackage", "MyRoot", "myContents")
+			.setName("myContentsRenamed");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"renamedFeature/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testCopyMutualReferencesRenamed() throws IOException {
+		var subdir = "mutualReferencesUnchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonForReferences.ecore", "WorkPlaceForReferences.ecore"),
+			of("Person1.xmi", "Person2.xmi", "WorkPlace1.xmi")
+		);
+
+		// refactoring of Ecore
+		getEClass(evolvingModelManager, "personforreferences", "Person")
+			.setName("PersonRenamed");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"mutualReferencesRenamed/",
+			of("PersonForReferences.ecore", "WorkPlaceForReferences.ecore"),
+			of("Person1.xmi", "Person2.xmi", "WorkPlace1.xmi")
+		);
+	}
+
+	@Test
+	public void testCopyMutualReferencesRenamed2() throws IOException {
+		var subdir = "mutualReferencesUnchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonForReferences.ecore", "WorkPlaceForReferences.ecore"),
+			of("Person1.xmi", "Person2.xmi", "WorkPlace1.xmi")
+		);
+
+		// refactoring of Ecore
+		// rename the feature before...
+		getFeature(evolvingModelManager, "personforreferences", "Person", "works")
+			.setName("workplace");
+		// ...renaming the class
+		getEClass(evolvingModelManager, "personforreferences", "Person")
+			.setName("PersonRenamed");
+		getFeature(evolvingModelManager, "WorkPlaceForReferences", "WorkPlace", "persons")
+			.setName("employees");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"mutualReferencesRenamed2/",
+			of("PersonForReferences.ecore", "WorkPlaceForReferences.ecore"),
+			of("Person1.xmi", "Person2.xmi", "WorkPlace1.xmi")
+		);
+	}
+
+	@Test
+	public void testRemovedContainmentFeature() throws IOException {
+		var subdir = "unchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+
+		// refactoring of Ecore
+		EcoreUtil.remove(getFeature(evolvingModelManager,
+				"mypackage", "MyRoot", "myContents"));
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"removedContainmentFeature/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testRemovedNonContainmentFeature() throws IOException {
+		var subdir = "unchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+
+		// refactoring of Ecore
+		EdeltaUtils.removeElement(getFeature(evolvingModelManager,
+				"mypackage", "MyRoot", "myReferences"));
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"removedNonContainmentFeature/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testRemovedNonReferredClass() throws IOException {
+		var subdir = "unchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+
+		// refactoring of Ecore
+		EdeltaUtils.removeElement(getEClass(evolvingModelManager,
+				"mypackage", "MyRoot"));
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"removedNonReferredClass/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testRemovedReferredClass() throws IOException {
+		var subdir = "unchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+
+		// refactoring of Ecore
+		EdeltaUtils.removeElement(getEClass(evolvingModelManager,
+				"mypackage", "MyClass"));
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"removedReferredClass/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
@@ -433,6 +671,24 @@ public class EdeltaModelMigratorTest {
 			(fileName -> assertGeneratedFiles(outputdir, output, fileName));
 		modelFiles.forEach
 			(fileName -> assertGeneratedFiles(outputdir, output, fileName));
+	}
+
+	private EAttribute getAttribute(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
+		return (EAttribute) getFeature(modelManager, packageName, className, attributeName);
+	}
+
+	private EReference getReference(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
+		return (EReference) getFeature(modelManager, packageName, className, attributeName);
+	}
+
+	private EStructuralFeature getFeature(EdeltaModelManager modelManager, String packageName, String className, String featureName) {
+		return getEClass(modelManager, packageName, className)
+				.getEStructuralFeature(featureName);
+	}
+
+	private EClass getEClass(EdeltaModelManager modelManager, String packageName, String className) {
+		return (EClass) modelManager.getEPackage(
+				packageName).getEClassifier(className);
 	}
 
 	private void assertGeneratedFiles(String subdir, String outputDir, String fileName) {
