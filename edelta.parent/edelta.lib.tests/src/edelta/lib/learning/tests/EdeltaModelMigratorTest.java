@@ -49,17 +49,65 @@ public class EdeltaModelMigratorTest {
 	EdeltaModelManager evolvingModelManager;
 
 	/**
+	 * A candidate for the model migration.
+	 * 
+	 * @author Lorenzo Bettini
+	 *
+	 */
+	static class EdeltaModelMigrator {
+
+		private EdeltaModelManager originalModelManager;
+		private EdeltaModelManager evolvingModelManager;
+		private EdeltaModelCopier modelCopier;
+
+		public EdeltaModelMigrator(String basedir, EdeltaModelManager originalModelManager, EdeltaModelManager evolvingModelManager) {
+			this.originalModelManager = originalModelManager;
+			this.evolvingModelManager = evolvingModelManager;
+			this.modelCopier = new EdeltaModelCopier(
+					evolvingModelManager.copyEcores(originalModelManager, basedir));
+		}
+
+		/**
+		 * This simulates what the final model migration should do.
+		 * 
+		 * IMPORTANT: the original Ecores and models must be in a subdirectory
+		 * of the directory that stores the modified Ecores.
+		 * 
+		 * It is crucial to strip the original path and use the baseDir
+		 * to create the new {@link Resource} URI, so that, upon saving,
+		 * the schema location is computed correctly.
+		 * 
+		 * @param baseDir
+		 */
+		public void copyModels(String baseDir) {
+			var map = originalModelManager.getModelResourceMap();
+			for (var entry : map.entrySet()) {
+				var originalResource = (XMIResource) entry.getValue();
+				var p = Paths.get(entry.getKey());
+				final var fileName = p.getFileName().toString();
+				var newResource = evolvingModelManager.createModelResource
+					(baseDir + fileName, originalResource);
+				var root = originalResource.getContents().get(0);
+				var copy = modelCopier.copy(root);
+				if (copy != null)
+					newResource.getContents().add(copy);
+			}
+			modelCopier.copyReferences();
+		}
+	}
+
+	/**
 	 * A candidate for the copier used for model migration.
 	 * 
 	 * @author Lorenzo Bettini
 	 *
 	 */
-	static class EdeltaModelMigrator extends Copier {
+	static class EdeltaModelCopier extends Copier {
 		private static final long serialVersionUID = 1L;
 
 		private BiMap<EObject, EObject> ecoreCopyMap;
 
-		public EdeltaModelMigrator(Map<EObject, EObject> ecoreCopyMap) {
+		public EdeltaModelCopier(Map<EObject, EObject> ecoreCopyMap) {
 			this.ecoreCopyMap = HashBiMap.create(ecoreCopyMap);
 		}
 
@@ -347,28 +395,8 @@ public class EdeltaModelMigratorTest {
 			.forEach(fileName -> originalModelManager.loadEcoreFile(basedir + fileName));
 		modelFiles
 			.forEach(fileName -> originalModelManager.loadModelFile(basedir + fileName));
-		var modelMigrator =
-			new EdeltaModelMigrator(
-				evolvingModelManager.copyEcores(originalModelManager, basedir));
+		var modelMigrator = new EdeltaModelMigrator(basedir, originalModelManager, evolvingModelManager);
 		return modelMigrator;
-	}
-
-	private void copyModelsSaveAndAssertOutputs(
-			EdeltaModelMigrator modelMigrator,
-			String origdir,
-			String outputdir,
-			Collection<String> ecoreFiles,
-			Collection<String> modelFiles
-		) throws IOException {
-		var basedir = TESTDATA + origdir;
-		copyModels(modelMigrator, basedir);
-		var output = OUTPUT + outputdir;
-		evolvingModelManager.saveEcores(output);
-		evolvingModelManager.saveModels(output);
-		ecoreFiles.forEach
-			(fileName -> assertGeneratedFiles(outputdir, output, fileName));
-		modelFiles.forEach
-			(fileName -> assertGeneratedFiles(outputdir, output, fileName));
 	}
 
 	@Test
@@ -387,6 +415,24 @@ public class EdeltaModelMigratorTest {
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi")
 		);
+	}
+
+	private void copyModelsSaveAndAssertOutputs(
+			EdeltaModelMigrator modelMigrator,
+			String origdir,
+			String outputdir,
+			Collection<String> ecoreFiles,
+			Collection<String> modelFiles
+		) throws IOException {
+		var basedir = TESTDATA + origdir;
+		copyModels(modelMigrator, basedir);
+		var output = OUTPUT + outputdir;
+		evolvingModelManager.saveEcores(output);
+		evolvingModelManager.saveModels(output);
+		ecoreFiles.forEach
+			(fileName -> assertGeneratedFiles(outputdir, output, fileName));
+		modelFiles.forEach
+			(fileName -> assertGeneratedFiles(outputdir, output, fileName));
 	}
 
 	private void assertGeneratedFiles(String subdir, String outputDir, String fileName) {
@@ -410,22 +456,9 @@ public class EdeltaModelMigratorTest {
 	 * to create the new {@link Resource} URI, so that, upon saving,
 	 * the schema location is computed correctly.
 	 * 
-	 * @param modelMigrator
 	 * @param baseDir
 	 */
 	private void copyModels(EdeltaModelMigrator modelMigrator, String baseDir) {
-		var map = originalModelManager.getModelResourceMap();
-		for (var entry : map.entrySet()) {
-			var originalResource = (XMIResource) entry.getValue();
-			var p = Paths.get(entry.getKey());
-			final var fileName = p.getFileName().toString();
-			var newResource = evolvingModelManager.createModelResource
-				(baseDir + fileName, originalResource);
-			var root = originalResource.getContents().get(0);
-			var copy = modelMigrator.copy(root);
-			if (copy != null)
-				newResource.getContents().add(copy);
-		}
-		modelMigrator.copyReferences();
+		modelMigrator.copyModels(baseDir);
 	}
 }
