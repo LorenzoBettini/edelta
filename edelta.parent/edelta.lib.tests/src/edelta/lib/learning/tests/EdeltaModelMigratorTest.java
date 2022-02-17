@@ -28,6 +28,7 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
@@ -133,11 +134,29 @@ public class EdeltaModelMigratorTest {
 				Function3<EAttribute, EObject, Object, Object> function) {
 			var customCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 				private static final long serialVersionUID = 1L;
-				
+
+				@Override
+				protected Setting getTarget(EStructuralFeature eStructuralFeature, EObject eObject,
+						EObject copyEObject) {
+					if (eStructuralFeature instanceof EAttribute) {
+						var eAttribute = (EAttribute) eStructuralFeature;
+						if (predicate.test(eAttribute)) {
+							// we must set the SettingDelegate to null
+							// to force its recreation, so that it takes into
+							// consideration possible changes of the feature, e.g., multiplicity
+							var targetEStructuralFeature = (EStructuralFeature.Internal) getTarget(eStructuralFeature);
+							targetEStructuralFeature.setSettingDelegate(null);
+							return ((InternalEObject) copyEObject).eSetting(targetEStructuralFeature);
+						}
+					}
+					return super.getTarget(eStructuralFeature, eObject, copyEObject);
+				}
+
 				@Override
 				protected void copyAttributeValue(EAttribute eAttribute, EObject eObject, Object value, Setting setting) {
-					if (predicate.test(eAttribute))
+					if (predicate.test(eAttribute)) {
 						value = function.apply(eAttribute, eObject, value);
+					}
 					super.copyAttributeValue(eAttribute, eObject, value, setting);
 				};
 			};
@@ -891,7 +910,48 @@ public class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			"toUpperCaseSingleAttributeAndMakeMultipleBefore/",
+			"toUpperCaseSingleAttributeAndMakeMultiple/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testToUpperCaseSingleAttributeAndMakeMultipleAfter() throws IOException {
+		var subdir = "toUpperCaseStringAttributes/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myAttribute");
+		modelMigrator.addTransformAttributeValueRule(
+			a ->
+				modelMigrator.isRelatedTo(a, attribute),
+			oldValue ->
+				oldValue.toString().toUpperCase()
+		);
+		attribute.setUpperBound(-1);
+		modelMigrator.addTransformAttributeValueRule(
+			a ->
+				modelMigrator.isRelatedTo(a, attribute),
+			(feature, oldObj, oldValue) ->
+				// if we come here the old attribute was set
+				EdeltaEcoreUtil.unwrapCollection(
+					// use the upper bound of the destination attribute, since it might
+					// be different from the original one
+					EdeltaEcoreUtil.wrapAsCollection(oldValue, attribute.getUpperBound()),
+					attribute
+				)
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"toUpperCaseSingleAttributeAndMakeMultiple/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
 		);
