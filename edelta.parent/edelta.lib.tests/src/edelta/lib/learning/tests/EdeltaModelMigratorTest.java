@@ -92,16 +92,16 @@ public class EdeltaModelMigratorTest {
 		 * @param baseDir
 		 */
 		public void copyModels(String baseDir) {
-			copyModels(modelCopier, baseDir);
+			copyModels(modelCopier, baseDir, originalModelManager, evolvingModelManager);
 		}
 
-		private void copyModels(EdeltaModelCopier edeltaModelCopier, String baseDir) {
-			var map = originalModelManager.getModelResourceMap();
+		private void copyModels(EdeltaModelCopier edeltaModelCopier, String baseDir, EdeltaModelManager from, EdeltaModelManager into) {
+			var map = from.getModelResourceMap();
 			for (var entry : map.entrySet()) {
 				var originalResource = (XMIResource) entry.getValue();
 				var p = Paths.get(entry.getKey());
 				final var fileName = p.getFileName().toString();
-				var newResource = evolvingModelManager.createModelResource
+				var newResource = into.createModelResource
 					(baseDir + fileName, originalResource);
 				var root = originalResource.getContents().get(0);
 				var copy = edeltaModelCopier.copy(root);
@@ -122,13 +122,14 @@ public class EdeltaModelMigratorTest {
 					super.copyAttributeValue(eAttribute, eObject, value, setting);
 				};
 			};
-			copyModels(customCopier, basedir);
+			copyModels(customCopier, basedir, originalModelManager, evolvingModelManager);
 			var backup = new EdeltaModelManager();
 			var map = backup.copyEcores(evolvingModelManager, basedir);
-			backup.copyModels(evolvingModelManager, basedir);
+			copyModels(new EdeltaModelCopier(map), basedir, evolvingModelManager, backup);
+			mapOfCopiedEcores = HashBiMap.create(map).inverse();
+			modelCopier = new EdeltaModelCopier(mapOfCopiedEcores);
+			evolvingModelManager.clearModels();
 			originalModelManager = backup;
-			modelCopier = new EdeltaModelCopier(map);
-			mapOfCopiedEcores = map;
 		}
 
 		public boolean isRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
@@ -425,20 +426,14 @@ public class EdeltaModelMigratorTest {
 			return ecoreCopier;
 		}
 
-		public Map<EObject, EObject> copyModels(EdeltaModelManager otherModelManager, String basedir) {
-			var ecoreResourceMap = otherModelManager.getModelResourceMap();
-			var ecoreCopier = new Copier();
-			for (var entry : ecoreResourceMap.entrySet()) {
-				var originalResource = (XMIResource) entry.getValue();
-				var p = Paths.get(entry.getKey());
-				final var fileName = p.getFileName().toString();
-				var newResource = this.createModelResource
-					(basedir + fileName, originalResource);
-				var root = originalResource.getContents().get(0);
-				newResource.getContents().add(ecoreCopier.copy(root));
+		public void clearModels() {
+			var map = getModelResourceMap();
+			for (var entry : map.entrySet()) {
+				var resource = (XMIResource) entry.getValue();
+				resource.getResourceSet()
+					.getResources().remove(resource);
 			}
-			ecoreCopier.copyReferences();
-			return ecoreCopier;
+			map.clear();
 		}
 	}
 
@@ -792,6 +787,35 @@ public class EdeltaModelMigratorTest {
 			oldValue ->
 				oldValue.toString().toUpperCase()
 		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"toUpperCaseSingleAttributeAndRenamedBefore/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testToUpperCaseSingleAttributeAndRenamedAfter() throws IOException {
+		var subdir = "toUpperCaseStringAttributes/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myAttribute");
+		modelMigrator.addTransformAttributeValueRule(
+			a ->
+				modelMigrator.isRelatedTo(a, attribute),
+			oldValue ->
+				oldValue.toString().toUpperCase()
+		);
+		attribute.setName("myAttributeRenamed");
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
