@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
@@ -37,6 +38,7 @@ import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
+import org.eclipse.xtext.xbase.lib.Functions.Function3;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -44,6 +46,7 @@ import org.junit.Test;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
+import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaResourceUtils;
 import edelta.lib.EdeltaUtils;
 
@@ -119,6 +122,22 @@ public class EdeltaModelMigratorTest {
 				protected void copyAttributeValue(EAttribute eAttribute, EObject eObject, Object value, Setting setting) {
 					if (predicate.test(eAttribute))
 						value = function.apply(value);
+					super.copyAttributeValue(eAttribute, eObject, value, setting);
+				};
+			};
+			copyModels(customCopier, basedir, originalModelManager, evolvingModelManager);
+			updateMigrationContext();
+		}
+
+		public void addTransformAttributeValueRule(Predicate<EAttribute> predicate,
+				Function3<EAttribute, EObject, Object, Object> function) {
+			var customCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
+				private static final long serialVersionUID = 1L;
+				
+				@Override
+				protected void copyAttributeValue(EAttribute eAttribute, EObject eObject, Object value, Setting setting) {
+					if (predicate.test(eAttribute))
+						value = function.apply(eAttribute, eObject, value);
 					super.copyAttributeValue(eAttribute, eObject, value, setting);
 				};
 			};
@@ -835,6 +854,44 @@ public class EdeltaModelMigratorTest {
 			modelMigrator,
 			subdir,
 			"toUpperCaseSingleAttributeAndRenamedBefore/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testToUpperCaseSingleAttributeAndMakeMultipleBefore() throws IOException {
+		var subdir = "toUpperCaseStringAttributes/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myAttribute");
+		attribute.setUpperBound(-1);
+		modelMigrator.addTransformAttributeValueRule(
+			a ->
+				modelMigrator.isRelatedTo(a, attribute),
+			(feature, oldObj, oldValue) ->
+				// if we come here the old attribute was set
+				EdeltaEcoreUtil.unwrapCollection(
+					// use the upper bound of the destination attribute, since it might
+					// be different from the original one
+					EdeltaEcoreUtil.wrapAsCollection(oldValue, attribute.getUpperBound())
+						.stream()
+						.map(o -> o.toString().toUpperCase())
+						.collect(Collectors.toList()),
+					attribute
+				)
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"toUpperCaseSingleAttributeAndMakeMultipleBefore/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
 		);
