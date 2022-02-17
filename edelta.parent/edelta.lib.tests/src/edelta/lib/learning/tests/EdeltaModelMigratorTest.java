@@ -13,15 +13,20 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -33,6 +38,7 @@ import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
+import org.eclipse.xtext.xbase.lib.Functions.Function3;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -40,6 +46,7 @@ import org.junit.Test;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
+import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaResourceUtils;
 import edelta.lib.EdeltaUtils;
 
@@ -60,15 +67,19 @@ public class EdeltaModelMigratorTest {
 	 */
 	static class EdeltaModelMigrator {
 
+		private String basedir;
 		private EdeltaModelManager originalModelManager;
 		private EdeltaModelManager evolvingModelManager;
+		private Map<EObject, EObject> mapOfCopiedEcores;
 		private EdeltaModelCopier modelCopier;
 
 		public EdeltaModelMigrator(String basedir, EdeltaModelManager originalModelManager, EdeltaModelManager evolvingModelManager) {
+			this.basedir = basedir;
 			this.originalModelManager = originalModelManager;
 			this.evolvingModelManager = evolvingModelManager;
+			this.mapOfCopiedEcores = evolvingModelManager.copyEcores(originalModelManager, basedir);
 			this.modelCopier = new EdeltaModelCopier(
-					evolvingModelManager.copyEcores(originalModelManager, basedir));
+					mapOfCopiedEcores);
 		}
 
 		/**
@@ -84,6 +95,10 @@ public class EdeltaModelMigratorTest {
 		 * @param baseDir
 		 */
 		public void copyModels(String baseDir) {
+			copyModels(modelCopier, baseDir);
+		}
+
+		private void copyModels(EdeltaModelCopier edeltaModelCopier, String baseDir) {
 			var map = originalModelManager.getModelResourceMap();
 			for (var entry : map.entrySet()) {
 				var originalResource = (XMIResource) entry.getValue();
@@ -92,11 +107,35 @@ public class EdeltaModelMigratorTest {
 				var newResource = evolvingModelManager.createModelResource
 					(baseDir + fileName, originalResource);
 				var root = originalResource.getContents().get(0);
-				var copy = modelCopier.copy(root);
+				var copy = edeltaModelCopier.copy(root);
 				if (copy != null)
 					newResource.getContents().add(copy);
 			}
-			modelCopier.copyReferences();
+			edeltaModelCopier.copyReferences();
+		}
+
+		public void addTransformAttributeValueRule(Predicate<EAttribute> predicate, Function<Object, Object> function) {
+			var customCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				protected void copyAttributeValue(EAttribute eAttribute, EObject eObject, Object value, Setting setting) {
+					if (predicate.test(eAttribute))
+						value = function.apply(value);
+					super.copyAttributeValue(eAttribute, eObject, value, setting);
+				};
+			};
+			copyModels(customCopier, basedir);
+			var backup = new EdeltaModelManager();
+			var map = backup.copyEcores(evolvingModelManager, basedir);
+			backup.copyModels(evolvingModelManager, basedir);
+			originalModelManager = backup;
+			modelCopier = new EdeltaModelCopier(map);
+			mapOfCopiedEcores = map;
+		}
+
+		public boolean isRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
+			return modelCopier.isRelatedTo(origEcoreElement, evolvedEcoreElement);
 		}
 	}
 
@@ -147,10 +186,22 @@ public class EdeltaModelMigratorTest {
 			return mapped;
 		}
 
+		private boolean isStillThere(EObject target) {
+			return target != null && !isNotThereAnymore(target);
+		}
+
 		private boolean isNotThereAnymore(EObject target) {
 			return target != null && target.eResource() == null;
 		}
 
+		public boolean isRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
+			return isStillThere(evolvedEcoreElement) &&
+				origEcoreElement == ecoreCopyMap.inverse().get(evolvedEcoreElement);
+		}
+
+		public <T extends ENamedElement> Predicate<T> relatesTo(T evolvedEcoreElements) {
+			return origEcoreElement -> isRelatedTo(origEcoreElement, evolvedEcoreElements);
+		}
 	}
 
 	/**
@@ -369,6 +420,22 @@ public class EdeltaModelMigratorTest {
 				var p = Paths.get(entry.getKey());
 				final var fileName = p.getFileName().toString();
 				var newResource = this.createEcoreResource
+					(basedir + fileName, originalResource);
+				var root = originalResource.getContents().get(0);
+				newResource.getContents().add(ecoreCopier.copy(root));
+			}
+			ecoreCopier.copyReferences();
+			return ecoreCopier;
+		}
+
+		public Map<EObject, EObject> copyModels(EdeltaModelManager otherModelManager, String basedir) {
+			var ecoreResourceMap = otherModelManager.getModelResourceMap();
+			var ecoreCopier = new Copier();
+			for (var entry : ecoreResourceMap.entrySet()) {
+				var originalResource = (XMIResource) entry.getValue();
+				var p = Paths.get(entry.getKey());
+				final var fileName = p.getFileName().toString();
+				var newResource = this.createModelResource
 					(basedir + fileName, originalResource);
 				var root = originalResource.getContents().get(0);
 				newResource.getContents().add(ecoreCopier.copy(root));
@@ -652,6 +719,32 @@ public class EdeltaModelMigratorTest {
 			"removedReferredClass/",
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testToUpperCaseStringAttributes() throws IOException {
+		var subdir = "toUpperCaseStringAttributes/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		modelMigrator.addTransformAttributeValueRule(
+			a ->
+				a.getEAttributeType() == EcorePackage.eINSTANCE.getEString(),
+			oldValue ->
+				oldValue.toString().toUpperCase()
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
 		);
 	}
 
