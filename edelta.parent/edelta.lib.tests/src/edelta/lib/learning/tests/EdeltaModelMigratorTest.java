@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
@@ -38,7 +37,6 @@ import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
-import org.eclipse.xtext.xbase.lib.Functions.Function3;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -46,7 +44,6 @@ import org.junit.Test;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaResourceUtils;
 import edelta.lib.EdeltaUtils;
 
@@ -743,6 +740,63 @@ public class EdeltaModelMigratorTest {
 			modelMigrator,
 			subdir,
 			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testToUpperCaseSingleAttribute() throws IOException {
+		var subdir = "toUpperCaseStringAttributes/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myAttribute");
+		modelMigrator.addTransformAttributeValueRule(
+			a ->
+				modelMigrator.isRelatedTo(a, attribute),
+			oldValue ->
+				oldValue.toString().toUpperCase()
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"toUpperCaseSingleAttribute/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testToUpperCaseSingleAttributeAndRenamedBefore() throws IOException {
+		var subdir = "toUpperCaseStringAttributes/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myAttribute");
+		attribute.setName("myAttributeRenamed");
+		modelMigrator.addTransformAttributeValueRule(
+			a ->
+				modelMigrator.isRelatedTo(a, attribute),
+			oldValue ->
+				oldValue.toString().toUpperCase()
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"toUpperCaseSingleAttributeAndRenamedBefore/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
 		);
