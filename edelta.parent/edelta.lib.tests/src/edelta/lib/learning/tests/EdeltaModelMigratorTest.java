@@ -39,6 +39,7 @@ import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import org.eclipse.xtext.xbase.lib.Functions.Function3;
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure3;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -146,6 +147,39 @@ public class EdeltaModelMigratorTest {
 			updateMigrationContext();
 		}
 
+		public void addCopyRule(Predicate<EStructuralFeature> predicate, Procedure3<EStructuralFeature, EObject, EObject> procedure) {
+			var customCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				protected void copyContainment(EReference eReference, EObject eObject, EObject copyEObject) {
+					applyCopyRuleOrElse(eReference, eObject, copyEObject,
+						() -> super.copyContainment(eReference, eObject, copyEObject));
+				}
+
+				@Override
+				protected void copyAttribute(EAttribute eAttribute, EObject eObject, EObject copyEObject) {
+					applyCopyRuleOrElse(eAttribute, eObject, copyEObject,
+						() -> super.copyAttribute(eAttribute, eObject, copyEObject));
+				}
+
+				@Override
+				protected void copyReference(EReference eReference, EObject eObject, EObject copyEObject) {
+					applyCopyRuleOrElse(eReference, eObject, copyEObject,
+						() -> super.copyReference(eReference, eObject, copyEObject));
+				}
+
+				private void applyCopyRuleOrElse(EStructuralFeature feature, EObject eObject, EObject copyEObject, Runnable runnable) {
+					if (predicate.test(feature))
+						procedure.apply(feature, eObject, copyEObject);
+					else
+						runnable.run();;
+				}
+			};
+			copyModels(customCopier, basedir, originalModelManager, evolvingModelManager);
+			updateMigrationContext();
+		}
+
 		private void updateMigrationContext() {
 			// here we copy the Ecores and models that have been migrated
 			var backup = new EdeltaModelManager();
@@ -177,6 +211,10 @@ public class EdeltaModelMigratorTest {
 
 		public boolean isRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
 			return modelCopier.isRelatedTo(origEcoreElement, evolvedEcoreElement);
+		}
+
+		public <T extends ENamedElement> Predicate<T> relatesTo(T evolvedEcoreElement) {
+			return modelCopier.relatesTo(evolvedEcoreElement);
 		}
 	}
 
@@ -881,7 +919,9 @@ public class EdeltaModelMigratorTest {
 
 		var attribute = getAttribute(evolvingModelManager,
 				"mypackage", "MyClass", "myAttribute");
-		attribute.setUpperBound(-1);
+
+		makeMultiple(modelMigrator, attribute);
+
 		modelMigrator.addTransformAttributeValueRule(
 			a ->
 				modelMigrator.isRelatedTo(a, attribute),
@@ -919,25 +959,15 @@ public class EdeltaModelMigratorTest {
 
 		var attribute = getAttribute(evolvingModelManager,
 				"mypackage", "MyClass", "myAttribute");
+
 		modelMigrator.addTransformAttributeValueRule(
 			a ->
 				modelMigrator.isRelatedTo(a, attribute),
 			oldValue ->
 				oldValue.toString().toUpperCase()
 		);
-		attribute.setUpperBound(-1);
-		modelMigrator.addTransformAttributeValueRule(
-			a ->
-				modelMigrator.isRelatedTo(a, attribute),
-			(feature, oldObj, oldValue) ->
-				// if we come here the old attribute was set
-				EdeltaEcoreUtil.unwrapCollection(
-					// use the upper bound of the destination attribute, since it might
-					// be different from the original one
-					EdeltaEcoreUtil.wrapAsCollection(oldValue, attribute.getUpperBound()),
-					attribute
-				)
-		);
+
+		makeMultiple(modelMigrator, attribute);
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
@@ -1010,4 +1040,29 @@ public class EdeltaModelMigratorTest {
 	private void copyModels(EdeltaModelMigrator modelMigrator, String baseDir) {
 		modelMigrator.copyModels(baseDir);
 	}
+
+	// SIMULATION OF REFACTORINGS THAT WILL BE PART OF OUR LIBRARY LATER
+
+	/**
+	 * Makes this feature multiple (upper = -1)
+	 * 
+	 * @param feature
+	 */
+	private static void makeMultiple(EdeltaModelMigrator modelMigrator, EStructuralFeature feature) {
+		feature.setUpperBound(-1);
+		modelMigrator.addCopyRule(
+			modelMigrator.relatesTo(feature),
+			(oldFeature, oldObj, newObj) -> {
+				// if we come here the old feature was set
+				EdeltaEcoreUtil.setValueForFeature(
+					newObj,
+					feature,
+					// use the upper bound of the destination feature, since it might
+					// be different from the original one
+					EdeltaEcoreUtil.getValueForFeature(oldObj, oldFeature, feature.getUpperBound())
+				);
+			}
+		);
+	}
+
 }
