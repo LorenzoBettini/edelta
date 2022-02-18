@@ -1702,6 +1702,78 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testChangedMultiAttributeTypeAndMultiplicityTo2() throws IOException {
+		var subdir = "changedMultiAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		makeMultiple(modelMigrator, attribute, 2);
+
+		changeAttributeType(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedMultiAttributeTypeAndMultiplicityTo2/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testChangedMultiAttributeTypeAndMultiplicityTo2Alternative() throws IOException {
+		var subdir = "changedMultiAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		makeMultiple(modelMigrator, attribute, 2);
+
+		changeAttributeTypeAlternative(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedMultiAttributeTypeAndMultiplicityTo2/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
