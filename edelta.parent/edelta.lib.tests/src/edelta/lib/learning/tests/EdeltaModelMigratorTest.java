@@ -115,7 +115,7 @@ public class EdeltaModelMigratorTest {
 			edeltaModelCopier.copyReferences();
 		}
 
-		public void addTransformAttributeValueRule(Predicate<EAttribute> predicate, Function<Object, Object> function) {
+		public void transformAttributeValueRule(Predicate<EAttribute> predicate, Function<Object, Object> function) {
 			var customCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 				private static final long serialVersionUID = 1L;
 
@@ -130,7 +130,7 @@ public class EdeltaModelMigratorTest {
 			updateMigrationContext();
 		}
 
-		public void addTransformAttributeValueRule(Predicate<EAttribute> predicate,
+		public void transformAttributeValueRule(Predicate<EAttribute> predicate,
 				Function3<EAttribute, EObject, Object, Object> function) {
 			var customCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 				private static final long serialVersionUID = 1L;
@@ -147,7 +147,7 @@ public class EdeltaModelMigratorTest {
 			updateMigrationContext();
 		}
 
-		public void addCopyRule(Predicate<EStructuralFeature> predicate, Procedure3<EStructuralFeature, EObject, EObject> procedure) {
+		public void copyRule(Predicate<EStructuralFeature> predicate, Procedure3<EStructuralFeature, EObject, EObject> procedure) {
 			var customCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 				private static final long serialVersionUID = 1L;
 
@@ -213,7 +213,7 @@ public class EdeltaModelMigratorTest {
 			return modelCopier.isRelatedTo(origEcoreElement, evolvedEcoreElement);
 		}
 
-		public <T extends ENamedElement> Predicate<T> relatesTo(T evolvedEcoreElement) {
+		public <T extends ENamedElement> Predicate<T> isRelatedTo(T evolvedEcoreElement) {
 			return modelCopier.relatesTo(evolvedEcoreElement);
 		}
 
@@ -833,7 +833,7 @@ public class EdeltaModelMigratorTest {
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
 		);
 
-		modelMigrator.addTransformAttributeValueRule(
+		modelMigrator.transformAttributeValueRule(
 			a ->
 				a.getEAttributeType() == EcorePackage.eINSTANCE.getEString(),
 			oldValue ->
@@ -861,7 +861,7 @@ public class EdeltaModelMigratorTest {
 
 		var attribute = getAttribute(evolvingModelManager,
 				"mypackage", "MyClass", "myAttribute");
-		modelMigrator.addTransformAttributeValueRule(
+		modelMigrator.transformAttributeValueRule(
 			a ->
 				modelMigrator.isRelatedTo(a, attribute),
 			oldValue ->
@@ -890,7 +890,7 @@ public class EdeltaModelMigratorTest {
 		var attribute = getAttribute(evolvingModelManager,
 				"mypackage", "MyClass", "myAttribute");
 		attribute.setName("myAttributeRenamed");
-		modelMigrator.addTransformAttributeValueRule(
+		modelMigrator.transformAttributeValueRule(
 			a ->
 				modelMigrator.isRelatedTo(a, attribute),
 			oldValue ->
@@ -918,7 +918,7 @@ public class EdeltaModelMigratorTest {
 
 		var attribute = getAttribute(evolvingModelManager,
 				"mypackage", "MyClass", "myAttribute");
-		modelMigrator.addTransformAttributeValueRule(
+		modelMigrator.transformAttributeValueRule(
 			a ->
 				modelMigrator.isRelatedTo(a, attribute),
 			oldValue ->
@@ -950,8 +950,8 @@ public class EdeltaModelMigratorTest {
 
 		makeMultiple(modelMigrator, attribute);
 
-		modelMigrator.addTransformAttributeValueRule(
-			modelMigrator.relatesTo(attribute),
+		modelMigrator.transformAttributeValueRule(
+			modelMigrator.isRelatedTo(attribute),
 			modelMigrator.multiplicityAwareTranformer(attribute,
 				o -> o.toString().toUpperCase())
 		);
@@ -978,7 +978,7 @@ public class EdeltaModelMigratorTest {
 		var attribute = getAttribute(evolvingModelManager,
 				"mypackage", "MyClass", "myAttribute");
 
-		modelMigrator.addTransformAttributeValueRule(
+		modelMigrator.transformAttributeValueRule(
 			a ->
 				modelMigrator.isRelatedTo(a, attribute),
 			oldValue ->
@@ -1009,8 +1009,8 @@ public class EdeltaModelMigratorTest {
 		var attribute = getAttribute(evolvingModelManager,
 				"mypackage", "MyClass", "myAttribute");
 
-		modelMigrator.addTransformAttributeValueRule(
-			modelMigrator.relatesTo(attribute),
+		modelMigrator.transformAttributeValueRule(
+			modelMigrator.isRelatedTo(attribute),
 			modelMigrator.multiplicityAwareTranformer(attribute,
 				o -> o.toString().toUpperCase())
 		);
@@ -1039,8 +1039,8 @@ public class EdeltaModelMigratorTest {
 
 		makeSingle(modelMigrator, attribute);
 
-		modelMigrator.addTransformAttributeValueRule(
-			modelMigrator.relatesTo(attribute),
+		modelMigrator.transformAttributeValueRule(
+			modelMigrator.isRelatedTo(attribute),
 			modelMigrator.multiplicityAwareTranformer(attribute,
 				o -> o.toString().toUpperCase())
 		);
@@ -1067,8 +1067,8 @@ public class EdeltaModelMigratorTest {
 		var attribute = getAttribute(evolvingModelManager,
 				"mypackage", "MyClass", "myAttribute");
 
-		modelMigrator.addTransformAttributeValueRule(
-			modelMigrator.relatesTo(attribute),
+		modelMigrator.transformAttributeValueRule(
+			modelMigrator.isRelatedTo(attribute),
 			modelMigrator.multiplicityAwareTranformer(attribute,
 				o -> o.toString().toUpperCase())
 		);
@@ -1215,8 +1215,8 @@ public class EdeltaModelMigratorTest {
 	 */
 	private static void makeMultiple(EdeltaModelMigrator modelMigrator, EStructuralFeature feature) {
 		feature.setUpperBound(-1);
-		modelMigrator.addCopyRule(
-			modelMigrator.relatesTo(feature),
+		modelMigrator.copyRule(
+			modelMigrator.isRelatedTo(feature),
 			modelMigrator.multiplicityAwareCopy(feature)
 		);
 	}
@@ -1228,8 +1228,8 @@ public class EdeltaModelMigratorTest {
 	 */
 	private static void makeSingle(EdeltaModelMigrator modelMigrator, EStructuralFeature feature) {
 		feature.setUpperBound(1);
-		modelMigrator.addCopyRule(
-			modelMigrator.relatesTo(feature),
+		modelMigrator.copyRule(
+			modelMigrator.isRelatedTo(feature),
 			modelMigrator.multiplicityAwareCopy(feature)
 		);
 	}
