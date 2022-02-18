@@ -1147,6 +1147,30 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
+	public void testMakeMultipleTo2() throws IOException {
+		var subdir = "toUpperCaseStringAttributesMultiple/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myAttribute");
+
+		makeMultiple(modelMigrator, attribute, 2);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"makeMultipleTo2/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
 	public void testMakeMultipleAndMakeSingle() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
@@ -1756,7 +1780,17 @@ public class EdeltaModelMigratorTest {
 	 * @param feature
 	 */
 	private static void makeMultiple(EdeltaModelMigrator modelMigrator, EStructuralFeature feature) {
-		feature.setUpperBound(-1);
+		makeMultiple(modelMigrator, feature, -1);
+	}
+
+	/**
+	 * Makes this feature multiple with a specific upper bound
+	 * 
+	 * @param feature
+	 * @param upperBound
+	 */
+	private static void makeMultiple(EdeltaModelMigrator modelMigrator, EStructuralFeature feature, int upperBound) {
+		feature.setUpperBound(upperBound);
 		modelMigrator.copyRule(
 			modelMigrator.isRelatedTo(feature),
 			modelMigrator.multiplicityAwareCopy(feature)
