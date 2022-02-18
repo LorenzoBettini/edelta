@@ -74,6 +74,18 @@ public class EdeltaModelMigratorTest {
 		private Map<EObject, EObject> mapOfCopiedEcores;
 		private EdeltaModelCopier modelCopier;
 
+		public static interface CopyProcedure extends Procedure3<EStructuralFeature, EObject, EObject> {
+			
+		}
+
+		public static interface AttributeTransformer extends Function3<EAttribute, EObject, Object, Object> {
+			
+		}
+
+		public static interface AttributeValueTransformer extends Function<Object, Object> {
+			
+		}
+
 		public EdeltaModelMigrator(String basedir, EdeltaModelManager originalModelManager, EdeltaModelManager evolvingModelManager) {
 			this.basedir = basedir;
 			this.originalModelManager = originalModelManager;
@@ -115,7 +127,7 @@ public class EdeltaModelMigratorTest {
 			edeltaModelCopier.copyReferences();
 		}
 
-		public void transformAttributeValueRule(Predicate<EAttribute> predicate, Function<Object, Object> function) {
+		public void transformAttributeValueRule(Predicate<EAttribute> predicate, AttributeValueTransformer function) {
 			var customCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 				private static final long serialVersionUID = 1L;
 
@@ -131,7 +143,7 @@ public class EdeltaModelMigratorTest {
 		}
 
 		public void transformAttributeValueRule(Predicate<EAttribute> predicate,
-				Function3<EAttribute, EObject, Object, Object> function) {
+				AttributeTransformer function) {
 			var customCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 				private static final long serialVersionUID = 1L;
 
@@ -147,7 +159,7 @@ public class EdeltaModelMigratorTest {
 			updateMigrationContext();
 		}
 
-		public void copyRule(Predicate<EStructuralFeature> predicate, Procedure3<EStructuralFeature, EObject, EObject> procedure) {
+		public void copyRule(Predicate<EStructuralFeature> predicate, CopyProcedure procedure) {
 			var customCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 				private static final long serialVersionUID = 1L;
 
@@ -217,7 +229,7 @@ public class EdeltaModelMigratorTest {
 			return modelCopier.relatesTo(evolvedEcoreElement);
 		}
 
-		public Procedure3<EStructuralFeature, EObject, EObject> multiplicityAwareCopy(EStructuralFeature feature) {
+		public CopyProcedure multiplicityAwareCopy(EStructuralFeature feature) {
 			return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> {
 				// if we come here the old feature was set
 				EdeltaEcoreUtil.setValueForFeature(
@@ -231,7 +243,7 @@ public class EdeltaModelMigratorTest {
 			};
 		}
 	
-		public Function3<EAttribute, EObject, Object, Object> multiplicityAwareTranformer(EAttribute attribute, Function<Object, Object> transformer) {
+		public AttributeTransformer multiplicityAwareTranformer(EAttribute attribute, Function<Object, Object> transformer) {
 			return (feature, oldObj, oldValue) ->
 				// if we come here the old attribute was set
 				EdeltaEcoreUtil.unwrapCollection(
