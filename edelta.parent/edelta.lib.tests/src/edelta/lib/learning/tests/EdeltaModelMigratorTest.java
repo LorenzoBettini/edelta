@@ -1084,6 +1084,65 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testMakeMultipleAndMakeSingle() throws IOException {
+		var subdir = "toUpperCaseStringAttributes/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myAttribute");
+
+		makeMultiple(modelMigrator, attribute);
+
+		makeSingle(modelMigrator, attribute);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"makeMultipleAndMakeSingle/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	/**
+	 * From the metamodel point of view we get the same Ecore,
+	 * but of course from the model point of view, during the first migration,
+	 * we lose some elements (the ones after the first one).
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testMakeSingleAndMakeMultiple() throws IOException {
+		var subdir = "toUpperCaseStringAttributesMultiple/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myAttribute");
+
+		makeSingle(modelMigrator, attribute);
+
+		makeMultiple(modelMigrator, attribute);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"makeSingleAndMakeMultiple/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
