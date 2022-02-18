@@ -966,6 +966,37 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
+	public void testToUpperCaseSingleAttributeAndMakeMultipleAfter() throws IOException {
+		var subdir = "toUpperCaseStringAttributes/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myAttribute");
+
+		modelMigrator.addTransformAttributeValueRule(
+			a ->
+				modelMigrator.isRelatedTo(a, attribute),
+			oldValue ->
+				oldValue.toString().toUpperCase()
+		);
+
+		makeMultiple(modelMigrator, attribute);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"toUpperCaseSingleAttributeAndMakeMultiple/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
 	public void testToUpperCaseSingleAttributeMultiple() throws IOException {
 		var subdir = "toUpperCaseStringAttributesMultiple/";
 
@@ -994,8 +1025,38 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseSingleAttributeAndMakeMultipleAfter() throws IOException {
-		var subdir = "toUpperCaseStringAttributes/";
+	public void testToUpperCaseSingleAttributeMultipleAndMakeSingleBefore() throws IOException {
+		var subdir = "toUpperCaseStringAttributesMultiple/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myAttribute");
+
+		makeSingle(modelMigrator, attribute);
+
+		modelMigrator.addTransformAttributeValueRule(
+			modelMigrator.relatesTo(attribute),
+			modelMigrator.multiplicityAwareTranformer(attribute,
+				o -> o.toString().toUpperCase())
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"toUpperCaseSingleAttributeMultipleAndMakeSingle/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testToUpperCaseSingleAttributeMultipleAndMakeSingleAfter() throws IOException {
+		var subdir = "toUpperCaseStringAttributesMultiple/";
 
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -1007,18 +1068,17 @@ public class EdeltaModelMigratorTest {
 				"mypackage", "MyClass", "myAttribute");
 
 		modelMigrator.addTransformAttributeValueRule(
-			a ->
-				modelMigrator.isRelatedTo(a, attribute),
-			oldValue ->
-				oldValue.toString().toUpperCase()
+			modelMigrator.relatesTo(attribute),
+			modelMigrator.multiplicityAwareTranformer(attribute,
+				o -> o.toString().toUpperCase())
 		);
 
-		makeMultiple(modelMigrator, attribute);
+		makeSingle(modelMigrator, attribute);
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			"toUpperCaseSingleAttributeAndMakeMultiple/",
+			"toUpperCaseSingleAttributeMultipleAndMakeSingle/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
 		);
@@ -1096,6 +1156,19 @@ public class EdeltaModelMigratorTest {
 	 */
 	private static void makeMultiple(EdeltaModelMigrator modelMigrator, EStructuralFeature feature) {
 		feature.setUpperBound(-1);
+		modelMigrator.addCopyRule(
+			modelMigrator.relatesTo(feature),
+			modelMigrator.multiplicityAwareCopy(feature)
+		);
+	}
+
+	/**
+	 * Makes this feature single (upper = 1)
+	 * 
+	 * @param feature
+	 */
+	private static void makeSingle(EdeltaModelMigrator modelMigrator, EStructuralFeature feature) {
+		feature.setUpperBound(1);
 		modelMigrator.addCopyRule(
 			modelMigrator.relatesTo(feature),
 			modelMigrator.multiplicityAwareCopy(feature)
