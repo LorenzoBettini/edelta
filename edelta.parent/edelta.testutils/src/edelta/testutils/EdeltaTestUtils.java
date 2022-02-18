@@ -66,7 +66,21 @@ public class EdeltaTestUtils {
 	 * @throws IOException
 	 */
 	public static void assertFilesAreEquals(String pathOfExpectedContents, String pathOfActualContents) throws IOException {
+		assertFilesAreEquals(null, pathOfExpectedContents, pathOfActualContents);
+	}
+
+	/**
+	 * Compares the string contents of the two files, given their paths,
+	 * {@link Assert#assertEquals(String, Object, Object)}
+	 * 
+	 * @param message
+	 * @param pathOfExpectedContents
+	 * @param pathOfActualContents
+	 * @throws IOException
+	 */
+	public static void assertFilesAreEquals(String message, String pathOfExpectedContents, String pathOfActualContents) throws IOException {
 		assertEquals(
+			message,
 			removeCR(loadFile(pathOfExpectedContents)),
 			removeCR(loadFile(pathOfActualContents)));
 	}
