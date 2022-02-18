@@ -18,9 +18,11 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
+import org.assertj.core.api.Assertions;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
@@ -1097,6 +1099,54 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
+	public void testMakeSingle() throws IOException {
+		var subdir = "toUpperCaseStringAttributesMultiple/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myAttribute");
+
+		makeSingle(modelMigrator, attribute);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"makeSingle/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testMakeMultiple() throws IOException {
+		var subdir = "toUpperCaseStringAttributes/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myAttribute");
+
+		makeMultiple(modelMigrator, attribute);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"makeMultiple/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
 	public void testMakeMultipleAndMakeSingle() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
@@ -1155,6 +1205,479 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testChangedAttributeTypeWithoutProperMigration() {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute")
+			.setEType(EcorePackage.eINSTANCE.getEInt());
+
+		Assertions.assertThatThrownBy(() -> // NOSONAR
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"should not get here/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		))
+		.isInstanceOf(ClassCastException.class)
+		.hasMessageContaining(
+			"The value of type 'class java.lang.String' must be of type 'class java.lang.Integer'");
+	}
+
+	@Test
+	public void testChangedAttributeTypeWithAttributeMigrator() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
+
+		// custom migration rule
+		modelMigrator.transformAttributeValueRule(
+			a ->
+				modelMigrator.isRelatedTo(a, attribute),
+			(feature, o, oldValue) -> {
+				// if we come here the old attribute was set
+				return EdeltaEcoreUtil.unwrapCollection(
+					EdeltaEcoreUtil.wrapAsCollection(oldValue, -1)
+						.stream()
+						.map(val -> {
+							try {
+								return Integer.parseInt(val.toString());
+							} catch (NumberFormatException e) {
+								return -1;
+							}
+						})
+						.collect(Collectors.toList()),
+					feature);
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testChangeAttributeType() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeType(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testChangeAttributeTypeAlternative() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeTypeAlternative(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	/**
+	 * Since the type (from String to int) is changed before changing it to
+	 * multiple, string values that were null become 0 int values, so they will
+	 * become a singleton list with 0 (MyClass.xmi). Instead, changing the
+	 * multiplicity before, will lead to an empty list for original null string
+	 * values.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testChangeAttributeTypeAndMutiplicityAfter() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeType(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		makeMultiple(modelMigrator, attribute);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedAttributeTypeAndMultiplicityAfter/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testChangeAttributeTypeAndMutiplicityAfterAlternative() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeTypeAlternative(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		makeMultiple(modelMigrator, attribute);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedAttributeTypeAndMultiplicityAfter/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testChangeAttributeTypeAndMutiplicityBefore() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		makeMultiple(modelMigrator, attribute);
+
+		changeAttributeType(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedAttributeTypeAndMultiplicityBefore/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testChangeAttributeTypeAndMutiplicityBeforeAlternative() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		makeMultiple(modelMigrator, attribute);
+
+		changeAttributeTypeAlternative(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedAttributeTypeAndMultiplicityBefore/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testChangedAttributeTypeWithCopyRule() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
+
+		// custom migration rule
+		modelMigrator.copyRule(
+			a ->
+				modelMigrator.isRelatedTo(a, attribute),
+			(feature, oldObj, newObj) -> {
+				// feature is the feature of the original ecore
+				// oldObj is the original model's object,
+				// newObj is the copy, so it's the new model's object
+				// feature must be used to access th eold model's object's value
+				// attribute is from the evolved ecore
+				newObj.eSet(attribute,
+					Integer.parseInt(
+						oldObj.eGet(feature).toString()));
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testChangedMultiAttributeType() throws IOException {
+		var subdir = "changedMultiAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeType(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testChangedMultiAttributeTypeAlternative() throws IOException {
+		var subdir = "changedMultiAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeTypeAlternative(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testChangedMultiAttributeTypeAndMultiplicity() throws IOException {
+		var subdir = "changedMultiAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeType(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		makeSingle(modelMigrator, attribute);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedMultiAttributeTypeAndMultiplicity/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testChangedMultiAttributeTypeAndMultiplicityAlternative() throws IOException {
+		var subdir = "changedMultiAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeTypeAlternative(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		makeSingle(modelMigrator, attribute);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedMultiAttributeTypeAndMultiplicity/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
@@ -1168,9 +1691,11 @@ public class EdeltaModelMigratorTest {
 		evolvingModelManager.saveEcores(output);
 		evolvingModelManager.saveModels(output);
 		ecoreFiles.forEach
-			(fileName -> assertGeneratedFiles(outputdir, output, fileName));
+			(fileName ->
+				assertGeneratedFiles(fileName, outputdir, output, fileName));
 		modelFiles.forEach
-			(fileName -> assertGeneratedFiles(outputdir, output, fileName));
+			(fileName ->
+				assertGeneratedFiles(fileName, outputdir, output, fileName));
 	}
 
 	private EAttribute getAttribute(EdeltaModelManager modelManager, String packageName, String className, String attributeName) {
@@ -1192,8 +1717,13 @@ public class EdeltaModelMigratorTest {
 	}
 
 	private void assertGeneratedFiles(String subdir, String outputDir, String fileName) {
+		assertGeneratedFiles(null, subdir, outputDir, fileName);
+	}
+
+	private void assertGeneratedFiles(String message, String subdir, String outputDir, String fileName) {
 		try {
 			assertFilesAreEquals(
+				message,
 				EXPECTATIONS + subdir + fileName,
 				outputDir + fileName);
 		} catch (IOException e) {
@@ -1246,4 +1776,65 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	/**
+	 * Changes the type of the attribute and when migrating the model
+	 * it applies the passed lambda to transform the value or values
+	 * (transparently).
+	 * 
+	 * @param modelMigrator
+	 * @param attribute
+	 * @param type
+	 * @param singleValueTransformer
+	 */
+	private void changeAttributeType(EdeltaModelMigrator modelMigrator, EAttribute attribute,
+			EDataType type, Function<Object, Object> singleValueTransformer) {
+		attribute.setEType(type);
+		modelMigrator.copyRule(
+			a ->
+				modelMigrator.isRelatedTo(a, attribute),
+			(feature, oldObj, newObj) -> {
+				// if we come here the old attribute was set
+				EdeltaEcoreUtil.setValueForFeature(
+					newObj,
+					attribute,
+					// use the upper bound of the destination attribute, since it might
+					// be different from the original one
+					EdeltaEcoreUtil.getValueForFeature(oldObj, feature, attribute.getUpperBound())
+						.stream()
+						.map(singleValueTransformer)
+						.collect(Collectors.toList())
+				);
+			}
+		);
+	}
+
+	/**
+	 * Changes the type of the attribute and when migrating the model
+	 * it applies the passed lambda to transform the value or values
+	 * (transparently).
+	 * 
+	 * @param modelMigrator
+	 * @param attribute
+	 * @param type
+	 * @param singleValueTransformer
+	 */
+	private void changeAttributeTypeAlternative(EdeltaModelMigrator modelMigrator, EAttribute attribute,
+			EDataType type, Function<Object, Object> singleValueTransformer) {
+		attribute.setEType(type);
+		modelMigrator.transformAttributeValueRule(
+			a ->
+				modelMigrator.isRelatedTo(a, attribute),
+			(feature, oldObj, oldValue) ->
+				// if we come here the old attribute was set
+				EdeltaEcoreUtil.unwrapCollection(
+					// use the upper bound of the destination attribute, since it might
+					// be different from the original one
+					EdeltaEcoreUtil.wrapAsCollection(oldValue, attribute.getUpperBound())
+						.stream()
+						.map(singleValueTransformer)
+						.collect(Collectors.toList()),
+					attribute
+				)
+		);
+	}
 }
