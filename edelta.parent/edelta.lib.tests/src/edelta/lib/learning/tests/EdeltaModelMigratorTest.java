@@ -966,6 +966,34 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
+	public void testToUpperCaseSingleAttributeMultiple() throws IOException {
+		var subdir = "toUpperCaseStringAttributesMultiple/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myAttribute");
+
+		modelMigrator.addTransformAttributeValueRule(
+			modelMigrator.relatesTo(attribute),
+			modelMigrator.multiplicityAwareTranformer(attribute,
+				o -> o.toString().toUpperCase())
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
 	public void testToUpperCaseSingleAttributeAndMakeMultipleAfter() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
