@@ -225,9 +225,24 @@ public class EdeltaModelMigratorTest {
 					feature,
 					// use the upper bound of the destination feature, since it might
 					// be different from the original one
-					EdeltaEcoreUtil.getValueForFeature(oldObj, oldFeature, feature.getUpperBound())
+					EdeltaEcoreUtil
+						.getValueForFeature(oldObj, oldFeature, feature.getUpperBound())
 				);
 			};
+		}
+	
+		public Function3<EAttribute, EObject, Object, Object> multiplicityAwareTranformer(EAttribute attribute, Function<Object, Object> transformer) {
+			return (feature, oldObj, oldValue) ->
+				// if we come here the old attribute was set
+				EdeltaEcoreUtil.unwrapCollection(
+					// use the upper bound of the destination attribute, since it might
+					// be different from the original one
+					EdeltaEcoreUtil.wrapAsCollection(oldValue, attribute.getUpperBound())
+						.stream()
+						.map(transformer)
+						.collect(Collectors.toList()),
+					attribute
+				);
 		}
 	}
 
@@ -936,19 +951,9 @@ public class EdeltaModelMigratorTest {
 		makeMultiple(modelMigrator, attribute);
 
 		modelMigrator.addTransformAttributeValueRule(
-			a ->
-				modelMigrator.isRelatedTo(a, attribute),
-			(feature, oldObj, oldValue) ->
-				// if we come here the old attribute was set
-				EdeltaEcoreUtil.unwrapCollection(
-					// use the upper bound of the destination attribute, since it might
-					// be different from the original one
-					EdeltaEcoreUtil.wrapAsCollection(oldValue, attribute.getUpperBound())
-						.stream()
-						.map(o -> o.toString().toUpperCase())
-						.collect(Collectors.toList()),
-					attribute
-				)
+			modelMigrator.relatesTo(attribute),
+			modelMigrator.multiplicityAwareTranformer(attribute,
+				o -> o.toString().toUpperCase())
 		);
 
 		copyModelsSaveAndAssertOutputs(
