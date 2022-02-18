@@ -216,6 +216,19 @@ public class EdeltaModelMigratorTest {
 		public <T extends ENamedElement> Predicate<T> relatesTo(T evolvedEcoreElement) {
 			return modelCopier.relatesTo(evolvedEcoreElement);
 		}
+
+		public Procedure3<EStructuralFeature, EObject, EObject> multiplicityAwareCopy(EStructuralFeature feature) {
+			return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> {
+				// if we come here the old feature was set
+				EdeltaEcoreUtil.setValueForFeature(
+					newObj,
+					feature,
+					// use the upper bound of the destination feature, since it might
+					// be different from the original one
+					EdeltaEcoreUtil.getValueForFeature(oldObj, oldFeature, feature.getUpperBound())
+				);
+			};
+		}
 	}
 
 	/**
@@ -1052,16 +1065,7 @@ public class EdeltaModelMigratorTest {
 		feature.setUpperBound(-1);
 		modelMigrator.addCopyRule(
 			modelMigrator.relatesTo(feature),
-			(oldFeature, oldObj, newObj) -> {
-				// if we come here the old feature was set
-				EdeltaEcoreUtil.setValueForFeature(
-					newObj,
-					feature,
-					// use the upper bound of the destination feature, since it might
-					// be different from the original one
-					EdeltaEcoreUtil.getValueForFeature(oldObj, oldFeature, feature.getUpperBound())
-				);
-			}
+			modelMigrator.multiplicityAwareCopy(feature)
 		);
 	}
 
