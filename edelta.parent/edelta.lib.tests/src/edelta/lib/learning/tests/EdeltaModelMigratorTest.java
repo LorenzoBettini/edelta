@@ -28,7 +28,6 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.EcorePackage;
-import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
@@ -136,23 +135,6 @@ public class EdeltaModelMigratorTest {
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				protected Setting getTarget(EStructuralFeature eStructuralFeature, EObject eObject,
-						EObject copyEObject) {
-					if (eStructuralFeature instanceof EAttribute) {
-						var eAttribute = (EAttribute) eStructuralFeature;
-						if (predicate.test(eAttribute)) {
-							// we must set the SettingDelegate to null
-							// to force its recreation, so that it takes into
-							// consideration possible changes of the feature, e.g., multiplicity
-							var targetEStructuralFeature = (EStructuralFeature.Internal) getTarget(eStructuralFeature);
-							targetEStructuralFeature.setSettingDelegate(null);
-							return ((InternalEObject) copyEObject).eSetting(targetEStructuralFeature);
-						}
-					}
-					return super.getTarget(eStructuralFeature, eObject, copyEObject);
-				}
-
-				@Override
 				protected void copyAttributeValue(EAttribute eAttribute, EObject eObject, Object value, Setting setting) {
 					if (predicate.test(eAttribute)) {
 						value = function.apply(eAttribute, eObject, value);
@@ -182,6 +164,15 @@ public class EdeltaModelMigratorTest {
 			evolvingModelManager.clearModels();
 			// the original model manager is updated with the copies we have just created
 			originalModelManager = backup;
+
+			// we must set the SettingDelegate to null
+			// to force its recreation, so that it takes into
+			// consideration possible changes of the feature, e.g., multiplicity
+			EdeltaResourceUtils.getEPackages(
+				evolvingModelManager.getEcoreResourceMap().values()).stream()
+				.flatMap(p -> EdeltaUtils.allEClasses(p).stream())
+				.flatMap(c -> c.getEStructuralFeatures().stream())
+				.forEach(f -> ((EStructuralFeature.Internal)f).setSettingDelegate(null));
 		}
 
 		public boolean isRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
