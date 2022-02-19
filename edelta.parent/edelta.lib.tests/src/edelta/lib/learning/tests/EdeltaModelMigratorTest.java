@@ -1851,6 +1851,48 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testMergeAttributes() throws IOException {
+		var subdir = "mergeAttributes/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("Person.ecore"),
+			of("Person.xmi")
+		);
+
+		var firstName = getAttribute(evolvingModelManager,
+				"person", "Person", "firstname");
+		var lastName = getAttribute(evolvingModelManager,
+				"person", "Person", "lastname");
+		// refactoring
+		EcoreUtil.remove(lastName);
+		// rename the first attribute among the ones to merge
+		firstName.setName("fullName");
+		// specify the converter using firstname and lastname original values
+		modelMigrator.transformAttributeValueRule(
+			modelMigrator.isRelatedTo(firstName),
+			(feature, o, oldValue) -> {
+				// o is the old object,
+				// so we must use the original feature to retrieve the value to copy
+				// that is, don't use attribute, which is the one of the new package
+				var eClass = o.eClass();
+				return 
+					o.eGet(feature) +
+					" " +
+					o.eGet(eClass.getEStructuralFeature("lastname"));
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("Person.ecore"),
+			of("Person.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
