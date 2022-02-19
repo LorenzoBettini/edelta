@@ -59,7 +59,6 @@ public class EdeltaModelMigratorTest {
 	private static final String OUTPUT = "output/";
 	private static final String EXPECTATIONS = "expectations/";
 
-	EdeltaModelManager originalModelManager;
 	EdeltaModelManager evolvingModelManager;
 
 	/**
@@ -567,7 +566,6 @@ public class EdeltaModelMigratorTest {
 
 	@Before
 	public void setup() {
-		originalModelManager = new EdeltaModelManager();
 		evolvingModelManager = new EdeltaModelManager();
 	}
 
@@ -577,6 +575,7 @@ public class EdeltaModelMigratorTest {
 			Collection<String> modelFiles
 		) {
 		var basedir = TESTDATA + subdir;
+		var originalModelManager = new EdeltaModelManager();
 		ecoreFiles
 			.forEach(fileName -> originalModelManager.loadEcoreFile(basedir + fileName));
 		modelFiles
