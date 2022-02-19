@@ -2168,6 +2168,75 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testPullUpAndPushDown() throws IOException {
+		var subdir = "pullUpFeatures/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personClass = getEClass(evolvingModelManager,
+				"PersonList", "Person");
+		var studentClass = getEClass(evolvingModelManager,
+				"PersonList", "Student");
+		var employeeClass = getEClass(evolvingModelManager,
+				"PersonList", "Employee");
+		var studentName = studentClass.getEStructuralFeature("name");
+		var employeeName = employeeClass.getEStructuralFeature("name");
+		// refactoring
+		var personName = pullUp(modelMigrator,
+				personClass,
+				List.of(studentName, employeeName));
+		pushDown(modelMigrator,
+				personName,
+				List.of(studentClass, employeeClass));
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"pullUpAndPushDown/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testPushDownAndPullUp() throws IOException {
+		var subdir = "pushDownFeatures/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personClass = getEClass(evolvingModelManager,
+				"PersonList", "Person");
+		var personName = personClass.getEStructuralFeature("name");
+		var studentClass = getEClass(evolvingModelManager,
+				"PersonList", "Student");
+		var employeeClass = getEClass(evolvingModelManager,
+				"PersonList", "Employee");
+		// refactoring
+		var features = pushDown(modelMigrator,
+				personName,
+				List.of(studentClass, employeeClass));
+		pullUp(modelMigrator,
+				personClass,
+				features);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"pushDownAndPullUp/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
