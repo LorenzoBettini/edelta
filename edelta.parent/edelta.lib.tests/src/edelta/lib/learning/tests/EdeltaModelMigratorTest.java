@@ -3,6 +3,8 @@ package edelta.lib.learning.tests;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirectories;
 import static java.util.List.of;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -59,7 +61,19 @@ public class EdeltaModelMigratorTest {
 	private static final String OUTPUT = "output/";
 	private static final String EXPECTATIONS = "expectations/";
 
+	/**
+	 * This stores the original ecores and models, and it's initially shared with
+	 * the model migrator; howver, during the evolution the migrator will update its
+	 * version of the original model manager, so in the tests, after the first model
+	 * migration, this model manager should NOT be used anymore in the tests, since
+	 * it refers to stale elements.
+	 */
 	EdeltaModelManager originalModelManager;
+
+	/**
+	 * This is always the most recent model manager, which is meant to be used for
+	 * simulating refactorings and model evolutions
+	 */
 	EdeltaModelManager evolvingModelManager;
 
 	/**
@@ -232,7 +246,15 @@ public class EdeltaModelMigratorTest {
 		}
 
 		public <T extends ENamedElement> Predicate<T> isRelatedTo(T evolvedEcoreElement) {
-			return modelCopier.isRelatedTo(evolvedEcoreElement);
+			return origEcoreElement -> isRelatedTo(origEcoreElement, evolvedEcoreElement);
+		}
+
+		public boolean wasRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
+			return modelCopier.wasRelatedTo(origEcoreElement, evolvedEcoreElement);
+		}
+
+		public <T extends ENamedElement> Predicate<T> wasRelatedTo(T evolvedEcoreElement) {
+			return origEcoreElement -> wasRelatedTo(origEcoreElement, evolvedEcoreElement);
 		}
 
 		public CopyProcedure multiplicityAwareCopy(EStructuralFeature feature) {
@@ -321,11 +343,11 @@ public class EdeltaModelMigratorTest {
 
 		public boolean isRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
 			return isStillThere(evolvedEcoreElement) &&
-				origEcoreElement == ecoreCopyMap.inverse().get(evolvedEcoreElement);
+				wasRelatedTo(origEcoreElement, evolvedEcoreElement);
 		}
 
-		public <T extends ENamedElement> Predicate<T> isRelatedTo(T evolvedEcoreElements) {
-			return origEcoreElement -> isRelatedTo(origEcoreElement, evolvedEcoreElements);
+		public boolean wasRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
+			return origEcoreElement == ecoreCopyMap.inverse().get(evolvedEcoreElement);
 		}
 	}
 
@@ -1894,6 +1916,45 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testElementAssociations() {
+		var subdir = "unchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		var origfeature1 = getAttribute(originalModelManager,
+				"mypackage", "MyClass", "myClassStringAttribute");
+		var origfeature2 = getFeature(originalModelManager,
+				"mypackage", "MyRoot", "myReferences");
+
+		var feature1 = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myClassStringAttribute");
+		var feature2 = getFeature(evolvingModelManager,
+				"mypackage", "MyRoot", "myReferences");
+
+		assertTrue(modelMigrator.isRelatedTo(origfeature1, feature1));
+		assertTrue(modelMigrator.isRelatedTo(origfeature2, feature2));
+		assertFalse(modelMigrator.isRelatedTo(origfeature2, feature1));
+		assertFalse(modelMigrator.isRelatedTo(origfeature1, feature2));
+
+		// remove a feature
+		EdeltaUtils.removeElement(feature1);
+		assertFalse(modelMigrator.isRelatedTo(origfeature1, feature1));
+		assertTrue(modelMigrator.isRelatedTo(origfeature2, feature2));
+		assertFalse(modelMigrator.isRelatedTo(origfeature2, feature1));
+		assertFalse(modelMigrator.isRelatedTo(origfeature1, feature2));
+
+		// wasRelatedTo does not check whether the second argument is still there
+		assertTrue(modelMigrator.wasRelatedTo(origfeature1, feature1));
+		assertTrue(modelMigrator.wasRelatedTo(origfeature2, feature2));
+		assertFalse(modelMigrator.wasRelatedTo(origfeature2, feature1));
+		assertFalse(modelMigrator.wasRelatedTo(origfeature1, feature2));
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
@@ -2063,4 +2124,5 @@ public class EdeltaModelMigratorTest {
 				)
 		);
 	}
+
 }
