@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +57,6 @@ import com.google.common.collect.HashBiMap;
 import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaResourceUtils;
 import edelta.lib.EdeltaUtils;
-import edelta.lib.learning.tests.EdeltaModelMigratorTest2.EdeltaModelMigrator;
 
 public class EdeltaModelMigratorTest {
 
@@ -2137,6 +2137,37 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testPushDownFeatures() throws IOException {
+		var subdir = "pushDownFeatures/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personClass = getEClass(evolvingModelManager,
+				"PersonList", "Person");
+		var personName = personClass.getEStructuralFeature("name");
+		var studentClass = getEClass(evolvingModelManager,
+				"PersonList", "Student");
+		var employeeClass = getEClass(evolvingModelManager,
+				"PersonList", "Employee");
+		// refactoring
+		pushDown(modelMigrator,
+				personName,
+				List.of(studentClass, employeeClass));
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
@@ -2345,5 +2376,31 @@ public class EdeltaModelMigratorTest {
 			}
 		);
 		return pulledUp;
+	}
+
+	private Collection<EStructuralFeature> pushDown(EdeltaModelMigrator modelMigrator,
+			EStructuralFeature featureToPush, Collection<EClass> subClasses) {
+		var pushedDownFeatures = new HashMap<EClass, EStructuralFeature>();
+		for (var subClass : subClasses) {
+			var pushedDown = createCopy(modelMigrator, featureToPush);
+			pushedDownFeatures.put(subClass, pushedDown);
+			// we add it in the very first position just to have exactly the
+			// same Ecore model as the starting one of pullUpFeatures
+			// but just for testing purposes: we verify that the output is
+			// exactly the same as the original model of pullUpFeatures
+			subClass.getEStructuralFeatures().add(0, pushedDown);
+		}
+		EdeltaUtils.removeElement(featureToPush);
+		// remember we must compare to the original metamodel element
+		modelMigrator.featureMigratorRule(
+			modelMigrator.wasRelatedTo(featureToPush),
+			(feature, oldObj, newObj) -> { // the object of the original model
+				// the result depends on the EClass of the original
+				// object being copied, but the map was built
+				// using evolved classes
+				return pushedDownFeatures.get(newObj.eClass());
+			}
+		);
+		return pushedDownFeatures.values();
 	}
 }
