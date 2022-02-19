@@ -1778,6 +1778,79 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testChangedAttributeNameAndType() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+		attribute.setName("newName");
+		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
+
+		// custom migration rule
+		modelMigrator.transformAttributeValueRule(
+			modelMigrator.isRelatedTo(attribute),
+			(feature, oldObj, oldValue) -> {
+				var eClass = oldObj.eClass();
+				return Integer.parseInt(
+					oldObj.eGet(eClass.getEStructuralFeature(attributeName)).toString());
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedAttributeNameAndType/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testChangedAttributeTypeAndName() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+		attribute.setEType(EcorePackage.eINSTANCE.getEInt());
+
+		// custom migration rule
+		modelMigrator.transformAttributeValueRule(
+				modelMigrator.isRelatedTo(attribute),
+			(feature, o, oldValue) -> {
+				// o is the old object,
+				// so we must use the original feature to retrieve the value to copy
+				// that is, don't use attribute, which is the one of the new package
+				var eClass = o.eClass();
+				return Integer.parseInt(
+					o.eGet(eClass.getEStructuralFeature(attributeName)).toString());
+			}
+		);
+		attribute.setName("newName");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedAttributeTypeAndName/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
