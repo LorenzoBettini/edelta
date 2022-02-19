@@ -231,7 +231,7 @@ public class EdeltaModelMigratorTest {
 		}
 
 		public <T extends ENamedElement> Predicate<T> isRelatedTo(T evolvedEcoreElement) {
-			return modelCopier.relatesTo(evolvedEcoreElement);
+			return modelCopier.isRelatedTo(evolvedEcoreElement);
 		}
 
 		public CopyProcedure multiplicityAwareCopy(EStructuralFeature feature) {
@@ -323,7 +323,7 @@ public class EdeltaModelMigratorTest {
 				origEcoreElement == ecoreCopyMap.inverse().get(evolvedEcoreElement);
 		}
 
-		public <T extends ENamedElement> Predicate<T> relatesTo(T evolvedEcoreElements) {
+		public <T extends ENamedElement> Predicate<T> isRelatedTo(T evolvedEcoreElements) {
 			return origEcoreElement -> isRelatedTo(origEcoreElement, evolvedEcoreElements);
 		}
 	}
