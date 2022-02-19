@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
@@ -283,6 +284,11 @@ public class EdeltaModelMigratorTest {
 
 		public <T extends ENamedElement> Predicate<T> wasRelatedTo(T evolvedEcoreElement) {
 			return origEcoreElement -> wasRelatedTo(origEcoreElement, evolvedEcoreElement);
+		}
+	
+		public boolean wasRelatedToAtLeastOneOf(ENamedElement origEcoreElement, Collection<? extends ENamedElement> evolvedEcoreElements) {
+			return evolvedEcoreElements.stream()
+				.anyMatch(e -> wasRelatedTo(origEcoreElement, e));
 		}
 
 		public CopyProcedure multiplicityAwareCopy(EStructuralFeature feature) {
@@ -2033,6 +2039,104 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	/**
+	 * Note that with pull up the migrated model is actually the same as the
+	 * original one, but we have to adjust some mappings to make the copy work,
+	 * because the value from the original object has to be put in an inherited
+	 * attribute in the copied object.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testPullUpFeatures() throws IOException {
+		var subdir = "pullUpFeatures/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personClass = getEClass(evolvingModelManager,
+				"PersonList", "Person");
+		var studentName = getFeature(evolvingModelManager,
+				"PersonList", "Student", "name");
+		var employeeName = getFeature(evolvingModelManager,
+				"PersonList", "Employee", "name");
+		// refactoring
+		pullUp(modelMigrator,
+				personClass,
+				List.of(studentName, employeeName));
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testPullUpReferences() throws IOException {
+		var subdir = "pullUpReferences/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personClass = getEClass(evolvingModelManager,
+				"PersonList", "Person");
+		var studentAddress = getFeature(evolvingModelManager,
+				"PersonList", "Student", "address");
+		var employeeAddress = getFeature(evolvingModelManager,
+				"PersonList", "Employee", "address");
+		// refactoring
+		pullUp(modelMigrator,
+				personClass,
+				List.of(studentAddress, employeeAddress));
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testPullUpContainmentReferences() throws IOException {
+		var subdir = "pullUpContainmentReferences/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personClass = getEClass(evolvingModelManager,
+				"PersonList", "Person");
+		var studentAddress = getFeature(evolvingModelManager,
+				"PersonList", "Student", "address");
+		var employeeAddress = getFeature(evolvingModelManager,
+				"PersonList", "Employee", "address");
+		// refactoring
+		pullUp(modelMigrator,
+				personClass,
+				List.of(studentAddress, employeeAddress));
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
@@ -2222,5 +2326,24 @@ public class EdeltaModelMigratorTest {
 		var iterator = elements.iterator();
 		var copy = createCopy(modelMigrator, iterator.next());
 		return copy;
+	}
+
+	private EStructuralFeature pullUp(EdeltaModelMigrator modelMigrator,
+			EClass superClass, Collection<EStructuralFeature> features) {
+		var pulledUp = createSingleCopy(modelMigrator, features);
+		superClass.getEStructuralFeatures().add(pulledUp);
+		EdeltaUtils.removeAllElements(features);
+		// remember we must map the original metamodel element to the new one
+		modelMigrator.featureMigratorRule(
+			f -> // the feature of the original metamodel
+				modelMigrator.wasRelatedToAtLeastOneOf(f, features),
+			(feature, o, oldValue) -> { // the object of the original model
+				// the result can be safely returned
+				// independently from the object's class, since the
+				// predicate already matched
+				return pulledUp;
+			}
+		);
+		return pulledUp;
 	}
 }
