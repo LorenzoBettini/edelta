@@ -995,83 +995,77 @@ public class EdeltaModelMigratorTest2 {
 		);
 	}
 
-	// the results from the following two tests were independent from the
-	// order of refactoring, while the order is important
-	// and the expectations directories were removed.
-	// in the new EdeltaModelMigratorTest we consider changing multiplicity
-	// before and after in separate tests (with different outputs, as expected)
+	@Test
+	public void testChangeAttributeTypeAndMutiplicity() throws IOException {
+		var subdir = "changedAttributeType/";
 
-//	@Test
-//	public void testChangeAttributeTypeAndMutiplicity() throws IOException {
-//		var subdir = "changedAttributeType/";
-//
-//		var modelMigrator = setupMigrator(
-//			subdir,
-//			of("My.ecore"),
-//			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
-//		);
-//
-//		// actual refactoring
-//		var attributeName = "myAttribute";
-//		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
-//
-//		changeAttributeType(modelMigrator, attribute,
-//			EcorePackage.eINSTANCE.getEInt(),
-//			val -> {
-//				try {
-//					return Integer.parseInt(val.toString());
-//				} catch (NumberFormatException e) {
-//					return -1;
-//				}
-//			}
-//		);
-//
-//		attribute.setUpperBound(-1);
-//
-//		copyModelsSaveAndAssertOutputs(
-//			modelMigrator,
-//			subdir,
-//			"changedAttributeTypeAndMultiplicity/",
-//			of("My.ecore"),
-//			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
-//		);
-//	}
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
 
-//	@Test
-//	public void testChangeAttributeTypeAndMutiplicityAlternative() throws IOException {
-//		var subdir = "changedAttributeType/";
-//
-//		var modelMigrator = setupMigrator(
-//			subdir,
-//			of("My.ecore"),
-//			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
-//		);
-//
-//		// actual refactoring
-//		var attributeName = "myAttribute";
-//		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
-//
-//		changeAttributeTypeAlternative(modelMigrator, attribute,
-//			EcorePackage.eINSTANCE.getEInt(),
-//			val -> {
-//				try {
-//					return Integer.parseInt(val.toString());
-//				} catch (NumberFormatException e) {
-//					return -1;
-//				}
-//			}
-//		);
-//
-//		attribute.setUpperBound(-1);
-//
-//		copyModelsSaveAndAssertOutputs(
-//			modelMigrator,
-//			subdir,
-//			"changedAttributeTypeAndMultiplicity/",
-//			of("My.ecore"),
-//			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
-//		);
-//	}
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeType(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		attribute.setUpperBound(-1);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedAttributeTypeAndMultiplicity/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testChangeAttributeTypeAndMutiplicityAlternative() throws IOException {
+		var subdir = "changedAttributeType/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+
+		// actual refactoring
+		var attributeName = "myAttribute";
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass", attributeName);
+
+		changeAttributeTypeAlternative(modelMigrator, attribute,
+			EcorePackage.eINSTANCE.getEInt(),
+			val -> {
+				try {
+					return Integer.parseInt(val.toString());
+				} catch (NumberFormatException e) {
+					return -1;
+				}
+			}
+		);
+
+		attribute.setUpperBound(-1);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"changedAttributeTypeAndMultiplicity/",
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
 
 	@Test
 	public void testChangedAttributeTypeWithCopyRule() throws IOException {

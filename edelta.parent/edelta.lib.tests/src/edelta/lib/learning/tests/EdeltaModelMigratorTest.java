@@ -183,7 +183,11 @@ public class EdeltaModelMigratorTest {
 				}
 
 				private void applyCopyRuleOrElse(EStructuralFeature feature, EObject eObject, EObject copyEObject, Runnable runnable) {
-					if (predicate.test(feature))
+					// if the multiplicity changes and the type changes we might
+					// end up with a list with a single default value.
+					// if instead we check that the original value of the object for the feature
+					// is set we avoid such a situation.
+					if (eObject.eIsSet(feature) && predicate.test(feature))
 						procedure.apply(feature, eObject, copyEObject);
 					else
 						runnable.run();;
@@ -1370,10 +1374,11 @@ public class EdeltaModelMigratorTest {
 
 	/**
 	 * Since the type (from String to int) is changed before changing it to
-	 * multiple, string values that were null become 0 int values, so they will
+	 * multiple, string values that were null would become 0 int values, so they would
 	 * become a singleton list with 0 (MyClass.xmi). Instead, changing the
 	 * multiplicity before, will lead to an empty list for original null string
-	 * values.
+	 * values. These two behaviors must be the same, that's why we have
+	 * the check eObject.eIsSet(feature) in {@link EdeltaModelMigrator#copyRule(Predicate, EdeltaModelMigrator.CopyProcedure)}.
 	 * 
 	 * @throws IOException
 	 */
@@ -1407,7 +1412,7 @@ public class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			"changedAttributeTypeAndMultiplicityAfter/",
+			"changedAttributeTypeAndMultiplicity/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
 		);
@@ -1443,7 +1448,7 @@ public class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			"changedAttributeTypeAndMultiplicityAfter/",
+			"changedAttributeTypeAndMultiplicity/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
 		);
@@ -1479,7 +1484,7 @@ public class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			"changedAttributeTypeAndMultiplicityBefore/",
+			"changedAttributeTypeAndMultiplicity/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
 		);
@@ -1515,7 +1520,7 @@ public class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			"changedAttributeTypeAndMultiplicityBefore/",
+			"changedAttributeTypeAndMultiplicity/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
 		);
