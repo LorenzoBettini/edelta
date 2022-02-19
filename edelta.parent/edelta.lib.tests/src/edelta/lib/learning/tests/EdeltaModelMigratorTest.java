@@ -2237,6 +2237,34 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testMakeBidirectional() throws IOException {
+		var subdir = "makeBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		var workPlace = getEClass(evolvingModelManager,
+				"PersonList", "WorkPlace");
+		// refactoring
+		var workPlacePerson = EdeltaUtils.newEReference("person", null);
+		workPlace.getEStructuralFeatures().add(workPlacePerson);
+		EdeltaUtils.makeBidirectional(personWorks, workPlacePerson);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
