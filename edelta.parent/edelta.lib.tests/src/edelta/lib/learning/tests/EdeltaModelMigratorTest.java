@@ -32,6 +32,7 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
@@ -54,6 +55,7 @@ import com.google.common.collect.HashBiMap;
 import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaResourceUtils;
 import edelta.lib.EdeltaUtils;
+import edelta.lib.learning.tests.EdeltaModelMigratorTest2.EdeltaModelMigrator;
 
 public class EdeltaModelMigratorTest {
 
@@ -90,16 +92,24 @@ public class EdeltaModelMigratorTest {
 		private Map<EObject, EObject> mapOfCopiedEcores;
 		private EdeltaModelCopier modelCopier;
 
-		public static interface CopyProcedure extends Procedure3<EStructuralFeature, EObject, EObject> {
-			
+		public static interface CopyProcedure
+				extends Procedure3<EStructuralFeature, EObject, EObject> {
+
 		}
 
-		public static interface AttributeTransformer extends Function3<EAttribute, EObject, Object, Object> {
-			
+		public static interface AttributeTransformer
+				extends Function3<EAttribute, EObject, Object, Object> {
+
 		}
 
-		public static interface AttributeValueTransformer extends Function<Object, Object> {
-			
+		public static interface AttributeValueTransformer
+				extends Function<Object, Object> {
+
+		}
+
+		public static interface FeatureMigrator
+				extends Function3<EStructuralFeature, EObject, EObject, EStructuralFeature> {
+
 		}
 
 		public EdeltaModelMigrator(String basedir, EdeltaModelManager originalModelManager, EdeltaModelManager evolvingModelManager) {
@@ -206,6 +216,24 @@ public class EdeltaModelMigratorTest {
 						procedure.apply(feature, eObject, copyEObject);
 					else
 						runnable.run();;
+				}
+			};
+			copyModels(customCopier, basedir, originalModelManager, evolvingModelManager);
+			updateMigrationContext();
+		}
+
+		public void featureMigratorRule(Predicate<EStructuralFeature> predicate, Function3<EStructuralFeature, EObject, EObject, EStructuralFeature> function) {
+			var customCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				protected Setting getTarget(EStructuralFeature eStructuralFeature, EObject eObject, EObject copyEObject) {
+					EStructuralFeature targetEStructuralFeature = null;
+					if (predicate.test(eStructuralFeature))
+						targetEStructuralFeature = function.apply(eStructuralFeature, eObject, copyEObject);
+					return targetEStructuralFeature == null ?
+						super.getTarget(eStructuralFeature, eObject, copyEObject)
+						: ((InternalEObject) copyEObject).eSetting(targetEStructuralFeature);
 				}
 			};
 			copyModels(customCopier, basedir, originalModelManager, evolvingModelManager);
@@ -1955,6 +1983,56 @@ public class EdeltaModelMigratorTest {
 		assertFalse(modelMigrator.wasRelatedTo(origfeature1, feature2));
 	}
 
+	@Test
+	public void testReplaceWithCopy() throws IOException {
+		var subdir = "unchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myClassStringAttribute");
+
+		replaceWithCopy(modelMigrator, attribute, "myAttributeRenamed");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"replaceWithCopy/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testReplaceWithCopyTwice() throws IOException {
+		var subdir = "unchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myClassStringAttribute");
+		var copied = replaceWithCopy(modelMigrator, attribute, "myAttributeRenamed");
+		replaceWithCopy(modelMigrator, copied, "myAttributeRenamedTwice");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"replaceWithCopyTwice/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
@@ -1991,10 +2069,6 @@ public class EdeltaModelMigratorTest {
 	private EClass getEClass(EdeltaModelManager modelManager, String packageName, String className) {
 		return (EClass) modelManager.getEPackage(
 				packageName).getEClassifier(className);
-	}
-
-	private void assertGeneratedFiles(String subdir, String outputDir, String fileName) {
-		assertGeneratedFiles(null, subdir, outputDir, fileName);
 	}
 
 	private void assertGeneratedFiles(String message, String subdir, String outputDir, String fileName) {
@@ -2125,4 +2199,28 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	private EAttribute replaceWithCopy(EdeltaModelMigrator modelMigrator, EAttribute attribute, String newName) {
+		var copy = createCopy(modelMigrator, attribute);
+		copy.setName(newName);
+		var containingClass = attribute.getEContainingClass();
+		EdeltaUtils.removeElement(attribute);
+		containingClass.getEStructuralFeatures().add(copy);
+		modelMigrator.featureMigratorRule(
+			f -> // the feature must be originally associated with the
+				// attribute we've just removed
+				modelMigrator.wasRelatedTo(f, attribute),
+			(feature, o, oldValue) -> copy);
+		return copy;
+	}
+
+	private <T extends EObject> T createCopy(EdeltaModelMigrator modelMigrator, T o) {
+		var copy = EcoreUtil.copy(o);
+		return copy;
+	}
+
+	private <T extends EObject> T createSingleCopy(EdeltaModelMigrator modelMigrator, Collection<T> elements) {
+		var iterator = elements.iterator();
+		var copy = createCopy(modelMigrator, iterator.next());
+		return copy;
+	}
 }
