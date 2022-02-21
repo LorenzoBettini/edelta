@@ -3,8 +3,12 @@ package edelta.lib.learning.tests;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirectories;
 import static java.util.List.of;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -155,7 +159,7 @@ public class EdeltaModelMigratorTest {
 		}
 
 		public void transformAttributeValueRule(Predicate<EAttribute> predicate, AttributeValueTransformer function) {
-			var customCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
+			modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -165,13 +169,13 @@ public class EdeltaModelMigratorTest {
 					super.copyAttributeValue(eAttribute, eObject, value, setting);
 				};
 			};
-			copyModels(customCopier, basedir, originalModelManager, evolvingModelManager);
+			copyModels(modelCopier, basedir, originalModelManager, evolvingModelManager);
 			updateMigrationContext();
 		}
 
 		public void transformAttributeValueRule(Predicate<EAttribute> predicate,
 				AttributeTransformer function) {
-			var customCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
+			modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -182,12 +186,12 @@ public class EdeltaModelMigratorTest {
 					super.copyAttributeValue(eAttribute, eObject, value, setting);
 				};
 			};
-			copyModels(customCopier, basedir, originalModelManager, evolvingModelManager);
+			copyModels(modelCopier, basedir, originalModelManager, evolvingModelManager);
 			updateMigrationContext();
 		}
 
 		public void copyRule(Predicate<EStructuralFeature> predicate, CopyProcedure procedure) {
-			var customCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
+			modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -219,12 +223,12 @@ public class EdeltaModelMigratorTest {
 						runnable.run();;
 				}
 			};
-			copyModels(customCopier, basedir, originalModelManager, evolvingModelManager);
+			copyModels(modelCopier, basedir, originalModelManager, evolvingModelManager);
 			updateMigrationContext();
 		}
 
 		public void featureMigratorRule(Predicate<EStructuralFeature> predicate, Function3<EStructuralFeature, EObject, EObject, EStructuralFeature> function) {
-			var customCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
+			modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -237,7 +241,7 @@ public class EdeltaModelMigratorTest {
 						: ((InternalEObject) copyEObject).eSetting(targetEStructuralFeature);
 				}
 			};
-			copyModels(customCopier, basedir, originalModelManager, evolvingModelManager);
+			copyModels(modelCopier, basedir, originalModelManager, evolvingModelManager);
 			updateMigrationContext();
 		}
 
@@ -268,6 +272,10 @@ public class EdeltaModelMigratorTest {
 				.flatMap(p -> EdeltaUtils.allEClasses(p).stream())
 				.flatMap(c -> c.getEStructuralFeatures().stream())
 				.forEach(f -> ((EStructuralFeature.Internal)f).setSettingDelegate(null));
+		}
+
+		public EObject getMigrated(EObject o) {
+			return modelCopier.copy(o);
 		}
 
 		public boolean isRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
@@ -2262,6 +2270,266 @@ public class EdeltaModelMigratorTest {
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
+		);
+	}
+
+	/**
+	 * Makes sure that when copying a model, getting the migrated version of an
+	 * object will use the current copier (and don't copy the same object twice).
+	 * 
+	 * IMPORTANT: this strongly relies on the contents of the test model MyRoot.xmi,
+	 * which contains two MyClass objects.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testGetMigratedInTransformAttributeValueRule() throws IOException {
+		var subdir = "getMigratedTestData/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi")
+		);
+
+		var myAttribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myAttribute");
+		var myOtherAttribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myOtherAttribute");
+
+		var myAttributeOriginal = getAttribute(originalModelManager,
+				"mypackage", "MyClass", "myAttribute");
+		var root = originalModelManager
+				.getModelResourceMap().values().iterator().next().getContents().get(0);
+		assertEquals("MyRoot", root.eClass().getName());
+		var myClassO1 = root.eContents().get(0);
+		var myClassO2 = root.eContents().get(1);
+		assertNotNull(myClassO1);
+		assertNotNull(myClassO2);
+		modelMigrator.transformAttributeValueRule(
+			a ->
+				a.getEAttributeType() == EcorePackage.eINSTANCE.getEString(),
+			oldValue -> {
+				// we make sure we also turn the other object value uppercase
+				// this way we know that this copier is being used.
+				var value = myClassO1.eGet(myAttributeOriginal);
+				if (value.equals(oldValue)) {
+					// get the migrated version of the other object
+					var migrated = modelMigrator.getMigrated(myClassO2);
+					// its attribute must be changed to upper case as well
+					var migratedValue = migrated.eGet(myAttribute);
+					// since that means that we are using the cupper copier
+					// to get or to create the migrated version of objects
+					assertThat(migratedValue.toString())
+						.isUpperCase();
+					// the same for the other attribute
+					migratedValue = migrated.eGet(myOtherAttribute);
+					// since that means that we are using the cupper copier
+					// to get or to create the migrated version of objects
+					assertThat(migratedValue.toString())
+						.isUpperCase();
+				}
+				
+				return oldValue.toString().toUpperCase();
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi")
+		);
+	}
+
+	/**
+	 * Makes sure that when copying a model, getting the migrated version of an
+	 * object will use the current copier (and don't copy the same object twice).
+	 * 
+	 * IMPORTANT: this strongly relies on the contents of the test model MyRoot.xmi,
+	 * which contains two MyClass objects.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testGetMigratedInTransformAttributeValueRule2() throws IOException {
+		var subdir = "getMigratedTestData/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi")
+		);
+
+		var myAttribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myAttribute");
+		var myOtherAttribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myOtherAttribute");
+
+		var root = originalModelManager
+				.getModelResourceMap().values().iterator().next().getContents().get(0);
+		assertEquals("MyRoot", root.eClass().getName());
+		var myClassO1 = root.eContents().get(0);
+		var myClassO2 = root.eContents().get(1);
+		assertNotNull(myClassO1);
+		assertNotNull(myClassO2);
+		modelMigrator.transformAttributeValueRule(
+			a ->
+				a.getEAttributeType() == EcorePackage.eINSTANCE.getEString(),
+			(feature, oldObj, oldValue) -> {
+				// we make sure we also turn the other object value uppercase
+				// this way we know that this copier is being used.
+				var value = myClassO1.eGet(feature);
+				if (value.equals(oldValue)) {
+					// get the migrated version of the other object
+					var migrated = modelMigrator.getMigrated(myClassO2);
+					// its attribute must be changed to upper case as well
+					var migratedValue = migrated.eGet(myAttribute);
+					// since that means that we are using the cupper copier
+					// to get or to create the migrated version of objects
+					assertThat(migratedValue.toString())
+						.isUpperCase();
+					// the same for the other attribute
+					migratedValue = migrated.eGet(myOtherAttribute);
+					// since that means that we are using the cupper copier
+					// to get or to create the migrated version of objects
+					assertThat(migratedValue.toString())
+						.isUpperCase();
+				}
+				
+				return oldValue.toString().toUpperCase();
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi")
+		);
+	}
+
+	/**
+	 * Makes sure that when copying a model, getting the migrated version of an
+	 * object will use the current copier (and don't copy the same object twice).
+	 * 
+	 * IMPORTANT: this strongly relies on the contents of the test model MyRoot.xmi,
+	 * which contains two MyClass objects.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testGetMigratedInCopyRule() throws IOException {
+		var subdir = "getMigratedTestData/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi")
+		);
+
+		var myAttribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myAttribute");
+		var myOtherAttribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myOtherAttribute");
+
+		var myAttributeOriginal = getAttribute(originalModelManager,
+				"mypackage", "MyClass", "myAttribute");
+		var myOtherAttributeOriginal = getAttribute(originalModelManager,
+				"mypackage", "MyClass", "myOtherAttribute");
+		var root = originalModelManager
+				.getModelResourceMap().values().iterator().next().getContents().get(0);
+		assertEquals("MyRoot", root.eClass().getName());
+		var myClassO1 = root.eContents().get(0);
+		var myClassO2 = root.eContents().get(1);
+		assertNotNull(myClassO1);
+		assertNotNull(myClassO2);
+		modelMigrator.copyRule(
+			a ->
+				a.getEType() == EcorePackage.eINSTANCE.getEString(),
+			(feature, oldObj, newObj) -> {
+				// we make sure we also turn the other object value uppercase
+				// this way we know that this copier is being used.
+				var value = myClassO1.eGet(feature);
+				var oldValue = oldObj.eGet(feature);
+				if (value.equals(oldValue)) {
+					// get the migrated version of the other object
+					var migrated = modelMigrator.getMigrated(myClassO2);
+					// its attribute must be changed to upper case as well
+					var migratedValue = migrated.eGet(myAttribute);
+					// since that means that we are using the cupper copier
+					// to get or to create the migrated version of objects
+					assertThat(migratedValue.toString())
+						.isUpperCase();
+					// the same for the other attribute
+					migratedValue = migrated.eGet(myOtherAttribute);
+					// since that means that we are using the cupper copier
+					// to get or to create the migrated version of objects
+					assertThat(migratedValue.toString())
+						.isUpperCase();
+				}
+				newObj.eSet(myAttribute, oldObj.eGet(myAttributeOriginal).toString().toUpperCase());
+				newObj.eSet(myOtherAttribute, oldObj.eGet(myOtherAttributeOriginal).toString().toUpperCase());
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi")
+		);
+	}
+
+	/**
+	 * Makes sure that when copying a model, getting the migrated version of an
+	 * object will use the current copier (and don't copy the same object twice).
+	 * 
+	 * IMPORTANT: this strongly relies on the contents of the test model MyRoot.xmi,
+	 * which contains two MyClass objects.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testGetMigratedInFeatureMigratorRule() throws IOException {
+		var subdir = "unchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myClassStringAttribute");
+
+//		replaceWithCopy(modelMigrator, attribute, "myAttributeRenamed");
+		var copy = createCopy(modelMigrator, attribute);
+		copy.setName("myAttributeRenamed");
+		var containingClass = attribute.getEContainingClass();
+		EdeltaUtils.removeElement(attribute);
+		containingClass.getEStructuralFeatures().add(copy);
+		modelMigrator.featureMigratorRule(
+			f -> // the feature must be originally associated with the
+				// attribute we've just removed
+				modelMigrator.wasRelatedTo(f, attribute),
+			(feature, oldObj, newObj) -> {
+				var migrated = modelMigrator.getMigrated(oldObj);
+				// if we don't use the same copier the objects will be different
+				assertSame(newObj, migrated);
+				return copy;
+			});
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"replaceWithCopy/",
+			of("My.ecore"),
+			of("MyClass.xmi")
 		);
 	}
 
