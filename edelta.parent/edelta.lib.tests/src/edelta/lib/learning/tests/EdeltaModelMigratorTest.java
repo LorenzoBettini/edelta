@@ -2584,6 +2584,30 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testReferenceToClassBidirectional() throws IOException {
+		var subdir = "referenceToClassBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
@@ -2872,12 +2896,18 @@ public class EdeltaModelMigratorTest {
 		// to a new object (of the extracted class), or, transparently
 		// to a list of new objects in case of a multi reference
 		modelMigrator.copyRule(
-			f ->
-				modelMigrator.isRelatedTo(f, reference),
+			feature ->
+				modelMigrator.isRelatedTo(feature, reference) || modelMigrator.isRelatedTo(feature, eOpposite),
 			(feature, oldObj, newObj) -> {
 				// feature: the feature of the original metamodel
 				// oldObj: the object of the original model
 				// newObj: the object of the new model, already created
+
+				// the opposite reference now changed its type
+				// so we have to skip the copy or we'll have a ClassCastException
+				// the bidirectionality will be implied in the next migrator
+				if (modelMigrator.isRelatedTo(feature, eOpposite))
+					return;
 
 				// retrieve the original value, wrapped in a list
 				// so this works (transparently) for both single and multi feature
