@@ -280,6 +280,10 @@ public class EdeltaModelMigratorTest {
 			return modelCopier.copy(o);
 		}
 
+		public Collection<?> getMigrated(Collection<?> objects) {
+			return modelCopier.copyAll(objects);
+		}
+
 		public boolean isRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
 			return modelCopier.isRelatedTo(origEcoreElement, evolvedEcoreElement);
 		}
@@ -2533,6 +2537,65 @@ public class EdeltaModelMigratorTest {
 			"replaceWithCopy/",
 			of("My.ecore"),
 			of("MyClass.xmi")
+		);
+	}
+
+	/**
+	 * Makes sure that when copying a model, getting the migrated version of an
+	 * object will use the current copier (and don't copy the same object twice).
+	 * 
+	 * IMPORTANT: this strongly relies on the contents of the test model MyRoot.xmi,
+	 * which contains two MyClass objects.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testGetMigratedMultipleInFeatureMigratorRule() throws IOException {
+		var subdir = "unchanged/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi")
+		);
+
+		// actual refactoring
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myClassStringAttribute");
+		attribute.setName("myAttributeRenamed");
+		// the above renaming is not relevant for this test, it's used only
+		// to have the final output just as the same as the previous test
+		// thus avoiding having to create another expectations folder
+
+		var reference = getReference(evolvingModelManager,
+				"mypackage", "MyRoot", "myReferences");
+
+		var copy = createCopy(modelMigrator, reference);
+		var containingClass = reference.getEContainingClass();
+		EdeltaUtils.removeElement(reference);
+		// put it in first position to have the same order as the original one
+		containingClass.getEStructuralFeatures().add(0, copy);
+		modelMigrator.featureMigratorRule(
+			f -> // the feature must be originally associated with the
+				// attribute we've just removed
+				modelMigrator.wasRelatedTo(f, reference),
+			(feature, oldObj, newObj) -> {
+				// make sure the copy is correctly propagated when copying a collection
+				var oldValue = (Collection<?>) oldObj.eGet(feature);
+				var migrated = modelMigrator.getMigrated(oldValue);
+				assertSame(
+					modelMigrator.getMigrated(oldValue).iterator().next(),
+					migrated.iterator().next()
+				);
+				return copy;
+			});
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"replaceWithCopy/",
+			of("My.ecore"),
+			of("MyRoot.xmi")
 		);
 	}
 
