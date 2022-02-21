@@ -30,6 +30,7 @@ import org.assertj.core.api.Assertions;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
@@ -49,6 +50,7 @@ import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
+import org.eclipse.xtext.xbase.lib.StringExtensions;
 import org.eclipse.xtext.xbase.lib.Functions.Function3;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure3;
 import org.junit.Before;
@@ -326,6 +328,7 @@ public class EdeltaModelMigratorTest {
 					attribute
 				);
 		}
+
 	}
 
 	/**
@@ -2533,6 +2536,54 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testReferenceToClassUnidirectional() throws IOException {
+		var subdir = "referenceToClassUnidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testReferenceToClassMultipleUnidirectional() throws IOException {
+		var subdir = "referenceToClassMultipleUnidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
@@ -2767,5 +2818,124 @@ public class EdeltaModelMigratorTest {
 			}
 		);
 		return pushedDownFeatures.values();
+	}
+
+	/**
+	 * Replaces an EReference with an EClass (with the given name, the same package
+	 * as the package of the reference's containing class), updating possible
+	 * opposite reference, so that a relation can be extended with additional
+	 * features. The original reference will be made a containment reference, (its
+	 * other properties will not be changed) to the added EClass (and made
+	 * bidirectional).
+	 * 
+	 * For example, given
+	 * 
+	 * <pre>
+	 *    b2    b1
+	 * A <-------> C
+	 * </pre>
+	 * 
+	 * (where the opposite "b2" might not be present) if we pass "b1" and the name
+	 * "B", then the result will be
+	 * 
+	 * <pre>
+	 *    a     b1    b2    c
+	 * A <-------> B <------> C
+	 * </pre>
+	 * 
+	 * where "b1" will be a containment reference. Note the names inferred for the
+	 * new additional opposite references.
+	 * 
+	 * @param name      the name for the extracted class
+	 * @param reference the reference to turn into a reference to the extracted
+	 *                  class
+	 * @return the extracted class
+	 */
+	private EClass referenceToClass(EdeltaModelMigrator modelMigrator,
+			EReference reference, String name) {
+		// checkNotContainment reference:
+		// "Cannot apply referenceToClass on containment reference"
+		var ePackage = reference.getEContainingClass().getEPackage();
+		var extracted = EdeltaUtils.newEClass(name);
+		ePackage.getEClassifiers().add(extracted);
+		var extractedRef = addMandatoryReference(extracted, 
+			fromTypeToFeatureName(reference.getEType()),
+			reference.getEReferenceType());
+		final EReference eOpposite = reference.getEOpposite();
+		if (eOpposite != null) {
+			EdeltaUtils.makeBidirectional(eOpposite, extractedRef);
+		}
+		reference.setEType(extracted);
+		makeContainmentBidirectional(reference);
+
+		// handle the migration of the reference that now has to refer
+		// to a new object (of the extracted class), or, transparently
+		// to a list of new objects in case of a multi reference
+		modelMigrator.copyRule(
+			f ->
+				modelMigrator.isRelatedTo(f, reference),
+			(feature, oldObj, newObj) -> {
+				// feature: the feature of the original metamodel
+				// oldObj: the object of the original model
+				// newObj: the object of the new model, already created
+
+				// retrieve the original value, wrapped in a list
+				// so this works (transparently) for both single and multi feature
+				// discard possible extra values, in case the multiplicity has changed
+				var oldValueOrValues =
+					EdeltaEcoreUtil
+						.getValueForFeature(oldObj, feature,
+								reference.getUpperBound());
+
+				// for each old value create a new object for the
+				// extracted class, by setting the reference's value
+				// with the copied value of that reference
+				var copies = oldValueOrValues.stream()
+					.map(oldValue -> {
+						// since this is NOT a containment reference
+						// the referred oldValue has already been copied
+						var copy = modelMigrator.getMigrated((EObject) oldValue);
+						var created = EcoreUtil.create(extracted);
+						// the bidirectionality is implied
+						created.eSet(extractedRef, copy);
+						return created;
+					})
+					.collect(Collectors.toList());
+				// in the new object set the value or values (transparently)
+				// with the created object (or objects, again, transparently)
+				EdeltaEcoreUtil.setValueForFeature(
+					newObj, reference, copies);
+			}
+		);
+		return extracted;
+	}
+
+	private String fromTypeToFeatureName(final EClassifier type) {
+		return StringExtensions.toFirstLower(type.getName());
+	}
+
+	/**
+	 * Makes the EReference, which is assumed to be already part of an EClass, a
+	 * single required containment reference, adds to the referred type, which is
+	 * assumed to be set, an opposite required single reference.
+	 * 
+	 * @param reference
+	 */
+	private EReference makeContainmentBidirectional(final EReference reference) {
+		EdeltaUtils.makeContainment(reference);
+		final EClass owner = reference.getEContainingClass();
+		final EClass referredType = reference.getEReferenceType();
+		EReference addedMandatoryReference = this.addMandatoryReference(referredType,
+				this.fromTypeToFeatureName(owner), owner);
+		EdeltaUtils.makeBidirectional(addedMandatoryReference, reference);
+		return addedMandatoryReference;
+	}
+
+	private EReference addMandatoryReference(final EClass eClass, final String referenceName, final EClass type) {
+		var reference = EdeltaUtils.newEReference(referenceName, type, it -> 
+			EdeltaUtils.makeSingleRequired(it)
+		);
+		eClass.getEStructuralFeatures().add(reference);
+		return reference;
 	}
 }
