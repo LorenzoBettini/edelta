@@ -2517,6 +2517,34 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testMakeBidirectionalExisting() throws IOException {
+		var subdir = "makeBidirectionalExisting/";
+	
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		var workPlacePerson = getReference(evolvingModelManager,
+				"PersonList", "WorkPlace", "person");
+		assertNotNull(workPlacePerson);
+		// this should not change anything
+		EdeltaUtils.makeBidirectional(personWorks, workPlacePerson);
+	
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	/**
 	 * Makes sure that when copying a model, getting the migrated version of an
 	 * object will use the current copier (and don't copy the same object twice).
