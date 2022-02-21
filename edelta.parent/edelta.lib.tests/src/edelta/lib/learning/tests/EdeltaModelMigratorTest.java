@@ -3012,6 +3012,44 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	/**
+	 * Changing from multi to single only the opposite reference after performing
+	 * referenceToClass does not make much sense, since in the evolved model we lose
+	 * some associations. This is just to make sure that nothing else bad happens
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleOpposite() throws IOException {
+		var subdir = "referenceToClassMultipleBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		var extractedClass = referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+		// in the evolved model, the original personWorks.getEOpposite
+		// now is extractedClass.getEStructuralFeature(0).getEOpposite
+		makeSingle(modelMigrator,
+			((EReference) extractedClass.getEStructuralFeature(0))
+				.getEOpposite());
+		// changing the opposite multi to single of course makes the model
+		// lose associations (the last Person that refers to a WorkingPosition wins)
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"referenceToClassMultipleBidirectionalChangedIntoSingleOpposite/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,

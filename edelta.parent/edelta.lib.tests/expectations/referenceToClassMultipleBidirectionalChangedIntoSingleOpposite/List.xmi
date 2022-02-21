@@ -7,21 +7,21 @@
     xsi:schemaLocation="http://cs.gssi.it/PersonMM PersonList.ecore">
   <members firstname="first"
       lastname="person">
-    <works/>
+    <works workPlace="//@wplaces.0"/>
   </members>
   <members firstname="second"
       lastname="person">
-    <works/>
+    <works workPlace="//@wplaces.1"/>
   </members>
   <members firstname="third"
       lastname="person">
-    <works workPlace="//@wplaces.1"/>
-    <works workPlace="//@wplaces.0"/>
+    <works/>
+    <works/>
   </members>
   <members firstname="without position"
       lastname="person"/>
-  <wplaces persons="//@members.2/@works.1"
+  <wplaces persons="//@members.0/@works.0"
       address="address1"/>
-  <wplaces persons="//@members.2/@works.0"
+  <wplaces persons="//@members.1/@works.0"
       address="address2"/>
 </person:List>
