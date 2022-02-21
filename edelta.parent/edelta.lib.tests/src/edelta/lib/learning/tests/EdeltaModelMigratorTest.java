@@ -2709,7 +2709,7 @@ public class EdeltaModelMigratorTest {
 			f -> // the feature must be originally associated with the
 				// attribute we've just removed
 				modelMigrator.wasRelatedTo(f, attribute),
-			(feature, o, oldValue) -> copy);
+			(feature, oldObj, newObj) -> copy);
 		return copy;
 	}
 
@@ -2733,7 +2733,7 @@ public class EdeltaModelMigratorTest {
 		modelMigrator.featureMigratorRule(
 			f -> // the feature of the original metamodel
 				modelMigrator.wasRelatedToAtLeastOneOf(f, features),
-			(feature, o, oldValue) -> { // the object of the original model
+			(feature, oldObj, newObj) -> { // the object of the original model
 				// the result can be safely returned
 				// independently from the object's class, since the
 				// predicate already matched
