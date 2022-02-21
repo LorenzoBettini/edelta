@@ -306,6 +306,22 @@ public class EdeltaModelMigratorTest {
 		}
 
 		public CopyProcedure multiplicityAwareCopy(EStructuralFeature feature) {
+			if (feature instanceof EReference) {
+				// for reference we must first propagate the copy
+				// especially in case of collections
+				return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> {
+					// if we come here the old feature was set
+					EdeltaEcoreUtil.setValueForFeature(
+							newObj,
+							feature,
+							// use the upper bound of the destination feature, since it might
+							// be different from the original one
+							getMigrated(
+								EdeltaEcoreUtil
+									.wrapAsCollection(oldObj.eGet(oldFeature), feature.getUpperBound()))
+							);
+				};
+			}
 			return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> {
 				// if we come here the old feature was set
 				EdeltaEcoreUtil.setValueForFeature(
@@ -1174,7 +1190,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeSingle() throws IOException {
+	public void testMakeSingleAttribute() throws IOException {
 		var subdir = "toUpperCaseStringAttributesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -1198,7 +1214,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeMultiple() throws IOException {
+	public void testMakeMultipleAttribute() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -1222,7 +1238,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeMultipleTo2() throws IOException {
+	public void testMakeMultipleTo2Attribute() throws IOException {
 		var subdir = "toUpperCaseStringAttributesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -1246,7 +1262,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeMultipleAndMakeSingle() throws IOException {
+	public void testMakeMultipleAndMakeSingleAttribute() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -1279,7 +1295,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMakeSingleAndMakeMultiple() throws IOException {
+	public void testMakeSingleAndMakeMultipleAttribute() throws IOException {
 		var subdir = "toUpperCaseStringAttributesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -1301,6 +1317,227 @@ public class EdeltaModelMigratorTest {
 			"makeSingleAndMakeMultiple/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	@Test
+	public void testMakeSingleNonContainmentReference() throws IOException {
+		var subdir = "referencesMultiple/";
+	
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi")
+		);
+	
+		var reference = getReference(evolvingModelManager,
+				"mypackage", "MyRoot", "myReferences");
+	
+		makeSingle(modelMigrator, reference);
+	
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"makeSingleNonContainmentReference/",
+			of("My.ecore"),
+			of("MyRoot.xmi")
+		);
+	}
+
+	/**
+	 * Since the list is turned into a single element and the second element used
+	 * to be the only referred class, the non containment references will be empty
+	 * in the migrated model.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testMakeSingleContainmentReference() throws IOException {
+		var subdir = "referencesMultiple/";
+	
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi")
+		);
+	
+		var reference = getReference(evolvingModelManager,
+				"mypackage", "MyRoot", "myContents");
+	
+		makeSingle(modelMigrator, reference);
+	
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"makeSingleContainmentReference/",
+			of("My.ecore"),
+			of("MyRoot.xmi")
+		);
+	}
+
+	@Test
+	public void testMakeMultipleNonContainmentReference() throws IOException {
+		var subdir = "referencesSingle/";
+	
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	
+		var reference = getReference(evolvingModelManager,
+				"mypackage", "MyRoot", "myReferences");
+	
+		makeMultiple(modelMigrator, reference);
+	
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"makeMultipleNonContainmentReference/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testMakeMultipleContainmentReference() throws IOException {
+		var subdir = "referencesSingle/";
+	
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	
+		var reference = getReference(evolvingModelManager,
+				"mypackage", "MyRoot", "myContents");
+	
+		makeMultiple(modelMigrator, reference);
+	
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"makeMultipleContainmentReference/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testMakeMultipleAndMakeSingleNonContainmentReference() throws IOException {
+		var subdir = "referencesSingle/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+
+		var reference = getReference(evolvingModelManager,
+				"mypackage", "MyRoot", "myReferences");
+
+		makeMultiple(modelMigrator, reference);
+
+		makeSingle(modelMigrator, reference);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"makeMultipleAndMakeSingleNonContainmentReference/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
+	/**
+	 * From the metamodel point of view we get the same Ecore,
+	 * but of course from the model point of view, during the first migration,
+	 * we lose some elements (the ones after the first one).
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testMakeSingleAndMakeMultipleNonContainmentReference() throws IOException {
+		var subdir = "referencesMultiple/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi")
+		);
+
+		var reference = getReference(evolvingModelManager,
+				"mypackage", "MyRoot", "myReferences");
+
+		makeSingle(modelMigrator, reference);
+
+		makeMultiple(modelMigrator, reference);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"makeSingleAndMakeMultipleNonContainmentReference/",
+			of("My.ecore"),
+			of("MyRoot.xmi")
+		);
+	}
+
+	@Test
+	public void testMakeMultipleAndMakeSingleContainmentReference() throws IOException {
+		var subdir = "referencesSingle/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+
+		var reference = getReference(evolvingModelManager,
+				"mypackage", "MyRoot", "myContents");
+
+		makeMultiple(modelMigrator, reference);
+
+		makeSingle(modelMigrator, reference);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"makeMultipleAndMakeSingleContainmentReference/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
+	/**
+	 * From the metamodel point of view we get the same Ecore,
+	 * but of course from the model point of view, during the first migration,
+	 * we lose some elements (the ones after the first one).
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testMakeSingleAndMakeMultipleContainmentReference() throws IOException {
+		var subdir = "referencesMultiple/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi")
+		);
+
+		var reference = getReference(evolvingModelManager,
+				"mypackage", "MyRoot", "myContents");
+
+		makeSingle(modelMigrator, reference);
+
+		makeMultiple(modelMigrator, reference);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"makeSingleAndMakeMultipleContainmentReference/",
+			of("My.ecore"),
+			of("MyRoot.xmi")
 		);
 	}
 
