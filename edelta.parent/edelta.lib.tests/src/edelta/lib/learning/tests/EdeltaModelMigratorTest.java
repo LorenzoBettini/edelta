@@ -2980,6 +2980,38 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	/**
+	 * Changing from multi to single only the main reference after performing
+	 * referenceToClass does not make much sense, since in the evolved model we lose
+	 * some associations. This is just to make sure that nothing else bad happens
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleMain() throws IOException {
+		var subdir = "referenceToClassMultipleBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+		makeSingle(modelMigrator, personWorks);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"referenceToClassMultipleBidirectionalChangedIntoSingleMain/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
