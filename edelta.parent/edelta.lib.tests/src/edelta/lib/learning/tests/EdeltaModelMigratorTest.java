@@ -3115,6 +3115,30 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testClassToReferenceUnidirectional() throws IOException {
+		var subdir = "classToReferenceUnidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		classToReference(modelMigrator, personWorks);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
@@ -3452,6 +3476,95 @@ public class EdeltaModelMigratorTest {
 	}
 
 	/**
+	 * SIMPLIFIED VERSION OF THE ACTUAL REFACTORING: directly pass the reference b1
+	 * to B instead of passing B
+	 * 
+	 * Given an EClass, which is meant to represent a relation, removes such a
+	 * class, transforming the relation into an EReference.
+	 * 
+	 * For example, given
+	 * 
+	 * <pre>
+	 *    a     b1    b2    c
+	 * A <-------> B <------> C
+	 * </pre>
+	 * 
+	 * (where the opposites "a" and "b2" might not be present) if we pass "B", then
+	 * the result will be
+	 * 
+	 * <pre>
+	 *    b2    b1
+	 * A <-------> C
+	 * </pre>
+	 * 
+	 * @param cl
+	 * @return the EReference that now represents the relation, that is, the
+	 *         EReference originally of type cl ("b1" above)
+	 */
+	private EReference classToReference(EdeltaModelMigrator modelMigrator,
+			final EReference reference) {
+		// "B" above
+		final EClass toRemove = reference.getEReferenceType();
+		// "A" above
+		final EClass owner = reference.getEContainingClass();
+		// search for a single EReference ("c" above) in cl that has not type owner
+		// (the one with type owner, if exists, would be the EOpposite
+		// of reference, which we are not interested in, "a" above).
+		final EReference referenceToTarget =
+				findSingleReferenceNotOfType(toRemove, owner);
+		reference.setEType(referenceToTarget.getEType());
+		EdeltaUtils.dropContainment(reference);
+		final EReference opposite = referenceToTarget.getEOpposite();
+		if (opposite != null) {
+			EdeltaUtils.makeBidirectional(reference, opposite);
+		}
+		EdeltaUtils.removeElement(toRemove);
+		modelMigrator.copyRule(
+			f ->
+				modelMigrator.isRelatedTo(f, reference),
+			(feature, oldObj, newObj) -> {
+				// feature: the feature of the original metamodel
+				// oldObj: the object of the original model
+				// newObj: the object of the new model, already created
+	
+				// retrieve the original value, wrapped in a list
+				// so this works (transparently) for both single and multi feature
+				// discard possible extra values, in case the multiplicity has changed
+				var oldValueOrValues =
+					EdeltaEcoreUtil
+						.getValueForFeature(oldObj, feature,
+								reference.getUpperBound());
+	
+				var copyOfOldReferred = oldValueOrValues.stream()
+					.map(value -> {
+						// the object of the class to remove
+						var objOfRemovedClass = (EObject) value;
+						var eClass = objOfRemovedClass.eClass();
+						// the reference not of type of the containing class of the feature
+						var refToTarget =
+							findSingleReferenceNotOfType(eClass, oldObj.eClass());
+						// the original referred object in the object to remove
+						var oldReferred =
+							(EObject) objOfRemovedClass.eGet(refToTarget);
+						// create the copy (our modelMigrator.copy checks whether
+						// an object has already been copied, so we avoid to copy
+						// the same object twice). We don't even have to care whether
+						// this will be part of a resource, since, as a contained
+						// object, it will be possibly copied later
+						return modelMigrator.getMigrated(oldReferred);
+					})
+					.collect(Collectors.toList());
+	
+				// in the new object set the value or values (transparently)
+				// with the created object (or objects, again, transparently)
+				EdeltaEcoreUtil.setValueForFeature(
+					newObj, reference, copyOfOldReferred);
+			}
+		);
+		return reference;
+	}
+
+	/**
 	 * Makes the EReference, which is assumed to be already part of an EClass, a
 	 * single required containment reference, adds to the referred type, which is
 	 * assumed to be set, an opposite required single reference.
@@ -3474,5 +3587,23 @@ public class EdeltaModelMigratorTest {
 		);
 		eClass.getEStructuralFeatures().add(reference);
 		return reference;
+	}
+
+	/**
+	 * SIMPLIFIED VERSION WITHOUT ERROR CHECKING
+	 * 
+	 * Finds the single EReference, in the EReferences of the given EClass, with a
+	 * type different from the given type, performing validation (that is, no
+	 * reference is found, or more than one) checks and in case show errors and
+	 * throws an IllegalArgumentException
+	 * 
+	 * @param cl
+	 * @param target
+	 */
+	private EReference findSingleReferenceNotOfType(final EClass cl, final EClass type) {
+		return cl.getEReferences().stream()
+				.filter(r -> r.getEType() != type)
+				.findFirst()
+				.orElse(null);
 	}
 }
