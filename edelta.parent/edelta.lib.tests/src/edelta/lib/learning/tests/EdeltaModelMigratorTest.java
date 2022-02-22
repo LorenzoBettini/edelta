@@ -3235,6 +3235,36 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	/**
+	 * The inversion works both for the metamodel and for the model.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testClassToReferenceAndReferenceToClassUnidirectional() throws IOException {
+		var subdir = "classToReferenceUnidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		classToReference(modelMigrator, personWorks);
+		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"referenceToClassUnidirectional/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
