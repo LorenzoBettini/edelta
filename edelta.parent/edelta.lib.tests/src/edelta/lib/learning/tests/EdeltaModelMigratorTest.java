@@ -2946,6 +2946,30 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
+	public void testReferenceToClassBidirectionalAlternative() throws IOException {
+		var subdir = "referenceToClassBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClassAlternative(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
 	public void testReferenceToClassBidirectionalDifferentOrder() throws IOException {
 		var subdir = "referenceToClassBidirectionalDifferentOrder/";
 
@@ -3007,6 +3031,30 @@ public class EdeltaModelMigratorTest {
 				"PersonList", "Person", "works");
 		// refactoring
 		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testReferenceToClassMultipleBidirectionalAlternative() throws IOException {
+		var subdir = "referenceToClassMultipleBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClassAlternative(modelMigrator, personWorks, "WorkingPosition");
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
@@ -3088,6 +3136,44 @@ public class EdeltaModelMigratorTest {
 	}
 
 	/**
+	 * Changing from multi to single only the opposite reference after performing
+	 * referenceToClass does not make much sense, since in the evolved model we lose
+	 * some associations. This is just to make sure that nothing else bad happens
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleOppositeAlternative() throws IOException {
+		var subdir = "referenceToClassMultipleBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		var extractedClass = referenceToClassAlternative(modelMigrator, personWorks, "WorkingPosition");
+		// in the evolved model, the original personWorks.getEOpposite
+		// now is extractedClass.getEStructuralFeature(0).getEOpposite
+		makeSingle(modelMigrator,
+			((EReference) extractedClass.getEStructuralFeature(0))
+				.getEOpposite());
+		// changing the opposite multi to single of course makes the model
+		// lose associations (the last Person that refers to a WorkingPosition wins)
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"referenceToClassMultipleBidirectionalChangedIntoSingleOpposite/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	/**
 	 * Changing from multi to single the two bidirectional references after performing
 	 * referenceToClass does not make much sense, since in the evolved model we lose
 	 * some associations. This is just to make sure that nothing else bad happens
@@ -3108,6 +3194,43 @@ public class EdeltaModelMigratorTest {
 				"PersonList", "Person", "works");
 		// refactoring
 		var extractedClass = referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+		makeSingle(modelMigrator, personWorks);
+		// in the evolved model, the original personWorks.getEOpposite
+		// now is extractedClass.getEStructuralFeature(0).getEOpposite
+		makeSingle(modelMigrator,
+			((EReference) extractedClass.getEStructuralFeature(0))
+				.getEOpposite());
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"referenceToClassMultipleBidirectionalChangedIntoSingleBoth/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	/**
+	 * Changing from multi to single the two bidirectional references after performing
+	 * referenceToClass does not make much sense, since in the evolved model we lose
+	 * some associations. This is just to make sure that nothing else bad happens
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleBothAlternative() throws IOException {
+		var subdir = "referenceToClassMultipleBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		var extractedClass = referenceToClassAlternative(modelMigrator, personWorks, "WorkingPosition");
 		makeSingle(modelMigrator, personWorks);
 		// in the evolved model, the original personWorks.getEOpposite
 		// now is extractedClass.getEStructuralFeature(0).getEOpposite
@@ -3338,6 +3461,56 @@ public class EdeltaModelMigratorTest {
 				"PersonList", "Person", "works");
 		// refactoring
 		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
+		classToReference(modelMigrator, personWorks);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"classToReferenceBidirectional/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testClassToReferenceAndReferenceToClassBidirectionalAlternative() throws IOException {
+		var subdir = "classToReferenceBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		classToReference(modelMigrator, personWorks);
+		referenceToClassAlternative(modelMigrator, personWorks, "WorkingPosition");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"referenceToClassBidirectional/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testReferenceToClassAndClassToReferenceBidirectionalAlternative() throws IOException {
+		var subdir = "referenceToClassBidirectional/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personWorks = getReference(evolvingModelManager,
+				"PersonList", "Person", "works");
+		// refactoring
+		referenceToClassAlternative(modelMigrator, personWorks, "WorkingPosition");
 		classToReference(modelMigrator, personWorks);
 
 		copyModelsSaveAndAssertOutputs(
@@ -3679,6 +3852,82 @@ public class EdeltaModelMigratorTest {
 			}
 		);
 		return extracted;
+	}
+
+	/**
+	 * Alternative implementation that copies and removes the possible
+	 * opposite reference (this way, we don't have to handle it in the
+	 * migration rule). On the other hand, we have to handle copy,
+	 * add and remove explicitly.
+	 * 
+	 * @param modelMigrator
+	 * @param reference
+	 * @param name
+	 * @return
+	 */
+	private EClass referenceToClassAlternative(EdeltaModelMigrator modelMigrator,
+			EReference reference, String name) {
+		// checkNotContainment reference:
+		// "Cannot apply referenceToClass on containment reference"
+		var ePackage = reference.getEContainingClass().getEPackage();
+		var extracted = EdeltaUtils.newEClass(name);
+		ePackage.getEClassifiers().add(extracted);
+		var extractedRef = addMandatoryReference(extracted, 
+			fromTypeToFeatureName(reference.getEType()),
+			reference.getEReferenceType());
+		final EReference eOpposite = reference.getEOpposite();
+		if (eOpposite != null) {
+			var newOpposite = createCopy(modelMigrator, eOpposite);
+			// put it in first position to have the same order as the original one
+			eOpposite.getEContainingClass().getEStructuralFeatures().
+				add(0, newOpposite);
+			EdeltaUtils.makeBidirectional(newOpposite, extractedRef);
+			EdeltaUtils.removeElement(eOpposite);
+		}
+		reference.setEType(extracted);
+		makeContainmentBidirectional(reference);
+
+		// handle the migration of the reference that now has to refer
+		// to a new object (of the extracted class), or, transparently
+		// to a list of new objects in case of a multi reference
+		modelMigrator.copyRule(
+			feature ->
+				modelMigrator.isRelatedTo(feature, reference),
+			(feature, oldObj, newObj) -> {
+				// feature: the feature of the original metamodel
+				// oldObj: the object of the original model
+				// newObj: the object of the new model, already created
+
+				// retrieve the original value, wrapped in a list
+				// so this works (transparently) for both single and multi feature
+				// discard possible extra values, in case the multiplicity has changed
+				var oldValueOrValues =
+					EdeltaEcoreUtil
+						.getValueForFeature(oldObj, feature,
+								reference.getUpperBound());
+
+				// for each old value create a new object for the
+				// extracted class, by setting the reference's value
+				// with the copied value of that reference
+				var copies = oldValueOrValues.stream()
+					.map(oldValue -> {
+						// since this is NOT a containment reference
+						// the referred oldValue has already been copied
+						var copy = modelMigrator.getMigrated((EObject) oldValue);
+						var created = EcoreUtil.create(extracted);
+						// the bidirectionality is implied
+						created.eSet(extractedRef, copy);
+						return created;
+					})
+					.collect(Collectors.toList());
+				// in the new object set the value or values (transparently)
+				// with the created object (or objects, again, transparently)
+				EdeltaEcoreUtil.setValueForFeature(
+					newObj, reference, copies);
+			}
+		);
+		return extracted;
+
 	}
 
 	private String fromTypeToFeatureName(final EClassifier type) {
