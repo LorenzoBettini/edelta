@@ -7,8 +7,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -50,9 +50,9 @@ import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
-import org.eclipse.xtext.xbase.lib.StringExtensions;
 import org.eclipse.xtext.xbase.lib.Functions.Function3;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure3;
+import org.eclipse.xtext.xbase.lib.StringExtensions;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -363,6 +363,11 @@ public class EdeltaModelMigratorTest {
 		private BiMap<EObject, EObject> ecoreCopyMap;
 
 		public EdeltaModelCopier(Map<EObject, EObject> ecoreCopyMap) {
+			// by default useOriginalReferences is true, but this breaks
+			// our migration strategy: if a reference refers something that
+			// in the evolved model has been removed, it must NOT refer to
+			// the old object
+			super(true, false);
 			this.ecoreCopyMap = HashBiMap.create(ecoreCopyMap);
 		}
 
@@ -1512,6 +1517,10 @@ public class EdeltaModelMigratorTest {
 	 * From the metamodel point of view we get the same Ecore,
 	 * but of course from the model point of view, during the first migration,
 	 * we lose some elements (the ones after the first one).
+	 * 
+	 * Since the list is turned into a single element and the second element used
+	 * to be the only referred class, the non containment references will be empty
+	 * in the migrated model.
 	 * 
 	 * @throws IOException
 	 */

@@ -149,6 +149,11 @@ public class EdeltaModelMigratorTest2 {
 		private Collection<ModelMigrationCopyFeatureRule> copyRules = new ArrayList<>();
 
 		public EdeltaModelMigrator(Map<EObject, EObject> ecoreCopyMap) {
+			// by default useOriginalReferences is true, but this breaks
+			// our migration strategy: if a reference refers something that
+			// in the evolved model has been removed, it must NOT refer to
+			// the old object
+			super(true, false);
 			this.ecoreCopyMap = HashBiMap.create(ecoreCopyMap);
 		}
 
