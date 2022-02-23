@@ -6,8 +6,10 @@ package edelta.lib;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -152,5 +154,11 @@ public class EdeltaEcoreUtil {
 			unwrapCollection = wrapAsCollection(unwrapCollection, feature.getUpperBound());
 		}
 		obj.eSet(feature, unwrapCollection);
+	}
+
+	public static EObject createInstance(EClass type, Consumer<EObject> initializer) {
+		var instance = EcoreUtil.create(type);
+		initializer.accept(instance);
+		return instance;
 	}
 }
