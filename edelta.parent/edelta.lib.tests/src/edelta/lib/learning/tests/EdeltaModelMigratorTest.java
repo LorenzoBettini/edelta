@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -216,11 +217,7 @@ public class EdeltaModelMigratorTest {
 				}
 
 				private void applyCopyRuleOrElse(EStructuralFeature feature, EObject eObject, EObject copyEObject, Runnable runnable) {
-					// if the multiplicity changes and the type changes we might
-					// end up with a list with a single default value.
-					// if instead we check that the original value of the object for the feature
-					// is set we avoid such a situation.
-					if (eObject.eIsSet(feature) && predicate.test(feature))
+					if (predicate.test(feature))
 						procedure.apply(feature, eObject, copyEObject);
 					else
 						runnable.run();
@@ -319,28 +316,32 @@ public class EdeltaModelMigratorTest {
 				// for reference we must first propagate the copy
 				// especially in case of collections
 				return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> {
-					// if we come here the old feature was set
 					EdeltaEcoreUtil.setValueForFeature(
-							newObj,
-							feature,
-							// use the upper bound of the destination feature, since it might
-							// be different from the original one
-							getMigrated(
-								EdeltaEcoreUtil
-									.wrapAsCollection(oldObj.eGet(oldFeature), feature.getUpperBound()))
-							);
+						newObj,
+						feature,
+						// use the upper bound of the destination feature, since it might
+						// be different from the original one
+						getMigrated(
+							EdeltaEcoreUtil
+								.wrapAsCollection(oldObj.eGet(oldFeature), feature.getUpperBound()))
+						);
 				};
 			}
 			return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> {
-				// if we come here the old feature was set
-				EdeltaEcoreUtil.setValueForFeature(
-					newObj,
-					feature,
-					// use the upper bound of the destination feature, since it might
-					// be different from the original one
-					EdeltaEcoreUtil
-						.getValueForFeature(oldObj, oldFeature, feature.getUpperBound())
-				);
+				// if the multiplicity changes and the type of the attribute changes we might
+				// end up with a list with a single default value.
+				// if instead we check that the original value of the object for the feature
+				// is set we avoid such a situation.
+				if (oldObj.eIsSet(oldFeature))
+					// if we come here the old feature was set
+					EdeltaEcoreUtil.setValueForFeature(
+						newObj,
+						feature,
+						// use the upper bound of the destination feature, since it might
+						// be different from the original one
+						EdeltaEcoreUtil
+							.getValueForFeature(oldObj, oldFeature, feature.getUpperBound())
+					);
 			};
 		}
 	
@@ -3592,10 +3593,13 @@ public class EdeltaModelMigratorTest {
 			asList(
 				person.getEStructuralFeature("firstName"),
 				person.getEStructuralFeature("lastName")),
-			values ->
-				values.stream()
+			values -> {
+				var merged = values.stream()
+					.filter(Objects::nonNull)
 					.map(Object::toString)
-					.collect(Collectors.joining(" "))
+					.collect(Collectors.joining(" "));
+				return merged.isEmpty() ? null : merged;
+			}
 			);
 
 		copyModelsSaveAndAssertOutputs(
@@ -3637,6 +3641,8 @@ public class EdeltaModelMigratorTest {
 					.map(o -> 
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
+				if (mergedValue.isEmpty())
+					return null;
 				var nameElementObject = EcoreUtil.create(nameElement);
 				nameElementObject.eSet(nameElementAttribute, mergedValue);
 				return nameElementObject;
@@ -4270,7 +4276,7 @@ public class EdeltaModelMigratorTest {
 		if (valueMerger != null) {
 			if (firstOne instanceof EReference) {
 				modelMigrator.copyRule(
-					modelMigrator.wasRelatedToAtLeastOneOf(features),
+					modelMigrator.wasRelatedTo(firstOne),
 					(feature, oldObj, newObj) -> {
 						var originalFeatures = features.stream()
 								.map(modelMigrator::getOriginal)
@@ -4286,7 +4292,7 @@ public class EdeltaModelMigratorTest {
 				);
 			} else {
 				modelMigrator.copyRule(
-					modelMigrator.wasRelatedToAtLeastOneOf(features),
+					modelMigrator.wasRelatedTo(firstOne),
 					(feature, oldObj, newObj) -> {
 						var originalFeatures = features.stream()
 								.map(modelMigrator::getOriginal)
