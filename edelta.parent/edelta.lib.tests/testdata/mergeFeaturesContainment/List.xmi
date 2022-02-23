@@ -7,17 +7,17 @@
     xsi:schemaLocation="http://cs.gssi.it/PersonMM PersonList.ecore">
   <members>
     <firstName
-        nameElementValue="a first name 1"/>
+        nameElementValue="aFirstName1"/>
     <lastName
-        nameElementValue="a last name 1"/>
+        nameElementValue="aLastName1"/>
   </members>
   <members/>
   <members>
     <firstName
-        nameElementValue="a first name 2"/>
+        nameElementValue="aFirstName2"/>
   </members>
   <members>
     <lastName
-        nameElementValue="a last name 2"/>
+        nameElementValue="aLastName2"/>
   </members>
 </person:List>

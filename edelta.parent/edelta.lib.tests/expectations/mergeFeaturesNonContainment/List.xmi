@@ -10,17 +10,17 @@
   <members name="//@nameElements.5"/>
   <members name="//@nameElements.6"/>
   <nameElements
-      nameElementValue="a first name 1"/>
+      nameElementValue="aFirstName1"/>
   <nameElements
-      nameElementValue="a last name 1"/>
+      nameElementValue="aLastName1"/>
   <nameElements
-      nameElementValue="a first name 2"/>
+      nameElementValue="aFirstName2"/>
   <nameElements
-      nameElementValue="a last name 2"/>
+      nameElementValue="aLastName2"/>
   <nameElements
-      nameElementValue="a first name 1 a last name 1"/>
+      nameElementValue="aFirstName1 aLastName1"/>
   <nameElements
-      nameElementValue="a first name 2"/>
+      nameElementValue="aFirstName2"/>
   <nameElements
-      nameElementValue="a last name 2"/>
+      nameElementValue="aLastName2"/>
 </person:List>

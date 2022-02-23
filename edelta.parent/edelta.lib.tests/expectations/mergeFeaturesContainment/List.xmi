@@ -6,13 +6,13 @@
     xmlns:person="http://cs.gssi.it/PersonMM"
     xsi:schemaLocation="http://cs.gssi.it/PersonMM PersonList.ecore">
   <members>
-    <name nameElementValue="a first name 1 a last name 1"/>
+    <name nameElementValue="aFirstName1 aLastName1"/>
   </members>
   <members/>
   <members>
-    <name nameElementValue="a first name 2"/>
+    <name nameElementValue="aFirstName2"/>
   </members>
   <members>
-    <name nameElementValue="a last name 2"/>
+    <name nameElementValue="aLastName2"/>
   </members>
 </person:List>

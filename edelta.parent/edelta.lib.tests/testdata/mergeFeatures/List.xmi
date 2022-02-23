@@ -5,7 +5,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:person="http://cs.gssi.it/PersonMM"
     xsi:schemaLocation="http://cs.gssi.it/PersonMM PersonList.ecore">
-  <members firstName="a first name 1"
-      lastName="a last name 1"/>
+  <members firstName="aFirstName1"
+      lastName="aLastName1"/>
   <members/>
 </person:List>

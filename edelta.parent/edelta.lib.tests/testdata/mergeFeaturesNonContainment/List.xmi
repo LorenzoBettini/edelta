@@ -11,11 +11,11 @@
   <members firstName="//@nameElements.2"/>
   <members lastName="//@nameElements.3"/>
   <nameElements
-      nameElementValue="a first name 1"/>
+      nameElementValue="aFirstName1"/>
   <nameElements
-      nameElementValue="a last name 1"/>
+      nameElementValue="aLastName1"/>
   <nameElements
-      nameElementValue="a first name 2"/>
+      nameElementValue="aFirstName2"/>
   <nameElements
-      nameElementValue="a last name 2"/>
+      nameElementValue="aLastName2"/>
 </person:List>
