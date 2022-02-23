@@ -1,7 +1,7 @@
 package edelta.lib.learning.tests;
 
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
-import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirectories;
+import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
 import static java.util.Arrays.asList;
 import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -675,7 +675,7 @@ public class EdeltaModelMigratorTest {
 
 	@BeforeClass
 	public static void clearOutput() throws IOException {
-		cleanDirectoryAndFirstSubdirectories(OUTPUT);
+		cleanDirectoryRecursive(OUTPUT);
 	}
 
 	@Before
