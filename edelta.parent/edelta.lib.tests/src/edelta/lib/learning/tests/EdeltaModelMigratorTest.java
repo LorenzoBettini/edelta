@@ -28,6 +28,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 import org.assertj.core.api.Assertions;
@@ -3761,6 +3762,57 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testSplitFeatureContainment() throws IOException {
+		var subdir = "splitFeatureContainment/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		EStructuralFeature personName = person.getEStructuralFeature("name");
+		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		EAttribute nameElementAttribute =
+				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
+		assertNotNull(nameElementAttribute);
+		splitFeature(
+			modelMigrator,
+			personName,
+			asList(
+				"firstName",
+				"lastName"),
+			value -> {
+				// a few more checks should be performed in a realistic context
+				if (value == null)
+					return Collections.emptyList();
+				var obj = (EObject) value;
+				// of course if there's no space and only one element in the array
+				// it will assigned to the first feature value
+				// that is, in case of a single element, the lastName will be empty
+				String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+				var splitted = Stream.of(split)
+					.map(val -> {
+						var splitObj = EcoreUtil.create(nameElement);
+						splitObj.eSet(nameElementAttribute, val);
+						return splitObj;
+					})
+					.collect(Collectors.toList());
+				return splitted;
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
@@ -4382,19 +4434,35 @@ public class EdeltaModelMigratorTest {
 		featureToSplit.getEContainingClass()
 			.getEStructuralFeatures().addAll(splitFeatures);
 		EdeltaUtils.removeElement(featureToSplit);
-		if (valueSplitter != null)
-			modelMigrator.copyRule(
-				modelMigrator.wasRelatedTo(featureToSplit),
-				(feature, oldObj, newObj) -> {
-					var oldValue = oldObj.eGet(feature);
-					var splittedValues = valueSplitter.apply(oldValue).iterator();
-					for (var splitFeature : splitFeatures) {
-						if (!splittedValues.hasNext())
-							break;
-						newObj.eSet(splitFeature, splittedValues.next());
+		if (valueSplitter != null) {
+			if (featureToSplit instanceof EReference)
+				modelMigrator.copyRule(
+					modelMigrator.wasRelatedTo(featureToSplit),
+					(feature, oldObj, newObj) -> {
+						// for references we must get the copied EObject
+						var oldValue = modelMigrator.getMigrated((EObject) oldObj.eGet(feature));
+						var splittedValues = valueSplitter.apply(oldValue).iterator();
+						for (var splitFeature : splitFeatures) {
+							if (!splittedValues.hasNext())
+								break;
+							newObj.eSet(splitFeature, splittedValues.next());
+						}
 					}
-				}
-			);
+				);
+			else
+				modelMigrator.copyRule(
+					modelMigrator.wasRelatedTo(featureToSplit),
+					(feature, oldObj, newObj) -> {
+						var oldValue = oldObj.eGet(feature);
+						var splittedValues = valueSplitter.apply(oldValue).iterator();
+						for (var splitFeature : splitFeatures) {
+							if (!splittedValues.hasNext())
+								break;
+							newObj.eSet(splitFeature, splittedValues.next());
+						}
+					}
+				);
+		}
 		return splitFeatures;
 	}
 }
