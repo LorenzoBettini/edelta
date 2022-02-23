@@ -3559,12 +3559,45 @@ public class EdeltaModelMigratorTest {
 			"name",
 			asList(
 				person.getEStructuralFeature("firstName"),
-				person.getEStructuralFeature("lastName")));
+				person.getEStructuralFeature("lastName")),
+			null);
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
 			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testMergeFeaturesWithValueMerger() throws IOException {
+		var subdir = "mergeFeatures/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		mergeFeatures(
+			modelMigrator,
+			"name",
+			asList(
+				person.getEStructuralFeature("firstName"),
+				person.getEStructuralFeature("lastName")),
+			values ->
+				values.stream()
+					.map(Object::toString)
+					.collect(Collectors.joining(" "))
+			);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"mergeFeaturesWithValueMerger/",
 			of("PersonList.ecore"),
 			of("List.xmi")
 		);
@@ -4121,19 +4154,39 @@ public class EdeltaModelMigratorTest {
 	 * 
 	 * @param newFeatureName
 	 * @param features
+	 * @param valueMerger if not null, it is used to merge the values of the original
+	 * features in the new model
 	 * @return the new feature added to the containing class of the features
 	 */
-	public EStructuralFeature mergeFeatures(EdeltaModelMigrator modelMigrator,
+	private EStructuralFeature mergeFeatures(EdeltaModelMigrator modelMigrator,
 			final String newFeatureName,
-			final Collection<EStructuralFeature> features) {
+			final Collection<EStructuralFeature> features,
+			Function<Collection<?>, Object> valueMerger) {
 		// THIS SHOULD BE CHECKED IN THE FINAL IMPLEMENTATION (ALREADY DONE IN refactorings.lib)
 //		this.checkNoDifferences(features, new EdeltaFeatureDifferenceFinder().ignoringName(),
 //				"The two features cannot be merged");
-		final EClass owner = features.iterator().next().getEContainingClass();
+		// ALSO MAKE SURE IT'S A SINGLE FEATURE, NOT MULTI (TO BE DONE ALSO IN refactorings.lib)
+		var firstOne = features.iterator().next();
+		final EClass owner = firstOne.getEContainingClass();
 		final EStructuralFeature copy = createSingleCopy(modelMigrator, features);
 		copy.setName(newFeatureName);
 		owner.getEStructuralFeatures().add(copy);
 		EdeltaUtils.removeAllElements(features);
+		if (valueMerger != null) {
+			modelMigrator.copyRule(
+				modelMigrator.wasRelatedTo(firstOne),
+				(feature, oldObj, newObj) -> {
+					var originalFeatures = features.stream()
+							.map(modelMigrator::getOriginal)
+							.map(EStructuralFeature.class::cast);
+					var oldValues = originalFeatures
+							.map(f -> oldObj.eGet(f))
+							.collect(Collectors.toList());
+					var merged = valueMerger.apply(oldValues);
+					newObj.eSet(copy, merged);
+				}
+			);
+		}
 		return copy;
 	}
 }
