@@ -3603,7 +3603,7 @@ public class EdeltaModelMigratorTest {
 					.collect(Collectors.joining(" "));
 				return merged.isEmpty() ? null : merged;
 			}
-			);
+		);
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
@@ -3862,6 +3862,64 @@ public class EdeltaModelMigratorTest {
 					})
 					.collect(Collectors.toList());
 				return splitted;
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	/**
+	 * The evolved metamodel and model are just the same as the original ones, as
+	 * long the merge and split can be inversed. For example, in this test we have
+	 * "firstname lastname" or no string at all. If you had "lastname" then the
+	 * model wouldn't be reversable.
+	 * 
+	 * The input directory and the output one will contain the same data.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testSplitAndMergeAttributes() throws IOException {
+		var subdir = "splitAndMergeAttributes/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		EStructuralFeature personName = person.getEStructuralFeature("name");
+		Collection<EStructuralFeature> splitFeatures = splitFeature(
+			modelMigrator,
+			personName,
+			asList(
+				"firstName",
+				"lastName"),
+			value -> {
+				// a few more checks should be performed in a realistic context
+				if (value == null)
+					return Collections.emptyList();
+				String[] split = value.toString().split("\\s+");
+				return Arrays.asList(split);
+			}
+		);
+		mergeFeatures(
+			modelMigrator,
+			"name",
+			splitFeatures,
+			values -> {
+				var merged = values.stream()
+					.filter(Objects::nonNull)
+					.map(Object::toString)
+					.collect(Collectors.joining(" "));
+				return merged.isEmpty() ? null : merged;
 			}
 		);
 
