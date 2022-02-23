@@ -285,6 +285,10 @@ public class EdeltaModelMigratorTest {
 			return modelCopier.copyAll(objects);
 		}
 
+		public EObject getOriginal(EObject o) {
+			return modelCopier.getOriginal(o);
+		}
+
 		public boolean isRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
 			return modelCopier.isRelatedTo(origEcoreElement, evolvedEcoreElement);
 		}
@@ -402,6 +406,10 @@ public class EdeltaModelMigratorTest {
 			if (isNotThereAnymore(mapped))
 				return null;
 			return mapped;
+		}
+
+		public EObject getOriginal(EObject o) {
+			return ecoreCopyMap.inverse().get(o);
 		}
 
 		private boolean isStillThere(EObject target) {
@@ -2237,6 +2245,11 @@ public class EdeltaModelMigratorTest {
 		assertFalse(modelMigrator.isRelatedTo(origfeature2, feature1));
 		assertFalse(modelMigrator.isRelatedTo(origfeature1, feature2));
 
+		assertSame(origfeature1,
+				modelMigrator.getOriginal(feature1));
+		assertSame(origfeature2,
+				modelMigrator.getOriginal(feature2));
+
 		// remove a feature
 		EdeltaUtils.removeElement(feature1);
 		assertFalse(modelMigrator.isRelatedTo(origfeature1, feature1));
@@ -2244,11 +2257,18 @@ public class EdeltaModelMigratorTest {
 		assertFalse(modelMigrator.isRelatedTo(origfeature2, feature1));
 		assertFalse(modelMigrator.isRelatedTo(origfeature1, feature2));
 
+		// getOriginal does not check whether the second argument is still there
+		assertSame(origfeature1,
+				modelMigrator.getOriginal(feature1));
+		assertSame(origfeature2,
+				modelMigrator.getOriginal(feature2));
+
 		// wasRelatedTo does not check whether the second argument is still there
 		assertTrue(modelMigrator.wasRelatedTo(origfeature1, feature1));
 		assertTrue(modelMigrator.wasRelatedTo(origfeature2, feature2));
 		assertFalse(modelMigrator.wasRelatedTo(origfeature2, feature1));
 		assertFalse(modelMigrator.wasRelatedTo(origfeature1, feature2));
+
 	}
 
 	@Test
