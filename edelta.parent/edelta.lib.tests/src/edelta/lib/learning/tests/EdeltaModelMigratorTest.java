@@ -3652,6 +3652,52 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testMergeFeaturesNonContainment() throws IOException {
+		var subdir = "mergeFeaturesNonContainment/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		EStructuralFeature nameElements = person.getEStructuralFeature("nameElements");
+		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		EAttribute nameElementAttribute =
+				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
+		assertNotNull(nameElementAttribute);
+		mergeFeatures(
+			modelMigrator,
+			"name",
+			asList(
+				person.getEStructuralFeature("firstName"),
+				person.getEStructuralFeature("lastName")),
+			values -> {
+				// it is responsibility of the merger to create an instance
+				// of the (now single) referred object with the result
+				// of merging the original objects' values
+				var mergedValue = values.stream()
+					.map(EObject.class::cast)
+					.map(o -> 
+						"" + o.eGet(nameElementAttribute))
+					.collect(Collectors.joining(" "));
+				var nameElementObject = EcoreUtil.create(nameElement);
+				nameElementObject.eSet(nameElementAttribute, mergedValue);
+				return nameElementObject;
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
