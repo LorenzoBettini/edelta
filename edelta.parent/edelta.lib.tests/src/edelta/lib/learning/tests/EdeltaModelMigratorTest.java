@@ -2,6 +2,7 @@ package edelta.lib.learning.tests;
 
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirectories;
+import static java.util.Arrays.asList;
 import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -3522,6 +3523,33 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testMergeFeatures() throws IOException {
+		var subdir = "mergeFeatures/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		mergeFeatures(
+			modelMigrator,
+			"name",
+			asList(
+				person.getEStructuralFeature("firstName"),
+				person.getEStructuralFeature("lastName")));
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
@@ -4064,5 +4092,28 @@ public class EdeltaModelMigratorTest {
 				.filter(r -> r.getEType() != type)
 				.findFirst()
 				.orElse(null);
+	}
+
+	/**
+	 * Merges the given features into a single new feature in the containing class.
+	 * The features must be compatible (same containing class, same type, same
+	 * cardinality, etc).
+	 * 
+	 * @param newFeatureName
+	 * @param features
+	 * @return the new feature added to the containing class of the features
+	 */
+	public EStructuralFeature mergeFeatures(EdeltaModelMigrator modelMigrator,
+			final String newFeatureName,
+			final Collection<EStructuralFeature> features) {
+		// THIS SHOULD BE CHECKED IN THE FINAL IMPLEMENTATION (ALREADY DONE IN refactorings.lib)
+//		this.checkNoDifferences(features, new EdeltaFeatureDifferenceFinder().ignoringName(),
+//				"The two features cannot be merged");
+		final EClass owner = features.iterator().next().getEContainingClass();
+		final EStructuralFeature copy = createSingleCopy(modelMigrator, features);
+		copy.setName(newFeatureName);
+		owner.getEStructuralFeatures().add(copy);
+		EdeltaUtils.removeAllElements(features);
+		return copy;
 	}
 }
