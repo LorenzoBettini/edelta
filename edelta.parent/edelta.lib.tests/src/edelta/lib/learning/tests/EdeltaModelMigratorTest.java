@@ -404,11 +404,11 @@ public class EdeltaModelMigratorTest {
 		}
 
 		private boolean isStillThere(EObject target) {
-			return target != null && !isNotThereAnymore(target);
+			return target != null && target.eResource() != null;
 		}
 
 		private boolean isNotThereAnymore(EObject target) {
-			return target != null && target.eResource() == null;
+			return target == null || target.eResource() == null;
 		}
 
 		public boolean isRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
