@@ -3723,6 +3723,36 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testSplitAttributesWithValueSplitter() throws IOException {
+		var subdir = "splitAttributesWithValueSplitter/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of() // TODO "List.xmi"
+		);
+
+		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		EStructuralFeature personName = person.getEStructuralFeature("name");
+		splitFeature(
+			modelMigrator,
+			personName,
+			asList(
+				"firstName",
+				"lastName"),
+			null
+			);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of() // TODO "List.xmi"
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
@@ -4326,5 +4356,23 @@ public class EdeltaModelMigratorTest {
 			}
 		}
 		return mergedFeature;
+	}
+
+	private Collection<EStructuralFeature> splitFeature(EdeltaModelMigrator modelMigrator,
+			final EStructuralFeature feature,
+			final Collection<String> newFeatureNames,
+			Function<Object, Collection<?>> valueSplitter) {
+		// THIS SHOULD BE CHECKED IN THE FINAL IMPLEMENTATION
+		// ALSO MAKE SURE IT'S A SINGLE FEATURE, NOT MULTI (TO BE DONE ALSO IN refactorings.lib)
+		var splitFeatures = newFeatureNames.stream()
+			.map(newName -> {
+				var newFeature = createCopy(modelMigrator, feature);
+				newFeature.setName(newName);
+				return newFeature;
+			})
+			.collect(Collectors.toList());
+		feature.getEContainingClass().getEStructuralFeatures().addAll(splitFeatures);
+		EdeltaUtils.removeElement(feature);
+		return splitFeatures;
 	}
 }
