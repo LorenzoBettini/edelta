@@ -3644,6 +3644,8 @@ public class EdeltaModelMigratorTest {
 				if (mergedValue.isEmpty())
 					return null;
 				var nameElementObject = EcoreUtil.create(nameElement);
+				// since it's a containment feature, setting it will also
+				// add it to the resource
 				nameElementObject.eSet(nameElementAttribute, mergedValue);
 				return nameElementObject;
 			}
@@ -3658,6 +3660,15 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	/**
+	 * It might not make much sense to merge features concerning non containment references,
+	 * but we just check that we can do it. In this example, the merged NameElement objects
+	 * will be the new referred objects. The previous ones are still copied and will be
+	 * contained in the evolved model. In a more realistic implementation we might have
+	 * to remove NameElements that are not referred anymore.
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void testMergeFeaturesNonContainment() throws IOException {
 		var subdir = "mergeFeaturesNonContainment/";
@@ -3669,7 +3680,6 @@ public class EdeltaModelMigratorTest {
 		);
 
 		EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
-		EStructuralFeature nameElements = person.getEStructuralFeature("nameElements");
 		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
 		EAttribute nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
@@ -3689,8 +3699,17 @@ public class EdeltaModelMigratorTest {
 					.map(o -> 
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
+				if (mergedValue.isEmpty())
+					return null;
 				var nameElementObject = EcoreUtil.create(nameElement);
 				nameElementObject.eSet(nameElementAttribute, mergedValue);
+				// since it's a NON containment feature, we have to manually
+				// add it to the resource
+				EObject firstObject = (EObject) values.iterator().next();
+				var containingFeature = firstObject.eContainingFeature();
+				@SuppressWarnings("unchecked")
+				List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
+				containerCollection.add(nameElementObject);
 				return nameElementObject;
 			}
 		);
