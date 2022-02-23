@@ -3603,6 +3603,34 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testMergeFeaturesContainment() throws IOException {
+		var subdir = "mergeFeaturesContainment/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		mergeFeatures(
+			modelMigrator,
+			"name",
+			asList(
+				person.getEStructuralFeature("firstName"),
+				person.getEStructuralFeature("lastName")),
+			null);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
