@@ -16,7 +16,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -3730,7 +3732,7 @@ public class EdeltaModelMigratorTest {
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("PersonList.ecore"),
-			of() // TODO "List.xmi"
+			of("List.xmi")
 		);
 
 		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
@@ -3741,15 +3743,21 @@ public class EdeltaModelMigratorTest {
 			asList(
 				"firstName",
 				"lastName"),
-			null
-			);
+			value -> {
+				// a few more checks should be performed in a realistic context
+				if (value == null)
+					return Collections.emptyList();
+				String[] split = value.toString().split("\\s+");
+				return Arrays.asList(split);
+			}
+		);
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
 			subdir,
 			of("PersonList.ecore"),
-			of() // TODO "List.xmi"
+			of("List.xmi")
 		);
 	}
 
@@ -4359,20 +4367,34 @@ public class EdeltaModelMigratorTest {
 	}
 
 	private Collection<EStructuralFeature> splitFeature(EdeltaModelMigrator modelMigrator,
-			final EStructuralFeature feature,
+			final EStructuralFeature featureToSplit,
 			final Collection<String> newFeatureNames,
 			Function<Object, Collection<?>> valueSplitter) {
 		// THIS SHOULD BE CHECKED IN THE FINAL IMPLEMENTATION
 		// ALSO MAKE SURE IT'S A SINGLE FEATURE, NOT MULTI (TO BE DONE ALSO IN refactorings.lib)
 		var splitFeatures = newFeatureNames.stream()
 			.map(newName -> {
-				var newFeature = createCopy(modelMigrator, feature);
+				var newFeature = createCopy(modelMigrator, featureToSplit);
 				newFeature.setName(newName);
 				return newFeature;
 			})
 			.collect(Collectors.toList());
-		feature.getEContainingClass().getEStructuralFeatures().addAll(splitFeatures);
-		EdeltaUtils.removeElement(feature);
+		featureToSplit.getEContainingClass()
+			.getEStructuralFeatures().addAll(splitFeatures);
+		EdeltaUtils.removeElement(featureToSplit);
+		if (valueSplitter != null)
+			modelMigrator.copyRule(
+				modelMigrator.wasRelatedTo(featureToSplit),
+				(feature, oldObj, newObj) -> {
+					var oldValue = oldObj.eGet(feature);
+					var splittedValues = valueSplitter.apply(oldValue).iterator();
+					for (var splitFeature : splitFeatures) {
+						if (!splittedValues.hasNext())
+							break;
+						newObj.eSet(splitFeature, splittedValues.next());
+					}
+				}
+			);
 		return splitFeatures;
 	}
 }
