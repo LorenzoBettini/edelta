@@ -3813,6 +3813,67 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testSplitFeatureNonContainment() throws IOException {
+		var subdir = "splitFeatureNonContainment/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		EStructuralFeature personName = person.getEStructuralFeature("name");
+		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		EAttribute nameElementAttribute =
+				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
+		assertNotNull(nameElementAttribute);
+		splitFeature(
+			modelMigrator,
+			personName,
+			asList(
+				"firstName",
+				"lastName"),
+			value -> {
+				// a few more checks should be performed in a realistic context
+				if (value == null)
+					return Collections.emptyList();
+				var obj = (EObject) value;
+
+				var containingFeature = obj.eContainingFeature();
+				@SuppressWarnings("unchecked")
+				List<EObject> containerCollection = (List<EObject>) obj.eContainer().eGet(containingFeature);
+
+				// of course if there's no space and only one element in the array
+				// it will assigned to the first feature value
+				// that is, in case of a single element, the lastName will be empty
+				String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+				var splitted = Stream.of(split)
+					.map(val -> {
+						var splitObj = EcoreUtil.create(nameElement);
+						splitObj.eSet(nameElementAttribute, val);
+
+						// since it's a NON containment feature, we have to manually
+						// add it to the resource
+						containerCollection.add(splitObj);
+
+						return splitObj;
+					})
+					.collect(Collectors.toList());
+				return splitted;
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
