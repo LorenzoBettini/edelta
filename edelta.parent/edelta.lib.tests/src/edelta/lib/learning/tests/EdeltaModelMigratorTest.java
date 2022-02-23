@@ -223,7 +223,7 @@ public class EdeltaModelMigratorTest {
 					if (eObject.eIsSet(feature) && predicate.test(feature))
 						procedure.apply(feature, eObject, copyEObject);
 					else
-						runnable.run();;
+						runnable.run();
 				}
 			};
 			copyModels(modelCopier, basedir, originalModelManager, evolvingModelManager);
