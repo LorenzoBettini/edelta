@@ -310,6 +310,10 @@ public class EdeltaModelMigratorTest {
 				.anyMatch(e -> wasRelatedTo(origEcoreElement, e));
 		}
 
+		public <T extends ENamedElement> Predicate<T> wasRelatedToAtLeastOneOf(Collection<? extends ENamedElement> evolvedEcoreElements) {
+			return origEcoreElement -> wasRelatedToAtLeastOneOf(origEcoreElement, evolvedEcoreElements);
+		}
+
 		public CopyProcedure multiplicityAwareCopy(EStructuralFeature feature) {
 			if (feature instanceof EReference) {
 				// for reference we must first propagate the copy
@@ -3613,14 +3617,31 @@ public class EdeltaModelMigratorTest {
 			of("List.xmi")
 		);
 
-		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		EAttribute nameElementAttribute =
+				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
+		assertNotNull(nameElementAttribute);
 		mergeFeatures(
 			modelMigrator,
 			"name",
 			asList(
 				person.getEStructuralFeature("firstName"),
 				person.getEStructuralFeature("lastName")),
-			null);
+			values -> {
+				// it is responsibility of the merger to create an instance
+				// of the (now single) referred object with the result
+				// of merging the original objects' values
+				var mergedValue = values.stream()
+					.map(EObject.class::cast)
+					.map(o -> 
+						"" + o.eGet(nameElementAttribute))
+					.collect(Collectors.joining(" "));
+				var nameElementObject = EcoreUtil.create(nameElement);
+				nameElementObject.eSet(nameElementAttribute, mergedValue);
+				return nameElementObject;
+			}
+		);
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
@@ -4201,19 +4222,37 @@ public class EdeltaModelMigratorTest {
 		owner.getEStructuralFeatures().add(copy);
 		EdeltaUtils.removeAllElements(features);
 		if (valueMerger != null) {
-			modelMigrator.copyRule(
-				modelMigrator.wasRelatedTo(firstOne),
-				(feature, oldObj, newObj) -> {
-					var originalFeatures = features.stream()
-							.map(modelMigrator::getOriginal)
-							.map(EStructuralFeature.class::cast);
-					var oldValues = originalFeatures
-							.map(f -> oldObj.eGet(f))
-							.collect(Collectors.toList());
-					var merged = valueMerger.apply(oldValues);
-					newObj.eSet(copy, merged);
-				}
-			);
+			if (firstOne instanceof EReference) {
+				modelMigrator.copyRule(
+					modelMigrator.wasRelatedToAtLeastOneOf(features),
+					(feature, oldObj, newObj) -> {
+						var originalFeatures = features.stream()
+								.map(modelMigrator::getOriginal)
+								.map(EStructuralFeature.class::cast);
+						// for references we must get the copied EObject
+						var oldValues = originalFeatures
+								.map(f -> oldObj.eGet(f))
+								.collect(Collectors.toList());
+						var merged = valueMerger.apply(
+							modelMigrator.getMigrated(oldValues));
+						newObj.eSet(copy, merged);
+					}
+				);
+			} else {
+				modelMigrator.copyRule(
+					modelMigrator.wasRelatedToAtLeastOneOf(features),
+					(feature, oldObj, newObj) -> {
+						var originalFeatures = features.stream()
+								.map(modelMigrator::getOriginal)
+								.map(EStructuralFeature.class::cast);
+						var oldValues = originalFeatures
+								.map(f -> oldObj.eGet(f))
+								.collect(Collectors.toList());
+						var merged = valueMerger.apply(oldValues);
+						newObj.eSet(copy, merged);
+					}
+				);
+			}
 		}
 		return copy;
 	}

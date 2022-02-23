@@ -12,4 +12,12 @@
         nameElementValue="a last name 1"/>
   </members>
   <members/>
+  <members>
+    <firstName
+        nameElementValue="a first name 2"/>
+  </members>
+  <members>
+    <lastName
+        nameElementValue="a last name 2"/>
+  </members>
 </person:List>
