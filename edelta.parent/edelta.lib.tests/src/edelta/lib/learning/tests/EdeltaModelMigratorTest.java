@@ -3562,12 +3562,14 @@ public class EdeltaModelMigratorTest {
 		);
 
 		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		var personFirstName = person.getEStructuralFeature("firstName");
+		var personLastName = person.getEStructuralFeature("lastName");
 		mergeFeatures(
 			modelMigrator,
 			"name",
 			asList(
-				person.getEStructuralFeature("firstName"),
-				person.getEStructuralFeature("lastName")),
+				personFirstName,
+				personLastName),
 			null);
 
 		copyModelsSaveAndAssertOutputs(
@@ -3920,6 +3922,63 @@ public class EdeltaModelMigratorTest {
 					.map(Object::toString)
 					.collect(Collectors.joining(" "));
 				return merged.isEmpty() ? null : merged;
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	/**
+	 * The evolved metamodel and model are just the same as the original ones.
+	 * 
+	 * The input directory and the output one will contain the same data.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testMergeAndSplitAttributes() throws IOException {
+		var subdir = "mergeAndSplitAttributes/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		var personFirstName = person.getEStructuralFeature("firstName");
+		var personLastName = person.getEStructuralFeature("lastName");
+		EStructuralFeature mergedFeature = mergeFeatures(
+			modelMigrator,
+			"name",
+			asList(
+				personFirstName,
+				personLastName),
+			values -> {
+				var merged = values.stream()
+					.filter(Objects::nonNull)
+					.map(Object::toString)
+					.collect(Collectors.joining(" "));
+				return merged.isEmpty() ? null : merged;
+			});
+		splitFeature(
+			modelMigrator,
+			mergedFeature,
+			asList(
+				personFirstName.getName(),
+				personLastName.getName()),
+			value -> {
+				// a few more checks should be performed in a realistic context
+				if (value == null)
+					return Collections.emptyList();
+				String[] split = value.toString().split("\\s+");
+				return Arrays.asList(split);
 			}
 		);
 
