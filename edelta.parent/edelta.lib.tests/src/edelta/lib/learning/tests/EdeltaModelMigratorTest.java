@@ -3648,11 +3648,11 @@ public class EdeltaModelMigratorTest {
 					.collect(Collectors.joining(" "));
 				if (mergedValue.isEmpty())
 					return null;
-				var nameElementObject = EcoreUtil.create(nameElement);
-				// since it's a containment feature, setting it will also
-				// add it to the resource
-				nameElementObject.eSet(nameElementAttribute, mergedValue);
-				return nameElementObject;
+				return EdeltaEcoreUtil.createInstance(nameElement,
+					// since it's a containment feature, setting it will also
+					// add it to the resource
+					o -> o.eSet(nameElementAttribute, mergedValue)
+				);
 			}
 		);
 
@@ -3706,16 +3706,18 @@ public class EdeltaModelMigratorTest {
 					.collect(Collectors.joining(" "));
 				if (mergedValue.isEmpty())
 					return null;
-				var nameElementObject = EcoreUtil.create(nameElement);
-				nameElementObject.eSet(nameElementAttribute, mergedValue);
-				// since it's a NON containment feature, we have to manually
-				// add it to the resource
-				EObject firstObject = (EObject) values.iterator().next();
-				var containingFeature = firstObject.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
-				containerCollection.add(nameElementObject);
-				return nameElementObject;
+				return EdeltaEcoreUtil.createInstance(nameElement,
+					o -> {
+						o.eSet(nameElementAttribute, mergedValue);
+						// since it's a NON containment feature, we have to manually
+						// add it to the resource
+						EObject firstObject = (EObject) values.iterator().next();
+						var containingFeature = firstObject.eContainingFeature();
+						@SuppressWarnings("unchecked")
+						List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
+						containerCollection.add(o);
+					}
+				);
 			}
 		);
 
@@ -3795,14 +3797,13 @@ public class EdeltaModelMigratorTest {
 				// it will assigned to the first feature value
 				// that is, in case of a single element, the lastName will be empty
 				String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
-				var splitted = Stream.of(split)
-					.map(val -> {
-						var splitObj = EcoreUtil.create(nameElement);
-						splitObj.eSet(nameElementAttribute, val);
-						return splitObj;
-					})
+				return Stream.of(split)
+					.map(val -> 
+						EdeltaEcoreUtil.createInstance(nameElement,
+							o -> o.eSet(nameElementAttribute, val)
+						)
+					)
 					.collect(Collectors.toList());
-				return splitted;
 			}
 		);
 
@@ -3851,19 +3852,16 @@ public class EdeltaModelMigratorTest {
 				// it will assigned to the first feature value
 				// that is, in case of a single element, the lastName will be empty
 				String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
-				var splitted = Stream.of(split)
-					.map(val -> {
-						var splitObj = EcoreUtil.create(nameElement);
-						splitObj.eSet(nameElementAttribute, val);
-
-						// since it's a NON containment feature, we have to manually
-						// add it to the resource
-						containerCollection.add(splitObj);
-
-						return splitObj;
-					})
+				return Stream.of(split)
+					.map(val -> EdeltaEcoreUtil.createInstance(nameElement,
+						o -> {
+							o.eSet(nameElementAttribute, val);
+							// since it's a NON containment feature, we have to manually
+							// add it to the resource
+							containerCollection.add(o);
+						}
+					))
 					.collect(Collectors.toList());
-				return splitted;
 			}
 		);
 
@@ -4308,9 +4306,9 @@ public class EdeltaModelMigratorTest {
 						// since this is NOT a containment reference
 						// the referred oldValue has already been copied
 						var copy = modelMigrator.getMigrated((EObject) oldValue);
-						var created = EcoreUtil.create(extracted);
-						// the bidirectionality is implied
-						created.eSet(extractedRef, copy);
+						var created = EdeltaEcoreUtil.createInstance(extracted,
+							o -> o.eSet(extractedRef, copy)
+						);
 						return created;
 					})
 					.collect(Collectors.toList());
@@ -4383,10 +4381,10 @@ public class EdeltaModelMigratorTest {
 						// since this is NOT a containment reference
 						// the referred oldValue has already been copied
 						var copy = modelMigrator.getMigrated((EObject) oldValue);
-						var created = EcoreUtil.create(extracted);
-						// the bidirectionality is implied
-						created.eSet(extractedRef, copy);
-						return created;
+						return EdeltaEcoreUtil.createInstance(extracted,
+							// the bidirectionality is implied
+							o -> o.eSet(extractedRef, copy)
+						);
 					})
 					.collect(Collectors.toList());
 				// in the new object set the value or values (transparently)
