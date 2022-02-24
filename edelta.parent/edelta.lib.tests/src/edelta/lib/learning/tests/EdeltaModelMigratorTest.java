@@ -3989,6 +3989,163 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	/**
+	 * The evolved metamodel and model are just the same as the original ones, as
+	 * long the merge and split can be inversed. For example, in this test we have
+	 * "firstname lastname" or no string at all. If you had "lastname" then the
+	 * model wouldn't be reversable.
+	 * 
+	 * The input directory and the output one will contain the same data.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testSplitAndMergeFeatureContainment() throws IOException {
+		var subdir = "splitAndMergeFeatureContainment/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		EStructuralFeature personName = person.getEStructuralFeature("name");
+		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		EAttribute nameElementAttribute =
+				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
+		assertNotNull(nameElementAttribute);
+		Collection<EStructuralFeature> splitFeatures = splitFeature(
+			modelMigrator,
+			personName,
+			asList(
+				"firstName",
+				"lastName"),
+			value -> {
+				// a few more checks should be performed in a realistic context
+				if (value == null)
+					return Collections.emptyList();
+				var obj = (EObject) value;
+				// of course if there's no space and only one element in the array
+				// it will assigned to the first feature value
+				// that is, in case of a single element, the lastName will be empty
+				String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+				return Stream.of(split)
+					.map(val -> 
+						EdeltaEcoreUtil.createInstance(nameElement,
+							o -> o.eSet(nameElementAttribute, val)
+						)
+					)
+					.collect(Collectors.toList());
+			}
+		);
+		mergeFeatures(
+			modelMigrator,
+			"name",
+			splitFeatures,
+			values -> {
+				// it is responsibility of the merger to create an instance
+				// of the (now single) referred object with the result
+				// of merging the original objects' values
+				var mergedValue = values.stream()
+					.map(EObject.class::cast)
+					.map(o -> 
+						"" + o.eGet(nameElementAttribute))
+					.collect(Collectors.joining(" "));
+				if (mergedValue.isEmpty())
+					return null;
+				return EdeltaEcoreUtil.createInstance(nameElement,
+					// since it's a containment feature, setting it will also
+					// add it to the resource
+					o -> o.eSet(nameElementAttribute, mergedValue)
+				);
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testMergeAndSplitFeaturesContainment() throws IOException {
+		var subdir = "mergeAndSplitFeaturesContainment/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		EAttribute nameElementAttribute =
+				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
+		var personFirstName = person.getEStructuralFeature("firstName");
+		var personLastName = person.getEStructuralFeature("lastName");
+		assertNotNull(nameElementAttribute);
+		EStructuralFeature mergedFeature =  mergeFeatures(
+			modelMigrator,
+			"name",
+			asList(
+				personFirstName,
+				personLastName),
+			values -> {
+				// it is responsibility of the merger to create an instance
+				// of the (now single) referred object with the result
+				// of merging the original objects' values
+				var mergedValue = values.stream()
+					.map(EObject.class::cast)
+					.map(o -> 
+						"" + o.eGet(nameElementAttribute))
+					.collect(Collectors.joining(" "));
+				if (mergedValue.isEmpty())
+					return null;
+				return EdeltaEcoreUtil.createInstance(nameElement,
+					// since it's a containment feature, setting it will also
+					// add it to the resource
+					o -> o.eSet(nameElementAttribute, mergedValue)
+				);
+			}
+		);
+		splitFeature(
+			modelMigrator,
+			mergedFeature,
+			asList(
+				personFirstName.getName(),
+				personLastName.getName()),
+			value -> {
+				// a few more checks should be performed in a realistic context
+				if (value == null)
+					return Collections.emptyList();
+				var obj = (EObject) value;
+				// of course if there's no space and only one element in the array
+				// it will assigned to the first feature value
+				// that is, in case of a single element, the lastName will be empty
+				String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+				return Stream.of(split)
+					.map(val -> 
+						EdeltaEcoreUtil.createInstance(nameElement,
+							o -> o.eSet(nameElementAttribute, val)
+						)
+					)
+					.collect(Collectors.toList());
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
