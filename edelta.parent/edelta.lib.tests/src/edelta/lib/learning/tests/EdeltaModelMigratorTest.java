@@ -3731,8 +3731,8 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testSplitAttributesWithValueSplitter() throws IOException {
-		var subdir = "splitAttributesWithValueSplitter/";
+	public void testSplitAttributes() throws IOException {
+		var subdir = "splitAttributes/";
 
 		var modelMigrator = setupMigrator(
 			subdir,
