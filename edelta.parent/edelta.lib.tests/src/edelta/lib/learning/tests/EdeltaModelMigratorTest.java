@@ -3758,7 +3758,7 @@ public class EdeltaModelMigratorTest {
 	 * objects that have been merged (indeed they don't make sense anymore in the
 	 * evolved model).
 	 * 
-	 * This requires some additional effert, but it shows that we can do it!
+	 * This requires some additional effort, but it shows that we can do it!
 	 * 
 	 * @throws IOException
 	 */
@@ -3865,7 +3865,7 @@ public class EdeltaModelMigratorTest {
 					return Collections.emptyList();
 				String[] split = value.toString().split("\\s+");
 				return Arrays.asList(split);
-			}
+			}, null
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -3915,7 +3915,7 @@ public class EdeltaModelMigratorTest {
 						)
 					)
 					.collect(Collectors.toList());
-			}
+			}, null
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -3987,7 +3987,7 @@ public class EdeltaModelMigratorTest {
 						}
 					))
 					.collect(Collectors.toList());
-			}
+			}, null
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -3999,6 +3999,19 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	/**
+	 * Since the referred NameElements are shared among Person objects, we cannot
+	 * simply remove the already splitted objects because they will have to be processed again
+	 * during the model migration. So we need to keep the associations between
+	 * objects that have been splitted into several ones (2 in this example), so that the sharing
+	 * semantics is kept in the evolved models, and we can then remove the old
+	 * objects that have been splitted (indeed they don't make sense anymore in the
+	 * evolved model).
+	 * 
+	 * This requires some additional effort, but it shows that we can do it!
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void testSplitFeatureNonContainmentShared() throws IOException {
 		var subdir = "splitFeatureNonContainmentShared/";
@@ -4015,6 +4028,10 @@ public class EdeltaModelMigratorTest {
 		EAttribute nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		assertNotNull(nameElementAttribute);
+
+		// keep track of objects that are splitted into several ones
+		var splitted = new HashMap<EObject, Collection<EObject>>();
+
 		splitFeature(
 			modelMigrator,
 			personName,
@@ -4027,6 +4044,12 @@ public class EdeltaModelMigratorTest {
 					return Collections.emptyList();
 				var obj = (EObject) value;
 
+				var alreadySplitted = splitted.get(obj);
+				if (alreadySplitted != null)
+					return alreadySplitted;
+				// we have already processed the object collection
+				// and created a merged one so we reuse it
+
 				var containingFeature = obj.eContainingFeature();
 				@SuppressWarnings("unchecked")
 				var containerCollection =
@@ -4036,17 +4059,26 @@ public class EdeltaModelMigratorTest {
 				// it will assigned to the first feature value
 				// that is, in case of a single element, the lastName will be empty
 				String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
-				return Stream.of(split)
+				var result = Stream.of(split)
 					.map(val -> EdeltaEcoreUtil.createInstance(nameElement,
 						o -> {
 							o.eSet(nameElementAttribute, val);
+
 							// since it's a NON containment feature, we have to manually
 							// add it to the resource
 							containerCollection.add(o);
 						}
 					))
 					.collect(Collectors.toList());
-			}
+
+				// record that we associated the several objects (2 in this example)
+				// to the original one, which is now splitted
+				splitted.put(obj, result);
+
+				return result;
+			},
+			// now we can remove the stale objects that have been splitted
+			() -> EcoreUtil.removeAll(splitted.keySet())
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -4092,7 +4124,7 @@ public class EdeltaModelMigratorTest {
 					return Collections.emptyList();
 				String[] split = value.toString().split("\\s+");
 				return Arrays.asList(split);
-			}
+			}, null
 		);
 		mergeFeatures(
 			modelMigrator,
@@ -4161,7 +4193,7 @@ public class EdeltaModelMigratorTest {
 					return Collections.emptyList();
 				String[] split = value.toString().split("\\s+");
 				return Arrays.asList(split);
-			}
+			}, null
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -4221,7 +4253,7 @@ public class EdeltaModelMigratorTest {
 						)
 					)
 					.collect(Collectors.toList());
-			}
+			}, null
 		);
 		mergeFeatures(
 			modelMigrator,
@@ -4318,7 +4350,7 @@ public class EdeltaModelMigratorTest {
 						)
 					)
 					.collect(Collectors.toList());
-			}
+			}, null
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -4392,7 +4424,7 @@ public class EdeltaModelMigratorTest {
 						}
 					))
 					.collect(Collectors.toList());
-			}
+			}, null
 		);
 		mergeFeatures(
 			modelMigrator,
@@ -5052,7 +5084,7 @@ public class EdeltaModelMigratorTest {
 	private Collection<EStructuralFeature> splitFeature(EdeltaModelMigrator modelMigrator,
 			final EStructuralFeature featureToSplit,
 			final Collection<String> newFeatureNames,
-			Function<Object, Collection<?>> valueSplitter) {
+			Function<Object, Collection<?>> valueSplitter, Runnable postCopy) {
 		// THIS SHOULD BE CHECKED IN THE FINAL IMPLEMENTATION
 		// ALSO MAKE SURE IT'S A SINGLE FEATURE, NOT MULTI (TO BE DONE ALSO IN refactorings.lib)
 		// ALSO MAKE SURE IT'S NOT BIDIRECTIONAL (TO BE DONE ALSO IN refactorings.lib)
@@ -5079,7 +5111,8 @@ public class EdeltaModelMigratorTest {
 								break;
 							newObj.eSet(splitFeature, splittedValues.next());
 						}
-					}
+					},
+					postCopy
 				);
 			else
 				modelMigrator.copyRule(
@@ -5092,7 +5125,8 @@ public class EdeltaModelMigratorTest {
 								break;
 							newObj.eSet(splitFeature, splittedValues.next());
 						}
-					}
+					},
+					postCopy
 				);
 		}
 		return splitFeatures;
