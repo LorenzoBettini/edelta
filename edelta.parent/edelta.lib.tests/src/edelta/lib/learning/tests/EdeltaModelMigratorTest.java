@@ -3742,6 +3742,66 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
+	public void testMergeFeaturesNonContainmentShared() throws IOException {
+		var subdir = "mergeFeaturesNonContainmentShared/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		EAttribute nameElementAttribute =
+				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
+		assertNotNull(nameElementAttribute);
+		mergeFeatures(
+			modelMigrator,
+			"name",
+			asList(
+				person.getEStructuralFeature("firstName"),
+				person.getEStructuralFeature("lastName")),
+			values -> {
+				// it is responsibility of the merger to create an instance
+				// of the (now single) referred object with the result
+				// of merging the original objects' values
+				if (values.isEmpty())
+					return null;
+				@SuppressWarnings("unchecked")
+				var objectValues =
+					(List<EObject>) values;
+
+				EObject firstObject = objectValues.iterator().next();
+				var containingFeature = firstObject.eContainingFeature();
+				@SuppressWarnings("unchecked")
+				List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
+
+				var mergedValue = objectValues.stream()
+					.map(o -> 
+						"" + o.eGet(nameElementAttribute))
+					.collect(Collectors.joining(" "));
+				return EdeltaEcoreUtil.createInstance(nameElement,
+					o -> {
+						o.eSet(nameElementAttribute, mergedValue);
+						// since it's a NON containment feature, we have to manually
+						// add it to the resource
+						containerCollection.add(o);
+					}
+				);
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
 	public void testSplitAttributes() throws IOException {
 		var subdir = "splitAttributes/";
 
