@@ -37,7 +37,7 @@ public class EdeltaEPackageManagerTest {
 	private static final String MY_ECORE = "My.ecore";
 	private static final String TESTECORES = "testecores/";
 	private static final String TESTDATA = "testdata/";
-	private static final String UNCHANGED = "unchanged/";
+	private static final String SIMPLE_TEST_DATA = "simpleTestData/";
 	private static final String MY_CLASS = "MyClass.xmi";
 	private static final String MY_ROOT = "MyRoot.xmi";
 
@@ -78,26 +78,26 @@ public class EdeltaEPackageManagerTest {
 
 	@Test
 	public void testSaveModels() throws IOException {
-		packageManager.loadEcoreFile(TESTDATA+UNCHANGED+MY_ECORE);
-		packageManager.loadModelFile(TESTDATA+UNCHANGED+MY_CLASS);
-		packageManager.loadModelFile(TESTDATA+UNCHANGED+MY_ROOT);
+		packageManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		packageManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
+		packageManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
 		packageManager.saveEcores(MODIFIED);
 		packageManager.saveModels(MODIFIED);
 		assertFilesAreEquals(
-				EXPECTATIONS+"/"+UNCHANGED+"/"+	MY_ECORE,
+				EXPECTATIONS+"/"+SIMPLE_TEST_DATA+"/"+	MY_ECORE,
 				MODIFIED+"/"+MY_ECORE);
 		assertFilesAreEquals(
-				EXPECTATIONS+"/"+UNCHANGED+"/"+	MY_CLASS,
+				EXPECTATIONS+"/"+SIMPLE_TEST_DATA+"/"+	MY_CLASS,
 				MODIFIED+"/"+MY_CLASS);
 		assertFilesAreEquals(
-				EXPECTATIONS+"/"+UNCHANGED+"/"+	MY_ROOT,
+				EXPECTATIONS+"/"+SIMPLE_TEST_DATA+"/"+	MY_ROOT,
 				MODIFIED+"/"+MY_ROOT);
 	}
 
 	@Test
 	public void testSaveModelsAfterRemovingClass() throws IOException {
-		packageManager.loadEcoreFile(TESTDATA+UNCHANGED+MY_ECORE);
-		packageManager.loadModelFile(TESTDATA+UNCHANGED+MY_ROOT);
+		packageManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		packageManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
 
 		var ePackage = packageManager.getEPackage(MYPACKAGE);
 		// modify the ecore model by removing MyBaseClass
@@ -118,7 +118,7 @@ public class EdeltaEPackageManagerTest {
 				output+"/"+MY_ROOT);
 
 		Assertions.assertThatThrownBy(
-			() -> packageManager.loadModelFile(TESTDATA+UNCHANGED+MY_CLASS))
+			() -> packageManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS))
 			.hasCauseInstanceOf(ClassNotFoundException.class)
 			.hasMessageContaining(MY_CLASS);
 	}
@@ -126,18 +126,18 @@ public class EdeltaEPackageManagerTest {
 	@Test
 	public void testSaveModelAfterCreatingResource() throws IOException {
 		var additionalPackageManager = new EdeltaEPackageManager();
-		additionalPackageManager.loadEcoreFile(TESTDATA+UNCHANGED+MY_ECORE);
-		var prototypeResource = (XMIResource) additionalPackageManager.loadModelFile(TESTDATA+UNCHANGED+MY_CLASS);
+		additionalPackageManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		var prototypeResource = (XMIResource) additionalPackageManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
 
 		// note that we use the same prototypeResource to create the
 		// two new resources, since we're only interested in the prototype's
 		// options and encoding. In this test this should be enough,
 		// since the models we create are based on the same ecore
-		packageManager.loadEcoreFile(TESTDATA+UNCHANGED+MY_ECORE);
+		packageManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
 		var myClassModelResource = packageManager
-			.createModelResource(TESTDATA+UNCHANGED+MY_CLASS, prototypeResource);
+			.createModelResource(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS, prototypeResource);
 		var myRootModelResource = packageManager
-			.createModelResource(TESTDATA+UNCHANGED+MY_ROOT, prototypeResource);
+			.createModelResource(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT, prototypeResource);
 		var myClassEClass = (EClass)
 			packageManager.getEPackage(MYPACKAGE).getEClassifier("MyClass");
 		myClassModelResource.getContents().add(EcoreUtil.create(myClassEClass));
@@ -162,13 +162,13 @@ public class EdeltaEPackageManagerTest {
 
 	@Test
 	public void testGetModelResourceMap() {
-		packageManager.loadEcoreFile(TESTDATA+UNCHANGED+MY_ECORE);
-		packageManager.loadModelFile(TESTDATA+UNCHANGED+MY_CLASS);
-		packageManager.loadModelFile(TESTDATA+UNCHANGED+MY_ROOT);
+		packageManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		packageManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
+		packageManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
 		var map = packageManager.getModelResourceMap();
 		assertThat(map.keySet())
 			.containsExactlyInAnyOrder(
-					TESTDATA+UNCHANGED+MY_CLASS,
-					TESTDATA+UNCHANGED+MY_ROOT);
+					TESTDATA+SIMPLE_TEST_DATA+MY_CLASS,
+					TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
 	}
 }

@@ -700,7 +700,7 @@ public class EdeltaModelMigratorTest {
 
 	@Test
 	public void testCopyUnchanged() throws IOException {
-		var subdir = "unchanged/";
+		var subdir = "simpleTestData/";
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("My.ecore"),
@@ -756,7 +756,7 @@ public class EdeltaModelMigratorTest {
 
 	@Test
 	public void testRenamedClass() throws IOException {
-		var subdir = "unchanged/";
+		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -781,7 +781,7 @@ public class EdeltaModelMigratorTest {
 
 	@Test
 	public void testRenamedFeature() throws IOException {
-		var subdir = "unchanged/";
+		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -860,7 +860,7 @@ public class EdeltaModelMigratorTest {
 
 	@Test
 	public void testRemovedContainmentFeature() throws IOException {
-		var subdir = "unchanged/";
+		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -883,7 +883,7 @@ public class EdeltaModelMigratorTest {
 
 	@Test
 	public void testRemovedNonContainmentFeature() throws IOException {
-		var subdir = "unchanged/";
+		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -906,7 +906,7 @@ public class EdeltaModelMigratorTest {
 
 	@Test
 	public void testRemovedNonReferredClass() throws IOException {
-		var subdir = "unchanged/";
+		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -929,7 +929,7 @@ public class EdeltaModelMigratorTest {
 
 	@Test
 	public void testRemovedReferredClass() throws IOException {
-		var subdir = "unchanged/";
+		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -2188,7 +2188,7 @@ public class EdeltaModelMigratorTest {
 
 	@Test
 	public void testElementAssociations() {
-		var subdir = "unchanged/";
+		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -2239,7 +2239,7 @@ public class EdeltaModelMigratorTest {
 
 	@Test
 	public void testReplaceWithCopy() throws IOException {
-		var subdir = "unchanged/";
+		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -2264,7 +2264,7 @@ public class EdeltaModelMigratorTest {
 
 	@Test
 	public void testReplaceWithCopyTwice() throws IOException {
-		var subdir = "unchanged/";
+		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -2763,7 +2763,7 @@ public class EdeltaModelMigratorTest {
 	 */
 	@Test
 	public void testGetMigratedInFeatureMigratorRule() throws IOException {
-		var subdir = "unchanged/";
+		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -2812,7 +2812,7 @@ public class EdeltaModelMigratorTest {
 	 */
 	@Test
 	public void testGetMigratedMultipleInFeatureMigratorRule() throws IOException {
-		var subdir = "unchanged/";
+		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
 			subdir,
