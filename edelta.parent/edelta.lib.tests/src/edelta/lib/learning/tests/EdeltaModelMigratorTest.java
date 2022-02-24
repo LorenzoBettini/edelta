@@ -4844,6 +4844,7 @@ public class EdeltaModelMigratorTest {
 //		this.checkNoDifferences(features, new EdeltaFeatureDifferenceFinder().ignoringName(),
 //				"The two features cannot be merged");
 		// ALSO MAKE SURE IT'S A SINGLE FEATURE, NOT MULTI (TO BE DONE ALSO IN refactorings.lib)
+		// ALSO MAKE SURE IT'S NOT BIDIRECTIONAL (TO BE DONE ALSO IN refactorings.lib)
 		var firstFeature = features.iterator().next();
 		final EClass owner = firstFeature.getEContainingClass();
 		final EStructuralFeature mergedFeature = createCopy(modelMigrator, firstFeature);
@@ -4892,6 +4893,7 @@ public class EdeltaModelMigratorTest {
 			Function<Object, Collection<?>> valueSplitter) {
 		// THIS SHOULD BE CHECKED IN THE FINAL IMPLEMENTATION
 		// ALSO MAKE SURE IT'S A SINGLE FEATURE, NOT MULTI (TO BE DONE ALSO IN refactorings.lib)
+		// ALSO MAKE SURE IT'S NOT BIDIRECTIONAL (TO BE DONE ALSO IN refactorings.lib)
 		var splitFeatures = newFeatureNames.stream()
 			.map(newName -> {
 				var newFeature = createCopy(modelMigrator, featureToSplit);
