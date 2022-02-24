@@ -3999,6 +3999,65 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testSplitFeatureNonContainmentShared() throws IOException {
+		var subdir = "splitFeatureNonContainmentShared/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		EStructuralFeature personName = person.getEStructuralFeature("name");
+		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		EAttribute nameElementAttribute =
+				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
+		assertNotNull(nameElementAttribute);
+		splitFeature(
+			modelMigrator,
+			personName,
+			asList(
+				"firstName",
+				"lastName"),
+			value -> {
+				// a few more checks should be performed in a realistic context
+				if (value == null)
+					return Collections.emptyList();
+				var obj = (EObject) value;
+
+				var containingFeature = obj.eContainingFeature();
+				@SuppressWarnings("unchecked")
+				var containerCollection =
+					(List<EObject>) obj.eContainer().eGet(containingFeature);
+
+				// of course if there's no space and only one element in the array
+				// it will assigned to the first feature value
+				// that is, in case of a single element, the lastName will be empty
+				String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+				return Stream.of(split)
+					.map(val -> EdeltaEcoreUtil.createInstance(nameElement,
+						o -> {
+							o.eSet(nameElementAttribute, val);
+							// since it's a NON containment feature, we have to manually
+							// add it to the resource
+							containerCollection.add(o);
+						}
+					))
+					.collect(Collectors.toList());
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	/**
 	 * The evolved metamodel and model are just the same as the original ones, as
 	 * long the merge and split can be inversed. For example, in this test we have
