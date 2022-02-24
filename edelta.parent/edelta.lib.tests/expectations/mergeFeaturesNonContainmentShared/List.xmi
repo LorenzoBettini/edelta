@@ -5,22 +5,12 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:person="http://cs.gssi.it/PersonMM"
     xsi:schemaLocation="http://cs.gssi.it/PersonMM PersonList.ecore">
-  <members name="//@nameElements.4"/>
+  <members name="//@nameElements.0"/>
   <members/>
-  <members name="//@nameElements.5"/>
-  <members name="//@nameElements.6"/>
-  <nameElements
-      nameElementValue="aFirstName1"/>
-  <nameElements
-      nameElementValue="aLastName1"/>
-  <nameElements
-      nameElementValue="aFirstName2"/>
-  <nameElements
-      nameElementValue="aLastName2"/>
+  <members name="//@nameElements.1"/>
+  <members name="//@nameElements.1"/>
   <nameElements
       nameElementValue="aFirstName1 aLastName1"/>
-  <nameElements
-      nameElementValue="aFirstName2 aLastName2"/>
   <nameElements
       nameElementValue="aFirstName2 aLastName2"/>
 </person:List>

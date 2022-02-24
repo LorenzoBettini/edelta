@@ -198,6 +198,12 @@ public class EdeltaModelMigratorTest {
 		}
 
 		public void copyRule(Predicate<EStructuralFeature> predicate, CopyProcedure procedure) {
+			copyRule(predicate, procedure, null);
+		}
+
+		public void copyRule(Predicate<EStructuralFeature> predicate,
+				CopyProcedure procedure,
+				Runnable postCopy) {
 			modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 				private static final long serialVersionUID = 1L;
 
@@ -227,6 +233,8 @@ public class EdeltaModelMigratorTest {
 				}
 			};
 			copyModels(modelCopier, basedir, originalModelManager, evolvingModelManager);
+			if (postCopy != null)
+				postCopy.run();
 			updateMigrationContext();
 		}
 
@@ -281,7 +289,7 @@ public class EdeltaModelMigratorTest {
 			return modelCopier.copy(o);
 		}
 
-		public Collection<?> getMigrated(Collection<?> objects) {
+		public <T> Collection<T> getMigrated(Collection<? extends T> objects) {
 			return modelCopier.copyAll(objects);
 		}
 
@@ -3570,7 +3578,7 @@ public class EdeltaModelMigratorTest {
 			asList(
 				personFirstName,
 				personLastName),
-			null);
+			null, null);
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
@@ -3604,7 +3612,7 @@ public class EdeltaModelMigratorTest {
 					.map(Object::toString)
 					.collect(Collectors.joining(" "));
 				return merged.isEmpty() ? null : merged;
-			}
+			}, null
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -3653,7 +3661,7 @@ public class EdeltaModelMigratorTest {
 					// add it to the resource
 					o -> o.eSet(nameElementAttribute, mergedValue)
 				);
-			}
+			}, null
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -3729,7 +3737,7 @@ public class EdeltaModelMigratorTest {
 						containerCollection.add(o);
 					}
 				);
-			}
+			}, null
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -3741,6 +3749,19 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	/**
+	 * Since the referred NameElements are shared among Person objects, we cannot
+	 * simply remove the merged objects because they will have to be processed again
+	 * during the model migration. So we need to keep the associations between
+	 * objects that have been merged into a single one, so that the sharing
+	 * semantics is kept in the evolved models, and we can then remove the old
+	 * objects that have been merged (indeed they don't make sense anymore in the
+	 * evolved model).
+	 * 
+	 * This requires some additional effert, but it shows that we can do it!
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void testMergeFeaturesNonContainmentShared() throws IOException {
 		var subdir = "mergeFeaturesNonContainmentShared/";
@@ -3756,6 +3777,10 @@ public class EdeltaModelMigratorTest {
 		EAttribute nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		assertNotNull(nameElementAttribute);
+
+		// keep track of objects that are merged into a single one
+		var merged = new HashMap<Collection<EObject>, EObject>();
+
 		mergeFeatures(
 			modelMigrator,
 			"name",
@@ -3772,6 +3797,12 @@ public class EdeltaModelMigratorTest {
 				var objectValues =
 					(List<EObject>) values;
 
+				var alreadyMerged = merged.get(objectValues);
+				if (alreadyMerged != null)
+					return alreadyMerged;
+				// we have already processed the object collection
+				// and created a merged one so we reuse it
+
 				EObject firstObject = objectValues.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
 				@SuppressWarnings("unchecked")
@@ -3787,9 +3818,18 @@ public class EdeltaModelMigratorTest {
 						// since it's a NON containment feature, we have to manually
 						// add it to the resource
 						containerCollection.add(o);
+
+						// record that we associated the single object o
+						// to the original ones, which are now merged
+						merged.put(objectValues, o);
 					}
 				);
-			}
+			},
+			// now we can remove the stale objects that have been merged
+			() -> EcoreUtil.removeAll(
+					merged.keySet().stream()
+						.flatMap(Collection<EObject>::stream)
+						.collect(Collectors.toList()))
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -4005,7 +4045,7 @@ public class EdeltaModelMigratorTest {
 					.map(Object::toString)
 					.collect(Collectors.joining(" "));
 				return merged.isEmpty() ? null : merged;
-			}
+			}, null
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -4049,7 +4089,7 @@ public class EdeltaModelMigratorTest {
 					.map(Object::toString)
 					.collect(Collectors.joining(" "));
 				return merged.isEmpty() ? null : merged;
-			});
+			}, null);
 		splitFeature(
 			modelMigrator,
 			mergedFeature,
@@ -4144,7 +4184,7 @@ public class EdeltaModelMigratorTest {
 					// add it to the resource
 					o -> o.eSet(nameElementAttribute, mergedValue)
 				);
-			}
+			}, null
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -4195,7 +4235,7 @@ public class EdeltaModelMigratorTest {
 					// add it to the resource
 					o -> o.eSet(nameElementAttribute, mergedValue)
 				);
-			}
+			}, null
 		);
 		splitFeature(
 			modelMigrator,
@@ -4329,7 +4369,7 @@ public class EdeltaModelMigratorTest {
 						containerCollection.add(o);
 					}
 				);
-			}
+			}, null
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -4889,17 +4929,18 @@ public class EdeltaModelMigratorTest {
 	 * Merges the given features into a single new feature in the containing class.
 	 * The features must be compatible (same containing class, same type, same
 	 * cardinality, etc).
-	 * 
 	 * @param newFeatureName
 	 * @param features
 	 * @param valueMerger if not null, it is used to merge the values of the original
 	 * features in the new model
+	 * @param postCopy TODO
+	 * 
 	 * @return the new feature added to the containing class of the features
 	 */
 	private EStructuralFeature mergeFeatures(EdeltaModelMigrator modelMigrator,
 			final String newFeatureName,
 			final Collection<EStructuralFeature> features,
-			Function<Collection<?>, Object> valueMerger) {
+			Function<Collection<?>, Object> valueMerger, Runnable postCopy) {
 		// THIS SHOULD BE CHECKED IN THE FINAL IMPLEMENTATION (ALREADY DONE IN refactorings.lib)
 //		this.checkNoDifferences(features, new EdeltaFeatureDifferenceFinder().ignoringName(),
 //				"The two features cannot be merged");
@@ -4926,7 +4967,8 @@ public class EdeltaModelMigratorTest {
 						var merged = valueMerger.apply(
 							modelMigrator.getMigrated(oldValues));
 						newObj.eSet(mergedFeature, merged);
-					}
+					},
+					postCopy
 				);
 			} else {
 				modelMigrator.copyRule(
@@ -4940,7 +4982,8 @@ public class EdeltaModelMigratorTest {
 								.collect(Collectors.toList());
 						var merged = valueMerger.apply(oldValues);
 						newObj.eSet(mergedFeature, merged);
-					}
+					},
+					postCopy
 				);
 			}
 		}
