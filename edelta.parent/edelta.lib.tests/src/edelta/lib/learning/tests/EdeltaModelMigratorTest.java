@@ -3666,11 +3666,15 @@ public class EdeltaModelMigratorTest {
 	}
 
 	/**
-	 * It might not make much sense to merge features concerning non containment references,
-	 * but we just check that we can do it. In this example, the merged NameElement objects
-	 * will be the new referred objects. The previous ones are still copied and will be
-	 * contained in the evolved model. In a more realistic implementation we might have
-	 * to remove NameElements that are not referred anymore.
+	 * It might not make much sense to merge features concerning non containment
+	 * references, but we just check that we can do it.
+	 * 
+	 * We assume that referred NameElements are not shared among Person, so that we
+	 * remove them while performing the copy (and split and merging), otherwise we
+	 * end up with a few additional objects in the final model.
+	 * 
+	 * In a more realistic scenario, the modeler will have to take care of that,
+	 * e.g., by later removing NameElements that are not referred anymore.
 	 * 
 	 * @throws IOException
 	 */
@@ -3699,22 +3703,29 @@ public class EdeltaModelMigratorTest {
 				// it is responsibility of the merger to create an instance
 				// of the (now single) referred object with the result
 				// of merging the original objects' values
-				var mergedValue = values.stream()
-					.map(EObject.class::cast)
+				if (values.isEmpty())
+					return null;
+				@SuppressWarnings("unchecked")
+				var objectValues =
+					(List<EObject>) values;
+
+				EObject firstObject = objectValues.iterator().next();
+				var containingFeature = firstObject.eContainingFeature();
+				@SuppressWarnings("unchecked")
+				List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
+
+				// assume that a referred NameElement object is not shared
+				EcoreUtil.removeAll(objectValues);
+
+				var mergedValue = objectValues.stream()
 					.map(o -> 
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
-				if (mergedValue.isEmpty())
-					return null;
 				return EdeltaEcoreUtil.createInstance(nameElement,
 					o -> {
 						o.eSet(nameElementAttribute, mergedValue);
 						// since it's a NON containment feature, we have to manually
 						// add it to the resource
-						EObject firstObject = (EObject) values.iterator().next();
-						var containingFeature = firstObject.eContainingFeature();
-						@SuppressWarnings("unchecked")
-						List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
 						containerCollection.add(o);
 					}
 				);
@@ -3816,6 +3827,16 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	/**
+	 * We assume that referred NameElements are not shared among Person, so that we
+	 * remove them while performing the copy (and split and merging), otherwise we
+	 * end up with a few additional objects in the final model.
+	 * 
+	 * In a more realistic scenario, the modeler will have to take care of that,
+	 * e.g., by later removing NameElements that are not referred anymore.
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void testSplitFeatureNonContainment() throws IOException {
 		var subdir = "splitFeatureNonContainment/";
@@ -3846,7 +3867,11 @@ public class EdeltaModelMigratorTest {
 
 				var containingFeature = obj.eContainingFeature();
 				@SuppressWarnings("unchecked")
-				List<EObject> containerCollection = (List<EObject>) obj.eContainer().eGet(containingFeature);
+				var containerCollection =
+					(List<EObject>) obj.eContainer().eGet(containingFeature);
+
+				// assume that a referred NameElement object is not shared
+				EcoreUtil.remove(obj);
 
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
@@ -4191,6 +4216,7 @@ public class EdeltaModelMigratorTest {
 				var containerCollection =
 					(List<EObject>) obj.eContainer().eGet(containingFeature);
 
+				// assume that a referred NameElement object is not shared
 				EcoreUtil.remove(obj);
 
 				// of course if there's no space and only one element in the array
@@ -4228,6 +4254,7 @@ public class EdeltaModelMigratorTest {
 				@SuppressWarnings("unchecked")
 				List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
 
+				// assume that a referred NameElement object is not shared
 				EcoreUtil.removeAll(objectValues);
 
 				var mergedValue = objectValues.stream()
