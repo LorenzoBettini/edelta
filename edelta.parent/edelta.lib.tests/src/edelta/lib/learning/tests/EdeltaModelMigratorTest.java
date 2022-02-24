@@ -4472,6 +4472,144 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	/**
+	 * See the Javadoc of
+	 * {@link #testSplitFeatureNonContainmentShared()}
+	 * and
+	 * {@link #testMergeFeaturesNonContainmentShared()}
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testSplitAndMergeFeaturesNonContainmentShared() throws IOException {
+		var subdir = "splitFeatureNonContainmentShared/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		EStructuralFeature personName = person.getEStructuralFeature("name");
+		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		EAttribute nameElementAttribute =
+				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
+		assertNotNull(nameElementAttribute);
+
+		// keep track of objects that are splitted into several ones
+		var splitted = new HashMap<EObject, Collection<EObject>>();
+
+		Collection<EStructuralFeature> splitFeatures = splitFeature(
+			modelMigrator,
+			personName,
+			asList(
+				"firstName",
+				"lastName"),
+			value -> {
+				// a few more checks should be performed in a realistic context
+				if (value == null)
+					return Collections.emptyList();
+				var obj = (EObject) value;
+
+				var alreadySplitted = splitted.get(obj);
+				if (alreadySplitted != null)
+					return alreadySplitted;
+				// we have already processed the object collection
+				// and created a merged one so we reuse it
+
+				var containingFeature = obj.eContainingFeature();
+				@SuppressWarnings("unchecked")
+				var containerCollection =
+					(List<EObject>) obj.eContainer().eGet(containingFeature);
+
+				// of course if there's no space and only one element in the array
+				// it will assigned to the first feature value
+				// that is, in case of a single element, the lastName will be empty
+				String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+				var result = Stream.of(split)
+					.map(val -> EdeltaEcoreUtil.createInstance(nameElement,
+						o -> {
+							o.eSet(nameElementAttribute, val);
+
+							// since it's a NON containment feature, we have to manually
+							// add it to the resource
+							containerCollection.add(o);
+						}
+					))
+					.collect(Collectors.toList());
+
+				// record that we associated the several objects (2 in this example)
+				// to the original one, which is now splitted
+				splitted.put(obj, result);
+
+				return result;
+			},
+			// now we can remove the stale objects that have been splitted
+			() -> EcoreUtil.removeAll(splitted.keySet())
+		);
+
+		// keep track of objects that are merged into a single one
+		var merged = new HashMap<Collection<EObject>, EObject>();
+
+		mergeFeatures(
+			modelMigrator,
+			"name",
+			splitFeatures,
+			values -> {
+				// it is responsibility of the merger to create an instance
+				// of the (now single) referred object with the result
+				// of merging the original objects' values
+				if (values.isEmpty())
+					return null;
+				@SuppressWarnings("unchecked")
+				var objectValues =
+					(List<EObject>) values;
+
+				var alreadyMerged = merged.get(objectValues);
+				if (alreadyMerged != null)
+					return alreadyMerged;
+				// we have already processed the object collection
+				// and created a merged one so we reuse it
+
+				EObject firstObject = objectValues.iterator().next();
+				var containingFeature = firstObject.eContainingFeature();
+				@SuppressWarnings("unchecked")
+				List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
+
+				var mergedValue = objectValues.stream()
+					.map(o -> 
+						"" + o.eGet(nameElementAttribute))
+					.collect(Collectors.joining(" "));
+				return EdeltaEcoreUtil.createInstance(nameElement,
+					o -> {
+						o.eSet(nameElementAttribute, mergedValue);
+						// since it's a NON containment feature, we have to manually
+						// add it to the resource
+						containerCollection.add(o);
+
+						// record that we associated the single object o
+						// to the original ones, which are now merged
+						merged.put(objectValues, o);
+					}
+				);
+			},
+			// now we can remove the stale objects that have been merged
+			() -> EcoreUtil.removeAll(
+					merged.keySet().stream()
+						.flatMap(Collection<EObject>::stream)
+						.collect(Collectors.toList()))
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"mergeFeaturesNonContainmentShared/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
