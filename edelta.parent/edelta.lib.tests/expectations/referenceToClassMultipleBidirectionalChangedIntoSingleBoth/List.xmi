@@ -11,16 +11,16 @@
   </members>
   <members firstname="second"
       lastname="person">
-    <works/>
+    <works workPlace="//@wplaces.1"/>
   </members>
   <members firstname="third"
       lastname="person">
-    <works workPlace="//@wplaces.1"/>
+    <works/>
   </members>
   <members firstname="without position"
       lastname="person"/>
   <wplaces persons="//@members.0/@works"
       address="address1"/>
-  <wplaces persons="//@members.2/@works"
+  <wplaces persons="//@members.1/@works"
       address="address2"/>
 </person:List>
