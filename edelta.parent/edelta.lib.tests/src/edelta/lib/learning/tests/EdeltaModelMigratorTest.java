@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -107,24 +106,30 @@ public class EdeltaModelMigratorTest {
 		private Map<EObject, EObject> mapOfCopiedEcores;
 		private EdeltaModelCopier modelCopier;
 
+		@FunctionalInterface
 		public static interface CopyProcedure
 				extends Procedure3<EStructuralFeature, EObject, EObject> {
-
 		}
 
+		@FunctionalInterface
 		public static interface AttributeTransformer
 				extends Function3<EAttribute, EObject, Object, Object> {
-
 		}
 
+		@FunctionalInterface
 		public static interface AttributeValueTransformer
 				extends Function<Object, Object> {
 
 		}
 
+		@FunctionalInterface
 		public static interface FeatureMigrator
 				extends Function3<EStructuralFeature, EObject, EObject, EStructuralFeature> {
+		}
 
+		@FunctionalInterface
+		public static interface EObjectFunction
+				extends Function<EObject, EObject> {
 		}
 
 		public EdeltaModelMigrator(String basedir, EdeltaModelManager originalModelManager, EdeltaModelManager evolvingModelManager) {
@@ -259,6 +264,21 @@ public class EdeltaModelMigratorTest {
 			updateMigrationContext();
 		}
 
+		public void createInstanceRule(Predicate<EClass> predicate, EObjectFunction function) {
+			modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				protected EObject createCopy(EObject eObject) {
+					if (predicate.test(eObject.eClass()))
+						return function.apply(eObject);
+					return super.createCopy(eObject);
+				}
+			};
+			copyModels(modelCopier, basedir, originalModelManager, evolvingModelManager);
+			updateMigrationContext();
+		}
+
 		private void updateMigrationContext() {
 			// here we copy the Ecores and models that have been migrated
 			var backup = new EdeltaModelManager();
@@ -296,7 +316,7 @@ public class EdeltaModelMigratorTest {
 			return modelCopier.copyAll(objects);
 		}
 
-		public EObject getOriginal(EObject o) {
+		public <T extends EObject> T getOriginal(T o) {
 			return modelCopier.getOriginal(o);
 		}
 
@@ -427,8 +447,9 @@ public class EdeltaModelMigratorTest {
 			return mapped;
 		}
 
-		public EObject getOriginal(EObject o) {
-			return ecoreCopyMap.inverse().get(o);
+		@SuppressWarnings("unchecked")
+		public <T extends EObject> T getOriginal(T o) {
+			return (T) ecoreCopyMap.inverse().get(o);
 		}
 
 		private boolean isStillThere(EObject target) {
@@ -4870,19 +4891,19 @@ public class EdeltaModelMigratorTest {
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("PersonList.ecore"),
-			of() // TODO "List.xmi"
+			of("List.xmi")
 		);
 
 		var person = getEClass(evolvingModelManager, "PersonList", "Person");
-		var genreFeature = person.getEStructuralFeature("gender");
-		enumToSubclasses(modelMigrator, (EAttribute) genreFeature);
+		var genreAttribute = (EAttribute) person.getEStructuralFeature("gender");
+		enumToSubclasses(modelMigrator, genreAttribute);
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
 			subdir,
 			of("PersonList.ecore"),
-			of() // TODO "List.xmi"
+			of("List.xmi")
 		);
 	}
 
@@ -5557,25 +5578,39 @@ public class EdeltaModelMigratorTest {
 	 * @param attr
 	 * @return the collection of created subclasses
 	 */
-	public Collection<EClass> enumToSubclasses(EdeltaModelMigrator modelMigrator, EAttribute attr) {
+	private Collection<EClass> enumToSubclasses(EdeltaModelMigrator modelMigrator, EAttribute attr) {
 		// CHECK THAT IT'S AN ENUM (already done in refactorings.lib)
 		var type = (EEnum) attr.getEAttributeType();
-		List<EClass> createdSubclasses = new ArrayList<>();
+		// map the literal string to the corresponding created Subclass
+		Map<String, EClass> createdSubclasses = new HashMap<>();
 		var owner = attr.getEContainingClass();
 		EdeltaUtils.makeAbstract(owner);
 		var containingPackage = owner.getEPackage();
 		var literals = type.getELiterals();
 		for (final EEnumLiteral literal : literals) {
 			// ensureEClassifierNameIsUnique (already done in refactorings.lib)
+			var literalString = literal.getLiteral();
 			var subclassName = 
-					StringExtensions.toFirstUpper(literal.getLiteral().toLowerCase());
-			var subClassForLiteral = EdeltaUtils.newEClass(subclassName);
-			subClassForLiteral.getESuperTypes().add(owner);
-			containingPackage.getEClassifiers().add(subClassForLiteral);
-			createdSubclasses.add(subClassForLiteral);
+				StringExtensions.toFirstUpper(literalString.toLowerCase());
+			createdSubclasses.put(literalString, EdeltaUtils.newEClass(subclassName,
+				c -> {
+					c.getESuperTypes().add(owner);
+					containingPackage.getEClassifiers().add(c);
+				}
+			));
 		}
 		// will also implicitly remove the attribute of this type
 		EdeltaUtils.removeElement(type);
-		return createdSubclasses;
+		modelMigrator.createInstanceRule(
+			modelMigrator.isRelatedTo(owner),
+			oldObj -> {
+				var literalValue =
+					oldObj.eGet(modelMigrator.getOriginal(attr)).toString();
+				var correspondingSubclass =
+					createdSubclasses.get(literalValue);
+				return EcoreUtil.create(correspondingSubclass);
+			}
+		);
+		return createdSubclasses.values();
 	}
 }

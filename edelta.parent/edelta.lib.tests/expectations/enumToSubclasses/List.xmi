@@ -5,11 +5,13 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:person="http://cs.gssi.it/PersonMM"
     xsi:schemaLocation="http://cs.gssi.it/PersonMM PersonList.ecore">
-  <members firstname="MaleFirstName"
+  <members xsi:type="person:Male"
+      firstname="MaleFirstName"
       lastname="MaleLastName"/>
-  <members firstname="FemaleFirstName"
-      lastname="FemaleLastName"
-      gender="FEMALE"/>
-  <members firstname="UnspecifiedFirstName"
+  <members xsi:type="person:Female"
+      firstname="FemaleFirstName"
+      lastname="FemaleLastName"/>
+  <members xsi:type="person:Male"
+      firstname="UnspecifiedFirstName"
       lastname="UnspecifiedLastName"/>
 </person:List>
