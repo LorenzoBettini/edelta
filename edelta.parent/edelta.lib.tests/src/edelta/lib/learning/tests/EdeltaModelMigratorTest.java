@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,6 +38,8 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
+import org.eclipse.emf.ecore.EEnum;
+import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
@@ -4860,6 +4863,29 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testEnumToSubclasses() throws IOException {
+		var subdir = "enumToSubclasses/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of() // TODO "List.xmi"
+		);
+
+		var person = getEClass(evolvingModelManager, "PersonList", "Person");
+		var genreFeature = person.getEStructuralFeature("gender");
+		enumToSubclasses(modelMigrator, (EAttribute) genreFeature);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of() // TODO "List.xmi"
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
@@ -5518,5 +5544,38 @@ public class EdeltaModelMigratorTest {
 				);
 		}
 		return splitFeatures;
+	}
+
+	/**
+	 * Given an EAttribute, expected to have an EEnum type, creates a subclass of
+	 * the containing class for each value of the referred EEnum (each subclass is
+	 * given a name corresponding to the the EEnumLiteral, all lowercase but the
+	 * first letter, for example, given the literal "LITERAL1", the subclass is
+	 * given the name "Literal1"). The attribute will then be removed and so will
+	 * the EEnum. The original containing EClass is made abstract.
+	 * 
+	 * @param attr
+	 * @return the collection of created subclasses
+	 */
+	public Collection<EClass> enumToSubclasses(EdeltaModelMigrator modelMigrator, EAttribute attr) {
+		// CHECK THAT IT'S AN ENUM (already done in refactorings.lib)
+		var type = (EEnum) attr.getEAttributeType();
+		List<EClass> createdSubclasses = new ArrayList<>();
+		var owner = attr.getEContainingClass();
+		EdeltaUtils.makeAbstract(owner);
+		var containingPackage = owner.getEPackage();
+		var literals = type.getELiterals();
+		for (final EEnumLiteral literal : literals) {
+			// ensureEClassifierNameIsUnique (already done in refactorings.lib)
+			var subclassName = 
+					StringExtensions.toFirstUpper(literal.getLiteral().toLowerCase());
+			var subClassForLiteral = EdeltaUtils.newEClass(subclassName);
+			subClassForLiteral.getESuperTypes().add(owner);
+			containingPackage.getEClassifiers().add(subClassForLiteral);
+			createdSubclasses.add(subClassForLiteral);
+		}
+		// will also implicitly remove the attribute of this type
+		EdeltaUtils.removeElement(type);
+		return createdSubclasses;
 	}
 }
