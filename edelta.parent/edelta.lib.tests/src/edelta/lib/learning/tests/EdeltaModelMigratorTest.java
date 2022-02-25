@@ -4907,6 +4907,32 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testSubclassesToEnum() throws IOException {
+		var subdir = "subclassesToEnum/";
+		
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of() // TODO "List.xmi"
+		);
+
+		var personList = evolvingModelManager.getEPackage("PersonList");
+		subclassesToEnum(modelMigrator,
+			"Gender",
+			asList(
+				(EClass) personList.getEClassifier("Male"),
+				(EClass) personList.getEClassifier("Female")));
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of() // TODO "List.xmi"
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
@@ -5612,5 +5638,54 @@ public class EdeltaModelMigratorTest {
 			}
 		);
 		return createdSubclasses.values();
+	}
+
+	/**
+	 * Given a collection of subclasses, which are expected to be direct subclasses
+	 * of an EClass, say superclass, generates an EEnum (in the superclass' package)
+	 * with the specified name, representing the inheritance relation, with an
+	 * EEnumLiteral for each subclass (the name is the name of the subclass in
+	 * uppercase); the subclasses are removed, and an attributed is added to the
+	 * superclass with the created EEnum as type (the name is the name of the EEnum,
+	 * first letter lowercase).
+	 * 
+	 * For example, given the name "BaseType" and the collection of classes
+	 * {"Derived1", "Derived2"} subclasses of the superclass "Base", it creates the
+	 * EEnum "BaseType" with literals "DERIVED1", "DERIVED2", (the values will be
+	 * incremental numbers starting from 0, according to the order of the subclasses
+	 * in the collection) it adds to "Base" the EAttribute "baseType" of type
+	 * "BaseType". The EClasses "Derived1" and "Derived2" are removed from the
+	 * package.
+	 * 
+	 * @param name       the name for the created EEnum
+	 * @param subclasses
+	 * @return the created EAttribute
+	 */
+	public EAttribute subclassesToEnum(EdeltaModelMigrator modelMigrator,
+			String name, final Collection<EClass> subclasses) {
+		// TO BE DONE (already implemented in refactorings.lib) this.checkNoFeatures(subclasses);
+		// ORIGINAL : final EClass superclass = this.getSingleDirectSuperclass(subclasses);
+		// SIMPLIFIED HERE: TAKE THE FIRST ONE
+		var superclass = subclasses.iterator().next().getESuperTypes().get(0);
+		var containingPackage = superclass.getEPackage();
+		var createdEnum = EdeltaUtils.newEEnum(name, e -> {
+			var i = 0;
+			for (var subclass : subclasses) {
+				// WAS val enumLiteralName = ensureEClassifierNameIsUnique
+				// (superclass, subClass.name.toUpperCase)
+				var literalName = subclass.getName().toUpperCase();
+				var val = i++;
+				e.getELiterals().add(
+					EdeltaUtils.newEEnumLiteral(literalName,
+						l -> l.setValue(val)));
+			}
+			containingPackage.getEClassifiers().add(e);
+		});
+		var attribute = EdeltaUtils.newEAttribute(
+			fromTypeToFeatureName(createdEnum), createdEnum);
+		superclass.getEStructuralFeatures().add(attribute);
+		EdeltaUtils.makeConcrete(superclass);
+		EdeltaUtils.removeAllElements(subclasses);
+		return attribute;
 	}
 }
