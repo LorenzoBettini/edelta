@@ -4946,7 +4946,7 @@ public class EdeltaModelMigratorTest {
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("PersonList.ecore"),
-			of() // TODO "List.xmi"
+			of("List.xmi")
 		);
 
 		var personList = evolvingModelManager.getEPackage("PersonList");
@@ -4961,7 +4961,7 @@ public class EdeltaModelMigratorTest {
 			subdir,
 			subdir,
 			of("PersonList.ecore"),
-			of() // TODO "List.xmi"
+			of("List.xmi")
 		);
 	}
 
@@ -5700,6 +5700,8 @@ public class EdeltaModelMigratorTest {
 		// SIMPLIFIED HERE: TAKE THE FIRST ONE
 		var superclass = subclasses.iterator().next().getESuperTypes().get(0);
 		var containingPackage = superclass.getEPackage();
+		// map the subclass name to the EEnumLiteral
+		Map<String, EEnumLiteral> createdLiterals = new HashMap<>();
 		var createdEnum = EdeltaUtils.newEEnum(name, e -> {
 			var i = 0;
 			for (var subclass : subclasses) {
@@ -5709,7 +5711,12 @@ public class EdeltaModelMigratorTest {
 				var val = i++;
 				e.getELiterals().add(
 					EdeltaUtils.newEEnumLiteral(literalName,
-						l -> l.setValue(val)));
+						l -> {
+							l.setValue(val);
+							createdLiterals.put(subclass.getName(), l);
+						}
+					)
+				);
 			}
 			containingPackage.getEClassifiers().add(e);
 		});
@@ -5718,6 +5725,18 @@ public class EdeltaModelMigratorTest {
 		superclass.getEStructuralFeatures().add(attribute);
 		EdeltaUtils.makeConcrete(superclass);
 		EdeltaUtils.removeAllElements(subclasses);
+		modelMigrator.createInstanceRule(
+			modelMigrator.wasRelatedToAtLeastOneOf(subclasses),
+			oldObj -> {
+				var literal =
+					createdLiterals.get(oldObj.eClass().getName());
+				return EdeltaEcoreUtil.createInstance(
+					superclass,
+					newObj ->
+						newObj.eSet(attribute, literal)
+				);
+			}
+		);
 		return attribute;
 	}
 }
