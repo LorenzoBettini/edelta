@@ -438,6 +438,20 @@ public class EdeltaModelMigratorTest {
 			return getMapped(eStructuralFeature);
 		}
 
+		/**
+		 * Handles values for enums differently, since they are objects, so we must
+		 * retrieve the corresponding mapped enum literal, or we'll get a
+		 * {@link ClassCastException}.
+		 */
+		@Override
+		protected void copyAttributeValue(EAttribute eAttribute, EObject eObject, Object value, Setting setting) {
+			var dataType = eAttribute.getEAttributeType();
+			if (dataType instanceof EEnum) {
+				value = getMapped((EEnumLiteral) value);
+			}
+			super.copyAttributeValue(eAttribute, eObject, value, setting);
+		}
+
 		private <T extends EObject> T getMapped(T o) {
 			var value = ecoreCopyMap.get(o);
 			@SuppressWarnings("unchecked")
@@ -745,6 +759,24 @@ public class EdeltaModelMigratorTest {
 			subdir,
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void testCopyUnchangedWithEnums() throws IOException {
+		var subdir = "simpleTestData/";
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
 		);
 	}
 
