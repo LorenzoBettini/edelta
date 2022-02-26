@@ -4965,6 +4965,65 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	public void testEnumToSubclassesAndSubclassesToEnum() throws IOException {
+		var subdir = "enumToSubclasses/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var person = getEClass(evolvingModelManager, "PersonList", "Person");
+		var genreAttribute = (EAttribute) person.getEStructuralFeature("gender");
+		var genreName = genreAttribute.getEAttributeType().getName();
+
+		Collection<EClass> subclasses =
+			enumToSubclasses(modelMigrator, genreAttribute);
+
+		subclassesToEnum(modelMigrator,
+			genreName, // "Genre"
+			subclasses);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"subclassesToEnum/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	public void testSubclassesToEnumAndEnumToSubclasses() throws IOException {
+		var subdir = "subclassesToEnum/";
+		
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var personList = evolvingModelManager.getEPackage("PersonList");
+
+		EAttribute genreAttribute = subclassesToEnum(modelMigrator,
+			"Gender",
+			asList(
+				(EClass) personList.getEClassifier("Male"),
+				(EClass) personList.getEClassifier("Female")));
+
+		enumToSubclasses(modelMigrator, genreAttribute);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"enumToSubclasses/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
@@ -5693,7 +5752,7 @@ public class EdeltaModelMigratorTest {
 	 * @param subclasses
 	 * @return the created EAttribute
 	 */
-	public EAttribute subclassesToEnum(EdeltaModelMigrator modelMigrator,
+	private EAttribute subclassesToEnum(EdeltaModelMigrator modelMigrator,
 			String name, final Collection<EClass> subclasses) {
 		// TO BE DONE (already implemented in refactorings.lib) this.checkNoFeatures(subclasses);
 		// ORIGINAL : final EClass superclass = this.getSingleDirectSuperclass(subclasses);
