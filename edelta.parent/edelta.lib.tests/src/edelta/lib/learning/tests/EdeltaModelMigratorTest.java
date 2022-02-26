@@ -5024,6 +5024,76 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
+	/**
+	 * enumToSubclasses, pushDown twice, merge attributes twice, pull up the merged
+	 * attributes.
+	 * 
+	 * Just for testing, the refactorings might not make sense.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testComposeOperations1() throws IOException {
+		var subdir = "enumToSubclasses/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var person = getEClass(evolvingModelManager, "PersonList", "Person");
+		var genreAttribute = (EAttribute) person.getEStructuralFeature("gender");
+
+		Collection<EClass> subclasses =
+			enumToSubclasses(modelMigrator, genreAttribute);
+
+		var personFirstName = person.getEStructuralFeature("firstname");
+		var personLastName = person.getEStructuralFeature("lastname");
+
+		// push down in both subclasses
+		pushDown(modelMigrator,
+			personFirstName,
+			subclasses);
+		pushDown(modelMigrator,
+			personLastName,
+			subclasses);
+
+		// merge for both subclasses
+		subclasses.forEach(
+			subclass ->
+				mergeFeatures(
+					modelMigrator,
+					"name",
+					asList(
+						subclass.getEStructuralFeature("firstname"),
+						subclass.getEStructuralFeature("lastname")),
+					values -> {
+						var merged = values.stream()
+							.filter(Objects::nonNull)
+							.map(Object::toString)
+							.collect(Collectors.joining(" "));
+						return merged.isEmpty() ? null : merged;
+					}, null
+				)
+		);
+
+		// pull up the merged features (name) in the superclass
+		pullUp(modelMigrator, person,
+			subclasses.stream()
+				.map(c -> c.getEStructuralFeature("name"))
+				.collect(Collectors.toList())
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			"composeOperations1/",
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String origdir,
