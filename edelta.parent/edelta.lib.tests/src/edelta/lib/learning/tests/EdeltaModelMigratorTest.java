@@ -132,7 +132,9 @@ public class EdeltaModelMigratorTest {
 				extends Function<EObject, EObject> {
 		}
 
-		public EdeltaModelMigrator(String basedir, EdeltaModelManager originalModelManager, EdeltaModelManager evolvingModelManager) {
+		public EdeltaModelMigrator(String basedir,
+				EdeltaModelManager originalModelManager,
+				EdeltaModelManager evolvingModelManager) {
 			this.basedir = basedir;
 			this.originalModelManager = originalModelManager;
 			this.evolvingModelManager = evolvingModelManager;
@@ -157,7 +159,8 @@ public class EdeltaModelMigratorTest {
 			copyModels(modelCopier, baseDir, originalModelManager, evolvingModelManager);
 		}
 
-		private void copyModels(EdeltaModelCopier edeltaModelCopier, String baseDir, EdeltaModelManager from, EdeltaModelManager into) {
+		private void copyModels(EdeltaModelCopier edeltaModelCopier, String baseDir,
+				EdeltaModelManager from, EdeltaModelManager into) {
 			var map = from.getModelResourceMap();
 			for (var entry : map.entrySet()) {
 				var originalResource = (XMIResource) entry.getValue();
@@ -173,18 +176,21 @@ public class EdeltaModelMigratorTest {
 			edeltaModelCopier.copyReferences();
 		}
 
-		public void transformAttributeValueRule(Predicate<EAttribute> predicate, AttributeValueTransformer function) {
+		public void transformAttributeValueRule(Predicate<EAttribute> predicate,
+				AttributeValueTransformer function) {
 			modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				protected void copyAttributeValue(EAttribute eAttribute, EObject eObject, Object value, Setting setting) {
+				protected void copyAttributeValue(EAttribute eAttribute,
+						EObject eObject, Object value, Setting setting) {
 					if (predicate.test(eAttribute))
 						value = function.apply(value);
 					super.copyAttributeValue(eAttribute, eObject, value, setting);
 				};
 			};
-			copyModels(modelCopier, basedir, originalModelManager, evolvingModelManager);
+			copyModels(modelCopier, basedir,
+					originalModelManager, evolvingModelManager);
 			updateMigrationContext();
 		}
 
@@ -194,18 +200,21 @@ public class EdeltaModelMigratorTest {
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				protected void copyAttributeValue(EAttribute eAttribute, EObject eObject, Object value, Setting setting) {
+				protected void copyAttributeValue(EAttribute eAttribute,
+						EObject eObject, Object value, Setting setting) {
 					if (predicate.test(eAttribute)) {
 						value = function.apply(eAttribute, eObject, value);
 					}
 					super.copyAttributeValue(eAttribute, eObject, value, setting);
 				};
 			};
-			copyModels(modelCopier, basedir, originalModelManager, evolvingModelManager);
+			copyModels(modelCopier, basedir,
+					originalModelManager, evolvingModelManager);
 			updateMigrationContext();
 		}
 
-		public void copyRule(Predicate<EStructuralFeature> predicate, CopyProcedure procedure) {
+		public void copyRule(Predicate<EStructuralFeature> predicate,
+				CopyProcedure procedure) {
 			copyRule(predicate, procedure, null);
 		}
 
@@ -216,42 +225,49 @@ public class EdeltaModelMigratorTest {
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				protected void copyContainment(EReference eReference, EObject eObject, EObject copyEObject) {
+				protected void copyContainment(EReference eReference,
+						EObject eObject, EObject copyEObject) {
 					applyCopyRuleOrElse(eReference, eObject, copyEObject,
 						() -> super.copyContainment(eReference, eObject, copyEObject));
 				}
 
 				@Override
-				protected void copyAttribute(EAttribute eAttribute, EObject eObject, EObject copyEObject) {
+				protected void copyAttribute(EAttribute eAttribute,
+						EObject eObject, EObject copyEObject) {
 					applyCopyRuleOrElse(eAttribute, eObject, copyEObject,
 						() -> super.copyAttribute(eAttribute, eObject, copyEObject));
 				}
 
 				@Override
-				protected void copyReference(EReference eReference, EObject eObject, EObject copyEObject) {
+				protected void copyReference(EReference eReference,
+						EObject eObject, EObject copyEObject) {
 					applyCopyRuleOrElse(eReference, eObject, copyEObject,
 						() -> super.copyReference(eReference, eObject, copyEObject));
 				}
 
-				private void applyCopyRuleOrElse(EStructuralFeature feature, EObject eObject, EObject copyEObject, Runnable runnable) {
+				private void applyCopyRuleOrElse(EStructuralFeature feature,
+						EObject eObject, EObject copyEObject, Runnable runnable) {
 					if (predicate.test(feature))
 						procedure.apply(feature, eObject, copyEObject);
 					else
 						runnable.run();
 				}
 			};
-			copyModels(modelCopier, basedir, originalModelManager, evolvingModelManager);
+			copyModels(modelCopier, basedir,
+					originalModelManager, evolvingModelManager);
 			if (postCopy != null)
 				postCopy.run();
 			updateMigrationContext();
 		}
 
-		public void featureMigratorRule(Predicate<EStructuralFeature> predicate, Function3<EStructuralFeature, EObject, EObject, EStructuralFeature> function) {
+		public void featureMigratorRule(Predicate<EStructuralFeature> predicate,
+				FeatureMigrator function) {
 			modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				protected Setting getTarget(EStructuralFeature eStructuralFeature, EObject eObject, EObject copyEObject) {
+				protected Setting getTarget(EStructuralFeature eStructuralFeature,
+						EObject eObject, EObject copyEObject) {
 					EStructuralFeature targetEStructuralFeature = null;
 					if (predicate.test(eStructuralFeature))
 						targetEStructuralFeature = function.apply(eStructuralFeature, eObject, copyEObject);
@@ -260,11 +276,13 @@ public class EdeltaModelMigratorTest {
 						: ((InternalEObject) copyEObject).eSetting(targetEStructuralFeature);
 				}
 			};
-			copyModels(modelCopier, basedir, originalModelManager, evolvingModelManager);
+			copyModels(modelCopier, basedir,
+					originalModelManager, evolvingModelManager);
 			updateMigrationContext();
 		}
 
-		public void createInstanceRule(Predicate<EClass> predicate, EObjectFunction function) {
+		public void createInstanceRule(Predicate<EClass> predicate,
+				EObjectFunction function) {
 			modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 				private static final long serialVersionUID = 1L;
 
@@ -275,7 +293,8 @@ public class EdeltaModelMigratorTest {
 					return super.createCopy(eObject);
 				}
 			};
-			copyModels(modelCopier, basedir, originalModelManager, evolvingModelManager);
+			copyModels(modelCopier, basedir,
+					originalModelManager, evolvingModelManager);
 			updateMigrationContext();
 		}
 
@@ -320,7 +339,8 @@ public class EdeltaModelMigratorTest {
 			return modelCopier.getOriginal(o);
 		}
 
-		public boolean isRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
+		public boolean isRelatedTo(ENamedElement origEcoreElement,
+				ENamedElement evolvedEcoreElement) {
 			return modelCopier.isRelatedTo(origEcoreElement, evolvedEcoreElement);
 		}
 
@@ -328,7 +348,8 @@ public class EdeltaModelMigratorTest {
 			return origEcoreElement -> isRelatedTo(origEcoreElement, evolvedEcoreElement);
 		}
 
-		public boolean wasRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
+		public boolean wasRelatedTo(ENamedElement origEcoreElement,
+				ENamedElement evolvedEcoreElement) {
 			return modelCopier.wasRelatedTo(origEcoreElement, evolvedEcoreElement);
 		}
 
@@ -336,12 +357,14 @@ public class EdeltaModelMigratorTest {
 			return origEcoreElement -> wasRelatedTo(origEcoreElement, evolvedEcoreElement);
 		}
 	
-		public boolean wasRelatedToAtLeastOneOf(ENamedElement origEcoreElement, Collection<? extends ENamedElement> evolvedEcoreElements) {
+		public boolean wasRelatedToAtLeastOneOf(ENamedElement origEcoreElement,
+				Collection<? extends ENamedElement> evolvedEcoreElements) {
 			return evolvedEcoreElements.stream()
 				.anyMatch(e -> wasRelatedTo(origEcoreElement, e));
 		}
 
-		public <T extends ENamedElement> Predicate<T> wasRelatedToAtLeastOneOf(Collection<? extends ENamedElement> evolvedEcoreElements) {
+		public <T extends ENamedElement> Predicate<T> wasRelatedToAtLeastOneOf(
+				Collection<? extends ENamedElement> evolvedEcoreElements) {
 			return origEcoreElement -> wasRelatedToAtLeastOneOf(origEcoreElement, evolvedEcoreElements);
 		}
 
@@ -379,7 +402,8 @@ public class EdeltaModelMigratorTest {
 			};
 		}
 	
-		public AttributeTransformer multiplicityAwareTranformer(EAttribute attribute, Function<Object, Object> transformer) {
+		public AttributeTransformer multiplicityAwareTranformer(EAttribute attribute,
+				Function<Object, Object> transformer) {
 			return (feature, oldObj, oldValue) ->
 				// if we come here the old attribute was set
 				EdeltaEcoreUtil.unwrapCollection(
