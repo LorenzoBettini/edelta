@@ -5695,8 +5695,7 @@ public class EdeltaModelMigratorTest {
 					modelMigrator.wasRelatedTo(firstFeature),
 					(feature, oldObj, newObj) -> {
 						var originalFeatures = features.stream()
-								.map(modelMigrator::getOriginal)
-								.map(EStructuralFeature.class::cast);
+								.map(modelMigrator::getOriginal);
 						// for references we must get the copied EObject
 						var oldValues = originalFeatures
 								.map(f -> oldObj.eGet(f))
@@ -5712,8 +5711,7 @@ public class EdeltaModelMigratorTest {
 					modelMigrator.wasRelatedTo(firstFeature),
 					(feature, oldObj, newObj) -> {
 						var originalFeatures = features.stream()
-								.map(modelMigrator::getOriginal)
-								.map(EStructuralFeature.class::cast);
+								.map(modelMigrator::getOriginal);
 						var oldValues = originalFeatures
 								.map(f -> oldObj.eGet(f))
 								.collect(Collectors.toList());
