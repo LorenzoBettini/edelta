@@ -126,18 +126,22 @@ public class EdeltaModelManagerTest {
 	@Test
 	public void testSaveModelAfterCreatingResource() throws IOException {
 		var additionalModelManager = new EdeltaModelManager();
-		additionalModelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
-		var prototypeResource = (XMIResource) additionalModelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
+		var prototypeEcoreResource =
+			(XMIResource) additionalModelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		var prototypeModelResource =
+			(XMIResource) additionalModelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
 
 		// note that we use the same prototypeResource to create the
 		// two new resources, since we're only interested in the prototype's
 		// options and encoding. In this test this should be enough,
 		// since the models we create are based on the same ecore
+		modelManager.createEcoreResource(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE,
+				prototypeEcoreResource);
 		modelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
 		var myClassModelResource = modelManager
-			.createModelResource(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS, prototypeResource);
+			.createModelResource(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS, prototypeModelResource);
 		var myRootModelResource = modelManager
-			.createModelResource(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT, prototypeResource);
+			.createModelResource(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT, prototypeModelResource);
 		var myClassEClass = (EClass)
 			modelManager.getEPackage(MYPACKAGE).getEClassifier("MyClass");
 		myClassModelResource.getContents().add(EcoreUtil.create(myClassEClass));
@@ -161,14 +165,16 @@ public class EdeltaModelManagerTest {
 	}
 
 	@Test
-	public void testGetModelResourceMap() {
+	public void testGetResourceMap() {
 		modelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
 		modelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
 		modelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
-		var map = modelManager.getModelResourceMap();
-		assertThat(map.keySet())
+		assertThat(modelManager.getModelResourceMap().keySet())
 			.containsExactlyInAnyOrder(
-					TESTDATA+SIMPLE_TEST_DATA+MY_CLASS,
-					TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
+				TESTDATA+SIMPLE_TEST_DATA+MY_CLASS,
+				TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
+		assertThat(modelManager.getEcoreResourceMap().keySet())
+			.containsExactlyInAnyOrder(
+				TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
 	}
 }
