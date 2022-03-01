@@ -152,13 +152,6 @@ def findDuplicatedFeaturesInSubclasses(EPackage ePackage) {
 	return map
 }
 
-def allEStructuralFeatures(EPackage ePackage) {
-	ePackage.
-		allEClasses.
-		map[EStructuralFeatures].
-		flatten
-}
-
 /**
  * Finds all the features corresponding to a redundant container,
  * that is, a missed opposite reference to the container.
