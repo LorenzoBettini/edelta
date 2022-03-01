@@ -10,8 +10,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      MAVEN_OPTS: --add-opens java.base/java.lang=ALL-UNNAMED
+# not required anymore, thanks to Guice 5
+#    env:
+#      MAVEN_OPTS: --add-opens java.base/java.lang=ALL-UNNAMED
 
     steps:
     - uses: actions/checkout@v2
