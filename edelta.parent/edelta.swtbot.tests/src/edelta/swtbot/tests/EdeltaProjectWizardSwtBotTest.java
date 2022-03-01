@@ -41,8 +41,13 @@ public class EdeltaProjectWizardSwtBotTest extends EdeltaAbstractSwtbotTest {
 
 //		System.out.println("Waiting for build...");
 //		waitForBuild();
+		// maybe before we were not waiting for auto build,
+		// which also creates the edelta-gen folder?
+		// note the edelta.ui.wizard.EdeltaExampleProjectTemplate.generateProjects(IProjectGenerator)
+		// does not create edelta-gen folder
 		System.out.println("Waiting for auto build...");
 		Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+		System.out.println("Auto build done.");
 		assertErrorsInProject(0);
 		getProjectTreeItem(TEST_PROJECT)
 			.expand()
