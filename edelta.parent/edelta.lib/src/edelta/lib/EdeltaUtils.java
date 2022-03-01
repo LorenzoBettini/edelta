@@ -242,6 +242,21 @@ public class EdeltaUtils {
 	}
 
 	/**
+	 * Returns a list of all the {@link EStructuralFeature}s of the specified
+	 * {@link EPackage} and of the packages in the same {@link Resource}
+	 * and {@link ResourceSet}.
+	 * 
+	 * @param ePackage
+	 * @return an empty list if the ePackage is null
+	 * @see #packagesToInspect(EClassifier)
+	 */
+	public static List<EStructuralFeature> allEStructuralFeatures(EPackage ePackage) {
+		return allEClasses(ePackage).stream()
+				.flatMap(c -> c.getEStructuralFeatures().stream())
+				.collect(Collectors.toList());
+	}
+
+	/**
 	 * Sets the EOpposite property of the two references and sets the EReferenceType
 	 * accordingly (that is, if <tt>C1.r1</tt> and <tt>C2.r2</tt> are made
 	 * bidirectional, then, <tt>C1.r1</tt> will have type <tt>C2</tt> and

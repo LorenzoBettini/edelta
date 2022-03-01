@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: edelta.tests
 Bundle-Vendor: Lorenzo Bettini
-Bundle-Version: 2.8.0.qualifier
+Bundle-Version: 2.9.0.qualifier
 Bundle-SymbolicName: edelta.tests; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: edelta,
  edelta.testutils,
  org.eclipse.xtext.xbase.lib;bundle-version="2.13.0",
- org.objectweb.asm;bundle-version="9.0.0";resolution:=optional,
+ org.objectweb.asm;bundle-version="9.2.0";resolution:=optional,
  org.eclipse.xtext.ecore,
  org.eclipse.jdt.core,
  org.eclipse.xtext.testing,

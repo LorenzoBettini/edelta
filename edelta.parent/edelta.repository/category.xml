@@ -12,9 +12,9 @@
    <feature id="edelta.dependency.analyzer.feature.source" version="0.0.0">
       <category name="main.source"/>
    </feature>
-   <category-def name="main" label="Edelta 2.8.x"/>
-   <category-def name="main.source" label="Edelta 2.8.x (Sources)"/>
-   <repository-reference location="https://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.25.0/" enabled="true" />
+   <category-def name="main" label="Edelta 2.9.x"/>
+   <category-def name="main.source" label="Edelta 2.9.x (Sources)"/>
+   <repository-reference location="https://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.26.0/" enabled="true" />
    <repository-reference location="https://download.eclipse.org/releases/2021-12/" enabled="true" />
    <repository-reference location="https://download.eclipse.org/epsilon/updates/2.3/" enabled="true" />
 </site>
