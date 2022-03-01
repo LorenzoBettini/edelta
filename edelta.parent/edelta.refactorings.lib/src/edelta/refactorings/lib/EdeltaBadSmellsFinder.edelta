@@ -58,7 +58,7 @@ def findDuplicatedFeatures(EPackage ePackage) {
  * @param matcher
  */
  def findDuplicatedFeaturesCustom(EPackage ePackage, BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
-	val allFeatures = ePackage.allEStructuralFeatures.toList
+	val allFeatures = ePackage.allEStructuralFeatures
 	val result = findDuplicatedFeaturesInCollection(allFeatures, matcher)
 	result.entrySet.forEach[
 	 	logInfo[
@@ -150,13 +150,6 @@ def findDuplicatedFeaturesInSubclasses(EPackage ePackage) {
 		}
 	}
 	return map
-}
-
-def allEStructuralFeatures(EPackage ePackage) {
-	ePackage.
-		allEClasses.
-		map[EStructuralFeatures].
-		flatten
 }
 
 /**
