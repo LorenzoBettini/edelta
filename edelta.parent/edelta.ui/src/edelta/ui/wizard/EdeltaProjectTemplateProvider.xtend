@@ -52,8 +52,7 @@ final class EdeltaExampleProjectTemplate {
 			projectNatures += #[JavaCore.NATURE_ID, "org.eclipse.pde.PluginNature", XtextProjectHelper.NATURE_ID]
 			builderIds += #[JavaCore.BUILDER_ID, XtextProjectHelper.BUILDER_ID]
 			requiredBundles += "edelta.lib"
-			// shouldn't we also create the edelta-gen folder?
-			folders += #["src", "model"]
+			folders += #["src", "edelta-gen", "model"]
 			addFile("modified/README", '''
 				Modified ecores will be saved here (see Main.java file)
 			'''

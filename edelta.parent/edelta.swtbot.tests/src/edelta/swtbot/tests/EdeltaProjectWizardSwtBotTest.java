@@ -11,6 +11,7 @@ import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -46,7 +47,10 @@ public class EdeltaProjectWizardSwtBotTest extends EdeltaAbstractSwtbotTest {
 		// note the edelta.ui.wizard.EdeltaExampleProjectTemplate.generateProjects(IProjectGenerator)
 		// does not create edelta-gen folder
 		System.out.println("Waiting for auto build...");
+		IResourcesSetupUtil.waitForBuild();
+		Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_REFRESH, null);
 		Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+//		IResourcesSetupUtil.reallyWaitForAutoBuild();
 		System.out.println("Auto build done.");
 		assertErrorsInProject(0);
 		getProjectTreeItem(TEST_PROJECT)
