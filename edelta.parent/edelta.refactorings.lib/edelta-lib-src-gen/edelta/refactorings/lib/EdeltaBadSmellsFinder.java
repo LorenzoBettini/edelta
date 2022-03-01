@@ -80,7 +80,7 @@ public class EdeltaBadSmellsFinder extends EdeltaDefaultRuntime {
    * @param matcher
    */
   public Map<EStructuralFeature, List<EStructuralFeature>> findDuplicatedFeaturesCustom(final EPackage ePackage, final BiPredicate<EStructuralFeature, EStructuralFeature> matcher) {
-    final List<EStructuralFeature> allFeatures = IterableExtensions.<EStructuralFeature>toList(EdeltaUtils.allEStructuralFeatures(ePackage));
+    final List<EStructuralFeature> allFeatures = EdeltaUtils.allEStructuralFeatures(ePackage);
     final Map<EStructuralFeature, List<EStructuralFeature>> result = this.findDuplicatedFeaturesInCollection(allFeatures, matcher);
     final Consumer<Map.Entry<EStructuralFeature, List<EStructuralFeature>>> _function = (Map.Entry<EStructuralFeature, List<EStructuralFeature>> it) -> {
       final Supplier<String> _function_1 = () -> {
