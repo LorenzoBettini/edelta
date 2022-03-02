@@ -8,6 +8,7 @@ Require-Bundle: org.eclipse.swtbot.go;bundle-version="2.3.0",
  org.eclipse.core.resources,
  org.eclipse.xtext.ui.testing,
  org.eclipse.jdt.core,
- org.eclipse.ui.ide
+ org.eclipse.ui.ide,
+ org.eclipse.pde.core;bundle-version="3.15.0"
 Bundle-Vendor: Lorenzo Bettini
 Automatic-Module-Name: edelta.swtbot.tests
