@@ -13,6 +13,7 @@ import java.io.IOException;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.ClassNotFoundException;
@@ -165,7 +166,7 @@ public class EdeltaModelManagerTest {
 	}
 
 	@Test
-	public void testGetResourceMap() {
+	public void testClearModel() {
 		modelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
 		modelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
 		modelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
@@ -176,5 +177,35 @@ public class EdeltaModelManagerTest {
 		assertThat(modelManager.getEcoreResourceMap().keySet())
 			.containsExactlyInAnyOrder(
 				TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		modelManager.clearModels();
+		assertThat(modelManager.getModelResourceMap().keySet())
+			.isEmpty();
+		assertThat(modelManager.getEcoreResourceMap().keySet())
+			.containsExactlyInAnyOrder(
+				TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+	}
+
+	@Test
+	public void testCopyEcores() {
+		var otherModelManager = new EdeltaModelManager();
+		var ecoreResource =
+			(XMIResource) otherModelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+
+		var map = modelManager.copyEcores(otherModelManager, TESTDATA+SIMPLE_TEST_DATA);
+
+		Iterable<EObject> originalContents = () -> 
+			EcoreUtil.getAllContents(ecoreResource, true);
+
+		// NOT exactly, because we don't care about GenericType elements
+		assertThat(map.keySet())
+			.containsAnyElementsOf(originalContents);
+
+		Iterable<EObject> copiedContents = () -> 
+			EcoreUtil.getAllContents(
+				modelManager.getEcoreResourceMap().values().iterator().next(),
+				true);
+
+		assertThat(map.values())
+			.containsAnyElementsOf(copiedContents);
 	}
 }
