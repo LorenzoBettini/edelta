@@ -3,11 +3,6 @@ package edelta.swtbot.tests;
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 import static org.junit.Assert.assertTrue;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -54,18 +49,22 @@ public class EdeltaProjectWizardSwtBotTest extends EdeltaAbstractSwtbotTest {
 		Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
 		System.out.println("Auto build done.");
 		assertErrorsInProject(0);
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(TEST_PROJECT);
+//		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(TEST_PROJECT);
 		bot.waitUntil(new ICondition() {
 			@Override
 			public boolean test() throws Exception {
-				var expectedSrcGenFolderSubDir = "edelta-gen/com/example";
-				var srcGenFolder = project.getFolder(expectedSrcGenFolderSubDir);
-				System.out.println("contents of " + srcGenFolder);
-				System.out.println(Stream.of(srcGenFolder.members())
-						.map(IResource::getName)
-						.collect(Collectors.joining("\n")));
-				var genfile = srcGenFolder.getFile("Example.java");
-				return genfile.exists();
+				System.out.println("*** expanding " + TEST_PROJECT);
+				getProjectTreeItem(TEST_PROJECT)
+					.expand()
+					.expandNode("edelta-gen", "com.example", "Example.java");
+//				var expectedSrcGenFolderSubDir = "edelta-gen/com/example";
+//				var srcGenFolder = project.getFolder(expectedSrcGenFolderSubDir);
+//				System.out.println("contents of " + srcGenFolder);
+//				System.out.println(Stream.of(srcGenFolder.members())
+//						.map(IResource::getName)
+//						.collect(Collectors.joining("\n")));
+//				var genfile = srcGenFolder.getFile("Example.java");
+				return true;
 			}
 
 			@Override
