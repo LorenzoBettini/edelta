@@ -8,6 +8,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.pde.internal.core.PDECore;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
@@ -41,6 +42,23 @@ public class EdeltaProjectWizardSwtBotTest extends EdeltaAbstractSwtbotTest {
 		// creation of a project might require some time
 		bot.waitUntil(shellCloses(shell), SWTBotPreferences.TIMEOUT);
 		assertTrue("Project doesn't exist: " + TEST_PROJECT, isProjectCreated(TEST_PROJECT));
+
+		bot.waitUntil(new ICondition() {
+			@Override
+			public boolean test() throws Exception {
+				System.out.println("Waiting for the plugin model...");
+				return PDECore.getDefault().getModelManager().isInitialized();
+			}
+
+			@Override
+			public void init(SWTBot bot) {
+			}
+
+			@Override
+			public String getFailureMessage() {
+				return "Failed waiting for inizialize of plugin models";
+			}
+		});
 
 		// maybe before we were not waiting for auto build,
 		System.out.println("Waiting for auto build...");
