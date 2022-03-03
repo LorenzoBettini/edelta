@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edelta.lib;
 
 import java.io.File;
@@ -13,11 +10,13 @@ import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
 import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
@@ -25,14 +24,14 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 
 /**
- * Loads ecore files and corresponding {@link EPackage} elements.
+ * Loads Ecore files and model files, and provides some methods.
  * 
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaEPackageManager {
+public class EdeltaModelManager {
 
-	private static final Logger LOG = Logger.getLogger(EdeltaEPackageManager.class);
+	private static final Logger LOG = Logger.getLogger(EdeltaModelManager.class);
 
 	/**
 	 * Here we store the association between the Ecore path and the
@@ -54,7 +53,7 @@ public class EdeltaEPackageManager {
 	/**
 	 * Performs EMF initialization (resource factories and package registry)
 	 */
-	public EdeltaEPackageManager() {
+	public EdeltaModelManager() {
 		// Register the appropriate resource factory to handle all file extensions.
 		resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put
 			("ecore", 
@@ -168,21 +167,48 @@ public class EdeltaEPackageManager {
 	}
 
 	/**
-	 * Create a new {@link XMIResource} in the {@link ResourceSet}, using the passed
-	 * resource as a "prototype": it takes all its options and encoding.
+	 * Create a new {@link XMIResource} for an Ecore in the {@link ResourceSet},
+	 * using the passed resource as a "prototype": it takes all its options and
+	 * encoding.
+	 * 
+	 * @param path
+	 * @param prototypeResource
+	 * @return
+	 */
+	public Resource createEcoreResource(String path, XMIResource prototypeResource) {
+		return createResource(path, prototypeResource, ecoreResourceMap);
+	}
+
+	/**
+	 * Create a new {@link XMIResource} in the {@link ResourceSet},
+	 * using the passed resource as a "prototype": it takes all its options and
+	 * encoding.
 	 * 
 	 * @param path
 	 * @param prototypeResource
 	 * @return
 	 */
 	public Resource createModelResource(String path, XMIResource prototypeResource) {
+		return createResource(path, prototypeResource, modelResourceMap);
+	}
+
+	/**
+	 * Create a new {@link XMIResource} in the {@link ResourceSet}, using the passed
+	 * resource as a "prototype": it takes all its options and encoding.
+	 * 
+	 * @param path
+	 * @param prototypeResource
+	 * @param resourceMap 
+	 * @return
+	 */
+	private Resource createResource(String path, XMIResource prototypeResource, Map<String, Resource> resourceMap) {
 		var uri = createAbsoluteFileURI(path);
 		LOG.info("Creating " + path + " (URI: " + uri + ")");
 		var resource = (XMIResource) resourceSet.createResource(uri);
 		resource.getDefaultLoadOptions().putAll(prototypeResource.getDefaultLoadOptions());
 		resource.getDefaultSaveOptions().putAll(prototypeResource.getDefaultSaveOptions());
 		resource.setEncoding(prototypeResource.getEncoding());
-		modelResourceMap.put(path, resource);
+		resourceMap.put(path, resource);
 		return resource;
 	}
 
@@ -199,5 +225,35 @@ public class EdeltaEPackageManager {
 
 	public Map<String, Resource> getModelResourceMap() {
 		return modelResourceMap;
+	}
+
+	public Map<String, Resource> getEcoreResourceMap() {
+		return ecoreResourceMap;
+	}
+
+	public Map<EObject, EObject> copyEcores(EdeltaModelManager otherModelManager, String basedir) {
+		var otherEcoreResourceMap = otherModelManager.getEcoreResourceMap();
+		var ecoreCopier = new Copier();
+		for (var entry : otherEcoreResourceMap.entrySet()) {
+			var originalResource = (XMIResource) entry.getValue();
+			var p = Paths.get(entry.getKey());
+			final var fileName = p.getFileName().toString();
+			var newResource = this.createEcoreResource
+				(basedir + fileName, originalResource);
+			var root = originalResource.getContents().get(0);
+			newResource.getContents().add(ecoreCopier.copy(root));
+		}
+		ecoreCopier.copyReferences();
+		return ecoreCopier;
+	}
+
+	public void clearModels() {
+		var map = getModelResourceMap();
+		for (var entry : map.entrySet()) {
+			var resource = (XMIResource) entry.getValue();
+			resource.getResourceSet()
+				.getResources().remove(resource);
+		}
+		map.clear();
 	}
 }

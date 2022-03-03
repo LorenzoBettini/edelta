@@ -59,8 +59,8 @@ import edelta.edelta.EdeltaProgram;
 import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaEPackageManager;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaModelManager;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.util.EdeltaEcoreHelper;
@@ -212,7 +212,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	 * @param copiedEPackagesMap
 	 */
 	private AbstractEdelta createThisObject(final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
-		var edeltaRuntime = new EdeltaDefaultRuntime(new EdeltaEPackageManager() {
+		var edeltaRuntime = new EdeltaDefaultRuntime(new EdeltaModelManager() {
 				@Override
 				public EPackage getEPackage(String packageName) {
 					return copiedEPackagesMap.get(packageName);

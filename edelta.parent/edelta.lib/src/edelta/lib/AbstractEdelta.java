@@ -33,7 +33,7 @@ public abstract class AbstractEdelta {
 	/**
 	 * For loading ecores and all other runtime {@link EPackage} management.
 	 */
-	private EdeltaEPackageManager packageManager;
+	private EdeltaModelManager modelManager;
 
 	private Logger logger = Logger.getLogger(getClass());
 
@@ -42,7 +42,7 @@ public abstract class AbstractEdelta {
 	private Collection<AbstractEdelta> children = new ArrayList<>();
 
 	protected AbstractEdelta() {
-		packageManager = new EdeltaEPackageManager();
+		modelManager = new EdeltaModelManager();
 	}
 
 	/**
@@ -52,7 +52,7 @@ public abstract class AbstractEdelta {
 	 * @param other
 	 */
 	protected AbstractEdelta(AbstractEdelta other) {
-		this(other.packageManager);
+		this(other.modelManager);
 		other.children.add(this);
 		setIssuePresenter(other.issuePresenter);
 	}
@@ -60,10 +60,10 @@ public abstract class AbstractEdelta {
 	/**
 	 * Uses the passed {@link EdeltaEPackageManager}.
 	 * 
-	 * @param packageManager
+	 * @param modelManager
 	 */
-	protected AbstractEdelta(EdeltaEPackageManager packageManager) {
-		this.packageManager = packageManager;
+	protected AbstractEdelta(EdeltaModelManager modelManager) {
+		this.modelManager = modelManager;
 	}
 
 	/**
@@ -112,7 +112,7 @@ public abstract class AbstractEdelta {
 	}
 
 	public Resource loadEcoreFile(String path) {
-		return packageManager.loadEcoreFile(path);
+		return modelManager.loadEcoreFile(path);
 	}
 
 	/**
@@ -128,7 +128,7 @@ public abstract class AbstractEdelta {
 	 * @throws IOException 
 	 */
 	public void saveModifiedEcores(String outputPath) throws IOException {
-		packageManager.saveEcores(outputPath);
+		modelManager.saveEcores(outputPath);
 	}
 
 	public Logger getLogger() {
@@ -207,7 +207,7 @@ public abstract class AbstractEdelta {
 	}
 
 	private EPackage getEPackageFromPackageManager(String packageName) {
-		return packageManager.getEPackage(packageName);
+		return modelManager.getEPackage(packageName);
 	}
 
 	public EClassifier getEClassifier(String packageName, String classifierName) {

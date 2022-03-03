@@ -36,8 +36,8 @@ public class EdeltaDefaultRuntime extends AbstractEdelta {
 		stdLib = new EdeltaStandardLibrary(this);
 	}
 
-	public EdeltaDefaultRuntime(EdeltaEPackageManager packageManager) {
-		super(packageManager);
+	public EdeltaDefaultRuntime(EdeltaModelManager modelManager) {
+		super(modelManager);
 		stdLib = new EdeltaStandardLibrary(this);
 	}
 

@@ -13,6 +13,7 @@ import java.io.IOException;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.ClassNotFoundException;
@@ -20,16 +21,16 @@ import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.junit.Before;
 import org.junit.Test;
 
-import edelta.lib.EdeltaEPackageManager;
+import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaUtils;
 
 /**
- * Tests for the {@link EdeltaEPackageManager}.
+ * Tests for the {@link EdeltaModelManager}.
  * 
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaEPackageManagerTest {
+public class EdeltaModelManagerTest {
 
 	private static final String MYPACKAGE = "mypackage";
 	private static final String MODIFIED = "modified";
@@ -41,34 +42,34 @@ public class EdeltaEPackageManagerTest {
 	private static final String MY_CLASS = "MyClass.xmi";
 	private static final String MY_ROOT = "MyRoot.xmi";
 
-	private EdeltaEPackageManager packageManager;
+	private EdeltaModelManager modelManager;
 
 	@Before
 	public void init() throws IOException {
 		cleanDirectoryAndFirstSubdirectories(MODIFIED);
-		packageManager = new EdeltaEPackageManager();
+		modelManager = new EdeltaModelManager();
 	}
 
 	@Test
 	public void testGetEPackage() {
-		packageManager.loadEcoreFile(TESTECORES+MY_ECORE);
-		var ePackage = packageManager.getEPackage(MYPACKAGE);
+		modelManager.loadEcoreFile(TESTECORES+MY_ECORE);
+		var ePackage = modelManager.getEPackage(MYPACKAGE);
 		assertNotNull(ePackage);
-		var ecorePackage = packageManager.getEPackage("ecore");
+		var ecorePackage = modelManager.getEPackage("ecore");
 		assertSame(EcorePackage.eINSTANCE, ecorePackage);
 	}
 
 	@Test
 	public void testSaveModifiedEcoresAfterRemovingBaseClass() throws IOException {
-		packageManager.loadEcoreFile(TESTECORES+MY_ECORE);
+		modelManager.loadEcoreFile(TESTECORES+MY_ECORE);
 		// modify the ecore model by removing MyBaseClass
-		var ePackage = packageManager.getEPackage(MYPACKAGE);
+		var ePackage = modelManager.getEPackage(MYPACKAGE);
 		// modify the ecore model by removing MyBaseClass
 		// this will also remove existing references, so the model
 		// is still valid
 		EdeltaUtils.removeElement(
 			ePackage.getEClassifier("MyBaseClass"));
-		packageManager.saveEcores(MODIFIED);
+		modelManager.saveEcores(MODIFIED);
 		assertFilesAreEquals(
 				EXPECTATIONS+"/"+
 					"testSaveModifiedEcoresAfterRemovingBaseClass"+"/"+
@@ -78,11 +79,11 @@ public class EdeltaEPackageManagerTest {
 
 	@Test
 	public void testSaveModels() throws IOException {
-		packageManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
-		packageManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
-		packageManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
-		packageManager.saveEcores(MODIFIED);
-		packageManager.saveModels(MODIFIED);
+		modelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		modelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
+		modelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
+		modelManager.saveEcores(MODIFIED);
+		modelManager.saveModels(MODIFIED);
 		assertFilesAreEquals(
 				EXPECTATIONS+"/"+SIMPLE_TEST_DATA+"/"+	MY_ECORE,
 				MODIFIED+"/"+MY_ECORE);
@@ -96,10 +97,10 @@ public class EdeltaEPackageManagerTest {
 
 	@Test
 	public void testSaveModelsAfterRemovingClass() throws IOException {
-		packageManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
-		packageManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
+		modelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		modelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
 
-		var ePackage = packageManager.getEPackage(MYPACKAGE);
+		var ePackage = modelManager.getEPackage(MYPACKAGE);
 		// modify the ecore model by removing MyBaseClass
 		// this will also remove existing references, so the ecore model
 		// is still valid
@@ -108,47 +109,51 @@ public class EdeltaEPackageManagerTest {
 
 		var subdir = "manuallyRemovedClass";
 		var output = MODIFIED+"/"+subdir;
-		packageManager.saveEcores(output);
+		modelManager.saveEcores(output);
 		assertFilesAreEquals(
 				EXPECTATIONS+"/"+subdir+"/"+MY_ECORE,
 				output+"/"+MY_ECORE);
-		packageManager.saveModels(output);
+		modelManager.saveModels(output);
 		assertFilesAreEquals(
 				EXPECTATIONS+"/"+subdir+"/"+MY_ROOT,
 				output+"/"+MY_ROOT);
 
 		Assertions.assertThatThrownBy(
-			() -> packageManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS))
+			() -> modelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS))
 			.hasCauseInstanceOf(ClassNotFoundException.class)
 			.hasMessageContaining(MY_CLASS);
 	}
 
 	@Test
 	public void testSaveModelAfterCreatingResource() throws IOException {
-		var additionalPackageManager = new EdeltaEPackageManager();
-		additionalPackageManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
-		var prototypeResource = (XMIResource) additionalPackageManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
+		var additionalModelManager = new EdeltaModelManager();
+		var prototypeEcoreResource =
+			(XMIResource) additionalModelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		var prototypeModelResource =
+			(XMIResource) additionalModelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
 
 		// note that we use the same prototypeResource to create the
 		// two new resources, since we're only interested in the prototype's
 		// options and encoding. In this test this should be enough,
 		// since the models we create are based on the same ecore
-		packageManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
-		var myClassModelResource = packageManager
-			.createModelResource(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS, prototypeResource);
-		var myRootModelResource = packageManager
-			.createModelResource(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT, prototypeResource);
+		modelManager.createEcoreResource(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE,
+				prototypeEcoreResource);
+		modelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		var myClassModelResource = modelManager
+			.createModelResource(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS, prototypeModelResource);
+		var myRootModelResource = modelManager
+			.createModelResource(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT, prototypeModelResource);
 		var myClassEClass = (EClass)
-			packageManager.getEPackage(MYPACKAGE).getEClassifier("MyClass");
+			modelManager.getEPackage(MYPACKAGE).getEClassifier("MyClass");
 		myClassModelResource.getContents().add(EcoreUtil.create(myClassEClass));
 		var myRootEClass = (EClass)
-			packageManager.getEPackage(MYPACKAGE).getEClassifier("MyRoot");
+			modelManager.getEPackage(MYPACKAGE).getEClassifier("MyRoot");
 		myRootModelResource.getContents().add(EcoreUtil.create(myRootEClass));
 
 		var subdir = "manuallyCreatedResource";
 		var output = MODIFIED+"/"+subdir;
-		packageManager.saveEcores(output);
-		packageManager.saveModels(output);
+		modelManager.saveEcores(output);
+		modelManager.saveModels(output);
 		assertFilesAreEquals(
 				EXPECTATIONS+"/"+subdir+"/"+MY_ECORE,
 				output+"/"+MY_ECORE);
@@ -161,14 +166,46 @@ public class EdeltaEPackageManagerTest {
 	}
 
 	@Test
-	public void testGetModelResourceMap() {
-		packageManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
-		packageManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
-		packageManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
-		var map = packageManager.getModelResourceMap();
-		assertThat(map.keySet())
+	public void testClearModel() {
+		modelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		modelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
+		modelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
+		assertThat(modelManager.getModelResourceMap().keySet())
 			.containsExactlyInAnyOrder(
-					TESTDATA+SIMPLE_TEST_DATA+MY_CLASS,
-					TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
+				TESTDATA+SIMPLE_TEST_DATA+MY_CLASS,
+				TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
+		assertThat(modelManager.getEcoreResourceMap().keySet())
+			.containsExactlyInAnyOrder(
+				TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		modelManager.clearModels();
+		assertThat(modelManager.getModelResourceMap().keySet())
+			.isEmpty();
+		assertThat(modelManager.getEcoreResourceMap().keySet())
+			.containsExactlyInAnyOrder(
+				TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+	}
+
+	@Test
+	public void testCopyEcores() {
+		var otherModelManager = new EdeltaModelManager();
+		var ecoreResource =
+			(XMIResource) otherModelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+
+		var map = modelManager.copyEcores(otherModelManager, TESTDATA+SIMPLE_TEST_DATA);
+
+		Iterable<EObject> originalContents = () -> 
+			EcoreUtil.getAllContents(ecoreResource, true);
+
+		// NOT exactly, because we don't care about GenericType elements
+		assertThat(map.keySet())
+			.containsAnyElementsOf(originalContents);
+
+		Iterable<EObject> copiedContents = () -> 
+			EcoreUtil.getAllContents(
+				modelManager.getEcoreResourceMap().values().iterator().next(),
+				true);
+
+		assertThat(map.values())
+			.containsAnyElementsOf(copiedContents);
 	}
 }

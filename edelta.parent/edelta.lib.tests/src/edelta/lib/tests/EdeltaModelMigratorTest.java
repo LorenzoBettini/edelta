@@ -1,77 +1,51 @@
-package edelta.lib.learning.tests;
+package edelta.lib.tests;
 
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
 import static java.util.Arrays.asList;
 import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.log4j.Logger;
 import org.assertj.core.api.Assertions;
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
-import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.EcorePackage;
-import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
-import org.eclipse.emf.ecore.xmi.XMIResource;
-import org.eclipse.emf.ecore.xmi.XMLResource;
-import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
-import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
-import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
-import org.eclipse.xtext.xbase.lib.Functions.Function3;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure3;
 import org.eclipse.xtext.xbase.lib.StringExtensions;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import edelta.lib.EdeltaEcoreUtil;
-import edelta.lib.EdeltaResourceUtils;
+import edelta.lib.EdeltaModelManager;
+import edelta.lib.EdeltaModelMigrator;
 import edelta.lib.EdeltaUtils;
 
-public class EdeltaModelMigratorTest {
+class EdeltaModelMigratorTest {
 
 	private static final String TESTDATA = "testdata/";
 	private static final String OUTPUT = "output/";
@@ -92,664 +66,13 @@ public class EdeltaModelMigratorTest {
 	 */
 	EdeltaModelManager evolvingModelManager;
 
-	/**
-	 * A candidate for the model migration.
-	 * 
-	 * @author Lorenzo Bettini
-	 *
-	 */
-	static class EdeltaModelMigrator {
-
-		private String basedir;
-		private EdeltaModelManager originalModelManager;
-		private EdeltaModelManager evolvingModelManager;
-		private Map<EObject, EObject> mapOfCopiedEcores;
-		private EdeltaModelCopier modelCopier;
-
-		@FunctionalInterface
-		public static interface CopyProcedure
-				extends Procedure3<EStructuralFeature, EObject, EObject> {
-		}
-
-		@FunctionalInterface
-		public static interface AttributeTransformer
-				extends Function3<EAttribute, EObject, Object, Object> {
-		}
-
-		@FunctionalInterface
-		public static interface AttributeValueTransformer
-				extends Function<Object, Object> {
-
-		}
-
-		@FunctionalInterface
-		public static interface FeatureMigrator
-				extends Function3<EStructuralFeature, EObject, EObject, EStructuralFeature> {
-		}
-
-		@FunctionalInterface
-		public static interface EObjectFunction
-				extends Function<EObject, EObject> {
-		}
-
-		public EdeltaModelMigrator(String basedir,
-				EdeltaModelManager originalModelManager,
-				EdeltaModelManager evolvingModelManager) {
-			this.basedir = basedir;
-			this.originalModelManager = originalModelManager;
-			this.evolvingModelManager = evolvingModelManager;
-			this.mapOfCopiedEcores = evolvingModelManager.copyEcores(originalModelManager, basedir);
-			this.modelCopier = new EdeltaModelCopier(
-					mapOfCopiedEcores);
-		}
-
-		/**
-		 * This simulates what the final model migration should do.
-		 * 
-		 * IMPORTANT: the original Ecores and models must be in a subdirectory
-		 * of the directory that stores the modified Ecores.
-		 * 
-		 * It is crucial to strip the original path and use the baseDir
-		 * to create the new {@link Resource} URI, so that, upon saving,
-		 * the schema location is computed correctly.
-		 * 
-		 * @param baseDir
-		 */
-		public void copyModels(String baseDir) {
-			copyModels(modelCopier, baseDir, originalModelManager, evolvingModelManager);
-		}
-
-		private void copyModels(EdeltaModelCopier edeltaModelCopier, String baseDir,
-				EdeltaModelManager from, EdeltaModelManager into) {
-			var map = from.getModelResourceMap();
-			for (var entry : map.entrySet()) {
-				var originalResource = (XMIResource) entry.getValue();
-				var p = Paths.get(entry.getKey());
-				final var fileName = p.getFileName().toString();
-				var newResource = into.createModelResource
-					(baseDir + fileName, originalResource);
-				var root = originalResource.getContents().get(0);
-				var copy = edeltaModelCopier.copy(root);
-				if (copy != null)
-					newResource.getContents().add(copy);
-			}
-			edeltaModelCopier.copyReferences();
-		}
-
-		public void transformAttributeValueRule(Predicate<EAttribute> predicate,
-				AttributeValueTransformer function) {
-			modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				protected void copyAttributeValue(EAttribute eAttribute,
-						EObject eObject, Object value, Setting setting) {
-					if (predicate.test(eAttribute))
-						value = function.apply(value);
-					super.copyAttributeValue(eAttribute, eObject, value, setting);
-				};
-			};
-			copyModels(modelCopier, basedir,
-					originalModelManager, evolvingModelManager);
-			updateMigrationContext();
-		}
-
-		public void transformAttributeValueRule(Predicate<EAttribute> predicate,
-				AttributeTransformer function) {
-			modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				protected void copyAttributeValue(EAttribute eAttribute,
-						EObject eObject, Object value, Setting setting) {
-					if (predicate.test(eAttribute)) {
-						value = function.apply(eAttribute, eObject, value);
-					}
-					super.copyAttributeValue(eAttribute, eObject, value, setting);
-				};
-			};
-			copyModels(modelCopier, basedir,
-					originalModelManager, evolvingModelManager);
-			updateMigrationContext();
-		}
-
-		public void copyRule(Predicate<EStructuralFeature> predicate,
-				CopyProcedure procedure) {
-			copyRule(predicate, procedure, null);
-		}
-
-		public void copyRule(Predicate<EStructuralFeature> predicate,
-				CopyProcedure procedure,
-				Runnable postCopy) {
-			modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				protected void copyContainment(EReference eReference,
-						EObject eObject, EObject copyEObject) {
-					applyCopyRuleOrElse(eReference, eObject, copyEObject,
-						() -> super.copyContainment(eReference, eObject, copyEObject));
-				}
-
-				@Override
-				protected void copyAttribute(EAttribute eAttribute,
-						EObject eObject, EObject copyEObject) {
-					applyCopyRuleOrElse(eAttribute, eObject, copyEObject,
-						() -> super.copyAttribute(eAttribute, eObject, copyEObject));
-				}
-
-				@Override
-				protected void copyReference(EReference eReference,
-						EObject eObject, EObject copyEObject) {
-					applyCopyRuleOrElse(eReference, eObject, copyEObject,
-						() -> super.copyReference(eReference, eObject, copyEObject));
-				}
-
-				private void applyCopyRuleOrElse(EStructuralFeature feature,
-						EObject eObject, EObject copyEObject, Runnable runnable) {
-					if (predicate.test(feature))
-						procedure.apply(feature, eObject, copyEObject);
-					else
-						runnable.run();
-				}
-			};
-			copyModels(modelCopier, basedir,
-					originalModelManager, evolvingModelManager);
-			if (postCopy != null)
-				postCopy.run();
-			updateMigrationContext();
-		}
-
-		public void featureMigratorRule(Predicate<EStructuralFeature> predicate,
-				FeatureMigrator function) {
-			modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				protected Setting getTarget(EStructuralFeature eStructuralFeature,
-						EObject eObject, EObject copyEObject) {
-					EStructuralFeature targetEStructuralFeature = null;
-					if (predicate.test(eStructuralFeature))
-						targetEStructuralFeature = function.apply(eStructuralFeature, eObject, copyEObject);
-					return targetEStructuralFeature == null ?
-						super.getTarget(eStructuralFeature, eObject, copyEObject)
-						: ((InternalEObject) copyEObject).eSetting(targetEStructuralFeature);
-				}
-			};
-			copyModels(modelCopier, basedir,
-					originalModelManager, evolvingModelManager);
-			updateMigrationContext();
-		}
-
-		public void createInstanceRule(Predicate<EClass> predicate,
-				EObjectFunction function) {
-			modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				protected EObject createCopy(EObject eObject) {
-					if (predicate.test(eObject.eClass()))
-						return function.apply(eObject);
-					return super.createCopy(eObject);
-				}
-			};
-			copyModels(modelCopier, basedir,
-					originalModelManager, evolvingModelManager);
-			updateMigrationContext();
-		}
-
-		private void updateMigrationContext() {
-			// here we copy the Ecores and models that have been migrated
-			var backup = new EdeltaModelManager();
-			// first create a copy of the evolved ecores
-			// map: orig -> copy
-			// orig are the evolved ecores, copy are the backup Ecores
-			var map = backup.copyEcores(evolvingModelManager, basedir);
-			// now create a copy of the evolved models
-			// we have to use our custom Copier because that will correctly
-			// create copies of models referring to the backup ecores
-			copyModels(new EdeltaModelCopier(map), basedir, evolvingModelManager, backup);
-			// now we need an inverted map, because the backup is meant to become the
-			// new originals, for the next model migrations
-			mapOfCopiedEcores = HashBiMap.create(map).inverse();
-			modelCopier = new EdeltaModelCopier(mapOfCopiedEcores);
-			evolvingModelManager.clearModels();
-			// the original model manager is updated with the copies we have just created
-			originalModelManager = backup;
-
-			// we must set the SettingDelegate to null
-			// to force its recreation, so that it takes into
-			// consideration possible changes of the feature, e.g., multiplicity
-			EdeltaResourceUtils.getEPackages(
-				evolvingModelManager.getEcoreResourceMap().values()).stream()
-				.flatMap(p -> EdeltaUtils.allEClasses(p).stream())
-				.flatMap(c -> c.getEStructuralFeatures().stream())
-				.forEach(f -> ((EStructuralFeature.Internal)f).setSettingDelegate(null));
-		}
-
-		public EObject getMigrated(EObject o) {
-			return modelCopier.copy(o);
-		}
-
-		public <T> Collection<T> getMigrated(Collection<? extends T> objects) {
-			return modelCopier.copyAll(objects);
-		}
-
-		public <T extends EObject> T getOriginal(T o) {
-			return modelCopier.getOriginal(o);
-		}
-
-		public boolean isRelatedTo(ENamedElement origEcoreElement,
-				ENamedElement evolvedEcoreElement) {
-			return modelCopier.isRelatedTo(origEcoreElement, evolvedEcoreElement);
-		}
-
-		public <T extends ENamedElement> Predicate<T> isRelatedTo(T evolvedEcoreElement) {
-			return origEcoreElement -> isRelatedTo(origEcoreElement, evolvedEcoreElement);
-		}
-
-		public boolean wasRelatedTo(ENamedElement origEcoreElement,
-				ENamedElement evolvedEcoreElement) {
-			return modelCopier.wasRelatedTo(origEcoreElement, evolvedEcoreElement);
-		}
-
-		public <T extends ENamedElement> Predicate<T> wasRelatedTo(T evolvedEcoreElement) {
-			return origEcoreElement -> wasRelatedTo(origEcoreElement, evolvedEcoreElement);
-		}
-	
-		public boolean wasRelatedToAtLeastOneOf(ENamedElement origEcoreElement,
-				Collection<? extends ENamedElement> evolvedEcoreElements) {
-			return evolvedEcoreElements.stream()
-				.anyMatch(e -> wasRelatedTo(origEcoreElement, e));
-		}
-
-		public <T extends ENamedElement> Predicate<T> wasRelatedToAtLeastOneOf(
-				Collection<? extends ENamedElement> evolvedEcoreElements) {
-			return origEcoreElement -> wasRelatedToAtLeastOneOf(origEcoreElement, evolvedEcoreElements);
-		}
-
-		public CopyProcedure multiplicityAwareCopy(EStructuralFeature feature) {
-			if (feature instanceof EReference) {
-				// for reference we must first propagate the copy
-				// especially in case of collections
-				return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> {
-					EdeltaEcoreUtil.setValueForFeature(
-						newObj,
-						feature,
-						// use the upper bound of the destination feature, since it might
-						// be different from the original one
-						getMigrated(
-							EdeltaEcoreUtil
-								.wrapAsCollection(oldObj.eGet(oldFeature), feature.getUpperBound()))
-						);
-				};
-			}
-			return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> {
-				// if the multiplicity changes and the type of the attribute changes we might
-				// end up with a list with a single default value.
-				// if instead we check that the original value of the object for the feature
-				// is set we avoid such a situation.
-				if (oldObj.eIsSet(oldFeature))
-					// if we come here the old feature was set
-					EdeltaEcoreUtil.setValueForFeature(
-						newObj,
-						feature,
-						// use the upper bound of the destination feature, since it might
-						// be different from the original one
-						EdeltaEcoreUtil
-							.getValueForFeature(oldObj, oldFeature, feature.getUpperBound())
-					);
-			};
-		}
-	
-		public AttributeTransformer multiplicityAwareTranformer(EAttribute attribute,
-				Function<Object, Object> transformer) {
-			return (feature, oldObj, oldValue) ->
-				// if we come here the old attribute was set
-				EdeltaEcoreUtil.unwrapCollection(
-					// use the upper bound of the destination attribute, since it might
-					// be different from the original one
-					EdeltaEcoreUtil.wrapAsCollection(oldValue, attribute.getUpperBound())
-						.stream()
-						.map(transformer)
-						.collect(Collectors.toList()),
-					attribute
-				);
-		}
-
-	}
-
-	/**
-	 * A candidate for the copier used for model migration.
-	 * 
-	 * @author Lorenzo Bettini
-	 *
-	 */
-	static class EdeltaModelCopier extends Copier {
-		private static final long serialVersionUID = 1L;
-
-		private BiMap<EObject, EObject> ecoreCopyMap;
-
-		public EdeltaModelCopier(Map<EObject, EObject> ecoreCopyMap) {
-			// by default useOriginalReferences is true, but this breaks
-			// our migration strategy: if a reference refers something that
-			// in the evolved model has been removed, it must NOT refer to
-			// the old object
-			super(true, false);
-			this.ecoreCopyMap = HashBiMap.create(ecoreCopyMap);
-		}
-
-		/**
-		 * An object can be explicitly copied after a containment reference
-		 * became a non-containment reference, we must first check whether it
-		 * has already been copied.
-		 */
-		@Override
-		public EObject copy(EObject eObject) {
-			var alreadyCopied = get(eObject);
-			if (alreadyCopied != null)
-				return alreadyCopied;
-			return super.copy(eObject);
-		}
-
-		@Override
-		protected EClass getTarget(EClass eClass) {
-			return getMapped(eClass);
-		}
-
-		@Override
-		protected EStructuralFeature getTarget(EStructuralFeature eStructuralFeature) {
-			return getMapped(eStructuralFeature);
-		}
-
-		/**
-		 * Handles values for enums differently, since they are objects, so we must
-		 * retrieve the corresponding mapped enum literal, or we'll get a
-		 * {@link ClassCastException}.
-		 */
-		@Override
-		protected void copyAttributeValue(EAttribute eAttribute, EObject eObject, Object value, Setting setting) {
-			var dataType = eAttribute.getEAttributeType();
-			if (dataType instanceof EEnum) {
-				value = getMapped((EEnumLiteral) value);
-			}
-			super.copyAttributeValue(eAttribute, eObject, value, setting);
-		}
-
-		private <T extends EObject> T getMapped(T o) {
-			var value = ecoreCopyMap.get(o);
-			@SuppressWarnings("unchecked")
-			var mapped = (T) value;
-			if (isNotThereAnymore(mapped))
-				return null;
-			return mapped;
-		}
-
-		@SuppressWarnings("unchecked")
-		public <T extends EObject> T getOriginal(T o) {
-			return (T) ecoreCopyMap.inverse().get(o);
-		}
-
-		private boolean isStillThere(EObject target) {
-			return target != null && target.eResource() != null;
-		}
-
-		private boolean isNotThereAnymore(EObject target) {
-			return target == null || target.eResource() == null;
-		}
-
-		public boolean isRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
-			return isStillThere(evolvedEcoreElement) &&
-				wasRelatedTo(origEcoreElement, evolvedEcoreElement);
-		}
-
-		public boolean wasRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
-			return origEcoreElement == ecoreCopyMap.inverse().get(evolvedEcoreElement);
-		}
-	}
-
-	/**
-	 * A candidate for the model manager (for Ecores and models).
-	 * 
-	 * @author Lorenzo Bettini
-	 *
-	 */
-	static class EdeltaModelManager {
-
-		private static final Logger LOG = Logger.getLogger(EdeltaModelManager.class);
-
-		/**
-		 * Here we store the association between the Ecore path and the
-		 * corresponding loaded Resource.
-		 */
-		private Map<String, Resource> ecoreResourceMap = new LinkedHashMap<>();
-
-		/**
-		 * Here we store the association between the model path and the
-		 * corresponding loaded Resource.
-		 */
-		private Map<String, Resource> modelResourceMap = new LinkedHashMap<>();
-
-		/**
-		 * Here we store all the Ecores and models used by the Edelta
-		 */
-		private ResourceSet resourceSet = new ResourceSetImpl();
-
-		/**
-		 * Performs EMF initialization (resource factories and package registry)
-		 */
-		public EdeltaModelManager() {
-			// Register the appropriate resource factory to handle all file extensions.
-			resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put
-				("ecore", 
-				new EcoreResourceFactoryImpl());
-			resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put
-				(Resource.Factory.Registry.DEFAULT_EXTENSION, 
-				new XMIResourceFactoryImpl() {
-					@Override
-					public Resource createResource(URI uri) {
-						var resource = new XMIResourceImpl(uri);
-						// this simulates the behavior of the
-						// "Sample Reflective Ecore Model Editor" when saving
-						resource.getDefaultSaveOptions().put(XMLResource.OPTION_LINE_WIDTH, 10);
-						return resource;
-					}
-				});
-
-			// Register the Ecore package to ensure it is available during loading.
-			resourceSet.getPackageRegistry().put
-				(EcorePackage.eNS_URI, 
-					 EcorePackage.eINSTANCE);
-		}
-
-		/**
-		 * Loads the ecore file specified in the path
-		 * @param path
-		 * @return the loaded {@link Resource}
-		 */
-		public Resource loadEcoreFile(String path) {
-			return loadResource(path, ecoreResourceMap);
-		}
-
-		private Resource loadResource(String path, Map<String, Resource> resourceMap) {
-			var uri = createAbsoluteFileURI(path);
-			// Demand load resource for this file.
-			LOG.info("Loading " + path + " (URI: " + uri + ")");
-			var resource = resourceSet.getResource(uri, true);
-			resourceMap.put(path, resource);
-			return resource;
-		}
-
-		/**
-		 * Tries to load the package name from the previously loaded ecores.
-		 * 
-		 * @param packageName
-		 * @return the found {@link EPackage} or null
-		 */
-		public EPackage getEPackage(String packageName) {
-			// Ecore package is implicitly available
-			if (EcorePackage.eNAME.equals(packageName)) {
-				return EcorePackage.eINSTANCE;
-			}
-			return EdeltaResourceUtils.getEPackages(ecoreResourceMap.values())
-				.stream()
-				.filter(p -> p.getName().equals(packageName))
-				.findFirst()
-				.orElse(null);
-		}
-
-		/**
-		 * Saves the modified EPackages as Ecore files in the specified
-		 * output path.
-		 * 
-		 * The final path of the modified Ecore files is made of the
-		 * specified outputPath and the original loaded Ecore
-		 * file names.
-		 * 
-		 * @param outputPath
-		 * @throws IOException 
-		 */
-		public void saveEcores(String outputPath) throws IOException {
-			saveResources(outputPath, ecoreResourceMap);
-		}
-
-		private void saveResources(String outputPath, Map<String, Resource> resourceMap) throws IOException {
-			for (Entry<String, Resource> entry : resourceMap.entrySet()) {
-				var p = Paths.get(entry.getKey());
-				final var fileName = p.getFileName().toString();
-				LOG.info("Saving " + outputPath + "/" + fileName);
-				var newFile = new File(outputPath, fileName);
-				newFile.getParentFile().mkdirs();
-				var fos = new FileOutputStream(newFile);
-				entry.getValue().save(fos, null);
-				fos.flush();
-				fos.close();
-			}
-		}
-
-		/**
-		 * Loads the XMI model file specified in the path
-		 * @param path
-		 * @return the loaded {@link Resource}
-		 */
-		public Resource loadModelFile(String path) {
-			return loadResource(path, modelResourceMap);
-		}
-
-		/**
-		 * Saves the modified models into files in the specified
-		 * output path.
-		 * 
-		 * The final path of the modified files is made of the
-		 * specified outputPath and the original loaded model
-		 * file names.
-		 * 
-		 * @param outputPath
-		 * @throws IOException 
-		 */
-		public void saveModels(String outputPath) throws IOException {
-			saveResources(outputPath, modelResourceMap);
-		}
-
-		/**
-		 * Create a new {@link XMIResource} for an Ecore in the {@link ResourceSet},
-		 * using the passed resource as a "prototype": it takes all its options and
-		 * encoding.
-		 * 
-		 * @param path
-		 * @param prototypeResource
-		 * @return
-		 */
-		public Resource createEcoreResource(String path, XMIResource prototypeResource) {
-			return createResource(path, prototypeResource, ecoreResourceMap);
-		}
-
-		/**
-		 * Create a new {@link XMIResource} in the {@link ResourceSet},
-		 * using the passed resource as a "prototype": it takes all its options and
-		 * encoding.
-		 * 
-		 * @param path
-		 * @param prototypeResource
-		 * @return
-		 */
-		public Resource createModelResource(String path, XMIResource prototypeResource) {
-			return createResource(path, prototypeResource, modelResourceMap);
-		}
-
-		/**
-		 * Create a new {@link XMIResource} in the {@link ResourceSet}, using the passed
-		 * resource as a "prototype": it takes all its options and encoding.
-		 * 
-		 * @param path
-		 * @param prototypeResource
-		 * @param resourceMap 
-		 * @return
-		 */
-		private Resource createResource(String path, XMIResource prototypeResource, Map<String, Resource> resourceMap) {
-			var uri = createAbsoluteFileURI(path);
-			LOG.info("Creating " + path + " (URI: " + uri + ")");
-			var resource = (XMIResource) resourceSet.createResource(uri);
-			resource.getDefaultLoadOptions().putAll(prototypeResource.getDefaultLoadOptions());
-			resource.getDefaultSaveOptions().putAll(prototypeResource.getDefaultSaveOptions());
-			resource.setEncoding(prototypeResource.getEncoding());
-			resourceMap.put(path, resource);
-			return resource;
-		}
-
-		/**
-		 * make sure we have a complete file URI, otherwise the saved modified files
-		 * will contain wrong references (i.e., with the prefixed relative path)
-		 * 
-		 * @param path
-		 * @return
-		 */
-		private URI createAbsoluteFileURI(String path) {
-			return URI.createFileURI(Paths.get(path).toAbsolutePath().toString());
-		}
-
-		public Map<String, Resource> getModelResourceMap() {
-			return modelResourceMap;
-		}
-
-		public Map<String, Resource> getEcoreResourceMap() {
-			return ecoreResourceMap;
-		}
-
-		public Map<EObject, EObject> copyEcores(EdeltaModelManager otherModelManager, String basedir) {
-			var ecoreResourceMap = otherModelManager.getEcoreResourceMap();
-			var ecoreCopier = new Copier();
-			for (var entry : ecoreResourceMap.entrySet()) {
-				var originalResource = (XMIResource) entry.getValue();
-				var p = Paths.get(entry.getKey());
-				final var fileName = p.getFileName().toString();
-				var newResource = this.createEcoreResource
-					(basedir + fileName, originalResource);
-				var root = originalResource.getContents().get(0);
-				newResource.getContents().add(ecoreCopier.copy(root));
-			}
-			ecoreCopier.copyReferences();
-			return ecoreCopier;
-		}
-
-		public void clearModels() {
-			var map = getModelResourceMap();
-			for (var entry : map.entrySet()) {
-				var resource = (XMIResource) entry.getValue();
-				resource.getResourceSet()
-					.getResources().remove(resource);
-			}
-			map.clear();
-		}
-	}
-
-	@BeforeClass
-	public static void clearOutput() throws IOException {
+	@BeforeAll
+	static void clearOutput() throws IOException {
 		cleanDirectoryRecursive(OUTPUT);
 	}
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup() {
 		originalModelManager = new EdeltaModelManager();
 		evolvingModelManager = new EdeltaModelManager();
 	}
@@ -769,7 +92,15 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testCopyUnchanged() throws IOException {
+	void testCopierEqualsAndHashCode() {
+		var edeltaModelCopier1 = new EdeltaModelMigrator.EdeltaModelCopier(new HashMap<>());
+		var edeltaModelCopier2 = new EdeltaModelMigrator.EdeltaModelCopier(new HashMap<>());
+		assertNotEquals(edeltaModelCopier1, edeltaModelCopier2);
+		assertEquals(edeltaModelCopier1.hashCode(), edeltaModelCopier2.hashCode());
+	}
+
+	@Test
+	void testCopyUnchanged() throws IOException {
 		var subdir = "simpleTestData/";
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -787,7 +118,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testCopyUnchangedWithEnums() throws IOException {
+	void testCopyUnchangedWithEnums() throws IOException {
 		var subdir = "simpleTestData/";
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -805,7 +136,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testCopyUnchangedClassesWithTheSameNameInDifferentPackages() throws IOException {
+	void testCopyUnchangedClassesWithTheSameNameInDifferentPackages() throws IOException {
 		var subdir = "classesWithTheSameName/";
 
 		var modelMigrator = setupMigrator(
@@ -824,7 +155,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testCopyMutualReferencesUnchanged() throws IOException {
+	void testCopyMutualReferencesUnchanged() throws IOException {
 		var subdir = "mutualReferencesUnchanged/";
 
 		var modelMigrator = setupMigrator(
@@ -843,7 +174,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testRenamedClass() throws IOException {
+	void testRenamedClass() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -868,7 +199,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testRenamedFeature() throws IOException {
+	void testRenamedFeature() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -895,7 +226,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testCopyMutualReferencesRenamed() throws IOException {
+	void testCopyMutualReferencesRenamed() throws IOException {
 		var subdir = "mutualReferencesUnchanged/";
 
 		var modelMigrator = setupMigrator(
@@ -918,7 +249,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testCopyMutualReferencesRenamed2() throws IOException {
+	void testCopyMutualReferencesRenamed2() throws IOException {
 		var subdir = "mutualReferencesUnchanged/";
 
 		var modelMigrator = setupMigrator(
@@ -947,7 +278,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testRemovedContainmentFeature() throws IOException {
+	void testRemovedContainmentFeature() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -970,7 +301,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testRemovedNonContainmentFeature() throws IOException {
+	void testRemovedNonContainmentFeature() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -993,7 +324,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testRemovedNonReferredClass() throws IOException {
+	void testRemovedNonReferredClass() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -1016,7 +347,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testRemovedReferredClass() throws IOException {
+	void testRemovedReferredClass() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -1039,7 +370,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseStringAttributes() throws IOException {
+	void testToUpperCaseStringAttributes() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -1065,7 +396,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseSingleAttribute() throws IOException {
+	void testToUpperCaseSingleAttribute() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -1093,7 +424,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseSingleAttributeAndRenamedBefore() throws IOException {
+	void testToUpperCaseSingleAttributeAndRenamedBefore() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -1122,7 +453,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseSingleAttributeAndRenamedAfter() throws IOException {
+	void testToUpperCaseSingleAttributeAndRenamedAfter() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -1151,7 +482,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseSingleAttributeAndMakeMultipleBefore() throws IOException {
+	void testToUpperCaseSingleAttributeAndMakeMultipleBefore() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -1181,7 +512,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseSingleAttributeAndMakeMultipleAfter() throws IOException {
+	void testToUpperCaseSingleAttributeAndMakeMultipleAfter() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -1212,7 +543,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseSingleAttributeMultiple() throws IOException {
+	void testToUpperCaseSingleAttributeMultiple() throws IOException {
 		var subdir = "toUpperCaseStringAttributesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -1240,7 +571,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseSingleAttributeMultipleAndMakeSingleBefore() throws IOException {
+	void testToUpperCaseSingleAttributeMultipleAndMakeSingleBefore() throws IOException {
 		var subdir = "toUpperCaseStringAttributesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -1270,7 +601,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseSingleAttributeMultipleAndMakeSingleAfter() throws IOException {
+	void testToUpperCaseSingleAttributeMultipleAndMakeSingleAfter() throws IOException {
 		var subdir = "toUpperCaseStringAttributesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -1300,7 +631,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeSingleAttribute() throws IOException {
+	void testMakeSingleAttribute() throws IOException {
 		var subdir = "toUpperCaseStringAttributesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -1324,7 +655,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeMultipleAttribute() throws IOException {
+	void testMakeMultipleAttribute() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -1348,7 +679,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeMultipleTo2Attribute() throws IOException {
+	void testMakeMultipleTo2Attribute() throws IOException {
 		var subdir = "toUpperCaseStringAttributesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -1372,7 +703,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeMultipleAndMakeSingleAttribute() throws IOException {
+	void testMakeMultipleAndMakeSingleAttribute() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -1405,7 +736,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMakeSingleAndMakeMultipleAttribute() throws IOException {
+	void testMakeSingleAndMakeMultipleAttribute() throws IOException {
 		var subdir = "toUpperCaseStringAttributesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -1431,7 +762,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeSingleNonContainmentReference() throws IOException {
+	void testMakeSingleNonContainmentReference() throws IOException {
 		var subdir = "referencesMultiple/";
 	
 		var modelMigrator = setupMigrator(
@@ -1462,7 +793,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMakeSingleContainmentReference() throws IOException {
+	void testMakeSingleContainmentReference() throws IOException {
 		var subdir = "referencesMultiple/";
 	
 		var modelMigrator = setupMigrator(
@@ -1486,7 +817,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeMultipleNonContainmentReference() throws IOException {
+	void testMakeMultipleNonContainmentReference() throws IOException {
 		var subdir = "referencesSingle/";
 	
 		var modelMigrator = setupMigrator(
@@ -1510,7 +841,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeMultipleContainmentReference() throws IOException {
+	void testMakeMultipleContainmentReference() throws IOException {
 		var subdir = "referencesSingle/";
 	
 		var modelMigrator = setupMigrator(
@@ -1534,7 +865,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeMultipleAndMakeSingleNonContainmentReference() throws IOException {
+	void testMakeMultipleAndMakeSingleNonContainmentReference() throws IOException {
 		var subdir = "referencesSingle/";
 
 		var modelMigrator = setupMigrator(
@@ -1567,7 +898,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMakeSingleAndMakeMultipleNonContainmentReference() throws IOException {
+	void testMakeSingleAndMakeMultipleNonContainmentReference() throws IOException {
 		var subdir = "referencesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -1593,7 +924,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeMultipleAndMakeSingleContainmentReference() throws IOException {
+	void testMakeMultipleAndMakeSingleContainmentReference() throws IOException {
 		var subdir = "referencesSingle/";
 
 		var modelMigrator = setupMigrator(
@@ -1630,7 +961,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMakeSingleAndMakeMultipleContainmentReference() throws IOException {
+	void testMakeSingleAndMakeMultipleContainmentReference() throws IOException {
 		var subdir = "referencesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -1656,7 +987,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedAttributeTypeWithoutProperMigration() {
+	void testChangedAttributeTypeWithoutProperMigration() {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1683,7 +1014,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedAttributeTypeWithAttributeMigrator() throws IOException {
+	void testChangedAttributeTypeWithAttributeMigrator() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1728,7 +1059,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangeAttributeType() throws IOException {
+	void testChangeAttributeType() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1762,7 +1093,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangeAttributeTypeAlternative() throws IOException {
+	void testChangeAttributeTypeAlternative() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1806,7 +1137,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testChangeAttributeTypeAndMutiplicityAfter() throws IOException {
+	void testChangeAttributeTypeAndMutiplicityAfter() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1842,7 +1173,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangeAttributeTypeAndMutiplicityAfterAlternative() throws IOException {
+	void testChangeAttributeTypeAndMutiplicityAfterAlternative() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1878,7 +1209,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangeAttributeTypeAndMutiplicityBefore() throws IOException {
+	void testChangeAttributeTypeAndMutiplicityBefore() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1914,7 +1245,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangeAttributeTypeAndMutiplicityBeforeAlternative() throws IOException {
+	void testChangeAttributeTypeAndMutiplicityBeforeAlternative() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1950,7 +1281,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedAttributeTypeWithCopyRule() throws IOException {
+	void testChangedAttributeTypeWithCopyRule() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1990,7 +1321,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedMultiAttributeType() throws IOException {
+	void testChangedMultiAttributeType() throws IOException {
 		var subdir = "changedMultiAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -2024,7 +1355,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedMultiAttributeTypeAlternative() throws IOException {
+	void testChangedMultiAttributeTypeAlternative() throws IOException {
 		var subdir = "changedMultiAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -2058,7 +1389,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedMultiAttributeTypeAndMultiplicity() throws IOException {
+	void testChangedMultiAttributeTypeAndMultiplicity() throws IOException {
 		var subdir = "changedMultiAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -2094,7 +1425,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedMultiAttributeTypeAndMultiplicityAlternative() throws IOException {
+	void testChangedMultiAttributeTypeAndMultiplicityAlternative() throws IOException {
 		var subdir = "changedMultiAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -2130,7 +1461,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedMultiAttributeTypeAndMultiplicityTo2() throws IOException {
+	void testChangedMultiAttributeTypeAndMultiplicityTo2() throws IOException {
 		var subdir = "changedMultiAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -2166,7 +1497,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedMultiAttributeTypeAndMultiplicityTo2Alternative() throws IOException {
+	void testChangedMultiAttributeTypeAndMultiplicityTo2Alternative() throws IOException {
 		var subdir = "changedMultiAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -2202,7 +1533,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedAttributeNameAndType() throws IOException {
+	void testChangedAttributeNameAndType() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -2237,7 +1568,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedAttributeTypeAndName() throws IOException {
+	void testChangedAttributeTypeAndName() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -2275,7 +1606,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testElementAssociations() {
+	void testElementAssociations() {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -2326,7 +1657,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReplaceWithCopy() throws IOException {
+	void testReplaceWithCopy() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -2351,7 +1682,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReplaceWithCopyTwice() throws IOException {
+	void testReplaceWithCopyTwice() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -2384,7 +1715,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testPullUpFeatures() throws IOException {
+	void testPullUpFeatures() throws IOException {
 		var subdir = "pullUpFeatures/";
 
 		var modelMigrator = setupMigrator(
@@ -2414,7 +1745,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testPullUpReferences() throws IOException {
+	void testPullUpReferences() throws IOException {
 		var subdir = "pullUpReferences/";
 
 		var modelMigrator = setupMigrator(
@@ -2444,7 +1775,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testPullUpContainmentReferences() throws IOException {
+	void testPullUpContainmentReferences() throws IOException {
 		var subdir = "pullUpContainmentReferences/";
 
 		var modelMigrator = setupMigrator(
@@ -2474,7 +1805,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testPushDownFeatures() throws IOException {
+	void testPushDownFeatures() throws IOException {
 		var subdir = "pushDownFeatures/";
 
 		var modelMigrator = setupMigrator(
@@ -2505,7 +1836,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testPullUpAndPushDown() throws IOException {
+	void testPullUpAndPushDown() throws IOException {
 		var subdir = "pullUpFeatures/";
 
 		var modelMigrator = setupMigrator(
@@ -2540,7 +1871,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testPushDownAndPullUp() throws IOException {
+	void testPushDownAndPullUp() throws IOException {
 		var subdir = "pushDownFeatures/";
 
 		var modelMigrator = setupMigrator(
@@ -2574,7 +1905,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeBidirectional() throws IOException {
+	void testMakeBidirectional() throws IOException {
 		var subdir = "makeBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2602,7 +1933,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeBidirectionalExisting() throws IOException {
+	void testMakeBidirectionalExisting() throws IOException {
 		var subdir = "makeBidirectionalExisting/";
 	
 		var modelMigrator = setupMigrator(
@@ -2639,7 +1970,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testGetMigratedInTransformAttributeValueRule() throws IOException {
+	void testGetMigratedInTransformAttributeValueRule() throws IOException {
 		var subdir = "getMigratedTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -2709,7 +2040,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testGetMigratedInTransformAttributeValueRule2() throws IOException {
+	void testGetMigratedInTransformAttributeValueRule2() throws IOException {
 		var subdir = "getMigratedTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -2777,7 +2108,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testGetMigratedInCopyRule() throws IOException {
+	void testGetMigratedInCopyRule() throws IOException {
 		var subdir = "getMigratedTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -2850,7 +2181,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testGetMigratedInFeatureMigratorRule() throws IOException {
+	void testGetMigratedInFeatureMigratorRule() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -2899,7 +2230,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testGetMigratedMultipleInFeatureMigratorRule() throws IOException {
+	void testGetMigratedMultipleInFeatureMigratorRule() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -2948,9 +2279,18 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
-	@Test
-	public void testReferenceToClassUnidirectional() throws IOException {
-		var subdir = "referenceToClassUnidirectional/";
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"referenceToClassUnidirectional/",
+		"referenceToClassMultipleUnidirectional/",
+		"referenceToClassBidirectional/",
+		"referenceToClassBidirectionalDifferentOrder/",
+		"referenceToClassBidirectionalOppositeMultiple/",
+		"referenceToClassMultipleBidirectional/",
+		
+	})
+	void testReferenceToClass(String directory) throws IOException {
+		var subdir = directory;
 
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -2973,55 +2313,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReferenceToClassMultipleUnidirectional() throws IOException {
-		var subdir = "referenceToClassMultipleUnidirectional/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
-	public void testReferenceToClassBidirectional() throws IOException {
-		var subdir = "referenceToClassBidirectional/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
-	public void testReferenceToClassBidirectionalAlternative() throws IOException {
+	void testReferenceToClassBidirectionalAlternative() throws IOException {
 		var subdir = "referenceToClassBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -3045,79 +2337,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReferenceToClassBidirectionalDifferentOrder() throws IOException {
-		var subdir = "referenceToClassBidirectionalDifferentOrder/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
-	public void testReferenceToClassBidirectionalOppositeMultiple() throws IOException {
-		var subdir = "referenceToClassBidirectionalOppositeMultiple/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
-	public void testReferenceToClassMultipleBidirectional() throws IOException {
-		var subdir = "referenceToClassMultipleBidirectional/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
-	public void testReferenceToClassMultipleBidirectionalAlternative() throws IOException {
+	void testReferenceToClassMultipleBidirectionalAlternative() throws IOException {
 		var subdir = "referenceToClassMultipleBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -3148,7 +2368,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleMain() throws IOException {
+	void testReferenceToClassMultipleBidirectionalChangedIntoSingleMain() throws IOException {
 		var subdir = "referenceToClassMultipleBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -3180,7 +2400,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleOpposite() throws IOException {
+	void testReferenceToClassMultipleBidirectionalChangedIntoSingleOpposite() throws IOException {
 		var subdir = "referenceToClassMultipleBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -3218,7 +2438,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleOppositeAlternative() throws IOException {
+	void testReferenceToClassMultipleBidirectionalChangedIntoSingleOppositeAlternative() throws IOException {
 		var subdir = "referenceToClassMultipleBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -3256,7 +2476,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleBoth() throws IOException {
+	void testReferenceToClassMultipleBidirectionalChangedIntoSingleBoth() throws IOException {
 		var subdir = "referenceToClassMultipleBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -3293,7 +2513,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleBothAlternative() throws IOException {
+	void testReferenceToClassMultipleBidirectionalChangedIntoSingleBothAlternative() throws IOException {
 		var subdir = "referenceToClassMultipleBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -3322,105 +2542,16 @@ public class EdeltaModelMigratorTest {
 		);
 	}
 
-	@Test
-	public void testClassToReferenceUnidirectional() throws IOException {
-		var subdir = "classToReferenceUnidirectional/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		classToReference(modelMigrator, personWorks);
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
-	public void testClassToReferenceMultipleUnidirectional() throws IOException {
-		var subdir = "classToReferenceMultipleUnidirectional/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		classToReference(modelMigrator, personWorks);
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
-	public void testClassToReferenceBidirectional() throws IOException {
-		var subdir = "classToReferenceBidirectional/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		classToReference(modelMigrator, personWorks);
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
-	public void testClassToReferenceBidirectionalDifferentOrder() throws IOException {
-		var subdir = "classToReferenceBidirectionalDifferentOrder/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		classToReference(modelMigrator, personWorks);
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
-	public void testClassToReferenceMultipleBidirectional() throws IOException {
-		var subdir = "classToReferenceMultipleBidirectional/";
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"classToReferenceUnidirectional/",
+		"classToReferenceMultipleUnidirectional/",
+		"classToReferenceBidirectional/",
+		"classToReferenceBidirectionalDifferentOrder/",
+		"classToReferenceMultipleBidirectional/"
+	})
+	void testClassToReference(String directory) throws IOException {
+		var subdir = directory;
 
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -3448,7 +2579,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testClassToReferenceAndReferenceToClassUnidirectional() throws IOException {
+	void testClassToReferenceAndReferenceToClassUnidirectional() throws IOException {
 		var subdir = "classToReferenceUnidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -3473,7 +2604,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReferenceToClassAndClassToReferenceUnidirectional() throws IOException {
+	void testReferenceToClassAndClassToReferenceUnidirectional() throws IOException {
 		var subdir = "referenceToClassUnidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -3498,7 +2629,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testClassToReferenceAndReferenceToClassBidirectional() throws IOException {
+	void testClassToReferenceAndReferenceToClassBidirectional() throws IOException {
 		var subdir = "classToReferenceBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -3523,7 +2654,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReferenceToClassAndClassToReferenceBidirectional() throws IOException {
+	void testReferenceToClassAndClassToReferenceBidirectional() throws IOException {
 		var subdir = "referenceToClassBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -3548,7 +2679,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testClassToReferenceAndReferenceToClassBidirectionalAlternative() throws IOException {
+	void testClassToReferenceAndReferenceToClassBidirectionalAlternative() throws IOException {
 		var subdir = "classToReferenceBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -3573,7 +2704,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReferenceToClassAndClassToReferenceBidirectionalAlternative() throws IOException {
+	void testReferenceToClassAndClassToReferenceBidirectionalAlternative() throws IOException {
 		var subdir = "referenceToClassBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -3598,7 +2729,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMergeAttributesManual() throws IOException {
+	void testMergeAttributesManual() throws IOException {
 		var subdir = "mergeAttributesManual/";
 	
 		var modelMigrator = setupMigrator(
@@ -3640,7 +2771,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMergeAttributesWithoutValueMerger() throws IOException {
+	void testMergeAttributesWithoutValueMerger() throws IOException {
 		var subdir = "mergeAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -3670,7 +2801,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMergeAttributes() throws IOException {
+	void testMergeAttributes() throws IOException {
 		var subdir = "mergeAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -3705,7 +2836,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMergeFeaturesContainment() throws IOException {
+	void testMergeFeaturesContainment() throws IOException {
 		var subdir = "mergeFeaturesContainment/";
 
 		var modelMigrator = setupMigrator(
@@ -3767,7 +2898,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMergeFeaturesNonContainment() throws IOException {
+	void testMergeFeaturesNonContainment() throws IOException {
 		var subdir = "mergeFeaturesNonContainment/";
 
 		var modelMigrator = setupMigrator(
@@ -3843,7 +2974,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMergeFeaturesNonContainmentShared() throws IOException {
+	void testMergeFeaturesNonContainmentShared() throws IOException {
 		var subdir = "mergeFeaturesNonContainmentShared/";
 
 		var modelMigrator = setupMigrator(
@@ -3922,7 +3053,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testSplitAttributes() throws IOException {
+	void testSplitAttributes() throws IOException {
 		var subdir = "splitAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -3958,7 +3089,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testSplitFeatureContainment() throws IOException {
+	void testSplitFeatureContainment() throws IOException {
 		var subdir = "splitFeatureContainment/";
 
 		var modelMigrator = setupMigrator(
@@ -4018,7 +3149,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testSplitFeatureNonContainment() throws IOException {
+	void testSplitFeatureNonContainment() throws IOException {
 		var subdir = "splitFeatureNonContainment/";
 
 		var modelMigrator = setupMigrator(
@@ -4093,7 +3224,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testSplitFeatureNonContainmentShared() throws IOException {
+	void testSplitFeatureNonContainmentShared() throws IOException {
 		var subdir = "splitFeatureNonContainmentShared/";
 
 		var modelMigrator = setupMigrator(
@@ -4181,7 +3312,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testSplitAndMergeAttributes() throws IOException {
+	void testSplitAndMergeAttributes() throws IOException {
 		var subdir = "splitAndMergeAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -4236,7 +3367,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMergeAndSplitAttributes() throws IOException {
+	void testMergeAndSplitAttributes() throws IOException {
 		var subdir = "mergeAndSplitAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -4286,7 +3417,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMergeAndSplitFeaturesContainment() throws IOException {
+	void testMergeAndSplitFeaturesContainment() throws IOException {
 		var subdir = "mergeAndSplitFeaturesContainment/";
 
 		var modelMigrator = setupMigrator(
@@ -4369,7 +3500,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMergeAndSplitFeaturesNonContainment() throws IOException {
+	void testMergeAndSplitFeaturesNonContainment() throws IOException {
 		var subdir = "mergeFeaturesNonContainment/";
 
 		var modelMigrator = setupMigrator(
@@ -4478,7 +3609,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMergeAndSplitFeaturesNonContainmentShared() throws IOException {
+	void testMergeAndSplitFeaturesNonContainmentShared() throws IOException {
 		var subdir = "mergeFeaturesNonContainmentShared/";
 
 		var modelMigrator = setupMigrator(
@@ -4621,7 +3752,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testSplitAndMergeFeatureContainment() throws IOException {
+	void testSplitAndMergeFeatureContainment() throws IOException {
 		var subdir = "splitAndMergeFeatureContainment/";
 	
 		var modelMigrator = setupMigrator(
@@ -4705,7 +3836,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testSplitAndMergeFeatureNonContainment() throws IOException {
+	void testSplitAndMergeFeatureNonContainment() throws IOException {
 		var subdir = "splitAndMergeFeatureNonContainment/";
 
 		var modelMigrator = setupMigrator(
@@ -4811,7 +3942,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testSplitAndMergeFeaturesNonContainmentShared() throws IOException {
+	void testSplitAndMergeFeaturesNonContainmentShared() throws IOException {
 		var subdir = "splitFeatureNonContainmentShared/";
 
 		var modelMigrator = setupMigrator(
@@ -4941,7 +4072,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testEnumToSubclasses() throws IOException {
+	void testEnumToSubclasses() throws IOException {
 		var subdir = "enumToSubclasses/";
 
 		var modelMigrator = setupMigrator(
@@ -4964,7 +4095,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testSubclassesToEnum() throws IOException {
+	void testSubclassesToEnum() throws IOException {
 		var subdir = "subclassesToEnum/";
 		
 		var modelMigrator = setupMigrator(
@@ -4990,7 +4121,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testEnumToSubclassesAndSubclassesToEnum() throws IOException {
+	void testEnumToSubclassesAndSubclassesToEnum() throws IOException {
 		var subdir = "enumToSubclasses/";
 
 		var modelMigrator = setupMigrator(
@@ -5020,7 +4151,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testSubclassesToEnumAndEnumToSubclasses() throws IOException {
+	void testSubclassesToEnumAndEnumToSubclasses() throws IOException {
 		var subdir = "subclassesToEnum/";
 		
 		var modelMigrator = setupMigrator(
@@ -5057,7 +4188,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testComposeOperations1() throws IOException {
+	void testComposeOperations1() throws IOException {
 		var subdir = "enumToSubclasses/";
 
 		var modelMigrator = setupMigrator(
@@ -5670,7 +4801,7 @@ public class EdeltaModelMigratorTest {
 	 * @param features
 	 * @param valueMerger if not null, it is used to merge the values of the original
 	 * features in the new model
-	 * @param postCopy TODO
+	 * @param postCopy executed after the model migrations
 	 * 
 	 * @return the new feature added to the containing class of the features
 	 */
