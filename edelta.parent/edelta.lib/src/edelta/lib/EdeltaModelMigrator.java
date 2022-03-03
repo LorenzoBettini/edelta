@@ -5,21 +5,26 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EEnum;
+import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.EStructuralFeature.Setting;
+import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
 import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.xtext.xbase.lib.Functions.Function3;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure3;
 
+import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 /**
@@ -29,6 +34,108 @@ import com.google.common.collect.HashBiMap;
  *
  */
 public class EdeltaModelMigrator {
+
+	/**
+	 * A custom {@link Copier} for EMF model (not Ecores, instances of Ecores)
+	 * migration. Without changing the values of the objects of the model, it takes
+	 * care of copying models of some Ecores as models of some other Ecores, which
+	 * are the exact copy of the original Ecores.
+	 * 
+	 * @author Lorenzo Bettini
+	 *
+	 */
+	private static class EdeltaModelCopier extends Copier {
+		private static final long serialVersionUID = 1L;
+
+		private transient BiMap<EObject, EObject> ecoreCopyMap;
+
+		public EdeltaModelCopier(Map<EObject, EObject> ecoreCopyMap) {
+			// by default useOriginalReferences is true, but this breaks
+			// our migration strategy: if a reference refers something that
+			// in the evolved model has been removed, it must NOT refer to
+			// the old object
+			super(true, false);
+			this.ecoreCopyMap = HashBiMap.create(ecoreCopyMap);
+		}
+
+		/**
+		 * An object can be explicitly copied after a containment reference
+		 * became a non-containment reference, we must first check whether it
+		 * has already been copied.
+		 */
+		@Override
+		public EObject copy(EObject eObject) {
+			var alreadyCopied = get(eObject);
+			if (alreadyCopied != null)
+				return alreadyCopied;
+			return super.copy(eObject);
+		}
+
+		@Override
+		protected EClass getTarget(EClass eClass) {
+			return getMapped(eClass);
+		}
+
+		@Override
+		protected EStructuralFeature getTarget(EStructuralFeature eStructuralFeature) {
+			return getMapped(eStructuralFeature);
+		}
+
+		/**
+		 * Handles values for enums differently, since they are objects, so we must
+		 * retrieve the corresponding mapped enum literal, or we'll get a
+		 * {@link ClassCastException}.
+		 */
+		@Override
+		protected void copyAttributeValue(EAttribute eAttribute, EObject eObject, Object value, Setting setting) {
+			var dataType = eAttribute.getEAttributeType();
+			if (dataType instanceof EEnum) {
+				value = getMapped((EEnumLiteral) value);
+			}
+			super.copyAttributeValue(eAttribute, eObject, value, setting);
+		}
+
+		private <T extends EObject> T getMapped(T o) {
+			var value = ecoreCopyMap.get(o);
+			@SuppressWarnings("unchecked")
+			var mapped = (T) value;
+			if (isNotThereAnymore(mapped))
+				return null;
+			return mapped;
+		}
+
+		@SuppressWarnings("unchecked")
+		public <T extends EObject> T getOriginal(T o) {
+			return (T) ecoreCopyMap.inverse().get(o);
+		}
+
+		private boolean isStillThere(EObject target) {
+			return target != null && target.eResource() != null;
+		}
+
+		private boolean isNotThereAnymore(EObject target) {
+			return target == null || target.eResource() == null;
+		}
+
+		public boolean isRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
+			return isStillThere(evolvedEcoreElement) &&
+				wasRelatedTo(origEcoreElement, evolvedEcoreElement);
+		}
+
+		public boolean wasRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
+			return origEcoreElement == ecoreCopyMap.inverse().get(evolvedEcoreElement);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return super.hashCode();
+		}
+	}
 
 	private String basedir;
 	private EdeltaModelManager originalModelManager;
@@ -117,7 +224,7 @@ public class EdeltaModelMigrator {
 				if (predicate.test(eAttribute))
 					value = function.apply(value);
 				super.copyAttributeValue(eAttribute, eObject, value, setting);
-			};
+			}
 		};
 		copyModels(modelCopier, basedir,
 				originalModelManager, evolvingModelManager);
@@ -136,7 +243,7 @@ public class EdeltaModelMigrator {
 					value = function.apply(eAttribute, eObject, value);
 				}
 				super.copyAttributeValue(eAttribute, eObject, value, setting);
-			};
+			}
 		};
 		copyModels(modelCopier, basedir,
 				originalModelManager, evolvingModelManager);
@@ -302,7 +409,7 @@ public class EdeltaModelMigrator {
 		if (feature instanceof EReference) {
 			// for reference we must first propagate the copy
 			// especially in case of collections
-			return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> {
+			return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> 
 				EdeltaEcoreUtil.setValueForFeature(
 					newObj,
 					feature,
@@ -311,8 +418,7 @@ public class EdeltaModelMigrator {
 					getMigrated(
 						EdeltaEcoreUtil
 							.wrapAsCollection(oldObj.eGet(oldFeature), feature.getUpperBound()))
-					);
-			};
+				);
 		}
 		return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> {
 			// if the multiplicity changes and the type of the attribute changes we might
@@ -333,7 +439,7 @@ public class EdeltaModelMigrator {
 	}
 
 	public EdeltaModelMigrator.AttributeTransformer multiplicityAwareTranformer(EAttribute attribute,
-			Function<Object, Object> transformer) {
+			UnaryOperator<Object> transformer) {
 		return (feature, oldObj, oldValue) ->
 			// if we come here the old attribute was set
 			EdeltaEcoreUtil.unwrapCollection(
