@@ -84,9 +84,7 @@ public class EdeltaDerivedStateHelper {
 			.collect(toList());
 		final var copiedEPackagesMap = getCopiedEPackagesMap(resource);
 		var copies = EdeltaEcoreUtil.copyEPackages(packages);
-		for (var copy : copies) {
-			copiedEPackagesMap.computeIfAbsent(copy.getName(), key -> copy);
-		}
+		copiedEPackagesMap.setCopies(copies);
 		// we must add the copied EPackages to the resource
 		addToProgramResource(resource, copiedEPackagesMap);
 	}
