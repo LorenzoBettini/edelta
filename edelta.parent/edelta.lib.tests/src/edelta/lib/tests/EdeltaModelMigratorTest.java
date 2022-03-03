@@ -37,6 +37,8 @@ import org.eclipse.xtext.xbase.lib.StringExtensions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaModelManager;
@@ -2277,57 +2279,18 @@ class EdeltaModelMigratorTest {
 		);
 	}
 
-	@Test
-	void testReferenceToClassUnidirectional() throws IOException {
-		var subdir = "referenceToClassUnidirectional/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
-	void testReferenceToClassMultipleUnidirectional() throws IOException {
-		var subdir = "referenceToClassMultipleUnidirectional/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
-	void testReferenceToClassBidirectional() throws IOException {
-		var subdir = "referenceToClassBidirectional/";
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"referenceToClassUnidirectional/",
+		"referenceToClassMultipleUnidirectional/",
+		"referenceToClassBidirectional/",
+		"referenceToClassBidirectionalDifferentOrder/",
+		"referenceToClassBidirectionalOppositeMultiple/",
+		"referenceToClassMultipleBidirectional/",
+		
+	})
+	void testReferenceToClass(String directory) throws IOException {
+		var subdir = directory;
 
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -2363,78 +2326,6 @@ class EdeltaModelMigratorTest {
 				"PersonList", "Person", "works");
 		// refactoring
 		referenceToClassAlternative(modelMigrator, personWorks, "WorkingPosition");
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
-	void testReferenceToClassBidirectionalDifferentOrder() throws IOException {
-		var subdir = "referenceToClassBidirectionalDifferentOrder/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
-	void testReferenceToClassBidirectionalOppositeMultiple() throws IOException {
-		var subdir = "referenceToClassBidirectionalOppositeMultiple/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
-	void testReferenceToClassMultipleBidirectional() throws IOException {
-		var subdir = "referenceToClassMultipleBidirectional/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		referenceToClass(modelMigrator, personWorks, "WorkingPosition");
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
@@ -2651,105 +2542,16 @@ class EdeltaModelMigratorTest {
 		);
 	}
 
-	@Test
-	void testClassToReferenceUnidirectional() throws IOException {
-		var subdir = "classToReferenceUnidirectional/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		classToReference(modelMigrator, personWorks);
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
-	void testClassToReferenceMultipleUnidirectional() throws IOException {
-		var subdir = "classToReferenceMultipleUnidirectional/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		classToReference(modelMigrator, personWorks);
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
-	void testClassToReferenceBidirectional() throws IOException {
-		var subdir = "classToReferenceBidirectional/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		classToReference(modelMigrator, personWorks);
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
-	void testClassToReferenceBidirectionalDifferentOrder() throws IOException {
-		var subdir = "classToReferenceBidirectionalDifferentOrder/";
-
-		var modelMigrator = setupMigrator(
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-
-		var personWorks = getReference(evolvingModelManager,
-				"PersonList", "Person", "works");
-		// refactoring
-		classToReference(modelMigrator, personWorks);
-
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			subdir,
-			subdir,
-			of("PersonList.ecore"),
-			of("List.xmi")
-		);
-	}
-
-	@Test
-	void testClassToReferenceMultipleBidirectional() throws IOException {
-		var subdir = "classToReferenceMultipleBidirectional/";
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"classToReferenceUnidirectional/",
+		"classToReferenceMultipleUnidirectional/",
+		"classToReferenceBidirectional/",
+		"classToReferenceBidirectionalDifferentOrder/",
+		"classToReferenceMultipleBidirectional/"
+	})
+	void testClassToReference(String directory) throws IOException {
+		var subdir = directory;
 
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -4999,7 +4801,7 @@ class EdeltaModelMigratorTest {
 	 * @param features
 	 * @param valueMerger if not null, it is used to merge the values of the original
 	 * features in the new model
-	 * @param postCopy TODO
+	 * @param postCopy executed after the model migrations
 	 * 
 	 * @return the new feature added to the containing class of the features
 	 */
