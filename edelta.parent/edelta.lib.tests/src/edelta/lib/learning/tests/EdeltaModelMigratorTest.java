@@ -5,13 +5,7 @@ import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
 import static java.util.Arrays.asList;
 import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -40,16 +34,16 @@ import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.xbase.lib.StringExtensions;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaModelMigrator;
 import edelta.lib.EdeltaUtils;
 
-public class EdeltaModelMigratorTest {
+class EdeltaModelMigratorTest {
 
 	private static final String TESTDATA = "testdata/";
 	private static final String OUTPUT = "output/";
@@ -70,13 +64,13 @@ public class EdeltaModelMigratorTest {
 	 */
 	EdeltaModelManager evolvingModelManager;
 
-	@BeforeClass
-	public static void clearOutput() throws IOException {
+	@BeforeAll
+	static void clearOutput() throws IOException {
 		cleanDirectoryRecursive(OUTPUT);
 	}
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup() {
 		originalModelManager = new EdeltaModelManager();
 		evolvingModelManager = new EdeltaModelManager();
 	}
@@ -96,7 +90,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testCopierEqualsAndHashCode() {
+	void testCopierEqualsAndHashCode() {
 		var edeltaModelCopier1 = new EdeltaModelMigrator.EdeltaModelCopier(new HashMap<>());
 		var edeltaModelCopier2 = new EdeltaModelMigrator.EdeltaModelCopier(new HashMap<>());
 		assertNotEquals(edeltaModelCopier1, edeltaModelCopier2);
@@ -104,7 +98,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testCopyUnchanged() throws IOException {
+	void testCopyUnchanged() throws IOException {
 		var subdir = "simpleTestData/";
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -122,7 +116,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testCopyUnchangedWithEnums() throws IOException {
+	void testCopyUnchangedWithEnums() throws IOException {
 		var subdir = "simpleTestData/";
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -140,7 +134,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testCopyUnchangedClassesWithTheSameNameInDifferentPackages() throws IOException {
+	void testCopyUnchangedClassesWithTheSameNameInDifferentPackages() throws IOException {
 		var subdir = "classesWithTheSameName/";
 
 		var modelMigrator = setupMigrator(
@@ -159,7 +153,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testCopyMutualReferencesUnchanged() throws IOException {
+	void testCopyMutualReferencesUnchanged() throws IOException {
 		var subdir = "mutualReferencesUnchanged/";
 
 		var modelMigrator = setupMigrator(
@@ -178,7 +172,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testRenamedClass() throws IOException {
+	void testRenamedClass() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -203,7 +197,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testRenamedFeature() throws IOException {
+	void testRenamedFeature() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -230,7 +224,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testCopyMutualReferencesRenamed() throws IOException {
+	void testCopyMutualReferencesRenamed() throws IOException {
 		var subdir = "mutualReferencesUnchanged/";
 
 		var modelMigrator = setupMigrator(
@@ -253,7 +247,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testCopyMutualReferencesRenamed2() throws IOException {
+	void testCopyMutualReferencesRenamed2() throws IOException {
 		var subdir = "mutualReferencesUnchanged/";
 
 		var modelMigrator = setupMigrator(
@@ -282,7 +276,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testRemovedContainmentFeature() throws IOException {
+	void testRemovedContainmentFeature() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -305,7 +299,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testRemovedNonContainmentFeature() throws IOException {
+	void testRemovedNonContainmentFeature() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -328,7 +322,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testRemovedNonReferredClass() throws IOException {
+	void testRemovedNonReferredClass() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -351,7 +345,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testRemovedReferredClass() throws IOException {
+	void testRemovedReferredClass() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -374,7 +368,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseStringAttributes() throws IOException {
+	void testToUpperCaseStringAttributes() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -400,7 +394,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseSingleAttribute() throws IOException {
+	void testToUpperCaseSingleAttribute() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -428,7 +422,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseSingleAttributeAndRenamedBefore() throws IOException {
+	void testToUpperCaseSingleAttributeAndRenamedBefore() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -457,7 +451,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseSingleAttributeAndRenamedAfter() throws IOException {
+	void testToUpperCaseSingleAttributeAndRenamedAfter() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -486,7 +480,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseSingleAttributeAndMakeMultipleBefore() throws IOException {
+	void testToUpperCaseSingleAttributeAndMakeMultipleBefore() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -516,7 +510,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseSingleAttributeAndMakeMultipleAfter() throws IOException {
+	void testToUpperCaseSingleAttributeAndMakeMultipleAfter() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -547,7 +541,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseSingleAttributeMultiple() throws IOException {
+	void testToUpperCaseSingleAttributeMultiple() throws IOException {
 		var subdir = "toUpperCaseStringAttributesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -575,7 +569,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseSingleAttributeMultipleAndMakeSingleBefore() throws IOException {
+	void testToUpperCaseSingleAttributeMultipleAndMakeSingleBefore() throws IOException {
 		var subdir = "toUpperCaseStringAttributesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -605,7 +599,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testToUpperCaseSingleAttributeMultipleAndMakeSingleAfter() throws IOException {
+	void testToUpperCaseSingleAttributeMultipleAndMakeSingleAfter() throws IOException {
 		var subdir = "toUpperCaseStringAttributesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -635,7 +629,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeSingleAttribute() throws IOException {
+	void testMakeSingleAttribute() throws IOException {
 		var subdir = "toUpperCaseStringAttributesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -659,7 +653,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeMultipleAttribute() throws IOException {
+	void testMakeMultipleAttribute() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -683,7 +677,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeMultipleTo2Attribute() throws IOException {
+	void testMakeMultipleTo2Attribute() throws IOException {
 		var subdir = "toUpperCaseStringAttributesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -707,7 +701,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeMultipleAndMakeSingleAttribute() throws IOException {
+	void testMakeMultipleAndMakeSingleAttribute() throws IOException {
 		var subdir = "toUpperCaseStringAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -740,7 +734,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMakeSingleAndMakeMultipleAttribute() throws IOException {
+	void testMakeSingleAndMakeMultipleAttribute() throws IOException {
 		var subdir = "toUpperCaseStringAttributesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -766,7 +760,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeSingleNonContainmentReference() throws IOException {
+	void testMakeSingleNonContainmentReference() throws IOException {
 		var subdir = "referencesMultiple/";
 	
 		var modelMigrator = setupMigrator(
@@ -797,7 +791,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMakeSingleContainmentReference() throws IOException {
+	void testMakeSingleContainmentReference() throws IOException {
 		var subdir = "referencesMultiple/";
 	
 		var modelMigrator = setupMigrator(
@@ -821,7 +815,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeMultipleNonContainmentReference() throws IOException {
+	void testMakeMultipleNonContainmentReference() throws IOException {
 		var subdir = "referencesSingle/";
 	
 		var modelMigrator = setupMigrator(
@@ -845,7 +839,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeMultipleContainmentReference() throws IOException {
+	void testMakeMultipleContainmentReference() throws IOException {
 		var subdir = "referencesSingle/";
 	
 		var modelMigrator = setupMigrator(
@@ -869,7 +863,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeMultipleAndMakeSingleNonContainmentReference() throws IOException {
+	void testMakeMultipleAndMakeSingleNonContainmentReference() throws IOException {
 		var subdir = "referencesSingle/";
 
 		var modelMigrator = setupMigrator(
@@ -902,7 +896,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMakeSingleAndMakeMultipleNonContainmentReference() throws IOException {
+	void testMakeSingleAndMakeMultipleNonContainmentReference() throws IOException {
 		var subdir = "referencesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -928,7 +922,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeMultipleAndMakeSingleContainmentReference() throws IOException {
+	void testMakeMultipleAndMakeSingleContainmentReference() throws IOException {
 		var subdir = "referencesSingle/";
 
 		var modelMigrator = setupMigrator(
@@ -965,7 +959,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMakeSingleAndMakeMultipleContainmentReference() throws IOException {
+	void testMakeSingleAndMakeMultipleContainmentReference() throws IOException {
 		var subdir = "referencesMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -991,7 +985,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedAttributeTypeWithoutProperMigration() {
+	void testChangedAttributeTypeWithoutProperMigration() {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1018,7 +1012,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedAttributeTypeWithAttributeMigrator() throws IOException {
+	void testChangedAttributeTypeWithAttributeMigrator() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1063,7 +1057,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangeAttributeType() throws IOException {
+	void testChangeAttributeType() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1097,7 +1091,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangeAttributeTypeAlternative() throws IOException {
+	void testChangeAttributeTypeAlternative() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1141,7 +1135,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testChangeAttributeTypeAndMutiplicityAfter() throws IOException {
+	void testChangeAttributeTypeAndMutiplicityAfter() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1177,7 +1171,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangeAttributeTypeAndMutiplicityAfterAlternative() throws IOException {
+	void testChangeAttributeTypeAndMutiplicityAfterAlternative() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1213,7 +1207,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangeAttributeTypeAndMutiplicityBefore() throws IOException {
+	void testChangeAttributeTypeAndMutiplicityBefore() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1249,7 +1243,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangeAttributeTypeAndMutiplicityBeforeAlternative() throws IOException {
+	void testChangeAttributeTypeAndMutiplicityBeforeAlternative() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1285,7 +1279,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedAttributeTypeWithCopyRule() throws IOException {
+	void testChangedAttributeTypeWithCopyRule() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1325,7 +1319,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedMultiAttributeType() throws IOException {
+	void testChangedMultiAttributeType() throws IOException {
 		var subdir = "changedMultiAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1359,7 +1353,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedMultiAttributeTypeAlternative() throws IOException {
+	void testChangedMultiAttributeTypeAlternative() throws IOException {
 		var subdir = "changedMultiAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1393,7 +1387,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedMultiAttributeTypeAndMultiplicity() throws IOException {
+	void testChangedMultiAttributeTypeAndMultiplicity() throws IOException {
 		var subdir = "changedMultiAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1429,7 +1423,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedMultiAttributeTypeAndMultiplicityAlternative() throws IOException {
+	void testChangedMultiAttributeTypeAndMultiplicityAlternative() throws IOException {
 		var subdir = "changedMultiAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1465,7 +1459,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedMultiAttributeTypeAndMultiplicityTo2() throws IOException {
+	void testChangedMultiAttributeTypeAndMultiplicityTo2() throws IOException {
 		var subdir = "changedMultiAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1501,7 +1495,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedMultiAttributeTypeAndMultiplicityTo2Alternative() throws IOException {
+	void testChangedMultiAttributeTypeAndMultiplicityTo2Alternative() throws IOException {
 		var subdir = "changedMultiAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1537,7 +1531,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedAttributeNameAndType() throws IOException {
+	void testChangedAttributeNameAndType() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1572,7 +1566,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testChangedAttributeTypeAndName() throws IOException {
+	void testChangedAttributeTypeAndName() throws IOException {
 		var subdir = "changedAttributeType/";
 
 		var modelMigrator = setupMigrator(
@@ -1610,7 +1604,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testElementAssociations() {
+	void testElementAssociations() {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -1661,7 +1655,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReplaceWithCopy() throws IOException {
+	void testReplaceWithCopy() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -1686,7 +1680,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReplaceWithCopyTwice() throws IOException {
+	void testReplaceWithCopyTwice() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -1719,7 +1713,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testPullUpFeatures() throws IOException {
+	void testPullUpFeatures() throws IOException {
 		var subdir = "pullUpFeatures/";
 
 		var modelMigrator = setupMigrator(
@@ -1749,7 +1743,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testPullUpReferences() throws IOException {
+	void testPullUpReferences() throws IOException {
 		var subdir = "pullUpReferences/";
 
 		var modelMigrator = setupMigrator(
@@ -1779,7 +1773,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testPullUpContainmentReferences() throws IOException {
+	void testPullUpContainmentReferences() throws IOException {
 		var subdir = "pullUpContainmentReferences/";
 
 		var modelMigrator = setupMigrator(
@@ -1809,7 +1803,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testPushDownFeatures() throws IOException {
+	void testPushDownFeatures() throws IOException {
 		var subdir = "pushDownFeatures/";
 
 		var modelMigrator = setupMigrator(
@@ -1840,7 +1834,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testPullUpAndPushDown() throws IOException {
+	void testPullUpAndPushDown() throws IOException {
 		var subdir = "pullUpFeatures/";
 
 		var modelMigrator = setupMigrator(
@@ -1875,7 +1869,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testPushDownAndPullUp() throws IOException {
+	void testPushDownAndPullUp() throws IOException {
 		var subdir = "pushDownFeatures/";
 
 		var modelMigrator = setupMigrator(
@@ -1909,7 +1903,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeBidirectional() throws IOException {
+	void testMakeBidirectional() throws IOException {
 		var subdir = "makeBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -1937,7 +1931,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMakeBidirectionalExisting() throws IOException {
+	void testMakeBidirectionalExisting() throws IOException {
 		var subdir = "makeBidirectionalExisting/";
 	
 		var modelMigrator = setupMigrator(
@@ -1974,7 +1968,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testGetMigratedInTransformAttributeValueRule() throws IOException {
+	void testGetMigratedInTransformAttributeValueRule() throws IOException {
 		var subdir = "getMigratedTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -2044,7 +2038,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testGetMigratedInTransformAttributeValueRule2() throws IOException {
+	void testGetMigratedInTransformAttributeValueRule2() throws IOException {
 		var subdir = "getMigratedTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -2112,7 +2106,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testGetMigratedInCopyRule() throws IOException {
+	void testGetMigratedInCopyRule() throws IOException {
 		var subdir = "getMigratedTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -2185,7 +2179,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testGetMigratedInFeatureMigratorRule() throws IOException {
+	void testGetMigratedInFeatureMigratorRule() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -2234,7 +2228,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testGetMigratedMultipleInFeatureMigratorRule() throws IOException {
+	void testGetMigratedMultipleInFeatureMigratorRule() throws IOException {
 		var subdir = "simpleTestData/";
 
 		var modelMigrator = setupMigrator(
@@ -2284,7 +2278,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReferenceToClassUnidirectional() throws IOException {
+	void testReferenceToClassUnidirectional() throws IOException {
 		var subdir = "referenceToClassUnidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2308,7 +2302,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReferenceToClassMultipleUnidirectional() throws IOException {
+	void testReferenceToClassMultipleUnidirectional() throws IOException {
 		var subdir = "referenceToClassMultipleUnidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2332,7 +2326,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReferenceToClassBidirectional() throws IOException {
+	void testReferenceToClassBidirectional() throws IOException {
 		var subdir = "referenceToClassBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2356,7 +2350,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReferenceToClassBidirectionalAlternative() throws IOException {
+	void testReferenceToClassBidirectionalAlternative() throws IOException {
 		var subdir = "referenceToClassBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2380,7 +2374,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReferenceToClassBidirectionalDifferentOrder() throws IOException {
+	void testReferenceToClassBidirectionalDifferentOrder() throws IOException {
 		var subdir = "referenceToClassBidirectionalDifferentOrder/";
 
 		var modelMigrator = setupMigrator(
@@ -2404,7 +2398,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReferenceToClassBidirectionalOppositeMultiple() throws IOException {
+	void testReferenceToClassBidirectionalOppositeMultiple() throws IOException {
 		var subdir = "referenceToClassBidirectionalOppositeMultiple/";
 
 		var modelMigrator = setupMigrator(
@@ -2428,7 +2422,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReferenceToClassMultipleBidirectional() throws IOException {
+	void testReferenceToClassMultipleBidirectional() throws IOException {
 		var subdir = "referenceToClassMultipleBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2452,7 +2446,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReferenceToClassMultipleBidirectionalAlternative() throws IOException {
+	void testReferenceToClassMultipleBidirectionalAlternative() throws IOException {
 		var subdir = "referenceToClassMultipleBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2483,7 +2477,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleMain() throws IOException {
+	void testReferenceToClassMultipleBidirectionalChangedIntoSingleMain() throws IOException {
 		var subdir = "referenceToClassMultipleBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2515,7 +2509,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleOpposite() throws IOException {
+	void testReferenceToClassMultipleBidirectionalChangedIntoSingleOpposite() throws IOException {
 		var subdir = "referenceToClassMultipleBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2553,7 +2547,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleOppositeAlternative() throws IOException {
+	void testReferenceToClassMultipleBidirectionalChangedIntoSingleOppositeAlternative() throws IOException {
 		var subdir = "referenceToClassMultipleBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2591,7 +2585,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleBoth() throws IOException {
+	void testReferenceToClassMultipleBidirectionalChangedIntoSingleBoth() throws IOException {
 		var subdir = "referenceToClassMultipleBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2628,7 +2622,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testReferenceToClassMultipleBidirectionalChangedIntoSingleBothAlternative() throws IOException {
+	void testReferenceToClassMultipleBidirectionalChangedIntoSingleBothAlternative() throws IOException {
 		var subdir = "referenceToClassMultipleBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2658,7 +2652,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testClassToReferenceUnidirectional() throws IOException {
+	void testClassToReferenceUnidirectional() throws IOException {
 		var subdir = "classToReferenceUnidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2682,7 +2676,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testClassToReferenceMultipleUnidirectional() throws IOException {
+	void testClassToReferenceMultipleUnidirectional() throws IOException {
 		var subdir = "classToReferenceMultipleUnidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2706,7 +2700,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testClassToReferenceBidirectional() throws IOException {
+	void testClassToReferenceBidirectional() throws IOException {
 		var subdir = "classToReferenceBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2730,7 +2724,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testClassToReferenceBidirectionalDifferentOrder() throws IOException {
+	void testClassToReferenceBidirectionalDifferentOrder() throws IOException {
 		var subdir = "classToReferenceBidirectionalDifferentOrder/";
 
 		var modelMigrator = setupMigrator(
@@ -2754,7 +2748,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testClassToReferenceMultipleBidirectional() throws IOException {
+	void testClassToReferenceMultipleBidirectional() throws IOException {
 		var subdir = "classToReferenceMultipleBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2783,7 +2777,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testClassToReferenceAndReferenceToClassUnidirectional() throws IOException {
+	void testClassToReferenceAndReferenceToClassUnidirectional() throws IOException {
 		var subdir = "classToReferenceUnidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2808,7 +2802,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReferenceToClassAndClassToReferenceUnidirectional() throws IOException {
+	void testReferenceToClassAndClassToReferenceUnidirectional() throws IOException {
 		var subdir = "referenceToClassUnidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2833,7 +2827,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testClassToReferenceAndReferenceToClassBidirectional() throws IOException {
+	void testClassToReferenceAndReferenceToClassBidirectional() throws IOException {
 		var subdir = "classToReferenceBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2858,7 +2852,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReferenceToClassAndClassToReferenceBidirectional() throws IOException {
+	void testReferenceToClassAndClassToReferenceBidirectional() throws IOException {
 		var subdir = "referenceToClassBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2883,7 +2877,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testClassToReferenceAndReferenceToClassBidirectionalAlternative() throws IOException {
+	void testClassToReferenceAndReferenceToClassBidirectionalAlternative() throws IOException {
 		var subdir = "classToReferenceBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2908,7 +2902,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testReferenceToClassAndClassToReferenceBidirectionalAlternative() throws IOException {
+	void testReferenceToClassAndClassToReferenceBidirectionalAlternative() throws IOException {
 		var subdir = "referenceToClassBidirectional/";
 
 		var modelMigrator = setupMigrator(
@@ -2933,7 +2927,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMergeAttributesManual() throws IOException {
+	void testMergeAttributesManual() throws IOException {
 		var subdir = "mergeAttributesManual/";
 	
 		var modelMigrator = setupMigrator(
@@ -2975,7 +2969,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMergeAttributesWithoutValueMerger() throws IOException {
+	void testMergeAttributesWithoutValueMerger() throws IOException {
 		var subdir = "mergeAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -3005,7 +2999,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMergeAttributes() throws IOException {
+	void testMergeAttributes() throws IOException {
 		var subdir = "mergeAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -3040,7 +3034,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMergeFeaturesContainment() throws IOException {
+	void testMergeFeaturesContainment() throws IOException {
 		var subdir = "mergeFeaturesContainment/";
 
 		var modelMigrator = setupMigrator(
@@ -3102,7 +3096,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMergeFeaturesNonContainment() throws IOException {
+	void testMergeFeaturesNonContainment() throws IOException {
 		var subdir = "mergeFeaturesNonContainment/";
 
 		var modelMigrator = setupMigrator(
@@ -3178,7 +3172,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMergeFeaturesNonContainmentShared() throws IOException {
+	void testMergeFeaturesNonContainmentShared() throws IOException {
 		var subdir = "mergeFeaturesNonContainmentShared/";
 
 		var modelMigrator = setupMigrator(
@@ -3257,7 +3251,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testSplitAttributes() throws IOException {
+	void testSplitAttributes() throws IOException {
 		var subdir = "splitAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -3293,7 +3287,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testSplitFeatureContainment() throws IOException {
+	void testSplitFeatureContainment() throws IOException {
 		var subdir = "splitFeatureContainment/";
 
 		var modelMigrator = setupMigrator(
@@ -3353,7 +3347,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testSplitFeatureNonContainment() throws IOException {
+	void testSplitFeatureNonContainment() throws IOException {
 		var subdir = "splitFeatureNonContainment/";
 
 		var modelMigrator = setupMigrator(
@@ -3428,7 +3422,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testSplitFeatureNonContainmentShared() throws IOException {
+	void testSplitFeatureNonContainmentShared() throws IOException {
 		var subdir = "splitFeatureNonContainmentShared/";
 
 		var modelMigrator = setupMigrator(
@@ -3516,7 +3510,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testSplitAndMergeAttributes() throws IOException {
+	void testSplitAndMergeAttributes() throws IOException {
 		var subdir = "splitAndMergeAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -3571,7 +3565,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMergeAndSplitAttributes() throws IOException {
+	void testMergeAndSplitAttributes() throws IOException {
 		var subdir = "mergeAndSplitAttributes/";
 
 		var modelMigrator = setupMigrator(
@@ -3621,7 +3615,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testMergeAndSplitFeaturesContainment() throws IOException {
+	void testMergeAndSplitFeaturesContainment() throws IOException {
 		var subdir = "mergeAndSplitFeaturesContainment/";
 
 		var modelMigrator = setupMigrator(
@@ -3704,7 +3698,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMergeAndSplitFeaturesNonContainment() throws IOException {
+	void testMergeAndSplitFeaturesNonContainment() throws IOException {
 		var subdir = "mergeFeaturesNonContainment/";
 
 		var modelMigrator = setupMigrator(
@@ -3813,7 +3807,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testMergeAndSplitFeaturesNonContainmentShared() throws IOException {
+	void testMergeAndSplitFeaturesNonContainmentShared() throws IOException {
 		var subdir = "mergeFeaturesNonContainmentShared/";
 
 		var modelMigrator = setupMigrator(
@@ -3956,7 +3950,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testSplitAndMergeFeatureContainment() throws IOException {
+	void testSplitAndMergeFeatureContainment() throws IOException {
 		var subdir = "splitAndMergeFeatureContainment/";
 	
 		var modelMigrator = setupMigrator(
@@ -4040,7 +4034,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testSplitAndMergeFeatureNonContainment() throws IOException {
+	void testSplitAndMergeFeatureNonContainment() throws IOException {
 		var subdir = "splitAndMergeFeatureNonContainment/";
 
 		var modelMigrator = setupMigrator(
@@ -4146,7 +4140,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testSplitAndMergeFeaturesNonContainmentShared() throws IOException {
+	void testSplitAndMergeFeaturesNonContainmentShared() throws IOException {
 		var subdir = "splitFeatureNonContainmentShared/";
 
 		var modelMigrator = setupMigrator(
@@ -4276,7 +4270,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testEnumToSubclasses() throws IOException {
+	void testEnumToSubclasses() throws IOException {
 		var subdir = "enumToSubclasses/";
 
 		var modelMigrator = setupMigrator(
@@ -4299,7 +4293,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testSubclassesToEnum() throws IOException {
+	void testSubclassesToEnum() throws IOException {
 		var subdir = "subclassesToEnum/";
 		
 		var modelMigrator = setupMigrator(
@@ -4325,7 +4319,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testEnumToSubclassesAndSubclassesToEnum() throws IOException {
+	void testEnumToSubclassesAndSubclassesToEnum() throws IOException {
 		var subdir = "enumToSubclasses/";
 
 		var modelMigrator = setupMigrator(
@@ -4355,7 +4349,7 @@ public class EdeltaModelMigratorTest {
 	}
 
 	@Test
-	public void testSubclassesToEnumAndEnumToSubclasses() throws IOException {
+	void testSubclassesToEnumAndEnumToSubclasses() throws IOException {
 		var subdir = "subclassesToEnum/";
 		
 		var modelMigrator = setupMigrator(
@@ -4392,7 +4386,7 @@ public class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testComposeOperations1() throws IOException {
+	void testComposeOperations1() throws IOException {
 		var subdir = "enumToSubclasses/";
 
 		var modelMigrator = setupMigrator(
