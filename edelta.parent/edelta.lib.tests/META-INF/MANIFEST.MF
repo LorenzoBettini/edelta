@@ -6,6 +6,7 @@ Bundle-Version: 2.9.0.qualifier
 Bundle-Vendor: Lorenzo Bettini
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: edelta.lib,
+ org.junit;bundle-version="4.12.0",
  edelta.testutils,
  org.eclipse.xtext.util,
  edelta.testing.libraries;bundle-version="0.9.0"
