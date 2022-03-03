@@ -7,6 +7,7 @@ import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -92,6 +93,14 @@ public class EdeltaModelMigratorTest {
 			.forEach(fileName -> originalModelManager.loadModelFile(basedir + fileName));
 		var modelMigrator = new EdeltaModelMigrator(basedir, originalModelManager, evolvingModelManager);
 		return modelMigrator;
+	}
+
+	@Test
+	public void testCopierEqualsAndHashCode() {
+		var edeltaModelCopier1 = new EdeltaModelMigrator.EdeltaModelCopier(new HashMap<>());
+		var edeltaModelCopier2 = new EdeltaModelMigrator.EdeltaModelCopier(new HashMap<>());
+		assertNotEquals(edeltaModelCopier1, edeltaModelCopier2);
+		assertEquals(edeltaModelCopier1.hashCode(), edeltaModelCopier2.hashCode());
 	}
 
 	@Test

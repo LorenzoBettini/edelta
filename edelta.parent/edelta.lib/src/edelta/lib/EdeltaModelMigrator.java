@@ -44,7 +44,7 @@ public class EdeltaModelMigrator {
 	 * @author Lorenzo Bettini
 	 *
 	 */
-	private static class EdeltaModelCopier extends Copier {
+	public static class EdeltaModelCopier extends Copier {
 		private static final long serialVersionUID = 1L;
 
 		private transient BiMap<EObject, EObject> ecoreCopyMap;
@@ -99,9 +99,9 @@ public class EdeltaModelMigrator {
 			var value = ecoreCopyMap.get(o);
 			@SuppressWarnings("unchecked")
 			var mapped = (T) value;
-			if (isNotThereAnymore(mapped))
-				return null;
-			return mapped;
+			if (isStillThere(mapped))
+				return mapped;
+			return null;
 		}
 
 		@SuppressWarnings("unchecked")
@@ -111,10 +111,6 @@ public class EdeltaModelMigrator {
 
 		private boolean isStillThere(EObject target) {
 			return target != null && target.eResource() != null;
-		}
-
-		private boolean isNotThereAnymore(EObject target) {
-			return target == null || target.eResource() == null;
 		}
 
 		public boolean isRelatedTo(ENamedElement origEcoreElement, ENamedElement evolvedEcoreElement) {
