@@ -3,8 +3,8 @@
  */
 package edelta.lib.tests;
 
-import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
+import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -35,9 +35,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaEPackageManager;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaIssuePresenter;
+import edelta.lib.EdeltaModelManager;
 import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
 /**
@@ -71,8 +71,8 @@ public class EdeltaTest {
 			super(other);
 		}
 
-		public TestableEdelta(EdeltaEPackageManager packageManager) {
-			super(packageManager);
+		public TestableEdelta(EdeltaModelManager modelManager) {
+			super(modelManager);
 		}
 
 		@Override
@@ -146,7 +146,7 @@ public class EdeltaTest {
 
 	@Test
 	public void testGetEPackageWithExplicitPackageManager() {
-		edelta = new TestableEdelta(new EdeltaEPackageManager() {
+		edelta = new TestableEdelta(new EdeltaModelManager() {
 			@Override
 			public EPackage getEPackage(String packageName) {
 				if (packageName.equals("toFind"))

@@ -10,7 +10,7 @@ import org.eclipse.emf.ecore.ENamedElement;
 import org.junit.Before;
 import org.junit.Test;
 
-import edelta.lib.EdeltaEPackageManager;
+import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaResourceUtils;
 
 /**
@@ -23,20 +23,20 @@ public class EdeltaResourceUtilsTest {
 
 	private static final String MODELS = "testdata/models/";
 
-	private EdeltaEPackageManager packageManager;
+	private EdeltaModelManager modelManager;
 
 	@Before
 	public void init() {
-		packageManager = new EdeltaEPackageManager();
+		modelManager = new EdeltaModelManager();
 	}
 
 	@Test
 	public void testGetEPackage() {
-		var r1 = packageManager.loadEcoreFile(MODELS + "My.ecore");
-		var r2 = packageManager.loadEcoreFile(MODELS + "My2.ecore");
-		var toEmpty = packageManager.loadEcoreFile(MODELS + "Empty.ecore");
+		var r1 = modelManager.loadEcoreFile(MODELS + "My.ecore");
+		var r2 = modelManager.loadEcoreFile(MODELS + "My2.ecore");
+		var toEmpty = modelManager.loadEcoreFile(MODELS + "Empty.ecore");
 		toEmpty.getContents().clear();
-		var notEcore = packageManager.loadEcoreFile(MODELS + "MyClass.xmi");
+		var notEcore = modelManager.loadEcoreFile(MODELS + "MyClass.xmi");
 		var packages = EdeltaResourceUtils.getEPackages(List.of(r1, r2, toEmpty, notEcore));
 		Assertions.assertThat(packages)
 			.extracting(ENamedElement::getName)
