@@ -1,4 +1,4 @@
-package edelta.lib.learning.tests;
+package edelta.lib.tests;
 
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
