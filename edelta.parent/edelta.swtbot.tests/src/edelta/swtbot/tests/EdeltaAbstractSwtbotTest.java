@@ -124,7 +124,6 @@ public abstract class EdeltaAbstractSwtbotTest {
 		bot.waitUntil(new ICondition() {
 			@Override
 			public boolean test() throws Exception {
-				// TODO Auto-generated method stub
 				IMarker[] markers = root().findMarkers(IMarker.PROBLEM, true,
 						IResource.DEPTH_INFINITE);
 				List<IMarker> errorMarkers = new LinkedList<IMarker>();
