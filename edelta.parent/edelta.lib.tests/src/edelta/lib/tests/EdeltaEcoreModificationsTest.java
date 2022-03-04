@@ -3,8 +3,8 @@
  */
 package edelta.lib.tests;
 
-import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
+import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
@@ -21,11 +21,11 @@ import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.Before;
 import org.junit.Test;
 
 import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaUtils;
 
@@ -165,7 +165,7 @@ public class EdeltaEcoreModificationsTest {
 		// perform copy and EOpposite refers to the copied opposite
 		// and that is good for us!
 		Collection<EPackage> copyEPackages =
-			EdeltaEcoreUtil.copyEPackages(Arrays.asList(original1, original2));
+			EcoreUtil.copyAll(Arrays.asList(original1, original2));
 		Iterator<EPackage> iterator = copyEPackages.iterator();
 		EPackage copied1 = iterator.next();
 		EPackage copied2 = iterator.next();

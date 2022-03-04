@@ -14,7 +14,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
+import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
+import org.eclipse.swtbot.swt.finder.waits.ICondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
@@ -119,19 +121,34 @@ public abstract class EdeltaAbstractSwtbotTest {
 	}
 
 	protected void assertErrorsInProject(int numOfErrors) throws CoreException {
-		IMarker[] markers = root().findMarkers(IMarker.PROBLEM, true,
-				IResource.DEPTH_INFINITE);
-		List<IMarker> errorMarkers = new LinkedList<IMarker>();
-		for (int i = 0; i < markers.length; i++) {
-			IMarker iMarker = markers[i];
-			if (iMarker.getAttribute(IMarker.SEVERITY).toString()
-					.equals("" + IMarker.SEVERITY_ERROR)) {
-				errorMarkers.add(iMarker);
+		bot.waitUntil(new ICondition() {
+			@Override
+			public boolean test() throws Exception {
+				IMarker[] markers = root().findMarkers(IMarker.PROBLEM, true,
+						IResource.DEPTH_INFINITE);
+				List<IMarker> errorMarkers = new LinkedList<IMarker>();
+				for (int i = 0; i < markers.length; i++) {
+					IMarker iMarker = markers[i];
+					if (iMarker.getAttribute(IMarker.SEVERITY).toString()
+							.equals("" + IMarker.SEVERITY_ERROR)) {
+						errorMarkers.add(iMarker);
+					}
+				}
+				var message = "### error markers: " + printMarkers(errorMarkers);
+				System.out.println(message);
+				assertEquals(message, numOfErrors, errorMarkers.size());
+				return true;
 			}
-		}
-		assertEquals(
-				"error markers: " + printMarkers(errorMarkers), numOfErrors,
-				errorMarkers.size());
+
+			@Override
+			public void init(SWTBot bot) {
+			}
+
+			@Override
+			public String getFailureMessage() {
+				return "failed to match error markers";
+			}
+		});
 	}
 
 	private String printMarkers(List<IMarker> errorMarkers) {
