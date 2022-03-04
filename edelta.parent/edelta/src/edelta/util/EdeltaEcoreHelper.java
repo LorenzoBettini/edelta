@@ -13,13 +13,13 @@ import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.util.IResourceScopeCache;
 
 import com.google.common.base.Predicate;
 import com.google.inject.Inject;
 
-import edelta.lib.EdeltaEcoreUtil;
 import edelta.resource.derivedstate.EdeltaAccessibleElement;
 import edelta.resource.derivedstate.EdeltaAccessibleElements;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
@@ -66,7 +66,7 @@ public class EdeltaEcoreHelper {
 	public EdeltaAccessibleElements createSnapshotOfAccessibleElements(EObject context) {
 		return cache.get("createSnapshotOfAccessibleElements", context.eResource(),
 			() -> fromEPackagesToAccessibleElements
-				(EdeltaEcoreUtil.copyEPackages(getCurrentEPackagesToProcess(context))));
+				(EcoreUtil.copyAll(getCurrentEPackagesToProcess(context))));
 	}
 
 	/**

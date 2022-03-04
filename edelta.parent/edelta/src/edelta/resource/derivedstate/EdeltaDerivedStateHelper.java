@@ -3,6 +3,7 @@ package edelta.resource.derivedstate;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.xtext.EcoreUtil2.getContainerOfType;
 
+import java.util.Collection;
 import java.util.Objects;
 
 import org.eclipse.emf.ecore.ENamedElement;
@@ -10,6 +11,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
 import org.eclipse.xtext.Constants;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.xbase.XExpression;
@@ -21,7 +23,6 @@ import com.google.inject.name.Named;
 import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
-import edelta.lib.EdeltaEcoreUtil;
 
 /**
  * Provides access (and possibly install) to the {@link EdeltaDerivedState}.
@@ -83,10 +84,10 @@ public class EdeltaDerivedStateHelper {
 			.distinct()
 			.collect(toList());
 		final var copiedEPackagesMap = getCopiedEPackagesMap(resource);
-		var copies = EdeltaEcoreUtil.copyEPackages(packages);
-		for (var copy : copies) {
-			copiedEPackagesMap.computeIfAbsent(copy.getName(), key -> copy);
-		}
+		Copier copier = new Copier();
+		Collection<EPackage> copies = copier.copyAll(packages);
+		copier.copyReferences();
+		copiedEPackagesMap.setCopies(copies, copier);
 		// we must add the copied EPackages to the resource
 		addToProgramResource(resource, copiedEPackagesMap);
 	}
