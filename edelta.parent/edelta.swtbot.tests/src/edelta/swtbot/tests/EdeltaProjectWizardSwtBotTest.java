@@ -1,9 +1,9 @@
 package edelta.swtbot.tests;
 
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
+import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.waitForBuild;
 import static org.junit.Assert.assertTrue;
 
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -60,14 +60,29 @@ public class EdeltaProjectWizardSwtBotTest extends EdeltaAbstractSwtbotTest {
 			}
 		});
 
-		// maybe before we were not waiting for auto build,
-		System.out.println("Waiting for auto build...");
-		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
-		Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_REFRESH, null);
-		Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
-		System.out.println("Auto build done.");
-		assertErrorsInProject(0);
-//		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(TEST_PROJECT);
+		// building seems to be flaky, so better to try again in case of failure
+		bot.waitUntil(new ICondition() {
+			@Override
+			public boolean test() throws Exception {
+				System.out.println("**** WAITING FOR BUILD...");
+				waitForBuild();
+				Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_REFRESH, null);
+				Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+				System.out.println("**** BUILD DONE");
+				assertErrorsInProject(0);
+				return true;
+			}
+
+			@Override
+			public void init(SWTBot bot) {
+			}
+
+			@Override
+			public String getFailureMessage() {
+				return "build failed";
+			}
+		});
+
 		bot.waitUntil(new ICondition() {
 			@Override
 			public boolean test() throws Exception {
