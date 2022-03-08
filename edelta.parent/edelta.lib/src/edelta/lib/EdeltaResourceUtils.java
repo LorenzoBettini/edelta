@@ -5,6 +5,7 @@ package edelta.lib;
 
 import static java.util.Comparator.comparing;
 
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
@@ -65,5 +66,17 @@ public class EdeltaResourceUtils {
 	 */
 	public static Comparator<EPackage> ePackageComparator() {
 		return comparing(EPackage::getNsURI);
+	}
+
+	/**
+	 * Returns the file name of the given {@link Resource}
+	 * 
+	 * @param resource
+	 * @return
+	 */
+	public static String getFileName(Resource resource) {
+		var resourceURI = resource.getURI();
+		var resourcePath = Paths.get(resourceURI.toFileString());
+		return resourcePath.getFileName().toString();
 	}
 }

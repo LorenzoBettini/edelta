@@ -3,9 +3,11 @@
  */
 package edelta.lib.tests;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.List;
 
-import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,9 +40,14 @@ public class EdeltaResourceUtilsTest {
 		toEmpty.getContents().clear();
 		var notEcore = modelManager.loadEcoreFile(MODELS + "MyClass.xmi");
 		var packages = EdeltaResourceUtils.getEPackages(List.of(r1, r2, toEmpty, notEcore));
-		Assertions.assertThat(packages)
+		assertThat(packages)
 			.extracting(ENamedElement::getName)
 			.containsExactly("mypackage", "myotherpackage");
 	}
 
+	@Test
+	public void testGetFileName() {
+		var r2 = modelManager.loadEcoreFile(MODELS + "My2.ecore");
+		assertEquals("My2.ecore", EdeltaResourceUtils.getFileName(r2));
+	}
 }
