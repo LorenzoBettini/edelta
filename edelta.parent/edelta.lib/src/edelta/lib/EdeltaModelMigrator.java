@@ -1,6 +1,5 @@
 package edelta.lib;
 
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
@@ -197,8 +196,7 @@ public class EdeltaModelMigrator {
 		var map = from.getModelResourceMap();
 		for (var entry : map.entrySet()) {
 			var originalResource = (XMIResource) entry.getValue();
-			var p = Paths.get(entry.getKey());
-			final var fileName = p.getFileName().toString();
+			var fileName = EdeltaResourceUtils.getFileName(originalResource);
 			var newResource = into.createModelResource
 				(baseDir + fileName, originalResource);
 			var root = originalResource.getContents().get(0);
