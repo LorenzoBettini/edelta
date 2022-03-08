@@ -194,8 +194,8 @@ public class EdeltaModelMigrator {
 	private void copyModels(EdeltaModelCopier edeltaModelCopier, String baseDir,
 			EdeltaModelManager from, EdeltaModelManager into) {
 		var map = from.getModelResourceMap();
-		for (var entry : map.entrySet()) {
-			var originalResource = (XMIResource) entry.getValue();
+		for (var resource : map) {
+			var originalResource = (XMIResource) resource;
 			var fileName = EdeltaResourceUtils.getFileName(originalResource);
 			var newResource = into.createModelResource
 				(baseDir + fileName, originalResource);
@@ -352,7 +352,7 @@ public class EdeltaModelMigrator {
 		// to force its recreation, so that it takes into
 		// consideration possible changes of the feature, e.g., multiplicity
 		EdeltaResourceUtils.getEPackages(
-			evolvingModelManager.getEcoreResourceMap().values()).stream()
+			evolvingModelManager.getEcoreResourceMap()).stream()
 			.flatMap(p -> EdeltaUtils.allEClasses(p).stream())
 			.flatMap(c -> c.getEStructuralFeatures().stream())
 			.forEach(f -> ((EStructuralFeature.Internal)f).setSettingDelegate(null));
