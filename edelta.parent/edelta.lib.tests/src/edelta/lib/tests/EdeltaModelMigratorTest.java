@@ -1987,7 +1987,7 @@ class EdeltaModelMigratorTest {
 		var myAttributeOriginal = getAttribute(originalModelManager,
 				"mypackage", "MyClass", "myAttribute");
 		var root = originalModelManager
-				.getModelResourceMap().iterator().next().getContents().get(0);
+				.getModelResources().iterator().next().getContents().get(0);
 		assertEquals("MyRoot", root.eClass().getName());
 		var myClassO1 = root.eContents().get(0);
 		var myClassO2 = root.eContents().get(1);
@@ -2055,7 +2055,7 @@ class EdeltaModelMigratorTest {
 				"mypackage", "MyClass", "myOtherAttribute");
 
 		var root = originalModelManager
-				.getModelResourceMap().iterator().next().getContents().get(0);
+				.getModelResources().iterator().next().getContents().get(0);
 		assertEquals("MyRoot", root.eClass().getName());
 		var myClassO1 = root.eContents().get(0);
 		var myClassO2 = root.eContents().get(1);
@@ -2127,7 +2127,7 @@ class EdeltaModelMigratorTest {
 		var myOtherAttributeOriginal = getAttribute(originalModelManager,
 				"mypackage", "MyClass", "myOtherAttribute");
 		var root = originalModelManager
-				.getModelResourceMap().iterator().next().getContents().get(0);
+				.getModelResources().iterator().next().getContents().get(0);
 		assertEquals("MyRoot", root.eClass().getName());
 		var myClassO1 = root.eContents().get(0);
 		var myClassO2 = root.eContents().get(1);
