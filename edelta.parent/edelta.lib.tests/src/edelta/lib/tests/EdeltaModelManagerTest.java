@@ -170,14 +170,14 @@ public class EdeltaModelManagerTest {
 		modelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
 		modelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
 		modelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
-		assertThat(modelManager.getModelResourceMap())
+		assertThat(modelManager.getModelResources())
 			.hasSize(2);
-		assertThat(modelManager.getEcoreResourceMap())
+		assertThat(modelManager.getEcoreResources())
 			.hasSize(1);
 		modelManager.clearModels();
-		assertThat(modelManager.getModelResourceMap())
+		assertThat(modelManager.getModelResources())
 			.isEmpty();
-		assertThat(modelManager.getEcoreResourceMap())
+		assertThat(modelManager.getEcoreResources())
 			.hasSize(1);
 	}
 
@@ -198,7 +198,7 @@ public class EdeltaModelManagerTest {
 
 		Iterable<EObject> copiedContents = () -> 
 			EcoreUtil.getAllContents(
-				modelManager.getEcoreResourceMap().iterator().next(),
+				modelManager.getEcoreResources().iterator().next(),
 				true);
 
 		assertThat(map.values())
