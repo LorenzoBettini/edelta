@@ -170,19 +170,15 @@ public class EdeltaModelManagerTest {
 		modelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
 		modelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
 		modelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
-		assertThat(modelManager.getModelResourceMap().keySet())
-			.containsExactlyInAnyOrder(
-				TESTDATA+SIMPLE_TEST_DATA+MY_CLASS,
-				TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
-		assertThat(modelManager.getEcoreResourceMap().keySet())
-			.containsExactlyInAnyOrder(
-				TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		assertThat(modelManager.getModelResourceMap())
+			.hasSize(2);
+		assertThat(modelManager.getEcoreResourceMap())
+			.hasSize(1);
 		modelManager.clearModels();
-		assertThat(modelManager.getModelResourceMap().keySet())
+		assertThat(modelManager.getModelResourceMap())
 			.isEmpty();
-		assertThat(modelManager.getEcoreResourceMap().keySet())
-			.containsExactlyInAnyOrder(
-				TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		assertThat(modelManager.getEcoreResourceMap())
+			.hasSize(1);
 	}
 
 	@Test
@@ -202,7 +198,7 @@ public class EdeltaModelManagerTest {
 
 		Iterable<EObject> copiedContents = () -> 
 			EcoreUtil.getAllContents(
-				modelManager.getEcoreResourceMap().values().iterator().next(),
+				modelManager.getEcoreResourceMap().iterator().next(),
 				true);
 
 		assertThat(map.values())

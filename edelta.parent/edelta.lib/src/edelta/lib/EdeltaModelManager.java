@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
@@ -34,16 +34,14 @@ public class EdeltaModelManager {
 	private static final Logger LOG = Logger.getLogger(EdeltaModelManager.class);
 
 	/**
-	 * Here we store the association between the Ecore path and the
-	 * corresponding loaded Resource.
+	 * Here we store loaded Ecore Resources.
 	 */
-	private Map<String, Resource> ecoreResourceMap = new LinkedHashMap<>();
+	private Collection<Resource> ecoreResourceMap = new ArrayList<>();
 
 	/**
-	 * Here we store the association between the model path and the
-	 * corresponding loaded Resource.
+	 * Here we store the loaded model Resources.
 	 */
-	private Map<String, Resource> modelResourceMap = new LinkedHashMap<>();
+	private Collection<Resource> modelResourceMap = new ArrayList<>();
 
 	/**
 	 * Here we store all the Ecores and models used by the Edelta
@@ -86,12 +84,12 @@ public class EdeltaModelManager {
 		return loadResource(path, ecoreResourceMap);
 	}
 
-	private Resource loadResource(String path, Map<String, Resource> resourceMap) {
+	private Resource loadResource(String path, Collection<Resource> resourceMap) {
 		var uri = createAbsoluteFileURI(path);
 		// Demand load resource for this file.
 		LOG.info("Loading " + path + " (URI: " + uri + ")");
 		var resource = resourceSet.getResource(uri, true);
-		resourceMap.put(path, resource);
+		resourceMap.add(resource);
 		return resource;
 	}
 
@@ -106,7 +104,7 @@ public class EdeltaModelManager {
 		if (EcorePackage.eNAME.equals(packageName)) {
 			return EcorePackage.eINSTANCE;
 		}
-		return EdeltaResourceUtils.getEPackages(ecoreResourceMap.values())
+		return EdeltaResourceUtils.getEPackages(ecoreResourceMap)
 			.stream()
 			.filter(p -> p.getName().equals(packageName))
 			.findFirst()
@@ -128,9 +126,8 @@ public class EdeltaModelManager {
 		saveResources(outputPath, ecoreResourceMap);
 	}
 
-	private void saveResources(String outputPath, Map<String, Resource> resourceMap) throws IOException {
-		for (Entry<String, Resource> entry : resourceMap.entrySet()) {
-			var resource = entry.getValue();
+	private void saveResources(String outputPath, Collection<Resource> resourceMap) throws IOException {
+		for (var resource : resourceMap) {
 			var fileName = EdeltaResourceUtils.getFileName(resource);
 			LOG.info("Saving " + outputPath + "/" + fileName);
 			var newFile = new File(outputPath, fileName);
@@ -201,14 +198,14 @@ public class EdeltaModelManager {
 	 * @param resourceMap 
 	 * @return
 	 */
-	private Resource createResource(String path, XMIResource prototypeResource, Map<String, Resource> resourceMap) {
+	private Resource createResource(String path, XMIResource prototypeResource, Collection<Resource> resourceMap) {
 		var uri = createAbsoluteFileURI(path);
 		LOG.info("Creating " + path + " (URI: " + uri + ")");
 		var resource = (XMIResource) resourceSet.createResource(uri);
 		resource.getDefaultLoadOptions().putAll(prototypeResource.getDefaultLoadOptions());
 		resource.getDefaultSaveOptions().putAll(prototypeResource.getDefaultSaveOptions());
 		resource.setEncoding(prototypeResource.getEncoding());
-		resourceMap.put(path, resource);
+		resourceMap.add(resource);
 		return resource;
 	}
 
@@ -223,19 +220,19 @@ public class EdeltaModelManager {
 		return URI.createFileURI(Paths.get(path).toAbsolutePath().toString());
 	}
 
-	public Map<String, Resource> getModelResourceMap() {
+	public Collection<Resource> getModelResourceMap() {
 		return modelResourceMap;
 	}
 
-	public Map<String, Resource> getEcoreResourceMap() {
+	public Collection<Resource> getEcoreResourceMap() {
 		return ecoreResourceMap;
 	}
 
 	public Map<EObject, EObject> copyEcores(EdeltaModelManager otherModelManager, String basedir) {
 		var otherEcoreResourceMap = otherModelManager.getEcoreResourceMap();
 		var ecoreCopier = new Copier();
-		for (var entry : otherEcoreResourceMap.entrySet()) {
-			var originalResource = (XMIResource) entry.getValue();
+		for (var resource : otherEcoreResourceMap) {
+			var originalResource = (XMIResource) resource;
 			var fileName = EdeltaResourceUtils.getFileName(originalResource);
 			var newResource = this.createEcoreResource
 				(basedir + fileName, originalResource);
@@ -248,8 +245,7 @@ public class EdeltaModelManager {
 
 	public void clearModels() {
 		var map = getModelResourceMap();
-		for (var entry : map.entrySet()) {
-			var resource = (XMIResource) entry.getValue();
+		for (var resource : map) {
 			resource.getResourceSet()
 				.getResources().remove(resource);
 		}
