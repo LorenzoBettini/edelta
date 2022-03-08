@@ -130,13 +130,13 @@ public class EdeltaModelManager {
 
 	private void saveResources(String outputPath, Map<String, Resource> resourceMap) throws IOException {
 		for (Entry<String, Resource> entry : resourceMap.entrySet()) {
-			var p = Paths.get(entry.getKey());
-			final var fileName = p.getFileName().toString();
+			var resource = entry.getValue();
+			var fileName = EdeltaResourceUtils.getFileName(resource);
 			LOG.info("Saving " + outputPath + "/" + fileName);
 			var newFile = new File(outputPath, fileName);
 			newFile.getParentFile().mkdirs();
 			var fos = new FileOutputStream(newFile);
-			entry.getValue().save(fos, null);
+			resource.save(fos, null);
 			fos.flush();
 			fos.close();
 		}
@@ -236,8 +236,7 @@ public class EdeltaModelManager {
 		var ecoreCopier = new Copier();
 		for (var entry : otherEcoreResourceMap.entrySet()) {
 			var originalResource = (XMIResource) entry.getValue();
-			var p = Paths.get(entry.getKey());
-			final var fileName = p.getFileName().toString();
+			var fileName = EdeltaResourceUtils.getFileName(originalResource);
 			var newResource = this.createEcoreResource
 				(basedir + fileName, originalResource);
 			var root = originalResource.getContents().get(0);
