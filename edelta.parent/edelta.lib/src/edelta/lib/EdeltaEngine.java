@@ -1,5 +1,6 @@
 package edelta.lib;
 
+import java.io.IOException;
 import java.util.function.Function;
 
 import org.eclipse.emf.ecore.resource.Resource;
@@ -18,6 +19,7 @@ public class EdeltaEngine {
 
 	private EdeltaModelManager originalModelManager = new EdeltaModelManager();
 	private EdeltaRuntimeProvider provider;
+	private EdeltaModelManager evolvingModelManager;
 
 	public EdeltaEngine(EdeltaRuntimeProvider provider) {
 		this.provider = provider;
@@ -32,10 +34,21 @@ public class EdeltaEngine {
 	}
 
 	public void execute() throws Exception {
-		var evolvingModelManager = new EdeltaModelManager();
+		evolvingModelManager = new EdeltaModelManager();
 		evolvingModelManager.copyEcores(originalModelManager);
-		var edelta = provider.apply(evolvingModelManager);
+		var provided = provider.apply(evolvingModelManager);
+		var edelta = new EdeltaDefaultRuntime(provided) {
+			@Override
+			public void execute() throws Exception {
+				provided.execute();
+			}
+		};
 		edelta.execute();
+	}
+
+	public void save(String outputPath) throws IOException {
+		evolvingModelManager.saveEcores(outputPath);
+		evolvingModelManager.saveModels(outputPath);
 	}
 
 }
