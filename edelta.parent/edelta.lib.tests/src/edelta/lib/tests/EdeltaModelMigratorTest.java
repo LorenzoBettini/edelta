@@ -87,7 +87,8 @@ class EdeltaModelMigratorTest {
 			.forEach(fileName -> originalModelManager.loadEcoreFile(basedir + fileName));
 		modelFiles
 			.forEach(fileName -> originalModelManager.loadModelFile(basedir + fileName));
-		var modelMigrator = new EdeltaModelMigrator(basedir, originalModelManager, evolvingModelManager);
+		var modelMigrator = new EdeltaModelMigrator(basedir, originalModelManager);
+		evolvingModelManager = modelMigrator.getEvolvingModelManager();
 		return modelMigrator;
 	}
 

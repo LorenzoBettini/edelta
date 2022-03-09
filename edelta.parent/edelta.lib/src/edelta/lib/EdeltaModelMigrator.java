@@ -165,14 +165,17 @@ public class EdeltaModelMigrator {
 	}
 
 	public EdeltaModelMigrator(String basedir,
-			EdeltaModelManager originalModelManager,
-			EdeltaModelManager evolvingModelManager) {
+			EdeltaModelManager originalModelManager) {
 		this.basedir = basedir;
 		this.originalModelManager = originalModelManager;
-		this.evolvingModelManager = evolvingModelManager;
+		this.evolvingModelManager = new EdeltaModelManager();
 		this.mapOfCopiedEcores = evolvingModelManager.copyEcores(originalModelManager, basedir);
 		this.modelCopier = new EdeltaModelCopier(
 				mapOfCopiedEcores);
+	}
+
+	public EdeltaModelManager getEvolvingModelManager() {
+		return evolvingModelManager;
 	}
 
 	/**
