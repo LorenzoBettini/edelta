@@ -33,7 +33,7 @@ public class EdeltaEngine {
 
 	public void execute() throws Exception {
 		var evolvingModelManager = new EdeltaModelManager();
-		evolvingModelManager.copyEcores(originalModelManager, "");
+		evolvingModelManager.copyEcores(originalModelManager);
 		var edelta = provider.apply(evolvingModelManager);
 		edelta.execute();
 	}
