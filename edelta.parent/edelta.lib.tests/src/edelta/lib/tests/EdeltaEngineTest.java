@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.Test;
 
+import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaEngine;
 import edelta.lib.EdeltaModelManager;
@@ -22,21 +23,26 @@ public class EdeltaEngineTest {
 	private static final String MY_CLASS = "MyClass.xmi";
 	private static final String MY_ROOT = "MyRoot.xmi";
 
-	static public class TestEdeltaRuntime extends EdeltaDefaultRuntime {
-		public TestEdeltaRuntime(EdeltaModelManager other) {
-			super(other);
-		}
-	};
-
 	@Test
-	public void testCreationAndExecution() {
-		var engine = new EdeltaEngine(TestEdeltaRuntime.class);
+	public void testCreationAndExecution() throws Exception {
+		var engine = new EdeltaEngine(modelManager -> 
+			new AbstractEdelta(modelManager) {
+				@Override
+				protected void doExecute() {
+					getEClass(MYPACKAGE, "MyClass").setName("Renamed");
+				}
+			}
+		);
 		var ecoreResource = engine.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
 		var ePackage = EdeltaResourceUtils.getEPackage(ecoreResource);
 		assertNotNull(ePackage);
+		var eClass = ePackage.getEClassifier("MyClass");
+		assertNotNull(eClass);
 		var model = engine.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
 		assertEquals("MyClass",
 			model.getContents().get(0).eClass().getName());
 		engine.execute();
+		// make sure the original Ecore is not changed
+		assertEquals("MyClass", eClass.getName());
 	}
 }
