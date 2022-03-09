@@ -5,7 +5,13 @@ import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
 import static java.util.Arrays.asList;
 import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -31,7 +37,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcorePackage;
-import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.xbase.lib.StringExtensions;
 import org.junit.jupiter.api.BeforeAll;
@@ -89,7 +94,7 @@ class EdeltaModelMigratorTest {
 			.forEach(fileName -> originalModelManager.loadEcoreFile(basedir + fileName));
 		modelFiles
 			.forEach(fileName -> originalModelManager.loadModelFile(basedir + fileName));
-		var modelMigrator = new EdeltaModelMigrator(basedir, originalModelManager);
+		var modelMigrator = new EdeltaModelMigrator(originalModelManager);
 		evolvingModelManager = modelMigrator.getEvolvingModelManager();
 		return modelMigrator;
 	}
@@ -4154,7 +4159,7 @@ class EdeltaModelMigratorTest {
 			Collection<String> ecoreFiles,
 			Collection<String> modelFiles
 		) throws IOException {
-		copyModels(modelMigrator, "");
+		copyModels(modelMigrator);
 		var output = OUTPUT + outputdir;
 		evolvingModelManager.saveEcores(output);
 		evolvingModelManager.saveModels(output);
@@ -4198,18 +4203,9 @@ class EdeltaModelMigratorTest {
 
 	/**
 	 * This simulates what the final model migration should do.
-	 * 
-	 * IMPORTANT: the original Ecores and models must be in a subdirectory
-	 * of the directory that stores the modified Ecores.
-	 * 
-	 * It is crucial to strip the original path and use the baseDir
-	 * to create the new {@link Resource} URI, so that, upon saving,
-	 * the schema location is computed correctly.
-	 * 
-	 * @param baseDir
 	 */
-	private void copyModels(EdeltaModelMigrator modelMigrator, String baseDir) {
-		modelMigrator.copyModels(baseDir);
+	private void copyModels(EdeltaModelMigrator modelMigrator) {
+		modelMigrator.copyModels();
 	}
 
 	// SIMULATION OF REFACTORINGS THAT WILL BE PART OF OUR LIBRARY LATER
