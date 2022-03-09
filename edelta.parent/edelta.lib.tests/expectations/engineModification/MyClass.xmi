@@ -5,4 +5,4 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:mypackage="http://my.package.org"
     xsi:schemaLocation="http://my.package.org My.ecore"
-    myClassStringAttribute="My Attribute Value"/>
+    myClassStringAttribute="MY ATTRIBUTE VALUE"/>

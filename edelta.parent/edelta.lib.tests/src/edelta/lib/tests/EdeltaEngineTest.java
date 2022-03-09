@@ -22,9 +22,7 @@ public class EdeltaEngineTest {
 	private static final String EXPECTATIONS = "expectations/";
 
 	private static final String MYPACKAGE = "mypackage";
-	private static final String MODIFIED = "modified";
 	private static final String MY_ECORE = "My.ecore";
-	private static final String TESTECORES = "testecores/";
 	private static final String TESTDATA = "testdata/";
 	private static final String SIMPLE_TEST_DATA = "simpleTestData/";
 	private static final String MY_CLASS = "MyClass.xmi";
@@ -68,7 +66,7 @@ public class EdeltaEngineTest {
 		engine.execute();
 		// make sure the original Ecore is not changed
 		assertEquals("MyClass", eClass.getName());
-		
+
 		var subdir = "engineModification/";
 		engine.save(OUTPUT + subdir);
 		assertGeneratedFiles(subdir, MY_ECORE);
