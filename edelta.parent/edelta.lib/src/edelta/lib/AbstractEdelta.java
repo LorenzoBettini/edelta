@@ -3,6 +3,7 @@ package edelta.lib;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.apache.log4j.Level;
@@ -272,6 +273,18 @@ public abstract class AbstractEdelta {
 			return null;
 		}
 		return eenum.getEEnumLiteral(enumLiteralName);
+	}
+
+	/**
+	 * Passes an {@link EdeltaModelMigrator} to the passed {@link Consumer}.
+	 * 
+	 * The default implementation does not nothing, since it is meant to be
+	 * implemented during the execution of the engine.
+	 * 
+	 * @param migratorConsumer
+	 */
+	public void modelMigration(Consumer<EdeltaModelMigrator> migratorConsumer) {
+
 	}
 
 }

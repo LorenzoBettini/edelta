@@ -11,6 +11,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -129,7 +130,7 @@ public class EdeltaTest {
 
 	@Test
 	public void testGetEPackageWithOtherEdelta() {
-		TestableEdelta other = edelta;
+		AbstractEdelta other = edelta;
 		edelta = new TestableEdelta(other);
 		tryToRetrieveSomeEPackages();
 	}
@@ -421,6 +422,15 @@ public class EdeltaTest {
 		assertNotNull(eAttribute);
 		assertEquals(MY_SUBSUBPACKAGE,
 			((EClass) eAttribute.eContainer()).getEPackage().getName());
+	}
+
+	@Test
+	public void testModelMigrationDefault() {
+		loadTestEcore(MY_ECORE);
+		edelta.modelMigration(migrator -> {
+			// this should not be called
+			fail("should not come here");
+		});
 	}
 
 	private void wipeModifiedDirectoryContents() throws IOException {
