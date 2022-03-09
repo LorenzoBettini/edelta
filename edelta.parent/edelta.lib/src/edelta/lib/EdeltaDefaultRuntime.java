@@ -41,4 +41,9 @@ public class EdeltaDefaultRuntime extends AbstractEdelta {
 		stdLib = new EdeltaStandardLibrary(this);
 	}
 
+	public EdeltaDefaultRuntime(EdeltaModelMigrator modelMigrator) {
+		super(modelMigrator);
+		stdLib = new EdeltaStandardLibrary(this);
+	}
+
 }
