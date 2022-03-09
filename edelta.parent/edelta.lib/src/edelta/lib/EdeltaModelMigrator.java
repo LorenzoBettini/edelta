@@ -17,7 +17,6 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.InternalEObject;
-import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
 import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.xtext.xbase.lib.Functions.Function3;
@@ -180,13 +179,6 @@ public class EdeltaModelMigrator {
 
 	/**
 	 * This simulates what the final model migration should do.
-	 * 
-	 * IMPORTANT: the original Ecores and models must be in a subdirectory
-	 * of the directory that stores the modified Ecores.
-	 * 
-	 * It is crucial to strip the original path and use the baseDir
-	 * to create the new {@link Resource} URI, so that, upon saving,
-	 * the schema location is computed correctly.
 	 * 
 	 * @param baseDir
 	 */

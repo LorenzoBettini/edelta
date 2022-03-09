@@ -199,9 +199,9 @@ public class EdeltaModelManager {
 	 * @return
 	 */
 	private Resource createResource(String path, XMIResource prototypeResource, Collection<Resource> resourceMap) {
-		var uri = createAbsoluteFileURI(path);
-		LOG.info("Creating " + path + " (URI: " + uri + ")");
-		var resource = (XMIResource) resourceSet.createResource(uri);
+		var originalURI = prototypeResource.getURI();
+		LOG.info("Creating " + originalURI);
+		var resource = (XMIResource) resourceSet.createResource(originalURI);
 		resource.getDefaultLoadOptions().putAll(prototypeResource.getDefaultLoadOptions());
 		resource.getDefaultSaveOptions().putAll(prototypeResource.getDefaultSaveOptions());
 		resource.setEncoding(prototypeResource.getEncoding());

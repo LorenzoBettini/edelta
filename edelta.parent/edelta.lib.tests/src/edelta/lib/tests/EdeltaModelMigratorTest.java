@@ -4154,7 +4154,7 @@ class EdeltaModelMigratorTest {
 			Collection<String> ecoreFiles,
 			Collection<String> modelFiles
 		) throws IOException {
-		copyModels(modelMigrator, basedir);
+		copyModels(modelMigrator, "");
 		var output = OUTPUT + outputdir;
 		evolvingModelManager.saveEcores(output);
 		evolvingModelManager.saveModels(output);
