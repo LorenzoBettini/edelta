@@ -38,8 +38,8 @@ public class EdeltaEngineTest {
 
 	@Test
 	public void testCreationAndExecution() throws Exception {
-		var engine = new EdeltaEngine(modelManager -> 
-			new AbstractEdelta(modelManager) {
+		var engine = new EdeltaEngine(other -> 
+			new AbstractEdelta(other) {
 				/**
 				 * The implementation doesn't have to make sense:
 				 * it's just to verify that Ecore and models are
@@ -113,6 +113,104 @@ public class EdeltaEngineTest {
 		assertEquals("MyClass", eClass.getName());
 
 		var subdir = "engineModification/";
+		engine.save(OUTPUT + subdir);
+		assertGeneratedFiles(subdir, MY_ECORE);
+		assertGeneratedFiles(subdir, MY_CLASS);
+		assertGeneratedFiles(subdir, MY_ROOT);
+	}
+
+	@Test
+	public void testCreationAndExecutionSimulatingLibraries() throws Exception {
+		class TestLib extends AbstractEdelta {
+			public TestLib(AbstractEdelta other) {
+				super(other);
+			}
+
+			/**
+			 * Simulates a library method.
+			 */
+			public void testLibMethod() {
+				var myClass = getEClass(MYPACKAGE, "MyClass");
+				myClass.setName("Renamed");
+				var firstAttribute =
+					(EAttribute) myClass.getEStructuralFeatures().get(0);
+				modelMigration(migrator -> {
+					// turn the MyClass objects values to uppercase
+					migrator.transformAttributeValueRule(
+						migrator.isRelatedTo(firstAttribute),
+						(feature, oldVal, newVal) -> {
+							return newVal.toString().toUpperCase();
+						}
+					);
+				});
+			}
+		};
+		class MyEDelta extends AbstractEdelta {
+			TestLib testLib;
+
+			public MyEDelta(AbstractEdelta other) {
+				super(other);
+				testLib = new TestLib(other);
+			}
+
+			/**
+			 * The implementation doesn't have to make sense:
+			 * it's just to verify that Ecore and models are
+			 * evolved as expected.
+			 */
+			@Override
+			public void doExecute() throws Exception {
+				var myClass = getEClass(MYPACKAGE, "MyClass");
+				var myRoot = getEClass(MYPACKAGE, "MyRoot");
+				modelMigration(migrator -> {
+					// completely creates new contents and references
+					// for MyRoot objects
+					migrator.createInstanceRule(
+						migrator.isRelatedTo(myRoot),
+						oldObj -> {
+							var oldClass = oldObj.eClass();
+							oldObj.eSet(oldClass.getEStructuralFeatures().get(0), emptyList());
+							oldObj.eSet(oldClass.getEStructuralFeatures().get(1), emptyList());
+							return createInstance(
+								myRoot,
+								newObj -> {
+									// clear the old values or they will be copied by the
+									// default implementation of EcoreUtil.copy
+									var myContents = myRoot.getEStructuralFeature("myContents");
+									var myReferences = myRoot.getEStructuralFeature("myReferences");
+									var myClassAttribute = myClass.getEStructuralFeatures().get(0);
+									// set the new values completely
+									var contents = List.of(
+										createInstance(myClass, o -> {
+											o.eSet(myClassAttribute, "Created");
+										}),
+										createInstance(myClass, o -> {
+											o.eSet(myClassAttribute, "Created and referred");
+										})
+									);
+									var references = List.of(
+										contents.get(1)
+									);
+									newObj.eSet(myContents, contents);
+									newObj.eSet(myReferences, references);
+								}
+							);
+						}
+					);
+				});
+				testLib.testLibMethod();
+			}
+		}
+		var engine = new EdeltaEngine(other -> 
+			new MyEDelta(other)
+		);
+		engine.loadEcoreFile(
+				TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		engine.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
+		engine.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
+		engine.execute();
+
+		var subdir = "engineModificationWithLib/";
 		engine.save(OUTPUT + subdir);
 		assertGeneratedFiles(subdir, MY_ECORE);
 		assertGeneratedFiles(subdir, MY_CLASS);
