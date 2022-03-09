@@ -1,6 +1,7 @@
 package edelta.lib;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.eclipse.emf.ecore.resource.Resource;
@@ -34,16 +35,21 @@ public class EdeltaEngine {
 	}
 
 	public void execute() throws Exception {
-		evolvingModelManager = new EdeltaModelManager();
-		evolvingModelManager.copyEcores(originalModelManager);
+		var migrator = new EdeltaModelMigrator(originalModelManager);
+		evolvingModelManager = migrator.getEvolvingModelManager();
 		var provided = provider.apply(evolvingModelManager);
 		var edelta = new EdeltaDefaultRuntime(provided) {
 			@Override
 			public void execute() throws Exception {
 				provided.execute();
 			}
+			@Override
+			public void modelMigration(Consumer<EdeltaModelMigrator> migratorConsumer) {
+				migratorConsumer.accept(migrator);
+			}
 		};
 		edelta.execute();
+		migrator.copyModels();
 	}
 
 	public void save(String outputPath) throws IOException {

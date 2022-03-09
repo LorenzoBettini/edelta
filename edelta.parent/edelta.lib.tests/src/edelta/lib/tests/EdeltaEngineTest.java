@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 
+import org.eclipse.emf.ecore.EAttribute;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -40,7 +41,18 @@ public class EdeltaEngineTest {
 			new AbstractEdelta(modelManager) {
 				@Override
 				protected void doExecute() {
-					getEClass(MYPACKAGE, "MyClass").setName("Renamed");
+					var myClass = getEClass(MYPACKAGE, "MyClass");
+					myClass.setName("Renamed");
+					var firstAttribute =
+						(EAttribute) myClass.getEStructuralFeatures().get(0);
+					modelMigration(migrator -> {
+						migrator.transformAttributeValueRule(
+							migrator.isRelatedTo(firstAttribute),
+							(feature, oldVal, newVal) -> {
+								return newVal.toString().toUpperCase();
+							}
+						);
+					});
 				}
 			}
 		);
@@ -56,8 +68,11 @@ public class EdeltaEngineTest {
 		engine.execute();
 		// make sure the original Ecore is not changed
 		assertEquals("MyClass", eClass.getName());
-		engine.save(OUTPUT+"engineModification/");
-		assertGeneratedFiles("engineModification/", MY_ECORE);
+		
+		var subdir = "engineModification/";
+		engine.save(OUTPUT + subdir);
+		assertGeneratedFiles(subdir, MY_ECORE);
+		assertGeneratedFiles(subdir, MY_CLASS);
 	}
 
 	private void assertGeneratedFiles(String subdir, String fileName) {
