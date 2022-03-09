@@ -168,12 +168,11 @@ public class EdeltaModelManager {
 	 * using the passed resource as a "prototype": it takes all its options and
 	 * encoding.
 	 * 
-	 * @param path
 	 * @param prototypeResource
 	 * @return
 	 */
-	public Resource createEcoreResource(String path, XMIResource prototypeResource) {
-		return createResource(path, prototypeResource, ecoreResources);
+	public Resource createEcoreResource(XMIResource prototypeResource) {
+		return createResource(prototypeResource, ecoreResources);
 	}
 
 	/**
@@ -181,27 +180,25 @@ public class EdeltaModelManager {
 	 * using the passed resource as a "prototype": it takes all its options and
 	 * encoding.
 	 * 
-	 * @param path
 	 * @param prototypeResource
 	 * @return
 	 */
-	public Resource createModelResource(String path, XMIResource prototypeResource) {
-		return createResource(path, prototypeResource, modelResources);
+	public Resource createModelResource(XMIResource prototypeResource) {
+		return createResource(prototypeResource, modelResources);
 	}
 
 	/**
 	 * Create a new {@link XMIResource} in the {@link ResourceSet}, using the passed
 	 * resource as a "prototype": it takes all its options and encoding.
 	 * 
-	 * @param path
 	 * @param prototypeResource
 	 * @param resourceMap 
 	 * @return
 	 */
-	private Resource createResource(String path, XMIResource prototypeResource, Collection<Resource> resourceMap) {
-		var uri = createAbsoluteFileURI(path);
-		LOG.info("Creating " + path + " (URI: " + uri + ")");
-		var resource = (XMIResource) resourceSet.createResource(uri);
+	private Resource createResource(XMIResource prototypeResource, Collection<Resource> resourceMap) {
+		var originalURI = prototypeResource.getURI();
+		LOG.info("Creating " + originalURI);
+		var resource = (XMIResource) resourceSet.createResource(originalURI);
 		resource.getDefaultLoadOptions().putAll(prototypeResource.getDefaultLoadOptions());
 		resource.getDefaultSaveOptions().putAll(prototypeResource.getDefaultSaveOptions());
 		resource.setEncoding(prototypeResource.getEncoding());
@@ -228,14 +225,12 @@ public class EdeltaModelManager {
 		return ecoreResources;
 	}
 
-	public Map<EObject, EObject> copyEcores(EdeltaModelManager otherModelManager, String basedir) {
+	public Map<EObject, EObject> copyEcores(EdeltaModelManager otherModelManager) {
 		var otherEcoreResources = otherModelManager.getEcoreResources();
 		var ecoreCopier = new Copier();
 		for (var resource : otherEcoreResources) {
 			var originalResource = (XMIResource) resource;
-			var fileName = EdeltaResourceUtils.getFileName(originalResource);
-			var newResource = this.createEcoreResource
-				(basedir + fileName, originalResource);
+			var newResource = this.createEcoreResource(originalResource);
 			var root = originalResource.getContents().get(0);
 			newResource.getContents().add(ecoreCopier.copy(root));
 		}

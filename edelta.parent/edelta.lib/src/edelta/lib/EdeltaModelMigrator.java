@@ -17,7 +17,6 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.InternalEObject;
-import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
 import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.xtext.xbase.lib.Functions.Function3;
@@ -132,7 +131,6 @@ public class EdeltaModelMigrator {
 		}
 	}
 
-	private String basedir;
 	private EdeltaModelManager originalModelManager;
 	private EdeltaModelManager evolvingModelManager;
 	private Map<EObject, EObject> mapOfCopiedEcores;
@@ -164,41 +162,30 @@ public class EdeltaModelMigrator {
 			extends Function<EObject, EObject> {
 	}
 
-	public EdeltaModelMigrator(String basedir,
-			EdeltaModelManager originalModelManager,
-			EdeltaModelManager evolvingModelManager) {
-		this.basedir = basedir;
+	public EdeltaModelMigrator(EdeltaModelManager originalModelManager) {
 		this.originalModelManager = originalModelManager;
-		this.evolvingModelManager = evolvingModelManager;
-		this.mapOfCopiedEcores = evolvingModelManager.copyEcores(originalModelManager, basedir);
+		this.evolvingModelManager = new EdeltaModelManager();
+		this.mapOfCopiedEcores = evolvingModelManager.copyEcores(originalModelManager);
 		this.modelCopier = new EdeltaModelCopier(
 				mapOfCopiedEcores);
 	}
 
-	/**
-	 * This simulates what the final model migration should do.
-	 * 
-	 * IMPORTANT: the original Ecores and models must be in a subdirectory
-	 * of the directory that stores the modified Ecores.
-	 * 
-	 * It is crucial to strip the original path and use the baseDir
-	 * to create the new {@link Resource} URI, so that, upon saving,
-	 * the schema location is computed correctly.
-	 * 
-	 * @param baseDir
-	 */
-	public void copyModels(String baseDir) {
-		copyModels(modelCopier, baseDir, originalModelManager, evolvingModelManager);
+	public EdeltaModelManager getEvolvingModelManager() {
+		return evolvingModelManager;
 	}
 
-	private void copyModels(EdeltaModelCopier edeltaModelCopier, String baseDir,
-			EdeltaModelManager from, EdeltaModelManager into) {
+	/**
+	 * This simulates what the final model migration should do.
+	 */
+	public void copyModels() {
+		copyModels(modelCopier, originalModelManager, evolvingModelManager);
+	}
+
+	private void copyModels(EdeltaModelCopier edeltaModelCopier, EdeltaModelManager from, EdeltaModelManager into) {
 		var models = from.getModelResources();
 		for (var resource : models) {
 			var originalResource = (XMIResource) resource;
-			var fileName = EdeltaResourceUtils.getFileName(originalResource);
-			var newResource = into.createModelResource
-				(baseDir + fileName, originalResource);
+			var newResource = into.createModelResource(originalResource);
 			var root = originalResource.getContents().get(0);
 			var copy = edeltaModelCopier.copy(root);
 			if (copy != null)
@@ -220,8 +207,7 @@ public class EdeltaModelMigrator {
 				super.copyAttributeValue(eAttribute, eObject, value, setting);
 			}
 		};
-		copyModels(modelCopier, basedir,
-				originalModelManager, evolvingModelManager);
+		copyModels(modelCopier, originalModelManager, evolvingModelManager);
 		updateMigrationContext();
 	}
 
@@ -239,8 +225,7 @@ public class EdeltaModelMigrator {
 				super.copyAttributeValue(eAttribute, eObject, value, setting);
 			}
 		};
-		copyModels(modelCopier, basedir,
-				originalModelManager, evolvingModelManager);
+		copyModels(modelCopier, originalModelManager, evolvingModelManager);
 		updateMigrationContext();
 	}
 
@@ -284,8 +269,7 @@ public class EdeltaModelMigrator {
 					runnable.run();
 			}
 		};
-		copyModels(modelCopier, basedir,
-				originalModelManager, evolvingModelManager);
+		copyModels(modelCopier, originalModelManager, evolvingModelManager);
 		if (postCopy != null)
 			postCopy.run();
 		updateMigrationContext();
@@ -307,8 +291,7 @@ public class EdeltaModelMigrator {
 					: ((InternalEObject) copyEObject).eSetting(targetEStructuralFeature);
 			}
 		};
-		copyModels(modelCopier, basedir,
-				originalModelManager, evolvingModelManager);
+		copyModels(modelCopier, originalModelManager, evolvingModelManager);
 		updateMigrationContext();
 	}
 
@@ -324,8 +307,7 @@ public class EdeltaModelMigrator {
 				return super.createCopy(eObject);
 			}
 		};
-		copyModels(modelCopier, basedir,
-				originalModelManager, evolvingModelManager);
+		copyModels(modelCopier, originalModelManager, evolvingModelManager);
 		updateMigrationContext();
 	}
 
@@ -335,11 +317,11 @@ public class EdeltaModelMigrator {
 		// first create a copy of the evolved ecores
 		// map: orig -> copy
 		// orig are the evolved ecores, copy are the backup Ecores
-		var map = backup.copyEcores(evolvingModelManager, basedir);
+		var map = backup.copyEcores(evolvingModelManager);
 		// now create a copy of the evolved models
 		// we have to use our custom Copier because that will correctly
 		// create copies of models referring to the backup ecores
-		copyModels(new EdeltaModelCopier(map), basedir, evolvingModelManager, backup);
+		copyModels(new EdeltaModelCopier(map), evolvingModelManager, backup);
 		// now we need an inverted map, because the backup is meant to become the
 		// new originals, for the next model migrations
 		mapOfCopiedEcores = HashBiMap.create(map).inverse();
