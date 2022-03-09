@@ -66,6 +66,8 @@ class EdeltaModelMigratorTest {
 	 */
 	EdeltaModelManager evolvingModelManager;
 
+	private String basedir;
+
 	@BeforeAll
 	static void clearOutput() throws IOException {
 		cleanDirectoryRecursive(OUTPUT);
@@ -82,7 +84,7 @@ class EdeltaModelMigratorTest {
 			Collection<String> ecoreFiles,
 			Collection<String> modelFiles
 		) {
-		var basedir = TESTDATA + subdir;
+		basedir = TESTDATA + subdir;
 		ecoreFiles
 			.forEach(fileName -> originalModelManager.loadEcoreFile(basedir + fileName));
 		modelFiles
@@ -112,7 +114,6 @@ class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			subdir,
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi")
 		);
@@ -129,7 +130,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -149,7 +149,6 @@ class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			subdir,
 			of("My1.ecore", "My2.ecore"),
 			of("MyRoot1.xmi", "MyClass1.xmi", "MyRoot2.xmi", "MyClass2.xmi")
 		);
@@ -167,7 +166,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("PersonForReferences.ecore", "WorkPlaceForReferences.ecore"),
 			of("Person1.xmi", "Person2.xmi", "WorkPlace1.xmi")
@@ -192,7 +190,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"renamedClass/",
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi")
@@ -219,7 +216,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"renamedFeature/",
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi")
@@ -242,7 +238,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"mutualReferencesRenamed/",
 			of("PersonForReferences.ecore", "WorkPlaceForReferences.ecore"),
 			of("Person1.xmi", "Person2.xmi", "WorkPlace1.xmi")
@@ -271,7 +266,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"mutualReferencesRenamed2/",
 			of("PersonForReferences.ecore", "WorkPlaceForReferences.ecore"),
 			of("Person1.xmi", "Person2.xmi", "WorkPlace1.xmi")
@@ -294,7 +288,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"removedContainmentFeature/",
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi")
@@ -317,7 +310,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"removedNonContainmentFeature/",
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi")
@@ -340,7 +332,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"removedNonReferredClass/",
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi")
@@ -363,7 +354,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"removedReferredClass/",
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi")
@@ -389,7 +379,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -417,7 +406,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"toUpperCaseSingleAttribute/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -446,7 +434,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"toUpperCaseSingleAttributeAndRenamedBefore/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -475,7 +462,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"toUpperCaseSingleAttributeAndRenamedBefore/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -505,7 +491,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"toUpperCaseSingleAttributeAndMakeMultiple/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -536,7 +521,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"toUpperCaseSingleAttributeAndMakeMultiple/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -564,7 +548,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -594,7 +577,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"toUpperCaseSingleAttributeMultipleAndMakeSingle/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -624,7 +606,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"toUpperCaseSingleAttributeMultipleAndMakeSingle/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -648,7 +629,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"makeSingle/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -672,7 +652,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"makeMultiple/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -696,7 +675,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"makeMultipleTo2/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -722,7 +700,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"makeMultipleAndMakeSingle/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -755,7 +732,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"makeSingleAndMakeMultiple/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -779,7 +755,6 @@ class EdeltaModelMigratorTest {
 	
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"makeSingleNonContainmentReference/",
 			of("My.ecore"),
 			of("MyRoot.xmi")
@@ -810,7 +785,6 @@ class EdeltaModelMigratorTest {
 	
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"makeSingleContainmentReference/",
 			of("My.ecore"),
 			of("MyRoot.xmi")
@@ -834,7 +808,6 @@ class EdeltaModelMigratorTest {
 	
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"makeMultipleNonContainmentReference/",
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi")
@@ -858,7 +831,6 @@ class EdeltaModelMigratorTest {
 	
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"makeMultipleContainmentReference/",
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi")
@@ -884,7 +856,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"makeMultipleAndMakeSingleNonContainmentReference/",
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi")
@@ -917,7 +888,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"makeSingleAndMakeMultipleNonContainmentReference/",
 			of("My.ecore"),
 			of("MyRoot.xmi")
@@ -943,7 +913,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"makeMultipleAndMakeSingleContainmentReference/",
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi")
@@ -980,7 +949,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"makeSingleAndMakeMultipleContainmentReference/",
 			of("My.ecore"),
 			of("MyRoot.xmi")
@@ -1004,7 +972,6 @@ class EdeltaModelMigratorTest {
 		Assertions.assertThatThrownBy(() -> // NOSONAR
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"should not get here/",
 			of("My.ecore"),
 			of("MyClass.xmi")
@@ -1053,7 +1020,6 @@ class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			subdir,
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
 		);
@@ -1087,7 +1053,6 @@ class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			subdir,
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
 		);
@@ -1120,7 +1085,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -1166,7 +1130,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"changedAttributeTypeAndMultiplicity/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -1202,7 +1165,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"changedAttributeTypeAndMultiplicity/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -1238,7 +1200,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"changedAttributeTypeAndMultiplicity/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -1274,7 +1235,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"changedAttributeTypeAndMultiplicity/",
 			of("My.ecore"),
 			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
@@ -1315,7 +1275,6 @@ class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			subdir,
 			of("My.ecore"),
 			of("MyClass.xmi")
 		);
@@ -1349,7 +1308,6 @@ class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			subdir,
 			of("My.ecore"),
 			of("MyClass.xmi")
 		);
@@ -1382,7 +1340,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("My.ecore"),
 			of("MyClass.xmi")
@@ -1418,7 +1375,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"changedMultiAttributeTypeAndMultiplicity/",
 			of("My.ecore"),
 			of("MyClass.xmi")
@@ -1454,7 +1410,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"changedMultiAttributeTypeAndMultiplicity/",
 			of("My.ecore"),
 			of("MyClass.xmi")
@@ -1490,7 +1445,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"changedMultiAttributeTypeAndMultiplicityTo2/",
 			of("My.ecore"),
 			of("MyClass.xmi")
@@ -1526,7 +1480,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"changedMultiAttributeTypeAndMultiplicityTo2/",
 			of("My.ecore"),
 			of("MyClass.xmi")
@@ -1561,7 +1514,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"changedAttributeNameAndType/",
 			of("My.ecore"),
 			of("MyClass.xmi")
@@ -1599,7 +1551,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"changedAttributeTypeAndName/",
 			of("My.ecore"),
 			of("MyClass.xmi")
@@ -1675,7 +1626,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"replaceWithCopy/",
 			of("My.ecore"),
 			of("MyClass.xmi")
@@ -1700,7 +1650,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"replaceWithCopyTwice/",
 			of("My.ecore"),
 			of("MyClass.xmi")
@@ -1739,7 +1688,6 @@ class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
 		);
@@ -1768,7 +1716,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -1799,7 +1746,6 @@ class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
 		);
@@ -1829,7 +1775,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -1864,7 +1809,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"pullUpAndPushDown/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -1898,7 +1842,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"pushDownAndPullUp/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -1927,7 +1870,6 @@ class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
 		);
@@ -1954,7 +1896,6 @@ class EdeltaModelMigratorTest {
 	
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -2025,7 +1966,6 @@ class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			subdir,
 			of("My.ecore"),
 			of("MyRoot.xmi")
 		);
@@ -2092,7 +2032,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("My.ecore"),
 			of("MyRoot.xmi")
@@ -2166,7 +2105,6 @@ class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			subdir,
 			of("My.ecore"),
 			of("MyRoot.xmi")
 		);
@@ -2214,7 +2152,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"replaceWithCopy/",
 			of("My.ecore"),
 			of("MyClass.xmi")
@@ -2273,7 +2210,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"replaceWithCopy/",
 			of("My.ecore"),
 			of("MyRoot.xmi")
@@ -2307,7 +2243,6 @@ class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
 		);
@@ -2331,7 +2266,6 @@ class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
 		);
@@ -2354,7 +2288,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -2386,7 +2319,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"referenceToClassMultipleBidirectionalChangedIntoSingleMain/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -2424,7 +2356,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"referenceToClassMultipleBidirectionalChangedIntoSingleOpposite/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -2462,7 +2393,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"referenceToClassMultipleBidirectionalChangedIntoSingleOpposite/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -2499,7 +2429,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"referenceToClassMultipleBidirectionalChangedIntoSingleBoth/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -2536,7 +2465,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"referenceToClassMultipleBidirectionalChangedIntoSingleBoth/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -2568,7 +2496,6 @@ class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
 		);
@@ -2597,7 +2524,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"referenceToClassUnidirectional/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -2622,7 +2548,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"classToReferenceUnidirectional/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -2647,7 +2572,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"referenceToClassBidirectional/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -2672,7 +2596,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"classToReferenceBidirectional/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -2697,7 +2620,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"referenceToClassBidirectional/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -2722,7 +2644,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"classToReferenceBidirectional/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -2765,7 +2686,6 @@ class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			subdir,
 			of("Person.ecore"),
 			of("Person.xmi")
 		);
@@ -2794,7 +2714,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"mergeAttributesWithoutValueMerger/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -2829,7 +2748,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -2878,7 +2796,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -2954,7 +2871,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -3047,7 +2963,6 @@ class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
 		);
@@ -3082,7 +2997,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -3132,7 +3046,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -3204,7 +3117,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -3296,7 +3208,6 @@ class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
 		);
@@ -3354,7 +3265,6 @@ class EdeltaModelMigratorTest {
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
-			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
 		);
@@ -3410,7 +3320,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -3485,7 +3394,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -3594,7 +3502,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"splitFeatureNonContainment/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -3735,7 +3642,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"splitFeatureNonContainmentShared/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -3817,7 +3723,6 @@ class EdeltaModelMigratorTest {
 	
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -3927,7 +3832,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -4065,7 +3969,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"mergeFeaturesNonContainmentShared/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -4088,7 +3991,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -4114,7 +4016,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -4144,7 +4045,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"subclassesToEnum/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -4173,7 +4073,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"enumToSubclasses/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -4243,7 +4142,6 @@ class EdeltaModelMigratorTest {
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
-			subdir,
 			"composeOperations1/",
 			of("PersonList.ecore"),
 			of("List.xmi")
@@ -4252,12 +4150,10 @@ class EdeltaModelMigratorTest {
 
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
-			String origdir,
 			String outputdir,
 			Collection<String> ecoreFiles,
 			Collection<String> modelFiles
 		) throws IOException {
-		var basedir = TESTDATA + origdir;
 		copyModels(modelMigrator, basedir);
 		var output = OUTPUT + outputdir;
 		evolvingModelManager.saveEcores(output);
