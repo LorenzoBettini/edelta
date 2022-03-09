@@ -129,20 +129,17 @@ public class EdeltaModelManagerTest {
 		var additionalModelManager = new EdeltaModelManager();
 		var prototypeEcoreResource =
 			(XMIResource) additionalModelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
-		var prototypeModelResource =
+		var prototypeMyClassModelResource =
 			(XMIResource) additionalModelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
+		var prototypeMyRootModelResource =
+			(XMIResource) additionalModelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
 
-		// note that we use the same prototypeResource to create the
-		// two new resources, since we're only interested in the prototype's
-		// options and encoding. In this test this should be enough,
-		// since the models we create are based on the same ecore
-		modelManager.createEcoreResource(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE,
-				prototypeEcoreResource);
+		modelManager.createEcoreResource(prototypeEcoreResource);
 		modelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
 		var myClassModelResource = modelManager
-			.createModelResource(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS, prototypeModelResource);
+			.createModelResource(prototypeMyClassModelResource);
 		var myRootModelResource = modelManager
-			.createModelResource(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT, prototypeModelResource);
+			.createModelResource(prototypeMyRootModelResource);
 		var myClassEClass = (EClass)
 			modelManager.getEPackage(MYPACKAGE).getEClassifier("MyClass");
 		myClassModelResource.getContents().add(EcoreUtil.create(myClassEClass));
@@ -187,7 +184,7 @@ public class EdeltaModelManagerTest {
 		var ecoreResource =
 			(XMIResource) otherModelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
 
-		var map = modelManager.copyEcores(otherModelManager, TESTDATA+SIMPLE_TEST_DATA);
+		var map = modelManager.copyEcores(otherModelManager);
 
 		Iterable<EObject> originalContents = () -> 
 			EcoreUtil.getAllContents(ecoreResource, true);
