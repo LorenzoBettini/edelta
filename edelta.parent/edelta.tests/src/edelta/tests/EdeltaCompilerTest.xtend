@@ -56,10 +56,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -79,10 +75,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -105,10 +97,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -128,10 +116,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -155,10 +139,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -184,10 +164,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -215,10 +191,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -272,10 +244,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -328,10 +296,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -367,10 +331,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -415,10 +375,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -468,10 +424,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			public class MyFile0 extends EdeltaDefaultRuntime {
 			  private MyCustomEdelta my;
 			  
-			  public MyFile0() {
-			    my = new MyCustomEdelta(this);
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			    my = new MyCustomEdelta(other);
@@ -512,10 +464,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			public class MyFile0 extends EdeltaDefaultRuntime {
 			  @Extension
 			  private MyCustomEdelta my;
-			  
-			  public MyFile0() {
-			    my = new MyCustomEdelta(this);
-			  }
 			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
@@ -565,11 +513,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
 			  private Object my;
-			  
-			  public MyFile0() {
-			     = new MyCustomEdelta(this);
-			    my = new (this);
-			  }
 			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
@@ -687,10 +630,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -749,10 +688,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -825,10 +760,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -872,10 +803,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -922,10 +849,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -993,10 +916,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -1044,10 +963,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -1106,10 +1021,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -1182,10 +1093,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class Example extends EdeltaDefaultRuntime {
-			  public Example() {
-			    
-			  }
-			  
 			  public Example(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -1302,10 +1209,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class Example extends EdeltaDefaultRuntime {
-			  public Example() {
-			    
-			  }
-			  
 			  public Example(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -1631,10 +1534,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				  @Extension
 				  private MyFile1 my;
 				  
-				  public MyFile2() {
-				    my = new MyFile1(this);
-				  }
-				  
 				  public MyFile2(final EdeltaRuntime other) {
 				    super(other);
 				    my = new MyFile1(other);
@@ -1865,10 +1764,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -1929,10 +1824,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
@@ -1987,10 +1878,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			public class Example extends EdeltaDefaultRuntime {
 			  @Extension
 			  private EdeltaRefactorings refactorings;
-			  
-			  public Example() {
-			    refactorings = new EdeltaRefactorings(this);
-			  }
 			  
 			  public Example(final EdeltaRuntime other) {
 			    super(other);

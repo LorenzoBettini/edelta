@@ -14,9 +14,6 @@ import edelta.tests.input.Inputs;
  */
 public class MyCustomEdeltaShowingError extends EdeltaRuntime {
 
-	public MyCustomEdeltaShowingError() {
-	}
-
 	public MyCustomEdeltaShowingError(EdeltaRuntime other) {
 		super(other);
 	}

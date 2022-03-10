@@ -13,9 +13,6 @@ import edelta.lib.EdeltaRuntime;
  */
 public class MyCustomEdeltaWithTimeout extends EdeltaRuntime {
 
-	public MyCustomEdeltaWithTimeout() {
-	}
-
 	public MyCustomEdeltaWithTimeout(EdeltaRuntime other) {
 		super(other);
 	}

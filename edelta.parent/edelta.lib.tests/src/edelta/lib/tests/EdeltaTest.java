@@ -56,10 +56,6 @@ public class EdeltaTest {
 
 	public static class TestableEdelta extends EdeltaDefaultRuntime {
 
-		public TestableEdelta() {
-			super();
-		}
-
 		public TestableEdelta(EdeltaRuntime other) {
 			super(other);
 		}

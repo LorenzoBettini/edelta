@@ -17,6 +17,7 @@ import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaUseAs;
 import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaModelManager;
 
 /**
  * Helper class for the EdeltaInterpreter.
@@ -27,7 +28,7 @@ import edelta.lib.EdeltaDefaultRuntime;
 @Singleton
 public class EdeltaInterpreterHelper {
 
-	private static EdeltaRuntime defaultInstance = new EdeltaDefaultRuntime();
+	private static EdeltaRuntime defaultInstance = new EdeltaDefaultRuntime((EdeltaModelManager) null);
 
 	public EdeltaRuntime safeInstantiate(JavaReflectAccess javaReflectAccess, EdeltaUseAs useAs, EdeltaRuntime other) {
 		var typeRef = useAs.getType();

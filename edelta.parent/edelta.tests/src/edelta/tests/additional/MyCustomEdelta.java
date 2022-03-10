@@ -17,9 +17,6 @@ import edelta.tests.input.Inputs;
  */
 public class MyCustomEdelta extends EdeltaDefaultRuntime {
 
-	public MyCustomEdelta() {
-	}
-
 	public MyCustomEdelta(EdeltaRuntime other) {
 		super(other);
 	}

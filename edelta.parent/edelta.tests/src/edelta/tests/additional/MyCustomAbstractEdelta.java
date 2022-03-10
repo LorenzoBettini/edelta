@@ -10,9 +10,6 @@ import edelta.lib.EdeltaRuntime;
  */
 public abstract class MyCustomAbstractEdelta extends EdeltaRuntime {
 
-	public MyCustomAbstractEdelta() {
-	}
-
 	public MyCustomAbstractEdelta(EdeltaRuntime other) {
 		super(other);
 	}

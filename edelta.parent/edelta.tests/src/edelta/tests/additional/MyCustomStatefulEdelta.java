@@ -18,9 +18,6 @@ public class MyCustomStatefulEdelta extends EdeltaDefaultRuntime {
 
 	private int counter = 0;
 
-	public MyCustomStatefulEdelta() {
-	}
-
 	public MyCustomStatefulEdelta(EdeltaRuntime other) {
 		super(other);
 	}

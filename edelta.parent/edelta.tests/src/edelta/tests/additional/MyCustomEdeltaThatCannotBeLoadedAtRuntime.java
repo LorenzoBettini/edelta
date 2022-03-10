@@ -7,6 +7,10 @@ import edelta.lib.EdeltaRuntime;
  * not be loaded.
  */
 public class MyCustomEdeltaThatCannotBeLoadedAtRuntime extends EdeltaRuntime {
+	protected MyCustomEdeltaThatCannotBeLoadedAtRuntime(EdeltaRuntime other) {
+		super(other);
+	}
+
 	public void aMethod() {
 		// just for testing
 	}
