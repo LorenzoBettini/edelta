@@ -1,18 +1,18 @@
 package edelta.twopackages.example;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaEngine;
 
 public class TwoPackagesExampleMain {
 
 	public static void main(String[] args) throws Exception {
-		// Create an instance of the generated Java class
-		AbstractEdelta edelta = new TwoPackagesExample();
-		// Make sure you load all the used Ecores
-		edelta.loadEcoreFile("model/Person.ecore");
-		edelta.loadEcoreFile("model/WorkPlace.ecore");
+		// create the engine specifying the generated Java class
+		EdeltaEngine engine = new EdeltaEngine(TwoPackagesExample::new);
+		// Make sure you load all the used Ecores (Ecore.ecore is always loaded)
+		engine.loadEcoreFile("model/Person.ecore");
+		engine.loadEcoreFile("model/WorkPlace.ecore");
 		// Execute the actual transformations defined in the DSL
-		edelta.execute();
-		// Save the modified Ecore model into a new path
-		edelta.saveModifiedEcores("modified");
+		engine.execute();
+		// Save the modified Ecores and models into a new path
+		engine.save("modified");
 	}
 }

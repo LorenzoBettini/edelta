@@ -13,6 +13,7 @@ import com.example.Example;
 
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaEngine;
 
 /**
  * Unit test for simple App.
@@ -21,14 +22,14 @@ public class AppTest {
 
 	@Test
 	public void testRunApp() throws Exception {
-		// Create an instance of the generated Java class
-		AbstractEdelta edelta = new Example();
-		// Make sure you load all the used Ecores
-		edelta.loadEcoreFile("model/My.ecore");
+		// create the engine specifying the generated Java class
+		EdeltaEngine engine = new EdeltaEngine(Example::new);
+		// Make sure you load all the used Ecores (Ecore.ecore is always loaded)
+		engine.loadEcoreFile("model/My.ecore");
 		// Execute the actual transformations defined in the DSL
-		edelta.execute();
-		// Save the modified Ecore model into a new path
-		edelta.saveModifiedEcores("modified");
+		engine.execute();
+		// Save the modified Ecores and models into a new path
+		engine.save("modified");
 
 		// load the modified file
 		AbstractEdelta verifier = new EdeltaDefaultRuntime();
