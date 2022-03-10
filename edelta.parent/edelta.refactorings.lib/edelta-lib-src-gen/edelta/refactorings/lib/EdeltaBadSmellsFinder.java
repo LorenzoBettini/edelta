@@ -31,10 +31,6 @@ import org.eclipse.xtext.xbase.lib.Pair;
 
 @SuppressWarnings("all")
 public class EdeltaBadSmellsFinder extends EdeltaDefaultRuntime {
-  public EdeltaBadSmellsFinder() {
-    
-  }
-  
   public EdeltaBadSmellsFinder(final EdeltaRuntime other) {
     super(other);
   }

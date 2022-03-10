@@ -7,10 +7,6 @@ import org.eclipse.emf.ecore.EReference;
 
 @SuppressWarnings("all")
 public class ExampleAcrossEPackages2 extends EdeltaDefaultRuntime {
-  public ExampleAcrossEPackages2() {
-    
-  }
-  
   public ExampleAcrossEPackages2(final EdeltaRuntime other) {
     super(other);
   }

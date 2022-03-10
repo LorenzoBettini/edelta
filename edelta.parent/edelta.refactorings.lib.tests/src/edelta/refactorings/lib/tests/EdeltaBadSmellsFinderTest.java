@@ -21,19 +21,15 @@ import org.junit.Test;
 import com.google.common.base.Objects;
 
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaModelManager;
 import edelta.refactorings.lib.EdeltaBadSmellsFinder;
 
 public class EdeltaBadSmellsFinderTest extends AbstractTest {
 	private EdeltaBadSmellsFinder finder;
 
 	@Before
-	public void setup() {
-		finder = new EdeltaBadSmellsFinder();
-	}
-
-	@Test
-	public void test_ConstructorArgument() throws Exception {
-		finder = new EdeltaBadSmellsFinder(new EdeltaDefaultRuntime());
+	public void setup() throws Exception {
+		finder = new EdeltaBadSmellsFinder(new EdeltaDefaultRuntime(new EdeltaModelManager()));
 		assertThat(finder).isNotNull();
 		finder.performSanityChecks();
 	}

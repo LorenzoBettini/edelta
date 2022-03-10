@@ -14,10 +14,6 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 
 @SuppressWarnings("all")
 public class Example extends EdeltaDefaultRuntime {
-  public Example() {
-    
-  }
-  
   public Example(final EdeltaRuntime other) {
     super(other);
   }

@@ -8,10 +8,6 @@ import org.eclipse.emf.ecore.EClass;
 
 @SuppressWarnings("all")
 public class ExampleReusableFunctions extends EdeltaDefaultRuntime {
-  public ExampleReusableFunctions() {
-    
-  }
-  
   public ExampleReusableFunctions(final EdeltaRuntime other) {
     super(other);
   }

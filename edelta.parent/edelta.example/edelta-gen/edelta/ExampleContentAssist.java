@@ -8,10 +8,6 @@ import org.eclipse.emf.ecore.EPackage;
 
 @SuppressWarnings("all")
 public class ExampleContentAssist extends EdeltaDefaultRuntime {
-  public ExampleContentAssist() {
-    
-  }
-  
   public ExampleContentAssist(final EdeltaRuntime other) {
     super(other);
   }

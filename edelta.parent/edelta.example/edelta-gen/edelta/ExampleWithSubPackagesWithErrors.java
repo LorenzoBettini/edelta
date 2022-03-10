@@ -5,10 +5,6 @@ import edelta.lib.EdeltaRuntime;
 
 @SuppressWarnings("all")
 public class ExampleWithSubPackagesWithErrors extends EdeltaDefaultRuntime {
-  public ExampleWithSubPackagesWithErrors() {
-    
-  }
-  
   public ExampleWithSubPackagesWithErrors(final EdeltaRuntime other) {
     super(other);
   }

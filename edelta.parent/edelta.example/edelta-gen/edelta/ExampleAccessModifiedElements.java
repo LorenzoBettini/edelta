@@ -9,10 +9,6 @@ import org.eclipse.emf.ecore.EPackage;
 
 @SuppressWarnings("all")
 public class ExampleAccessModifiedElements extends EdeltaDefaultRuntime {
-  public ExampleAccessModifiedElements() {
-    
-  }
-  
   public ExampleAccessModifiedElements(final EdeltaRuntime other) {
     super(other);
   }

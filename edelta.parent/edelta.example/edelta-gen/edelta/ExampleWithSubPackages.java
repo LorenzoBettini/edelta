@@ -8,10 +8,6 @@ import org.eclipse.emf.ecore.EPackage;
 
 @SuppressWarnings("all")
 public class ExampleWithSubPackages extends EdeltaDefaultRuntime {
-  public ExampleWithSubPackages() {
-    
-  }
-  
   public ExampleWithSubPackages(final EdeltaRuntime other) {
     super(other);
   }

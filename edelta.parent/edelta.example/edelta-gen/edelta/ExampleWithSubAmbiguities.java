@@ -9,10 +9,6 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 @SuppressWarnings("all")
 public class ExampleWithSubAmbiguities extends EdeltaDefaultRuntime {
-  public ExampleWithSubAmbiguities() {
-    
-  }
-  
   public ExampleWithSubAmbiguities(final EdeltaRuntime other) {
     super(other);
   }

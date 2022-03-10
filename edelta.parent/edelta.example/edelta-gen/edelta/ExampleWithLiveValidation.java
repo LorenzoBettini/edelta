@@ -13,10 +13,6 @@ import org.eclipse.xtext.xbase.lib.StringExtensions;
 
 @SuppressWarnings("all")
 public class ExampleWithLiveValidation extends EdeltaDefaultRuntime {
-  public ExampleWithLiveValidation() {
-    
-  }
-  
   public ExampleWithLiveValidation(final EdeltaRuntime other) {
     super(other);
   }

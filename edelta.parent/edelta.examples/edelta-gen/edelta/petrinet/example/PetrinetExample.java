@@ -18,10 +18,6 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 public class PetrinetExample extends EdeltaDefaultRuntime {
   private EdeltaRefactorings refactorings;
   
-  public PetrinetExample() {
-    refactorings = new EdeltaRefactorings(this);
-  }
-  
   public PetrinetExample(final EdeltaRuntime other) {
     super(other);
     refactorings = new EdeltaRefactorings(other);

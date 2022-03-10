@@ -7,10 +7,6 @@ import org.eclipse.emf.ecore.EClass;
 
 @SuppressWarnings("all")
 public class IntroducingDepOpExample extends EdeltaDefaultRuntime {
-  public IntroducingDepOpExample() {
-    
-  }
-  
   public IntroducingDepOpExample(final EdeltaRuntime other) {
     super(other);
   }

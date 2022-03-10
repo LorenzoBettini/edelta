@@ -13,10 +13,6 @@ public class Example extends EdeltaDefaultRuntime {
   @Extension
   private ExampleReusableFunctions myfunctions;
   
-  public Example() {
-    myfunctions = new ExampleReusableFunctions(this);
-  }
-  
   public Example(final EdeltaRuntime other) {
     super(other);
     myfunctions = new ExampleReusableFunctions(other);

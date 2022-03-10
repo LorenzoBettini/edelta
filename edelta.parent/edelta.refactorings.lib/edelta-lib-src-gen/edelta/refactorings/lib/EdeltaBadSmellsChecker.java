@@ -15,10 +15,6 @@ import org.eclipse.xtext.xbase.lib.IterableExtensions;
 public class EdeltaBadSmellsChecker extends EdeltaDefaultRuntime {
   private EdeltaBadSmellsFinder finder;
   
-  public EdeltaBadSmellsChecker() {
-    finder = new EdeltaBadSmellsFinder(this);
-  }
-  
   public EdeltaBadSmellsChecker(final EdeltaRuntime other) {
     super(other);
     finder = new EdeltaBadSmellsFinder(other);

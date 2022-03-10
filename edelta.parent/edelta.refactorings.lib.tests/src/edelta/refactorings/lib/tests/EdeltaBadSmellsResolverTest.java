@@ -1,7 +1,6 @@
 package edelta.refactorings.lib.tests;
 
 import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
 
 import java.io.IOException;
@@ -70,12 +69,6 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 					AbstractTest.EXPECTATIONS + testModelDirectory + "/" + testModelFile,
 					AbstractTest.MODIFIED + testModelFile);
 		}
-	}
-
-	@Test
-	public void test_ConstructorArgument() {
-		resolver = new EdeltaBadSmellsResolver(new EdeltaDefaultRuntime());
-		assertThat(resolver).isNotNull();
 	}
 
 	@Test

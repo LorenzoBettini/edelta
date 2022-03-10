@@ -16,11 +16,6 @@ public class Example extends EdeltaDefaultRuntime {
   @Extension
   private ExampleReusableFunctions myfunctions;
   
-  public Example() {
-    refactorings = new EdeltaRefactorings(this);
-    myfunctions = new ExampleReusableFunctions(this);
-  }
-  
   public Example(final EdeltaRuntime other) {
     super(other);
     refactorings = new EdeltaRefactorings(other);

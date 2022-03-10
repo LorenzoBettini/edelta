@@ -8,10 +8,6 @@ import org.eclipse.emf.ecore.EPackage;
 
 @SuppressWarnings("all")
 public class ExampleAccessNotYetExistingElements extends EdeltaDefaultRuntime {
-  public ExampleAccessNotYetExistingElements() {
-    
-  }
-  
   public ExampleAccessNotYetExistingElements(final EdeltaRuntime other) {
     super(other);
   }

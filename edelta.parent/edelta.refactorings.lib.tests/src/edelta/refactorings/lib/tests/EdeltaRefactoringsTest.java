@@ -127,16 +127,6 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	void test_ConstructorArgument() {
-		refactorings = new EdeltaRefactorings(new EdeltaDefaultRuntime());
-		final EClass c = this.createEClassWithoutPackage("C1");
-		refactorings.addMandatoryAttribute(c, "test", this.stringDataType);
-		final EAttribute attr = head(c.getEAttributes());
-		assertThat(attr)
-			.returns("test", EAttribute::getName);
-	}
-
-	@Test
 	void test_addMandatoryAttribute() {
 		final EClass c = this.createEClassWithoutPackage("C1");
 		refactorings.addMandatoryAttribute(c, "test", this.stringDataType);

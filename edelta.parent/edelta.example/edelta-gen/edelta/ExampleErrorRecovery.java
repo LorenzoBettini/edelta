@@ -6,10 +6,6 @@ import org.eclipse.emf.ecore.EPackage;
 
 @SuppressWarnings("all")
 public class ExampleErrorRecovery extends EdeltaDefaultRuntime {
-  public ExampleErrorRecovery() {
-    
-  }
-  
   public ExampleErrorRecovery(final EdeltaRuntime other) {
     super(other);
   }

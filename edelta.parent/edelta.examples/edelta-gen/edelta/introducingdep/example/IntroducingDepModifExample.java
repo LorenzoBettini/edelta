@@ -14,10 +14,6 @@ public class IntroducingDepModifExample extends EdeltaDefaultRuntime {
   @Extension
   private IntroducingDepOpExample operations;
   
-  public IntroducingDepModifExample() {
-    operations = new IntroducingDepOpExample(this);
-  }
-  
   public IntroducingDepModifExample(final EdeltaRuntime other) {
     super(other);
     operations = new IntroducingDepOpExample(other);

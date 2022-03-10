@@ -39,10 +39,6 @@ import org.eclipse.xtext.xbase.lib.StringExtensions;
 
 @SuppressWarnings("all")
 public class EdeltaRefactorings extends EdeltaDefaultRuntime {
-  public EdeltaRefactorings() {
-    
-  }
-  
   public EdeltaRefactorings(final EdeltaRuntime other) {
     super(other);
   }

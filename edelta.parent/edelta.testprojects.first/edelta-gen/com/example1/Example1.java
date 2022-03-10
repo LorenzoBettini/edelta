@@ -13,10 +13,6 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class Example1 extends EdeltaDefaultRuntime {
-  public Example1() {
-    
-  }
-  
   public Example1(final EdeltaRuntime other) {
     super(other);
   }

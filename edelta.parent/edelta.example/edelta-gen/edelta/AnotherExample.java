@@ -10,11 +10,6 @@ public class AnotherExample extends EdeltaDefaultRuntime {
   
   private EdeltaRefactorings std;
   
-  public AnotherExample() {
-    example = new Example(this);
-    std = new EdeltaRefactorings(this);
-  }
-  
   public AnotherExample(final EdeltaRuntime other) {
     super(other);
     example = new Example(other);

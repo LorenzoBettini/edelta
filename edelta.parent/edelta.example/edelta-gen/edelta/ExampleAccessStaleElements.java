@@ -8,10 +8,6 @@ import org.eclipse.emf.ecore.EPackage;
 
 @SuppressWarnings("all")
 public class ExampleAccessStaleElements extends EdeltaDefaultRuntime {
-  public ExampleAccessStaleElements() {
-    
-  }
-  
   public ExampleAccessStaleElements(final EdeltaRuntime other) {
     super(other);
   }

@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaModelManager;
 import edelta.refactorings.lib.EdeltaBadSmellsChecker;
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 
@@ -17,16 +18,10 @@ public class EdeltaBadSmellsCheckerTest extends AbstractTest {
 
 	@Before
 	public void setup() {
-		checker = new EdeltaBadSmellsChecker();
+		checker = new EdeltaBadSmellsChecker(new EdeltaDefaultRuntime(new EdeltaModelManager()));
 		appender = new InMemoryLoggerAppender();
 		appender.setLineSeparator("\n");
 		checker.getLogger().addAppender(appender);
-	}
-
-	@Test
-	public void test_ConstructorArgument() {
-		checker = new EdeltaBadSmellsChecker(new EdeltaDefaultRuntime());
-		assertThat(checker).isNotNull();
 	}
 
 	@Test

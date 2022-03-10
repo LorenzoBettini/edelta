@@ -17,10 +17,6 @@ public class PersonListExample extends EdeltaDefaultRuntime {
   @Extension
   private EdeltaRefactorings refactorings;
   
-  public PersonListExample() {
-    refactorings = new EdeltaRefactorings(this);
-  }
-  
   public PersonListExample(final EdeltaRuntime other) {
     super(other);
     refactorings = new EdeltaRefactorings(other);

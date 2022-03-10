@@ -14,10 +14,6 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 public class ExampleWithDuplicatedFeatureCheck extends EdeltaDefaultRuntime {
   private EdeltaBadSmellsChecker checker;
   
-  public ExampleWithDuplicatedFeatureCheck() {
-    checker = new EdeltaBadSmellsChecker(this);
-  }
-  
   public ExampleWithDuplicatedFeatureCheck(final EdeltaRuntime other) {
     super(other);
     checker = new EdeltaBadSmellsChecker(other);
