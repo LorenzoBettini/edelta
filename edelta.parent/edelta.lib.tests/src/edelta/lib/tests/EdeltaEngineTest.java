@@ -21,6 +21,13 @@ import edelta.lib.EdeltaEngine;
 import edelta.lib.EdeltaModelMigrator;
 import edelta.lib.EdeltaResourceUtils;
 
+/**
+ * This is also meant to simulate what the final Java main for a generated
+ * runtime Edelta should look like.
+ * 
+ * @author Lorenzo Bettini
+ *
+ */
 public class EdeltaEngineTest {
 
 	private static final String OUTPUT = "output/";
@@ -130,9 +137,7 @@ public class EdeltaEngineTest {
 				testLib.testLibMethod();
 			}
 		}
-		var engine = new EdeltaEngine(other -> 
-			new MyEDelta(other)
-		);
+		var engine = new EdeltaEngine(MyEDelta::new);
 		engine.loadEcoreFile(
 				TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
 		engine.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
@@ -208,9 +213,7 @@ public class EdeltaEngineTest {
 				testLib1.testLib1Method();
 			}
 		}
-		var engine = new EdeltaEngine(other -> 
-			new MyEDelta(other)
-		);
+		var engine = new EdeltaEngine(MyEDelta::new);
 		engine.loadEcoreFile(
 				TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
 		engine.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
@@ -287,9 +290,7 @@ public class EdeltaEngineTest {
 				testLib2.testLib2Method();
 			}
 		}
-		var engine = new EdeltaEngine(other -> 
-			new MyEDelta(other)
-		);
+		var engine = new EdeltaEngine(MyEDelta::new);
 		engine.loadEcoreFile(
 				TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
 		engine.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
