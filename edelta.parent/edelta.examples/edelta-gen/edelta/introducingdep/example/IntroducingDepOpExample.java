@@ -1,7 +1,7 @@
 package edelta.introducingdep.example;
 
-import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 

@@ -1,8 +1,8 @@
 package com.example;
 
-import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaModelMigrator;
+import edelta.lib.EdeltaRuntime;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import org.eclipse.emf.ecore.EAttribute;

@@ -1,7 +1,7 @@
 package edelta;
 
-import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import edelta.refactorings.lib.EdeltaRefactorings;
 
 @SuppressWarnings("all")

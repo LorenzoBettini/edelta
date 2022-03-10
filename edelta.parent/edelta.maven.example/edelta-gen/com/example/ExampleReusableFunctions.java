@@ -1,7 +1,7 @@
 package com.example;
 
-import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaUtils;
 import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EClass;

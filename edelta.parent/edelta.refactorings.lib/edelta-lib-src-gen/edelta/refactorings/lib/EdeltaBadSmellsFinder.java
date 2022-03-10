@@ -1,8 +1,8 @@
 package edelta.refactorings.lib;
 
 import com.google.common.collect.Iterables;
-import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.helper.EdeltaFeatureEqualityHelper;
 import java.util.ArrayList;

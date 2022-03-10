@@ -1,7 +1,7 @@
 package edelta.petrinet.example;
 
-import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.Collections;

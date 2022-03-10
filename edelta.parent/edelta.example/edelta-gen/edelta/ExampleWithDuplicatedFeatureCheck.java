@@ -1,7 +1,7 @@
 package edelta;
 
-import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import edelta.refactorings.lib.EdeltaBadSmellsChecker;
 import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EAttribute;
