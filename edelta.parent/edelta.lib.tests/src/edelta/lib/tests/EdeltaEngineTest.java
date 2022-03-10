@@ -16,7 +16,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaEngine;
 import edelta.lib.EdeltaModelMigrator;
 import edelta.lib.EdeltaResourceUtils;
@@ -48,7 +48,7 @@ public class EdeltaEngineTest {
 	@Test
 	public void testCreationAndExecution() throws Exception {
 		var engine = new EdeltaEngine(other -> 
-			new AbstractEdelta(other) {
+			new EdeltaRuntime(other) {
 				/**
 				 * The implementation doesn't have to make sense:
 				 * it's just to verify that Ecore and models are
@@ -96,8 +96,8 @@ public class EdeltaEngineTest {
 	 */
 	@Test
 	public void testCreationAndExecutionSimulatingLibraries() throws Exception {
-		class TestLib extends AbstractEdelta {
-			public TestLib(AbstractEdelta other) {
+		class TestLib extends EdeltaRuntime {
+			public TestLib(EdeltaRuntime other) {
 				super(other);
 			}
 
@@ -114,10 +114,10 @@ public class EdeltaEngineTest {
 				});
 			}
 		};
-		class MyEDelta extends AbstractEdelta {
+		class MyEDelta extends EdeltaRuntime {
 			TestLib testLib;
 
-			public MyEDelta(AbstractEdelta other) {
+			public MyEDelta(EdeltaRuntime other) {
 				super(other);
 				testLib = new TestLib(other);
 			}
@@ -158,8 +158,8 @@ public class EdeltaEngineTest {
 	 */
 	@Test
 	public void testCreationAndExecutionSimulatingLibraries2() throws Exception {
-		class TestLib1 extends AbstractEdelta {
-			public TestLib1(AbstractEdelta other) {
+		class TestLib1 extends EdeltaRuntime {
+			public TestLib1(EdeltaRuntime other) {
 				super(other);
 			}
 
@@ -176,8 +176,8 @@ public class EdeltaEngineTest {
 				});
 			}
 		};
-		class TestLib2 extends AbstractEdelta {
-			public TestLib2(AbstractEdelta other) {
+		class TestLib2 extends EdeltaRuntime {
+			public TestLib2(EdeltaRuntime other) {
 				super(other);
 			}
 
@@ -192,11 +192,11 @@ public class EdeltaEngineTest {
 				});
 			}
 		};
-		class MyEDelta extends AbstractEdelta {
+		class MyEDelta extends EdeltaRuntime {
 			TestLib1 testLib1;
 			TestLib2 testLib2;
 
-			public MyEDelta(AbstractEdelta other) {
+			public MyEDelta(EdeltaRuntime other) {
 				super(other);
 				testLib1 = new TestLib1(other);
 				testLib2 = new TestLib2(other);
@@ -234,8 +234,8 @@ public class EdeltaEngineTest {
 	 */
 	@Test
 	public void testCreationAndExecutionSimulatingLibraries3() throws Exception {
-		class TestLib1 extends AbstractEdelta {
-			public TestLib1(AbstractEdelta other) {
+		class TestLib1 extends EdeltaRuntime {
+			public TestLib1(EdeltaRuntime other) {
 				super(other);
 			}
 
@@ -252,10 +252,10 @@ public class EdeltaEngineTest {
 				});
 			}
 		};
-		class TestLib2 extends AbstractEdelta {
+		class TestLib2 extends EdeltaRuntime {
 			TestLib1 testLib1;
 
-			public TestLib2(AbstractEdelta other) {
+			public TestLib2(EdeltaRuntime other) {
 				super(other);
 				testLib1 = new TestLib1(other);
 			}
@@ -272,10 +272,10 @@ public class EdeltaEngineTest {
 				testLib1.testLib1Method();
 			}
 		};
-		class MyEDelta extends AbstractEdelta {
+		class MyEDelta extends EdeltaRuntime {
 			TestLib2 testLib2;
 
-			public MyEDelta(AbstractEdelta other) {
+			public MyEDelta(EdeltaRuntime other) {
 				super(other);
 				testLib2 = new TestLib2(other);
 			}

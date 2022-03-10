@@ -29,7 +29,7 @@ import com.google.inject.Inject;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.edelta.EdeltaUseAs;
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.util.EdeltaModelUtil;
 
@@ -91,8 +91,8 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 
 	@Check
 	public void checkValidUseAs(EdeltaUseAs useAs) {
-		if (!isConformant(useAs, AbstractEdelta.class, useAs.getType())) {
-			error("Not a valid type: must be an " + AbstractEdelta.class.getName(),
+		if (!isConformant(useAs, EdeltaRuntime.class, useAs.getType())) {
+			error("Not a valid type: must be an " + EdeltaRuntime.class.getName(),
 				EDELTA_USE_AS__TYPE,
 				TYPE_MISMATCH);
 		} else {

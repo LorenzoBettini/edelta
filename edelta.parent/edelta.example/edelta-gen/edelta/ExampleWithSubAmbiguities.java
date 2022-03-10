@@ -1,7 +1,7 @@
 package edelta;
 
-import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
@@ -9,11 +9,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 @SuppressWarnings("all")
 public class ExampleWithSubAmbiguities extends EdeltaDefaultRuntime {
-  public ExampleWithSubAmbiguities() {
-    
-  }
-  
-  public ExampleWithSubAmbiguities(final AbstractEdelta other) {
+  public ExampleWithSubAmbiguities(final EdeltaRuntime other) {
     super(other);
   }
   

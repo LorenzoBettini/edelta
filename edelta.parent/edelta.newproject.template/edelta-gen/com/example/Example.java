@@ -1,8 +1,8 @@
 package com.example;
 
-import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaModelMigrator;
+import edelta.lib.EdeltaRuntime;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import org.eclipse.emf.ecore.EAttribute;
@@ -14,11 +14,7 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 
 @SuppressWarnings("all")
 public class Example extends EdeltaDefaultRuntime {
-  public Example() {
-    
-  }
-  
-  public Example(final AbstractEdelta other) {
+  public Example(final EdeltaRuntime other) {
     super(other);
   }
   

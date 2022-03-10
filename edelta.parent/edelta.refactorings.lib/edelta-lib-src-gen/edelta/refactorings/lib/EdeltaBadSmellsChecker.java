@@ -1,7 +1,7 @@
 package edelta.refactorings.lib;
 
-import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaUtils;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +15,7 @@ import org.eclipse.xtext.xbase.lib.IterableExtensions;
 public class EdeltaBadSmellsChecker extends EdeltaDefaultRuntime {
   private EdeltaBadSmellsFinder finder;
   
-  public EdeltaBadSmellsChecker() {
-    finder = new EdeltaBadSmellsFinder(this);
-  }
-  
-  public EdeltaBadSmellsChecker(final AbstractEdelta other) {
+  public EdeltaBadSmellsChecker(final EdeltaRuntime other) {
     super(other);
     finder = new EdeltaBadSmellsFinder(other);
   }

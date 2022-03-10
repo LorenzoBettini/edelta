@@ -2,8 +2,8 @@ package edelta.refactorings.lib;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
-import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder;
 import java.util.ArrayList;
@@ -39,11 +39,7 @@ import org.eclipse.xtext.xbase.lib.StringExtensions;
 
 @SuppressWarnings("all")
 public class EdeltaRefactorings extends EdeltaDefaultRuntime {
-  public EdeltaRefactorings() {
-    
-  }
-  
-  public EdeltaRefactorings(final AbstractEdelta other) {
+  public EdeltaRefactorings(final EdeltaRuntime other) {
     super(other);
   }
   

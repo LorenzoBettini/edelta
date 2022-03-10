@@ -1,8 +1,8 @@
 package com.example2;
 
 import com.example1.Example1;
-import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
@@ -15,11 +15,7 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 public class Example2 extends EdeltaDefaultRuntime {
   private Example1 example1;
   
-  public Example2() {
-    example1 = new Example1(this);
-  }
-  
-  public Example2(final AbstractEdelta other) {
+  public Example2(final EdeltaRuntime other) {
     super(other);
     example1 = new Example1(other);
   }

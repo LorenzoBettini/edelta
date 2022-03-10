@@ -28,7 +28,7 @@ import org.eclipse.xtext.util.Wrapper;
 import org.junit.Before;
 import org.junit.Test;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.EdeltaModelManager;
@@ -56,11 +56,7 @@ public class EdeltaTest {
 
 	public static class TestableEdelta extends EdeltaDefaultRuntime {
 
-		public TestableEdelta() {
-			super();
-		}
-
-		public TestableEdelta(AbstractEdelta other) {
+		public TestableEdelta(EdeltaRuntime other) {
 			super(other);
 		}
 
@@ -125,7 +121,7 @@ public class EdeltaTest {
 
 	@Test
 	public void testGetEPackageWithOtherEdelta() {
-		AbstractEdelta other = edelta;
+		EdeltaRuntime other = edelta;
 		edelta = new TestableEdelta(other);
 		tryToRetrieveSomeEPackages();
 	}
@@ -328,8 +324,8 @@ public class EdeltaTest {
 	@Test
 	public void testSetIssuePresenterPropagatesToChildren() {
 		var issuePresenter = mock(EdeltaIssuePresenter.class);
-		AbstractEdelta child = new EdeltaDefaultRuntime(edelta);
-		AbstractEdelta grandchild = new EdeltaDefaultRuntime(child);
+		EdeltaRuntime child = new EdeltaDefaultRuntime(edelta);
+		EdeltaRuntime grandchild = new EdeltaDefaultRuntime(child);
 		edelta.setIssuePresenter(issuePresenter);
 		EPackage problematicObject = EcoreFactory.eINSTANCE.createEPackage();
 		problematicObject.setName("anEPackage");
@@ -347,8 +343,8 @@ public class EdeltaTest {
 	public void testIssuePresenterIsPropagatedToChildrenByConstructor() {
 		var issuePresenter = mock(EdeltaIssuePresenter.class);
 		edelta.setIssuePresenter(issuePresenter);
-		AbstractEdelta child = new EdeltaDefaultRuntime(edelta);
-		AbstractEdelta grandchild = new EdeltaDefaultRuntime(child);
+		EdeltaRuntime child = new EdeltaDefaultRuntime(edelta);
+		EdeltaRuntime grandchild = new EdeltaDefaultRuntime(child);
 		EPackage problematicObject = EcoreFactory.eINSTANCE.createEPackage();
 		problematicObject.setName("anEPackage");
 		child.showError(problematicObject, "an error");

@@ -3,7 +3,6 @@ package edelta.tests
 import com.google.inject.Inject
 import edelta.interpreter.EdeltaInterpreterHelper
 import edelta.interpreter.EdeltaInterpreterRuntimeException
-import edelta.lib.AbstractEdelta
 import edelta.tests.additional.MyCustomEdelta
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
 import edelta.tests.injectors.EdeltaInjectorProviderForJavaReflectAccess
@@ -17,6 +16,8 @@ import org.junit.runner.RunWith
 import static org.assertj.core.api.Assertions.*
 import static org.junit.Assert.*
 import edelta.lib.EdeltaDefaultRuntime
+import edelta.lib.EdeltaRuntime
+import edelta.lib.EdeltaModelManager
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderForJavaReflectAccess)
@@ -26,7 +27,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 
 	@Inject JavaReflectAccess javaReflectAccess;
 
-	var AbstractEdelta other
+	var EdeltaRuntime other
 
 	static class InstantiateExceptionClass {
 
@@ -38,7 +39,7 @@ class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 
 	@Before
 	def void setup() {
-		other = new EdeltaDefaultRuntime()
+		other = new EdeltaDefaultRuntime(new EdeltaModelManager)
 	}
 
 	@Test

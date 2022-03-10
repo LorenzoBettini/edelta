@@ -1,7 +1,7 @@
 package edelta.personlist.example;
 
-import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.Collections;
 import org.eclipse.emf.ecore.EClass;
@@ -17,11 +17,7 @@ public class PersonListExample extends EdeltaDefaultRuntime {
   @Extension
   private EdeltaRefactorings refactorings;
   
-  public PersonListExample() {
-    refactorings = new EdeltaRefactorings(this);
-  }
-  
-  public PersonListExample(final AbstractEdelta other) {
+  public PersonListExample(final EdeltaRuntime other) {
     super(other);
     refactorings = new EdeltaRefactorings(other);
   }

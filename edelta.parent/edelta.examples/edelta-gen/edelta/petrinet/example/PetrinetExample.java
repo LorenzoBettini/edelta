@@ -1,7 +1,7 @@
 package edelta.petrinet.example;
 
-import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.Collections;
@@ -18,11 +18,7 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 public class PetrinetExample extends EdeltaDefaultRuntime {
   private EdeltaRefactorings refactorings;
   
-  public PetrinetExample() {
-    refactorings = new EdeltaRefactorings(this);
-  }
-  
-  public PetrinetExample(final AbstractEdelta other) {
+  public PetrinetExample(final EdeltaRuntime other) {
     super(other);
     refactorings = new EdeltaRefactorings(other);
   }

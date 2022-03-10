@@ -2,7 +2,6 @@ package edelta.tests
 
 import com.google.common.base.Joiner
 import com.google.inject.Inject
-import edelta.lib.AbstractEdelta
 import edelta.lib.EdeltaDefaultRuntime
 import edelta.lib.EdeltaIssuePresenter
 import edelta.lib.EdeltaModelManager
@@ -29,6 +28,7 @@ import static edelta.testutils.EdeltaTestUtils.*
 import static org.assertj.core.api.Assertions.*
 
 import static extension org.junit.Assert.*
+import edelta.lib.EdeltaRuntime
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
@@ -51,16 +51,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			}
@@ -74,16 +70,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			}
@@ -100,16 +92,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package foo;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			}
@@ -123,16 +111,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package foo;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -150,16 +134,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package foo;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -177,18 +157,14 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package foo;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import edelta.lib.EdeltaUtils;
 			import org.eclipse.emf.ecore.EClass;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -206,8 +182,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package foo;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import edelta.lib.EdeltaUtils;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.common.util.EList;
@@ -215,11 +191,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -260,8 +232,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package foo;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import org.eclipse.emf.ecore.EAttribute;
 			import org.eclipse.emf.ecore.EClass;
 			import org.eclipse.emf.ecore.EEnum;
@@ -272,11 +244,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -322,17 +290,13 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package foo;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import org.eclipse.emf.ecore.EPackage;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -361,17 +325,13 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import org.eclipse.emf.ecore.EPackage;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -409,17 +369,13 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import org.eclipse.emf.ecore.EPackage;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -459,8 +415,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import edelta.tests.additional.MyCustomEdelta;
 			import org.eclipse.emf.ecore.EPackage;
 			
@@ -468,11 +424,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			public class MyFile0 extends EdeltaDefaultRuntime {
 			  private MyCustomEdelta my;
 			  
-			  public MyFile0() {
-			    my = new MyCustomEdelta(this);
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			    my = new MyCustomEdelta(other);
 			  }
@@ -502,8 +454,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import edelta.tests.additional.MyCustomEdelta;
 			import org.eclipse.emf.ecore.EPackage;
 			import org.eclipse.xtext.xbase.lib.Extension;
@@ -513,11 +465,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  @Extension
 			  private MyCustomEdelta my;
 			  
-			  public MyFile0() {
-			    my = new MyCustomEdelta(this);
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			    my = new MyCustomEdelta(other);
 			  }
@@ -557,8 +505,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import edelta.tests.additional.MyCustomEdelta;
 			import org.eclipse.emf.ecore.EPackage;
 			
@@ -566,12 +514,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			public class MyFile0 extends EdeltaDefaultRuntime {
 			  private Object my;
 			  
-			  public MyFile0() {
-			     = new MyCustomEdelta(this);
-			    my = new (this);
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			     = new MyCustomEdelta(other);
 			    my = new (other);
@@ -676,8 +619,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import edelta.lib.EdeltaUtils;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.common.util.EList;
@@ -687,11 +630,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -736,8 +675,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import edelta.lib.EdeltaUtils;
 			import org.eclipse.emf.common.util.EList;
 			import org.eclipse.emf.ecore.EAttribute;
@@ -749,11 +688,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -817,19 +752,15 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.ecore.EClass;
 			import org.eclipse.emf.ecore.EPackage;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -864,19 +795,15 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import org.eclipse.emf.common.util.EList;
 			import org.eclipse.emf.ecore.EPackage;
 			import org.eclipse.emf.ecore.EStructuralFeature;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -910,8 +837,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.ecore.EAttribute;
 			import org.eclipse.emf.ecore.EClass;
@@ -922,11 +849,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -985,19 +908,15 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import org.eclipse.emf.common.util.EList;
 			import org.eclipse.emf.ecore.EPackage;
 			import org.eclipse.emf.ecore.EStructuralFeature;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -1037,18 +956,14 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import org.eclipse.emf.ecore.EPackage;
 			import org.eclipse.emf.ecore.util.EcoreUtil;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -1093,8 +1008,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import edelta.lib.EdeltaUtils;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.common.util.EList;
@@ -1106,11 +1021,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -1175,18 +1086,14 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package test;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import org.eclipse.emf.ecore.EPackage;
 			import org.eclipse.emf.ecore.EReference;
 			
 			@SuppressWarnings("all")
 			public class Example extends EdeltaDefaultRuntime {
-			  public Example() {
-			    
-			  }
-			  
-			  public Example(final AbstractEdelta other) {
+			  public Example(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -1295,18 +1202,14 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package test;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import org.eclipse.emf.ecore.EPackage;
 			import org.eclipse.emf.ecore.EReference;
 			
 			@SuppressWarnings("all")
 			public class Example extends EdeltaDefaultRuntime {
-			  public Example() {
-			    
-			  }
-			  
-			  public Example(final AbstractEdelta other) {
+			  public Example(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -1620,8 +1523,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				'''
 				package test3;
 				
-				import edelta.lib.AbstractEdelta;
 				import edelta.lib.EdeltaDefaultRuntime;
+				import edelta.lib.EdeltaRuntime;
 				import org.eclipse.emf.ecore.EPackage;
 				import org.eclipse.xtext.xbase.lib.Extension;
 				import test2.MyFile1;
@@ -1631,11 +1534,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				  @Extension
 				  private MyFile1 my;
 				  
-				  public MyFile2() {
-				    my = new MyFile1(this);
-				  }
-				  
-				  public MyFile2(final AbstractEdelta other) {
+				  public MyFile2(final EdeltaRuntime other) {
 				    super(other);
 				    my = new MyFile1(other);
 				  }
@@ -1854,8 +1753,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.common.util.EList;
 			import org.eclipse.emf.ecore.EClass;
@@ -1865,11 +1764,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -1921,19 +1816,15 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import java.util.function.Consumer;
 			import org.eclipse.emf.ecore.EClass;
 			import org.eclipse.emf.ecore.EPackage;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			    
-			  }
-			  
-			  public MyFile0(final AbstractEdelta other) {
+			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
 			  }
 			  
@@ -1971,8 +1862,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			'''
 			package edelta.personlist.example;
 			
-			import edelta.lib.AbstractEdelta;
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
 			import edelta.refactorings.lib.EdeltaRefactorings;
 			import java.util.Collections;
 			import org.eclipse.emf.ecore.EClass;
@@ -1988,11 +1879,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  @Extension
 			  private EdeltaRefactorings refactorings;
 			  
-			  public Example() {
-			    refactorings = new EdeltaRefactorings(this);
-			  }
-			  
-			  public Example(final AbstractEdelta other) {
+			  public Example(final EdeltaRuntime other) {
 			    super(other);
 			    refactorings = new EdeltaRefactorings(other);
 			  }
@@ -2152,8 +2039,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			val modelManager = new EdeltaModelManager
 			val defaultEdelta = new EdeltaDefaultRuntime(modelManager)
 			val edeltaObj = genClass
-				.getDeclaredConstructor(AbstractEdelta)
-				.newInstance(defaultEdelta) as AbstractEdelta
+				.getDeclaredConstructor(edelta.lib.EdeltaRuntime)
+				.newInstance(defaultEdelta) as EdeltaRuntime
 			// load ecore files
 			modelManager.loadEcoreFile("testecores/foo.ecore")
 			edeltaObj.execute
@@ -2198,7 +2085,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			String classToExecute,
 			List<Pair<CharSequence, CharSequence>> expectedModifiedEcores,
 			boolean checkValidationErrors,
-			Consumer<AbstractEdelta> instanceConsumer) {
+			Consumer<EdeltaRuntime> instanceConsumer) {
 		wipeModifiedDirectoryContents
 		val rs = createResourceSetWithEcoresAndSeveralInputs(ecoreNames, inputs)
 		rs.compile [
@@ -2217,13 +2104,13 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 
 	private def void checkExecutionAndAssertExpectedModifiedEcores(Class<?> genClass,
 		List<String> ecoreNames, List<Pair<CharSequence, CharSequence>> expectedModifiedEcores,
-		Consumer<AbstractEdelta> instanceConsumer
+		Consumer<EdeltaRuntime> instanceConsumer
 	) {
 		val modelManager = new EdeltaModelManager
 		val mainEdelta = new EdeltaDefaultRuntime(modelManager)
 		val edeltaObj = genClass
-			.getDeclaredConstructor(AbstractEdelta)
-			.newInstance(mainEdelta) as AbstractEdelta
+			.getDeclaredConstructor(EdeltaRuntime)
+			.newInstance(mainEdelta) as EdeltaRuntime
 		// we must pass the mainEdelta so that the issue presented
 		// is correctly propagated to the child edeltaObj
 		instanceConsumer.accept(mainEdelta)

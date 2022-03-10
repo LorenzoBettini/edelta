@@ -1,7 +1,7 @@
 package edelta;
 
-import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import edelta.refactorings.lib.EdeltaBadSmellsChecker;
 import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EAttribute;
@@ -14,11 +14,7 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 public class ExampleWithDuplicatedFeatureCheck extends EdeltaDefaultRuntime {
   private EdeltaBadSmellsChecker checker;
   
-  public ExampleWithDuplicatedFeatureCheck() {
-    checker = new EdeltaBadSmellsChecker(this);
-  }
-  
-  public ExampleWithDuplicatedFeatureCheck(final AbstractEdelta other) {
+  public ExampleWithDuplicatedFeatureCheck(final EdeltaRuntime other) {
     super(other);
     checker = new EdeltaBadSmellsChecker(other);
   }

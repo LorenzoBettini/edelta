@@ -1,7 +1,7 @@
 package com.example;
 
-import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EClass;
@@ -16,12 +16,7 @@ public class Example extends EdeltaDefaultRuntime {
   @Extension
   private ExampleReusableFunctions myfunctions;
   
-  public Example() {
-    refactorings = new EdeltaRefactorings(this);
-    myfunctions = new ExampleReusableFunctions(this);
-  }
-  
-  public Example(final AbstractEdelta other) {
+  public Example(final EdeltaRuntime other) {
     super(other);
     refactorings = new EdeltaRefactorings(other);
     myfunctions = new ExampleReusableFunctions(other);

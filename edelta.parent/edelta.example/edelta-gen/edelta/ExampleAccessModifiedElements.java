@@ -1,7 +1,7 @@
 package edelta;
 
-import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClassifier;
@@ -9,11 +9,7 @@ import org.eclipse.emf.ecore.EPackage;
 
 @SuppressWarnings("all")
 public class ExampleAccessModifiedElements extends EdeltaDefaultRuntime {
-  public ExampleAccessModifiedElements() {
-    
-  }
-  
-  public ExampleAccessModifiedElements(final AbstractEdelta other) {
+  public ExampleAccessModifiedElements(final EdeltaRuntime other) {
     super(other);
   }
   

@@ -1,7 +1,7 @@
 package edelta.refactorings.lib;
 
-import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaUtils;
 import java.util.List;
 import java.util.Map;
@@ -22,12 +22,7 @@ public class EdeltaBadSmellsResolver extends EdeltaDefaultRuntime {
   
   private EdeltaBadSmellsFinder finder;
   
-  public EdeltaBadSmellsResolver() {
-    refactorings = new EdeltaRefactorings(this);
-    finder = new EdeltaBadSmellsFinder(this);
-  }
-  
-  public EdeltaBadSmellsResolver(final AbstractEdelta other) {
+  public EdeltaBadSmellsResolver(final EdeltaRuntime other) {
     super(other);
     refactorings = new EdeltaRefactorings(other);
     finder = new EdeltaBadSmellsFinder(other);

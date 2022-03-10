@@ -1,18 +1,14 @@
 package edelta;
 
-import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 
 @SuppressWarnings("all")
 public class ExampleAccessNotYetExistingElements extends EdeltaDefaultRuntime {
-  public ExampleAccessNotYetExistingElements() {
-    
-  }
-  
-  public ExampleAccessNotYetExistingElements(final AbstractEdelta other) {
+  public ExampleAccessNotYetExistingElements(final EdeltaRuntime other) {
     super(other);
   }
   
