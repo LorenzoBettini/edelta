@@ -82,6 +82,11 @@ public class EdeltaEngineTest {
 		assertGeneratedFiles(subdir, MY_ROOT);
 	}
 
+	/**
+	 * An Edelta calling a Library
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void testCreationAndExecutionSimulatingLibraries() throws Exception {
 		class TestLib extends AbstractEdelta {
@@ -123,6 +128,163 @@ public class EdeltaEngineTest {
 					createCustomInstanceOfMyRoot(myClass, myRoot, migrator);
 				});
 				testLib.testLibMethod();
+			}
+		}
+		var engine = new EdeltaEngine(other -> 
+			new MyEDelta(other)
+		);
+		engine.loadEcoreFile(
+				TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		engine.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
+		engine.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
+		engine.execute();
+
+		var subdir = "engineModificationWithLib/";
+		engine.save(OUTPUT + subdir);
+		assertGeneratedFiles(subdir, MY_ECORE);
+		assertGeneratedFiles(subdir, MY_CLASS);
+		assertGeneratedFiles(subdir, MY_ROOT);
+	}
+
+	/**
+	 * An Edelta calling two Libraries
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testCreationAndExecutionSimulatingLibraries2() throws Exception {
+		class TestLib1 extends AbstractEdelta {
+			public TestLib1(AbstractEdelta other) {
+				super(other);
+			}
+
+			/**
+			 * Simulates a library method.
+			 */
+			public void testLib1Method() {
+				var myClass = getEClass(MYPACKAGE, "MyClass");
+				myClass.setName("Renamed");
+				var firstAttribute =
+					(EAttribute) myClass.getEStructuralFeatures().get(0);
+				modelMigration(migrator -> {
+					turnMyClassAttributeValueToUpperCase(firstAttribute, migrator);
+				});
+			}
+		};
+		class TestLib2 extends AbstractEdelta {
+			public TestLib2(AbstractEdelta other) {
+				super(other);
+			}
+
+			/**
+			 * Simulates a library method.
+			 */
+			public void testLib2Method() {
+				var myClass = getEClass(MYPACKAGE, "MyClass");
+				var myRoot = getEClass(MYPACKAGE, "MyRoot");
+				modelMigration(migrator -> {
+					createCustomInstanceOfMyRoot(myClass, myRoot, migrator);
+				});
+			}
+		};
+		class MyEDelta extends AbstractEdelta {
+			TestLib1 testLib1;
+			TestLib2 testLib2;
+
+			public MyEDelta(AbstractEdelta other) {
+				super(other);
+				testLib1 = new TestLib1(other);
+				testLib2 = new TestLib2(other);
+			}
+
+			/**
+			 * The implementation doesn't have to make sense:
+			 * it's just to verify that Ecore and models are
+			 * evolved as expected.
+			 */
+			@Override
+			public void doExecute() throws Exception {
+				testLib2.testLib2Method();
+				testLib1.testLib1Method();
+			}
+		}
+		var engine = new EdeltaEngine(other -> 
+			new MyEDelta(other)
+		);
+		engine.loadEcoreFile(
+				TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		engine.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
+		engine.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
+		engine.execute();
+
+		var subdir = "engineModificationWithLib/";
+		engine.save(OUTPUT + subdir);
+		assertGeneratedFiles(subdir, MY_ECORE);
+		assertGeneratedFiles(subdir, MY_CLASS);
+		assertGeneratedFiles(subdir, MY_ROOT);
+	}
+
+	/**
+	 * An Edelta calling a Library calling a Library
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testCreationAndExecutionSimulatingLibraries3() throws Exception {
+		class TestLib1 extends AbstractEdelta {
+			public TestLib1(AbstractEdelta other) {
+				super(other);
+			}
+
+			/**
+			 * Simulates a library method.
+			 */
+			public void testLib1Method() {
+				var myClass = getEClass(MYPACKAGE, "MyClass");
+				myClass.setName("Renamed");
+				var firstAttribute =
+					(EAttribute) myClass.getEStructuralFeatures().get(0);
+				modelMigration(migrator -> {
+					turnMyClassAttributeValueToUpperCase(firstAttribute, migrator);
+				});
+			}
+		};
+		class TestLib2 extends AbstractEdelta {
+			TestLib1 testLib1;
+
+			public TestLib2(AbstractEdelta other) {
+				super(other);
+				testLib1 = new TestLib1(other);
+			}
+
+			/**
+			 * Simulates a library method.
+			 */
+			public void testLib2Method() {
+				var myClass = getEClass(MYPACKAGE, "MyClass");
+				var myRoot = getEClass(MYPACKAGE, "MyRoot");
+				modelMigration(migrator -> {
+					createCustomInstanceOfMyRoot(myClass, myRoot, migrator);
+				});
+				testLib1.testLib1Method();
+			}
+		};
+		class MyEDelta extends AbstractEdelta {
+			TestLib2 testLib2;
+
+			public MyEDelta(AbstractEdelta other) {
+				super(other);
+				testLib2 = new TestLib2(other);
+			}
+
+			/**
+			 * The implementation doesn't have to make sense:
+			 * it's just to verify that Ecore and models are
+			 * evolved as expected.
+			 */
+			@Override
+			public void doExecute() throws Exception {
+				testLib2.testLib2Method();
 			}
 		}
 		var engine = new EdeltaEngine(other -> 
