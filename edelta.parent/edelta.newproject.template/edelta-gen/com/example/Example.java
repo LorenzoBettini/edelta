@@ -2,16 +2,15 @@ package com.example;
 
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
-import edelta.lib.EdeltaUtils;
+import edelta.lib.EdeltaModelMigrator;
 import java.util.function.Consumer;
-import org.eclipse.emf.common.util.EList;
+import java.util.function.Predicate;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EEnumLiteral;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
-import org.eclipse.emf.ecore.EcoreFactory;
-import org.eclipse.xtext.xbase.lib.ObjectExtensions;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
+import org.eclipse.emf.ecore.EStructuralFeature;
 
 @SuppressWarnings("all")
 public class Example extends EdeltaDefaultRuntime {
@@ -24,17 +23,10 @@ public class Example extends EdeltaDefaultRuntime {
   }
   
   /**
-   * Reusable function to create a new EClass with the
-   * specified name, setting MyEClass as its superclass
-   * @param name
+   * Reusable function
    */
-  public EClass myReusableCreateSubclassOfMyEClass(final String name) {
-    EClass _newEClass = EdeltaUtils.newEClass(name);
-    final Procedure1<EClass> _function = (EClass it) -> {
-      EList<EClass> _eSuperTypes = it.getESuperTypes();
-      _eSuperTypes.add(getEClass("myecore", "MyEClass"));
-    };
-    return ObjectExtensions.<EClass>operator_doubleArrow(_newEClass, _function);
+  public void makeItNotRequired(final EStructuralFeature f) {
+    f.setLowerBound(0);
   }
   
   public void someModifications(final EPackage it) {
@@ -43,47 +35,38 @@ public class Example extends EdeltaDefaultRuntime {
       final Consumer<EReference> _function_1 = (EReference it_2) -> {
         it_2.setUpperBound((-1));
         it_2.setContainment(true);
-        it_2.setLowerBound(0);
+        this.makeItNotRequired(it_2);
       };
-      this.stdLib.addNewEReference(it_1, "myReference", getEClass("myecore", "MyEClass"), _function_1);
+      this.stdLib.addNewEReference(it_1, "myReference", getEClass("mypackage", "MyClass"), _function_1);
     };
     this.stdLib.addNewEClass(it, "NewClass", _function);
-    EList<EEnumLiteral> _eLiterals = getEEnum("myecore", "MyENum").getELiterals();
-    EEnumLiteral _createEEnumLiteral = EcoreFactory.eINSTANCE.createEEnumLiteral();
-    final Procedure1<EEnumLiteral> _function_1 = (EEnumLiteral it_1) -> {
-      it_1.setName("ANewEnumLiteral");
-      it_1.setValue(3);
-    };
-    EEnumLiteral _doubleArrow = ObjectExtensions.<EEnumLiteral>operator_doubleArrow(_createEEnumLiteral, _function_1);
-    _eLiterals.add(_doubleArrow);
-    final Consumer<EEnumLiteral> _function_2 = (EEnumLiteral it_1) -> {
-      it_1.setValue(4);
-    };
-    this.stdLib.addNewEEnumLiteral(getEEnum("myecore", "MyENum"), "AnotherNewEnumLiteral", _function_2);
   }
   
   public void otherModifications(final EPackage it) {
-    this.stdLib.addEClass(it, this.myReusableCreateSubclassOfMyEClass("ASubclassOfMyEClass"));
-    EClass _myReusableCreateSubclassOfMyEClass = this.myReusableCreateSubclassOfMyEClass("AnotherSubclassOfMyEClass");
-    final Procedure1<EClass> _function = (EClass it_1) -> {
-      EList<EClass> _eSuperTypes = it_1.getESuperTypes();
-      _eSuperTypes.add(getEClass("myecore", "NewClass"));
+    getEAttribute("mypackage", "MyClass", "myClassStringAttribute").setName("stringAttribute");
+    this.makeItNotRequired(getEAttribute("mypackage", "MyClass", "stringAttribute"));
+    final EAttribute stringAttr = getEAttribute("mypackage", "MyClass", "stringAttribute");
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it_1) -> {
+      final Predicate<EAttribute> _function_1 = (EAttribute f) -> {
+        return it_1.isRelatedTo(f, stringAttr);
+      };
+      final EdeltaModelMigrator.AttributeTransformer _function_2 = (EAttribute feature, EObject oldVal, Object newVal) -> {
+        return newVal.toString().toUpperCase();
+      };
+      it_1.transformAttributeValueRule(_function_1, _function_2);
     };
-    EClass _doubleArrow = ObjectExtensions.<EClass>operator_doubleArrow(_myReusableCreateSubclassOfMyEClass, _function);
-    this.stdLib.addEClass(it, _doubleArrow);
-    getEClass("myecore", "MyOtherEClass").setName("RenamedClass");
-    this.stdLib.addNewEAttribute(getEClass("myecore", "RenamedClass"), "addedNow", getEDataType("ecore", "EInt"));
+    this.modelMigration(_function);
   }
   
   @Override
   public void performSanityChecks() throws Exception {
-    ensureEPackageIsLoaded("myecore");
+    ensureEPackageIsLoaded("mypackage");
     ensureEPackageIsLoaded("ecore");
   }
   
   @Override
   protected void doExecute() throws Exception {
-    someModifications(getEPackage("myecore"));
-    otherModifications(getEPackage("myecore"));
+    someModifications(getEPackage("mypackage"));
+    otherModifications(getEPackage("mypackage"));
   }
 }

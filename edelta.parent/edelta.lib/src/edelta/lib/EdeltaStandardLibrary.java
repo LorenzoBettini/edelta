@@ -44,6 +44,10 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 		super(other);
 	}
 
+	public EdeltaStandardLibrary(EdeltaModelManager modelManager) {
+		super(modelManager);
+	}
+
 	public void addEStructuralFeature(EClass eClass, EStructuralFeature eStructuralFeature) {
 		var eStructuralFeatures = eClass.getEStructuralFeatures();
 		var existing = eClass.getEStructuralFeature(eStructuralFeature.getName());

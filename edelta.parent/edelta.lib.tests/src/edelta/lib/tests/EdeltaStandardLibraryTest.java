@@ -37,6 +37,7 @@ import org.junit.function.ThrowingRunnable;
 
 import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaIssuePresenter;
+import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaStandardLibrary;
 
 /**
@@ -59,16 +60,19 @@ public class EdeltaStandardLibraryTest {
 
 	private EdeltaIssuePresenter issuePresenter;
 
+	private EdeltaModelManager modelManager;
+
 	@Before
 	public void setup() {
 		issuePresenter = mock(EdeltaIssuePresenter.class);
-		lib = new EdeltaStandardLibrary();
+		modelManager = new EdeltaModelManager();
+		lib = new EdeltaStandardLibrary(modelManager);
 		lib.setIssuePresenter(issuePresenter);
 	}
 
 	@Test
 	public void testGetEPackageWithOtherEdelta() {
-		AbstractEdelta other = new AbstractEdelta() {
+		AbstractEdelta other = new AbstractEdelta(modelManager) {
 		};
 		lib = new EdeltaStandardLibrary(other);
 		// now lib and other share the same package manager
@@ -849,7 +853,7 @@ public class EdeltaStandardLibraryTest {
 	}
 
 	private Resource loadTestEcore(String ecoreFile) {
-		return lib.loadEcoreFile(TESTECORES+ecoreFile);
+		return modelManager.loadEcoreFile(TESTECORES+ecoreFile);
 	}
 
 	private IllegalArgumentException assertThrowsIAE(ThrowingRunnable executable,

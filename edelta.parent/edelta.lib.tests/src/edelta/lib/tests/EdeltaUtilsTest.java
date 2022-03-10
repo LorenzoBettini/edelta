@@ -29,6 +29,7 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.junit.Test;
 
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaUtils;
 
 /**
@@ -599,11 +600,12 @@ public class EdeltaUtilsTest {
 
 	@Test
 	public void test_usedPackages() {
-		var edelta = new EdeltaDefaultRuntime();
-		edelta.loadEcoreFile("testecores/TestEcoreForUsages1.ecore");
-		edelta.loadEcoreFile("testecores/TestEcoreForUsages2.ecore");
-		edelta.loadEcoreFile("testecores/TestEcoreForUsages3.ecore");
-		edelta.loadEcoreFile("testecores/TestEcoreForUsages4.ecore");
+		var modelManager = new EdeltaModelManager();
+		var edelta = new EdeltaDefaultRuntime(modelManager);
+		modelManager.loadEcoreFile("testecores/TestEcoreForUsages1.ecore");
+		modelManager.loadEcoreFile("testecores/TestEcoreForUsages2.ecore");
+		modelManager.loadEcoreFile("testecores/TestEcoreForUsages3.ecore");
+		modelManager.loadEcoreFile("testecores/TestEcoreForUsages4.ecore");
 		var package1 = edelta.getEPackage("testecoreforusages1");
 		var package2 = edelta.getEPackage("testecoreforusages2");
 		var package3 = edelta.getEPackage("testecoreforusages3");

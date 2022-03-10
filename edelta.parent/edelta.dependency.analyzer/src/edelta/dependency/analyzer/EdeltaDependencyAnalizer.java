@@ -26,7 +26,7 @@ import GraphMM.GraphMMFactory;
 import GraphMM.GraphMMPackage;
 import GraphMM.Metamodel;
 import GraphMM.Repository;
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaResourceUtils;
 import edelta.lib.EdeltaUtils;
 
@@ -36,11 +36,13 @@ import edelta.lib.EdeltaUtils;
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaDependencyAnalizer extends AbstractEdelta {
+public class EdeltaDependencyAnalizer {
 
 	private static final GraphMMFactory graphFactory = GraphMMFactory.eINSTANCE;
 
 	private static final Logger LOG = Logger.getLogger(EdeltaDependencyAnalizer.class);
+
+	private EdeltaModelManager modelManager = new EdeltaModelManager();
 
 	/**
 	 * Analyzes the dependencies of the specified Ecore file together
@@ -51,7 +53,7 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 	 * @throws IOException
 	 */
 	public Repository analyzeEPackage(String ecoreFile) throws IOException {
-		var loaded = loadEcoreFile(ecoreFile);
+		var loaded = modelManager.loadEcoreFile(ecoreFile);
 		var packageToAnalyze = EdeltaResourceUtils.getEPackage(loaded);
 		String path = new File(ecoreFile).getParent();
 		return analyzeEPackage(path, packageToAnalyze.getName());
@@ -89,7 +91,7 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 		return stream
 			.filter(file -> !Files.isDirectory(file))
 			.filter(file -> file.toString().endsWith(".ecore"))
-			.map(file -> loadEcoreFile(file.toString()))
+			.map(file -> modelManager.loadEcoreFile(file.toString()))
 			.collect(Collectors.toList());
 	}
 
@@ -220,6 +222,16 @@ public class EdeltaDependencyAnalizer extends AbstractEdelta {
 		resource.save(fos, null);
 		fos.flush();
 		fos.close();
+	}
+
+	// for testing
+	public void loadEcoreFile(String path) {
+		modelManager.loadEcoreFile(path);
+	}
+
+	// for testing
+	public EPackage getEPackage(String packageName) {
+		return modelManager.getEPackage(packageName);
 	}
 
 }

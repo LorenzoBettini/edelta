@@ -60,19 +60,46 @@ final class EdeltaExampleProjectTemplate {
 			addFile("model/My.ecore", '''
 				<?xml version="1.0" encoding="UTF-8"?>
 				<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-				    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="myecore" nsURI="http://www.eclipse.org/emf/2002/Myecore" nsPrefix="myecore">
-				  <eClassifiers xsi:type="ecore:EClass" name="MyEClass">
-				    <eStructuralFeatures xsi:type="ecore:EAttribute" name="astring" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+				    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="mypackage" nsURI="http://my.package.org" nsPrefix="mypackage">
+				  <eClassifiers xsi:type="ecore:EClass" name="MyClass">
+				    <eStructuralFeatures xsi:type="ecore:EAttribute" name="myClassStringAttribute"
+				        lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
 				  </eClassifiers>
-				  <eClassifiers xsi:type="ecore:EEnum" name="MyENum">
-				    <eLiterals name="FirstEnumLiteral"/>
-				    <eLiterals name="SecondEnumLiteral" value="1"/>
+				  <eClassifiers xsi:type="ecore:EClass" name="MyRoot">
+				    <eStructuralFeatures xsi:type="ecore:EReference" name="myReferences" upperBound="-1"
+				        eType="#//MyClass"/>
+				    <eStructuralFeatures xsi:type="ecore:EReference" name="myContents" upperBound="-1"
+				        eType="#//MyClass" containment="true"/>
 				  </eClassifiers>
-				  <eClassifiers xsi:type="ecore:EClass" name="MyOtherEClass"/>
 				</ecore:EPackage>
 			''')
+			addFile("model/MyClass.xmi", '''
+				<?xml version="1.0" encoding="UTF-8"?>
+				<mypackage:MyClass
+				    xmi:version="2.0"
+				    xmlns:xmi="http://www.omg.org/XMI"
+				    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				    xmlns:mypackage="http://my.package.org"
+				    xsi:schemaLocation="http://my.package.org My.ecore"
+				    myClassStringAttribute="My Attribute Value"/>
+			''')
+			addFile("model/MyRoot.xmi", '''
+				<?xml version="1.0" encoding="UTF-8"?>
+				<mypackage:MyRoot
+				    xmi:version="2.0"
+				    xmlns:xmi="http://www.omg.org/XMI"
+				    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				    xmlns:mypackage="http://my.package.org"
+				    xsi:schemaLocation="http://my.package.org My.ecore"
+				    myReferences="//@myContents.1">
+				  <myContents
+				      myClassStringAttribute="contained not referred"/>
+				  <myContents
+				      myClassStringAttribute="contained referred"/>
+				</mypackage:MyRoot>
+			''')
 			addFile('''src/«path»/Example.edelta''', '''
-				import org.eclipse.emf.ecore.EcoreFactory
+				import org.eclipse.emf.ecore.EStructuralFeature
 				
 				// IMPORTANT: ecores must be in a source directory
 				// otherwise you can't refer to them
@@ -80,28 +107,23 @@ final class EdeltaExampleProjectTemplate {
 				package «path.value.replaceAll("/", ".")»
 				
 				// import existing metamodels
-				metamodel "myecore"
+				metamodel "mypackage"
 				metamodel "ecore" // this one should usually be there
 				
 				// you can define reusable functions...
 				
 				/*
-				 * Reusable function to create a new EClass with the
-				 * specified name, setting MyEClass as its superclass
-				 * @param name
+				 * Reusable function
 				 */
-				def myReusableCreateSubclassOfMyEClass(String name) {
-					newEClass(name) => [
-						// refer to Ecore elements with ecoreref
-						ESuperTypes += ecoreref(MyEClass)
-					]
+				def makeItNotRequired(EStructuralFeature f) {
+					f.lowerBound = 0
 				}
 				
 				// ...and then modification blocks
 				// look at the "Outline" view, which immediately shows the modified EPackages
 				
 				// specify modifications of an EPackage
-				modifyEcore someModifications epackage myecore {
+				modifyEcore someModifications epackage mypackage {
 					// the currently modified package is available
 					// through the implicit parameter 'it', similar to 'this'	
 				
@@ -111,59 +133,60 @@ final class EdeltaExampleProjectTemplate {
 						// where the new class is available through the implicit parameter 'it'
 						addNewEAttribute("myStringAttribute", ecoreref(EString))
 						// references to Ecore elements can be fully qualified
-						addNewEReference("myReference", ecoreref(myecore.MyEClass)) [
+						addNewEReference("myReference", ecoreref(mypackage.MyClass)) [
 							// initialization as above
 							// the current element is available through the implicit parameter 'it'
 							// use syntactic sugar for setters
 							upperBound = -1;
 							containment = true;
-							lowerBound = 0
+							// you can call the reusable functions you defined
+							makeItNotRequired(it)
 						]
-					]
-					// you could also modify existing Ecore elements manually
-					ecoreref(MyENum).ELiterals += EcoreFactory.eINSTANCE.createEEnumLiteral => [
-						// => [] is the 'with' operator
-						name = "ANewEnumLiteral"
-						value = 3
-					]
-					// or again with Edelta library functions
-					ecoreref(MyENum).addNewEEnumLiteral("AnotherNewEnumLiteral") [
-						value = 4
 					]
 				}
 				
 				// you can have several modification blocks for the same EPackage
-				modifyEcore otherModifications epackage myecore {
-					// you can call the reusable functions you defined
-					addEClass(myReusableCreateSubclassOfMyEClass("ASubclassOfMyEClass"))
-					// remember you can use the 'with' operator
-					addEClass(myReusableCreateSubclassOfMyEClass("AnotherSubclassOfMyEClass") => [
-						// and refer to new classes you created in previous modification blocks
-						ESuperTypes += ecoreref(NewClass)
-					])
-				
+				modifyEcore otherModifications epackage mypackage {
 					// you can rename existing classes
-					ecoreref(MyOtherEClass).name = "RenamedClass"
+					ecoreref(MyClass.myClassStringAttribute).name = "stringAttribute"
 					// and the renamed version is immediately available
-					ecoreref(RenamedClass).addNewEAttribute("addedNow", ecoreref(EInt))
+					ecoreref(stringAttribute).makeItNotRequired
+					// the above is an example of use of extension method
+				
+					val stringAttr = ecoreref(stringAttribute)
+				
+					// you can specify specific model migration rules
+					modelMigration[
+						transformAttributeValueRule(
+							[f | isRelatedTo(f, stringAttr)],
+							[feature, oldVal, newVal |
+								// turns the old value into an upper case version
+								// in the migrated model
+								return newVal.toString().toUpperCase();
+							]
+						)
+					]
 				}
 			''')
 			addFile('''src/«path»/Main.java''', '''
 				package «path.value.replaceAll("/", ".")»;
 				
-				import edelta.lib.AbstractEdelta;
+				import edelta.lib.EdeltaEngine;
 				
 				public class Main {
 				
 					public static void main(String[] args) throws Exception {
-						// Create an instance of the generated Java class
-						AbstractEdelta edelta = new Example();
+						// create the engine specifying the generated Java class
+						EdeltaEngine engine = new EdeltaEngine(Example::new);
 						// Make sure you load all the used Ecores (Ecore.ecore is always loaded)
-						edelta.loadEcoreFile("model/My.ecore");
+						engine.loadEcoreFile("model/My.ecore");
+						// In case, also load model files
+						engine.loadModelFile("model/MyClass.xmi");
+						engine.loadModelFile("model/MyRoot.xmi");
 						// Execute the actual transformations defined in the DSL
-						edelta.execute();
-						// Save the modified Ecore model into a new path
-						edelta.saveModifiedEcores("modified");
+						engine.execute();
+						// Save the modified Ecores and models into a new path
+						engine.save("modified");
 					}
 				}
 			''')
