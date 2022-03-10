@@ -2,7 +2,7 @@ package edelta.tests.additional;
 
 import org.eclipse.emf.ecore.EClass;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.tests.input.Inputs;
 
 /**
@@ -12,12 +12,12 @@ import edelta.tests.input.Inputs;
  * @author Lorenzo Bettini
  *
  */
-public class MyCustomEdeltaShowingError extends AbstractEdelta {
+public class MyCustomEdeltaShowingError extends EdeltaRuntime {
 
 	public MyCustomEdeltaShowingError() {
 	}
 
-	public MyCustomEdeltaShowingError(AbstractEdelta other) {
+	public MyCustomEdeltaShowingError(EdeltaRuntime other) {
 		super(other);
 	}
 

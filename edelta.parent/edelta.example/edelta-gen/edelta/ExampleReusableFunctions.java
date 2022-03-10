@@ -1,6 +1,6 @@
 package edelta;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import org.eclipse.emf.ecore.EClass;
 
@@ -10,7 +10,7 @@ public class ExampleReusableFunctions extends EdeltaDefaultRuntime {
     
   }
   
-  public ExampleReusableFunctions(final AbstractEdelta other) {
+  public ExampleReusableFunctions(final EdeltaRuntime other) {
     super(other);
   }
   

@@ -1,6 +1,6 @@
 package edelta;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
@@ -11,7 +11,7 @@ public class ExampleAcrossEPackages extends EdeltaDefaultRuntime {
     
   }
   
-  public ExampleAcrossEPackages(final AbstractEdelta other) {
+  public ExampleAcrossEPackages(final EdeltaRuntime other) {
     super(other);
   }
   

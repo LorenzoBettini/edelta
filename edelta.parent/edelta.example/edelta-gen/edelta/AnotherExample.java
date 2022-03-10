@@ -1,6 +1,6 @@
 package edelta;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.refactorings.lib.EdeltaRefactorings;
 
@@ -15,7 +15,7 @@ public class AnotherExample extends EdeltaDefaultRuntime {
     std = new EdeltaRefactorings(this);
   }
   
-  public AnotherExample(final AbstractEdelta other) {
+  public AnotherExample(final EdeltaRuntime other) {
     super(other);
     example = new Example(other);
     std = new EdeltaRefactorings(other);

@@ -1,6 +1,6 @@
 package edelta.tests.additional;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 
 /**
  * This is references in inputs for "use ... as ..." expressions
@@ -8,12 +8,12 @@ import edelta.lib.AbstractEdelta;
  * @author Lorenzo Bettini
  *
  */
-public abstract class MyCustomAbstractEdelta extends AbstractEdelta {
+public abstract class MyCustomAbstractEdelta extends EdeltaRuntime {
 
 	public MyCustomAbstractEdelta() {
 	}
 
-	public MyCustomAbstractEdelta(AbstractEdelta other) {
+	public MyCustomAbstractEdelta(EdeltaRuntime other) {
 		super(other);
 	}
 

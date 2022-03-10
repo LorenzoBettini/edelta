@@ -1,6 +1,6 @@
 package edelta.introducingdep.example;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
@@ -11,7 +11,7 @@ public class IntroducingDepOpExample extends EdeltaDefaultRuntime {
     
   }
   
-  public IntroducingDepOpExample(final AbstractEdelta other) {
+  public IntroducingDepOpExample(final EdeltaRuntime other) {
     super(other);
   }
   

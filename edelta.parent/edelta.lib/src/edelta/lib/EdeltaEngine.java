@@ -7,7 +7,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 
 /**
  * The main engine to load Ecore and model files and migrate them, using an
- * {@link AbstractEdelta}.
+ * {@link EdeltaRuntime}.
  * 
  * @author Lorenzo Bettini
  *
@@ -21,7 +21,7 @@ public class EdeltaEngine {
 	 *
 	 */
 	@FunctionalInterface
-	public static interface EdeltaRuntimeProvider extends UnaryOperator<AbstractEdelta> {
+	public static interface EdeltaRuntimeProvider extends UnaryOperator<EdeltaRuntime> {
 	}
 
 	private EdeltaRuntimeProvider provider;

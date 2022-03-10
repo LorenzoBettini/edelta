@@ -1,6 +1,6 @@
 package edelta;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClassifier;
@@ -12,7 +12,7 @@ public class ExampleAccessStaleElements extends EdeltaDefaultRuntime {
     
   }
   
-  public ExampleAccessStaleElements(final AbstractEdelta other) {
+  public ExampleAccessStaleElements(final EdeltaRuntime other) {
     super(other);
   }
   

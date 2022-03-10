@@ -1,6 +1,6 @@
 package edelta;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClassifier;
@@ -12,7 +12,7 @@ public class ExampleContentAssist extends EdeltaDefaultRuntime {
     
   }
   
-  public ExampleContentAssist(final AbstractEdelta other) {
+  public ExampleContentAssist(final EdeltaRuntime other) {
     super(other);
   }
   

@@ -1,6 +1,6 @@
 package edelta;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
@@ -17,7 +17,7 @@ public class ExampleWithLiveValidation extends EdeltaDefaultRuntime {
     
   }
   
-  public ExampleWithLiveValidation(final AbstractEdelta other) {
+  public ExampleWithLiveValidation(final EdeltaRuntime other) {
     super(other);
   }
   

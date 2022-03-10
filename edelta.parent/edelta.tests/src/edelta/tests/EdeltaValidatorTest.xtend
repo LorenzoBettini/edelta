@@ -2,7 +2,6 @@
 package edelta.tests
 
 import edelta.edelta.EdeltaPackage
-import edelta.lib.AbstractEdelta
 import edelta.tests.injectors.EdeltaInjectorProviderCustom
 import edelta.validation.EdeltaValidator
 import org.eclipse.xtext.diagnostics.Diagnostic
@@ -13,6 +12,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static edelta.edelta.EdeltaPackage.Literals.*
+import edelta.lib.EdeltaRuntime
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderCustom)
@@ -61,7 +61,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 			EDELTA_USE_AS,
 			EdeltaValidator.TYPE_MISMATCH,
 			input.lastIndexOf("List"), 4,
-			"Not a valid type: must be an " + AbstractEdelta.name
+			"Not a valid type: must be an " + EdeltaRuntime.name
 		)
 	}
 

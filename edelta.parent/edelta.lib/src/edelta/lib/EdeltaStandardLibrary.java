@@ -29,7 +29,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
  * @author Lorennzo Bettini
  *
  */
-public class EdeltaStandardLibrary extends AbstractEdelta {
+public class EdeltaStandardLibrary extends EdeltaRuntime {
 
 	private static EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
 
@@ -40,7 +40,7 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 	/**
 	 * @param other
 	 */
-	public EdeltaStandardLibrary(AbstractEdelta other) {
+	public EdeltaStandardLibrary(EdeltaRuntime other) {
 		super(other);
 	}
 

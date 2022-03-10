@@ -2,7 +2,7 @@ package edelta.tests.additional;
 
 import org.eclipse.emf.ecore.EClass;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 
 /**
  * This is used in tests, it contains an operation that never returns and leads
@@ -11,12 +11,12 @@ import edelta.lib.AbstractEdelta;
  * @author Lorenzo Bettini
  *
  */
-public class MyCustomEdeltaWithTimeout extends AbstractEdelta {
+public class MyCustomEdeltaWithTimeout extends EdeltaRuntime {
 
 	public MyCustomEdeltaWithTimeout() {
 	}
 
-	public MyCustomEdeltaWithTimeout(AbstractEdelta other) {
+	public MyCustomEdeltaWithTimeout(EdeltaRuntime other) {
 		super(other);
 	}
 

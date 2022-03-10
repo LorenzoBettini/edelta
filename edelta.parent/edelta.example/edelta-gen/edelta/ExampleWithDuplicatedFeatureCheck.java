@@ -1,6 +1,6 @@
 package edelta;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.refactorings.lib.EdeltaBadSmellsChecker;
 import java.util.function.Consumer;
@@ -18,7 +18,7 @@ public class ExampleWithDuplicatedFeatureCheck extends EdeltaDefaultRuntime {
     checker = new EdeltaBadSmellsChecker(this);
   }
   
-  public ExampleWithDuplicatedFeatureCheck(final AbstractEdelta other) {
+  public ExampleWithDuplicatedFeatureCheck(final EdeltaRuntime other) {
     super(other);
     checker = new EdeltaBadSmellsChecker(other);
   }

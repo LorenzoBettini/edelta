@@ -3,7 +3,7 @@ package edelta.tests.additional;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EcorePackage;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.tests.input.Inputs;
 
@@ -21,7 +21,7 @@ public class MyCustomStatefulEdelta extends EdeltaDefaultRuntime {
 	public MyCustomStatefulEdelta() {
 	}
 
-	public MyCustomStatefulEdelta(AbstractEdelta other) {
+	public MyCustomStatefulEdelta(EdeltaRuntime other) {
 		super(other);
 	}
 

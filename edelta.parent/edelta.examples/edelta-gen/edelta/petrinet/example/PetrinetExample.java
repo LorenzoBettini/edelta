@@ -1,6 +1,6 @@
 package edelta.petrinet.example;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.EdeltaRefactorings;
@@ -22,7 +22,7 @@ public class PetrinetExample extends EdeltaDefaultRuntime {
     refactorings = new EdeltaRefactorings(this);
   }
   
-  public PetrinetExample(final AbstractEdelta other) {
+  public PetrinetExample(final EdeltaRuntime other) {
     super(other);
     refactorings = new EdeltaRefactorings(other);
   }

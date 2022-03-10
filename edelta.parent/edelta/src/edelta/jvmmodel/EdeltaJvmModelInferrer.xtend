@@ -6,7 +6,6 @@ package edelta.jvmmodel
 import com.google.inject.Inject
 import edelta.compiler.EdeltaCompilerUtil
 import edelta.edelta.EdeltaProgram
-import edelta.lib.AbstractEdelta
 import edelta.lib.EdeltaDefaultRuntime
 import org.eclipse.emf.ecore.EPackage
 import org.eclipse.xtext.common.types.JvmDeclaredType
@@ -15,6 +14,7 @@ import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
+import edelta.lib.EdeltaRuntime
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -75,7 +75,7 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 				'''
 			]
 			members += program.toConstructor[
-				parameters += program.toParameter("other", AbstractEdelta.typeRef)
+				parameters += program.toParameter("other", EdeltaRuntime.typeRef)
 				body = '''
 				super(other);
 				«FOR u : program.useAsClauses»

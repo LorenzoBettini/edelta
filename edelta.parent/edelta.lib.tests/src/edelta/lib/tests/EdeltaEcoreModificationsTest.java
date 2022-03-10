@@ -22,7 +22,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.Before;
 import org.junit.Test;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaUtils;
@@ -43,7 +43,7 @@ public class EdeltaEcoreModificationsTest {
 	private static final String TEST_PACKAGE_FOR_REFERENCES2 = "testecoreforreferences2";
 	private static final String TESTECORES = "testecores/";
 
-	protected AbstractEdelta edelta;
+	protected EdeltaRuntime edelta;
 
 	protected EdeltaModelManager modelManager;
 

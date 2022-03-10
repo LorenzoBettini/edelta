@@ -1,7 +1,7 @@
 package edelta.refactorings.lib;
 
 import com.google.common.collect.Iterables;
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.helper.EdeltaFeatureEqualityHelper;
@@ -35,7 +35,7 @@ public class EdeltaBadSmellsFinder extends EdeltaDefaultRuntime {
     
   }
   
-  public EdeltaBadSmellsFinder(final AbstractEdelta other) {
+  public EdeltaBadSmellsFinder(final EdeltaRuntime other) {
     super(other);
   }
   

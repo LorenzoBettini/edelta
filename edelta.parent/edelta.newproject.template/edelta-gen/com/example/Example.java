@@ -1,6 +1,6 @@
 package com.example;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaModelMigrator;
 import java.util.function.Consumer;
@@ -18,7 +18,7 @@ public class Example extends EdeltaDefaultRuntime {
     
   }
   
-  public Example(final AbstractEdelta other) {
+  public Example(final EdeltaRuntime other) {
     super(other);
   }
   

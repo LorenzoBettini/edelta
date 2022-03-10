@@ -1,6 +1,6 @@
 package com.example;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaUtils;
 import java.util.function.Consumer;
@@ -12,7 +12,7 @@ public class ExampleReusableFunctions extends EdeltaDefaultRuntime {
     
   }
   
-  public ExampleReusableFunctions(final AbstractEdelta other) {
+  public ExampleReusableFunctions(final EdeltaRuntime other) {
     super(other);
   }
   

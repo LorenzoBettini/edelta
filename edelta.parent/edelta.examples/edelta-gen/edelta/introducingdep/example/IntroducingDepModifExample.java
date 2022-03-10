@@ -1,6 +1,6 @@
 package edelta.introducingdep.example;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EClass;
@@ -18,7 +18,7 @@ public class IntroducingDepModifExample extends EdeltaDefaultRuntime {
     operations = new IntroducingDepOpExample(this);
   }
   
-  public IntroducingDepModifExample(final AbstractEdelta other) {
+  public IntroducingDepModifExample(final EdeltaRuntime other) {
     super(other);
     operations = new IntroducingDepOpExample(other);
   }

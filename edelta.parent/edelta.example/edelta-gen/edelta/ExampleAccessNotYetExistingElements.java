@@ -1,6 +1,6 @@
 package edelta;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
@@ -12,7 +12,7 @@ public class ExampleAccessNotYetExistingElements extends EdeltaDefaultRuntime {
     
   }
   
-  public ExampleAccessNotYetExistingElements(final AbstractEdelta other) {
+  public ExampleAccessNotYetExistingElements(final EdeltaRuntime other) {
     super(other);
   }
   

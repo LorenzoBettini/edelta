@@ -1,6 +1,6 @@
 package edelta;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
@@ -13,7 +13,7 @@ public class ExampleAccessModifiedElements extends EdeltaDefaultRuntime {
     
   }
   
-  public ExampleAccessModifiedElements(final AbstractEdelta other) {
+  public ExampleAccessModifiedElements(final EdeltaRuntime other) {
     super(other);
   }
   

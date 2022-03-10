@@ -35,7 +35,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaStandardLibrary;
@@ -72,7 +72,7 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void testGetEPackageWithOtherEdelta() {
-		AbstractEdelta other = new AbstractEdelta(modelManager) {
+		EdeltaRuntime other = new EdeltaRuntime(modelManager) {
 		};
 		lib = new EdeltaStandardLibrary(other);
 		// now lib and other share the same package manager

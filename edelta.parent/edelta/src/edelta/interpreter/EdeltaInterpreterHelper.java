@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaUseAs;
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 
 /**
@@ -27,9 +27,9 @@ import edelta.lib.EdeltaDefaultRuntime;
 @Singleton
 public class EdeltaInterpreterHelper {
 
-	private static AbstractEdelta defaultInstance = new EdeltaDefaultRuntime();
+	private static EdeltaRuntime defaultInstance = new EdeltaDefaultRuntime();
 
-	public AbstractEdelta safeInstantiate(JavaReflectAccess javaReflectAccess, EdeltaUseAs useAs, AbstractEdelta other) {
+	public EdeltaRuntime safeInstantiate(JavaReflectAccess javaReflectAccess, EdeltaUseAs useAs, EdeltaRuntime other) {
 		var typeRef = useAs.getType();
 		if (typeRef == null) {
 			return defaultInstance;
@@ -50,7 +50,7 @@ public class EdeltaInterpreterHelper {
 			};
 		}
 		try {
-			return (AbstractEdelta) javaType.getConstructor(AbstractEdelta.class)
+			return (EdeltaRuntime) javaType.getConstructor(EdeltaRuntime.class)
 						.newInstance(other);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {

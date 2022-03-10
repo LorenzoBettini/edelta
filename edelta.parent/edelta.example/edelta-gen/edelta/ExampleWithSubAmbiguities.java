@@ -1,6 +1,6 @@
 package edelta;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EClass;
@@ -13,7 +13,7 @@ public class ExampleWithSubAmbiguities extends EdeltaDefaultRuntime {
     
   }
   
-  public ExampleWithSubAmbiguities(final AbstractEdelta other) {
+  public ExampleWithSubAmbiguities(final EdeltaRuntime other) {
     super(other);
   }
   

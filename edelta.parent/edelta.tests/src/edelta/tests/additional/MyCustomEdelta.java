@@ -5,7 +5,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcorePackage;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.tests.input.Inputs;
 
@@ -20,7 +20,7 @@ public class MyCustomEdelta extends EdeltaDefaultRuntime {
 	public MyCustomEdelta() {
 	}
 
-	public MyCustomEdelta(AbstractEdelta other) {
+	public MyCustomEdelta(EdeltaRuntime other) {
 		super(other);
 	}
 
