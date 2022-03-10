@@ -11,6 +11,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -38,6 +39,7 @@ import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.EdeltaModelManager;
+import edelta.lib.EdeltaModelMigrator;
 import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
 /**
@@ -73,6 +75,11 @@ public class EdeltaTest {
 
 		public TestableEdelta(EdeltaModelManager modelManager) {
 			super(modelManager);
+		}
+
+		
+		public TestableEdelta(EdeltaModelMigrator modelMigrator) {
+			super(modelMigrator);
 		}
 
 		@Override
@@ -129,7 +136,7 @@ public class EdeltaTest {
 
 	@Test
 	public void testGetEPackageWithOtherEdelta() {
-		TestableEdelta other = edelta;
+		AbstractEdelta other = edelta;
 		edelta = new TestableEdelta(other);
 		tryToRetrieveSomeEPackages();
 	}
@@ -421,6 +428,25 @@ public class EdeltaTest {
 		assertNotNull(eAttribute);
 		assertEquals(MY_SUBSUBPACKAGE,
 			((EClass) eAttribute.eContainer()).getEPackage().getName());
+	}
+
+	@Test
+	public void testModelMigrationNull() {
+		loadTestEcore(MY_ECORE);
+		edelta.modelMigration(migrator -> {
+			// this should not be called
+			fail("should not come here");
+		});
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testModelMigrationNotNull() {
+		var other = new TestableEdelta(new EdeltaModelMigrator(new EdeltaModelManager()));
+		edelta = new TestableEdelta(other);
+		loadTestEcore(MY_ECORE);
+		edelta.modelMigration(migrator -> {
+			throw new IllegalArgumentException("expected");
+		});
 	}
 
 	private void wipeModifiedDirectoryContents() throws IOException {

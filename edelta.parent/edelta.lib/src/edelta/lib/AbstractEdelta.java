@@ -3,6 +3,7 @@ package edelta.lib;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.apache.log4j.Level;
@@ -35,6 +36,11 @@ public abstract class AbstractEdelta {
 	 */
 	private EdeltaModelManager modelManager;
 
+	/**
+	 * For migrating model instances
+	 */
+	private EdeltaModelMigrator modelMigrator = null;
+
 	private Logger logger = Logger.getLogger(getClass());
 
 	private EdeltaIssuePresenter issuePresenter = EdeltaNopIssuePresenter.INSTANCE;
@@ -53,17 +59,28 @@ public abstract class AbstractEdelta {
 	 */
 	protected AbstractEdelta(AbstractEdelta other) {
 		this(other.modelManager);
+		modelMigrator = other.modelMigrator;
 		other.children.add(this);
 		setIssuePresenter(other.issuePresenter);
 	}
 
 	/**
-	 * Uses the passed {@link EdeltaEPackageManager}.
+	 * Uses the passed {@link EdeltaModelManager}.
 	 * 
 	 * @param modelManager
 	 */
 	protected AbstractEdelta(EdeltaModelManager modelManager) {
 		this.modelManager = modelManager;
+	}
+
+	/**
+	 * Uses the passed {@link EdeltaModelMigrator}.
+	 * 
+	 * @param modelMigrator
+	 */
+	protected AbstractEdelta(EdeltaModelMigrator modelMigrator) {
+		this(modelMigrator.getEvolvingModelManager());
+		this.modelMigrator = modelMigrator;
 	}
 
 	/**
@@ -272,6 +289,19 @@ public abstract class AbstractEdelta {
 			return null;
 		}
 		return eenum.getEEnumLiteral(enumLiteralName);
+	}
+
+	/**
+	 * Passes an {@link EdeltaModelMigrator} to the passed {@link Consumer}.
+	 * 
+	 * The default implementation does not nothing, since it is meant to be
+	 * implemented during the execution of the engine.
+	 * 
+	 * @param migratorConsumer
+	 */
+	public void modelMigration(Consumer<EdeltaModelMigrator> migratorConsumer) {
+		if (modelMigrator != null)
+			migratorConsumer.accept(modelMigrator);
 	}
 
 }
