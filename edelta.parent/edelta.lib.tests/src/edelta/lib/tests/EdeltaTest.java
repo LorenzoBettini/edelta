@@ -3,8 +3,6 @@
  */
 package edelta.lib.tests;
 
-import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
-import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -17,13 +15,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.eclipse.emf.common.util.WrappedException;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
@@ -53,8 +46,6 @@ public class EdeltaTest {
 	private static final String MY_CLASS = "MyClass";
 	private static final String MYOTHERPACKAGE = "myotherpackage";
 	private static final String MYPACKAGE = "mypackage";
-	private static final String MODIFIED = "modified";
-	private static final String NEW_MODIFIED = "new_modified";
 	private static final String MY2_ECORE = "My2.ecore";
 	private static final String MY_ECORE = "My.ecore";
 	private static final String MY_SUBPACKAGES_ECORE = "MySubPackages.ecore";
@@ -90,9 +81,12 @@ public class EdeltaTest {
 
 	protected TestableEdelta edelta;
 
+	protected EdeltaModelManager modelManager;
+
 	@Before
 	public void init() {
-		edelta = new TestableEdelta();
+		modelManager = new EdeltaModelManager();
+		edelta = new TestableEdelta(modelManager);
 	}
 
 	@Test
@@ -105,11 +99,6 @@ public class EdeltaTest {
 		var loadTestEcore = loadTestEcore(MY_ECORE);
 		assertThat(((EPackage) loadTestEcore.getContents().get(0)).getName())
 			.isEqualTo(MYPACKAGE);
-	}
-
-	@Test(expected=WrappedException.class)
-	public void testLoadNonExistantEcoreFile() {
-		edelta.loadEcoreFile("foo.ecore");
 	}
 
 	@Test
@@ -280,42 +269,6 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testSaveModifiedEcores() throws IOException {
-		loadTestEcore(MY_ECORE);
-		loadTestEcore(MY2_ECORE);
-		wipeModifiedDirectoryContents();
-		edelta.saveModifiedEcores(MODIFIED);
-		// we did not modify anything so the generated files and the
-		// original ones must be the same
-		assertFilesAreEquals(
-				TESTECORES+"/"+MY_ECORE, MODIFIED+"/"+MY_ECORE);
-		assertFilesAreEquals(
-				TESTECORES+"/"+MY2_ECORE, MODIFIED+"/"+MY2_ECORE);
-	}
-
-	@Test
-	public void testSaveModifiedEcoresInNonExistingDirectory() throws IOException {
-		var nested = NEW_MODIFIED + "/nested";
-		deleteDirectory(nested);
-		deleteDirectory(NEW_MODIFIED);
-		try {
-			loadTestEcore(MY_ECORE);
-			loadTestEcore(MY2_ECORE);
-			wipeModifiedDirectoryContents();
-			edelta.saveModifiedEcores(nested);
-			// we did not modify anything so the generated files and the
-			// original ones must be the same
-			assertFilesAreEquals(
-				TESTECORES + "/" + MY_ECORE, nested + "/" + MY_ECORE);
-			assertFilesAreEquals(
-				TESTECORES + "/" + MY2_ECORE, nested + "/" + MY2_ECORE);
-		} finally {
-			deleteDirectory(nested);
-			deleteDirectory(NEW_MODIFIED);
-		}
-	}
-
-	@Test
 	public void testGetLogger() { // NOSONAR just make sure it runs
 		edelta.getLogger().info("test message");
 	}
@@ -449,20 +402,8 @@ public class EdeltaTest {
 		});
 	}
 
-	private void wipeModifiedDirectoryContents() throws IOException {
-		cleanDirectory(MODIFIED);
-	}
-
-	private void deleteDirectory(String directory) throws IOException {
-		File dir = new File(directory);
-		if (dir.exists()) {
-			cleanDirectory(directory);
-			Files.delete(dir.toPath());
-		}
-	}
-
 	private Resource loadTestEcore(String ecoreFile) {
-		return edelta.loadEcoreFile(TESTECORES+ecoreFile);
+		return modelManager.loadEcoreFile(TESTECORES+ecoreFile);
 	}
 
 	private void assertEAttribute(EAttribute f, String expectedName) {

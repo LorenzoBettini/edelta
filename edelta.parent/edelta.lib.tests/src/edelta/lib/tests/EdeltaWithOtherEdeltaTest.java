@@ -1,6 +1,7 @@
 package edelta.lib.tests;
 
 import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaModelManager;
 
 /**
  * Variant that runs all the tests by delegating to another
@@ -13,7 +14,8 @@ public class EdeltaWithOtherEdeltaTest extends EdeltaTest {
 
 	@Override
 	public void init() {
-		AbstractEdelta other = new TestableEdelta();
+		modelManager = new EdeltaModelManager();
+		AbstractEdelta other = new TestableEdelta(modelManager);
 		edelta = new TestableEdelta(other);
 	}
 }

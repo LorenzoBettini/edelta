@@ -1,6 +1,5 @@
 package edelta.lib;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -18,7 +17,6 @@ import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.resource.Resource;
 
 import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
@@ -126,26 +124,6 @@ public abstract class AbstractEdelta {
 		if (getEPackage(packageName) == null) {
 			throw new EdeltaPackageNotLoadedException(packageName);
 		}
-	}
-
-	public Resource loadEcoreFile(String path) {
-		return modelManager.loadEcoreFile(path);
-	}
-
-	/**
-	 * Saves the modified EPackages as Ecore files in the specified
-	 * output path.
-	 * 
-	 * The final path of the generated Ecore files is made of the
-	 * specified outputPath and the original loaded Ecore
-	 * file names.
-	 * 
-	 * @see EdeltaEPackageManager#saveEcores(String)
-	 * @param outputPath
-	 * @throws IOException 
-	 */
-	public void saveModifiedEcores(String outputPath) throws IOException {
-		modelManager.saveEcores(outputPath);
 	}
 
 	public Logger getLogger() {

@@ -2,16 +2,21 @@ package edelta.tests
 
 import com.google.common.base.Joiner
 import com.google.inject.Inject
+import edelta.lib.AbstractEdelta
+import edelta.lib.EdeltaDefaultRuntime
+import edelta.lib.EdeltaIssuePresenter
+import edelta.lib.EdeltaModelManager
 import edelta.tests.injectors.EdeltaInjectorProviderTestableDerivedStateComputer
 import edelta.testutils.EdeltaTestUtils
 import java.util.List
+import java.util.function.Consumer
+import org.eclipse.emf.ecore.ENamedElement
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.resource.FileExtensionProvider
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.util.JavaVersion
-import org.eclipse.xtext.xbase.lib.util.ReflectExtensions
 import org.eclipse.xtext.xbase.testing.CompilationTestHelper
 import org.eclipse.xtext.xbase.testing.CompilationTestHelper.Result
 import org.eclipse.xtext.xbase.testing.TemporaryFolder
@@ -21,13 +26,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static edelta.testutils.EdeltaTestUtils.*
+import static org.assertj.core.api.Assertions.*
 
 import static extension org.junit.Assert.*
-import static org.assertj.core.api.Assertions.*
-import edelta.lib.AbstractEdelta
-import java.util.function.Consumer
-import edelta.lib.EdeltaIssuePresenter
-import org.eclipse.emf.ecore.ENamedElement
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
@@ -36,7 +37,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 	@Rule @Inject public TemporaryFolder temporaryFolder
 	@Inject extension CompilationTestHelper compilationTestHelper
 	@Inject FileExtensionProvider extensionProvider
-	@Inject extension ReflectExtensions
 
 	static final String MODIFIED = "modified";
 
@@ -1808,14 +1808,16 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				'''
 			],
 			true,
-			[issuePresenter = new EdeltaIssuePresenter() {
-				override showError(ENamedElement problematicObject, String message) {
-					
+			[ edelta |
+				edelta.issuePresenter = new EdeltaIssuePresenter() {
+					override showError(ENamedElement problematicObject, String message) {
+					}
+
+					override showWarning(ENamedElement problematicObject, String message) {
+						collectedWarnings += message
+					}
 				}
-				override showWarning(ENamedElement problematicObject, String message) {
-					collectedWarnings += message
-				}
-			}]
+			]
 		)
 		assertThat(collectedWarnings)
 			.containsExactly(
@@ -2147,11 +2149,15 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				assertGeneratedJavaCodeCompiles
 			}
 			val genClass = compiledClass
-			val edeltaObj = genClass.getDeclaredConstructor().newInstance()
+			val modelManager = new EdeltaModelManager
+			val defaultEdelta = new EdeltaDefaultRuntime(modelManager)
+			val edeltaObj = genClass
+				.getDeclaredConstructor(AbstractEdelta)
+				.newInstance(defaultEdelta) as AbstractEdelta
 			// load ecore files
-			edeltaObj.invoke("loadEcoreFile", #["testecores/foo.ecore"])
-			edeltaObj.invoke("execute")
-			edeltaObj.invoke("saveModifiedEcores", #[MODIFIED])
+			modelManager.loadEcoreFile("testecores/foo.ecore")
+			edeltaObj.execute
+			modelManager.saveEcores(MODIFIED)
 			assertFileContents(MODIFIED+"/foo.ecore", expectedGeneratedEcore.toString)
 		]
 	}
@@ -2213,15 +2219,20 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		List<String> ecoreNames, List<Pair<CharSequence, CharSequence>> expectedModifiedEcores,
 		Consumer<AbstractEdelta> instanceConsumer
 	) {
-		val edeltaObj = genClass.getDeclaredConstructor().newInstance()
-			as AbstractEdelta
-		instanceConsumer.accept(edeltaObj)
+		val modelManager = new EdeltaModelManager
+		val mainEdelta = new EdeltaDefaultRuntime(modelManager)
+		val edeltaObj = genClass
+			.getDeclaredConstructor(AbstractEdelta)
+			.newInstance(mainEdelta) as AbstractEdelta
+		// we must pass the mainEdelta so that the issue presented
+		// is correctly propagated to the child edeltaObj
+		instanceConsumer.accept(mainEdelta)
 		// load ecore files
 		for (ecoreName : ecoreNames) {
-			edeltaObj.invoke("loadEcoreFile", #[METAMODEL_PATH + ecoreName])
+			modelManager.loadEcoreFile(METAMODEL_PATH + ecoreName)
 		}
-		edeltaObj.invoke("execute")
-		edeltaObj.invoke("saveModifiedEcores", #[MODIFIED])
+		edeltaObj.execute
+		modelManager.saveEcores(MODIFIED)
 		for (expected : expectedModifiedEcores) {
 			assertFileContents(
 				MODIFIED+"/"+expected.key,

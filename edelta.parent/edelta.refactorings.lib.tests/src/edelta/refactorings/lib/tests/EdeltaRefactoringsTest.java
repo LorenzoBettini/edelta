@@ -28,6 +28,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaModelManager;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 import edelta.testutils.EdeltaTestUtils;
@@ -41,9 +42,12 @@ class EdeltaRefactoringsTest extends AbstractTest {
 
 	private List<String> testModelFiles;
 
+	private EdeltaModelManager modelManager;
+
 	@BeforeEach
 	void setup() throws Exception {
-		refactorings = new EdeltaRefactorings();
+		modelManager = new EdeltaModelManager();
+		refactorings = new EdeltaRefactorings(new EdeltaDefaultRuntime(modelManager));
 		appender = new InMemoryLoggerAppender();
 		appender.setLineSeparator("\n");
 		refactorings.getLogger().addAppender(appender);
@@ -74,7 +78,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	private void loadModelFiles() {
 		checkInputModelSettings();
 		for (String testModelFile : testModelFiles) {
-			refactorings
+			modelManager
 				.loadEcoreFile(AbstractTest.TESTECORES +
 					testModelDirectory + "/" + testModelFile);
 		}
@@ -111,9 +115,9 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	private void assertOppositeRefactorings(final Runnable first, final Runnable second) throws IOException {
 		loadModelFiles();
 		first.run();
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		second.run();
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 	}
 
@@ -163,7 +167,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				person.getEStructuralFeature("firstName"),
 				person.getEStructuralFeature("lastName")));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -176,20 +180,20 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				person.getEStructuralFeature("firstName"),
 				person.getEStructuralFeature("lastName"))));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		final EClass student = refactorings.getEClass("PersonList", "Student");
 		assertThrowsIAE(() -> refactorings.mergeFeatures("name",
 			asList(
 				person.getEStructuralFeature("lastName"),
 				student.getEStructuralFeature("lastName"))));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThrowsIAE(() -> refactorings.mergeFeatures("name",
 			asList(
 				person.getEStructuralFeature("list"),
 				person.getEStructuralFeature("lastName"))));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult())
 			.isEqualTo(
@@ -228,7 +232,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				person.getEStructuralFeature("firstName"),
 				person.getEStructuralFeature("lastName")));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -294,7 +298,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				person.getEStructuralFeature("firstName"),
 				person.getEStructuralFeature("lastName")));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -305,7 +309,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		EStructuralFeature _eStructuralFeature = person.getEStructuralFeature("gender");
 		final Collection<EClass> result = refactorings.enumToSubclasses(((EAttribute) _eStructuralFeature));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFiles();
 		assertThat(result)
 			.extracting(EClass::getName)
@@ -321,7 +325,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			refactorings.enumToSubclasses(
 				((EAttribute) person.getEStructuralFeature("firstname")));
 		assertThat(result).isNull();
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo("ERROR: PersonList.Person.firstname: Not an EEnum: ecore.EString");
@@ -336,7 +340,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				(EClass) personList.getEClassifier("Male"),
 				(EClass) personList.getEClassifier("Female")));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFiles();
 		assertThat(result)
 			.returns("gender", EAttribute::getName);
@@ -352,7 +356,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 				(EClass) personList.getEClassifier("Male"),
 				(EClass) personList.getEClassifier("NotSpecified"),
 				(EClass) personList.getEClassifier("Female"))));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
@@ -378,7 +382,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 				asList(female, anotherFemale)));
 		assertThrowsIAE(() -> refactorings.subclassesToEnum("Gender",
 				asList(female)));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
@@ -404,7 +408,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		var female = (EClass) personList.getEClassifier("Female");
 		assertThrowsIAE(() -> refactorings.subclassesToEnum("Gender",
 				asList(female)));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
@@ -448,7 +452,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 				refactorings.getEAttribute("PersonList", "Person", "street"),
 				refactorings.getEAttribute("PersonList", "Person", "houseNumber"))
 			);
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -468,7 +472,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			+ "    PersonList.Person.street\n"
 			+ "  PersonList.Person2:\n"
 			+ "    PersonList.Person2.street");
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
@@ -492,7 +496,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 				refactorings.getEReference("PersonList", "Person", "workplace"),
 				refactorings.getEAttribute("PersonList", "Person", "houseNumber"))
 			);
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -517,7 +521,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		withInputModels("inlineClassWithAttributes", "PersonList.ecore");
 		loadModelFiles();
 		refactorings.inlineClass(refactorings.getEClass("PersonList", "Address"));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -528,7 +532,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		refactorings.inlineClass(
 			refactorings.getEClass("PersonList", "Address"),
 			"address_");
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -537,7 +541,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		withInputModels("inlineClassWithReferences", "PersonList.ecore");
 		loadModelFiles();
 		refactorings.inlineClass(refactorings.getEClass("PersonList", "WorkAddress"));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -548,7 +552,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		loadModelFiles();
 		assertThrowsIAE(() ->
 			refactorings.inlineClass(refactorings.getEClass("PersonList", "Address")));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
@@ -568,7 +572,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		loadModelFiles();
 		assertThrowsIAE(() ->
 			refactorings.inlineClass(refactorings.getEClass("PersonList", "Address")));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
@@ -629,7 +633,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		loadModelFiles();
 		final EReference ref = refactorings.getEReference("PersonList", "Person", "works");
 		refactorings.referenceToClass("WorkingPosition", ref);
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -639,7 +643,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		loadModelFiles();
 		final EReference ref = refactorings.getEReference("PersonList", "Person", "works");
 		assertThrowsIAE(() -> refactorings.referenceToClass("WorkingPosition", ref));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim()).isEqualTo(
 			"ERROR: PersonList.Person.works: Cannot apply referenceToClass on containment reference: PersonList.Person.works");
@@ -658,7 +662,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		var result = refactorings.classToReference(cl);
 		assertThat(result)
 			.isEqualTo(refactorings.getEReference("PersonList", "Person", "works"));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -741,7 +745,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		personFeature.getEOpposite().setEOpposite(null);
 		cl.getEStructuralFeatures().remove(personFeature);
 		refactorings.classToReference(cl);
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -801,7 +805,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				refactorings.getEAttribute("p", "C3", "a1"),
 				refactorings.getEAttribute("p", "C4", "a1")));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFiles();
 		assertLogIsEmpty();
 	}
@@ -817,7 +821,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				student.getEStructuralFeature("name"),
 				employee.getEStructuralFeature("name")));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -832,7 +836,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				student.getEStructuralFeature("name"),
 				employee.getEStructuralFeature("name"))));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult())
 			.isEqualTo(
@@ -855,7 +859,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				student.getEStructuralFeature("name"),
 				employee.getEStructuralFeature("name"))));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult())
 			.isEqualTo(

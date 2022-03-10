@@ -11,9 +11,8 @@ import org.junit.Test;
 
 import com.example.Example;
 
-import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaEngine;
+import edelta.lib.EdeltaModelManager;
 
 /**
  * Unit test for simple App.
@@ -32,7 +31,7 @@ public class AppTest {
 		engine.save("modified");
 
 		// load the modified file
-		AbstractEdelta verifier = new EdeltaDefaultRuntime();
+		var verifier = new EdeltaModelManager();
 		verifier.loadEcoreFile("modified/My.ecore");
 		// verify the structure of the modified ecore
 		EPackage ePackage = verifier.getEPackage("myecore");
@@ -41,7 +40,7 @@ public class AppTest {
 		assertTrue(myNewAttribute.isRequired());
 		assertSame(EcorePackage.Literals.EINT, myNewAttribute.getEAttributeType());
 		EClass aNewDerivedClass = (EClass) ePackage.getEClassifier("ANewDerivedEClass");
-		assertSame(verifier.getEClass("myecore", "MyEClass"), aNewDerivedClass.getESuperTypes().get(0));
+		assertSame(ePackage.getEClassifier("MyEClass"), aNewDerivedClass.getESuperTypes().get(0));
 		assertTrue(aNewDerivedClass.isAbstract());
 	}
 }
