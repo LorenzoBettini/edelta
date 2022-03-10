@@ -32,7 +32,7 @@ public abstract class EdeltaRuntime {
 	/**
 	 * For loading ecores and all other runtime {@link EPackage} management.
 	 */
-	private EdeltaModelManager modelManager;
+	private EdeltaModelManager modelManager = null;
 
 	/**
 	 * For migrating model instances
@@ -44,10 +44,6 @@ public abstract class EdeltaRuntime {
 	private EdeltaIssuePresenter issuePresenter = EdeltaNopIssuePresenter.INSTANCE;
 
 	private Collection<EdeltaRuntime> children = new ArrayList<>();
-
-	protected EdeltaRuntime() {
-		modelManager = new EdeltaModelManager();
-	}
 
 	/**
 	 * Reuses the {@link EdeltaEPackageManager} from the other object

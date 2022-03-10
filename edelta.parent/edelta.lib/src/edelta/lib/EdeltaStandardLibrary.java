@@ -33,10 +33,6 @@ public class EdeltaStandardLibrary extends EdeltaRuntime {
 
 	private static EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
 
-	public EdeltaStandardLibrary() {
-		super();
-	}
-
 	/**
 	 * @param other
 	 */

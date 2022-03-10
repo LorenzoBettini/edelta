@@ -23,11 +23,6 @@ public class EdeltaDefaultRuntime extends EdeltaRuntime {
 	@Extension
 	protected EdeltaStandardLibrary stdLib;
 
-	public EdeltaDefaultRuntime() {
-		super();
-		stdLib = new EdeltaStandardLibrary(this);
-	}
-
 	/**
 	 * @param other
 	 */
