@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
@@ -185,27 +186,26 @@ class EdeltaRefactoringsTest extends AbstractTest {
 				person.getEStructuralFeature("lastName"))));
 		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
-		assertThat(appender.getResult())
-			.isEqualTo(
-			"ERROR: PersonList.Person.lastName: The two features cannot be merged:\n"
-			+ "ecore.ETypedElement.lowerBound:\n"
-			+ "  PersonList.Person.firstName: 0\n"
-			+ "  PersonList.Person.lastName: 1\n"
-			+ "\n"
-			+ "ERROR: PersonList.Student.lastName: The two features cannot be merged:\n"
-			+ "ecore.ENamedElement.name:\n"
-			+ "  PersonList.Person: Person\n"
-			+ "  PersonList.Student: Student\n"
-			+ "ecore.EStructuralFeature.eContainingClass:\n"
-			+ "  PersonList.Person.lastName: PersonList.Person\n"
-			+ "  PersonList.Student.lastName: PersonList.Student\n"
-			+ "\n"
-			+ "ERROR: PersonList.Person.lastName: The two features cannot be merged:\n"
-			+ "different kinds:\n"
-			+ "  PersonList.Person.list: ecore.EReference\n"
-			+ "  PersonList.Person.lastName: ecore.EAttribute\n"
-			+ "\n"
-			+ "");
+		assertEquals("""
+		ERROR: PersonList.Person.lastName: The two features cannot be merged:
+		ecore.ETypedElement.lowerBound:
+		  PersonList.Person.firstName: 0
+		  PersonList.Person.lastName: 1
+		
+		ERROR: PersonList.Student.lastName: The two features cannot be merged:
+		ecore.ENamedElement.name:
+		  PersonList.Person: Person
+		  PersonList.Student: Student
+		ecore.EStructuralFeature.eContainingClass:
+		  PersonList.Person.lastName: PersonList.Person
+		  PersonList.Student.lastName: PersonList.Student
+		
+		ERROR: PersonList.Person.lastName: The two features cannot be merged:
+		different kinds:
+		  PersonList.Person.list: ecore.EReference
+		  PersonList.Person.lastName: ecore.EAttribute
+		
+		""", appender.getResult());
 	}
 
 	@Test
@@ -254,23 +254,23 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				person.getEStructuralFeature("firstName"),
 				person.getEStructuralFeature("lastName"))));
-		assertThat(appender.getResult())
-			.isEqualTo(
-			"ERROR: PersonList.List.wplaces: features not compliant with type PersonList.WorkPlace:\n"
-			+ "  PersonList.List.places: PersonList.Place\n"
-			+ "  PersonList.List.lplaces: PersonList.LivingPlace\n"
-			+ "ERROR: PersonList.List.wplaces: The two features cannot be merged:\n"
-			+ "ecore.ETypedElement.lowerBound:\n"
-			+ "  PersonList.List.places: 0\n"
-			+ "  PersonList.List.wplaces: 1\n"
-			+ "\n"
-			+ "ERROR: PersonList.List.places: features not compliant with type PersonList.Place:\n"
-			+ "  PersonList.Person.firstName: ecore.EString\n"
-			+ "  PersonList.Person.lastName: ecore.EString\n"
-			+ "ERROR: PersonList.Person.age: features not compliant with type ecore.EInt:\n"
-			+ "  PersonList.Person.firstName: ecore.EString\n"
-			+ "  PersonList.Person.lastName: ecore.EString\n"
-			+ "");
+		assertEquals("""
+			ERROR: PersonList.List.wplaces: features not compliant with type PersonList.WorkPlace:
+			  PersonList.List.places: PersonList.Place
+			  PersonList.List.lplaces: PersonList.LivingPlace
+			ERROR: PersonList.List.wplaces: The two features cannot be merged:
+			ecore.ETypedElement.lowerBound:
+			  PersonList.List.places: 0
+			  PersonList.List.wplaces: 1
+			
+			ERROR: PersonList.List.places: features not compliant with type PersonList.Place:
+			  PersonList.Person.firstName: ecore.EString
+			  PersonList.Person.lastName: ecore.EString
+			ERROR: PersonList.Person.age: features not compliant with type ecore.EInt:
+			  PersonList.Person.firstName: ecore.EString
+			  PersonList.Person.lastName: ecore.EString
+			""",
+			appender.getResult());
 	}
 
 	@Test
@@ -350,10 +350,11 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
-			"ERROR: PersonList.Male: Not an empty class: PersonList.Male:\n"
-			+ "  PersonList.Male.maleName\n"
-			+ "ERROR: PersonList.Female: Not an empty class: PersonList.Female:\n"
-			+ "  PersonList.Female.femaleName");
+			"""
+				ERROR: PersonList.Male: Not an empty class: PersonList.Male:
+				  PersonList.Male.maleName
+				ERROR: PersonList.Female: Not an empty class: PersonList.Female:
+				  PersonList.Female.femaleName""");
 	}
 
 	@Test
@@ -376,17 +377,18 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
-			"ERROR: PersonList.FemaleEmployee: Expected one superclass: PersonList.FemaleEmployee instead of:\n"
-			+ "  PersonList.Person\n"
-			+ "  PersonList.Employee\n"
-			+ "ERROR: PersonList.Employee: Expected one superclass: PersonList.Employee instead of:\n"
-			+ "  empty\n"
-			+ "ERROR: PersonList.AnotherFemale: Wrong superclass of PersonList.AnotherFemale:\n"
-			+ "  Expected: PersonList.Person\n"
-			+ "  Actual  : PersonList.AnotherPerson\n"
-			+ "ERROR: PersonList.Person: The class has additional subclasses:\n"
-			+ "  PersonList.Male\n"
-			+ "  PersonList.FemaleEmployee");
+			"""
+				ERROR: PersonList.FemaleEmployee: Expected one superclass: PersonList.FemaleEmployee instead of:
+				  PersonList.Person
+				  PersonList.Employee
+				ERROR: PersonList.Employee: Expected one superclass: PersonList.Employee instead of:
+				  empty
+				ERROR: PersonList.AnotherFemale: Wrong superclass of PersonList.AnotherFemale:
+				  Expected: PersonList.Person
+				  Actual  : PersonList.AnotherPerson
+				ERROR: PersonList.Person: The class has additional subclasses:
+				  PersonList.Male
+				  PersonList.FemaleEmployee""");
 	}
 
 	@Test
@@ -402,9 +404,10 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
-			"ERROR: PersonList.Person: The class has additional subclasses:\n"
-			+ "  PersonList.Male\n"
-			+ "  PersonListReferring.FemaleEmployee");
+			"""
+				ERROR: PersonList.Person: The class has additional subclasses:
+				  PersonList.Male
+				  PersonListReferring.FemaleEmployee""");
 	}
 
 	@Test
@@ -457,17 +460,20 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			));
 		assertThat(thrown.getMessage())
 			.isEqualTo(
-			"Multiple containing classes:\n"
-			+ "  PersonList.Person:\n"
-			+ "    PersonList.Person.street\n"
-			+ "  PersonList.Person2:\n"
-			+ "    PersonList.Person2.street");
+			"""
+				Multiple containing classes:
+				  PersonList.Person:
+				    PersonList.Person.street
+				  PersonList.Person2:
+				    PersonList.Person2.street""");
 		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
-			"ERROR: PersonList.Person: Extracted features must belong to the same class: PersonList.Person\n"
-			+ "ERROR: PersonList.Person2: Extracted features must belong to the same class: PersonList.Person2");
+			"""
+			ERROR: PersonList.Person: Extracted features must belong to the same class: PersonList.Person
+			ERROR: PersonList.Person2: Extracted features must belong to the same class: PersonList.Person2"""
+			);
 	}
 
 	@Test
@@ -502,8 +508,10 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			));
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
-			"ERROR: PersonList.Person.workplace: Cannot extract bidirectional references:\n"
-			+ "  PersonList.Person.workplace");
+			"""
+			ERROR: PersonList.Person.workplace: Cannot extract bidirectional references:
+			  PersonList.Person.workplace"""
+			);
 	}
 
 	@Test
@@ -546,13 +554,14 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
-			"ERROR: PersonList.Address: The EClass is used by more than one element:\n"
-			+ "  PersonList.Person.address\n"
-			+ "    ecore.ETypedElement.eType\n"
-			+ "  PersonListReferring.UsesAddress.address\n"
-			+ "    ecore.ETypedElement.eType\n"
-			+ "  PersonListReferring.ExtendsAddress\n"
-			+ "    ecore.EClass.eSuperTypes");
+			"""
+				ERROR: PersonList.Address: The EClass is used by more than one element:
+				  PersonList.Person.address
+				    ecore.ETypedElement.eType
+				  PersonListReferring.UsesAddress.address
+				    ecore.ETypedElement.eType
+				  PersonListReferring.ExtendsAddress
+				    ecore.EClass.eSuperTypes""");
 	}
 
 	@Test
@@ -577,11 +586,12 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			refactorings.inlineClass(refactorings.getEClass("PersonList", "WorkAddress")));
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
-			"ERROR: PersonList.WorkAddress: The EClass is used by more than one element:\n"
-			+ "  PersonList.Person.workAddress\n"
-			+ "    ecore.ETypedElement.eType\n"
-			+ "  PersonList.WorkPlace.address\n"
-			+ "    ecore.ETypedElement.eType");
+			"""
+				ERROR: PersonList.WorkAddress: The EClass is used by more than one element:
+				  PersonList.Person.workAddress
+				    ecore.ETypedElement.eType
+				  PersonList.WorkPlace.address
+				    ecore.ETypedElement.eType""");
 	}
 
 	@Test
@@ -674,10 +684,12 @@ class EdeltaRefactoringsTest extends AbstractTest {
 				refactorings.getEClass("p", "C")));
 		assertThat(appender.getResult())
 			.isEqualTo(
-			"ERROR: p.C: The EClass is referred by more than one container:\n"
-			+ "  p.C1.r1\n"
-			+ "  p.C2.r2\n"
-			+ "");
+			"""
+			ERROR: p.C: The EClass is referred by more than one container:
+			  p.C1.r1
+			  p.C2.r2
+			"""
+			);
 	}
 
 	@Test
@@ -689,10 +701,12 @@ class EdeltaRefactoringsTest extends AbstractTest {
 				refactorings.getEClass("p", "C")));
 		assertThat(appender.getResult())
 			.isEqualTo(
-			"ERROR: p.C: The EClass is referred by more than one container:\n"
-			+ "  p.C1.r1\n"
-			+ "  p2.C2.r2\n"
-			+ "");
+			"""
+			ERROR: p.C: The EClass is referred by more than one container:
+			  p.C1.r1
+			  p2.C2.r2
+			"""
+			);
 	}
 
 	@Test
@@ -718,10 +732,12 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertThrowsIAE(() -> refactorings.classToReference(cl));
 		assertThat(appender.getResult())
 			.isEqualTo(
-			"ERROR: PersonList.WorkingPosition: Too many references not of type PersonList.Person:\n"
-			+ "  PersonList.WorkingPosition.workPlace\n"
-			+ "  PersonList.WorkingPosition.another\n"
-			+ "");
+			"""
+			ERROR: PersonList.WorkingPosition: Too many references not of type PersonList.Person:
+			  PersonList.WorkingPosition.workPlace
+			  PersonList.WorkingPosition.another
+			"""
+			);
 	}
 
 	@Test
@@ -828,14 +844,15 @@ class EdeltaRefactoringsTest extends AbstractTest {
 				employee.getEStructuralFeature("name"))));
 		modelManager.saveEcores(AbstractTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
-		assertThat(appender.getResult())
-			.isEqualTo(
-			"ERROR: PersonList.Employee.name: The two features are not equal:\n"
-			+ "ecore.ETypedElement.lowerBound:\n"
-			+ "  PersonList.Student.name: 0\n"
-			+ "  PersonList.Employee.name: 1\n"
-			+ "\n"
-			+ "");
+		assertEquals(
+		"""
+		ERROR: PersonList.Employee.name: The two features are not equal:
+		ecore.ETypedElement.lowerBound:
+		  PersonList.Student.name: 0
+		  PersonList.Employee.name: 1
+		
+		"""
+		, appender.getResult());
 	}
 
 	@Test
@@ -853,9 +870,11 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult())
 			.isEqualTo(
-			"ERROR: PersonList.Student: Not a direct subclass of: PersonList.Person\n"
-			+ "ERROR: PersonList.Employee: Not a direct subclass of: PersonList.Person\n"
-			+ "");
+			"""
+			ERROR: PersonList.Student: Not a direct subclass of: PersonList.Person
+			ERROR: PersonList.Employee: Not a direct subclass of: PersonList.Person
+			"""
+			);
 	}
 
 	@Test
@@ -873,10 +892,11 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			.collect(Collectors.joining("\n"));
 		assertThat(repr)
 			.isEqualTo(
-			"p.SubClass\n"
-			+ "  ecore.EClass.eSuperTypes\n"
-			+ "p.UsesC.refToC\n"
-			+ "  ecore.ETypedElement.eType");
+			"""
+				p.SubClass
+				  ecore.EClass.eSuperTypes
+				p.UsesC.refToC
+				  ecore.ETypedElement.eType""");
 	}
 
 	@Test
@@ -896,15 +916,16 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		stdLib.addNewEClass(p, "UsesC", c ->
 			stdLib.addNewEReference(c, "refToC", classForUsages));
 		assertThrowsIAE(() -> refactorings.findSingleUsageOfThisClass(classForUsages));
-		assertThat(appender.getResult())
-			.isEqualTo(
-			"ERROR: p.C: The EClass is not used: p.C\n"
-			+ "ERROR: p.C: The EClass is used by more than one element:\n"
-			+ "  p.SubClass\n"
-			+ "    ecore.EClass.eSuperTypes\n"
-			+ "  p.UsesC.refToC\n"
-			+ "    ecore.ETypedElement.eType\n"
-			+ "");
+		assertEquals(
+			"""
+			ERROR: p.C: The EClass is not used: p.C
+			ERROR: p.C: The EClass is used by more than one element:
+			  p.SubClass
+			    ecore.EClass.eSuperTypes
+			  p.UsesC.refToC
+			    ecore.ETypedElement.eType
+			"""
+			, appender.getResult());
 	}
 
 	@Test
@@ -926,9 +947,11 @@ class EdeltaRefactoringsTest extends AbstractTest {
 
 		assertThat(appender.getResult())
 			.isEqualTo(
-			"ERROR: p.C: Not a reference: p.C\n"
-			+ "ERROR: p.C.refToC: Not a containment reference: p.C.refToC\n"
-			+ "");
+			"""
+			ERROR: p.C: Not a reference: p.C
+			ERROR: p.C.refToC: Not a containment reference: p.C.refToC
+			"""
+			);
 	}
 
 	private static IllegalArgumentException assertThrowsIAE(Executable executable) {

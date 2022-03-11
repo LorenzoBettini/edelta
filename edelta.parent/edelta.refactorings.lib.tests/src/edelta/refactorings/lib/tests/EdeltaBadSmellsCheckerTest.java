@@ -49,9 +49,11 @@ public class EdeltaBadSmellsCheckerTest extends AbstractTest {
 		checker.checkDuplicatedFeatures(p);
 		assertThat(appender.getResult())
 			.isEqualTo(
-			"WARN: pack.C1.A1: pack.C1.A1, duplicate features: pack.C2.A1, pack.C3.A1\n"
-			+ "WARN: pack.C2.A1: pack.C2.A1, duplicate features: pack.C1.A1, pack.C3.A1\n"
-			+ "WARN: pack.C3.A1: pack.C3.A1, duplicate features: pack.C1.A1, pack.C2.A1\n"
-			+ "");
+			"""
+			WARN: pack.C1.A1: pack.C1.A1, duplicate features: pack.C2.A1, pack.C3.A1
+			WARN: pack.C2.A1: pack.C2.A1, duplicate features: pack.C1.A1, pack.C3.A1
+			WARN: pack.C3.A1: pack.C3.A1, duplicate features: pack.C1.A1, pack.C2.A1
+			"""
+			);
 	}
 }

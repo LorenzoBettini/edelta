@@ -44,11 +44,13 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 	@Test
 	public void testEClassifierDirectReference() throws Exception {
 		EdeltaProgram prog = parseWithTestEcore(
-			"metamodel \"foo\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage foo {\n"
-			+ "   ecoreref(FooClass)\n"
-			+ "}"
+			"""
+				metamodel "foo"
+				
+				modifyEcore aTest epackage foo {
+				   ecoreref(FooClass)
+				}
+			"""
 		);
 		var ref = lastEcoreReferenceExpression(prog).getReference();
 		recorder.recordOriginalENamedElement(ref);
@@ -60,11 +62,13 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 	@Test
 	public void testEClassifierQualifiedReference() throws Exception {
 		EdeltaProgram prog = parseWithTestEcore(
-			"metamodel \"foo\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage foo {\n"
-			+ "   ecoreref(foo.FooClass)\n"
-			+ "}"
+			"""
+				metamodel "foo"
+				
+				modifyEcore aTest epackage foo {
+				   ecoreref(foo.FooClass)
+				}
+			"""
 		);
 		var ref = getEdeltaEcoreQualifiedReference(
 			lastEcoreReferenceExpression(prog).getReference());
@@ -80,12 +84,14 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 	@Test
 	public void testCreatedEClassifierDirectReference() throws Exception {
 		EdeltaProgram prog = parseWithTestEcore(
-			"metamodel \"foo\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage foo {\n"
-			+ "   addNewEClass(\"NewClass\")\n"
-			+ "   ecoreref(NewClass)\n"
-			+ "}"
+			"""
+				metamodel "foo"
+				
+				modifyEcore aTest epackage foo {
+				   addNewEClass("NewClass")
+				   ecoreref(NewClass)
+				}
+			"""
 		);
 		var ref = lastEcoreReferenceExpression(prog).getReference();
 		recorder.recordOriginalENamedElement(ref);
@@ -95,12 +101,14 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 	@Test
 	public void testCreatedEClassifierQualifiedReference() throws Exception {
 		EdeltaProgram prog = parseWithTestEcore(
-			"metamodel \"foo\"\n"
-			+ "			\n"
-			+ "			modifyEcore aTest epackage foo {\n"
-			+ "				addNewEClass(\"NewClass\")\n"
-			+ "				ecoreref(foo.NewClass)\n"
-			+ "			}"
+			"""
+				metamodel "foo"
+				
+				modifyEcore aTest epackage foo {
+					addNewEClass("NewClass")
+					ecoreref(foo.NewClass)
+				}
+			"""
 		);
 		var ref = getEdeltaEcoreQualifiedReference(
 				lastEcoreReferenceExpression(prog).getReference());

@@ -1,19 +1,13 @@
 package edelta.tests;
 
 import com.google.inject.Inject;
-import edelta.edelta.EdeltaEcoreReferenceExpression;
-import edelta.edelta.EdeltaProgram;
 import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.extensions.InjectionExtension;
-import org.eclipse.xtext.xbase.XExpression;
-import org.eclipse.xtext.xbase.lib.ObjectExtensions;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -72,12 +66,14 @@ public class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	@Test
 	public void testTypeForRenamedEClassInModifyEcore() throws Exception {
 		var prog = parseWithTestEcore(
-			"metamodel \"foo\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage foo {\n"
-			+ "	ecoreref(foo.FooClass).name = \"RenamedClass\"\n"
-			+ "	ecoreref(RenamedClass)\n"
-			+ "}"
+			"""
+				metamodel "foo"
+				
+				modifyEcore aTest epackage foo {
+					ecoreref(foo.FooClass).name = "RenamedClass"
+					ecoreref(RenamedClass)
+				}
+			"""
 		);
 		var ecoreRefExp = getEdeltaEcoreReferenceExpression(
 				getBlockLastExpression(lastModifyEcoreOperation(prog).getBody()));
@@ -89,12 +85,14 @@ public class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	@Test
 	public void testTypeForRenamedQualifiedEClassInModifyEcore() throws Exception {
 		var prog = parseWithTestEcore(
-			"metamodel \"foo\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage foo {\n"
-			+ "	ecoreref(foo.FooClass).name = \"RenamedClass\"\n"
-			+ "	ecoreref(foo.RenamedClass)\n"
-			+ "}"
+			"""
+				metamodel "foo"
+				
+				modifyEcore aTest epackage foo {
+					ecoreref(foo.FooClass).name = "RenamedClass"
+					ecoreref(foo.RenamedClass)
+				}
+			"""
 		);
 		var ecoreRefExp = getEdeltaEcoreReferenceExpression(
 				getBlockLastExpression(lastModifyEcoreOperation(prog).getBody()));
@@ -118,10 +116,12 @@ public class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 		var blockLastExpression = getBlockLastExpression(lastModifyEcoreOperation(
 			parseWithTestEcore(
 				String.format(
-					"metamodel \"foo\"\n"
-					+ "modifyEcore aTest epackage foo {\n"
-					+ "   %s\n"
-					+ "}"
+					"""
+						metamodel "foo"
+						modifyEcore aTest epackage foo {
+						   %s
+						}
+					"""
 				, input))).getBody());
 		Assertions.assertEquals(expectedTypeFQN,
 			typeResolver.resolveTypes(blockLastExpression)

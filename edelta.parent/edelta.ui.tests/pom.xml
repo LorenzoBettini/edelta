@@ -12,10 +12,12 @@
   <packaging>eclipse-test-plugin</packaging>
 
   <properties>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
     <systemProperties>-Dedelta.interpreter.timeout=30000</systemProperties>
     <!-- Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=397015 -->
     <sonar.sources></sonar.sources>
-    <sonar.tests>src,xtend-gen</sonar.tests>
+    <sonar.tests>src</sonar.tests>
   </properties>
 
   <profiles>
