@@ -223,12 +223,53 @@ public class EdeltaUtils {
 	 * @see #packagesToInspect(EClassifier)
 	 */
 	public static List<EClass> allEClasses(EPackage ePackage) {
-		if (ePackage == null)
-			return Collections.emptyList();
-		return filterByType(
-			packagesToInspect(ePackage).stream().flatMap(p -> p.getEClassifiers().stream()),
-				EClass.class)
+		return allEClassesStream(ePackage)
 			.collect(Collectors.toList());
+	}
+
+	/**
+	 * Returns a stream of all the {@link EClass}es of the specified
+	 * {@link EPackage} and of the packages in the same {@link Resource}
+	 * and {@link ResourceSet}.
+	 * 
+	 * @param ePackage
+	 * @return an empty stream if the ePackage is null
+	 * @see #packagesToInspect(EClassifier)
+	 */
+	public static Stream<EClass> allEClassesStream(EPackage ePackage) {
+		if (ePackage == null)
+			return Stream.empty();
+		return filterByType(
+			packagesToInspect(ePackage).stream()
+					.flatMap(p -> p.getEClassifiers().stream()),
+				EClass.class);
+	}
+
+	/**
+	 * Returns a list of all the {@link EClass}es of the specified
+	 * {@link EPackage} only.
+	 * 
+	 * @param ePackage
+	 * @return an empty list if the ePackage is null
+	 */
+	public static List<EClass> getEClasses(EPackage ePackage) {
+		return getEClassesStream(ePackage)
+			.collect(Collectors.toList());
+	}
+
+	/**
+	 * Returns a stream of all the {@link EClass}es of the specified
+	 * {@link EPackage} only.
+	 * 
+	 * @param ePackage
+	 * @return an empty stream if the ePackage is null
+	 */
+	public static Stream<EClass> getEClassesStream(EPackage ePackage) {
+		if (ePackage == null)
+			return Stream.empty();
+		return filterByType(
+				ePackage.getEClassifiers().stream(),
+				EClass.class);
 	}
 
 	/**
@@ -241,9 +282,46 @@ public class EdeltaUtils {
 	 * @see #packagesToInspect(EClassifier)
 	 */
 	public static List<EStructuralFeature> allEStructuralFeatures(EPackage ePackage) {
-		return allEClasses(ePackage).stream()
-				.flatMap(c -> c.getEStructuralFeatures().stream())
+		return allEStructuralFeaturesStream(ePackage)
 				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Returns a stream of all the {@link EStructuralFeature}s of the specified
+	 * {@link EPackage} and of the packages in the same {@link Resource}
+	 * and {@link ResourceSet}.
+	 * 
+	 * @param ePackage
+	 * @return an empty stream if the ePackage is null
+	 * @see #packagesToInspect(EClassifier)
+	 */
+	public static Stream<EStructuralFeature> allEStructuralFeaturesStream(EPackage ePackage) {
+		return allEClassesStream(ePackage)
+				.flatMap(c -> c.getEStructuralFeatures().stream());
+	}
+
+	/**
+	 * Returns a list of all the {@link EStructuralFeature}s of the specified
+	 * {@link EPackage} only.
+	 * 
+	 * @param ePackage
+	 * @return an empty list if the ePackage is null
+	 */
+	public static List<EStructuralFeature> getEStructuralFeatures(EPackage ePackage) {
+		return getEStructuralFeaturesStream(ePackage)
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Returns a stream of all the {@link EStructuralFeature}s of the specified
+	 * {@link EPackage} only.
+	 * 
+	 * @param ePackage
+	 * @return an empty stream if the ePackage is null
+	 */
+	public static Stream<EStructuralFeature> getEStructuralFeaturesStream(EPackage ePackage) {
+		return getEClassesStream(ePackage)
+				.flatMap(c -> c.getEStructuralFeatures().stream());
 	}
 
 	/**
