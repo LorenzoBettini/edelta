@@ -47,9 +47,11 @@ public class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 	@Test
 	public void testSafeInstantiateOfValidUseAs() throws Exception {
 		var useAsClause = parseHelper.parse(
-			"import edelta.tests.additional.MyCustomEdelta\n"
-			+ "\n"
-			+ "use MyCustomEdelta as my")
+			"""
+			import edelta.tests.additional.MyCustomEdelta
+			
+			use MyCustomEdelta as my
+			""")
 			.getUseAsClauses().get(0);
 		assertEquals(MyCustomEdelta.class,
 			interpreterHelper
@@ -68,8 +70,11 @@ public class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 	@Test
 	public void testSafeInstantiateOfValidUseAsWithoutType() throws Exception {
 		var useAsClause = parseHelper.parse(
-			"import edelta.tests.EdeltaInterpreterHelperTest.InstantiateExceptionClass\n"
-			+ "use InstantiateExceptionClass as my")
+			"""
+			import edelta.tests.EdeltaInterpreterHelperTest.InstantiateExceptionClass
+
+			use InstantiateExceptionClass as my
+			""")
 				.getUseAsClauses().get(0);
 		assertThat(interpreterHelper
 			.safeInstantiate(javaReflectAccess, useAsClause, other).getClass())
@@ -94,9 +99,11 @@ public class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 		// because the ClassLoader cannot find it
 		// https://github.com/LorenzoBettini/edelta/issues/69
 		var useAsClause = parseHelper.parse(
-			"import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime\n"
-					+ "\n"
-					+ "use MyCustomEdeltaThatCannotBeLoadedAtRuntime as my")
+			"""
+			import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime
+			
+			use MyCustomEdeltaThatCannotBeLoadedAtRuntime as my
+			""")
 			.getUseAsClauses().get(0);
 		assertThatThrownBy(() -> {
 			interpreterHelper
@@ -112,8 +119,11 @@ public class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 	@Test
 	public void testFilterOperationsWithNullEPackage() throws Exception {
 		var prog = parseHelper.parse(
-			"modifyEcore first epackage {}\n"
-			+ "modifyEcore second epackage foo {}");
+			"""
+			modifyEcore first epackage {}
+			
+			modifyEcore second epackage foo {}
+			""");
 		assertThat(
 			interpreterHelper.filterOperations(prog.getModifyEcoreOperations()))
 				.containsExactly(last(prog.getModifyEcoreOperations()));
@@ -122,11 +132,13 @@ public class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 	@Test
 	public void testFilterOperationsWithSubPackage() throws Exception {
 		var prog = parseWithTestEcoreWithSubPackage(
-			"metamodel \"mainpackage.mainsubpackage\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage mainsubpackage {\n"
-			+ "	\n"
-			+ "}");
+			"""
+			metamodel "mainpackage.mainsubpackage"
+
+			modifyEcore aTest epackage mainsubpackage {
+				
+			}
+			""");
 		assertThat(
 			interpreterHelper
 				.filterOperations(prog.getModifyEcoreOperations())).isEmpty();
