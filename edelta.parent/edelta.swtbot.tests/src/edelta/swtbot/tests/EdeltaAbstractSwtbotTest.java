@@ -14,7 +14,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
+import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
+import org.eclipse.swtbot.swt.finder.waits.ICondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
@@ -144,6 +146,31 @@ public abstract class EdeltaAbstractSwtbotTest {
 			}
 		}
 		return buffer.toString();
+	}
+
+	protected void edeltaContextMenu(String project, String ecoreFile, String menu) {
+		bot.waitUntil(new ICondition() {
+			@Override
+			public boolean test() throws Exception {
+				System.out.println("### menu for "
+						+ project + " " + ecoreFile + " " + menu);
+				getProjectTreeItem(project)
+					.expand()
+					.expandNode("model", ecoreFile).select()
+					.contextMenu("Edelta").menu(menu).click();
+				return true;
+			}
+	
+			@Override
+			public void init(SWTBot bot) {
+			}
+	
+			@Override
+			public String getFailureMessage() {
+				return "Cannot find menu for "
+					+ project + " " + ecoreFile + " " + menu;
+			}
+		});
 	}
 
 }

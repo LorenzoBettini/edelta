@@ -30,10 +30,7 @@ public class EdeltaTemplateGeneratorSwtBotTest extends EdeltaAbstractSwtbotTest 
 	@Test
 	public void canGenerateTemplateFiles() throws CoreException {
 		assertErrorsInProject(0);
-		getProjectTreeItem(TEST_PROJECT)
-			.expand()
-			.expandNode("model", PERSONS_MM_ECORE).select()
-			.contextMenu("Edelta").menu("Generate Edelta Template File").click();
+		edeltaContextMenu(TEST_PROJECT, PERSONS_MM_ECORE, "Generate Edelta Template File");
 		waitForBuild();
 		assertErrorsInProject(0);
 		bot.editorByTitle(PERSONS_MM_TEMPLATE_EDELTA);
