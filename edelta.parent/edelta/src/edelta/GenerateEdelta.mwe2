@@ -47,6 +47,9 @@ Workflow {
 			projectWizard = {
 				generate = true
 			}
+			junitSupport = {
+				generateXtendStub = false
+			}
 		}
 	}
 }
