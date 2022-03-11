@@ -30,10 +30,7 @@ public class EdeltaDependencyAnalyzerSwtBotTest extends EdeltaAbstractSwtbotTest
 	@Test
 	public void canAnalyzeEcoreFiles() throws CoreException {
 		assertErrorsInProject(0);
-		getProjectTreeItem(TEST_PROJECT)
-			.expand()
-			.expandNode("model", PERSONS_MM_ECORE).select()
-			.contextMenu("Edelta").menu("Analyze Ecore Files").click();
+		edeltaContextMenu(TEST_PROJECT, PERSONS_MM_ECORE, "Analyze Ecore Files");
 		bot.editorByTitle(PERSONS_MM_ECORE_GRAPHMM);
 		getProjectTreeItem(TEST_PROJECT)
 			.expand()
