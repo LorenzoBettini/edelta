@@ -47,6 +47,13 @@ public class EdeltaModelMigrator {
 
 		private transient BiMap<EObject, EObject> ecoreCopyMap;
 
+		/**
+		 * Creates a custom copier for migrating EMF models based on the passed map
+		 * where the key is the original Ecore element and the value is the evolved
+		 * Ecore element
+		 * 
+		 * @param ecoreCopyMap
+		 */
 		public EdeltaModelCopier(Map<EObject, EObject> ecoreCopyMap) {
 			// by default useOriginalReferences is true, but this breaks
 			// our migration strategy: if a reference refers something that
@@ -102,6 +109,14 @@ public class EdeltaModelMigrator {
 			return null;
 		}
 
+		/**
+		 * Returns the Ecore element of the original Ecore corresponding to the passed
+		 * Ecore element of the evolved Ecore.
+		 * 
+		 * @param <T>
+		 * @param o
+		 * @return
+		 */
 		@SuppressWarnings("unchecked")
 		public <T extends EObject> T getOriginal(T o) {
 			return (T) ecoreCopyMap.inverse().get(o);
@@ -159,7 +174,7 @@ public class EdeltaModelMigrator {
 
 	@FunctionalInterface
 	public static interface EObjectFunction
-			extends Function<EObject, EObject> {
+			extends UnaryOperator<EObject> {
 	}
 
 	public EdeltaModelMigrator(EdeltaModelManager originalModelManager) {
@@ -194,8 +209,15 @@ public class EdeltaModelMigrator {
 		edeltaModelCopier.copyReferences();
 	}
 
+	/**
+	 * When the attribute predicate matches, copy the attribute value after applying
+	 * the transformation implemented by the function.
+	 * 
+	 * @param predicate
+	 * @param function
+	 */
 	public void transformAttributeValueRule(Predicate<EAttribute> predicate,
-			EdeltaModelMigrator.AttributeValueTransformer function) {
+			AttributeValueTransformer function) {
 		modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 			private static final long serialVersionUID = 1L;
 
@@ -335,8 +357,7 @@ public class EdeltaModelMigrator {
 		// consideration possible changes of the feature, e.g., multiplicity
 		EdeltaResourceUtils.getEPackages(
 			evolvingModelManager.getEcoreResources()).stream()
-			.flatMap(p -> EdeltaUtils.allEClasses(p).stream())
-			.flatMap(c -> c.getEStructuralFeatures().stream())
+			.flatMap(EdeltaUtils::allEStructuralFeaturesStream)
 			.forEach(f -> ((EStructuralFeature.Internal)f).setSettingDelegate(null));
 	}
 
