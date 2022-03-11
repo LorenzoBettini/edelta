@@ -355,10 +355,11 @@ public class EdeltaModelMigrator {
 		// we must set the SettingDelegate to null
 		// to force its recreation, so that it takes into
 		// consideration possible changes of the feature, e.g., multiplicity
-		EdeltaResourceUtils.getEPackages(
-			evolvingModelManager.getEcoreResources()).stream()
-			.flatMap(EdeltaUtils::allEStructuralFeaturesStream)
-			.forEach(f -> ((EStructuralFeature.Internal)f).setSettingDelegate(null));
+		EdeltaResourceUtils.getEPackagesStream(
+			evolvingModelManager.getEcoreResources())
+			.flatMap(EdeltaUtils::getEStructuralFeaturesStream)
+			.forEach(f -> 
+				((EStructuralFeature.Internal)f).setSettingDelegate(null));
 	}
 
 	public EObject getMigrated(EObject o) {
