@@ -323,6 +323,38 @@ public class EdeltaUtilsTest {
 	}
 
 	@Test
+	public void test_getEClasses() {
+		var p1 = ecoreFactory.createEPackage();
+		var eClass1 = ecoreFactory.createEClass();
+		var dataType = ecoreFactory.createEDataType();
+		p1.getEClassifiers().add(eClass1);
+		p1.getEClassifiers().add(dataType);
+
+		var p2 = ecoreFactory.createEPackage();
+		var eClass2 = ecoreFactory.createEClass();
+		p2.getEClassifiers().add(eClass2);
+
+		var resource1 = new ResourceImpl();
+		resource1.getContents().add(p1);
+
+		var resource2 = new ResourceImpl();
+		resource2.getContents().add(p2);
+		
+		var resourceSet = new ResourceSetImpl();
+		resourceSet.getResources().add(resource1);
+		resourceSet.getResources().add(resource2);
+
+		// differently from allEClasses, it only returns
+		// the EClasses of the single package
+		assertThat(EdeltaUtils.getEClasses(p1))
+			.containsOnly(eClass1);
+		assertThat(EdeltaUtils.getEClasses(p2))
+			.containsOnly(eClass2);
+		assertThat(EdeltaUtils.getEClasses(null))
+			.isEmpty();
+	}
+
+	@Test
 	public void test_allEStructuralFeatures() {
 		var p1 = ecoreFactory.createEPackage();
 		var eClass1 = ecoreFactory.createEClass();
@@ -352,6 +384,47 @@ public class EdeltaUtilsTest {
 		var f4 = ecoreFactory.createEReference();
 		eClass2.getEStructuralFeatures().addAll(List.of(f3, f4));
 
+		// differently from allEStructuralFeatures, it only returns
+		// the EStructuralFeatures of the single package
+		assertThat(EdeltaUtils.getEStructuralFeatures(p1))
+			.containsOnly(f1, f2);
+		assertThat(EdeltaUtils.getEStructuralFeatures(p2))
+			.containsOnly(f3, f4);
+		assertThat(EdeltaUtils.getEStructuralFeatures(null))
+			.isEmpty();
+	}
+
+	@Test
+	public void test_getEStructuralFeatures() {
+		var p1 = ecoreFactory.createEPackage();
+		var eClass1 = ecoreFactory.createEClass();
+		var dataType = ecoreFactory.createEDataType();
+		p1.getEClassifiers().add(eClass1);
+		p1.getEClassifiers().add(dataType);
+
+		var p2 = ecoreFactory.createEPackage();
+		var eClass2 = ecoreFactory.createEClass();
+		p2.getEClassifiers().add(eClass2);
+
+		var resource1 = new ResourceImpl();
+		resource1.getContents().add(p1);
+
+		var resource2 = new ResourceImpl();
+		resource2.getContents().add(p2);
+		
+		var resourceSet = new ResourceSetImpl();
+		resourceSet.getResources().add(resource1);
+		resourceSet.getResources().add(resource2);
+
+		var f1 = ecoreFactory.createEAttribute();
+		var f2 = ecoreFactory.createEReference();
+		eClass1.getEStructuralFeatures().addAll(List.of(f1, f2));
+
+		var f3 = ecoreFactory.createEAttribute();
+		var f4 = ecoreFactory.createEReference();
+		eClass2.getEStructuralFeatures().addAll(List.of(f3, f4));
+
+		
 		assertThat(EdeltaUtils.allEStructuralFeatures(p1))
 			.containsExactlyInAnyOrder(f1, f2, f3, f4);
 	}
