@@ -84,18 +84,11 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
 			+ "	ecoreref()\n"
 			+ "}");
 		var expressions = getLastModifyEcoreOperationBlock(prog).getExpressions();
-		assertEquals("FooClass",
-			EdeltaModelUtil
-				.getEcoreReferenceText(getEdeltaEcoreReference(expressions.get(0))));
-		assertEquals("foo.FooClass",
-			EdeltaModelUtil
-				.getEcoreReferenceText(getEdeltaEcoreReference(expressions.get(1))));
-		assertEquals("NonExistingClass",
-			EdeltaModelUtil
-				.getEcoreReferenceText(getEdeltaEcoreReference(expressions.get(2))));
-		assertEquals("",
-			EdeltaModelUtil
-				.getEcoreReferenceText(getEdeltaEcoreReference(expressions.get(3))));
+
+		assertThat(expressions)
+			.extracting(e -> EdeltaModelUtil
+				.getEcoreReferenceText(getEdeltaEcoreReference(e)))
+			.containsExactly("FooClass", "foo.FooClass", "NonExistingClass", "");
 	}
 
 	@Test
