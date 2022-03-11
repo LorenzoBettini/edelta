@@ -13,7 +13,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.xbase.lib.Exceptions;
-import org.junit.Assert;
 
 /**
  * Utility class for creating a Plug-in project for testing.
@@ -24,7 +23,7 @@ public class PluginProjectHelper {
 
 	public static void assertNoErrors() throws CoreException {
 		final Iterable<IMarker> markers = getErrorMarkers();
-		Assert.assertEquals(
+		assertEquals(
 			("unexpected errors:\n" + 
 				join(map(markers, it -> {
 					try {
