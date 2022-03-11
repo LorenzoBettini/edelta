@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -34,11 +35,22 @@ public class EdeltaResourceUtils {
 	 * @return
 	 */
 	public static Collection<EPackage> getEPackages(Collection<Resource> resources) {
+		return getEPackagesStream(resources) // we must be deterministic
+			.collect(Collectors.toList());
+	}
+
+	/**
+	 * Returns a stream with all the {@link EPackage} instances found as first
+	 * element of the given {@link Resource}s.
+	 * 
+	 * @param resources
+	 * @return
+	 */
+	public static Stream<EPackage> getEPackagesStream(Collection<Resource> resources) {
 		return resources.stream()
 			.map(EdeltaResourceUtils::getEPackage)
 			.filter(Objects::nonNull)
-			.sorted(ePackageComparator()) // we must be deterministic
-			.collect(Collectors.toList());
+			.sorted(ePackageComparator());
 	}
 
 	/**
