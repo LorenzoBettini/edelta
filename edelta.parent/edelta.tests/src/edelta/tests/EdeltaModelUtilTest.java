@@ -22,9 +22,11 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
 	@Test
 	public void testGetProgram() throws Exception {
 		var prog = parseWithTestEcore(
-			"metamodel \"foo\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage foo {}");
+			"""
+				metamodel "foo"
+				
+				modifyEcore aTest epackage foo {}
+			""");
 		assertSame(prog, EdeltaModelUtil.getProgram(lastModifyEcoreOperation(prog)));
 	}
 
@@ -75,14 +77,16 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
 	@Test
 	public void testGetEcoreReferenceText() throws Exception {
 		var prog = parseWithTestEcore(
-			"metamodel \"foo\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage foo {\n"
-			+ "	ecoreref(FooClass)\n"
-			+ "	ecoreref(foo.FooClass)\n"
-			+ "	ecoreref(NonExistingClass)\n"
-			+ "	ecoreref()\n"
-			+ "}");
+			"""
+				metamodel "foo"
+				
+				modifyEcore aTest epackage foo {
+					ecoreref(FooClass)
+					ecoreref(foo.FooClass)
+					ecoreref(NonExistingClass)
+					ecoreref()
+				}
+			""");
 		var expressions = getLastModifyEcoreOperationBlock(prog).getExpressions();
 
 		assertThat(expressions)
@@ -94,9 +98,11 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
 	@Test
 	public void testGetMetamodelImportText() throws Exception {
 		var input =
-			"metamodel \"foo\"\n"
-			+ "metamodel \"bar\"\n"
-			+ "metamodel \"foo\"";
+			"""
+			metamodel "foo"
+			metamodel "bar"
+			metamodel "foo"
+			""";
 		var prog = parseWithTestEcore(input);
 		assertEquals("\"foo\"", EdeltaModelUtil.getMetamodelImportText(prog, 0));
 		assertEquals("\"bar\"", EdeltaModelUtil.getMetamodelImportText(prog, 1));
@@ -134,16 +140,18 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
 	@Test
 	public void testGetContainingBlockXExpression() throws Exception {
 		var input =
-			"metamodel \"foo\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage foo {\n"
-			+ "	ecoreref(FooClass) // 0\n"
-			+ "	ecoreref(FooClass).abstract = true // 1\n"
-			+ "	ecoreref(FooClass).ESuperTypes += null // 2\n"
-			+ "	if (true) {\n"
-			+ "		ecoreref(FooClass).ESuperTypes += null // 3\n"
-			+ "	}\n"
-			+ "}";
+			"""
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				ecoreref(FooClass) // 0
+				ecoreref(FooClass).abstract = true // 1
+				ecoreref(FooClass).ESuperTypes += null // 2
+				if (true) {
+					ecoreref(FooClass).ESuperTypes += null // 3
+				}
+			}
+			""";
 		var prog = parseWithTestEcore(input);
 		var mainBlock = getLastModifyEcoreOperationBlock(prog);
 		var ecoreRefs = getAllEcoreReferenceExpressions(prog).stream()
