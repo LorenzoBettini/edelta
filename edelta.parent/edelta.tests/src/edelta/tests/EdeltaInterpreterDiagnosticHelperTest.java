@@ -22,11 +22,13 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
 	@Test
 	public void testAddErrorWithCurrentExpression() throws Exception {
 		var input =
-			"metamodel \"foo\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage foo {\n"
-			+ "	val s = null\n"
-			+ "}";
+			"""
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				val s = null
+			}
+			""";
 		var prog = parseWithTestEcore(input);
 		var exp = getLastModifyEcoreOperationLastExpression(prog);
 		diagnosticHelper.setCurrentExpression(exp);
@@ -44,12 +46,14 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
 	@Test
 	public void testAddErrorWithDifferentCorrespondingExpression() throws Exception {
 		var input =
-			"metamodel \"foo\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage foo {\n"
-			+ "	var s = null\n"
-			+ "	s = null\n"
-			+ "}";
+			"""
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				var s = null
+				s = null
+			}
+			""";
 		var prog = parseWithTestEcore(input);
 		// just an ENamedElement to pass to show method as
 		// the problematic object
@@ -77,11 +81,13 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
 	@Test
 	public void testAddWarningWithCurrentExpression() throws Exception {
 		var input =
-			"metamodel \"foo\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage foo {\n"
-			+ "	val s = null\n"
-			+ "}";
+			"""
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				val s = null
+			}
+			""";
 		var prog = parseWithTestEcore(input);
 		var exp = getLastModifyEcoreOperationLastExpression(prog);
 		diagnosticHelper.setCurrentExpression(exp);
@@ -99,12 +105,14 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
 	@Test
 	public void testAddWarningWithDifferentCorrespondingExpression() throws Exception {
 		var input =
-			"metamodel \"foo\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage foo {\n"
-			+ "	var s = null\n"
-			+ "	s = null\n"
-			+ "}";
+			"""
+			metamodel "foo"
+			
+			modifyEcore aTest epackage foo {
+				var s = null
+				s = null
+			}
+			""";
 		var prog = parseWithTestEcore(input);
 		// just an ENamedElement to pass to show method as
 		// the problematic object
