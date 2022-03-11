@@ -29,11 +29,13 @@ public class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
 	@Test
 	public void testTargetInTheImportedMetamodel() throws Exception {
 		var prog = parseWithTestEcore(
-			"metamodel \"foo\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage foo {\n"
-			+ "   ecoreref(FooClass)\n"
-			+ "}");
+			"""
+				metamodel "foo"
+				
+				modifyEcore aTest epackage foo {
+				   ecoreref(FooClass)
+				}
+			""");
 		var target = navigationTargetHelper
 				.getTarget(getFirstOfAllEcoreReferenceExpressions(prog).getReference());
 		var original = getEClassiferByName(
@@ -45,12 +47,14 @@ public class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
 	@Test
 	public void testTargetAsXExpression() throws Exception {
 		var prog = parseWithTestEcore(
-			"metamodel \"foo\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage foo {\n"
-			+ "	addNewEClass(\"NewClass\")\n"
-			+ "	ecoreref(NewClass)\n"
-			+ "}");
+			"""
+				metamodel "foo"
+				
+				modifyEcore aTest epackage foo {
+					addNewEClass("NewClass")
+					ecoreref(NewClass)
+				}
+			""");
 		var target = navigationTargetHelper
 				.getTarget(getFirstOfAllEcoreReferenceExpressions(prog).getReference());
 		var exp = getLastModifyEcoreOperationFirstExpression(prog);
@@ -61,12 +65,14 @@ public class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
 	@Test
 	public void testTargetOfForwardReference() throws Exception {
 		var prog = parseWithTestEcore(
-			"metamodel \"foo\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage foo {\n"
-			+ "	ecoreref(NewClass)\n"
-			+ "	addNewEClass(\"NewClass\")\n"
-			+ "}");
+			"""
+				metamodel "foo"
+				
+				modifyEcore aTest epackage foo {
+					ecoreref(NewClass)
+					addNewEClass("NewClass")
+				}
+			""");
 		var target = navigationTargetHelper
 				.getTarget(getFirstOfAllEcoreReferenceExpressions(prog).getReference());
 		var exp = getLastModifyEcoreOperationLastExpression(prog);
