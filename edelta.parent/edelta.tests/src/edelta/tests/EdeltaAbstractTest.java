@@ -13,6 +13,7 @@ import static org.eclipse.xtext.xbase.lib.ListExtensions.map;
 import static org.junit.Assert.assertEquals;
 
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -400,7 +401,7 @@ public abstract class EdeltaAbstractTest {
 		return last(getCopiedEPackages(context));
 	}
 
-	protected Iterable<EPackage> getCopiedEPackages(EObject context) {
+	protected Collection<EPackage> getCopiedEPackages(EObject context) {
 		return derivedStateHelper.getCopiedEPackagesMap(context.eResource()).values();
 	}
 
