@@ -233,7 +233,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testAdaptersAreRemovedFromDerivedEPackagesAfterUnloading() throws Exception {
-		final EdeltaProgram program = parseWithTestEcore("""
+		EdeltaProgram program = parseWithTestEcore("""
 			package test
 			
 			metamodel "foo"
@@ -411,7 +411,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		validationTestHelper.assertNoErrors(prog);
 	}
 
-	private EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(final EdeltaProgram program)
+	private EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program)
 			throws Exception {
 		return getEdeltaEcoreQualifiedReference(
 			last(getAllContentsOfType(
@@ -420,7 +420,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 					.getReference());
 	}
 
-	private void assertEClassContainsFeature(final EClass c, final EStructuralFeature f, final boolean expected)
+	private void assertEClassContainsFeature(EClass c, EStructuralFeature f, boolean expected)
 			throws Exception {
 		assertEquals(expected,
 			c.getEStructuralFeatures().contains(f));

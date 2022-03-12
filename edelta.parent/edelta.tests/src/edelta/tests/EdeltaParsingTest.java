@@ -109,24 +109,24 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 		assertNotNull(use.getName());
 	}
 
-	private EdeltaEcoreReferenceExpression getEcoreReferenceExpression(final CharSequence ecoreRefArg)
+	private EdeltaEcoreReferenceExpression getEcoreReferenceExpression(CharSequence ecoreRefArg)
 			throws Exception {
 		return getEdeltaEcoreReferenceExpression(
 			getLastModifyEcoreOperationLastExpression(
 				parseHelper.parse(textForEcoreRef(ecoreRefArg))));
 	}
 
-	private String textForEcoreRef(final CharSequence ecoreRefArg) throws Exception {
+	private String textForEcoreRef(CharSequence ecoreRefArg) throws Exception {
 		return "modifyEcore aTest epackage foo { ecoreref(" +
 				ecoreRefArg;
 	}
 
-	private String getTextualRepresentation(final EObject o) {
+	private String getTextualRepresentation(EObject o) {
 		return NodeModelUtils.getTokenText(
 				NodeModelUtils.findActualNodeFor(o));
 	}
 
-	private String getTextualReferenceRepresentation(final EObject o) {
+	private String getTextualReferenceRepresentation(EObject o) {
 		return NodeModelUtils.getTokenText(NodeModelUtils
 				.findNodesForFeature(o,
 					EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE__ENAMEDELEMENT)
