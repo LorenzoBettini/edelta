@@ -211,7 +211,13 @@ public class EdeltaModelMigrator {
 
 	/**
 	 * When the attribute predicate matches, copy the attribute value after applying
-	 * the transformation implemented by the function.
+	 * the transformation implemented by the function (which takes the old value as
+	 * argument and has to return the transformed new value).
+	 * <p>
+	 * Differently from
+	 * {@link #transformAttributeValueRule(Predicate, AttributeTransformer)}, the
+	 * old attribute and the old object are not passed to compute the transformed
+	 * value.
 	 * 
 	 * @param predicate
 	 * @param function
@@ -233,8 +239,22 @@ public class EdeltaModelMigrator {
 		updateMigrationContext();
 	}
 
+	/**
+	 * When the attribute predicate matches, copy the attribute value after applying
+	 * the transformation implemented by the function (which takes as arguments, the
+	 * old attribute, the old object and the old value and has to return the
+	 * transformed new value).
+	 * <p>
+	 * Differently from
+	 * {@link #transformAttributeValueRule(Predicate, AttributeValueTransformer)},
+	 * the old attribute and the old object, besides the old value, can be used to
+	 * compute the transformed value.
+	 * 
+	 * @param predicate
+	 * @param function
+	 */
 	public void transformAttributeValueRule(Predicate<EAttribute> predicate,
-			EdeltaModelMigrator.AttributeTransformer function) {
+			AttributeTransformer function) {
 		modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 			private static final long serialVersionUID = 1L;
 
@@ -297,8 +317,20 @@ public class EdeltaModelMigrator {
 		updateMigrationContext();
 	}
 
+	/**
+	 * When the feature predicate matches, uses the function: the function takes as
+	 * argument the old Ecore feature (the one that matched the predicate), the old
+	 * object and the new object of the new Ecore, and has to return the feature (of
+	 * the new Ecore) to use to set the new object feature value.
+	 * <p>
+	 * This is useful when in the evolved Ecore a feature is replaced with
+	 * another feature with a few changed elements.
+	 * 
+	 * @param predicate
+	 * @param function
+	 */
 	public void featureMigratorRule(Predicate<EStructuralFeature> predicate,
-			EdeltaModelMigrator.FeatureMigrator function) {
+			FeatureMigrator function) {
 		modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 			private static final long serialVersionUID = 1L;
 
@@ -436,7 +468,7 @@ public class EdeltaModelMigrator {
 		};
 	}
 
-	public EdeltaModelMigrator.AttributeTransformer multiplicityAwareTranformer(EAttribute attribute,
+	public AttributeTransformer multiplicityAwareTranformer(EAttribute attribute,
 			UnaryOperator<Object> transformer) {
 		return (feature, oldObj, oldValue) ->
 			// if we come here the old attribute was set

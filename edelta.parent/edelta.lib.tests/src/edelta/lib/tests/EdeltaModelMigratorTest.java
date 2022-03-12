@@ -5,6 +5,7 @@ import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
 import static java.util.Arrays.asList;
 import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -26,7 +27,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
@@ -974,13 +974,13 @@ class EdeltaModelMigratorTest {
 		getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute")
 			.setEType(EcorePackage.eINSTANCE.getEInt());
 
-		Assertions.assertThatThrownBy(() -> // NOSONAR
-		copyModelsSaveAndAssertOutputs(
-			modelMigrator,
-			"should not get here/",
-			of("My.ecore"),
-			of("MyClass.xmi")
-		))
+		assertThatThrownBy(() -> // NOSONAR
+			copyModelsSaveAndAssertOutputs(
+				modelMigrator,
+				"should not get here/",
+				of("My.ecore"),
+				of("MyClass.xmi")
+			))
 		.isInstanceOf(ClassCastException.class)
 		.hasMessageContaining(
 			"The value of type 'class java.lang.String' must be of type 'class java.lang.Integer'");
