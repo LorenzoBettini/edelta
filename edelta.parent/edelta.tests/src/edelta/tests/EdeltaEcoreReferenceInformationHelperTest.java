@@ -13,8 +13,6 @@ import com.google.inject.Inject;
 
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
-import edelta.resource.derivedstate.EdeltaEcoreReferenceState;
-import edelta.resource.derivedstate.EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation;
 import edelta.tests.injectors.EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter;
 import edelta.util.EdeltaEcoreReferenceInformationHelper;
 
@@ -34,10 +32,8 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
 					ecoreref(foo)
 				}
 				"""));
-		final EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation info1 = informationHelper
-				.getOrComputeInformation(ref);
-		final EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation info2 = informationHelper
-				.getOrComputeInformation(ref);
+		var info1 = informationHelper.getOrComputeInformation(ref);
+		var info2 = informationHelper.getOrComputeInformation(ref);
 		assertThat(info1).isNotNull();
 		assertThat(info2).isNotNull();
 		assertThat(info1).isSameAs(info2);
@@ -56,10 +52,10 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
 		var info = informationHelper
 				.getOrComputeInformation(ref);
 		assertThat(info)
-			.returns("EPackage", EdeltaEcoreReferenceStateInformation::getType)
-			.returns("foo", EdeltaEcoreReferenceStateInformation::getEPackageName)
-			.returns(null, EdeltaEcoreReferenceStateInformation::getEClassifierName)
-			.returns(null, EdeltaEcoreReferenceStateInformation::getENamedElementName);
+			.returns("EPackage", t -> t.getType())
+			.returns("foo", t -> t.getEPackageName())
+			.returns(null, t -> t.getEClassifierName())
+			.returns(null, t -> t.getENamedElementName());
 	}
 
 	@Test
@@ -75,10 +71,10 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
 		var info = informationHelper
 				.getOrComputeInformation(ref);
 		assertThat(info)
-			.returns("EPackage", EdeltaEcoreReferenceStateInformation::getType)
-			.returns("mainpackage.mainsubpackage", EdeltaEcoreReferenceStateInformation::getEPackageName)
-			.returns(null, EdeltaEcoreReferenceStateInformation::getEClassifierName)
-			.returns(null, EdeltaEcoreReferenceStateInformation::getENamedElementName);
+			.returns("EPackage", t -> t.getType())
+			.returns("mainpackage.mainsubpackage", t -> t.getEPackageName())
+			.returns(null, t -> t.getEClassifierName())
+			.returns(null, t -> t.getENamedElementName());
 	}
 
 	@Test
@@ -94,10 +90,10 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
 		var info = informationHelper
 				.getOrComputeInformation(ref);
 		assertThat(info)
-			.returns("EAttribute", EdeltaEcoreReferenceStateInformation::getType)
-			.returns("mainpackage.mainsubpackage", EdeltaEcoreReferenceStateInformation::getEPackageName)
-			.returns("MainSubPackageFooClass", EdeltaEcoreReferenceStateInformation::getEClassifierName)
-			.returns("mySubPackageAttribute", EdeltaEcoreReferenceStateInformation::getENamedElementName);
+			.returns("EAttribute", t -> t.getType())
+			.returns("mainpackage.mainsubpackage", t -> t.getEPackageName())
+			.returns("MainSubPackageFooClass", t -> t.getEClassifierName())
+			.returns("mySubPackageAttribute", t -> t.getENamedElementName());
 	}
 
 	@Test
@@ -118,10 +114,10 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
 				.getOrComputeInformation(ref);
 		// due to the cycle the parent relation is not visited
 		assertThat(info)
-			.returns("EPackage", EdeltaEcoreReferenceStateInformation::getType)
-			.returns("subsubpackage", EdeltaEcoreReferenceStateInformation::getEPackageName)
-			.returns(null, EdeltaEcoreReferenceStateInformation::getEClassifierName)
-			.returns(null, EdeltaEcoreReferenceStateInformation::getENamedElementName);
+			.returns("EPackage", t -> t.getType())
+			.returns("subsubpackage", t -> t.getEPackageName())
+			.returns(null, t -> t.getEClassifierName())
+			.returns(null, t -> t.getENamedElementName());
 	}
 
 	@Test
@@ -137,10 +133,10 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
 		var info = informationHelper
 				.getOrComputeInformation(ref);
 		assertThat(info)
-			.returns("EClass", EdeltaEcoreReferenceStateInformation::getType)
-			.returns("foo", EdeltaEcoreReferenceStateInformation::getEPackageName)
-			.returns("FooClass", EdeltaEcoreReferenceStateInformation::getEClassifierName)
-			.returns(null, EdeltaEcoreReferenceStateInformation::getENamedElementName);
+			.returns("EClass", t -> t.getType())
+			.returns("foo", t -> t.getEPackageName())
+			.returns("FooClass", t -> t.getEClassifierName())
+			.returns(null, t -> t.getENamedElementName());
 	}
 
 	@Test
@@ -156,10 +152,10 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
 		var info = informationHelper
 				.getOrComputeInformation(ref);
 		assertThat(info)
-			.returns("EEnumLiteral", EdeltaEcoreReferenceStateInformation::getType)
-			.returns("foo", EdeltaEcoreReferenceStateInformation::getEPackageName)
-			.returns("FooEnum", EdeltaEcoreReferenceStateInformation::getEClassifierName)
-			.returns("FooEnumLiteral", EdeltaEcoreReferenceStateInformation::getENamedElementName);
+			.returns("EEnumLiteral", t -> t.getType())
+			.returns("foo", t -> t.getEPackageName())
+			.returns("FooEnum", t -> t.getEClassifierName())
+			.returns("FooEnumLiteral", t -> t.getENamedElementName());
 	}
 
 	@Test
@@ -175,10 +171,10 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
 		var info = informationHelper
 				.getOrComputeInformation(ref);
 		assertThat(info)
-			.returns("EReference", EdeltaEcoreReferenceStateInformation::getType)
-			.returns("foo", EdeltaEcoreReferenceStateInformation::getEPackageName)
-			.returns("FooClass", EdeltaEcoreReferenceStateInformation::getEClassifierName)
-			.returns("myReference", EdeltaEcoreReferenceStateInformation::getENamedElementName);
+			.returns("EReference", t -> t.getType())
+			.returns("foo", t -> t.getEPackageName())
+			.returns("FooClass", t -> t.getEClassifierName())
+			.returns("myReference", t -> t.getENamedElementName());
 	}
 
 	@Test
@@ -194,10 +190,10 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
 		var info = informationHelper
 				.getOrComputeInformation(ref);
 		assertThat(info)
-			.returns("ENamedElement", EdeltaEcoreReferenceStateInformation::getType)
-			.returns("", EdeltaEcoreReferenceStateInformation::getEPackageName)
-			.returns("", EdeltaEcoreReferenceStateInformation::getEClassifierName)
-			.returns("", EdeltaEcoreReferenceStateInformation::getENamedElementName);
+			.returns("ENamedElement", t -> t.getType())
+			.returns("", t -> t.getEPackageName())
+			.returns("", t -> t.getEClassifierName())
+			.returns("", t -> t.getENamedElementName());
 	}
 
 	@Test
@@ -213,21 +209,21 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
 		var info = informationHelper
 				.getOrComputeInformation(ref);
 		assertThat(info)
-			.returns("EAttribute", EdeltaEcoreReferenceStateInformation::getType)
-			.returns("foo", EdeltaEcoreReferenceStateInformation::getEPackageName)
-			.returns("FooClass", EdeltaEcoreReferenceStateInformation::getEClassifierName)
-			.returns("myAttribute", EdeltaEcoreReferenceStateInformation::getENamedElementName);
+			.returns("EAttribute", t -> t.getType())
+			.returns("foo", t -> t.getEPackageName())
+			.returns("FooClass", t -> t.getEClassifierName())
+			.returns("myAttribute", t -> t.getENamedElementName());
 		// change the underlying model
-		final EAttribute attr = (EAttribute) ref.getReference().getEnamedelement();
+		var attr = (EAttribute) ref.getReference().getEnamedelement();
 		attr.setName("renamed");
 		attr.getEContainingClass().setName("Renamed");
 		// but the information stored hasn't changed
 		info = informationHelper.getOrComputeInformation(ref);
 		assertThat(info)
-			.returns("EAttribute", EdeltaEcoreReferenceStateInformation::getType)
-			.returns("foo", EdeltaEcoreReferenceStateInformation::getEPackageName)
-			.returns("FooClass", EdeltaEcoreReferenceStateInformation::getEClassifierName)
-			.returns("myAttribute", EdeltaEcoreReferenceStateInformation::getENamedElementName);
+			.returns("EAttribute", t -> t.getType())
+			.returns("foo", t -> t.getEPackageName())
+			.returns("FooClass", t -> t.getEClassifierName())
+			.returns("myAttribute", t -> t.getENamedElementName());
 	}
 
 	@Test
@@ -243,10 +239,10 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
 		var info = informationHelper
 				.getOrComputeInformation(ref);
 		assertThat(info)
-			.returns("ENamedElement", EdeltaEcoreReferenceStateInformation::getType)
-			.returns(null, EdeltaEcoreReferenceStateInformation::getEPackageName)
-			.returns(null, EdeltaEcoreReferenceStateInformation::getEClassifierName)
-			.returns(null, EdeltaEcoreReferenceStateInformation::getENamedElementName);
+			.returns("ENamedElement", t -> t.getType())
+			.returns(null, t -> t.getEPackageName())
+			.returns(null, t -> t.getEClassifierName())
+			.returns(null, t -> t.getENamedElementName());
 	}
 
 	private EdeltaEcoreReferenceExpression lastEcoreRef(final EdeltaProgram p) throws Exception {
