@@ -371,8 +371,17 @@ public class EdeltaModelMigrator {
 		updateMigrationContext();
 	}
 
+	/**
+	 * When the class predicate matches, uses the passed function to create an
+	 * instance of the new object corresponding to the passed old object. In this
+	 * case, the creation of the instance (and possibly the setting of its values)
+	 * is completely up to you.
+	 * 
+	 * @param predicate
+	 * @param function
+	 */
 	public void createInstanceRule(Predicate<EClass> predicate,
-			EdeltaModelMigrator.EObjectFunction function) {
+			EObjectFunction function) {
 		modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 			private static final long serialVersionUID = 1L;
 
