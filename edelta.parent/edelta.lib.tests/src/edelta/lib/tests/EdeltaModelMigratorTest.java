@@ -228,6 +228,32 @@ class EdeltaModelMigratorTest {
 	}
 
 	@Test
+	void testMovement() throws IOException {
+		var subdir = "simpleTestData/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+
+		// refactoring of Ecore
+		var ePackage = evolvingModelManager.getEPackage("mypackage");
+		var myRoot = (EClass) ePackage.getEClassifier("MyRoot");
+		// move MyRoot before MyClass in the package
+		ePackage.getEClassifiers().move(0, 1);
+		// move features in MyRoot
+		myRoot.getEStructuralFeatures().move(0, 1);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			"movement/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
+	@Test
 	void testCopyMutualReferencesRenamed() throws IOException {
 		var subdir = "mutualReferencesUnchanged/";
 
