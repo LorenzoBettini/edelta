@@ -22,7 +22,7 @@ import static org.junit.Assert.*
 @InjectWith(EdeltaInjectorProviderCustom)
 class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 
-	@Inject extension IScopeProvider
+	@Inject extension IScopeProvider scopeProvider
 
 	@Test
 	def void testSuperScope() throws Exception {
@@ -41,9 +41,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	def void testScopeForMetamodel() throws Exception {
 		referenceToMetamodel.parseWithTestEcore.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaProgram_Metamodels,
-			'''
-			foo
-			'''
+			"foo"
 			)
 		// we skip nsURI references, like http://foo
 	}
@@ -52,11 +50,8 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	def void testScopeForMetamodels() throws Exception {
 		referencesToMetamodels.parseWithTestEcores.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaProgram_Metamodels,
-			'''
-			foo
-			bar
-			'''
-			)
+			"foo\nbar"
+		)
 	}
 
 	@Test
@@ -186,9 +181,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			.lastEcoreReferenceExpression
 			.reference
 			.assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
-			'''
-			MyClass
-			''')
+			"MyClass")
 	}
 
 	@Test
@@ -221,10 +214,8 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	def void testScopeForEnamedElementInEcoreReferenceExpressionQualifiedEClass() throws Exception {
 		"ecoreref(foo.FooClass.".ecoreReferenceExpression.reference.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaEcoreReference_Enamedelement,
-			'''
-			myAttribute
-			myReference
-			''')
+			"myAttribute\nmyReference"
+		)
 	}
 
 	@Test
@@ -362,10 +353,7 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			modifyEcore aTest epackage foo {}
 		'''.parseWithTestEcores.
 			assertScope(EdeltaPackage.eINSTANCE.edeltaModifyEcoreOperation_Epackage,
-			'''
-			foo
-			bar
-			'''
+			"foo\nbar"
 			)
 	}
 
@@ -482,10 +470,13 @@ class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	def private assertScope(EObject context, EReference reference, CharSequence expected) {
+		var end = ""
+		if (expected.toString.endsWith("\n"))
+			end = "\n"
 		expected.toString.assertEqualsStrings(
 			context.getScope(reference).
 				allElements.
-				map[name].join("\n") + "\n"
+				map[name].join("\n") + end
 		)
 	}
 }
