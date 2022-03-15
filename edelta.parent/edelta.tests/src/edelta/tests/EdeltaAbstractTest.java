@@ -329,20 +329,28 @@ public abstract class EdeltaAbstractTest {
 	}
 
 	protected void assertNamedElements(Iterable<? extends ENamedElement> elements, CharSequence expected) {
+		var end = "";
+		if (expected.toString().endsWith("\n")) {
+			end = "\n";
+		}
 		assertEqualsStrings(expected,
 			join(
 				map(elements, ENamedElement::getName),
 				"\n")
-			+ "\n");
+			+ end);
 	}
 
 	protected void assertAccessibleElements(EdeltaAccessibleElements elements, CharSequence expected) {
+		var end = "";
+		if (expected.toString().endsWith("\n")) {
+			end = "\n";
+		}
 		assertEqualsStrings(expected,
 			join(
 				sort(
 					map(elements, it -> it.getQualifiedName().toString())),
 				"\n")
-			+ "\n");
+			+ end);
 	}
 
 	protected EPackage getEPackageByName(EdeltaProgram context, String packagename) {
