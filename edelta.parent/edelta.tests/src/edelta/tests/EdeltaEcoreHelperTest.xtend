@@ -13,7 +13,7 @@ import org.junit.runner.RunWith
 @InjectWith(EdeltaInjectorProviderCustom)
 class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 
-	@Inject extension EdeltaEcoreHelper
+	@Inject extension EdeltaEcoreHelper ecoreHelper
 
 	@Test
 	def void testProgramENamedElements() throws Exception {
@@ -118,9 +118,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 		'''.parseWithTestEcore.
 			createSnapshotOfAccessibleElements.
 			assertAccessibleElements(
-				'''
-
-				'''
+				""
 			)
 	}
 
@@ -220,9 +218,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 		'''.parseWithTestEcore => [
 			getENamedElements(copiedEPackages.head.ESubpackages.head).
 			assertNamedElements(
-				'''
-				AddedInSubpackage
-				'''
+				"AddedInSubpackage"
 			)
 		]
 	}
@@ -250,9 +246,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 					.ESubpackages.head
 			).
 			assertNamedElements(
-				'''
-				MyClass
-				'''
+				"MyClass"
 			)
 		]
 	}
@@ -268,10 +262,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			subsubpackage.ESubpackages += mainpackage
 			getENamedElements(subsubpackage).
 			assertNamedElements(
-				'''
-				MyClass
-				mainpackage
-				'''
+				"MyClass\nmainpackage"
 			)
 			// it simply returns the first package of the loop
 		]
@@ -293,9 +284,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 				''')
 			getENamedElements(mainpackage.getEClassiferByName("MyClass")).
 				assertNamedElements(
-				'''
-				myClassAttribute
-				''')
+				"myClassAttribute")
 		]
 	}
 
@@ -304,9 +293,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 		referenceToMetamodel.parseWithTestEcore => [
 			getENamedElements(getEClassifierByName("foo", "FooDataType")).
 			assertNamedElements(
-				'''
-
-				'''
+				""
 			)
 		]
 	}
@@ -316,9 +303,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 		referenceToMetamodel.parseWithTestEcore => [
 			getENamedElements(getEClassifierByName("foo", "FooEnum")).
 			assertNamedElements(
-				'''
-				FooEnumLiteral
-				'''
+				"FooEnumLiteral"
 			)
 		]
 	}
@@ -328,9 +313,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 		referenceToCreatedEClass.parseWithTestEcore => [
 			getENamedElements(getEClassifierByName("foo", "FooEnum")).
 			assertNamedElements(
-				'''
-				FooEnumLiteral
-				'''
+				"FooEnumLiteral"
 			)
 		]
 	}
@@ -347,10 +330,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 		referenceToMetamodel.parseWithTestEcore => [
 			getENamedElements(getEClassifierByName("foo", "FooClass")).
 			assertNamedElements(
-				'''
-				myAttribute
-				myReference
-				'''
+				"myAttribute\nmyReference"
 			)
 		]
 	}
@@ -360,10 +340,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 		referenceToCreatedEClass.parseWithTestEcore => [
 			getENamedElements(getEClassifierByName("foo", "FooClass")).
 			assertNamedElements(
-				'''
-				myAttribute
-				myReference
-				'''
+				"myAttribute\nmyReference"
 			)
 		]
 	}
@@ -389,10 +366,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 		referenceToMetamodel.parseWithTestEcore => [
 			getENamedElements(getEClassifierByName("foo", "FooClass")).
 			assertNamedElements(
-				'''
-				myAttribute
-				myReference
-				'''
+				"myAttribute\nmyReference"
 			)
 		]
 	}
@@ -402,9 +376,7 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 		referenceToMetamodel.parseWithTestEcore => [
 			getENamedElements(getEClassifierByName("foo", "FooEnum")).
 			assertNamedElements(
-				'''
-				FooEnumLiteral
-				'''
+				"FooEnumLiteral"
 			)
 		]
 	}
