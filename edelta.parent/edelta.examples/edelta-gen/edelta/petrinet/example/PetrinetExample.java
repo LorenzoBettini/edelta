@@ -20,7 +20,7 @@ public class PetrinetExample extends EdeltaDefaultRuntime {
   
   public PetrinetExample(final EdeltaRuntime other) {
     super(other);
-    refactorings = new EdeltaRefactorings(other);
+    refactorings = new EdeltaRefactorings(this);
   }
   
   public EAttribute addWeightAttribute(final EClass c) {

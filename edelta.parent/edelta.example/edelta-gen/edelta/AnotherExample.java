@@ -12,8 +12,8 @@ public class AnotherExample extends EdeltaDefaultRuntime {
   
   public AnotherExample(final EdeltaRuntime other) {
     super(other);
-    example = new Example(other);
-    std = new EdeltaRefactorings(other);
+    example = new Example(this);
+    std = new EdeltaRefactorings(this);
   }
   
   @Override

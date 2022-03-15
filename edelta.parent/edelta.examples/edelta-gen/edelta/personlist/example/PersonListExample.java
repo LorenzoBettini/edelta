@@ -19,7 +19,7 @@ public class PersonListExample extends EdeltaDefaultRuntime {
   
   public PersonListExample(final EdeltaRuntime other) {
     super(other);
-    refactorings = new EdeltaRefactorings(other);
+    refactorings = new EdeltaRefactorings(this);
   }
   
   public void improvePerson(final EPackage it) {

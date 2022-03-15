@@ -16,7 +16,7 @@ public class ExampleWithDuplicatedFeatureCheck extends EdeltaDefaultRuntime {
   
   public ExampleWithDuplicatedFeatureCheck(final EdeltaRuntime other) {
     super(other);
-    checker = new EdeltaBadSmellsChecker(other);
+    checker = new EdeltaBadSmellsChecker(this);
   }
   
   public void someChanges(final EPackage it) {

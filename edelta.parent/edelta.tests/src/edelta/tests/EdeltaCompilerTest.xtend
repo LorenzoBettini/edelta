@@ -426,7 +426,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
-			    my = new MyCustomEdelta(other);
+			    my = new MyCustomEdelta(this);
 			  }
 			  
 			  public void aTest(final EPackage it) {
@@ -467,7 +467,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
-			    my = new MyCustomEdelta(other);
+			    my = new MyCustomEdelta(this);
 			  }
 			  
 			  public void aTest(final EPackage it) {
@@ -516,8 +516,8 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public MyFile0(final EdeltaRuntime other) {
 			    super(other);
-			     = new MyCustomEdelta(other);
-			    my = new (other);
+			     = new MyCustomEdelta(this);
+			    my = new (this);
 			  }
 			  
 			  public void aTest(final EPackage it) {
@@ -1536,7 +1536,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				  
 				  public MyFile2(final EdeltaRuntime other) {
 				    super(other);
-				    my = new MyFile1(other);
+				    my = new MyFile1(this);
 				  }
 				  
 				  public void aModificationTest(final EPackage it) {
@@ -1881,7 +1881,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  
 			  public Example(final EdeltaRuntime other) {
 			    super(other);
-			    refactorings = new EdeltaRefactorings(other);
+			    refactorings = new EdeltaRefactorings(this);
 			  }
 			  
 			  public void improvePerson(final EPackage it) {
@@ -2111,9 +2111,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		val edeltaObj = genClass
 			.getDeclaredConstructor(EdeltaRuntime)
 			.newInstance(mainEdelta) as EdeltaRuntime
-		// we must pass the mainEdelta so that the issue presented
-		// is correctly propagated to the child edeltaObj
-		instanceConsumer.accept(mainEdelta)
+		instanceConsumer.accept(edeltaObj)
 		// load ecore files
 		for (ecoreName : ecoreNames) {
 			modelManager.loadEcoreFile(METAMODEL_PATH + ecoreName)

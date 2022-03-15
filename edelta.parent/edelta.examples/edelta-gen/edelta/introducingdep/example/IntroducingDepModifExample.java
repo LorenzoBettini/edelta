@@ -16,7 +16,7 @@ public class IntroducingDepModifExample extends EdeltaDefaultRuntime {
   
   public IntroducingDepModifExample(final EdeltaRuntime other) {
     super(other);
-    operations = new IntroducingDepOpExample(other);
+    operations = new IntroducingDepOpExample(this);
   }
   
   public void aModificationTest(final EPackage it) {

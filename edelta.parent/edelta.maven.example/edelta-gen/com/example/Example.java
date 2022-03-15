@@ -18,8 +18,8 @@ public class Example extends EdeltaDefaultRuntime {
   
   public Example(final EdeltaRuntime other) {
     super(other);
-    refactorings = new EdeltaRefactorings(other);
-    myfunctions = new ExampleReusableFunctions(other);
+    refactorings = new EdeltaRefactorings(this);
+    myfunctions = new ExampleReusableFunctions(this);
   }
   
   public EClass createSubClassOfMyEClass(final String name) {

@@ -72,7 +72,7 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 				body = '''
 				super(other);
 				«FOR u : program.useAsClauses»
-				«u.name» = new «u.type»(other);
+				«u.name» = new «u.type»(this);
 				«ENDFOR»
 				'''
 			]
