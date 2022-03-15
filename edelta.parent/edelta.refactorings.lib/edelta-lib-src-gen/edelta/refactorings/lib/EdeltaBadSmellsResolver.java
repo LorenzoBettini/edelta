@@ -24,8 +24,8 @@ public class EdeltaBadSmellsResolver extends EdeltaDefaultRuntime {
   
   public EdeltaBadSmellsResolver(final EdeltaRuntime other) {
     super(other);
-    refactorings = new EdeltaRefactorings(other);
-    finder = new EdeltaBadSmellsFinder(other);
+    refactorings = new EdeltaRefactorings(this);
+    finder = new EdeltaBadSmellsFinder(this);
   }
   
   /**

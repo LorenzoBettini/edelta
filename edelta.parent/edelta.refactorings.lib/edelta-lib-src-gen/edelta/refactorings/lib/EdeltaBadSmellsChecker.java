@@ -17,7 +17,7 @@ public class EdeltaBadSmellsChecker extends EdeltaDefaultRuntime {
   
   public EdeltaBadSmellsChecker(final EdeltaRuntime other) {
     super(other);
-    finder = new EdeltaBadSmellsFinder(other);
+    finder = new EdeltaBadSmellsFinder(this);
   }
   
   /**
