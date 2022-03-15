@@ -13,7 +13,7 @@ import org.junit.runner.RunWith
 @InjectWith(EdeltaInjectorProviderCustom)
 class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 
-	@Inject extension EdeltaEcoreHelper
+	@Inject extension EdeltaEcoreHelper ecoreHelper
 
 	@Test
 	def void testProgramENamedElements() throws Exception {
@@ -113,14 +113,10 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testCreateSnapshotOfAccessibleElementsWithUnresolvedEPackage() throws Exception {
-		'''
-		metamodel "nonexisting"
-		'''.parseWithTestEcore.
+		'metamodel "nonexisting"'.parseWithTestEcore.
 			createSnapshotOfAccessibleElements.
 			assertAccessibleElements(
-				'''
-
-				'''
+				""
 			)
 	}
 
@@ -179,37 +175,37 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testEPackageENamedElements() throws Exception {
-		referenceToMetamodel.parseWithTestEcore => [
-			getENamedElements(getEPackageByName("foo")).
-			assertNamedElements(
-				'''
-				FooClass
-				FooDataType
-				FooEnum
-				'''
-			)
-		]
+		var prog = referenceToMetamodel.parseWithTestEcore
+		
+		getENamedElements(prog.getEPackageByName("foo")).
+		assertNamedElements(
+			'''
+			FooClass
+			FooDataType
+			FooEnum
+			'''
+		)
 	}
 
 	@Test
 	def void testEPackageENamedElementsWithSubPackages() throws Exception {
-		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
-			getENamedElements(getEPackageByName("mainpackage")).
-			assertNamedElements(
-				'''
-				MainFooClass
-				MainFooDataType
-				MainFooEnum
-				MyClass
-				mainsubpackage
-				'''
-			)
-		]
+		var prog = referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage
+		
+		getENamedElements(prog.getEPackageByName("mainpackage")).
+		assertNamedElements(
+			'''
+			MainFooClass
+			MainFooDataType
+			MainFooEnum
+			MyClass
+			mainsubpackage
+			'''
+		)
 	}
 
 	@Test
 	def void testEPackageENamedElementsWithNewSubPackages() throws Exception {
-		'''
+		var prog = '''
 			metamodel "foo"
 			
 			modifyEcore aTest epackage foo {
@@ -217,195 +213,154 @@ class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 					addNewEClass("AddedInSubpackage")
 				]
 			}
-		'''.parseWithTestEcore => [
-			getENamedElements(copiedEPackages.head.ESubpackages.head).
-			assertNamedElements(
-				'''
-				AddedInSubpackage
-				'''
-			)
-		]
+		'''.parseWithTestEcore
+		
+		getENamedElements(prog.copiedEPackages.head.ESubpackages.get(0)).
+		assertNamedElements(
+			"AddedInSubpackage"
+		)
 	}
 
 	@Test
 	def void testSubPackageEPackageENamedElementsWithSubPackages() throws Exception {
-		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
-			getENamedElements(getEPackageByName("mainpackage").ESubpackages.head).
-			assertNamedElements(
-				'''
-				MainSubPackageFooClass
-				MyClass
-				subsubpackage
-				'''
-			)
-		]
+		var prog = referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage
+		getENamedElements(prog.getEPackageByName("mainpackage").ESubpackages.get(0)).
+		assertNamedElements(
+			'''
+			MainSubPackageFooClass
+			MyClass
+			subsubpackage
+			'''
+		)
 	}
 
 	@Test
 	def void testSubSubPackageEPackageENamedElementsWithSubPackages() throws Exception {
-		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
-			getENamedElements(
-				getEPackageByName("mainpackage")
-					.ESubpackages.head
-					.ESubpackages.head
-			).
-			assertNamedElements(
-				'''
-				MyClass
-				'''
-			)
-		]
+		var prog = referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage
+		getENamedElements(
+			prog.getEPackageByName("mainpackage")
+				.ESubpackages.get(0)
+				.ESubpackages.get(0)
+		).
+		assertNamedElements(
+			"MyClass"
+		)
 	}
 
 	@Test
 	def void testEPackageENamedElementsWithCycleInSubPackages() throws Exception {
-		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
-			val mainpackage = getEPackageByName("mainpackage")
-			val subsubpackage = mainpackage
-								.ESubpackages.head
-								.ESubpackages.head
-			// simulate the loop in the package relation
-			subsubpackage.ESubpackages += mainpackage
-			getENamedElements(subsubpackage).
-			assertNamedElements(
-				'''
-				MyClass
-				mainpackage
-				'''
-			)
-			// it simply returns the first package of the loop
-		]
+		var prog = referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage
+		val mainpackage = prog.getEPackageByName("mainpackage")
+		val subsubpackage = mainpackage
+							.ESubpackages.get(0)
+							.ESubpackages.get(0)
+		// simulate the loop in the package relation
+		subsubpackage.ESubpackages += mainpackage
+		getENamedElements(subsubpackage).
+		assertNamedElements(
+			"MyClass\nmainpackage"
+		)
+		// it simply returns the first package of the loop
 	}
 
 	@Test
 	def void testENamedElementsWithWithTheSameNameInSubPackages() throws Exception {
-		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
-			val mainpackage = getEPackageByName("mainpackage")
-			val subsubpackage = mainpackage
-								.ESubpackages.head
-								.ESubpackages.head
-			// both packages have a class with the same name but with different
-			// structure
-			getENamedElements(subsubpackage.getEClassiferByName("MyClass")).
-				assertNamedElements(
-				'''
-
-				''')
-			getENamedElements(mainpackage.getEClassiferByName("MyClass")).
-				assertNamedElements(
-				'''
-				myClassAttribute
-				''')
-		]
+		var prog = referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage
+		val mainpackage = prog.getEPackageByName("mainpackage")
+		val subsubpackage = mainpackage
+							.ESubpackages.get(0)
+							.ESubpackages.get(0)
+		// both packages have a class with the same name but with different
+		// structure
+		getENamedElements(subsubpackage.getEClassiferByName("MyClass")).
+			assertNamedElements(
+			"")
+		getENamedElements(mainpackage.getEClassiferByName("MyClass")).
+			assertNamedElements(
+			"myClassAttribute")
 	}
 
 	@Test
 	def void testEDataTypeENamedElements() throws Exception {
-		referenceToMetamodel.parseWithTestEcore => [
-			getENamedElements(getEClassifierByName("foo", "FooDataType")).
-			assertNamedElements(
-				'''
-
-				'''
-			)
-		]
+		var prog = referenceToMetamodel.parseWithTestEcore
+		getENamedElements(prog.getEClassifierByName("foo", "FooDataType")).
+		assertNamedElements(
+			""
+		)
 	}
 
 	@Test
 	def void testENumENamedElements() throws Exception {
-		referenceToMetamodel.parseWithTestEcore => [
-			getENamedElements(getEClassifierByName("foo", "FooEnum")).
-			assertNamedElements(
-				'''
-				FooEnumLiteral
-				'''
-			)
-		]
+		var prog = referenceToMetamodel.parseWithTestEcore
+		getENamedElements(prog.getEClassifierByName("foo", "FooEnum")).
+		assertNamedElements(
+			"FooEnumLiteral"
+		)
 	}
 
 	@Test
 	def void testENumENamedElementsWithCreatedEClass() throws Exception {
-		referenceToCreatedEClass.parseWithTestEcore => [
-			getENamedElements(getEClassifierByName("foo", "FooEnum")).
-			assertNamedElements(
-				'''
-				FooEnumLiteral
-				'''
-			)
-		]
+		var prog = referenceToCreatedEClass.parseWithTestEcore
+		getENamedElements(prog.getEClassifierByName("foo", "FooEnum")).
+		assertNamedElements(
+			"FooEnumLiteral"
+		)
 	}
 
 	@Test
 	def void testNullENamedElements() throws Exception {
-		referenceToMetamodel.parseWithTestEcore => [
-			Assert.assertTrue(getENamedElements(null).isEmpty)
-		]
+		referenceToMetamodel.parseWithTestEcore
+		Assert.assertTrue(getENamedElements(null).isEmpty)
 	}
 
 	@Test
 	def void testEClassENamedElements() throws Exception {
-		referenceToMetamodel.parseWithTestEcore => [
-			getENamedElements(getEClassifierByName("foo", "FooClass")).
-			assertNamedElements(
-				'''
-				myAttribute
-				myReference
-				'''
-			)
-		]
+		var prog = referenceToMetamodel.parseWithTestEcore
+		getENamedElements(prog.getEClassifierByName("foo", "FooClass")).
+		assertNamedElements(
+			"myAttribute\nmyReference"
+		)
 	}
 
 	@Test
 	def void testEClassENamedElementsWithCreatedEClass() throws Exception {
-		referenceToCreatedEClass.parseWithTestEcore => [
-			getENamedElements(getEClassifierByName("foo", "FooClass")).
-			assertNamedElements(
-				'''
-				myAttribute
-				myReference
-				'''
-			)
-		]
+		var prog = referenceToCreatedEClass.parseWithTestEcore
+		getENamedElements(prog.getEClassifierByName("foo", "FooClass")).
+		assertNamedElements(
+			"myAttribute\nmyReference"
+		)
 	}
 
 	@Test
 	def void testENamedElementsOfEPackage() throws Exception {
-		referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage => [
-			getENamedElements(getEPackageByName("mainpackage")).
-			assertNamedElements(
-				'''
-				MainFooClass
-				MainFooDataType
-				MainFooEnum
-				MyClass
-				mainsubpackage
-				'''
-			)
-		]
+		var prog = referenceToMetamodelWithSubPackage.parseWithTestEcoreWithSubPackage
+		getENamedElements(prog.getEPackageByName("mainpackage")).
+		assertNamedElements(
+			'''
+			MainFooClass
+			MainFooDataType
+			MainFooEnum
+			MyClass
+			mainsubpackage
+			'''
+		)
 	}
 
 	@Test
 	def void testENamedElementsOfEClass() throws Exception {
-		referenceToMetamodel.parseWithTestEcore => [
-			getENamedElements(getEClassifierByName("foo", "FooClass")).
-			assertNamedElements(
-				'''
-				myAttribute
-				myReference
-				'''
-			)
-		]
+		var prog = referenceToMetamodel.parseWithTestEcore
+		getENamedElements(prog.getEClassifierByName("foo", "FooClass")).
+		assertNamedElements(
+			"myAttribute\nmyReference"
+		)
 	}
 
 	@Test
 	def void testENamedElementsOfENum() throws Exception {
-		referenceToMetamodel.parseWithTestEcore => [
-			getENamedElements(getEClassifierByName("foo", "FooEnum")).
-			assertNamedElements(
-				'''
-				FooEnumLiteral
-				'''
-			)
-		]
+		var prog = referenceToMetamodel.parseWithTestEcore
+		getENamedElements(prog.getEClassifierByName("foo", "FooEnum")).
+		assertNamedElements(
+			"FooEnumLiteral"
+		)
 	}
 }
