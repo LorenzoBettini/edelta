@@ -233,23 +233,24 @@ class EdeltaModelMigratorTest {
 
 		var modelMigrator = setupMigrator(
 			subdir,
-			of("My.ecore"),
-			of("MyRoot.xmi", "MyClass.xmi")
+			of("PersonList.ecore"),
+			of("List.xmi")
 		);
 
 		// refactoring of Ecore
-		var ePackage = evolvingModelManager.getEPackage("mypackage");
-		var myRoot = (EClass) ePackage.getEClassifier("MyRoot");
-		// move MyRoot before MyClass in the package
+		var ePackage = evolvingModelManager.getEPackage("PersonList");
+		var person = (EClass) ePackage.getEClassifier("Person");
+		// move Person before List in the package
 		ePackage.getEClassifiers().move(0, 1);
-		// move features in MyRoot
-		myRoot.getEStructuralFeatures().move(0, 1);
+		// move features in Person
+		person.getEStructuralFeatures().move(0, 1);
+		person.getEStructuralFeatures().move(0, 2);
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			"movement/",
-			of("My.ecore"),
-			of("MyRoot.xmi", "MyClass.xmi")
+			of("PersonList.ecore"),
+			of("List.xmi")
 		);
 	}
 
