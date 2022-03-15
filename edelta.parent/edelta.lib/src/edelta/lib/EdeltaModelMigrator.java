@@ -271,11 +271,33 @@ public class EdeltaModelMigrator {
 		updateMigrationContext();
 	}
 
+	/**
+	 * When the feature predicate matches, perform the copy of the feature value
+	 * applying the passed {@link CopyProcedure}, which takes the old feature, the
+	 * old object and the new object (where the value for the feature must be set).
+	 * 
+	 * @param predicate
+	 * @param procedure
+	 */
 	public void copyRule(Predicate<EStructuralFeature> predicate,
-			EdeltaModelMigrator.CopyProcedure procedure) {
+			CopyProcedure procedure) {
 		copyRule(predicate, procedure, null);
 	}
 
+	/**
+	 * When the feature predicate matches, perform the copy of the feature value
+	 * applying the passed {@link CopyProcedure}, which takes the old feature, the
+	 * old object and the new object (where the value for the feature must be set).
+	 * After the copy has been done for the feature, also executes the passed
+	 * {@link Runnable}, which can be used to do some cleanup (for example, if you
+	 * merge features into a single one, once the old object values have been used
+	 * to create the new merged value, you can use this postCopy to remove the
+	 * merged values).
+	 * 
+	 * @param predicate
+	 * @param procedure
+	 * @param postCopy
+	 */
 	public void copyRule(Predicate<EStructuralFeature> predicate,
 			EdeltaModelMigrator.CopyProcedure procedure,
 			Runnable postCopy) {
