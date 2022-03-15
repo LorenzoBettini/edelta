@@ -15,7 +15,7 @@ public class Example extends EdeltaDefaultRuntime {
   
   public Example(final EdeltaRuntime other) {
     super(other);
-    myfunctions = new ExampleReusableFunctions(other);
+    myfunctions = new ExampleReusableFunctions(this);
   }
   
   public void SomeChanges(final EPackage it) {

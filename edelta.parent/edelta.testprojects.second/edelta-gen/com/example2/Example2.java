@@ -17,7 +17,7 @@ public class Example2 extends EdeltaDefaultRuntime {
   
   public Example2(final EdeltaRuntime other) {
     super(other);
-    example1 = new Example1(other);
+    example1 = new Example1(this);
   }
   
   public void someModifications(final EPackage it) {
