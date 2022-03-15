@@ -20,7 +20,7 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 
 	@Test
 	def void testEmptyProgram() throws Exception {
-		''''''.parse.assertNoErrors
+		"".parse.assertNoErrors
 	}
 
 	@Test
@@ -244,30 +244,30 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		modifyEcore anotherDuplicate epackage foo {} // implicit Java method param: EPackage
 		modifyEcore anotherFun epackage foo {} // OK, different params
 		'''
-		input.parseWithTestEcore => [
-			assertError(
-				EdeltaPackage.eINSTANCE.edeltaOperation,
-				EdeltaValidator.DUPLICATE_DECLARATION,
-				input.indexOf("anotherDuplicate"), "anotherDuplicate".length,
-				"Duplicate definition 'anotherDuplicate'"
-			)
-			assertError(
-				EdeltaPackage.eINSTANCE.edeltaModifyEcoreOperation,
-				EdeltaValidator.DUPLICATE_DECLARATION,
-				input.lastIndexOf("anotherDuplicate"), "anotherDuplicate".length,
-				"Duplicate definition 'anotherDuplicate'"
-			)
-			assertErrorsAsStrings(
-				'''
-				Duplicate definition 'aTest'
-				Duplicate definition 'aTest'
-				Duplicate definition 'anotherDuplicate'
-				Duplicate definition 'anotherDuplicate'
-				Duplicate definition 'myFun'
-				Duplicate definition 'myFun'
-				'''
-			)
-		]
+		var prog = input.parseWithTestEcore
+		
+		prog.assertError(
+			EdeltaPackage.eINSTANCE.edeltaOperation,
+			EdeltaValidator.DUPLICATE_DECLARATION,
+			input.indexOf("anotherDuplicate"), "anotherDuplicate".length,
+			"Duplicate definition 'anotherDuplicate'"
+		)
+		prog.assertError(
+			EdeltaPackage.eINSTANCE.edeltaModifyEcoreOperation,
+			EdeltaValidator.DUPLICATE_DECLARATION,
+			input.lastIndexOf("anotherDuplicate"), "anotherDuplicate".length,
+			"Duplicate definition 'anotherDuplicate'"
+		)
+		prog.assertErrorsAsStrings(
+			'''
+			Duplicate definition 'aTest'
+			Duplicate definition 'aTest'
+			Duplicate definition 'anotherDuplicate'
+			Duplicate definition 'anotherDuplicate'
+			Duplicate definition 'myFun'
+			Duplicate definition 'myFun'
+			'''
+		)
 	}
 
 	@Test
@@ -279,20 +279,20 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 		metamodel "nonexistent" // also check unresolved imports
 		metamodel "foo"
 		'''
-		input.parseWithTestEcores => [
-			assertError(
-				EdeltaPackage.eINSTANCE.edeltaProgram,
-				EdeltaValidator.DUPLICATE_METAMODEL_IMPORT,
-				input.lastIndexOf('"nonexistent"'), '"nonexistent"'.length,
-				'Duplicate metamodel import "nonexistent"'
-			)
-			assertError(
-				EdeltaPackage.eINSTANCE.edeltaProgram,
-				EdeltaValidator.DUPLICATE_METAMODEL_IMPORT,
-				input.lastIndexOf('"foo"'), '"foo"'.length,
-				'Duplicate metamodel import "foo"'
-			)
-		]
+		var prog = input.parseWithTestEcores
+		
+		prog.assertError(
+			EdeltaPackage.eINSTANCE.edeltaProgram,
+			EdeltaValidator.DUPLICATE_METAMODEL_IMPORT,
+			input.lastIndexOf('"nonexistent"'), '"nonexistent"'.length,
+			'Duplicate metamodel import "nonexistent"'
+		)
+		prog.assertError(
+			EdeltaPackage.eINSTANCE.edeltaProgram,
+			EdeltaValidator.DUPLICATE_METAMODEL_IMPORT,
+			input.lastIndexOf('"foo"'), '"foo"'.length,
+			'Duplicate metamodel import "foo"'
+		)
 	}
 
 	@Test
@@ -347,15 +347,15 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 			val EPackage p = ecoreref(RenamedClass) // ERROR also after interpretation
 		}
 		'''
-		input.parseWithTestEcore => [
-			assertError(
-				EDELTA_ECORE_REFERENCE_EXPRESSION,
-				IssueCodes.INCOMPATIBLE_TYPES,
-				input.lastIndexOf("ecoreref(RenamedClass)"), "ecoreref(RenamedClass)".length,
-				"Type mismatch: cannot convert from EClass to EPackage"
-			)
-			assertErrorsAsStrings("Type mismatch: cannot convert from EClass to EPackage")
-		]
+		var prog = input.parseWithTestEcore
+		
+		prog.assertError(
+			EDELTA_ECORE_REFERENCE_EXPRESSION,
+			IssueCodes.INCOMPATIBLE_TYPES,
+			input.lastIndexOf("ecoreref(RenamedClass)"), "ecoreref(RenamedClass)".length,
+			"Type mismatch: cannot convert from EClass to EPackage"
+		)
+		prog.assertErrorsAsStrings("Type mismatch: cannot convert from EClass to EPackage")
 	}
 
 	@Test
@@ -371,22 +371,22 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 			ecoreref(ANewClass) // this is OK
 		}
 		'''
-		input
-		.parseWithTestEcore => [
-			assertError(
-				EDELTA_ECORE_DIRECT_REFERENCE,
-				EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
-				input.indexOf("ANewClass"),
-				"ANewClass".length,
-				"Element not yet available in this context: foo.ANewClass"
-			)
-			assertErrorsAsStrings(
-				'''
-				Element not yet available in this context: foo.ANewClass
-				NonExisting cannot be resolved.
-				'''
-			)
-		]
+		var prog = input
+		.parseWithTestEcore
+		
+		prog.assertError(
+			EDELTA_ECORE_DIRECT_REFERENCE,
+			EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
+			input.indexOf("ANewClass"),
+			"ANewClass".length,
+			"Element not yet available in this context: foo.ANewClass"
+		)
+		prog.assertErrorsAsStrings(
+			'''
+			Element not yet available in this context: foo.ANewClass
+			NonExisting cannot be resolved.
+			'''
+		)
 	}
 
 	@Test
@@ -405,30 +405,30 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 			ecoreref(ANewSuperClass) // this is OK
 		}
 		'''
-		input
-		.parseWithTestEcore => [
-			assertErrorsAsStrings(
-				'''
-				Element not yet available in this context: foo.ANewClass
-				Element not yet available in this context: foo.ANewSuperClass
-				The method ESuperTypes(EClass) is undefined for the type EClass
-				'''
-			)
-			assertError(
-				EDELTA_ECORE_DIRECT_REFERENCE,
-				EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
-				input.indexOf("ANewClass"),
-				"ANewClass".length,
-				"Element not yet available in this context: foo.ANewClass"
-			)
-			assertError(
-				EDELTA_ECORE_DIRECT_REFERENCE,
-				EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
-				input.indexOf("ANewSuperClass"),
-				"ANewSuperClass".length,
-				"Element not yet available in this context: foo.ANewSuperClass"
-			)
-		]
+		var prog = input
+		.parseWithTestEcore
+		
+		prog.assertErrorsAsStrings(
+			'''
+			Element not yet available in this context: foo.ANewClass
+			Element not yet available in this context: foo.ANewSuperClass
+			The method ESuperTypes(EClass) is undefined for the type EClass
+			'''
+		)
+		prog.assertError(
+			EDELTA_ECORE_DIRECT_REFERENCE,
+			EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
+			input.indexOf("ANewClass"),
+			"ANewClass".length,
+			"Element not yet available in this context: foo.ANewClass"
+		)
+		prog.assertError(
+			EDELTA_ECORE_DIRECT_REFERENCE,
+			EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
+			input.indexOf("ANewSuperClass"),
+			"ANewSuperClass".length,
+			"Element not yet available in this context: foo.ANewSuperClass"
+		)
 	}
 
 	@Test
@@ -447,28 +447,28 @@ class EdeltaValidatorTest extends EdeltaAbstractTest {
 			ecoreref(ANewSuperClass) // this is OK
 		}
 		'''
-		input
-		.parseWithTestEcore => [
-			assertErrorsAsStrings(
-				'''
-				Element not yet available in this context: foo.ANewClass
-				Element not yet available in this context: foo.ANewSuperClass
-				'''
-			)
-			assertError(
-				EDELTA_ECORE_DIRECT_REFERENCE,
-				EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
-				input.indexOf("ANewClass"),
-				"ANewClass".length,
-				"Element not yet available in this context: foo.ANewClass"
-			)
-			assertError(
-				EDELTA_ECORE_DIRECT_REFERENCE,
-				EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
-				input.indexOf("ANewSuperClass"),
-				"ANewSuperClass".length,
-				"Element not yet available in this context: foo.ANewSuperClass"
-			)
-		]
+		var prog = input
+		.parseWithTestEcore
+		
+		prog.assertErrorsAsStrings(
+			'''
+			Element not yet available in this context: foo.ANewClass
+			Element not yet available in this context: foo.ANewSuperClass
+			'''
+		)
+		prog.assertError(
+			EDELTA_ECORE_DIRECT_REFERENCE,
+			EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
+			input.indexOf("ANewClass"),
+			"ANewClass".length,
+			"Element not yet available in this context: foo.ANewClass"
+		)
+		prog.assertError(
+			EDELTA_ECORE_DIRECT_REFERENCE,
+			EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
+			input.indexOf("ANewSuperClass"),
+			"ANewSuperClass".length,
+			"Element not yet available in this context: foo.ANewSuperClass"
+		)
 	}
 }
