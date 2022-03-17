@@ -11,7 +11,7 @@
   <packaging>maven-plugin</packaging>
 
   <properties>
-    <maven.version>3.6.0</maven.version>
+    <maven.version>3.8.1</maven.version>
   </properties>
 
   <prerequisites>
@@ -215,7 +215,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-invoker-plugin</artifactId>
-            <version>3.1.0</version>
+            <version>3.2.2</version>
             <configuration>
               <debug>true</debug>
               <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
@@ -225,19 +225,14 @@
               <postBuildHookScript>verify</postBuildHookScript>
               <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
               <settingsFile>src/it/settings.xml</settingsFile>
-              <goals>
-                <goal>clean</goal>
-                <goal>compile</goal>
-                <goal>test-compile</goal>
-              </goals>
+              <showErrors>true</showErrors>
             </configuration>
             <executions>
               <execution>
                 <id>integration-test</id>
                 <goals>
                   <goal>install</goal>
-                  <goal>integration-test</goal>
-                  <goal>verify</goal>
+                  <goal>run</goal>
                 </goals>
               </execution>
             </executions>
