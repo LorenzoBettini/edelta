@@ -33,10 +33,10 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml', '**/*.yml', '**/*.target') }}
         restore-keys: ${{ runner.os }}-m2-
     - name: Build with Maven
-      run: ./mvnw -f edelta.parent/pom.xml clean verify -Ptest-ide
+      run: ./mvnw -f edelta.parent/pom.xml clean verify -Ptest-ide,run-its
       if: runner.os == 'macOS'
     - name: Build with Maven
-      run: .\mvnw.cmd -f edelta.parent/pom.xml clean verify '-Ptest-ide'
+      run: .\mvnw.cmd -f edelta.parent/pom.xml clean verify '-Ptest-ide,run-its'
       if: runner.os == 'Windows'
     - name: Archive Test Results
       uses: actions/upload-artifact@v2

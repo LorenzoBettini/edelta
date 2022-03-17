@@ -37,7 +37,7 @@ jobs:
         xvfb-run
         ./mvnw -f edelta.parent/pom.xml
         clean verify
-        -Pjacoco,test-ide
+        -Pjacoco,test-ide,run-its
         sonar:sonar
         -Dsonar.organization=lorenzobettini-github
         -Dsonar.host.url=https://sonarcloud.io
