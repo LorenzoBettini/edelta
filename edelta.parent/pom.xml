@@ -291,6 +291,16 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-packaging-plugin</artifactId>
+          <configuration>
+            <!-- required to have valid consumable Maven artifacts
+              https://github.com/LorenzoBettini/edelta/issues/408
+              https://github.com/eclipse/tycho/issues/781 -->
+            <skipPomGeneration>true</skipPomGeneration>
+          </configuration>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
           <configuration>
