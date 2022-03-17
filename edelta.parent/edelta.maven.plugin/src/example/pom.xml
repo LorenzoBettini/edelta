@@ -18,9 +18,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>@project.groupId@</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>edelta.lib</artifactId>
-      <version>@project.version@</version>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 
@@ -45,9 +45,9 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>@project.groupId@</groupId>
-        <artifactId>@project.artifactId@</artifactId>
-        <version>@project.version@</version>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edelta-maven-plugin</artifactId>
+        <version>${project.version}</version>
         <executions>
           <execution>
             <goals>
