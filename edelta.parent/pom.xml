@@ -293,9 +293,10 @@
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-packaging-plugin</artifactId>
-          <!-- version can be removed when switching to build utils 0.7.1 -->
-          <version>${tycho-version}</version>
           <configuration>
+            <!-- required to have valid consumable Maven artifacts
+              https://github.com/LorenzoBettini/edelta/issues/408
+              https://github.com/eclipse/tycho/issues/781 -->
             <skipPomGeneration>true</skipPomGeneration>
           </configuration>
         </plugin>
