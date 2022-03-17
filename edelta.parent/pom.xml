@@ -291,6 +291,15 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-packaging-plugin</artifactId>
+          <!-- version can be removed when switching to build utils 0.7.1 -->
+          <version>${tycho-version}</version>
+          <configuration>
+            <skipPomGeneration>true</skipPomGeneration>
+          </configuration>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
           <configuration>
