@@ -17,18 +17,14 @@ import java.util.List;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
-import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
-import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.XbasePackage;
 import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,18 +33,13 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import edelta.edelta.EdeltaEcoreReference;
-import edelta.edelta.EdeltaEcoreReferenceExpression;
-import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaPackage;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreter;
 import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.interpreter.EdeltaInterpreterWrapperException;
-import edelta.resource.derivedstate.EdeltaAccessibleElements;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
-import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
-import edelta.resource.derivedstate.EdeltaUnresolvedEcoreReferences;
 import edelta.tests.additional.EdeltaEContentAdapter.EdeltaEContentAdapterException;
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime;
 import edelta.tests.additional.MyCustomException;
@@ -87,9 +78,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void makeSureModificationsToOriginalEPackageAreDetected() throws Exception {
-		final EdeltaProgram prog = parseWithTestEcore("""
+		var prog = parseWithTestEcore("""
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 		}
 		""");
@@ -104,17 +95,17 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	public void testCreateEClassAndCallLibMethod() throws Exception {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation("""
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			addNewEClass("NewClass") [
 				EStructuralFeatures += newEAttribute("newTestAttr", ecoreref(FooDataType))
 			]
 		}
 		""", ePackage -> {
-			final EClass derivedEClass = getLastEClass(ePackage);
+			var derivedEClass = getLastEClass(ePackage);
 			assertEquals("NewClass", derivedEClass.getName());
 			assertEquals(1, derivedEClass.getEStructuralFeatures().size());
-			final EStructuralFeature attr = derivedEClass.getEStructuralFeatures().get(0);
+			var attr = derivedEClass.getEStructuralFeatures().get(0);
 			assertEquals("newTestAttr", attr.getName());
 			assertEquals("FooDataType", attr.getEType().getName());
 		});
@@ -126,13 +117,13 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			assertAfterInterpretationOfEdeltaModifyEcoreOperation("""
 			import org.eclipse.emf.ecore.EClass
 			import edelta.tests.additional.MyCustomException
-			
+
 			metamodel "foo"
-			
+
 			def op(EClass c) : void {
 				throw new MyCustomException
 			}
-			
+
 			modifyEcore aTest epackage foo {
 				addNewEClass("NewClass") [
 					op(it)
@@ -151,13 +142,13 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			assertAfterInterpretationOfEdeltaModifyEcoreOperation("""
 			import org.eclipse.emf.ecore.EClass
 			import edelta.tests.additional.MyCustomException
-			
+
 			metamodel "foo"
-			
+
 			def op(EClass c) : void {
 				throw new NullPointerException
 			}
-			
+
 			modifyEcore aTest epackage foo {
 				addNewEClass("NewClass") [
 					op(it)
@@ -174,9 +165,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	public void testCreateEClassAndCallOperationFromUseAsReferringToUnknownType() throws Exception {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation("""
 		metamodel "foo"
-		
+
 		use NonExistant as my
-		
+
 		modifyEcore aTest epackage foo {
 			val c = addNewEClass("NewClass")
 			my.createANewEAttribute(c) // this won't break the interpreter
@@ -204,7 +195,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			metamodel "foo"
 
 			use MyCustomEdeltaThatCannotBeLoadedAtRuntime as my
-			
+
 			modifyEcore aTest epackage foo {
 				my.aMethod()
 			}
@@ -225,7 +216,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	public void testCreateEClassAndCreateEAttribute() throws Exception {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation("""
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			addNewEClass("NewClass") [
 				addNewEAttribute("newTestAttr", ecoreref(FooDataType)) [
@@ -234,10 +225,10 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			]
 		}
 		""", ePackage -> {
-			final EClass derivedEClass = getLastEClass(ePackage);
+			var derivedEClass = getLastEClass(ePackage);
 			assertEquals("NewClass", derivedEClass.getName());
 			assertEquals(1, derivedEClass.getEStructuralFeatures().size());
-			final EStructuralFeature attr = derivedEClass.getEStructuralFeatures().get(0);
+			var attr = derivedEClass.getEStructuralFeatures().get(0);
 			assertEquals("newTestAttr", attr.getName());
 			assertEquals((-1), attr.getLowerBound());
 			assertEquals("FooDataType", attr.getEType().getName());
@@ -248,11 +239,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	public void testRenameEClassAndCreateEAttributeAndCallOperationFromUseAs() throws Exception {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation("""
 		import edelta.tests.additional.MyCustomEdelta
-		
+
 		metamodel "foo"
-		
+
 		use MyCustomEdelta as my
-		
+
 		modifyEcore aTest epackage foo {
 			ecoreref(foo.FooClass).name = "Renamed"
 			ecoreref(Renamed).addNewEAttribute("newTestAttr", ecoreref(FooDataType)) [
@@ -261,9 +252,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		}
 		""",
 		ePackage -> {
-			final EClass derivedEClass = getFirstEClass(ePackage);
+			var derivedEClass = getFirstEClass(ePackage);
 			assertEquals("Renamed", derivedEClass.getName());
-			final EStructuralFeature attr =
+			var attr =
 					last(derivedEClass.getEStructuralFeatures());
 			assertEquals("newTestAttr", attr.getName());
 			assertEquals(1, attr.getLowerBound());
@@ -277,7 +268,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 			inputs.useAsCustomEdeltaCreatingEClass(),
 		ePackage -> {
-			final EClass eClass = getLastEClass(ePackage);
+			var eClass = getLastEClass(ePackage);
 			assertEquals("ANewClass", eClass.getName());
 			assertEquals("aNewAttr",
 				((EAttribute) eClass.getEStructuralFeatures().get(0)).getName());
@@ -289,7 +280,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 			inputs.useAsCustomEdeltaAsExtensionCreatingEClass(),
 		ePackage -> {
-			final EClass eClass = getLastEClass(ePackage);
+			var eClass = getLastEClass(ePackage);
 			assertEquals("ANewClass", eClass.getName());
 			assertEquals("aNewAttr",
 				((EAttribute) eClass.getEStructuralFeatures().get(0)).getName());
@@ -301,7 +292,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 			inputs.useAsCustomStatefulEdeltaCreatingEClass(),
 		ePackage -> {
-			final EClass eClass = getLastEClass(ePackage);
+			var eClass = getLastEClass(ePackage);
 			assertEquals("ANewClass3", eClass.getName());
 			assertEquals("aNewAttr4",
 				((EAttribute) eClass.getEStructuralFeatures().get(0)).getName());
@@ -327,7 +318,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testNullEcoreRefNamedElement() throws Exception {
-		final String input = """
+		var input = """
 		import org.eclipse.emf.ecore.EClass
 
 		metamodel "foo"
@@ -341,14 +332,14 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			input,
 			false,
 			ePackage -> {
-				final EClass eClass = getLastEClass(ePackage);
+				var eClass = getLastEClass(ePackage);
 				assertEquals("ANewClass1", eClass.getName());
 			});
 	}
 
 	@Test
 	public void testNullEcoreRef() throws Exception {
-		final String input = """
+		var input = """
 		import org.eclipse.emf.ecore.EClass
 
 		metamodel "foo"
@@ -362,18 +353,18 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			input,
 			false,
 			ePackage -> {
-				final EClass eClass = getLastEClass(ePackage);
+				var eClass = getLastEClass(ePackage);
 				assertEquals("ANewClass1", eClass.getName());
 			});
 	}
 
 	@Test
 	public void testOperationWithErrorsDueToWrongParsing() throws Exception {
-		final String input = """
+		var input = """
 		package test
-		
+
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			addNewEClass("NewClass1")
 			eclass NewClass1 // this won't break the interpreter
@@ -384,7 +375,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			input,
 			false,
 			derivedEPackage -> {
-				EClass lastEClass = getLastEClass(derivedEPackage);
+				var lastEClass = getLastEClass(derivedEPackage);
 				assertEquals("NewClass1", lastEClass.getName());
 				assertThat(lastEClass.isAbstract()).isTrue();
 			});
@@ -392,7 +383,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testUnresolvedEcoreReference() throws Exception {
-		final String input = """
+		var input = """
 		import org.eclipse.emf.ecore.EClass
 
 		metamodel "foo"
@@ -407,7 +398,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			input,
 			false,
 			derivedEPackage -> {
-				EClass lastEClass = getLastEClass(derivedEPackage);
+				var lastEClass = getLastEClass(derivedEPackage);
 				assertEquals("NewClass1", lastEClass.getName());
 				assertThat(lastEClass.isAbstract()).isTrue();
 			});
@@ -415,7 +406,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testUnresolvedEcoreReferenceMethodCall() throws Exception {
-		final String input = """
+		var input = """
 		import org.eclipse.emf.ecore.EClass
 
 		metamodel "foo"
@@ -430,7 +421,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			input,
 			false,
 			derivedEPackage -> {
-				EClass lastEClass = getLastEClass(derivedEPackage);
+				var lastEClass = getLastEClass(derivedEPackage);
 				assertEquals("NewClass1", lastEClass.getName());
 				assertThat(lastEClass.isAbstract()).isTrue();
 			});
@@ -438,7 +429,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testUnresolvedEcoreReferenceMethodCall2() throws Exception {
-		final String input = """
+		var input = """
 		import org.eclipse.emf.ecore.EClass
 
 		metamodel "foo"
@@ -453,7 +444,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			input,
 			false,
 			derivedEPackage -> {
-				EClass lastEClass = getLastEClass(derivedEPackage);
+				var lastEClass = getLastEClass(derivedEPackage);
 				assertEquals("NewClass1", lastEClass.getName());
 				assertThat(lastEClass.isAbstract()).isTrue();
 			});
@@ -461,7 +452,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testUnresolvedEcoreReferenceMethodCall3() throws Exception {
-		final String input = """
+		var input = """
 		import org.eclipse.emf.ecore.EClass
 
 		metamodel "foo"
@@ -479,7 +470,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			input,
 			false,
 			derivedEPackage -> {
-				EClass lastEClass = getLastEClass(derivedEPackage);
+				var lastEClass = getLastEClass(derivedEPackage);
 				assertEquals("AnotherNewClass", lastEClass.getName());
 				assertThat(lastEClass.isAbstract()).isTrue();
 			});
@@ -487,7 +478,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testUnresolvedEcoreReferenceQualified() throws Exception {
-		final String input = """
+		var input = """
 		import org.eclipse.emf.ecore.EClass
 
 		metamodel "foo"
@@ -508,11 +499,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testModifyOperationCreateEClass() throws Exception {
-		final String input = """
+		var input = """
 		package test
-		
+
 		metamodel "foo"
-		
+
 		modifyEcore aModificationTest epackage foo {
 			EClassifiers += newEClass("ANewClass") [
 				ESuperTypes += newEClass("Base")
@@ -522,7 +513,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 			input,
 			derivedEPackage -> {
-				EClass lastEClass = getLastEClass(derivedEPackage);
+				var lastEClass = getLastEClass(derivedEPackage);
 				assertEquals("ANewClass", lastEClass.getName());
 				assertEquals("Base",
 						last(lastEClass.getESuperTypes()).getName());
@@ -534,13 +525,13 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 			"""
 			import org.eclipse.emf.ecore.EClass
-			
+
 			metamodel "foo"
-			
+
 			def op(EClass c) : void {
 				c.abstract = true
 			}
-			
+
 			modifyEcore aModificationTest epackage foo {
 				EClassifiers += newEClass("ANewClass") [
 					ESuperTypes += newEClass("Base")
@@ -549,7 +540,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			}
 			""",
 			derivedEPackage -> {
-				EClass lastEClass = getLastEClass(derivedEPackage);
+				var lastEClass = getLastEClass(derivedEPackage);
 				assertEquals("ANewClass", lastEClass.getName());
 				assertEquals("Base",
 						last(lastEClass.getESuperTypes()).getName());
@@ -562,13 +553,13 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 			"""
 			import org.eclipse.emf.ecore.EClass
-			
+
 			metamodel "foo"
-			
+
 			def op(EClass c) : void {
 				c.abstract = true
 			}
-			
+
 			modifyEcore aTest epackage foo {
 				ecoreref(foo.FooClass).name = "RenamedClass"
 				ecoreref(RenamedClass).ESuperTypes += newEClass("Base")
@@ -579,7 +570,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			""",
 			true,
 			derivedEPackage -> {
-				EClass firstEClass = getFirstEClass(derivedEPackage);
+				var firstEClass = getFirstEClass(derivedEPackage);
 				assertEquals("RenamedClass", firstEClass.getName());
 				assertEquals("Base",
 					last(firstEClass.getESuperTypes()).getName());
@@ -594,9 +585,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 			"""
 			import org.eclipse.emf.ecore.EClass
-			
+
 			metamodel "foo"
-			
+
 			modifyEcore aTest epackage foo {
 				ecoreref(foo.FooClass).name = "RenamedClass"
 				ecoreref(RenamedClass).getEStructuralFeatures +=
@@ -606,7 +597,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			""",
 			true,
 			derivedEPackage -> {
-				EClass firstEClass = getFirstEClass(derivedEPackage);
+				var firstEClass = getFirstEClass(derivedEPackage);
 				assertEquals("RenamedClass", firstEClass.getName());
 				assertEquals("added",
 					last(firstEClass.getEStructuralFeatures()).getName());
@@ -617,11 +608,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	public void testTimeoutWarning() throws Exception {
 		// in this test we really need the timeout
 		interpreter.setInterpreterTimeout(2000);
-		final String input = """
+		var input = """
 		import org.eclipse.emf.ecore.EClass
 
 		metamodel "foo"
-		
+
 		def op(EClass c) : void {
 			var i = 10;
 			while (i >= 0) {
@@ -631,7 +622,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			// this will never be executed
 			c.abstract = true
 		}
-		
+
 		modifyEcore aModificationTest epackage foo {
 			EClassifiers += newEClass("ANewClass")
 			op(EClassifiers.last as EClass)
@@ -640,11 +631,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 			input,
 			derivedEPackage -> {
-				EClass lastEClass = getLastEClass(derivedEPackage);
+				var lastEClass = getLastEClass(derivedEPackage);
 				assertEquals("ANewClass", lastEClass.getName());
 				assertEquals(false, lastEClass.isAbstract());
-				final String offendingString = "Thread.sleep(1000)";
-				final int initialIndex = input.lastIndexOf(offendingString);
+				var offendingString = "Thread.sleep(1000)";
+				var initialIndex = input.lastIndexOf(offendingString);
 				validationTestHelper.assertWarning(
 					currentProgram,
 					XbasePackage.eINSTANCE.getXMemberFeatureCall(),
@@ -659,14 +650,14 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	public void testTimeoutWarningWhenCallingJavaCode() throws Exception {
 		// in this test we really need the timeout
 		interpreter.setInterpreterTimeout(2000);
-		final String input = """
+		var input = """
 		import org.eclipse.emf.ecore.EClass
 		import edelta.tests.additional.MyCustomEdeltaWithTimeout
 
 		metamodel "foo"
 
 		use MyCustomEdeltaWithTimeout as extension mylib
-		
+
 		modifyEcore aModificationTest epackage foo {
 			EClassifiers += newEClass("ANewClass")
 			op(EClassifiers.last as EClass)
@@ -675,11 +666,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 			input,
 			derivedEPackage -> {
-				EClass lastEClass = getLastEClass(derivedEPackage);
+				var lastEClass = getLastEClass(derivedEPackage);
 				assertEquals("ANewClass", lastEClass.getName());
 				assertEquals(false, lastEClass.isAbstract());
-				final String offendingString = "op(EClassifiers.last as EClass)";
-				final int initialIndex = input.lastIndexOf(offendingString);
+				var offendingString = "op(EClassifiers.last as EClass)";
+				var initialIndex = input.lastIndexOf(offendingString);
 				validationTestHelper.assertWarning(
 					currentProgram,
 					XbasePackage.eINSTANCE.getXFeatureCall(),
@@ -693,7 +684,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	public void testTimeoutWarningWithSeveralFiles() throws Exception {
 		// in this test we really need the timeout
 		interpreter.setInterpreterTimeout(2000);
-		final String lib1 = """
+		var lib1 = """
 		import org.eclipse.emf.ecore.EClass
 
 		def op1(EClass c) : void {
@@ -706,7 +697,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			c.abstract = true
 		}
 		""";
-		final String lib2 = """
+		var lib2 = """
 		import org.eclipse.emf.ecore.EClass
 
 		import edelta.__synthetic0
@@ -717,14 +708,14 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			op1(c)
 		}
 		""";
-		final String input = """
+		var input = """
 		import org.eclipse.emf.ecore.EClass
 		import edelta.__synthetic1
-		
+
 		metamodel "foo"
-		
+
 		use __synthetic1 as extension mylib
-		
+
 		modifyEcore aModificationTest epackage foo {
 			EClassifiers += newEClass("ANewClass")
 			op(EClassifiers.last as EClass)
@@ -734,11 +725,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			List.of(lib1, lib2, input),
 			true,
 			derivedEPackage -> {
-				EClass lastEClass = getLastEClass(derivedEPackage);
+				var lastEClass = getLastEClass(derivedEPackage);
 				assertEquals("ANewClass", lastEClass.getName());
 				assertEquals(Boolean.valueOf(false), Boolean.valueOf(lastEClass.isAbstract()));
-				final String offendingString = "op(EClassifiers.last as EClass)";
-				final int initialIndex = input.lastIndexOf(offendingString);
+				var offendingString = "op(EClassifiers.last as EClass)";
+				var initialIndex = input.lastIndexOf(offendingString);
 				validationTestHelper.assertWarning(
 					currentProgram,
 					XbasePackage.eINSTANCE.getXFeatureCall(),
@@ -753,7 +744,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 			parseWithTestEcoreWithSubPackage("""
 			metamodel "mainpackage"
-			
+
 			modifyEcore aTest epackage mainpackage {
 				ecoreref(mainsubpackage).addNewEClass("NewClass") [
 					EStructuralFeatures += newEAttribute("newTestAttr", ecoreref(MainFooDataType))
@@ -762,10 +753,10 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			"""),
 			true,
 			ePackage -> {
-				final EClass derivedEClass = getLastEClass(ePackage.getESubpackages().get(0));
+				var derivedEClass = getLastEClass(ePackage.getESubpackages().get(0));
 				assertEquals("NewClass", derivedEClass.getName());
 				assertEquals(1, derivedEClass.getEStructuralFeatures().size());
-				final EStructuralFeature attr = derivedEClass.getEStructuralFeatures().get(0);
+				var attr = derivedEClass.getEStructuralFeatures().get(0);
 				assertEquals("newTestAttr", attr.getName());
 				assertEquals("MainFooDataType", attr.getEType().getName());
 			});
@@ -776,7 +767,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 			parseWithTestEcoreWithSubPackage("""
 			metamodel "mainpackage"
-			
+
 			modifyEcore aTest epackage mainpackage {
 				ecoreref(subsubpackage).addNewEClass("NewClass") [
 					EStructuralFeatures += newEAttribute("newTestAttr", ecoreref(MainFooDataType))
@@ -785,10 +776,10 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			"""),
 			true,
 			ePackage -> {
-				final EClass derivedEClass = getLastEClass(ePackage.getESubpackages().get(0).getESubpackages().get(0));
+				var derivedEClass = getLastEClass(ePackage.getESubpackages().get(0).getESubpackages().get(0));
 				assertEquals("NewClass", derivedEClass.getName());
 				assertEquals(1, derivedEClass.getEStructuralFeatures().size());
-				final EStructuralFeature attr = derivedEClass.getEStructuralFeatures().get(0);
+				var attr = derivedEClass.getEStructuralFeatures().get(0);
 				assertEquals("newTestAttr", attr.getName());
 				assertEquals("MainFooDataType", attr.getEType().getName());
 			});
@@ -799,9 +790,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 			parseWithTestEcoreWithSubPackage("""
 			import org.eclipse.emf.ecore.EcoreFactory
-			
+
 			metamodel "mainpackage"
-			
+
 			modifyEcore aTest epackage mainpackage {
 				ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
 					name = "anewsubpackage"
@@ -813,12 +804,12 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			"""),
 			true,
 			ePackage -> {
-				final EPackage newSubPackage = last(ePackage.getESubpackages());
+				var newSubPackage = last(ePackage.getESubpackages());
 				assertEquals("anewsubpackage", newSubPackage.getName());
-				final EClass derivedEClass = getLastEClass(IterableExtensions.<EPackage>last(ePackage.getESubpackages()));
+				var derivedEClass = getLastEClass(IterableExtensions.<EPackage>last(ePackage.getESubpackages()));
 				assertEquals("NewClass", derivedEClass.getName());
 				assertEquals(1, derivedEClass.getEStructuralFeatures().size());
-				final EStructuralFeature attr = derivedEClass.getEStructuralFeatures().get(0);
+				var attr = derivedEClass.getEStructuralFeatures().get(0);
 				assertEquals("newTestAttr", attr.getName());
 				assertEquals("MainFooDataType", attr.getEType().getName());
 			});
@@ -829,9 +820,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 			parseWithTestEcoreWithSubPackage("""
 			import org.eclipse.emf.ecore.EcoreFactory
-			
+
 			metamodel "mainpackage"
-			
+
 			modifyEcore aTest epackage mainpackage {
 				ESubpackages += EcoreFactory.eINSTANCE.createEPackage => [
 					name = "anewsubpackage"
@@ -846,15 +837,15 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			"""),
 			true,
 			ePackage -> {
-				final EPackage newSubPackage = IterableExtensions.<EPackage>last(ePackage.getESubpackages());
+				var newSubPackage = IterableExtensions.<EPackage>last(ePackage.getESubpackages());
 				assertEquals("anewsubpackage", newSubPackage.getName());
-				final EClass derivedEClass = getLastEClass(IterableExtensions.<EPackage>last(ePackage.getESubpackages()));
+				var derivedEClass = getLastEClass(IterableExtensions.<EPackage>last(ePackage.getESubpackages()));
 				assertEquals("RenamedClass", derivedEClass.getName());
 				assertEquals(2, derivedEClass.getEStructuralFeatures().size());
-				final EStructuralFeature attr1 = derivedEClass.getEStructuralFeatures().get(0);
+				var attr1 = derivedEClass.getEStructuralFeatures().get(0);
 				assertEquals("newTestAttr", attr1.getName());
 				assertEquals("MainFooDataType", attr1.getEType().getName());
-				final EStructuralFeature attr2 =
+				var attr2 =
 						last(derivedEClass.getEStructuralFeatures());
 				assertEquals("added", attr2.getName());
 				assertEquals("MainFooDataType", attr2.getEType().getName());
@@ -866,7 +857,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(
 			parseWithTestEcoreWithSubPackage("""
 			metamodel "mainpackage.mainsubpackage"
-			
+
 			modifyEcore aTest epackage mainsubpackage {
 				// this should not be executed
 				throw new MyCustomException
@@ -886,7 +877,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			import org.eclipse.emf.ecore.EClass
 
 			package test1
-			
+
 			def op(EClass c) : void {
 				c.op2
 			}
@@ -896,13 +887,13 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			""", """
 			import org.eclipse.emf.ecore.EClass
 			import test1.__synthetic0
-			
+
 			package test2
-			
+
 			metamodel "foo"
-			
+
 			use test1.__synthetic0 as my
-			
+
 			modifyEcore aModificationTest epackage foo {
 				my.op(ecoreref(FooClass))
 			}
@@ -920,7 +911,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			import org.eclipse.emf.ecore.EClass
 
 			package test1
-			
+
 			def op(EClass c) : void {
 				c.op2
 			}
@@ -930,13 +921,13 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			""", """
 			import org.eclipse.emf.ecore.EClass
 			import test1.__synthetic0
-			
+
 			package test2
-			
+
 			metamodel "foo"
-			
+
 			use test1.__synthetic0 as extension my
-			
+
 			modifyEcore aModificationTest epackage foo {
 				ecoreref(FooClass).op
 			}
@@ -954,7 +945,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			import org.eclipse.emf.ecore.EClass
 
 			package test1
-			
+
 			def op2(EClass c) : void {
 				c.abstract = true
 			}
@@ -963,7 +954,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			import test1.__synthetic0
 
 			package test2
-			
+
 			use test1.__synthetic0 as extension my
 
 			def op(EClass c) : void {
@@ -972,13 +963,13 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			""", """
 			import org.eclipse.emf.ecore.EClass
 			import test2.__synthetic1
-			
+
 			package test3
-			
+
 			metamodel "foo"
-			
+
 			use test2.__synthetic1 as extension my
-			
+
 			modifyEcore aModificationTest epackage foo {
 				ecoreref(FooClass).op
 			}
@@ -991,36 +982,36 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testModificationsOfMetamodelsAcrossSeveralFilesIntroducingDepOnAnotherMetamodel() throws Exception {
-		final EdeltaProgram program = parseSeveralWithTestEcores(List.of(
+		var program = parseSeveralWithTestEcores(List.of(
 		"""
 		import org.eclipse.emf.ecore.EClass
 
 		package test1
-		
+
 		metamodel "bar"
-		
+
 		def setBaseClass(EClass c) : void {
 			c.getESuperTypes += ecoreref(BarClass)
 		}
 		""", """
 		import org.eclipse.emf.ecore.EClass
 		import test1.__synthetic0
-		
+
 		package test2
-		
+
 		metamodel "foo"
-		
+
 		use test1.__synthetic0 as extension my
-		
+
 		modifyEcore aModificationTest epackage foo {
 			// the other file's operation will set the
 			// base class of foo.FooClass to bar.BarClass
 			ecoreref(FooClass).setBaseClass
 			// now the foo package refers to bar package
-			
+
 			// now modify the bar's class
 			ecoreref(FooClass).ESuperTypes.head.abstract = true
-			
+
 			// modify again the imported metamodel
 			ecoreref(FooClass).name = "Renamed"
 		}
@@ -1029,7 +1020,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			program,
 			true,
 			derivedEPackage -> {
-				EClass firstEClass = getFirstEClass(derivedEPackage);
+				var firstEClass = getFirstEClass(derivedEPackage);
 				assertThat(map(firstEClass.getESuperTypes(), EClass::getName))
 						.containsExactly("BarClass");
 				assertThat(firstEClass.getESuperTypes().get(0).isAbstract()).isTrue();
@@ -1042,7 +1033,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testRenameReferencesAcrossEPackages() throws Exception {
-		EdeltaProgram it = parseWithTestEcoresWithReferences("""
+		var it = parseWithTestEcoresWithReferences("""
 		package test
 
 		metamodel "testecoreforreferences1"
@@ -1058,29 +1049,29 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreref(renamedPersons).EOpposite.name = "renamedWorks"
 		}
 		""");
-		final EdeltaCopiedEPackagesMap map = interpretProgram(it);
-		final EPackage testecoreforreferences1 = map.get("testecoreforreferences1");
-		final EPackage testecoreforreferences2 = map.get("testecoreforreferences2");
-		final EClass person = getEClassByName(testecoreforreferences1, "Person");
+		var map = interpretProgram(it);
+		var testecoreforreferences1 = map.get("testecoreforreferences1");
+		var testecoreforreferences2 = map.get("testecoreforreferences2");
+		var person = getEClassByName(testecoreforreferences1, "Person");
 		assertThat(
 			map(
 			filter(person.getEStructuralFeatures(), EReference.class),
 			EReference::getName))
 				.containsOnly("renamedWorks");
-		final EClass workplace = getEClassByName(testecoreforreferences2, "WorkPlace");
+		var workplace = getEClassByName(testecoreforreferences2, "WorkPlace");
 		assertThat(
 			map(
 			filter(workplace.getEStructuralFeatures(), EReference.class),
 			 EReference::getName))
 				.containsOnly("renamedPersons");
-		final EdeltaUnresolvedEcoreReferences unresolvedEcoreRefs = derivedStateHelper
+		var unresolvedEcoreRefs = derivedStateHelper
 				.getUnresolvedEcoreReferences(it.eResource());
 		assertThat(unresolvedEcoreRefs).isEmpty();
 	}
 
 	@Test
 	public void testRenameReferencesAcrossEPackagesModifyingOnePackageOnly() throws Exception {
-		EdeltaProgram it = parseWithTestEcoresWithReferences("""
+		var it = parseWithTestEcoresWithReferences("""
 		package test
 
 		metamodel "testecoreforreferences1"
@@ -1091,18 +1082,16 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreref(Person.works).EOpposite.name = "renamedPersons"
 		}
 		""");
-		final EdeltaCopiedEPackagesMap map = interpretProgram(it);
-		final EPackage testecoreforreferences1 = map.get("testecoreforreferences1");
-		final EPackage testecoreforreferences2 = map.get("testecoreforreferences2");
-		final EClass person = getEClassByName(testecoreforreferences1, "Person");
+		var map = interpretProgram(it);
+		var testecoreforreferences1 = map.get("testecoreforreferences1");
+		var testecoreforreferences2 = map.get("testecoreforreferences2");
+		var person = getEClassByName(testecoreforreferences1, "Person");
 		assertThat(
 			map(
 			filter(person.getEStructuralFeatures(), EReference.class),
-			it_1 -> {
-				return it_1.getEOpposite().getName();
-			}))
+			it_1 -> it_1.getEOpposite().getName()))
 				.containsOnly("renamedPersons");
-		final EClass workplace = getEClassByName(testecoreforreferences2, "WorkPlace");
+		var workplace = getEClassByName(testecoreforreferences2, "WorkPlace");
 		assertThat(
 			map(
 			filter(workplace.getEStructuralFeatures(), EReference.class),
@@ -1114,25 +1103,25 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				.isSameAs(((Object[]) unwrapArray(
 						filter(workplace.getEStructuralFeatures(), EReference.class),
 						Object.class))[0]);
-		final EdeltaUnresolvedEcoreReferences unresolvedEcoreRefs = derivedStateHelper
+		var unresolvedEcoreRefs = derivedStateHelper
 				.getUnresolvedEcoreReferences(it.eResource());
 		assertThat(unresolvedEcoreRefs).isEmpty();
 	}
 
 	@Test
 	public void testElementExpressionForCreatedEClassWithEdeltaAPI() throws Exception {
-		EdeltaProgram it = parseWithTestEcore("""
+		var it = parseWithTestEcore("""
 		import org.eclipse.emf.ecore.EcoreFactory
-		
+
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			addNewEClass("NewClass")
 		}
 		""");
-		final EdeltaCopiedEPackagesMap map = interpretProgram(it);
-		final EClassifier createClass = map.get("foo").getEClassifier("NewClass");
-		final XExpression exp =
+		var map = interpretProgram(it);
+		var createClass = map.get("foo").getEClassifier("NewClass");
+		var exp =
 			derivedStateHelper
 			.getEnamedElementXExpressionMap(it.eResource()).get(createClass);
 		assertNotNull(exp);
@@ -1142,11 +1131,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testEcoreRefExpExpressionForCreatedEClassWithEdeltaAPI() throws Exception {
-		EdeltaProgram prog = parseWithTestEcore("""
+		var prog = parseWithTestEcore("""
 		import org.eclipse.emf.ecore.EcoreFactory
-		
+
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			addNewEClass("NewClass")
 		}
@@ -1155,7 +1144,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		}
 		""");
 		interpretProgram(prog);
-		EdeltaEcoreReferenceExpression it =
+		var it =
 				getLastOfAllEcoreReferenceExpressions(prog);
 		// ecoreref(NewClass) -> addNewEClass
 		assertEcoreRefExpElementMapsToXExpression(it.getReference(),
@@ -1164,11 +1153,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testEcoreRefExpExpressionForCreatedEClassWithOperation() throws Exception {
-		EdeltaProgram prog = parseWithTestEcore("""
+		var prog = parseWithTestEcore("""
 		import org.eclipse.emf.ecore.EPackage
-		
+
 		metamodel "foo"
-		
+
 		def create(EPackage it) {
 			addNewEClass("NewClass")
 		}
@@ -1178,7 +1167,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		}
 		""");
 		interpretProgram(prog);
-		EdeltaEcoreReferenceExpression it =
+		var it =
 				getLastOfAllEcoreReferenceExpressions(prog);
 		// ecoreref(NewClass) -> addNewEClass
 		assertEcoreRefExpElementMapsToXExpression(it.getReference(),
@@ -1187,25 +1176,25 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testEcoreRefExpExpressionForCreatedEClassWithOperationInAnotherFile() throws Exception {
-		EdeltaProgram prog = parseSeveralWithTestEcore(List.of(
+		var prog = parseSeveralWithTestEcore(List.of(
 		"""
 		import org.eclipse.emf.ecore.EPackage
-		
+
 		def create(EPackage it) {
 			addNewEClass("NewClass")
 		}
 		""", """
 		metamodel "foo"
-		
+
 		use edelta.__synthetic0 as extension my
-		
+
 		modifyEcore anotherTest epackage foo {
 			create(it)
 			ecoreref(NewClass)
 		}
 		"""));
 		interpretProgram(prog);
-		EdeltaEcoreReferenceExpression it =
+		var it =
 				getLastOfAllEcoreReferenceExpressions(prog);
 		// ecoreref(NewClass) -> create
 		assertEcoreRefExpElementMapsToXExpression(it.getReference(),
@@ -1214,11 +1203,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testEcoreRefExpForCreatedEClassRenamed() throws Exception {
-		EdeltaProgram prog = parseWithTestEcore("""
+		var prog = parseWithTestEcore("""
 		import org.eclipse.emf.ecore.EcoreFactory
-		
+
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			addNewEClass("NewClass")
 			ecoreref(NewClass).name = "Renamed"
@@ -1237,11 +1226,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testEcoreRefExpForCreatedSubPackage() throws Exception {
-		EdeltaProgram prog = parseWithTestEcore("""
+		var prog = parseWithTestEcore("""
 		import org.eclipse.emf.ecore.EcoreFactory
-		
+
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			addNewEClass("NewClass")
 			ecoreref(NewClass) // 0
@@ -1266,11 +1255,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testEcoreRefExpForExistingEClass() throws Exception {
-		EdeltaProgram it = parseWithTestEcore("""
+		var it = parseWithTestEcore("""
 		import org.eclipse.emf.ecore.EcoreFactory
-		
+
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			ecoreref(FooClass)
 		}
@@ -1285,11 +1274,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testEcoreRefExpForCreatedEClassRenamedInInitializer() throws Exception {
-		EdeltaProgram prog = parseWithTestEcore("""
+		var prog = parseWithTestEcore("""
 		import org.eclipse.emf.ecore.EcoreFactory
-		
+
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			addNewEClass("NewClass") [
 				ecoreref(NewClass)
@@ -1311,11 +1300,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testEcoreRefExpForCreatedEClassRenamedInInitializer2() throws Exception {
-		EdeltaProgram prog = parseWithTestEcore("""
+		var prog = parseWithTestEcore("""
 		import org.eclipse.emf.ecore.EcoreFactory
-		
+
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			addNewEClass("NewClass") [
 				ecoreref(NewClass).name = "Renamed"
@@ -1336,11 +1325,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testElementExpressionMapForCreatedEClassWithEMFAPI() throws Exception {
-		EdeltaProgram it = parseWithTestEcore("""
+		var it = parseWithTestEcore("""
 		import org.eclipse.emf.ecore.EcoreFactory
-		
+
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			EClassifiers += EcoreFactory.eINSTANCE.createEClass
 			EClassifiers.last.name = "NewClass"
@@ -1349,10 +1338,10 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreref(NewClass)
 		}
 		""");
-		final EdeltaCopiedEPackagesMap map = interpretProgram(it);
-		final EClassifier createClass =
+		var map = interpretProgram(it);
+		var createClass =
 				map.get("foo").getEClassifier("NewClass");
-		final XExpression exp =
+		var exp =
 			derivedStateHelper
 			.getEnamedElementXExpressionMap(it.eResource()).get(createClass);
 		assertNotNull(exp);
@@ -1362,11 +1351,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testElementExpressionMapForCreatedEClassWithDoubleArrow() throws Exception {
-		EdeltaProgram it = parseWithTestEcore("""
+		var it = parseWithTestEcore("""
 		import org.eclipse.emf.ecore.EcoreFactory
-		
+
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			EClassifiers += EcoreFactory.eINSTANCE.createEClass => [
 				name = "NewClass"
@@ -1376,10 +1365,10 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreref(NewClass)
 		}
 		""");
-		final EdeltaCopiedEPackagesMap map = interpretProgram(it);
-		final EClassifier createClass =
+		var map = interpretProgram(it);
+		var createClass =
 			map.get("foo").getEClassifier("NewClass");
-		final XExpression exp =
+		var exp =
 			derivedStateHelper
 			.getEnamedElementXExpressionMap(it.eResource()).get(createClass);
 		assertNotNull(exp);
@@ -1389,18 +1378,18 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testElementExpressionMapForCreatedEClassWithoutName() throws Exception {
-		EdeltaProgram it = parseWithTestEcore("""
+		var it = parseWithTestEcore("""
 		import org.eclipse.emf.ecore.EcoreFactory
-		
+
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			EClassifiers += EcoreFactory.eINSTANCE.createEClass
 		}
 		""");
-		final EdeltaCopiedEPackagesMap map = interpretProgram(it);
-		final EClass createClass = getLastEClass(map.get("foo"));
-		final XExpression exp =
+		var map = interpretProgram(it);
+		var createClass = getLastEClass(map.get("foo"));
+		var exp =
 			derivedStateHelper
 			.getEnamedElementXExpressionMap(it.eResource()).get(createClass);
 		assertNotNull(exp);
@@ -1410,18 +1399,18 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testElementExpressionMapForCreatedEClassWithMethodCall() throws Exception {
-		EdeltaProgram it = parseWithTestEcore("""
+		var it = parseWithTestEcore("""
 		import org.eclipse.emf.ecore.EcoreFactory
-		
+
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			getEClassifiers().add(EcoreFactory.eINSTANCE.createEClass)
 		}
 		""");
-		final EdeltaCopiedEPackagesMap map = interpretProgram(it);
-		final EClass createClass = getLastEClass(map.get("foo"));
-		final XExpression exp =
+		var map = interpretProgram(it);
+		var createClass = getLastEClass(map.get("foo"));
+		var exp =
 			derivedStateHelper
 			.getEnamedElementXExpressionMap(it.eResource()).get(createClass);
 		assertNotNull(exp);
@@ -1431,8 +1420,8 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testReferenceToEClassRemoved() throws Exception {
-		final String input = inputs.referenceToEClassRemoved().toString();
-		final EdeltaProgram it = parseWithTestEcore(input);
+		var input = inputs.referenceToEClassRemoved().toString();
+		var it = parseWithTestEcore(input);
 		assertThatThrownBy(
 			() -> interpretProgram(it))
 		.isInstanceOf(EdeltaInterpreterWrapperException.class);
@@ -1450,17 +1439,17 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	public void testReferenceToEClassDeleted() throws Exception {
 		// EcoreUtil.delete sets to null also the ENamedElement of the ecoreref
 		// see https://github.com/LorenzoBettini/edelta/issues/271
-		final String input = """
+		var input = """
 		import static org.eclipse.emf.ecore.util.EcoreUtil.delete
-		
+
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			delete(ecoreref(FooClass))
 			ecoreref(FooClass).abstract // this doesn't exist anymore
 		}
 		""";
-		final EdeltaProgram it = parseWithTestEcore(input);
+		var it = parseWithTestEcore(input);
 		assertThatThrownBy(() -> {
 			interpretProgram(it);
 		})
@@ -1477,9 +1466,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testReferenceToEClassRemovedInLoop() throws Exception {
-		final String input = """
+		var input = """
 		metamodel "foo"
-		
+
 		modifyEcore creation epackage foo {
 			addNewEClass("NewClass1")
 			for (var i = 0; i < 3; i++)
@@ -1489,7 +1478,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				EClassifiers -= ecoreref(NewClass2) // the second time it doesn't exist anymore
 		}
 		""";
-		EdeltaProgram it = parseWithTestEcore(input);
+		var it = parseWithTestEcore(input);
 		interpretProgram(it);
 		validationTestHelper.assertError(
 			it,
@@ -1514,9 +1503,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testReferenceToCreatedEClassRemoved() throws Exception {
-		final String input = """
+		var input = """
 		metamodel "foo"
-		
+
 		modifyEcore creation epackage foo {
 			addNewEClass("NewClass")
 		}
@@ -1527,7 +1516,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreref(NewClass) // this doesn't exist anymore
 		}
 		""";
-		EdeltaProgram it = parseWithTestEcore(input);
+		var it = parseWithTestEcore(input);
 		interpretProgram(it);
 		validationTestHelper.assertError(it,
 			EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(),
@@ -1540,8 +1529,8 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testReferenceToEClassRenamed() throws Exception {
-		final String input = inputs.referenceToEClassRenamed().toString();
-		EdeltaProgram it = parseWithTestEcore(input);
+		var input = inputs.referenceToEClassRenamed().toString();
+		var it = parseWithTestEcore(input);
 		interpretProgram(it);
 		validationTestHelper.assertError(it,
 			EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(),
@@ -1554,8 +1543,8 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testReferenceToCreatedEClassRenamed() throws Exception {
-		final String input = inputs.referenceToCreatedEClassRenamed().toString();
-		EdeltaProgram it = parseWithTestEcore(input);
+		var input = inputs.referenceToCreatedEClassRenamed().toString();
+		var it = parseWithTestEcore(input);
 		interpretProgram(it);
 		validationTestHelper.assertError(it,
 			EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(),
@@ -1568,9 +1557,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testShowErrorOnExistingEClass() throws Exception {
-		final String input = """
+		var input = """
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			val found = EClassifiers.findFirst[
 				name == "FooClass"
@@ -1581,7 +1570,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 					"Found class FooClass")
 		}
 		""";
-		EdeltaProgram it = parseWithTestEcore(input);
+		var it = parseWithTestEcore(input);
 		interpretProgram(it);
 		validationTestHelper.assertError(it,
 			XbasePackage.eINSTANCE.getXIfExpression(),
@@ -1592,9 +1581,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testShowErrorOnCreatedEClass() throws Exception {
-		final String input = """
+		var input = """
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			addNewEClass("NewClass")
 			val found = EClassifiers.findFirst[
@@ -1606,7 +1595,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 					"Found class " + found.name)
 		}
 		""";
-		EdeltaProgram it = parseWithTestEcore(input);
+		var it = parseWithTestEcore(input);
 		interpretProgram(it);
 		validationTestHelper.assertError(it,
 			XbasePackage.eINSTANCE.getXFeatureCall(),
@@ -1617,11 +1606,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testShowErrorOnCreatedEClassGeneratedByOperation() throws Exception {
-		final String input = """
+		var input = """
 		import org.eclipse.emf.ecore.EPackage
 
 		metamodel "foo"
-		
+
 		def myCheck(EPackage it) {
 			val found = EClassifiers.findFirst[
 				name == "NewClass"
@@ -1631,13 +1620,13 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 					found,
 					"Found class " + found.name)
 		}
-		
+
 		modifyEcore aTest epackage foo {
 			addNewEClass("NewClass")
 			myCheck()
 		}
 		""";
-		EdeltaProgram it = parseWithTestEcore(input);
+		var it = parseWithTestEcore(input);
 		interpretProgram(it);
 		validationTestHelper.assertError(it,
 			XbasePackage.eINSTANCE.getXFeatureCall(),
@@ -1651,21 +1640,21 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	@Test
 	public void testShowErrorOnCreatedEClassGeneratedByJavaOperation() throws Exception {
 		// see https://github.com/LorenzoBettini/edelta/issues/289
-		final String input = """
+		var input = """
 		import edelta.tests.additional.MyCustomEdeltaShowingError
 
 		metamodel "foo"
-		
+
 		use MyCustomEdeltaShowingError as extension my
-		
+
 		modifyEcore aTest epackage foo {
 			checkClassName(addNewEClass("NewClass"))
 			checkClassName(addNewEClass("anotherNewClass"))
 		}
 		""";
-		EdeltaProgram it = parseWithTestEcore(input);
+		var it = parseWithTestEcore(input);
 		interpretProgram(it);
-		final String offendingString = "checkClassName(addNewEClass(\"anotherNewClass\"))";
+		var offendingString = "checkClassName(addNewEClass(\"anotherNewClass\"))";
 		validationTestHelper.assertError(it,
 			XbasePackage.eINSTANCE.getXFeatureCall(),
 			EdeltaValidator.LIVE_VALIDATION_ERROR,
@@ -1678,12 +1667,12 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	@Test
 	public void testShowErrorOnCreatedEClassGeneratedByExternalOperation() throws Exception {
 		// see https://github.com/LorenzoBettini/edelta/issues/348
-		final List<String> inputs = List.of(
+		List<String> inputs = List.of(
 		"""
 		import org.eclipse.emf.ecore.EPackage
 
 		metamodel "foo"
-		
+
 		def myCheck(EPackage it) {
 			val found = EClassifiers.findFirst[
 				name == "NewClass"
@@ -1695,15 +1684,15 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		}
 		""", """
 		metamodel "foo"
-		
+
 		use edelta.__synthetic0 as extension my
-		
+
 		modifyEcore aTest epackage foo {
 			addNewEClass("NewClass")
 			myCheck()
 		}
 		""");
-		EdeltaProgram it = parseSeveralWithTestEcore(inputs);
+		var it = parseSeveralWithTestEcore(inputs);
 		interpretProgram(it);
 		validationTestHelper.assertError(it,
 			XbasePackage.eINSTANCE.getXFeatureCall(),
@@ -1718,12 +1707,12 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	public void testShowErrorOnCreatedEClassGeneratedByExternalOperation2() throws Exception {
 		// see https://github.com/LorenzoBettini/edelta/issues/348
 		// like the previous one, but with one more level of indirection
-		final List<String> inputs = List.of(
+		List<String> inputs = List.of(
 		"""
 		import org.eclipse.emf.ecore.EPackage
 
 		metamodel "foo"
-		
+
 		def myCheckInternal(EPackage it) {
 			val found = EClassifiers.findFirst[
 				name == "NewClass"
@@ -1737,21 +1726,21 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		import org.eclipse.emf.ecore.EPackage
 
 		use edelta.__synthetic0 as extension my
-		
+
 		def myCheck(EPackage it) {
 			myCheckInternal
 		}
 		""", """
 		metamodel "foo"
-		
+
 		use edelta.__synthetic1 as extension my
-		
+
 		modifyEcore aTest epackage foo {
 			addNewEClass("NewClass")
 			myCheck()
 		}
 		""");
-		EdeltaProgram it = parseSeveralWithTestEcore(inputs);
+		var it = parseSeveralWithTestEcore(inputs);
 		interpretProgram(it);
 		validationTestHelper.assertError(it,
 			XbasePackage.eINSTANCE.getXFeatureCall(),
@@ -1764,9 +1753,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testIntroducedCycles() throws Exception {
-		final String input = """
+		var input = """
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			addNewEClass("C1")
 			addNewEClass("C2") [ ESuperTypes += ecoreref(C1) ]
@@ -1781,7 +1770,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreref(subpackage.foo) // NOT valid
 		}
 		""";
-		EdeltaProgram it = parseWithTestEcore(input);
+		var it = parseWithTestEcore(input);
 		interpretProgram(it);
 		validationTestHelper.assertError(it,
 			XbasePackage.eINSTANCE.getXBinaryOperation(),
@@ -1804,9 +1793,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testAccessToNotYetExistingElement() throws Exception {
-		final String input = """
+		var input = """
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			ecoreref(ANewClass) // doesn't exist yet
 			ecoreref(NonExisting) // doesn't exist at all
@@ -1814,17 +1803,17 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreref(ANewClass) // this is OK
 		}
 		""";
-		EdeltaProgram it = parseWithTestEcore(input);
+		var it = parseWithTestEcore(input);
 		interpretProgram(it);
-		final EdeltaEcoreReference ecoreref1 = getAllEcoreReferenceExpressions(it).get(0).getReference();
-		final EdeltaEcoreReference ecoreref2 = getAllEcoreReferenceExpressions(it).get(1).getReference();
-		final EdeltaUnresolvedEcoreReferences unresolved = derivedStateHelper
+		var ecoreref1 = getAllEcoreReferenceExpressions(it).get(0).getReference();
+		var ecoreref2 = getAllEcoreReferenceExpressions(it).get(1).getReference();
+		var unresolved = derivedStateHelper
 				.getUnresolvedEcoreReferences(it.eResource());
 		assertThat(unresolved).containsOnly(ecoreref1, ecoreref2);
 		// also check what's resolved in the end
 		assertThat(ecoreref1.getEnamedelement().eIsProxy()).isFalse();
 		assertThat(ecoreref2.getEnamedelement().eIsProxy()).isTrue();
-		final EdeltaENamedElementXExpressionMap map = derivedStateHelper.getEnamedElementXExpressionMap(it.eResource());
+		var map = derivedStateHelper.getEnamedElementXExpressionMap(it.eResource());
 		// we can access the expression that created the element
 		// that is not available in the current context
 		assertThat(map.get(ecoreref1.getEnamedelement())).isNotNull()
@@ -1834,9 +1823,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testAccessibleElements() throws Exception {
-		final String input = """
+		var input = """
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			ecoreref(FooClass) // 0
 			addNewEClass("ANewClass")
@@ -1845,14 +1834,14 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreref(ANewClass) // 3
 		}
 		""";
-		EdeltaProgram it = parseWithTestEcore(input);
+		var it = parseWithTestEcore(input);
 		interpretProgram(it);
-		final List<EdeltaEcoreReferenceExpression> exps = getAllEcoreReferenceExpressions(it);
-		final EdeltaEcoreReferenceExpression ecoreref1 = exps.get(0);
-		final EdeltaEcoreReferenceExpression ecoreref2 = exps.get(1);
-		final EdeltaEcoreReferenceExpression ecoreref3 = exps.get(2);
-		final EdeltaEcoreReferenceExpression ecoreref4 = exps.get(3);
-		final EdeltaAccessibleElements elements1 = derivedStateHelper.getAccessibleElements(ecoreref1);
+		var exps = getAllEcoreReferenceExpressions(it);
+		var ecoreref1 = exps.get(0);
+		var ecoreref2 = exps.get(1);
+		var ecoreref3 = exps.get(2);
+		var ecoreref4 = exps.get(3);
+		var elements1 = derivedStateHelper.getAccessibleElements(ecoreref1);
 		assertAccessibleElements(elements1, """
 		foo
 		foo.FooClass
@@ -1862,7 +1851,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		foo.FooEnum
 		foo.FooEnum.FooEnumLiteral
 		""");
-		final EdeltaAccessibleElements elements2 = derivedStateHelper.getAccessibleElements(ecoreref2);
+		var elements2 = derivedStateHelper.getAccessibleElements(ecoreref2);
 		assertAccessibleElements(elements2, """
 		foo
 		foo.ANewClass
@@ -1873,11 +1862,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		foo.FooEnum
 		foo.FooEnum.FooEnumLiteral
 		""");
-		final EdeltaAccessibleElements elements3 = derivedStateHelper.getAccessibleElements(ecoreref3);
+		var elements3 = derivedStateHelper.getAccessibleElements(ecoreref3);
 		// nothing has changed between ecoreref 2 and 3
 		// so the available elements must be the same
 		assertThat(elements2).isSameAs(elements3);
-		final EdeltaAccessibleElements elements4 = derivedStateHelper.getAccessibleElements(ecoreref4);
+		var elements4 = derivedStateHelper.getAccessibleElements(ecoreref4);
 		assertAccessibleElements(elements4, """
 		foo
 		foo.ANewClass
@@ -1889,14 +1878,14 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testInvalidAmbiguousEcoreref() throws Exception {
-		final String input = """
+		var input = """
 		metamodel "mainpackage"
-		
+
 		modifyEcore aTest epackage mainpackage {
 			ecoreref(MyClass)
 		}
 		""";
-		EdeltaProgram it = parseWithTestEcoreWithSubPackage(input);
+		var it = parseWithTestEcoreWithSubPackage(input);
 		interpretProgram(it);
 		assertErrorsAsStrings(it, """
 			Ambiguous reference 'MyClass':
@@ -1908,15 +1897,15 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testAmbiguousEcorerefAfterRemoval() throws Exception {
-		final String input = """
+		var input = """
 		metamodel "mainpackage"
-		
+
 		modifyEcore aTest epackage mainpackage {
 			EClassifiers -= ecoreref(mainpackage.MyClass)
 			ecoreref(MyClass) // still ambiguous
 		}
 		""";
-		EdeltaProgram it = parseWithTestEcoreWithSubPackage(input);
+		var it = parseWithTestEcoreWithSubPackage(input);
 		interpretProgram(it);
 		assertErrorsAsStrings(it, """
 			Ambiguous reference 'MyClass':
@@ -1927,24 +1916,24 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testNonAmbiguousEcorerefAfterRemoval() throws Exception {
-		final String input = """
+		var input = """
 		import static org.eclipse.emf.ecore.util.EcoreUtil.remove
-		
+
 		metamodel "mainpackage"
-		
+
 		modifyEcore aTest epackage mainpackage {
 			EClassifiers -= ecoreref(mainpackage.MyClass)
 			remove(ecoreref(mainpackage.mainsubpackage.subsubpackage.MyClass))
 			ecoreref(MyClass) // non ambiguous
 		}
 		""";
-		EdeltaProgram it = parseWithTestEcoreWithSubPackage(input);
-		final EdeltaCopiedEPackagesMap map = interpretProgram(it);
+		var it = parseWithTestEcoreWithSubPackage(input);
+		var map = interpretProgram(it);
 		validationTestHelper.assertNoErrors(it);
 		// mainpackage.mainsubpackage.MyClass
-		final EClass mainSubPackageClass = getLastEClass(
+		var mainSubPackageClass = getLastEClass(
 				((EPackage[]) Conversions.unwrapArray(map.values(), EPackage.class))[0].getESubpackages().get(0));
-		final EdeltaEcoreReference lastEcoreRef = getLastOfAllEcoreReferenceExpressions(it).getReference();
+		var lastEcoreRef = getLastOfAllEcoreReferenceExpressions(it).getReference();
 		assertNotNull(lastEcoreRef.getEnamedelement());
 		// the non ambiguous ecoreref should be correctly linked
 		// to the only available element in that context
@@ -1953,12 +1942,12 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTypedInAssignment() throws Exception {
-		final String input = """
+		var input = """
 		import org.eclipse.emf.ecore.EAttribute
 		import org.eclipse.emf.ecore.EReference
-		
+
 		metamodel "mainpackage"
-		
+
 		modifyEcore aTest epackage mainpackage {
 			addNewEClass("ANewClass") [
 				addNewEAttribute("created", null)
@@ -1974,7 +1963,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			val EReference r = ecoreref(created) // OK
 		}
 		""";
-		EdeltaProgram it = parseWithTestEcoreWithSubPackage(input);
+		var it = parseWithTestEcoreWithSubPackage(input);
 		interpretProgram(it);
 		assertErrorsAsStrings(it,
 			"Type mismatch: cannot convert from EReference to EAttribute");
@@ -1982,11 +1971,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testNonAmbiguousEcorerefAfterRemovalIsCorrectlyTypedInFeatureCall2() throws Exception {
-		final String input = """
+		var input = """
 		import static org.eclipse.emf.ecore.util.EcoreUtil.remove
-		
+
 		metamodel "mainpackage"
-		
+
 		modifyEcore aTest epackage mainpackage {
 			addNewEClass("created")
 			ESubpackages.head.addNewESubpackage("created", null, null)
@@ -2002,7 +1991,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreref(created).nonExistent // ERROR to cover the last case in the interpreter
 		}
 		""";
-		EdeltaProgram it = parseWithTestEcoreWithSubPackage(input);
+		var it = parseWithTestEcoreWithSubPackage(input);
 		interpretProgram(it);
 		assertErrorsAsStrings(it, """
 			Ambiguous reference 'created':
@@ -2016,9 +2005,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testInvalidAmbiguousEcorerefWithCreatedElements() throws Exception {
-		final String input = """
+		var input = """
 		metamodel "mainpackage"
-		
+
 		modifyEcore aTest epackage mainpackage {
 			addNewEClass("created") [
 				addNewEAttribute("created", null)
@@ -2026,7 +2015,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreref(created)
 		}
 		""";
-		EdeltaProgram it = parseWithTestEcoreWithSubPackage(input);
+		var it = parseWithTestEcoreWithSubPackage(input);
 		interpretProgram(it);
 		assertErrorsAsStrings(it, """
 			Ambiguous reference 'created':
@@ -2037,9 +2026,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testNonAmbiguousEcorerefWithQualification() throws Exception {
-		final String input = """
+		var input = """
 		metamodel "mainpackage"
-		
+
 		modifyEcore aTest epackage mainpackage {
 			addNewEClass("created") [
 				addNewEAttribute("created", null)
@@ -2048,16 +2037,16 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreref(mainpackage.created) // NON ambiguous
 		}
 		""";
-		EdeltaProgram it = parseWithTestEcoreWithSubPackage(input);
+		var it = parseWithTestEcoreWithSubPackage(input);
 		interpretProgram(it);
 		validationTestHelper.assertNoErrors(it);
 	}
 
 	@Test
 	public void testNonAmbiguousEcoreref() throws Exception {
-		final String input = """
+		var input = """
 		metamodel "mainpackage"
-		
+
 		modifyEcore aTest epackage mainpackage {
 			addNewEClass("WorkPlace")
 			addNewEClass("LivingPlace")
@@ -2065,7 +2054,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreref(Place) // NON ambiguous
 		}
 		""";
-		EdeltaProgram it = parseWithTestEcoreWithSubPackage(input);
+		var it = parseWithTestEcoreWithSubPackage(input);
 		interpretProgram(it);
 		validationTestHelper.assertNoErrors(it);
 	}
@@ -2074,7 +2063,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	public void testCallOperationThatCallsAnotherNonVoidOperation() throws Exception {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation("""
 			metamodel "foo"
-			
+
 			def createANewClassInMyEcore(String name) {
 				if (aCheck()) // this will always return false
 					return null // so this won't be executed
@@ -2082,15 +2071,15 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 					return null // so this won't be executed
 				ecoreref(foo).addNewEClass(name)
 			}
-			
+
 			def aCheck() {
 				return false
 			}
-			
+
 			def aCheck2() : boolean {
 				false
 			}
-			
+
 			modifyEcore SomeChanges epackage foo {
 				// the ANewClass is not actually created
 				// not shown in the outline
@@ -2100,7 +2089,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			}
 			""",
 			derivedEPackage -> {
-				EClass lastEClass = getLastEClass(derivedEPackage);
+				var lastEClass = getLastEClass(derivedEPackage);
 				assertEquals("ANewClass", lastEClass.getName());
 				assertTrue(lastEClass.isAbstract());
 			});
@@ -2109,11 +2098,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	@Test
 	public void testCallOperationThatCallsAnotherNonVoidOperationInAnotherFile() throws Exception {
 		// see https://github.com/LorenzoBettini/edelta/issues/268
-		EdeltaProgram it = parseSeveralWithTestEcore(
+		var it = parseSeveralWithTestEcore(
 			List.of(
 			"""
 			import org.eclipse.emf.ecore.EPackage
-			
+
 			def create(EPackage it) {
 				if (aCheck()) // this will always return false
 					return null // so this won't be executed
@@ -2121,25 +2110,25 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 					return null // so this won't be executed
 				addNewEClass("NewClass")
 			}
-			
+
 			def aCheck() {
 				return false
 			}
-			
+
 			def aCheck2() : boolean {
 				false
 			}
 			""", """
 			metamodel "foo"
-			
+
 			use edelta.__synthetic0 as extension my
-			
+
 			modifyEcore anotherTest epackage foo {
 				create(it)
 				ecoreref(NewClass)
 			}
 			"""));
-		final EClass created =
+		var created =
 			getEClassByName(interpretProgram(it).get("foo"), "NewClass");
 		assertNotNull(created);
 	}
@@ -2148,9 +2137,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	public void testAccessToResourceSet() throws Exception {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation("""
 		import org.eclipse.emf.ecore.EPackage
-		
+
 		metamodel "foo"
-		
+
 		modifyEcore aTest epackage foo {
 			// access the ResourceSet
 			// but during the interpration we use a sandbox ResourceSet
@@ -2172,26 +2161,26 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		});
 	}
 
-	private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input,
-			final Procedure1<? super EPackage> testExecutor) throws Exception {
+	private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(CharSequence input,
+			Procedure1<? super EPackage> testExecutor) throws Exception {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(input, true, testExecutor);
 	}
 
-	private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final CharSequence input,
-			final boolean doValidate, final Procedure1<? super EPackage> testExecutor) throws Exception {
-		final EdeltaProgram program = parseWithTestEcore(input);
+	private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(CharSequence input,
+			boolean doValidate, Procedure1<? super EPackage> testExecutor) throws Exception {
+		var program = parseWithTestEcore(input);
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor);
 	}
 
-	private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final List<CharSequence> inputs,
-			final boolean doValidate, final Procedure1<? super EPackage> testExecutor) throws Exception {
-		final EdeltaProgram program = parseSeveralWithTestEcore(inputs);
+	private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(List<CharSequence> inputs,
+			boolean doValidate, Procedure1<? super EPackage> testExecutor) throws Exception {
+		var program = parseSeveralWithTestEcore(inputs);
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, doValidate, testExecutor);
 	}
 
-	private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaProgram program,
-			final boolean doValidate, final Procedure1<? super EPackage> testExecutor) throws Exception {
-		final Procedure1<EPackage> _function = (EPackage it) -> {
+	private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(EdeltaProgram program,
+			boolean doValidate, Procedure1<? super EPackage> testExecutor) throws Exception {
+		Procedure1<EPackage> _function = (var it) -> {
 			if (doValidate) {
 				validationTestHelper.assertNoErrors(program);
 			}
@@ -2200,25 +2189,25 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, _function);
 	}
 
-	private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(final EdeltaProgram program,
-			final Procedure1<? super EPackage> testExecutor) throws Exception {
+	private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(EdeltaProgram program,
+			Procedure1<? super EPackage> testExecutor) throws Exception {
 		currentProgram = program;
-		final EdeltaModifyEcoreOperation it = lastModifyEcoreOperation(program);
+		var it = lastModifyEcoreOperation(program);
 		interpreter.evaluateModifyEcoreOperations(program);
-		final String packageName = it.getEpackage().getName();
-		final EPackage epackage = derivedStateHelper.getCopiedEPackagesMap(program.eResource()).get(packageName);
+		var packageName = it.getEpackage().getName();
+		var epackage = derivedStateHelper.getCopiedEPackagesMap(program.eResource()).get(packageName);
 		testExecutor.apply(epackage);
 	}
 
-	private EdeltaCopiedEPackagesMap interpretProgram(final EdeltaProgram program) throws Exception {
+	private EdeltaCopiedEPackagesMap interpretProgram(EdeltaProgram program) throws Exception {
 		interpreter.evaluateModifyEcoreOperations(program);
 		return derivedStateHelper.getCopiedEPackagesMap(program.eResource());
 	}
 
-	private void assertEcoreRefExpElementMapsToXExpression(final EdeltaEcoreReference reference,
-			final String expectedFeatureCallSimpleName) throws Exception {
-		final XExpression exp = derivedStateHelper.getResponsibleExpression(reference);
-		Assert.assertNotNull(exp);
+	private void assertEcoreRefExpElementMapsToXExpression(EdeltaEcoreReference reference,
+			String expectedFeatureCallSimpleName) throws Exception {
+		var exp = derivedStateHelper.getResponsibleExpression(reference);
+		assertNotNull(exp);
 		assertEquals(expectedFeatureCallSimpleName, getFeatureCall(exp).getFeature().getSimpleName());
 	}
 }
