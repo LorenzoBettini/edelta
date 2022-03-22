@@ -3,7 +3,7 @@ package edelta.tests;
 import static com.google.common.collect.Iterables.filter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.eclipse.xtext.xbase.lib.Conversions.unwrapArray;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.last;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.map;
 import static org.eclipse.xtext.xbase.lib.ListExtensions.map;
@@ -22,7 +22,6 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.xbase.XbasePackage;
-import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Before;
@@ -1097,12 +1096,13 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			filter(workplace.getEStructuralFeatures(), EReference.class),
 			EReference::getName))
 				.containsOnly("renamedPersons");
-		assertThat(((EReference[]) unwrapArray(
-						filter(person.getEStructuralFeatures(), EReference.class),
-						EReference.class))[0].getEOpposite())
-				.isSameAs(((Object[]) unwrapArray(
-						filter(workplace.getEStructuralFeatures(), EReference.class),
-						Object.class))[0]);
+		var eOpposite =
+			head(filter(person.getEStructuralFeatures(), EReference.class))
+			.getEOpposite();
+		var expected =
+			head(filter(workplace.getEStructuralFeatures(), EReference.class));
+		assertThat(eOpposite)
+				.isSameAs(expected);
 		var unresolvedEcoreRefs = derivedStateHelper
 				.getUnresolvedEcoreReferences(it.eResource());
 		assertThat(unresolvedEcoreRefs).isEmpty();
@@ -1932,7 +1932,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		validationTestHelper.assertNoErrors(it);
 		// mainpackage.mainsubpackage.MyClass
 		var mainSubPackageClass = getLastEClass(
-				((EPackage[]) Conversions.unwrapArray(map.values(), EPackage.class))[0].getESubpackages().get(0));
+				head(map.values()).getESubpackages().get(0));
 		var lastEcoreRef = getLastOfAllEcoreReferenceExpressions(it).getReference();
 		assertNotNull(lastEcoreRef.getEnamedelement());
 		// the non ambiguous ecoreref should be correctly linked
