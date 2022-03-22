@@ -1109,7 +1109,8 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	public void testElementExpressionForCreatedEClassWithEdeltaAPI() throws Exception {
+	public void testElementExpressionForCreatedEClassWithEdeltaAPI() // NOSONAR: parameterized test would not be feasible
+			throws Exception {
 		var it = parseWithTestEcore("""
 		import org.eclipse.emf.ecore.EcoreFactory
 
@@ -1202,7 +1203,8 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	public void testEcoreRefExpForCreatedEClassRenamed() throws Exception {
+	public void testEcoreRefExpForCreatedEClassRenamed() // NOSONAR: parameterized test would not be feasible
+			throws Exception {
 		var prog = parseWithTestEcore("""
 		import org.eclipse.emf.ecore.EcoreFactory
 
@@ -1877,7 +1879,8 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	public void testInvalidAmbiguousEcoreref() throws Exception {
+	public void testInvalidAmbiguousEcoreref() // NOSONAR: parameterized test would not be feasible
+			throws Exception {
 		var input = """
 		metamodel "mainpackage"
 
