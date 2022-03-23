@@ -3,6 +3,8 @@
  */
 package edelta.lib.tests;
 
+import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
+import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.emf.ecore.EcorePackage.Literals.EOBJECT;
 import static org.eclipse.emf.ecore.EcorePackage.Literals.ESTRING;
@@ -11,11 +13,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.emf.ecore.EAttribute;
@@ -35,9 +40,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
-import edelta.lib.EdeltaRuntime;
+import edelta.lib.EdeltaEngine;
 import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.EdeltaModelManager;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaStandardLibrary;
 
 /**
@@ -47,6 +53,10 @@ import edelta.lib.EdeltaStandardLibrary;
  *
  */
 public class EdeltaStandardLibraryTest {
+
+	private static final String TESTDATA = "testdata/";
+	private static final String OUTPUT = "output/";
+	private static final String EXPECTATIONS = "expectations/";
 
 	private static final String MYPACKAGE = "mypackage";
 	private static final String MYOTHERPACKAGE = "myotherpackage";
@@ -62,12 +72,28 @@ public class EdeltaStandardLibraryTest {
 
 	private EdeltaModelManager modelManager;
 
+	private String basedir;
+
 	@Before
 	public void setup() {
 		issuePresenter = mock(EdeltaIssuePresenter.class);
 		modelManager = new EdeltaModelManager();
 		lib = new EdeltaStandardLibrary(modelManager);
 		lib.setIssuePresenter(issuePresenter);
+	}
+
+	private EdeltaEngine setupEngine(
+			String subdir,
+			Collection<String> ecoreFiles,
+			Collection<String> modelFiles
+		) {
+		basedir = TESTDATA + subdir;
+		var engine = new EdeltaEngine(EdeltaStandardLibrary::new);
+		ecoreFiles
+			.forEach(fileName -> engine.loadEcoreFile(basedir + fileName));
+		modelFiles
+			.forEach(fileName -> engine.loadModelFile(basedir + fileName));
+		return engine;
 	}
 
 	@Test
@@ -852,6 +878,22 @@ public class EdeltaStandardLibraryTest {
 		assertThat(c3.getEReferences()).containsExactly(c3Ref);
 	}
 
+	@Test
+	public void modelMigrationUnchanged() throws Exception {
+		var subdir = "simpleTestData/";
+		var engine = setupEngine(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
 	private Resource loadTestEcore(String ecoreFile) {
 		return modelManager.loadEcoreFile(TESTECORES+ecoreFile);
 	}
@@ -872,5 +914,34 @@ public class EdeltaStandardLibraryTest {
 			argThat(a -> a.getName().equals(elementName)),
 			argThat(a -> a.equals(expectedError)));
 		return assertThrows;
+	}
+
+	private void copyModelsSaveAndAssertOutputs(
+			EdeltaEngine engine,
+			String outputdir,
+			Collection<String> ecoreFiles,
+			Collection<String> modelFiles
+		) throws Exception {
+		engine.execute();
+		var output = OUTPUT + outputdir;
+		engine.save(output);
+		ecoreFiles.forEach
+			(fileName ->
+				assertGeneratedFiles(fileName, outputdir, output, fileName));
+		modelFiles.forEach
+			(fileName ->
+				assertGeneratedFiles(fileName, outputdir, output, fileName));
+	}
+
+	private void assertGeneratedFiles(String message, String subdir, String outputDir, String fileName) {
+		try {
+			assertFilesAreEquals(
+				message,
+				EXPECTATIONS + subdir + fileName,
+				outputDir + fileName);
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail(e.getClass().getName() + ": " + e.getMessage());
+		}
 	}
 }
