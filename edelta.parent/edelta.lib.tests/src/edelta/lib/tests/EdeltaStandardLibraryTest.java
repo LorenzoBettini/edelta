@@ -1,9 +1,7 @@
-/**
- * 
- */
 package edelta.lib.tests;
 
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
+import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
 import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.emf.ecore.EcorePackage.Literals.EOBJECT;
@@ -22,6 +20,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -37,9 +36,11 @@ import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil.EqualityHelper;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
+import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaEngine;
 import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.EdeltaModelManager;
@@ -74,6 +75,11 @@ public class EdeltaStandardLibraryTest {
 
 	private String basedir;
 
+	@BeforeClass
+	static public void clearOutput() throws IOException {
+		cleanDirectoryRecursive(OUTPUT);
+	}
+
 	@Before
 	public void setup() {
 		issuePresenter = mock(EdeltaIssuePresenter.class);
@@ -85,10 +91,18 @@ public class EdeltaStandardLibraryTest {
 	private EdeltaEngine setupEngine(
 			String subdir,
 			Collection<String> ecoreFiles,
-			Collection<String> modelFiles
+			Collection<String> modelFiles,
+			Consumer<EdeltaStandardLibrary> libConsumer
 		) {
 		basedir = TESTDATA + subdir;
-		var engine = new EdeltaEngine(EdeltaStandardLibrary::new);
+		var engine = new EdeltaEngine(other -> {
+			return new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					libConsumer.accept(stdLib);
+				}
+			};
+		});
 		ecoreFiles
 			.forEach(fileName -> engine.loadEcoreFile(basedir + fileName));
 		modelFiles
@@ -884,11 +898,35 @@ public class EdeltaStandardLibraryTest {
 		var engine = setupEngine(
 			subdir,
 			of("My.ecore"),
-			of("MyRoot.xmi", "MyClass.xmi")
+			of("MyRoot.xmi", "MyClass.xmi"),
+			stdLib -> {}
 		);
 		copyModelsSaveAndAssertOutputs(
 			engine,
 			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void modelMigrationRenamed() throws Exception {
+		var subdir = "simpleTestData/";
+		var engine = setupEngine(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi"),
+			stdLib -> {
+				// refactoring of Ecore
+				stdLib.getEClass("mypackage", "MyClass")
+					.setName("MyClassRenamed");
+				stdLib.getEClass("mypackage", "MyRoot")
+					.setName("MyRootRenamed");
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			"renamedClass/",
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi")
 		);
