@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Consumer;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -41,7 +40,9 @@ import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaEngine;
+import edelta.lib.EdeltaEngine.EdeltaRuntimeProvider;
 import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaRuntime;
@@ -92,17 +93,10 @@ public class EdeltaStandardLibraryTest {
 			String subdir,
 			Collection<String> ecoreFiles,
 			Collection<String> modelFiles,
-			Consumer<EdeltaStandardLibrary> libConsumer
+			EdeltaRuntimeProvider runtimeProvider
 		) {
 		basedir = TESTDATA + subdir;
-		var engine = new EdeltaEngine(other -> {
-			return new EdeltaDefaultRuntime(other) {
-				@Override
-				protected void doExecute() {
-					libConsumer.accept(stdLib);
-				}
-			};
-		});
+		var engine = new EdeltaEngine(runtimeProvider);
 		ecoreFiles
 			.forEach(fileName -> engine.loadEcoreFile(basedir + fileName));
 		modelFiles
@@ -899,7 +893,7 @@ public class EdeltaStandardLibraryTest {
 			subdir,
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi"),
-			stdLib -> {}
+			EdeltaDefaultRuntime::new
 		);
 		copyModelsSaveAndAssertOutputs(
 			engine,
@@ -916,12 +910,15 @@ public class EdeltaStandardLibraryTest {
 			subdir,
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi"),
-			stdLib -> {
-				// refactoring of Ecore
-				stdLib.getEClass("mypackage", "MyClass")
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					// refactoring of Ecore
+					stdLib.getEClass("mypackage", "MyClass")
 					.setName("MyClassRenamed");
-				stdLib.getEClass("mypackage", "MyRoot")
+					stdLib.getEClass("mypackage", "MyRoot")
 					.setName("MyRootRenamed");
+				}
 			}
 		);
 		copyModelsSaveAndAssertOutputs(
@@ -939,11 +936,24 @@ public class EdeltaStandardLibraryTest {
 			subdir,
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi"),
-			stdLib -> {
-				var a = stdLib.getEAttribute("mypackage", "MyClass",
-						"myClassStringAttribute");
-				var myRoot = stdLib.getEClass("mypackage", "MyRoot");
-				stdLib.copyToAs(a, myRoot, "myRootStringAttribute");
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					var a = stdLib.getEAttribute("mypackage", "MyClass",
+							"myClassStringAttribute");
+					var myRoot = stdLib.getEClass("mypackage", "MyRoot");
+					var copied = stdLib.copyToAs(a, myRoot, "myRootStringAttribute");
+					// custom migration rule setting the default value for the copied feature
+					modelMigration(migrator -> {
+						migrator.createInstanceRule(
+							migrator.isRelatedTo(myRoot),
+							oldObj ->
+								EdeltaEcoreUtil.createInstance(myRoot, o -> {
+									o.eSet(copied, "default value");
+								})
+							);
+					});
+				}
 			}
 		);
 		copyModelsSaveAndAssertOutputs(

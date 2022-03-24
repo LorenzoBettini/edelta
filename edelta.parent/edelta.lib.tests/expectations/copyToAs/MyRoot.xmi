@@ -5,7 +5,8 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:mypackage="http://my.package.org"
     xsi:schemaLocation="http://my.package.org My.ecore"
-    myReferences="//@myContents.1">
+    myReferences="//@myContents.1"
+    myRootStringAttribute="default value">
   <myContents
       myClassStringAttribute="contained not referred"/>
   <myContents
