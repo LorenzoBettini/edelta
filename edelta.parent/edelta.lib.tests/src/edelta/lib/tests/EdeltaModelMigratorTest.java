@@ -4264,7 +4264,7 @@ class EdeltaModelMigratorTest {
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("PersonList.ecore"),
-			of("List.xmi")
+			of("List.xmi", "List1.xmi", "List2.xmi")
 		);
 
 		var person = getEClass(evolvingModelManager, "PersonList", "Person");
@@ -4320,7 +4320,7 @@ class EdeltaModelMigratorTest {
 			modelMigrator,
 			subdir,
 			of("PersonList.ecore"),
-			of("List.xmi")
+			of("List.xmi", "List1.xmi", "List2.xmi")
 		);
 	}
 
