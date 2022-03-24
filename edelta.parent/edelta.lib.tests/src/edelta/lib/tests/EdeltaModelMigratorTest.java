@@ -2876,19 +2876,16 @@ class EdeltaModelMigratorTest {
 				// of merging the original objects' values
 				if (values.isEmpty())
 					return null;
-				@SuppressWarnings("unchecked")
-				var objectValues =
-					(List<EObject>) values;
 
-				EObject firstObject = objectValues.iterator().next();
+				EObject firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
 				List<EObject> containerCollection =
 					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
-				EcoreUtil.removeAll(objectValues);
+				EcoreUtil.removeAll(values);
 
-				var mergedValue = objectValues.stream()
+				var mergedValue = values.stream()
 					.map(o -> 
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
@@ -2955,22 +2952,19 @@ class EdeltaModelMigratorTest {
 				// of merging the original objects' values
 				if (values.isEmpty())
 					return null;
-				@SuppressWarnings("unchecked")
-				var objectValues =
-					(List<EObject>) values;
 
-				var alreadyMerged = merged.get(objectValues);
+				var alreadyMerged = merged.get(values);
 				if (alreadyMerged != null)
 					return alreadyMerged;
 				// we have already processed the object collection
 				// and created a merged one so we reuse it
 
-				EObject firstObject = objectValues.iterator().next();
+				EObject firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
 				List<EObject> containerCollection =
 					getValueAsList(firstObject.eContainer(), containingFeature);
 
-				var mergedValue = objectValues.stream()
+				var mergedValue = values.stream()
 					.map(o -> 
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
@@ -2983,7 +2977,7 @@ class EdeltaModelMigratorTest {
 
 						// record that we associated the single object o
 						// to the original ones, which are now merged
-						merged.put(objectValues, o);
+						merged.put(values, o);
 					}
 				);
 			},
@@ -3469,19 +3463,16 @@ class EdeltaModelMigratorTest {
 				// of merging the original objects' values
 				if (values.isEmpty())
 					return null;
-				@SuppressWarnings("unchecked")
-				var objectValues =
-					(List<EObject>) values;
 
-				EObject firstObject = objectValues.iterator().next();
+				EObject firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
 				List<EObject> containerCollection =
 					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
-				EcoreUtil.removeAll(objectValues);
+				EcoreUtil.removeAll(values);
 
-				var mergedValue = objectValues.stream()
+				var mergedValue = values.stream()
 					.map(o -> 
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
@@ -3580,22 +3571,19 @@ class EdeltaModelMigratorTest {
 				// of merging the original objects' values
 				if (values.isEmpty())
 					return null;
-				@SuppressWarnings("unchecked")
-				var objectValues =
-					(List<EObject>) values;
 
-				var alreadyMerged = merged.get(objectValues);
+				var alreadyMerged = merged.get(values);
 				if (alreadyMerged != null)
 					return alreadyMerged;
 				// we have already processed the object collection
 				// and created a merged one so we reuse it
 
-				EObject firstObject = objectValues.iterator().next();
+				EObject firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
 				List<EObject> containerCollection =
 					getValueAsList(firstObject.eContainer(), containingFeature);
 
-				var mergedValue = objectValues.stream()
+				var mergedValue = values.stream()
 					.map(o -> 
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
@@ -3608,7 +3596,7 @@ class EdeltaModelMigratorTest {
 
 						// record that we associated the single object o
 						// to the original ones, which are now merged
-						merged.put(objectValues, o);
+						merged.put(values, o);
 					}
 				);
 			},
@@ -3832,19 +3820,16 @@ class EdeltaModelMigratorTest {
 				// of merging the original objects' values
 				if (values.isEmpty())
 					return null;
-				@SuppressWarnings("unchecked")
-				var objectValues =
-					(List<EObject>) values;
 
-				EObject firstObject = objectValues.iterator().next();
+				EObject firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
 				List<EObject> containerCollection =
 					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
-				EcoreUtil.removeAll(objectValues);
+				EcoreUtil.removeAll(values);
 
-				var mergedValue = objectValues.stream()
+				var mergedValue = values.stream()
 					.map(o -> 
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
@@ -3956,22 +3941,19 @@ class EdeltaModelMigratorTest {
 				// of merging the original objects' values
 				if (values.isEmpty())
 					return null;
-				@SuppressWarnings("unchecked")
-				var objectValues =
-					(List<EObject>) values;
 
-				var alreadyMerged = merged.get(objectValues);
+				var alreadyMerged = merged.get(values);
 				if (alreadyMerged != null)
 					return alreadyMerged;
 				// we have already processed the object collection
 				// and created a merged one so we reuse it
 
-				EObject firstObject = objectValues.iterator().next();
+				EObject firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
 				List<EObject> containerCollection =
 					getValueAsList(firstObject.eContainer(), containingFeature);
 
-				var mergedValue = objectValues.stream()
+				var mergedValue = values.stream()
 					.map(o -> 
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
@@ -3984,7 +3966,7 @@ class EdeltaModelMigratorTest {
 
 						// record that we associated the single object o
 						// to the original ones, which are now merged
-						merged.put(objectValues, o);
+						merged.put(values, o);
 					}
 				);
 			},
@@ -4958,7 +4940,7 @@ class EdeltaModelMigratorTest {
 	private EReference mergeReferences(EdeltaModelMigrator modelMigrator,
 			final String newFeatureName,
 			final Collection<EReference> features,
-			Function<Collection<?>, Object> valueMerger, Runnable postCopy) {
+			Function<Collection<EObject>, EObject> valueMerger, Runnable postCopy) {
 		var firstFeature = features.iterator().next();
 		var mergedFeature = mergeFeatures(modelMigrator, newFeatureName, features);
 		if (valueMerger != null) {
@@ -4970,6 +4952,7 @@ class EdeltaModelMigratorTest {
 					// for references we must get the copied EObject
 					var oldValues = originalFeatures
 							.map(f -> oldObj.eGet(f))
+							.map(EObject.class::cast)
 							.collect(Collectors.toList());
 					var merged = valueMerger.apply(
 						modelMigrator.getMigrated(oldValues));
