@@ -4324,38 +4324,6 @@ class EdeltaModelMigratorTest {
 		);
 	}
 
-	/**
-	 * @param modelMigrator
-	 * @param reference
-	 * @param newType
-	 * @param referredObjectTransformer given the old referred object
-	 * (already in the model being migrated), return a the new object
-	 * to be referred (which is assumed to be of the right new type)
-	 * (the first argument is the old referred object, the second one
-	 * is the new referred object); both objects are part of the model
-	 * being migrated.
-	 * @param postCopy optional {@link Runnable} that will be executed
-	 * after the migration of the model, e.g., for cleanup and
-	 * stale objects removal (shared non-containment references not
-	 * used anymore can be deleted in this runnable)
-	 */
-	private void changeReferenceType(EdeltaModelMigrator modelMigrator,
-			EReference reference, EClass newType,
-			EObjectFunction referredObjectTransformer,
-			Runnable postCopy) {
-		// change type of the reference
-		reference.setEType(newType);
-
-		// and adjust model migration...
-
-		modelMigrator.copyRule(
-			modelMigrator.isRelatedTo(reference),
-			modelMigrator
-				.multiplicityAwareCopy(reference, referredObjectTransformer),
-			postCopy
-		);
-	}
-
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String outputdir,
@@ -5169,5 +5137,37 @@ class EdeltaModelMigratorTest {
 			}
 		);
 		return attribute;
+	}
+
+	/**
+	 * @param modelMigrator
+	 * @param reference
+	 * @param newType
+	 * @param referredObjectTransformer given the old referred object
+	 * (already in the model being migrated), return a the new object
+	 * to be referred (which is assumed to be of the right new type)
+	 * (the first argument is the old referred object, the second one
+	 * is the new referred object); both objects are part of the model
+	 * being migrated.
+	 * @param postCopy optional {@link Runnable} that will be executed
+	 * after the migration of the model, e.g., for cleanup and
+	 * stale objects removal (shared non-containment references not
+	 * used anymore can be deleted in this runnable)
+	 */
+	private void changeReferenceType(EdeltaModelMigrator modelMigrator,
+			EReference reference, EClass newType,
+			EObjectFunction referredObjectTransformer,
+			Runnable postCopy) {
+		// change type of the reference
+		reference.setEType(newType);
+	
+		// and adjust model migration...
+	
+		modelMigrator.copyRule(
+			modelMigrator.isRelatedTo(reference),
+			modelMigrator
+				.multiplicityAwareCopy(reference, referredObjectTransformer),
+			postCopy
+		);
 	}
 }
