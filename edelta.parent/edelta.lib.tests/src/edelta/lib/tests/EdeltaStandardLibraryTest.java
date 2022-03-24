@@ -932,6 +932,28 @@ public class EdeltaStandardLibraryTest {
 		);
 	}
 
+	@Test
+	public void modelMigrationCopyToAs() throws Exception {
+		var subdir = "simpleTestData/";
+		var engine = setupEngine(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi"),
+			stdLib -> {
+				var a = stdLib.getEAttribute("mypackage", "MyClass",
+						"myClassStringAttribute");
+				var myRoot = stdLib.getEClass("mypackage", "MyRoot");
+				stdLib.copyToAs(a, myRoot, "myRootStringAttribute");
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			"copyToAs/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
 	private Resource loadTestEcore(String ecoreFile) {
 		return modelManager.loadEcoreFile(TESTECORES+ecoreFile);
 	}
