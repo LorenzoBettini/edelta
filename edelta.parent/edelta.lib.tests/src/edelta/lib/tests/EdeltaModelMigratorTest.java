@@ -2734,9 +2734,9 @@ class EdeltaModelMigratorTest {
 		);
 
 		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
-		var personFirstName = person.getEStructuralFeature("firstName");
-		var personLastName = person.getEStructuralFeature("lastName");
-		mergeFeatures(
+		var personFirstName = (EAttribute) person.getEStructuralFeature("firstName");
+		var personLastName = (EAttribute) person.getEStructuralFeature("lastName");
+		mergeAttributes(
 			modelMigrator,
 			"name",
 			asList(
@@ -2763,12 +2763,12 @@ class EdeltaModelMigratorTest {
 		);
 
 		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
-		mergeFeatures(
+		mergeAttributes(
 			modelMigrator,
 			"name",
 			asList(
-				person.getEStructuralFeature("firstName"),
-				person.getEStructuralFeature("lastName")),
+				(EAttribute) person.getEStructuralFeature("firstName"),
+				(EAttribute) person.getEStructuralFeature("lastName")),
 			values -> {
 				var merged = values.stream()
 					.filter(Objects::nonNull)
@@ -2801,12 +2801,12 @@ class EdeltaModelMigratorTest {
 		EAttribute nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		assertNotNull(nameElementAttribute);
-		mergeFeatures(
+		mergeReferences(
 			modelMigrator,
 			"name",
 			asList(
-				person.getEStructuralFeature("firstName"),
-				person.getEStructuralFeature("lastName")),
+				(EReference) person.getEStructuralFeature("firstName"),
+				(EReference) person.getEStructuralFeature("lastName")),
 			values -> {
 				// it is responsibility of the merger to create an instance
 				// of the (now single) referred object with the result
@@ -2862,12 +2862,12 @@ class EdeltaModelMigratorTest {
 		EAttribute nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		assertNotNull(nameElementAttribute);
-		mergeFeatures(
+		mergeReferences(
 			modelMigrator,
 			"name",
 			asList(
-				person.getEStructuralFeature("firstName"),
-				person.getEStructuralFeature("lastName")),
+				(EReference) person.getEStructuralFeature("firstName"),
+				(EReference) person.getEStructuralFeature("lastName")),
 			values -> {
 				// it is responsibility of the merger to create an instance
 				// of the (now single) referred object with the result
@@ -2941,12 +2941,12 @@ class EdeltaModelMigratorTest {
 		// keep track of objects that are merged into a single one
 		var merged = new HashMap<Collection<EObject>, EObject>();
 
-		mergeFeatures(
+		mergeReferences(
 			modelMigrator,
 			"name",
 			asList(
-				person.getEStructuralFeature("firstName"),
-				person.getEStructuralFeature("lastName")),
+				(EReference) person.getEStructuralFeature("firstName"),
+				(EReference) person.getEStructuralFeature("lastName")),
 			values -> {
 				// it is responsibility of the merger to create an instance
 				// of the (now single) referred object with the result
@@ -3011,8 +3011,8 @@ class EdeltaModelMigratorTest {
 		);
 
 		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
-		EStructuralFeature personName = person.getEStructuralFeature("name");
-		splitFeature(
+		var personName = (EAttribute) person.getEStructuralFeature("name");
+		splitAttribute(
 			modelMigrator,
 			personName,
 			asList(
@@ -3046,12 +3046,12 @@ class EdeltaModelMigratorTest {
 		);
 
 		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
-		EStructuralFeature personName = person.getEStructuralFeature("name");
+		var personName = (EReference) person.getEStructuralFeature("name");
 		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
 		EAttribute nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		assertNotNull(nameElementAttribute);
-		splitFeature(
+		splitReference(
 			modelMigrator,
 			personName,
 			asList(
@@ -3105,12 +3105,12 @@ class EdeltaModelMigratorTest {
 		);
 
 		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
-		EStructuralFeature personName = person.getEStructuralFeature("name");
+		var personName = (EReference) person.getEStructuralFeature("name");
 		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
 		EAttribute nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		assertNotNull(nameElementAttribute);
-		splitFeature(
+		splitReference(
 			modelMigrator,
 			personName,
 			asList(
@@ -3179,7 +3179,7 @@ class EdeltaModelMigratorTest {
 		);
 
 		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
-		EStructuralFeature personName = person.getEStructuralFeature("name");
+		var personName = (EReference) person.getEStructuralFeature("name");
 		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
 		EAttribute nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
@@ -3188,7 +3188,7 @@ class EdeltaModelMigratorTest {
 		// keep track of objects that are splitted into several ones
 		var splitted = new HashMap<EObject, Collection<EObject>>();
 
-		splitFeature(
+		splitReference(
 			modelMigrator,
 			personName,
 			asList(
@@ -3266,8 +3266,8 @@ class EdeltaModelMigratorTest {
 		);
 
 		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
-		EStructuralFeature personName = person.getEStructuralFeature("name");
-		Collection<EStructuralFeature> splitFeatures = splitFeature(
+		var personName = (EAttribute) person.getEStructuralFeature("name");
+		var splitFeatures = splitAttribute(
 			modelMigrator,
 			personName,
 			asList(
@@ -3281,7 +3281,7 @@ class EdeltaModelMigratorTest {
 				return Arrays.asList(split);
 			}, null
 		);
-		mergeFeatures(
+		mergeAttributes(
 			modelMigrator,
 			"name",
 			splitFeatures,
@@ -3320,9 +3320,9 @@ class EdeltaModelMigratorTest {
 		);
 
 		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
-		var personFirstName = person.getEStructuralFeature("firstName");
-		var personLastName = person.getEStructuralFeature("lastName");
-		EStructuralFeature mergedFeature = mergeFeatures(
+		var personFirstName = (EAttribute) person.getEStructuralFeature("firstName");
+		var personLastName = (EAttribute) person.getEStructuralFeature("lastName");
+		var mergedFeature = mergeAttributes(
 			modelMigrator,
 			"name",
 			asList(
@@ -3335,7 +3335,7 @@ class EdeltaModelMigratorTest {
 					.collect(Collectors.joining(" "));
 				return merged.isEmpty() ? null : merged;
 			}, null);
-		splitFeature(
+		splitAttribute(
 			modelMigrator,
 			mergedFeature,
 			asList(
@@ -3372,10 +3372,10 @@ class EdeltaModelMigratorTest {
 		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
 		EAttribute nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
-		var personFirstName = person.getEStructuralFeature("firstName");
-		var personLastName = person.getEStructuralFeature("lastName");
+		var personFirstName = (EReference) person.getEStructuralFeature("firstName");
+		var personLastName = (EReference) person.getEStructuralFeature("lastName");
 		assertNotNull(nameElementAttribute);
-		EStructuralFeature mergedFeature =  mergeFeatures(
+		var mergedFeature =  mergeReferences(
 			modelMigrator,
 			"name",
 			asList(
@@ -3399,7 +3399,7 @@ class EdeltaModelMigratorTest {
 				);
 			}, null
 		);
-		splitFeature(
+		splitReference(
 			modelMigrator,
 			mergedFeature,
 			asList(
@@ -3454,10 +3454,10 @@ class EdeltaModelMigratorTest {
 		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
 		EAttribute nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
-		var personFirstName = person.getEStructuralFeature("firstName");
-		var personLastName = person.getEStructuralFeature("lastName");
+		var personFirstName = (EReference) person.getEStructuralFeature("firstName");
+		var personLastName = (EReference) person.getEStructuralFeature("lastName");
 		assertNotNull(nameElementAttribute);
-		EStructuralFeature mergedFeature =  mergeFeatures(
+		var mergedFeature =  mergeReferences(
 			modelMigrator,
 			"name",
 			asList(
@@ -3495,7 +3495,7 @@ class EdeltaModelMigratorTest {
 				);
 			}, null
 		);
-		splitFeature(
+		splitReference(
 			modelMigrator,
 			mergedFeature,
 			asList(
@@ -3562,14 +3562,14 @@ class EdeltaModelMigratorTest {
 		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
 		EAttribute nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
-		var personFirstName = person.getEStructuralFeature("firstName");
-		var personLastName = person.getEStructuralFeature("lastName");
+		var personFirstName = (EReference) person.getEStructuralFeature("firstName");
+		var personLastName = (EReference) person.getEStructuralFeature("lastName");
 		assertNotNull(nameElementAttribute);
 
 		// keep track of objects that are merged into a single one
 		var merged = new HashMap<Collection<EObject>, EObject>();
 
-		EStructuralFeature mergedFeature =  mergeFeatures(
+		var mergedFeature =  mergeReferences(
 			modelMigrator,
 			"name",
 			asList(
@@ -3623,7 +3623,7 @@ class EdeltaModelMigratorTest {
 		// keep track of objects that are splitted into several ones
 		var splitted = new HashMap<EObject, Collection<EObject>>();
 
-		splitFeature(
+		splitReference(
 			modelMigrator,
 			mergedFeature,
 			asList(
@@ -3701,12 +3701,12 @@ class EdeltaModelMigratorTest {
 		);
 	
 		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
-		EStructuralFeature personName = person.getEStructuralFeature("name");
+		var personName = (EReference) person.getEStructuralFeature("name");
 		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
 		EAttribute nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		assertNotNull(nameElementAttribute);
-		Collection<EStructuralFeature> splitFeatures = splitFeature(
+		var splitFeatures = splitReference(
 			modelMigrator,
 			personName,
 			asList(
@@ -3730,7 +3730,7 @@ class EdeltaModelMigratorTest {
 					.collect(Collectors.toList());
 			}, null
 		);
-		mergeFeatures(
+		mergeReferences(
 			modelMigrator,
 			"name",
 			splitFeatures,
@@ -3784,12 +3784,12 @@ class EdeltaModelMigratorTest {
 		);
 
 		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
-		EStructuralFeature personName = person.getEStructuralFeature("name");
+		var personName = (EReference) person.getEStructuralFeature("name");
 		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
 		EAttribute nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		assertNotNull(nameElementAttribute);
-		Collection<EStructuralFeature> splitFeatures = splitFeature(
+		var splitFeatures = splitReference(
 			modelMigrator,
 			personName,
 			asList(
@@ -3825,7 +3825,7 @@ class EdeltaModelMigratorTest {
 					.collect(Collectors.toList());
 			}, null
 		);
-		mergeFeatures(
+		mergeReferences(
 			modelMigrator,
 			"name",
 			splitFeatures,
@@ -3889,7 +3889,7 @@ class EdeltaModelMigratorTest {
 		);
 
 		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
-		EStructuralFeature personName = person.getEStructuralFeature("name");
+		var personName = (EReference) person.getEStructuralFeature("name");
 		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
 		EAttribute nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
@@ -3898,7 +3898,7 @@ class EdeltaModelMigratorTest {
 		// keep track of objects that are splitted into several ones
 		var splitted = new HashMap<EObject, Collection<EObject>>();
 
-		Collection<EStructuralFeature> splitFeatures = splitFeature(
+		var splitFeatures = splitReference(
 			modelMigrator,
 			personName,
 			asList(
@@ -3950,10 +3950,10 @@ class EdeltaModelMigratorTest {
 		// keep track of objects that are merged into a single one
 		var merged = new HashMap<Collection<EObject>, EObject>();
 
-		mergeFeatures(
+		mergeReferences(
 			modelMigrator,
 			"name",
-			splitFeatures,
+			splitFeatures.stream().map(EReference.class::cast).collect(Collectors.toList()),
 			values -> {
 				// it is responsibility of the merger to create an instance
 				// of the (now single) referred object with the result
@@ -4149,12 +4149,12 @@ class EdeltaModelMigratorTest {
 		// merge for both subclasses
 		subclasses.forEach(
 			subclass ->
-				mergeFeatures(
+				mergeAttributes(
 					modelMigrator,
 					"name",
 					asList(
-						subclass.getEStructuralFeature("firstname"),
-						subclass.getEStructuralFeature("lastname")),
+						(EAttribute) subclass.getEStructuralFeature("firstname"),
+						(EAttribute) subclass.getEStructuralFeature("lastname")),
 					values -> {
 						var merged = values.stream()
 							.filter(Objects::nonNull)
@@ -4714,8 +4714,8 @@ class EdeltaModelMigratorTest {
 	}
 
 	/**
-	 * Merges the given features into a single new feature in the containing class.
-	 * The features must be compatible (same containing class, same type, same
+	 * Merges the given attributes into a single new attribute in the containing class.
+	 * The attributes must be compatible (same containing class, same type, same
 	 * cardinality, etc).
 	 * @param newFeatureName
 	 * @param features
@@ -4725,10 +4725,80 @@ class EdeltaModelMigratorTest {
 	 * 
 	 * @return the new feature added to the containing class of the features
 	 */
-	private EStructuralFeature mergeFeatures(EdeltaModelMigrator modelMigrator,
+	private EAttribute mergeAttributes(EdeltaModelMigrator modelMigrator,
 			final String newFeatureName,
-			final Collection<EStructuralFeature> features,
+			final Collection<EAttribute> features,
 			Function<Collection<?>, Object> valueMerger, Runnable postCopy) {
+		var firstFeature = features.iterator().next();
+		var mergedFeature = mergeFeatures(modelMigrator, newFeatureName, features);
+		if (valueMerger != null) {
+			modelMigrator.copyRule(
+				modelMigrator.wasRelatedTo(firstFeature),
+				(feature, oldObj, newObj) -> {
+					var originalFeatures = features.stream()
+							.map(modelMigrator::getOriginal);
+					var oldValues = originalFeatures
+							.map(f -> oldObj.eGet(f))
+							.collect(Collectors.toList());
+					var merged = valueMerger.apply(oldValues);
+					newObj.eSet(mergedFeature, merged);
+				},
+				postCopy
+			);
+		}
+		return mergedFeature;
+	}
+
+	/**
+	 * Merges the given references into a single new reference in the containing class.
+	 * The references must be compatible (same containing class, same type, same
+	 * cardinality, etc).
+	 * @param newFeatureName
+	 * @param features
+	 * @param valueMerger if not null, it is used to merge the values of the original
+	 * features in the new model
+	 * @param postCopy executed after the model migrations
+	 * 
+	 * @return the new feature added to the containing class of the features
+	 */
+	private EReference mergeReferences(EdeltaModelMigrator modelMigrator,
+			final String newFeatureName,
+			final Collection<EReference> features,
+			Function<Collection<?>, Object> valueMerger, Runnable postCopy) {
+		var firstFeature = features.iterator().next();
+		var mergedFeature = mergeFeatures(modelMigrator, newFeatureName, features);
+		if (valueMerger != null) {
+			modelMigrator.copyRule(
+				modelMigrator.wasRelatedTo(firstFeature),
+				(feature, oldObj, newObj) -> {
+					var originalFeatures = features.stream()
+							.map(modelMigrator::getOriginal);
+					// for references we must get the copied EObject
+					var oldValues = originalFeatures
+							.map(f -> oldObj.eGet(f))
+							.collect(Collectors.toList());
+					var merged = valueMerger.apply(
+						modelMigrator.getMigrated(oldValues));
+					newObj.eSet(mergedFeature, merged);
+				},
+				postCopy
+			);
+		}
+		return mergedFeature;
+	}
+
+	/**
+	 * Merges the given features into a single new feature in the containing class.
+	 * The references must be compatible (same containing class, same type, same
+	 * cardinality, etc).
+	 * @param newFeatureName
+	 * @param features
+	 * 
+	 * @return the new feature added to the containing class of the features
+	 */
+	private <T extends EStructuralFeature> T mergeFeatures(EdeltaModelMigrator modelMigrator,
+			final String newFeatureName,
+			final Collection<T> features) {
 		// THIS SHOULD BE CHECKED IN THE FINAL IMPLEMENTATION (ALREADY DONE IN refactorings.lib)
 //		this.checkNoDifferences(features, new EdeltaFeatureDifferenceFinder().ignoringName(),
 //				"The two features cannot be merged");
@@ -4736,50 +4806,63 @@ class EdeltaModelMigratorTest {
 		// ALSO MAKE SURE IT'S NOT BIDIRECTIONAL (TO BE DONE ALSO IN refactorings.lib)
 		var firstFeature = features.iterator().next();
 		final EClass owner = firstFeature.getEContainingClass();
-		final EStructuralFeature mergedFeature = createCopy(modelMigrator, firstFeature);
+		var mergedFeature = createCopy(modelMigrator, firstFeature);
 		mergedFeature.setName(newFeatureName);
 		owner.getEStructuralFeatures().add(mergedFeature);
 		EdeltaUtils.removeAllElements(features);
-		if (valueMerger != null) {
-			if (firstFeature instanceof EReference) {
-				modelMigrator.copyRule(
-					modelMigrator.wasRelatedTo(firstFeature),
-					(feature, oldObj, newObj) -> {
-						var originalFeatures = features.stream()
-								.map(modelMigrator::getOriginal);
-						// for references we must get the copied EObject
-						var oldValues = originalFeatures
-								.map(f -> oldObj.eGet(f))
-								.collect(Collectors.toList());
-						var merged = valueMerger.apply(
-							modelMigrator.getMigrated(oldValues));
-						newObj.eSet(mergedFeature, merged);
-					},
-					postCopy
-				);
-			} else {
-				modelMigrator.copyRule(
-					modelMigrator.wasRelatedTo(firstFeature),
-					(feature, oldObj, newObj) -> {
-						var originalFeatures = features.stream()
-								.map(modelMigrator::getOriginal);
-						var oldValues = originalFeatures
-								.map(f -> oldObj.eGet(f))
-								.collect(Collectors.toList());
-						var merged = valueMerger.apply(oldValues);
-						newObj.eSet(mergedFeature, merged);
-					},
-					postCopy
-				);
-			}
-		}
 		return mergedFeature;
 	}
 
-	private Collection<EStructuralFeature> splitFeature(EdeltaModelMigrator modelMigrator,
-			final EStructuralFeature featureToSplit,
+	private Collection<EAttribute> splitAttribute(EdeltaModelMigrator modelMigrator,
+			final EAttribute featureToSplit,
 			final Collection<String> newFeatureNames,
 			Function<Object, Collection<?>> valueSplitter, Runnable postCopy) {
+		var splitFeatures = splitFeature(modelMigrator, featureToSplit, newFeatureNames);
+		if (valueSplitter != null) {
+			modelMigrator.copyRule(
+				modelMigrator.wasRelatedTo(featureToSplit),
+				(feature, oldObj, newObj) -> {
+					var oldValue = oldObj.eGet(feature);
+					var splittedValues = valueSplitter.apply(oldValue).iterator();
+					for (var splitFeature : splitFeatures) {
+						if (!splittedValues.hasNext())
+							break;
+						newObj.eSet(splitFeature, splittedValues.next());
+					}
+				},
+				postCopy
+			);
+		}
+		return splitFeatures;
+	}
+
+	private Collection<EReference> splitReference(EdeltaModelMigrator modelMigrator,
+			final EReference featureToSplit,
+			final Collection<String> newFeatureNames,
+			Function<Object, Collection<?>> valueSplitter, Runnable postCopy) {
+		var splitFeatures = splitFeature(modelMigrator, featureToSplit, newFeatureNames);
+		if (valueSplitter != null) {
+			modelMigrator.copyRule(
+				modelMigrator.wasRelatedTo(featureToSplit),
+				(feature, oldObj, newObj) -> {
+					// for references we must get the copied EObject
+					var oldValue = modelMigrator.getMigrated((EObject) oldObj.eGet(feature));
+					var splittedValues = valueSplitter.apply(oldValue).iterator();
+					for (var splitFeature : splitFeatures) {
+						if (!splittedValues.hasNext())
+							break;
+						newObj.eSet(splitFeature, splittedValues.next());
+					}
+				},
+				postCopy
+			);
+		}
+		return splitFeatures;
+	}
+
+	private <T extends EStructuralFeature> Collection<T> splitFeature(EdeltaModelMigrator modelMigrator,
+			final T featureToSplit,
+			final Collection<String> newFeatureNames) {
 		// THIS SHOULD BE CHECKED IN THE FINAL IMPLEMENTATION
 		// ALSO MAKE SURE IT'S A SINGLE FEATURE, NOT MULTI (TO BE DONE ALSO IN refactorings.lib)
 		// ALSO MAKE SURE IT'S NOT BIDIRECTIONAL (TO BE DONE ALSO IN refactorings.lib)
@@ -4793,37 +4876,6 @@ class EdeltaModelMigratorTest {
 		featureToSplit.getEContainingClass()
 			.getEStructuralFeatures().addAll(splitFeatures);
 		EdeltaUtils.removeElement(featureToSplit);
-		if (valueSplitter != null) {
-			if (featureToSplit instanceof EReference)
-				modelMigrator.copyRule(
-					modelMigrator.wasRelatedTo(featureToSplit),
-					(feature, oldObj, newObj) -> {
-						// for references we must get the copied EObject
-						var oldValue = modelMigrator.getMigrated((EObject) oldObj.eGet(feature));
-						var splittedValues = valueSplitter.apply(oldValue).iterator();
-						for (var splitFeature : splitFeatures) {
-							if (!splittedValues.hasNext())
-								break;
-							newObj.eSet(splitFeature, splittedValues.next());
-						}
-					},
-					postCopy
-				);
-			else
-				modelMigrator.copyRule(
-					modelMigrator.wasRelatedTo(featureToSplit),
-					(feature, oldObj, newObj) -> {
-						var oldValue = oldObj.eGet(feature);
-						var splittedValues = valueSplitter.apply(oldValue).iterator();
-						for (var splitFeature : splitFeatures) {
-							if (!splittedValues.hasNext())
-								break;
-							newObj.eSet(splitFeature, splittedValues.next());
-						}
-					},
-					postCopy
-				);
-		}
 		return splitFeatures;
 	}
 
