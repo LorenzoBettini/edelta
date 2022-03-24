@@ -4180,6 +4180,69 @@ class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	void testChangeReferenceTypeContainment() throws IOException {
+		var subdir = "changeReferenceTypeContainment/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var person = getEClass(evolvingModelManager, "PersonList", "Person");
+		var firstName = (EReference) person.getEStructuralFeature("firstName");
+		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+
+		// add a new class similar to NameElement
+		var otherNameElement = createCopy(modelMigrator, nameElement);
+		otherNameElement.setName("OtherNameElement");
+		var otherNameElementFeature = otherNameElement.getEStructuralFeatures().get(0);
+		otherNameElementFeature.setName("otherNameElementValue");
+		person.getEPackage().getEClassifiers().add(otherNameElement);
+
+		// change type of firstName
+		firstName.setEType(otherNameElement);
+
+		// adjust model migration
+
+		// for reference we must first propagate the copy
+		// especially in case of collections
+		modelMigrator.copyRule(
+			modelMigrator.isRelatedTo(firstName),
+			(oldFeature, oldObj, newObj) -> {
+				// if we come here the old attribute was set
+				EdeltaEcoreUtil.setValueForFeature(
+					newObj,
+					firstName,
+					// use the upper bound of the destination attribute, since it might
+					// be different from the original one
+					modelMigrator.getMigrated(
+						EdeltaEcoreUtil
+							.wrapAsCollection(oldObj.eGet(oldFeature), firstName.getUpperBound()))
+						.stream()
+						.map(oldFeatureSingleValue -> (EObject)oldFeatureSingleValue)
+						.map(oldFeatureSingleValue -> EdeltaEcoreUtil
+							.createInstance(firstName.getEReferenceType(), eO -> {
+								eO.eSet(otherNameElementFeature,
+									oldFeatureSingleValue.eGet(
+										oldFeatureSingleValue.eClass()
+											.getEStructuralFeature("nameElementValue")
+									));
+							}))
+						.collect(Collectors.toList())
+				);
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String outputdir,
