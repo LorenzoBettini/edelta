@@ -994,6 +994,41 @@ public class EdeltaStandardLibraryTest {
 		);
 	}
 
+	/**
+	 * Note that, since we handle multiplicity automatically, the code of the
+	 * refactoring and transformer is just the same as the previous test.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void changeAttributeTypeMultiple() throws Exception {
+		var subdir = "changedMultiAttributeType/";
+		var engine = setupEngine(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi"),
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					var attribute = stdLib.getEAttribute("mypackage", "MyClass", "myAttribute");
+					stdLib.changeType(attribute, EINT, val -> {
+						try {
+							return Integer.parseInt(val.toString());
+						} catch (NumberFormatException e) {
+							return -1;
+						}
+					});
+				}
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
 	private Resource loadTestEcore(String ecoreFile) {
 		return modelManager.loadEcoreFile(TESTECORES+ecoreFile);
 	}
