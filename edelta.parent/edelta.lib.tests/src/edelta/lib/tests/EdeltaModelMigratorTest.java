@@ -1,5 +1,7 @@
 package edelta.lib.tests;
 
+import static edelta.lib.EdeltaEcoreUtil.createInstance;
+import static edelta.lib.EdeltaEcoreUtil.wrapAsCollection;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
 import static java.util.Arrays.asList;
@@ -22,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -4201,45 +4204,62 @@ class EdeltaModelMigratorTest {
 		otherNameElementFeature.setName("otherNameElementValue");
 		person.getEPackage().getEClassifiers().add(otherNameElement);
 
-		// change type of firstName
-		firstName.setEType(otherNameElement);
-
-		// adjust model migration
-
-		// for reference we must first propagate the copy
-		// especially in case of collections
-		modelMigrator.copyRule(
-			modelMigrator.isRelatedTo(firstName),
-			(oldFeature, oldObj, newObj) -> {
-				// if we come here the old attribute was set
-				EdeltaEcoreUtil.setValueForFeature(
-					newObj,
-					firstName,
-					// use the upper bound of the destination attribute, since it might
-					// be different from the original one
-					modelMigrator.getMigrated(
-						EdeltaEcoreUtil
-							.wrapAsCollection(oldObj.eGet(oldFeature), firstName.getUpperBound()))
-						.stream()
-						.map(oldFeatureSingleValue -> (EObject)oldFeatureSingleValue)
-						.map(oldFeatureSingleValue -> EdeltaEcoreUtil
-							.createInstance(firstName.getEReferenceType(), eO -> {
-								eO.eSet(otherNameElementFeature,
-									oldFeatureSingleValue.eGet(
-										oldFeatureSingleValue.eClass()
-											.getEStructuralFeature("nameElementValue")
-									));
-							}))
-						.collect(Collectors.toList())
-				);
-			}
-		);
+		changeReferenceType(modelMigrator, firstName, otherNameElement,
+			(oldReferredObject, newReferredObject) ->
+			newReferredObject.eSet(otherNameElementFeature,
+				oldReferredObject.eGet(
+					oldReferredObject.eClass()
+						.getEStructuralFeature("nameElementValue")
+				)));
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
+		);
+	}
+
+	/**
+	 * @param modelMigrator
+	 * @param reference
+	 * @param newType
+	 * @param newTypeReferredObjectConsumer What to do with the automatically
+	 * newly instantiated referred object of the newType
+	 * (the first argument is the old referred object, the second one
+	 * is the new referred object)
+	 */
+	private void changeReferenceType(EdeltaModelMigrator modelMigrator,
+			EReference reference, EClass newType,
+			BiConsumer<EObject, EObject> newTypeReferredObjectConsumer) {
+		// change type of the reference
+		reference.setEType(newType);
+
+		// and adjust model migration...
+
+		// for reference we must first propagate the copy
+		// especially in case of collections
+		modelMigrator.copyRule(
+			modelMigrator.isRelatedTo(reference),
+			(oldFeature, oldObj, newObj) -> {
+				// if we come here the old attribute was set
+				EdeltaEcoreUtil.setValueForFeature(
+					newObj,
+					reference,
+					// use the upper bound of the destination attribute, since it might
+					// be different from the original one
+					modelMigrator.getMigrated(
+						wrapAsCollection(oldObj.eGet(oldFeature), reference.getUpperBound()))
+						.stream()
+						.map(oldFeatureSingleValue -> (EObject)oldFeatureSingleValue)
+						.map(oldFeatureSingleValue -> createInstance(reference.getEReferenceType(),
+							newReferredObject ->
+								newTypeReferredObjectConsumer.accept(
+									oldFeatureSingleValue, newReferredObject)
+						))
+						.collect(Collectors.toList())
+				);
+			}
 		);
 	}
 
