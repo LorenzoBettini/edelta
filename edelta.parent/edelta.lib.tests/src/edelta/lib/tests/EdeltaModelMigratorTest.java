@@ -1,6 +1,5 @@
 package edelta.lib.tests;
 
-import static edelta.lib.EdeltaEcoreUtil.createInstance;
 import static edelta.lib.EdeltaEcoreUtil.wrapAsCollection;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
@@ -24,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -51,6 +49,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaModelMigrator;
+import edelta.lib.EdeltaModelMigrator.EObjectFunction;
 import edelta.lib.EdeltaUtils;
 
 class EdeltaModelMigratorTest {
@@ -4205,12 +4204,15 @@ class EdeltaModelMigratorTest {
 		person.getEPackage().getEClassifiers().add(otherNameElement);
 
 		changeReferenceType(modelMigrator, firstName, otherNameElement,
-			(oldReferredObject, newReferredObject) ->
-			newReferredObject.eSet(otherNameElementFeature,
+			oldReferredObject ->
+			EdeltaEcoreUtil.createInstance(otherNameElement,
+				newReferredObject ->
+				newReferredObject.eSet(otherNameElementFeature,
 				oldReferredObject.eGet(
 					oldReferredObject.eClass()
 						.getEStructuralFeature("nameElementValue")
-				)));
+				))),
+			null);
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
@@ -4250,8 +4252,7 @@ class EdeltaModelMigratorTest {
 		list.getEStructuralFeatures().add(otherNameElements);
 
 		changeReferenceType(modelMigrator, firstName, otherNameElement,
-			(oldReferredObject, newReferredObject) ->
-			{
+			oldReferredObject -> {
 				// it's responsibility of the caller to store the new
 				// object in a container
 				
@@ -4261,14 +4262,83 @@ class EdeltaModelMigratorTest {
 				var listObject = oldReferredObject.eContainer();
 				@SuppressWarnings("unchecked")
 				var otherNameElementsCollection = (List<EObject>) listObject.eGet(otherNameElements);
-				otherNameElementsCollection.add(newReferredObject);
+				return EdeltaEcoreUtil.createInstance(otherNameElement,
+					newReferredObject -> {
+						newReferredObject.eSet(otherNameElementFeature,
+						oldReferredObject.eGet(
+							oldReferredObject.eClass()
+								.getEStructuralFeature("nameElementValue")
+						));
+						otherNameElementsCollection.add(newReferredObject);
+					});
+			}, null);
 
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	void testChangeReferenceTypeNonContainmentShared() throws IOException {
+		var subdir = "changeReferenceTypeNonContainmentShared/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var person = getEClass(evolvingModelManager, "PersonList", "Person");
+		var firstName = (EReference) person.getEStructuralFeature("firstName");
+		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+
+		// add a new class similar to NameElement
+		var otherNameElement = createCopy(modelMigrator, nameElement);
+		otherNameElement.setName("OtherNameElement");
+		var otherNameElementFeature = otherNameElement.getEStructuralFeatures().get(0);
+		otherNameElementFeature.setName("otherNameElementValue");
+		person.getEPackage().getEClassifiers().add(otherNameElement);
+
+		// since in this test the referred object was NOT contained,
+		// we must also add a containment feature in the Ecore
+		var list = getEClass(evolvingModelManager, "PersonList", "List");
+		var otherNameElements = EcoreUtil.copy(list.getEStructuralFeature("nameElements"));
+		otherNameElements.setName("otherNameElements");
+		otherNameElements.setEType(otherNameElement);
+		list.getEStructuralFeatures().add(otherNameElements);
+
+		var referredMap = new HashMap<EObject, EObject>();
+
+		changeReferenceType(modelMigrator, firstName, otherNameElement,
+			oldReferredObject -> {
+				// it's responsibility of the caller to store the new
+				// object in a container...
+				var newReferredObject = referredMap.computeIfAbsent(oldReferredObject,
+					oldReferred -> {
+					// ... avoiding duplicates like in this case
+					// where references are meant to be shared
+
+					// retrieve the copied List object
+					// remember also the oldReferredObject is part
+					// of the (new) model, the one migrateds
+					var listObject = oldReferredObject.eContainer();
+					@SuppressWarnings("unchecked")
+					var otherNameElementsCollection = (List<EObject>) listObject.eGet(otherNameElements);
+					return EdeltaEcoreUtil.createInstance(otherNameElement,
+						otherNameElementsCollection::add);
+					});
 				newReferredObject.eSet(otherNameElementFeature,
 					oldReferredObject.eGet(
 						oldReferredObject.eClass()
 							.getEStructuralFeature("nameElementValue")
 					));
-			});
+				return newReferredObject;
+			},
+			// old shared referred objects can be removed now
+			() -> EcoreUtil.removeAll(referredMap.keySet()));
 
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
@@ -4282,15 +4352,21 @@ class EdeltaModelMigratorTest {
 	 * @param modelMigrator
 	 * @param reference
 	 * @param newType
-	 * @param newTypeReferredObjectConsumer What to do with the automatically
-	 * newly instantiated referred object of the newType
+	 * @param referredObjectTransformer given the old referred object
+	 * (already in the model being migrated), return a the new object
+	 * to be referred (which is assumed to be of the right new type)
 	 * (the first argument is the old referred object, the second one
 	 * is the new referred object); both objects are part of the model
 	 * being migrated.
+	 * @param postCopy optional {@link Runnable} that will be executed
+	 * after the migration of the model, e.g., for cleanup and
+	 * stale objects removal (shared non-containment references not
+	 * used anymore can be deleted in this runnable)
 	 */
 	private void changeReferenceType(EdeltaModelMigrator modelMigrator,
 			EReference reference, EClass newType,
-			BiConsumer<EObject, EObject> newTypeReferredObjectConsumer) {
+			EObjectFunction referredObjectTransformer,
+			Runnable postCopy) {
 		// change type of the reference
 		reference.setEType(newType);
 
@@ -4311,14 +4387,11 @@ class EdeltaModelMigratorTest {
 						wrapAsCollection(oldObj.eGet(oldFeature), reference.getUpperBound()))
 						.stream()
 						.map(oldFeatureSingleValue -> (EObject)oldFeatureSingleValue)
-						.map(oldFeatureSingleValue -> createInstance(reference.getEReferenceType(),
-							newReferredObject ->
-								newTypeReferredObjectConsumer.accept(
-									oldFeatureSingleValue, newReferredObject)
-						))
+						.map(referredObjectTransformer)
 						.collect(Collectors.toList())
 				);
-			}
+			},
+			postCopy
 		);
 	}
 
