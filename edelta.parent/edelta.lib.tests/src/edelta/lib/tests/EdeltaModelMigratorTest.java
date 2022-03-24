@@ -4220,6 +4220,64 @@ class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	void testChangeReferenceTypeNonContainment() throws IOException {
+		var subdir = "changeReferenceTypeNonContainment/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var person = getEClass(evolvingModelManager, "PersonList", "Person");
+		var firstName = (EReference) person.getEStructuralFeature("firstName");
+		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+
+		// add a new class similar to NameElement
+		var otherNameElement = createCopy(modelMigrator, nameElement);
+		otherNameElement.setName("OtherNameElement");
+		var otherNameElementFeature = otherNameElement.getEStructuralFeatures().get(0);
+		otherNameElementFeature.setName("otherNameElementValue");
+		person.getEPackage().getEClassifiers().add(otherNameElement);
+
+		// since in this test the referred object was NOT contained,
+		// we must also add a containment feature in the Ecore
+		var list = getEClass(evolvingModelManager, "PersonList", "List");
+		var otherNameElements = EcoreUtil.copy(list.getEStructuralFeature("nameElements"));
+		otherNameElements.setName("otherNameElements");
+		otherNameElements.setEType(otherNameElement);
+		list.getEStructuralFeatures().add(otherNameElements);
+
+		changeReferenceType(modelMigrator, firstName, otherNameElement,
+			(oldReferredObject, newReferredObject) ->
+			{
+				// it's responsibility of the caller to store the new
+				// object in a container
+				
+				// retrieve the copied List object
+				// remember also the oldReferredObject is part
+				// of the (new) model, the one migrateds
+				var listObject = oldReferredObject.eContainer();
+				@SuppressWarnings("unchecked")
+				var otherNameElementsCollection = (List<EObject>) listObject.eGet(otherNameElements);
+				otherNameElementsCollection.add(newReferredObject);
+
+				newReferredObject.eSet(otherNameElementFeature,
+					oldReferredObject.eGet(
+						oldReferredObject.eClass()
+							.getEStructuralFeature("nameElementValue")
+					));
+			});
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
 	/**
 	 * @param modelMigrator
 	 * @param reference
@@ -4227,7 +4285,8 @@ class EdeltaModelMigratorTest {
 	 * @param newTypeReferredObjectConsumer What to do with the automatically
 	 * newly instantiated referred object of the newType
 	 * (the first argument is the old referred object, the second one
-	 * is the new referred object)
+	 * is the new referred object); both objects are part of the model
+	 * being migrated.
 	 */
 	private void changeReferenceType(EdeltaModelMigrator modelMigrator,
 			EReference reference, EClass newType,
