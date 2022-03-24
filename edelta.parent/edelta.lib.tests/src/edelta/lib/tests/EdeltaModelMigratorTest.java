@@ -4817,19 +4817,7 @@ class EdeltaModelMigratorTest {
 			final EAttribute featureToSplit,
 			final Collection<String> newFeatureNames,
 			Function<Object, Collection<?>> valueSplitter, Runnable postCopy) {
-		// THIS SHOULD BE CHECKED IN THE FINAL IMPLEMENTATION
-		// ALSO MAKE SURE IT'S A SINGLE FEATURE, NOT MULTI (TO BE DONE ALSO IN refactorings.lib)
-		// ALSO MAKE SURE IT'S NOT BIDIRECTIONAL (TO BE DONE ALSO IN refactorings.lib)
-		var splitFeatures = newFeatureNames.stream()
-			.map(newName -> {
-				var newFeature = createCopy(modelMigrator, featureToSplit);
-				newFeature.setName(newName);
-				return newFeature;
-			})
-			.collect(Collectors.toList());
-		featureToSplit.getEContainingClass()
-			.getEStructuralFeatures().addAll(splitFeatures);
-		EdeltaUtils.removeElement(featureToSplit);
+		var splitFeatures = splitFeature(modelMigrator, featureToSplit, newFeatureNames);
 		if (valueSplitter != null) {
 			modelMigrator.copyRule(
 				modelMigrator.wasRelatedTo(featureToSplit),
@@ -4852,19 +4840,7 @@ class EdeltaModelMigratorTest {
 			final EReference featureToSplit,
 			final Collection<String> newFeatureNames,
 			Function<Object, Collection<?>> valueSplitter, Runnable postCopy) {
-		// THIS SHOULD BE CHECKED IN THE FINAL IMPLEMENTATION
-		// ALSO MAKE SURE IT'S A SINGLE FEATURE, NOT MULTI (TO BE DONE ALSO IN refactorings.lib)
-		// ALSO MAKE SURE IT'S NOT BIDIRECTIONAL (TO BE DONE ALSO IN refactorings.lib)
-		var splitFeatures = newFeatureNames.stream()
-			.map(newName -> {
-				var newFeature = createCopy(modelMigrator, featureToSplit);
-				newFeature.setName(newName);
-				return newFeature;
-			})
-			.collect(Collectors.toList());
-		featureToSplit.getEContainingClass()
-			.getEStructuralFeatures().addAll(splitFeatures);
-		EdeltaUtils.removeElement(featureToSplit);
+		var splitFeatures = splitFeature(modelMigrator, featureToSplit, newFeatureNames);
 		if (valueSplitter != null) {
 			modelMigrator.copyRule(
 				modelMigrator.wasRelatedTo(featureToSplit),
@@ -4881,6 +4857,25 @@ class EdeltaModelMigratorTest {
 				postCopy
 			);
 		}
+		return splitFeatures;
+	}
+
+	private <T extends EStructuralFeature> Collection<T> splitFeature(EdeltaModelMigrator modelMigrator,
+			final T featureToSplit,
+			final Collection<String> newFeatureNames) {
+		// THIS SHOULD BE CHECKED IN THE FINAL IMPLEMENTATION
+		// ALSO MAKE SURE IT'S A SINGLE FEATURE, NOT MULTI (TO BE DONE ALSO IN refactorings.lib)
+		// ALSO MAKE SURE IT'S NOT BIDIRECTIONAL (TO BE DONE ALSO IN refactorings.lib)
+		var splitFeatures = newFeatureNames.stream()
+			.map(newName -> {
+				var newFeature = createCopy(modelMigrator, featureToSplit);
+				newFeature.setName(newName);
+				return newFeature;
+			})
+			.collect(Collectors.toList());
+		featureToSplit.getEContainingClass()
+			.getEStructuralFeatures().addAll(splitFeatures);
+		EdeltaUtils.removeElement(featureToSplit);
 		return splitFeatures;
 	}
 
