@@ -7,6 +7,7 @@ import static edelta.lib.EdeltaUtils.getEObjectRepr;
 
 import java.util.Collection;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -21,6 +22,8 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+
+import edelta.lib.EdeltaModelMigrator.AttributeValueTransformer;
 
 /**
  * Standard library methods, for example, for adding, copying, moving
@@ -388,6 +391,41 @@ public class EdeltaStandardLibrary extends EdeltaRuntime {
 		return addNewEReference(target, name, reference.getEContainingClass(),
 			newRef -> EdeltaUtils.makeBidirectional(newRef, reference)
 		);
+	}
+
+	/**
+	 * Changes the {@link EDataType} of the given {@link EAttribute}; concerning the model migration,
+	 * it applies the specified {@link AttributeValueTransformer}. During the model migration
+	 * the multiplicity of the attribute is taken care automatically, so the value transformer
+	 * must only take care of transforming a single value.
+	 * 
+	 * @param attribute
+	 * @param type
+	 * @param singleValueTransformer
+	 */
+	public void changeType(EAttribute attribute, EDataType type, AttributeValueTransformer singleValueTransformer) {
+		attribute.setEType(type);
+		modelMigration(modelMigrator -> modelMigrator.copyRule(
+			modelMigrator.isRelatedTo(attribute),
+			(EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> {
+				// if the multiplicity changes and the type of the attribute changes we might
+				// end up with a list with a single default value.
+				// if instead we check that the original value of the object for the feature
+				// is set we avoid such a situation.
+				if (oldObj.eIsSet(oldFeature))
+					// if we come here the old feature was set
+					EdeltaEcoreUtil.setValueForFeature(
+						newObj,
+						attribute,
+						// use the upper bound of the destination attribute, since it might
+						// be different from the original one
+						EdeltaEcoreUtil.getValueForFeature(oldObj, oldFeature, attribute.getUpperBound())
+							.stream()
+							.map(singleValueTransformer)
+							.collect(Collectors.toList())
+					);
+			}
+		));
 	}
 
 	private <T extends ENamedElement> void safeRunInitializer(Consumer<T> initializer, T e) {

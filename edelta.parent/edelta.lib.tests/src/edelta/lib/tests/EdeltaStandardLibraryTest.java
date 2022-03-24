@@ -6,6 +6,7 @@ import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.emf.ecore.EcorePackage.Literals.EOBJECT;
 import static org.eclipse.emf.ecore.EcorePackage.Literals.ESTRING;
+import static org.eclipse.emf.ecore.EcorePackage.Literals.EINT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -961,6 +962,35 @@ public class EdeltaStandardLibraryTest {
 			"copyToAs/",
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void changeAttributeType() throws Exception {
+		var subdir = "changedAttributeType/";
+		var engine = setupEngine(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi"),
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					var attribute = stdLib.getEAttribute("mypackage", "MyClass", "myAttribute");
+					stdLib.changeType(attribute, EINT, val -> {
+						try {
+							return Integer.parseInt(val.toString());
+						} catch (NumberFormatException e) {
+							return -1;
+						}
+					});
+				}
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
 		);
 	}
 
