@@ -1,5 +1,6 @@
 package edelta.lib.tests;
 
+import static edelta.lib.EdeltaEcoreUtil.getValueAsList;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
 import static java.util.Arrays.asList;
@@ -2881,8 +2882,8 @@ class EdeltaModelMigratorTest {
 
 				EObject firstObject = objectValues.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
 				EcoreUtil.removeAll(objectValues);
@@ -2966,8 +2967,8 @@ class EdeltaModelMigratorTest {
 
 				EObject firstObject = objectValues.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				var mergedValue = objectValues.stream()
 					.map(o -> 
@@ -3124,9 +3125,8 @@ class EdeltaModelMigratorTest {
 				var obj = (EObject) value;
 
 				var containingFeature = obj.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				var containerCollection =
-					(List<EObject>) obj.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(obj.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
 				EcoreUtil.remove(obj);
@@ -3208,9 +3208,8 @@ class EdeltaModelMigratorTest {
 				// and created a merged one so we reuse it
 
 				var containingFeature = obj.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				var containerCollection =
-					(List<EObject>) obj.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(obj.eContainer(), containingFeature);
 
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
@@ -3476,8 +3475,8 @@ class EdeltaModelMigratorTest {
 
 				EObject firstObject = objectValues.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
 				EcoreUtil.removeAll(objectValues);
@@ -3509,9 +3508,8 @@ class EdeltaModelMigratorTest {
 				var obj = (EObject) value;
 
 				var containingFeature = obj.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				var containerCollection =
-					(List<EObject>) obj.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(obj.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
 				EcoreUtil.remove(obj);
@@ -3594,8 +3592,8 @@ class EdeltaModelMigratorTest {
 
 				EObject firstObject = objectValues.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				var mergedValue = objectValues.stream()
 					.map(o -> 
@@ -3643,9 +3641,8 @@ class EdeltaModelMigratorTest {
 				// and created a merged one so we reuse it
 
 				var containingFeature = obj.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				var containerCollection =
-					(List<EObject>) obj.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(obj.eContainer(), containingFeature);
 
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
@@ -3803,9 +3800,8 @@ class EdeltaModelMigratorTest {
 				var obj = (EObject) value;
 
 				var containingFeature = obj.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				var containerCollection =
-					(List<EObject>) obj.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(obj.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
 				EcoreUtil.remove(obj);
@@ -3842,8 +3838,8 @@ class EdeltaModelMigratorTest {
 
 				EObject firstObject = objectValues.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
 				EcoreUtil.removeAll(objectValues);
@@ -3918,9 +3914,8 @@ class EdeltaModelMigratorTest {
 				// and created a merged one so we reuse it
 
 				var containingFeature = obj.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				var containerCollection =
-					(List<EObject>) obj.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(obj.eContainer(), containingFeature);
 
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
@@ -3973,8 +3968,8 @@ class EdeltaModelMigratorTest {
 
 				EObject firstObject = objectValues.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				var mergedValue = objectValues.stream()
 					.map(o -> 
@@ -4259,8 +4254,8 @@ class EdeltaModelMigratorTest {
 				// remember also the oldReferredObject is part
 				// of the (new) model, the one migrateds
 				var listObject = oldReferredObject.eContainer();
-				@SuppressWarnings("unchecked")
-				var otherNameElementsCollection = (List<EObject>) listObject.eGet(otherNameElements);
+				var otherNameElementsCollection =
+					getValueAsList(listObject, otherNameElements);
 				return EdeltaEcoreUtil.createInstance(otherNameElement,
 					newReferredObject -> {
 						newReferredObject.eSet(otherNameElementFeature,
@@ -4324,8 +4319,8 @@ class EdeltaModelMigratorTest {
 					// remember also the oldReferredObject is part
 					// of the (new) model, the one migrateds
 					var listObject = oldReferredObject.eContainer();
-					@SuppressWarnings("unchecked")
-					var otherNameElementsCollection = (List<EObject>) listObject.eGet(otherNameElements);
+					var otherNameElementsCollection =
+						getValueAsList(listObject, otherNameElements);
 					return EdeltaEcoreUtil.createInstance(otherNameElement,
 						otherNameElementsCollection::add);
 					});
