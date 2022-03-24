@@ -1,6 +1,5 @@
 package edelta.lib.tests;
 
-import static edelta.lib.EdeltaEcoreUtil.wrapAsCollection;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
 import static java.util.Arrays.asList;
@@ -4372,25 +4371,10 @@ class EdeltaModelMigratorTest {
 
 		// and adjust model migration...
 
-		// for reference we must first propagate the copy
-		// especially in case of collections
 		modelMigrator.copyRule(
 			modelMigrator.isRelatedTo(reference),
-			(oldFeature, oldObj, newObj) -> {
-				// if we come here the old attribute was set
-				EdeltaEcoreUtil.setValueForFeature(
-					newObj,
-					reference,
-					// use the upper bound of the destination attribute, since it might
-					// be different from the original one
-					modelMigrator.getMigrated(
-						wrapAsCollection(oldObj.eGet(oldFeature), reference.getUpperBound()))
-						.stream()
-						.map(oldFeatureSingleValue -> (EObject)oldFeatureSingleValue)
-						.map(referredObjectTransformer)
-						.collect(Collectors.toList())
-				);
-			},
+			modelMigrator
+				.multiplicityAwareCopy(reference, referredObjectTransformer),
 			postCopy
 		);
 	}
