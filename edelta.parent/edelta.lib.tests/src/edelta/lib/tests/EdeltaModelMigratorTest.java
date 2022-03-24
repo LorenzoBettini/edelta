@@ -4729,17 +4729,8 @@ class EdeltaModelMigratorTest {
 			final String newFeatureName,
 			final Collection<EAttribute> features,
 			Function<Collection<?>, Object> valueMerger, Runnable postCopy) {
-		// THIS SHOULD BE CHECKED IN THE FINAL IMPLEMENTATION (ALREADY DONE IN refactorings.lib)
-//		this.checkNoDifferences(features, new EdeltaFeatureDifferenceFinder().ignoringName(),
-//				"The two features cannot be merged");
-		// ALSO MAKE SURE IT'S A SINGLE FEATURE, NOT MULTI (TO BE DONE ALSO IN refactorings.lib)
-		// ALSO MAKE SURE IT'S NOT BIDIRECTIONAL (TO BE DONE ALSO IN refactorings.lib)
 		var firstFeature = features.iterator().next();
-		final EClass owner = firstFeature.getEContainingClass();
-		var mergedFeature = createCopy(modelMigrator, firstFeature);
-		mergedFeature.setName(newFeatureName);
-		owner.getEStructuralFeatures().add(mergedFeature);
-		EdeltaUtils.removeAllElements(features);
+		var mergedFeature = mergeFeatures(modelMigrator, newFeatureName, features);
 		if (valueMerger != null) {
 			modelMigrator.copyRule(
 				modelMigrator.wasRelatedTo(firstFeature),
@@ -4774,17 +4765,8 @@ class EdeltaModelMigratorTest {
 			final String newFeatureName,
 			final Collection<EReference> features,
 			Function<Collection<?>, Object> valueMerger, Runnable postCopy) {
-		// THIS SHOULD BE CHECKED IN THE FINAL IMPLEMENTATION (ALREADY DONE IN refactorings.lib)
-//		this.checkNoDifferences(features, new EdeltaFeatureDifferenceFinder().ignoringName(),
-//				"The two features cannot be merged");
-		// ALSO MAKE SURE IT'S A SINGLE FEATURE, NOT MULTI (TO BE DONE ALSO IN refactorings.lib)
-		// ALSO MAKE SURE IT'S NOT BIDIRECTIONAL (TO BE DONE ALSO IN refactorings.lib)
 		var firstFeature = features.iterator().next();
-		final EClass owner = firstFeature.getEContainingClass();
-		var mergedFeature = createCopy(modelMigrator, firstFeature);
-		mergedFeature.setName(newFeatureName);
-		owner.getEStructuralFeatures().add(mergedFeature);
-		EdeltaUtils.removeAllElements(features);
+		var mergedFeature = mergeFeatures(modelMigrator, newFeatureName, features);
 		if (valueMerger != null) {
 			modelMigrator.copyRule(
 				modelMigrator.wasRelatedTo(firstFeature),
@@ -4802,6 +4784,32 @@ class EdeltaModelMigratorTest {
 				postCopy
 			);
 		}
+		return mergedFeature;
+	}
+
+	/**
+	 * Merges the given features into a single new feature in the containing class.
+	 * The references must be compatible (same containing class, same type, same
+	 * cardinality, etc).
+	 * @param newFeatureName
+	 * @param features
+	 * 
+	 * @return the new feature added to the containing class of the features
+	 */
+	private <T extends EStructuralFeature> T mergeFeatures(EdeltaModelMigrator modelMigrator,
+			final String newFeatureName,
+			final Collection<T> features) {
+		// THIS SHOULD BE CHECKED IN THE FINAL IMPLEMENTATION (ALREADY DONE IN refactorings.lib)
+//		this.checkNoDifferences(features, new EdeltaFeatureDifferenceFinder().ignoringName(),
+//				"The two features cannot be merged");
+		// ALSO MAKE SURE IT'S A SINGLE FEATURE, NOT MULTI (TO BE DONE ALSO IN refactorings.lib)
+		// ALSO MAKE SURE IT'S NOT BIDIRECTIONAL (TO BE DONE ALSO IN refactorings.lib)
+		var firstFeature = features.iterator().next();
+		final EClass owner = firstFeature.getEContainingClass();
+		var mergedFeature = createCopy(modelMigrator, firstFeature);
+		mergedFeature.setName(newFeatureName);
+		owner.getEStructuralFeatures().add(mergedFeature);
+		EdeltaUtils.removeAllElements(features);
 		return mergedFeature;
 	}
 
