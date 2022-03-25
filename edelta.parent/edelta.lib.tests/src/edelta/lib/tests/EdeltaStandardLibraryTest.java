@@ -1,6 +1,7 @@
 package edelta.lib.tests;
 
 import static edelta.lib.EdeltaEcoreUtil.createInstance;
+import static edelta.lib.EdeltaEcoreUtil.getValueAsList;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
 import static java.util.List.of;
@@ -1075,6 +1076,90 @@ public class EdeltaStandardLibraryTest {
 						// since the original reference Person.firstName was a
 						// containment reference, just referring to the newly
 						// created object will add it to the model
+					);
+				}
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	/**
+	 * Since this is meant as a simulation of what a user would do in the
+	 * Edelta DSL, we access {@link ENamedElement}s with strings, since
+	 * that's how "ecoreref()" expressions are translated by the Edelta DSL
+	 * compiler.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void changeReferenceTypeNonContainment() throws Exception {
+		var subdir = "changeReferenceTypeNonContainment/";
+		var engine = setupEngine(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi"),
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					var reference = stdLib.getEReference("PersonList", "Person", "firstName");
+					// first add the new class similar to NameElement
+					var nameElement = stdLib.getEClass("PersonList", "NameElement");
+					// the attribute of the original reference type NameElement
+					var nameElementFeature = stdLib.getEAttribute
+						("PersonList", "NameElement", "nameElementValue");
+					var otherNameElement = stdLib.addNewEClassAsSibling(
+						nameElement,
+						"OtherNameElement");
+					// the attribute we copy and add to the new class
+					// of the new type OtherNameElement
+					var otherNameElementFeature = stdLib.copyToAs
+						(nameElementFeature, otherNameElement, "otherNameElementValue");
+					// since the references are non containment, we need to add
+					// a containment reference for the objects of the new type OtherNameElement
+					// somewhere, e.g., in the List class
+					var otherNameElements = stdLib.copyToAs(
+						stdLib.getEReference("PersonList", "List", "nameElements"),
+						stdLib.getEClass("PersonList", "List"),
+						"otherNameElements",
+						otherNameElement);
+					
+					// change the reference type
+					stdLib.changeType(reference, otherNameElement,
+						// and provide the model migration for the changed reference
+						oldReferredObject -> {
+							// oldReferredObject is part of the model being migrated
+							// so it's safe to use features retrieved above,
+							// like nameElementFeature
+							
+							// retrieve the copied List object
+							// remember also the oldReferredObject is part
+							// of the (new) model, the one being migrated
+							var listObject = oldReferredObject.eContainer();
+							var otherNameElementsCollection =
+								getValueAsList(listObject, otherNameElements);
+							return createInstance(otherNameElement,
+								// we refer to a new object of type OtherNameElement
+								newReferredObject -> {
+									// copying its value from the original referred
+									// Object of type NameElement
+									newReferredObject.eSet(otherNameElementFeature,
+										oldReferredObject.eGet(nameElementFeature)
+									);
+									// differently from the previous test
+									// it's now responsibility of the caller to store the new
+									// object in a container.
+									// Since the original reference Person.firstName was NOT
+									// containment reference, just referring to the newly
+									// created object will NOT add it to the model
+									otherNameElementsCollection.add(newReferredObject);
+								}
+							);
+						}
 					);
 				}
 			}

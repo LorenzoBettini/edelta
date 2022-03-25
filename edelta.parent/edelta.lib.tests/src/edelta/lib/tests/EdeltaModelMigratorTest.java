@@ -4234,7 +4234,7 @@ class EdeltaModelMigratorTest {
 				
 				// retrieve the copied List object
 				// remember also the oldReferredObject is part
-				// of the (new) model, the one migrateds
+				// of the (new) model, the one being migrated
 				var listObject = oldReferredObject.eContainer();
 				var otherNameElementsCollection =
 					getValueAsList(listObject, otherNameElements);
