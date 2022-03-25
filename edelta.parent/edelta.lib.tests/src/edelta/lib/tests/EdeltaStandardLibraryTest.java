@@ -22,6 +22,7 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.emf.ecore.EAttribute;
@@ -30,12 +31,14 @@ import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.ENamedElement;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.util.EcoreUtil.EqualityHelper;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -1031,6 +1034,14 @@ public class EdeltaStandardLibraryTest {
 		);
 	}
 
+	/**
+	 * Since this is meant as a simulation of what a user would do in the
+	 * Edelta DSL, we access {@link ENamedElement}s with strings, since
+	 * that's how "ecoreref()" expressions are translated by the Edelta DSL
+	 * compiler.
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void changeReferenceTypeContainment() throws Exception {
 		var subdir = "changeReferenceTypeContainment/";
@@ -1169,6 +1180,109 @@ public class EdeltaStandardLibraryTest {
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
+		);
+	}
+
+	/**
+	 * Since this is meant as a simulation of what a user would do in the
+	 * Edelta DSL, we access {@link ENamedElement}s with strings, since
+	 * that's how "ecoreref()" expressions are translated by the Edelta DSL
+	 * compiler.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void changeReferenceTypeNonContainmentShared() throws Exception {
+		var subdir = "changeReferenceTypeNonContainmentShared/";
+		var engine = setupEngine(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi", "List1.xmi", "List2.xmi"),
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					var reference = stdLib.getEReference("PersonList", "Person", "firstName");
+					// first add the new class similar to NameElement
+					var nameElement = stdLib.getEClass("PersonList", "NameElement");
+					// the attribute of the original reference type NameElement
+					var nameElementFeature = stdLib.getEAttribute
+						("PersonList", "NameElement", "nameElementValue");
+					var otherNameElement = stdLib.addNewEClassAsSibling(
+						nameElement,
+						"OtherNameElement");
+					// the attribute we copy and add to the new class
+					// of the new type OtherNameElement
+					var otherNameElementFeature = stdLib.copyToAs
+						(nameElementFeature, otherNameElement, "otherNameElementValue");
+					// since the references are non containment, we need to add
+					// a containment reference for the objects of the new type OtherNameElement
+					// somewhere, e.g., in the List class
+					var otherNameElements = stdLib.copyToAs(
+						stdLib.getEReference("PersonList", "List", "nameElements"),
+						stdLib.getEClass("PersonList", "List"),
+						"otherNameElements",
+						otherNameElement);
+					
+					// this is useful in the model migration rule to avoid
+					// creating two many new referred objects, since, in this
+					// test, referred objects were and are meant to be share
+					// this will also be useful to remove previously referred
+					// objects since they will not be referred anymore
+					var referredMap = new HashMap<EObject, EObject>();
+					// note that we use the same maps for migrating all the models
+					// and that's correct, since, like in this test, objects can
+					// refer to objects of other model XMI files.
+					
+					// change the reference type
+					stdLib.changeType(reference, otherNameElement,
+						// and provide the model migration for the changed reference
+						oldReferredObject -> {
+							// oldReferredObject is part of the model being migrated
+							// so it's safe to use features retrieved above,
+							// like nameElementFeature
+							
+							var newReferredObject = referredMap.computeIfAbsent(oldReferredObject,
+								oldReferred -> {
+								// ... avoiding duplicates like in this case
+								// where references are meant to be shared
+
+								// retrieve the copied List object
+								// remember also the oldReferredObject is part
+								// of the (new) model, the one migrateds
+								var listObject = oldReferredObject.eContainer();
+								var otherNameElementsCollection =
+									getValueAsList(listObject, otherNameElements);
+								// differently from the first test (and like the previous one)
+								// it's now responsibility of the caller to store the new
+								// object in a container.
+								// Since the original reference Person.firstName was NOT
+								// containment reference, just referring to the newly
+								// created object will NOT add it to the model
+								return EdeltaEcoreUtil.createInstance(otherNameElement,
+									otherNameElementsCollection::add);
+								}
+							);
+							
+							// we refer to a new object of type OtherNameElement
+							// copying its value from the original referred
+							// Object of type NameElement
+							newReferredObject.eSet(otherNameElementFeature,
+								oldReferredObject.eGet(nameElementFeature)
+							);
+							
+							return newReferredObject;
+						},
+						// old shared referred objects can be removed now
+						() -> EcoreUtil.removeAll(referredMap.keySet())
+					);
+				}
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi", "List1.xmi", "List2.xmi")
 		);
 	}
 
