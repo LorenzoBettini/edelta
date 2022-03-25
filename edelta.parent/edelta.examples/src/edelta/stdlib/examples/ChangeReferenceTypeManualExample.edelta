@@ -1,5 +1,3 @@
-import org.eclipse.emf.ecore.EObject
-
 package edelta.stdlib.examples
 
 metamodel "PersonListForChangeType"
@@ -33,7 +31,9 @@ modifyEcore exampleOfChangeReferenceType epackage PersonListForChangeType {
 				// retrieve the value of the attribute of the
 				// originally referred object (of type NameElement) in the
 				// currently being migrated model (that's why getMigrated)
-				val oldReferred = getMigrated(oldObj.eGet(oldFeature) as EObject)
+				val oldReferred = getMigrated(
+					getValueAsEObject(oldObj, oldFeature)
+				)
 				val oldValue = oldReferred.eGet(ecoreref(nameElementValue))
 				
 				// we refer to a new object of type OtherNameElement
