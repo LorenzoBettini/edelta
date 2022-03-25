@@ -218,4 +218,27 @@ public class EdeltaEcoreUtilTest {
 		assertEquals("a name",
 			instance.eGet(EcorePackage.eINSTANCE.getENamedElement_Name()));
 	}
+
+	@Test
+	public void testGetValueAsList() {
+		var pack = EcoreFactory.eINSTANCE.createEPackage();
+
+		var collection = EdeltaEcoreUtil.getValueAsList(
+				pack, EcorePackage.Literals.EPACKAGE__ECLASSIFIERS);
+	
+		assertThat(collection)
+			.isSameAs(pack.getEClassifiers())
+			.isEmpty();
+	
+		var c1 = EcoreFactory.eINSTANCE.createEClass();
+		var c2 = EcoreFactory.eINSTANCE.createEDataType();
+		var c3 = EcoreFactory.eINSTANCE.createEEnum();
+		pack.getEClassifiers().addAll(List.of(c1, c2, c3));
+
+		collection = EdeltaEcoreUtil.getValueAsList(
+				pack, EcorePackage.Literals.EPACKAGE__ECLASSIFIERS);
+		assertThat(collection)
+			.isSameAs(pack.getEClassifiers())
+			.containsExactlyInAnyOrder(c1, c2, c3);
+	}
 }

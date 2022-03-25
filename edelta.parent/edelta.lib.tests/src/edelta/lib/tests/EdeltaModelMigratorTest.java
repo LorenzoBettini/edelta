@@ -1,5 +1,6 @@
 package edelta.lib.tests;
 
+import static edelta.lib.EdeltaEcoreUtil.getValueAsList;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
 import static java.util.Arrays.asList;
@@ -48,6 +49,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaModelMigrator;
+import edelta.lib.EdeltaModelMigrator.EObjectFunction;
 import edelta.lib.EdeltaUtils;
 
 class EdeltaModelMigratorTest {
@@ -2874,19 +2876,16 @@ class EdeltaModelMigratorTest {
 				// of merging the original objects' values
 				if (values.isEmpty())
 					return null;
-				@SuppressWarnings("unchecked")
-				var objectValues =
-					(List<EObject>) values;
 
-				EObject firstObject = objectValues.iterator().next();
+				EObject firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
-				EcoreUtil.removeAll(objectValues);
+				EcoreUtil.removeAll(values);
 
-				var mergedValue = objectValues.stream()
+				var mergedValue = values.stream()
 					.map(o -> 
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
@@ -2953,22 +2952,19 @@ class EdeltaModelMigratorTest {
 				// of merging the original objects' values
 				if (values.isEmpty())
 					return null;
-				@SuppressWarnings("unchecked")
-				var objectValues =
-					(List<EObject>) values;
 
-				var alreadyMerged = merged.get(objectValues);
+				var alreadyMerged = merged.get(values);
 				if (alreadyMerged != null)
 					return alreadyMerged;
 				// we have already processed the object collection
 				// and created a merged one so we reuse it
 
-				EObject firstObject = objectValues.iterator().next();
+				EObject firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(firstObject.eContainer(), containingFeature);
 
-				var mergedValue = objectValues.stream()
+				var mergedValue = values.stream()
 					.map(o -> 
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
@@ -2981,7 +2977,7 @@ class EdeltaModelMigratorTest {
 
 						// record that we associated the single object o
 						// to the original ones, which are now merged
-						merged.put(objectValues, o);
+						merged.put(values, o);
 					}
 				);
 			},
@@ -3123,9 +3119,8 @@ class EdeltaModelMigratorTest {
 				var obj = (EObject) value;
 
 				var containingFeature = obj.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				var containerCollection =
-					(List<EObject>) obj.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(obj.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
 				EcoreUtil.remove(obj);
@@ -3207,9 +3202,8 @@ class EdeltaModelMigratorTest {
 				// and created a merged one so we reuse it
 
 				var containingFeature = obj.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				var containerCollection =
-					(List<EObject>) obj.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(obj.eContainer(), containingFeature);
 
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
@@ -3469,19 +3463,16 @@ class EdeltaModelMigratorTest {
 				// of merging the original objects' values
 				if (values.isEmpty())
 					return null;
-				@SuppressWarnings("unchecked")
-				var objectValues =
-					(List<EObject>) values;
 
-				EObject firstObject = objectValues.iterator().next();
+				EObject firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
-				EcoreUtil.removeAll(objectValues);
+				EcoreUtil.removeAll(values);
 
-				var mergedValue = objectValues.stream()
+				var mergedValue = values.stream()
 					.map(o -> 
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
@@ -3508,9 +3499,8 @@ class EdeltaModelMigratorTest {
 				var obj = (EObject) value;
 
 				var containingFeature = obj.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				var containerCollection =
-					(List<EObject>) obj.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(obj.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
 				EcoreUtil.remove(obj);
@@ -3581,22 +3571,19 @@ class EdeltaModelMigratorTest {
 				// of merging the original objects' values
 				if (values.isEmpty())
 					return null;
-				@SuppressWarnings("unchecked")
-				var objectValues =
-					(List<EObject>) values;
 
-				var alreadyMerged = merged.get(objectValues);
+				var alreadyMerged = merged.get(values);
 				if (alreadyMerged != null)
 					return alreadyMerged;
 				// we have already processed the object collection
 				// and created a merged one so we reuse it
 
-				EObject firstObject = objectValues.iterator().next();
+				EObject firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(firstObject.eContainer(), containingFeature);
 
-				var mergedValue = objectValues.stream()
+				var mergedValue = values.stream()
 					.map(o -> 
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
@@ -3609,7 +3596,7 @@ class EdeltaModelMigratorTest {
 
 						// record that we associated the single object o
 						// to the original ones, which are now merged
-						merged.put(objectValues, o);
+						merged.put(values, o);
 					}
 				);
 			},
@@ -3642,9 +3629,8 @@ class EdeltaModelMigratorTest {
 				// and created a merged one so we reuse it
 
 				var containingFeature = obj.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				var containerCollection =
-					(List<EObject>) obj.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(obj.eContainer(), containingFeature);
 
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
@@ -3802,9 +3788,8 @@ class EdeltaModelMigratorTest {
 				var obj = (EObject) value;
 
 				var containingFeature = obj.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				var containerCollection =
-					(List<EObject>) obj.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(obj.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
 				EcoreUtil.remove(obj);
@@ -3835,19 +3820,16 @@ class EdeltaModelMigratorTest {
 				// of merging the original objects' values
 				if (values.isEmpty())
 					return null;
-				@SuppressWarnings("unchecked")
-				var objectValues =
-					(List<EObject>) values;
 
-				EObject firstObject = objectValues.iterator().next();
+				EObject firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
-				EcoreUtil.removeAll(objectValues);
+				EcoreUtil.removeAll(values);
 
-				var mergedValue = objectValues.stream()
+				var mergedValue = values.stream()
 					.map(o -> 
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
@@ -3917,9 +3899,8 @@ class EdeltaModelMigratorTest {
 				// and created a merged one so we reuse it
 
 				var containingFeature = obj.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				var containerCollection =
-					(List<EObject>) obj.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(obj.eContainer(), containingFeature);
 
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
@@ -3960,22 +3941,19 @@ class EdeltaModelMigratorTest {
 				// of merging the original objects' values
 				if (values.isEmpty())
 					return null;
-				@SuppressWarnings("unchecked")
-				var objectValues =
-					(List<EObject>) values;
 
-				var alreadyMerged = merged.get(objectValues);
+				var alreadyMerged = merged.get(values);
 				if (alreadyMerged != null)
 					return alreadyMerged;
 				// we have already processed the object collection
 				// and created a merged one so we reuse it
 
-				EObject firstObject = objectValues.iterator().next();
+				EObject firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
-				@SuppressWarnings("unchecked")
-				List<EObject> containerCollection = (List<EObject>) firstObject.eContainer().eGet(containingFeature);
+				List<EObject> containerCollection =
+					getValueAsList(firstObject.eContainer(), containingFeature);
 
-				var mergedValue = objectValues.stream()
+				var mergedValue = values.stream()
 					.map(o -> 
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
@@ -3988,7 +3966,7 @@ class EdeltaModelMigratorTest {
 
 						// record that we associated the single object o
 						// to the original ones, which are now merged
-						merged.put(objectValues, o);
+						merged.put(values, o);
 					}
 				);
 			},
@@ -4177,6 +4155,172 @@ class EdeltaModelMigratorTest {
 			"composeOperations1/",
 			of("PersonList.ecore"),
 			of("List.xmi")
+		);
+	}
+
+	@Test
+	void testChangeReferenceTypeContainment() throws IOException {
+		var subdir = "changeReferenceTypeContainment/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var person = getEClass(evolvingModelManager, "PersonList", "Person");
+		var firstName = (EReference) person.getEStructuralFeature("firstName");
+		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+
+		// add a new class similar to NameElement
+		var otherNameElement = createCopy(modelMigrator, nameElement);
+		otherNameElement.setName("OtherNameElement");
+		var otherNameElementFeature = otherNameElement.getEStructuralFeatures().get(0);
+		otherNameElementFeature.setName("otherNameElementValue");
+		person.getEPackage().getEClassifiers().add(otherNameElement);
+
+		changeReferenceType(modelMigrator, firstName, otherNameElement,
+			oldReferredObject ->
+			EdeltaEcoreUtil.createInstance(otherNameElement,
+				newReferredObject ->
+				newReferredObject.eSet(otherNameElementFeature,
+				oldReferredObject.eGet(
+					oldReferredObject.eClass()
+						.getEStructuralFeature("nameElementValue")
+				))),
+			null);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	void testChangeReferenceTypeNonContainment() throws IOException {
+		var subdir = "changeReferenceTypeNonContainment/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+
+		var person = getEClass(evolvingModelManager, "PersonList", "Person");
+		var firstName = (EReference) person.getEStructuralFeature("firstName");
+		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+
+		// add a new class similar to NameElement
+		var otherNameElement = createCopy(modelMigrator, nameElement);
+		otherNameElement.setName("OtherNameElement");
+		var otherNameElementFeature = otherNameElement.getEStructuralFeatures().get(0);
+		otherNameElementFeature.setName("otherNameElementValue");
+		person.getEPackage().getEClassifiers().add(otherNameElement);
+
+		// since in this test the referred object was NOT contained,
+		// we must also add a containment feature in the Ecore
+		var list = getEClass(evolvingModelManager, "PersonList", "List");
+		var otherNameElements = EcoreUtil.copy(list.getEStructuralFeature("nameElements"));
+		otherNameElements.setName("otherNameElements");
+		otherNameElements.setEType(otherNameElement);
+		list.getEStructuralFeatures().add(otherNameElements);
+
+		changeReferenceType(modelMigrator, firstName, otherNameElement,
+			oldReferredObject -> {
+				// it's responsibility of the caller to store the new
+				// object in a container
+				
+				// retrieve the copied List object
+				// remember also the oldReferredObject is part
+				// of the (new) model, the one migrateds
+				var listObject = oldReferredObject.eContainer();
+				var otherNameElementsCollection =
+					getValueAsList(listObject, otherNameElements);
+				return EdeltaEcoreUtil.createInstance(otherNameElement,
+					newReferredObject -> {
+						newReferredObject.eSet(otherNameElementFeature,
+						oldReferredObject.eGet(
+							oldReferredObject.eClass()
+								.getEStructuralFeature("nameElementValue")
+						));
+						otherNameElementsCollection.add(newReferredObject);
+					});
+			}, null);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	@Test
+	void testChangeReferenceTypeNonContainmentShared() throws IOException {
+		var subdir = "changeReferenceTypeNonContainmentShared/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi", "List1.xmi", "List2.xmi")
+		);
+
+		var person = getEClass(evolvingModelManager, "PersonList", "Person");
+		var firstName = (EReference) person.getEStructuralFeature("firstName");
+		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+
+		// add a new class similar to NameElement
+		var otherNameElement = createCopy(modelMigrator, nameElement);
+		otherNameElement.setName("OtherNameElement");
+		var otherNameElementFeature = otherNameElement.getEStructuralFeatures().get(0);
+		otherNameElementFeature.setName("otherNameElementValue");
+		person.getEPackage().getEClassifiers().add(otherNameElement);
+
+		// since in this test the referred object was NOT contained,
+		// we must also add a containment feature in the Ecore
+		var list = getEClass(evolvingModelManager, "PersonList", "List");
+		var otherNameElements = EcoreUtil.copy(list.getEStructuralFeature("nameElements"));
+		otherNameElements.setName("otherNameElements");
+		otherNameElements.setEType(otherNameElement);
+		list.getEStructuralFeatures().add(otherNameElements);
+
+		var referredMap = new HashMap<EObject, EObject>();
+
+		changeReferenceType(modelMigrator, firstName, otherNameElement,
+			oldReferredObject -> {
+				// it's responsibility of the caller to store the new
+				// object in a container...
+				var newReferredObject = referredMap.computeIfAbsent(oldReferredObject,
+					oldReferred -> {
+					// ... avoiding duplicates like in this case
+					// where references are meant to be shared
+
+					// retrieve the copied List object
+					// remember also the oldReferredObject is part
+					// of the (new) model, the one migrateds
+					var listObject = oldReferredObject.eContainer();
+					var otherNameElementsCollection =
+						getValueAsList(listObject, otherNameElements);
+					return EdeltaEcoreUtil.createInstance(otherNameElement,
+						otherNameElementsCollection::add);
+					});
+				newReferredObject.eSet(otherNameElementFeature,
+					oldReferredObject.eGet(
+						oldReferredObject.eClass()
+							.getEStructuralFeature("nameElementValue")
+					));
+				return newReferredObject;
+			},
+			// old shared referred objects can be removed now
+			() -> EcoreUtil.removeAll(referredMap.keySet()));
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi", "List1.xmi", "List2.xmi")
 		);
 	}
 
@@ -4764,7 +4908,7 @@ class EdeltaModelMigratorTest {
 	private EReference mergeReferences(EdeltaModelMigrator modelMigrator,
 			final String newFeatureName,
 			final Collection<EReference> features,
-			Function<Collection<?>, Object> valueMerger, Runnable postCopy) {
+			Function<Collection<EObject>, EObject> valueMerger, Runnable postCopy) {
 		var firstFeature = features.iterator().next();
 		var mergedFeature = mergeFeatures(modelMigrator, newFeatureName, features);
 		if (valueMerger != null) {
@@ -4776,6 +4920,7 @@ class EdeltaModelMigratorTest {
 					// for references we must get the copied EObject
 					var oldValues = originalFeatures
 							.map(f -> oldObj.eGet(f))
+							.map(EObject.class::cast)
 							.collect(Collectors.toList());
 					var merged = valueMerger.apply(
 						modelMigrator.getMigrated(oldValues));
@@ -4992,5 +5137,37 @@ class EdeltaModelMigratorTest {
 			}
 		);
 		return attribute;
+	}
+
+	/**
+	 * @param modelMigrator
+	 * @param reference
+	 * @param newType
+	 * @param referredObjectTransformer given the old referred object
+	 * (already in the model being migrated), return a the new object
+	 * to be referred (which is assumed to be of the right new type)
+	 * (the first argument is the old referred object, the second one
+	 * is the new referred object); both objects are part of the model
+	 * being migrated.
+	 * @param postCopy optional {@link Runnable} that will be executed
+	 * after the migration of the model, e.g., for cleanup and
+	 * stale objects removal (shared non-containment references not
+	 * used anymore can be deleted in this runnable)
+	 */
+	private void changeReferenceType(EdeltaModelMigrator modelMigrator,
+			EReference reference, EClass newType,
+			EObjectFunction referredObjectTransformer,
+			Runnable postCopy) {
+		// change type of the reference
+		reference.setEType(newType);
+	
+		// and adjust model migration...
+	
+		modelMigrator.copyRule(
+			modelMigrator.isRelatedTo(reference),
+			modelMigrator
+				.multiplicityAwareCopy(reference, referredObjectTransformer),
+			postCopy
+		);
 	}
 }

@@ -1,5 +1,7 @@
 package edelta.lib;
 
+import static edelta.lib.EdeltaEcoreUtil.wrapAsCollection;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
@@ -499,6 +501,15 @@ public class EdeltaModelMigrator {
 		};
 	}
 
+	/**
+	 * Returns an {@link AttributeTransformer} that automatically takes care of the
+	 * multiplicity of the attribute and applies the passed transformer to transform
+	 * the value or values.
+	 * 
+	 * @param attribute
+	 * @param transformer
+	 * @return
+	 */
 	public AttributeTransformer multiplicityAwareTranformer(EAttribute attribute,
 			UnaryOperator<Object> transformer) {
 		return (feature, oldObj, oldValue) ->
@@ -514,4 +525,31 @@ public class EdeltaModelMigrator {
 			);
 	}
 
+	/**
+	 * Returns a {@link CopyProcedure} that automatically takes care of the
+	 * multiplicity of the reference and applies the passed transformer to transform
+	 * the {@link EObject} or {@link EObject}s.
+	 * 
+	 * @param reference
+	 * @param transformer
+	 * @return
+	 */
+	public CopyProcedure multiplicityAwareCopy(EReference reference,
+			EObjectFunction transformer) {
+		return (oldFeature, oldObj, newObj) ->
+			EdeltaEcoreUtil.setValueForFeature(
+				newObj,
+				reference,
+				// for reference we must first propagate the copy
+				// especially in case of collections
+				getMigrated(
+					wrapAsCollection(oldObj.eGet(oldFeature), reference.getUpperBound()))
+					.stream()
+					.map(EObject.class::cast)
+					.map(transformer)
+					.collect(Collectors.toList())
+				// use the upper bound of the destination attribute, since it might
+				// be different from the original one
+			);
+	}
 }

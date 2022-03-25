@@ -6,6 +6,7 @@ package edelta.lib;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -147,5 +148,10 @@ public class EdeltaEcoreUtil {
 		var instance = EcoreUtil.create(type);
 		initializer.accept(instance);
 		return instance;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List<EObject> getValueAsList(EObject obj, EStructuralFeature feature) {
+		return (List<EObject>) obj.eGet(feature);
 	}
 }
