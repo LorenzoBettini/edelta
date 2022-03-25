@@ -32,14 +32,10 @@ modifyEcore exampleOfChangeReferenceType epackage PersonListForChangeType {
 				if (!oldObj.eIsSet(oldFeature))
 					return // nothing to migrate
 				// retrieve the value of the attribute of the
-				// old referred object (of type NameElement) in the
-				// original model
-				val oldReferred = oldObj.eGet(oldFeature) as EObject
-				val oldType = oldReferred.eClass
-				val oldValue = oldReferred.eGet(
-					// we know that NameElement has a single feature
-					oldType.EStructuralFeatures.head
-				)
+				// originally referred object (of type NameElement) in the
+				// currently being migrated model (that's why getMigrated)
+				val oldReferred = getMigrated(oldObj.eGet(oldFeature) as EObject)
+				val oldValue = oldReferred.eGet(ecoreref(nameElementValue))
 				
 				// we refer to a new object of type OtherNameElement
 				// copying its value from the original referred

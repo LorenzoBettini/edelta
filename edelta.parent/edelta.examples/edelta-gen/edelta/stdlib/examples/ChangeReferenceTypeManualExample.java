@@ -9,7 +9,6 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.xtext.xbase.lib.IterableExtensions;
 
 @SuppressWarnings("all")
 public class ChangeReferenceTypeManualExample extends EdeltaDefaultRuntime {
@@ -31,10 +30,8 @@ public class ChangeReferenceTypeManualExample extends EdeltaDefaultRuntime {
           return;
         }
         Object _eGet = oldObj.eGet(oldFeature);
-        final EObject oldReferred = ((EObject) _eGet);
-        final EClass oldType = oldReferred.eClass();
-        final Object oldValue = oldReferred.eGet(
-          IterableExtensions.<EStructuralFeature>head(oldType.getEStructuralFeatures()));
+        final EObject oldReferred = it_1.getMigrated(((EObject) _eGet));
+        final Object oldValue = oldReferred.eGet(getEAttribute("PersonListForChangeType", "NameElement", "nameElementValue"));
         final Consumer<EObject> _function_2 = (EObject newRef) -> {
           newRef.eSet(getEAttribute("PersonListForChangeType", "OtherNameElement", "otherNameElementValue"), oldValue);
         };
