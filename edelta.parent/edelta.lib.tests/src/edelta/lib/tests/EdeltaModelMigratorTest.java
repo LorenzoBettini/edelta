@@ -4163,6 +4163,8 @@ class EdeltaModelMigratorTest {
 		var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		var firstName = (EReference) person.getEStructuralFeature("firstName");
 		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		var nameElementFeature = getAttribute(
+			evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 
 		// add a new class similar to NameElement
 		var otherNameElement = createCopy(modelMigrator, nameElement);
@@ -4175,11 +4177,10 @@ class EdeltaModelMigratorTest {
 			oldReferredObject ->
 			EdeltaEcoreUtil.createInstance(otherNameElement,
 				newReferredObject ->
-				newReferredObject.eSet(otherNameElementFeature,
-				oldReferredObject.eGet(
-					oldReferredObject.eClass()
-						.getEStructuralFeature("nameElementValue")
-				))),
+				EdeltaEcoreUtil.setValueFrom(
+					newReferredObject, otherNameElementFeature,
+					oldReferredObject, nameElementFeature)
+				),
 			null);
 
 		copyModelsSaveAndAssertOutputs(
@@ -4203,6 +4204,8 @@ class EdeltaModelMigratorTest {
 		var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		var firstName = (EReference) person.getEStructuralFeature("firstName");
 		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		var nameElementFeature = getAttribute(
+			evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 
 		// add a new class similar to NameElement
 		var otherNameElement = createCopy(modelMigrator, nameElement);
@@ -4232,11 +4235,10 @@ class EdeltaModelMigratorTest {
 					getValueAsList(listObject, otherNameElements);
 				return EdeltaEcoreUtil.createInstance(otherNameElement,
 					newReferredObject -> {
-						newReferredObject.eSet(otherNameElementFeature,
-						oldReferredObject.eGet(
-							oldReferredObject.eClass()
-								.getEStructuralFeature("nameElementValue")
-						));
+						EdeltaEcoreUtil.setValueFrom(
+							newReferredObject, otherNameElementFeature,
+							oldReferredObject, nameElementFeature
+						);
 						otherNameElementsCollection.add(newReferredObject);
 					});
 			}, null);
@@ -4262,6 +4264,8 @@ class EdeltaModelMigratorTest {
 		var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		var firstName = (EReference) person.getEStructuralFeature("firstName");
 		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		var nameElementFeature = getAttribute(
+			evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 
 		// add a new class similar to NameElement
 		var otherNameElement = createCopy(modelMigrator, nameElement);
@@ -4298,11 +4302,10 @@ class EdeltaModelMigratorTest {
 					return EdeltaEcoreUtil.createInstance(otherNameElement,
 						otherNameElementsCollection::add);
 					});
-				newReferredObject.eSet(otherNameElementFeature,
-					oldReferredObject.eGet(
-						oldReferredObject.eClass()
-							.getEStructuralFeature("nameElementValue")
-					));
+				EdeltaEcoreUtil.setValueFrom(
+					newReferredObject, otherNameElementFeature,
+					oldReferredObject, nameElementFeature
+				);
 				return newReferredObject;
 			},
 			// old shared referred objects can be removed now
