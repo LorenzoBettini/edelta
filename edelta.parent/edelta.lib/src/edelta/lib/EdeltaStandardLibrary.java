@@ -415,10 +415,39 @@ public class EdeltaStandardLibrary extends EdeltaRuntime {
 		);
 	}
 
+	/**
+	 * Changes the {@link EClass} type of the given {@link EReference}; concerning
+	 * the model migration, it applies the specified referredObjectTransformer.
+	 * During the model migration the multiplicity of the reference is taken care
+	 * automatically, so the referredObjectTransformer must only take care of
+	 * returning a new single object to be referred, using the previously referred
+	 * object somehow.
+	 * 
+	 * @param reference
+	 * @param newType
+	 * @param referredObjectTransformer
+	 */
 	public void changeType(EReference reference, EClass newType, EObjectFunction referredObjectTransformer) {
 		changeType(reference, newType, referredObjectTransformer, null);
 	}
 
+	/**
+	 * Changes the {@link EClass} type of the given {@link EReference}; concerning
+	 * the model migration, it applies the specified referredObjectTransformer.
+	 * During the model migration the multiplicity of the reference is taken care
+	 * automatically, so the referredObjectTransformer must only take care of
+	 * returning a new single object to be referred, using the previously referred
+	 * object somehow.
+	 * 
+	 * @param reference
+	 * @param newType
+	 * @param referredObjectTransformer
+	 * @param postCopy                  {@link Runnable} that will be executed after
+	 *                                  the migration of the model, e.g., for
+	 *                                  cleanup and stale objects removal (shared
+	 *                                  non-containment references not used anymore
+	 *                                  can be deleted in this runnable)
+	 */
 	public void changeType(EReference reference, EClass newType, EObjectFunction referredObjectTransformer,
 			Runnable postCopy) {
 		reference.setEType(newType);
