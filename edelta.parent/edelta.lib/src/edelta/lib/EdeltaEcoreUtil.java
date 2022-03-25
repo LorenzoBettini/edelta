@@ -158,4 +158,9 @@ public class EdeltaEcoreUtil {
 	public static EObject getValueAsEObject(EObject obj, EStructuralFeature feature) {
 		return (EObject) obj.eGet(feature);
 	}
+
+	public static void setValueFrom(EObject dest, EStructuralFeature destFeature,
+			EObject source, EStructuralFeature sourceFeature) {
+		dest.eSet(destFeature, source.eGet(sourceFeature));
+	}
 }

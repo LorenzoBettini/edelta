@@ -1,6 +1,7 @@
 package edelta.lib.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collection;
@@ -253,5 +254,31 @@ public class EdeltaEcoreUtilTest {
 
 		assertThat(o)
 			.isSameAs(EcorePackage.Literals.ESTRING);
+	}
+
+	@Test
+	public void testSetValueFrom() {
+		var src = EcoreFactory.eINSTANCE.createEAttribute();
+		src.setName("anAttribute");
+		src.setEType(EcorePackage.Literals.ESTRING);
+
+		var dest = EcoreFactory.eINSTANCE.createEAttribute();
+		EdeltaEcoreUtil.setValueFrom(
+			dest,
+			EcorePackage.Literals.ETYPED_ELEMENT__ETYPE,
+			src,
+			EcorePackage.Literals.ETYPED_ELEMENT__ETYPE);
+
+		assertThat(dest.getEAttributeType())
+			.isSameAs(EcorePackage.Literals.ESTRING);
+
+		assertThatThrownBy(() -> 
+			EdeltaEcoreUtil.setValueFrom(
+				dest,
+				EcorePackage.Literals.ETYPED_ELEMENT__ETYPE,
+				src,
+				EcorePackage.Literals.ENAMED_ELEMENT__NAME))
+			.isInstanceOf(ClassCastException.class)
+			.hasMessageContaining("class java.lang.String cannot be cast to class org.eclipse.emf.ecore.EClassifier");
 	}
 }
