@@ -1,4 +1,4 @@
-*.ecore
-*.xmi
+*
 
 !.gitignore
+!README
