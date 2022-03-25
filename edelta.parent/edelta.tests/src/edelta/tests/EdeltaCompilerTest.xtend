@@ -158,9 +158,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			package foo;
 			
 			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaEcoreUtil;
 			import edelta.lib.EdeltaRuntime;
 			import edelta.lib.EdeltaUtils;
-			import org.eclipse.emf.ecore.EClass;
+			import java.util.function.Consumer;
+			import org.eclipse.emf.ecore.EObject;
 			
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
@@ -168,8 +170,20 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    super(other);
 			  }
 			  
-			  public EClass bar(final String s) {
-			    return EdeltaUtils.newEClass(s);
+			  public EObject bar(final String s) {
+			    EObject _xblockexpression = null;
+			    {
+			      EdeltaUtils.newEClass(s);
+			      final Consumer<EObject> _function = (EObject it) -> {
+			      };
+			      _xblockexpression = EdeltaEcoreUtil.createInstance(getEClass("foo", "FooClass"), _function);
+			    }
+			    return _xblockexpression;
+			  }
+			  
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
 			  }
 			}
 			'''
