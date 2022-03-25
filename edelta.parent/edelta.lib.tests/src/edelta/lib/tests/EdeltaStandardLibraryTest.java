@@ -1,5 +1,6 @@
 package edelta.lib.tests;
 
+import static edelta.lib.EdeltaEcoreUtil.createInstance;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
 import static java.util.List.of;
@@ -1026,6 +1027,52 @@ public class EdeltaStandardLibraryTest {
 			subdir,
 			of("My.ecore"),
 			of("MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void changeReferenceTypeContainment() throws Exception {
+		var subdir = "changeReferenceTypeContainment/";
+		var engine = setupEngine(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi"),
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					var reference = stdLib.getEReference("PersonList", "Person", "firstName");
+					// first add the new class similar to NameElement
+					var nameElement = stdLib.getEClass("PersonList", "NameElement");
+					var otherNameElement = stdLib.addNewEClassAsSibling(
+						nameElement,
+						"OtherNameElement",
+						c -> {
+							stdLib.addNewEAttribute(c,
+								"otherNameElementValue", ESTRING);
+						});
+					// the attribute we just added to the new class
+					var otherNameElementFeature = otherNameElement
+						.getEStructuralFeatures().get(0);
+					stdLib.changeType(reference, otherNameElement,
+						oldReferredObject ->
+						createInstance(otherNameElement,
+							newReferredObject ->
+							newReferredObject.eSet(otherNameElementFeature,
+								oldReferredObject.eGet(
+									oldReferredObject.eClass()
+										.getEStructuralFeature("nameElementValue")
+								)
+							)
+						)
+					);
+				}
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
 		);
 	}
 

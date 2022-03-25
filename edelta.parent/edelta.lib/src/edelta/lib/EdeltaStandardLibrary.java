@@ -23,6 +23,8 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import edelta.lib.EdeltaModelMigrator.EObjectFunction;
+
 /**
  * Standard library methods, for example, for adding, copying, moving
  * elements.
@@ -398,15 +400,36 @@ public class EdeltaStandardLibrary extends EdeltaRuntime {
 	 * must only take care of transforming a single value.
 	 * 
 	 * @param attribute
-	 * @param type
+	 * @param newType
 	 * @param singleValueTransformer
 	 */
-	public void changeType(EAttribute attribute, EDataType type, UnaryOperator<Object> singleValueTransformer) {
-		attribute.setEType(type);
-		modelMigration(modelMigrator -> modelMigrator.transformAttributeValueRule(
-			modelMigrator.isRelatedTo(attribute),
-			modelMigrator.multiplicityAwareTranformer(attribute, singleValueTransformer)
-		));
+	public void changeType(EAttribute attribute, EDataType newType, UnaryOperator<Object> singleValueTransformer) {
+		attribute.setEType(newType);
+		// and adjust model migration
+		modelMigration(modelMigrator ->
+			modelMigrator.transformAttributeValueRule(
+				modelMigrator.isRelatedTo(attribute),
+				modelMigrator
+					.multiplicityAwareTranformer(attribute, singleValueTransformer)
+			)
+		);
+	}
+
+	public void changeType(EReference reference, EClass newType, EObjectFunction referredObjectTransformer) {
+		changeType(reference, newType, referredObjectTransformer, null);
+	}
+
+	public void changeType(EReference reference, EClass newType, EObjectFunction referredObjectTransformer,
+			Runnable postCopy) {
+		reference.setEType(newType);
+		modelMigration(modelMigrator ->
+			modelMigrator.copyRule(
+				modelMigrator.isRelatedTo(reference),
+				modelMigrator
+					.multiplicityAwareCopy(reference, referredObjectTransformer),
+				postCopy
+			)
+		);
 	}
 
 	private <T extends ENamedElement> void safeRunInitializer(Consumer<T> initializer, T e) {
