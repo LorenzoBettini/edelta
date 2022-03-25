@@ -1,2 +1,4 @@
 *.ecore
+*.xmi
+
 !.gitignore

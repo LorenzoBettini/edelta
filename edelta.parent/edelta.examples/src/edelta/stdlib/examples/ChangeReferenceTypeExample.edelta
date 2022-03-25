@@ -1,0 +1,27 @@
+import edelta.lib.EdeltaEcoreUtil
+
+package edelta.stdlib.examples
+
+metamodel "PersonListForChangeType"
+
+modifyEcore exampleOfChangeReferenceType epackage PersonListForChangeType {
+	var reference = ecoreref(firstName)
+	val nameElement = ecoreref(NameElement)
+	val otherNameElement =
+		nameElement.addNewEClassAsSibling("OtherNameElement")
+	val nameElementFeature = ecoreref(nameElementValue)
+	val otherNameElementFeature = copyToAs(
+		nameElementFeature,
+		otherNameElement,
+		"otherNameElementValue"
+	)
+	changeType(reference, otherNameElement) [
+		oldReferredObject |
+		EdeltaEcoreUtil.createInstance(otherNameElement) [
+			newReferredObject |
+			newReferredObject.eSet(otherNameElementFeature,
+				oldReferredObject.eGet(nameElementFeature)
+			)
+		]
+	]
+}
