@@ -80,8 +80,6 @@ public class EdeltaStandardLibraryTest {
 
 	private EdeltaModelManager modelManager;
 
-	private String basedir;
-
 	@BeforeClass
 	static public void clearOutput() throws IOException {
 		cleanDirectoryRecursive(OUTPUT);
@@ -101,7 +99,7 @@ public class EdeltaStandardLibraryTest {
 			Collection<String> modelFiles,
 			EdeltaRuntimeProvider runtimeProvider
 		) {
-		basedir = TESTDATA + subdir;
+		var basedir = TESTDATA + subdir;
 		var engine = new EdeltaEngine(runtimeProvider);
 		ecoreFiles
 			.forEach(fileName -> engine.loadEcoreFile(basedir + fileName));
