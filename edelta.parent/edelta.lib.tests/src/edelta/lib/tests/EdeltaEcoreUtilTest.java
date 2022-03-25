@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.junit.Test;
@@ -240,5 +241,17 @@ public class EdeltaEcoreUtilTest {
 		assertThat(collection)
 			.isSameAs(pack.getEClassifiers())
 			.containsExactlyInAnyOrder(c1, c2, c3);
+	}
+
+	@Test
+	public void testGetValueAsEObject() {
+		var attr = EcoreFactory.eINSTANCE.createEAttribute();
+		attr.setEType(EcorePackage.Literals.ESTRING);
+
+		EObject o = EdeltaEcoreUtil.getValueAsEObject(attr,
+			EcorePackage.Literals.ETYPED_ELEMENT__ETYPE);
+
+		assertThat(o)
+			.isSameAs(EcorePackage.Literals.ESTRING);
 	}
 }

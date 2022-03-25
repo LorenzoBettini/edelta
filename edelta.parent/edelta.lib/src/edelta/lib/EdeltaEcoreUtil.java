@@ -154,4 +154,8 @@ public class EdeltaEcoreUtil {
 	public static List<EObject> getValueAsList(EObject obj, EStructuralFeature feature) {
 		return (List<EObject>) obj.eGet(feature);
 	}
+
+	public static EObject getValueAsEObject(EObject obj, EStructuralFeature feature) {
+		return (EObject) obj.eGet(feature);
+	}
 }
