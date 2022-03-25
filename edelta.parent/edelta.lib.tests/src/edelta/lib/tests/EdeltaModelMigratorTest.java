@@ -1,5 +1,6 @@
 package edelta.lib.tests;
 
+import static edelta.lib.EdeltaEcoreUtil.getValueAsEObject;
 import static edelta.lib.EdeltaEcoreUtil.getValueAsList;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
@@ -4786,7 +4787,7 @@ class EdeltaModelMigratorTest {
 							findSingleReferenceNotOfType(eClass, oldObj.eClass());
 						// the original referred object in the object to remove
 						var oldReferred =
-							(EObject) objOfRemovedClass.eGet(refToTarget);
+							getValueAsEObject(objOfRemovedClass, refToTarget);
 						// create the copy (our modelMigrator.copy checks whether
 						// an object has already been copied, so we avoid to copy
 						// the same object twice). We don't even have to care whether
@@ -4983,7 +4984,8 @@ class EdeltaModelMigratorTest {
 				modelMigrator.wasRelatedTo(featureToSplit),
 				(feature, oldObj, newObj) -> {
 					// for references we must get the copied EObject
-					var oldValue = modelMigrator.getMigrated((EObject) oldObj.eGet(feature));
+					var oldValue = modelMigrator.getMigrated(
+						EdeltaEcoreUtil.getValueAsEObject(oldObj, feature));
 					var splittedValues = objectValueSplitter.apply(oldValue).iterator();
 					for (var splitFeature : splitFeatures) {
 						if (!splittedValues.hasNext())
