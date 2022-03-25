@@ -5,12 +5,9 @@ import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaModelMigrator;
 import edelta.lib.EdeltaRuntime;
 import java.util.function.Consumer;
-import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.emf.ecore.EReference;
-import org.eclipse.emf.ecore.EStructuralFeature;
 
 @SuppressWarnings("all")
 public class ChangeReferenceTypeExample extends EdeltaDefaultRuntime {
@@ -19,20 +16,18 @@ public class ChangeReferenceTypeExample extends EdeltaDefaultRuntime {
   }
   
   public void exampleOfChangeReferenceType(final EPackage it) {
-    EReference reference = getEReference("PersonListForChangeType", "Person", "firstName");
-    final EClass nameElement = getEClass("PersonListForChangeType", "NameElement");
-    final EClass otherNameElement = this.stdLib.addNewEClassAsSibling(nameElement, "OtherNameElement");
-    final EAttribute nameElementFeature = getEAttribute("PersonListForChangeType", "NameElement", "nameElementValue");
-    final EStructuralFeature otherNameElementFeature = this.stdLib.copyToAs(nameElementFeature, otherNameElement, 
+    final EClass otherNameElement = this.stdLib.addNewEClassAsSibling(getEClass("PersonListForChangeType", "NameElement"), "OtherNameElement");
+    this.stdLib.copyToAs(
+      getEAttribute("PersonListForChangeType", "NameElement", "nameElementValue"), otherNameElement, 
       "otherNameElementValue");
     final EdeltaModelMigrator.EObjectFunction _function = (EObject oldReferredObject) -> {
       final Consumer<EObject> _function_1 = (EObject newReferredObject) -> {
-        newReferredObject.eSet(otherNameElementFeature, 
-          oldReferredObject.eGet(nameElementFeature));
+        newReferredObject.eSet(getEAttribute("PersonListForChangeType", "OtherNameElement", "otherNameElementValue"), 
+          oldReferredObject.eGet(getEAttribute("PersonListForChangeType", "NameElement", "nameElementValue")));
       };
       return EdeltaEcoreUtil.createInstance(otherNameElement, _function_1);
     };
-    this.stdLib.changeType(reference, otherNameElement, _function);
+    this.stdLib.changeType(getEReference("PersonListForChangeType", "Person", "firstName"), otherNameElement, _function);
   }
   
   @Override
