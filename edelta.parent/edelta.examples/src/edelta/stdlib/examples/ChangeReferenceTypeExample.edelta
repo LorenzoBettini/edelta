@@ -1,5 +1,3 @@
-import edelta.lib.EdeltaEcoreUtil
-
 package edelta.stdlib.examples
 
 metamodel "PersonListForChangeType"
@@ -20,7 +18,7 @@ modifyEcore exampleOfChangeReferenceType epackage PersonListForChangeType {
 	changeType(ecoreref(firstName), otherNameElement) [
 		// and specify the transformer for the migrator
 		oldReferredObject |
-		EdeltaEcoreUtil.createInstance(otherNameElement) [
+		createInstance(otherNameElement) [
 			newReferredObject |
 			// oldReferredObject is part of the model being migrated
 			// so it's safe to use features retrieved above,
