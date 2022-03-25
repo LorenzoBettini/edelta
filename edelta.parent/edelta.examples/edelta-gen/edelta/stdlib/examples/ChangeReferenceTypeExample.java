@@ -22,8 +22,7 @@ public class ChangeReferenceTypeExample extends EdeltaDefaultRuntime {
       "otherNameElementValue");
     final EdeltaModelMigrator.EObjectFunction _function = (EObject oldReferredObject) -> {
       final Consumer<EObject> _function_1 = (EObject newReferredObject) -> {
-        newReferredObject.eSet(getEAttribute("PersonListForChangeType", "OtherNameElement", "otherNameElementValue"), 
-          oldReferredObject.eGet(getEAttribute("PersonListForChangeType", "NameElement", "nameElementValue")));
+        EdeltaEcoreUtil.setValueFrom(newReferredObject, getEAttribute("PersonListForChangeType", "OtherNameElement", "otherNameElementValue"), oldReferredObject, getEAttribute("PersonListForChangeType", "NameElement", "nameElementValue"));
       };
       return EdeltaEcoreUtil.createInstance(otherNameElement, _function_1);
     };

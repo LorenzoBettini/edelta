@@ -27,8 +27,9 @@ modifyEcore exampleOfChangeReferenceType epackage PersonListForChangeType {
 			// we refer to a new object of type OtherNameElement
 			// copying its value from the original referred
 			// Object of type NameElement
-			newReferredObject.eSet(ecoreref(otherNameElementValue),
-				oldReferredObject.eGet(ecoreref(nameElementValue))
+			setValueFrom(
+				newReferredObject, ecoreref(otherNameElementValue),
+				oldReferredObject, ecoreref(nameElementValue)
 			)
 			// since the original reference Person.firstName was a
 			// containment reference, just referring to the newly
