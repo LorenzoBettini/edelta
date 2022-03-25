@@ -1,0 +1,61 @@
+import edelta.lib.EdeltaEcoreUtil
+import org.eclipse.emf.ecore.EObject
+
+package edelta.stdlib.examples
+
+metamodel "PersonListForChangeType"
+
+modifyEcore exampleOfChangeReferenceType epackage PersonListForChangeType {
+	// add another class similar to NameElement
+	val otherNameElement =
+		ecoreref(NameElement)
+		.addNewEClassAsSibling("OtherNameElement")
+	// copy the feature of NameElement in OtherNameElement
+	// with a new name
+	copyToAs(
+		ecoreref(nameElementValue),
+		otherNameElement,
+		"otherNameElementValue"
+	)
+	
+	// manually change the type
+	ecoreref(firstName).EType = otherNameElement
+	
+	// manually specify migration rule
+	modelMigration[
+		copyRule(
+			isRelatedTo(ecoreref(firstName)),
+			// oldFeature is from the original Ecore
+			// oldObj is from the original model
+			// newObj has already been copied in the new model
+			[oldFeature, oldObj, newObj |
+				if (!oldObj.eIsSet(oldFeature))
+					return // nothing to migrate
+				// retrieve the value of the attribute of the
+				// old referred object (of type NameElement) in the
+				// original model
+				val oldReferred = oldObj.eGet(oldFeature) as EObject
+				val oldType = oldReferred.eClass
+				val oldValue = oldReferred.eGet(
+					// we know that NameElement has a single feature
+					oldType.EStructuralFeatures.head
+				)
+				
+				// we refer to a new object of type OtherNameElement
+				// copying its value from the original referred
+				// Object of type NameElement
+				newObj.eSet(ecoreref(firstName),
+					EdeltaEcoreUtil.createInstance(otherNameElement) [
+						newRef |
+						newRef.eSet(ecoreref(otherNameElementValue),
+							oldValue
+						)
+					]
+				)
+				// since the original reference Person.firstName was a
+				// containment reference, just referring to the newly
+				// created object will add it to the model
+			]
+		)
+	]
+}
