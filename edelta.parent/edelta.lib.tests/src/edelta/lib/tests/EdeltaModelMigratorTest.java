@@ -3053,11 +3053,10 @@ class EdeltaModelMigratorTest {
 			asList(
 				"firstName",
 				"lastName"),
-			value -> {
+			obj -> {
 				// a few more checks should be performed in a realistic context
-				if (value == null)
+				if (obj == null)
 					return Collections.emptyList();
-				var obj = (EObject) value;
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
 				// that is, in case of a single element, the lastName will be empty
@@ -3112,11 +3111,10 @@ class EdeltaModelMigratorTest {
 			asList(
 				"firstName",
 				"lastName"),
-			value -> {
+			obj -> {
 				// a few more checks should be performed in a realistic context
-				if (value == null)
+				if (obj == null)
 					return Collections.emptyList();
-				var obj = (EObject) value;
 
 				var containingFeature = obj.eContainingFeature();
 				List<EObject> containerCollection =
@@ -3189,11 +3187,10 @@ class EdeltaModelMigratorTest {
 			asList(
 				"firstName",
 				"lastName"),
-			value -> {
+			obj -> {
 				// a few more checks should be performed in a realistic context
-				if (value == null)
+				if (obj == null)
 					return Collections.emptyList();
-				var obj = (EObject) value;
 
 				var alreadySplitted = splitted.get(obj);
 				if (alreadySplitted != null)
@@ -3399,11 +3396,10 @@ class EdeltaModelMigratorTest {
 			asList(
 				personFirstName.getName(),
 				personLastName.getName()),
-			value -> {
+			obj -> {
 				// a few more checks should be performed in a realistic context
-				if (value == null)
+				if (obj == null)
 					return Collections.emptyList();
-				var obj = (EObject) value;
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
 				// that is, in case of a single element, the lastName will be empty
@@ -3492,11 +3488,10 @@ class EdeltaModelMigratorTest {
 			asList(
 				personFirstName.getName(),
 				personLastName.getName()),
-			value -> {
+			obj -> {
 				// a few more checks should be performed in a realistic context
-				if (value == null)
+				if (obj == null)
 					return Collections.emptyList();
-				var obj = (EObject) value;
 
 				var containingFeature = obj.eContainingFeature();
 				List<EObject> containerCollection =
@@ -3616,11 +3611,10 @@ class EdeltaModelMigratorTest {
 			asList(
 				personFirstName.getName(),
 				personLastName.getName()),
-			value -> {
+			obj -> {
 				// a few more checks should be performed in a realistic context
-				if (value == null)
+				if (obj == null)
 					return Collections.emptyList();
-				var obj = (EObject) value;
 
 				var alreadySplitted = splitted.get(obj);
 				if (alreadySplitted != null)
@@ -3698,11 +3692,10 @@ class EdeltaModelMigratorTest {
 			asList(
 				"firstName",
 				"lastName"),
-			value -> {
+			obj -> {
 				// a few more checks should be performed in a realistic context
-				if (value == null)
+				if (obj == null)
 					return Collections.emptyList();
-				var obj = (EObject) value;
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
 				// that is, in case of a single element, the lastName will be empty
@@ -3781,11 +3774,10 @@ class EdeltaModelMigratorTest {
 			asList(
 				"firstName",
 				"lastName"),
-			value -> {
+			obj -> {
 				// a few more checks should be performed in a realistic context
-				if (value == null)
+				if (obj == null)
 					return Collections.emptyList();
-				var obj = (EObject) value;
 
 				var containingFeature = obj.eContainingFeature();
 				List<EObject> containerCollection =
@@ -3886,11 +3878,10 @@ class EdeltaModelMigratorTest {
 			asList(
 				"firstName",
 				"lastName"),
-			value -> {
+			obj -> {
 				// a few more checks should be performed in a realistic context
-				if (value == null)
+				if (obj == null)
 					return Collections.emptyList();
-				var obj = (EObject) value;
 
 				var alreadySplitted = splitted.get(obj);
 				if (alreadySplitted != null)
@@ -4984,15 +4975,16 @@ class EdeltaModelMigratorTest {
 	private Collection<EReference> splitReference(EdeltaModelMigrator modelMigrator,
 			final EReference featureToSplit,
 			final Collection<String> newFeatureNames,
-			Function<Object, Collection<?>> valueSplitter, Runnable postCopy) {
+			Function<EObject, Collection<EObject>> objectValueSplitter,
+			Runnable postCopy) {
 		var splitFeatures = splitFeature(modelMigrator, featureToSplit, newFeatureNames);
-		if (valueSplitter != null) {
+		if (objectValueSplitter != null) {
 			modelMigrator.copyRule(
 				modelMigrator.wasRelatedTo(featureToSplit),
 				(feature, oldObj, newObj) -> {
 					// for references we must get the copied EObject
 					var oldValue = modelMigrator.getMigrated((EObject) oldObj.eGet(feature));
-					var splittedValues = valueSplitter.apply(oldValue).iterator();
+					var splittedValues = objectValueSplitter.apply(oldValue).iterator();
 					for (var splitFeature : splitFeatures) {
 						if (!splittedValues.hasNext())
 							break;
