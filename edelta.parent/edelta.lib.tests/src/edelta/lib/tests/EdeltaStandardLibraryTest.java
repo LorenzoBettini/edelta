@@ -1050,20 +1050,31 @@ public class EdeltaStandardLibraryTest {
 							stdLib.addNewEAttribute(c,
 								"otherNameElementValue", ESTRING);
 						});
+					// the attribute of the original reference type
+					var nameElementFeature = stdLib.getEAttribute
+						("PersonList", "NameElement", "nameElementValue");
 					// the attribute we just added to the new class
-					var otherNameElementFeature = otherNameElement
-						.getEStructuralFeatures().get(0);
+					var otherNameElementFeature = stdLib.getEAttribute
+						("PersonList", "OtherNameElement", "otherNameElementValue");
+					// change the reference type
 					stdLib.changeType(reference, otherNameElement,
+						// and provide the model migration for the changed reference
 						oldReferredObject ->
+						// oldReferredObject is part of the model being migrated
+						// so it's safe to use features retrieved above,
+						// like nameElementFeature
 						createInstance(otherNameElement,
+							// we refer to a new object of type OtherNameElement
 							newReferredObject ->
+							// copying its value from the original referred
+							// Object of type NameElement
 							newReferredObject.eSet(otherNameElementFeature,
-								oldReferredObject.eGet(
-									oldReferredObject.eClass()
-										.getEStructuralFeature("nameElementValue")
-								)
+								oldReferredObject.eGet(nameElementFeature)
 							)
 						)
+						// since the original reference Person.firstName was a
+						// containment reference, just referring to the newly
+						// created object will add it to the model
 					);
 				}
 			}
