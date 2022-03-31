@@ -14,6 +14,7 @@ import edelta.lib.EdeltaEngine;
 import edelta.lib.EdeltaEngine.EdeltaRuntimeProvider;
 import edelta.stdlib.examples.ChangeReferenceTypeExample;
 import edelta.stdlib.examples.ChangeReferenceTypeManualExample;
+import edelta.stdlib.examples.ChangeReferenceTypeMultipleExample;
 import edelta.testutils.EdeltaTestUtils;
 
 public class EdeltaStdLibExamplesTest {
@@ -52,6 +53,24 @@ public class EdeltaStdLibExamplesTest {
 			ecores,
 			models,
 			ChangeReferenceTypeExample::new);
+
+		executeSaveAndAssert(engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	public void testChangeReferenceTypeMultiple() throws Exception {
+		var subdir = "ChangeReferenceTypeMultiple/";
+		var ecores = of("PersonListForChangeType.ecore");
+		var models = of("ListForChangeType.xmi");
+
+		var engine = setupEngine(
+			ecores,
+			models,
+			ChangeReferenceTypeMultipleExample::new);
 
 		executeSaveAndAssert(engine,
 			subdir,
