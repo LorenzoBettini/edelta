@@ -22,8 +22,8 @@ modifyEcore exampleOfChangeToAbstract epackage PersonListForChangeToAbstract {
 				// so we use getOriginal
 				val managerFeature = getOriginal(ecoreref(Person.manager))
 				if (oldObj.eGet(managerFeature) as Boolean)
-					return createInstance(manager) []
-				return createInstance(employee) []
+					return createInstance(manager)
+				return createInstance(employee)
 			]
 		)
 	]

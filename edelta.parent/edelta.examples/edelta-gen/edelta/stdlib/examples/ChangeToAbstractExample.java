@@ -26,13 +26,9 @@ public class ChangeToAbstractExample extends EdeltaDefaultRuntime {
         final EAttribute managerFeature = it_1.<EAttribute>getOriginal(getEAttribute("PersonListForChangeToAbstract", "Person", "manager"));
         Object _eGet = oldObj.eGet(managerFeature);
         if ((((Boolean) _eGet)).booleanValue()) {
-          final Consumer<EObject> _function_2 = (EObject it_2) -> {
-          };
-          return EdeltaEcoreUtil.createInstance(manager, _function_2);
+          return EdeltaEcoreUtil.createInstance(manager);
         }
-        final Consumer<EObject> _function_3 = (EObject it_2) -> {
-        };
-        return EdeltaEcoreUtil.createInstance(employee, _function_3);
+        return EdeltaEcoreUtil.createInstance(employee);
       };
       it_1.createInstanceRule(
         it_1.<EClass>isRelatedTo(personClass), _function_1);
