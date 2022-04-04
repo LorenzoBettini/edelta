@@ -144,6 +144,10 @@ public class EdeltaEcoreUtil {
 		obj.eSet(feature, unwrapCollection);
 	}
 
+	public static EObject createInstance(EClass type) {
+		return EcoreUtil.create(type);
+	}
+
 	public static EObject createInstance(EClass type, Consumer<EObject> initializer) {
 		var instance = EcoreUtil.create(type);
 		initializer.accept(instance);

@@ -3,6 +3,7 @@ package edelta.lib.tests;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -218,6 +219,10 @@ public class EdeltaEcoreUtilTest {
 			o -> o.eSet(EcorePackage.eINSTANCE.getENamedElement_Name(), "a name")
 		);
 		assertEquals("a name",
+			instance.eGet(EcorePackage.eINSTANCE.getENamedElement_Name()));
+		instance = EdeltaEcoreUtil.createInstance(
+			EcorePackage.eINSTANCE.getEDataType());
+		assertNull(
 			instance.eGet(EcorePackage.eINSTANCE.getENamedElement_Name()));
 	}
 
