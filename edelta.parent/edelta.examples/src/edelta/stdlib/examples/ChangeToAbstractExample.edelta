@@ -1,5 +1,3 @@
-import org.eclipse.emf.ecore.util.EcoreUtil
-
 package edelta.stdlib.examples
 
 metamodel "PersonListForChangeToAbstract"
