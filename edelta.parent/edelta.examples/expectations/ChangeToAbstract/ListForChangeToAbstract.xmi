@@ -8,11 +8,9 @@
   <members xsi:type="person:Employee"
       name="I'm an employee"/>
   <members xsi:type="person:Manager"
-      name="I'm a manager"
-      manager="true"/>
+      name="I'm a manager"/>
   <members xsi:type="person:Employee"
       name="I'm another employee"/>
   <members xsi:type="person:Manager"
-      name="I'm another manager"
-      manager="true"/>
+      name="I'm another manager"/>
 </person:List>
