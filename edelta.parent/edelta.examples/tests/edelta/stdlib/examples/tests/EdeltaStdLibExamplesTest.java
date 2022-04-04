@@ -15,6 +15,7 @@ import edelta.lib.EdeltaEngine.EdeltaRuntimeProvider;
 import edelta.stdlib.examples.ChangeReferenceTypeExample;
 import edelta.stdlib.examples.ChangeReferenceTypeManualExample;
 import edelta.stdlib.examples.ChangeReferenceTypeMultipleExample;
+import edelta.stdlib.examples.ChangeToAbstractExample;
 import edelta.testutils.EdeltaTestUtils;
 
 public class EdeltaStdLibExamplesTest {
@@ -89,6 +90,24 @@ public class EdeltaStdLibExamplesTest {
 			ecores,
 			models,
 			ChangeReferenceTypeManualExample::new);
+
+		executeSaveAndAssert(engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	public void testChangeToAbstract() throws Exception {
+		var subdir = "ChangeToAbstract/";
+		var ecores = of("PersonListForChangeToAbstract.ecore");
+		var models = of("ListForChangeToAbstract.xmi");
+
+		var engine = setupEngine(
+			ecores,
+			models,
+			ChangeToAbstractExample::new);
 
 		executeSaveAndAssert(engine,
 			subdir,
