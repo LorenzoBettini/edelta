@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<petrinet:Petrinet
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:petrinet="http://gssi.it/petrinet"
+    xsi:schemaLocation="http://gssi.it/petrinet Petrinet.ecore"
+    name="A net">
+  <places name="Place 1">
+    <out dst="//@transitions.0"/>
+  </places>
+  <places name="Place 2"
+      in="//@transitions.0/@out.0">
+    <out dst="//@transitions.1"/>
+  </places>
+  <places name="Place 3"
+      in="//@transitions.1/@out.0"/>
+  <transitions
+      name="1 -> 2"
+      in="//@places.0/@out.0">
+    <out dst="//@places.1"/>
+  </transitions>
+  <transitions
+      name="2 -> 3"
+      in="//@places.1/@out.0">
+    <out dst="//@places.2"/>
+  </transitions>
+</petrinet:Petrinet>
