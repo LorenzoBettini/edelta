@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -643,17 +642,17 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	void referenceToClass() throws Exception {
 		var subdir = "referenceToClassUnidirectional/";
 		var ecores = of("PersonList.ecore");
-		var models = new ArrayList<String>(); // of("List.xmi");
+		var models = of("List.xmi");
 
 		var engine = setupEngine(
 			subdir,
 			ecores,
 			models,
-			other -> new EdeltaDefaultRuntime(other) {
+			other -> new EdeltaRefactorings(other) {
 				@Override
 				protected void doExecute() {
-					final EReference ref = stdLib.getEReference("PersonList", "Person", "works");
-					refactorings.referenceToClass("WorkingPosition", ref);
+					final EReference ref = getEReference("PersonList", "Person", "works");
+					referenceToClass("WorkingPosition", ref);
 				}
 			}
 		);

@@ -13,6 +13,7 @@ import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.ETypedElement
 import org.eclipse.emf.ecore.util.EcoreUtil
+import java.util.stream.Collectors
 
 package edelta.refactorings.lib
 
@@ -277,6 +278,54 @@ def referenceToClass(String name, EReference reference) {
 	}
 	reference.EType = extracted
 	reference.makeContainmentBidirectional
+
+	// handle the migration of the reference that now has to refer
+	// to a new object (of the extracted class), or, transparently
+	// to a list of new objects in case of a multi reference
+	modelMigration[
+		copyRule(
+			[feature |
+				isRelatedTo(feature, reference) ||
+				isRelatedTo(feature, eOpposite)],
+			[feature, oldObj, newObj |
+				// feature: the feature of the original metamodel
+				// oldObj: the object of the original model
+				// newObj: the object of the new model, already created
+	
+				// the opposite reference now changed its type
+				// so we have to skip the copy or we'll have a ClassCastException
+				// the bidirectionality will be implied in the next migrator
+				if (isRelatedTo(feature, eOpposite))
+					return
+	
+				// retrieve the original value, wrapped in a list
+				// so this works (transparently) for both single and multi feature
+				// discard possible extra values, in case the multiplicity has changed
+				var oldValueOrValues =
+					getValueForFeature(oldObj, feature,
+						reference.getUpperBound())
+	
+				// for each old value create a new object for the
+				// extracted class, by setting the reference's value
+				// with the copied value of that reference
+				var copies = oldValueOrValues.stream()
+					.map[oldValue |
+						// since this is NOT a containment reference
+						// the referred oldValue has already been copied
+						val copy = getMigrated(oldValue as EObject)
+						return createInstance(extracted) [
+							o | o.eSet(extractedRef, copy)
+						]
+					]
+					.collect(Collectors.toList())
+				// in the new object set the value or values (transparently)
+				// with the created object (or objects, again, transparently)
+				setValueForFeature(
+					newObj, reference, copies)
+			]
+		);
+	]
+
 	return extracted
 }
 
