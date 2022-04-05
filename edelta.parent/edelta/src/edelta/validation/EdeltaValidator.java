@@ -12,11 +12,13 @@ import static org.eclipse.xtext.xbase.typesystem.util.Multimaps2.newLinkedHashLi
 import java.util.HashSet;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.common.types.JvmGenericType;
 import org.eclipse.xtext.common.types.JvmOperation;
 import org.eclipse.xtext.common.types.JvmTypeReference;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.validation.Check;
+import org.eclipse.xtext.xbase.XAbstractFeatureCall;
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations;
 import org.eclipse.xtext.xbase.typesystem.override.OverrideHelper;
 import org.eclipse.xtext.xbase.typesystem.references.LightweightTypeReference;
@@ -26,6 +28,7 @@ import org.eclipse.xtext.xbase.typesystem.util.CommonTypeComputationServices;
 import com.google.common.collect.ListMultimap;
 import com.google.inject.Inject;
 
+import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.edelta.EdeltaUseAs;
@@ -73,6 +76,9 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 	public static final String EPACKAGE_CYCLE = PREFIX + "EPackageCycle";
 
 	public static final String ECLASS_CYCLE = PREFIX + "EClassCycle";
+
+	public static final String INVALID_ECOREREF_USAGE = PREFIX
+			+ "InvalidEcoreRefUsage";
 
 	@Inject
 	private CommonTypeComputationServices services;
@@ -178,6 +184,18 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 				op,
 				EDELTA_MODIFY_ECORE_OPERATION__EPACKAGE,
 				INVALID_SUBPACKAGE_MODIFICATION);
+		}
+	}
+
+	@Check
+	public void checkInvalidUseOfEcorerefInModelMigration(XAbstractFeatureCall call) {
+		if (call.getFeature().getSimpleName().equals("modelMigration")) {
+			EcoreUtil2.eAllOfType(call, EdeltaEcoreReferenceExpression.class).forEach(ref ->
+				error("Invalid use of ecoreref() inside model migration",
+					ref,
+					null,
+					INVALID_ECOREREF_USAGE)
+			);
 		}
 	}
 

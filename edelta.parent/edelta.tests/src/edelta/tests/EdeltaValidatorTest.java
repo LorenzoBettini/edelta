@@ -448,7 +448,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
 		metamodel "foo"
 
 		modifyEcore aTest epackage foo {
-			ecoreref(FooClass) // OK
+			ecoreref(FooDataType) // OK
 			modelMigration[
 				createInstanceRule(
 					isRelatedTo(ecoreref(FooClass)), // INVALID
@@ -461,7 +461,21 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
 		}
 		""";
 		var prog = parseWithTestEcore(input);
-		// TODO this should fail
-		validationTestHelper.assertNoErrors(prog);
+		assertErrorsAsStrings(prog, """
+			Invalid use of ecoreref() inside model migration
+			Invalid use of ecoreref() inside model migration
+			""");
+		validationTestHelper.assertError(prog,
+			EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION,
+			EdeltaValidator.INVALID_ECOREREF_USAGE,
+			input.indexOf("ecoreref(FooClass)"),
+			"ecoreref(FooClass)".length(),
+			"Invalid use of ecoreref() inside model migration");
+		validationTestHelper.assertError(prog,
+			EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION,
+			EdeltaValidator.INVALID_ECOREREF_USAGE,
+			input.lastIndexOf("ecoreref(FooClass)"),
+			"ecoreref(FooClass)".length(),
+			"Invalid use of ecoreref() inside model migration");
 	}
 }
