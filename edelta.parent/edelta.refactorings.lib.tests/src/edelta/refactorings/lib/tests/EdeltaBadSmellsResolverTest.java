@@ -19,7 +19,7 @@ import edelta.lib.EdeltaModelManager;
 import edelta.refactorings.lib.EdeltaBadSmellsResolver;
 import edelta.testutils.EdeltaTestUtils;
 
-public class EdeltaBadSmellsResolverTest extends AbstractTest {
+public class EdeltaBadSmellsResolverTest extends AbstractEdeltaRefactoringsLibTest {
 	private EdeltaBadSmellsResolver resolver;
 
 	private String testModelDirectory;
@@ -47,7 +47,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 	 */
 	@After
 	public void cleanModifiedOutputDirectory() throws IOException {
-		EdeltaTestUtils.cleanDirectory(AbstractTest.MODIFIED);
+		EdeltaTestUtils.cleanDirectory(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 	}
 
 
@@ -56,7 +56,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 		this.testModelFiles = asList(testModelFiles);
 		for (String testModelFile : testModelFiles) {
 			modelManager
-				.loadEcoreFile(AbstractTest.TESTECORES +
+				.loadEcoreFile(AbstractEdeltaRefactoringsLibTest.TESTECORES +
 					testModelDirectory + "/" + testModelFile);
 		}
 	}
@@ -66,8 +66,8 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 		// if the ecore file is saved then it is valid
 		for (String testModelFile : testModelFiles) {
 			EdeltaTestUtils.assertFilesAreEquals(
-					AbstractTest.EXPECTATIONS + testModelDirectory + "/" + testModelFile,
-					AbstractTest.MODIFIED + testModelFile);
+					AbstractEdeltaRefactoringsLibTest.EXPECTATIONS + testModelDirectory + "/" + testModelFile,
+					AbstractEdeltaRefactoringsLibTest.MODIFIED + testModelFile);
 		}
 	}
 
@@ -75,7 +75,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 	public void test_resolveDuplicatedFeatures() throws IOException {
 		loadModelFiles("resolveDuplicatedFeatures", "TestEcore.ecore");
 		resolver.resolveDuplicatedFeatures(resolver.getEPackage("p"));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -86,7 +86,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 		// dead classifiers
 		resolver.resolveDeadClassifiers(resolver.getEPackage("p"),
 			it -> Objects.equals(it.getName(), "Unused2"));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -95,7 +95,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 		loadModelFiles("resolveDeadClassifiersAlwaysTrue", "TestEcore.ecore");
 		// all classifiers considered dead classifiers will be removed
 		resolver.resolveDeadClassifiers(resolver.getEPackage("p"));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -108,7 +108,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 		loadModelFiles("resolveDeadClassifiersParallel",
 				"TestEcoreReferred.ecore", "TestEcoreReferring.ecore");
 		resolver.resolveDeadClassifiers(resolver.getEPackage("p"));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -116,7 +116,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 	public void test_resolveRedundantContainers() throws IOException {
 		loadModelFiles("resolveRedundantContainers", "TestEcore.ecore");
 		resolver.resolveRedundantContainers(resolver.getEPackage("p"));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -124,7 +124,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 	public void test_resolveClassificationByHierarchy() throws IOException {
 		loadModelFiles("resolveClassificationByHierarchy", "TestEcore.ecore");
 		resolver.resolveClassificationByHierarchy(resolver.getEPackage("p"));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -132,7 +132,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 	public void test_resolveConcreteAbstractMetaclass() throws IOException {
 		loadModelFiles("resolveConcreteAbstractMetaclass", "TestEcore.ecore");
 		resolver.resolveConcreteAbstractMetaclass(resolver.getEPackage("p"));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -149,7 +149,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 	public void test_resolveAbstractSubclassesOfConcreteSuperclasses() throws IOException {
 		loadModelFiles("resolveAbstractSubclassesOfConcreteSuperclasses", "TestEcore.ecore");
 		resolver.resolveAbstractSubclassesOfConcreteSuperclasses(resolver.getEPackage("p"));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -157,7 +157,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractTest {
 	public void test_resolveDuplicatedFeaturesInSubclasses() throws IOException {
 		loadModelFiles("resolveDuplicatedFeaturesInSubclasses", "TestEcore.ecore");
 		resolver.resolveDuplicatedFeaturesInSubclasses(resolver.getEPackage("p"));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 }

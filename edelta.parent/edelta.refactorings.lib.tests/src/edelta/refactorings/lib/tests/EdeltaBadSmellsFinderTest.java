@@ -24,7 +24,7 @@ import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaModelManager;
 import edelta.refactorings.lib.EdeltaBadSmellsFinder;
 
-public class EdeltaBadSmellsFinderTest extends AbstractTest {
+public class EdeltaBadSmellsFinderTest extends AbstractEdeltaRefactoringsLibTest {
 	private EdeltaBadSmellsFinder finder;
 
 	@Before

@@ -20,7 +20,7 @@ import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaStandardLibrary;
 import edelta.lib.EdeltaUtils;
 
-public abstract class AbstractTest {
+public abstract class AbstractEdeltaRefactoringsLibTest {
 	protected EcoreFactory factory = EcoreFactory.eINSTANCE;
 
 	protected EDataType stringDataType = EcorePackage.eINSTANCE.getEString();
