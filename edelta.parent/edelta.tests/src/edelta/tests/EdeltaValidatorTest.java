@@ -441,4 +441,27 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
 				"ANewSuperClass".length(),
 				"Element not yet available in this context: foo.ANewSuperClass");
 	}
+
+	@Test
+	public void testInvalidUseOfEcorerefInModelMigration() throws Exception {
+		var input = """
+		metamodel "foo"
+
+		modifyEcore aTest epackage foo {
+			ecoreref(FooClass) // OK
+			modelMigration[
+				createInstanceRule(
+					isRelatedTo(ecoreref(FooClass)), // INVALID
+					[ o |
+						return edelta.lib.EdeltaEcoreUtil.createInstance
+							(ecoreref(FooClass)) []  // INVALID
+					]
+				)
+			]
+		}
+		""";
+		var prog = parseWithTestEcore(input);
+		// TODO this should fail
+		validationTestHelper.assertNoErrors(prog);
+	}
 }
