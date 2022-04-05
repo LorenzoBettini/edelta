@@ -23,10 +23,6 @@ public abstract class AbstractEdeltaExamplesTest {
 		EdeltaTestUtils.cleanDirectoryRecursive(OUTPUT);
 	}
 
-	public AbstractEdeltaExamplesTest() {
-		super();
-	}
-
 	protected EdeltaEngine setupEngine(Collection<String> ecoreFiles, Collection<String> modelFiles, EdeltaRuntimeProvider runtimeProvider) {
 		var basedir = TESTDATA; // subdir is not used for the moment
 		var engine = new EdeltaEngine(runtimeProvider);
