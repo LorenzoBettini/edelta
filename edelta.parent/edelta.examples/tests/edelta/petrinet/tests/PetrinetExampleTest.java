@@ -1,26 +1,30 @@
 package edelta.petrinet.tests;
 
+import static java.util.List.of;
+
 import org.junit.Test;
 
-import edelta.lib.EdeltaEngine;
+import edelta.examples.tests.AbstractEdeltaExamplesTest;
 import edelta.petrinet.example.PetrinetExample;
-import edelta.testutils.EdeltaTestUtils;
 
-public class PetrinetExampleTest {
+public class PetrinetExampleTest extends AbstractEdeltaExamplesTest {
+
 	@Test
 	public void testPetrinet() throws Exception {
-		// create the engine specifying the generated Java class
-		EdeltaEngine engine = new EdeltaEngine(PetrinetExample::new);
-		// Make sure you load all the used Ecores (Ecore.ecore is always loaded)
-		engine.loadEcoreFile("model/Petrinet.ecore");
-		// Execute the actual transformations defined in the DSL
-		engine.execute();
-		// Save the modified Ecores and models into a new path
-		engine.save("modified");
+		var subdir = "";
+		var ecores = of("Petrinet.ecore");
+		var models = of(); // "Net.xmi"
 
-		EdeltaTestUtils.assertFilesAreEquals(
-			"expectations/Petrinet.ecore",
-			"modified/Petrinet.ecore");
+		var engine = setupEngine(
+			ecores,
+			of(),
+			PetrinetExample::new);
+
+		executeSaveAndAssert(engine,
+			subdir,
+			ecores,
+			of()
+		);
 	}
 
 }
