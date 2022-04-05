@@ -1,8 +1,12 @@
 package edelta.refactorings.lib.tests;
 
 import static com.google.common.collect.Iterables.filter;
+import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.findFirst;
+import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.IOException;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -16,9 +20,11 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 
+import edelta.lib.EdeltaEngine;
 import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaStandardLibrary;
 import edelta.lib.EdeltaUtils;
+import edelta.lib.EdeltaEngine.EdeltaRuntimeProvider;
 
 public abstract class AbstractEdeltaRefactoringsLibTest {
 	protected EcoreFactory factory = EcoreFactory.eINSTANCE;
@@ -36,6 +42,50 @@ public abstract class AbstractEdeltaRefactoringsLibTest {
 	protected static final String EXPECTATIONS = "test-output-expectations/";
 
 	protected EdeltaStandardLibrary stdLib = new EdeltaStandardLibrary(new EdeltaModelManager());
+
+	protected EdeltaEngine setupEngine(
+			String subdir,
+			Collection<String> ecoreFiles,
+			Collection<String> modelFiles,
+			EdeltaRuntimeProvider runtimeProvider
+		) {
+		var basedir = TESTECORES + subdir;
+		var engine = new EdeltaEngine(runtimeProvider);
+		ecoreFiles
+			.forEach(fileName -> engine.loadEcoreFile(basedir + fileName));
+		modelFiles
+			.forEach(fileName -> engine.loadModelFile(basedir + fileName));
+		return engine;
+	}
+
+	protected void assertOutputs(
+			EdeltaEngine engine,
+			String outputdir,
+			Collection<String> ecoreFiles,
+			Collection<String> modelFiles
+		) throws Exception {
+		engine.execute();
+		var output = MODIFIED + outputdir;
+		engine.save(output);
+		ecoreFiles.forEach
+			(fileName ->
+				assertGeneratedFiles(fileName, outputdir, output, fileName));
+		modelFiles.forEach
+			(fileName ->
+				assertGeneratedFiles(fileName, outputdir, output, fileName));
+	}
+
+	protected void assertGeneratedFiles(String message, String subdir, String outputDir, String fileName) {
+		try {
+			assertFilesAreEquals(
+				message,
+				EXPECTATIONS + subdir + fileName,
+				outputDir + fileName);
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail(e.getClass().getName() + ": " + e.getMessage());
+		}
+	}
 
 	protected EPackage createEPackage(final String name) {
 		EPackage p = this.factory.createEPackage();

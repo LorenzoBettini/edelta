@@ -3,12 +3,14 @@ package edelta.refactorings.lib.tests;
 import static edelta.lib.EdeltaUtils.getEObjectRepr;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -635,6 +637,33 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 		refactorings.referenceToClass("WorkingPosition", ref);
 		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
+	}
+
+	@Test
+	void referenceToClass() throws Exception {
+		var subdir = "referenceToClassUnidirectional/";
+		var ecores = of("PersonList.ecore");
+		var models = new ArrayList<String>(); // of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					final EReference ref = stdLib.getEReference("PersonList", "Person", "works");
+					refactorings.referenceToClass("WorkingPosition", ref);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test
