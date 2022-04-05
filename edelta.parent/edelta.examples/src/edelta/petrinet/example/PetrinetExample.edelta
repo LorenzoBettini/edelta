@@ -10,8 +10,6 @@ metamodel "ecore"
 
 use EdeltaRefactorings as refactorings
 
-//Petrinet MM0-MM1
-
 def addWeightAttribute(EClass c) {
 	c.addNewEAttribute("weight", ecoreref(EInt)) [
 		makeRequired // lowerBound = 1
@@ -25,9 +23,6 @@ modifyEcore modifyNet epackage petrinet {
 }
 
 modifyEcore introducePTArc epackage petrinet {
-//	refactorings.extractMetaClass("PTArc", ecoreref(Place.dst), 'out', 'in') => [
-//		addWeightAttribute
-//	]
 	refactorings.referenceToClass("PTArc", ecoreref(Place.dst)) => [
 		addWeightAttribute
 	]
@@ -38,9 +33,6 @@ modifyEcore introducePTArc epackage petrinet {
 }
 
 modifyEcore introduceTPArc epackage petrinet {
-//	refactorings.extractMetaClass("TPArc", ecoreref(Transition.dst), 'out', 'in') => [
-//		addWeightAttribute
-//	]
 	refactorings.referenceToClass("TPArc", ecoreref(Transition.dst)) => [
 		addWeightAttribute
 	]
