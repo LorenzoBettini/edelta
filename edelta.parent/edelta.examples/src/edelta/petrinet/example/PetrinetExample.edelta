@@ -51,6 +51,14 @@ modifyEcore introduceTPArc epackage petrinet {
 }
 
 modifyEcore introduceAbstractArc epackage petrinet {
-	refactorings.extractSuperclass("Arc",
+	val arc = refactorings.extractSuperclass("Arc",
 		#[ecoreref(PTArc.weight), ecoreref(TPArc.weight)])
+
+	val netRef= arc.addNewEReference("net", ecoreref(Petrinet))
+
+	ecoreref(Petrinet).addNewEReference("arcs", arc) [
+		makeContainment
+		makeMultiple
+		makeBidirectional(netRef)
+	]
 }

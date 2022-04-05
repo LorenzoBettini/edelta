@@ -9,6 +9,8 @@
         upperBound="-1" eType="#//Place" containment="true" eOpposite="#//Place/net"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="transitions" lowerBound="1"
         upperBound="-1" eType="#//Transition" containment="true" eOpposite="#//Transition/net"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="arcs" upperBound="-1" eType="#//Arc"
+        containment="true" eOpposite="#//Arc/net"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Place" eSuperTypes="#//NamedElement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="net" lowerBound="1" eType="#//Petrinet"
@@ -41,5 +43,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="Arc" abstract="true">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="weight" lowerBound="1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="net" eType="#//Petrinet"
+        eOpposite="#//Petrinet/arcs"/>
   </eClassifiers>
 </ecore:EPackage>

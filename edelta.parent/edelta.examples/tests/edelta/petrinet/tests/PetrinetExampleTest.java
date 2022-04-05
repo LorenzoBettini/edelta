@@ -22,4 +22,5 @@ public class PetrinetExampleTest {
 			"expectations/Petrinet.ecore",
 			"modified/Petrinet.ecore");
 	}
+
 }

@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
@@ -61,8 +62,15 @@ public class PetrinetExample extends EdeltaDefaultRuntime {
   }
   
   public void introduceAbstractArc(final EPackage it) {
-    this.refactorings.extractSuperclass("Arc", 
+    final EClass arc = this.refactorings.extractSuperclass("Arc", 
       Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(getEAttribute("petrinet", "PTArc", "weight"), getEAttribute("petrinet", "TPArc", "weight"))));
+    final EReference netRef = this.stdLib.addNewEReference(arc, "net", getEClass("petrinet", "Petrinet"));
+    final Consumer<EReference> _function = (EReference it_1) -> {
+      EdeltaUtils.makeContainment(it_1);
+      EdeltaUtils.makeMultiple(it_1);
+      EdeltaUtils.makeBidirectional(it_1, netRef);
+    };
+    this.stdLib.addNewEReference(getEClass("petrinet", "Petrinet"), "arcs", arc, _function);
   }
   
   @Override
