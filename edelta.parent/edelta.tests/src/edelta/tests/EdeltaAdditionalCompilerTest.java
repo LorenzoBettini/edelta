@@ -27,6 +27,7 @@ import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 
 import edelta.tests.injectors.EdeltaInjectorProviderTestableDerivedStateComputer;
+import edelta.testutils.EdeltaTestUtils;
 
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer.class)
@@ -149,10 +150,11 @@ public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
 	}
 
 	private void assertGeneratedJavaCode(CompilationTestHelper.Result r, CharSequence expected) {
+		var singleGeneratedCode = EdeltaTestUtils.removeCR(r.getSingleGeneratedCode());
 		assertEquals(expected.toString(),
 			// lines with only spaces are skipped in Java text blocks
 			// but they are present in the generated code so we need to remove them
-			r.getSingleGeneratedCode().replace("  \n", "\n"));
+			singleGeneratedCode.replace("  \n", "\n"));
 	}
 
 	private Class<?> assertGeneratedJavaCodeCompiles(CompilationTestHelper.Result r) {
