@@ -8,6 +8,7 @@ import org.eclipse.xtext.ui.editor.model.edit.ITextEditComposer;
 
 import com.google.inject.Inject;
 
+import edelta.testutils.EdeltaTestUtils;
 import edelta.ui.quickfix.EdeltaQuickfixProvider;
 import edelta.ui.tests.EdeltaQuickfixTest;
 
@@ -36,6 +37,6 @@ public class CarriageReturnAwareXtextDocument extends XtextDocument {
 
 	@Override
 	public String get() {
-		return super.get().replace("\r", "");
+		return EdeltaTestUtils.removeCR(super.get());
 	}
 }

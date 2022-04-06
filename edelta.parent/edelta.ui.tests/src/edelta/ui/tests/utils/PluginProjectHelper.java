@@ -14,6 +14,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 
+import edelta.testutils.EdeltaTestUtils;
+
 /**
  * Utility class for creating a Plug-in project for testing.
  * 
@@ -53,7 +55,9 @@ public class PluginProjectHelper {
 	}
 
 	protected static void assertEqualsStrings(final CharSequence expected, final CharSequence actual) {
-		assertEquals(expected.toString().replace("\r", ""), actual.toString());
+		assertEquals(
+			EdeltaTestUtils.removeCR(expected.toString()),
+			actual.toString());
 	}
 
 }
