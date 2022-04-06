@@ -7,12 +7,14 @@
     xsi:schemaLocation="http://gssi.it/petrinet Petrinet.ecore"
     name="A net">
   <places name="Place 1"
-      dst="//@transitions.0"/>
+      dst="//@transitions.0 //@transitions.3"
+      src="//@transitions.2"/>
   <places name="Place 2"
       dst="//@transitions.1"
       src="//@transitions.0"/>
   <places name="Place 3"
-      src="//@transitions.1"/>
+      dst="//@transitions.2"
+      src="//@transitions.1 //@transitions.3"/>
   <transitions
       name="1 -> 2"
       src="//@places.0"
@@ -20,5 +22,13 @@
   <transitions
       name="2 -> 3"
       src="//@places.1"
+      dst="//@places.2"/>
+  <transitions
+      name="3 -> 1"
+      src="//@places.2"
+      dst="//@places.0"/>
+  <transitions
+      name="1 -> 3"
+      src="//@places.0"
       dst="//@places.2"/>
 </petrinet:Net>
