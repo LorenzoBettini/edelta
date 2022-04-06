@@ -18,8 +18,6 @@ def addWeightAttribute(EClass c) {
 
 modifyEcore modifyNet epackage petrinet {
 	ecoreref(Net).name = "Petrinet"
-	ecoreref(Petrinet.places).makeRequired
-	ecoreref(Petrinet.transitions).makeRequired
 }
 
 modifyEcore introducePTArc epackage petrinet {

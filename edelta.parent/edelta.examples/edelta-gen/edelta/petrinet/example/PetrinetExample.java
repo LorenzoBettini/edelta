@@ -33,8 +33,6 @@ public class PetrinetExample extends EdeltaDefaultRuntime {
   
   public void modifyNet(final EPackage it) {
     getEClass("petrinet", "Net").setName("Petrinet");
-    EdeltaUtils.makeRequired(getEReference("petrinet", "Petrinet", "places"));
-    EdeltaUtils.makeRequired(getEReference("petrinet", "Petrinet", "transitions"));
   }
   
   public void introducePTArc(final EPackage it) {

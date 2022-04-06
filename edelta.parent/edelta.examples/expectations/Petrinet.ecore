@@ -5,10 +5,10 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Petrinet" eSuperTypes="#//NamedElement">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="places" lowerBound="1"
-        upperBound="-1" eType="#//Place" containment="true" eOpposite="#//Place/net"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="transitions" lowerBound="1"
-        upperBound="-1" eType="#//Transition" containment="true" eOpposite="#//Transition/net"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="places" upperBound="-1"
+        eType="#//Place" containment="true" eOpposite="#//Place/net"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="transitions" upperBound="-1"
+        eType="#//Transition" containment="true" eOpposite="#//Transition/net"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="arcs" upperBound="-1" eType="#//Arc"
         containment="true" eOpposite="#//Arc/net"/>
   </eClassifiers>
