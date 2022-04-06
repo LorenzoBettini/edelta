@@ -18,6 +18,8 @@ import org.junit.Assert;
  */
 public class EdeltaTestUtils {
 
+	private static final boolean OS_WINDOWS = System.getProperty("os.name").startsWith("Windows");
+
 	private EdeltaTestUtils() {
 
 	}
@@ -77,6 +79,8 @@ public class EdeltaTestUtils {
 	 * @return
 	 */
 	public static String removeCR(String s) {
+		if (!OS_WINDOWS)
+			return s;
 		return s.replace("\r", "");
 	}
 }
