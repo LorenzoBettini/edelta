@@ -1311,6 +1311,60 @@ public class EdeltaStandardLibraryTest {
 		);
 	}
 
+	@Test
+	public void changeToMultipleTo2() throws Exception {
+		var subdir = "toUpperCaseStringAttributesMultiple/";
+		var ecores = of("My.ecore");
+		var models = of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					EStructuralFeature feature = stdLib.getEAttribute(
+						"mypackage", "MyClass", "myAttribute");
+					stdLib.changeToMultiple(feature, 2);
+				}
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			"makeMultipleTo2/",
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	public void changeToMultiple() throws Exception {
+		var subdir = "toUpperCaseStringAttributes/";
+		var ecores = of("My.ecore");
+		var models = of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					EStructuralFeature feature = stdLib.getEAttribute(
+						"mypackage", "MyClass", "myAttribute");
+					stdLib.changeToMultiple(feature);
+				}
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			"makeMultiple/",
+			ecores,
+			models
+		);
+	}
+
 	private Resource loadTestEcore(String ecoreFile) {
 		return modelManager.loadEcoreFile(TESTECORES+ecoreFile);
 	}

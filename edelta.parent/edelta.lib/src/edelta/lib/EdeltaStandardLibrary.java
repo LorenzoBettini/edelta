@@ -462,13 +462,41 @@ public class EdeltaStandardLibrary extends EdeltaRuntime {
 	}
 
 	/**
-	 * Changes this feature single (upper = 1); the model is migrated as well,
-	 * taking the first element of the old list.
+	 * Changes this feature to single (upper = 1); the model is migrated as well,
+	 * taking the first element of the old list (the other elements in the old list
+	 * are lost).
 	 * 
 	 * @param feature
 	 */
 	public void changeToSingle(EStructuralFeature feature) {
 		feature.setUpperBound(1);
+		migrationWithMultiplicityAwareCopy(feature);
+	}
+
+	/**
+	 * Changes this feature to multiple (upper = -1); the model is migrated as well,
+	 * creating an empty list or a list with a single element.
+	 * 
+	 * @param feature
+	 */
+	public void changeToMultiple(EStructuralFeature feature) {
+		changeToMultiple(feature, -1);
+	}
+
+	/**
+	 * Changes this feature to multiple with the given upperBound; the model is
+	 * migrated as well, creating an empty list or a list with at most upperBound
+	 * elements.
+	 * 
+	 * @param feature
+	 * @param upperBound
+	 */
+	public void changeToMultiple(EStructuralFeature feature, int upperBound) {
+		feature.setUpperBound(upperBound);
+		migrationWithMultiplicityAwareCopy(feature);
+	}
+
+	private void migrationWithMultiplicityAwareCopy(EStructuralFeature feature) {
 		modelMigration(modelMigrator ->
 			modelMigrator.copyRule(
 				modelMigrator.isRelatedTo(feature),
