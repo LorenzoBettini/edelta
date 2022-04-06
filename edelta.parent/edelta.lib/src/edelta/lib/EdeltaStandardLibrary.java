@@ -461,6 +461,22 @@ public class EdeltaStandardLibrary extends EdeltaRuntime {
 		);
 	}
 
+	/**
+	 * Changes this feature single (upper = 1); the model is migrated as well,
+	 * taking the first element of the old list.
+	 * 
+	 * @param feature
+	 */
+	public void changeToSingle(EStructuralFeature feature) {
+		feature.setUpperBound(1);
+		modelMigration(modelMigrator ->
+			modelMigrator.copyRule(
+				modelMigrator.isRelatedTo(feature),
+				modelMigrator.multiplicityAwareCopy(feature)
+			)
+		);
+	}
+
 	private <T extends ENamedElement> void safeRunInitializer(Consumer<T> initializer, T e) {
 		if (initializer != null) {
 			initializer.accept(e);
