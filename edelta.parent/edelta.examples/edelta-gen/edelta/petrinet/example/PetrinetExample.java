@@ -1,13 +1,18 @@
 package edelta.petrinet.example;
 
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaEcoreUtil;
+import edelta.lib.EdeltaModelMigrator;
 import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.EdeltaRefactorings;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -68,7 +73,23 @@ public class PetrinetExample extends EdeltaDefaultRuntime {
       EdeltaUtils.makeMultiple(it_1);
       EdeltaUtils.makeBidirectional(it_1, netRef);
     };
-    this.stdLib.addNewEReference(getEClass("petrinet", "Petrinet"), "arcs", arc, _function);
+    final EReference arcs = this.stdLib.addNewEReference(getEClass("petrinet", "Petrinet"), "arcs", arc, _function);
+    final EReference placeOut = getEReference("petrinet", "Place", "out");
+    EdeltaUtils.dropContainment(placeOut);
+    final EReference transitionOut = getEReference("petrinet", "Transition", "out");
+    EdeltaUtils.dropContainment(transitionOut);
+    final Consumer<EdeltaModelMigrator> _function_1 = (EdeltaModelMigrator it_1) -> {
+      final Predicate<EStructuralFeature> _function_2 = (EStructuralFeature f) -> {
+        return (it_1.isRelatedTo(f, placeOut) || it_1.isRelatedTo(f, transitionOut));
+      };
+      final EdeltaModelMigrator.CopyProcedure _function_3 = (EStructuralFeature f, EObject oldObj, EObject newObj) -> {
+        final EObject migratedNet = it_1.getMigrated(oldObj.eContainer());
+        final Collection<EObject> migratedArcs = it_1.<EObject>getMigrated(EdeltaEcoreUtil.getValueAsList(oldObj, f));
+        EdeltaEcoreUtil.getValueAsList(migratedNet, arcs).addAll(migratedArcs);
+      };
+      it_1.copyRule(_function_2, _function_3);
+    };
+    this.modelMigration(_function_1);
   }
   
   @Override

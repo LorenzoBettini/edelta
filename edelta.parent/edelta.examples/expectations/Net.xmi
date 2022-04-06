@@ -7,36 +7,37 @@
     xsi:schemaLocation="http://gssi.it/petrinet Petrinet.ecore"
     name="A net">
   <places name="Place 1"
-      in="//@transitions.2/@out.0">
-    <out dst="//@transitions.0"/>
-    <out dst="//@transitions.3"/>
-  </places>
+      in="//@arcs.6"/>
   <places name="Place 2"
-      in="//@transitions.0/@out.0">
-    <out dst="//@transitions.1"/>
-  </places>
+      in="//@arcs.4"/>
   <places name="Place 3"
-      in="//@transitions.1/@out.0 //@transitions.3/@out.0">
-    <out dst="//@transitions.2"/>
-  </places>
+      in="//@arcs.5 //@arcs.7"/>
   <transitions
       name="1 -> 2"
-      in="//@places.0/@out.0">
-    <out dst="//@places.1"/>
-  </transitions>
+      in="//@arcs.0"/>
   <transitions
       name="2 -> 3"
-      in="//@places.1/@out.0">
-    <out dst="//@places.2"/>
-  </transitions>
+      in="//@arcs.2"/>
   <transitions
       name="3 -> 1"
-      in="//@places.2/@out.0">
-    <out dst="//@places.0"/>
-  </transitions>
+      in="//@arcs.3"/>
   <transitions
       name="1 -> 3"
-      in="//@places.0/@out.1">
-    <out dst="//@places.2"/>
-  </transitions>
+      in="//@arcs.1"/>
+  <arcs xsi:type="petrinet:PTArc"
+      dst="//@transitions.0"/>
+  <arcs xsi:type="petrinet:PTArc"
+      dst="//@transitions.3"/>
+  <arcs xsi:type="petrinet:PTArc"
+      dst="//@transitions.1"/>
+  <arcs xsi:type="petrinet:PTArc"
+      dst="//@transitions.2"/>
+  <arcs xsi:type="petrinet:TPArc"
+      dst="//@places.1"/>
+  <arcs xsi:type="petrinet:TPArc"
+      dst="//@places.2"/>
+  <arcs xsi:type="petrinet:TPArc"
+      dst="//@places.0"/>
+  <arcs xsi:type="petrinet:TPArc"
+      dst="//@places.2"/>
 </petrinet:Petrinet>
