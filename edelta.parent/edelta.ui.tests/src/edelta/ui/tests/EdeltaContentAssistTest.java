@@ -30,6 +30,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import edelta.testutils.EdeltaTestUtils;
 import edelta.ui.internal.EdeltaActivator;
 import edelta.ui.tests.utils.EdeltaWorkbenchUtils;
 import edelta.ui.tests.utils.ProjectImportUtil;
@@ -562,7 +563,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	}
 
 	private String[] fromLinesOfStringsToStringArray(CharSequence strings) {
-		return strings.toString().replace("\r", "").split("\n");
+		return EdeltaTestUtils.removeCR(strings.toString()).split("\n");
 	}
 
 	private void testContentAssistant(CharSequence text, List<String> expectedProposals) throws Exception {
