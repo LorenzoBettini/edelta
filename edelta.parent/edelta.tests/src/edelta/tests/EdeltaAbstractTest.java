@@ -1,5 +1,6 @@
 package edelta.tests;
 
+import static edelta.testutils.EdeltaTestUtils.removeCR;
 import static java.util.Arrays.asList;
 import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.filter;
@@ -324,8 +325,8 @@ public abstract class EdeltaAbstractTest {
 	}
 
 	protected void assertEqualsStrings(CharSequence expected, CharSequence actual) {
-		assertEquals(expected.toString().replace("\r", ""),
-			actual.toString().replace("\r", ""));
+		assertEquals(removeCR(expected.toString()),
+			removeCR(actual.toString()));
 	}
 
 	protected void assertNamedElements(Iterable<? extends ENamedElement> elements, CharSequence expected) {

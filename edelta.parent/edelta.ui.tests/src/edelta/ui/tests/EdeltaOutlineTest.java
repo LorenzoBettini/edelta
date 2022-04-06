@@ -16,6 +16,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import edelta.testutils.EdeltaTestUtils;
 import edelta.ui.internal.EdeltaActivator;
 import edelta.ui.tests.utils.ProjectImportUtil;
 
@@ -74,8 +75,7 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
 	 */
 	@Override
 	protected String outlineStringRepresentation(IOutlineNode node) {
-		return super.outlineStringRepresentation(node)
-			.replace("\r", "");
+		return EdeltaTestUtils.removeCR(super.outlineStringRepresentation(node));
 	}
 
 	@Test
