@@ -20,7 +20,7 @@ public class PetrinetExampleTest extends AbstractEdeltaExamplesTest {
 			models,
 			PetrinetExample::new);
 
-		executeSaveAndAssert(engine,
+		assertOutputs(engine,
 			subdir,
 			ecores,
 			models

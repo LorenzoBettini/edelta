@@ -23,7 +23,7 @@ public class EdeltaStdLibExamplesTest extends AbstractEdeltaExamplesTest {
 			models,
 			ChangeReferenceTypeExample::new);
 
-		executeSaveAndAssert(engine,
+		assertOutputs(engine,
 			subdir,
 			ecores,
 			models
@@ -41,7 +41,7 @@ public class EdeltaStdLibExamplesTest extends AbstractEdeltaExamplesTest {
 			models,
 			ChangeReferenceTypeMultipleExample::new);
 
-		executeSaveAndAssert(engine,
+		assertOutputs(engine,
 			subdir,
 			ecores,
 			models
@@ -59,7 +59,7 @@ public class EdeltaStdLibExamplesTest extends AbstractEdeltaExamplesTest {
 			models,
 			ChangeReferenceTypeManualExample::new);
 
-		executeSaveAndAssert(engine,
+		assertOutputs(engine,
 			subdir,
 			ecores,
 			models
@@ -77,7 +77,7 @@ public class EdeltaStdLibExamplesTest extends AbstractEdeltaExamplesTest {
 			models,
 			ChangeToAbstractExample::new);
 
-		executeSaveAndAssert(engine,
+		assertOutputs(engine,
 			subdir,
 			ecores,
 			models

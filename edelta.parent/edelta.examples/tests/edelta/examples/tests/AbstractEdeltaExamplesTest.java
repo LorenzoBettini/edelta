@@ -33,7 +33,7 @@ public abstract class AbstractEdeltaExamplesTest {
 		return engine;
 	}
 
-	protected void executeSaveAndAssert(EdeltaEngine engine, String outputdir, Collection<String> ecoreFiles, Collection<String> modelFiles) throws Exception {
+	protected void assertOutputs(EdeltaEngine engine, String outputdir, Collection<String> ecoreFiles, Collection<String> modelFiles) throws Exception {
 		engine.execute();
 		var output = OUTPUT + outputdir;
 		engine.save(output);
