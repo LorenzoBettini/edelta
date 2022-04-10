@@ -1,13 +1,16 @@
 package edelta.lib.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.junit.Test;
@@ -217,6 +220,10 @@ public class EdeltaEcoreUtilTest {
 		);
 		assertEquals("a name",
 			instance.eGet(EcorePackage.eINSTANCE.getENamedElement_Name()));
+		instance = EdeltaEcoreUtil.createInstance(
+			EcorePackage.eINSTANCE.getEDataType());
+		assertNull(
+			instance.eGet(EcorePackage.eINSTANCE.getENamedElement_Name()));
 	}
 
 	@Test
@@ -240,5 +247,43 @@ public class EdeltaEcoreUtilTest {
 		assertThat(collection)
 			.isSameAs(pack.getEClassifiers())
 			.containsExactlyInAnyOrder(c1, c2, c3);
+	}
+
+	@Test
+	public void testGetValueAsEObject() {
+		var attr = EcoreFactory.eINSTANCE.createEAttribute();
+		attr.setEType(EcorePackage.Literals.ESTRING);
+
+		EObject o = EdeltaEcoreUtil.getValueAsEObject(attr,
+			EcorePackage.Literals.ETYPED_ELEMENT__ETYPE);
+
+		assertThat(o)
+			.isSameAs(EcorePackage.Literals.ESTRING);
+	}
+
+	@Test
+	public void testSetValueFrom() {
+		var src = EcoreFactory.eINSTANCE.createEAttribute();
+		src.setName("anAttribute");
+		src.setEType(EcorePackage.Literals.ESTRING);
+
+		var dest = EcoreFactory.eINSTANCE.createEAttribute();
+		EdeltaEcoreUtil.setValueFrom(
+			dest,
+			EcorePackage.Literals.ETYPED_ELEMENT__ETYPE,
+			src,
+			EcorePackage.Literals.ETYPED_ELEMENT__ETYPE);
+
+		assertThat(dest.getEAttributeType())
+			.isSameAs(EcorePackage.Literals.ESTRING);
+
+		assertThatThrownBy(() -> 
+			EdeltaEcoreUtil.setValueFrom(
+				dest,
+				EcorePackage.Literals.ETYPED_ELEMENT__ETYPE,
+				src,
+				EcorePackage.Literals.ENAMED_ELEMENT__NAME))
+			.isInstanceOf(ClassCastException.class)
+			.hasMessageContaining("class java.lang.String cannot be cast to class org.eclipse.emf.ecore.EClassifier");
 	}
 }

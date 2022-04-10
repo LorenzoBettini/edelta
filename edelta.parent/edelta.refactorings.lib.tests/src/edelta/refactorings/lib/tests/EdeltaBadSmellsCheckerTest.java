@@ -11,7 +11,7 @@ import edelta.lib.EdeltaModelManager;
 import edelta.refactorings.lib.EdeltaBadSmellsChecker;
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 
-public class EdeltaBadSmellsCheckerTest extends AbstractTest {
+public class EdeltaBadSmellsCheckerTest extends AbstractEdeltaRefactoringsLibTest {
 	private EdeltaBadSmellsChecker checker;
 
 	private InMemoryLoggerAppender appender;

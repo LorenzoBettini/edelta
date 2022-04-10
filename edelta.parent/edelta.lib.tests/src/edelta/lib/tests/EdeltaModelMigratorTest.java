@@ -1,5 +1,6 @@
 package edelta.lib.tests;
 
+import static edelta.lib.EdeltaEcoreUtil.getValueAsEObject;
 import static edelta.lib.EdeltaEcoreUtil.getValueAsList;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
@@ -4162,6 +4163,8 @@ class EdeltaModelMigratorTest {
 		var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		var firstName = (EReference) person.getEStructuralFeature("firstName");
 		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		var nameElementFeature = getAttribute(
+			evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 
 		// add a new class similar to NameElement
 		var otherNameElement = createCopy(modelMigrator, nameElement);
@@ -4174,11 +4177,10 @@ class EdeltaModelMigratorTest {
 			oldReferredObject ->
 			EdeltaEcoreUtil.createInstance(otherNameElement,
 				newReferredObject ->
-				newReferredObject.eSet(otherNameElementFeature,
-				oldReferredObject.eGet(
-					oldReferredObject.eClass()
-						.getEStructuralFeature("nameElementValue")
-				))),
+				EdeltaEcoreUtil.setValueFrom(
+					newReferredObject, otherNameElementFeature,
+					oldReferredObject, nameElementFeature)
+				),
 			null);
 
 		copyModelsSaveAndAssertOutputs(
@@ -4202,6 +4204,8 @@ class EdeltaModelMigratorTest {
 		var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		var firstName = (EReference) person.getEStructuralFeature("firstName");
 		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		var nameElementFeature = getAttribute(
+			evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 
 		// add a new class similar to NameElement
 		var otherNameElement = createCopy(modelMigrator, nameElement);
@@ -4225,17 +4229,16 @@ class EdeltaModelMigratorTest {
 				
 				// retrieve the copied List object
 				// remember also the oldReferredObject is part
-				// of the (new) model, the one migrateds
+				// of the (new) model, the one being migrated
 				var listObject = oldReferredObject.eContainer();
 				var otherNameElementsCollection =
 					getValueAsList(listObject, otherNameElements);
 				return EdeltaEcoreUtil.createInstance(otherNameElement,
 					newReferredObject -> {
-						newReferredObject.eSet(otherNameElementFeature,
-						oldReferredObject.eGet(
-							oldReferredObject.eClass()
-								.getEStructuralFeature("nameElementValue")
-						));
+						EdeltaEcoreUtil.setValueFrom(
+							newReferredObject, otherNameElementFeature,
+							oldReferredObject, nameElementFeature
+						);
 						otherNameElementsCollection.add(newReferredObject);
 					});
 			}, null);
@@ -4261,6 +4264,8 @@ class EdeltaModelMigratorTest {
 		var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		var firstName = (EReference) person.getEStructuralFeature("firstName");
 		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		var nameElementFeature = getAttribute(
+			evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 
 		// add a new class similar to NameElement
 		var otherNameElement = createCopy(modelMigrator, nameElement);
@@ -4297,11 +4302,10 @@ class EdeltaModelMigratorTest {
 					return EdeltaEcoreUtil.createInstance(otherNameElement,
 						otherNameElementsCollection::add);
 					});
-				newReferredObject.eSet(otherNameElementFeature,
-					oldReferredObject.eGet(
-						oldReferredObject.eClass()
-							.getEStructuralFeature("nameElementValue")
-					));
+				EdeltaEcoreUtil.setValueFrom(
+					newReferredObject, otherNameElementFeature,
+					oldReferredObject, nameElementFeature
+				);
 				return newReferredObject;
 			},
 			// old shared referred objects can be removed now
@@ -4786,7 +4790,7 @@ class EdeltaModelMigratorTest {
 							findSingleReferenceNotOfType(eClass, oldObj.eClass());
 						// the original referred object in the object to remove
 						var oldReferred =
-							(EObject) objOfRemovedClass.eGet(refToTarget);
+							getValueAsEObject(objOfRemovedClass, refToTarget);
 						// create the copy (our modelMigrator.copy checks whether
 						// an object has already been copied, so we avoid to copy
 						// the same object twice). We don't even have to care whether
@@ -4983,7 +4987,8 @@ class EdeltaModelMigratorTest {
 				modelMigrator.wasRelatedTo(featureToSplit),
 				(feature, oldObj, newObj) -> {
 					// for references we must get the copied EObject
-					var oldValue = modelMigrator.getMigrated((EObject) oldObj.eGet(feature));
+					var oldValue = modelMigrator.getMigrated(
+						EdeltaEcoreUtil.getValueAsEObject(oldObj, feature));
 					var splittedValues = objectValueSplitter.apply(oldValue).iterator();
 					for (var splitFeature : splitFeatures) {
 						if (!splittedValues.hasNext())

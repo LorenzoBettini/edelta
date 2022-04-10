@@ -33,6 +33,7 @@
 
     <sonar.exclusions>
       **/example/**,
+      **/examples/**,
       **/mwe2/**,
       **/Messages.java,
       **/*ProjectTemplateProvider.java,

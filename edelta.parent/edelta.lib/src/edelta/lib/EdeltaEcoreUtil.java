@@ -144,6 +144,10 @@ public class EdeltaEcoreUtil {
 		obj.eSet(feature, unwrapCollection);
 	}
 
+	public static EObject createInstance(EClass type) {
+		return EcoreUtil.create(type);
+	}
+
 	public static EObject createInstance(EClass type, Consumer<EObject> initializer) {
 		var instance = EcoreUtil.create(type);
 		initializer.accept(instance);
@@ -153,5 +157,14 @@ public class EdeltaEcoreUtil {
 	@SuppressWarnings("unchecked")
 	public static List<EObject> getValueAsList(EObject obj, EStructuralFeature feature) {
 		return (List<EObject>) obj.eGet(feature);
+	}
+
+	public static EObject getValueAsEObject(EObject obj, EStructuralFeature feature) {
+		return (EObject) obj.eGet(feature);
+	}
+
+	public static void setValueFrom(EObject dest, EStructuralFeature destFeature,
+			EObject source, EStructuralFeature sourceFeature) {
+		dest.eSet(destFeature, source.eGet(sourceFeature));
 	}
 }

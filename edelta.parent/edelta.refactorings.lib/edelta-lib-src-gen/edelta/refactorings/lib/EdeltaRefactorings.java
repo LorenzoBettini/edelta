@@ -3,6 +3,8 @@ package edelta.refactorings.lib;
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaEcoreUtil;
+import edelta.lib.EdeltaModelMigrator;
 import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder;
@@ -13,7 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -326,6 +330,31 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     }
     reference.setEType(extracted);
     this.makeContainmentBidirectional(reference);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final Predicate<EStructuralFeature> _function_1 = (EStructuralFeature feature) -> {
+        return (it.isRelatedTo(feature, reference) || 
+          it.isRelatedTo(feature, eOpposite));
+      };
+      final EdeltaModelMigrator.CopyProcedure _function_2 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
+        boolean _isRelatedTo = it.isRelatedTo(feature, eOpposite);
+        if (_isRelatedTo) {
+          return;
+        }
+        Collection<Object> oldValueOrValues = EdeltaEcoreUtil.getValueForFeature(oldObj, feature, 
+          reference.getUpperBound());
+        final Function<Object, EObject> _function_3 = (Object oldValue) -> {
+          final EObject copy = it.getMigrated(((EObject) oldValue));
+          final Consumer<EObject> _function_4 = (EObject o) -> {
+            o.eSet(extractedRef, copy);
+          };
+          return EdeltaEcoreUtil.createInstance(extracted, _function_4);
+        };
+        List<EObject> copies = oldValueOrValues.stream().<EObject>map(_function_3).collect(Collectors.<EObject>toList());
+        EdeltaEcoreUtil.setValueForFeature(newObj, reference, copies);
+      };
+      it.copyRule(_function_1, _function_2);
+    };
+    this.modelMigration(_function);
     return extracted;
   }
   

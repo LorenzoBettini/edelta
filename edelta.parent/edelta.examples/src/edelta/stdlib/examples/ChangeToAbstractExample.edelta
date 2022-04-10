@@ -1,0 +1,37 @@
+package edelta.stdlib.examples
+
+metamodel "PersonListForChangeToAbstract"
+
+modifyEcore exampleOfChangeToAbstract epackage PersonListForChangeToAbstract {
+	val personClass = ecoreref(Person)
+
+	val employee = personClass.addNewSubclass("Employee")
+	val manager = personClass.addNewSubclass("Manager")
+
+	// make the Person class abstract
+	personClass.abstract = true
+
+	val managerAttribute = ecoreref(Person.manager)
+
+	// adjust model migration
+	modelMigration[
+		createInstanceRule(
+			isRelatedTo(personClass),
+			[oldObj|
+				// we cannot use managerAttribute directly,
+				// because that's part of the evolving metamodel,
+				// while oldObj belongs to the old model,
+				// so we use getOriginal
+				val managerFeature = getOriginal(managerAttribute)
+				if (oldObj.eGet(managerFeature) as Boolean)
+					return createInstance(manager)
+				return createInstance(employee)
+			]
+		)
+	]
+
+	// remove the manager attribute now,
+	// after a first migration of the model has been done
+	// (where we still need that attribute)
+	removeElement(managerAttribute)
+}

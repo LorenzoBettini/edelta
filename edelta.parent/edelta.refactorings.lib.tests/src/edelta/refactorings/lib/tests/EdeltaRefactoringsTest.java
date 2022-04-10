@@ -3,6 +3,7 @@ package edelta.refactorings.lib.tests;
 import static edelta.lib.EdeltaUtils.getEObjectRepr;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,7 +35,7 @@ import edelta.refactorings.lib.EdeltaRefactorings;
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 import edelta.testutils.EdeltaTestUtils;
 
-class EdeltaRefactoringsTest extends AbstractTest {
+class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	private EdeltaRefactorings refactorings;
 
 	private InMemoryLoggerAppender appender;
@@ -68,7 +69,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	 */
 	@AfterEach
 	void cleanModifiedOutputDirectory() throws IOException {
-		EdeltaTestUtils.cleanDirectory(AbstractTest.MODIFIED);
+		EdeltaTestUtils.cleanDirectory(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 	}
 
 	private void withInputModels(String testModelDirectory, String... testModelFiles) {
@@ -76,11 +77,11 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		this.testModelFiles = Arrays.asList(testModelFiles);
 	}
 
-	private void loadModelFiles() {
+	private void loadEcoreFiles() {
 		checkInputModelSettings();
 		for (String testModelFile : testModelFiles) {
 			modelManager
-				.loadEcoreFile(AbstractTest.TESTECORES +
+				.loadEcoreFile(AbstractEdeltaRefactoringsLibTest.TESTECORES +
 					testModelDirectory + "/" + testModelFile);
 		}
 	}
@@ -91,8 +92,8 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		// if the ecore file is saved then it is valid
 		for (String testModelFile : testModelFiles) {
 			EdeltaTestUtils.assertFilesAreEquals(
-					AbstractTest.EXPECTATIONS + testModelDirectory + "/" + testModelFile,
-					AbstractTest.MODIFIED + testModelFile);
+					AbstractEdeltaRefactoringsLibTest.EXPECTATIONS + testModelDirectory + "/" + testModelFile,
+					AbstractEdeltaRefactoringsLibTest.MODIFIED + testModelFile);
 		}
 		assertLogIsEmpty();
 	}
@@ -105,20 +106,20 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		checkInputModelSettings();
 		for (String testModelFile : testModelFiles) {
 			EdeltaTestUtils.assertFilesAreEquals(
-				AbstractTest.TESTECORES +
+				AbstractEdeltaRefactoringsLibTest.TESTECORES +
 				testModelDirectory +
 				"/" +
 				testModelFile,
-				AbstractTest.MODIFIED + testModelFile);
+				AbstractEdeltaRefactoringsLibTest.MODIFIED + testModelFile);
 		}
 	}
 
 	private void assertOppositeRefactorings(final Runnable first, final Runnable second) throws IOException {
-		loadModelFiles();
+		loadEcoreFiles();
 		first.run();
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		second.run();
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 	}
 
@@ -152,39 +153,39 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_mergeFeatures() throws IOException {
 		withInputModels("mergeFeatures", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		refactorings.mergeFeatures("name",
 			asList(
 				person.getEStructuralFeature("firstName"),
 				person.getEStructuralFeature("lastName")));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
 	@Test
 	void test_mergeFeaturesDifferent() throws IOException {
 		withInputModels("mergeFeaturesDifferent", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		assertThrowsIAE(() -> refactorings.mergeFeatures("name",
 			asList(
 				person.getEStructuralFeature("firstName"),
 				person.getEStructuralFeature("lastName"))));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		final EClass student = refactorings.getEClass("PersonList", "Student");
 		assertThrowsIAE(() -> refactorings.mergeFeatures("name",
 			asList(
 				person.getEStructuralFeature("lastName"),
 				student.getEStructuralFeature("lastName"))));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThrowsIAE(() -> refactorings.mergeFeatures("name",
 			asList(
 				person.getEStructuralFeature("list"),
 				person.getEStructuralFeature("lastName"))));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertEquals("""
 		ERROR: PersonList.Person.lastName: The two features cannot be merged:
@@ -211,7 +212,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_mergeFeatures2() throws IOException {
 		withInputModels("mergeFeatures2", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass list = refactorings.getEClass("PersonList", "List");
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		refactorings.mergeFeatures(list.getEStructuralFeature("places"),
@@ -222,14 +223,14 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				person.getEStructuralFeature("firstName"),
 				person.getEStructuralFeature("lastName")));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
 	@Test
 	void test_mergeFeatures2NonCompliant() {
 		withInputModels("mergeFeatures2", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass list = refactorings.getEClass("PersonList", "List");
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		final EStructuralFeature wplaces = list.getEStructuralFeature("wplaces");
@@ -276,7 +277,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_mergeFeatures3() throws IOException {
 		withInputModels("mergeFeatures3", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass list = refactorings.getEClass("PersonList", "List");
 		final EClass place = refactorings.getEClass("PersonList", "Place");
 		final EClass person = refactorings.getEClass("PersonList", "Person");
@@ -288,18 +289,18 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				person.getEStructuralFeature("firstName"),
 				person.getEStructuralFeature("lastName")));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
 	@Test
 	void test_enumToSubclasses() throws IOException {
 		withInputModels("enumToSubclasses", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		EStructuralFeature _eStructuralFeature = person.getEStructuralFeature("gender");
 		final Collection<EClass> result = refactorings.enumToSubclasses(((EAttribute) _eStructuralFeature));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 		assertThat(result)
 			.extracting(EClass::getName)
@@ -309,13 +310,13 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_enumToSubclassesNotAnEEnum() throws IOException {
 		withInputModels("enumToSubclasses", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		final Collection<EClass> result = 
 			refactorings.enumToSubclasses(
 				((EAttribute) person.getEStructuralFeature("firstname")));
 		assertThat(result).isNull();
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo("ERROR: PersonList.Person.firstname: Not an EEnum: ecore.EString");
@@ -324,13 +325,13 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_subclassesToEnum() throws IOException {
 		withInputModels("subclassesToEnum", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EPackage personList = refactorings.getEPackage("PersonList");
 		final EAttribute result = refactorings.subclassesToEnum("Gender",
 			asList(
 				(EClass) personList.getEClassifier("Male"),
 				(EClass) personList.getEClassifier("Female")));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 		assertThat(result)
 			.returns("gender", EAttribute::getName);
@@ -339,14 +340,14 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_subclassesToEnumSubclassesNotEmpty() throws IOException {
 		withInputModels("subclassesToEnumSubclassesNotEmpty", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EPackage personList = refactorings.getEPackage("PersonList");
 		assertThrowsIAE(() -> refactorings.subclassesToEnum("Gender",
 			asList(
 				(EClass) personList.getEClassifier("Male"),
 				(EClass) personList.getEClassifier("NotSpecified"),
 				(EClass) personList.getEClassifier("Female"))));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
@@ -360,7 +361,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_subclassesToEnumSubclassesWrongSubclasses() throws IOException {
 		withInputModels("subclassesToEnumSubclassesWrongSubclasses", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		var personList = refactorings.getEPackage("PersonList");
 		var female = (EClass) personList.getEClassifier("Female");
 		var anotherFemale = (EClass) personList.getEClassifier("AnotherFemale");
@@ -373,7 +374,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 				asList(female, anotherFemale)));
 		assertThrowsIAE(() -> refactorings.subclassesToEnum("Gender",
 				asList(female)));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
@@ -395,12 +396,12 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	void test_subclassesToEnumSubclassesWrongSubclassesParallel() throws IOException {
 		withInputModels("subclassesToEnumSubclassesWrongSubclassesParallel",
 				"PersonList.ecore", "PersonListReferring.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		var personList = refactorings.getEPackage("PersonList");
 		var female = (EClass) personList.getEClassifier("Female");
 		assertThrowsIAE(() -> refactorings.subclassesToEnum("Gender",
 				asList(female)));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
@@ -439,20 +440,20 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_extractClassWithAttributes() throws IOException {
 		withInputModels("extractClassWithAttributes", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		refactorings.extractClass("Address",
 			asList(
 				refactorings.getEAttribute("PersonList", "Person", "street"),
 				refactorings.getEAttribute("PersonList", "Person", "houseNumber"))
 			);
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
 	@Test
 	void test_extractClassWithAttributesContainedInDifferentClasses() throws IOException {
 		withInputModels("extractClassWithAttributesContainedInDifferentClasses", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		var thrown = assertThrowsIAE(() -> refactorings.extractClass("Address",
 			asList(
 				refactorings.getEAttribute("PersonList", "Person", "street"),
@@ -466,7 +467,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 				    PersonList.Person.street
 				  PersonList.Person2:
 				    PersonList.Person2.street""");
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
@@ -485,21 +486,21 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_extractClassWithReferences() throws IOException {
 		withInputModels("extractClassWithReferences", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		refactorings.extractClass("WorkAddress",
 			asList(
 				refactorings.getEAttribute("PersonList", "Person", "street"),
 				refactorings.getEReference("PersonList", "Person", "workplace"),
 				refactorings.getEAttribute("PersonList", "Person", "houseNumber"))
 			);
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
 	@Test
 	void test_extractClassWithReferencesBidirectional() throws IOException {
 		withInputModels("extractClassWithReferencesBidirectional", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		assertThrowsIAE(() -> refactorings.extractClass("WorkAddress",
 			asList(
 				refactorings.getEAttribute("PersonList", "Person", "street"),
@@ -517,29 +518,29 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_inlineClassWithAttributes() throws IOException {
 		withInputModels("inlineClassWithAttributes", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		refactorings.inlineClass(refactorings.getEClass("PersonList", "Address"));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
 	@Test
 	void test_inlineClassPrefix() throws IOException {
 		withInputModels("inlineClassPrefix", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		refactorings.inlineClass(
 			refactorings.getEClass("PersonList", "Address"),
 			"address_");
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
 	@Test
 	void test_inlineClassWithReferences() throws IOException {
 		withInputModels("inlineClassWithReferences", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		refactorings.inlineClass(refactorings.getEClass("PersonList", "WorkAddress"));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -547,10 +548,10 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	void test_inlineClassWithAttributesWronglyUsedByOthersParallel() throws IOException {
 		withInputModels("inlineClassWithAttributesWronglyUsedByOthersParallel",
 				"PersonList.ecore", "PersonListReferring.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		assertThrowsIAE(() ->
 			refactorings.inlineClass(refactorings.getEClass("PersonList", "Address")));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
@@ -568,10 +569,10 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	void test_inlineClassWithAttributesWronglyMulti() throws IOException {
 		withInputModels("inlineClassWithAttributesWronglyMulti",
 				"PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		assertThrowsIAE(() ->
 			refactorings.inlineClass(refactorings.getEClass("PersonList", "Address")));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
@@ -581,7 +582,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_inlineClassWithReferencesBidirectional() throws IOException {
 		withInputModels("inlineClassWithReferencesBidirectional", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		assertThrowsIAE(() ->
 			refactorings.inlineClass(refactorings.getEClass("PersonList", "WorkAddress")));
 		assertThat(appender.getResult().trim())
@@ -624,26 +625,47 @@ class EdeltaRefactoringsTest extends AbstractTest {
 
 	@ParameterizedTest
 	@ValueSource(strings = {
-		"referenceToClassBidirectional",
-		"referenceToClassWithCardinality",
-		"referenceToClassUnidirectional"
+		"referenceToClassUnidirectional/",
+		"referenceToClassMultipleUnidirectional/",
+		"referenceToClassBidirectional/",
+		"referenceToClassBidirectionalDifferentOrder/",
+		"referenceToClassBidirectionalOppositeMultiple/",
+		"referenceToClassMultipleBidirectional/",
+		
 	})
-	void test_referenceToClass(String directory) throws IOException {
-		withInputModels(directory, "PersonList.ecore");
-		loadModelFiles();
-		final EReference ref = refactorings.getEReference("PersonList", "Person", "works");
-		refactorings.referenceToClass("WorkingPosition", ref);
-		modelManager.saveEcores(AbstractTest.MODIFIED);
-		assertModifiedFiles();
+	void test_referenceToClass(String directory) throws Exception {
+		var subdir = directory;
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					final EReference ref = getEReference("PersonList", "Person", "works");
+					referenceToClass("WorkingPosition", ref);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test
 	void test_referenceToClassWithContainmentReference() throws IOException {
 		withInputModels("referenceToClassWithContainmentReference", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EReference ref = refactorings.getEReference("PersonList", "Person", "works");
 		assertThrowsIAE(() -> refactorings.referenceToClass("WorkingPosition", ref));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim()).isEqualTo(
 			"ERROR: PersonList.Person.works: Cannot apply referenceToClass on containment reference: PersonList.Person.works");
@@ -657,19 +679,19 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	})
 	void test_classToReferenceUnidirectional(String directory) throws IOException {
 		withInputModels(directory, "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
 		var result = refactorings.classToReference(cl);
 		assertThat(result)
 			.isEqualTo(refactorings.getEReference("PersonList", "Person", "works"));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
 	@Test
 	void test_classToReferenceWhenClassIsNotReferred() {
 		withInputModels("classToReferenceWronglyReferred", "TestEcore.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		assertThrowsIAE(() -> refactorings.classToReference(
 				refactorings.getEClass("p", "CNotReferred")));
 		assertThat(appender.getResult().trim())
@@ -679,7 +701,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_classToReferenceWhenClassIsReferredMoreThanOnce() {
 		withInputModels("classToReferenceWronglyReferred", "TestEcore.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		assertThrowsIAE(() -> refactorings.classToReference(
 				refactorings.getEClass("p", "C")));
 		assertThat(appender.getResult())
@@ -696,7 +718,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	void test_classToReferenceWhenClassIsReferredMoreThanOnceParallel() {
 		withInputModels("classToReferenceWronglyReferredParallel",
 				"TestEcore.ecore", "TestEcoreReferring.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		assertThrowsIAE(() -> refactorings.classToReference(
 				refactorings.getEClass("p", "C")));
 		assertThat(appender.getResult())
@@ -712,7 +734,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_classToReferenceWithMissingTarget() {
 		withInputModels("classToReferenceUnidirectional", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
 		// manually remove reference to target class WorkPlace
 		cl.getEStructuralFeatures().remove(cl.getEStructuralFeature("workPlace"));
@@ -724,7 +746,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_classToReferenceWithTooManyTargets() {
 		withInputModels("classToReferenceUnidirectional", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
 		// manually add another reference to target class
 		EReference ref = this.createEReference(cl, "another");
@@ -743,7 +765,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_classToReferenceUnidirectionalWithoutOppositeIsOk() throws IOException {
 		withInputModels("classToReferenceUnidirectional", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
 		// manually remove the opposite reference
 		EReference personFeature = (EReference) cl.getEStructuralFeature("person");
@@ -751,7 +773,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		personFeature.getEOpposite().setEOpposite(null);
 		cl.getEStructuralFeatures().remove(personFeature);
 		refactorings.classToReference(cl);
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -802,7 +824,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_extractSuperclass() throws IOException {
 		withInputModels("extractSuperclass", "TestEcore.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		refactorings.extractSuperclass(
 			asList(
 				refactorings.getEAttribute("p", "C1", "a1"),
@@ -811,7 +833,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				refactorings.getEAttribute("p", "C3", "a1"),
 				refactorings.getEAttribute("p", "C4", "a1")));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 		assertLogIsEmpty();
 	}
@@ -819,7 +841,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_pullUpFeatures() throws IOException {
 		withInputModels("pullUpFeatures", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		final EClass student = refactorings.getEClass("PersonList", "Student");
 		final EClass employee = refactorings.getEClass("PersonList", "Employee");
@@ -827,14 +849,14 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				student.getEStructuralFeature("name"),
 				employee.getEStructuralFeature("name")));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
 	@Test
 	void test_pullUpFeaturesDifferent() throws IOException {
 		withInputModels("pullUpFeaturesDifferent", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		final EClass student = refactorings.getEClass("PersonList", "Student");
 		final EClass employee = refactorings.getEClass("PersonList", "Employee");
@@ -842,7 +864,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				student.getEStructuralFeature("name"),
 				employee.getEStructuralFeature("name"))));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertEquals(
 		"""
@@ -858,7 +880,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_pullUpFeaturesNotSubclass() throws IOException {
 		withInputModels("pullUpFeaturesNotSubclass", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		final EClass student = refactorings.getEClass("PersonList", "Student");
 		final EClass employee = refactorings.getEClass("PersonList", "Employee");
@@ -866,7 +888,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				student.getEStructuralFeature("name"),
 				employee.getEStructuralFeature("name"))));
-		modelManager.saveEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult())
 			.isEqualTo(

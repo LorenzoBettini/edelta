@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures;
 
+import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaUtils;
 
 /**
@@ -21,6 +22,7 @@ public class EdeltaImplicitlyImportedFeatures extends ImplicitlyImportedFeatures
 	protected List<Class<?>> getExtensionClasses() {
 		final var extensionClasses = super.getExtensionClasses();
 		extensionClasses.add(EdeltaUtils.class);
+		extensionClasses.add(EdeltaEcoreUtil.class);
 		return extensionClasses;
 	}
 
@@ -28,6 +30,7 @@ public class EdeltaImplicitlyImportedFeatures extends ImplicitlyImportedFeatures
 	protected List<Class<?>> getStaticImportClasses() {
 		final var staticImportClasses = super.getStaticImportClasses();
 		staticImportClasses.add(EdeltaUtils.class);
+		staticImportClasses.add(EdeltaEcoreUtil.class);
 		return staticImportClasses;
 	}
 }
