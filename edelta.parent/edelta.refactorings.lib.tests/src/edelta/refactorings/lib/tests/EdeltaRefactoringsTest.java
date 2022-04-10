@@ -625,22 +625,16 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 
 	@ParameterizedTest
 	@ValueSource(strings = {
-		"referenceToClassBidirectional",
-		"referenceToClassWithCardinality",
-		"referenceToClassUnidirectional"
+		"referenceToClassUnidirectional/",
+		"referenceToClassMultipleUnidirectional/",
+		"referenceToClassBidirectional/",
+		"referenceToClassBidirectionalDifferentOrder/",
+		"referenceToClassBidirectionalOppositeMultiple/",
+		"referenceToClassMultipleBidirectional/",
+		
 	})
-	void test_referenceToClass(String directory) throws IOException {
-		withInputModels(directory, "PersonList.ecore");
-		loadEcoreFiles();
-		final EReference ref = refactorings.getEReference("PersonList", "Person", "works");
-		refactorings.referenceToClass("WorkingPosition", ref);
-		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
-		assertModifiedFiles();
-	}
-
-	@Test
-	void referenceToClass() throws Exception {
-		var subdir = "referenceToClassUnidirectional/";
+	void test_referenceToClass(String directory) throws Exception {
+		var subdir = directory;
 		var ecores = of("PersonList.ecore");
 		var models = of("List.xmi");
 

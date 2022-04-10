@@ -12,18 +12,10 @@
         eOpposite="#//List/members"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="firstname" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lastname" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="works" lowerBound="1" eType="#//WorkingPosition"
-        containment="true" eOpposite="#//WorkingPosition/person"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="works" lowerBound="1" upperBound="-1"
+        eType="#//WorkPlace"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="WorkPlace">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="person" eType="#//WorkingPosition"
-        eOpposite="#//WorkingPosition/workPlace"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="address" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="WorkingPosition">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="workPlace" lowerBound="1"
-        eType="#//WorkPlace" eOpposite="#//WorkPlace/person"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="person" lowerBound="1"
-        eType="#//Person" eOpposite="#//Person/works"/>
   </eClassifiers>
 </ecore:EPackage>
