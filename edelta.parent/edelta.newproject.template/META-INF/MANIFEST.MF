@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Edelta Template for New Project Wizard
 Bundle-SymbolicName: edelta.newproject.template
-Bundle-Version: 2.11.0.qualifier
+Bundle-Version: 2.12.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: edelta.lib
 Bundle-Vendor: Lorenzo Bettini
