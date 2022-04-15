@@ -23,7 +23,7 @@ import edelta.lib.EdeltaResourceUtils;
  */
 public class EdeltaResourceUtilsTest {
 
-	private static final String MODELS = "testdata/models/";
+	private static final String MODELS = "../edelta.testdata/testdata/models/";
 
 	private EdeltaModelManager modelManager;
 

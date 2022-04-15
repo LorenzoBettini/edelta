@@ -31,11 +31,11 @@ import edelta.lib.EdeltaResourceUtils;
 public class EdeltaEngineTest {
 
 	private static final String OUTPUT = "output/";
-	private static final String EXPECTATIONS = "expectations/";
+	private static final String TESTDATA = "../edelta.testdata/testdata/";
+	private static final String EXPECTATIONS = "../edelta.testdata/expectations/";
 
 	private static final String MYPACKAGE = "mypackage";
 	private static final String MY_ECORE = "My.ecore";
-	private static final String TESTDATA = "testdata/";
 	private static final String SIMPLE_TEST_DATA = "simpleTestData/";
 	private static final String MY_CLASS = "MyClass.xmi";
 	private static final String MY_ROOT = "MyRoot.xmi";
