@@ -62,9 +62,9 @@ import edelta.lib.EdeltaStandardLibrary;
  */
 public class EdeltaStandardLibraryTest {
 
-	private static final String TESTDATA = "testdata/";
+	private static final String TESTDATA = "../edelta.testdata/testdata/";
 	private static final String OUTPUT = "output/";
-	private static final String EXPECTATIONS = "expectations/";
+	private static final String EXPECTATIONS = "../edelta.testdata/expectations/";
 
 	private static final String MYPACKAGE = "mypackage";
 	private static final String MYOTHERPACKAGE = "myotherpackage";

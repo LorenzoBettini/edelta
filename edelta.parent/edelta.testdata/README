@@ -1,0 +1,4 @@
+This project contains input models and expectations for tests that
+modify ecores and models.
+
+Most of them are common to tests in edelta.lib.tests and edelta.refactorings.lib.tests

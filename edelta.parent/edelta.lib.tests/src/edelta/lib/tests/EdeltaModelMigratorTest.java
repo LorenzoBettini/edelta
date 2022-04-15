@@ -55,9 +55,9 @@ import edelta.lib.EdeltaUtils;
 
 class EdeltaModelMigratorTest {
 
-	private static final String TESTDATA = "testdata/";
+	private static final String TESTDATA = "../edelta.testdata/testdata/";
 	private static final String OUTPUT = "output/";
-	private static final String EXPECTATIONS = "expectations/";
+	private static final String EXPECTATIONS = "../edelta.testdata/expectations/";
 
 	/**
 	 * This stores the original ecores and models, and it's initially shared with

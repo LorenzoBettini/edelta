@@ -37,9 +37,9 @@ public abstract class AbstractEdeltaRefactoringsLibTest {
 
 	protected static final String MODIFIED = "modified/";
 
-	protected static final String TESTECORES = "test-input-models/";
+	protected static final String TESTECORES = "../edelta.testdata/testdata/";
 
-	protected static final String EXPECTATIONS = "test-output-expectations/";
+	protected static final String EXPECTATIONS = "../edelta.testdata/expectations/";
 
 	protected EdeltaStandardLibrary stdLib = new EdeltaStandardLibrary(new EdeltaModelManager());
 
