@@ -9,7 +9,7 @@
     <relativePath>../edelta.tests.parent/pom.xml</relativePath>
   </parent>
   <artifactId>edelta.tests</artifactId>
-  <packaging>eclipse-test-plugin</packaging>
+  <packaging>eclipse-plugin</packaging>
 
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
@@ -19,4 +19,12 @@
     <sonar.tests>src,xtend-gen</sonar.tests>
   </properties>
 
+  <dependencies>
+    <!-- required to avoid null injected elements -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 </project>
