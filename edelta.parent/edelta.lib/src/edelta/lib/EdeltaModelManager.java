@@ -3,6 +3,7 @@ package edelta.lib;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -208,13 +209,20 @@ public class EdeltaModelManager {
 
 	/**
 	 * make sure we have a complete file URI, otherwise the saved modified files
-	 * will contain wrong references (i.e., with the prefixed relative path)
+	 * will contain wrong references (i.e., with the prefixed relative path or
+	 * with ".." in the absolute path).
+	 * 
+	 * @see Path#normalize()
+	 * @see Path#toAbsolutePath()
 	 * 
 	 * @param path
 	 * @return
 	 */
 	private URI createAbsoluteFileURI(String path) {
-		return URI.createFileURI(Paths.get(path).toAbsolutePath().toString());
+		return URI.createFileURI(Paths.get(path)
+				.toAbsolutePath()
+				.normalize() // "avoid "." and ".."
+				.toString());
 	}
 
 	public Collection<Resource> getModelResources() {
