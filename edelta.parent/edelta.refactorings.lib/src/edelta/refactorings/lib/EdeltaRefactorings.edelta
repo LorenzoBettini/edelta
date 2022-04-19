@@ -425,15 +425,29 @@ def extractSuperclass(String name, List<? extends EStructuralFeature> duplicates
  * @param dest
  * @param duplicates
  */
-def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates) : void {
+def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates) : EStructuralFeature {
 	checkNoDifferences(
 		duplicates,
 		new EdeltaFeatureDifferenceFinder().ignoringContainingClass,
 		"The two features are not equal"
 	)
 	checkAllDirectSubclasses(dest, duplicates.map[EContainingClass])
-	duplicates.head.copyTo(dest)
+	val pulledUp = duplicates.head.copyTo(dest)
 	removeAllElements(duplicates)
+	modelMigration[
+		// remember we must map the original metamodel element to the new one
+		featureMigratorRule(
+			[f | // the feature of the original metamodel
+				wasRelatedToAtLeastOneOf(f, duplicates)],
+			[feature, oldObj, newObj |
+				// the result can be safely returned
+				// independently from the object's class, since the
+				// predicate already matched
+				return pulledUp
+			]
+		);
+	]
+	return pulledUp
 }
 
 /**

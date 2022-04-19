@@ -451,7 +451,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * @param dest
    * @param duplicates
    */
-  public void pullUpFeatures(final EClass dest, final List<? extends EStructuralFeature> duplicates) {
+  public EStructuralFeature pullUpFeatures(final EClass dest, final List<? extends EStructuralFeature> duplicates) {
     this.checkNoDifferences(duplicates, 
       new EdeltaFeatureDifferenceFinder().ignoringContainingClass(), 
       "The two features are not equal");
@@ -459,8 +459,19 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       return it.getEContainingClass();
     };
     this.checkAllDirectSubclasses(dest, ListExtensions.map(duplicates, _function));
-    this.stdLib.copyTo(IterableExtensions.head(duplicates), dest);
+    final EStructuralFeature pulledUp = this.stdLib.copyTo(IterableExtensions.head(duplicates), dest);
     EdeltaUtils.removeAllElements(duplicates);
+    final Consumer<EdeltaModelMigrator> _function_1 = (EdeltaModelMigrator it) -> {
+      final Predicate<EStructuralFeature> _function_2 = (EStructuralFeature f) -> {
+        return it.wasRelatedToAtLeastOneOf(f, duplicates);
+      };
+      final EdeltaModelMigrator.FeatureMigrator _function_3 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
+        return pulledUp;
+      };
+      it.featureMigratorRule(_function_2, _function_3);
+    };
+    this.modelMigration(_function_1);
+    return pulledUp;
   }
   
   /**
