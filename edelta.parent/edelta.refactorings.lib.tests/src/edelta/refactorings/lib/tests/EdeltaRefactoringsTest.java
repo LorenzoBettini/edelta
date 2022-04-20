@@ -874,7 +874,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 
 	@Test
 	void test_pullUpAttributes() throws Exception {
-		var subdir = "pullUpFeatures/";
+		var subdir = "pullUpAttributes/";
 		var ecores = of("PersonList.ecore");
 		var models = of("List.xmi");
 
