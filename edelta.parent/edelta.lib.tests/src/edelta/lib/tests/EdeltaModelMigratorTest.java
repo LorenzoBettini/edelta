@@ -1691,6 +1691,54 @@ class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	void testReplaceWithCopyWithMap() throws IOException {
+		var subdir = "simpleTestData/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myClassStringAttribute");
+
+		replaceWithCopyWithMap(modelMigrator, attribute, "myAttributeRenamed");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			"replaceWithCopy/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	@Test
+	void testReplaceWithCopyTwiceWithMap() throws IOException {
+		var subdir = "simpleTestData/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+
+		// actual refactoring
+		var attribute = getAttribute(evolvingModelManager,
+				"mypackage", "MyClass", "myClassStringAttribute");
+		var copied = replaceWithCopy(modelMigrator, attribute, "myAttributeRenamed");
+		replaceWithCopyWithMap(modelMigrator, copied, "myAttributeRenamedTwice");
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			"replaceWithCopyTwice/",
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
 	/**
 	 * Note that with pull up the migrated model is actually the same as the
 	 * original one, but we have to adjust some mappings to make the copy work,
@@ -4485,6 +4533,16 @@ class EdeltaModelMigratorTest {
 				// attribute we've just removed
 				modelMigrator.wasRelatedTo(f, attribute),
 			(feature, oldObj, newObj) -> copy);
+		return copy;
+	}
+
+	private EAttribute replaceWithCopyWithMap(EdeltaModelMigrator modelMigrator, EAttribute attribute, String newName) {
+		var copy = createCopy(modelMigrator, attribute);
+		copy.setName(newName);
+		var containingClass = attribute.getEContainingClass();
+		EdeltaUtils.removeElement(attribute);
+		containingClass.getEStructuralFeatures().add(copy);
+		modelMigrator.mapFeatureRule(attribute, copy);
 		return copy;
 	}
 

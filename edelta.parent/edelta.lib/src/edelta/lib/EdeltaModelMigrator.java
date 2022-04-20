@@ -374,6 +374,31 @@ public class EdeltaModelMigrator {
 	}
 
 	/**
+	 * Maps the old Ecore feature to the new Ecore feature.
+	 * <p>
+	 * This is useful when in the evolved Ecore a feature is replaced with
+	 * another feature.
+	 * 
+	 * @param from
+	 * @param to
+	 */
+	public void mapFeatureRule(EStructuralFeature from,
+			EStructuralFeature to) {
+		modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected EStructuralFeature getTarget(EStructuralFeature eStructuralFeature) {
+				if (wasRelatedTo(eStructuralFeature, from))
+					return to;
+				return super.getTarget(eStructuralFeature);
+			}
+		};
+		copyModels(modelCopier, originalModelManager, evolvingModelManager);
+		updateMigrationContext();
+	}
+
+	/**
 	 * When the class predicate matches, uses the passed function to create an
 	 * instance of the new object corresponding to the passed old object. In this
 	 * case, the creation of the instance (and possibly the setting of its values)
