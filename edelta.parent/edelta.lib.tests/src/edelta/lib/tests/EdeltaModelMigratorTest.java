@@ -4563,16 +4563,7 @@ class EdeltaModelMigratorTest {
 		superClass.getEStructuralFeatures().add(pulledUp);
 		EdeltaUtils.removeAllElements(features);
 		// remember we must map the original metamodel element to the new one
-		modelMigrator.featureMigratorRule(
-			f -> // the feature of the original metamodel
-				modelMigrator.wasRelatedToAtLeastOneOf(f, features),
-			(feature, oldObj, newObj) -> { // the object of the original model
-				// the result can be safely returned
-				// independently from the object's class, since the
-				// predicate already matched
-				return pulledUp;
-			}
-		);
+		modelMigrator.mapFeatureRule(features, pulledUp);
 		return pulledUp;
 	}
 
