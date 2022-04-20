@@ -11,6 +11,7 @@ import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -466,6 +467,37 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     };
     this.modelMigration(_function_1);
     return pulledUp;
+  }
+  
+  /**
+   * Given a feature and a non empty list of {@link EClass}, which are known to
+   * be direct subclasses of the containing class of the feature, pushes the feature down in
+   * the given common subclasses
+   * (and removes the feature from the original containing class).
+   * 
+   * @param featureToPush
+   * @param subClasses
+   */
+  public Collection<EStructuralFeature> pushDownFeature(final EStructuralFeature featureToPush, final List<EClass> subClasses) {
+    this.checkAllDirectSubclasses(featureToPush.getEContainingClass(), subClasses);
+    final HashMap<EClass, EStructuralFeature> pushedDownFeatures = new HashMap<EClass, EStructuralFeature>();
+    for (final EClass subClass : subClasses) {
+      {
+        EStructuralFeature pushedDown = EcoreUtil.<EStructuralFeature>copy(featureToPush);
+        pushedDownFeatures.put(subClass, pushedDown);
+        subClass.getEStructuralFeatures().add(0, pushedDown);
+      }
+    }
+    EdeltaUtils.removeElement(featureToPush);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.FeatureMigrator _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
+        return pushedDownFeatures.get(newObj.eClass());
+      };
+      it.featureMigratorRule(
+        it.<EStructuralFeature>wasRelatedTo(featureToPush), _function_1);
+    };
+    this.modelMigration(_function);
+    return pushedDownFeatures.values();
   }
   
   /**

@@ -14,6 +14,7 @@ import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.ETypedElement
 import org.eclipse.emf.ecore.util.EcoreUtil
 import java.util.stream.Collectors
+import java.util.HashMap
 
 package edelta.refactorings.lib
 
@@ -438,6 +439,38 @@ def pullUpFeatures(EClass dest, List<EStructuralFeature> duplicates) : EStructur
 		mapFeaturesRule(duplicates, pulledUp)
 	]
 	return pulledUp
+}
+
+/**
+ * Given a feature and a non empty list of {@link EClass}, which are known to
+ * be direct subclasses of the containing class of the feature, pushes the feature down in
+ * the given common subclasses
+ * (and removes the feature from the original containing class).
+ * 
+ * @param featureToPush
+ * @param subClasses
+ */
+def pushDownFeature(EStructuralFeature featureToPush, List<EClass> subClasses) : Collection<EStructuralFeature> {
+	checkAllDirectSubclasses(featureToPush.EContainingClass, subClasses)
+	val pushedDownFeatures = new HashMap<EClass, EStructuralFeature>()
+	for (subClass : subClasses) {
+		var pushedDown = EcoreUtil.copy(featureToPush)
+		pushedDownFeatures.put(subClass, pushedDown)
+		subClass.getEStructuralFeatures().add(0, pushedDown)
+	}
+	removeElement(featureToPush)
+	modelMigration[
+		featureMigratorRule(
+			wasRelatedTo(featureToPush),
+			[feature, oldObj, newObj | // the object of the original model
+				// the result depends on the EClass of the original
+				// object being copied, but the map was built
+				// using evolved classes
+				pushedDownFeatures.get(newObj.eClass())
+			]
+		);
+	]
+	return pushedDownFeatures.values
 }
 
 /**

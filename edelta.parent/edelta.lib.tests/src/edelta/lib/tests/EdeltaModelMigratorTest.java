@@ -1748,7 +1748,7 @@ class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	void testpullUpAttributes() throws IOException {
+	void testPullUpAttributes() throws IOException {
 		var subdir = "pullUpAttributes/";
 
 		var modelMigrator = setupMigrator(

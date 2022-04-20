@@ -950,6 +950,39 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
+	void test_pushDownFeature() throws Exception {
+		var subdir = "pushDownFeatures/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var personClass = getEClass("PersonList", "Person");
+					var personName = personClass.getEStructuralFeature("name");
+					var studentClass = getEClass("PersonList", "Student");
+					var employeeClass = getEClass("PersonList", "Employee");
+					// refactoring
+					pushDownFeature(
+							personName,
+							List.of(studentClass, employeeClass));
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	@Test
 	void test_allUsagesOfThisClass() {
 		var p = createEPackage("p");
 		var classForUsages = stdLib.addNewEClass(p, "C");
