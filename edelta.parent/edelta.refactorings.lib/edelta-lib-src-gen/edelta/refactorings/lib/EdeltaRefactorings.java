@@ -408,8 +408,8 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * 
    * @param duplicates
    */
-  public EClass extractSuperclass(final List<? extends EStructuralFeature> duplicates) {
-    final EStructuralFeature feature = IterableExtensions.head(duplicates);
+  public EClass extractSuperclass(final List<EStructuralFeature> duplicates) {
+    final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(duplicates);
     String _firstUpper = StringExtensions.toFirstUpper(feature.getName());
     String _plus = (_firstUpper + "Element");
     final String superClassName = this.ensureEClassifierNameIsUnique(feature, _plus);
@@ -426,8 +426,8 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * @param name
    * @param duplicates
    */
-  public EClass extractSuperclass(final String name, final List<? extends EStructuralFeature> duplicates) {
-    final EStructuralFeature feature = IterableExtensions.head(duplicates);
+  public EClass extractSuperclass(final String name, final List<EStructuralFeature> duplicates) {
+    final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(duplicates);
     final Consumer<EClass> _function = (EClass it) -> {
       EdeltaUtils.makeAbstract(it);
       final Function1<EStructuralFeature, EClass> _function_1 = (EStructuralFeature it_1) -> {
@@ -436,7 +436,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       final Consumer<EClass> _function_2 = (EClass c) -> {
         this.stdLib.addESuperType(c, it);
       };
-      ListExtensions.map(duplicates, _function_1).forEach(_function_2);
+      ListExtensions.<EStructuralFeature, EClass>map(duplicates, _function_1).forEach(_function_2);
       this.pullUpFeatures(it, duplicates);
     };
     return this.stdLib.addNewEClassAsSibling(feature.getEContainingClass(), name, _function);
@@ -451,24 +451,18 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * @param dest
    * @param duplicates
    */
-  public EStructuralFeature pullUpFeatures(final EClass dest, final List<? extends EStructuralFeature> duplicates) {
+  public EStructuralFeature pullUpFeatures(final EClass dest, final List<EStructuralFeature> duplicates) {
     this.checkNoDifferences(duplicates, 
       new EdeltaFeatureDifferenceFinder().ignoringContainingClass(), 
       "The two features are not equal");
     final Function1<EStructuralFeature, EClass> _function = (EStructuralFeature it) -> {
       return it.getEContainingClass();
     };
-    this.checkAllDirectSubclasses(dest, ListExtensions.map(duplicates, _function));
-    final EStructuralFeature pulledUp = this.stdLib.copyTo(IterableExtensions.head(duplicates), dest);
+    this.checkAllDirectSubclasses(dest, ListExtensions.<EStructuralFeature, EClass>map(duplicates, _function));
+    final EStructuralFeature pulledUp = this.stdLib.copyTo(IterableExtensions.<EStructuralFeature>head(duplicates), dest);
     EdeltaUtils.removeAllElements(duplicates);
     final Consumer<EdeltaModelMigrator> _function_1 = (EdeltaModelMigrator it) -> {
-      final Predicate<EStructuralFeature> _function_2 = (EStructuralFeature f) -> {
-        return it.wasRelatedToAtLeastOneOf(f, duplicates);
-      };
-      final EdeltaModelMigrator.FeatureMigrator _function_3 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
-        return pulledUp;
-      };
-      it.featureMigratorRule(_function_2, _function_3);
+      it.mapFeaturesRule(duplicates, pulledUp);
     };
     this.modelMigration(_function_1);
     return pulledUp;

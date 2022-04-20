@@ -385,7 +385,7 @@ def classToReference(EClass cl) : EReference {
  * 
  * @param duplicates
  */
-def extractSuperclass(List<? extends EStructuralFeature> duplicates) {
+def extractSuperclass(List<EStructuralFeature> duplicates) {
 	val feature = duplicates.head;
 	val superClassName =
 		ensureEClassifierNameIsUnique(feature,
@@ -404,7 +404,7 @@ def extractSuperclass(List<? extends EStructuralFeature> duplicates) {
  * @param name
  * @param duplicates
  */
-def extractSuperclass(String name, List<? extends EStructuralFeature> duplicates) {
+def extractSuperclass(String name, List<EStructuralFeature> duplicates) {
 	val feature = duplicates.head;
 
 	return feature.EContainingClass.addNewEClassAsSibling(name) [
@@ -425,7 +425,7 @@ def extractSuperclass(String name, List<? extends EStructuralFeature> duplicates
  * @param dest
  * @param duplicates
  */
-def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates) : EStructuralFeature {
+def pullUpFeatures(EClass dest, List<EStructuralFeature> duplicates) : EStructuralFeature {
 	checkNoDifferences(
 		duplicates,
 		new EdeltaFeatureDifferenceFinder().ignoringContainingClass,
@@ -435,17 +435,7 @@ def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates) :
 	val pulledUp = duplicates.head.copyTo(dest)
 	removeAllElements(duplicates)
 	modelMigration[
-		// remember we must map the original metamodel element to the new one
-		featureMigratorRule(
-			[f | // the feature of the original metamodel
-				wasRelatedToAtLeastOneOf(f, duplicates)],
-			[feature, oldObj, newObj |
-				// the result can be safely returned
-				// independently from the object's class, since the
-				// predicate already matched
-				return pulledUp
-			]
-		);
+		mapFeaturesRule(duplicates, pulledUp)
 	]
 	return pulledUp
 }
