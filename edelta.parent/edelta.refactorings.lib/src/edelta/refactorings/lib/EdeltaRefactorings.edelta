@@ -426,13 +426,13 @@ def extractSuperclass(String name, List<EStructuralFeature> duplicates) {
  * @param dest
  * @param duplicates
  */
-def pullUpFeatures(EClass dest, List<EStructuralFeature> duplicates) : EStructuralFeature {
+def pullUpFeatures(EClass dest, Collection<EStructuralFeature> duplicates) : EStructuralFeature {
 	checkNoDifferences(
 		duplicates,
 		new EdeltaFeatureDifferenceFinder().ignoringContainingClass,
 		"The two features are not equal"
 	)
-	checkAllDirectSubclasses(dest, duplicates.map[EContainingClass])
+	checkAllDirectSubclasses(dest, duplicates.map[EContainingClass].toList)
 	val pulledUp = duplicates.head.copyTo(dest)
 	removeAllElements(duplicates)
 	modelMigration[

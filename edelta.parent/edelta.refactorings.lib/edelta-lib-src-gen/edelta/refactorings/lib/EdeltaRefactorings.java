@@ -452,14 +452,14 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * @param dest
    * @param duplicates
    */
-  public EStructuralFeature pullUpFeatures(final EClass dest, final List<EStructuralFeature> duplicates) {
+  public EStructuralFeature pullUpFeatures(final EClass dest, final Collection<EStructuralFeature> duplicates) {
     this.checkNoDifferences(duplicates, 
       new EdeltaFeatureDifferenceFinder().ignoringContainingClass(), 
       "The two features are not equal");
     final Function1<EStructuralFeature, EClass> _function = (EStructuralFeature it) -> {
       return it.getEContainingClass();
     };
-    this.checkAllDirectSubclasses(dest, ListExtensions.<EStructuralFeature, EClass>map(duplicates, _function));
+    this.checkAllDirectSubclasses(dest, IterableExtensions.<EClass>toList(IterableExtensions.<EStructuralFeature, EClass>map(duplicates, _function)));
     final EStructuralFeature pulledUp = this.stdLib.copyTo(IterableExtensions.<EStructuralFeature>head(duplicates), dest);
     EdeltaUtils.removeAllElements(duplicates);
     final Consumer<EdeltaModelMigrator> _function_1 = (EdeltaModelMigrator it) -> {

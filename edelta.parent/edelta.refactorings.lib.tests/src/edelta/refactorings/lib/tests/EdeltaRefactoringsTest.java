@@ -983,6 +983,80 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
+	void test_pushDown_IsOppositeOf_pullUp() throws Exception {
+		var subdir = "pushDownFeatures/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var personClass = getEClass("PersonList", "Person");
+					var personName = personClass.getEStructuralFeature("name");
+					var studentClass = getEClass("PersonList", "Student");
+					var employeeClass = getEClass("PersonList", "Employee");
+					// refactoring
+					var features = pushDownFeature(
+							personName,
+							List.of(studentClass, employeeClass));
+					// opposite
+					pullUpFeatures(personClass,
+							features);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"pushDownAndPullUp/",
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_pullUp_IsOppositeOf_pushDown() throws Exception {
+		var subdir = "pullUpAttributes/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var personClass = getEClass("PersonList", "Person");
+					var studentClass = getEClass("PersonList", "Student");
+					var employeeClass = getEClass("PersonList", "Employee");
+					var studentName = studentClass.getEStructuralFeature("name");
+					var employeeName = employeeClass.getEStructuralFeature("name");
+					// refactoring
+					var personName = pullUpFeatures(
+							personClass,
+							List.of(studentName, employeeName));
+					// opposite
+					pushDownFeature(
+							personName,
+							List.of(studentClass, employeeClass));
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"pullUpAndPushDown/",
+			ecores,
+			models
+		);
+	}
+
+	@Test
 	void test_allUsagesOfThisClass() {
 		var p = createEPackage("p");
 		var classForUsages = stdLib.addNewEClass(p, "C");
