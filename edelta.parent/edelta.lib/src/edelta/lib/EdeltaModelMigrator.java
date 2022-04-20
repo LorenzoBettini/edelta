@@ -3,6 +3,7 @@ package edelta.lib;
 import static edelta.lib.EdeltaEcoreUtil.wrapAsCollection;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -367,6 +368,45 @@ public class EdeltaModelMigrator {
 				return targetEStructuralFeature == null ?
 					super.getTarget(eStructuralFeature, eObject, copyEObject)
 					: ((InternalEObject) copyEObject).eSetting(targetEStructuralFeature);
+			}
+		};
+		copyModels(modelCopier, originalModelManager, evolvingModelManager);
+		updateMigrationContext();
+	}
+
+	/**
+	 * Maps the old Ecore feature to the new Ecore feature.
+	 * <p>
+	 * This is useful when in the evolved Ecore a feature is replaced with
+	 * another feature.
+	 * 
+	 * @param from
+	 * @param to
+	 */
+	public void mapFeatureRule(EStructuralFeature from,
+			EStructuralFeature to) {
+		mapFeaturesRule(Collections.singletonList(from), to);
+	}
+
+	/**
+	 * Maps the old Ecore features to the new Ecore feature.
+	 * <p>
+	 * This is useful when in the evolved Ecore a feature is replaced with
+	 * another feature.
+	 * 
+	 * @param from
+	 * @param to
+	 */
+	public void mapFeaturesRule(Collection<EStructuralFeature> from,
+			EStructuralFeature to) {
+		modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected EStructuralFeature getTarget(EStructuralFeature eStructuralFeature) {
+				if (wasRelatedToAtLeastOneOf(eStructuralFeature, from))
+					return to;
+				return super.getTarget(eStructuralFeature);
 			}
 		};
 		copyModels(modelCopier, originalModelManager, evolvingModelManager);
