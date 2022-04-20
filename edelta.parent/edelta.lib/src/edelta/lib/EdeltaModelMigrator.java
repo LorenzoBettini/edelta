@@ -385,7 +385,7 @@ public class EdeltaModelMigrator {
 	 */
 	public void mapFeatureRule(EStructuralFeature from,
 			EStructuralFeature to) {
-		mapFeatureRule(Collections.singletonList(from), to);
+		mapFeaturesRule(Collections.singletonList(from), to);
 	}
 
 	/**
@@ -397,7 +397,7 @@ public class EdeltaModelMigrator {
 	 * @param from
 	 * @param to
 	 */
-	public void mapFeatureRule(Collection<EStructuralFeature> from,
+	public void mapFeaturesRule(Collection<EStructuralFeature> from,
 			EStructuralFeature to) {
 		modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 			private static final long serialVersionUID = 1L;

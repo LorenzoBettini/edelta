@@ -4563,7 +4563,7 @@ class EdeltaModelMigratorTest {
 		superClass.getEStructuralFeatures().add(pulledUp);
 		EdeltaUtils.removeAllElements(features);
 		// remember we must map the original metamodel element to the new one
-		modelMigrator.mapFeatureRule(features, pulledUp);
+		modelMigrator.mapFeaturesRule(features, pulledUp);
 		return pulledUp;
 	}
 
