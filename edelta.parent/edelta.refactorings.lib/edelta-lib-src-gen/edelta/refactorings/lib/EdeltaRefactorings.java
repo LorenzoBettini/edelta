@@ -8,7 +8,6 @@ import edelta.lib.EdeltaModelMigrator;
 import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -131,22 +130,33 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   public Collection<EClass> enumToSubclasses(final EAttribute attr) {
     final EDataType type = attr.getEAttributeType();
     if ((type instanceof EEnum)) {
-      final ArrayList<EClass> createdSubclasses = CollectionLiterals.<EClass>newArrayList();
+      final HashMap<String, EClass> createdSubclasses = CollectionLiterals.<String, EClass>newHashMap();
       final EClass owner = attr.getEContainingClass();
       EdeltaUtils.makeAbstract(owner);
       EList<EEnumLiteral> _eLiterals = ((EEnum)type).getELiterals();
-      for (final EEnumLiteral subc : _eLiterals) {
+      for (final EEnumLiteral literal : _eLiterals) {
         {
-          final String subclassName = this.ensureEClassifierNameIsUnique(owner, StringExtensions.toFirstUpper(subc.getLiteral().toLowerCase()));
+          final String literalString = literal.getLiteral();
+          final String subclassName = this.ensureEClassifierNameIsUnique(owner, StringExtensions.toFirstUpper(literalString.toLowerCase()));
           final Consumer<EClass> _function = (EClass it) -> {
             this.stdLib.addESuperType(it, owner);
           };
-          EClass _addNewEClassAsSibling = this.stdLib.addNewEClassAsSibling(owner, subclassName, _function);
-          createdSubclasses.add(_addNewEClassAsSibling);
+          createdSubclasses.put(literalString, 
+            this.stdLib.addNewEClassAsSibling(owner, subclassName, _function));
         }
       }
       EdeltaUtils.removeElement(type);
-      return createdSubclasses;
+      final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+        final EdeltaModelMigrator.EObjectFunction _function_1 = (EObject oldObj) -> {
+          final String literalValue = oldObj.eGet(it.<EAttribute>getOriginal(attr)).toString();
+          final EClass correspondingSubclass = createdSubclasses.get(literalValue);
+          return EcoreUtil.create(correspondingSubclass);
+        };
+        it.createInstanceRule(
+          it.<EClass>isRelatedTo(owner), _function_1);
+      };
+      this.modelMigration(_function);
+      return createdSubclasses.values();
     } else {
       String _eObjectRepr = EdeltaUtils.getEObjectRepr(type);
       String _plus = ("Not an EEnum: " + _eObjectRepr);

@@ -294,17 +294,34 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
-	void test_enumToSubclasses() throws IOException {
-		withInputModels("enumToSubclasses", "PersonList.ecore");
-		loadEcoreFiles();
-		final EClass person = refactorings.getEClass("PersonList", "Person");
-		EStructuralFeature _eStructuralFeature = person.getEStructuralFeature("gender");
-		final Collection<EClass> result = refactorings.enumToSubclasses(((EAttribute) _eStructuralFeature));
-		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
-		assertModifiedFiles();
-		assertThat(result)
-			.extracting(EClass::getName)
-			.containsExactlyInAnyOrder("Male", "Female");
+	void test_enumToSubclasses() throws Exception {
+		var subdir = "enumToSubclasses/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var person = getEClass("PersonList", "Person");
+					var genreAttribute = (EAttribute) person.getEStructuralFeature("gender");
+					var result = enumToSubclasses(genreAttribute);
+					assertThat(result)
+						.extracting(EClass::getName)
+						.containsExactlyInAnyOrder("Male", "Female");
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test

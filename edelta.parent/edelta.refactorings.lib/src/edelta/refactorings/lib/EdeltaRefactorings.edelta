@@ -1,7 +1,9 @@
 import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder
 import java.util.Collection
+import java.util.HashMap
 import java.util.List
 import java.util.function.Predicate
+import java.util.stream.Collectors
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
@@ -13,8 +15,6 @@ import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.ETypedElement
 import org.eclipse.emf.ecore.util.EcoreUtil
-import java.util.stream.Collectors
-import java.util.HashMap
 
 package edelta.refactorings.lib
 
@@ -103,18 +103,34 @@ def mergeFeatures(String newFeatureName, EClassifier type, Collection<EStructura
 def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 	val type = attr.EAttributeType
 	if (type instanceof EEnum) {
-		val createdSubclasses = newArrayList
+		val createdSubclasses = newHashMap
 		val owner = attr.EContainingClass
 		owner.makeAbstract
-		for (subc : type.ELiterals) {
+		for (literal : type.ELiterals) {
+			val literalString = literal.getLiteral
 			val subclassName = ensureEClassifierNameIsUnique
-				(owner, subc.literal.toLowerCase.toFirstUpper)
-			createdSubclasses += owner.addNewEClassAsSibling(subclassName) [
-				addESuperType(owner)
-			]
+				(owner, literalString.toLowerCase.toFirstUpper)
+			createdSubclasses.put(
+				literalString,
+				owner.addNewEClassAsSibling(subclassName) [
+					addESuperType(owner)
+				]
+			)
 		}
 		removeElement(type) // will also remove the attribute
-		return createdSubclasses
+		modelMigration[
+			createInstanceRule(
+				isRelatedTo(owner),
+				[oldObj |
+					val literalValue =
+						oldObj.eGet(getOriginal(attr)).toString()
+					val correspondingSubclass =
+						createdSubclasses.get(literalValue)
+					return EcoreUtil.create(correspondingSubclass)
+				]
+			)
+		]
+		return createdSubclasses.values
 	} else {
 		showError(attr,
 			"Not an EEnum: " + getEObjectRepr(type)
