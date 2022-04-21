@@ -133,7 +133,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     if ((type instanceof EEnum)) {
       final EClass owner = attr.getEContainingClass();
       final Function1<EEnumLiteral, String> _function = (EEnumLiteral it) -> {
-        return StringExtensions.toFirstUpper(it.getLiteral().toLowerCase());
+        return StringExtensions.toFirstUpper(it.toString().toLowerCase());
       };
       final Function2<EdeltaModelMigrator, EObject, EObject> _function_1 = (EdeltaModelMigrator modelMigrator, EObject oldObj) -> {
         final String literalValue = oldObj.eGet(modelMigrator.<EAttribute>getOriginal(attr)).toString();

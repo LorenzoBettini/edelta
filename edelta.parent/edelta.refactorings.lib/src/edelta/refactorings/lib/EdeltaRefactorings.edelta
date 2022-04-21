@@ -106,7 +106,7 @@ def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 	if (type instanceof EEnum) {
 		val owner = attr.EContainingClass
 		val createdSubclasses = introduceSubclasses(owner,
-			type.ELiterals.map[literal.toLowerCase.toFirstUpper].toList,
+			type.ELiterals.map[toString.toLowerCase.toFirstUpper].toList,
 			[modelMigrator, oldObj |
 				val literalValue =
 					oldObj.eGet(modelMigrator.getOriginal(attr)).toString()
