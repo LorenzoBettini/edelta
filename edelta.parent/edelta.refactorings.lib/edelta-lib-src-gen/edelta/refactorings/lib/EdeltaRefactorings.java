@@ -130,39 +130,51 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   public Collection<EClass> enumToSubclasses(final EAttribute attr) {
     final EDataType type = attr.getEAttributeType();
     if ((type instanceof EEnum)) {
-      final HashMap<String, EClass> createdSubclasses = CollectionLiterals.<String, EClass>newHashMap();
       final EClass owner = attr.getEContainingClass();
-      EdeltaUtils.makeAbstract(owner);
-      EList<EEnumLiteral> _eLiterals = ((EEnum)type).getELiterals();
-      for (final EEnumLiteral literal : _eLiterals) {
-        {
-          final String literalString = literal.getLiteral();
-          final String subclassName = this.ensureEClassifierNameIsUnique(owner, StringExtensions.toFirstUpper(literalString.toLowerCase()));
-          final Consumer<EClass> _function = (EClass it) -> {
-            this.stdLib.addESuperType(it, owner);
-          };
-          createdSubclasses.put(literalString, 
-            this.stdLib.addNewEClassAsSibling(owner, subclassName, _function));
-        }
-      }
+      final Function1<EEnumLiteral, String> _function = (EEnumLiteral it) -> {
+        return StringExtensions.toFirstUpper(it.getLiteral().toLowerCase());
+      };
+      final Collection<EClass> createdSubclasses = this.introduceSubclasses(owner, 
+        IterableExtensions.<String>toList(ListExtensions.<EEnumLiteral, String>map(((EEnum)type).getELiterals(), _function)));
       EdeltaUtils.removeElement(type);
-      final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
-        final EdeltaModelMigrator.EObjectFunction _function_1 = (EObject oldObj) -> {
+      final Consumer<EdeltaModelMigrator> _function_1 = (EdeltaModelMigrator it) -> {
+        final EdeltaModelMigrator.EObjectFunction _function_2 = (EObject oldObj) -> {
           final String literalValue = oldObj.eGet(it.<EAttribute>getOriginal(attr)).toString();
-          final EClass correspondingSubclass = createdSubclasses.get(literalValue);
+          final Function1<EClass, Boolean> _function_3 = (EClass it_1) -> {
+            String _name = it_1.getName();
+            String _firstUpper = StringExtensions.toFirstUpper(literalValue.toLowerCase());
+            return Boolean.valueOf(Objects.equal(_name, _firstUpper));
+          };
+          final EClass correspondingSubclass = IterableExtensions.<EClass>findFirst(createdSubclasses, _function_3);
           return EcoreUtil.create(correspondingSubclass);
         };
         it.createInstanceRule(
-          it.<EClass>isRelatedTo(owner), _function_1);
+          it.<EClass>isRelatedTo(owner), _function_2);
       };
-      this.modelMigration(_function);
-      return createdSubclasses.values();
+      this.modelMigration(_function_1);
+      return createdSubclasses;
     } else {
       String _eObjectRepr = EdeltaUtils.getEObjectRepr(type);
       String _plus = ("Not an EEnum: " + _eObjectRepr);
       this.showError(attr, _plus);
       return null;
     }
+  }
+  
+  /**
+   * Creates the classes with the given names as subclasses of the passed
+   * superClass, which will then be made abstract
+   */
+  public Collection<EClass> introduceSubclasses(final EClass superClass, final Collection<String> names) {
+    List<EClass> _xblockexpression = null;
+    {
+      EdeltaUtils.makeAbstract(superClass);
+      final Function1<String, EClass> _function = (String name) -> {
+        return this.stdLib.addNewSubclass(superClass, name);
+      };
+      _xblockexpression = IterableExtensions.<EClass>toList(IterableExtensions.<String, EClass>map(names, _function));
+    }
+    return _xblockexpression;
   }
   
   /**

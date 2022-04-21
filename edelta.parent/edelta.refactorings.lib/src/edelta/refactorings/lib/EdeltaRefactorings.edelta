@@ -103,20 +103,10 @@ def mergeFeatures(String newFeatureName, EClassifier type, Collection<EStructura
 def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 	val type = attr.EAttributeType
 	if (type instanceof EEnum) {
-		val createdSubclasses = newHashMap
 		val owner = attr.EContainingClass
-		owner.makeAbstract
-		for (literal : type.ELiterals) {
-			val literalString = literal.getLiteral
-			val subclassName = ensureEClassifierNameIsUnique
-				(owner, literalString.toLowerCase.toFirstUpper)
-			createdSubclasses.put(
-				literalString,
-				owner.addNewEClassAsSibling(subclassName) [
-					addESuperType(owner)
-				]
-			)
-		}
+		val createdSubclasses = introduceSubclasses(owner,
+			type.ELiterals.map[literal.toLowerCase.toFirstUpper].toList
+		)
 		removeElement(type) // will also remove the attribute
 		modelMigration[
 			createInstanceRule(
@@ -125,18 +115,31 @@ def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 					val literalValue =
 						oldObj.eGet(getOriginal(attr)).toString()
 					val correspondingSubclass =
-						createdSubclasses.get(literalValue)
+						createdSubclasses.findFirst[
+							name == literalValue.toLowerCase.toFirstUpper
+						]
 					return EcoreUtil.create(correspondingSubclass)
 				]
 			)
 		]
-		return createdSubclasses.values
+		return createdSubclasses
 	} else {
 		showError(attr,
 			"Not an EEnum: " + getEObjectRepr(type)
 		)
 		return null
 	}
+}
+
+/**
+ * Creates the classes with the given names as subclasses of the passed
+ * superClass, which will then be made abstract
+ */
+def introduceSubclasses(EClass superClass, Collection<String> names) : Collection<EClass> {
+	superClass.makeAbstract
+	names.map[name|
+		superClass.addNewSubclass(name)
+	].toList
 }
 
 /**
