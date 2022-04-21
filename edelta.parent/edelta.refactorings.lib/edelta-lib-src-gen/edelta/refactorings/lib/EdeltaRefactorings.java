@@ -209,7 +209,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     final EClass superclass = this.getSingleDirectSuperclass(subclasses);
     final Consumer<EEnum> _function = (EEnum it) -> {
       final Procedure2<EClass, Integer> _function_1 = (EClass subClass, Integer index) -> {
-        final String enumLiteralName = this.ensureEClassifierNameIsUnique(superclass, subClass.getName().toUpperCase());
+        final String enumLiteralName = subClass.getName().toUpperCase();
         EEnumLiteral _addNewEEnumLiteral = this.stdLib.addNewEEnumLiteral(it, enumLiteralName);
         final Procedure1<EEnumLiteral> _function_2 = (EEnumLiteral it_1) -> {
           it_1.setValue((index).intValue());
@@ -222,6 +222,19 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     final EAttribute attribute = this.stdLib.addNewEAttribute(superclass, this.fromTypeToFeatureName(enum_), enum_);
     EdeltaUtils.makeConcrete(superclass);
     EdeltaUtils.removeAllElements(subclasses);
+    final Consumer<EdeltaModelMigrator> _function_1 = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.EObjectFunction _function_2 = (EObject oldObj) -> {
+        final EEnumLiteral enumLiteralName = enum_.getEEnumLiteral(
+          oldObj.eClass().getName().toUpperCase());
+        final Consumer<EObject> _function_3 = (EObject newObj) -> {
+          newObj.eSet(attribute, enumLiteralName);
+        };
+        return EdeltaEcoreUtil.createInstance(superclass, _function_3);
+      };
+      it.createInstanceRule(
+        it.<EClass>wasRelatedToAtLeastOneOf(subclasses), _function_2);
+    };
+    this.modelMigration(_function_1);
     return attribute;
   }
   

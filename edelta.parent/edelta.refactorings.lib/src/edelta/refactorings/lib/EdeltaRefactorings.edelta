@@ -178,8 +178,7 @@ def subclassesToEnum(String name, Collection<EClass> subclasses) : EAttribute {
 	val superclass = getSingleDirectSuperclass(subclasses)
 	val enum = superclass.addNewEEnumAsSibling(name) [
 		subclasses.forEach[subClass, index |
-			val enumLiteralName = ensureEClassifierNameIsUnique
-				(superclass, subClass.name.toUpperCase)
+			val enumLiteralName = subClass.name.toUpperCase
 			addNewEEnumLiteral(enumLiteralName) => [
 				value = index
 			]
@@ -188,6 +187,19 @@ def subclassesToEnum(String name, Collection<EClass> subclasses) : EAttribute {
 	val attribute = superclass.addNewEAttribute(enum.fromTypeToFeatureName, enum)
 	superclass.makeConcrete
 	removeAllElements(subclasses)
+	modelMigration[
+		createInstanceRule(
+			wasRelatedToAtLeastOneOf(subclasses),
+			[oldObj |
+				val enumLiteralName = enum.getEEnumLiteral(
+					oldObj.eClass.name.toUpperCase)
+				return createInstance(
+					superclass,
+					[newObj | newObj.eSet(attribute, enumLiteralName)]
+				)
+			]
+		)
+	]
 	return attribute
 }
 

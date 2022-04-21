@@ -340,18 +340,35 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
-	void test_subclassesToEnum() throws IOException {
-		withInputModels("subclassesToEnum", "PersonList.ecore");
-		loadEcoreFiles();
-		final EPackage personList = refactorings.getEPackage("PersonList");
-		final EAttribute result = refactorings.subclassesToEnum("Gender",
-			asList(
-				(EClass) personList.getEClassifier("Male"),
-				(EClass) personList.getEClassifier("Female")));
-		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
-		assertModifiedFiles();
-		assertThat(result)
-			.returns("gender", EAttribute::getName);
+	void test_subclassesToEnum() throws Exception {
+		var subdir = "subclassesToEnum/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var personList = getEPackage("PersonList");
+					var result = subclassesToEnum("Gender",
+						asList(
+							(EClass) personList.getEClassifier("Male"),
+							(EClass) personList.getEClassifier("Female")));
+					assertThat(result)
+						.returns("gender", EAttribute::getName);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test
