@@ -143,7 +143,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
           return Boolean.valueOf(Objects.equal(_name, _firstUpper));
         };
         final EClass correspondingSubclass = IterableExtensions.<EClass>findFirst(EdeltaUtils.getEClasses(EdeltaUtils.getEContainingPackage(owner)), _function_2);
-        return EcoreUtil.create(correspondingSubclass);
+        return EdeltaEcoreUtil.createInstance(correspondingSubclass);
       };
       final Collection<EClass> createdSubclasses = this.introduceSubclasses(owner, 
         IterableExtensions.<String>toList(ListExtensions.<EEnumLiteral, String>map(((EEnum)type).getELiterals(), _function)), _function_1);

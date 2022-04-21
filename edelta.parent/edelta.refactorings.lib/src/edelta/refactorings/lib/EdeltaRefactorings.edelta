@@ -114,7 +114,7 @@ def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 					owner.EContainingPackage.EClasses.findFirst[
 						name == literalValue.toLowerCase.toFirstUpper
 					]
-				return EcoreUtil.create(correspondingSubclass)
+				return createInstance(correspondingSubclass)
 			]
 		)
 		removeElement(type) // will also remove the attribute
