@@ -131,7 +131,7 @@ def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 /**
  * Creates the classes with the given names as subclasses of the passed
  * superClass, which will then be made abstract; the objectMigrator is applied
- * for migrating objects that were orignally instances of the superClass.
+ * for migrating objects that were originally instances of the superClass.
  * 
  * @param superClass
  * @param name
