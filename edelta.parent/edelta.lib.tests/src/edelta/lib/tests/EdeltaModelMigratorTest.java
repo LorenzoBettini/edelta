@@ -1748,8 +1748,8 @@ class EdeltaModelMigratorTest {
 	 * @throws IOException
 	 */
 	@Test
-	void testPullUpFeatures() throws IOException {
-		var subdir = "pullUpFeatures/";
+	void testPullUpAttributes() throws IOException {
+		var subdir = "pullUpAttributes/";
 
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -1866,7 +1866,7 @@ class EdeltaModelMigratorTest {
 
 	@Test
 	void testPullUpAndPushDown() throws IOException {
-		var subdir = "pullUpFeatures/";
+		var subdir = "pullUpAttributes/";
 
 		var modelMigrator = setupMigrator(
 			subdir,
@@ -4574,9 +4574,9 @@ class EdeltaModelMigratorTest {
 			var pushedDown = createCopy(modelMigrator, featureToPush);
 			pushedDownFeatures.put(subClass, pushedDown);
 			// we add it in the very first position just to have exactly the
-			// same Ecore model as the starting one of pullUpFeatures
+			// same Ecore model as the starting one of pullUpAttributes
 			// but just for testing purposes: we verify that the output is
-			// exactly the same as the original model of pullUpFeatures
+			// exactly the same as the original model of pullUpAttributes
 			subClass.getEStructuralFeatures().add(0, pushedDown);
 		}
 		EdeltaUtils.removeElement(featureToPush);

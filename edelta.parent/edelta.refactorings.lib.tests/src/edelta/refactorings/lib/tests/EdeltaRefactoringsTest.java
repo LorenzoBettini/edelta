@@ -631,7 +631,6 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 		"referenceToClassBidirectionalDifferentOrder/",
 		"referenceToClassBidirectionalOppositeMultiple/",
 		"referenceToClassMultipleBidirectional/",
-		
 	})
 	void test_referenceToClass(String directory) throws Exception {
 		var subdir = directory;
@@ -838,19 +837,70 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 		assertLogIsEmpty();
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"pullUpReferences/",
+		"pullUpContainmentReferences/",
+	})
+	void test_pullUpReferences(String directory) throws Exception {
+		var subdir = directory;
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var personClass = getEClass("PersonList", "Person");
+					var studentAddress = getEReference("PersonList", "Student", "address");
+					var employeeAddress = getEReference("PersonList", "Employee", "address");
+					pullUpFeatures(personClass,
+						asList(
+							studentAddress, employeeAddress));
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
 	@Test
-	void test_pullUpFeatures() throws IOException {
-		withInputModels("pullUpFeatures", "PersonList.ecore");
-		loadEcoreFiles();
-		final EClass person = refactorings.getEClass("PersonList", "Person");
-		final EClass student = refactorings.getEClass("PersonList", "Student");
-		final EClass employee = refactorings.getEClass("PersonList", "Employee");
-		refactorings.pullUpFeatures(person,
-			asList(
-				student.getEStructuralFeature("name"),
-				employee.getEStructuralFeature("name")));
-		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
-		assertModifiedFiles();
+	void test_pullUpAttributes() throws Exception {
+		var subdir = "pullUpAttributes/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var personClass = getEClass("PersonList", "Person");
+					var studentAddress = getEAttribute("PersonList", "Student", "name");
+					var employeeAddress = getEAttribute("PersonList", "Employee", "name");
+					pullUpFeatures(personClass,
+						asList(
+							studentAddress, employeeAddress));
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test
@@ -897,6 +947,113 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 			ERROR: PersonList.Employee: Not a direct subclass of: PersonList.Person
 			"""
 			);
+	}
+
+	@Test
+	void test_pushDownFeature() throws Exception {
+		var subdir = "pushDownFeatures/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var personClass = getEClass("PersonList", "Person");
+					var personName = personClass.getEStructuralFeature("name");
+					var studentClass = getEClass("PersonList", "Student");
+					var employeeClass = getEClass("PersonList", "Employee");
+					// refactoring
+					pushDownFeature(
+							personName,
+							List.of(studentClass, employeeClass));
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_pushDown_IsOppositeOf_pullUp() throws Exception {
+		var subdir = "pushDownFeatures/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var personClass = getEClass("PersonList", "Person");
+					var personName = personClass.getEStructuralFeature("name");
+					var studentClass = getEClass("PersonList", "Student");
+					var employeeClass = getEClass("PersonList", "Employee");
+					// refactoring
+					var features = pushDownFeature(
+							personName,
+							List.of(studentClass, employeeClass));
+					// opposite
+					pullUpFeatures(personClass,
+							features);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"pushDownAndPullUp/",
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_pullUp_IsOppositeOf_pushDown() throws Exception {
+		var subdir = "pullUpAttributes/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var personClass = getEClass("PersonList", "Person");
+					var studentClass = getEClass("PersonList", "Student");
+					var employeeClass = getEClass("PersonList", "Employee");
+					var studentName = studentClass.getEStructuralFeature("name");
+					var employeeName = employeeClass.getEStructuralFeature("name");
+					// refactoring
+					var personName = pullUpFeatures(
+							personClass,
+							List.of(studentName, employeeName));
+					// opposite
+					pushDownFeature(
+							personName,
+							List.of(studentClass, employeeClass));
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"pullUpAndPushDown/",
+			ecores,
+			models
+		);
 	}
 
 	@Test
