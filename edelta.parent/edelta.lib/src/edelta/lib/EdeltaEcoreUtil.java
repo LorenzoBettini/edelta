@@ -167,4 +167,15 @@ public class EdeltaEcoreUtil {
 			EObject source, EStructuralFeature sourceFeature) {
 		dest.eSet(destFeature, source.eGet(sourceFeature));
 	}
+
+	public static Object getValueFromFeatureName(EObject obj, String featureName) {
+		return obj.eGet(obj.eClass().getEStructuralFeature(featureName));
+	}
+
+	public static EClass findSiblingByName(EClass cl, String sibingName) {
+		return EdeltaUtils.getEClassesStream(cl.getEPackage())
+				.filter(c -> c.getName().equals(sibingName))
+				.findFirst()
+				.orElse(null);
+	}
 }

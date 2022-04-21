@@ -286,4 +286,38 @@ public class EdeltaEcoreUtilTest {
 			.isInstanceOf(ClassCastException.class)
 			.hasMessageContaining("class java.lang.String cannot be cast to class org.eclipse.emf.ecore.EClassifier");
 	}
+
+	@Test
+	public void testGetValueFromFeatureName() {
+		var attr = EcoreFactory.eINSTANCE.createEAttribute();
+		attr.setEType(EcorePackage.Literals.ESTRING);
+
+		Object o = EdeltaEcoreUtil.getValueFromFeatureName(attr,
+			EcorePackage.Literals.ETYPED_ELEMENT__ETYPE.getName());
+
+		assertThat(o)
+			.isSameAs(EcorePackage.Literals.ESTRING);
+	}
+
+	@Test
+	public void testFindSiblingByName() {
+		var pack = EcoreFactory.eINSTANCE.createEPackage();
+
+		var c1 = EcoreFactory.eINSTANCE.createEClass();
+		c1.setName("C1");
+		var c2 = EcoreFactory.eINSTANCE.createEClass();
+		c2.setName("C2");
+		var c3 = EcoreFactory.eINSTANCE.createEClass();
+		c3.setName("C3");
+		pack.getEClassifiers().addAll(List.of(c1, c2, c3));
+
+		assertThat(EdeltaEcoreUtil.findSiblingByName(c1, "C1"))
+			.isSameAs(c1);
+		assertThat(EdeltaEcoreUtil.findSiblingByName(c1, "C2"))
+			.isSameAs(c2);
+		assertThat(EdeltaEcoreUtil.findSiblingByName(c1, "C3"))
+			.isSameAs(c3);
+		assertThat(EdeltaEcoreUtil.findSiblingByName(c1, "NonExisting"))
+			.isNull();;
+	}
 }
