@@ -1,4 +1,4 @@
-import edelta.lib.EdeltaModelMigrator
+import edelta.lib.EdeltaModelMigrator.EObjectFunction
 import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder
 import java.util.Collection
 import java.util.HashMap
@@ -107,9 +107,10 @@ def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 		val owner = attr.EContainingClass
 		val createdSubclasses = introduceSubclasses(owner,
 			type.ELiterals.map[toString.toLowerCase.toFirstUpper].toList,
-			[modelMigrator, oldObj |
+			[oldObj |
+				var oldAttribute = oldObj.eClass.getEStructuralFeature(attr.name)
 				val literalValue =
-					oldObj.eGet(modelMigrator.getOriginal(attr)).toString()
+					oldObj.eGet(oldAttribute).toString()
 				val correspondingSubclass =
 					owner.EContainingPackage.EClasses.findFirst[
 						name == literalValue.toLowerCase.toFirstUpper
@@ -137,7 +138,7 @@ def enumToSubclasses(EAttribute attr) : Collection<EClass> {
  * @param objectMigration
  */
 def introduceSubclasses(EClass superClass, Collection<String> names,
-	(EdeltaModelMigrator, EObject) => EObject objectMigrator
+	EObjectFunction objectMigrator
 ) : Collection<EClass> {
 	superClass.makeAbstract
 	val subclasses = names.map[name|
@@ -146,7 +147,7 @@ def introduceSubclasses(EClass superClass, Collection<String> names,
 	modelMigration[
 		createInstanceRule(
 			isRelatedTo(superClass),
-			[eObj | return objectMigrator.apply(it, eObj)]
+			objectMigrator
 		)
 	]
 	return subclasses

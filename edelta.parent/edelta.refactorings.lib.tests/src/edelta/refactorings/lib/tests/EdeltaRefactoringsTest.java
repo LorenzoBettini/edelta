@@ -293,6 +293,11 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 		assertModifiedFiles();
 	}
 
+	/**
+	 * This also implicitly tests introduceSubclasses
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	void test_enumToSubclasses() throws Exception {
 		var subdir = "enumToSubclasses/";
