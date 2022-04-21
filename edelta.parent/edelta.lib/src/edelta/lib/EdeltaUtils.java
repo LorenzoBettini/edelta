@@ -566,4 +566,11 @@ public class EdeltaUtils {
 
 		return null;
 	}
+
+	public static EClass findSiblingByName(EClass cl, String sibingName) {
+		return EdeltaUtils.getEClassesStream(cl.getEPackage())
+				.filter(c -> c.getName().equals(sibingName))
+				.findFirst()
+				.orElse(null);
+	}
 }
