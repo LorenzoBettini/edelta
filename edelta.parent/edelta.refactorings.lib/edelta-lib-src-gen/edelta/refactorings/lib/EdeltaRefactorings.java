@@ -135,14 +135,8 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
         return StringExtensions.toFirstUpper(it.toString().toLowerCase());
       };
       final EdeltaModelMigrator.EObjectFunction _function_1 = (EObject oldObj) -> {
-        EStructuralFeature oldAttribute = oldObj.eClass().getEStructuralFeature(attr.getName());
-        final String literalValue = oldObj.eGet(oldAttribute).toString();
-        final Function1<EClass, Boolean> _function_2 = (EClass it) -> {
-          String _name = it.getName();
-          String _firstUpper = StringExtensions.toFirstUpper(literalValue.toLowerCase());
-          return Boolean.valueOf(Objects.equal(_name, _firstUpper));
-        };
-        final EClass correspondingSubclass = IterableExtensions.<EClass>findFirst(EdeltaUtils.getEClasses(EdeltaUtils.getEContainingPackage(owner)), _function_2);
+        final String literalValue = EdeltaEcoreUtil.getValueFromFeatureName(oldObj, attr.getName()).toString();
+        final EClass correspondingSubclass = EdeltaUtils.findSiblingByName(owner, StringExtensions.toFirstUpper(literalValue.toLowerCase()));
         return EdeltaEcoreUtil.createInstance(correspondingSubclass);
       };
       final Collection<EClass> createdSubclasses = this.introduceSubclasses(owner, 

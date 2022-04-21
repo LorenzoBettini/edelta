@@ -108,13 +108,10 @@ def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 		val createdSubclasses = introduceSubclasses(owner,
 			type.ELiterals.map[toString.toLowerCase.toFirstUpper].toList,
 			[oldObj |
-				var oldAttribute = oldObj.eClass.getEStructuralFeature(attr.name)
 				val literalValue =
-					oldObj.eGet(oldAttribute).toString()
+					oldObj.getValueFromFeatureName(attr.name).toString()
 				val correspondingSubclass =
-					owner.EContainingPackage.EClasses.findFirst[
-						name == literalValue.toLowerCase.toFirstUpper
-					]
+					owner.findSiblingByName(literalValue.toLowerCase.toFirstUpper)
 				return createInstance(correspondingSubclass)
 			]
 		)
