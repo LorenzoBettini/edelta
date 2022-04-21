@@ -34,6 +34,7 @@ import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
+import org.eclipse.xtext.xbase.lib.Functions.Function2;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.ListExtensions;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
@@ -134,24 +135,19 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       final Function1<EEnumLiteral, String> _function = (EEnumLiteral it) -> {
         return StringExtensions.toFirstUpper(it.getLiteral().toLowerCase());
       };
-      final Collection<EClass> createdSubclasses = this.introduceSubclasses(owner, 
-        IterableExtensions.<String>toList(ListExtensions.<EEnumLiteral, String>map(((EEnum)type).getELiterals(), _function)));
-      EdeltaUtils.removeElement(type);
-      final Consumer<EdeltaModelMigrator> _function_1 = (EdeltaModelMigrator it) -> {
-        final EdeltaModelMigrator.EObjectFunction _function_2 = (EObject oldObj) -> {
-          final String literalValue = oldObj.eGet(it.<EAttribute>getOriginal(attr)).toString();
-          final Function1<EClass, Boolean> _function_3 = (EClass it_1) -> {
-            String _name = it_1.getName();
-            String _firstUpper = StringExtensions.toFirstUpper(literalValue.toLowerCase());
-            return Boolean.valueOf(Objects.equal(_name, _firstUpper));
-          };
-          final EClass correspondingSubclass = IterableExtensions.<EClass>findFirst(createdSubclasses, _function_3);
-          return EcoreUtil.create(correspondingSubclass);
+      final Function2<EdeltaModelMigrator, EObject, EObject> _function_1 = (EdeltaModelMigrator modelMigrator, EObject oldObj) -> {
+        final String literalValue = oldObj.eGet(modelMigrator.<EAttribute>getOriginal(attr)).toString();
+        final Function1<EClass, Boolean> _function_2 = (EClass it) -> {
+          String _name = it.getName();
+          String _firstUpper = StringExtensions.toFirstUpper(literalValue.toLowerCase());
+          return Boolean.valueOf(Objects.equal(_name, _firstUpper));
         };
-        it.createInstanceRule(
-          it.<EClass>isRelatedTo(owner), _function_2);
+        final EClass correspondingSubclass = IterableExtensions.<EClass>findFirst(EdeltaUtils.getEClasses(EdeltaUtils.getEContainingPackage(owner)), _function_2);
+        return EcoreUtil.create(correspondingSubclass);
       };
-      this.modelMigration(_function_1);
+      final Collection<EClass> createdSubclasses = this.introduceSubclasses(owner, 
+        IterableExtensions.<String>toList(ListExtensions.<EEnumLiteral, String>map(((EEnum)type).getELiterals(), _function)), _function_1);
+      EdeltaUtils.removeElement(type);
       return createdSubclasses;
     } else {
       String _eObjectRepr = EdeltaUtils.getEObjectRepr(type);
@@ -163,18 +159,28 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   
   /**
    * Creates the classes with the given names as subclasses of the passed
-   * superClass, which will then be made abstract
+   * superClass, which will then be made abstract; the objectMigrator is applied
+   * for migrating objects that were orignally instances of the superClass.
+   * 
+   * @param superClass
+   * @param name
+   * @param objectMigration
    */
-  public Collection<EClass> introduceSubclasses(final EClass superClass, final Collection<String> names) {
-    List<EClass> _xblockexpression = null;
-    {
-      EdeltaUtils.makeAbstract(superClass);
-      final Function1<String, EClass> _function = (String name) -> {
-        return this.stdLib.addNewSubclass(superClass, name);
+  public Collection<EClass> introduceSubclasses(final EClass superClass, final Collection<String> names, final Function2<? super EdeltaModelMigrator, ? super EObject, ? extends EObject> objectMigrator) {
+    EdeltaUtils.makeAbstract(superClass);
+    final Function1<String, EClass> _function = (String name) -> {
+      return this.stdLib.addNewSubclass(superClass, name);
+    };
+    final List<EClass> subclasses = IterableExtensions.<EClass>toList(IterableExtensions.<String, EClass>map(names, _function));
+    final Consumer<EdeltaModelMigrator> _function_1 = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.EObjectFunction _function_2 = (EObject eObj) -> {
+        return objectMigrator.apply(it, eObj);
       };
-      _xblockexpression = IterableExtensions.<EClass>toList(IterableExtensions.<String, EClass>map(names, _function));
-    }
-    return _xblockexpression;
+      it.createInstanceRule(
+        it.<EClass>isRelatedTo(superClass), _function_2);
+    };
+    this.modelMigration(_function_1);
+    return subclasses;
   }
   
   /**

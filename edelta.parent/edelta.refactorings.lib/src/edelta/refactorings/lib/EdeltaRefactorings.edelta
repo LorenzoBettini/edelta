@@ -1,3 +1,4 @@
+import edelta.lib.EdeltaModelMigrator
 import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder
 import java.util.Collection
 import java.util.HashMap
@@ -105,23 +106,18 @@ def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 	if (type instanceof EEnum) {
 		val owner = attr.EContainingClass
 		val createdSubclasses = introduceSubclasses(owner,
-			type.ELiterals.map[literal.toLowerCase.toFirstUpper].toList
+			type.ELiterals.map[literal.toLowerCase.toFirstUpper].toList,
+			[modelMigrator, oldObj |
+				val literalValue =
+					oldObj.eGet(modelMigrator.getOriginal(attr)).toString()
+				val correspondingSubclass =
+					owner.EContainingPackage.EClasses.findFirst[
+						name == literalValue.toLowerCase.toFirstUpper
+					]
+				return EcoreUtil.create(correspondingSubclass)
+			]
 		)
 		removeElement(type) // will also remove the attribute
-		modelMigration[
-			createInstanceRule(
-				isRelatedTo(owner),
-				[oldObj |
-					val literalValue =
-						oldObj.eGet(getOriginal(attr)).toString()
-					val correspondingSubclass =
-						createdSubclasses.findFirst[
-							name == literalValue.toLowerCase.toFirstUpper
-						]
-					return EcoreUtil.create(correspondingSubclass)
-				]
-			)
-		]
 		return createdSubclasses
 	} else {
 		showError(attr,
@@ -133,13 +129,27 @@ def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 
 /**
  * Creates the classes with the given names as subclasses of the passed
- * superClass, which will then be made abstract
+ * superClass, which will then be made abstract; the objectMigrator is applied
+ * for migrating objects that were orignally instances of the superClass.
+ * 
+ * @param superClass
+ * @param name
+ * @param objectMigration
  */
-def introduceSubclasses(EClass superClass, Collection<String> names) : Collection<EClass> {
+def introduceSubclasses(EClass superClass, Collection<String> names,
+	(EdeltaModelMigrator, EObject) => EObject objectMigrator
+) : Collection<EClass> {
 	superClass.makeAbstract
-	names.map[name|
+	val subclasses = names.map[name|
 		superClass.addNewSubclass(name)
 	].toList
+	modelMigration[
+		createInstanceRule(
+			isRelatedTo(superClass),
+			[eObj | return objectMigrator.apply(it, eObj)]
+		)
+	]
+	return subclasses
 }
 
 /**

@@ -185,3 +185,55 @@ def isNotReferencedByOthers(EClassifier cl) {
 		.filter[!EcoreUtil.isAncestor(cl, EObject)]
 		.empty
 }
+
+/**
+ * Given an EAttribute, expected to have an EEnum type, creates a subclass of
+ * the containing class for each value of the referred EEnum
+ * (each subclass is given a name corresponding to the the EEnumLiteral,
+ * all lowercase but the first letter, for example, given the literal
+ * "LITERAL1", the subclass is given the name "Literal1").
+ * The attribute will then be removed and so will the EEnum.
+ * The original containing EClass is made abstract.
+ * 
+ * @param attr
+ * @return the collection of created subclasses
+ */
+def enumToSubclasses(EAttribute attr) : Collection<EClass> {
+	val type = attr.EAttributeType
+	if (type instanceof EEnum) {
+		val createdSubclasses = newHashMap
+		val owner = attr.EContainingClass
+		owner.makeAbstract
+		for (literal : type.ELiterals) {
+			val literalString = literal.getLiteral
+			val subclassName = ensureEClassifierNameIsUnique
+				(owner, literalString.toLowerCase.toFirstUpper)
+			createdSubclasses.put(
+				literalString,
+				owner.addNewEClassAsSibling(subclassName) [
+					addESuperType(owner)
+				]
+			)
+		}
+		removeElement(type) // will also remove the attribute
+		modelMigration[
+			createInstanceRule(
+				isRelatedTo(owner),
+				[oldObj |
+					val literalValue =
+						oldObj.eGet(getOriginal(attr)).toString()
+					val correspondingSubclass =
+						createdSubclasses.get(literalValue)
+					return EcoreUtil.create(correspondingSubclass)
+				]
+			)
+		]
+		return createdSubclasses.values
+	} else {
+		showError(attr,
+			"Not an EEnum: " + getEObjectRepr(type)
+		)
+		return null
+	}
+}
+
