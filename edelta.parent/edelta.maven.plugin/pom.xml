@@ -12,6 +12,8 @@
 
   <properties>
     <maven.version>3.8.1</maven.version>
+    <assertj-version>3.22.0</assertj-version>
+    <mockito-version>3.12.4</mockito-version>
   </properties>
 
   <prerequisites>
