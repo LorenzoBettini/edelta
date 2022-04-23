@@ -31,6 +31,19 @@
       <groupId>io.github.lorenzobettini.edelta</groupId>
       <artifactId>edelta.lib</artifactId>
       <exclusions>
+        <!-- 
+          https://github.com/LorenzoBettini/edelta/issues/429
+
+          Exclude it to avoid java.lang.SecurityException when running in a Tycho build:
+          java.lang.SecurityException:
+          class "javax.annotation.Nonnull"'s signer information does not match
+          signer information of other classes in the same package
+          at edelta.maven.plugin.EdeltaMojoTest.spyLog(EdeltaMojoTest.java)
+
+          This dep is required by guava 30.1-jre
+            required by org.eclipse.xtext.xbase.lib
+              required by edelta.lib
+        -->
         <exclusion>
           <groupId>com.google.code.findbugs</groupId>
           <artifactId>jsr305</artifactId>
