@@ -11,9 +11,9 @@
   <packaging>maven-plugin</packaging>
 
   <properties>
-    <maven.version>3.8.1</maven.version>
+    <maven.version>3.8.3</maven.version>
     <assertj-version>3.22.0</assertj-version>
-    <mockito-version>3.12.4</mockito-version>
+    <mockito-version>4.5.1</mockito-version>
   </properties>
 
   <prerequisites>
@@ -30,6 +30,12 @@
         since maven-invoker-plugin does not install this locally -->
       <groupId>io.github.lorenzobettini.edelta</groupId>
       <artifactId>edelta.lib</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.code.findbugs</groupId>
+          <artifactId>jsr305</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
