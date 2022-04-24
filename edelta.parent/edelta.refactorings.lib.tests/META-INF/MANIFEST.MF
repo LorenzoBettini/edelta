@@ -7,7 +7,6 @@ Bundle-Vendor: Lorenzo Bettini
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: edelta.testutils,
  org.eclipse.xtext.util,
- edelta.testing.libraries;bundle-version="0.6.0",
  edelta.refactorings.lib,
  com.google.guava,
  org.eclipse.xtext.xbase.lib,
@@ -16,5 +15,6 @@ Require-Bundle: edelta.testutils,
  org.eclipse.emf.ecore,
  org.junit.jupiter.api;bundle-version="[5.1.0,6.0.0)",
  org.junit.jupiter.params;bundle-version="[5.1.0,6.0.0)",
- org.junit;bundle-version="4.13.0"
+ org.junit;bundle-version="4.13.0",
+ assertj-core;bundle-version="3.22.0"
 Automatic-Module-Name: edelta.lib.tests

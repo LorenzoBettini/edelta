@@ -8,5 +8,5 @@ Automatic-Module-Name: edelta.dependency.analyzer.tests
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.junit,
  edelta.dependency.analyzer,
- edelta.testing.libraries,
- edelta.testutils
+ edelta.testutils,
+ assertj-core;bundle-version="3.22.0"
