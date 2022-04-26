@@ -40,13 +40,21 @@ import org.junit.runner.RunWith;
 
 import edelta.swtbot.tests.utils.ProjectImportUtil;
 
+/**
+ * Better to have all SWTBot tests in a single file, since if executed in
+ * separate files in some order, some tests fail to find File menu, Show View,
+ * etc.
+ * 
+ * @author Lorenzo Bettini
+ *
+ */
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class EdeltaSwtbotTest {
 
-	protected static final String MY_TEST_PROJECT = "MyTestProject";
-	protected static final String PROJECT_EXPLORER = "Project Explorer";
-	protected static final String CATEGORY_NAME = "Edelta";
-	protected static SWTWorkbenchBot bot;
+	private static final String MY_TEST_PROJECT = "MyTestProject";
+	private static final String PROJECT_EXPLORER = "Project Explorer";
+	private static final String CATEGORY_NAME = "Edelta";
+	private static SWTWorkbenchBot bot;
 
 	private static final String PERSONS_MM_ECORE = "PersonsMM.ecore";
 	private static final String PERSONS_MM_ECORE_GRAPHMM = "PersonsMM.ecore.graphmm";
@@ -67,7 +75,7 @@ public class EdeltaSwtbotTest {
 	public static void afterClass() {
 		bot.resetWorkbench();
 	}
-	
+
 	@After
 	public void runAfterEveryTest() throws CoreException {
 		cleanWorkspace();
@@ -193,7 +201,7 @@ public class EdeltaSwtbotTest {
 		});
 	}
 
-	public static void openViewById(String viewId) throws InterruptedException {
+	protected static void openViewById(String viewId) throws InterruptedException {
 		Display.getDefault().syncExec(() -> {
 			IWorkbench workbench = PlatformUI.getWorkbench();
 			try {
