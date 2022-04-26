@@ -1,10 +1,8 @@
 import edelta.refactorings.lib.EdeltaRefactorings
-import org.eclipse.emf.ecore.EClass
 
 package edelta.statecharts.example
 
 metamodel "statecharts"
-metamodel "ecore"
 
 use EdeltaRefactorings as refactorings
 
@@ -18,11 +16,11 @@ modifyEcore introduceNodeSubclasses epackage statecharts {
 			val nodes = container.getValueAsList(oldObj.eContainingFeature)
 			
 			if (nodes.head == oldObj)
-				return createInstance(ePackage.getEClassifier("InitialState") as EClass)
+				return createInstance(ePackage.getEClass("InitialState"))
 			else if (nodes.last == oldObj)
-				return createInstance(ePackage.getEClassifier("FinalState") as EClass)
+				return createInstance(ePackage.getEClass("FinalState"))
 			
-			return createInstance(ePackage.getEClassifier("State") as EClass)
+			return createInstance(ePackage.getEClass("State"))
 		]
 	)
 }

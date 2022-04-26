@@ -8,8 +8,6 @@ import edelta.lib.EdeltaRuntime;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.Collections;
 import java.util.List;
-import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
@@ -32,18 +30,15 @@ public class StateChartsExample extends EdeltaDefaultRuntime {
       EObject _head = IterableExtensions.<EObject>head(nodes);
       boolean _equals = Objects.equal(_head, oldObj);
       if (_equals) {
-        EClassifier _eClassifier = ePackage.getEClassifier("InitialState");
-        return EdeltaEcoreUtil.createInstance(((EClass) _eClassifier));
+        return EdeltaEcoreUtil.createInstance(this.getEClass(ePackage, "InitialState"));
       } else {
         EObject _last = IterableExtensions.<EObject>last(nodes);
         boolean _equals_1 = Objects.equal(_last, oldObj);
         if (_equals_1) {
-          EClassifier _eClassifier_1 = ePackage.getEClassifier("FinalState");
-          return EdeltaEcoreUtil.createInstance(((EClass) _eClassifier_1));
+          return EdeltaEcoreUtil.createInstance(this.getEClass(ePackage, "FinalState"));
         }
       }
-      EClassifier _eClassifier_2 = ePackage.getEClassifier("State");
-      return EdeltaEcoreUtil.createInstance(((EClass) _eClassifier_2));
+      return EdeltaEcoreUtil.createInstance(this.getEClass(ePackage, "State"));
     };
     this.refactorings.introduceSubclasses(
       getEClass("statecharts", "Node"), 
@@ -53,7 +48,6 @@ public class StateChartsExample extends EdeltaDefaultRuntime {
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("statecharts");
-    ensureEPackageIsLoaded("ecore");
   }
   
   @Override
