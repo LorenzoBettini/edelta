@@ -20,7 +20,9 @@ import org.eclipse.swtbot.swt.finder.waits.ICondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -40,7 +42,7 @@ public abstract class EdeltaAbstractSwtbotTest {
 
 		closeWelcomePage();
 
-		openView(PROJECT_EXPLORER);
+		openViewById("org.eclipse.ui.navigator.ProjectExplorer");
 	}
 
 	@AfterClass
@@ -173,27 +175,13 @@ public abstract class EdeltaAbstractSwtbotTest {
 		});
 	}
 
-	protected static void openView(String viewName) {
-		bot.waitUntil(new ICondition() {
-			@Override
-			public boolean test() throws Exception {
-				System.out.println("### opening view "
-						+ viewName);
-				bot.menu("Window")
-					.menu("Show View")
-					.menu(PROJECT_EXPLORER)
-						.click();
-				return true;
-			}
-	
-			@Override
-			public void init(SWTBot bot) {
-			}
-	
-			@Override
-			public String getFailureMessage() {
-				return "Cannot open view "
-					+ viewName;
+	public static void openViewById(String viewId) throws InterruptedException {
+		Display.getDefault().syncExec(() -> {
+			IWorkbench workbench = PlatformUI.getWorkbench();
+			try {
+				workbench.getActiveWorkbenchWindow().getActivePage().showView(viewId);
+			} catch (WorkbenchException e) {
+				e.printStackTrace();
 			}
 		});
 	}
