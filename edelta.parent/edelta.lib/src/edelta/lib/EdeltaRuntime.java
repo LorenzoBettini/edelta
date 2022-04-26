@@ -217,6 +217,14 @@ public abstract class EdeltaRuntime {
 		return null;
 	}
 
+	public EClass getEClass(EPackage ePackage, String className) {
+		var c = ePackage.getEClassifier(className);
+		if (c instanceof EClass) {
+			return (EClass) c;
+		}
+		return null;
+	}
+
 	public EDataType getEDataType(String packageName, String datatypeName) {
 		var c = getEClassifier(packageName, datatypeName);
 		if (c instanceof EDataType) {
