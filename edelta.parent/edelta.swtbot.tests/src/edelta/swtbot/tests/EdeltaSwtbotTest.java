@@ -1,23 +1,32 @@
 package edelta.swtbot.tests;
 
+import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.cleanWorkspace;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.root;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.waitForBuild;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.pde.internal.core.PDECore;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
+import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
+import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.waits.ICondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.eclipse.ui.IWorkbench;
@@ -26,13 +35,22 @@ import org.eclipse.ui.WorkbenchException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public abstract class EdeltaAbstractSwtbotTest {
+import edelta.swtbot.tests.utils.ProjectImportUtil;
 
-	protected static final String TEST_PROJECT = "MyTestProject";
+@RunWith(SWTBotJunit4ClassRunner.class)
+public class EdeltaSwtbotTest {
+
+	protected static final String MY_TEST_PROJECT = "MyTestProject";
 	protected static final String PROJECT_EXPLORER = "Project Explorer";
 	protected static final String CATEGORY_NAME = "Edelta";
 	protected static SWTWorkbenchBot bot;
+
+	private static final String PERSONS_MM_ECORE = "PersonsMM.ecore";
+	private static final String PERSONS_MM_ECORE_GRAPHMM = "PersonsMM.ecore.graphmm";
+	private static final String PERSONS_MM_TEMPLATE_EDELTA = "PersonsMMTemplate.edelta";
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
@@ -184,5 +202,133 @@ public abstract class EdeltaAbstractSwtbotTest {
 				e.printStackTrace();
 			}
 		});
+	}
+
+	@Test
+	public void canCreateANewProject() throws CoreException, OperationCanceledException, InterruptedException {
+		bot.waitUntil(new ICondition() {
+			@Override
+			public boolean test() throws Exception {
+				System.out.println("### File -> New -> Project...");
+				bot.menu("File").menu("New").menu("Project...").click();
+				return true;
+			}
+
+			@Override
+			public void init(SWTBot bot) {
+			}
+
+			@Override
+			public String getFailureMessage() {
+				return "Failed File -> New -> Project...";
+			}
+		});
+
+		SWTBotShell shell = bot.shell("New Project");
+		shell.activate();
+		SWTBotTreeItem categoryNode = bot.tree().expandNode(CATEGORY_NAME);
+		categoryNode.select("Edelta Project");
+		bot.button("Next >").click();
+
+		bot.textWithLabel("Project name:").setText(MY_TEST_PROJECT);
+
+		bot.button("Finish").click();
+
+		// creation of a project might require some time
+		bot.waitUntil(shellCloses(shell), SWTBotPreferences.TIMEOUT);
+		assertTrue("Project doesn't exist: " + MY_TEST_PROJECT, isProjectCreated(MY_TEST_PROJECT));
+
+		bot.waitUntil(new ICondition() {
+			@Override
+			public boolean test() throws Exception {
+				System.out.println("Waiting for the plugin model...");
+				return PDECore.getDefault().getModelManager().isInitialized();
+			}
+
+			@Override
+			public void init(SWTBot bot) {
+			}
+
+			@Override
+			public String getFailureMessage() {
+				return "Failed waiting for inizialize of plugin models";
+			}
+		});
+
+		// building seems to be flaky, so better to try again in case of failure
+		bot.waitUntil(new ICondition() {
+			@Override
+			public boolean test() throws Exception {
+				System.out.println("**** WAITING FOR BUILD...");
+				waitForBuild();
+				Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_REFRESH, null);
+				Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+				System.out.println("**** BUILD DONE");
+				assertErrorsInProject(0);
+				return true;
+			}
+
+			@Override
+			public void init(SWTBot bot) {
+			}
+
+			@Override
+			public String getFailureMessage() {
+				return "build failed";
+			}
+		});
+
+		bot.waitUntil(new ICondition() {
+			@Override
+			public boolean test() throws Exception {
+				System.out.println("*** expanding " + MY_TEST_PROJECT);
+				getProjectTreeItem(MY_TEST_PROJECT)
+					.expand()
+					.expandNode("edelta-gen", "com.example", "Example.java");
+//				var expectedSrcGenFolderSubDir = "edelta-gen/com/example";
+//				var srcGenFolder = project.getFolder(expectedSrcGenFolderSubDir);
+//				System.out.println("contents of " + srcGenFolder);
+//				System.out.println(Stream.of(srcGenFolder.members())
+//						.map(IResource::getName)
+//						.collect(Collectors.joining("\n")));
+//				var genfile = srcGenFolder.getFile("Example.java");
+				return true;
+			}
+
+			@Override
+			public void init(SWTBot bot) {
+			}
+
+			@Override
+			public String getFailureMessage() {
+				return "Example.java does not exist";
+			}
+		});
+	}
+
+	@Test
+	public void canAnalyzeEcoreFiles() throws Exception {
+		final String TEST_PROJECT = "edelta.dependency.analyzer.swtbot.tests.project";
+		ProjectImportUtil.importJavaProject(TEST_PROJECT);
+		waitForBuild();
+		assertErrorsInProject(0);
+		edeltaContextMenu(TEST_PROJECT, PERSONS_MM_ECORE, "Analyze Ecore Files");
+		bot.editorByTitle(PERSONS_MM_ECORE_GRAPHMM);
+		getProjectTreeItem(TEST_PROJECT)
+			.expand()
+			.expandNode("analysis", "results", "model", PERSONS_MM_ECORE_GRAPHMM);
+		bot.viewByPartName("Picto");
+	}
+
+	@Test
+	public void canGenerateTemplateFiles() throws Exception {
+		final String TEST_PROJECT = "edelta.dependency.analyzer.swtbot.tests.project";
+		ProjectImportUtil.importJavaProject(TEST_PROJECT);
+		waitForBuild();
+		assertErrorsInProject(0);
+		edeltaContextMenu(TEST_PROJECT, PERSONS_MM_ECORE, "Generate Edelta Template File");
+		waitForBuild();
+		assertErrorsInProject(0);
+		bot.editorByTitle(PERSONS_MM_TEMPLATE_EDELTA);
 	}
 }
