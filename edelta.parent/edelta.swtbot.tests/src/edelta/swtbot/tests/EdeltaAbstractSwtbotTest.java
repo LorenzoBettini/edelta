@@ -40,7 +40,7 @@ public abstract class EdeltaAbstractSwtbotTest {
 
 		closeWelcomePage();
 
-		bot.menu("Window").menu("Show View").menu(PROJECT_EXPLORER).click();
+		openView(PROJECT_EXPLORER);
 	}
 
 	@AfterClass
@@ -173,4 +173,28 @@ public abstract class EdeltaAbstractSwtbotTest {
 		});
 	}
 
+	protected static void openView(String viewName) {
+		bot.waitUntil(new ICondition() {
+			@Override
+			public boolean test() throws Exception {
+				System.out.println("### opening view "
+						+ viewName);
+				bot.menu("Window")
+					.menu("Show View")
+					.menu(PROJECT_EXPLORER)
+						.click();
+				return true;
+			}
+	
+			@Override
+			public void init(SWTBot bot) {
+			}
+	
+			@Override
+			public String getFailureMessage() {
+				return "Cannot open view "
+					+ viewName;
+			}
+		});
+	}
 }
