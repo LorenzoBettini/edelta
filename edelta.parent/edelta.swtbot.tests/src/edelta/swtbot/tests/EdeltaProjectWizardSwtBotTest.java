@@ -27,7 +27,23 @@ public class EdeltaProjectWizardSwtBotTest extends EdeltaAbstractSwtbotTest {
 
 	@Test
 	public void canCreateANewProject() throws CoreException, OperationCanceledException, InterruptedException {
-		bot.menu("File").menu("New").menu("Project...").click();
+		bot.waitUntil(new ICondition() {
+			@Override
+			public boolean test() throws Exception {
+				System.out.println("### File -> New -> Project...");
+				bot.menu("File").menu("New").menu("Project...").click();
+				return true;
+			}
+
+			@Override
+			public void init(SWTBot bot) {
+			}
+
+			@Override
+			public String getFailureMessage() {
+				return "Failed File -> New -> Project...";
+			}
+		});
 
 		SWTBotShell shell = bot.shell("New Project");
 		shell.activate();
