@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="edelta.target" sequenceNumber="13">
+<target name="edelta.target" sequenceNumber="14">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.equinox.executable.feature.group" version="0.0.0"/>
@@ -13,6 +13,9 @@
 <unit id="org.eclipse.swtbot.ide.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.swtbot.eclipse.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.egit.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.m2e.feature.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.m2e.sse.ui.feature.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.emf.ecoretools.design.feature.group" version="0.0.0"/>
 <repository location="https://download.eclipse.org/releases/2022-03"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
