@@ -10,7 +10,7 @@ import edelta.statecharts.example.StateChartsExample;
 public class StateChartsExampleTest extends AbstractEdeltaExamplesTest {
 
 	@Test
-	public void testPetrinet() throws Exception {
+	public void testStateCharts() throws Exception {
 		var subdir = "";
 		var ecores = of("StateCharts.ecore");
 		var models = of("StateChartsModel.xmi");
