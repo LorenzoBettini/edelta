@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EObject;
 
+import edelta.lib.EdeltaEcoreUtil;
+
 public class EdeltaEObjectHelper {
 
 	public String represent(EObject o) {
@@ -21,6 +23,16 @@ public class EdeltaEObjectHelper {
 			})
 			.filter(Objects::nonNull)
 			.collect(Collectors.joining(", "));
+	}
+
+	public String positionInContainter(EObject o) {
+		var container = o.eContainer();
+		if (container != null) {
+			var containingFeature = o.eContainingFeature();
+			var list = EdeltaEcoreUtil.getValueAsList(container, containingFeature);
+			return (list.indexOf(o) + 1) + " / " + list.size();
+		}
+		return "";
 	}
 
 }

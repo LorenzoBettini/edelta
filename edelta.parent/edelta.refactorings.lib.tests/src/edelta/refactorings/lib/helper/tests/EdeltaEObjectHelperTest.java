@@ -32,4 +32,13 @@ class EdeltaEObjectHelperTest {
 		assertEquals("name = AClass, abstract = true, interface = false", repr);
 	}
 
+	@Test
+	void testPositionInContainer() {
+		var o = EcoreFactory.eINSTANCE.createEClass();
+		assertEquals("", edeltaEObjectHelper.positionInContainter(o));
+		var p = EcoreFactory.eINSTANCE.createEPackage();
+		p.getEClassifiers().add(o);
+		assertEquals("1 / 1", edeltaEObjectHelper.positionInContainter(o));
+	}
+
 }
