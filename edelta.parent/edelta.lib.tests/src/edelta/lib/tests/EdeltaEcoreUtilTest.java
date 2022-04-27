@@ -286,4 +286,17 @@ public class EdeltaEcoreUtilTest {
 			.isInstanceOf(ClassCastException.class)
 			.hasMessageContaining("class java.lang.String cannot be cast to class org.eclipse.emf.ecore.EClassifier");
 	}
+
+	@Test
+	public void testGetValueFromFeatureName() {
+		var attr = EcoreFactory.eINSTANCE.createEAttribute();
+		attr.setEType(EcorePackage.Literals.ESTRING);
+
+		Object o = EdeltaEcoreUtil.getValueFromFeatureName(attr,
+			EcorePackage.Literals.ETYPED_ELEMENT__ETYPE.getName());
+
+		assertThat(o)
+			.isSameAs(EcorePackage.Literals.ESTRING);
+	}
+
 }

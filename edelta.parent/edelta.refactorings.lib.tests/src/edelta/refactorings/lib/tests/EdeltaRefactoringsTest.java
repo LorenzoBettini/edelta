@@ -293,18 +293,40 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 		assertModifiedFiles();
 	}
 
+	/**
+	 * This also implicitly tests introduceSubclasses
+	 * 
+	 * @throws Exception
+	 */
 	@Test
-	void test_enumToSubclasses() throws IOException {
-		withInputModels("enumToSubclasses", "PersonList.ecore");
-		loadEcoreFiles();
-		final EClass person = refactorings.getEClass("PersonList", "Person");
-		EStructuralFeature _eStructuralFeature = person.getEStructuralFeature("gender");
-		final Collection<EClass> result = refactorings.enumToSubclasses(((EAttribute) _eStructuralFeature));
-		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
-		assertModifiedFiles();
-		assertThat(result)
-			.extracting(EClass::getName)
-			.containsExactlyInAnyOrder("Male", "Female");
+	void test_enumToSubclasses() throws Exception {
+		var subdir = "enumToSubclasses/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var person = getEClass("PersonList", "Person");
+					var genreAttribute = (EAttribute) person.getEStructuralFeature("gender");
+					var subclasses = enumToSubclasses(genreAttribute);
+					assertThat(subclasses)
+						.extracting(EClass::getName)
+						.containsExactlyInAnyOrder("Male", "Female");
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test
@@ -323,18 +345,35 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
-	void test_subclassesToEnum() throws IOException {
-		withInputModels("subclassesToEnum", "PersonList.ecore");
-		loadEcoreFiles();
-		final EPackage personList = refactorings.getEPackage("PersonList");
-		final EAttribute result = refactorings.subclassesToEnum("Gender",
-			asList(
-				(EClass) personList.getEClassifier("Male"),
-				(EClass) personList.getEClassifier("Female")));
-		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
-		assertModifiedFiles();
-		assertThat(result)
-			.returns("gender", EAttribute::getName);
+	void test_subclassesToEnum() throws Exception {
+		var subdir = "subclassesToEnum/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var personList = getEPackage("PersonList");
+					var result = subclassesToEnum("Gender",
+						asList(
+							(EClass) personList.getEClassifier("Male"),
+							(EClass) personList.getEClassifier("Female")));
+					assertThat(result)
+						.returns("gender", EAttribute::getName);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test
@@ -412,29 +451,76 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
-	void test_enumToSubclasses_IsOppositeOf_subclassesToEnum() throws IOException {
-		withInputModels("enumToSubclasses", "PersonList.ecore");
-		assertOppositeRefactorings(
-			() -> refactorings.enumToSubclasses(
-					refactorings.getEAttribute("PersonList", "Person", "gender")),
-			() -> refactorings.subclassesToEnum("Gender",
-				asList(
-					refactorings.getEClass("PersonList", "Male"),
-					refactorings.getEClass("PersonList", "Female"))));
-		assertLogIsEmpty();
+	void test_enumToSubclasses_IsOppositeOf_subclassesToEnum() throws Exception {
+		var subdir = "enumToSubclasses/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var person = getEClass("PersonList", "Person");
+					var genreAttribute = (EAttribute) person.getEStructuralFeature("gender");
+					var subclasses = enumToSubclasses(genreAttribute);
+					assertThat(subclasses)
+						.extracting(EClass::getName)
+						.containsExactlyInAnyOrder("Male", "Female");
+					// inverse
+					var result = subclassesToEnum("Gender",
+						subclasses);
+					assertThat(result)
+						.returns("gender", EAttribute::getName);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"subclassesToEnum/",
+			ecores,
+			models
+		);
 	}
 
 	@Test
-	void test_subclassesToEnum_IsOppositeOf_enumToSubclasses() throws IOException {
-		withInputModels("subclassesToEnum", "PersonList.ecore");
-		assertOppositeRefactorings(
-			() -> refactorings.subclassesToEnum("Gender",
-				asList(
-					refactorings.getEClass("PersonList", "Male"),
-					refactorings.getEClass("PersonList", "Female"))),
-			() -> refactorings.enumToSubclasses(
-					refactorings.getEAttribute("PersonList", "Person", "gender")));
-		assertLogIsEmpty();
+	void test_subclassesToEnum_IsOppositeOf_enumToSubclasses() throws Exception {
+		var subdir = "subclassesToEnum/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var personList = getEPackage("PersonList");
+					var result = subclassesToEnum("Gender",
+						asList(
+							(EClass) personList.getEClassifier("Male"),
+							(EClass) personList.getEClassifier("Female")));
+					assertThat(result)
+						.returns("gender", EAttribute::getName);
+					// inverse
+					var subclasses = enumToSubclasses(result);
+					assertThat(subclasses)
+						.extracting(EClass::getName)
+						.containsExactlyInAnyOrder("Male", "Female");
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"enumToSubclasses/",
+			ecores,
+			models
+		);
 	}
 
 	@Test

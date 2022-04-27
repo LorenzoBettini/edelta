@@ -1,7 +1,10 @@
+import edelta.lib.EdeltaModelMigrator.EObjectFunction
 import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder
 import java.util.Collection
+import java.util.HashMap
 import java.util.List
 import java.util.function.Predicate
+import java.util.stream.Collectors
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
@@ -13,8 +16,6 @@ import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.ETypedElement
 import org.eclipse.emf.ecore.util.EcoreUtil
-import java.util.stream.Collectors
-import java.util.HashMap
 
 package edelta.refactorings.lib
 
@@ -103,16 +104,17 @@ def mergeFeatures(String newFeatureName, EClassifier type, Collection<EStructura
 def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 	val type = attr.EAttributeType
 	if (type instanceof EEnum) {
-		val createdSubclasses = newArrayList
 		val owner = attr.EContainingClass
-		owner.makeAbstract
-		for (subc : type.ELiterals) {
-			val subclassName = ensureEClassifierNameIsUnique
-				(owner, subc.literal.toLowerCase.toFirstUpper)
-			createdSubclasses += owner.addNewEClassAsSibling(subclassName) [
-				addESuperType(owner)
+		val createdSubclasses = introduceSubclasses(owner,
+			type.ELiterals.map[toString.toLowerCase.toFirstUpper].toList,
+			[oldObj |
+				val literalValue =
+					oldObj.getValueFromFeatureName(attr.name).toString()
+				val correspondingSubclass =
+					owner.findSiblingByName(literalValue.toLowerCase.toFirstUpper)
+				return createInstance(correspondingSubclass)
 			]
-		}
+		)
 		removeElement(type) // will also remove the attribute
 		return createdSubclasses
 	} else {
@@ -121,6 +123,31 @@ def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 		)
 		return null
 	}
+}
+
+/**
+ * Creates the classes with the given names as subclasses of the passed
+ * superClass, which will then be made abstract; the objectMigrator is applied
+ * for migrating objects that were originally instances of the superClass.
+ * 
+ * @param superClass
+ * @param name
+ * @param objectMigration
+ */
+def introduceSubclasses(EClass superClass, Collection<String> names,
+	EObjectFunction objectMigrator
+) : Collection<EClass> {
+	superClass.makeAbstract
+	val subclasses = names.map[name|
+		superClass.addNewSubclass(name)
+	].toList
+	modelMigration[
+		createInstanceRule(
+			isRelatedTo(superClass),
+			objectMigrator
+		)
+	]
+	return subclasses
 }
 
 /**
@@ -149,8 +176,7 @@ def subclassesToEnum(String name, Collection<EClass> subclasses) : EAttribute {
 	val superclass = getSingleDirectSuperclass(subclasses)
 	val enum = superclass.addNewEEnumAsSibling(name) [
 		subclasses.forEach[subClass, index |
-			val enumLiteralName = ensureEClassifierNameIsUnique
-				(superclass, subClass.name.toUpperCase)
+			val enumLiteralName = subClass.name.toUpperCase
 			addNewEEnumLiteral(enumLiteralName) => [
 				value = index
 			]
@@ -159,6 +185,19 @@ def subclassesToEnum(String name, Collection<EClass> subclasses) : EAttribute {
 	val attribute = superclass.addNewEAttribute(enum.fromTypeToFeatureName, enum)
 	superclass.makeConcrete
 	removeAllElements(subclasses)
+	modelMigration[
+		createInstanceRule(
+			wasRelatedToAtLeastOneOf(subclasses),
+			[oldObj |
+				val enumLiteralName = enum.getEEnumLiteral(
+					oldObj.eClass.name.toUpperCase)
+				return createInstance(
+					superclass,
+					[newObj | newObj.eSet(attribute, enumLiteralName)]
+				)
+			]
+		)
+	]
 	return attribute
 }
 

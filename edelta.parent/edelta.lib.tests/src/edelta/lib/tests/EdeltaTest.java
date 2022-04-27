@@ -167,6 +167,8 @@ public class EdeltaTest {
 		loadTestEcore(MY_ECORE);
 		assertNotNull(edelta.getEClass(MYPACKAGE, MY_CLASS));
 		assertNull(edelta.getEClass(MYPACKAGE, "MyDataType"));
+		assertNotNull(edelta.getEClass(edelta.getEPackage(MYPACKAGE), MY_CLASS));
+		assertNull(edelta.getEClass(edelta.getEPackage(MYPACKAGE), "MyDataType"));
 	}
 
 	@Test

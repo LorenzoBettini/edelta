@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<statechartsenum:Model
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:statechartsenum="http://www.statechartsenum"
+    xsi:schemaLocation="http://www.statechartsenum StateChartsEnum.ecore">
+  <nodes xsi:type="statechartsenum:InitialState"
+      name="1">
+    <children
+        xsi:type="statechartsenum:InitialState"
+        name="2"/>
+    <children
+        xsi:type="statechartsenum:State"
+        name="3"/>
+    <children
+        xsi:type="statechartsenum:FinalState"
+        name="4"/>
+  </nodes>
+  <nodes xsi:type="statechartsenum:State"
+      name="5">
+    <children
+        xsi:type="statechartsenum:InitialState"
+        name="6"/>
+    <children
+        xsi:type="statechartsenum:State"
+        name="7"/>
+    <children
+        xsi:type="statechartsenum:FinalState"
+        name="8"/>
+  </nodes>
+  <nodes xsi:type="statechartsenum:FinalState"
+      name="9"/>
+  <transitions
+      name="1->2"
+      source="//@nodes.0"
+      target="//@nodes.0/@children.0"/>
+  <transitions
+      name="2->3"
+      source="//@nodes.0/@children.0"
+      target="//@nodes.0/@children.1"/>
+  <transitions
+      name="3->4"
+      source="//@nodes.0/@children.1"
+      target="//@nodes.0/@children.2"/>
+</statechartsenum:Model>
