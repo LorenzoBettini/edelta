@@ -10,7 +10,7 @@ modifyEcore introduceNodeSubclasses epackage statecharts {
 	val ePackage = it
 	refactorings.introduceSubclasses(
 		ecoreref(Node),
-		#["InitialState", "FinalState", "State"],
+		#["InitialState", "State", "FinalState"],
 		[oldObj |
 			val container = oldObj.eContainer
 			val nodes = container.getValueAsList(oldObj.eContainingFeature)
