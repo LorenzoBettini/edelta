@@ -25,19 +25,17 @@ class EdeltaPromptHelperTest {
 	private final PrintStream originalErr = System.err;
 	private final InputStream originalIn = System.in;
 
-	private EdeltaPromptHelper promptHelper;
-
 	@BeforeEach
 	public void setUpStreams() {
 		outContent = new ByteArrayOutputStream();
 		errContent = new ByteArrayOutputStream();
 		System.setOut(new PrintStream(outContent));
 		System.setErr(new PrintStream(errContent));
-		promptHelper = new EdeltaPromptHelper();
 	}
 
 	@AfterEach
 	public void restoreStreams() {
+		EdeltaPromptHelper.close();
 		System.setOut(originalOut);
 		System.setErr(originalErr);
 		System.setIn(originalIn);
@@ -45,14 +43,14 @@ class EdeltaPromptHelperTest {
 
 	@Test
 	void testShow() {
-		promptHelper.show("A test");
+		EdeltaPromptHelper.show("A test");
 		assertEquals("A test\n", getOutContent());
 	}
 
 	@Test
 	void testValidChoice() {
 		enterInput("2");
-		String result = promptHelper.choice(List.of("First", "Second", "Third"));
+		String result = EdeltaPromptHelper.choice(List.of("First", "Second", "Third"));
 		assertEquals("""
 				  1 First
 				  2 Second
@@ -64,7 +62,7 @@ class EdeltaPromptHelperTest {
 	@Test
 	void testInvalidChoices() {
 		enterInput("0\n4\nBANG\n2");
-		String result = promptHelper.choice(List.of("First", "Second", "Third"));
+		String result = EdeltaPromptHelper.choice(List.of("First", "Second", "Third"));
 		assertEquals("""
 				  1 First
 				  2 Second
@@ -81,7 +79,7 @@ class EdeltaPromptHelperTest {
 	@Test
 	void testExitChoicesWithNegativeNumber() {
 		enterInput("-1");
-		String result = promptHelper.choice(List.of("First", "Second", "Third"));
+		String result = EdeltaPromptHelper.choice(List.of("First", "Second", "Third"));
 		assertNull(result);
 	}
 

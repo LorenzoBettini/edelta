@@ -1,5 +1,6 @@
 package edelta.refactorings.lib.helper;
 
+import java.io.PrintStream;
 import java.util.List;
 import java.util.Scanner;
 
@@ -11,17 +12,39 @@ import java.util.Scanner;
  */
 public class EdeltaPromptHelper {
 
-	public void show(String message) {
+	private static Scanner scanner;
+
+	private EdeltaPromptHelper() {
+		// Only static methods
+	}
+
+	private static void ensureScannerIsSet() {
+		if (scanner == null)
+			scanner = new Scanner(System.in);
+	}
+
+	/**
+	 * Delegates to {@link System#out}'s {@link PrintStream#println(String)}
+	 * 
+	 * @param message
+	 */
+	public static void show(String message) {
 		System.out.println(message); // NOSONAR
 	}
 
-	public String choice(List<String> choices) {
+	/**
+	 * Presents the choices that can be selected by their numbers, make sure the
+	 * selected number is valid and return the corresponding String.
+	 * 
+	 * @param choices
+	 * @return
+	 */
+	public static String choice(List<String> choices) {
 		var i = 0;
 		for (String choice : choices) {
 			show("  " + ++i + " " + choice);
 		}
-		@SuppressWarnings("resource") // we need to keep System.in open
-		Scanner scanner = new Scanner(System.in);
+		ensureScannerIsSet();
 		while (true) {
 			showNoNl("Choice? ");
 			var chosen = scanner.nextLine();
@@ -40,12 +63,30 @@ public class EdeltaPromptHelper {
 		return null;
 	}
 
-	private void showError(String message) {
+	/**
+	 * Delegates to {@link System#err}'s {@link PrintStream#println(String)}
+	 * 
+	 * @param message
+	 */
+	public static void showError(String message) {
 		System.err.println(message); // NOSONAR
 	}
 
-	private void showNoNl(String message) {
+	/**
+	 * Delegates to {@link System#out}'s {@link PrintStream#print(String)}
+	 * 
+	 * @param message
+	 */
+	public static void showNoNl(String message) {
 		System.out.print(message); // NOSONAR
+	}
+
+	/**
+	 * Must be called only after we are sure that we don't need the scanner anymore.
+	 * Typically used in tests.
+	 */
+	public static void close() {
+		scanner = null;
 	}
 
 }
