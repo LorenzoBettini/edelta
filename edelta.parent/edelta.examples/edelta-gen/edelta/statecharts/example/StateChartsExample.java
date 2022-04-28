@@ -42,7 +42,7 @@ public class StateChartsExample extends EdeltaDefaultRuntime {
     };
     this.refactorings.introduceSubclasses(
       getEClass("statecharts", "Node"), 
-      Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("InitialState", "FinalState", "State")), _function);
+      Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("InitialState", "State", "FinalState")), _function);
   }
   
   @Override

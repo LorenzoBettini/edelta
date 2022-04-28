@@ -25,6 +25,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="target" eType="#//Node"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="InitialState" eSuperTypes="#//Node"/>
-  <eClassifiers xsi:type="ecore:EClass" name="FinalState" eSuperTypes="#//Node"/>
   <eClassifiers xsi:type="ecore:EClass" name="State" eSuperTypes="#//Node"/>
+  <eClassifiers xsi:type="ecore:EClass" name="FinalState" eSuperTypes="#//Node"/>
 </ecore:EPackage>
