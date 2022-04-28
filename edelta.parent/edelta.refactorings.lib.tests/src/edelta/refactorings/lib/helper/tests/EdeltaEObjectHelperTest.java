@@ -7,9 +7,12 @@ import org.eclipse.emf.ecore.EcoreFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import edelta.lib.EdeltaModelManager;
 import edelta.refactorings.lib.helper.EdeltaEObjectHelper;
 
 class EdeltaEObjectHelperTest {
+
+	private static final String TESTECORES = "../edelta.testdata/testdata/";
 
 	private EdeltaEObjectHelper edeltaEObjectHelper;
 
@@ -39,6 +42,16 @@ class EdeltaEObjectHelperTest {
 		var p = EcoreFactory.eINSTANCE.createEPackage();
 		p.getEClassifiers().add(o);
 		assertEquals("1 / 1", edeltaEObjectHelper.positionInContainter(o));
+	}
+
+	@Test
+	void testPositionInContainerNotList() {
+		EdeltaModelManager modelManager = new EdeltaModelManager();
+		var subdir = "simpleTestData/";
+		modelManager.loadEcoreFile(TESTECORES + subdir + "SingleContainment.ecore");
+		var resource = modelManager.loadModelFile(TESTECORES + subdir + "SingleContainmentModel.xmi");
+		var contained = resource.getContents().get(0).eContents().get(0);
+		assertEquals("", edeltaEObjectHelper.positionInContainter(contained));
 	}
 
 }

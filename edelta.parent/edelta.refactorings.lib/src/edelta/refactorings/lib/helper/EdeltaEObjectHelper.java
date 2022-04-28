@@ -29,8 +29,10 @@ public class EdeltaEObjectHelper {
 		var container = o.eContainer();
 		if (container != null) {
 			var containingFeature = o.eContainingFeature();
-			var list = EdeltaEcoreUtil.getValueAsList(container, containingFeature);
-			return (list.indexOf(o) + 1) + " / " + list.size();
+			if (containingFeature.isMany()) {
+				var list = EdeltaEcoreUtil.getValueAsList(container, containingFeature);
+				return (list.indexOf(o) + 1) + " / " + list.size();
+			}
 		}
 		return "";
 	}
