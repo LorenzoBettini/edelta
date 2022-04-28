@@ -1,0 +1,13 @@
+import edelta.refactorings.lib.EdeltaRefactoringsWithPrompt
+
+package edelta.statecharts.example
+
+metamodel "statecharts"
+
+use EdeltaRefactoringsWithPrompt as refactorings
+
+modifyEcore introduceNodeSubclasses epackage statecharts {
+	refactorings.introduceSubclassesInteractive(
+		ecoreref(Node),
+		#["InitialState", "State", "FinalState"])
+}
