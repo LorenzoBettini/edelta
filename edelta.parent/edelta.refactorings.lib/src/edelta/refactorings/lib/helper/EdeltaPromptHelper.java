@@ -20,21 +20,21 @@ public class EdeltaPromptHelper {
 		for (String choice : choices) {
 			show("  " + ++i + " " + choice);
 		}
-		showNoNl("Choice? ");
-		try (Scanner scanner = new Scanner(System.in)) {
-			while (true) {
-				var chosen = scanner.next();
-				try {
-					int selectedNum = Integer.parseInt(chosen);
-					if (selectedNum == 0 || selectedNum > choices.size())
-						showError("Not a valid choice: " + chosen);
-					else if (selectedNum < 0)
-						break;
-					else
-						return choices.get(selectedNum - 1);
-				} catch (NumberFormatException e) {
-					showError("Not a valid number: " + chosen);
-				}
+		@SuppressWarnings("resource") // we need to keep System.in open
+		Scanner scanner = new Scanner(System.in);
+		while (true) {
+			showNoNl("Choice? ");
+			var chosen = scanner.nextLine();
+			try {
+				int selectedNum = Integer.parseInt(chosen);
+				if (selectedNum == 0 || selectedNum > choices.size())
+					showError("Not a valid choice: " + chosen);
+				else if (selectedNum < 0)
+					break;
+				else
+					return choices.get(selectedNum - 1);
+			} catch (NumberFormatException e) {
+				showError("Not a valid number: " + chosen);
 			}
 		}
 		return null;

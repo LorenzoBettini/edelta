@@ -69,7 +69,7 @@ class EdeltaPromptHelperTest {
 				  1 First
 				  2 Second
 				  3 Third
-				Choice?\s""", getOutContent());
+				Choice? Choice? Choice? Choice?\s""", getOutContent());
 		assertEquals("""
 				Not a valid choice: 0
 				Not a valid choice: 4
