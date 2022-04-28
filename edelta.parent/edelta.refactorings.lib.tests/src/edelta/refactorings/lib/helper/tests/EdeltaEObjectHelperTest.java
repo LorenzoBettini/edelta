@@ -54,4 +54,14 @@ class EdeltaEObjectHelperTest {
 		assertEquals("", edeltaEObjectHelper.positionInContainter(contained));
 	}
 
+	@Test
+	void testPositionInNotContained() {
+		EdeltaModelManager modelManager = new EdeltaModelManager();
+		var subdir = "simpleTestData/";
+		modelManager.loadEcoreFile(TESTECORES + subdir + "SingleContainment.ecore");
+		var resource = modelManager.loadModelFile(TESTECORES + subdir + "SingleContainmentModel.xmi");
+		var container = resource.getContents().get(0);
+		assertEquals("", edeltaEObjectHelper.positionInContainter(container));
+	}
+
 }
