@@ -105,15 +105,15 @@ class EdeltaRefactoringsWithPromptTest extends AbstractEdeltaRefactoringsLibTest
 			);
 		});
 		assertEquals("""
-			Migrating firstname = MaleFirstName, lastname = MaleLastName, gender = MALE
+			Migrating PersonList.Person{firstname = MaleFirstName, lastname = MaleLastName, gender = MALE}
 			1 / 3
 			  1 Male
 			  2 Female
-			Choice? Migrating firstname = FemaleFirstName, lastname = FemaleLastName, gender = FEMALE
+			Choice? Migrating PersonList.Person{firstname = FemaleFirstName, lastname = FemaleLastName, gender = FEMALE}
 			2 / 3
 			  1 Male
 			  2 Female
-			Choice? Migrating firstname = UnspecifiedFirstName, lastname = UnspecifiedLastName, gender = MALE
+			Choice? Migrating PersonList.Person{firstname = UnspecifiedFirstName, lastname = UnspecifiedLastName, gender = MALE}
 			3 / 3
 			  1 Male
 			  2 Female

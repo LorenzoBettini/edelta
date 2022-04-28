@@ -6,23 +6,27 @@ import java.util.stream.Collectors;
 import org.eclipse.emf.ecore.EObject;
 
 import edelta.lib.EdeltaEcoreUtil;
+import edelta.lib.EdeltaUtils;
 
 public class EdeltaEObjectHelper {
 
 	public String represent(EObject o) {
 		if (o == null)
 			return null;
-		return o.eClass().getEAllAttributes().stream()
-			.map(attr -> {
-				var value = o.eGet(attr);
-				if (value != null) {
-					return attr.getName() + " = " + value;
-				} else {
-					return null;
-				}
-			})
-			.filter(Objects::nonNull)
-			.collect(Collectors.joining(", "));
+		var eClass = o.eClass();
+		return
+			EdeltaUtils.getEObjectRepr(eClass) + "{" +
+			eClass.getEAllAttributes().stream()
+				.map(attr -> {
+					var value = o.eGet(attr);
+					if (value != null) {
+						return attr.getName() + " = " + value;
+					} else {
+						return null;
+					}
+				})
+				.filter(Objects::nonNull)
+				.collect(Collectors.joining(", ")) + "}";
 	}
 
 	public String positionInContainter(EObject o) {

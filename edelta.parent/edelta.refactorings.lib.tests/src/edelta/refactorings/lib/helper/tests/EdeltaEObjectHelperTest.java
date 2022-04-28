@@ -32,7 +32,7 @@ class EdeltaEObjectHelperTest {
 		o.setName("AClass");
 		o.setAbstract(true);
 		String repr = edeltaEObjectHelper.represent(o);
-		assertEquals("name = AClass, abstract = true, interface = false", repr);
+		assertEquals("ecore.EClass{name = AClass, abstract = true, interface = false}", repr);
 	}
 
 	@Test
