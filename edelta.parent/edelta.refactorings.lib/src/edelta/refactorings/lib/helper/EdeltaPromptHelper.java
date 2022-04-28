@@ -50,17 +50,14 @@ public class EdeltaPromptHelper {
 			var chosen = scanner.nextLine();
 			try {
 				int selectedNum = Integer.parseInt(chosen);
-				if (selectedNum == 0 || selectedNum > choices.size())
+				if (selectedNum <= 0 || selectedNum > choices.size())
 					showError("Not a valid choice: " + chosen);
-				else if (selectedNum < 0)
-					break;
 				else
 					return choices.get(selectedNum - 1);
 			} catch (NumberFormatException e) {
 				showError("Not a valid number: " + chosen);
 			}
 		}
-		return null;
 	}
 
 	/**

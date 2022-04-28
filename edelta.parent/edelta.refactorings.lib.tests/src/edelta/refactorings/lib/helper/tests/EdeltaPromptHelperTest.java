@@ -1,6 +1,5 @@
 package edelta.refactorings.lib.helper.tests;
 
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayInputStream;
@@ -49,14 +48,16 @@ class EdeltaPromptHelperTest {
 
 	@Test
 	void testValidChoice() {
-		enterInput("2");
-		String result = EdeltaPromptHelper.choice(List.of("First", "Second", "Third"));
+		enterInput("2\n3\n");
+		var result = EdeltaPromptHelper.choice(List.of("First", "Second", "Third"));
 		assertEquals("""
 				  1 First
 				  2 Second
 				  3 Third
 				Choice?\s""", getOutContent());
 		assertEquals("Second", result);
+		result = EdeltaPromptHelper.choice(List.of("First", "Second", "Third"));
+		assertEquals("Third", result);
 	}
 
 	@Test
@@ -74,13 +75,6 @@ class EdeltaPromptHelperTest {
 				Not a valid number: BANG
 				""", getErrContent());
 		assertEquals("Second", result);
-	}
-
-	@Test
-	void testExitChoicesWithNegativeNumber() {
-		enterInput("-1");
-		String result = EdeltaPromptHelper.choice(List.of("First", "Second", "Third"));
-		assertNull(result);
 	}
 
 	private void enterInput(String data) {
