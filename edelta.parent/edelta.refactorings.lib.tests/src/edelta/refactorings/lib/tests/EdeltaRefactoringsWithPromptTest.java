@@ -59,7 +59,7 @@ class EdeltaRefactoringsWithPromptTest extends AbstractEdeltaRefactoringsLibTest
 	 * @throws IOException
 	 */
 	@AfterEach
-	void cleanModifiedOutputDirectory() throws IOException {
+	void tearDown() throws IOException {
 		System.setOut(originalOut);
 		System.setErr(originalErr);
 		System.setIn(originalIn);
