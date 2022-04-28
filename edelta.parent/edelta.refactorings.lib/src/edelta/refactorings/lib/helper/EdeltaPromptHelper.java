@@ -86,6 +86,8 @@ public class EdeltaPromptHelper {
 	 * Typically used in tests.
 	 */
 	public static void close() {
+		if (scanner != null)
+			scanner.close();
 		scanner = null;
 	}
 
