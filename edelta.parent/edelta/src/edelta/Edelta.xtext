@@ -29,7 +29,9 @@ EdeltaModifyEcoreOperation:
 ;
 
 EdeltaOperation:
-	{EdeltaOperation} 'def' name=ValidID
+	{EdeltaOperation} 'def'
+		('<' typeParameters+=JvmTypeParameter (',' typeParameters+=JvmTypeParameter)* '>')?
+		name=ValidID
 		'(' (params+=FullJvmFormalParameter (',' params+=FullJvmFormalParameter)*)? ')'
 		(':' type=JvmTypeReference)?
 		body=XBlockExpression;
