@@ -5,6 +5,7 @@ import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaModelMigrator;
 import edelta.lib.EdeltaRuntime;
 import java.util.function.Consumer;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
@@ -17,7 +18,7 @@ public class ChangeReferenceTypeMultipleExample extends EdeltaDefaultRuntime {
   
   public void exampleOfChangeReferenceType(final EPackage it) {
     final EClass otherNameElement = this.stdLib.addNewEClassAsSibling(getEClass("PersonListForChangeType", "NameElement"), "OtherNameElement");
-    this.stdLib.copyToAs(
+    this.stdLib.<EAttribute>copyToAs(
       getEAttribute("PersonListForChangeType", "NameElement", "nameElementValue"), otherNameElement, 
       "otherNameElementValue");
     getEReference("PersonListForChangeType", "Person", "firstName").setUpperBound((-1));

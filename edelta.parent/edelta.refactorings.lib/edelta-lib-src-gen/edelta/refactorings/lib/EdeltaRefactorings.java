@@ -74,8 +74,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    */
   public EAttribute mergeAttributes(final String newAttributeName, final Collection<EAttribute> attributes, final Function<Collection<?>, Object> valueMerger) {
     final EAttribute firstFeature = IterableExtensions.<EAttribute>head(attributes);
-    EStructuralFeature _mergeFeatures = this.mergeFeatures(newAttributeName, attributes);
-    final EAttribute mergedFeature = ((EAttribute) _mergeFeatures);
+    final EAttribute mergedFeature = this.<EAttribute>mergeFeatures(newAttributeName, attributes);
     final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
       final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
         final Function<EAttribute, EAttribute> _function_2 = (EAttribute a) -> {
@@ -109,8 +108,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    */
   public EReference mergeReferences(final String newReferenceName, final Collection<EReference> references, final Function<Collection<EObject>, EObject> valueMerger, final Runnable postCopy) {
     final EReference firstFeature = IterableExtensions.<EReference>head(references);
-    EStructuralFeature _mergeFeatures = this.mergeFeatures(newReferenceName, references);
-    final EReference mergedFeature = ((EReference) _mergeFeatures);
+    final EReference mergedFeature = this.<EReference>mergeFeatures(newReferenceName, references);
     final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
       final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
         final Function<EReference, EReference> _function_2 = (EReference a) -> {
@@ -139,13 +137,13 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * @param features
    * @return the new feature added to the containing class of the features
    */
-  public EStructuralFeature mergeFeatures(final String newFeatureName, final Collection<? extends EStructuralFeature> features) {
+  public <T extends EStructuralFeature> T mergeFeatures(final String newFeatureName, final Collection<T> features) {
     this.checkNoDifferences(features, 
       new EdeltaFeatureDifferenceFinder().ignoringName(), 
       "The two features cannot be merged");
-    final EStructuralFeature feature = IterableExtensions.head(features);
+    final T feature = IterableExtensions.<T>head(features);
     final EClass owner = feature.getEContainingClass();
-    final EStructuralFeature copy = this.stdLib.copyToAs(feature, owner, newFeatureName);
+    final T copy = this.stdLib.<T>copyToAs(feature, owner, newFeatureName);
     EdeltaUtils.removeAllElements(features);
     return copy;
   }
@@ -180,7 +178,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   public EStructuralFeature mergeFeatures(final String newFeatureName, final EClassifier type, final Collection<EStructuralFeature> features) {
     final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
     final EClass owner = feature.getEContainingClass();
-    final EStructuralFeature copy = this.stdLib.copyToAs(feature, owner, newFeatureName, type);
+    final EStructuralFeature copy = this.stdLib.<EStructuralFeature>copyToAs(feature, owner, newFeatureName, type);
     this.mergeFeatures(copy, features);
     return copy;
   }
@@ -562,7 +560,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       return it.getEContainingClass();
     };
     this.checkAllDirectSubclasses(dest, IterableExtensions.<EClass>toList(IterableExtensions.<EStructuralFeature, EClass>map(duplicates, _function)));
-    final EStructuralFeature pulledUp = this.stdLib.copyTo(IterableExtensions.<EStructuralFeature>head(duplicates), dest);
+    final EStructuralFeature pulledUp = this.stdLib.<EStructuralFeature>copyTo(IterableExtensions.<EStructuralFeature>head(duplicates), dest);
     EdeltaUtils.removeAllElements(duplicates);
     final Consumer<EdeltaModelMigrator> _function_1 = (EdeltaModelMigrator it) -> {
       it.mapFeaturesRule(duplicates, pulledUp);

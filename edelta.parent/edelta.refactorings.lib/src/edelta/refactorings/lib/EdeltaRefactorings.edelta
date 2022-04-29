@@ -48,7 +48,7 @@ def mergeAttributes(String newAttributeName, Collection<EAttribute> attributes,
 	Function<Collection<?>, Object> valueMerger
 ) : EAttribute {
 	val firstFeature = attributes.head
-	val mergedFeature = mergeFeatures(newAttributeName, attributes) as EAttribute
+	val mergedFeature = mergeFeatures(newAttributeName, attributes)
 	modelMigration[
 		copyRule(
 			wasRelatedTo(firstFeature),
@@ -80,7 +80,7 @@ def mergeAttributes(String newAttributeName, Collection<EAttribute> attributes,
 def mergeReferences(String newReferenceName, Collection<EReference> references,
 		Function<Collection<EObject>, EObject> valueMerger, Runnable postCopy) : EReference {
 	val firstFeature = references.head
-	val mergedFeature = mergeFeatures(newReferenceName, references) as EReference
+	val mergedFeature = mergeFeatures(newReferenceName, references)
 	modelMigration[
 		copyRule(
 			wasRelatedTo(firstFeature),
@@ -108,7 +108,7 @@ def mergeReferences(String newReferenceName, Collection<EReference> references,
  * @param features
  * @return the new feature added to the containing class of the features
  */
-def mergeFeatures(String newFeatureName, Collection<? extends EStructuralFeature> features) : EStructuralFeature {
+def <T extends EStructuralFeature> mergeFeatures(String newFeatureName, Collection<T> features) : T {
 	checkNoDifferences(
 		features,
 		new EdeltaFeatureDifferenceFinder().ignoringName,

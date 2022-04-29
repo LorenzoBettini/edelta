@@ -4,6 +4,7 @@ import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaRuntime;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.Collections;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -24,8 +25,8 @@ public class PersonListExample extends EdeltaDefaultRuntime {
   
   public void improvePerson(final EPackage it) {
     this.refactorings.enumToSubclasses(getEAttribute("PersonList", "Person", "gender"));
-    this.refactorings.mergeFeatures("name", 
-      Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname"))));
+    this.refactorings.<EAttribute>mergeFeatures("name", 
+      Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname"))));
   }
   
   public void introducePlace(final EPackage it) {
