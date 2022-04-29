@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Edelta Library
 Bundle-SymbolicName: edelta.lib
-Bundle-Version: 2.15.0.qualifier
+Bundle-Version: 2.16.0.qualifier
 Bundle-Vendor: Lorenzo Bettini
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.eclipse.xtext.xbase.lib;visibility:=reexport,
