@@ -3,6 +3,7 @@ import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder
 import java.util.Collection
 import java.util.HashMap
 import java.util.List
+import java.util.function.Function
 import java.util.function.Predicate
 import java.util.stream.Collectors
 import org.eclipse.emf.ecore.EAttribute
@@ -39,10 +40,30 @@ def addMandatoryReference(EClass eClass, String referenceName, EClass type): ERe
  * 
  * @param newAttributeName
  * @param attributes
+ * @param valueMerger is used to merge the values of the original
+ * features in the new model
  * @return the new attribute added to the containing class of the attributes
  */
-def mergeAttributes(String newAttributeName, Collection<EAttribute> attributes) : EAttribute {
-	return mergeFeatures(newAttributeName, attributes) as EAttribute
+def mergeAttributes(String newAttributeName, Collection<EAttribute> attributes,
+	Function<Collection<?>, Object> valueMerger
+) : EAttribute {
+	val firstFeature = attributes.head
+	val mergedFeature = mergeFeatures(newAttributeName, attributes) as EAttribute
+	modelMigration[
+		copyRule(
+			wasRelatedTo(firstFeature),
+			[feature, oldObj, newObj |
+				var originalFeatures = attributes.stream()
+						.map[a | getOriginal(a)]
+				var oldValues = originalFeatures
+						.map[f | oldObj.eGet(f)]
+						.collect(Collectors.toList())
+				var merged = valueMerger.apply(oldValues)
+				newObj.eSet(mergedFeature, merged)
+			]
+		)
+	]
+	return mergedFeature
 }
 
 /**

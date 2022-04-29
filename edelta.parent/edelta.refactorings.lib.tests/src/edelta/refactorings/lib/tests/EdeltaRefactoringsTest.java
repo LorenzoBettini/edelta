@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.assertj.core.api.Assertions;
@@ -150,16 +151,42 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
-	void test_mergeAttributes() throws IOException {
-		withInputModels("mergeFeatures", "PersonList.ecore");
-		loadEcoreFiles();
-		final EClass person = refactorings.getEClass("PersonList", "Person");
-		refactorings.mergeAttributes("name",
-			asList(
-				(EAttribute) person.getEStructuralFeature("firstName"),
-				(EAttribute) person.getEStructuralFeature("lastName")));
-		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
-		assertModifiedFiles();
+	void test_mergeAttributes() throws Exception {
+		var subdir = "mergeAttributes/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var person = getEClass("PersonList", "Person");
+					mergeAttributes(
+						"name",
+						asList(
+							(EAttribute) person.getEStructuralFeature("firstName"),
+							(EAttribute) person.getEStructuralFeature("lastName")),
+						values -> {
+							var merged = values.stream()
+								.filter(Objects::nonNull)
+								.map(Object::toString)
+								.collect(Collectors.joining(" "));
+							return merged.isEmpty() ? null : merged;
+						}
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test

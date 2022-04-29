@@ -18,6 +18,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -67,11 +68,32 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * 
    * @param newAttributeName
    * @param attributes
+   * @param valueMerger is used to merge the values of the original
+   * features in the new model
    * @return the new attribute added to the containing class of the attributes
    */
-  public EAttribute mergeAttributes(final String newAttributeName, final Collection<EAttribute> attributes) {
+  public EAttribute mergeAttributes(final String newAttributeName, final Collection<EAttribute> attributes, final Function<Collection<?>, Object> valueMerger) {
+    final EAttribute firstFeature = IterableExtensions.<EAttribute>head(attributes);
     EStructuralFeature _mergeFeatures = this.mergeFeatures(newAttributeName, attributes);
-    return ((EAttribute) _mergeFeatures);
+    final EAttribute mergedFeature = ((EAttribute) _mergeFeatures);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
+        final Function<EAttribute, EAttribute> _function_2 = (EAttribute a) -> {
+          return it.<EAttribute>getOriginal(a);
+        };
+        Stream<EAttribute> originalFeatures = attributes.stream().<EAttribute>map(_function_2);
+        final Function<EAttribute, Object> _function_3 = (EAttribute f) -> {
+          return oldObj.eGet(f);
+        };
+        List<Object> oldValues = originalFeatures.<Object>map(_function_3).collect(Collectors.<Object>toList());
+        Object merged = valueMerger.apply(oldValues);
+        newObj.eSet(mergedFeature, merged);
+      };
+      it.copyRule(
+        it.<EStructuralFeature>wasRelatedTo(firstFeature), _function_1);
+    };
+    this.modelMigration(_function);
+    return mergedFeature;
   }
   
   /**
