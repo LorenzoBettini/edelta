@@ -62,6 +62,32 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   }
   
   /**
+   * Merges the given attributes into a single new attribute in the containing class.
+   * The attributes must be compatible (same containing class, same type, same cardinality, etc).
+   * 
+   * @param newAttributeName
+   * @param attributes
+   * @return the new attribute added to the containing class of the attributes
+   */
+  public EAttribute mergeAttributes(final String newAttributeName, final Collection<EAttribute> attributes) {
+    EStructuralFeature _mergeFeatures = this.mergeFeatures(newAttributeName, attributes);
+    return ((EAttribute) _mergeFeatures);
+  }
+  
+  /**
+   * Merges the given references into a single new reference in the containing class.
+   * The references must be compatible (same containing class, same type, same cardinality, etc).
+   * 
+   * @param newReferenceName
+   * @param references
+   * @return the new reference added to the containing class of the references
+   */
+  public EReference mergeReferences(final String newReferenceName, final Collection<EReference> references) {
+    EStructuralFeature _mergeFeatures = this.mergeFeatures(newReferenceName, references);
+    return ((EReference) _mergeFeatures);
+  }
+  
+  /**
    * Merges the given features into a single new feature in the containing class.
    * The features must be compatible (same containing class, same type, same cardinality, etc).
    * 
@@ -69,11 +95,11 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * @param features
    * @return the new feature added to the containing class of the features
    */
-  public EStructuralFeature mergeFeatures(final String newFeatureName, final Collection<EStructuralFeature> features) {
+  public EStructuralFeature mergeFeatures(final String newFeatureName, final Collection<? extends EStructuralFeature> features) {
     this.checkNoDifferences(features, 
       new EdeltaFeatureDifferenceFinder().ignoringName(), 
       "The two features cannot be merged");
-    final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
+    final EStructuralFeature feature = IterableExtensions.head(features);
     final EClass owner = feature.getEContainingClass();
     final EStructuralFeature copy = this.stdLib.copyToAs(feature, owner, newFeatureName);
     EdeltaUtils.removeAllElements(features);

@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -151,14 +150,27 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
-	void test_mergeFeatures() throws IOException {
+	void test_mergeAttributes() throws IOException {
 		withInputModels("mergeFeatures", "PersonList.ecore");
 		loadEcoreFiles();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
-		refactorings.mergeFeatures("name",
+		refactorings.mergeAttributes("name",
 			asList(
-				person.getEStructuralFeature("firstName"),
-				person.getEStructuralFeature("lastName")));
+				(EAttribute) person.getEStructuralFeature("firstName"),
+				(EAttribute) person.getEStructuralFeature("lastName")));
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
+		assertModifiedFiles();
+	}
+
+	@Test
+	void test_mergeReferences() throws IOException {
+		withInputModels("mergeFeaturesContainment", "PersonList.ecore");
+		loadEcoreFiles();
+		final EClass person = refactorings.getEClass("PersonList", "Person");
+		refactorings.mergeReferences("name",
+			asList(
+				(EReference) person.getEStructuralFeature("firstName"),
+				(EReference) person.getEStructuralFeature("lastName")));
 		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
@@ -281,10 +293,10 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 		final EClass list = refactorings.getEClass("PersonList", "List");
 		final EClass place = refactorings.getEClass("PersonList", "Place");
 		final EClass person = refactorings.getEClass("PersonList", "Person");
-		refactorings.mergeFeatures("places", place, Collections.<EStructuralFeature>unmodifiableList(
+		refactorings.mergeFeatures("places", place,
 			asList(
 				list.getEStructuralFeature("wplaces"),
-				list.getEStructuralFeature("lplaces"))));
+				list.getEStructuralFeature("lplaces")));
 		refactorings.mergeFeatures("name", this.stringDataType,
 			asList(
 				person.getEStructuralFeature("firstName"),

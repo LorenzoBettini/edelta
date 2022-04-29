@@ -34,6 +34,30 @@ def addMandatoryReference(EClass eClass, String referenceName, EClass type): ERe
 }
 
 /**
+ * Merges the given attributes into a single new attribute in the containing class.
+ * The attributes must be compatible (same containing class, same type, same cardinality, etc).
+ * 
+ * @param newAttributeName
+ * @param attributes
+ * @return the new attribute added to the containing class of the attributes
+ */
+def mergeAttributes(String newAttributeName, Collection<EAttribute> attributes) : EAttribute {
+	return mergeFeatures(newAttributeName, attributes) as EAttribute
+}
+
+/**
+ * Merges the given references into a single new reference in the containing class.
+ * The references must be compatible (same containing class, same type, same cardinality, etc).
+ * 
+ * @param newReferenceName
+ * @param references
+ * @return the new reference added to the containing class of the references
+ */
+def mergeReferences(String newReferenceName, Collection<EReference> references) : EReference {
+	return mergeFeatures(newReferenceName, references) as EReference
+}
+
+/**
  * Merges the given features into a single new feature in the containing class.
  * The features must be compatible (same containing class, same type, same cardinality, etc).
  * 
@@ -41,7 +65,7 @@ def addMandatoryReference(EClass eClass, String referenceName, EClass type): ERe
  * @param features
  * @return the new feature added to the containing class of the features
  */
-def mergeFeatures(String newFeatureName, Collection<EStructuralFeature> features) : EStructuralFeature {
+def mergeFeatures(String newFeatureName, Collection<? extends EStructuralFeature> features) : EStructuralFeature {
 	checkNoDifferences(
 		features,
 		new EdeltaFeatureDifferenceFinder().ignoringName,
