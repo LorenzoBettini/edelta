@@ -14,7 +14,6 @@ import org.eclipse.xtext.resource.FileExtensionProvider;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.util.JavaVersion;
-import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.Pair;
 import org.eclipse.xtext.xbase.testing.CompilationTestHelper;
 import org.eclipse.xtext.xbase.testing.TemporaryFolder;
@@ -37,7 +36,6 @@ public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
 	public TemporaryFolder temporaryFolder;
 
 	@Inject
-	@Extension
 	private CompilationTestHelper compilationTestHelper;
 
 	@Inject
@@ -49,7 +47,7 @@ public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	public void testCompilationOfModelMigration() throws Exception {
+	public void testCompilationOfTypeParameters() throws Exception {
 		checkCompilation("""
 			import java.util.Collection
 			import java.util.List
