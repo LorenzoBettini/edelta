@@ -1,5 +1,6 @@
 package edelta.refactorings.lib.tests;
 
+import static edelta.lib.EdeltaEcoreUtil.getValueAsList;
 import static edelta.lib.EdeltaUtils.getEObjectRepr;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -7,11 +8,13 @@ import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -19,9 +22,11 @@ import java.util.stream.Collectors;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +35,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaModelManager;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
@@ -190,16 +196,137 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
-	void test_mergeReferences() throws IOException {
-		withInputModels("mergeFeaturesContainment", "PersonList.ecore");
-		loadEcoreFiles();
-		final EClass person = refactorings.getEClass("PersonList", "Person");
-		refactorings.mergeReferences("name",
-			asList(
-				(EReference) person.getEStructuralFeature("firstName"),
-				(EReference) person.getEStructuralFeature("lastName")));
-		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
-		assertModifiedFiles();
+	void test_mergeReferences() throws Exception {
+		var subdir = "mergeFeaturesContainment/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					EClass person = getEClass("PersonList", "Person");
+					EClass nameElement = getEClass("PersonList", "NameElement");
+					EAttribute nameElementAttribute =
+							getEAttribute("PersonList", "NameElement", "nameElementValue");
+					assertNotNull(nameElementAttribute);
+
+					mergeReferences(
+						"name",
+						asList(
+							(EReference) person.getEStructuralFeature("firstName"),
+							(EReference) person.getEStructuralFeature("lastName")),
+						values -> {
+							// it is responsibility of the merger to create an instance
+							// of the (now single) referred object with the result
+							// of merging the original objects' values
+							var mergedValue = values.stream()
+								.map(EObject.class::cast)
+								.map(o -> 
+									"" + o.eGet(nameElementAttribute))
+								.collect(Collectors.joining(" "));
+							if (mergedValue.isEmpty())
+								return null;
+							return EdeltaEcoreUtil.createInstance(nameElement,
+								// since it's a containment feature, setting it will also
+								// add it to the resource
+								o -> o.eSet(nameElementAttribute, mergedValue)
+							);
+						}, null
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_mergeReferencesWithPostCopy() throws Exception {
+		var subdir = "mergeFeaturesNonContainmentShared/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					EClass person = getEClass("PersonList", "Person");
+					EClass nameElement = getEClass("PersonList", "NameElement");
+					EAttribute nameElementAttribute =
+							getEAttribute("PersonList", "NameElement", "nameElementValue");
+					assertNotNull(nameElementAttribute);
+
+					// keep track of objects that are merged into a single one
+					var merged = new HashMap<Collection<EObject>, EObject>();
+
+					mergeReferences(
+						"name",
+						asList(
+							(EReference) person.getEStructuralFeature("firstName"),
+							(EReference) person.getEStructuralFeature("lastName")),
+						values -> {
+							// it is responsibility of the merger to create an instance
+							// of the (now single) referred object with the result
+							// of merging the original objects' values
+							if (values.isEmpty())
+								return null;
+
+							var alreadyMerged = merged.get(values);
+							if (alreadyMerged != null)
+								return alreadyMerged;
+							// we have already processed the object collection
+							// and created a merged one so we reuse it
+
+							EObject firstObject = values.iterator().next();
+							var containingFeature = firstObject.eContainingFeature();
+							List<EObject> containerCollection =
+								getValueAsList(firstObject.eContainer(), containingFeature);
+
+							var mergedValue = values.stream()
+								.map(o -> 
+									"" + o.eGet(nameElementAttribute))
+								.collect(Collectors.joining(" "));
+							return EdeltaEcoreUtil.createInstance(nameElement,
+								o -> {
+									o.eSet(nameElementAttribute, mergedValue);
+									// since it's a NON containment feature, we have to manually
+									// add it to the resource
+									containerCollection.add(o);
+
+									// record that we associated the single object o
+									// to the original ones, which are now merged
+									merged.put(values, o);
+								}
+							);
+						},
+						// now we can remove the stale objects that have been merged
+						() -> EcoreUtil.removeAll(
+								merged.keySet().stream()
+									.flatMap(Collection<EObject>::stream)
+									.collect(Collectors.toList()))
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test

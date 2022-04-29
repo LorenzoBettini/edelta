@@ -102,11 +102,33 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * 
    * @param newReferenceName
    * @param references
+   * @param valueMerger if not null, it is used to merge the values of the original
+   * features in the new model
+   * @param postCopy executed after the model migrations
    * @return the new reference added to the containing class of the references
    */
-  public EReference mergeReferences(final String newReferenceName, final Collection<EReference> references) {
+  public EReference mergeReferences(final String newReferenceName, final Collection<EReference> references, final Function<Collection<EObject>, EObject> valueMerger, final Runnable postCopy) {
+    final EReference firstFeature = IterableExtensions.<EReference>head(references);
     EStructuralFeature _mergeFeatures = this.mergeFeatures(newReferenceName, references);
-    return ((EReference) _mergeFeatures);
+    final EReference mergedFeature = ((EReference) _mergeFeatures);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
+        final Function<EReference, EReference> _function_2 = (EReference a) -> {
+          return it.<EReference>getOriginal(a);
+        };
+        Stream<EReference> originalFeatures = references.stream().<EReference>map(_function_2);
+        final Function<EReference, EObject> _function_3 = (EReference f) -> {
+          return EdeltaEcoreUtil.getValueAsEObject(oldObj, f);
+        };
+        List<EObject> oldValues = originalFeatures.<EObject>map(_function_3).collect(Collectors.<EObject>toList());
+        EObject merged = valueMerger.apply(it.<EObject>getMigrated(oldValues));
+        newObj.eSet(mergedFeature, merged);
+      };
+      it.copyRule(
+        it.<EStructuralFeature>wasRelatedTo(firstFeature), _function_1, postCopy);
+    };
+    this.modelMigration(_function);
+    return mergedFeature;
   }
   
   /**
