@@ -49,70 +49,70 @@ public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
 	@Test
 	public void testCompilationOfTypeParameters() throws Exception {
 		checkCompilation("""
-			import java.util.Collection
-			import java.util.List
-			import org.eclipse.emf.ecore.EStructuralFeature
-			import org.eclipse.emf.ecore.EAttribute
-			import org.eclipse.emf.ecore.EReference
+		import java.util.Collection
+		import java.util.List
+		import org.eclipse.emf.ecore.EStructuralFeature
+		import org.eclipse.emf.ecore.EAttribute
+		import org.eclipse.emf.ecore.EReference
 
-			package foo
+		package foo
 
-			metamodel "foo"
+		metamodel "foo"
 
-			def <T extends EStructuralFeature>
-				mergeFeatures(String newFeatureName, Collection<T> features) : T {
-				// just an example
-				features.head
-			}
+		def <T extends EStructuralFeature>
+			mergeFeatures(String newFeatureName, Collection<T> features) : T {
+			// just an example
+			features.head
+		}
 
-			modifyEcore aTest epackage foo {
-				val EAttribute a = mergeFeatures("anAttribute", List.of(ecoreref(myAttribute)))
-				val EReference r = mergeFeatures("aReference", List.of(ecoreref(myReference)))
-			}
-			""","""
-			package foo;
-			
-			import edelta.lib.AbstractEdelta;
-			import edelta.lib.EdeltaDefaultRuntime;
-			import java.util.Collection;
-			import java.util.List;
-			import org.eclipse.emf.ecore.EAttribute;
-			import org.eclipse.emf.ecore.EPackage;
-			import org.eclipse.emf.ecore.EReference;
-			import org.eclipse.emf.ecore.EStructuralFeature;
-			import org.eclipse.xtext.xbase.lib.IterableExtensions;
-			
-			@SuppressWarnings("all")
-			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0() {
-			
-			  }
-			
-			  public MyFile0(final AbstractEdelta other) {
-			    super(other);
-			  }
-			
-			  public <T extends EStructuralFeature> T mergeFeatures(final String newFeatureName, final Collection<T> features) {
-			    return IterableExtensions.<T>head(features);
-			  }
-			
-			  public void aTest(final EPackage it) {
-			    final EAttribute a = this.<EAttribute>mergeFeatures("anAttribute", List.<EAttribute>of(getEAttribute("foo", "FooClass", "myAttribute")));
-			    final EReference r = this.<EReference>mergeFeatures("aReference", List.<EReference>of(getEReference("foo", "FooClass", "myReference")));
-			  }
-			
-			  @Override
-			  public void performSanityChecks() throws Exception {
-			    ensureEPackageIsLoaded("foo");
-			  }
-			
-			  @Override
-			  protected void doExecute() throws Exception {
-			    aTest(getEPackage("foo"));
-			  }
-			}
-			"""
-			);
+		modifyEcore aTest epackage foo {
+			val EAttribute a = mergeFeatures("anAttribute", List.of(ecoreref(myAttribute)))
+			val EReference r = mergeFeatures("aReference", List.of(ecoreref(myReference)))
+		}
+		""","""
+		package foo;
+		
+		import edelta.lib.AbstractEdelta;
+		import edelta.lib.EdeltaDefaultRuntime;
+		import java.util.Collection;
+		import java.util.List;
+		import org.eclipse.emf.ecore.EAttribute;
+		import org.eclipse.emf.ecore.EPackage;
+		import org.eclipse.emf.ecore.EReference;
+		import org.eclipse.emf.ecore.EStructuralFeature;
+		import org.eclipse.xtext.xbase.lib.IterableExtensions;
+		
+		@SuppressWarnings("all")
+		public class MyFile0 extends EdeltaDefaultRuntime {
+		  public MyFile0() {
+		
+		  }
+		
+		  public MyFile0(final AbstractEdelta other) {
+		    super(other);
+		  }
+		
+		  public <T extends EStructuralFeature> T mergeFeatures(final String newFeatureName, final Collection<T> features) {
+		    return IterableExtensions.<T>head(features);
+		  }
+		
+		  public void aTest(final EPackage it) {
+		    final EAttribute a = this.<EAttribute>mergeFeatures("anAttribute", List.<EAttribute>of(getEAttribute("foo", "FooClass", "myAttribute")));
+		    final EReference r = this.<EReference>mergeFeatures("aReference", List.<EReference>of(getEReference("foo", "FooClass", "myReference")));
+		  }
+		
+		  @Override
+		  public void performSanityChecks() throws Exception {
+		    ensureEPackageIsLoaded("foo");
+		  }
+		
+		  @Override
+		  protected void doExecute() throws Exception {
+		    aTest(getEPackage("foo"));
+		  }
+		}
+		"""
+		);
 	}
 
 	private void checkCompilation(CharSequence input, CharSequence expectedGeneratedJava) throws Exception {
