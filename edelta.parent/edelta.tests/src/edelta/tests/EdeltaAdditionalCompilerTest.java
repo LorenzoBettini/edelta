@@ -59,15 +59,22 @@ public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
 
 		metamodel "foo"
 
+		def <T>
+			exampleWithoutBound(String newFeatureName, Collection<T> features) : T {
+			// just an example
+			features.head
+		}
+
 		def <T extends EStructuralFeature>
-			mergeFeatures(String newFeatureName, Collection<T> features) : T {
+			exampleWithBound(String newFeatureName, Collection<T> features) : T {
 			// just an example
 			features.head
 		}
 
 		modifyEcore aTest epackage foo {
-			val EAttribute a = mergeFeatures("anAttribute", List.of(ecoreref(myAttribute)))
-			val EReference r = mergeFeatures("aReference", List.of(ecoreref(myReference)))
+			val EAttribute a = exampleWithBound("anAttribute", List.of(ecoreref(myAttribute)))
+			val EReference r = exampleWithBound("aReference", List.of(ecoreref(myReference)))
+			val String s = exampleWithoutBound("aReference", List.of("a string"))
 		}
 		""","""
 		package foo;
@@ -92,13 +99,18 @@ public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
 		    super(other);
 		  }
 		
-		  public <T extends EStructuralFeature> T mergeFeatures(final String newFeatureName, final Collection<T> features) {
+		  public <T> T exampleWithoutBound(final String newFeatureName, final Collection<T> features) {
+		    return IterableExtensions.<T>head(features);
+		  }
+		
+		  public <T extends EStructuralFeature> T exampleWithBound(final String newFeatureName, final Collection<T> features) {
 		    return IterableExtensions.<T>head(features);
 		  }
 		
 		  public void aTest(final EPackage it) {
-		    final EAttribute a = this.<EAttribute>mergeFeatures("anAttribute", List.<EAttribute>of(getEAttribute("foo", "FooClass", "myAttribute")));
-		    final EReference r = this.<EReference>mergeFeatures("aReference", List.<EReference>of(getEReference("foo", "FooClass", "myReference")));
+		    final EAttribute a = this.<EAttribute>exampleWithBound("anAttribute", List.<EAttribute>of(getEAttribute("foo", "FooClass", "myAttribute")));
+		    final EReference r = this.<EReference>exampleWithBound("aReference", List.<EReference>of(getEReference("foo", "FooClass", "myReference")));
+		    final String s = this.<String>exampleWithoutBound("aReference", List.<String>of("a string"));
 		  }
 		
 		  @Override
