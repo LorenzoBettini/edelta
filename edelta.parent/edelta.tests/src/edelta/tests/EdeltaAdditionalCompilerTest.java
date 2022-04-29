@@ -14,7 +14,6 @@ import org.eclipse.xtext.resource.FileExtensionProvider;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.util.JavaVersion;
-import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.Pair;
 import org.eclipse.xtext.xbase.testing.CompilationTestHelper;
 import org.eclipse.xtext.xbase.testing.TemporaryFolder;
@@ -37,7 +36,6 @@ public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
 	public TemporaryFolder temporaryFolder;
 
 	@Inject
-	@Extension
 	private CompilationTestHelper compilationTestHelper;
 
 	@Inject
@@ -49,70 +47,153 @@ public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	public void testCompilationOfTypeParameters() throws Exception {
+		checkCompilation("""
+		import java.util.Collection
+		import java.util.List
+		import org.eclipse.emf.ecore.EStructuralFeature
+		import org.eclipse.emf.ecore.EAttribute
+		import org.eclipse.emf.ecore.EReference
+
+		package foo
+
+		metamodel "foo"
+
+		def <T>
+			exampleWithoutBound(String newFeatureName, Collection<T> features) : T {
+			// just an example
+			features.head
+		}
+
+		def <T extends EStructuralFeature>
+			exampleWithBound(String newFeatureName, Collection<T> features) : T {
+			// just an example
+			features.head
+		}
+
+		modifyEcore aTest epackage foo {
+			val EAttribute a = exampleWithBound("anAttribute", List.of(ecoreref(myAttribute)))
+			val a1 = exampleWithBound("anAttribute", List.of(ecoreref(myAttribute)))
+			val EReference r = exampleWithBound("aReference", List.of(ecoreref(myReference)))
+			val r1 = exampleWithBound("aReference", List.of(ecoreref(myReference)))
+			val String s = exampleWithoutBound("aReference", List.of("a string"))
+			val s1 = exampleWithoutBound("aReference", List.of("a string"))
+		}
+		""","""
+		package foo;
+		
+		import edelta.lib.EdeltaDefaultRuntime;
+		import edelta.lib.EdeltaRuntime;
+		import java.util.Collection;
+		import java.util.List;
+		import org.eclipse.emf.ecore.EAttribute;
+		import org.eclipse.emf.ecore.EPackage;
+		import org.eclipse.emf.ecore.EReference;
+		import org.eclipse.emf.ecore.EStructuralFeature;
+		import org.eclipse.xtext.xbase.lib.IterableExtensions;
+		
+		@SuppressWarnings("all")
+		public class MyFile0 extends EdeltaDefaultRuntime {
+		  public MyFile0(final EdeltaRuntime other) {
+		    super(other);
+		  }
+		
+		  public <T> T exampleWithoutBound(final String newFeatureName, final Collection<T> features) {
+		    return IterableExtensions.<T>head(features);
+		  }
+		
+		  public <T extends EStructuralFeature> T exampleWithBound(final String newFeatureName, final Collection<T> features) {
+		    return IterableExtensions.<T>head(features);
+		  }
+		
+		  public void aTest(final EPackage it) {
+		    final EAttribute a = this.<EAttribute>exampleWithBound("anAttribute", List.<EAttribute>of(getEAttribute("foo", "FooClass", "myAttribute")));
+		    final EAttribute a1 = this.<EAttribute>exampleWithBound("anAttribute", List.<EAttribute>of(getEAttribute("foo", "FooClass", "myAttribute")));
+		    final EReference r = this.<EReference>exampleWithBound("aReference", List.<EReference>of(getEReference("foo", "FooClass", "myReference")));
+		    final EReference r1 = this.<EReference>exampleWithBound("aReference", List.<EReference>of(getEReference("foo", "FooClass", "myReference")));
+		    final String s = this.<String>exampleWithoutBound("aReference", List.<String>of("a string"));
+		    final String s1 = this.<String>exampleWithoutBound("aReference", List.<String>of("a string"));
+		  }
+		
+		  @Override
+		  public void performSanityChecks() throws Exception {
+		    ensureEPackageIsLoaded("foo");
+		  }
+		
+		  @Override
+		  protected void doExecute() throws Exception {
+		    aTest(getEPackage("foo"));
+		  }
+		}
+		"""
+		);
+	}
+
+	@Test
 	public void testCompilationOfModelMigration() throws Exception {
 		checkCompilation("""
-			package foo;
+		package foo;
 
-			metamodel "foo"
+		metamodel "foo"
 
-			modifyEcore aTest epackage foo {
-				val fooClass = ecoreref(FooClass)
-				val mySubClass = fooClass.addNewSubclass("MySubClass")
-				fooClass.abstract = true
-				// adjust model migration
-				modelMigration[
-					createInstanceRule(
-						isRelatedTo(fooClass),
-						[oldObj|
-							return createInstance(mySubClass)
-						]
-					)
-				]
-			}
-			""","""
-			package foo;
+		modifyEcore aTest epackage foo {
+			val fooClass = ecoreref(FooClass)
+			val mySubClass = fooClass.addNewSubclass("MySubClass")
+			fooClass.abstract = true
+			// adjust model migration
+			modelMigration[
+				createInstanceRule(
+					isRelatedTo(fooClass),
+					[oldObj|
+						return createInstance(mySubClass)
+					]
+				)
+			]
+		}
+		""","""
+		package foo;
 
-			import edelta.lib.EdeltaDefaultRuntime;
-			import edelta.lib.EdeltaEcoreUtil;
-			import edelta.lib.EdeltaModelMigrator;
-			import edelta.lib.EdeltaRuntime;
-			import java.util.function.Consumer;
-			import org.eclipse.emf.ecore.EClass;
-			import org.eclipse.emf.ecore.EObject;
-			import org.eclipse.emf.ecore.EPackage;
+		import edelta.lib.EdeltaDefaultRuntime;
+		import edelta.lib.EdeltaEcoreUtil;
+		import edelta.lib.EdeltaModelMigrator;
+		import edelta.lib.EdeltaRuntime;
+		import java.util.function.Consumer;
+		import org.eclipse.emf.ecore.EClass;
+		import org.eclipse.emf.ecore.EObject;
+		import org.eclipse.emf.ecore.EPackage;
 
-			@SuppressWarnings("all")
-			public class MyFile0 extends EdeltaDefaultRuntime {
-			  public MyFile0(final EdeltaRuntime other) {
-			    super(other);
-			  }
-			  
-			  public void aTest(final EPackage it) {
-			    final EClass fooClass = getEClass("foo", "FooClass");
-			    final EClass mySubClass = this.stdLib.addNewSubclass(fooClass, "MySubClass");
-			    fooClass.setAbstract(true);
-			    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it_1) -> {
-			      final EdeltaModelMigrator.EObjectFunction _function_1 = (EObject oldObj) -> {
-			        return EdeltaEcoreUtil.createInstance(mySubClass);
-			      };
-			      it_1.createInstanceRule(
-			        it_1.<EClass>isRelatedTo(fooClass), _function_1);
-			    };
-			    this.modelMigration(_function);
-			  }
-			  
-			  @Override
-			  public void performSanityChecks() throws Exception {
-			    ensureEPackageIsLoaded("foo");
-			  }
-			  
-			  @Override
-			  protected void doExecute() throws Exception {
-			    aTest(getEPackage("foo"));
-			  }
-			}
-			"""
-			);
+		@SuppressWarnings("all")
+		public class MyFile0 extends EdeltaDefaultRuntime {
+		  public MyFile0(final EdeltaRuntime other) {
+		    super(other);
+		  }
+		  
+		  public void aTest(final EPackage it) {
+		    final EClass fooClass = getEClass("foo", "FooClass");
+		    final EClass mySubClass = this.stdLib.addNewSubclass(fooClass, "MySubClass");
+		    fooClass.setAbstract(true);
+		    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it_1) -> {
+		      final EdeltaModelMigrator.EObjectFunction _function_1 = (EObject oldObj) -> {
+		        return EdeltaEcoreUtil.createInstance(mySubClass);
+		      };
+		      it_1.createInstanceRule(
+		        it_1.<EClass>isRelatedTo(fooClass), _function_1);
+		    };
+		    this.modelMigration(_function);
+		  }
+		  
+		  @Override
+		  public void performSanityChecks() throws Exception {
+		    ensureEPackageIsLoaded("foo");
+		  }
+		  
+		  @Override
+		  protected void doExecute() throws Exception {
+		    aTest(getEPackage("foo"));
+		  }
+		}
+		"""
+		);
 	}
 
 	private void checkCompilation(CharSequence input, CharSequence expectedGeneratedJava) throws Exception {
@@ -152,9 +233,14 @@ public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
 	private void assertGeneratedJavaCode(CompilationTestHelper.Result r, CharSequence expected) {
 		var singleGeneratedCode = EdeltaTestUtils.removeCR(r.getSingleGeneratedCode());
 		assertEquals(expected.toString(),
+			// see https://github.com/eclipse/xtext-extras/issues/772
+			// remove whe Xtext 2.27.0 is released
 			// lines with only spaces are skipped in Java text blocks
 			// but they are present in the generated code so we need to remove them
-			singleGeneratedCode.replace("  \n", "\n"));
+			// do that twice for possible empty constructor's body which has four spaces
+			singleGeneratedCode
+				.replace("  \n", "\n")
+				.replace("  \n", "\n"));
 	}
 
 	private Class<?> assertGeneratedJavaCodeCompiles(CompilationTestHelper.Result r) {

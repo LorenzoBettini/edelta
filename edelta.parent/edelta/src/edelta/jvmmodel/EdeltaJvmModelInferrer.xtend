@@ -79,6 +79,11 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 			for (o : program.operations) {
 				members += o.toMethod(o.name, o.type ?: inferredType) [
 					documentation = o.documentation
+					for (typeParameter : o.typeParameters) {
+						val clonedTypeParameter = typeParameter.cloneWithProxies
+						typeParameters += clonedTypeParameter
+						associate(typeParameter, clonedTypeParameter)
+					}
 					for (p : o.params) {
 						parameters += p.toParameter(p.name, p.parameterType)
 					}
