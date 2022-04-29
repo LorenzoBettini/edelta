@@ -281,12 +281,13 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 	 * Copies the specified {@link EStructuralFeature} into the specified
 	 * {@link EClass}, using {@link EcoreUtil#copy(EObject)}.
 	 * 
+	 * @param <T>
 	 * @param feature
 	 * @param eClassDest
 	 * @return the copied feature
 	 * @see EcoreUtil#copy(EObject)
 	 */
-	public EStructuralFeature copyTo(EStructuralFeature feature, EClass eClassDest) {
+	public <T extends EStructuralFeature> T copyTo(T feature, EClass eClassDest) {
 		var copy = EcoreUtil.copy(feature);
 		addEStructuralFeature(eClassDest, copy);
 		return copy;
@@ -296,13 +297,14 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 	 * Copies the specified {@link EStructuralFeature} into the specified
 	 * {@link EClass}, using {@link EcoreUtil#copy(EObject)}, but changing its name.
 	 * 
+	 * @param <T>
 	 * @param feature
 	 * @param eClassDest
 	 * @param name
 	 * @return the copied feature
 	 * @see EcoreUtil#copy(EObject)
 	 */
-	public EStructuralFeature copyToAs(EStructuralFeature feature, EClass eClassDest, String name) {
+	public <T extends EStructuralFeature> T copyToAs(T feature, EClass eClassDest, String name) {
 		var copy = EcoreUtil.copy(feature);
 		copy.setName(name);
 		addEStructuralFeature(eClassDest, copy);
@@ -314,6 +316,7 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 	 * {@link EClass}, using {@link EcoreUtil#copy(EObject)}, but changing its name
 	 * and type.
 	 * 
+	 * @param <T>
 	 * @param feature
 	 * @param eClassDest
 	 * @param name
@@ -321,7 +324,7 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 	 * @return the copied feature
 	 * @see EcoreUtil#copy(EObject)
 	 */
-	public EStructuralFeature copyToAs(EStructuralFeature feature, EClass eClassDest, String name,
+	public <T extends EStructuralFeature> T copyToAs(T feature, EClass eClassDest, String name,
 			EClassifier type) {
 		var copy = EcoreUtil.copy(feature);
 		copy.setName(name);
