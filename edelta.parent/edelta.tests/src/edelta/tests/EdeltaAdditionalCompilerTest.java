@@ -73,8 +73,11 @@ public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
 
 		modifyEcore aTest epackage foo {
 			val EAttribute a = exampleWithBound("anAttribute", List.of(ecoreref(myAttribute)))
+			val a1 = exampleWithBound("anAttribute", List.of(ecoreref(myAttribute)))
 			val EReference r = exampleWithBound("aReference", List.of(ecoreref(myReference)))
+			val r1 = exampleWithBound("aReference", List.of(ecoreref(myReference)))
 			val String s = exampleWithoutBound("aReference", List.of("a string"))
+			val s1 = exampleWithoutBound("aReference", List.of("a string"))
 		}
 		""","""
 		package foo;
@@ -109,8 +112,11 @@ public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
 		
 		  public void aTest(final EPackage it) {
 		    final EAttribute a = this.<EAttribute>exampleWithBound("anAttribute", List.<EAttribute>of(getEAttribute("foo", "FooClass", "myAttribute")));
+		    final EAttribute a1 = this.<EAttribute>exampleWithBound("anAttribute", List.<EAttribute>of(getEAttribute("foo", "FooClass", "myAttribute")));
 		    final EReference r = this.<EReference>exampleWithBound("aReference", List.<EReference>of(getEReference("foo", "FooClass", "myReference")));
+		    final EReference r1 = this.<EReference>exampleWithBound("aReference", List.<EReference>of(getEReference("foo", "FooClass", "myReference")));
 		    final String s = this.<String>exampleWithoutBound("aReference", List.<String>of("a string"));
+		    final String s1 = this.<String>exampleWithoutBound("aReference", List.<String>of("a string"));
 		  }
 		
 		  @Override
