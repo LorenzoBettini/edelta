@@ -11,6 +11,7 @@ import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -133,6 +134,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * Merges the given features into a single new feature in the containing class.
    * The features must be compatible (same containing class, same type, same cardinality, etc).
    * 
+   * @param <T>
    * @param newFeatureName
    * @param features
    * @return the new feature added to the containing class of the features
@@ -181,6 +183,54 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     final EStructuralFeature copy = this.stdLib.<EStructuralFeature>copyToAs(feature, owner, newFeatureName, type);
     this.mergeFeatures(copy, features);
     return copy;
+  }
+  
+  public Collection<EAttribute> splitAttribute(final EAttribute attribute, final Collection<String> newNames, final Function<Object, Collection<?>> valueSplitter) {
+    final Collection<EAttribute> splittedAttributes = this.<EAttribute>splitFeature(attribute, newNames);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
+        Object oldValue = oldObj.eGet(feature);
+        Iterator<?> splittedValues = valueSplitter.apply(oldValue).iterator();
+        for (final EAttribute splitFeature : splittedAttributes) {
+          {
+            boolean _hasNext = splittedValues.hasNext();
+            boolean _not = (!_hasNext);
+            if (_not) {
+              return;
+            }
+            newObj.eSet(splitFeature, splittedValues.next());
+          }
+        }
+      };
+      it.copyRule(
+        it.<EStructuralFeature>wasRelatedTo(attribute), _function_1);
+    };
+    this.modelMigration(_function);
+    return splittedAttributes;
+  }
+  
+  /**
+   * Split the given feature into several features with the same type
+   * as the original one, using the specified names. The original feature
+   * will be removed.
+   * 
+   * @param <T>
+   * @param featureToSplit
+   * @param newFeatureNames
+   * @return the collection of features
+   */
+  public <T extends EStructuralFeature> Collection<T> splitFeature(final T featureToSplit, final Collection<String> newFeatureNames) {
+    this.checkNotMany(featureToSplit, 
+      "Cannot split \'many\' feature");
+    this.checkNoBidirectionalReferences(Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(featureToSplit)), 
+      "Cannot split a bidirectional reference");
+    final EClass owner = featureToSplit.getEContainingClass();
+    final Function<String, T> _function = (String newName) -> {
+      return this.stdLib.<T>copyToAs(featureToSplit, owner, newName);
+    };
+    List<T> splitFeatures = newFeatureNames.stream().<T>map(_function).collect(Collectors.<T>toList());
+    EdeltaUtils.removeElement(featureToSplit);
+    return splitFeatures;
   }
   
   /**

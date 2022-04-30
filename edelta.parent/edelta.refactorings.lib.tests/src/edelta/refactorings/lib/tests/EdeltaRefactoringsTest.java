@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -457,6 +458,46 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 				person.getEStructuralFeature("lastName")));
 		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
+	}
+
+	@Test
+	void test_splitAttribute() throws Exception {
+		var subdir = "splitAttributes/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					final EClass person = getEClass("PersonList", "Person");
+					var personName = (EAttribute) person.getEStructuralFeature("name");
+					splitAttribute(
+						personName,
+						asList(
+							"firstName",
+							"lastName"),
+						value -> {
+							// a few more checks should be performed in a realistic context
+							if (value == null)
+								return Collections.emptyList();
+							String[] split = value.toString().split("\\s+");
+							return Arrays.asList(split);
+						}
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	/**

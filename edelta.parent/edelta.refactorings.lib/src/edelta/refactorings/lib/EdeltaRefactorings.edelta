@@ -104,6 +104,7 @@ def mergeReferences(String newReferenceName, Collection<EReference> references,
  * Merges the given features into a single new feature in the containing class.
  * The features must be compatible (same containing class, same type, same cardinality, etc).
  * 
+ * @param <T>
  * @param newFeatureName
  * @param features
  * @return the new feature added to the containing class of the features
@@ -154,6 +155,54 @@ def mergeFeatures(String newFeatureName, EClassifier type, Collection<EStructura
 	val copy = feature.copyToAs(owner, newFeatureName, type)
 	mergeFeatures(copy, features)
 	return copy
+}
+
+def splitAttribute(EAttribute attribute, Collection<String> newNames,
+		Function<Object, Collection<?>> valueSplitter) :
+		Collection<EAttribute> {
+	val splittedAttributes = splitFeature(attribute, newNames)
+	modelMigration[
+		copyRule(
+			wasRelatedTo(attribute),
+			[feature, oldObj, newObj |
+				var oldValue = oldObj.eGet(feature)
+				var splittedValues = valueSplitter
+					.apply(oldValue).iterator()
+				for (splitFeature : splittedAttributes) {
+					if (!splittedValues.hasNext())
+						return;
+					newObj.eSet(splitFeature, splittedValues.next())
+				}
+			]
+		)
+	]
+	return splittedAttributes
+}
+
+/**
+ * Split the given feature into several features with the same type
+ * as the original one, using the specified names. The original feature
+ * will be removed.
+ * 
+ * @param <T>
+ * @param featureToSplit
+ * @param newFeatureNames
+ * @return the collection of features
+ */
+def <T extends EStructuralFeature> splitFeature(T featureToSplit,
+		Collection<String> newFeatureNames) : Collection<T> {
+	checkNotMany(featureToSplit,
+		"Cannot split 'many' feature")
+	checkNoBidirectionalReferences(#[featureToSplit],
+		"Cannot split a bidirectional reference")
+	val owner = featureToSplit.EContainingClass
+	var splitFeatures = newFeatureNames.stream()
+		.map[newName |
+			copyToAs(featureToSplit, owner, newName)
+		]
+		.collect(Collectors.toList())
+	removeElement(featureToSplit)
+	return splitFeatures;
 }
 
 /**
