@@ -581,6 +581,377 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 		);
 	}
 
+	@Test
+	void test_mergeAttributes_IsOppositeOf_splitAttribute() throws Exception {
+		var subdir = "mergeAndSplitAttributes/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					final EClass person = getEClass("PersonList", "Person");
+					var personFirstName = (EAttribute) person.getEStructuralFeature("firstName");
+					var personLastName = (EAttribute) person.getEStructuralFeature("lastName");
+					var mergedFeature = mergeAttributes(
+						"name",
+						asList(
+							personFirstName,
+							personLastName),
+						values -> {
+							var merged = values.stream()
+								.filter(Objects::nonNull)
+								.map(Object::toString)
+								.collect(Collectors.joining(" "));
+							return merged.isEmpty() ? null : merged;
+						});
+					splitAttribute(
+						mergedFeature,
+						asList(
+							personFirstName.getName(),
+							personLastName.getName()),
+						value -> {
+							// a few more checks should be performed in a realistic context
+							if (value == null)
+								return Collections.emptyList();
+							String[] split = value.toString().split("\\s+");
+							return Arrays.asList(split);
+						}
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	/**
+	 * The evolved metamodel and model are just the same as the original ones, as
+	 * long the merge and split can be inversed. For example, in this test we have
+	 * "firstname lastname" or no string at all. If you had "lastname" then the
+	 * model wouldn't be reversable.
+	 * 
+	 * The input directory and the output one will contain the same data.
+	 */
+	@Test
+	void test_splitAttribute_IsOppositeOf_mergeAttributes() throws Exception {
+		var subdir = "splitAndMergeAttributes/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					final EClass person = getEClass("PersonList", "Person");
+					var personName = (EAttribute) person.getEStructuralFeature("name");
+					var splitFeatures = splitAttribute(
+						personName,
+						asList(
+							"firstName",
+							"lastName"),
+						value -> {
+							// a few more checks should be performed in a realistic context
+							if (value == null)
+								return Collections.emptyList();
+							String[] split = value.toString().split("\\s+");
+							return Arrays.asList(split);
+						}
+					);
+					mergeAttributes(
+						"name",
+						splitFeatures,
+						values -> {
+							var merged = values.stream()
+								.filter(Objects::nonNull)
+								.map(Object::toString)
+								.collect(Collectors.joining(" "));
+							return merged.isEmpty() ? null : merged;
+						}
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_mergeReferences_IsOppositeOf_splitReference() throws Exception {
+		var subdir = "mergeFeaturesNonContainmentShared/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					EClass person = getEClass("PersonList", "Person");
+					EClass nameElement = getEClass("PersonList", "NameElement");
+					EAttribute nameElementAttribute =
+							getEAttribute("PersonList", "NameElement", "nameElementValue");
+					var personFirstName = (EReference) person.getEStructuralFeature("firstName");
+					var personLastName = (EReference) person.getEStructuralFeature("lastName");
+					assertNotNull(nameElementAttribute);
+
+					// keep track of objects that are merged into a single one
+					var merged = new HashMap<Collection<EObject>, EObject>();
+
+					var mergedFeature =  mergeReferences(
+						"name",
+						asList(
+							personFirstName,
+							personLastName),
+						values -> {
+							// it is responsibility of the merger to create an instance
+							// of the (now single) referred object with the result
+							// of merging the original objects' values
+							if (values.isEmpty())
+								return null;
+
+							var alreadyMerged = merged.get(values);
+							if (alreadyMerged != null)
+								return alreadyMerged;
+							// we have already processed the object collection
+							// and created a merged one so we reuse it
+
+							EObject firstObject = values.iterator().next();
+							var containingFeature = firstObject.eContainingFeature();
+							List<EObject> containerCollection =
+								getValueAsList(firstObject.eContainer(), containingFeature);
+
+							var mergedValue = values.stream()
+								.map(o -> 
+									"" + o.eGet(nameElementAttribute))
+								.collect(Collectors.joining(" "));
+							return EdeltaEcoreUtil.createInstance(nameElement,
+								o -> {
+									o.eSet(nameElementAttribute, mergedValue);
+									// since it's a NON containment feature, we have to manually
+									// add it to the resource
+									containerCollection.add(o);
+
+									// record that we associated the single object o
+									// to the original ones, which are now merged
+									merged.put(values, o);
+								}
+							);
+						},
+						// now we can remove the stale objects that have been merged
+						() -> EcoreUtil.removeAll(
+								merged.keySet().stream()
+									.flatMap(Collection<EObject>::stream)
+									.collect(Collectors.toList()))
+					);
+
+					// keep track of objects that are split into several ones
+					var splitted = new HashMap<EObject, Collection<EObject>>();
+
+					splitReference(
+						mergedFeature,
+						asList(
+							personFirstName.getName(),
+							personLastName.getName()),
+						obj -> {
+							// a few more checks should be performed in a realistic context
+							if (obj == null)
+								return Collections.emptyList();
+
+							var alreadySplitted = splitted.get(obj);
+							if (alreadySplitted != null)
+								return alreadySplitted;
+							// we have already processed the object collection
+							// and created a merged one so we reuse it
+
+							var containingFeature = obj.eContainingFeature();
+							List<EObject> containerCollection =
+								getValueAsList(obj.eContainer(), containingFeature);
+
+							// of course if there's no space and only one element in the array
+							// it will assigned to the first feature value
+							// that is, in case of a single element, the lastName will be empty
+							String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+							var result = Stream.of(split)
+								.map(val -> EdeltaEcoreUtil.createInstance(nameElement,
+									o -> {
+										o.eSet(nameElementAttribute, val);
+
+										// since it's a NON containment feature, we have to manually
+										// add it to the resource
+										containerCollection.add(o);
+									}
+								))
+								.collect(Collectors.toList());
+
+							// record that we associated the several objects (2 in this example)
+							// to the original one, which is now splitted
+							splitted.put(obj, result);
+
+							return result;
+						},
+						// now we can remove the stale objects that have been splitted
+						() -> EcoreUtil.removeAll(splitted.keySet())
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"splitFeatureNonContainmentShared/",
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_splitReference_IsOppositeOf_mergeReferences() throws Exception {
+		var subdir = "splitFeatureNonContainmentShared/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					final EClass person = getEClass("PersonList", "Person");
+					var personName = (EReference) person.getEStructuralFeature("name");
+					EClass nameElement = getEClass("PersonList", "NameElement");
+					EAttribute nameElementAttribute =
+							getEAttribute("PersonList", "NameElement", "nameElementValue");
+					assertNotNull(nameElementAttribute);
+
+					// keep track of objects that are splitted into several ones
+					var splitted = new HashMap<EObject, Collection<EObject>>();
+
+					var splitFeatures = splitReference(
+						personName,
+						asList(
+							"firstName",
+							"lastName"),
+						obj -> {
+							// a few more checks should be performed in a realistic context
+							if (obj == null)
+								return Collections.emptyList();
+
+							var alreadySplitted = splitted.get(obj);
+							if (alreadySplitted != null)
+								return alreadySplitted;
+							// we have already processed the object collection
+							// and created a merged one so we reuse it
+
+							var containingFeature = obj.eContainingFeature();
+							List<EObject> containerCollection =
+								getValueAsList(obj.eContainer(), containingFeature);
+
+							// of course if there's no space and only one element in the array
+							// it will assigned to the first feature value
+							// that is, in case of a single element, the lastName will be empty
+							String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+							var result = Stream.of(split)
+								.map(val -> EdeltaEcoreUtil.createInstance(nameElement,
+									o -> {
+										o.eSet(nameElementAttribute, val);
+
+										// since it's a NON containment feature, we have to manually
+										// add it to the resource
+										containerCollection.add(o);
+									}
+								))
+								.collect(Collectors.toList());
+
+							// record that we associated the several objects (2 in this example)
+							// to the original one, which is now splitted
+							splitted.put(obj, result);
+
+							return result;
+						},
+						// now we can remove the stale objects that have been splitted
+						() -> EcoreUtil.removeAll(splitted.keySet())
+					);
+
+					// keep track of objects that are merged into a single one
+					var merged = new HashMap<Collection<EObject>, EObject>();
+
+					mergeReferences(
+						"name",
+						splitFeatures.stream().map(EReference.class::cast).collect(Collectors.toList()),
+						values -> {
+							// it is responsibility of the merger to create an instance
+							// of the (now single) referred object with the result
+							// of merging the original objects' values
+							if (values.isEmpty())
+								return null;
+
+							var alreadyMerged = merged.get(values);
+							if (alreadyMerged != null)
+								return alreadyMerged;
+							// we have already processed the object collection
+							// and created a merged one so we reuse it
+
+							EObject firstObject = values.iterator().next();
+							var containingFeature = firstObject.eContainingFeature();
+							List<EObject> containerCollection =
+								getValueAsList(firstObject.eContainer(), containingFeature);
+
+							var mergedValue = values.stream()
+								.map(o -> 
+									"" + o.eGet(nameElementAttribute))
+								.collect(Collectors.joining(" "));
+							return EdeltaEcoreUtil.createInstance(nameElement,
+								o -> {
+									o.eSet(nameElementAttribute, mergedValue);
+									// since it's a NON containment feature, we have to manually
+									// add it to the resource
+									containerCollection.add(o);
+
+									// record that we associated the single object o
+									// to the original ones, which are now merged
+									merged.put(values, o);
+								}
+							);
+						},
+						// now we can remove the stale objects that have been merged
+						() -> EcoreUtil.removeAll(
+								merged.keySet().stream()
+									.flatMap(Collection<EObject>::stream)
+									.collect(Collectors.toList()))
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"mergeFeaturesNonContainmentShared/",
+			ecores,
+			models
+		);
+	}
+
 	/**
 	 * This also implicitly tests introduceSubclasses
 	 * 
