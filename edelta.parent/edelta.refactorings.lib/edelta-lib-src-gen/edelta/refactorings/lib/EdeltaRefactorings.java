@@ -185,13 +185,24 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     return copy;
   }
   
+  /**
+   * Split the given attribute into several attributes with the same type
+   * as the original one, using the specified names. The original attribute
+   * will be removed. The passed valueSplitter is used to migrate the
+   * original object into the corresponding split ones.
+   * 
+   * @param attribute
+   * @param newNames
+   * @param valueSplitter
+   * @return the collection of features
+   */
   public Collection<EAttribute> splitAttribute(final EAttribute attribute, final Collection<String> newNames, final Function<Object, Collection<?>> valueSplitter) {
-    final Collection<EAttribute> splittedAttributes = this.<EAttribute>splitFeature(attribute, newNames);
+    final Collection<EAttribute> splitAttributes = this.<EAttribute>splitFeature(attribute, newNames);
     final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
       final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
         Object oldValue = oldObj.eGet(feature);
         Iterator<?> splittedValues = valueSplitter.apply(oldValue).iterator();
-        for (final EAttribute splitFeature : splittedAttributes) {
+        for (final EAttribute splitFeature : splitAttributes) {
           {
             boolean _hasNext = splittedValues.hasNext();
             boolean _not = (!_hasNext);
@@ -206,7 +217,44 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
         it.<EStructuralFeature>wasRelatedTo(attribute), _function_1);
     };
     this.modelMigration(_function);
-    return splittedAttributes;
+    return splitAttributes;
+  }
+  
+  /**
+   * Split the given reference into several references with the same type
+   * as the original one, using the specified names. The original reference
+   * will be removed. The passed valueSplitter is used to migrate the
+   * original object into the corresponding split ones.
+   * 
+   * @param reference
+   * @param newNames
+   * @param valueSplitter
+   * @param postCopy executed after the model migrations
+   * @return the collection of features
+   */
+  public Collection<EReference> splitReference(final EReference reference, final Collection<String> newNames, final Function<EObject, Collection<EObject>> valueSplitter, final Runnable postCopy) {
+    final Collection<EReference> splitReferences = this.<EReference>splitFeature(reference, newNames);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
+        EObject oldValue = it.getMigrated(
+          EdeltaEcoreUtil.getValueAsEObject(oldObj, feature));
+        Iterator<EObject> splittedValues = valueSplitter.apply(oldValue).iterator();
+        for (final EReference splitFeature : splitReferences) {
+          {
+            boolean _hasNext = splittedValues.hasNext();
+            boolean _not = (!_hasNext);
+            if (_not) {
+              return;
+            }
+            newObj.eSet(splitFeature, splittedValues.next());
+          }
+        }
+      };
+      it.copyRule(
+        it.<EStructuralFeature>wasRelatedTo(reference), _function_1, postCopy);
+    };
+    this.modelMigration(_function);
+    return splitReferences;
   }
   
   /**

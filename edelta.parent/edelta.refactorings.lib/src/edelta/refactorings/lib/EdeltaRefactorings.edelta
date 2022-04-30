@@ -157,10 +157,21 @@ def mergeFeatures(String newFeatureName, EClassifier type, Collection<EStructura
 	return copy
 }
 
+/**
+ * Split the given attribute into several attributes with the same type
+ * as the original one, using the specified names. The original attribute
+ * will be removed. The passed valueSplitter is used to migrate the
+ * original object into the corresponding split ones.
+ * 
+ * @param attribute
+ * @param newNames
+ * @param valueSplitter
+ * @return the collection of features
+ */
 def splitAttribute(EAttribute attribute, Collection<String> newNames,
 		Function<Object, Collection<?>> valueSplitter) :
 		Collection<EAttribute> {
-	val splittedAttributes = splitFeature(attribute, newNames)
+	val splitAttributes = splitFeature(attribute, newNames)
 	modelMigration[
 		copyRule(
 			wasRelatedTo(attribute),
@@ -168,7 +179,7 @@ def splitAttribute(EAttribute attribute, Collection<String> newNames,
 				var oldValue = oldObj.eGet(feature)
 				var splittedValues = valueSplitter
 					.apply(oldValue).iterator()
-				for (splitFeature : splittedAttributes) {
+				for (splitFeature : splitAttributes) {
 					if (!splittedValues.hasNext())
 						return;
 					newObj.eSet(splitFeature, splittedValues.next())
@@ -176,7 +187,46 @@ def splitAttribute(EAttribute attribute, Collection<String> newNames,
 			]
 		)
 	]
-	return splittedAttributes
+	return splitAttributes
+}
+
+/**
+ * Split the given reference into several references with the same type
+ * as the original one, using the specified names. The original reference
+ * will be removed. The passed valueSplitter is used to migrate the
+ * original object into the corresponding split ones.
+ * 
+ * @param reference
+ * @param newNames
+ * @param valueSplitter
+ * @param postCopy executed after the model migrations
+ * @return the collection of features
+ */
+def splitReference(EReference reference,
+			Collection<String> newNames,
+			Function<EObject, Collection<EObject>> valueSplitter,
+			Runnable postCopy) :
+		Collection<EReference> {
+	val splitReferences = splitFeature(reference, newNames)
+	modelMigration[
+		copyRule(
+			wasRelatedTo(reference),
+			[feature, oldObj, newObj |
+				// for references we must get the migrated EObject
+				var oldValue = getMigrated(
+					getValueAsEObject(oldObj, feature))
+				var splittedValues = valueSplitter
+					.apply(oldValue).iterator()
+				for (splitFeature : splitReferences) {
+					if (!splittedValues.hasNext())
+						return;
+					newObj.eSet(splitFeature, splittedValues.next())
+				}
+			],
+			postCopy
+		)
+	]
+	return splitReferences
 }
 
 /**

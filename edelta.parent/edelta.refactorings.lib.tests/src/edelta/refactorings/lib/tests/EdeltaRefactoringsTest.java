@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EAttribute;
@@ -487,6 +488,86 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 							String[] split = value.toString().split("\\s+");
 							return Arrays.asList(split);
 						}
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_splitFeature() throws Exception {
+		var subdir = "splitFeatureNonContainmentShared/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					final EClass person = getEClass("PersonList", "Person");
+					var personName = (EReference) person.getEStructuralFeature("name");
+					EClass nameElement = getEClass("PersonList", "NameElement");
+					EAttribute nameElementAttribute =
+							getEAttribute("PersonList", "NameElement", "nameElementValue");
+					assertNotNull(nameElementAttribute);
+
+					// keep track of objects that are splitted into several ones
+					var splitted = new HashMap<EObject, Collection<EObject>>();
+
+					splitReference(
+						personName,
+						asList(
+							"firstName",
+							"lastName"),
+						obj -> {
+							// a few more checks should be performed in a realistic context
+							if (obj == null)
+								return Collections.emptyList();
+
+							var alreadySplitted = splitted.get(obj);
+							if (alreadySplitted != null)
+								return alreadySplitted;
+							// we have already processed the object collection
+							// and created a merged one so we reuse it
+
+							var containingFeature = obj.eContainingFeature();
+							List<EObject> containerCollection =
+								getValueAsList(obj.eContainer(), containingFeature);
+
+							// of course if there's no space and only one element in the array
+							// it will assigned to the first feature value
+							// that is, in case of a single element, the lastName will be empty
+							String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+							var result = Stream.of(split)
+								.map(val -> EdeltaEcoreUtil.createInstance(nameElement,
+									o -> {
+										o.eSet(nameElementAttribute, val);
+
+										// since it's a NON containment feature, we have to manually
+										// add it to the resource
+										containerCollection.add(o);
+									}
+								))
+								.collect(Collectors.toList());
+
+							// record that we associated the several objects (2 in this example)
+							// to the original one, which is now splitted
+							splitted.put(obj, result);
+
+							return result;
+						},
+						// now we can remove the stale objects that have been splitted
+						() -> EcoreUtil.removeAll(splitted.keySet())
 					);
 				}
 			}
