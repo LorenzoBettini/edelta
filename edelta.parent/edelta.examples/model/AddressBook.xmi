@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addressbook:AddressBook
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:addressbook="http://addressbook"
+    xsi:schemaLocation="http://addressbook AddressBook.ecore">
+  <persons firstname="Ludovico"
+      lastname="Iovino"/>
+  <persons firstname="Davide"
+      lastname="Di Ruscio"/>
+  <persons firstname="Lorenzo"
+      lastname="Bettini"/>
+</addressbook:AddressBook>
