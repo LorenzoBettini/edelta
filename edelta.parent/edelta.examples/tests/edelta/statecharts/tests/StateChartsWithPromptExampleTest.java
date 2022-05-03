@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import edelta.examples.tests.AbstractEdeltaExamplesWithPromptTest;
 import edelta.statecharts.example.StateChartsWithPromptExample;
 
-public class StateChartsWithPromptExampleTest extends AbstractEdeltaExamplesWithPromptTest {
+class StateChartsWithPromptExampleTest extends AbstractEdeltaExamplesWithPromptTest {
 
 	@Test
 	void testStateChartsWithPrompt() throws Exception {
