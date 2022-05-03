@@ -826,7 +826,9 @@ def checkCompliant(EStructuralFeature feature, Collection<? extends EStructuralF
 }
 
 def checkType(EStructuralFeature feature, EClassifier expectedType) : void {
-	if (feature.EType !== expectedType) {
+	// don't rely on equality because in the interpreter the types
+	// might be loaded from different Ecore models
+	if (feature.EType.fullyQualifiedName != expectedType.fullyQualifiedName) {
 		val message =
 			"expecting " + getEObjectRepr(expectedType) + " but was " +
 				getEObjectRepr(feature.EType)

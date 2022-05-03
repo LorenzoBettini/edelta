@@ -888,9 +888,10 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   }
   
   public void checkType(final EStructuralFeature feature, final EClassifier expectedType) {
-    EClassifier _eType = feature.getEType();
-    boolean _tripleNotEquals = (_eType != expectedType);
-    if (_tripleNotEquals) {
+    String _fullyQualifiedName = EdeltaUtils.getFullyQualifiedName(feature.getEType());
+    String _fullyQualifiedName_1 = EdeltaUtils.getFullyQualifiedName(expectedType);
+    boolean _notEquals = (!Objects.equal(_fullyQualifiedName, _fullyQualifiedName_1));
+    if (_notEquals) {
       String _eObjectRepr = EdeltaUtils.getEObjectRepr(expectedType);
       String _plus = ("expecting " + _eObjectRepr);
       String _plus_1 = (_plus + " but was ");
