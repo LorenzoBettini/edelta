@@ -75,7 +75,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    */
   public EAttribute mergeAttributes(final String newAttributeName, final Collection<EAttribute> attributes, final Function<Collection<?>, Object> valueMerger) {
     final EAttribute firstFeature = IterableExtensions.<EAttribute>head(attributes);
-    final EAttribute mergedFeature = this.<EAttribute>mergeFeatures(newAttributeName, attributes);
+    final EAttribute mergedAttribute = this.<EAttribute>mergeFeatures(newAttributeName, attributes);
     final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
       final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
         final Function1<EAttribute, Object> _function_2 = (EAttribute a) -> {
@@ -83,13 +83,13 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
         };
         Iterable<Object> oldValues = IterableExtensions.<EAttribute, Object>map(attributes, _function_2);
         Object mergedValue = valueMerger.apply(IterableExtensions.<Object>toList(oldValues));
-        newObj.eSet(mergedFeature, mergedValue);
+        newObj.eSet(mergedAttribute, mergedValue);
       };
       it.copyRule(
         it.<EStructuralFeature>wasRelatedTo(firstFeature), _function_1);
     };
     this.modelMigration(_function);
-    return mergedFeature;
+    return mergedAttribute;
   }
   
   /**
@@ -105,7 +105,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    */
   public EReference mergeReferences(final String newReferenceName, final Collection<EReference> references, final Function<Collection<EObject>, EObject> valueMerger, final Runnable postCopy) {
     final EReference firstFeature = IterableExtensions.<EReference>head(references);
-    final EReference mergedFeature = this.<EReference>mergeFeatures(newReferenceName, references);
+    final EReference mergedReference = this.<EReference>mergeFeatures(newReferenceName, references);
     final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
       final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
         final Function<EReference, EReference> _function_2 = (EReference a) -> {
@@ -117,13 +117,13 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
         };
         List<EObject> oldValues = originalFeatures.<EObject>map(_function_3).collect(Collectors.<EObject>toList());
         EObject merged = valueMerger.apply(it.<EObject>getMigrated(oldValues));
-        newObj.eSet(mergedFeature, merged);
+        newObj.eSet(mergedReference, merged);
       };
       it.copyRule(
         it.<EStructuralFeature>wasRelatedTo(firstFeature), _function_1, postCopy);
     };
     this.modelMigration(_function);
-    return mergedFeature;
+    return mergedReference;
   }
   
   /**

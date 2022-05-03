@@ -48,7 +48,7 @@ def mergeAttributes(String newAttributeName, Collection<EAttribute> attributes,
 	Function<Collection<?>, Object> valueMerger
 ) : EAttribute {
 	val firstFeature = attributes.head
-	val mergedFeature = mergeFeatures(newAttributeName, attributes)
+	val mergedAttribute = mergeFeatures(newAttributeName, attributes)
 	modelMigration[
 		copyRule(
 			wasRelatedTo(firstFeature),
@@ -56,11 +56,11 @@ def mergeAttributes(String newAttributeName, Collection<EAttribute> attributes,
 				var oldValues = attributes
 					.map[a | oldObj.eGet(getOriginal(a))]
 				var mergedValue = valueMerger.apply(oldValues.toList)
-				newObj.eSet(mergedFeature, mergedValue)
+				newObj.eSet(mergedAttribute, mergedValue)
 			]
 		)
 	]
-	return mergedFeature
+	return mergedAttribute
 }
 
 /**
@@ -77,7 +77,7 @@ def mergeAttributes(String newAttributeName, Collection<EAttribute> attributes,
 def mergeReferences(String newReferenceName, Collection<EReference> references,
 		Function<Collection<EObject>, EObject> valueMerger, Runnable postCopy) : EReference {
 	val firstFeature = references.head
-	val mergedFeature = mergeFeatures(newReferenceName, references)
+	val mergedReference = mergeFeatures(newReferenceName, references)
 	modelMigration[
 		copyRule(
 			wasRelatedTo(firstFeature),
@@ -89,12 +89,12 @@ def mergeReferences(String newReferenceName, Collection<EReference> references,
 						.map[f | oldObj.getValueAsEObject(f)]
 						.collect(Collectors.toList())
 				var merged = valueMerger.apply(getMigrated(oldValues))
-				newObj.eSet(mergedFeature, merged)
+				newObj.eSet(mergedReference, merged)
 			],
 			postCopy
 		)
 	]
-	return mergedFeature
+	return mergedReference
 }
 
 /**
