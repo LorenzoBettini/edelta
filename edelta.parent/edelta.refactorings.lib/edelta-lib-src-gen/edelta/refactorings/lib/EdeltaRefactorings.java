@@ -78,16 +78,12 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     final EAttribute mergedFeature = this.<EAttribute>mergeFeatures(newAttributeName, attributes);
     final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
       final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
-        final Function<EAttribute, EAttribute> _function_2 = (EAttribute a) -> {
-          return it.<EAttribute>getOriginal(a);
+        final Function1<EAttribute, Object> _function_2 = (EAttribute a) -> {
+          return oldObj.eGet(it.<EAttribute>getOriginal(a));
         };
-        Stream<EAttribute> originalFeatures = attributes.stream().<EAttribute>map(_function_2);
-        final Function<EAttribute, Object> _function_3 = (EAttribute f) -> {
-          return oldObj.eGet(f);
-        };
-        List<Object> oldValues = originalFeatures.<Object>map(_function_3).collect(Collectors.<Object>toList());
-        Object merged = valueMerger.apply(oldValues);
-        newObj.eSet(mergedFeature, merged);
+        Iterable<Object> oldValues = IterableExtensions.<EAttribute, Object>map(attributes, _function_2);
+        Object mergedValue = valueMerger.apply(IterableExtensions.<Object>toList(oldValues));
+        newObj.eSet(mergedFeature, mergedValue);
       };
       it.copyRule(
         it.<EStructuralFeature>wasRelatedTo(firstFeature), _function_1);

@@ -53,13 +53,10 @@ def mergeAttributes(String newAttributeName, Collection<EAttribute> attributes,
 		copyRule(
 			wasRelatedTo(firstFeature),
 			[feature, oldObj, newObj |
-				var originalFeatures = attributes.stream()
-						.map[a | getOriginal(a)]
-				var oldValues = originalFeatures
-						.map[f | oldObj.eGet(f)]
-						.collect(Collectors.toList())
-				var merged = valueMerger.apply(oldValues)
-				newObj.eSet(mergedFeature, merged)
+				var oldValues = attributes
+					.map[a | oldObj.eGet(getOriginal(a))]
+				var mergedValue = valueMerger.apply(oldValues.toList)
+				newObj.eSet(mergedFeature, mergedValue)
 			]
 		)
 	]
