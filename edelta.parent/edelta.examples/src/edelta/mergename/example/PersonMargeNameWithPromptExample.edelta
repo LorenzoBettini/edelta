@@ -4,6 +4,7 @@ import edelta.refactorings.lib.EdeltaRefactoringsWithPrompt
 // otherwise you can't refer to them
 package edelta.mergename.example
 
+metamodel "ecore"
 metamodel "addressbook"
 
 use EdeltaRefactoringsWithPrompt as extension refactorings

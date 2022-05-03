@@ -27,6 +27,7 @@ public class PersonMargeNameWithPromptExample extends EdeltaDefaultRuntime {
   
   @Override
   public void performSanityChecks() throws Exception {
+    ensureEPackageIsLoaded("ecore");
     ensureEPackageIsLoaded("addressbook");
   }
   
