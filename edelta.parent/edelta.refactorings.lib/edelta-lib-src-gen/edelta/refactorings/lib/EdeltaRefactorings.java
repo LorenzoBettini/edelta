@@ -887,6 +887,20 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     }
   }
   
+  public void checkType(final EStructuralFeature feature, final EClassifier expectedType) {
+    EClassifier _eType = feature.getEType();
+    boolean _tripleNotEquals = (_eType != expectedType);
+    if (_tripleNotEquals) {
+      String _eObjectRepr = EdeltaUtils.getEObjectRepr(expectedType);
+      String _plus = ("expecting " + _eObjectRepr);
+      String _plus_1 = (_plus + " but was ");
+      String _eObjectRepr_1 = EdeltaUtils.getEObjectRepr(feature.getEType());
+      final String message = (_plus_1 + _eObjectRepr_1);
+      this.showError(feature, message);
+      throw new IllegalArgumentException(message);
+    }
+  }
+  
   /**
    * Makes sure the passed EClasses have no features, if not, shows
    * error information and throws an IllegalArgumentException.

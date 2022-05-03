@@ -28,6 +28,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -1876,6 +1877,15 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 			ERROR: p.C.refToC: Not a containment reference: p.C.refToC
 			"""
 			);
+	}
+
+	@Test
+	void test_checkType() {
+		refactorings.checkType(EcorePackage.Literals.ENAMED_ELEMENT__NAME, stringDataType);
+		assertThrowsIAE(() -> refactorings.checkType(EcorePackage.Literals.ENAMED_ELEMENT__NAME, intDataType));
+		assertEquals(
+			"ERROR: ecore.ENamedElement.name: expecting ecore.EInt but was ecore.EString\n"
+			, appender.getResult());
 	}
 
 	private static IllegalArgumentException assertThrowsIAE(Executable executable) {

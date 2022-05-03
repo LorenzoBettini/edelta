@@ -825,6 +825,16 @@ def checkCompliant(EStructuralFeature feature, Collection<? extends EStructuralF
 	}
 }
 
+def checkType(EStructuralFeature feature, EClassifier expectedType) : void {
+	if (feature.EType !== expectedType) {
+		val message =
+			"expecting " + getEObjectRepr(expectedType) + " but was " +
+				getEObjectRepr(feature.EType)
+		showError(feature, message)
+		throw new IllegalArgumentException(message)
+	}
+}
+
 /**
  * Makes sure the passed EClasses have no features, if not, shows
  * error information and throws an IllegalArgumentException.
