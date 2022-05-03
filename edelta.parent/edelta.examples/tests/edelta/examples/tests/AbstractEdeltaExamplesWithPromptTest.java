@@ -9,6 +9,8 @@ import java.io.PrintStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
+import edelta.refactorings.lib.helper.EdeltaPromptHelper;
+
 public abstract class AbstractEdeltaExamplesWithPromptTest extends AbstractEdeltaExamplesTest {
 
 	private ByteArrayOutputStream outContent;
@@ -28,6 +30,7 @@ public abstract class AbstractEdeltaExamplesWithPromptTest extends AbstractEdelt
 
 	@AfterEach
 	void resetStreams() throws IOException {
+		EdeltaPromptHelper.close();
 		System.setOut(originalOut);
 		System.setErr(originalErr);
 		System.setIn(originalIn);

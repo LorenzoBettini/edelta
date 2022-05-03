@@ -24,6 +24,7 @@ import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import edelta.refactorings.lib.EdeltaRefactoringsWithPrompt;
+import edelta.refactorings.lib.helper.EdeltaPromptHelper;
 import edelta.testutils.EdeltaTestUtils;
 
 class EdeltaRefactoringsWithPromptTest extends AbstractEdeltaRefactoringsLibTest {
@@ -60,6 +61,7 @@ class EdeltaRefactoringsWithPromptTest extends AbstractEdeltaRefactoringsLibTest
 	 */
 	@AfterEach
 	void tearDown() throws IOException {
+		EdeltaPromptHelper.close();
 		System.setOut(originalOut);
 		System.setErr(originalErr);
 		System.setIn(originalIn);
