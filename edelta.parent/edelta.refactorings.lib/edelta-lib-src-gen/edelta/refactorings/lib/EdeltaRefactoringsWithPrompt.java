@@ -47,6 +47,16 @@ public class EdeltaRefactoringsWithPrompt extends EdeltaDefaultRuntime {
     return this.refactorings.introduceSubclasses(superClass, names, _function);
   }
   
+  /**
+   * Merges the given attributes, expected to be of type EString,
+   * into a single new attribute in the containing class; For model migration it
+   * prompts the user on the console.
+   * 
+   * @see EdeltaRefactorings#mergeAttributes(String, Collection, Function)
+   * 
+   * @param newAttributeName
+   * @param attributes
+   */
   public EAttribute mergeStringAttributes(final String newAttributeName, final Collection<EAttribute> attributes) {
     EAttribute _xblockexpression = null;
     {

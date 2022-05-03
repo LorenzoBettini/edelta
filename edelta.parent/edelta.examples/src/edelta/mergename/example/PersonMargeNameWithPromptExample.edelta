@@ -4,7 +4,11 @@ import edelta.refactorings.lib.EdeltaRefactoringsWithPrompt
 // otherwise you can't refer to them
 package edelta.mergename.example
 
+// importing Ecore is required for compilation in Maven
+// otherwise the type of the passed feature is not resolved
+// when interpreting the call to mergeStringAttributes
 metamodel "ecore"
+
 metamodel "addressbook"
 
 use EdeltaRefactoringsWithPrompt as extension refactorings

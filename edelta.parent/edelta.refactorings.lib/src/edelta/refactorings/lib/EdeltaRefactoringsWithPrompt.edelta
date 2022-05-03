@@ -32,6 +32,16 @@ def introduceSubclassesInteractive(EClass superClass, List<String> names) : Coll
 	]
 }
 
+/**
+ * Merges the given attributes, expected to be of type EString,
+ * into a single new attribute in the containing class; For model migration it
+ * prompts the user on the console.
+ * 
+ * @see EdeltaRefactorings#mergeAttributes(String, Collection, Function)
+ * 
+ * @param newAttributeName
+ * @param attributes
+ */
 def mergeStringAttributes(String newAttributeName, Collection<EAttribute> attributes) : EAttribute {
 	refactorings.checkType(attributes.head, ecoreref(EString))
 	refactorings.mergeAttributes(
