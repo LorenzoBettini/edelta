@@ -3,6 +3,7 @@ import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder
 import java.util.Collection
 import java.util.HashMap
 import java.util.List
+import java.util.function.Function
 import java.util.function.Predicate
 import java.util.stream.Collectors
 import org.eclipse.emf.ecore.EAttribute
@@ -34,14 +35,78 @@ def addMandatoryReference(EClass eClass, String referenceName, EClass type): ERe
 }
 
 /**
+ * Merges the given attributes into a single new attribute in the containing class.
+ * The attributes must be compatible (same containing class, same type, same cardinality, etc).
+ * 
+ * @param newAttributeName
+ * @param attributes
+ * @param valueMerger is used to merge the values of the original
+ * features in the new model
+ * @return the new attribute added to the containing class of the attributes
+ */
+def mergeAttributes(String newAttributeName, Collection<EAttribute> attributes,
+	Function<Collection<?>, Object> valueMerger
+) : EAttribute {
+	val firstFeature = attributes.head
+	val mergedAttribute = mergeFeatures(newAttributeName, attributes)
+	modelMigration[
+		copyRule(
+			wasRelatedTo(firstFeature),
+			[feature, oldObj, newObj |
+				var oldValues = attributes
+					.map[a | oldObj.eGet(getOriginal(a))]
+				var mergedValue = valueMerger.apply(oldValues.toList)
+				newObj.eSet(mergedAttribute, mergedValue)
+			]
+		)
+	]
+	return mergedAttribute
+}
+
+/**
+ * Merges the given references into a single new reference in the containing class.
+ * The references must be compatible (same containing class, same type, same cardinality, etc).
+ * 
+ * @param newReferenceName
+ * @param references
+ * @param valueMerger if not null, it is used to merge the values of the original
+ * features in the new model
+ * @param postCopy executed after the model migrations
+ * @return the new reference added to the containing class of the references
+ */
+def mergeReferences(String newReferenceName, Collection<EReference> references,
+		Function<Collection<EObject>, EObject> valueMerger, Runnable postCopy) : EReference {
+	val firstFeature = references.head
+	val mergedReference = mergeFeatures(newReferenceName, references)
+	modelMigration[
+		copyRule(
+			wasRelatedTo(firstFeature),
+			[feature, oldObj, newObj |
+				var originalFeatures = references.stream()
+						.map[a | getOriginal(a)]
+				// for references we must get the copied EObject
+				var oldValues = originalFeatures
+						.map[f | oldObj.getValueAsEObject(f)]
+						.collect(Collectors.toList())
+				var merged = valueMerger.apply(getMigrated(oldValues))
+				newObj.eSet(mergedReference, merged)
+			],
+			postCopy
+		)
+	]
+	return mergedReference
+}
+
+/**
  * Merges the given features into a single new feature in the containing class.
  * The features must be compatible (same containing class, same type, same cardinality, etc).
  * 
+ * @param <T>
  * @param newFeatureName
  * @param features
  * @return the new feature added to the containing class of the features
  */
-def mergeFeatures(String newFeatureName, Collection<EStructuralFeature> features) : EStructuralFeature {
+def <T extends EStructuralFeature> mergeFeatures(String newFeatureName, Collection<T> features) : T {
 	checkNoDifferences(
 		features,
 		new EdeltaFeatureDifferenceFinder().ignoringName,
@@ -87,6 +152,104 @@ def mergeFeatures(String newFeatureName, EClassifier type, Collection<EStructura
 	val copy = feature.copyToAs(owner, newFeatureName, type)
 	mergeFeatures(copy, features)
 	return copy
+}
+
+/**
+ * Split the given attribute into several attributes with the same type
+ * as the original one, using the specified names. The original attribute
+ * will be removed. The passed valueSplitter is used to migrate the
+ * original object into the corresponding split ones.
+ * 
+ * @param attribute
+ * @param newNames
+ * @param valueSplitter
+ * @return the collection of features
+ */
+def splitAttribute(EAttribute attribute, Collection<String> newNames,
+		Function<Object, Collection<?>> valueSplitter) :
+		Collection<EAttribute> {
+	val splitAttributes = splitFeature(attribute, newNames)
+	modelMigration[
+		copyRule(
+			wasRelatedTo(attribute),
+			[feature, oldObj, newObj |
+				var oldValue = oldObj.eGet(feature)
+				var splittedValues = valueSplitter
+					.apply(oldValue).iterator()
+				for (splitFeature : splitAttributes) {
+					if (!splittedValues.hasNext())
+						return;
+					newObj.eSet(splitFeature, splittedValues.next())
+				}
+			]
+		)
+	]
+	return splitAttributes
+}
+
+/**
+ * Split the given reference into several references with the same type
+ * as the original one, using the specified names. The original reference
+ * will be removed. The passed valueSplitter is used to migrate the
+ * original object into the corresponding split ones.
+ * 
+ * @param reference
+ * @param newNames
+ * @param valueSplitter
+ * @param postCopy executed after the model migrations
+ * @return the collection of features
+ */
+def splitReference(EReference reference,
+			Collection<String> newNames,
+			Function<EObject, Collection<EObject>> valueSplitter,
+			Runnable postCopy) :
+		Collection<EReference> {
+	val splitReferences = splitFeature(reference, newNames)
+	modelMigration[
+		copyRule(
+			wasRelatedTo(reference),
+			[feature, oldObj, newObj |
+				// for references we must get the migrated EObject
+				var oldValue = getMigrated(
+					getValueAsEObject(oldObj, feature))
+				var splittedValues = valueSplitter
+					.apply(oldValue).iterator()
+				for (splitFeature : splitReferences) {
+					if (!splittedValues.hasNext())
+						return;
+					newObj.eSet(splitFeature, splittedValues.next())
+				}
+			],
+			postCopy
+		)
+	]
+	return splitReferences
+}
+
+/**
+ * Split the given feature into several features with the same type
+ * as the original one, using the specified names. The original feature
+ * will be removed.
+ * 
+ * @param <T>
+ * @param featureToSplit
+ * @param newFeatureNames
+ * @return the collection of features
+ */
+def <T extends EStructuralFeature> splitFeature(T featureToSplit,
+		Collection<String> newFeatureNames) : Collection<T> {
+	checkNotMany(featureToSplit,
+		"Cannot split 'many' feature")
+	checkNoBidirectionalReferences(#[featureToSplit],
+		"Cannot split a bidirectional reference")
+	val owner = featureToSplit.EContainingClass
+	var splitFeatures = newFeatureNames.stream()
+		.map[newName |
+			copyToAs(featureToSplit, owner, newName)
+		]
+		.collect(Collectors.toList())
+	removeElement(featureToSplit)
+	return splitFeatures;
 }
 
 /**
@@ -657,6 +820,18 @@ def checkCompliant(EStructuralFeature feature, Collection<? extends EStructuralF
 			"features not compliant with type " + getEObjectRepr(feature.EType) + ":\n" +
 				nonCompliant
 					.map["  " + getEObjectRepr(it) + ": " + getEObjectRepr(EType)].join("\n")
+		showError(feature, message)
+		throw new IllegalArgumentException(message)
+	}
+}
+
+def checkType(EStructuralFeature feature, EClassifier expectedType) : void {
+	// don't rely on equality because in the interpreter the types
+	// might be loaded from different Ecore models
+	if (feature.EType.fullyQualifiedName != expectedType.fullyQualifiedName) {
+		val message =
+			"expecting " + getEObjectRepr(expectedType) + " but was " +
+				getEObjectRepr(feature.EType)
 		showError(feature, message)
 		throw new IllegalArgumentException(message)
 	}

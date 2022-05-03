@@ -8,8 +8,12 @@ import edelta.refactorings.lib.helper.EdeltaEObjectHelper;
 import edelta.refactorings.lib.helper.EdeltaPromptHelper;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtext.xbase.lib.Functions.Function1;
+import org.eclipse.xtext.xbase.lib.IterableExtensions;
 
 @SuppressWarnings("all")
 public class EdeltaRefactoringsWithPrompt extends EdeltaDefaultRuntime {
@@ -41,6 +45,41 @@ public class EdeltaRefactoringsWithPrompt extends EdeltaDefaultRuntime {
       return EdeltaEcoreUtil.createInstance(this.getEClass(superClass.getEPackage(), choice));
     };
     return this.refactorings.introduceSubclasses(superClass, names, _function);
+  }
+  
+  /**
+   * Merges the given attributes, expected to be of type EString,
+   * into a single new attribute in the containing class; For model migration it
+   * prompts the user on the console.
+   * 
+   * @see EdeltaRefactorings#mergeAttributes(String, Collection, Function)
+   * 
+   * @param newAttributeName
+   * @param attributes
+   */
+  public EAttribute mergeStringAttributes(final String newAttributeName, final Collection<EAttribute> attributes) {
+    EAttribute _xblockexpression = null;
+    {
+      EAttribute _head = IterableExtensions.<EAttribute>head(attributes);
+      this.refactorings.checkType(_head, getEDataType("ecore", "EString"));
+      final Function<Collection<?>, Object> _function = (Collection<?> oldValues) -> {
+        final Function1<Object, String> _function_1 = (Object it) -> {
+          return it.toString();
+        };
+        final Iterable<String> stringValues = IterableExtensions.map(IterableExtensions.filterNull(oldValues), _function_1);
+        boolean _isEmpty = IterableExtensions.isEmpty(stringValues);
+        if (_isEmpty) {
+          return null;
+        }
+        String _join = IterableExtensions.join(stringValues, ", ");
+        String _plus = ("Merging values: " + _join);
+        EdeltaPromptHelper.show(_plus);
+        final String sep = EdeltaPromptHelper.ask("Separator?");
+        return IterableExtensions.join(stringValues, sep);
+      };
+      _xblockexpression = this.refactorings.mergeAttributes(newAttributeName, attributes, _function);
+    }
+    return _xblockexpression;
   }
   
   @Override

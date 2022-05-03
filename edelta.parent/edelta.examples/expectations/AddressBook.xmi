@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addressbook:AddressBook
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:addressbook="http://addressbook"
+    xsi:schemaLocation="http://addressbook AddressBook.ecore">
+  <persons name="Ludovico Iovino"/>
+  <persons name="Davide Di Ruscio"/>
+  <persons name="Lorenzo Bettini"/>
+</addressbook:AddressBook>

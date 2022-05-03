@@ -21,7 +21,7 @@ public class ChangeReferenceTypeManualExample extends EdeltaDefaultRuntime {
   public void exampleOfChangeReferenceType(final EPackage it) {
     final EAttribute nameElementValue = getEAttribute("PersonListForChangeType", "NameElement", "nameElementValue");
     final EClass otherNameElement = this.stdLib.addNewEClassAsSibling(getEClass("PersonListForChangeType", "NameElement"), "OtherNameElement");
-    final EStructuralFeature otherNameElementValue = this.stdLib.copyToAs(
+    final EAttribute otherNameElementValue = this.stdLib.<EAttribute>copyToAs(
       getEAttribute("PersonListForChangeType", "NameElement", "nameElementValue"), otherNameElement, 
       "otherNameElementValue");
     final EReference firstName = getEReference("PersonListForChangeType", "Person", "firstName");

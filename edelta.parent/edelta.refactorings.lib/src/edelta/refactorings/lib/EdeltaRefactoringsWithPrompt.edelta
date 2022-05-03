@@ -2,6 +2,7 @@ import edelta.refactorings.lib.helper.EdeltaEObjectHelper
 import edelta.refactorings.lib.helper.EdeltaPromptHelper
 import java.util.Collection
 import java.util.List
+import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 
 package edelta.refactorings.lib
@@ -29,4 +30,32 @@ def introduceSubclassesInteractive(EClass superClass, List<String> names) : Coll
 		val choice = EdeltaPromptHelper.choice(names)
 		return createInstance(superClass.EPackage.getEClass(choice))
 	]
+}
+
+/**
+ * Merges the given attributes, expected to be of type EString,
+ * into a single new attribute in the containing class; For model migration it
+ * prompts the user on the console.
+ * 
+ * @see EdeltaRefactorings#mergeAttributes(String, Collection, Function)
+ * 
+ * @param newAttributeName
+ * @param attributes
+ */
+def mergeStringAttributes(String newAttributeName, Collection<EAttribute> attributes) : EAttribute {
+	refactorings.checkType(attributes.head, ecoreref(EString))
+	refactorings.mergeAttributes(
+		newAttributeName,
+		attributes,
+		[oldValues|
+			val stringValues = oldValues.filterNull.map[toString]
+			if (stringValues.empty)
+				return null
+			EdeltaPromptHelper.show("Merging values: " +
+				(stringValues).join(", ")
+			)
+			val sep = EdeltaPromptHelper.ask("Separator?")
+			return stringValues.join(sep)
+		]
+	)
 }

@@ -11,6 +11,7 @@ import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +19,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -62,20 +64,84 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   }
   
   /**
+   * Merges the given attributes into a single new attribute in the containing class.
+   * The attributes must be compatible (same containing class, same type, same cardinality, etc).
+   * 
+   * @param newAttributeName
+   * @param attributes
+   * @param valueMerger is used to merge the values of the original
+   * features in the new model
+   * @return the new attribute added to the containing class of the attributes
+   */
+  public EAttribute mergeAttributes(final String newAttributeName, final Collection<EAttribute> attributes, final Function<Collection<?>, Object> valueMerger) {
+    final EAttribute firstFeature = IterableExtensions.<EAttribute>head(attributes);
+    final EAttribute mergedAttribute = this.<EAttribute>mergeFeatures(newAttributeName, attributes);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
+        final Function1<EAttribute, Object> _function_2 = (EAttribute a) -> {
+          return oldObj.eGet(it.<EAttribute>getOriginal(a));
+        };
+        Iterable<Object> oldValues = IterableExtensions.<EAttribute, Object>map(attributes, _function_2);
+        Object mergedValue = valueMerger.apply(IterableExtensions.<Object>toList(oldValues));
+        newObj.eSet(mergedAttribute, mergedValue);
+      };
+      it.copyRule(
+        it.<EStructuralFeature>wasRelatedTo(firstFeature), _function_1);
+    };
+    this.modelMigration(_function);
+    return mergedAttribute;
+  }
+  
+  /**
+   * Merges the given references into a single new reference in the containing class.
+   * The references must be compatible (same containing class, same type, same cardinality, etc).
+   * 
+   * @param newReferenceName
+   * @param references
+   * @param valueMerger if not null, it is used to merge the values of the original
+   * features in the new model
+   * @param postCopy executed after the model migrations
+   * @return the new reference added to the containing class of the references
+   */
+  public EReference mergeReferences(final String newReferenceName, final Collection<EReference> references, final Function<Collection<EObject>, EObject> valueMerger, final Runnable postCopy) {
+    final EReference firstFeature = IterableExtensions.<EReference>head(references);
+    final EReference mergedReference = this.<EReference>mergeFeatures(newReferenceName, references);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
+        final Function<EReference, EReference> _function_2 = (EReference a) -> {
+          return it.<EReference>getOriginal(a);
+        };
+        Stream<EReference> originalFeatures = references.stream().<EReference>map(_function_2);
+        final Function<EReference, EObject> _function_3 = (EReference f) -> {
+          return EdeltaEcoreUtil.getValueAsEObject(oldObj, f);
+        };
+        List<EObject> oldValues = originalFeatures.<EObject>map(_function_3).collect(Collectors.<EObject>toList());
+        EObject merged = valueMerger.apply(it.<EObject>getMigrated(oldValues));
+        newObj.eSet(mergedReference, merged);
+      };
+      it.copyRule(
+        it.<EStructuralFeature>wasRelatedTo(firstFeature), _function_1, postCopy);
+    };
+    this.modelMigration(_function);
+    return mergedReference;
+  }
+  
+  /**
    * Merges the given features into a single new feature in the containing class.
    * The features must be compatible (same containing class, same type, same cardinality, etc).
    * 
+   * @param <T>
    * @param newFeatureName
    * @param features
    * @return the new feature added to the containing class of the features
    */
-  public EStructuralFeature mergeFeatures(final String newFeatureName, final Collection<EStructuralFeature> features) {
+  public <T extends EStructuralFeature> T mergeFeatures(final String newFeatureName, final Collection<T> features) {
     this.checkNoDifferences(features, 
       new EdeltaFeatureDifferenceFinder().ignoringName(), 
       "The two features cannot be merged");
-    final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
+    final T feature = IterableExtensions.<T>head(features);
     final EClass owner = feature.getEContainingClass();
-    final EStructuralFeature copy = this.stdLib.copyToAs(feature, owner, newFeatureName);
+    final T copy = this.stdLib.<T>copyToAs(feature, owner, newFeatureName);
     EdeltaUtils.removeAllElements(features);
     return copy;
   }
@@ -110,9 +176,105 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   public EStructuralFeature mergeFeatures(final String newFeatureName, final EClassifier type, final Collection<EStructuralFeature> features) {
     final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
     final EClass owner = feature.getEContainingClass();
-    final EStructuralFeature copy = this.stdLib.copyToAs(feature, owner, newFeatureName, type);
+    final EStructuralFeature copy = this.stdLib.<EStructuralFeature>copyToAs(feature, owner, newFeatureName, type);
     this.mergeFeatures(copy, features);
     return copy;
+  }
+  
+  /**
+   * Split the given attribute into several attributes with the same type
+   * as the original one, using the specified names. The original attribute
+   * will be removed. The passed valueSplitter is used to migrate the
+   * original object into the corresponding split ones.
+   * 
+   * @param attribute
+   * @param newNames
+   * @param valueSplitter
+   * @return the collection of features
+   */
+  public Collection<EAttribute> splitAttribute(final EAttribute attribute, final Collection<String> newNames, final Function<Object, Collection<?>> valueSplitter) {
+    final Collection<EAttribute> splitAttributes = this.<EAttribute>splitFeature(attribute, newNames);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
+        Object oldValue = oldObj.eGet(feature);
+        Iterator<?> splittedValues = valueSplitter.apply(oldValue).iterator();
+        for (final EAttribute splitFeature : splitAttributes) {
+          {
+            boolean _hasNext = splittedValues.hasNext();
+            boolean _not = (!_hasNext);
+            if (_not) {
+              return;
+            }
+            newObj.eSet(splitFeature, splittedValues.next());
+          }
+        }
+      };
+      it.copyRule(
+        it.<EStructuralFeature>wasRelatedTo(attribute), _function_1);
+    };
+    this.modelMigration(_function);
+    return splitAttributes;
+  }
+  
+  /**
+   * Split the given reference into several references with the same type
+   * as the original one, using the specified names. The original reference
+   * will be removed. The passed valueSplitter is used to migrate the
+   * original object into the corresponding split ones.
+   * 
+   * @param reference
+   * @param newNames
+   * @param valueSplitter
+   * @param postCopy executed after the model migrations
+   * @return the collection of features
+   */
+  public Collection<EReference> splitReference(final EReference reference, final Collection<String> newNames, final Function<EObject, Collection<EObject>> valueSplitter, final Runnable postCopy) {
+    final Collection<EReference> splitReferences = this.<EReference>splitFeature(reference, newNames);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
+        EObject oldValue = it.getMigrated(
+          EdeltaEcoreUtil.getValueAsEObject(oldObj, feature));
+        Iterator<EObject> splittedValues = valueSplitter.apply(oldValue).iterator();
+        for (final EReference splitFeature : splitReferences) {
+          {
+            boolean _hasNext = splittedValues.hasNext();
+            boolean _not = (!_hasNext);
+            if (_not) {
+              return;
+            }
+            newObj.eSet(splitFeature, splittedValues.next());
+          }
+        }
+      };
+      it.copyRule(
+        it.<EStructuralFeature>wasRelatedTo(reference), _function_1, postCopy);
+    };
+    this.modelMigration(_function);
+    return splitReferences;
+  }
+  
+  /**
+   * Split the given feature into several features with the same type
+   * as the original one, using the specified names. The original feature
+   * will be removed.
+   * 
+   * @param <T>
+   * @param featureToSplit
+   * @param newFeatureNames
+   * @return the collection of features
+   */
+  public <T extends EStructuralFeature> Collection<T> splitFeature(final T featureToSplit, final Collection<String> newFeatureNames) {
+    this.checkNotMany(featureToSplit, 
+      "Cannot split \'many\' feature");
+    this.checkNoBidirectionalReferences(Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(featureToSplit)), 
+      "Cannot split a bidirectional reference");
+    final EClass owner = featureToSplit.getEContainingClass();
+    final Function<String, T> _function = (String newName) -> {
+      return this.stdLib.<T>copyToAs(featureToSplit, owner, newName);
+    };
+    List<T> splitFeatures = newFeatureNames.stream().<T>map(_function).collect(Collectors.<T>toList());
+    EdeltaUtils.removeElement(featureToSplit);
+    return splitFeatures;
   }
   
   /**
@@ -492,7 +654,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       return it.getEContainingClass();
     };
     this.checkAllDirectSubclasses(dest, IterableExtensions.<EClass>toList(IterableExtensions.<EStructuralFeature, EClass>map(duplicates, _function)));
-    final EStructuralFeature pulledUp = this.stdLib.copyTo(IterableExtensions.<EStructuralFeature>head(duplicates), dest);
+    final EStructuralFeature pulledUp = this.stdLib.<EStructuralFeature>copyTo(IterableExtensions.<EStructuralFeature>head(duplicates), dest);
     EdeltaUtils.removeAllElements(duplicates);
     final Consumer<EdeltaModelMigrator> _function_1 = (EdeltaModelMigrator it) -> {
       it.mapFeaturesRule(duplicates, pulledUp);
@@ -720,6 +882,21 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       };
       String _join = IterableExtensions.join(IterableExtensions.map(nonCompliant, _function_3), "\n");
       final String message = (_plus_1 + _join);
+      this.showError(feature, message);
+      throw new IllegalArgumentException(message);
+    }
+  }
+  
+  public void checkType(final EStructuralFeature feature, final EClassifier expectedType) {
+    String _fullyQualifiedName = EdeltaUtils.getFullyQualifiedName(feature.getEType());
+    String _fullyQualifiedName_1 = EdeltaUtils.getFullyQualifiedName(expectedType);
+    boolean _notEquals = (!Objects.equal(_fullyQualifiedName, _fullyQualifiedName_1));
+    if (_notEquals) {
+      String _eObjectRepr = EdeltaUtils.getEObjectRepr(expectedType);
+      String _plus = ("expecting " + _eObjectRepr);
+      String _plus_1 = (_plus + " but was ");
+      String _eObjectRepr_1 = EdeltaUtils.getEObjectRepr(feature.getEType());
+      final String message = (_plus_1 + _eObjectRepr_1);
       this.showError(feature, message);
       throw new IllegalArgumentException(message);
     }
