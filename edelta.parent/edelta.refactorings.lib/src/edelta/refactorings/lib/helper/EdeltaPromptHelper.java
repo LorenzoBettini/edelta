@@ -44,7 +44,6 @@ public class EdeltaPromptHelper {
 		for (String choice : choices) {
 			show("  " + ++i + " " + choice);
 		}
-		ensureScannerIsSet();
 		while (true) {
 			var chosen = ask("Choice?");
 			try {
@@ -60,6 +59,7 @@ public class EdeltaPromptHelper {
 	}
 
 	public static String ask(String question) {
+		ensureScannerIsSet();
 		showNoNl(question + " ");
 		return scanner.nextLine();
 	}
