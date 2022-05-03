@@ -46,8 +46,7 @@ public class EdeltaPromptHelper {
 		}
 		ensureScannerIsSet();
 		while (true) {
-			showNoNl("Choice? ");
-			var chosen = scanner.nextLine();
+			var chosen = ask("Choice?");
 			try {
 				int selectedNum = Integer.parseInt(chosen);
 				if (selectedNum <= 0 || selectedNum > choices.size())
@@ -58,6 +57,11 @@ public class EdeltaPromptHelper {
 				showError("Not a valid number: " + chosen);
 			}
 		}
+	}
+
+	public static String ask(String question) {
+		showNoNl(question + " ");
+		return scanner.nextLine();
 	}
 
 	/**
