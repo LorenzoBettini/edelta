@@ -1,0 +1,16 @@
+import edelta.refactorings.lib.EdeltaRefactoringsWithPrompt
+
+// IMPORTANT: ecores must be in a source directory
+// otherwise you can't refer to them
+package edelta.mergename.example
+
+metamodel "addressbook"
+
+use EdeltaRefactoringsWithPrompt as extension refactorings
+
+modifyEcore mergeName epackage addressbook {
+	refactorings.mergeStringAttributes(
+		"name",
+		#[ecoreref(firstname), ecoreref(lastname)]
+	)
+}
