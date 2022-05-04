@@ -468,6 +468,20 @@ public class EdeltaModelMigrator {
 	}
 
 	/**
+	 * If the passed object is an {@link EObject} delegates to
+	 * {@link #getMigrated(EObject)} otherwise it returns the object itself.
+	 * 
+	 * @param o
+	 * @return
+	 */
+	public Object getMigrated(Object o) {
+		if (o instanceof EObject) {
+			return modelCopier.copy((EObject) o);
+		}
+		return o;
+	}
+
+	/**
 	 * Returns the migrated version of a model object; if
 	 * it hasn't been migrated yet, it will migrate it.
 	 * 
