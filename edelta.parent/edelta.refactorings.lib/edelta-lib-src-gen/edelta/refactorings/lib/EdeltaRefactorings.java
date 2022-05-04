@@ -421,13 +421,11 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
           return EdeltaEcoreUtil.createInstance(extracted);
         };
         EObject extractedObj = EdeltaEcoreUtil.getOrSetEObject(newObj, reference, _function_2);
-        final Object origValue = oldObj.eGet(feature);
-        final EStructuralFeature newFeature = it.<EStructuralFeature>getMigrated(feature);
-        if ((feature instanceof EAttribute)) {
-          extractedObj.eSet(newFeature, origValue);
-        } else {
-          extractedObj.eSet(newFeature, it.getMigrated(((EObject) origValue)));
+        Object origValue = oldObj.eGet(feature);
+        if ((origValue instanceof EObject)) {
+          origValue = it.getMigrated(((EObject)origValue));
         }
+        extractedObj.eSet(it.<EStructuralFeature>getMigrated(feature), origValue);
       };
       it.copyRule(
         it.<EStructuralFeature>wasRelatedToAtLeastOneOf(features), _function_1);
