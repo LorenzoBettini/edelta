@@ -389,11 +389,8 @@ def extractClass(String name, Collection<EStructuralFeature> features) {
 		copyRule(
 			wasRelatedToAtLeastOneOf(features),
 			[feature, oldObj, newObj |
-				var extractedObj = newObj.getValueAsEObject(reference)
-				if (extractedObj === null)
-					extractedObj = extracted.createInstance[ o |
-						newObj.eSet(reference, o)
-					]
+				var extractedObj = newObj.getOrSetEObject(reference,
+						[extracted.createInstance])
 				val origValue = oldObj.eGet(feature)
 				val newFeature = getMigrated(feature)
 				if (feature instanceof EAttribute)

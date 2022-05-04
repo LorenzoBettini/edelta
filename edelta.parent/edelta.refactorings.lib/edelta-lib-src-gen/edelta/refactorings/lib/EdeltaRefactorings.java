@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.eclipse.emf.common.util.EList;
@@ -416,13 +417,10 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     this.stdLib.moveAllTo(features, extracted);
     final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
       final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
-        EObject extractedObj = EdeltaEcoreUtil.getValueAsEObject(newObj, reference);
-        if ((extractedObj == null)) {
-          final Consumer<EObject> _function_2 = (EObject o) -> {
-            newObj.eSet(reference, o);
-          };
-          extractedObj = EdeltaEcoreUtil.createInstance(extracted, _function_2);
-        }
+        final Supplier<EObject> _function_2 = () -> {
+          return EdeltaEcoreUtil.createInstance(extracted);
+        };
+        EObject extractedObj = EdeltaEcoreUtil.getOrSetEObject(newObj, reference, _function_2);
         final Object origValue = oldObj.eGet(feature);
         final EStructuralFeature newFeature = it.<EStructuralFeature>getMigrated(feature);
         if ((feature instanceof EAttribute)) {
