@@ -416,16 +416,16 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     this.makeContainmentBidirectional(reference);
     this.stdLib.moveAllTo(features, extracted);
     final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
-      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature origFeature, EObject origObj, EObject migratedObj) -> {
         final Supplier<EObject> _function_2 = () -> {
           return EdeltaEcoreUtil.createInstance(extracted);
         };
-        EObject extractedObj = EdeltaEcoreUtil.getOrSetEObject(newObj, reference, _function_2);
-        Object origValue = oldObj.eGet(feature);
+        EObject extractedObj = EdeltaEcoreUtil.getOrSetEObject(migratedObj, reference, _function_2);
+        Object origValue = origObj.eGet(origFeature);
         if ((origValue instanceof EObject)) {
           origValue = it.getMigrated(((EObject)origValue));
         }
-        extractedObj.eSet(it.<EStructuralFeature>getMigrated(feature), origValue);
+        extractedObj.eSet(it.<EStructuralFeature>getMigrated(origFeature), origValue);
       };
       it.copyRule(
         it.<EStructuralFeature>wasRelatedToAtLeastOneOf(features), _function_1);
