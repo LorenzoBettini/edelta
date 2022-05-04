@@ -391,10 +391,10 @@ def extractClass(String name, Collection<EStructuralFeature> features) {
 			[origFeature, origObj, migratedObj |
 				var extractedObj = migratedObj.getOrSetEObject(reference,
 						[extracted.createInstance])
-				var origValue = origObj.eGet(origFeature)
-				if (origValue instanceof EObject)
-					origValue = getMigrated(origValue)
-				extractedObj.eSet(getMigrated(origFeature), origValue)
+				extractedObj.eSet(
+					getMigrated(origFeature),
+					getMigrated(origObj.eGet(origFeature))
+				)
 			]
 		)
 	]
