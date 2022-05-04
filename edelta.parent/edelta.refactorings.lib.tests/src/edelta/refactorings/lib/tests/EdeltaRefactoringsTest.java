@@ -1233,7 +1233,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	void test_extractClassWithReferences() throws Exception {
 		var subdir = "extractClassWithReferences/";
 		var ecores = of("PersonList.ecore");
-		var models = List.<String>of(); // of("List.xmi");
+		var models = of("List.xmi");
 
 		var engine = setupEngine(
 			subdir,

@@ -417,6 +417,27 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     };
     final EReference reference = ObjectExtensions.<EReference>operator_doubleArrow(_addMandatoryReference, _function);
     this.stdLib.moveAllTo(features, extracted);
+    final Consumer<EdeltaModelMigrator> _function_1 = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_2 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
+        EObject extractedObj = EdeltaEcoreUtil.getValueAsEObject(newObj, reference);
+        if ((extractedObj == null)) {
+          final Consumer<EObject> _function_3 = (EObject o) -> {
+            newObj.eSet(reference, o);
+          };
+          extractedObj = EdeltaEcoreUtil.createInstance(extracted, _function_3);
+        }
+        final Object origValue = oldObj.eGet(feature);
+        final EStructuralFeature newFeature = it.<EStructuralFeature>getMigrated(feature);
+        if ((feature instanceof EAttribute)) {
+          extractedObj.eSet(newFeature, origValue);
+        } else {
+          extractedObj.eSet(newFeature, it.getMigrated(((EObject) origValue)));
+        }
+      };
+      it.copyRule(
+        it.<EStructuralFeature>wasRelatedToAtLeastOneOf(features), _function_2);
+    };
+    this.modelMigration(_function_1);
     return reference;
   }
   

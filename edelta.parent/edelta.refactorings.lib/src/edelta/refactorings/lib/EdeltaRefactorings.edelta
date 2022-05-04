@@ -386,6 +386,24 @@ def extractClass(String name, Collection<EStructuralFeature> features) {
 		makeContainmentBidirectional
 	]
 	features.moveAllTo(extracted)
+	modelMigration[
+		copyRule(
+			wasRelatedToAtLeastOneOf(features),
+			[feature, oldObj, newObj |
+				var extractedObj = newObj.getValueAsEObject(reference)
+				if (extractedObj === null)
+					extractedObj = extracted.createInstance[ o |
+						newObj.eSet(reference, o)
+					]
+				val origValue = oldObj.eGet(feature)
+				val newFeature = getMigrated(feature)
+				if (feature instanceof EAttribute)
+					extractedObj.eSet(newFeature, origValue)
+				else
+					extractedObj.eSet(newFeature, getMigrated(origValue as EObject))
+			]
+		)
+	]
 	return reference
 }
 
