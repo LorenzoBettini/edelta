@@ -1230,17 +1230,34 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
-	void test_extractClassWithReferences() throws IOException {
-		withInputModels("extractClassWithReferences", "PersonList.ecore");
-		loadEcoreFiles();
-		refactorings.extractClass("WorkAddress",
-			asList(
-				refactorings.getEAttribute("PersonList", "Person", "street"),
-				refactorings.getEReference("PersonList", "Person", "workplace"),
-				refactorings.getEAttribute("PersonList", "Person", "houseNumber"))
-			);
-		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
-		assertModifiedFiles();
+	void test_extractClassWithReferences() throws Exception {
+		var subdir = "extractClassWithReferences/";
+		var ecores = of("PersonList.ecore");
+		var models = List.<String>of(); // of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					extractClass("WorkAddress",
+						asList(
+							getEAttribute("PersonList", "Person", "street"),
+							getEReference("PersonList", "Person", "workplace"),
+							getEAttribute("PersonList", "Person", "houseNumber"))
+						);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test
