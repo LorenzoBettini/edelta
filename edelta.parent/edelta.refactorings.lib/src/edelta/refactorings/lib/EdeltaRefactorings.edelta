@@ -382,9 +382,8 @@ def extractClass(String name, Collection<EStructuralFeature> features) {
 		"Cannot extract bidirectional references")
 	val owner = findSingleOwner(features)
 	val extracted = owner.addNewEClassAsSibling(name)
-	val reference = owner.addMandatoryReference(name.toFirstLower, extracted) => [
-		makeContainmentBidirectional
-	]
+	val reference = owner.addMandatoryReference(name.toFirstLower, extracted)
+	makeContainmentBidirectional(reference)
 	features.moveAllTo(extracted)
 	modelMigration[
 		copyRule(
