@@ -8,14 +8,14 @@
   <persons firstname="Ludovico"
       lastname="Iovino">
     <address
-        street="V.le Crispi"
+        street="Viale XXX"
         zip="67100"
         city="Roma"/>
   </persons>
   <persons firstname="Lorenzo"
       lastname="Bettini">
     <address
-        street="Via Roma"
+        street="Piazza YYY"
         zip="50100"
         city="Firenze"/>
   </persons>

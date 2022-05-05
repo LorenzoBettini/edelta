@@ -7,12 +7,12 @@
     xsi:schemaLocation="http://addressbook2 AddressBook2.ecore">
   <persons firstname="Ludovico"
       lastname="Iovino"
-      street="V.le Crispi"
+      street="Viale XXX"
       zip="67100"
       city="Roma"/>
   <persons firstname="Lorenzo"
       lastname="Bettini"
-      street="Via Roma"
+      street="Piazza YYY"
       zip="50100"
       city="Firenze"/>
 </addressbook2:AddressBook>
