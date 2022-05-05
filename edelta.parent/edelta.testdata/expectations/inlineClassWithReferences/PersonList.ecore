@@ -14,5 +14,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="workplace" eType="#//WorkPlace"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="houseNumber" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="WorkPlace"/>
+  <eClassifiers xsi:type="ecore:EClass" name="WorkPlace">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="wplaceName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
 </ecore:EPackage>

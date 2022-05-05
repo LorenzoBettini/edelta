@@ -1299,12 +1299,29 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
-	void test_inlineClassWithReferences() throws IOException {
-		withInputModels("inlineClassWithReferences", "PersonList.ecore");
-		loadEcoreFiles();
-		refactorings.inlineClass(refactorings.getEClass("PersonList", "WorkAddress"));
-		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
-		assertModifiedFiles();
+	void test_inlineClassWithReferences() throws Exception {
+		var subdir = "inlineClassWithReferences/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					inlineClass(getEClass("PersonList", "WorkAddress"));
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test

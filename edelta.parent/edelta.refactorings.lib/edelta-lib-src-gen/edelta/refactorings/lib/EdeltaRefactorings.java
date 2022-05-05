@@ -454,11 +454,11 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * @return the features of the original class
    */
   public List<EStructuralFeature> inlineClass(final EClass cl, final String prefix) {
-    final EReference ref = this.findSingleContainmentReferenceToThisClass(cl);
-    this.checkNotMany(ref, 
+    final EReference reference = this.findSingleContainmentReferenceToThisClass(cl);
+    this.checkNotMany(reference, 
       "Cannot inline in a \'many\' reference");
     final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
-      EReference _eOpposite = ref.getEOpposite();
+      EReference _eOpposite = reference.getEOpposite();
       return Boolean.valueOf((it != _eOpposite));
     };
     final List<EStructuralFeature> featuresToInline = IterableExtensions.<EStructuralFeature>toList(IterableExtensions.<EStructuralFeature>filter(cl.getEStructuralFeatures(), _function));
@@ -468,8 +468,20 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       it.setName(_plus);
     };
     featuresToInline.forEach(_function_1);
-    this.stdLib.moveAllTo(featuresToInline, ref.getEContainingClass());
+    this.stdLib.moveAllTo(featuresToInline, reference.getEContainingClass());
     EdeltaUtils.removeElement(cl);
+    final Consumer<EdeltaModelMigrator> _function_2 = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_3 = (EStructuralFeature origFeature, EObject origObj, EObject migratedObj) -> {
+        final EObject origReferredObj = EdeltaEcoreUtil.getValueAsEObject(origObj, origFeature);
+        for (final EStructuralFeature feature : featuresToInline) {
+          migratedObj.eSet(feature, 
+            it.getMigrated(origReferredObj.eGet(it.<EStructuralFeature>getOriginal(feature))));
+        }
+      };
+      it.copyRule(
+        it.<EStructuralFeature>wasRelatedTo(reference), _function_3);
+    };
+    this.modelMigration(_function_2);
     return featuresToInline;
   }
   
