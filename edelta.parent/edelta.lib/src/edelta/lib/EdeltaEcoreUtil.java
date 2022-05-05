@@ -8,10 +8,12 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
@@ -170,6 +172,21 @@ public class EdeltaEcoreUtil {
 
 	public static Object getValueFromFeatureName(EObject obj, String featureName) {
 		return obj.eGet(obj.eClass().getEStructuralFeature(featureName));
+	}
+
+	/**
+	 * If the object does not have the reference set, it sets it using the passed
+	 * {@link Supplier}; then it returns the set value for the reference.
+	 * 
+	 * @param o
+	 * @param reference
+	 * @param eObjectSupplier
+	 * @return
+	 */
+	public static EObject getOrSetEObject(EObject o, EReference reference, Supplier<EObject> eObjectSupplier) {
+		if (!o.eIsSet(reference))
+			o.eSet(reference, eObjectSupplier.get());
+		return (EObject) o.eGet(reference);
 	}
 
 }

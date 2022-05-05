@@ -467,15 +467,63 @@ public class EdeltaModelMigrator {
 				((EStructuralFeature.Internal)f).setSettingDelegate(null));
 	}
 
+	/**
+	 * If the passed object is an {@link EObject} delegates to
+	 * {@link #getMigrated(EObject)} otherwise it returns the object itself.
+	 * 
+	 * @param o
+	 * @return
+	 */
+	public Object getMigrated(Object o) {
+		if (o instanceof EObject) {
+			return modelCopier.copy((EObject) o);
+		}
+		return o;
+	}
+
+	/**
+	 * Returns the migrated version of a model object; if
+	 * it hasn't been migrated yet, it will migrate it.
+	 * 
+	 * @param o
+	 * @return
+	 */
 	public EObject getMigrated(EObject o) {
 		return modelCopier.copy(o);
 	}
 
+	/**
+	 * Returns the migrated version of the model objects; if
+	 * any of them hasn't been migrated yet, it will migrate them.
+	 * 
+	 * @param o
+	 * @return
+	 */
 	public <T> Collection<T> getMigrated(Collection<? extends T> objects) {
 		return modelCopier.copyAll(objects);
 	}
 
-	public <T extends EObject> T getOriginal(T o) {
+	/**
+	 * Returns the migrated version of a metamodel element,
+	 * given an original metamodel element.
+	 * 
+	 * @param <T>
+	 * @param o
+	 * @return
+	 */
+	public <T extends ENamedElement> T getMigrated(T o) {
+		return modelCopier.getMapped(o);
+	}
+
+	/**
+	 * Returns the original version of a metamodel element,
+	 * given a migrated metamodel element.
+	 * 
+	 * @param <T>
+	 * @param o
+	 * @return
+	 */
+	public <T extends ENamedElement> T getOriginal(T o) {
 		return modelCopier.getOriginal(o);
 	}
 

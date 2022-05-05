@@ -1230,17 +1230,35 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
-	void test_extractClassWithReferences() throws IOException {
-		withInputModels("extractClassWithReferences", "PersonList.ecore");
-		loadEcoreFiles();
-		refactorings.extractClass("WorkAddress",
-			asList(
-				refactorings.getEAttribute("PersonList", "Person", "street"),
-				refactorings.getEReference("PersonList", "Person", "workplace"),
-				refactorings.getEAttribute("PersonList", "Person", "houseNumber"))
-			);
-		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
-		assertModifiedFiles();
+	void test_extractClassWithReferences() throws Exception {
+		var subdir = "extractClassWithReferences/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					extractClass("WorkAddress",
+						asList(
+							getEAttribute("PersonList", "Person", "street"),
+							getEAttribute("PersonList", "Person", "houseNumber"),
+							getEReference("PersonList", "Person", "workplace")
+						)
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test
@@ -1282,12 +1300,29 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
-	void test_inlineClassWithReferences() throws IOException {
-		withInputModels("inlineClassWithReferences", "PersonList.ecore");
-		loadEcoreFiles();
-		refactorings.inlineClass(refactorings.getEClass("PersonList", "WorkAddress"));
-		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
-		assertModifiedFiles();
+	void test_inlineClassWithReferences() throws Exception {
+		var subdir = "inlineClassWithReferences/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					inlineClass(getEClass("PersonList", "WorkAddress"));
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test
@@ -1341,32 +1376,83 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 				    ecore.ETypedElement.eType""");
 	}
 
+	/**
+	 * To have complete reversibility (since we use text comparison), we
+	 * have to extract features in a specific order. In fact, during model migration,
+	 * attributes are processed before references and this might change the resulting
+	 * XMI, though the models are effectively the same).
+	 * 
+	 * @throws Exception
+	 */
 	@Test
-	void test_inlineClass_IsOppositeOf_extractClass() throws IOException {
-		withInputModels("extractClassWithAttributes", "PersonList.ecore");
-		assertOppositeRefactorings(
-			() -> refactorings.extractClass("Address",
-					asList(
-							refactorings.getEAttribute("PersonList", "Person", "street"),
-							refactorings.getEAttribute("PersonList", "Person", "houseNumber"))
-						),
-			() -> refactorings.inlineClass(refactorings.getEClass("PersonList", "Address"))
+	void test_extractClass_IsOppositeOf_inlineClass() throws Exception {
+		var subdir = "extractClassWithReferences/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var ref = extractClass("WorkAddress",
+						asList(
+							getEAttribute("PersonList", "Person", "street"),
+							getEReference("PersonList", "Person", "workplace"),
+							getEAttribute("PersonList", "Person", "houseNumber")
+						)
+					);
+					inlineClass(ref.getEReferenceType());
+				}
+			}
 		);
-		assertLogIsEmpty();
+
+		assertOutputs(
+			engine,
+			"inlineClassWithReferences/",
+			ecores,
+			models
+		);
 	}
 
+	/**
+	 * see {@link #test_extractClass_IsOppositeOf_inlineClass()}
+	 * 
+	 * @throws Exception
+	 */
 	@Test
-	void test_inlineClass_IsOppositeOf_extractClass2() throws IOException {
-		withInputModels("inlineClassWithAttributes", "PersonList.ecore");
-		assertOppositeRefactorings(
-			() -> refactorings.inlineClass(refactorings.getEClass("PersonList", "Address")),
-			() -> refactorings.extractClass("Address",
-					asList(
-							refactorings.getEAttribute("PersonList", "Person", "street"),
-							refactorings.getEAttribute("PersonList", "Person", "houseNumber"))
-					)
+	void test_inlineClass_IsOppositeOf_extractClass() throws Exception {
+		var subdir = "inlineClassWithReferences/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					inlineClass(getEClass("PersonList", "WorkAddress"));
+					extractClass("WorkAddress",
+						asList(
+							getEAttribute("PersonList", "Person", "street"),
+							getEAttribute("PersonList", "Person", "houseNumber"),
+							getEReference("PersonList", "Person", "workplace")
+						)
+					);
+				}
+			}
 		);
-		assertLogIsEmpty();
+
+		assertOutputs(
+			engine,
+			"extractClassWithReferences/",
+			ecores,
+			models
+		);
 	}
 
 	@ParameterizedTest

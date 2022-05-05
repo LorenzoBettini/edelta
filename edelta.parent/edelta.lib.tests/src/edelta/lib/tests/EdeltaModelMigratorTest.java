@@ -1602,6 +1602,16 @@ class EdeltaModelMigratorTest {
 			of("MyClass.xmi")
 		);
 
+		var origClass = getEClass(originalModelManager, "mypackage", "MyClass");
+		assertNotNull(origClass);
+		var migratedClass = getEClass(evolvingModelManager, "mypackage", "MyClass");
+		assertNotNull(migratedClass);
+		assertSame(migratedClass, modelMigrator.getMigrated(origClass));
+		assertSame(origClass, modelMigrator.getOriginal(migratedClass));
+
+		var notAnEObject = "test".toUpperCase();
+		assertSame(notAnEObject, modelMigrator.getMigrated(notAnEObject));
+
 		var origfeature1 = getAttribute(originalModelManager,
 				"mypackage", "MyClass", "myClassStringAttribute");
 		var origfeature2 = getFeature(originalModelManager,

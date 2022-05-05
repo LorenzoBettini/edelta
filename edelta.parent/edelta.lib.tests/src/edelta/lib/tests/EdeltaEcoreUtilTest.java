@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -299,4 +300,23 @@ public class EdeltaEcoreUtilTest {
 			.isSameAs(EcorePackage.Literals.ESTRING);
 	}
 
+	@Test
+	public void testGetOrSetEObject() {
+		var ref = EcoreFactory.eINSTANCE.createEReference();
+		var typeValue = EcorePackage.Literals.EOBJECT;
+		var type = EdeltaEcoreUtil.getOrSetEObject(
+			ref,
+			EcorePackage.Literals.ETYPED_ELEMENT__ETYPE,
+			() -> typeValue
+		);
+		assertSame(type, typeValue);
+		assertSame(type, ref.eGet(EcorePackage.Literals.ETYPED_ELEMENT__ETYPE));
+		var type2 = EdeltaEcoreUtil.getOrSetEObject(
+			ref,
+			EcorePackage.Literals.ETYPED_ELEMENT__ETYPE,
+			() -> null
+		);
+		assertSame(type, ref.eGet(EcorePackage.Literals.ETYPED_ELEMENT__ETYPE));
+		assertSame(type, type2);
+	}
 }

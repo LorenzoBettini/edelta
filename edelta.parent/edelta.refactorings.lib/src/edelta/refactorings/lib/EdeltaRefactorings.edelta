@@ -382,10 +382,22 @@ def extractClass(String name, Collection<EStructuralFeature> features) {
 		"Cannot extract bidirectional references")
 	val owner = findSingleOwner(features)
 	val extracted = owner.addNewEClassAsSibling(name)
-	val reference = owner.addMandatoryReference(name.toFirstLower, extracted) => [
-		makeContainmentBidirectional
-	]
+	val reference = owner.addMandatoryReference(name.toFirstLower, extracted)
+	makeContainmentBidirectional(reference)
 	features.moveAllTo(extracted)
+	modelMigration[
+		copyRule(
+			wasRelatedToAtLeastOneOf(features),
+			[origFeature, origObj, migratedObj |
+				var extractedObj = migratedObj.getOrSetEObject(reference,
+						[extracted.createInstance])
+				extractedObj.eSet(
+					getMigrated(origFeature),
+					getMigrated(origObj.eGet(origFeature))
+				)
+			]
+		)
+	]
 	return reference
 }
 
@@ -411,15 +423,29 @@ def inlineClass(EClass cl) {
  * @return the features of the original class
  */
 def inlineClass(EClass cl, String prefix) {
-	val ref = findSingleContainmentReferenceToThisClass(cl)
-	checkNotMany(ref,
+	val reference = findSingleContainmentReferenceToThisClass(cl)
+	checkNotMany(reference,
 		"Cannot inline in a 'many' reference")
 	val featuresToInline = cl.EStructuralFeatures
-		.filter[it !== ref.EOpposite] // skip the possible back reference
+		.filter[it !== reference.EOpposite] // skip the possible back reference
 		.toList
 	featuresToInline.forEach[name = prefix + name]
-	featuresToInline.moveAllTo(ref.EContainingClass)
+	featuresToInline.moveAllTo(reference.EContainingClass)
 	removeElement(cl)
+	modelMigration[
+		copyRule(
+			wasRelatedTo(reference),
+			[origFeature, origObj, migratedObj |
+				val origReferredObj = origObj.getValueAsEObject(origFeature)
+				for (feature : featuresToInline) {
+					migratedObj.eSet(
+						feature,
+						getMigrated(origReferredObj.eGet(getOriginal(feature)))
+					)
+				}
+			]
+		)
+	]
 	return featuresToInline
 }
 

@@ -13,7 +13,9 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="workAddress" lowerBound="1"
         eType="#//WorkAddress" containment="true" eOpposite="#//WorkAddress/person"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="WorkPlace"/>
+  <eClassifiers xsi:type="ecore:EClass" name="WorkPlace">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="wplaceName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="WorkAddress">
     <eStructuralFeatures xsi:type="ecore:EReference" name="person" lowerBound="1"
         eType="#//Person" eOpposite="#//Person/workAddress"/>

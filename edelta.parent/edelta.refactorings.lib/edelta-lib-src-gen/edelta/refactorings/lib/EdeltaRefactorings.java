@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.eclipse.emf.common.util.EList;
@@ -411,12 +412,23 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       "Cannot extract bidirectional references");
     final EClass owner = this.findSingleOwner(features);
     final EClass extracted = this.stdLib.addNewEClassAsSibling(owner, name);
-    EReference _addMandatoryReference = this.addMandatoryReference(owner, StringExtensions.toFirstLower(name), extracted);
-    final Procedure1<EReference> _function = (EReference it) -> {
-      this.makeContainmentBidirectional(it);
-    };
-    final EReference reference = ObjectExtensions.<EReference>operator_doubleArrow(_addMandatoryReference, _function);
+    final EReference reference = this.addMandatoryReference(owner, StringExtensions.toFirstLower(name), extracted);
+    this.makeContainmentBidirectional(reference);
     this.stdLib.moveAllTo(features, extracted);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature origFeature, EObject origObj, EObject migratedObj) -> {
+        final Supplier<EObject> _function_2 = () -> {
+          return EdeltaEcoreUtil.createInstance(extracted);
+        };
+        EObject extractedObj = EdeltaEcoreUtil.getOrSetEObject(migratedObj, reference, _function_2);
+        extractedObj.eSet(
+          it.<EStructuralFeature>getMigrated(origFeature), 
+          it.getMigrated(origObj.eGet(origFeature)));
+      };
+      it.copyRule(
+        it.<EStructuralFeature>wasRelatedToAtLeastOneOf(features), _function_1);
+    };
+    this.modelMigration(_function);
     return reference;
   }
   
@@ -442,11 +454,11 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * @return the features of the original class
    */
   public List<EStructuralFeature> inlineClass(final EClass cl, final String prefix) {
-    final EReference ref = this.findSingleContainmentReferenceToThisClass(cl);
-    this.checkNotMany(ref, 
+    final EReference reference = this.findSingleContainmentReferenceToThisClass(cl);
+    this.checkNotMany(reference, 
       "Cannot inline in a \'many\' reference");
     final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
-      EReference _eOpposite = ref.getEOpposite();
+      EReference _eOpposite = reference.getEOpposite();
       return Boolean.valueOf((it != _eOpposite));
     };
     final List<EStructuralFeature> featuresToInline = IterableExtensions.<EStructuralFeature>toList(IterableExtensions.<EStructuralFeature>filter(cl.getEStructuralFeatures(), _function));
@@ -456,8 +468,20 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       it.setName(_plus);
     };
     featuresToInline.forEach(_function_1);
-    this.stdLib.moveAllTo(featuresToInline, ref.getEContainingClass());
+    this.stdLib.moveAllTo(featuresToInline, reference.getEContainingClass());
     EdeltaUtils.removeElement(cl);
+    final Consumer<EdeltaModelMigrator> _function_2 = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_3 = (EStructuralFeature origFeature, EObject origObj, EObject migratedObj) -> {
+        final EObject origReferredObj = EdeltaEcoreUtil.getValueAsEObject(origObj, origFeature);
+        for (final EStructuralFeature feature : featuresToInline) {
+          migratedObj.eSet(feature, 
+            it.getMigrated(origReferredObj.eGet(it.<EStructuralFeature>getOriginal(feature))));
+        }
+      };
+      it.copyRule(
+        it.<EStructuralFeature>wasRelatedTo(reference), _function_3);
+    };
+    this.modelMigration(_function_2);
     return featuresToInline;
   }
   
