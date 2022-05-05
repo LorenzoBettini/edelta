@@ -1245,9 +1245,10 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 					extractClass("WorkAddress",
 						asList(
 							getEAttribute("PersonList", "Person", "street"),
-							getEReference("PersonList", "Person", "workplace"),
-							getEAttribute("PersonList", "Person", "houseNumber"))
-						);
+							getEAttribute("PersonList", "Person", "houseNumber"),
+							getEReference("PersonList", "Person", "workplace")
+						)
+					);
 				}
 			}
 		);

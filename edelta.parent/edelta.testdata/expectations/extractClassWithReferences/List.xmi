@@ -8,20 +8,20 @@
   <members firstname="firstPerson">
     <workAddress
         street="firstPerson street"
-        workplace="//@wplaces.0"
-        houseNumber="1"/>
+        houseNumber="1"
+        workplace="//@wplaces.0"/>
   </members>
   <members firstname="secondPerson">
     <workAddress
         street="secondPerson street"
-        workplace="//@wplaces.1"
-        houseNumber="2"/>
+        houseNumber="2"
+        workplace="//@wplaces.1"/>
   </members>
   <members firstname="thirdPerson">
     <workAddress
         street="thirdPerson street"
-        workplace="//@wplaces.0"
-        houseNumber="3"/>
+        houseNumber="3"
+        workplace="//@wplaces.0"/>
   </members>
   <wplaces wplaceName="WP1"/>
   <wplaces wplaceName="WP2"/>
