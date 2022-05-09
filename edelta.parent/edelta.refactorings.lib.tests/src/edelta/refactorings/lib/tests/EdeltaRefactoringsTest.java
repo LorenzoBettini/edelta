@@ -160,6 +160,35 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
+	void test_changeToSingle() throws Exception {
+		var subdir = "toUpperCaseStringAttributesMultiple/";
+		var ecores = of("My.ecore");
+		var models = of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var attribute = getEAttribute(
+							"mypackage", "MyClass", "myAttribute");
+
+					changeToSingle(attribute);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"makeSingle/",
+			ecores,
+			models
+		);
+	}
+
+	@Test
 	void test_mergeAttributes() throws Exception {
 		var subdir = "mergeAttributes/";
 		var ecores = of("PersonList.ecore");

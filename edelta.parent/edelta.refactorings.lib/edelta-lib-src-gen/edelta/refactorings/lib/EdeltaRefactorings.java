@@ -65,6 +65,23 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   }
   
   /**
+   * Changes this feature to single (upper = 1); concerning model migration,
+   * it takes the first element of the previous model object's collection
+   * for this feature.
+   * 
+   * @param feature
+   */
+  public void changeToSingle(final EStructuralFeature feature) {
+    feature.setUpperBound(1);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      it.copyRule(
+        it.<EStructuralFeature>isRelatedTo(feature), 
+        it.multiplicityAwareCopy(feature));
+    };
+    this.modelMigration(_function);
+  }
+  
+  /**
    * Merges the given attributes into a single new attribute in the containing class.
    * The attributes must be compatible (same containing class, same type, same cardinality, etc).
    * 
