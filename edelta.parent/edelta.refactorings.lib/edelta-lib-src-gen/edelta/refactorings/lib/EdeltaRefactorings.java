@@ -72,13 +72,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * @param feature
    */
   public void changeToSingle(final EStructuralFeature feature) {
-    feature.setUpperBound(1);
-    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
-      it.copyRule(
-        it.<EStructuralFeature>isRelatedTo(feature), 
-        it.multiplicityAwareCopy(feature));
-    };
-    this.modelMigration(_function);
+    this.changeUpperBound(feature, 1);
   }
   
   /**
@@ -88,7 +82,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * @param feature
    */
   public void changeToMultiple(final EStructuralFeature feature) {
-    this.changeToMultiple(feature, (-1));
+    this.changeUpperBound(feature, (-1));
   }
   
   /**
@@ -99,7 +93,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * 
    * @param feature
    */
-  public void changeToMultiple(final EStructuralFeature feature, final int upperBound) {
+  public void changeUpperBound(final EStructuralFeature feature, final int upperBound) {
     feature.setUpperBound(upperBound);
     final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
       it.copyRule(

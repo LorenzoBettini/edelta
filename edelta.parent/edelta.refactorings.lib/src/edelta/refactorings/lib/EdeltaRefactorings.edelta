@@ -42,13 +42,7 @@ def addMandatoryReference(EClass eClass, String referenceName, EClass type): ERe
  * @param feature
  */
 def changeToSingle(EStructuralFeature feature) {
-	feature.upperBound = 1
-	modelMigration[
-		copyRule(
-			isRelatedTo(feature),
-			multiplicityAwareCopy(feature)
-		)
-	]
+	changeUpperBound(feature, 1)
 }
 
 /**
@@ -58,7 +52,7 @@ def changeToSingle(EStructuralFeature feature) {
  * @param feature
  */
 def changeToMultiple(EStructuralFeature feature) {
-	changeToMultiple(feature, -1)
+	changeUpperBound(feature, -1)
 }
 
 /**
@@ -69,7 +63,7 @@ def changeToMultiple(EStructuralFeature feature) {
  * 
  * @param feature
  */
-def changeToMultiple(EStructuralFeature feature, int upperBound) {
+def changeUpperBound(EStructuralFeature feature, int upperBound) {
 	feature.upperBound = upperBound
 	modelMigration[
 		copyRule(

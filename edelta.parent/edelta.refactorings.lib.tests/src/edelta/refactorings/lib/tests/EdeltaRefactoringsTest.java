@@ -218,7 +218,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
-	void test_changeToMultipleTo2() throws Exception {
+	void test_changeUpperBound() throws Exception {
 		var subdir = "toUpperCaseStringAttributesMultiple/";
 		var ecores = of("My.ecore");
 		var models = of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi");
@@ -233,7 +233,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 					var attribute = getEAttribute(
 							"mypackage", "MyClass", "myAttribute");
 
-					changeToMultiple(attribute, 2);
+					changeUpperBound(attribute, 2);
 				}
 			}
 		);
