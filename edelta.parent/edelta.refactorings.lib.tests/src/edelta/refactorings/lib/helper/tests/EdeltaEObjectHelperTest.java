@@ -31,8 +31,10 @@ class EdeltaEObjectHelperTest {
 		var o = EcoreFactory.eINSTANCE.createEClass();
 		o.setName("AClass");
 		o.setAbstract(true);
-		String repr = edeltaEObjectHelper.represent(o);
-		assertEquals("ecore.EClass{name = AClass, abstract = true, interface = false}", repr);
+		assertEquals("ecore.EClass{name = AClass, abstract = true, interface = false}",
+				edeltaEObjectHelper.represent(o));
+		assertEquals("A string",
+				edeltaEObjectHelper.represent("A string"));
 	}
 
 	@Test
