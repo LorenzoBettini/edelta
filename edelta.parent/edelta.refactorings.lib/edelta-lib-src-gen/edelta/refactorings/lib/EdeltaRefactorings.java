@@ -92,6 +92,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * the original collection.
    * 
    * @param feature
+   * @param upperBound
    */
   public void changeUpperBound(final EStructuralFeature feature, final int upperBound) {
     feature.setUpperBound(upperBound);

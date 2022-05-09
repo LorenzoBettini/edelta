@@ -72,7 +72,7 @@ class EdeltaRefactoringsWithPromptTest extends AbstractEdeltaRefactoringsLibTest
 	}
 
 	@Test
-	void test_enumToSubclasses() throws Exception {
+	void test_introduceSubclassesInteractive() throws Exception {
 		var subdir = "enumToSubclasses/";
 		var ecores = of("PersonList.ecore");
 		var models = of("List.xmi");
@@ -165,6 +165,54 @@ class EdeltaRefactoringsWithPromptTest extends AbstractEdeltaRefactoringsLibTest
 		assertEquals("""
 			Merging values: aFirstName1, aLastName1
 			Separator?\s""",
+			getOutContent());
+		assertEquals("", getErrContent());
+	}
+
+	@Test
+	void test_changeUpperBoundInteractive() throws Exception {
+		var subdir = "changeUpperBound/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		enterInput("2\n3\n");
+
+		// must complete within 5 seconds
+		assertTimeoutPreemptively(Duration.ofSeconds(5), () -> {
+			var engine = setupEngine(
+				subdir,
+				ecores,
+				models,
+				other -> new EdeltaRefactoringsWithPrompt(other) {
+					@Override
+					protected void doExecute() {
+						var attribute = getEReference(
+								"PersonList", "Person", "workAddress");
+
+						changeUpperBoundInteractive(attribute, 2);
+					}
+				}
+			);
+
+			assertOutputs(
+				engine,
+				subdir,
+				ecores,
+				models
+			);
+		});
+
+		assertEquals("""
+			Migrating PersonList.Person{firstname = thirdPerson}
+			Choice 1 of 2
+			  1 PersonList.WorkAddress{street = a street, houseNumber = 3}
+			  2 PersonList.WorkAddress{street = another street, houseNumber = 3}
+			  3 PersonList.WorkAddress{street = some street, houseNumber = 3}
+			Choice? Choice 2 of 2
+			  1 PersonList.WorkAddress{street = a street, houseNumber = 3}
+			  2 PersonList.WorkAddress{street = another street, houseNumber = 3}
+			  3 PersonList.WorkAddress{street = some street, houseNumber = 3}
+			Choice?\s""",
 			getOutContent());
 		assertEquals("", getErrContent());
 	}

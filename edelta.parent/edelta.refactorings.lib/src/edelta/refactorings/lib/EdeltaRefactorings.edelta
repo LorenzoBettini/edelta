@@ -62,6 +62,7 @@ def changeToMultiple(EStructuralFeature feature) {
  * the original collection.
  * 
  * @param feature
+ * @param upperBound
  */
 def changeUpperBound(EStructuralFeature feature, int upperBound) {
 	feature.upperBound = upperBound

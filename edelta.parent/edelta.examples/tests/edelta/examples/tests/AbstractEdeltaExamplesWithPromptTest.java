@@ -22,6 +22,7 @@ public abstract class AbstractEdeltaExamplesWithPromptTest extends AbstractEdelt
 
 	@BeforeEach
 	void setup() throws Exception {
+		EdeltaPromptHelper.close();
 		outContent = new ByteArrayOutputStream();
 		errContent = new ByteArrayOutputStream();
 		System.setOut(new PrintStream(outContent));
