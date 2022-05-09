@@ -40,6 +40,18 @@ public class EdeltaPromptHelper {
 	 * @return
 	 */
 	public static String choice(List<String> choices) {
+		return choices.get(choiceIndex(choices));
+	}
+
+	/**
+	 * Presents the choices that can be selected by their numbers, make sure the
+	 * selected number is valid and return that number (minus one, so that it
+	 * can be used as an index of a collection).
+	 * 
+	 * @param choices
+	 * @return
+	 */
+	public static int choiceIndex(List<String> choices) {
 		var i = 0;
 		for (String choice : choices) {
 			show("  " + ++i + " " + choice);
@@ -51,7 +63,7 @@ public class EdeltaPromptHelper {
 				if (selectedNum <= 0 || selectedNum > choices.size())
 					showError("Not a valid choice: " + chosen);
 				else
-					return choices.get(selectedNum - 1);
+					return selectedNum - 1;
 			} catch (NumberFormatException e) {
 				showError("Not a valid number: " + chosen);
 			}
