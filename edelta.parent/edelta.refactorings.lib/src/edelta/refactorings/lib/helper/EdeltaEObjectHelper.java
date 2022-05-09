@@ -10,23 +10,28 @@ import edelta.lib.EdeltaUtils;
 
 public class EdeltaEObjectHelper {
 
-	public String represent(EObject o) {
+	public String represent(Object o) {
 		if (o == null)
 			return null;
-		var eClass = o.eClass();
-		return
-			EdeltaUtils.getEObjectRepr(eClass) + "{" +
-			eClass.getEAllAttributes().stream()
-				.map(attr -> {
-					var value = o.eGet(attr);
-					if (value != null) {
-						return attr.getName() + " = " + value;
-					} else {
-						return null;
-					}
-				})
-				.filter(Objects::nonNull)
-				.collect(Collectors.joining(", ")) + "}";
+		if (o instanceof EObject) {
+			EObject eObject = (EObject) o;
+			var eClass = eObject.eClass();
+			return
+					EdeltaUtils.getEObjectRepr(eClass) + "{" +
+					eClass.getEAllAttributes().stream()
+					.map(attr -> {
+						var value = eObject.eGet(attr);
+						if (value != null) {
+							return attr.getName() + " = " + value;
+						} else {
+							return null;
+						}
+					})
+					.filter(Objects::nonNull)
+					.collect(Collectors.joining(", ")) + "}";
+			
+		}
+		return o.toString();
 	}
 
 	public String positionInContainter(EObject o) {

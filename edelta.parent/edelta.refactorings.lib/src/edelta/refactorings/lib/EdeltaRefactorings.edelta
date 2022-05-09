@@ -35,6 +35,46 @@ def addMandatoryReference(EClass eClass, String referenceName, EClass type): ERe
 }
 
 /**
+ * Changes this feature to single (upper = 1); concerning model migration,
+ * it takes the first element of the previous model object's collection
+ * for this feature.
+ * 
+ * @param feature
+ */
+def changeToSingle(EStructuralFeature feature) {
+	changeUpperBound(feature, 1)
+}
+
+/**
+ * Changes this feature to multiple (upper = -1); concerning model migration,
+ * it makes sure that a collection is created if the previous model object's value was set.
+ * 
+ * @param feature
+ */
+def changeToMultiple(EStructuralFeature feature) {
+	changeUpperBound(feature, -1)
+}
+
+/**
+ * Changes this feature to multiple with the given upper bound; concerning model migration,
+ * it makes sure that a collection is created with at most the specified upper bound
+ * if the previous model object's value was set, discarding possible additional values in
+ * the original collection.
+ * 
+ * @param feature
+ * @param upperBound
+ */
+def changeUpperBound(EStructuralFeature feature, int upperBound) {
+	feature.upperBound = upperBound
+	modelMigration[
+		copyRule(
+			isRelatedTo(feature),
+			multiplicityAwareCopy(feature)
+		)
+	]
+}
+
+/**
  * Merges the given attributes into a single new attribute in the containing class.
  * The attributes must be compatible (same containing class, same type, same cardinality, etc).
  * 

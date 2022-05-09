@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 
+import org.apache.log4j.Logger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -20,8 +21,11 @@ public abstract class AbstractEdeltaExamplesWithPromptTest extends AbstractEdelt
 	private final PrintStream originalErr = System.err;
 	private final InputStream originalIn = System.in;
 
+	private Logger logger = Logger.getLogger(getClass());
+
 	@BeforeEach
 	void setup() throws Exception {
+		EdeltaPromptHelper.close();
 		outContent = new ByteArrayOutputStream();
 		errContent = new ByteArrayOutputStream();
 		System.setOut(new PrintStream(outContent));
@@ -30,6 +34,7 @@ public abstract class AbstractEdeltaExamplesWithPromptTest extends AbstractEdelt
 
 	@AfterEach
 	void resetStreams() throws IOException {
+		logger.info("Resetting streams");
 		EdeltaPromptHelper.close();
 		System.setOut(originalOut);
 		System.setErr(originalErr);

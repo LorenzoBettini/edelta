@@ -18,7 +18,7 @@ class StateChartsWithPromptExampleTest extends AbstractEdeltaExamplesWithPromptT
 		var ecores = of("StateCharts.ecore");
 		var models = of("StateChartsModel.xmi");
 
-		enterInput("1\n1\n2\n3\n2\n1\n2\n3\n3");
+		enterInput("1\n1\n2\n3\n2\n1\n2\n3\n3\n");
 
 		// must complete within 5 seconds
 		assertTimeoutPreemptively(Duration.ofSeconds(5), () -> {

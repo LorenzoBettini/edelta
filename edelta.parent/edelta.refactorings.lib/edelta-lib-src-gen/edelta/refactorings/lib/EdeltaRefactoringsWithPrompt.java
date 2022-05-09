@@ -6,12 +6,16 @@ import edelta.lib.EdeltaModelMigrator;
 import edelta.lib.EdeltaRuntime;
 import edelta.refactorings.lib.helper.EdeltaEObjectHelper;
 import edelta.refactorings.lib.helper.EdeltaPromptHelper;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 
@@ -80,6 +84,53 @@ public class EdeltaRefactoringsWithPrompt extends EdeltaDefaultRuntime {
       _xblockexpression = this.refactorings.mergeAttributes(newAttributeName, attributes, _function);
     }
     return _xblockexpression;
+  }
+  
+  /**
+   * Changes this feature to multiple with the given upper bound; concerning model migration,
+   * it makes sure that a collection is created with at most the specified upper bound
+   * if the previous model object's value was set, prompting the user to select the
+   * values (in case the original values are less than or equal to upperBound it
+   * performs the migration automatically).
+   * 
+   * @param feature
+   * @param upperBound
+   */
+  public void changeUpperBoundInteractive(final EStructuralFeature feature, final int upperBound) {
+    feature.setUpperBound(upperBound);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature origFeature, EObject origObj, EObject migratedObj) -> {
+        Collection<Object> origValues = EdeltaEcoreUtil.getValueForFeature(origObj, origFeature, (-1));
+        int _size = origValues.size();
+        boolean _lessEqualsThan = (_size <= upperBound);
+        if (_lessEqualsThan) {
+          EdeltaEcoreUtil.setValueForFeature(migratedObj, feature, it.<Object>getMigrated(origValues));
+          return;
+        }
+        final EdeltaEObjectHelper helper = new EdeltaEObjectHelper();
+        String _represent = helper.represent(origObj);
+        String _plus = ("Migrating " + _represent);
+        EdeltaPromptHelper.show(_plus);
+        final Function1<Object, String> _function_2 = (Object it_1) -> {
+          return helper.represent(it_1);
+        };
+        final List<String> choices = IterableExtensions.<String>toList(IterableExtensions.<Object, String>map(origValues, _function_2));
+        final ArrayList<Object> newValues = new ArrayList<Object>(upperBound);
+        for (int i = 1; (i <= upperBound); i++) {
+          {
+            EdeltaPromptHelper.show(((("Choice " + Integer.valueOf(i)) + " of ") + Integer.valueOf(upperBound)));
+            final int choice = EdeltaPromptHelper.choiceIndex(choices);
+            final Collection<Object> _converted_origValues = (Collection<Object>)origValues;
+            final Object chosen = ((Object[])Conversions.unwrapArray(_converted_origValues, Object.class))[choice];
+            newValues.add(it.getMigrated(chosen));
+          }
+        }
+        EdeltaEcoreUtil.setValueForFeature(migratedObj, feature, newValues);
+      };
+      it.copyRule(
+        it.<EStructuralFeature>isRelatedTo(feature), _function_1);
+    };
+    this.modelMigration(_function);
   }
   
   @Override

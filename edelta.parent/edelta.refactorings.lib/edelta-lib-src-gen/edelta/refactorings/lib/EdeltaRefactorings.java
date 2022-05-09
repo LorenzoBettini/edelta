@@ -65,6 +65,46 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   }
   
   /**
+   * Changes this feature to single (upper = 1); concerning model migration,
+   * it takes the first element of the previous model object's collection
+   * for this feature.
+   * 
+   * @param feature
+   */
+  public void changeToSingle(final EStructuralFeature feature) {
+    this.changeUpperBound(feature, 1);
+  }
+  
+  /**
+   * Changes this feature to multiple (upper = -1); concerning model migration,
+   * it makes sure that a collection is created if the previous model object's value was set.
+   * 
+   * @param feature
+   */
+  public void changeToMultiple(final EStructuralFeature feature) {
+    this.changeUpperBound(feature, (-1));
+  }
+  
+  /**
+   * Changes this feature to multiple with the given upper bound; concerning model migration,
+   * it makes sure that a collection is created with at most the specified upper bound
+   * if the previous model object's value was set, discarding possible additional values in
+   * the original collection.
+   * 
+   * @param feature
+   * @param upperBound
+   */
+  public void changeUpperBound(final EStructuralFeature feature, final int upperBound) {
+    feature.setUpperBound(upperBound);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      it.copyRule(
+        it.<EStructuralFeature>isRelatedTo(feature), 
+        it.multiplicityAwareCopy(feature));
+    };
+    this.modelMigration(_function);
+  }
+  
+  /**
    * Merges the given attributes into a single new attribute in the containing class.
    * The attributes must be compatible (same containing class, same type, same cardinality, etc).
    * 

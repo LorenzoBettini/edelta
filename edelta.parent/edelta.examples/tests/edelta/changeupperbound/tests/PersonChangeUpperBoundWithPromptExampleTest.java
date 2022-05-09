@@ -1,4 +1,4 @@
-package edelta.mergename.tests;
+package edelta.changeupperbound.tests;
 
 import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
@@ -7,24 +7,24 @@ import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
+import edelta.changeupperbound.example.PersonListChangeUpperBoundExample;
 import edelta.examples.tests.AbstractEdeltaExamplesWithPromptTest;
-import edelta.mergename.example.PersonMargeNameWithPromptExample;
 
-class PersonMergeNameWithPromptExampleTest extends AbstractEdeltaExamplesWithPromptTest {
+class PersonChangeUpperBoundWithPromptExampleTest extends AbstractEdeltaExamplesWithPromptTest {
 	@Test
-	void testMergeNameWithPrompt() throws Exception {
+	void testChangeUpperBoundInteractive() throws Exception {
 		var subdir = "";
-		var ecores = of("AddressBook.ecore");
-		var models = of("AddressBook.xmi");
+		var ecores = of("PersonListForChangeUpperBound.ecore");
+		var models = of("ListForChangeUpperBound.xmi");
 
-		enterInput(" \n \n \n");
+		enterInput("2\n3\n");
 
 		// must complete within 5 seconds
 		assertTimeoutPreemptively(Duration.ofSeconds(5), () -> {
 			var engine = setupEngine(
 				ecores,
 				models,
-				PersonMargeNameWithPromptExample::new);
+				PersonListChangeUpperBoundExample::new);
 	
 			assertOutputs(engine,
 				subdir,
