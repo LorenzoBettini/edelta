@@ -493,8 +493,9 @@ public class EdeltaModelMigrator {
 	}
 
 	/**
-	 * Returns the migrated version of the model objects; if
-	 * any of them hasn't been migrated yet, it will migrate them.
+	 * Returns the migrated version of the model objects (it assumes it's a
+	 * collection of {@link EObject}); if any of them hasn't been migrated yet, it
+	 * will migrate them.
 	 * 
 	 * @param o
 	 * @return
@@ -557,36 +558,24 @@ public class EdeltaModelMigrator {
 	}
 
 	public EdeltaModelMigrator.CopyProcedure multiplicityAwareCopy(EStructuralFeature feature) {
-		if (feature instanceof EReference) {
-			// for reference we must first propagate the copy
-			// especially in case of collections
-			return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> 
-				EdeltaEcoreUtil.setValueForFeature(
-					newObj,
-					feature,
-					// use the upper bound of the destination feature, since it might
-					// be different from the original one
-					getMigrated(
+			return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> {
+				// if the multiplicity changes and the type of the attribute changes we might
+				// end up with a list with a single default value.
+				// if instead we check that the original value of the object for the feature
+				// is set we avoid such a situation.
+				if (oldObj.eIsSet(oldFeature))
+					EdeltaEcoreUtil.setValueForFeature(
+						newObj,
+						feature,
+						// use the upper bound of the destination feature, since it might
+						// be different from the original one
 						EdeltaEcoreUtil
-							.wrapAsCollection(oldObj.eGet(oldFeature), feature.getUpperBound()))
-				);
-		}
-		return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> {
-			// if the multiplicity changes and the type of the attribute changes we might
-			// end up with a list with a single default value.
-			// if instead we check that the original value of the object for the feature
-			// is set we avoid such a situation.
-			if (oldObj.eIsSet(oldFeature))
-				// if we come here the old feature was set
-				EdeltaEcoreUtil.setValueForFeature(
-					newObj,
-					feature,
-					// use the upper bound of the destination feature, since it might
-					// be different from the original one
-					EdeltaEcoreUtil
-						.getValueForFeature(oldObj, oldFeature, feature.getUpperBound())
-				);
-		};
+							.wrapAsCollection(oldObj.eGet(oldFeature), feature.getUpperBound()).stream()
+							// for reference we must first propagate the copy with getMigrated
+							.map(this::getMigrated)
+							.collect(Collectors.toList())
+					);
+			};
 	}
 
 	/**
