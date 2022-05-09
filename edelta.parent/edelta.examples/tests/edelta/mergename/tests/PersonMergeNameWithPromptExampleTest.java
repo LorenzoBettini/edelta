@@ -2,6 +2,10 @@ package edelta.mergename.tests;
 
 import static java.util.List.of;
 
+import java.time.Duration;
+
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
+
 import org.junit.Test;
 
 import edelta.examples.tests.AbstractEdeltaExamplesWithPromptTest;
@@ -16,15 +20,18 @@ public class PersonMergeNameWithPromptExampleTest extends AbstractEdeltaExamples
 
 		enterInput(" \n \n \n");
 
-		var engine = setupEngine(
-			ecores,
-			models,
-			PersonMargeNameWithPromptExample::new);
-
-		assertOutputs(engine,
-			subdir,
-			ecores,
-			models
-		);
+		// must complete within 5 seconds
+		assertTimeoutPreemptively(Duration.ofSeconds(5), () -> {
+			var engine = setupEngine(
+				ecores,
+				models,
+				PersonMargeNameWithPromptExample::new);
+	
+			assertOutputs(engine,
+				subdir,
+				ecores,
+				models
+			);
+		});
 	}
 }
