@@ -1,19 +1,18 @@
 package edelta.mergename.tests;
 
 import static java.util.List.of;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 import java.time.Duration;
 
-import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import edelta.examples.tests.AbstractEdeltaExamplesWithPromptTest;
 import edelta.mergename.example.PersonMargeNameWithPromptExample;
 
-public class PersonMergeNameWithPromptExampleTest extends AbstractEdeltaExamplesWithPromptTest {
+class PersonMergeNameWithPromptExampleTest extends AbstractEdeltaExamplesWithPromptTest {
 	@Test
-	public void testMergeNameWithPrompt() throws Exception {
+	void testMergeNameWithPrompt() throws Exception {
 		var subdir = "";
 		var ecores = of("AddressBook.ecore");
 		var models = of("AddressBook.xmi");

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 
 import edelta.lib.EdeltaEngine;
 import edelta.lib.EdeltaEngine.EdeltaRuntimeProvider;
@@ -19,6 +20,7 @@ public abstract class AbstractEdeltaExamplesTest {
 	private static final String EXPECTATIONS = "expectations/";
 
 	@BeforeClass
+	@BeforeAll
 	public static void clearOutput() throws IOException {
 		EdeltaTestUtils.cleanDirectoryRecursive(OUTPUT);
 	}

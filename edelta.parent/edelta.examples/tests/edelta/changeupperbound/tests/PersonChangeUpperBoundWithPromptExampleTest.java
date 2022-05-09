@@ -1,19 +1,18 @@
 package edelta.changeupperbound.tests;
 
 import static java.util.List.of;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 import java.time.Duration;
 
-import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import edelta.changeupperbound.example.PersonListChangeUpperBoundExample;
 import edelta.examples.tests.AbstractEdeltaExamplesWithPromptTest;
 
-public class PersonChangeUpperBoundExampleTest extends AbstractEdeltaExamplesWithPromptTest {
+class PersonChangeUpperBoundWithPromptExampleTest extends AbstractEdeltaExamplesWithPromptTest {
 	@Test
-	public void testChangeUpperBoundInteractive() throws Exception {
+	void testChangeUpperBoundInteractive() throws Exception {
 		var subdir = "";
 		var ecores = of("PersonListForChangeUpperBound.ecore");
 		var models = of("ListForChangeUpperBound.xmi");
