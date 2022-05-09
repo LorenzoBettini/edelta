@@ -189,6 +189,64 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
+	void test_changeToMultiple() throws Exception {
+		var subdir = "toUpperCaseStringAttributes/";
+		var ecores = of("My.ecore");
+		var models = of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var attribute = getEAttribute(
+							"mypackage", "MyClass", "myAttribute");
+
+					changeToMultiple(attribute);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"makeMultiple/",
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_changeToMultipleTo2() throws Exception {
+		var subdir = "toUpperCaseStringAttributesMultiple/";
+		var ecores = of("My.ecore");
+		var models = of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var attribute = getEAttribute(
+							"mypackage", "MyClass", "myAttribute");
+
+					changeToMultiple(attribute, 2);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"makeMultipleTo2/",
+			ecores,
+			models
+		);
+	}
+
+	@Test
 	void test_mergeAttributes() throws Exception {
 		var subdir = "mergeAttributes/";
 		var ecores = of("PersonList.ecore");
