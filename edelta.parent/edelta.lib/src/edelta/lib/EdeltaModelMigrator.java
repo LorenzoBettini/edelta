@@ -5,6 +5,7 @@ import static edelta.lib.EdeltaEcoreUtil.wrapAsCollection;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -493,15 +494,21 @@ public class EdeltaModelMigrator {
 	}
 
 	/**
-	 * Returns the migrated version of the model objects (it assumes it's a
-	 * collection of {@link EObject}); if any of them hasn't been migrated yet, it
-	 * will migrate them.
+	 * Returns the migrated version of the model objects (in case there's at least
+	 * an instance of {@link EObject} - if there's such ans instance we assume that
+	 * it's a collection of {@link EObject}); if any of them hasn't been migrated
+	 * yet, it will migrate them. If it's not a collection of {@link EObject} it
+	 * returns the collection itself without null values.
 	 * 
 	 * @param o
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> Collection<T> getMigrated(Collection<? extends T> objects) {
-		return modelCopier.copyAll(objects);
+		if (objects.stream().anyMatch(EObject.class::isInstance))
+			return modelCopier.copyAll(objects);
+		return (Collection<T>) objects.stream()
+				.filter(Objects::nonNull).collect(Collectors.toList());
 	}
 
 	/**
@@ -569,11 +576,9 @@ public class EdeltaModelMigrator {
 						feature,
 						// use the upper bound of the destination feature, since it might
 						// be different from the original one
-						EdeltaEcoreUtil
-							.wrapAsCollection(oldObj.eGet(oldFeature), feature.getUpperBound()).stream()
+						getMigrated(EdeltaEcoreUtil
+							.wrapAsCollection(oldObj.eGet(oldFeature), feature.getUpperBound()))
 							// for reference we must first propagate the copy with getMigrated
-							.map(this::getMigrated)
-							.collect(Collectors.toList())
 					);
 			};
 	}
