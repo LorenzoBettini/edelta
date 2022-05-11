@@ -54,7 +54,7 @@ def mergeStringAttributes(String newAttributeName, Collection<EAttribute> attrib
 			if (stringValues.empty)
 				return null
 			EdeltaPromptHelper.show("Merging values: " +
-				(stringValues).join(", ")
+				stringValues.join(", ")
 			)
 			val sep = EdeltaPromptHelper.ask("Separator?")
 			return stringValues.join(sep)
