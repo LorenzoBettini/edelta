@@ -577,7 +577,7 @@ public class EdeltaModelMigrator {
 					// use the upper bound of the destination feature, since it might
 					// be different from the original one
 					getMigrated(EdeltaEcoreUtil
-						.wrapAsCollection(oldObj.eGet(oldFeature), feature.getUpperBound()))
+						.getValueForFeature(oldObj, oldFeature, feature.getUpperBound()))
 						// for reference we must first propagate the copy with getMigrated
 				);
 		};
