@@ -565,22 +565,22 @@ public class EdeltaModelMigrator {
 	}
 
 	public EdeltaModelMigrator.CopyProcedure multiplicityAwareCopy(EStructuralFeature feature) {
-			return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> {
-				// if the multiplicity changes and the type of the attribute changes we might
-				// end up with a list with a single default value.
-				// if instead we check that the original value of the object for the feature
-				// is set we avoid such a situation.
-				if (oldObj.eIsSet(oldFeature))
-					EdeltaEcoreUtil.setValueForFeature(
-						newObj,
-						feature,
-						// use the upper bound of the destination feature, since it might
-						// be different from the original one
-						getMigrated(EdeltaEcoreUtil
-							.wrapAsCollection(oldObj.eGet(oldFeature), feature.getUpperBound()))
-							// for reference we must first propagate the copy with getMigrated
-					);
-			};
+		return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> {
+			// if the multiplicity changes and the type of the attribute changes we might
+			// end up with a list with a single default value.
+			// if instead we check that the original value of the object for the feature
+			// is set we avoid such a situation.
+			if (oldObj.eIsSet(oldFeature))
+				EdeltaEcoreUtil.setValueForFeature(
+					newObj,
+					feature,
+					// use the upper bound of the destination feature, since it might
+					// be different from the original one
+					getMigrated(EdeltaEcoreUtil
+						.wrapAsCollection(oldObj.eGet(oldFeature), feature.getUpperBound()))
+						// for reference we must first propagate the copy with getMigrated
+				);
+		};
 	}
 
 	/**
