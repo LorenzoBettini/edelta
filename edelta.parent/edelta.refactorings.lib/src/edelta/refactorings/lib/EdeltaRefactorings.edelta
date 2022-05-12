@@ -132,7 +132,7 @@ def <T extends EStructuralFeature, V> mergeFeatures(String newFeatureName, Colle
 	modelMigration[
 		copyRule(
 			wasRelatedTo(firstFeature),
-			[feature, oldObj, newObj |
+			[_, oldObj, newObj |
 				var originalFeatures = features.stream()
 						.map[a | getOriginal(a)]
 				// for references we must get the copied EObject

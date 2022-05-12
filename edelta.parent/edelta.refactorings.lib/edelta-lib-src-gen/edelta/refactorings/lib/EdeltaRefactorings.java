@@ -155,7 +155,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     final T mergedFeature = this.stdLib.<T>copyToAs(firstFeature, owner, newFeatureName);
     EdeltaUtils.removeAllElements(features);
     final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
-      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature __, EObject oldObj, EObject newObj) -> {
         final Function<T, T> _function_2 = (T a) -> {
           return it.<T>getOriginal(a);
         };
