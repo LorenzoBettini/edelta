@@ -24,11 +24,11 @@ public class PersonMargeNameExample extends EdeltaDefaultRuntime {
   }
   
   public void mergeName(final EPackage it) {
-    final Function<Collection<?>, Object> _function = (Collection<?> oldValues) -> {
+    final Function<Collection<Object>, Object> _function = (Collection<Object> oldValues) -> {
       final Function1<Object, String> _function_1 = (Object it_1) -> {
         return it_1.toString();
       };
-      return IterableExtensions.join(IterableExtensions.map(IterableExtensions.filterNull(oldValues), _function_1), " ");
+      return IterableExtensions.join(IterableExtensions.<Object, String>map(IterableExtensions.<Object>filterNull(oldValues), _function_1), " ");
     };
     this.refactorings.mergeAttributes(
       "name", 
