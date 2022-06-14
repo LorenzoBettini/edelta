@@ -59,7 +59,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
@@ -82,7 +82,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
@@ -108,7 +108,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
@@ -131,11 +131,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public boolean bar(final String s) {
 			    return s.isEmpty();
 			  }
@@ -158,11 +158,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public boolean bar(final String s) {
 			    return s.isEmpty();
 			  }
@@ -187,11 +187,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public EClass bar(final String s) {
 			    return EdeltaUtils.newEClass(s);
 			  }
@@ -218,11 +218,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public EClass bar(final String s) {
 			    final Consumer<EClass> _function = (EClass it) -> {
 			      EList<EClass> _eSuperTypes = it.getESuperTypes();
@@ -275,11 +275,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public void aTest(final EPackage it) {
 			    getEPackage("foo");
 			    InputOutput.<EPackage>println(getEPackage("foo"));
@@ -293,12 +293,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    InputOutput.<EEnumLiteral>println(getEEnumLiteral("foo", "FooEnum", "FooEnumLiteral"));
 			    final EReference ref = getEReference("foo", "FooClass", "myReference");
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    aTest(getEPackage("foo"));
@@ -331,20 +331,20 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public void aTest(final EPackage it) {
 			    getENamedElement("", "", "");
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    aTest(getEPackage("foo"));
@@ -370,24 +370,24 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public void aTest(final EPackage it) {
 			    this.stdLib.addNewEClass(it, "NewClass");
 			  }
-			  
+			
 			  public void anotherTest(final EPackage it) {
 			    getEClass("foo", "NewClass");
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    aTest(getEPackage("foo"));
@@ -418,29 +418,29 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public void creation(final EPackage it) {
 			    this.stdLib.addNewEClass(it, "NewClass");
 			  }
-			  
+			
 			  public void renaming(final EPackage it) {
 			    getEClass("foo", "NewClass").setName("changed");
 			  }
-			  
+			
 			  public void accessing(final EPackage it) {
 			    getEClass("foo", "changed");
 			    getEClass("foo", "changed");
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    creation(getEPackage("foo"));
@@ -467,26 +467,26 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
 			  private MyCustomEdelta my;
-			  
+			
 			  public MyFile0() {
 			    my = new MyCustomEdelta(this);
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			    my = new MyCustomEdelta(other);
 			  }
-			  
+			
 			  public void aTest(final EPackage it) {
 			    this.my.createANewEAttribute(
 			      this.my.createANewEClass());
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    aTest(getEPackage("foo"));
@@ -512,25 +512,25 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			public class MyFile0 extends EdeltaDefaultRuntime {
 			  @Extension
 			  private MyCustomEdelta my;
-			  
+			
 			  public MyFile0() {
 			    my = new MyCustomEdelta(this);
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			    my = new MyCustomEdelta(other);
 			  }
-			  
+			
 			  public void aTest(final EPackage it) {
 			    this.my.createANewEAttribute(this.my.createANewEClass());
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    aTest(getEPackage("foo"));
@@ -565,27 +565,27 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			@SuppressWarnings("all")
 			public class MyFile0 extends EdeltaDefaultRuntime {
 			  private Object my;
-			  
+			
 			  public MyFile0() {
 			     = new MyCustomEdelta(this);
 			    my = new (this);
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			     = new MyCustomEdelta(other);
 			    my = new (other);
 			  }
-			  
+			
 			  public void aTest(final EPackage it) {
 			    this.my./* name is null */;
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    aTest(getEPackage("foo"));
@@ -690,11 +690,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public void aModificationTest(final EPackage it) {
 			    EList<EClassifier> _eClassifiers = it.getEClassifiers();
 			    final Consumer<EClass> _function = (EClass it_1) -> {
@@ -705,12 +705,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    EClass _newEClass = EdeltaUtils.newEClass("ANewClass", _function);
 			    _eClassifiers.add(_newEClass);
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    aModificationTest(getEPackage("foo"));
@@ -752,11 +752,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public void modifyFoo(final EPackage it) {
 			    getEClass("foo", "FooClass").setName("RenamedClass");
 			    EList<EStructuralFeature> _eStructuralFeatures = getEClass("foo", "RenamedClass").getEStructuralFeatures();
@@ -769,12 +769,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    ObjectExtensions.<EClass>operator_doubleArrow(
 			      getEClass("foo", "RenamedClass"), _function);
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    modifyFoo(getEPackage("foo"));
@@ -828,23 +828,23 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public void aTest(final EPackage it) {
 			    final Consumer<EClass> _function = (EClass it_1) -> {
 			      this.stdLib.addEAttribute(it_1, getEAttribute("foo", "FooClass", "myAttribute"));
 			    };
 			    this.stdLib.addNewEClass(it, "NewClass", _function);
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    aTest(getEPackage("foo"));
@@ -875,21 +875,21 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public void aTest(final EPackage it) {
 			    EList<EStructuralFeature> _eStructuralFeatures = getEClass("foo", "FooClass").getEStructuralFeatures();
 			    _eStructuralFeatures.remove(getEAttribute("foo", "FooClass", "myAttribute"));
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    aTest(getEPackage("foo"));
@@ -925,11 +925,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public void aTest(final EPackage it) {
 			    final Consumer<EClass> _function = (EClass it_1) -> {
 			      final Consumer<EAttribute> _function_1 = (EAttribute it_2) -> {
@@ -957,12 +957,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    getEEnumLiteral("foo", "ANewEnum", "ANewEnumLiteral");
 			    getEDataType("foo", "ANewDataType");
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    aTest(getEPackage("foo"));
@@ -996,22 +996,22 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public void modifyFoo(final EPackage it) {
 			    getEClass("foo", "FooClass").setName("Renamed");
 			    EList<EStructuralFeature> _eStructuralFeatures = getEClass("foo", "Renamed").getEStructuralFeatures();
 			    _eStructuralFeatures.remove(getEAttribute("foo", "Renamed", "myAttribute"));
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    modifyFoo(getEPackage("foo"));
@@ -1047,20 +1047,20 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public void modifyFoo(final EPackage it) {
 			    EcoreUtil.delete(getEClass("foo", "FooClass"));
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    modifyFoo(getEPackage("foo"));
@@ -1109,11 +1109,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public void modifyFoo(final EPackage it) {
 			    final Consumer<EPackage> _function = (EPackage it_1) -> {
 			      final Consumer<EPackage> _function_1 = (EPackage it_2) -> {
@@ -1133,12 +1133,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    EAttribute _newEAttribute = EdeltaUtils.newEAttribute("added", getEDataType("foo", "FooDataType"));
 			    _eStructuralFeatures.add(_newEAttribute);
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    modifyFoo(getEPackage("foo"));
@@ -1185,27 +1185,27 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public Example() {
 			    
 			  }
-			  
+			
 			  public Example(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public void aTest1(final EPackage it) {
 			    EReference _eOpposite = getEReference("testecoreforreferences1", "Person", "works").getEOpposite();
 			    _eOpposite.setName("renamedPersons");
 			  }
-			  
+			
 			  public void aTest2(final EPackage it) {
 			    EReference _eOpposite = getEReference("testecoreforreferences2", "WorkPlace", "renamedPersons").getEOpposite();
 			    _eOpposite.setName("renamedWorks");
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("testecoreforreferences1");
 			    ensureEPackageIsLoaded("testecoreforreferences2");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    aTest1(getEPackage("testecoreforreferences1"));
@@ -1305,24 +1305,24 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public Example() {
 			    
 			  }
-			  
+			
 			  public Example(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public void aTest1(final EPackage it) {
 			    EReference _eOpposite = getEReference("testecoreforreferences1", "Person", "works").getEOpposite();
 			    _eOpposite.setName("renamedPersons");
 			    EReference _eOpposite_1 = getEReference("testecoreforreferences2", "WorkPlace", "renamedPersons").getEOpposite();
 			    _eOpposite_1.setName("renamedWorks");
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("testecoreforreferences1");
 			    ensureEPackageIsLoaded("testecoreforreferences2");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    aTest1(getEPackage("testecoreforreferences1"));
@@ -1630,27 +1630,27 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 				public class MyFile2 extends EdeltaDefaultRuntime {
 				  @Extension
 				  private MyFile1 my;
-				  
+				
 				  public MyFile2() {
 				    my = new MyFile1(this);
 				  }
-				  
+				
 				  public MyFile2(final AbstractEdelta other) {
 				    super(other);
 				    my = new MyFile1(other);
 				  }
-				  
+				
 				  public void aModificationTest(final EPackage it) {
 				    this.my.enrichWithAttribute(getEClass("foo", "FooClass"), "prefix");
 				    getEAttribute("foo", "FooClass", "prefixAttr").setChangeable(true);
 				    getEReference("foo", "FooClass", "prefixRef").setContainment(true);
 				  }
-				  
+				
 				  @Override
 				  public void performSanityChecks() throws Exception {
 				    ensureEPackageIsLoaded("foo");
 				  }
-				  
+				
 				  @Override
 				  protected void doExecute() throws Exception {
 				    aModificationTest(getEPackage("foo"));
@@ -1866,11 +1866,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public void aTest(final EPackage it) {
 			    final Consumer<EClass> _function = (EClass it_1) -> {
 			      this.stdLib.addNewEAttribute(it_1, "created", null);
@@ -1884,12 +1884,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    _eClassifiers.remove(getEClass("mainpackage", "ANewClass"));
 			    final EReference r = getEReference("mainpackage", "AnotherNewClass", "created");
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("mainpackage");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    aTest(getEPackage("mainpackage"));
@@ -1930,11 +1930,11 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  public MyFile0() {
 			    
 			  }
-			  
+			
 			  public MyFile0(final AbstractEdelta other) {
 			    super(other);
 			  }
-			  
+			
 			  public void aTest(final EPackage it) {
 			    final Consumer<EClass> _function = (EClass it_1) -> {
 			      getEClass("foo", "NewClass").setAbstract(true);
@@ -1943,12 +1943,12 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    this.stdLib.addNewEClass(it, "NewClass", _function);
 			    getEClass("foo", "Renamed");
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("foo");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    aTest(getEPackage("foo"));
@@ -1985,27 +1985,27 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			public class Example extends EdeltaDefaultRuntime {
 			  @Extension
 			  private EdeltaRefactorings refactorings;
-			  
+			
 			  public Example() {
 			    refactorings = new EdeltaRefactorings(this);
 			  }
-			  
+			
 			  public Example(final AbstractEdelta other) {
 			    super(other);
 			    refactorings = new EdeltaRefactorings(other);
 			  }
-			  
+			
 			  public void improvePerson(final EPackage it) {
 			    this.refactorings.enumToSubclasses(getEAttribute("PersonList", "Person", "gender"));
 			    this.refactorings.mergeFeatures("name", 
 			      Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(getEAttribute("PersonList", "Person", "firstname"), getEAttribute("PersonList", "Person", "lastname"))));
 			  }
-			  
+			
 			  public void introducePlace(final EPackage it) {
 			    this.refactorings.extractSuperclass("Place", 
 			      Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(getEAttribute("PersonList", "LivingPlace", "address"), getEAttribute("PersonList", "WorkPlace", "address"))));
 			  }
-			  
+			
 			  public void introduceWorkingPosition(final EPackage it) {
 			    EClass _referenceToClass = this.refactorings.referenceToClass("WorkingPosition", getEReference("PersonList", "Person", "works"));
 			    final Procedure1<EClass> _function = (EClass it_1) -> {
@@ -2014,19 +2014,19 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			    ObjectExtensions.<EClass>operator_doubleArrow(_referenceToClass, _function);
 			    getEReference("PersonList", "WorkPlace", "persons").setName("position");
 			  }
-			  
+			
 			  public void improveList(final EPackage it) {
 			    this.refactorings.mergeFeatures("places", 
 			      getEClass("PersonList", "Place"), 
 			      Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(getEReference("PersonList", "List", "wplaces"), getEReference("PersonList", "List", "lplaces"))));
 			  }
-			  
+			
 			  @Override
 			  public void performSanityChecks() throws Exception {
 			    ensureEPackageIsLoaded("PersonList");
 			    ensureEPackageIsLoaded("ecore");
 			  }
-			  
+			
 			  @Override
 			  protected void doExecute() throws Exception {
 			    improvePerson(getEPackage("PersonList"));
