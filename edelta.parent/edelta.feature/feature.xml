@@ -6,8 +6,8 @@
       provider-name="Lorenzo Bettini">
 
    <requires>
-      <import feature="org.eclipse.xtext.xbase" version="2.26.0" match="equivalent"/>
-      <import feature="org.eclipse.xtext.ui" version="2.26.0" match="equivalent"/>
+      <import feature="org.eclipse.xtext.xbase" version="2.27.0" match="equivalent"/>
+      <import feature="org.eclipse.xtext.ui" version="2.27.0" match="equivalent"/>
       <import plugin="org.eclipse.pde.ui"/>
    </requires>
 
