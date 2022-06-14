@@ -233,14 +233,11 @@ public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
 	private void assertGeneratedJavaCode(CompilationTestHelper.Result r, CharSequence expected) {
 		var singleGeneratedCode = EdeltaTestUtils.removeCR(r.getSingleGeneratedCode());
 		assertEquals(expected.toString(),
-			// see https://github.com/eclipse/xtext-extras/issues/772
-			// remove whe Xtext 2.27.0 is released
 			// lines with only spaces are skipped in Java text blocks
-			// but they are present in the generated code so we need to remove them
-			// do that twice for possible empty constructor's body which has four spaces
+			// but they are present in the generated code for empty methods, e.g., constructors
+			// so we need to remove four spaces
 			singleGeneratedCode
-				.replace("  \n", "\n")
-				.replace("  \n", "\n"));
+				.replace("    \n", "\n"));
 	}
 
 	private Class<?> assertGeneratedJavaCodeCompiles(CompilationTestHelper.Result r) {
