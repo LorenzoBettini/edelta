@@ -66,11 +66,11 @@ public class EdeltaRefactoringsWithPrompt extends EdeltaDefaultRuntime {
     {
       EAttribute _head = IterableExtensions.<EAttribute>head(attributes);
       this.refactorings.checkType(_head, getEDataType("ecore", "EString"));
-      final Function<Collection<?>, Object> _function = (Collection<?> oldValues) -> {
+      final Function<Collection<Object>, Object> _function = (Collection<Object> oldValues) -> {
         final Function1<Object, String> _function_1 = (Object it) -> {
           return it.toString();
         };
-        final Iterable<String> stringValues = IterableExtensions.map(IterableExtensions.filterNull(oldValues), _function_1);
+        final Iterable<String> stringValues = IterableExtensions.<Object, String>map(IterableExtensions.<Object>filterNull(oldValues), _function_1);
         boolean _isEmpty = IterableExtensions.isEmpty(stringValues);
         if (_isEmpty) {
           return null;

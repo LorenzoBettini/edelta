@@ -114,23 +114,8 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * features in the new model
    * @return the new attribute added to the containing class of the attributes
    */
-  public EAttribute mergeAttributes(final String newAttributeName, final Collection<EAttribute> attributes, final Function<Collection<?>, Object> valueMerger) {
-    final EAttribute firstFeature = IterableExtensions.<EAttribute>head(attributes);
-    final EAttribute mergedAttribute = this.<EAttribute>mergeFeatures(newAttributeName, attributes);
-    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
-      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
-        final Function1<EAttribute, Object> _function_2 = (EAttribute a) -> {
-          return oldObj.eGet(it.<EAttribute>getOriginal(a));
-        };
-        Iterable<Object> oldValues = IterableExtensions.<EAttribute, Object>map(attributes, _function_2);
-        Object mergedValue = valueMerger.apply(IterableExtensions.<Object>toList(oldValues));
-        newObj.eSet(mergedAttribute, mergedValue);
-      };
-      it.copyRule(
-        it.<EStructuralFeature>wasRelatedTo(firstFeature), _function_1);
-    };
-    this.modelMigration(_function);
-    return mergedAttribute;
+  public EAttribute mergeAttributes(final String newAttributeName, final Collection<EAttribute> attributes, final Function<Collection<Object>, Object> valueMerger) {
+    return this.<EAttribute, Object>mergeFeatures(newAttributeName, attributes, valueMerger, null);
   }
   
   /**
@@ -139,37 +124,63 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * 
    * @param newReferenceName
    * @param references
-   * @param valueMerger if not null, it is used to merge the values of the original
+   * @param valueMerger is used to merge the values of the original
    * features in the new model
    * @param postCopy executed after the model migrations
    * @return the new reference added to the containing class of the references
    */
   public EReference mergeReferences(final String newReferenceName, final Collection<EReference> references, final Function<Collection<EObject>, EObject> valueMerger, final Runnable postCopy) {
-    final EReference firstFeature = IterableExtensions.<EReference>head(references);
-    final EReference mergedReference = this.<EReference>mergeFeatures(newReferenceName, references);
-    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
-      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
-        final Function<EReference, EReference> _function_2 = (EReference a) -> {
-          return it.<EReference>getOriginal(a);
-        };
-        Stream<EReference> originalFeatures = references.stream().<EReference>map(_function_2);
-        final Function<EReference, EObject> _function_3 = (EReference f) -> {
-          return EdeltaEcoreUtil.getValueAsEObject(oldObj, f);
-        };
-        List<EObject> oldValues = originalFeatures.<EObject>map(_function_3).collect(Collectors.<EObject>toList());
-        EObject merged = valueMerger.apply(it.<EObject>getMigrated(oldValues));
-        newObj.eSet(mergedReference, merged);
-      };
-      it.copyRule(
-        it.<EStructuralFeature>wasRelatedTo(firstFeature), _function_1, postCopy);
-    };
-    this.modelMigration(_function);
-    return mergedReference;
+    return this.<EReference, EObject>mergeFeatures(newReferenceName, references, valueMerger, postCopy);
   }
   
   /**
    * Merges the given features into a single new feature in the containing class.
    * The features must be compatible (same containing class, same type, same cardinality, etc).
+   * 
+   * @param <T> meant for both {@link EAttribute} and {@link EReference}
+   * @param <V> the type for the function (either {@link Object} or {@link EObject})
+   * @param newFeatureName
+   * @param features
+   * @param valueMerger is used to merge the values of the original
+   * features in the new model
+   * @param postCopy if not null, it is executed after the model migrations
+   * @return the new feature added to the containing class of the features
+   */
+  public <T extends EStructuralFeature, V> T mergeFeatures(final String newFeatureName, final Collection<T> features, final Function<Collection<V>, V> valueMerger, final Runnable postCopy) {
+    this.checkNoDifferences(features, 
+      new EdeltaFeatureDifferenceFinder().ignoringName(), 
+      "The two features cannot be merged");
+    final T firstFeature = IterableExtensions.<T>head(features);
+    final EClass owner = firstFeature.getEContainingClass();
+    final T mergedFeature = this.stdLib.<T>copyToAs(firstFeature, owner, newFeatureName);
+    EdeltaUtils.removeAllElements(features);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature __, EObject oldObj, EObject newObj) -> {
+        final Function<T, T> _function_2 = (T a) -> {
+          return it.<T>getOriginal(a);
+        };
+        Stream<T> originalFeatures = features.stream().<T>map(_function_2);
+        final Function<T, Object> _function_3 = (T f) -> {
+          return oldObj.eGet(f);
+        };
+        List<Object> oldValues = originalFeatures.<Object>map(_function_3).collect(Collectors.<Object>toList());
+        Collection<Object> _migrated = it.<Object>getMigrated(oldValues);
+        V merged = valueMerger.apply(((Collection<V>) _migrated));
+        newObj.eSet(mergedFeature, merged);
+      };
+      it.copyRule(
+        it.<EStructuralFeature>wasRelatedTo(firstFeature), _function_1, postCopy);
+    };
+    this.modelMigration(_function);
+    return mergedFeature;
+  }
+  
+  /**
+   * Merges the given features into a single new feature in the containing class.
+   * The features must be compatible (same containing class, same type, same cardinality, etc).
+   * 
+   * TODO: this has to be removed once all the examples and tests have been ported
+   * to model migration as well.
    * 
    * @param <T>
    * @param newFeatureName

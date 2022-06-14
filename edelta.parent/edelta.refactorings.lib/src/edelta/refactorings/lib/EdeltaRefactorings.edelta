@@ -85,22 +85,8 @@ def changeUpperBound(EStructuralFeature feature, int upperBound) {
  * @return the new attribute added to the containing class of the attributes
  */
 def mergeAttributes(String newAttributeName, Collection<EAttribute> attributes,
-	Function<Collection<?>, Object> valueMerger
-) : EAttribute {
-	val firstFeature = attributes.head
-	val mergedAttribute = mergeFeatures(newAttributeName, attributes)
-	modelMigration[
-		copyRule(
-			wasRelatedTo(firstFeature),
-			[feature, oldObj, newObj |
-				var oldValues = attributes
-					.map[a | oldObj.eGet(getOriginal(a))]
-				var mergedValue = valueMerger.apply(oldValues.toList)
-				newObj.eSet(mergedAttribute, mergedValue)
-			]
-		)
-	]
-	return mergedAttribute
+	Function<Collection<Object>, Object> valueMerger) : EAttribute {
+	return mergeFeatures(newAttributeName, attributes, valueMerger, null)
 }
 
 /**
@@ -109,37 +95,68 @@ def mergeAttributes(String newAttributeName, Collection<EAttribute> attributes,
  * 
  * @param newReferenceName
  * @param references
- * @param valueMerger if not null, it is used to merge the values of the original
+ * @param valueMerger is used to merge the values of the original
  * features in the new model
  * @param postCopy executed after the model migrations
  * @return the new reference added to the containing class of the references
  */
 def mergeReferences(String newReferenceName, Collection<EReference> references,
 		Function<Collection<EObject>, EObject> valueMerger, Runnable postCopy) : EReference {
-	val firstFeature = references.head
-	val mergedReference = mergeFeatures(newReferenceName, references)
-	modelMigration[
-		copyRule(
-			wasRelatedTo(firstFeature),
-			[feature, oldObj, newObj |
-				var originalFeatures = references.stream()
-						.map[a | getOriginal(a)]
-				// for references we must get the copied EObject
-				var oldValues = originalFeatures
-						.map[f | oldObj.getValueAsEObject(f)]
-						.collect(Collectors.toList())
-				var merged = valueMerger.apply(getMigrated(oldValues))
-				newObj.eSet(mergedReference, merged)
-			],
-			postCopy
-		)
-	]
-	return mergedReference
+	return mergeFeatures(newReferenceName, references, valueMerger, postCopy)
 }
 
 /**
  * Merges the given features into a single new feature in the containing class.
  * The features must be compatible (same containing class, same type, same cardinality, etc).
+ * 
+ * @param <T> meant for both {@link EAttribute} and {@link EReference}
+ * @param <V> the type for the function (either {@link Object} or {@link EObject})
+ * @param newFeatureName
+ * @param features
+ * @param valueMerger is used to merge the values of the original
+ * features in the new model
+ * @param postCopy if not null, it is executed after the model migrations
+ * @return the new feature added to the containing class of the features
+ */
+def <T extends EStructuralFeature, V> mergeFeatures(String newFeatureName, Collection<T> features,
+		Function<Collection<V>, V> valueMerger, Runnable postCopy) : T {
+	checkNoDifferences(
+		features,
+		new EdeltaFeatureDifferenceFinder().ignoringName,
+		"The two features cannot be merged"
+	)
+	val firstFeature = features.head
+	val owner = firstFeature.EContainingClass
+	val mergedFeature = firstFeature.copyToAs(owner, newFeatureName)
+	removeAllElements(features)
+	modelMigration[
+		copyRule(
+			wasRelatedTo(firstFeature),
+			[_, oldObj, newObj |
+				var originalFeatures = features.stream()
+						.map[a | getOriginal(a)]
+				// for references we must get the copied EObject
+				var oldValues = originalFeatures
+						.map[f | oldObj.eGet(f)]
+						.collect(Collectors.toList())
+				// the explicit cast is required to avoid compilation error
+				// in the generated Java code:
+				// The method apply(Collection<V>) in the type Function<Collection<V>,V> is not applicable for the arguments (Object)
+				var merged = valueMerger.apply(getMigrated(oldValues) as Collection<V>)
+				newObj.eSet(mergedFeature, merged)
+			],
+			postCopy
+		)
+	]
+	return mergedFeature
+}
+
+/**
+ * Merges the given features into a single new feature in the containing class.
+ * The features must be compatible (same containing class, same type, same cardinality, etc).
+ * 
+ * TODO: this has to be removed once all the examples and tests have been ported
+ * to model migration as well.
  * 
  * @param <T>
  * @param newFeatureName
