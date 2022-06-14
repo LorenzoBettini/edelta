@@ -15,7 +15,7 @@ public class ChangeReferenceTypeMultipleExample extends EdeltaDefaultRuntime {
   public ChangeReferenceTypeMultipleExample(final EdeltaRuntime other) {
     super(other);
   }
-  
+
   public void exampleOfChangeReferenceType(final EPackage it) {
     final EClass otherNameElement = this.stdLib.addNewEClassAsSibling(getEClass("PersonListForChangeType", "NameElement"), "OtherNameElement");
     this.stdLib.<EAttribute>copyToAs(
@@ -30,12 +30,12 @@ public class ChangeReferenceTypeMultipleExample extends EdeltaDefaultRuntime {
     };
     this.stdLib.changeType(getEReference("PersonListForChangeType", "Person", "firstName"), otherNameElement, _function);
   }
-  
+
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("PersonListForChangeType");
   }
-  
+
   @Override
   protected void doExecute() throws Exception {
     exampleOfChangeReferenceType(getEPackage("PersonListForChangeType"));

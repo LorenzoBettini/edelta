@@ -17,14 +17,14 @@ public class Example extends EdeltaDefaultRuntime {
   public Example(final EdeltaRuntime other) {
     super(other);
   }
-  
+
   /**
    * Reusable function
    */
   public void makeItNotRequired(final EStructuralFeature f) {
     f.setLowerBound(0);
   }
-  
+
   public void someModifications(final EPackage it) {
     final Consumer<EClass> _function = (EClass it_1) -> {
       this.stdLib.addNewEAttribute(it_1, "myStringAttribute", getEDataType("ecore", "EString"));
@@ -37,7 +37,7 @@ public class Example extends EdeltaDefaultRuntime {
     };
     this.stdLib.addNewEClass(it, "NewClass", _function);
   }
-  
+
   public void otherModifications(final EPackage it) {
     getEAttribute("mypackage", "MyClass", "myClassStringAttribute").setName("stringAttribute");
     this.makeItNotRequired(getEAttribute("mypackage", "MyClass", "stringAttribute"));
@@ -53,13 +53,13 @@ public class Example extends EdeltaDefaultRuntime {
     };
     this.modelMigration(_function);
   }
-  
+
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("mypackage");
     ensureEPackageIsLoaded("ecore");
   }
-  
+
   @Override
   protected void doExecute() throws Exception {
     someModifications(getEPackage("mypackage"));

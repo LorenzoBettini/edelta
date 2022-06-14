@@ -9,11 +9,11 @@ public class ExampleReusableFunctions extends EdeltaDefaultRuntime {
   public ExampleReusableFunctions(final EdeltaRuntime other) {
     super(other);
   }
-  
+
   public EClass createANewClassInMyEcore(final String name) {
     return this.stdLib.addNewEClass(getEPackage("myecore"), name);
   }
-  
+
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("ecore");

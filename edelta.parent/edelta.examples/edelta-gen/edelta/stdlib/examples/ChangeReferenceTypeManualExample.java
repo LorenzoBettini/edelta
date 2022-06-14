@@ -17,7 +17,7 @@ public class ChangeReferenceTypeManualExample extends EdeltaDefaultRuntime {
   public ChangeReferenceTypeManualExample(final EdeltaRuntime other) {
     super(other);
   }
-  
+
   public void exampleOfChangeReferenceType(final EPackage it) {
     final EAttribute nameElementValue = getEAttribute("PersonListForChangeType", "NameElement", "nameElementValue");
     final EClass otherNameElement = this.stdLib.addNewEClassAsSibling(getEClass("PersonListForChangeType", "NameElement"), "OtherNameElement");
@@ -47,12 +47,12 @@ public class ChangeReferenceTypeManualExample extends EdeltaDefaultRuntime {
     };
     this.modelMigration(_function);
   }
-  
+
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("PersonListForChangeType");
   }
-  
+
   @Override
   protected void doExecute() throws Exception {
     exampleOfChangeReferenceType(getEPackage("PersonListForChangeType"));

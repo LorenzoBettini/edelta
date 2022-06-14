@@ -17,12 +17,12 @@ import org.eclipse.xtext.xbase.lib.IterableExtensions;
 public class PersonMargeNameExample extends EdeltaDefaultRuntime {
   @Extension
   private EdeltaRefactorings refactorings;
-  
+
   public PersonMargeNameExample(final EdeltaRuntime other) {
     super(other);
     refactorings = new EdeltaRefactorings(this);
   }
-  
+
   public void mergeName(final EPackage it) {
     final Function<Collection<Object>, Object> _function = (Collection<Object> oldValues) -> {
       final Function1<Object, String> _function_1 = (Object it_1) -> {
@@ -34,12 +34,12 @@ public class PersonMargeNameExample extends EdeltaDefaultRuntime {
       "name", 
       Collections.<EAttribute>unmodifiableList(CollectionLiterals.<EAttribute>newArrayList(getEAttribute("addressbook", "Person", "firstname"), getEAttribute("addressbook", "Person", "lastname"))), _function);
   }
-  
+
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("addressbook");
   }
-  
+
   @Override
   protected void doExecute() throws Exception {
     mergeName(getEPackage("addressbook"));

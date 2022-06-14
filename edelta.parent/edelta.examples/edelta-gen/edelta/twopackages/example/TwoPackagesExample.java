@@ -10,23 +10,23 @@ public class TwoPackagesExample extends EdeltaDefaultRuntime {
   public TwoPackagesExample(final EdeltaRuntime other) {
     super(other);
   }
-  
+
   public void aTest1(final EPackage it) {
     EReference _eOpposite = getEReference("person", "Person", "works").getEOpposite();
     _eOpposite.setName("renamedPersons");
   }
-  
+
   public void aTest2(final EPackage it) {
     EReference _eOpposite = getEReference("workplace", "WorkPlace", "renamedPersons").getEOpposite();
     _eOpposite.setName("renamedWorks");
   }
-  
+
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("person");
     ensureEPackageIsLoaded("workplace");
   }
-  
+
   @Override
   protected void doExecute() throws Exception {
     aTest1(getEPackage("person"));

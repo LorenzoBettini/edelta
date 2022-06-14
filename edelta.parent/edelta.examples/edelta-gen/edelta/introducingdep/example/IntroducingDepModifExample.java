@@ -13,12 +13,12 @@ import org.eclipse.xtext.xbase.lib.IterableExtensions;
 public class IntroducingDepModifExample extends EdeltaDefaultRuntime {
   @Extension
   private IntroducingDepOpExample operations;
-  
+
   public IntroducingDepModifExample(final EdeltaRuntime other) {
     super(other);
     operations = new IntroducingDepOpExample(this);
   }
-  
+
   public void aModificationTest(final EPackage it) {
     this.operations.setBaseClass(getEClass("anothersimple", "AnotherSimpleClass"));
     final EClass referenceToSuperClass = IterableExtensions.<EClass>head(getEClass("anothersimple", "AnotherSimpleClass").getESuperTypes());
@@ -30,12 +30,12 @@ public class IntroducingDepModifExample extends EdeltaDefaultRuntime {
     };
     this.stdLib.addNewEReference(referenceToSuperClass, "aReferenceToAnotherSimpleClass", getEClass("anothersimple", "AnotherSimpleClass"), _function);
   }
-  
+
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("anothersimple");
   }
-  
+
   @Override
   protected void doExecute() throws Exception {
     aModificationTest(getEPackage("anothersimple"));

@@ -16,7 +16,7 @@ public class ChangeToAbstractExample extends EdeltaDefaultRuntime {
   public ChangeToAbstractExample(final EdeltaRuntime other) {
     super(other);
   }
-  
+
   public void exampleOfChangeToAbstract(final EPackage it) {
     final EClass personClass = getEClass("PersonListForChangeToAbstract", "Person");
     final EClass employee = this.stdLib.addNewSubclass(personClass, "Employee");
@@ -38,12 +38,12 @@ public class ChangeToAbstractExample extends EdeltaDefaultRuntime {
     this.modelMigration(_function);
     EdeltaUtils.removeElement(managerAttribute);
   }
-  
+
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("PersonListForChangeToAbstract");
   }
-  
+
   @Override
   protected void doExecute() throws Exception {
     exampleOfChangeToAbstract(getEPackage("PersonListForChangeToAbstract"));

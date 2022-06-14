@@ -16,12 +16,12 @@ import org.eclipse.xtext.xbase.lib.IterableExtensions;
 @SuppressWarnings("all")
 public class StateChartsExample extends EdeltaDefaultRuntime {
   private EdeltaRefactorings refactorings;
-  
+
   public StateChartsExample(final EdeltaRuntime other) {
     super(other);
     refactorings = new EdeltaRefactorings(this);
   }
-  
+
   public void introduceNodeSubclasses(final EPackage it) {
     final EPackage ePackage = it;
     final EdeltaModelMigrator.EObjectFunction _function = (EObject oldObj) -> {
@@ -44,12 +44,12 @@ public class StateChartsExample extends EdeltaDefaultRuntime {
       getEClass("statecharts", "Node"), 
       Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("InitialState", "State", "FinalState")), _function);
   }
-  
+
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("statecharts");
   }
-  
+
   @Override
   protected void doExecute() throws Exception {
     introduceNodeSubclasses(getEPackage("statecharts"));
