@@ -14,12 +14,12 @@ import org.eclipse.xtext.xbase.lib.IterableExtensions;
 @SuppressWarnings("all")
 public class EdeltaBadSmellsChecker extends EdeltaDefaultRuntime {
   private EdeltaBadSmellsFinder finder;
-  
+
   public EdeltaBadSmellsChecker(final EdeltaRuntime other) {
     super(other);
     finder = new EdeltaBadSmellsFinder(this);
   }
-  
+
   /**
    * Shows warnings in case duplicate features are found;
    * for each feature that has duplicates shows a warning and the

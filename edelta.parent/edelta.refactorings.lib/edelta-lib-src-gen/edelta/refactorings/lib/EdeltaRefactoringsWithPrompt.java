@@ -22,12 +22,12 @@ import org.eclipse.xtext.xbase.lib.IterableExtensions;
 @SuppressWarnings("all")
 public class EdeltaRefactoringsWithPrompt extends EdeltaDefaultRuntime {
   private EdeltaRefactorings refactorings;
-  
+
   public EdeltaRefactoringsWithPrompt(final EdeltaRuntime other) {
     super(other);
     refactorings = new EdeltaRefactorings(this);
   }
-  
+
   /**
    * Creates the classes with the given names as subclasses of the passed
    * superClass, which will then be made abstract; For model migration it
@@ -50,7 +50,7 @@ public class EdeltaRefactoringsWithPrompt extends EdeltaDefaultRuntime {
     };
     return this.refactorings.introduceSubclasses(superClass, names, _function);
   }
-  
+
   /**
    * Merges the given attributes, expected to be of type EString,
    * into a single new attribute in the containing class; For model migration it
@@ -85,7 +85,7 @@ public class EdeltaRefactoringsWithPrompt extends EdeltaDefaultRuntime {
     }
     return _xblockexpression;
   }
-  
+
   /**
    * Changes this feature to multiple with the given upper bound; concerning model migration,
    * it makes sure that a collection is created with at most the specified upper bound
@@ -132,7 +132,7 @@ public class EdeltaRefactoringsWithPrompt extends EdeltaDefaultRuntime {
     };
     this.modelMigration(_function);
   }
-  
+
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("ecore");
