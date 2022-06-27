@@ -9,6 +9,7 @@ public class PetrinetExampleMain {
 		EdeltaEngine engine = new EdeltaEngine(PetrinetExample::new);
 		// Make sure you load all the used Ecores (Ecore.ecore is always loaded)
 		engine.loadEcoreFile("model/Petrinet.ecore");
+		engine.loadModelFile("model/Net.xmi");
 		// Execute the actual transformations defined in the DSL
 		engine.execute();
 		// Save the modified Ecores and models into a new path
