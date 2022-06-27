@@ -1,0 +1,40 @@
+import edelta.refactorings.lib.EdeltaRefactorings
+
+package edelta.examxml.example
+
+metamodel "examxml"
+metamodel "ecore"
+
+use EdeltaRefactorings as refactorings
+
+modifyEcore removeAttributes epackage examxml {
+	removeElement(ecoreref(question))
+	removeElement(ecoreref(optional))
+}
+
+modifyEcore introduceExerciseElement epackage examxml {
+	ecoreref(ExamElement).addNewSubclass("ExerciseElement")
+}
+
+modifyEcore splitOpenElement epackage examxml {
+	val superClass = ecoreref(OpenElement)
+	val specificQuestion1 = ecoreref(specificQuestion1)
+	val specificQuestion2 = ecoreref(specificQuestion2)
+	refactorings.introduceSubclasses(
+		superClass,
+		#["OpenElement1", "OpenElement2"],
+		[origElement |
+			val c = origElement.eClass
+			val origSpecificQuestion1 = c.getEStructuralFeature("specificQuestion1")
+			val origSpecificQuestion2 = c.getEStructuralFeature("specificQuestion2")
+			if (origElement.eIsSet(origSpecificQuestion1))
+				createInstance(superClass.EPackage.getEClass("OpenElement1")) [
+					o | setValueFrom(o, specificQuestion1, origElement, origSpecificQuestion1)
+				]
+			else
+				createInstance(superClass.EPackage.getEClass("OpenElement2")) [
+					o | setValueFrom(o, specificQuestion2, origElement, origSpecificQuestion2)
+				]
+		]
+	)
+}
