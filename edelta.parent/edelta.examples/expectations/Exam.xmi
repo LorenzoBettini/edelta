@@ -13,8 +13,7 @@
       specificQuestion2="another specific question"/>
   <elements
       xsi:type="examxml:OpenElement1"
-      specificQuestion1="question1"
-      specificQuestion2="question2"/>
+      specificQuestion1="question1"/>
   <elements
       xsi:type="examxml:MultipleChoiceElement"/>
 </examxml:Exam>

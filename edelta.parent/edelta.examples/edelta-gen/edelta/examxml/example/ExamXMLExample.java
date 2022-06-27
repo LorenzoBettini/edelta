@@ -62,6 +62,8 @@ public class ExamXMLExample extends EdeltaDefaultRuntime {
     };
     this.refactorings.introduceSubclasses(superClass, 
       Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("OpenElement1", "OpenElement2")), _function);
+    this.refactorings.pushDownFeature(specificQuestion1, Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(getEClass("examxml", "OpenElement1"))));
+    this.refactorings.pushDownFeature(specificQuestion2, Collections.<EClass>unmodifiableList(CollectionLiterals.<EClass>newArrayList(getEClass("examxml", "OpenElement2"))));
   }
 
   @Override

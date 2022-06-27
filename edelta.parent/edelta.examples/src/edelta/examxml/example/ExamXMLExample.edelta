@@ -37,4 +37,6 @@ modifyEcore splitOpenElement epackage examxml {
 				]
 		]
 	)
+	refactorings.pushDownFeature(specificQuestion1, #[ecoreref(OpenElement1)])
+	refactorings.pushDownFeature(specificQuestion2, #[ecoreref(OpenElement2)])
 }
