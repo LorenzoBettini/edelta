@@ -811,6 +811,23 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   }
 
   /**
+   * Splits the passed class into several classes with the given names;
+   * all classes will be copies of the original class (which will be removed)
+   * 
+   * @param toSplit
+   * @param names
+   */
+  public Collection<EClass> splitClass(final EClass toSplit, final Collection<String> names) {
+    final EPackage containingPackage = toSplit.getEPackage();
+    final Function1<String, EClass> _function = (String n) -> {
+      return this.stdLib.<EClass>copyToAs(toSplit, containingPackage, n);
+    };
+    final List<EClass> split = IterableExtensions.<EClass>toList(IterableExtensions.<String, EClass>map(names, _function));
+    EdeltaUtils.removeElement(toSplit);
+    return split;
+  }
+
+  /**
    * Ensures that the proposed classifier name is unique within the containing package of
    * the passed context; if not, it appends an incremental index until the name
    * is actually unique

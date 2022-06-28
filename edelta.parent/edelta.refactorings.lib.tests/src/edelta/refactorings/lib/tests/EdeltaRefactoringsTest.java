@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,6 +25,7 @@ import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
@@ -2053,6 +2055,50 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 			
 			""",
 			appender.getResult());
+	}
+
+	@Test
+	void test_splitClass() throws Exception {
+		var subdir = "splitClass/";
+		var ecores = of("TestEcore.ecore");
+		var models = new ArrayList<String>();
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var toSplit = getEClass("testecore", "SubElement");
+					var split = splitClass(toSplit,
+						of(
+							"SubElement1",
+							"SubElement2",
+							"SubElement3"
+						)
+					);
+					var superClass = getEClass("testecore", "Element");
+					assertThat(split.stream()
+						.flatMap(c -> c.getESuperTypes().stream()))
+						.containsOnly(superClass);
+					assertThat(split.stream()
+						.map(ENamedElement::getName))
+						.containsExactly(
+							"SubElement1",
+							"SubElement2",
+							"SubElement3"
+						);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test
