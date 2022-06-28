@@ -777,6 +777,22 @@ public class EdeltaStandardLibraryTest {
 	}
 
 	@Test
+	public void test_copyToAsForClassifier() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		EClass eClassSrc = ecoreFactory.createEClass();
+		eClassSrc.setName("originalName");
+		ePackage.getEClassifiers().add(eClassSrc);
+		// before
+		assertThat(ePackage.getEClassifiers())
+			.containsExactly(eClassSrc);
+		var copy = lib.copyToAs(eClassSrc, ePackage, "newName");
+		// after
+		assertThat(ePackage.getEClassifiers())
+			.containsExactly(eClassSrc, copy);
+		assertEquals("newName", copy.getName());
+	}
+
+	@Test
 	public void test_copyAllTo() {
 		EClass eClassSrc = ecoreFactory.createEClass();
 		EClass eClassDest = ecoreFactory.createEClass();
