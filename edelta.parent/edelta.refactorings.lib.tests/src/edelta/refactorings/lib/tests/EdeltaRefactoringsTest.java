@@ -2100,6 +2100,66 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 		);
 	}
 
+	/**
+	 * Assumes that the name of the SubElement ends with a number
+	 * that is used to create the instance of one of the splitted classes.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	void test_splitClass() throws Exception {
+		var subdir = "splitClass/";
+		var ecores = of("TestEcore.ecore");
+		var models = of("Container.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var ePackage = getEPackage("testecore");
+					var toSplit = getEClass("testecore", "SubElement");
+					var split = splitClass(toSplit,
+						of(
+							"SubElement1",
+							"SubElement2",
+							"SubElement3"
+						),
+						(origObj -> {
+							var origClass = origObj.eClass();
+							var nameFeature = origClass.getEStructuralFeature("name");
+							var nameValue = origObj.eGet(nameFeature).toString();
+							var newObjClassName = "SubElement" +
+									nameValue.charAt(nameValue.length() - 1);
+							return EdeltaEcoreUtil.createInstance(
+									getEClass(ePackage, newObjClassName));
+						})
+					);
+					var superClass = getEClass("testecore", "Element");
+					assertThat(split.stream()
+						.flatMap(c -> c.getESuperTypes().stream()))
+						.containsOnly(superClass);
+					assertThat(split.stream()
+						.map(ENamedElement::getName))
+						.containsExactly(
+							"SubElement1",
+							"SubElement2",
+							"SubElement3"
+						);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
 	@Test
 	void test_allUsagesOfThisClass() {
 		var p = createEPackage("p");
