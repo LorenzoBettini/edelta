@@ -564,23 +564,38 @@ public class EdeltaModelMigrator {
 		return origEcoreElement -> wasRelatedToAtLeastOneOf(origEcoreElement, evolvedEcoreElements);
 	}
 
-	public EdeltaModelMigrator.CopyProcedure multiplicityAwareCopy(EStructuralFeature feature) {
+	public EdeltaModelMigrator.CopyProcedure multiplicityAwareCopy(EStructuralFeature newFeature) {
 		return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> {
-			// if the multiplicity changes and the type of the attribute changes we might
-			// end up with a list with a single default value.
-			// if instead we check that the original value of the object for the feature
-			// is set we avoid such a situation.
-			if (oldObj.eIsSet(oldFeature))
-				EdeltaEcoreUtil.setValueForFeature(
-					newObj,
-					feature,
-					// use the upper bound of the destination feature, since it might
-					// be different from the original one
-					getMigrated(EdeltaEcoreUtil
-						.getValueForFeature(oldObj, oldFeature, feature.getUpperBound()))
-						// for reference we must first propagate the copy with getMigrated
-				);
+			copyFrom(newObj, newFeature, oldObj, oldFeature);
 		};
+	}
+
+	/**
+	 * Copy (in case, by first propagating the copy for references) the value of
+	 * oldFeature of the oldObj into the newFeature of the newObj, taking into
+	 * account possible multiple elements and possible changes to the multiplicity
+	 * of the involved features.
+	 * 
+	 * @param newObj
+	 * @param newFeature
+	 * @param oldObj
+	 * @param oldFeature
+	 */
+	public void copyFrom(EObject newObj, EStructuralFeature newFeature, EObject oldObj, EStructuralFeature oldFeature) {
+		// if the multiplicity changes and the type of the attribute changes we might
+		// end up with a list with a single default value.
+		// if instead we check that the original value of the object for the feature
+		// is set we avoid such a situation.
+		if (oldObj.eIsSet(oldFeature))
+			EdeltaEcoreUtil.setValueForFeature(
+				newObj,
+				newFeature,
+				// use the upper bound of the destination feature, since it might
+				// be different from the original one
+				getMigrated(EdeltaEcoreUtil
+					.getValueForFeature(oldObj, oldFeature, newFeature.getUpperBound()))
+					// for reference we must first propagate the copy with getMigrated
+			);
 	}
 
 	/**
