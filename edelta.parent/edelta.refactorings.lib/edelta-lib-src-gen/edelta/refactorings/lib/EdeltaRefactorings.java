@@ -769,6 +769,21 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     return pushedDownFeatures.values();
   }
 
+  public EClass mergeClasses(final String mergedClassName, final Collection<EClass> toMerge) {
+    final EClass superClass = this.getSingleDirectSuperclass(toMerge);
+    final Function1<EClass, EList<EStructuralFeature>> _function = (EClass it) -> {
+      return it.getEStructuralFeatures();
+    };
+    this.checkNoBidirectionalReferences(IterableExtensions.<EStructuralFeature>toList(Iterables.<EStructuralFeature>concat(IterableExtensions.<EClass, EList<EStructuralFeature>>map(toMerge, _function))), 
+      "Cannot merge in the presence of bidirectional references");
+    final EClass merged = EcoreUtil.<EClass>copy(IterableExtensions.<EClass>head(toMerge));
+    merged.setName(mergedClassName);
+    EList<EClassifier> _eClassifiers = superClass.getEPackage().getEClassifiers();
+    _eClassifiers.add(merged);
+    EdeltaUtils.removeAllElements(toMerge);
+    return merged;
+  }
+
   /**
    * Ensures that the proposed classifier name is unique within the containing package of
    * the passed context; if not, it appends an incremental index until the name

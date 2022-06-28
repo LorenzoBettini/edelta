@@ -758,6 +758,18 @@ def pushDownFeature(EStructuralFeature featureToPush, List<EClass> subClasses) :
 	return pushedDownFeatures.values
 }
 
+def mergeClasses(String mergedClassName, Collection<EClass> toMerge) : EClass {
+	val superClass = getSingleDirectSuperclass(toMerge)
+	checkNoBidirectionalReferences(toMerge.map[EStructuralFeatures].flatten.toList,
+		"Cannot merge in the presence of bidirectional references"
+	)
+	val merged = EcoreUtil.copy(toMerge.head)
+	merged.name = mergedClassName
+	superClass.EPackage.EClassifiers += merged
+	removeAllElements(toMerge)
+	return merged
+}
+
 /**
  * Ensures that the proposed classifier name is unique within the containing package of
  * the passed context; if not, it appends an incremental index until the name

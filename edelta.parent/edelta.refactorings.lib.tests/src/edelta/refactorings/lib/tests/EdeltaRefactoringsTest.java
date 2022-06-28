@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -1970,6 +1971,38 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 		assertOutputs(
 			engine,
 			"pullUpAndPushDown/",
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_mergeClasses() throws Exception {
+		var subdir = "mergeClasses/";
+		var ecores = of("TestEcore.ecore");
+		var models = new ArrayList<String>();
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var toMerge = of(getEClass("testecore", "SubElement1"), getEClass("testecore", "SubElement2"));
+					var merged = mergeClasses("SubElement", toMerge);
+					var superClass = getEClass("testecore", "Element");
+					assertThat(merged.getESuperTypes())
+						.containsOnly(superClass);
+					assertThat(merged.getEPackage())
+						.isSameAs(superClass.getEPackage());
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
 			ecores,
 			models
 		);
