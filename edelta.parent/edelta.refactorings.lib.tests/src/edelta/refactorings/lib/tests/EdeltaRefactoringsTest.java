@@ -1173,7 +1173,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 				ERROR: PersonList.AnotherFemale: Wrong superclass of PersonList.AnotherFemale:
 				  Expected: PersonList.Person
 				  Actual  : PersonList.AnotherPerson
-				ERROR: PersonList.Person: The class has additional subclasses:
+				ERROR: PersonList.Person: The class PersonList.Person has additional subclasses:
 				  PersonList.Male
 				  PersonList.FemaleEmployee""");
 	}
@@ -1192,7 +1192,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
 			"""
-				ERROR: PersonList.Person: The class has additional subclasses:
+				ERROR: PersonList.Person: The class PersonList.Person has additional subclasses:
 				  PersonList.Male
 				  PersonListReferring.FemaleEmployee""");
 	}
@@ -1988,7 +1988,9 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 			other -> new EdeltaRefactorings(other) {
 				@Override
 				protected void doExecute() {
-					var toMerge = of(getEClass("testecore", "SubElement1"), getEClass("testecore", "SubElement2"));
+					var toMerge = of(
+						getEClass("testecore", "SubElement1"),
+						getEClass("testecore", "SubElement2"));
 					var merged = mergeClasses("SubElement", toMerge);
 					var superClass = getEClass("testecore", "Element");
 					assertThat(merged.getESuperTypes())

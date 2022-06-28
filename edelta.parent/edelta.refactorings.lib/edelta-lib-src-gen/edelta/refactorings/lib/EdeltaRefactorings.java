@@ -769,6 +769,16 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     return pushedDownFeatures.values();
   }
 
+  /**
+   * Create a new target class with the given name that merges all
+   * the passed classes.
+   * 
+   * The classes are expected to have the same single direct superclass
+   * and to define the same features.
+   * 
+   * @param mergedClassName
+   * @param toMerge
+   */
   public EClass mergeClasses(final String mergedClassName, final Collection<EClass> toMerge) {
     final EClass superClass = this.getSingleDirectSuperclass(toMerge);
     final Function1<EClass, EList<EStructuralFeature>> _function = (EClass it) -> {
@@ -1308,10 +1318,10 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       invalid.forEach(_function_1);
       throw new IllegalArgumentException("Wrong superclasses");
     }
-    final EClass result = IterableExtensions.<EClass>head(IterableExtensions.<EClass>head(subclasses).getESuperTypes());
+    final EClass superclass = IterableExtensions.<EClass>head(IterableExtensions.<EClass>head(subclasses).getESuperTypes());
     final Function1<EClass, Boolean> _function_2 = (EClass it) -> {
       EClass _head = IterableExtensions.<EClass>head(it.getESuperTypes());
-      return Boolean.valueOf((_head != result));
+      return Boolean.valueOf((_head != superclass));
     };
     final Iterable<EClass> differences = IterableExtensions.<EClass>filter(subclasses, _function_2);
     boolean _isEmpty_1 = IterableExtensions.isEmpty(differences);
@@ -1323,7 +1333,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
         String _plus_1 = (_plus + ":\n");
         String _plus_2 = (_plus_1 + 
           "  Expected: ");
-        String _eObjectRepr_1 = EdeltaUtils.getEObjectRepr(result);
+        String _eObjectRepr_1 = EdeltaUtils.getEObjectRepr(superclass);
         String _plus_3 = (_plus_2 + _eObjectRepr_1);
         String _plus_4 = (_plus_3 + "\n");
         String _plus_5 = (_plus_4 + 
@@ -1335,21 +1345,24 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       differences.forEach(_function_3);
       throw new IllegalArgumentException("Wrong superclasses");
     }
-    final Set<EClass> additionalSubclasses = IterableExtensions.<EClass>toSet(this.directSubclasses(result));
+    final Set<EClass> additionalSubclasses = IterableExtensions.<EClass>toSet(this.directSubclasses(superclass));
     additionalSubclasses.removeAll(IterableExtensions.<EClass>toSet(subclasses));
     boolean _isEmpty_2 = additionalSubclasses.isEmpty();
     boolean _not_2 = (!_isEmpty_2);
     if (_not_2) {
+      String _eObjectRepr = EdeltaUtils.getEObjectRepr(superclass);
+      String _plus = ("The class " + _eObjectRepr);
+      String _plus_1 = (_plus + " has additional subclasses:\n");
       final Function1<EClass, String> _function_4 = (EClass it) -> {
-        String _eObjectRepr = EdeltaUtils.getEObjectRepr(it);
-        return ("  " + _eObjectRepr);
+        String _eObjectRepr_1 = EdeltaUtils.getEObjectRepr(it);
+        return ("  " + _eObjectRepr_1);
       };
       String _join = IterableExtensions.join(IterableExtensions.<EClass, String>map(additionalSubclasses, _function_4), "\n");
-      final String message = ("The class has additional subclasses:\n" + _join);
-      this.showError(result, message);
+      final String message = (_plus_1 + _join);
+      this.showError(superclass, message);
       throw new IllegalArgumentException(message);
     }
-    return result;
+    return superclass;
   }
 
   public Iterable<EClass> directSubclasses(final EClass cl) {

@@ -758,6 +758,16 @@ def pushDownFeature(EStructuralFeature featureToPush, List<EClass> subClasses) :
 	return pushedDownFeatures.values
 }
 
+/**
+ * Create a new target class with the given name that merges all
+ * the passed classes.
+ * 
+ * The classes are expected to have the same single direct superclass
+ * and to define the same features.
+ * 
+ * @param mergedClassName
+ * @param toMerge
+ */
 def mergeClasses(String mergedClassName, Collection<EClass> toMerge) : EClass {
 	val superClass = getSingleDirectSuperclass(toMerge)
 	checkNoBidirectionalReferences(toMerge.map[EStructuralFeatures].flatten.toList,
@@ -1171,27 +1181,27 @@ def getSingleDirectSuperclass(Collection<EClass> subclasses) : EClass {
 		throw new IllegalArgumentException("Wrong superclasses")
 	}
 	// now all subclasses are known to have exactly one superclass
-	val result = subclasses.head.ESuperTypes.head
+	val superclass = subclasses.head.ESuperTypes.head
 	val differences = subclasses
-		.filter[ESuperTypes.head !== result]
+		.filter[ESuperTypes.head !== superclass]
 	if (!differences.empty) {
 		differences.forEach[
 			val message = "Wrong superclass of " + EObjectRepr + ":\n"+
-							"  Expected: " + getEObjectRepr(result) + "\n" +
+							"  Expected: " + getEObjectRepr(superclass) + "\n" +
 							"  Actual  : " + getEObjectRepr(ESuperTypes.head)
 			showError(it, message)
 		]
 		throw new IllegalArgumentException("Wrong superclasses")
 	}
-	val additionalSubclasses = directSubclasses(result).toSet
+	val additionalSubclasses = directSubclasses(superclass).toSet
 	additionalSubclasses.removeAll(subclasses.toSet)
 	if (!additionalSubclasses.empty) {
-		val message = "The class has additional subclasses:\n" +
+		val message = "The class " + getEObjectRepr(superclass) + " has additional subclasses:\n" +
 					additionalSubclasses.map["  " + EObjectRepr].join("\n")
-		showError(result, message)
+		showError(superclass, message)
 		throw new IllegalArgumentException(message)
 	}
-	return result
+	return superclass
 }
 
 def directSubclasses(EClass cl) {
