@@ -10,14 +10,18 @@
       name="name1"
       optional="true"
       referred="//@references.0">
-    <containments/>
+    <containments
+        name="contained1"/>
   </elements>
   <elements
       xsi:type="testecore:SubElement"
       name="name2"
       referred="//@references.1">
-    <containments/>
+    <containments
+        name="contained2"/>
   </elements>
-  <references/>
-  <references/>
+  <references
+      name="referred1"/>
+  <references
+      name="referred2"/>
 </testecore:Container>

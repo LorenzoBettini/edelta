@@ -16,8 +16,12 @@
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="referred" eType="#//Referred"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Contained"/>
-  <eClassifiers xsi:type="ecore:EClass" name="Referred"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Contained">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Referred">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SubElement2" eSuperTypes="#//Element">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="optional" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="containments" eType="#//Contained"
