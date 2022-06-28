@@ -774,9 +774,7 @@ def mergeClasses(String mergedClassName, Collection<EClass> toMerge) : EClass {
 	checkNoBidirectionalReferences(toMerge.map[EStructuralFeatures].flatten.toList,
 		"Cannot merge in the presence of bidirectional references"
 	)
-	val merged = EcoreUtil.copy(toMerge.head)
-	merged.name = mergedClassName
-	superClass.EPackage.EClassifiers += merged
+	val merged = copyToAs(toMerge.head, superClass.EPackage, mergedClassName)
 	removeAllElements(toMerge)
 	modelMigration[
 		createInstanceRule(

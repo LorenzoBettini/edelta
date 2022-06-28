@@ -787,10 +787,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     };
     this.checkNoBidirectionalReferences(IterableExtensions.<EStructuralFeature>toList(Iterables.<EStructuralFeature>concat(IterableExtensions.<EClass, EList<EStructuralFeature>>map(toMerge, _function))), 
       "Cannot merge in the presence of bidirectional references");
-    final EClass merged = EcoreUtil.<EClass>copy(IterableExtensions.<EClass>head(toMerge));
-    merged.setName(mergedClassName);
-    EList<EClassifier> _eClassifiers = superClass.getEPackage().getEClassifiers();
-    _eClassifiers.add(merged);
+    final EClass merged = this.stdLib.<EClass>copyToAs(IterableExtensions.<EClass>head(toMerge), superClass.getEPackage(), mergedClassName);
     EdeltaUtils.removeAllElements(toMerge);
     final Consumer<EdeltaModelMigrator> _function_1 = (EdeltaModelMigrator it) -> {
       final EdeltaModelMigrator.EObjectFunction _function_2 = (EObject origObj) -> {
