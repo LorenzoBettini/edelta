@@ -9,4 +9,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.junit,
  edelta.dependency.analyzer,
  edelta.testutils,
- assertj-core;bundle-version="3.22.0"
+ assertj-core;bundle-version="3.23.1"

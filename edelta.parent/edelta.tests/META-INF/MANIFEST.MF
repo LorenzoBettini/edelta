@@ -18,10 +18,10 @@ Require-Bundle: edelta,
  org.junit.jupiter.api;bundle-version="[5.1.0,6.0.0)",
  org.junit.jupiter.params;bundle-version="[5.1.0,6.0.0)",
  org.junit;bundle-version="4.13.0",
- assertj-core;bundle-version="3.22.0",
- org.mockito.mockito-core;bundle-version="3.12.4",
- net.bytebuddy.byte-buddy;bundle-version="1.11.13",
- org.objenesis;bundle-version="3.2.0"
+ assertj-core;bundle-version="3.23.1",
+ org.mockito.mockito-core;bundle-version="4.6.1",
+ net.bytebuddy.byte-buddy,
+ org.objenesis
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: edelta.tests;x-internal=true
 Automatic-Module-Name: edelta.tests
