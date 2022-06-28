@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -2058,10 +2057,10 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
-	void test_splitClass() throws Exception {
+	void test_splitClassDefault() throws Exception {
 		var subdir = "splitClass/";
 		var ecores = of("TestEcore.ecore");
-		var models = new ArrayList<String>();
+		var models = of("Container.xmi");
 
 		var engine = setupEngine(
 			subdir,
@@ -2095,7 +2094,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 
 		assertOutputs(
 			engine,
-			subdir,
+			"splitClassDefault/",
 			ecores,
 			models
 		);

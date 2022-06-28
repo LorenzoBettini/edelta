@@ -797,17 +797,55 @@ def mergeClasses(String mergedClassName, Collection<EClass> toMerge) : EClass {
 
 /**
  * Splits the passed class into several classes with the given names;
- * all classes will be copies of the original class (which will be removed)
+ * all classes will be copies of the original class (which will be removed).
+ * Concerning model migration, it creates an object of the first split class.
  * 
  * @param toSplit
  * @param names
  */
 def splitClass(EClass toSplit, Collection<String> names) : Collection<EClass> {
 	val containingPackage = toSplit.EPackage
+	return splitClass(toSplit, names, 
+		[origObj |
+			createInstance(containingPackage.getEClass(names.head))
+		]
+	)
+}
+
+/**
+ * Splits the passed class into several classes with the given names;
+ * all classes will be copies of the original class (which will be removed).
+ * The objectMigrator is used when migrating the model objects of the original class:
+ * it is used to create an instance of the proper class and then all the features
+ * of the original object are copied into the created instance automatically
+ * 
+ * @param toSplit
+ * @param names
+ * @param objectMigration
+ */
+def splitClass(EClass toSplit, Collection<String> names, EObjectFunction objectMigrator) 
+		: Collection<EClass> {
+	val containingPackage = toSplit.EPackage
 	val split = names.map[ n |
 		copyToAs(toSplit, containingPackage, n)
 	].toList
 	removeElement(toSplit)
+	modelMigration[
+		createInstanceRule(
+			wasRelatedTo(toSplit),
+			[origObj |
+				val origFeatures = origObj.eClass.EAllStructuralFeatures
+				val newObj = objectMigrator.apply(origObj)
+				val newClass = newObj.eClass
+				for (origFeature : origFeatures)
+					copyFrom(
+						newObj, newClass.getEStructuralFeature(origFeature.name),
+						origObj, origFeature
+					)
+				return newObj
+			]
+		)
+	]
 	return split
 }
 

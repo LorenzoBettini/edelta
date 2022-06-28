@@ -812,18 +812,52 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
 
   /**
    * Splits the passed class into several classes with the given names;
-   * all classes will be copies of the original class (which will be removed)
+   * all classes will be copies of the original class (which will be removed).
+   * Concerning model migration, it creates an object of the first split class.
    * 
    * @param toSplit
    * @param names
    */
   public Collection<EClass> splitClass(final EClass toSplit, final Collection<String> names) {
     final EPackage containingPackage = toSplit.getEPackage();
+    final EdeltaModelMigrator.EObjectFunction _function = (EObject origObj) -> {
+      return EdeltaEcoreUtil.createInstance(this.getEClass(containingPackage, IterableExtensions.<String>head(names)));
+    };
+    return this.splitClass(toSplit, names, _function);
+  }
+
+  /**
+   * Splits the passed class into several classes with the given names;
+   * all classes will be copies of the original class (which will be removed).
+   * The objectMigrator is used when migrating the model objects of the original class:
+   * it is used to create an instance of the proper class and then all the features
+   * of the original object are copied into the created instance automatically
+   * 
+   * @param toSplit
+   * @param names
+   * @param objectMigration
+   */
+  public Collection<EClass> splitClass(final EClass toSplit, final Collection<String> names, final EdeltaModelMigrator.EObjectFunction objectMigrator) {
+    final EPackage containingPackage = toSplit.getEPackage();
     final Function1<String, EClass> _function = (String n) -> {
       return this.stdLib.<EClass>copyToAs(toSplit, containingPackage, n);
     };
     final List<EClass> split = IterableExtensions.<EClass>toList(IterableExtensions.<String, EClass>map(names, _function));
     EdeltaUtils.removeElement(toSplit);
+    final Consumer<EdeltaModelMigrator> _function_1 = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.EObjectFunction _function_2 = (EObject origObj) -> {
+        final EList<EStructuralFeature> origFeatures = origObj.eClass().getEAllStructuralFeatures();
+        final EObject newObj = objectMigrator.apply(origObj);
+        final EClass newClass = newObj.eClass();
+        for (final EStructuralFeature origFeature : origFeatures) {
+          it.copyFrom(newObj, newClass.getEStructuralFeature(origFeature.getName()), origObj, origFeature);
+        }
+        return newObj;
+      };
+      it.createInstanceRule(
+        it.<EClass>wasRelatedTo(toSplit), _function_2);
+    };
+    this.modelMigration(_function_1);
     return split;
   }
 
