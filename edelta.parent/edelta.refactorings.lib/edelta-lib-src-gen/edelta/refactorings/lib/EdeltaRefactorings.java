@@ -781,6 +781,24 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     EList<EClassifier> _eClassifiers = superClass.getEPackage().getEClassifiers();
     _eClassifiers.add(merged);
     EdeltaUtils.removeAllElements(toMerge);
+    final Consumer<EdeltaModelMigrator> _function_1 = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.EObjectFunction _function_2 = (EObject origObj) -> {
+        EObject _xblockexpression = null;
+        {
+          final EList<EStructuralFeature> origFeatures = origObj.eClass().getEAllStructuralFeatures();
+          final Consumer<EObject> _function_3 = (EObject newObj) -> {
+            for (final EStructuralFeature origFeature : origFeatures) {
+              it.copyFrom(newObj, merged.getEStructuralFeature(origFeature.getName()), origObj, origFeature);
+            }
+          };
+          _xblockexpression = EdeltaEcoreUtil.createInstance(merged, _function_3);
+        }
+        return _xblockexpression;
+      };
+      it.createInstanceRule(
+        it.<EClass>wasRelatedToAtLeastOneOf(toMerge), _function_2);
+    };
+    this.modelMigration(_function_1);
     return merged;
   }
 

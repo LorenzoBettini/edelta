@@ -767,6 +767,22 @@ def mergeClasses(String mergedClassName, Collection<EClass> toMerge) : EClass {
 	merged.name = mergedClassName
 	superClass.EPackage.EClassifiers += merged
 	removeAllElements(toMerge)
+	modelMigration[
+		createInstanceRule(
+			wasRelatedToAtLeastOneOf(toMerge),
+			[origObj |
+				val origFeatures = origObj.eClass.EAllStructuralFeatures
+				createInstance(merged) [
+					newObj |
+						for (origFeature : origFeatures)
+							copyFrom(
+								newObj, merged.getEStructuralFeature(origFeature.name),
+								origObj, origFeature
+							)
+				]
+			]
+		)
+	]
 	return merged
 }
 

@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -1980,7 +1979,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	void test_mergeClasses() throws Exception {
 		var subdir = "mergeClasses/";
 		var ecores = of("TestEcore.ecore");
-		var models = new ArrayList<String>();
+		var models = of("Container.xmi");
 
 		var engine = setupEngine(
 			subdir,
