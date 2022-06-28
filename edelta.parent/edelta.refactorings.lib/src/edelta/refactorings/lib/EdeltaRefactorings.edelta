@@ -770,6 +770,7 @@ def pushDownFeature(EStructuralFeature featureToPush, List<EClass> subClasses) :
  */
 def mergeClasses(String mergedClassName, Collection<EClass> toMerge) : EClass {
 	val superClass = getSingleDirectSuperclass(toMerge)
+	checkSameFeatures(toMerge)
 	checkNoBidirectionalReferences(toMerge.map[EStructuralFeatures].flatten.toList,
 		"Cannot merge in the presence of bidirectional references"
 	)
@@ -978,6 +979,44 @@ def checkNoFeatures(Collection<EClass> classes) {
 	].toList
 	if (!classesWithFeatures.empty)
 		throw new IllegalArgumentException("Classes not empty")
+}
+
+/**
+ * Makes sure the passed EClasses have the same features,
+ * independently from the order, if not, shows
+ * error information and throws an IllegalArgumentException.
+ * 
+ * @param classes
+ */
+def checkSameFeatures(Collection<EClass> classes) {
+	// the order is not important
+	val firstClass = classes.head
+	val features = firstClass.EStructuralFeatures.sortBy[name]
+	val otherClasses = classes.tail
+	for (otherClass : otherClasses) {
+		val otherFeatures = otherClass.EStructuralFeatures.sortBy[name]
+		val expectedSize = features.size
+		val actualSize = otherFeatures.size
+		if (expectedSize !== actualSize) {
+			showError(otherClass, "Different features size: expected " +
+				expectedSize + " but was " + actualSize + "\n  " +
+				"in classes " + getEObjectRepr(firstClass) + ", " +
+				getEObjectRepr(otherClass)
+			)
+			throw new IllegalArgumentException("Features don't match in size")
+		} else {
+			val finder = new EdeltaFeatureDifferenceFinder().ignoringContainingClass
+			val otherIt = otherFeatures.iterator
+			for (f : features) {
+				val other = otherIt.next
+				if (!finder.equals(f, other)) {
+					val message = finder.differenceDetails
+					showError(otherClass, message)
+					throw new IllegalArgumentException(message)
+				}
+			}
+		}
+	}
 }
 
 /**

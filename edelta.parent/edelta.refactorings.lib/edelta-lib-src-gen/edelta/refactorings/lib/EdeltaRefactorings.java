@@ -781,6 +781,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    */
   public EClass mergeClasses(final String mergedClassName, final Collection<EClass> toMerge) {
     final EClass superClass = this.getSingleDirectSuperclass(toMerge);
+    this.checkSameFeatures(toMerge);
     final Function1<EClass, EList<EStructuralFeature>> _function = (EClass it) -> {
       return it.getEStructuralFeatures();
     };
@@ -1049,6 +1050,57 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     boolean _not = (!_isEmpty);
     if (_not) {
       throw new IllegalArgumentException("Classes not empty");
+    }
+  }
+
+  /**
+   * Makes sure the passed EClasses have the same features,
+   * independently from the order, if not, shows
+   * error information and throws an IllegalArgumentException.
+   * 
+   * @param classes
+   */
+  public void checkSameFeatures(final Collection<EClass> classes) {
+    final EClass firstClass = IterableExtensions.<EClass>head(classes);
+    final Function1<EStructuralFeature, String> _function = (EStructuralFeature it) -> {
+      return it.getName();
+    };
+    final List<EStructuralFeature> features = IterableExtensions.<EStructuralFeature, String>sortBy(firstClass.getEStructuralFeatures(), _function);
+    final Iterable<EClass> otherClasses = IterableExtensions.<EClass>tail(classes);
+    for (final EClass otherClass : otherClasses) {
+      {
+        final Function1<EStructuralFeature, String> _function_1 = (EStructuralFeature it) -> {
+          return it.getName();
+        };
+        final List<EStructuralFeature> otherFeatures = IterableExtensions.<EStructuralFeature, String>sortBy(otherClass.getEStructuralFeatures(), _function_1);
+        final int expectedSize = features.size();
+        final int actualSize = otherFeatures.size();
+        if ((expectedSize != actualSize)) {
+          String _eObjectRepr = EdeltaUtils.getEObjectRepr(firstClass);
+          String _plus = (((((("Different features size: expected " + Integer.valueOf(expectedSize)) + " but was ") + Integer.valueOf(actualSize)) + "\n  ") + 
+            "in classes ") + _eObjectRepr);
+          String _plus_1 = (_plus + ", ");
+          String _eObjectRepr_1 = EdeltaUtils.getEObjectRepr(otherClass);
+          String _plus_2 = (_plus_1 + _eObjectRepr_1);
+          this.showError(otherClass, _plus_2);
+          throw new IllegalArgumentException("Features don\'t match in size");
+        } else {
+          final EdeltaFeatureDifferenceFinder finder = new EdeltaFeatureDifferenceFinder().ignoringContainingClass();
+          final Iterator<EStructuralFeature> otherIt = otherFeatures.iterator();
+          for (final EStructuralFeature f : features) {
+            {
+              final EStructuralFeature other = otherIt.next();
+              boolean _equals = finder.equals(f, other);
+              boolean _not = (!_equals);
+              if (_not) {
+                final String message = finder.getDifferenceDetails();
+                this.showError(otherClass, message);
+                throw new IllegalArgumentException(message);
+              }
+            }
+          }
+        }
+      }
     }
   }
 

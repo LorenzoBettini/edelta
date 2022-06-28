@@ -1990,7 +1990,9 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 				protected void doExecute() {
 					var toMerge = of(
 						getEClass("testecore", "SubElement1"),
-						getEClass("testecore", "SubElement2"));
+						getEClass("testecore", "SubElement2"),
+						getEClass("testecore", "SubElement3")
+					);
 					var merged = mergeClasses("SubElement", toMerge);
 					var superClass = getEClass("testecore", "Element");
 					assertThat(merged.getESuperTypes())
@@ -2007,6 +2009,50 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 			ecores,
 			models
 		);
+	}
+
+	@Test
+	void test_mergeClassesFeaturesDifferInSize() throws Exception {
+		withInputModels("mergeClasses", "TestEcore.ecore");
+		loadEcoreFiles();
+		var thirdSubClass = refactorings.getEClass("testecore", "SubElement3");
+		thirdSubClass.getEStructuralFeatures().remove(2);
+		var toMerge = of(
+			refactorings.getEClass("testecore", "SubElement1"),
+			refactorings.getEClass("testecore", "SubElement2"),
+			thirdSubClass
+		);
+		assertThrowsIAE(() -> refactorings.mergeClasses("SubElement", toMerge));
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
+		assertEquals(
+			"""
+			ERROR: testecore.SubElement3: Different features size: expected 3 but was 2
+			  in classes testecore.SubElement1, testecore.SubElement3
+			""",
+			appender.getResult());
+	}
+
+	@Test
+	void test_mergeClassesFeaturesDifferInADetail() throws Exception {
+		withInputModels("mergeClasses", "TestEcore.ecore");
+		loadEcoreFiles();
+		var thirdSubClass = refactorings.getEClass("testecore", "SubElement3");
+		thirdSubClass.getEStructuralFeature("containments").setLowerBound(2);
+		var toMerge = of(
+			refactorings.getEClass("testecore", "SubElement1"),
+			refactorings.getEClass("testecore", "SubElement2"),
+			thirdSubClass
+		);
+		assertThrowsIAE(() -> refactorings.mergeClasses("SubElement", toMerge));
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
+		assertEquals(
+			"""
+			ERROR: testecore.SubElement3: ecore.ETypedElement.lowerBound:
+			  testecore.SubElement1.containments: 0
+			  testecore.SubElement3.containments: 2
+			
+			""",
+			appender.getResult());
 	}
 
 	@Test
