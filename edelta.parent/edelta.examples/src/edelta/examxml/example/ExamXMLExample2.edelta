@@ -1,0 +1,79 @@
+import edelta.lib.EdeltaModelMigrator
+import edelta.refactorings.lib.EdeltaRefactorings
+import java.util.Collection
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EStructuralFeature
+
+package edelta.examxml.example
+
+metamodel "examxml"
+metamodel "ecore"
+
+use EdeltaRefactorings as refactorings
+
+def createAndCopyFrom(EdeltaModelMigrator modelMigrator, EObject origElement,
+						Collection<EStructuralFeature> subElementFeatures, EClass newClass) {
+	return createInstance(newClass,
+		[o |
+			for (subElementFeature : subElementFeatures)
+				modelMigrator.copyFrom(o,
+					newClass.getEStructuralFeature(subElementFeature.getName()),
+					origElement, subElementFeature)
+		]
+	)
+}
+
+modifyEcore removeAttributes epackage examxml {
+	removeElement(ecoreref(question))
+	removeElement(ecoreref(optional))
+}
+
+modifyEcore introduceExerciseElement epackage examxml {
+	ecoreref(ExamElement).addNewSubclass("ExerciseElement")
+}
+
+modifyEcore splitOpenElement epackage examxml {
+	val superClass = ecoreref(OpenElement)
+	val ePackage = ecoreref(examxml)
+	val elementsFeature = ecoreref(Exam.elements)
+	refactorings.splitClass(
+		superClass,
+		#["OpenElement1", "OpenElement2"],
+		[EdeltaModelMigrator it |
+			copyRule(
+				wasRelatedTo(elementsFeature),
+				[origElementsFeature, origExam, newExam |
+					val newElements = newArrayList
+					val origElements = origExam.getValueAsList(origElementsFeature)
+					for (origElement : origElements) {
+						val origElementClass = origElement.eClass
+						if (origElementClass == getOriginal(superClass)) {
+							val specificQuestion1 =
+								origElementClass.getEStructuralFeature("specificQuestion1")
+							val specificQuestion2 =
+								origElementClass.getEStructuralFeature("specificQuestion2")
+							val openElement1 = ePackage.getEClass("OpenElement1")
+							val openElement2 = ePackage.getEClass("OpenElement2")
+							if (origElement.eIsSet(specificQuestion1))
+								newElements += createAndCopyFrom(origElement,
+									origElementClass.EAllStructuralFeatures,
+									openElement1
+								)
+							if (origElement.eIsSet(specificQuestion2))
+								newElements += createAndCopyFrom(origElement,
+									origElementClass.EAllStructuralFeatures,
+									openElement2
+								)
+						} else {
+							newElements += getMigrated(origElement)
+						}
+					}
+					newExam.eSet(elementsFeature, newElements)
+				]
+			)
+		]
+	)
+	removeElement(ecoreref(examxml.OpenElement1.specificQuestion2))
+	removeElement(ecoreref(examxml.OpenElement2.specificQuestion1))
+}

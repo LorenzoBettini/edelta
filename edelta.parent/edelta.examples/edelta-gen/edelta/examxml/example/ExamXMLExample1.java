@@ -14,10 +14,10 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 
 @SuppressWarnings("all")
-public class ExamXMLExample extends EdeltaDefaultRuntime {
+public class ExamXMLExample1 extends EdeltaDefaultRuntime {
   private EdeltaRefactorings refactorings;
 
-  public ExamXMLExample(final EdeltaRuntime other) {
+  public ExamXMLExample1(final EdeltaRuntime other) {
     super(other);
     refactorings = new EdeltaRefactorings(this);
   }
