@@ -17,6 +17,8 @@ import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.ETypedElement
 import org.eclipse.emf.ecore.util.EcoreUtil
+import java.util.function.Consumer
+import edelta.lib.EdeltaModelMigrator
 
 package edelta.refactorings.lib
 
@@ -825,27 +827,44 @@ def splitClass(EClass toSplit, Collection<String> names) : Collection<EClass> {
  */
 def splitClass(EClass toSplit, Collection<String> names, EObjectFunction objectMigrator) 
 		: Collection<EClass> {
+	return splitClass(toSplit, names)
+		[EdeltaModelMigrator it |
+			createInstanceRule(
+				wasRelatedTo(toSplit),
+				[origObj |
+					val origFeatures = origObj.eClass.EAllStructuralFeatures
+					val newObj = objectMigrator.apply(origObj)
+					val newClass = newObj.eClass
+					for (origFeature : origFeatures)
+						copyFrom(
+							newObj, newClass.getEStructuralFeature(origFeature.name),
+							origObj, origFeature
+						)
+					return newObj
+				]
+			)
+		]
+}
+
+/**
+ * Splits the passed class into several classes with the given names;
+ * all classes will be copies of the original class (which will be removed).
+ * The migratorConsumer is used when migrating the model and the developer ahs
+ * the full control on such a migration by using the migratorConsumer appropriately
+ * to define migration rules.
+ * 
+ * @param toSplit
+ * @param names
+ * @param objectMigration
+ */
+def splitClass(EClass toSplit, Collection<String> names, Consumer<EdeltaModelMigrator> migratorConsumer) 
+		: Collection<EClass> {
 	val containingPackage = toSplit.EPackage
 	val split = names.map[ n |
 		copyToAs(toSplit, containingPackage, n)
 	].toList
 	removeElement(toSplit)
-	modelMigration[
-		createInstanceRule(
-			wasRelatedTo(toSplit),
-			[origObj |
-				val origFeatures = origObj.eClass.EAllStructuralFeatures
-				val newObj = objectMigrator.apply(origObj)
-				val newClass = newObj.eClass
-				for (origFeature : origFeatures)
-					copyFrom(
-						newObj, newClass.getEStructuralFeature(origFeature.name),
-						origObj, origFeature
-					)
-				return newObj
-			]
-		)
-	]
+	modelMigration(migratorConsumer)
 	return split
 }
 
