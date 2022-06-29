@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,6 +42,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaModelManager;
+import edelta.lib.EdeltaModelMigrator;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 import edelta.testutils.EdeltaTestUtils;
@@ -2107,7 +2109,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	 * @throws Exception
 	 */
 	@Test
-	void test_splitClass() throws Exception {
+	void test_splitClassWithEObjectFunction() throws Exception {
 		var subdir = "splitClass/";
 		var ecores = of("TestEcore.ecore");
 		var models = of("Container.xmi");
@@ -2155,6 +2157,98 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 		assertOutputs(
 			engine,
 			subdir,
+			ecores,
+			models
+		);
+	}
+
+	/**
+	 * Acts at the level of containing feature to possibly create several
+	 * objects corresponding to a single one.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	void test_splitClassWithMigratorConsumer() throws Exception {
+		var subdir = "splitClass/";
+		var ecores = of("TestEcore.ecore");
+		var models = of("Container2.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var ePackage = getEPackage("testecore");
+					var toSplit = getEClass("testecore", "SubElement");
+					var containingFeature = getEReference("testecore", "Container", "elements");
+					var split = splitClass(toSplit,
+						of(
+							"SubElement1",
+							"SubElement2",
+							"SubElement3"
+						),
+						(EdeltaModelMigrator modelMigrator) -> modelMigrator.copyRule(
+							modelMigrator.wasRelatedTo(containingFeature),
+							(origFeature, origObj, newObj) -> {
+								var origElements = getValueAsList(origObj, origFeature);
+								var subElementClass = getEClass(
+									origObj.eClass().getEPackage(), "SubElement");
+								var subElementOptionalFeature = subElementClass
+									.getEStructuralFeature("optional");
+								var subElementFeatures = subElementClass.getEAllStructuralFeatures();
+								var subElement1Class = getEClass(ePackage, "SubElement1");
+								var subElement2Class = getEClass(ePackage, "SubElement2");
+								var subElement3Class = getEClass(ePackage, "SubElement3");
+								// if not optional create an instance of all the new classes
+								// (just an example, it does not necessarily make sense)
+								var newElements = new ArrayList<>();
+								for (var origElement : origElements) {
+									if (!(boolean) origElement.eGet(subElementOptionalFeature)) {
+										newElements.add(createAndCopyFrom(modelMigrator, origElement, subElementFeatures,
+												subElement1Class));
+										newElements.add(createAndCopyFrom(modelMigrator, origElement, subElementFeatures,
+												subElement2Class));
+										newElements.add(createAndCopyFrom(modelMigrator, origElement, subElementFeatures,
+												subElement3Class));
+									}
+								}
+								newObj.eSet(containingFeature, newElements);
+							}
+						)
+					);
+					var superClass = getEClass("testecore", "Element");
+					assertThat(split.stream()
+						.flatMap(c -> c.getESuperTypes().stream()))
+						.containsOnly(superClass);
+					assertThat(split.stream()
+						.map(ENamedElement::getName))
+						.containsExactly(
+							"SubElement1",
+							"SubElement2",
+							"SubElement3"
+						);
+				}
+
+				public EObject createAndCopyFrom(EdeltaModelMigrator modelMigrator, EObject origElement,
+						Collection<EStructuralFeature> subElementFeatures, EClass newClass) {
+					return EdeltaEcoreUtil.createInstance(newClass,
+						o -> {
+							for (var subElementFeature : subElementFeatures)
+								modelMigrator.copyFrom(o,
+									newClass.getEStructuralFeature(subElementFeature.getName()),
+									origElement, subElementFeature);
+						}
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"splitClassCustom/",
 			ecores,
 			models
 		);

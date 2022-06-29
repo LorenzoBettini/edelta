@@ -1,0 +1,3 @@
+Container2.xmi is used for splitClass passing a Consumer<EdeltaModelMigrator>
+where we specify a rule for the containing feature, in order to possibly create
+several objects in the migrated model starting from a single object in the original model.
