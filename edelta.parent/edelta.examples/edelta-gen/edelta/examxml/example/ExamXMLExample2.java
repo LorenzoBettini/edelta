@@ -8,10 +8,10 @@ import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
@@ -28,11 +28,12 @@ public class ExamXMLExample2 extends EdeltaDefaultRuntime {
     refactorings = new EdeltaRefactorings(this);
   }
 
-  public EObject createAndCopyFrom(final EdeltaModelMigrator modelMigrator, final EObject origElement, final Collection<EStructuralFeature> subElementFeatures, final EClass newClass) {
+  public EObject createAndCopyFrom(final EdeltaModelMigrator modelMigrator, final EClass newClass, final EObject origElement) {
     final Consumer<EObject> _function = (EObject o) -> {
-      for (final EStructuralFeature subElementFeature : subElementFeatures) {
+      final EList<EStructuralFeature> origElementFeatures = origElement.eClass().getEAllStructuralFeatures();
+      for (final EStructuralFeature origElementFeature : origElementFeatures) {
         modelMigrator.copyFrom(o, 
-          newClass.getEStructuralFeature(subElementFeature.getName()), origElement, subElementFeature);
+          newClass.getEStructuralFeature(origElementFeature.getName()), origElement, origElementFeature);
       }
     };
     return EdeltaEcoreUtil.createInstance(newClass, _function);
@@ -63,18 +64,14 @@ public class ExamXMLExample2 extends EdeltaDefaultRuntime {
             if (_equals) {
               final EStructuralFeature specificQuestion1 = origElementClass.getEStructuralFeature("specificQuestion1");
               final EStructuralFeature specificQuestion2 = origElementClass.getEStructuralFeature("specificQuestion2");
-              final EClass openElement1 = this.getEClass(ePackage, "OpenElement1");
-              final EClass openElement2 = this.getEClass(ePackage, "OpenElement2");
               boolean _eIsSet = origElement.eIsSet(specificQuestion1);
               if (_eIsSet) {
-                EObject _createAndCopyFrom = this.createAndCopyFrom(it_1, origElement, 
-                  origElementClass.getEAllStructuralFeatures(), openElement1);
+                EObject _createAndCopyFrom = this.createAndCopyFrom(it_1, this.getEClass(ePackage, "OpenElement1"), origElement);
                 newElements.add(_createAndCopyFrom);
               }
               boolean _eIsSet_1 = origElement.eIsSet(specificQuestion2);
               if (_eIsSet_1) {
-                EObject _createAndCopyFrom_1 = this.createAndCopyFrom(it_1, origElement, 
-                  origElementClass.getEAllStructuralFeatures(), openElement2);
+                EObject _createAndCopyFrom_1 = this.createAndCopyFrom(it_1, this.getEClass(ePackage, "OpenElement2"), origElement);
                 newElements.add(_createAndCopyFrom_1);
               }
             } else {

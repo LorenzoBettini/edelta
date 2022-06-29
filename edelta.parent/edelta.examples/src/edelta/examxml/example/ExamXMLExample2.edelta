@@ -1,9 +1,7 @@
 import edelta.lib.EdeltaModelMigrator
 import edelta.refactorings.lib.EdeltaRefactorings
-import java.util.Collection
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.EStructuralFeature
 
 package edelta.examxml.example
 
@@ -12,14 +10,15 @@ metamodel "ecore"
 
 use EdeltaRefactorings as refactorings
 
-def createAndCopyFrom(EdeltaModelMigrator modelMigrator, EObject origElement,
-						Collection<EStructuralFeature> subElementFeatures, EClass newClass) {
+def createAndCopyFrom(EdeltaModelMigrator modelMigrator,
+						EClass newClass, EObject origElement) {
 	return createInstance(newClass,
 		[o |
-			for (subElementFeature : subElementFeatures)
+			val origElementFeatures = origElement.eClass.EAllStructuralFeatures
+			for (origElementFeature : origElementFeatures)
 				modelMigrator.copyFrom(o,
-					newClass.getEStructuralFeature(subElementFeature.getName()),
-					origElement, subElementFeature)
+					newClass.getEStructuralFeature(origElementFeature.getName()),
+					origElement, origElementFeature)
 		]
 	)
 }
@@ -53,18 +52,10 @@ modifyEcore splitOpenElement epackage examxml {
 								origElementClass.getEStructuralFeature("specificQuestion1")
 							val specificQuestion2 =
 								origElementClass.getEStructuralFeature("specificQuestion2")
-							val openElement1 = ePackage.getEClass("OpenElement1")
-							val openElement2 = ePackage.getEClass("OpenElement2")
 							if (origElement.eIsSet(specificQuestion1))
-								newElements += createAndCopyFrom(origElement,
-									origElementClass.EAllStructuralFeatures,
-									openElement1
-								)
+								newElements += createAndCopyFrom(ePackage.getEClass("OpenElement1"), origElement)
 							if (origElement.eIsSet(specificQuestion2))
-								newElements += createAndCopyFrom(origElement,
-									origElementClass.EAllStructuralFeatures,
-									openElement2
-								)
+								newElements += createAndCopyFrom(ePackage.getEClass("OpenElement2"), origElement)
 						} else {
 							newElements += getMigrated(origElement)
 						}
