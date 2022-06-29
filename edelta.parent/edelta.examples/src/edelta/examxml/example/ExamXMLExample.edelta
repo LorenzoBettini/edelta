@@ -18,25 +18,19 @@ modifyEcore introduceExerciseElement epackage examxml {
 
 modifyEcore splitOpenElement epackage examxml {
 	val superClass = ecoreref(OpenElement)
-	val specificQuestion1 = ecoreref(specificQuestion1)
-	val specificQuestion2 = ecoreref(specificQuestion2)
-	refactorings.introduceSubclasses(
+	val ePackage = ecoreref(examxml)
+	refactorings.splitClass(
 		superClass,
 		#["OpenElement1", "OpenElement2"],
 		[origElement |
 			val c = origElement.eClass
 			val origSpecificQuestion1 = c.getEStructuralFeature("specificQuestion1")
-			val origSpecificQuestion2 = c.getEStructuralFeature("specificQuestion2")
 			if (origElement.eIsSet(origSpecificQuestion1))
-				createInstance(superClass.EPackage.getEClass("OpenElement1")) [
-					o | setValueFrom(o, specificQuestion1, origElement, origSpecificQuestion1)
-				]
+				createInstance(ePackage.getEClass("OpenElement1"))
 			else
-				createInstance(superClass.EPackage.getEClass("OpenElement2")) [
-					o | setValueFrom(o, specificQuestion2, origElement, origSpecificQuestion2)
-				]
+				createInstance(ePackage.getEClass("OpenElement2"))
 		]
 	)
-	refactorings.pushDownFeature(specificQuestion1, #[ecoreref(OpenElement1)])
-	refactorings.pushDownFeature(specificQuestion2, #[ecoreref(OpenElement2)])
+	removeElement(ecoreref(examxml.OpenElement1.specificQuestion2))
+	removeElement(ecoreref(examxml.OpenElement2.specificQuestion1))
 }
