@@ -9,9 +9,19 @@
   <elements
       name="1">
     <elements
-        name="1-1"/>
+        name="1-1">
+      <references
+          name="referred 1-1-1"/>
+      <references
+          name="referred 1-1-2"/>
+    </elements>
     <elements
-        name="1-2"/>
+        name="1-2">
+      <references
+          name="referred 1-2-1"/>
+      <references
+          name="referred 1-2-2"/>
+    </elements>
     <references
         name="referred1"/>
   </elements>

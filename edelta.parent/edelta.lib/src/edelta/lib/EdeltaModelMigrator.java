@@ -51,6 +51,8 @@ public class EdeltaModelMigrator {
 
 		private transient BiMap<EObject, EObject> ecoreCopyMap;
 
+		private boolean forceCopy = false;
+
 		/**
 		 * Creates a custom copier for migrating EMF models based on the passed map
 		 * where the key is the original Ecore element and the value is the evolved
@@ -70,24 +72,17 @@ public class EdeltaModelMigrator {
 		/**
 		 * An object can be explicitly copied after a containment reference
 		 * became a non-containment reference, we must first check whether it
-		 * has already been copied.
+		 * has already been copied, unless {@link #forceCopy} is set to true,
+		 * in which case the copy always takes place.
 		 */
 		@Override
 		public EObject copy(EObject eObject) {
+			if (forceCopy)
+				return super.copy(eObject);
+
 			var alreadyCopied = get(eObject);
 			if (alreadyCopied != null)
 				return alreadyCopied;
-			return super.copy(eObject);
-		}
-
-		/**
-		 * Creates a copy even if it has already been copied
-		 * (simply delegates to {@link Copier:#copy(EObject)}
-		 * 
-		 * @param eObject
-		 * @return
-		 */
-		public EObject copyForced(EObject eObject) {
 			return super.copy(eObject);
 		}
 
@@ -586,6 +581,12 @@ public class EdeltaModelMigrator {
 	 * account possible multiple elements and possible changes to the multiplicity
 	 * of the involved features.
 	 * 
+	 * If newFeature is a containment reference the contained object(s) are
+	 * deeply copied, even if they had been copied before (for instance, in
+	 * another object).
+	 * 
+	 * This assumes that the newFeature and oldFeature are compatible.
+	 * 
 	 * @param newObj
 	 * @param newFeature
 	 * @param oldObj
@@ -602,19 +603,23 @@ public class EdeltaModelMigrator {
 			var isContainmentReference =
 				newFeature instanceof EReference &&
 				((EReference) newFeature).isContainment();
+			var oldForceCopy = modelCopier.forceCopy;
+			if (isContainmentReference) {
+				modelCopier.forceCopy = true;
+			}
 			EdeltaEcoreUtil.setValueForFeature(
 				newObj,
 				newFeature,
 				// use the upper bound of the destination feature, since it might
 				// be different from the original one
-				isContainmentReference ?
-					oldValues.stream()
-						.map(o -> modelCopier.copyForced((EObject) o))
-						.collect(Collectors.toList()):
-					getMigrated(oldValues)
+				getMigrated(oldValues)
 				// for reference we must first propagate the copy with getMigrated
 				// but if it's a containment reference we must propagate and force the copy
 			);
+			if (isContainmentReference) {
+				// reset the original value
+				modelCopier.forceCopy = oldForceCopy;
+			}
 		}
 	}
 
