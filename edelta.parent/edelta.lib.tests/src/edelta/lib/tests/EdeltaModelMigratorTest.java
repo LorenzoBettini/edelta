@@ -4377,6 +4377,36 @@ class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	void testCopyFromFeature() throws IOException {
+		var subdir = "splitClass/";
+		var ecores = of("TestEcore.ecore");
+		var models = of("Container.xmi");
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			ecores,
+			models
+		);
+
+		var containments =
+			getReference(evolvingModelManager, "testecore", "SubElement", "containments");
+
+		modelMigrator.copyRule(
+			modelMigrator.isRelatedTo(containments),
+			(oldFeature, oldObj, newObj) -> {
+				modelMigrator.copyFrom(newObj, containments, oldObj, oldFeature);
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			"copyFromFeature/",
+			ecores,
+			models
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String outputdir,
