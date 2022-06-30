@@ -565,9 +565,8 @@ public class EdeltaModelMigrator {
 	}
 
 	public EdeltaModelMigrator.CopyProcedure multiplicityAwareCopy(EStructuralFeature newFeature) {
-		return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> {
-			copyFrom(newObj, newFeature, oldObj, oldFeature);
-		};
+		return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj)
+				-> copyFrom(newObj, newFeature, oldObj, oldFeature);
 	}
 
 	/**
