@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -50,6 +51,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaModelMigrator;
+import edelta.lib.EdeltaModelMigrator.CopyProcedure;
 import edelta.lib.EdeltaModelMigrator.EObjectFunction;
 import edelta.lib.EdeltaUtils;
 
@@ -4389,13 +4391,42 @@ class EdeltaModelMigratorTest {
 			models
 		);
 
-		var containments =
-			getReference(evolvingModelManager, "testecore", "SubElement", "containments");
+		var elements =
+			getReference(evolvingModelManager, "testecore", "Container", "elements");
+
+		var subElementClass = getEClass(evolvingModelManager, "testecore", "SubElement");
 
 		modelMigrator.copyRule(
-			modelMigrator.isRelatedTo(containments),
-			(oldFeature, oldObj, newObj) -> {
-				modelMigrator.copyFrom(newObj, containments, oldObj, oldFeature);
+			modelMigrator.isRelatedTo(elements),
+			new CopyProcedure() {
+				@Override
+				public void apply(EStructuralFeature oldFeature, EObject oldObj, EObject newObj) {
+					var newElements = new ArrayList<>();
+					var oldElements = getValueAsList(oldObj, oldFeature);
+					for (var oldElement : oldElements) {
+						// two copies
+						newElements.add(createCopy(oldElement));
+						newElements.add(createCopy(oldElement));
+					}
+					newObj.eSet(elements, newElements);
+				}
+
+				private EObject createCopy(EObject oldElement) {
+					var newElement = EdeltaEcoreUtil.createInstance(subElementClass,
+						o -> {
+							var oldElementFeatures = oldElement.eClass().getEAllStructuralFeatures();
+							for (var oldElementFeature : oldElementFeatures) {
+								modelMigrator.copyFrom(
+									o,
+									subElementClass
+										.getEStructuralFeature(oldElementFeature.getName()),
+									oldElement,
+									oldElementFeature);
+							}
+						}
+					);
+					return newElement;
+				}
 			}
 		);
 
