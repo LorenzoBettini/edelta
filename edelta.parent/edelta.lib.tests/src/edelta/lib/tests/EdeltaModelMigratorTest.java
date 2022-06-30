@@ -4497,6 +4497,55 @@ class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	void testCopyFromObject() throws IOException {
+		var subdir = "copyFromFeatureRecursive/";
+		var ecores = of("TestEcore.ecore");
+		var models = of("Container.xmi");
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			ecores,
+			models
+		);
+
+		var elements =
+			getReference(evolvingModelManager, "testecore", "Container", "elements");
+
+		var subElementClass = getEClass(evolvingModelManager, "testecore", "Container");
+
+		modelMigrator.copyRule(
+			modelMigrator.isRelatedTo(elements),
+			new CopyProcedure() {
+				@Override
+				public void apply(EStructuralFeature oldFeature, EObject oldObj, EObject newObj) {
+					var newElements = new ArrayList<>();
+					var oldElements = getValueAsList(oldObj, oldFeature);
+					for (var oldElement : oldElements) {
+						// two copies
+						newElements.add(createCopy(oldElement));
+						newElements.add(createCopy(oldElement));
+					}
+					newObj.eSet(elements, newElements);
+				}
+
+				private EObject createCopy(EObject oldElement) {
+					var newElement = EdeltaEcoreUtil.createInstance(subElementClass,
+						o -> modelMigrator.copyFrom(o, oldElement)
+					);
+					return newElement;
+				}
+			}
+		);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String outputdir,
