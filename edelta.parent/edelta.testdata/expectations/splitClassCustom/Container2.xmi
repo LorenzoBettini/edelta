@@ -8,11 +8,17 @@
   <elements
       xsi:type="testecore:SubElement1"
       name="name2"
-      referred="//@references.1"/>
+      referred="//@references.1">
+    <containments
+        name="contained2"/>
+  </elements>
   <elements
       xsi:type="testecore:SubElement2"
       name="name2"
-      referred="//@references.1"/>
+      referred="//@references.1">
+    <containments
+        name="contained2"/>
+  </elements>
   <elements
       xsi:type="testecore:SubElement3"
       name="name2"
@@ -23,11 +29,17 @@
   <elements
       xsi:type="testecore:SubElement1"
       name="name3"
-      referred="//@references.2"/>
+      referred="//@references.2">
+    <containments
+        name="contained3"/>
+  </elements>
   <elements
       xsi:type="testecore:SubElement2"
       name="name3"
-      referred="//@references.2"/>
+      referred="//@references.2">
+    <containments
+        name="contained3"/>
+  </elements>
   <elements
       xsi:type="testecore:SubElement3"
       name="name3"

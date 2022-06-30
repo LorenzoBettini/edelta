@@ -80,6 +80,17 @@ public class EdeltaModelMigrator {
 			return super.copy(eObject);
 		}
 
+		/**
+		 * Creates a copy even if it has already been copied
+		 * (simply delegates to {@link Copier:#copy(EObject)}
+		 * 
+		 * @param eObject
+		 * @return
+		 */
+		public EObject copyForced(EObject eObject) {
+			return super.copy(eObject);
+		}
+
 		@Override
 		protected EClass getTarget(EClass eClass) {
 			return getMapped(eClass);
@@ -585,16 +596,26 @@ public class EdeltaModelMigrator {
 		// end up with a list with a single default value.
 		// if instead we check that the original value of the object for the feature
 		// is set we avoid such a situation.
-		if (oldObj.eIsSet(oldFeature))
+		if (oldObj.eIsSet(oldFeature)) {
+			var oldValues = EdeltaEcoreUtil
+				.getValueForFeature(oldObj, oldFeature, newFeature.getUpperBound());
+			var isContainmentReference =
+				newFeature instanceof EReference &&
+				((EReference) newFeature).isContainment();
 			EdeltaEcoreUtil.setValueForFeature(
 				newObj,
 				newFeature,
 				// use the upper bound of the destination feature, since it might
 				// be different from the original one
-				getMigrated(EdeltaEcoreUtil
-					.getValueForFeature(oldObj, oldFeature, newFeature.getUpperBound()))
-					// for reference we must first propagate the copy with getMigrated
+				isContainmentReference ?
+					oldValues.stream()
+						.map(o -> modelCopier.copyForced((EObject) o))
+						.collect(Collectors.toList()):
+					getMigrated(oldValues)
+				// for reference we must first propagate the copy with getMigrated
+				// but if it's a containment reference we must propagate and force the copy
 			);
+		}
 	}
 
 	/**
