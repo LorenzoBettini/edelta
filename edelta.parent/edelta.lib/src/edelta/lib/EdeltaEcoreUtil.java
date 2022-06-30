@@ -18,7 +18,7 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 /**
- * Static utility functions acting on Ecore.
+ * Static utility functions acting on Ecore and EObject elements.
  * 
  * @author Lorenzo Bettini
  *
