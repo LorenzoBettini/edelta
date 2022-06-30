@@ -301,6 +301,18 @@ public class EdeltaEcoreUtilTest {
 	}
 
 	@Test
+	public void testIsSet() {
+		var attr = EcoreFactory.eINSTANCE.createEAttribute();
+		attr.setEType(EcorePackage.Literals.ESTRING);
+
+		boolean o = EdeltaEcoreUtil.isSet(attr,
+			EcorePackage.Literals.ETYPED_ELEMENT__ETYPE.getName());
+
+		assertThat(o)
+			.isTrue();
+	}
+
+	@Test
 	public void testGetOrSetEObject() {
 		var ref = EcoreFactory.eINSTANCE.createEReference();
 		var typeValue = EcorePackage.Literals.EOBJECT;
