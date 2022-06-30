@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
@@ -29,12 +28,8 @@ public class ExamXMLExample2 extends EdeltaDefaultRuntime {
   }
 
   public EObject createAndCopyFrom(final EdeltaModelMigrator modelMigrator, final EClass newClass, final EObject origElement) {
-    final Consumer<EObject> _function = (EObject o) -> {
-      final EList<EStructuralFeature> origElementFeatures = origElement.eClass().getEAllStructuralFeatures();
-      for (final EStructuralFeature origElementFeature : origElementFeatures) {
-        modelMigrator.copyFrom(o, 
-          newClass.getEStructuralFeature(origElementFeature.getName()), origElement, origElementFeature);
-      }
+    final Consumer<EObject> _function = (EObject newElement) -> {
+      modelMigrator.copyFrom(newElement, origElement);
     };
     return EdeltaEcoreUtil.createInstance(newClass, _function);
   }

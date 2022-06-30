@@ -13,13 +13,7 @@ use EdeltaRefactorings as refactorings
 def createAndCopyFrom(EdeltaModelMigrator modelMigrator,
 						EClass newClass, EObject origElement) {
 	return createInstance(newClass,
-		[o |
-			val origElementFeatures = origElement.eClass.EAllStructuralFeatures
-			for (origElementFeature : origElementFeatures)
-				modelMigrator.copyFrom(o,
-					newClass.getEStructuralFeature(origElementFeature.getName()),
-					origElement, origElementFeature)
-		]
+		[newElement | modelMigrator.copyFrom(newElement, origElement)]
 	)
 }
 
