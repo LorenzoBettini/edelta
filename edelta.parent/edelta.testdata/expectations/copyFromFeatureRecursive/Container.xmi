@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testecore:Container
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:testecore="http://testecore"
+    xsi:schemaLocation="http://testecore TestEcore.ecore"
+    name="root">
+  <elements
+      name="1">
+    <elements
+        name="1-1"/>
+    <elements
+        name="1-2"/>
+    <references
+        name="referred1"/>
+  </elements>
+  <elements
+      name="1">
+    <elements
+        name="1-1">
+      <references
+          name="referred 1-1-1"/>
+      <references
+          name="referred 1-1-2"/>
+    </elements>
+    <elements
+        name="1-2">
+      <references
+          name="referred 1-2-1"/>
+      <references
+          name="referred 1-2-2"/>
+    </elements>
+    <references
+        name="referred1"/>
+  </elements>
+  <elements
+      name="2">
+    <references
+        name="referred2"/>
+  </elements>
+  <elements
+      name="2">
+    <references
+        name="referred2"/>
+  </elements>
+  <references
+      name="referred3"/>
+</testecore:Container>
