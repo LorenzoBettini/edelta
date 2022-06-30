@@ -57,15 +57,13 @@ public class ExamXMLExample2 extends EdeltaDefaultRuntime {
             EClass _original = it_1.<EClass>getOriginal(superClass);
             boolean _equals = Objects.equal(origElementClass, _original);
             if (_equals) {
-              final EStructuralFeature specificQuestion1 = origElementClass.getEStructuralFeature("specificQuestion1");
-              final EStructuralFeature specificQuestion2 = origElementClass.getEStructuralFeature("specificQuestion2");
-              boolean _eIsSet = origElement.eIsSet(specificQuestion1);
-              if (_eIsSet) {
+              boolean _isSet = EdeltaEcoreUtil.isSet(origElement, "specificQuestion1");
+              if (_isSet) {
                 EObject _createAndCopyFrom = this.createAndCopyFrom(it_1, this.getEClass(ePackage, "OpenElement1"), origElement);
                 newElements.add(_createAndCopyFrom);
               }
-              boolean _eIsSet_1 = origElement.eIsSet(specificQuestion2);
-              if (_eIsSet_1) {
+              boolean _isSet_1 = EdeltaEcoreUtil.isSet(origElement, "specificQuestion2");
+              if (_isSet_1) {
                 EObject _createAndCopyFrom_1 = this.createAndCopyFrom(it_1, this.getEClass(ePackage, "OpenElement2"), origElement);
                 newElements.add(_createAndCopyFrom_1);
               }

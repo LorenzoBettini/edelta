@@ -42,13 +42,9 @@ modifyEcore splitOpenElement epackage examxml {
 					for (origElement : origElements) {
 						val origElementClass = origElement.eClass
 						if (origElementClass == getOriginal(superClass)) {
-							val specificQuestion1 =
-								origElementClass.getEStructuralFeature("specificQuestion1")
-							val specificQuestion2 =
-								origElementClass.getEStructuralFeature("specificQuestion2")
-							if (origElement.eIsSet(specificQuestion1))
+							if (origElement.isSet("specificQuestion1"))
 								newElements += createAndCopyFrom(ePackage.getEClass("OpenElement1"), origElement)
-							if (origElement.eIsSet(specificQuestion2))
+							if (origElement.isSet("specificQuestion2"))
 								newElements += createAndCopyFrom(ePackage.getEClass("OpenElement2"), origElement)
 						} else {
 							newElements += getMigrated(origElement)
