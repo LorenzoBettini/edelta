@@ -10,7 +10,6 @@ import java.util.Collections;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 
 @SuppressWarnings("all")
@@ -35,20 +34,14 @@ public class ExamXMLExample1 extends EdeltaDefaultRuntime {
     final EClass superClass = getEClass("examxml", "OpenElement");
     final EPackage ePackage = getEPackage("examxml");
     final EdeltaModelMigrator.EObjectFunction _function = (EObject origElement) -> {
-      EObject _xblockexpression = null;
-      {
-        final EClass c = origElement.eClass();
-        final EStructuralFeature origSpecificQuestion1 = c.getEStructuralFeature("specificQuestion1");
-        EObject _xifexpression = null;
-        boolean _eIsSet = origElement.eIsSet(origSpecificQuestion1);
-        if (_eIsSet) {
-          _xifexpression = EdeltaEcoreUtil.createInstance(this.getEClass(ePackage, "OpenElement1"));
-        } else {
-          _xifexpression = EdeltaEcoreUtil.createInstance(this.getEClass(ePackage, "OpenElement2"));
-        }
-        _xblockexpression = _xifexpression;
+      EObject _xifexpression = null;
+      boolean _isSet = EdeltaEcoreUtil.isSet(origElement, "specificQuestion1");
+      if (_isSet) {
+        _xifexpression = EdeltaEcoreUtil.createInstance(this.getEClass(ePackage, "OpenElement1"));
+      } else {
+        _xifexpression = EdeltaEcoreUtil.createInstance(this.getEClass(ePackage, "OpenElement2"));
       }
-      return _xblockexpression;
+      return _xifexpression;
     };
     this.refactorings.splitClass(superClass, 
       Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("OpenElement1", "OpenElement2")), _function);
