@@ -231,13 +231,8 @@ public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
 	}
 
 	private void assertGeneratedJavaCode(CompilationTestHelper.Result r, CharSequence expected) {
-		var singleGeneratedCode = EdeltaTestUtils.removeCR(r.getSingleGeneratedCode());
 		assertEquals(expected.toString(),
-			// lines with only spaces are skipped in Java text blocks
-			// but they are present in the generated code for empty methods, e.g., constructors
-			// so we need to remove four spaces
-			singleGeneratedCode
-				.replace("    \n", "\n"));
+			EdeltaTestUtils.removeCR(r.getSingleGeneratedCode()));
 	}
 
 	private Class<?> assertGeneratedJavaCodeCompiles(CompilationTestHelper.Result r) {
