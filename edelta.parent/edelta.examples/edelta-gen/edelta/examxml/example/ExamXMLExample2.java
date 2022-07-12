@@ -44,7 +44,7 @@ public class ExamXMLExample2 extends EdeltaDefaultRuntime {
   }
 
   public void splitOpenElement(final EPackage it) {
-    final EClass superClass = getEClass("examxml", "OpenElement");
+    final EClass toSplit = getEClass("examxml", "OpenElement");
     final EPackage ePackage = getEPackage("examxml");
     final EReference elementsFeature = getEReference("examxml", "Exam", "elements");
     final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it_1) -> {
@@ -54,7 +54,7 @@ public class ExamXMLExample2 extends EdeltaDefaultRuntime {
         for (final EObject origElement : origElements) {
           {
             final EClass origElementClass = origElement.eClass();
-            EClass _original = it_1.<EClass>getOriginal(superClass);
+            EClass _original = it_1.<EClass>getOriginal(toSplit);
             boolean _equals = Objects.equal(origElementClass, _original);
             if (_equals) {
               boolean _isSet = EdeltaEcoreUtil.isSet(origElement, "specificQuestion1");
@@ -78,7 +78,7 @@ public class ExamXMLExample2 extends EdeltaDefaultRuntime {
       it_1.copyRule(
         it_1.<EStructuralFeature>wasRelatedTo(elementsFeature), _function_1);
     };
-    this.refactorings.splitClass(superClass, 
+    this.refactorings.splitClass(toSplit, 
       Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("OpenElement1", "OpenElement2")), _function);
     EdeltaUtils.removeElement(getEAttribute("examxml", "OpenElement1", "specificQuestion2"));
     EdeltaUtils.removeElement(getEAttribute("examxml", "OpenElement2", "specificQuestion1"));

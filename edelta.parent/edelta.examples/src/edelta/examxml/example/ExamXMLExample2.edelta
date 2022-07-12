@@ -27,11 +27,11 @@ modifyEcore introduceExerciseElement epackage examxml {
 }
 
 modifyEcore splitOpenElement epackage examxml {
-	val superClass = ecoreref(OpenElement)
+	val toSplit = ecoreref(OpenElement)
 	val ePackage = ecoreref(examxml)
 	val elementsFeature = ecoreref(Exam.elements)
 	refactorings.splitClass(
-		superClass,
+		toSplit,
 		#["OpenElement1", "OpenElement2"],
 		[EdeltaModelMigrator it |
 			copyRule(
@@ -41,7 +41,7 @@ modifyEcore splitOpenElement epackage examxml {
 					val origElements = origExam.getValueAsList(origElementsFeature)
 					for (origElement : origElements) {
 						val origElementClass = origElement.eClass
-						if (origElementClass == getOriginal(superClass)) {
+						if (origElementClass == getOriginal(toSplit)) {
 							if (origElement.isSet("specificQuestion1"))
 								newElements += createAndCopyFrom(ePackage.getEClass("OpenElement1"), origElement)
 							if (origElement.isSet("specificQuestion2"))

@@ -31,7 +31,7 @@ public class ExamXMLExample1 extends EdeltaDefaultRuntime {
   }
 
   public void splitOpenElement(final EPackage it) {
-    final EClass superClass = getEClass("examxml", "OpenElement");
+    final EClass toSplit = getEClass("examxml", "OpenElement");
     final EPackage ePackage = getEPackage("examxml");
     final EdeltaModelMigrator.EObjectFunction _function = (EObject origElement) -> {
       EObject _xifexpression = null;
@@ -43,7 +43,7 @@ public class ExamXMLExample1 extends EdeltaDefaultRuntime {
       }
       return _xifexpression;
     };
-    this.refactorings.splitClass(superClass, 
+    this.refactorings.splitClass(toSplit, 
       Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("OpenElement1", "OpenElement2")), _function);
     EdeltaUtils.removeElement(getEAttribute("examxml", "OpenElement1", "specificQuestion2"));
     EdeltaUtils.removeElement(getEAttribute("examxml", "OpenElement2", "specificQuestion1"));

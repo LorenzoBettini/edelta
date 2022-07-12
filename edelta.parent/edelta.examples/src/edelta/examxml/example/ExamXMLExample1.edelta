@@ -17,10 +17,10 @@ modifyEcore introduceExerciseElement epackage examxml {
 }
 
 modifyEcore splitOpenElement epackage examxml {
-	val superClass = ecoreref(OpenElement)
+	val toSplit = ecoreref(OpenElement)
 	val ePackage = ecoreref(examxml)
 	refactorings.splitClass(
-		superClass,
+		toSplit,
 		#["OpenElement1", "OpenElement2"],
 		[origElement |
 			if (origElement.isSet("specificQuestion1"))
