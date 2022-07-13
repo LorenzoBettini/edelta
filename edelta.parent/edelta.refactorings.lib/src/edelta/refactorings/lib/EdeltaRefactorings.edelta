@@ -17,6 +17,8 @@ import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.ETypedElement
 import org.eclipse.emf.ecore.util.EcoreUtil
+import java.util.function.Consumer
+import edelta.lib.EdeltaModelMigrator
 
 package edelta.refactorings.lib
 
@@ -759,6 +761,114 @@ def pushDownFeature(EStructuralFeature featureToPush, List<EClass> subClasses) :
 }
 
 /**
+ * Create a new target class with the given name that merges all
+ * the passed classes.
+ * 
+ * The classes are expected to have the same single direct superclass
+ * and to define the same features.
+ * 
+ * @param mergedClassName
+ * @param toMerge
+ */
+def mergeClasses(String mergedClassName, Collection<EClass> toMerge) : EClass {
+	val superClass = getSingleDirectSuperclass(toMerge)
+	checkSameFeatures(toMerge)
+	checkNoBidirectionalReferences(toMerge.map[EStructuralFeatures].flatten.toList,
+		"Cannot merge in the presence of bidirectional references"
+	)
+	val merged = copyToAs(toMerge.head, superClass.EPackage, mergedClassName)
+	removeAllElements(toMerge)
+	modelMigration[
+		createInstanceRule(
+			wasRelatedToAtLeastOneOf(toMerge),
+			[origObj |
+				val origFeatures = origObj.eClass.EAllStructuralFeatures
+				createInstance(merged) [
+					newObj |
+						for (origFeature : origFeatures)
+							copyFrom(
+								newObj, merged.getEStructuralFeature(origFeature.name),
+								origObj, origFeature
+							)
+				]
+			]
+		)
+	]
+	return merged
+}
+
+/**
+ * Splits the passed class into several classes with the given names;
+ * all classes will be copies of the original class (which will be removed).
+ * Concerning model migration, it creates an object of the first split class.
+ * 
+ * @param toSplit
+ * @param names
+ */
+def splitClass(EClass toSplit, Collection<String> names) : Collection<EClass> {
+	val containingPackage = toSplit.EPackage
+	return splitClass(toSplit, names, 
+		[origObj |
+			createInstance(containingPackage.getEClass(names.head))
+		]
+	)
+}
+
+/**
+ * Splits the passed class into several classes with the given names;
+ * all classes will be copies of the original class (which will be removed).
+ * The objectMigrator is used when migrating the model objects of the original class:
+ * it is used to create an instance of the proper class and then all the features
+ * of the original object are copied into the created instance automatically
+ * 
+ * @param toSplit
+ * @param names
+ * @param objectMigration
+ */
+def splitClass(EClass toSplit, Collection<String> names, EObjectFunction objectMigrator) 
+		: Collection<EClass> {
+	return splitClass(toSplit, names)
+		[EdeltaModelMigrator it |
+			createInstanceRule(
+				wasRelatedTo(toSplit),
+				[origObj |
+					val origFeatures = origObj.eClass.EAllStructuralFeatures
+					val newObj = objectMigrator.apply(origObj)
+					val newClass = newObj.eClass
+					for (origFeature : origFeatures)
+						copyFrom(
+							newObj, newClass.getEStructuralFeature(origFeature.name),
+							origObj, origFeature
+						)
+					return newObj
+				]
+			)
+		]
+}
+
+/**
+ * Splits the passed class into several classes with the given names;
+ * all classes will be copies of the original class (which will be removed).
+ * The migratorConsumer is used when migrating the model and the developer ahs
+ * the full control on such a migration by using the migratorConsumer appropriately
+ * to define migration rules.
+ * 
+ * @param toSplit
+ * @param names
+ * @param objectMigration
+ */
+def splitClass(EClass toSplit, Collection<String> names, Consumer<EdeltaModelMigrator> migratorConsumer) 
+		: Collection<EClass> {
+	val containingPackage = toSplit.EPackage
+	val split = names.map[ n |
+		copyToAs(toSplit, containingPackage, n)
+	].toList
+	removeElement(toSplit)
+	modelMigration(migratorConsumer)
+	return split
+}
+
+/**
  * Ensures that the proposed classifier name is unique within the containing package of
  * the passed context; if not, it appends an incremental index until the name
  * is actually unique
@@ -940,6 +1050,44 @@ def checkNoFeatures(Collection<EClass> classes) {
 	].toList
 	if (!classesWithFeatures.empty)
 		throw new IllegalArgumentException("Classes not empty")
+}
+
+/**
+ * Makes sure the passed EClasses have the same features,
+ * independently from the order, if not, shows
+ * error information and throws an IllegalArgumentException.
+ * 
+ * @param classes
+ */
+def checkSameFeatures(Collection<EClass> classes) {
+	// the order is not important
+	val firstClass = classes.head
+	val features = firstClass.EStructuralFeatures.sortBy[name]
+	val otherClasses = classes.tail
+	for (otherClass : otherClasses) {
+		val otherFeatures = otherClass.EStructuralFeatures.sortBy[name]
+		val expectedSize = features.size
+		val actualSize = otherFeatures.size
+		if (expectedSize !== actualSize) {
+			showError(otherClass, "Different features size: expected " +
+				expectedSize + " but was " + actualSize + "\n  " +
+				"in classes " + getEObjectRepr(firstClass) + ", " +
+				getEObjectRepr(otherClass)
+			)
+			throw new IllegalArgumentException("Features don't match in size")
+		} else {
+			val finder = new EdeltaFeatureDifferenceFinder().ignoringContainingClass
+			val otherIt = otherFeatures.iterator
+			for (f : features) {
+				val other = otherIt.next
+				if (!finder.equals(f, other)) {
+					val message = finder.differenceDetails
+					showError(otherClass, message)
+					throw new IllegalArgumentException(message)
+				}
+			}
+		}
+	}
 }
 
 /**
@@ -1143,27 +1291,27 @@ def getSingleDirectSuperclass(Collection<EClass> subclasses) : EClass {
 		throw new IllegalArgumentException("Wrong superclasses")
 	}
 	// now all subclasses are known to have exactly one superclass
-	val result = subclasses.head.ESuperTypes.head
+	val superclass = subclasses.head.ESuperTypes.head
 	val differences = subclasses
-		.filter[ESuperTypes.head !== result]
+		.filter[ESuperTypes.head !== superclass]
 	if (!differences.empty) {
 		differences.forEach[
 			val message = "Wrong superclass of " + EObjectRepr + ":\n"+
-							"  Expected: " + getEObjectRepr(result) + "\n" +
+							"  Expected: " + getEObjectRepr(superclass) + "\n" +
 							"  Actual  : " + getEObjectRepr(ESuperTypes.head)
 			showError(it, message)
 		]
 		throw new IllegalArgumentException("Wrong superclasses")
 	}
-	val additionalSubclasses = directSubclasses(result).toSet
+	val additionalSubclasses = directSubclasses(superclass).toSet
 	additionalSubclasses.removeAll(subclasses.toSet)
 	if (!additionalSubclasses.empty) {
-		val message = "The class has additional subclasses:\n" +
+		val message = "The class " + getEObjectRepr(superclass) + " has additional subclasses:\n" +
 					additionalSubclasses.map["  " + EObjectRepr].join("\n")
-		showError(result, message)
+		showError(superclass, message)
 		throw new IllegalArgumentException(message)
 	}
-	return result
+	return superclass
 }
 
 def directSubclasses(EClass cl) {

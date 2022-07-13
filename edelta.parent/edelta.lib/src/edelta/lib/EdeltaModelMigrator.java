@@ -51,6 +51,8 @@ public class EdeltaModelMigrator {
 
 		private transient BiMap<EObject, EObject> ecoreCopyMap;
 
+		private boolean forceCopy = false;
+
 		/**
 		 * Creates a custom copier for migrating EMF models based on the passed map
 		 * where the key is the original Ecore element and the value is the evolved
@@ -70,10 +72,14 @@ public class EdeltaModelMigrator {
 		/**
 		 * An object can be explicitly copied after a containment reference
 		 * became a non-containment reference, we must first check whether it
-		 * has already been copied.
+		 * has already been copied, unless {@link #forceCopy} is set to true,
+		 * in which case the copy always takes place.
 		 */
 		@Override
 		public EObject copy(EObject eObject) {
+			if (forceCopy)
+				return super.copy(eObject);
+
 			var alreadyCopied = get(eObject);
 			if (alreadyCopied != null)
 				return alreadyCopied;
@@ -564,23 +570,111 @@ public class EdeltaModelMigrator {
 		return origEcoreElement -> wasRelatedToAtLeastOneOf(origEcoreElement, evolvedEcoreElements);
 	}
 
-	public EdeltaModelMigrator.CopyProcedure multiplicityAwareCopy(EStructuralFeature feature) {
-		return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj) -> {
-			// if the multiplicity changes and the type of the attribute changes we might
-			// end up with a list with a single default value.
-			// if instead we check that the original value of the object for the feature
-			// is set we avoid such a situation.
-			if (oldObj.eIsSet(oldFeature))
-				EdeltaEcoreUtil.setValueForFeature(
-					newObj,
-					feature,
-					// use the upper bound of the destination feature, since it might
-					// be different from the original one
-					getMigrated(EdeltaEcoreUtil
-						.getValueForFeature(oldObj, oldFeature, feature.getUpperBound()))
-						// for reference we must first propagate the copy with getMigrated
-				);
-		};
+	public EdeltaModelMigrator.CopyProcedure multiplicityAwareCopy(EStructuralFeature newFeature) {
+		return (EStructuralFeature oldFeature, EObject oldObj, EObject newObj)
+				-> copyFrom(newObj, newFeature, oldObj, oldFeature);
+	}
+
+	/**
+	 * Copy (in case, by first propagating the copy for references) the value of
+	 * oldFeature of the oldObj into the newFeature of the newObj, taking into
+	 * account possible multiple elements and possible changes to the multiplicity
+	 * of the involved features.
+	 * 
+	 * If newFeature is a containment reference the contained object(s) are
+	 * deeply copied, even if they had been copied before (for instance, in
+	 * another object).
+	 * 
+	 * This assumes that the newFeature and oldFeature are compatible.
+	 * 
+	 * @param newObj
+	 * @param newFeature
+	 * @param oldObj
+	 * @param oldFeature
+	 */
+	public void copyFrom(EObject newObj, EStructuralFeature newFeature, EObject oldObj, EStructuralFeature oldFeature) {
+		// if the multiplicity changes and the type of the attribute changes we might
+		// end up with a list with a single default value.
+		// if instead we check that the original value of the object for the feature
+		// is set we avoid such a situation.
+		if (oldObj.eIsSet(oldFeature)) {
+			var oldValues = EdeltaEcoreUtil
+				.getValueForFeature(oldObj, oldFeature, newFeature.getUpperBound());
+			var isContainmentReference =
+				newFeature instanceof EReference &&
+				((EReference) newFeature).isContainment();
+			var oldForceCopy = modelCopier.forceCopy;
+			if (isContainmentReference) {
+				modelCopier.forceCopy = true;
+			}
+			EdeltaEcoreUtil.setValueForFeature(
+				newObj,
+				newFeature,
+				// use the upper bound of the destination feature, since it might
+				// be different from the original one
+				getMigrated(oldValues)
+				// for reference we must first propagate the copy with getMigrated
+				// but if it's a containment reference we must propagate and force the copy
+			);
+			if (isContainmentReference) {
+				// reset the original value
+				modelCopier.forceCopy = oldForceCopy;
+			}
+		}
+	}
+
+	/**
+	 * Copy (in case, by first propagating the copy for references) all the value of
+	 * oldObj into the corresponding features of the newObj, taking into
+	 * account possible multiple elements and possible changes to the multiplicity
+	 * of the involved features.
+	 * 
+	 * For containment references the contained object(s) are
+	 * deeply copied, even if they had been copied before (for instance, in
+	 * another object).
+	 * 
+	 * This assumes that the newObj and oldObj have all the compatible features.
+	 * 
+	 * @param newObj
+	 * @param oldObj
+	 * @see #copyFrom(EObject, EStructuralFeature, EObject, EStructuralFeature)
+	 */
+	public void copyFrom(EObject newObj, EObject oldObj) {
+		var oldFeatures = oldObj.eClass().getEAllStructuralFeatures();
+		var newClass = newObj.eClass();
+		for (var oldFeature : oldFeatures) {
+			copyFrom(
+				newObj,
+				newClass.getEStructuralFeature(oldFeature.getName()),
+				oldObj,
+				oldFeature
+			);
+		}
+	}
+
+	/**
+	 * Create an instance of the specified {@link EClass} and then copy (in case, by
+	 * first propagating the copy for references) all the value of oldObj into the
+	 * created instance, taking into account possible multiple elements and possible
+	 * changes to the multiplicity of the involved features.
+	 * 
+	 * For containment references the contained object(s) are deeply copied, even if
+	 * they had been copied before (for instance, in another object).
+	 * 
+	 * This assumes that the newEClass and the {@link EClass} of the oldObj have all
+	 * the compatible features.
+	 * 
+	 * @param newEClass
+	 * @param oldObj
+	 * @see 
+	 * #copyFrom(EObject, EObject)
+	 * @see 
+	 * {@link EdeltaEcoreUtil#createInstance(EClass)}
+	 */
+	public EObject createFrom(EClass newEClass, EObject oldObj) {
+		return EdeltaEcoreUtil.createInstance(newEClass,
+			newObj -> copyFrom(newObj, oldObj)
+		);
 	}
 
 	/**

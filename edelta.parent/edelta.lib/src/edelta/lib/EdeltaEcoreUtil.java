@@ -18,7 +18,7 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 /**
- * Static utility functions acting on Ecore.
+ * Static utility functions acting on Ecore and EObject elements.
  * 
  * @author Lorenzo Bettini
  *
@@ -171,7 +171,15 @@ public class EdeltaEcoreUtil {
 	}
 
 	public static Object getValueFromFeatureName(EObject obj, String featureName) {
-		return obj.eGet(obj.eClass().getEStructuralFeature(featureName));
+		return obj.eGet(getFeatureByName(obj, featureName));
+	}
+
+	public static boolean isSet(EObject obj, String featureName) {
+		return obj.eIsSet(getFeatureByName(obj, featureName));
+	}
+
+	private static EStructuralFeature getFeatureByName(EObject obj, String featureName) {
+		return obj.eClass().getEStructuralFeature(featureName);
 	}
 
 	/**

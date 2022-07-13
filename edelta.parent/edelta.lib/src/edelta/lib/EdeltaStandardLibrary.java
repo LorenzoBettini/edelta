@@ -337,6 +337,24 @@ public class EdeltaStandardLibrary extends EdeltaRuntime {
 	}
 
 	/**
+	 * Copies the specified {@link EClassifier} into the specified
+	 * {@link EPackage}, using {@link EcoreUtil#copy(EObject)}, but changing its name.
+	 * 
+	 * @param <T>
+	 * @param classifier
+	 * @param ePackageDest
+	 * @param name
+	 * @return
+	 * @see EcoreUtil#copy(EObject)
+	 */
+	public <T extends EClassifier> T copyToAs(T classifier, EPackage ePackageDest, String name) {
+		var copy = EcoreUtil.copy(classifier);
+		copy.setName(name);
+		addEClassifier(ePackageDest, copy);
+		return copy;
+	}
+
+	/**
 	 * Copies the specified {@link EStructuralFeature}s into the specified
 	 * {@link EClass}, using {@link EcoreUtil#copyAll(Collection)}.
 	 * 

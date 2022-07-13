@@ -11,13 +11,12 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="fontName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="fontColor" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="OpenElement" abstract="true" eSuperTypes="#//ExamElement"/>
   <eClassifiers xsi:type="ecore:EClass" name="MultipleChoiceElement" eSuperTypes="#//ExamElement"/>
   <eClassifiers xsi:type="ecore:EClass" name="ExerciseElement" eSuperTypes="#//ExamElement"/>
-  <eClassifiers xsi:type="ecore:EClass" name="OpenElement1" eSuperTypes="#//OpenElement">
+  <eClassifiers xsi:type="ecore:EClass" name="OpenElement1" eSuperTypes="#//ExamElement">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="specificQuestion1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="OpenElement2" eSuperTypes="#//OpenElement">
+  <eClassifiers xsi:type="ecore:EClass" name="OpenElement2" eSuperTypes="#//ExamElement">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="specificQuestion2" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
 </ecore:EPackage>

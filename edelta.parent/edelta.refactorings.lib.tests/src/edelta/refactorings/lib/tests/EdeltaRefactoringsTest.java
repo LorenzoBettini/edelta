@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,6 +25,7 @@ import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
@@ -40,6 +42,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaModelManager;
+import edelta.lib.EdeltaModelMigrator;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 import edelta.testutils.EdeltaTestUtils;
@@ -1173,7 +1176,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 				ERROR: PersonList.AnotherFemale: Wrong superclass of PersonList.AnotherFemale:
 				  Expected: PersonList.Person
 				  Actual  : PersonList.AnotherPerson
-				ERROR: PersonList.Person: The class has additional subclasses:
+				ERROR: PersonList.Person: The class PersonList.Person has additional subclasses:
 				  PersonList.Male
 				  PersonList.FemaleEmployee""");
 	}
@@ -1192,7 +1195,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
 			"""
-				ERROR: PersonList.Person: The class has additional subclasses:
+				ERROR: PersonList.Person: The class PersonList.Person has additional subclasses:
 				  PersonList.Male
 				  PersonListReferring.FemaleEmployee""");
 	}
@@ -1970,6 +1973,282 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 		assertOutputs(
 			engine,
 			"pullUpAndPushDown/",
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_mergeClasses() throws Exception {
+		var subdir = "mergeClasses/";
+		var ecores = of("TestEcore.ecore");
+		var models = of("Container.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var toMerge = of(
+						getEClass("testecore", "SubElement1"),
+						getEClass("testecore", "SubElement2"),
+						getEClass("testecore", "SubElement3")
+					);
+					var merged = mergeClasses("SubElement", toMerge);
+					var superClass = getEClass("testecore", "Element");
+					assertThat(merged.getESuperTypes())
+						.containsOnly(superClass);
+					assertThat(merged.getEPackage())
+						.isSameAs(superClass.getEPackage());
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_mergeClassesFeaturesDifferInSize() throws Exception {
+		withInputModels("mergeClasses", "TestEcore.ecore");
+		loadEcoreFiles();
+		var thirdSubClass = refactorings.getEClass("testecore", "SubElement3");
+		thirdSubClass.getEStructuralFeatures().remove(2);
+		var toMerge = of(
+			refactorings.getEClass("testecore", "SubElement1"),
+			refactorings.getEClass("testecore", "SubElement2"),
+			thirdSubClass
+		);
+		assertThrowsIAE(() -> refactorings.mergeClasses("SubElement", toMerge));
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
+		assertEquals(
+			"""
+			ERROR: testecore.SubElement3: Different features size: expected 3 but was 2
+			  in classes testecore.SubElement1, testecore.SubElement3
+			""",
+			appender.getResult());
+	}
+
+	@Test
+	void test_mergeClassesFeaturesDifferInADetail() throws Exception {
+		withInputModels("mergeClasses", "TestEcore.ecore");
+		loadEcoreFiles();
+		var thirdSubClass = refactorings.getEClass("testecore", "SubElement3");
+		thirdSubClass.getEStructuralFeature("containments").setLowerBound(2);
+		var toMerge = of(
+			refactorings.getEClass("testecore", "SubElement1"),
+			refactorings.getEClass("testecore", "SubElement2"),
+			thirdSubClass
+		);
+		assertThrowsIAE(() -> refactorings.mergeClasses("SubElement", toMerge));
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
+		assertEquals(
+			"""
+			ERROR: testecore.SubElement3: ecore.ETypedElement.lowerBound:
+			  testecore.SubElement1.containments: 0
+			  testecore.SubElement3.containments: 2
+			
+			""",
+			appender.getResult());
+	}
+
+	@Test
+	void test_splitClassDefault() throws Exception {
+		var subdir = "splitClass/";
+		var ecores = of("TestEcore.ecore");
+		var models = of("Container.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var toSplit = getEClass("testecore", "SubElement");
+					var split = splitClass(toSplit,
+						of(
+							"SubElement1",
+							"SubElement2",
+							"SubElement3"
+						)
+					);
+					var superClass = getEClass("testecore", "Element");
+					assertThat(split.stream()
+						.flatMap(c -> c.getESuperTypes().stream()))
+						.containsOnly(superClass);
+					assertThat(split.stream()
+						.map(ENamedElement::getName))
+						.containsExactly(
+							"SubElement1",
+							"SubElement2",
+							"SubElement3"
+						);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"splitClassDefault/",
+			ecores,
+			models
+		);
+	}
+
+	/**
+	 * Assumes that the name of the SubElement ends with a number
+	 * that is used to create the instance of one of the splitted classes.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	void test_splitClassWithEObjectFunction() throws Exception {
+		var subdir = "splitClass/";
+		var ecores = of("TestEcore.ecore");
+		var models = of("Container.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var ePackage = getEPackage("testecore");
+					var toSplit = getEClass("testecore", "SubElement");
+					var split = splitClass(toSplit,
+						of(
+							"SubElement1",
+							"SubElement2",
+							"SubElement3"
+						),
+						(origObj -> {
+							var origClass = origObj.eClass();
+							var nameFeature = origClass.getEStructuralFeature("name");
+							var nameValue = origObj.eGet(nameFeature).toString();
+							var newObjClassName = "SubElement" +
+									nameValue.charAt(nameValue.length() - 1);
+							return EdeltaEcoreUtil.createInstance(
+									getEClass(ePackage, newObjClassName));
+						})
+					);
+					var superClass = getEClass("testecore", "Element");
+					assertThat(split.stream()
+						.flatMap(c -> c.getESuperTypes().stream()))
+						.containsOnly(superClass);
+					assertThat(split.stream()
+						.map(ENamedElement::getName))
+						.containsExactly(
+							"SubElement1",
+							"SubElement2",
+							"SubElement3"
+						);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	/**
+	 * Acts at the level of containing feature to possibly create several
+	 * objects corresponding to a single one.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	void test_splitClassWithMigratorConsumer() throws Exception {
+		var subdir = "splitClass/";
+		var ecores = of("TestEcore.ecore");
+		var models = of("Container2.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var ePackage = getEPackage("testecore");
+					var toSplit = getEClass("testecore", "SubElement");
+					var containingFeature = getEReference("testecore", "Container", "elements");
+					var split = splitClass(toSplit,
+						of(
+							"SubElement1",
+							"SubElement2",
+							"SubElement3"
+						),
+						(EdeltaModelMigrator modelMigrator) -> modelMigrator.copyRule(
+							modelMigrator.wasRelatedTo(containingFeature),
+							(origFeature, origObj, newObj) -> {
+								var origElements = getValueAsList(origObj, origFeature);
+								var subElementClass = getEClass(
+									origObj.eClass().getEPackage(), "SubElement");
+								var subElementOptionalFeature = subElementClass
+									.getEStructuralFeature("optional");
+								var subElementFeatures = subElementClass.getEAllStructuralFeatures();
+								var subElement1Class = getEClass(ePackage, "SubElement1");
+								var subElement2Class = getEClass(ePackage, "SubElement2");
+								var subElement3Class = getEClass(ePackage, "SubElement3");
+								// if not optional create an instance of all the new classes
+								// (just an example, it does not necessarily make sense)
+								var newElements = new ArrayList<>();
+								for (var origElement : origElements) {
+									if (!(boolean) origElement.eGet(subElementOptionalFeature)) {
+										newElements.add(createAndCopyFrom(modelMigrator, origElement, subElementFeatures,
+												subElement1Class));
+										newElements.add(createAndCopyFrom(modelMigrator, origElement, subElementFeatures,
+												subElement2Class));
+										newElements.add(createAndCopyFrom(modelMigrator, origElement, subElementFeatures,
+												subElement3Class));
+									}
+								}
+								newObj.eSet(containingFeature, newElements);
+							}
+						)
+					);
+					var superClass = getEClass("testecore", "Element");
+					assertThat(split.stream()
+						.flatMap(c -> c.getESuperTypes().stream()))
+						.containsOnly(superClass);
+					assertThat(split.stream()
+						.map(ENamedElement::getName))
+						.containsExactly(
+							"SubElement1",
+							"SubElement2",
+							"SubElement3"
+						);
+				}
+
+				public EObject createAndCopyFrom(EdeltaModelMigrator modelMigrator, EObject origElement,
+						Collection<EStructuralFeature> subElementFeatures, EClass newClass) {
+					return EdeltaEcoreUtil.createInstance(newClass,
+						o -> {
+							for (var subElementFeature : subElementFeatures)
+								modelMigrator.copyFrom(o,
+									newClass.getEStructuralFeature(subElementFeature.getName()),
+									origElement, subElementFeature);
+						}
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"splitClassCustom/",
 			ecores,
 			models
 		);
