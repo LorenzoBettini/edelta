@@ -27,13 +27,6 @@ public class ExamXMLExample2 extends EdeltaDefaultRuntime {
     refactorings = new EdeltaRefactorings(this);
   }
 
-  public EObject createAndCopyFrom(final EdeltaModelMigrator modelMigrator, final EClass newClass, final EObject origElement) {
-    final Consumer<EObject> _function = (EObject newElement) -> {
-      modelMigrator.copyFrom(newElement, origElement);
-    };
-    return EdeltaEcoreUtil.createInstance(newClass, _function);
-  }
-
   public void removeAttributes(final EPackage it) {
     EdeltaUtils.removeElement(getEAttribute("examxml", "ExamElement", "question"));
     EdeltaUtils.removeElement(getEAttribute("examxml", "ExamElement", "optional"));
@@ -59,13 +52,13 @@ public class ExamXMLExample2 extends EdeltaDefaultRuntime {
             if (_equals) {
               boolean _isSet = EdeltaEcoreUtil.isSet(origElement, "specificQuestion1");
               if (_isSet) {
-                EObject _createAndCopyFrom = this.createAndCopyFrom(it_1, this.getEClass(ePackage, "OpenElement1"), origElement);
-                newElements.add(_createAndCopyFrom);
+                EObject _createFrom = it_1.createFrom(this.getEClass(ePackage, "OpenElement1"), origElement);
+                newElements.add(_createFrom);
               }
               boolean _isSet_1 = EdeltaEcoreUtil.isSet(origElement, "specificQuestion2");
               if (_isSet_1) {
-                EObject _createAndCopyFrom_1 = this.createAndCopyFrom(it_1, this.getEClass(ePackage, "OpenElement2"), origElement);
-                newElements.add(_createAndCopyFrom_1);
+                EObject _createFrom_1 = it_1.createFrom(this.getEClass(ePackage, "OpenElement2"), origElement);
+                newElements.add(_createFrom_1);
               }
             } else {
               EObject _migrated = it_1.getMigrated(origElement);

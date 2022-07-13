@@ -1,7 +1,5 @@
 import edelta.lib.EdeltaModelMigrator
 import edelta.refactorings.lib.EdeltaRefactorings
-import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.EObject
 
 package edelta.examxml.example
 
@@ -9,13 +7,6 @@ metamodel "examxml"
 metamodel "ecore"
 
 use EdeltaRefactorings as refactorings
-
-def createAndCopyFrom(EdeltaModelMigrator modelMigrator,
-						EClass newClass, EObject origElement) {
-	return createInstance(newClass,
-		[newElement | modelMigrator.copyFrom(newElement, origElement)]
-	)
-}
 
 modifyEcore removeAttributes epackage examxml {
 	removeElement(ecoreref(question))
@@ -43,9 +34,9 @@ modifyEcore splitOpenElement epackage examxml {
 						val origElementClass = origElement.eClass
 						if (origElementClass == getOriginal(toSplit)) {
 							if (origElement.isSet("specificQuestion1"))
-								newElements += createAndCopyFrom(ePackage.getEClass("OpenElement1"), origElement)
+								newElements += createFrom(ePackage.getEClass("OpenElement1"), origElement)
 							if (origElement.isSet("specificQuestion2"))
-								newElements += createAndCopyFrom(ePackage.getEClass("OpenElement2"), origElement)
+								newElements += createFrom(ePackage.getEClass("OpenElement2"), origElement)
 						} else {
 							newElements += getMigrated(origElement)
 						}
