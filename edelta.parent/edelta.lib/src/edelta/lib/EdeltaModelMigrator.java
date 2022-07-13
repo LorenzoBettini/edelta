@@ -653,6 +653,31 @@ public class EdeltaModelMigrator {
 	}
 
 	/**
+	 * Create an instance of the specified {@link EClass} and then copy (in case, by
+	 * first propagating the copy for references) all the value of oldObj into the
+	 * created instance, taking into account possible multiple elements and possible
+	 * changes to the multiplicity of the involved features.
+	 * 
+	 * For containment references the contained object(s) are deeply copied, even if
+	 * they had been copied before (for instance, in another object).
+	 * 
+	 * This assumes that the newEClass and the {@link EClass} of the oldObj have all
+	 * the compatible features.
+	 * 
+	 * @param newEClass
+	 * @param oldObj
+	 * @see 
+	 * #copyFrom(EObject, EObject)
+	 * @see 
+	 * {@link EdeltaEcoreUtil#createInstance(EClass)}
+	 */
+	public EObject createFrom(EClass newEClass, EObject oldObj) {
+		return EdeltaEcoreUtil.createInstance(newEClass,
+			newObj -> copyFrom(newObj, oldObj)
+		);
+	}
+
+	/**
 	 * Returns an {@link AttributeTransformer} that automatically takes care of the
 	 * multiplicity of the attribute and applies the passed transformer to transform
 	 * the value or values.
