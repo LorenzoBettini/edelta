@@ -2,12 +2,12 @@
 <feature
       id="edelta.feature"
       label="Edelta Feature "
-      version="2.18.0.qualifier"
+      version="2.19.0.qualifier"
       provider-name="Lorenzo Bettini">
 
    <requires>
-      <import feature="org.eclipse.xtext.xbase" version="2.27.0" match="equivalent"/>
-      <import feature="org.eclipse.xtext.ui" version="2.27.0" match="equivalent"/>
+      <import feature="org.eclipse.xtext.xbase" version="2.28.0" match="equivalent"/>
+      <import feature="org.eclipse.xtext.ui" version="2.28.0" match="equivalent"/>
       <import plugin="org.eclipse.pde.ui"/>
    </requires>
 
