@@ -34,7 +34,7 @@ jobs:
         ./mvnw
         -f edelta.parent/pom.xml
         -Pjacoco,test-ide,run-its,skip-edelta-maven-plugin
-        validate 
+        validate
 
   build:
     needs: cache-dependencies
