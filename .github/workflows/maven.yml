@@ -29,13 +29,6 @@ jobs:
         restore-keys: ${{ runner.os }}-m2-
         # hashFiles('**/pom.xml', '**/maven.yml', '**/*.target') might be too much
         # just the .target files should be enough to invalidate the cache (and the Maven wrapper properties)
-    - name: Download Maven dependencies
-      run: >
-        ./mvnw
-        -Dtycho.mode=maven
-        -f edelta.parent/pom.xml
-        -Pjacoco,test-ide,run-its
-        dependency:go-offline
     - name: Download p2 dependencies
       run: >
         ./mvnw
