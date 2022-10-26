@@ -227,6 +227,28 @@
       </modules>
     </profile>
     <profile>
+      <!-- This is crucial to run simple validate phase, e.g.,
+        to cache dependencies for creating an initial GitHub Actions cache.
+        Otherwise, the build would fail because this plugin (its dependencies)
+        could not be resolved. -->
+      <id>skip-edelta-maven-plugin</id>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>io.github.lorenzobettini.edelta</groupId>
+              <artifactId>edelta-maven-plugin</artifactId>
+              <executions>
+                <execution>
+                  <phase />
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+    <profile>
       <id>sonatype-oss-release</id>
       <activation>
         <activeByDefault>false</activeByDefault>
