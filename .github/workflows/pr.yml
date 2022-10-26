@@ -23,6 +23,7 @@ jobs:
         distribution: adopt
     - name: Cache Maven packages
       uses: actions/cache@v3
+      id: m2cache # note the cache id, see below for cache-hit
       with:
         path: |
           ~/.m2
@@ -38,6 +39,7 @@ jobs:
         -f edelta.parent/pom.xml
         '-Ptest-ide,run-its,skip-edelta-maven-plugin'
         validate
+      if: steps.m2cache.outputs.cache-hit != 'true'
 
   build:
     needs: cache-dependencies
