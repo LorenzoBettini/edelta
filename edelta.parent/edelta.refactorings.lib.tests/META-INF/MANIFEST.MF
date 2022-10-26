@@ -17,5 +17,7 @@ Require-Bundle: edelta.testutils,
  assertj-core;bundle-version="3.23.1"
 Import-Package: org.junit.jupiter.api;version="[5.1.0,6.0.0)",
  org.junit.jupiter.api.function;version="[5.1.0,6.0.0)",
+ org.junit.jupiter.params;version="[5.1.0,6.0.0)",
+ org.junit.jupiter.params.provider;version="[5.1.0,6.0.0)",
  org.junit.jupiter.api.extension;version="[5.1.0,6.0.0)"
 Automatic-Module-Name: edelta.lib.tests
