@@ -34,7 +34,7 @@ jobs:
         ./mvnw
         -f edelta.parent/pom.xml
         -Pjacoco,test-ide,run-its
-        validate
+        clean 
 
   build:
     needs: cache-dependencies
