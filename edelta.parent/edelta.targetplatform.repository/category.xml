@@ -27,4 +27,6 @@
    <bundle id="org.junit.platform.suite.api"/>
    <bundle id="org.junit.platform.suite.commons"/>
    <bundle id="org.apiguardian"/>
+   <bundle id="org.junit.vintage.engine"/>
+   <bundle id="org.apache.commons.commons-io"/>
 </site>
