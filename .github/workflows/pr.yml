@@ -40,6 +40,14 @@ jobs:
         '-Ptest-ide,run-its,skip-edelta-maven-plugin'
         clean validate
       if: steps.m2cache.outputs.cache-hit != 'true'
+    - name: Download Maven dependencies
+      run: >
+        ./mvnw
+        '-Dtycho.mode=maven'
+        -f edelta.parent/pom.xml
+        '-Ptest-ide,run-its,skip-edelta-maven-plugin'
+        dependency:go-offline
+      if: steps.m2cache.outputs.cache-hit != 'true'
 
   build:
     needs: cache-dependencies
