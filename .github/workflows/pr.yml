@@ -38,7 +38,7 @@ jobs:
         ./mvnw
         -f edelta.parent/pom.xml
         '-Ptest-ide,run-its,skip-edelta-maven-plugin'
-        clean validate
+        clean validate dependency:go-offline
       if: steps.m2cache.outputs.cache-hit != 'true'
 
   build:
