@@ -29,17 +29,10 @@ jobs:
           ~/.m2
           ~/.sonar/cache
           !**/*edelta*
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/*.target', '**/maven-wrapper.properties') }}
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/invalidate-github-cache.txt', '**/*.target', '**/maven-wrapper.properties') }}
         restore-keys: ${{ runner.os }}-m2-
         # hashFiles('**/pom.xml', '**/maven.yml', '**/*.target') might be too much
         # just the .target files should be enough to invalidate the cache (and the Maven wrapper properties)
-    - name: Download p2 dependencies
-      run: >
-        ./mvnw
-        -f edelta.parent/pom.xml
-        '-Ptest-ide,run-its,skip-edelta-maven-plugin'
-        clean validate
-      if: steps.m2cache.outputs.cache-hit != 'true'
     - name: Download Maven dependencies
       run: >
         ./mvnw
@@ -48,6 +41,12 @@ jobs:
         -pl '!edelta.maven.example'
         '-Ptest-ide,run-its,skip-edelta-maven-plugin'
         dependency:go-offline
+      if: steps.m2cache.outputs.cache-hit != 'true'
+    - name: Download p2 dependencies
+      run: >
+        ./mvnw
+        -f edelta.parent/edelta.targetplatform.repository/pom.xml
+        clean package
       if: steps.m2cache.outputs.cache-hit != 'true'
 
   build:
