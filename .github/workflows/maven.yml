@@ -26,7 +26,7 @@ jobs:
           ~/.m2
           ~/.sonar/cache
           !**/*edelta*
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/*.target', '**/maven-wrapper.properties') }}
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/invalidate-github-cache.txt', '**/*.target', '**/maven-wrapper.properties') }}
         restore-keys: ${{ runner.os }}-m2-
         # hashFiles('**/pom.xml', '**/maven.yml', '**/*.target') might be too much
         # just the .target files should be enough to invalidate the cache (and the Maven wrapper properties)
