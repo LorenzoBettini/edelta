@@ -42,6 +42,7 @@ jobs:
         ./mvnw
         -Dtycho.mode=maven
         -f edelta.parent/pom.xml
+        -pl !edelta.maven.example
         -Pjacoco,test-ide,run-its,skip-edelta-maven-plugin
         dependency:go-offline
       if: steps.m2cache.outputs.cache-hit != 'true'
