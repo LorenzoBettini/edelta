@@ -70,7 +70,7 @@ jobs:
           ~/.m2
           ~/.sonar/cache
           !**/*edelta*
-        key: ${{ runner.os }}-m2-build-${{ hashFiles('**/*.target', '**/maven-wrapper.properties') }}
+        key: ${{ runner.os }}-m2-build-${{ hashFiles('**/invalidate-github-cache.txt', '**/*.target', '**/maven-wrapper.properties') }}
         restore-keys: ${{ runner.os }}-m2-${{ hashFiles('**/*.target', '**/maven-wrapper.properties') }}
     - name: Set Maven offline option in Unix
       run: |
