@@ -7,7 +7,7 @@ permissions:
   actions: write
 
 jobs:
-  clear-ccache:
+  clear-all-caches:
     runs-on: ubuntu-latest
     steps:
       - name: Clear cache
