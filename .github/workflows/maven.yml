@@ -35,7 +35,7 @@ jobs:
         ./mvnw
         -f edelta.parent/pom.xml
         -Pjacoco,test-ide,run-its,skip-edelta-maven-plugin
-        validate
+        clean validate
       if: steps.m2cache.outputs.cache-hit != 'true'
 
   build:
