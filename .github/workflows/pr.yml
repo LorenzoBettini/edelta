@@ -7,7 +7,50 @@ on:
   pull_request:
 
 jobs:
+  cache-dependencies:
+    strategy:
+      matrix:
+        os: ['macos-latest', 'windows-latest']
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2.5.0
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3.6.0
+      with:
+        java-version: 17
+        distribution: adopt
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      id: m2cache # note the cache id, see below for cache-hit
+      with:
+        path: |
+          ~/.m2
+          ~/.sonar/cache
+          !**/*edelta*
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/invalidate-github-cache.txt', '**/*.target', '**/maven-wrapper.properties') }}
+        restore-keys: ${{ runner.os }}-m2-
+        # hashFiles('**/pom.xml', '**/maven.yml', '**/*.target') might be too much
+        # just the .target files should be enough to invalidate the cache (and the Maven wrapper properties)
+    - name: Download Maven dependencies
+      run: >
+        ./mvnw
+        '-Dtycho.mode=maven'
+        -f edelta.parent/pom.xml
+        -pl '!edelta.maven.example'
+        '-Ptest-ide,run-its,skip-edelta-maven-plugin'
+        dependency:go-offline
+      if: steps.m2cache.outputs.cache-hit != 'true'
+    - name: Download p2 dependencies
+      run: >
+        ./mvnw
+        -f edelta.parent/edelta.targetplatform.repository/pom.xml
+        clean package
+      if: steps.m2cache.outputs.cache-hit != 'true'
+
   build:
+    needs: cache-dependencies
     strategy:
       matrix:
         os: ['macos-latest', 'windows-latest']
@@ -18,22 +61,37 @@ jobs:
 #      MAVEN_OPTS: --add-opens java.base/java.lang=ALL-UNNAMED
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v2.5.0
+      with:
+        # Shallow clones should be disabled for a better relevancy of SonarQube analysis
+        fetch-depth: 0
     - name: Set up JDK 17
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v3.6.0
       with:
         java-version: 17
+        distribution: adopt
     - name: Cache Maven packages
-      uses: actions/cache@v2
+      uses: actions/cache@v3
+      id: m2cache # note the cache id, see below for cache-hit
       with:
         path: |
           ~/.m2
           ~/.sonar/cache
           !**/*edelta*
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml', '**/*.yml', '**/*.target') }}
-        restore-keys: ${{ runner.os }}-m2-
+        key: ${{ runner.os }}-m2-build-${{ hashFiles('**/invalidate-github-cache.txt', '**/*.target', '**/maven-wrapper.properties') }}
+        restore-keys: ${{ runner.os }}-m2-${{ hashFiles('**/invalidate-github-cache.txt', '**/*.target', '**/maven-wrapper.properties') }}
+    - name: Set Maven offline option in Unix
+      run: |
+        echo "maven_arguments='--offline'" >> $GITHUB_ENV
+      # note the use of the id 'm2cache'
+      if: steps.m2cache.outputs.cache-hit == 'true' && runner.os != 'Windows'
+    - name: Set Maven offline option in Windows
+      run: |
+        echo "maven_arguments='--offline'" | Out-File -FilePath $env:GITHUB_ENV -Append
+      # In Windows the syntax for setting environment variable is different
+      if: steps.m2cache.outputs.cache-hit == 'true' && runner.os == 'Windows'
     - name: Build with Maven
-      run: ./mvnw -f edelta.parent/pom.xml clean verify '-Ptest-ide,run-its'
+      run: ./mvnw ${{ env.maven_arguments }} -f edelta.parent/pom.xml clean verify '-Ptest-ide,run-its'
     - name: Archive Test Results
       uses: actions/upload-artifact@v2
       if: ${{ failure() || cancelled() }}

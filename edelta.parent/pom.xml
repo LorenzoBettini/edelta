@@ -15,7 +15,7 @@
   <description>An Xtext DSL for EMF metamodels refactoring and migration.</description>
 
   <properties>
-    <eclipse-version>2022-06</eclipse-version>
+    <eclipse-version>2022-09</eclipse-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
@@ -155,13 +155,13 @@
         <module>edelta.ide</module>
         <module>edelta.ui</module>
         <module>edelta.refactorings.lib.tests</module>
-        <module>edelta.feature</module>
-        <module>edelta.repository</module>
-        <module>edelta.product.ui.feature</module>
         <module>edelta.tests</module>
         <module>edelta.ui.tests</module>
         <module>edelta.examples</module>
         <module>edelta.maven.example</module>
+        <module>edelta.feature</module>
+        <module>edelta.repository</module>
+        <module>edelta.product.ui.feature</module>
         <module>edelta.tests.parent</module>
         <module>edelta.tests.report</module>
       </modules>
@@ -226,6 +226,28 @@
       <modules>
         <module>edelta.swtbot.tests</module>
       </modules>
+    </profile>
+    <profile>
+      <!-- This is crucial to run simple validate phase, e.g.,
+        to cache dependencies for creating an initial GitHub Actions cache.
+        Otherwise, the build would fail because this plugin (its dependencies)
+        could not be resolved. -->
+      <id>skip-edelta-maven-plugin</id>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>io.github.lorenzobettini.edelta</groupId>
+              <artifactId>edelta-maven-plugin</artifactId>
+              <executions>
+                <execution>
+                  <phase />
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
     </profile>
     <profile>
       <id>sonatype-oss-release</id>
