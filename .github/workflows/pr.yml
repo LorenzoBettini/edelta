@@ -20,7 +20,7 @@ jobs:
       uses: actions/setup-java@v3.6.0
       with:
         java-version: 17
-        distribution: adopt
+        distribution: temurin
     - name: Cache Maven packages
       uses: actions/cache@v3
       id: m2cache # note the cache id, see below for cache-hit
@@ -69,7 +69,7 @@ jobs:
       uses: actions/setup-java@v3.6.0
       with:
         java-version: 17
-        distribution: adopt
+        distribution: temurin
     - name: Cache Maven packages
       uses: actions/cache@v3
       id: m2cache # note the cache id, see below for cache-hit
