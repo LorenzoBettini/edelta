@@ -12,7 +12,10 @@ Require-Bundle: edelta.lib,
  assertj-core;bundle-version="3.23.1",
  org.mockito.mockito-core;bundle-version="4.6.1",
  net.bytebuddy.byte-buddy,
- org.objenesis,
- org.junit.jupiter.api;bundle-version="5.8.1",
- org.junit.jupiter.params;bundle-version="5.8.1"
+ org.objenesis
 Automatic-Module-Name: edelta.lib.tests
+Import-Package: org.junit.jupiter.api;version="[5.1.0,6.0.0)",
+ org.junit.jupiter.api.function;version="[5.1.0,6.0.0)",
+ org.junit.jupiter.params;version="[5.1.0,6.0.0)",
+ org.junit.jupiter.params.provider;version="[5.1.0,6.0.0)",
+ org.junit.jupiter.api.extension;version="[5.1.0,6.0.0)"
