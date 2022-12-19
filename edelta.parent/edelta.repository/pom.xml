@@ -285,8 +285,8 @@
                   <type>eclipse-plugin</type>
                 </dependency>
                 <dependency>
-                  <artifactId>org.eclipse.equinox.ds</artifactId>
-                  <type>eclipse-plugin</type>
+                  <artifactId>org.eclipse.rcp</artifactId>
+                  <type>eclipse-feature</type>
                 </dependency>
                 <dependency>
                   <artifactId>org.eclipse.core.net</artifactId>
