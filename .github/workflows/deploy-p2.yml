@@ -21,3 +21,9 @@ jobs:
       with:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ secrets.KNOWN_HOSTS }}
+    - name: Test rsync update
+      run: >
+        rsync -avP -e ssh lbettini@frs.sourceforge.net:/home/frs/project/edelta/products ./test
+    - name: Test rsync commit
+      run: >
+        rsync -avP -e ssh README.md lbettini@frs.sourceforge.net:/home/frs/project/edelta/products/
