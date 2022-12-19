@@ -13,7 +13,6 @@
   <properties>
     <maven.version>3.8.3</maven.version>
     <assertj-version>3.23.1</assertj-version>
-    <mockito-version>4.6.1</mockito-version>
   </properties>
 
   <prerequisites>
@@ -111,12 +110,6 @@
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
       <version>${assertj-version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>${mockito-version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
