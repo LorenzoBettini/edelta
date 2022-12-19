@@ -22,6 +22,7 @@
 
     <mwe2.skip>false</mwe2.skip>
     <xtend.skip>false</xtend.skip>
+    <edelta.skip>false</edelta.skip>
 
     <jacoco-aggregate-report>edelta.tests.report/target/site/jacoco-aggregate/jacoco.xml</jacoco-aggregate-report>
 
@@ -172,6 +173,11 @@
       </activation>
       <properties>
         <skipTests>true</skipTests>
+        <!-- 
+        we rely on the committed .java._trace files for
+        https://github.com/LorenzoBettini/edelta/issues/467
+        -->
+        <edelta.skip>true</edelta.skip>
       </properties>
     </profile>
     <profile>
@@ -181,6 +187,11 @@
       </activation>
       <properties>
         <skipTests>true</skipTests>
+        <!-- 
+        we rely on the committed .java._trace files for
+        https://github.com/LorenzoBettini/edelta/issues/467
+        -->
+        <edelta.skip>true</edelta.skip>
       </properties>
       <build>
         <pluginManagement>
@@ -253,6 +264,14 @@
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
+      <properties>
+        <skipTests>true</skipTests>
+        <!-- 
+        we rely on the committed .java._trace files for
+        https://github.com/LorenzoBettini/edelta/issues/467
+        -->
+        <edelta.skip>true</edelta.skip>
+      </properties>
       <build>
         <plugins>
           <plugin>
@@ -398,6 +417,7 @@
               that is not yet handled by Xbase -->
             <compilerSourceLevel>11</compilerSourceLevel>
             <compilerTargetLevel>11</compilerTargetLevel>
+            <skip>${edelta.skip}</skip>
           </configuration>
         </plugin>
         <!--This plugin's configuration is used to store Eclipse m2e settings only. 
