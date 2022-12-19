@@ -22,6 +22,7 @@
                 <directory>${basedir}/edelta-lib-src-gen</directory>
               </fileset>
             </filesets>
+            <skip>${edelta.skip}</skip>
           </configuration>
         </plugin>
       </plugins>
