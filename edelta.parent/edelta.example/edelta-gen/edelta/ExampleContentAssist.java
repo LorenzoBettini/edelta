@@ -11,11 +11,11 @@ public class ExampleContentAssist extends EdeltaDefaultRuntime {
   public ExampleContentAssist() {
     
   }
-  
+
   public ExampleContentAssist(final AbstractEdelta other) {
     super(other);
   }
-  
+
   public void SomeChanges(final EPackage it) {
     getEClass("myecore", "MyEClass");
     getEAttribute("myecore", "MyEClass", "astring");
@@ -30,13 +30,13 @@ public class ExampleContentAssist extends EdeltaDefaultRuntime {
     getEEnum("myecore", "MyEEnum").setName("RenamedEnum");
     getEEnum("myecore", "RenamedEnum");
   }
-  
+
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("ecore");
     ensureEPackageIsLoaded("myecore");
   }
-  
+
   @Override
   protected void doExecute() throws Exception {
     SomeChanges(getEPackage("myecore"));

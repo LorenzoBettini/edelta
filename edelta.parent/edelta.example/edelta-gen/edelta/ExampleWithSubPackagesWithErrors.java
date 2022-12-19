@@ -8,11 +8,11 @@ public class ExampleWithSubPackagesWithErrors extends EdeltaDefaultRuntime {
   public ExampleWithSubPackagesWithErrors() {
     
   }
-  
+
   public ExampleWithSubPackagesWithErrors(final AbstractEdelta other) {
     super(other);
   }
-  
+
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("ecore");

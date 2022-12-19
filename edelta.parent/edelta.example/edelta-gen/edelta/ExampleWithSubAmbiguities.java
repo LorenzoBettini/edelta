@@ -12,11 +12,11 @@ public class ExampleWithSubAmbiguities extends EdeltaDefaultRuntime {
   public ExampleWithSubAmbiguities() {
     
   }
-  
+
   public ExampleWithSubAmbiguities(final AbstractEdelta other) {
     super(other);
   }
-  
+
   public void SomeChanges(final EPackage it) {
     final Consumer<EClass> _function = (EClass it_1) -> {
       this.stdLib.addNewEReference(it_1, "refToMainPackageClass", 
@@ -27,13 +27,13 @@ public class ExampleWithSubAmbiguities extends EdeltaDefaultRuntime {
     EcoreUtil.remove(getEAttribute("mainpackage.subpackage", "MyClass", "myAttribute"));
     getEAttribute("mainpackage.subpackage.subsubpackage", "MyClass", "myAttribute");
   }
-  
+
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("ecore");
     ensureEPackageIsLoaded("mainpackage");
   }
-  
+
   @Override
   protected void doExecute() throws Exception {
     SomeChanges(getEPackage("mainpackage"));

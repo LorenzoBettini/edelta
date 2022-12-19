@@ -16,11 +16,11 @@ public class ExampleWithLiveValidation extends EdeltaDefaultRuntime {
   public ExampleWithLiveValidation() {
     
   }
-  
+
   public ExampleWithLiveValidation(final AbstractEdelta other) {
     super(other);
   }
-  
+
   public void someChanges(final EPackage it) {
     final Procedure1<EClass> _function = (EClass it_1) -> {
       it_1.setName(StringExtensions.toFirstUpper(it_1.getName()));
@@ -28,7 +28,7 @@ public class ExampleWithLiveValidation extends EdeltaDefaultRuntime {
     ObjectExtensions.<EClass>operator_doubleArrow(
       getEClass("myecoreforvalidation", "myOtherEClass"), _function);
   }
-  
+
   public void someLiveChecks(final EPackage it) {
     EList<EClassifier> _eClassifiers = it.getEClassifiers();
     for (final EClassifier eClassifier : _eClassifiers) {
@@ -53,13 +53,13 @@ public class ExampleWithLiveValidation extends EdeltaDefaultRuntime {
       }
     }
   }
-  
+
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("ecore");
     ensureEPackageIsLoaded("myecoreforvalidation");
   }
-  
+
   @Override
   protected void doExecute() throws Exception {
     someChanges(getEPackage("myecoreforvalidation"));
