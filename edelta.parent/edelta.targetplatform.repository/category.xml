@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature id="org.eclipse.xtext.sdk"/>
    <feature id="org.eclipse.equinox.executable"/>
    <feature id="org.eclipse.pde"/>
    <feature id="org.eclipse.emf.sdk"/>
@@ -15,6 +14,17 @@
    <feature id="de.itemis.xtext.antlr.feature"/>
    <feature id="org.eclipse.epsilon.picto.feature"/>
    <feature id="org.eclipse.epsilon.emf.feature"/>
+
+   <feature id="org.eclipse.xtext.docs"/>
+   <feature id="org.eclipse.xtext.runtime"/>
+   <feature id="org.eclipse.xtext.redist"/>
+   <feature id="org.eclipse.xtext.examples"/>
+   <feature id="org.eclipse.xtext.ui"/>
+   <feature id="org.eclipse.xtext.xbase"/>
+   <feature id="org.eclipse.xtext.xbase.lib"/>
+   <feature id="org.eclipse.xtext.xtext.ui"/>
+   <feature id="org.eclipse.xtend.sdk"/>
+
    <bundle id="org.eclipse.sdk"/>
    <bundle id="org.junit.jupiter.api"/>
    <bundle id="org.junit.jupiter.engine"/>
