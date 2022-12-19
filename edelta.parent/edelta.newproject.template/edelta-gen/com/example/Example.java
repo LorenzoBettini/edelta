@@ -18,11 +18,11 @@ public class Example extends EdeltaDefaultRuntime {
   public Example() {
     
   }
-  
+
   public Example(final AbstractEdelta other) {
     super(other);
   }
-  
+
   /**
    * Reusable function to create a new EClass with the
    * specified name, setting MyEClass as its superclass
@@ -36,7 +36,7 @@ public class Example extends EdeltaDefaultRuntime {
     };
     return ObjectExtensions.<EClass>operator_doubleArrow(_newEClass, _function);
   }
-  
+
   public void someModifications(final EPackage it) {
     final Consumer<EClass> _function = (EClass it_1) -> {
       this.stdLib.addNewEAttribute(it_1, "myStringAttribute", getEDataType("ecore", "EString"));
@@ -61,7 +61,7 @@ public class Example extends EdeltaDefaultRuntime {
     };
     this.stdLib.addNewEEnumLiteral(getEEnum("myecore", "MyENum"), "AnotherNewEnumLiteral", _function_2);
   }
-  
+
   public void otherModifications(final EPackage it) {
     this.stdLib.addEClass(it, this.myReusableCreateSubclassOfMyEClass("ASubclassOfMyEClass"));
     EClass _myReusableCreateSubclassOfMyEClass = this.myReusableCreateSubclassOfMyEClass("AnotherSubclassOfMyEClass");
@@ -74,13 +74,13 @@ public class Example extends EdeltaDefaultRuntime {
     getEClass("myecore", "MyOtherEClass").setName("RenamedClass");
     this.stdLib.addNewEAttribute(getEClass("myecore", "RenamedClass"), "addedNow", getEDataType("ecore", "EInt"));
   }
-  
+
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("myecore");
     ensureEPackageIsLoaded("ecore");
   }
-  
+
   @Override
   protected void doExecute() throws Exception {
     someModifications(getEPackage("myecore"));

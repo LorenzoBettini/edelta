@@ -11,11 +11,11 @@ public class ExampleWithSubPackages extends EdeltaDefaultRuntime {
   public ExampleWithSubPackages() {
     
   }
-  
+
   public ExampleWithSubPackages(final AbstractEdelta other) {
     super(other);
   }
-  
+
   public void SomeChanges(final EPackage it) {
     final Consumer<EClass> _function = (EClass it_1) -> {
       this.stdLib.addNewEReference(it_1, "refToMainPackageClass", 
@@ -23,13 +23,13 @@ public class ExampleWithSubPackages extends EdeltaDefaultRuntime {
     };
     this.stdLib.addNewEClass(getEPackage("mainpackage.subpackage"), "AddedToSubPackage", _function);
   }
-  
+
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("ecore");
     ensureEPackageIsLoaded("mainpackage");
   }
-  
+
   @Override
   protected void doExecute() throws Exception {
     SomeChanges(getEPackage("mainpackage"));
