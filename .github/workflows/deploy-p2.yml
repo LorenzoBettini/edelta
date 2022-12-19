@@ -21,22 +21,3 @@ jobs:
       with:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ secrets.KNOWN_HOSTS }}
-    - name: Cache Maven packages
-      uses: actions/cache@v3
-      id: m2cache # note the cache id, see below for cache-hit
-      with:
-        path: |
-          ~/.m2
-          !**/*edelta*
-        key: ${{ runner.os }}-p2-deploy-${{ hashFiles('**/*.target', '**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-p2-deploy-
-    - name: Configure Git
-      run: |
-        git config --global user.name 'GitHub Actions'
-        git config --global user.email 'lorenzo.bettini@users.noreply.github.com'
-    - name: Deploy p2
-      run: >
-        ./mvnw -f edelta.parent/pom.xml
-        clean deploy
-        -Prelease-composite,release-ide
-        -Dgithub-update-repo=https://x-access-token:${{ secrets.ACTIONS_TOKEN }}@github.com/LorenzoBettini/edelta-releases
