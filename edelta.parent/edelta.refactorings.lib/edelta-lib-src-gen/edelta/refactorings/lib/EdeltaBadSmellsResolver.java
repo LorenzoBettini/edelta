@@ -19,20 +19,20 @@ import org.eclipse.xtext.xbase.lib.Pair;
 @SuppressWarnings("all")
 public class EdeltaBadSmellsResolver extends EdeltaDefaultRuntime {
   private EdeltaRefactorings refactorings;
-  
+
   private EdeltaBadSmellsFinder finder;
-  
+
   public EdeltaBadSmellsResolver() {
     refactorings = new EdeltaRefactorings(this);
     finder = new EdeltaBadSmellsFinder(this);
   }
-  
+
   public EdeltaBadSmellsResolver(final AbstractEdelta other) {
     super(other);
     refactorings = new EdeltaRefactorings(other);
     finder = new EdeltaBadSmellsFinder(other);
   }
-  
+
   /**
    * Extracts superclasses in the presence of duplicate features
    * considering all the classes of the given package.
@@ -45,7 +45,7 @@ public class EdeltaBadSmellsResolver extends EdeltaDefaultRuntime {
     };
     this.finder.findDuplicatedFeatures(ePackage).values().forEach(_function);
   }
-  
+
   /**
    * Removes the dead classifiers.
    */
@@ -55,7 +55,7 @@ public class EdeltaBadSmellsResolver extends EdeltaDefaultRuntime {
     };
     this.resolveDeadClassifiers(ePackage, _function);
   }
-  
+
   /**
    * Removes the dead classifiers by first checking the passed
    * predicate.
@@ -70,7 +70,7 @@ public class EdeltaBadSmellsResolver extends EdeltaDefaultRuntime {
     };
     deadClassifiers.forEach(_function);
   }
-  
+
   /**
    * Applies redundantContainerToEOpposite to redundant containers
    */
@@ -81,7 +81,7 @@ public class EdeltaBadSmellsResolver extends EdeltaDefaultRuntime {
     };
     findRedundantContainers.forEach(_function);
   }
-  
+
   /**
    * Applies subclassesToEnum to findClassificationByHierarchy
    */
@@ -94,28 +94,28 @@ public class EdeltaBadSmellsResolver extends EdeltaDefaultRuntime {
     };
     findClassificationByHierarchy.entrySet().forEach(_function);
   }
-  
+
   public void resolveConcreteAbstractMetaclass(final EPackage ePackage) {
     final Consumer<EClass> _function = (EClass it) -> {
       EdeltaUtils.makeAbstract(it);
     };
     this.finder.findConcreteAbstractMetaclasses(ePackage).forEach(_function);
   }
-  
+
   public void resolveAbstractConcreteMetaclass(final EPackage ePackage) {
     final Consumer<EClass> _function = (EClass it) -> {
       EdeltaUtils.makeConcrete(it);
     };
     this.finder.findAbstractConcreteMetaclasses(ePackage).forEach(_function);
   }
-  
+
   public void resolveAbstractSubclassesOfConcreteSuperclasses(final EPackage ePackage) {
     final Consumer<EClass> _function = (EClass it) -> {
       EdeltaUtils.makeConcrete(it);
     };
     this.finder.findAbstractSubclassesOfConcreteSuperclasses(ePackage).forEach(_function);
   }
-  
+
   public void resolveDuplicatedFeaturesInSubclasses(final EPackage ePackage) {
     final BiConsumer<EClass, Map<EStructuralFeature, List<EStructuralFeature>>> _function = (EClass superClass, Map<EStructuralFeature, List<EStructuralFeature>> duplicates) -> {
       final BiConsumer<EStructuralFeature, List<EStructuralFeature>> _function_1 = (EStructuralFeature key, List<EStructuralFeature> values) -> {

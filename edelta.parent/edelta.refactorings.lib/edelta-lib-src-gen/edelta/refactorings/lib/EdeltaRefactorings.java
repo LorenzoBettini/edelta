@@ -42,25 +42,25 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   public EdeltaRefactorings() {
     
   }
-  
+
   public EdeltaRefactorings(final AbstractEdelta other) {
     super(other);
   }
-  
+
   public EAttribute addMandatoryAttribute(final EClass eClass, final String attributeName, final EDataType dataType) {
     final Consumer<EAttribute> _function = (EAttribute it) -> {
       EdeltaUtils.makeSingleRequired(it);
     };
     return this.stdLib.addNewEAttribute(eClass, attributeName, dataType, _function);
   }
-  
+
   public EReference addMandatoryReference(final EClass eClass, final String referenceName, final EClass type) {
     final Consumer<EReference> _function = (EReference it) -> {
       EdeltaUtils.makeSingleRequired(it);
     };
     return this.stdLib.addNewEReference(eClass, referenceName, type, _function);
   }
-  
+
   /**
    * Merges the given features into a single new feature in the containing class.
    * The features must be compatible (same containing class, same type, same cardinality, etc).
@@ -75,11 +75,11 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       "The two features cannot be merged");
     final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
     final EClass owner = feature.getEContainingClass();
-    final EStructuralFeature copy = this.stdLib.copyToAs(feature, owner, newFeatureName);
+    final EStructuralFeature copy = this.stdLib.<EStructuralFeature>copyToAs(feature, owner, newFeatureName);
     EdeltaUtils.removeAllElements(features);
     return copy;
   }
-  
+
   /**
    * Merges the given features into the single given existing feature in the containing class.
    * The features must be compatible (same containing class, same type, same cardinality, etc)
@@ -97,7 +97,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     EdeltaUtils.removeAllElements(features);
     return feature;
   }
-  
+
   /**
    * Merges the given features into a single new feature, with the given type, in the containing class.
    * The features must be compatible (same containing class, same type, same cardinality, etc)
@@ -110,11 +110,11 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   public EStructuralFeature mergeFeatures(final String newFeatureName, final EClassifier type, final Collection<EStructuralFeature> features) {
     final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
     final EClass owner = feature.getEContainingClass();
-    final EStructuralFeature copy = this.stdLib.copyToAs(feature, owner, newFeatureName, type);
+    final EStructuralFeature copy = this.stdLib.<EStructuralFeature>copyToAs(feature, owner, newFeatureName, type);
     this.mergeFeatures(copy, features);
     return copy;
   }
-  
+
   /**
    * Given an EAttribute, expected to have an EEnum type, creates a subclass of
    * the containing class for each value of the referred EEnum
@@ -153,7 +153,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       return null;
     }
   }
-  
+
   /**
    * Given a collection of subclasses, which are expected to be direct subclasses of
    * an EClass, say superclass, generates an EEnum (in the superclass' package)
@@ -195,7 +195,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     EdeltaUtils.removeAllElements(subclasses);
     return attribute;
   }
-  
+
   /**
    * Extracts the specified features into a new class with the given name.
    * The features must belong to the same class.
@@ -224,7 +224,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     this.stdLib.moveAllTo(features, extracted);
     return reference;
   }
-  
+
   /**
    * Inlines the features of the specified class into the single class
    * that has a containment reference to the specified class.
@@ -236,7 +236,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   public List<EStructuralFeature> inlineClass(final EClass cl) {
     return this.inlineClass(cl, "");
   }
-  
+
   /**
    * Inlines the features of the specified class into the single class
    * that has a containment reference to the specified class.
@@ -265,7 +265,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     EdeltaUtils.removeElement(cl);
     return featuresToInline;
   }
-  
+
   /**
    * Makes the EReference, which is assumed to be already part of an EClass,
    * a single required containment reference, adds to the referred
@@ -286,7 +286,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     }
     return _xblockexpression;
   }
-  
+
   /**
    * Replaces an EReference with an EClass (with the given name, the same package
    * as the package of the reference's containing class),
@@ -332,7 +332,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     this.makeContainmentBidirectional(reference);
     return extracted;
   }
-  
+
   /**
    * Given an EClass, which is meant to represent a relation,
    * removes such a class, transforming the relation into an EReference.
@@ -367,7 +367,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     EdeltaUtils.removeElement(cl);
     return reference;
   }
-  
+
   /**
    * Given a non empty list of {@link EStructuralFeature}, which are known to
    * appear in several classes as duplicates, extracts a new common superclass,
@@ -390,7 +390,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     final String superClassName = this.ensureEClassifierNameIsUnique(feature, _plus);
     return this.extractSuperclass(superClassName, duplicates);
   }
-  
+
   /**
    * Given a non empty list of {@link EStructuralFeature}, which are known to
    * appear in several classes as duplicates, extracts a new common superclass,
@@ -416,7 +416,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     };
     return this.stdLib.addNewEClassAsSibling(feature.getEContainingClass(), name, _function);
   }
-  
+
   /**
    * Given a non empty list of {@link EStructuralFeature}, which are known to
    * appear in several subclasses as duplicates, pulls them up in
@@ -434,10 +434,10 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       return it.getEContainingClass();
     };
     this.checkAllDirectSubclasses(dest, ListExtensions.map(duplicates, _function));
-    this.stdLib.copyTo(IterableExtensions.head(duplicates), dest);
+    this.stdLib.<EStructuralFeature>copyTo(IterableExtensions.head(duplicates), dest);
     EdeltaUtils.removeAllElements(duplicates);
   }
-  
+
   /**
    * Ensures that the proposed classifier name is unique within the containing package of
    * the passed context; if not, it appends an incremental index until the name
@@ -458,11 +458,11 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     }
     return className;
   }
-  
+
   public String fromTypeToFeatureName(final EClassifier type) {
     return StringExtensions.toFirstLower(type.getName());
   }
-  
+
   /**
    * Makes sure that this is not a containment reference,
    * otherwise it shows an error message
@@ -481,7 +481,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       throw new IllegalArgumentException(message);
     }
   }
-  
+
   /**
    * Makes sure that this is not a multi element (upperBound > 1),
    * otherwise it shows an error message
@@ -499,7 +499,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       throw new IllegalArgumentException(message);
     }
   }
-  
+
   /**
    * Makes sure that the passed collection does not have EReferences
    * with an EOpposite. Otherwise shows an error (using
@@ -525,7 +525,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       throw new IllegalArgumentException(message);
     }
   }
-  
+
   /**
    * Makes sure that there are no differences in the passed features,
    * using the specified differenceFinder, otherwise it shows an error message
@@ -549,7 +549,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       throw new IllegalArgumentException(message);
     }
   }
-  
+
   /**
    * Makes sure that all the passed classes are direct subclasses of
    * the passed class.
@@ -575,7 +575,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       throw new IllegalArgumentException("Not all direct subclasses");
     }
   }
-  
+
   /**
    * Makes sure that the features have types that are subtypes of the
    * specified feature, if not, shows
@@ -630,7 +630,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       throw new IllegalArgumentException(message);
     }
   }
-  
+
   /**
    * Makes sure the passed EClasses have no features, if not, shows
    * error information and throws an IllegalArgumentException.
@@ -662,7 +662,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       throw new IllegalArgumentException("Classes not empty");
     }
   }
-  
+
   /**
    * Finds, among all references to the given EClass, the single containment reference in the
    * EClass' package's resource set, performing validation (that is,
@@ -693,7 +693,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     }
     return IterableExtensions.<EReference>head(references);
   }
-  
+
   /**
    * Finds all the EReferences to the given EClass in the
    * EClass' package's resource set. If no such references are
@@ -712,7 +712,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     }
     return references;
   }
-  
+
   /**
    * Returns all the EReferences to the given EClass in the
    * EClass' package's resource set.
@@ -725,7 +725,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     };
     return Iterables.<EReference>filter(ListExtensions.<EStructuralFeature.Setting, EObject>map(this.allUsagesOfThisClass(cl), _function), EReference.class);
   }
-  
+
   /**
    * Finds the single usage of this class and it must be a
    * containment reference. Otherwise it show errors and throws an IllegalArgumentException.
@@ -738,7 +738,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   public EReference findSingleContainmentReferenceToThisClass(final EClass cl) {
     return this.getAsContainmentReference(this.findSingleUsageOfThisClass(cl));
   }
-  
+
   /**
    * Finds the single usage the given EClass in the
    * EClass' package's resource set, performing validation (that is,
@@ -775,7 +775,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     }
     return IterableExtensions.<EStructuralFeature.Setting>head(usages).getEObject();
   }
-  
+
   /**
    * Makes sure that the passed EObject represent a containment EReference
    * otherwise shows an error and throws an IllegalArgumentException
@@ -800,7 +800,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     this.showError(((ENamedElement) o), message_1);
     throw new IllegalArgumentException(message_1);
   }
-  
+
   /**
    * Returns all the usages of the given EClass in the
    * EClass' package's resource set.
@@ -818,7 +818,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     };
     return IterableExtensions.<EStructuralFeature.Setting>toList(IterableExtensions.<EStructuralFeature.Setting>filter(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, EdeltaUtils.packagesToInspect(cl)), _function), _function_1));
   }
-  
+
   /**
    * Finds the single EReference, in the EReferences of the given EClass,
    * with a type different from the given type, performing validation (that is,
@@ -859,7 +859,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     }
     return IterableExtensions.<EReference>head(otherReferences);
   }
-  
+
   /**
    * Finds and returns the single containing class of the passed features.
    * If there's more than one containing class throws an IllegalArgumentException.
@@ -889,7 +889,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     }
     return IterableExtensions.<EStructuralFeature>head(features).getEContainingClass();
   }
-  
+
   /**
    * Checks that the passed subclasses have all exactly one superclass
    * and that it is the same and returns that as a result. It also checks
@@ -972,7 +972,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     }
     return result;
   }
-  
+
   public Iterable<EClass> directSubclasses(final EClass cl) {
     final Function1<EStructuralFeature.Setting, Boolean> _function = (EStructuralFeature.Setting it) -> {
       EStructuralFeature _eStructuralFeature = it.getEStructuralFeature();
@@ -984,7 +984,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     };
     return IterableExtensions.<EStructuralFeature.Setting, EClass>map(IterableExtensions.<EStructuralFeature.Setting>filter(this.allUsagesOfThisClass(cl), _function), _function_1);
   }
-  
+
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("ecore");

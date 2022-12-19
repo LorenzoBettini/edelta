@@ -34,11 +34,11 @@ public class EdeltaBadSmellsFinder extends EdeltaDefaultRuntime {
   public EdeltaBadSmellsFinder() {
     
   }
-  
+
   public EdeltaBadSmellsFinder(final AbstractEdelta other) {
     super(other);
   }
-  
+
   /**
    * Finds all the features that are structurally equal
    * in the given {@link EPackage}.
@@ -72,7 +72,7 @@ public class EdeltaBadSmellsFinder extends EdeltaDefaultRuntime {
     };
     return this.findDuplicatedFeaturesCustom(ePackage, _function);
   }
-  
+
   /**
    * Allows you to specify the lambda checking for equality of features.
    * 
@@ -95,7 +95,7 @@ public class EdeltaBadSmellsFinder extends EdeltaDefaultRuntime {
     result.entrySet().forEach(_function);
     return result;
   }
-  
+
   /**
    * Finds all the features that are structurally equal
    * in the given collection.
@@ -149,7 +149,7 @@ public class EdeltaBadSmellsFinder extends EdeltaDefaultRuntime {
     };
     return MapExtensions.<EStructuralFeature, List<EStructuralFeature>>filter(map, _function);
   }
-  
+
   /**
    * If a class has more than one direct subclass, it finds duplicate features in all
    * of its direct subclasses.
@@ -203,7 +203,7 @@ public class EdeltaBadSmellsFinder extends EdeltaDefaultRuntime {
     }
     return map;
   }
-  
+
   /**
    * Finds all the features corresponding to a redundant container,
    * that is, a missed opposite reference to the container.
@@ -227,7 +227,7 @@ public class EdeltaBadSmellsFinder extends EdeltaDefaultRuntime {
     };
     return Iterables.<Pair<EReference, EReference>>concat(ListExtensions.<EClass, ArrayList<Pair<EReference, EReference>>>map(EdeltaUtils.allEClasses(ePackage), _function));
   }
-  
+
   /**
    * see {@link #findRedundantContainers(EPackage)}
    */
@@ -262,7 +262,7 @@ public class EdeltaBadSmellsFinder extends EdeltaDefaultRuntime {
     }
     return redundantContainers;
   }
-  
+
   /**
    * see {@link #isDeadClassifier(EClassifier)}
    */
@@ -272,7 +272,7 @@ public class EdeltaBadSmellsFinder extends EdeltaDefaultRuntime {
     };
     return IterableExtensions.<EClassifier>toList(IterableExtensions.<EClassifier>filter(ePackage.getEClassifiers(), _function));
   }
-  
+
   /**
    * Whether {@link #doesNotReferToClasses(EClassifier)} and
    * {@link #isNotReferredByClassifiers(EClassifier)}
@@ -288,21 +288,21 @@ public class EdeltaBadSmellsFinder extends EdeltaDefaultRuntime {
     }
     return result;
   }
-  
+
   /**
    * Whether the passed EClassifier does not refer to any EClass
    */
   public boolean doesNotReferToClasses(final EClassifier c) {
     return IterableExtensions.isEmpty(Iterables.<EClass>filter(EcoreUtil.CrossReferencer.find(CollectionLiterals.<EClassifier>newArrayList(c)).keySet(), EClass.class));
   }
-  
+
   /**
    * Whether the passed EClassifier is not referred by EClassifiers.
    */
   public boolean isNotReferredByClassifiers(final EClassifier cl) {
     return EcoreUtil.UsageCrossReferencer.find(cl, EdeltaUtils.packagesToInspect(cl)).isEmpty();
   }
-  
+
   /**
    * Returns a map where the key is an EClass (superclass)
    * and the associated value is a list of subclasses that are
@@ -340,7 +340,7 @@ public class EdeltaBadSmellsFinder extends EdeltaDefaultRuntime {
     classification.entrySet().forEach(_function_3);
     return classification;
   }
-  
+
   /**
    * Finds base classes that should be set as abstract,
    * since they have subclasses.
@@ -361,12 +361,12 @@ public class EdeltaBadSmellsFinder extends EdeltaDefaultRuntime {
     classes.forEach(_function_1);
     return classes;
   }
-  
+
   public boolean hasSubclasses(final EClass cl) {
     boolean _isEmpty = IterableExtensions.isEmpty(this.directSubclasses(cl));
     return (!_isEmpty);
   }
-  
+
   public Iterable<EClass> directSubclasses(final EClass cl) {
     final Function1<EStructuralFeature.Setting, Boolean> _function = (EStructuralFeature.Setting it) -> {
       EStructuralFeature _eStructuralFeature = it.getEStructuralFeature();
@@ -378,7 +378,7 @@ public class EdeltaBadSmellsFinder extends EdeltaDefaultRuntime {
     };
     return IterableExtensions.<EStructuralFeature.Setting, EClass>map(IterableExtensions.<EStructuralFeature.Setting>filter(EcoreUtil.UsageCrossReferencer.find(cl, EdeltaUtils.packagesToInspect(cl)), _function), _function_1);
   }
-  
+
   /**
    * Finds abstract classes that should be concrete,
    * since they have no subclasses.
@@ -399,7 +399,7 @@ public class EdeltaBadSmellsFinder extends EdeltaDefaultRuntime {
     classes.forEach(_function_1);
     return classes;
   }
-  
+
   /**
    * Finds classes that are abstract though they have only concrete superclasses.
    */
@@ -423,7 +423,7 @@ public class EdeltaBadSmellsFinder extends EdeltaDefaultRuntime {
     classes.forEach(_function_1);
     return classes;
   }
-  
+
   @Override
   public void performSanityChecks() throws Exception {
     ensureEPackageIsLoaded("ecore");
