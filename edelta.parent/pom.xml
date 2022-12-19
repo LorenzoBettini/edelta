@@ -417,7 +417,6 @@
               that is not yet handled by Xbase -->
             <compilerSourceLevel>11</compilerSourceLevel>
             <compilerTargetLevel>11</compilerTargetLevel>
-            <skip>${edelta.skip}</skip>
           </configuration>
         </plugin>
         <!--This plugin's configuration is used to store Eclipse m2e settings only. 

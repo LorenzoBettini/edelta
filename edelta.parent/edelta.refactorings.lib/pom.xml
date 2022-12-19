@@ -41,6 +41,7 @@
           <javaSourceRoots>
             <javaSourceRoot>${basedir}/src</javaSourceRoot>
           </javaSourceRoots>
+          <skip>${edelta.skip}</skip>
         </configuration>
       </plugin>
     </plugins>
