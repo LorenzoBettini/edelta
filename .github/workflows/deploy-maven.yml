@@ -29,8 +29,8 @@ jobs:
         path: |
           ~/.m2
           !**/*edelta*
-        key: ${{ runner.os }}-p2-deploy-${{ hashFiles('**/*.target', '**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-p2-deploy-
+        key: ${{ runner.os }}-maven-deploy-${{ hashFiles('**/*.target', '**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-maven-deploy-
     - name: Publish to Apache Maven Central
       run: >
         ./mvnw -f edelta.parent/pom.xml
