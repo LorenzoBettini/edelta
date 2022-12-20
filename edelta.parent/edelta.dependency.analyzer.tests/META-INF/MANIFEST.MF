@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Edelta Dependency Analyzer Tests
 Bundle-SymbolicName: edelta.dependency.analyzer.tests
-Bundle-Version: 2.20.0.qualifier
+Bundle-Version: 2.19.0.qualifier
 Bundle-Vendor: Lorenzo Bettini
 Automatic-Module-Name: edelta.dependency.analyzer.tests
 Bundle-RequiredExecutionEnvironment: JavaSE-11

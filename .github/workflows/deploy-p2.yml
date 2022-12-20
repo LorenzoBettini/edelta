@@ -25,7 +25,6 @@ jobs:
         known_hosts: ${{ secrets.KNOWN_HOSTS }}
     - name: Cache Maven packages
       uses: actions/cache@v3
-      id: m2cache # note the cache id, see below for cache-hit
       with:
         path: |
           ~/.m2
