@@ -11,7 +11,7 @@
   <parent>
     <groupId>io.github.lorenzobettini.xtextutils</groupId>
     <artifactId>xtext-tycho-parent</artifactId>
-    <version>0.10.0</version>
+    <version>0.10.1</version>
     <relativePath></relativePath>
   </parent>
   <packaging>pom</packaging>
@@ -116,27 +116,6 @@
           <groupId>org.sonarsource.scanner.maven</groupId>
           <artifactId>sonar-maven-plugin</artifactId>
           <version>3.9.0.2155</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-gpg-plugin</artifactId>
-          <version>3.0.1</version>
-          <executions>
-            <execution>
-              <id>sign-artifacts</id>
-              <phase>verify</phase>
-              <goals>
-                <goal>sign</goal>
-              </goals>
-              <configuration>
-                <!-- Prevent gpg from using pinentry programs -->
-                <gpgArguments>
-                  <arg>--pinentry-mode</arg>
-                  <arg>loopback</arg>
-                </gpgArguments>
-              </configuration>
-            </execution>
-          </executions>
         </plugin>
       </plugins>
     </pluginManagement>

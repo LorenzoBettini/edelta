@@ -295,11 +295,10 @@
               <attachP2Metadata>false</attachP2Metadata>
             </configuration>
           </plugin>
-          <plugin>
-            <!-- configured in the BOM -->
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-          </plugin>
+          <!--
+            configured and enabled in the xtextutils parent:
+            maven-gpg-plugin
+          -->
         </plugins>
       </build>
     </profile>
