@@ -31,8 +31,6 @@ jobs:
           !**/*edelta*
         key: ${{ runner.os }}-maven-deploy-${{ hashFiles('**/*.target', '**/pom.xml') }}
         restore-keys: ${{ runner.os }}-maven-deploy-
-    - name: List gpg keys
-      run: gpg --list-keys
     - name: Publish to Apache Maven Central
       run: >
         ./mvnw -f edelta.parent/pom.xml
