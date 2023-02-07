@@ -53,6 +53,11 @@ final class EdeltaExampleProjectTemplate {
 			builderIds += #[JavaCore.BUILDER_ID, XtextProjectHelper.BUILDER_ID]
 			requiredBundles += "edelta.lib"
 			folders += #["src", "edelta-gen", "model"]
+			addFile(".settings/org.eclipse.core.resources.prefs", '''
+				eclipse.preferences.version=1
+				encoding/<project>=UTF-8
+			'''
+			)
 			addFile("modified/README", '''
 				Modified ecores will be saved here (see Main.java file)
 			'''

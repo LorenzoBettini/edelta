@@ -15,13 +15,14 @@
   <description>An Xtext DSL for EMF metamodels refactoring and migration.</description>
 
   <properties>
-    <eclipse-version>2022-09</eclipse-version>
+    <eclipse-version>2022-12</eclipse-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
 
     <mwe2.skip>false</mwe2.skip>
     <xtend.skip>false</xtend.skip>
+    <edelta.skip>false</edelta.skip>
 
     <jacoco-aggregate-report>edelta.tests.report/target/site/jacoco-aggregate/jacoco.xml</jacoco-aggregate-report>
 
@@ -173,6 +174,11 @@
       </activation>
       <properties>
         <skipTests>true</skipTests>
+        <!-- 
+        we rely on the committed .java._trace files for
+        https://github.com/LorenzoBettini/edelta/issues/467
+        -->
+        <edelta.skip>true</edelta.skip>
       </properties>
     </profile>
     <profile>
@@ -182,6 +188,11 @@
       </activation>
       <properties>
         <skipTests>true</skipTests>
+        <!-- 
+        we rely on the committed .java._trace files for
+        https://github.com/LorenzoBettini/edelta/issues/467
+        -->
+        <edelta.skip>true</edelta.skip>
       </properties>
       <build>
         <pluginManagement>
@@ -254,6 +265,14 @@
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
+      <properties>
+        <skipTests>true</skipTests>
+        <!-- 
+        we rely on the committed .java._trace files for
+        https://github.com/LorenzoBettini/edelta/issues/467
+        -->
+        <edelta.skip>true</edelta.skip>
+      </properties>
       <build>
         <plugins>
           <plugin>
@@ -277,6 +296,10 @@
               <attachP2Metadata>false</attachP2Metadata>
             </configuration>
           </plugin>
+          <!--
+            configured and enabled in the xtextutils parent:
+            maven-gpg-plugin
+          -->
         </plugins>
       </build>
     </profile>

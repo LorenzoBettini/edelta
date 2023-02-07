@@ -8,46 +8,7 @@ on:
   pull_request:
 
 jobs:
-  cache-dependencies:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2.5.0
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3.6.0
-      with:
-        java-version: 17
-        distribution: temurin
-    - name: Cache Maven packages
-      uses: actions/cache@v3
-      id: m2cache # note the cache id, see below for cache-hit
-      with:
-        path: |
-          ~/.m2
-          ~/.sonar/cache
-          !**/*edelta*
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/invalidate-github-cache.txt', '**/*.target', '**/maven-wrapper.properties') }}
-        restore-keys: ${{ runner.os }}-m2-
-        # hashFiles('**/pom.xml', '**/maven.yml', '**/*.target') might be too much
-        # just the .target files should be enough to invalidate the cache (and the Maven wrapper properties)
-    - name: Download Maven dependencies
-      run: >
-        ./mvnw
-        -Dtycho.mode=maven
-        -f edelta.parent/pom.xml
-        -pl !edelta.maven.example
-        -Pjacoco,test-ide,run-its,skip-edelta-maven-plugin
-        dependency:go-offline
-      if: steps.m2cache.outputs.cache-hit != 'true'
-    - name: Download p2 dependencies
-      run: >
-        ./mvnw
-        -f edelta.parent/edelta.targetplatform.repository/pom.xml
-        clean package
-      if: steps.m2cache.outputs.cache-hit != 'true'
-
   build:
-    needs: cache-dependencies
     runs-on: ubuntu-latest
 # not required anymore, thanks to Guice 5
 #    env:
@@ -63,24 +24,21 @@ jobs:
       with:
         java-version: 17
         distribution: temurin
-    - name: Cache Maven packages
-      uses: actions/cache@v3
-      id: m2cache # note the cache id, see below for cache-hit
+
+    - name: Restore cache
+      uses: actions/cache/restore@v3
       with:
         path: |
           ~/.m2
           ~/.sonar/cache
           !**/*edelta*
-        key: ${{ runner.os }}-m2-build-${{ hashFiles('**/invalidate-github-cache.txt', '**/*.target', '**/maven-wrapper.properties') }}
-        restore-keys: ${{ runner.os }}-m2-${{ hashFiles('**/invalidate-github-cache.txt', '**/*.target', '**/maven-wrapper.properties') }}
-    - name: Set Maven offline option
-      run: |
-        echo "maven_arguments='--offline'" >> $GITHUB_ENV
-      if: steps.m2cache.outputs.cache-hit == 'true' # note the use of the id 'm2cache'
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml', '**/*.target', '**/maven-wrapper.properties') }}
+        restore-keys: ${{ runner.os }}-m2-
+
     - name: Build with Maven and SonarCloud
       run: >
         xvfb-run
-        ./mvnw ${{ env.maven_arguments }} -f edelta.parent/pom.xml
+        ./mvnw -f edelta.parent/pom.xml
         clean verify
         -Pjacoco,test-ide,run-its
         sonar:sonar
@@ -89,6 +47,17 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    - name: Save cache
+      uses: actions/cache/save@v3
+      if: always()
+      with:
+        path: |
+          ~/.m2
+          ~/.sonar/cache
+          !**/*edelta*
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml', '**/*.target', '**/maven-wrapper.properties') }}
+
     - name: Archive Test Results
       uses: actions/upload-artifact@v2
       if: ${{ failure() || cancelled() }}

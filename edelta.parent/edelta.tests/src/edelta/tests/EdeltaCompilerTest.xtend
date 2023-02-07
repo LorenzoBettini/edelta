@@ -535,7 +535,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			  }
 			
 			  public void aTest(final EPackage it) {
-			    this.my./* name is null */;
+			    this.my._myMethod;
 			  }
 			
 			  @Override
