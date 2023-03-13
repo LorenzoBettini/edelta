@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Edelta Dependency Analyzer Tests
 Bundle-SymbolicName: edelta.dependency.analyzer.tests
-Bundle-Version: 2.19.0.qualifier
+Bundle-Version: 2.20.0.qualifier
 Bundle-Vendor: Lorenzo Bettini
 Automatic-Module-Name: edelta.dependency.analyzer.tests
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.junit,
  edelta.dependency.analyzer,
  edelta.testutils,
- assertj-core;bundle-version="3.23.1"
+ org.assertj;bundle-version="3.20.2"

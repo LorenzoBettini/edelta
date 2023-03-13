@@ -2,15 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Edelta Library Tests
 Bundle-SymbolicName: edelta.lib.tests
-Bundle-Version: 2.19.0.qualifier
+Bundle-Version: 2.20.0.qualifier
 Bundle-Vendor: Lorenzo Bettini
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: edelta.lib,
  org.junit;bundle-version="4.12.0",
  edelta.testutils,
  org.eclipse.xtext.util,
- assertj-core;bundle-version="3.23.1",
- org.mockito.mockito-core;bundle-version="4.6.1",
+ org.mockito.mockito-core;bundle-version="4.8.1",
  net.bytebuddy.byte-buddy,
- org.objenesis
+ org.objenesis,
+ org.assertj;bundle-version="3.20.2"
 Automatic-Module-Name: edelta.lib.tests
