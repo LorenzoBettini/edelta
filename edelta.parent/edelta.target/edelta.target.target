@@ -36,6 +36,7 @@
 <repository location="https://download.eclipse.org/epsilon/updates/2.4/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.apache.log4j" version="1.2.24.v20221221-2012"/>
 <unit id="org.apiguardian" version="0.0.0"/>
 <unit id="org.junit.jupiter.api" version="0.0.0"/>
 <unit id="org.junit.jupiter.engine" version="0.0.0"/>
@@ -50,7 +51,7 @@
 <unit id="org.junit.vintage.engine" version="0.0.0"/>
 <unit id="org.mockito.mockito-core" version="4.8.1.v20221103-2317"/>
 <unit id="org.assertj" version="3.20.2.v20210706-1104"/>
-<repository location="https://download.eclipse.org/tools/orbit/downloads/2022-12"/>
+<repository location="https://download.eclipse.org/tools/orbit/downloads/2023-03"/>
 </location>
 </locations>
 </target>
