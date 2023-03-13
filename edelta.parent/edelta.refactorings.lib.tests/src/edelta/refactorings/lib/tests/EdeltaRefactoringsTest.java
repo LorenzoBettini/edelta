@@ -1,26 +1,37 @@
 package edelta.refactorings.lib.tests;
 
+import static edelta.lib.EdeltaEcoreUtil.getValueAsList;
 import static edelta.lib.EdeltaUtils.getEObjectRepr;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.ENamedElement;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,11 +40,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaEcoreUtil;
+import edelta.lib.EdeltaModelManager;
+import edelta.lib.EdeltaModelMigrator;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import edelta.refactorings.lib.tests.utils.InMemoryLoggerAppender;
 import edelta.testutils.EdeltaTestUtils;
 
-class EdeltaRefactoringsTest extends AbstractTest {
+class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	private EdeltaRefactorings refactorings;
 
 	private InMemoryLoggerAppender appender;
@@ -42,9 +56,12 @@ class EdeltaRefactoringsTest extends AbstractTest {
 
 	private List<String> testModelFiles;
 
+	private EdeltaModelManager modelManager;
+
 	@BeforeEach
 	void setup() throws Exception {
-		refactorings = new EdeltaRefactorings();
+		modelManager = new EdeltaModelManager();
+		refactorings = new EdeltaRefactorings(new EdeltaDefaultRuntime(modelManager));
 		appender = new InMemoryLoggerAppender();
 		appender.setLineSeparator("\n");
 		refactorings.getLogger().addAppender(appender);
@@ -64,7 +81,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	 */
 	@AfterEach
 	void cleanModifiedOutputDirectory() throws IOException {
-		EdeltaTestUtils.cleanDirectory(AbstractTest.MODIFIED);
+		EdeltaTestUtils.cleanDirectory(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 	}
 
 	private void withInputModels(String testModelDirectory, String... testModelFiles) {
@@ -72,11 +89,11 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		this.testModelFiles = Arrays.asList(testModelFiles);
 	}
 
-	private void loadModelFiles() {
+	private void loadEcoreFiles() {
 		checkInputModelSettings();
 		for (String testModelFile : testModelFiles) {
-			refactorings
-				.loadEcoreFile(AbstractTest.TESTECORES +
+			modelManager
+				.loadEcoreFile(AbstractEdeltaRefactoringsLibTest.TESTECORES +
 					testModelDirectory + "/" + testModelFile);
 		}
 	}
@@ -87,8 +104,8 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		// if the ecore file is saved then it is valid
 		for (String testModelFile : testModelFiles) {
 			EdeltaTestUtils.assertFilesAreEquals(
-					AbstractTest.EXPECTATIONS + testModelDirectory + "/" + testModelFile,
-					AbstractTest.MODIFIED + testModelFile);
+					AbstractEdeltaRefactoringsLibTest.EXPECTATIONS + testModelDirectory + "/" + testModelFile,
+					AbstractEdeltaRefactoringsLibTest.MODIFIED + testModelFile);
 		}
 		assertLogIsEmpty();
 	}
@@ -101,36 +118,26 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		checkInputModelSettings();
 		for (String testModelFile : testModelFiles) {
 			EdeltaTestUtils.assertFilesAreEquals(
-				AbstractTest.TESTECORES +
+				AbstractEdeltaRefactoringsLibTest.TESTECORES +
 				testModelDirectory +
 				"/" +
 				testModelFile,
-				AbstractTest.MODIFIED + testModelFile);
+				AbstractEdeltaRefactoringsLibTest.MODIFIED + testModelFile);
 		}
 	}
 
 	private void assertOppositeRefactorings(final Runnable first, final Runnable second) throws IOException {
-		loadModelFiles();
+		loadEcoreFiles();
 		first.run();
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		second.run();
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 	}
 
 	private void checkInputModelSettings() {
 		assertThat(this.testModelDirectory).isNotNull();
 		assertThat(this.testModelFiles).isNotNull();
-	}
-
-	@Test
-	void test_ConstructorArgument() {
-		refactorings = new EdeltaRefactorings(new EdeltaDefaultRuntime());
-		final EClass c = this.createEClassWithoutPackage("C1");
-		refactorings.addMandatoryAttribute(c, "test", this.stringDataType);
-		final EAttribute attr = head(c.getEAttributes());
-		assertThat(attr)
-			.returns("test", EAttribute::getName);
 	}
 
 	@Test
@@ -156,41 +163,288 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	void test_mergeFeatures() throws IOException {
-		withInputModels("mergeFeatures", "PersonList.ecore");
-		loadModelFiles();
-		final EClass person = refactorings.getEClass("PersonList", "Person");
-		refactorings.mergeFeatures("name",
-			asList(
-				person.getEStructuralFeature("firstName"),
-				person.getEStructuralFeature("lastName")));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFiles();
+	void test_changeToSingle() throws Exception {
+		var subdir = "toUpperCaseStringAttributesMultiple/";
+		var ecores = of("My.ecore");
+		var models = of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var attribute = getEAttribute(
+							"mypackage", "MyClass", "myAttribute");
+
+					changeToSingle(attribute);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"makeSingle/",
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_changeToMultiple() throws Exception {
+		var subdir = "toUpperCaseStringAttributes/";
+		var ecores = of("My.ecore");
+		var models = of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var attribute = getEAttribute(
+							"mypackage", "MyClass", "myAttribute");
+
+					changeToMultiple(attribute);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"makeMultiple/",
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_changeUpperBound() throws Exception {
+		var subdir = "toUpperCaseStringAttributesMultiple/";
+		var ecores = of("My.ecore");
+		var models = of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var attribute = getEAttribute(
+							"mypackage", "MyClass", "myAttribute");
+
+					changeUpperBound(attribute, 2);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"makeMultipleTo2/",
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_mergeAttributes() throws Exception {
+		var subdir = "mergeAttributes/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var person = getEClass("PersonList", "Person");
+					mergeAttributes(
+						"name",
+						asList(
+							(EAttribute) person.getEStructuralFeature("firstName"),
+							(EAttribute) person.getEStructuralFeature("lastName")),
+						values -> {
+							var merged = values.stream()
+								.filter(Objects::nonNull)
+								.map(Object::toString)
+								.collect(Collectors.joining(" "));
+							return merged.isEmpty() ? null : merged;
+						}
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_mergeReferences() throws Exception {
+		var subdir = "mergeFeaturesContainment/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					EClass person = getEClass("PersonList", "Person");
+					EClass nameElement = getEClass("PersonList", "NameElement");
+					EAttribute nameElementAttribute =
+							getEAttribute("PersonList", "NameElement", "nameElementValue");
+					assertNotNull(nameElementAttribute);
+
+					mergeReferences(
+						"name",
+						asList(
+							(EReference) person.getEStructuralFeature("firstName"),
+							(EReference) person.getEStructuralFeature("lastName")),
+						values -> {
+							// it is responsibility of the merger to create an instance
+							// of the (now single) referred object with the result
+							// of merging the original objects' values
+							var mergedValue = values.stream()
+								.map(EObject.class::cast)
+								.map(o -> 
+									"" + o.eGet(nameElementAttribute))
+								.collect(Collectors.joining(" "));
+							if (mergedValue.isEmpty())
+								return null;
+							return EdeltaEcoreUtil.createInstance(nameElement,
+								// since it's a containment feature, setting it will also
+								// add it to the resource
+								o -> o.eSet(nameElementAttribute, mergedValue)
+							);
+						}, null
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_mergeReferencesWithPostCopy() throws Exception {
+		var subdir = "mergeFeaturesNonContainmentShared/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					EClass person = getEClass("PersonList", "Person");
+					EClass nameElement = getEClass("PersonList", "NameElement");
+					EAttribute nameElementAttribute =
+							getEAttribute("PersonList", "NameElement", "nameElementValue");
+					assertNotNull(nameElementAttribute);
+
+					// keep track of objects that are merged into a single one
+					var merged = new HashMap<Collection<EObject>, EObject>();
+
+					mergeReferences(
+						"name",
+						asList(
+							(EReference) person.getEStructuralFeature("firstName"),
+							(EReference) person.getEStructuralFeature("lastName")),
+						values -> {
+							// it is responsibility of the merger to create an instance
+							// of the (now single) referred object with the result
+							// of merging the original objects' values
+							if (values.isEmpty())
+								return null;
+
+							var alreadyMerged = merged.get(values);
+							if (alreadyMerged != null)
+								return alreadyMerged;
+							// we have already processed the object collection
+							// and created a merged one so we reuse it
+
+							EObject firstObject = values.iterator().next();
+							var containingFeature = firstObject.eContainingFeature();
+							List<EObject> containerCollection =
+								getValueAsList(firstObject.eContainer(), containingFeature);
+
+							var mergedValue = values.stream()
+								.map(o -> 
+									"" + o.eGet(nameElementAttribute))
+								.collect(Collectors.joining(" "));
+							return EdeltaEcoreUtil.createInstance(nameElement,
+								o -> {
+									o.eSet(nameElementAttribute, mergedValue);
+									// since it's a NON containment feature, we have to manually
+									// add it to the resource
+									containerCollection.add(o);
+
+									// record that we associated the single object o
+									// to the original ones, which are now merged
+									merged.put(values, o);
+								}
+							);
+						},
+						// now we can remove the stale objects that have been merged
+						() -> EcoreUtil.removeAll(
+								merged.keySet().stream()
+									.flatMap(Collection<EObject>::stream)
+									.collect(Collectors.toList()))
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test
 	void test_mergeFeaturesDifferent() throws IOException {
 		withInputModels("mergeFeaturesDifferent", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		assertThrowsIAE(() -> refactorings.mergeFeatures("name",
 			asList(
 				person.getEStructuralFeature("firstName"),
 				person.getEStructuralFeature("lastName"))));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		final EClass student = refactorings.getEClass("PersonList", "Student");
 		assertThrowsIAE(() -> refactorings.mergeFeatures("name",
 			asList(
 				person.getEStructuralFeature("lastName"),
 				student.getEStructuralFeature("lastName"))));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThrowsIAE(() -> refactorings.mergeFeatures("name",
 			asList(
 				person.getEStructuralFeature("list"),
 				person.getEStructuralFeature("lastName"))));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertEquals("""
 		ERROR: PersonList.Person.lastName: The two features cannot be merged:
@@ -217,7 +471,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_mergeFeatures2() throws IOException {
 		withInputModels("mergeFeatures2", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass list = refactorings.getEClass("PersonList", "List");
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		refactorings.mergeFeatures(list.getEStructuralFeature("places"),
@@ -228,14 +482,14 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				person.getEStructuralFeature("firstName"),
 				person.getEStructuralFeature("lastName")));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
 	@Test
 	void test_mergeFeatures2NonCompliant() {
 		withInputModels("mergeFeatures2", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass list = refactorings.getEClass("PersonList", "List");
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		final EStructuralFeature wplaces = list.getEStructuralFeature("wplaces");
@@ -282,77 +536,607 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_mergeFeatures3() throws IOException {
 		withInputModels("mergeFeatures3", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass list = refactorings.getEClass("PersonList", "List");
 		final EClass place = refactorings.getEClass("PersonList", "Place");
 		final EClass person = refactorings.getEClass("PersonList", "Person");
-		refactorings.mergeFeatures("places", place, Collections.<EStructuralFeature>unmodifiableList(
+		refactorings.mergeFeatures("places", place,
 			asList(
 				list.getEStructuralFeature("wplaces"),
-				list.getEStructuralFeature("lplaces"))));
+				list.getEStructuralFeature("lplaces")));
 		refactorings.mergeFeatures("name", this.stringDataType,
 			asList(
 				person.getEStructuralFeature("firstName"),
 				person.getEStructuralFeature("lastName")));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
 	@Test
-	void test_enumToSubclasses() throws IOException {
-		withInputModels("enumToSubclasses", "PersonList.ecore");
-		loadModelFiles();
-		final EClass person = refactorings.getEClass("PersonList", "Person");
-		EStructuralFeature _eStructuralFeature = person.getEStructuralFeature("gender");
-		final Collection<EClass> result = refactorings.enumToSubclasses(((EAttribute) _eStructuralFeature));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFiles();
-		assertThat(result)
-			.extracting(EClass::getName)
-			.containsExactlyInAnyOrder("Male", "Female");
+	void test_splitAttribute() throws Exception {
+		var subdir = "splitAttributes/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					final EClass person = getEClass("PersonList", "Person");
+					var personName = (EAttribute) person.getEStructuralFeature("name");
+					splitAttribute(
+						personName,
+						asList(
+							"firstName",
+							"lastName"),
+						value -> {
+							// a few more checks should be performed in a realistic context
+							if (value == null)
+								return Collections.emptyList();
+							String[] split = value.toString().split("\\s+");
+							return Arrays.asList(split);
+						}
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_splitFeature() throws Exception {
+		var subdir = "splitFeatureNonContainmentShared/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					final EClass person = getEClass("PersonList", "Person");
+					var personName = (EReference) person.getEStructuralFeature("name");
+					EClass nameElement = getEClass("PersonList", "NameElement");
+					EAttribute nameElementAttribute =
+							getEAttribute("PersonList", "NameElement", "nameElementValue");
+					assertNotNull(nameElementAttribute);
+
+					// keep track of objects that are splitted into several ones
+					var splitted = new HashMap<EObject, Collection<EObject>>();
+
+					splitReference(
+						personName,
+						asList(
+							"firstName",
+							"lastName"),
+						obj -> {
+							// a few more checks should be performed in a realistic context
+							if (obj == null)
+								return Collections.emptyList();
+
+							var alreadySplitted = splitted.get(obj);
+							if (alreadySplitted != null)
+								return alreadySplitted;
+							// we have already processed the object collection
+							// and created a merged one so we reuse it
+
+							var containingFeature = obj.eContainingFeature();
+							List<EObject> containerCollection =
+								getValueAsList(obj.eContainer(), containingFeature);
+
+							// of course if there's no space and only one element in the array
+							// it will assigned to the first feature value
+							// that is, in case of a single element, the lastName will be empty
+							String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+							var result = Stream.of(split)
+								.map(val -> EdeltaEcoreUtil.createInstance(nameElement,
+									o -> {
+										o.eSet(nameElementAttribute, val);
+
+										// since it's a NON containment feature, we have to manually
+										// add it to the resource
+										containerCollection.add(o);
+									}
+								))
+								.collect(Collectors.toList());
+
+							// record that we associated the several objects (2 in this example)
+							// to the original one, which is now splitted
+							splitted.put(obj, result);
+
+							return result;
+						},
+						// now we can remove the stale objects that have been splitted
+						() -> EcoreUtil.removeAll(splitted.keySet())
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_mergeAttributes_IsOppositeOf_splitAttribute() throws Exception {
+		var subdir = "mergeAndSplitAttributes/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					final EClass person = getEClass("PersonList", "Person");
+					var personFirstName = (EAttribute) person.getEStructuralFeature("firstName");
+					var personLastName = (EAttribute) person.getEStructuralFeature("lastName");
+					var mergedFeature = mergeAttributes(
+						"name",
+						asList(
+							personFirstName,
+							personLastName),
+						values -> {
+							var merged = values.stream()
+								.filter(Objects::nonNull)
+								.map(Object::toString)
+								.collect(Collectors.joining(" "));
+							return merged.isEmpty() ? null : merged;
+						});
+					splitAttribute(
+						mergedFeature,
+						asList(
+							personFirstName.getName(),
+							personLastName.getName()),
+						value -> {
+							// a few more checks should be performed in a realistic context
+							if (value == null)
+								return Collections.emptyList();
+							String[] split = value.toString().split("\\s+");
+							return Arrays.asList(split);
+						}
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	/**
+	 * The evolved metamodel and model are just the same as the original ones, as
+	 * long the merge and split can be inversed. For example, in this test we have
+	 * "firstname lastname" or no string at all. If you had "lastname" then the
+	 * model wouldn't be reversable.
+	 * 
+	 * The input directory and the output one will contain the same data.
+	 */
+	@Test
+	void test_splitAttribute_IsOppositeOf_mergeAttributes() throws Exception {
+		var subdir = "splitAndMergeAttributes/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					final EClass person = getEClass("PersonList", "Person");
+					var personName = (EAttribute) person.getEStructuralFeature("name");
+					var splitFeatures = splitAttribute(
+						personName,
+						asList(
+							"firstName",
+							"lastName"),
+						value -> {
+							// a few more checks should be performed in a realistic context
+							if (value == null)
+								return Collections.emptyList();
+							String[] split = value.toString().split("\\s+");
+							return Arrays.asList(split);
+						}
+					);
+					mergeAttributes(
+						"name",
+						splitFeatures,
+						values -> {
+							var merged = values.stream()
+								.filter(Objects::nonNull)
+								.map(Object::toString)
+								.collect(Collectors.joining(" "));
+							return merged.isEmpty() ? null : merged;
+						}
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_mergeReferences_IsOppositeOf_splitReference() throws Exception {
+		var subdir = "mergeFeaturesNonContainmentShared/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					EClass person = getEClass("PersonList", "Person");
+					EClass nameElement = getEClass("PersonList", "NameElement");
+					EAttribute nameElementAttribute =
+							getEAttribute("PersonList", "NameElement", "nameElementValue");
+					var personFirstName = (EReference) person.getEStructuralFeature("firstName");
+					var personLastName = (EReference) person.getEStructuralFeature("lastName");
+					assertNotNull(nameElementAttribute);
+
+					// keep track of objects that are merged into a single one
+					var merged = new HashMap<Collection<EObject>, EObject>();
+
+					var mergedFeature =  mergeReferences(
+						"name",
+						asList(
+							personFirstName,
+							personLastName),
+						values -> {
+							// it is responsibility of the merger to create an instance
+							// of the (now single) referred object with the result
+							// of merging the original objects' values
+							if (values.isEmpty())
+								return null;
+
+							var alreadyMerged = merged.get(values);
+							if (alreadyMerged != null)
+								return alreadyMerged;
+							// we have already processed the object collection
+							// and created a merged one so we reuse it
+
+							EObject firstObject = values.iterator().next();
+							var containingFeature = firstObject.eContainingFeature();
+							List<EObject> containerCollection =
+								getValueAsList(firstObject.eContainer(), containingFeature);
+
+							var mergedValue = values.stream()
+								.map(o -> 
+									"" + o.eGet(nameElementAttribute))
+								.collect(Collectors.joining(" "));
+							return EdeltaEcoreUtil.createInstance(nameElement,
+								o -> {
+									o.eSet(nameElementAttribute, mergedValue);
+									// since it's a NON containment feature, we have to manually
+									// add it to the resource
+									containerCollection.add(o);
+
+									// record that we associated the single object o
+									// to the original ones, which are now merged
+									merged.put(values, o);
+								}
+							);
+						},
+						// now we can remove the stale objects that have been merged
+						() -> EcoreUtil.removeAll(
+								merged.keySet().stream()
+									.flatMap(Collection<EObject>::stream)
+									.collect(Collectors.toList()))
+					);
+
+					// keep track of objects that are split into several ones
+					var splitted = new HashMap<EObject, Collection<EObject>>();
+
+					splitReference(
+						mergedFeature,
+						asList(
+							personFirstName.getName(),
+							personLastName.getName()),
+						obj -> {
+							// a few more checks should be performed in a realistic context
+							if (obj == null)
+								return Collections.emptyList();
+
+							var alreadySplitted = splitted.get(obj);
+							if (alreadySplitted != null)
+								return alreadySplitted;
+							// we have already processed the object collection
+							// and created a merged one so we reuse it
+
+							var containingFeature = obj.eContainingFeature();
+							List<EObject> containerCollection =
+								getValueAsList(obj.eContainer(), containingFeature);
+
+							// of course if there's no space and only one element in the array
+							// it will assigned to the first feature value
+							// that is, in case of a single element, the lastName will be empty
+							String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+							var result = Stream.of(split)
+								.map(val -> EdeltaEcoreUtil.createInstance(nameElement,
+									o -> {
+										o.eSet(nameElementAttribute, val);
+
+										// since it's a NON containment feature, we have to manually
+										// add it to the resource
+										containerCollection.add(o);
+									}
+								))
+								.collect(Collectors.toList());
+
+							// record that we associated the several objects (2 in this example)
+							// to the original one, which is now splitted
+							splitted.put(obj, result);
+
+							return result;
+						},
+						// now we can remove the stale objects that have been splitted
+						() -> EcoreUtil.removeAll(splitted.keySet())
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"splitFeatureNonContainmentShared/",
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_splitReference_IsOppositeOf_mergeReferences() throws Exception {
+		var subdir = "splitFeatureNonContainmentShared/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					final EClass person = getEClass("PersonList", "Person");
+					var personName = (EReference) person.getEStructuralFeature("name");
+					EClass nameElement = getEClass("PersonList", "NameElement");
+					EAttribute nameElementAttribute =
+							getEAttribute("PersonList", "NameElement", "nameElementValue");
+					assertNotNull(nameElementAttribute);
+
+					// keep track of objects that are splitted into several ones
+					var splitted = new HashMap<EObject, Collection<EObject>>();
+
+					var splitFeatures = splitReference(
+						personName,
+						asList(
+							"firstName",
+							"lastName"),
+						obj -> {
+							// a few more checks should be performed in a realistic context
+							if (obj == null)
+								return Collections.emptyList();
+
+							var alreadySplitted = splitted.get(obj);
+							if (alreadySplitted != null)
+								return alreadySplitted;
+							// we have already processed the object collection
+							// and created a merged one so we reuse it
+
+							var containingFeature = obj.eContainingFeature();
+							List<EObject> containerCollection =
+								getValueAsList(obj.eContainer(), containingFeature);
+
+							// of course if there's no space and only one element in the array
+							// it will assigned to the first feature value
+							// that is, in case of a single element, the lastName will be empty
+							String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+							var result = Stream.of(split)
+								.map(val -> EdeltaEcoreUtil.createInstance(nameElement,
+									o -> {
+										o.eSet(nameElementAttribute, val);
+
+										// since it's a NON containment feature, we have to manually
+										// add it to the resource
+										containerCollection.add(o);
+									}
+								))
+								.collect(Collectors.toList());
+
+							// record that we associated the several objects (2 in this example)
+							// to the original one, which is now splitted
+							splitted.put(obj, result);
+
+							return result;
+						},
+						// now we can remove the stale objects that have been splitted
+						() -> EcoreUtil.removeAll(splitted.keySet())
+					);
+
+					// keep track of objects that are merged into a single one
+					var merged = new HashMap<Collection<EObject>, EObject>();
+
+					mergeReferences(
+						"name",
+						splitFeatures.stream().map(EReference.class::cast).collect(Collectors.toList()),
+						values -> {
+							// it is responsibility of the merger to create an instance
+							// of the (now single) referred object with the result
+							// of merging the original objects' values
+							if (values.isEmpty())
+								return null;
+
+							var alreadyMerged = merged.get(values);
+							if (alreadyMerged != null)
+								return alreadyMerged;
+							// we have already processed the object collection
+							// and created a merged one so we reuse it
+
+							EObject firstObject = values.iterator().next();
+							var containingFeature = firstObject.eContainingFeature();
+							List<EObject> containerCollection =
+								getValueAsList(firstObject.eContainer(), containingFeature);
+
+							var mergedValue = values.stream()
+								.map(o -> 
+									"" + o.eGet(nameElementAttribute))
+								.collect(Collectors.joining(" "));
+							return EdeltaEcoreUtil.createInstance(nameElement,
+								o -> {
+									o.eSet(nameElementAttribute, mergedValue);
+									// since it's a NON containment feature, we have to manually
+									// add it to the resource
+									containerCollection.add(o);
+
+									// record that we associated the single object o
+									// to the original ones, which are now merged
+									merged.put(values, o);
+								}
+							);
+						},
+						// now we can remove the stale objects that have been merged
+						() -> EcoreUtil.removeAll(
+								merged.keySet().stream()
+									.flatMap(Collection<EObject>::stream)
+									.collect(Collectors.toList()))
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"mergeFeaturesNonContainmentShared/",
+			ecores,
+			models
+		);
+	}
+
+	/**
+	 * This also implicitly tests introduceSubclasses
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	void test_enumToSubclasses() throws Exception {
+		var subdir = "enumToSubclasses/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var person = getEClass("PersonList", "Person");
+					var genreAttribute = (EAttribute) person.getEStructuralFeature("gender");
+					var subclasses = enumToSubclasses(genreAttribute);
+					assertThat(subclasses)
+						.extracting(EClass::getName)
+						.containsExactlyInAnyOrder("Male", "Female");
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test
 	void test_enumToSubclassesNotAnEEnum() throws IOException {
 		withInputModels("enumToSubclasses", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		final Collection<EClass> result = 
 			refactorings.enumToSubclasses(
 				((EAttribute) person.getEStructuralFeature("firstname")));
 		assertThat(result).isNull();
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo("ERROR: PersonList.Person.firstname: Not an EEnum: ecore.EString");
 	}
 
 	@Test
-	void test_subclassesToEnum() throws IOException {
-		withInputModels("subclassesToEnum", "PersonList.ecore");
-		loadModelFiles();
-		final EPackage personList = refactorings.getEPackage("PersonList");
-		final EAttribute result = refactorings.subclassesToEnum("Gender",
-			asList(
-				(EClass) personList.getEClassifier("Male"),
-				(EClass) personList.getEClassifier("Female")));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFiles();
-		assertThat(result)
-			.returns("gender", EAttribute::getName);
+	void test_subclassesToEnum() throws Exception {
+		var subdir = "subclassesToEnum/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var personList = getEPackage("PersonList");
+					var result = subclassesToEnum("Gender",
+						asList(
+							(EClass) personList.getEClassifier("Male"),
+							(EClass) personList.getEClassifier("Female")));
+					assertThat(result)
+						.returns("gender", EAttribute::getName);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test
 	void test_subclassesToEnumSubclassesNotEmpty() throws IOException {
 		withInputModels("subclassesToEnumSubclassesNotEmpty", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EPackage personList = refactorings.getEPackage("PersonList");
 		assertThrowsIAE(() -> refactorings.subclassesToEnum("Gender",
 			asList(
 				(EClass) personList.getEClassifier("Male"),
 				(EClass) personList.getEClassifier("NotSpecified"),
 				(EClass) personList.getEClassifier("Female"))));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
@@ -366,7 +1150,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_subclassesToEnumSubclassesWrongSubclasses() throws IOException {
 		withInputModels("subclassesToEnumSubclassesWrongSubclasses", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		var personList = refactorings.getEPackage("PersonList");
 		var female = (EClass) personList.getEClassifier("Female");
 		var anotherFemale = (EClass) personList.getEClassifier("AnotherFemale");
@@ -379,7 +1163,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 				asList(female, anotherFemale)));
 		assertThrowsIAE(() -> refactorings.subclassesToEnum("Gender",
 				asList(female)));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
@@ -392,7 +1176,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 				ERROR: PersonList.AnotherFemale: Wrong superclass of PersonList.AnotherFemale:
 				  Expected: PersonList.Person
 				  Actual  : PersonList.AnotherPerson
-				ERROR: PersonList.Person: The class has additional subclasses:
+				ERROR: PersonList.Person: The class PersonList.Person has additional subclasses:
 				  PersonList.Male
 				  PersonList.FemaleEmployee""");
 	}
@@ -401,64 +1185,111 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	void test_subclassesToEnumSubclassesWrongSubclassesParallel() throws IOException {
 		withInputModels("subclassesToEnumSubclassesWrongSubclassesParallel",
 				"PersonList.ecore", "PersonListReferring.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		var personList = refactorings.getEPackage("PersonList");
 		var female = (EClass) personList.getEClassifier("Female");
 		assertThrowsIAE(() -> refactorings.subclassesToEnum("Gender",
 				asList(female)));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
 			"""
-				ERROR: PersonList.Person: The class has additional subclasses:
+				ERROR: PersonList.Person: The class PersonList.Person has additional subclasses:
 				  PersonList.Male
 				  PersonListReferring.FemaleEmployee""");
 	}
 
 	@Test
-	void test_enumToSubclasses_IsOppositeOf_subclassesToEnum() throws IOException {
-		withInputModels("enumToSubclasses", "PersonList.ecore");
-		assertOppositeRefactorings(
-			() -> refactorings.enumToSubclasses(
-					refactorings.getEAttribute("PersonList", "Person", "gender")),
-			() -> refactorings.subclassesToEnum("Gender",
-				asList(
-					refactorings.getEClass("PersonList", "Male"),
-					refactorings.getEClass("PersonList", "Female"))));
-		assertLogIsEmpty();
+	void test_enumToSubclasses_IsOppositeOf_subclassesToEnum() throws Exception {
+		var subdir = "enumToSubclasses/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var person = getEClass("PersonList", "Person");
+					var genreAttribute = (EAttribute) person.getEStructuralFeature("gender");
+					var subclasses = enumToSubclasses(genreAttribute);
+					assertThat(subclasses)
+						.extracting(EClass::getName)
+						.containsExactlyInAnyOrder("Male", "Female");
+					// inverse
+					var result = subclassesToEnum("Gender",
+						subclasses);
+					assertThat(result)
+						.returns("gender", EAttribute::getName);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"subclassesToEnum/",
+			ecores,
+			models
+		);
 	}
 
 	@Test
-	void test_subclassesToEnum_IsOppositeOf_enumToSubclasses() throws IOException {
-		withInputModels("subclassesToEnum", "PersonList.ecore");
-		assertOppositeRefactorings(
-			() -> refactorings.subclassesToEnum("Gender",
-				asList(
-					refactorings.getEClass("PersonList", "Male"),
-					refactorings.getEClass("PersonList", "Female"))),
-			() -> refactorings.enumToSubclasses(
-					refactorings.getEAttribute("PersonList", "Person", "gender")));
-		assertLogIsEmpty();
+	void test_subclassesToEnum_IsOppositeOf_enumToSubclasses() throws Exception {
+		var subdir = "subclassesToEnum/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var personList = getEPackage("PersonList");
+					var result = subclassesToEnum("Gender",
+						asList(
+							(EClass) personList.getEClassifier("Male"),
+							(EClass) personList.getEClassifier("Female")));
+					assertThat(result)
+						.returns("gender", EAttribute::getName);
+					// inverse
+					var subclasses = enumToSubclasses(result);
+					assertThat(subclasses)
+						.extracting(EClass::getName)
+						.containsExactlyInAnyOrder("Male", "Female");
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"enumToSubclasses/",
+			ecores,
+			models
+		);
 	}
 
 	@Test
 	void test_extractClassWithAttributes() throws IOException {
 		withInputModels("extractClassWithAttributes", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		refactorings.extractClass("Address",
 			asList(
 				refactorings.getEAttribute("PersonList", "Person", "street"),
 				refactorings.getEAttribute("PersonList", "Person", "houseNumber"))
 			);
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
 	@Test
 	void test_extractClassWithAttributesContainedInDifferentClasses() throws IOException {
 		withInputModels("extractClassWithAttributesContainedInDifferentClasses", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		var thrown = assertThrowsIAE(() -> refactorings.extractClass("Address",
 			asList(
 				refactorings.getEAttribute("PersonList", "Person", "street"),
@@ -472,7 +1303,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 				    PersonList.Person.street
 				  PersonList.Person2:
 				    PersonList.Person2.street""");
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
@@ -489,23 +1320,41 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	}
 
 	@Test
-	void test_extractClassWithReferences() throws IOException {
-		withInputModels("extractClassWithReferences", "PersonList.ecore");
-		loadModelFiles();
-		refactorings.extractClass("WorkAddress",
-			asList(
-				refactorings.getEAttribute("PersonList", "Person", "street"),
-				refactorings.getEReference("PersonList", "Person", "workplace"),
-				refactorings.getEAttribute("PersonList", "Person", "houseNumber"))
-			);
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFiles();
+	void test_extractClassWithReferences() throws Exception {
+		var subdir = "extractClassWithReferences/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					extractClass("WorkAddress",
+						asList(
+							getEAttribute("PersonList", "Person", "street"),
+							getEAttribute("PersonList", "Person", "houseNumber"),
+							getEReference("PersonList", "Person", "workplace")
+						)
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test
 	void test_extractClassWithReferencesBidirectional() throws IOException {
 		withInputModels("extractClassWithReferencesBidirectional", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		assertThrowsIAE(() -> refactorings.extractClass("WorkAddress",
 			asList(
 				refactorings.getEAttribute("PersonList", "Person", "street"),
@@ -523,40 +1372,57 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_inlineClassWithAttributes() throws IOException {
 		withInputModels("inlineClassWithAttributes", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		refactorings.inlineClass(refactorings.getEClass("PersonList", "Address"));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
 	@Test
 	void test_inlineClassPrefix() throws IOException {
 		withInputModels("inlineClassPrefix", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		refactorings.inlineClass(
 			refactorings.getEClass("PersonList", "Address"),
 			"address_");
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
 	@Test
-	void test_inlineClassWithReferences() throws IOException {
-		withInputModels("inlineClassWithReferences", "PersonList.ecore");
-		loadModelFiles();
-		refactorings.inlineClass(refactorings.getEClass("PersonList", "WorkAddress"));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFiles();
+	void test_inlineClassWithReferences() throws Exception {
+		var subdir = "inlineClassWithReferences/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					inlineClass(getEClass("PersonList", "WorkAddress"));
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test
 	void test_inlineClassWithAttributesWronglyUsedByOthersParallel() throws IOException {
 		withInputModels("inlineClassWithAttributesWronglyUsedByOthersParallel",
 				"PersonList.ecore", "PersonListReferring.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		assertThrowsIAE(() ->
 			refactorings.inlineClass(refactorings.getEClass("PersonList", "Address")));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
@@ -574,10 +1440,10 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	void test_inlineClassWithAttributesWronglyMulti() throws IOException {
 		withInputModels("inlineClassWithAttributesWronglyMulti",
 				"PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		assertThrowsIAE(() ->
 			refactorings.inlineClass(refactorings.getEClass("PersonList", "Address")));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim())
 			.isEqualTo(
@@ -587,7 +1453,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_inlineClassWithReferencesBidirectional() throws IOException {
 		withInputModels("inlineClassWithReferencesBidirectional", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		assertThrowsIAE(() ->
 			refactorings.inlineClass(refactorings.getEClass("PersonList", "WorkAddress")));
 		assertThat(appender.getResult().trim())
@@ -600,56 +1466,127 @@ class EdeltaRefactoringsTest extends AbstractTest {
 				    ecore.ETypedElement.eType""");
 	}
 
+	/**
+	 * To have complete reversibility (since we use text comparison), we
+	 * have to extract features in a specific order. In fact, during model migration,
+	 * attributes are processed before references and this might change the resulting
+	 * XMI, though the models are effectively the same).
+	 * 
+	 * @throws Exception
+	 */
 	@Test
-	void test_inlineClass_IsOppositeOf_extractClass() throws IOException {
-		withInputModels("extractClassWithAttributes", "PersonList.ecore");
-		assertOppositeRefactorings(
-			() -> refactorings.extractClass("Address",
-					asList(
-							refactorings.getEAttribute("PersonList", "Person", "street"),
-							refactorings.getEAttribute("PersonList", "Person", "houseNumber"))
-						),
-			() -> refactorings.inlineClass(refactorings.getEClass("PersonList", "Address"))
+	void test_extractClass_IsOppositeOf_inlineClass() throws Exception {
+		var subdir = "extractClassWithReferences/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var ref = extractClass("WorkAddress",
+						asList(
+							getEAttribute("PersonList", "Person", "street"),
+							getEReference("PersonList", "Person", "workplace"),
+							getEAttribute("PersonList", "Person", "houseNumber")
+						)
+					);
+					inlineClass(ref.getEReferenceType());
+				}
+			}
 		);
-		assertLogIsEmpty();
+
+		assertOutputs(
+			engine,
+			"inlineClassWithReferences/",
+			ecores,
+			models
+		);
 	}
 
+	/**
+	 * see {@link #test_extractClass_IsOppositeOf_inlineClass()}
+	 * 
+	 * @throws Exception
+	 */
 	@Test
-	void test_inlineClass_IsOppositeOf_extractClass2() throws IOException {
-		withInputModels("inlineClassWithAttributes", "PersonList.ecore");
-		assertOppositeRefactorings(
-			() -> refactorings.inlineClass(refactorings.getEClass("PersonList", "Address")),
-			() -> refactorings.extractClass("Address",
-					asList(
-							refactorings.getEAttribute("PersonList", "Person", "street"),
-							refactorings.getEAttribute("PersonList", "Person", "houseNumber"))
-					)
+	void test_inlineClass_IsOppositeOf_extractClass() throws Exception {
+		var subdir = "inlineClassWithReferences/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					inlineClass(getEClass("PersonList", "WorkAddress"));
+					extractClass("WorkAddress",
+						asList(
+							getEAttribute("PersonList", "Person", "street"),
+							getEAttribute("PersonList", "Person", "houseNumber"),
+							getEReference("PersonList", "Person", "workplace")
+						)
+					);
+				}
+			}
 		);
-		assertLogIsEmpty();
+
+		assertOutputs(
+			engine,
+			"extractClassWithReferences/",
+			ecores,
+			models
+		);
 	}
 
 	@ParameterizedTest
 	@ValueSource(strings = {
-		"referenceToClassBidirectional",
-		"referenceToClassWithCardinality",
-		"referenceToClassUnidirectional"
+		"referenceToClassUnidirectional/",
+		"referenceToClassMultipleUnidirectional/",
+		"referenceToClassBidirectional/",
+		"referenceToClassBidirectionalDifferentOrder/",
+		"referenceToClassBidirectionalOppositeMultiple/",
+		"referenceToClassMultipleBidirectional/",
 	})
-	void test_referenceToClass(String directory) throws IOException {
-		withInputModels(directory, "PersonList.ecore");
-		loadModelFiles();
-		final EReference ref = refactorings.getEReference("PersonList", "Person", "works");
-		refactorings.referenceToClass("WorkingPosition", ref);
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFiles();
+	void test_referenceToClass(String directory) throws Exception {
+		var subdir = directory;
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					final EReference ref = getEReference("PersonList", "Person", "works");
+					referenceToClass("WorkingPosition", ref);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test
 	void test_referenceToClassWithContainmentReference() throws IOException {
 		withInputModels("referenceToClassWithContainmentReference", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EReference ref = refactorings.getEReference("PersonList", "Person", "works");
 		assertThrowsIAE(() -> refactorings.referenceToClass("WorkingPosition", ref));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult().trim()).isEqualTo(
 			"ERROR: PersonList.Person.works: Cannot apply referenceToClass on containment reference: PersonList.Person.works");
@@ -663,19 +1600,19 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	})
 	void test_classToReferenceUnidirectional(String directory) throws IOException {
 		withInputModels(directory, "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
 		var result = refactorings.classToReference(cl);
 		assertThat(result)
 			.isEqualTo(refactorings.getEReference("PersonList", "Person", "works"));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
 	@Test
 	void test_classToReferenceWhenClassIsNotReferred() {
 		withInputModels("classToReferenceWronglyReferred", "TestEcore.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		assertThrowsIAE(() -> refactorings.classToReference(
 				refactorings.getEClass("p", "CNotReferred")));
 		assertThat(appender.getResult().trim())
@@ -685,7 +1622,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_classToReferenceWhenClassIsReferredMoreThanOnce() {
 		withInputModels("classToReferenceWronglyReferred", "TestEcore.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		assertThrowsIAE(() -> refactorings.classToReference(
 				refactorings.getEClass("p", "C")));
 		assertThat(appender.getResult())
@@ -702,7 +1639,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	void test_classToReferenceWhenClassIsReferredMoreThanOnceParallel() {
 		withInputModels("classToReferenceWronglyReferredParallel",
 				"TestEcore.ecore", "TestEcoreReferring.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		assertThrowsIAE(() -> refactorings.classToReference(
 				refactorings.getEClass("p", "C")));
 		assertThat(appender.getResult())
@@ -718,7 +1655,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_classToReferenceWithMissingTarget() {
 		withInputModels("classToReferenceUnidirectional", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
 		// manually remove reference to target class WorkPlace
 		cl.getEStructuralFeatures().remove(cl.getEStructuralFeature("workPlace"));
@@ -730,7 +1667,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_classToReferenceWithTooManyTargets() {
 		withInputModels("classToReferenceUnidirectional", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
 		// manually add another reference to target class
 		EReference ref = this.createEReference(cl, "another");
@@ -749,7 +1686,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_classToReferenceUnidirectionalWithoutOppositeIsOk() throws IOException {
 		withInputModels("classToReferenceUnidirectional", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass cl = refactorings.getEClass("PersonList", "WorkingPosition");
 		// manually remove the opposite reference
 		EReference personFeature = (EReference) cl.getEStructuralFeature("person");
@@ -757,7 +1694,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 		personFeature.getEOpposite().setEOpposite(null);
 		cl.getEStructuralFeatures().remove(personFeature);
 		refactorings.classToReference(cl);
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 	}
 
@@ -808,7 +1745,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_extractSuperclass() throws IOException {
 		withInputModels("extractSuperclass", "TestEcore.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		refactorings.extractSuperclass(
 			asList(
 				refactorings.getEAttribute("p", "C1", "a1"),
@@ -817,30 +1754,81 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				refactorings.getEAttribute("p", "C3", "a1"),
 				refactorings.getEAttribute("p", "C4", "a1")));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFiles();
 		assertLogIsEmpty();
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"pullUpReferences/",
+		"pullUpContainmentReferences/",
+	})
+	void test_pullUpReferences(String directory) throws Exception {
+		var subdir = directory;
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var personClass = getEClass("PersonList", "Person");
+					var studentAddress = getEReference("PersonList", "Student", "address");
+					var employeeAddress = getEReference("PersonList", "Employee", "address");
+					pullUpFeatures(personClass,
+						asList(
+							studentAddress, employeeAddress));
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
 	@Test
-	void test_pullUpFeatures() throws IOException {
-		withInputModels("pullUpFeatures", "PersonList.ecore");
-		loadModelFiles();
-		final EClass person = refactorings.getEClass("PersonList", "Person");
-		final EClass student = refactorings.getEClass("PersonList", "Student");
-		final EClass employee = refactorings.getEClass("PersonList", "Employee");
-		refactorings.pullUpFeatures(person,
-			asList(
-				student.getEStructuralFeature("name"),
-				employee.getEStructuralFeature("name")));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
-		assertModifiedFiles();
+	void test_pullUpAttributes() throws Exception {
+		var subdir = "pullUpAttributes/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var personClass = getEClass("PersonList", "Person");
+					var studentAddress = getEAttribute("PersonList", "Student", "name");
+					var employeeAddress = getEAttribute("PersonList", "Employee", "name");
+					pullUpFeatures(personClass,
+						asList(
+							studentAddress, employeeAddress));
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
 	}
 
 	@Test
 	void test_pullUpFeaturesDifferent() throws IOException {
 		withInputModels("pullUpFeaturesDifferent", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		final EClass student = refactorings.getEClass("PersonList", "Student");
 		final EClass employee = refactorings.getEClass("PersonList", "Employee");
@@ -848,7 +1836,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				student.getEStructuralFeature("name"),
 				employee.getEStructuralFeature("name"))));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertEquals(
 		"""
@@ -864,7 +1852,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 	@Test
 	void test_pullUpFeaturesNotSubclass() throws IOException {
 		withInputModels("pullUpFeaturesNotSubclass", "PersonList.ecore");
-		loadModelFiles();
+		loadEcoreFiles();
 		final EClass person = refactorings.getEClass("PersonList", "Person");
 		final EClass student = refactorings.getEClass("PersonList", "Student");
 		final EClass employee = refactorings.getEClass("PersonList", "Employee");
@@ -872,7 +1860,7 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			asList(
 				student.getEStructuralFeature("name"),
 				employee.getEStructuralFeature("name"))));
-		refactorings.saveModifiedEcores(AbstractTest.MODIFIED);
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 		assertModifiedFilesAreSameAsOriginal();
 		assertThat(appender.getResult())
 			.isEqualTo(
@@ -881,6 +1869,389 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			ERROR: PersonList.Employee: Not a direct subclass of: PersonList.Person
 			"""
 			);
+	}
+
+	@Test
+	void test_pushDownFeature() throws Exception {
+		var subdir = "pushDownFeatures/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var personClass = getEClass("PersonList", "Person");
+					var personName = personClass.getEStructuralFeature("name");
+					var studentClass = getEClass("PersonList", "Student");
+					var employeeClass = getEClass("PersonList", "Employee");
+					// refactoring
+					pushDownFeature(
+							personName,
+							List.of(studentClass, employeeClass));
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_pushDown_IsOppositeOf_pullUp() throws Exception {
+		var subdir = "pushDownFeatures/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var personClass = getEClass("PersonList", "Person");
+					var personName = personClass.getEStructuralFeature("name");
+					var studentClass = getEClass("PersonList", "Student");
+					var employeeClass = getEClass("PersonList", "Employee");
+					// refactoring
+					var features = pushDownFeature(
+							personName,
+							List.of(studentClass, employeeClass));
+					// opposite
+					pullUpFeatures(personClass,
+							features);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"pushDownAndPullUp/",
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_pullUp_IsOppositeOf_pushDown() throws Exception {
+		var subdir = "pullUpAttributes/";
+		var ecores = of("PersonList.ecore");
+		var models = of("List.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var personClass = getEClass("PersonList", "Person");
+					var studentClass = getEClass("PersonList", "Student");
+					var employeeClass = getEClass("PersonList", "Employee");
+					var studentName = studentClass.getEStructuralFeature("name");
+					var employeeName = employeeClass.getEStructuralFeature("name");
+					// refactoring
+					var personName = pullUpFeatures(
+							personClass,
+							List.of(studentName, employeeName));
+					// opposite
+					pushDownFeature(
+							personName,
+							List.of(studentClass, employeeClass));
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"pullUpAndPushDown/",
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_mergeClasses() throws Exception {
+		var subdir = "mergeClasses/";
+		var ecores = of("TestEcore.ecore");
+		var models = of("Container.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var toMerge = of(
+						getEClass("testecore", "SubElement1"),
+						getEClass("testecore", "SubElement2"),
+						getEClass("testecore", "SubElement3")
+					);
+					var merged = mergeClasses("SubElement", toMerge);
+					var superClass = getEClass("testecore", "Element");
+					assertThat(merged.getESuperTypes())
+						.containsOnly(superClass);
+					assertThat(merged.getEPackage())
+						.isSameAs(superClass.getEPackage());
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	void test_mergeClassesFeaturesDifferInSize() throws Exception {
+		withInputModels("mergeClasses", "TestEcore.ecore");
+		loadEcoreFiles();
+		var thirdSubClass = refactorings.getEClass("testecore", "SubElement3");
+		thirdSubClass.getEStructuralFeatures().remove(2);
+		var toMerge = of(
+			refactorings.getEClass("testecore", "SubElement1"),
+			refactorings.getEClass("testecore", "SubElement2"),
+			thirdSubClass
+		);
+		assertThrowsIAE(() -> refactorings.mergeClasses("SubElement", toMerge));
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
+		assertEquals(
+			"""
+			ERROR: testecore.SubElement3: Different features size: expected 3 but was 2
+			  in classes testecore.SubElement1, testecore.SubElement3
+			""",
+			appender.getResult());
+	}
+
+	@Test
+	void test_mergeClassesFeaturesDifferInADetail() throws Exception {
+		withInputModels("mergeClasses", "TestEcore.ecore");
+		loadEcoreFiles();
+		var thirdSubClass = refactorings.getEClass("testecore", "SubElement3");
+		thirdSubClass.getEStructuralFeature("containments").setLowerBound(2);
+		var toMerge = of(
+			refactorings.getEClass("testecore", "SubElement1"),
+			refactorings.getEClass("testecore", "SubElement2"),
+			thirdSubClass
+		);
+		assertThrowsIAE(() -> refactorings.mergeClasses("SubElement", toMerge));
+		modelManager.saveEcores(AbstractEdeltaRefactoringsLibTest.MODIFIED);
+		assertEquals(
+			"""
+			ERROR: testecore.SubElement3: ecore.ETypedElement.lowerBound:
+			  testecore.SubElement1.containments: 0
+			  testecore.SubElement3.containments: 2
+			
+			""",
+			appender.getResult());
+	}
+
+	@Test
+	void test_splitClassDefault() throws Exception {
+		var subdir = "splitClass/";
+		var ecores = of("TestEcore.ecore");
+		var models = of("Container.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var toSplit = getEClass("testecore", "SubElement");
+					var split = splitClass(toSplit,
+						of(
+							"SubElement1",
+							"SubElement2",
+							"SubElement3"
+						)
+					);
+					var superClass = getEClass("testecore", "Element");
+					assertThat(split.stream()
+						.flatMap(c -> c.getESuperTypes().stream()))
+						.containsOnly(superClass);
+					assertThat(split.stream()
+						.map(ENamedElement::getName))
+						.containsExactly(
+							"SubElement1",
+							"SubElement2",
+							"SubElement3"
+						);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"splitClassDefault/",
+			ecores,
+			models
+		);
+	}
+
+	/**
+	 * Assumes that the name of the SubElement ends with a number
+	 * that is used to create the instance of one of the splitted classes.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	void test_splitClassWithEObjectFunction() throws Exception {
+		var subdir = "splitClass/";
+		var ecores = of("TestEcore.ecore");
+		var models = of("Container.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var ePackage = getEPackage("testecore");
+					var toSplit = getEClass("testecore", "SubElement");
+					var split = splitClass(toSplit,
+						of(
+							"SubElement1",
+							"SubElement2",
+							"SubElement3"
+						),
+						(origObj -> {
+							var origClass = origObj.eClass();
+							var nameFeature = origClass.getEStructuralFeature("name");
+							var nameValue = origObj.eGet(nameFeature).toString();
+							var newObjClassName = "SubElement" +
+									nameValue.charAt(nameValue.length() - 1);
+							return EdeltaEcoreUtil.createInstance(
+									getEClass(ePackage, newObjClassName));
+						})
+					);
+					var superClass = getEClass("testecore", "Element");
+					assertThat(split.stream()
+						.flatMap(c -> c.getESuperTypes().stream()))
+						.containsOnly(superClass);
+					assertThat(split.stream()
+						.map(ENamedElement::getName))
+						.containsExactly(
+							"SubElement1",
+							"SubElement2",
+							"SubElement3"
+						);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			subdir,
+			ecores,
+			models
+		);
+	}
+
+	/**
+	 * Acts at the level of containing feature to possibly create several
+	 * objects corresponding to a single one.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	void test_splitClassWithMigratorConsumer() throws Exception {
+		var subdir = "splitClass/";
+		var ecores = of("TestEcore.ecore");
+		var models = of("Container2.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaRefactorings(other) {
+				@Override
+				protected void doExecute() {
+					var ePackage = getEPackage("testecore");
+					var toSplit = getEClass("testecore", "SubElement");
+					var containingFeature = getEReference("testecore", "Container", "elements");
+					var split = splitClass(toSplit,
+						of(
+							"SubElement1",
+							"SubElement2",
+							"SubElement3"
+						),
+						(EdeltaModelMigrator modelMigrator) -> modelMigrator.copyRule(
+							modelMigrator.wasRelatedTo(containingFeature),
+							(origFeature, origObj, newObj) -> {
+								var origElements = getValueAsList(origObj, origFeature);
+								var subElementClass = getEClass(
+									origObj.eClass().getEPackage(), "SubElement");
+								var subElementOptionalFeature = subElementClass
+									.getEStructuralFeature("optional");
+								var subElementFeatures = subElementClass.getEAllStructuralFeatures();
+								var subElement1Class = getEClass(ePackage, "SubElement1");
+								var subElement2Class = getEClass(ePackage, "SubElement2");
+								var subElement3Class = getEClass(ePackage, "SubElement3");
+								// if not optional create an instance of all the new classes
+								// (just an example, it does not necessarily make sense)
+								var newElements = new ArrayList<>();
+								for (var origElement : origElements) {
+									if (!(boolean) origElement.eGet(subElementOptionalFeature)) {
+										newElements.add(createAndCopyFrom(modelMigrator, origElement, subElementFeatures,
+												subElement1Class));
+										newElements.add(createAndCopyFrom(modelMigrator, origElement, subElementFeatures,
+												subElement2Class));
+										newElements.add(createAndCopyFrom(modelMigrator, origElement, subElementFeatures,
+												subElement3Class));
+									}
+								}
+								newObj.eSet(containingFeature, newElements);
+							}
+						)
+					);
+					var superClass = getEClass("testecore", "Element");
+					assertThat(split.stream()
+						.flatMap(c -> c.getESuperTypes().stream()))
+						.containsOnly(superClass);
+					assertThat(split.stream()
+						.map(ENamedElement::getName))
+						.containsExactly(
+							"SubElement1",
+							"SubElement2",
+							"SubElement3"
+						);
+				}
+
+				public EObject createAndCopyFrom(EdeltaModelMigrator modelMigrator, EObject origElement,
+						Collection<EStructuralFeature> subElementFeatures, EClass newClass) {
+					return EdeltaEcoreUtil.createInstance(newClass,
+						o -> {
+							for (var subElementFeature : subElementFeatures)
+								modelMigrator.copyFrom(o,
+									newClass.getEStructuralFeature(subElementFeature.getName()),
+									origElement, subElementFeature);
+						}
+					);
+				}
+			}
+		);
+
+		assertOutputs(
+			engine,
+			"splitClassCustom/",
+			ecores,
+			models
+		);
 	}
 
 	@Test
@@ -958,6 +2329,15 @@ class EdeltaRefactoringsTest extends AbstractTest {
 			ERROR: p.C.refToC: Not a containment reference: p.C.refToC
 			"""
 			);
+	}
+
+	@Test
+	void test_checkType() {
+		refactorings.checkType(EcorePackage.Literals.ENAMED_ELEMENT__NAME, stringDataType);
+		assertThrowsIAE(() -> refactorings.checkType(EcorePackage.Literals.ENAMED_ELEMENT__NAME, intDataType));
+		assertEquals(
+			"ERROR: ecore.ENamedElement.name: expecting ecore.EInt but was ecore.EString\n"
+			, appender.getResult());
 	}
 
 	private static IllegalArgumentException assertThrowsIAE(Executable executable) {

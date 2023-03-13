@@ -1,0 +1,14 @@
+import edelta.refactorings.lib.EdeltaRefactorings
+
+package edelta.statechartsenum.example
+
+metamodel "statechartsenum"
+
+use EdeltaRefactorings as refactorings
+
+modifyEcore introduceNodeSubclasses epackage statechartsenum {
+	refactorings.enumToSubclasses(ecoreref(type))
+	ecoreref(Normal).name = "State"
+	ecoreref(Initial).name = "InitialState"
+	ecoreref(Final).name = "FinalState"
+}

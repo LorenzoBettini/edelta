@@ -8,7 +8,7 @@ import org.eclipse.xtext.ui.testing.AbstractEditorTest;
  * @author Lorenzo Bettini
  *
  */
-public class CustomAbstractEditorTest extends AbstractEditorTest {
+public abstract class CustomAbstractEditorTest extends AbstractEditorTest {
 
 	/**
 	 * Avoids deleting project

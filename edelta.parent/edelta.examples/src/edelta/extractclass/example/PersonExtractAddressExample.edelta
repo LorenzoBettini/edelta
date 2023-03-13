@@ -1,0 +1,16 @@
+import edelta.refactorings.lib.EdeltaRefactorings
+
+// IMPORTANT: ecores must be in a source directory
+// otherwise you can't refer to them
+package edelta.extractclass.example
+
+metamodel "addressbook2"
+
+use EdeltaRefactorings as extension refactorings
+
+modifyEcore extractAddress epackage addressbook2 {
+	refactorings.extractClass(
+		"Address",
+		#[ecoreref(street), ecoreref(zip), ecoreref(city)]
+	)
+}

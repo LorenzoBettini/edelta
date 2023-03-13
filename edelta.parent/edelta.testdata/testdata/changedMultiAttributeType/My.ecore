@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="mypackage" nsURI="http://my.package.org" nsPrefix="mypackage">
+  <eClassifiers xsi:type="ecore:EClass" name="MyClass">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="myAttribute" upperBound="-1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="myOtherAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MyRoot">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="myReferences" upperBound="-1"
+        eType="#//MyClass"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="myContents" upperBound="-1"
+        eType="#//MyClass" containment="true"/>
+  </eClassifiers>
+</ecore:EPackage>

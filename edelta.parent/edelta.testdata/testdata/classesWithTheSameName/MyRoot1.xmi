@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mypackage:MyRoot
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:mypackage="http://my.package1.org"
+    xsi:schemaLocation="http://my.package1.org My1.ecore"
+    myReferences="//@myContents.1">
+  <myContents
+      myClassStringAttribute="contained not referred"/>
+  <myContents
+      myClassStringAttribute="contained referred"/>
+</mypackage:MyRoot>

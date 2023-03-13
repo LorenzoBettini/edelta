@@ -2,14 +2,14 @@ package edelta.interpreter;
 
 import org.eclipse.emf.ecore.ENamedElement;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaIssuePresenter;
 import edelta.validation.EdeltaValidator;
 
 /**
  * Used by the {@link EdeltaInterpreter} to catch issues reported by
- * {@link AbstractEdelta#showError(ENamedElement, String)},
- * {@link AbstractEdelta#showWarning(ENamedElement, String)}, etc, using
+ * {@link EdeltaRuntime#showError(ENamedElement, String)},
+ * {@link EdeltaRuntime#showWarning(ENamedElement, String)}, etc, using
  * {@link EdeltaInterpreterDiagnosticHelper}.
  * 
  * @author Lorenzo Bettini

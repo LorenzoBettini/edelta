@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testecore:Container
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:testecore="http://testecore"
+    xsi:schemaLocation="http://testecore TestEcore.ecore">
+  <elements
+      xsi:type="testecore:SubElement1"
+      name="name1"
+      optional="true"
+      referred="//@references.0">
+    <containments
+        name="contained1"/>
+  </elements>
+  <elements
+      xsi:type="testecore:SubElement2"
+      name="name2"
+      referred="//@references.1">
+    <containments
+        name="contained2"/>
+  </elements>
+  <elements
+      xsi:type="testecore:SubElement3"
+      name="name3"
+      referred="//@references.2">
+    <containments
+        name="contained3"/>
+  </elements>
+  <references
+      name="referred1"/>
+  <references
+      name="referred2"/>
+  <references
+      name="referred3"/>
+</testecore:Container>

@@ -16,8 +16,9 @@ import com.google.inject.Inject;
 
 import edelta.interpreter.EdeltaInterpreterHelper;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
-import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaModelManager;
+import edelta.lib.EdeltaRuntime;
 import edelta.tests.additional.MyCustomEdelta;
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime;
 import edelta.tests.injectors.EdeltaInjectorProviderForJavaReflectAccess;
@@ -37,11 +38,11 @@ public class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 	@Inject
 	private JavaReflectAccess javaReflectAccess;
 
-	private AbstractEdelta other;
+	private EdeltaRuntime other;
 
 	@Before
 	public void setup() {
-		other = new EdeltaDefaultRuntime();
+		other = new EdeltaDefaultRuntime(new EdeltaModelManager());
 	}
 
 	@Test

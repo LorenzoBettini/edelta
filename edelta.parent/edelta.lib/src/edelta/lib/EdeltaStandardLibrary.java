@@ -7,6 +7,7 @@ import static edelta.lib.EdeltaUtils.getEObjectRepr;
 
 import java.util.Collection;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -22,6 +23,8 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import edelta.lib.EdeltaModelMigrator.EObjectFunction;
+
 /**
  * Standard library methods, for example, for adding, copying, moving
  * elements.
@@ -29,19 +32,19 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
  * @author Lorennzo Bettini
  *
  */
-public class EdeltaStandardLibrary extends AbstractEdelta {
+public class EdeltaStandardLibrary extends EdeltaRuntime {
 
 	private static EcoreFactory ecoreFactory = EcoreFactory.eINSTANCE;
-
-	public EdeltaStandardLibrary() {
-		super();
-	}
 
 	/**
 	 * @param other
 	 */
-	public EdeltaStandardLibrary(AbstractEdelta other) {
+	public EdeltaStandardLibrary(EdeltaRuntime other) {
 		super(other);
+	}
+
+	public EdeltaStandardLibrary(EdeltaModelManager modelManager) {
+		super(modelManager);
 	}
 
 	public void addEStructuralFeature(EClass eClass, EStructuralFeature eStructuralFeature) {
@@ -334,6 +337,24 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 	}
 
 	/**
+	 * Copies the specified {@link EClassifier} into the specified
+	 * {@link EPackage}, using {@link EcoreUtil#copy(EObject)}, but changing its name.
+	 * 
+	 * @param <T>
+	 * @param classifier
+	 * @param ePackageDest
+	 * @param name
+	 * @return
+	 * @see EcoreUtil#copy(EObject)
+	 */
+	public <T extends EClassifier> T copyToAs(T classifier, EPackage ePackageDest, String name) {
+		var copy = EcoreUtil.copy(classifier);
+		copy.setName(name);
+		addEClassifier(ePackageDest, copy);
+		return copy;
+	}
+
+	/**
 	 * Copies the specified {@link EStructuralFeature}s into the specified
 	 * {@link EClass}, using {@link EcoreUtil#copyAll(Collection)}.
 	 * 
@@ -390,6 +411,118 @@ public class EdeltaStandardLibrary extends AbstractEdelta {
 	public EReference createOpposite(EReference reference, String name, EClass target) {
 		return addNewEReference(target, name, reference.getEContainingClass(),
 			newRef -> EdeltaUtils.makeBidirectional(newRef, reference)
+		);
+	}
+
+	/**
+	 * Changes the {@link EDataType} of the given {@link EAttribute}; concerning the model migration,
+	 * it applies the specified singleValueTransformer. During the model migration
+	 * the multiplicity of the attribute is taken care automatically, so the value transformer
+	 * must only take care of transforming a single value.
+	 * 
+	 * @param attribute
+	 * @param newType
+	 * @param singleValueTransformer
+	 */
+	public void changeType(EAttribute attribute, EDataType newType, UnaryOperator<Object> singleValueTransformer) {
+		attribute.setEType(newType);
+		// and adjust model migration
+		modelMigration(modelMigrator ->
+			modelMigrator.transformAttributeValueRule(
+				modelMigrator.isRelatedTo(attribute),
+				modelMigrator
+					.multiplicityAwareTranformer(attribute, singleValueTransformer)
+			)
+		);
+	}
+
+	/**
+	 * Changes the {@link EClass} type of the given {@link EReference}; concerning
+	 * the model migration, it applies the specified referredObjectTransformer.
+	 * During the model migration the multiplicity of the reference is taken care
+	 * automatically, so the referredObjectTransformer must only take care of
+	 * returning a new single object to be referred, using the previously referred
+	 * object somehow.
+	 * 
+	 * @param reference
+	 * @param newType
+	 * @param referredObjectTransformer
+	 */
+	public void changeType(EReference reference, EClass newType, EObjectFunction referredObjectTransformer) {
+		changeType(reference, newType, referredObjectTransformer, null);
+	}
+
+	/**
+	 * Changes the {@link EClass} type of the given {@link EReference}; concerning
+	 * the model migration, it applies the specified referredObjectTransformer.
+	 * During the model migration the multiplicity of the reference is taken care
+	 * automatically, so the referredObjectTransformer must only take care of
+	 * returning a new single object to be referred, using the previously referred
+	 * object somehow.
+	 * 
+	 * @param reference
+	 * @param newType
+	 * @param referredObjectTransformer
+	 * @param postCopy                  {@link Runnable} that will be executed after
+	 *                                  the migration of the model, e.g., for
+	 *                                  cleanup and stale objects removal (shared
+	 *                                  non-containment references not used anymore
+	 *                                  can be deleted in this runnable)
+	 */
+	public void changeType(EReference reference, EClass newType, EObjectFunction referredObjectTransformer,
+			Runnable postCopy) {
+		reference.setEType(newType);
+		modelMigration(modelMigrator ->
+			modelMigrator.copyRule(
+				modelMigrator.isRelatedTo(reference),
+				modelMigrator
+					.multiplicityAwareCopy(reference, referredObjectTransformer),
+				postCopy
+			)
+		);
+	}
+
+	/**
+	 * Changes this feature to single (upper = 1); the model is migrated as well,
+	 * taking the first element of the old list (the other elements in the old list
+	 * are lost).
+	 * 
+	 * @param feature
+	 */
+	public void changeToSingle(EStructuralFeature feature) {
+		feature.setUpperBound(1);
+		migrationWithMultiplicityAwareCopy(feature);
+	}
+
+	/**
+	 * Changes this feature to multiple (upper = -1); the model is migrated as well,
+	 * creating an empty list or a list with a single element.
+	 * 
+	 * @param feature
+	 */
+	public void changeToMultiple(EStructuralFeature feature) {
+		changeToMultiple(feature, -1);
+	}
+
+	/**
+	 * Changes this feature to multiple with the given upperBound; the model is
+	 * migrated as well, creating an empty list or a list with at most upperBound
+	 * elements.
+	 * 
+	 * @param feature
+	 * @param upperBound
+	 */
+	public void changeToMultiple(EStructuralFeature feature, int upperBound) {
+		feature.setUpperBound(upperBound);
+		migrationWithMultiplicityAwareCopy(feature);
+	}
+
+	private void migrationWithMultiplicityAwareCopy(EStructuralFeature feature) {
+		modelMigration(modelMigrator ->
+			modelMigrator.copyRule(
+				modelMigrator.isRelatedTo(feature),
+				modelMigrator.multiplicityAwareCopy(feature)
+			)
 		);
 	}
 

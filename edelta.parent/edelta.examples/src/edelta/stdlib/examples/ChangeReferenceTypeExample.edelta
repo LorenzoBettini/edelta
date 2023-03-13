@@ -1,0 +1,39 @@
+package edelta.stdlib.examples
+
+metamodel "PersonListForChangeType"
+
+modifyEcore exampleOfChangeReferenceType epackage PersonListForChangeType {
+	// add another class similar to NameElement
+	val otherNameElement =
+		ecoreref(NameElement)
+		.addNewEClassAsSibling("OtherNameElement")
+	// copy the feature of NameElement in OtherNameElement
+	// with a new name
+	copyToAs(
+		ecoreref(nameElementValue),
+		otherNameElement,
+		"otherNameElementValue"
+	)
+	// change the type of Person.firstName to OtherNameElement
+	changeType(ecoreref(firstName), otherNameElement) [
+		// and specify the transformer for the migrator
+		oldReferredObject |
+		createInstance(otherNameElement) [
+			newReferredObject |
+			// oldReferredObject is part of the model being migrated
+			// so it's safe to use features retrieved above,
+			// like nameElementFeature
+			
+			// we refer to a new object of type OtherNameElement
+			// copying its value from the original referred
+			// Object of type NameElement
+			setValueFrom(
+				newReferredObject, ecoreref(otherNameElementValue),
+				oldReferredObject, ecoreref(nameElementValue)
+			)
+			// since the original reference Person.firstName was a
+			// containment reference, just referring to the newly
+			// created object will add it to the model
+		]
+	]
+}

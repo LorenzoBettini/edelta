@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Edelta Library Tests
 Bundle-SymbolicName: edelta.lib.tests
-Bundle-Version: 2.20.0.qualifier
+Bundle-Version: 3.0.0.qualifier
 Bundle-Vendor: Lorenzo Bettini
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: edelta.lib,
@@ -14,3 +14,8 @@ Require-Bundle: edelta.lib,
  org.objenesis,
  org.assertj;bundle-version="3.20.2"
 Automatic-Module-Name: edelta.lib.tests
+Import-Package: org.junit.jupiter.api;version="[5.1.0,6.0.0)",
+ org.junit.jupiter.api.function;version="[5.1.0,6.0.0)",
+ org.junit.jupiter.params;version="[5.1.0,6.0.0)",
+ org.junit.jupiter.params.provider;version="[5.1.0,6.0.0)",
+ org.junit.jupiter.api.extension;version="[5.1.0,6.0.0)"

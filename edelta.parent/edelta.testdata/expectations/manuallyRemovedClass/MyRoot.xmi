@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mypackage:MyRoot
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:mypackage="http://my.package.org"
+    xsi:schemaLocation="http://my.package.org My.ecore"/>

@@ -12,6 +12,7 @@ import static org.eclipse.emf.ecore.EcorePackage.Literals.ESTRUCTURAL_FEATURE__E
 import org.eclipse.emf.ecore.EClass;
 import org.junit.Test;
 
+import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaStandardLibrary;
 import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder;
 
@@ -19,7 +20,8 @@ public class EdeltaFeatureDifferenceFinderTest {
 
 	private static EClass aType1 = newEClass("aType1");
 	private static EClass aType2 = newEClass("aType2");
-	private EdeltaStandardLibrary stdLib = new EdeltaStandardLibrary();
+	private EdeltaStandardLibrary stdLib = new EdeltaStandardLibrary(
+			new EdeltaModelManager());
 
 	@Test
 	public void whenTwoFeaturesAreEqual() {

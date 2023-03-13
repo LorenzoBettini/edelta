@@ -1,18 +1,14 @@
 package edelta;
 
-import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 
 @SuppressWarnings("all")
 public class ExampleWithSubPackages extends EdeltaDefaultRuntime {
-  public ExampleWithSubPackages() {
-    
-  }
-
-  public ExampleWithSubPackages(final AbstractEdelta other) {
+  public ExampleWithSubPackages(final EdeltaRuntime other) {
     super(other);
   }
 

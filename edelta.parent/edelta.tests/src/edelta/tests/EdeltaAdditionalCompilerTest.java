@@ -82,8 +82,8 @@ public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
 		""","""
 		package foo;
 		
-		import edelta.lib.AbstractEdelta;
 		import edelta.lib.EdeltaDefaultRuntime;
+		import edelta.lib.EdeltaRuntime;
 		import java.util.Collection;
 		import java.util.List;
 		import org.eclipse.emf.ecore.EAttribute;
@@ -94,11 +94,7 @@ public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
 		
 		@SuppressWarnings("all")
 		public class MyFile0 extends EdeltaDefaultRuntime {
-		  public MyFile0() {
-		
-		  }
-		
-		  public MyFile0(final AbstractEdelta other) {
+		  public MyFile0(final EdeltaRuntime other) {
 		    super(other);
 		  }
 		
@@ -124,6 +120,73 @@ public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
 		    ensureEPackageIsLoaded("foo");
 		  }
 		
+		  @Override
+		  protected void doExecute() throws Exception {
+		    aTest(getEPackage("foo"));
+		  }
+		}
+		"""
+		);
+	}
+
+	@Test
+	public void testCompilationOfModelMigration() throws Exception {
+		checkCompilation("""
+		package foo;
+
+		metamodel "foo"
+
+		modifyEcore aTest epackage foo {
+			val fooClass = ecoreref(FooClass)
+			val mySubClass = fooClass.addNewSubclass("MySubClass")
+			fooClass.abstract = true
+			// adjust model migration
+			modelMigration[
+				createInstanceRule(
+					isRelatedTo(fooClass),
+					[oldObj|
+						return createInstance(mySubClass)
+					]
+				)
+			]
+		}
+		""","""
+		package foo;
+
+		import edelta.lib.EdeltaDefaultRuntime;
+		import edelta.lib.EdeltaEcoreUtil;
+		import edelta.lib.EdeltaModelMigrator;
+		import edelta.lib.EdeltaRuntime;
+		import java.util.function.Consumer;
+		import org.eclipse.emf.ecore.EClass;
+		import org.eclipse.emf.ecore.EObject;
+		import org.eclipse.emf.ecore.EPackage;
+
+		@SuppressWarnings("all")
+		public class MyFile0 extends EdeltaDefaultRuntime {
+		  public MyFile0(final EdeltaRuntime other) {
+		    super(other);
+		  }
+		  
+		  public void aTest(final EPackage it) {
+		    final EClass fooClass = getEClass("foo", "FooClass");
+		    final EClass mySubClass = this.stdLib.addNewSubclass(fooClass, "MySubClass");
+		    fooClass.setAbstract(true);
+		    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it_1) -> {
+		      final EdeltaModelMigrator.EObjectFunction _function_1 = (EObject oldObj) -> {
+		        return EdeltaEcoreUtil.createInstance(mySubClass);
+		      };
+		      it_1.createInstanceRule(
+		        it_1.<EClass>isRelatedTo(fooClass), _function_1);
+		    };
+		    this.modelMigration(_function);
+		  }
+		  
+		  @Override
+		  public void performSanityChecks() throws Exception {
+		    ensureEPackageIsLoaded("foo");
+		  }
+		  
 		  @Override
 		  protected void doExecute() throws Exception {
 		    aTest(getEPackage("foo"));
@@ -168,13 +231,8 @@ public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
 	}
 
 	private void assertGeneratedJavaCode(CompilationTestHelper.Result r, CharSequence expected) {
-		var singleGeneratedCode = EdeltaTestUtils.removeCR(r.getSingleGeneratedCode());
 		assertEquals(expected.toString(),
-			// lines with only spaces are skipped in Java text blocks
-			// but they are present in the generated code for empty methods, e.g., constructors
-			// so we need to remove four spaces
-			singleGeneratedCode
-				.replace("    \n", "\n"));
+			EdeltaTestUtils.removeCR(r.getSingleGeneratedCode()));
 	}
 
 	private Class<?> assertGeneratedJavaCodeCompiles(CompilationTestHelper.Result r) {

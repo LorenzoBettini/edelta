@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<personforreferences:PersonRenamed
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:personforreferences="http://my.personforreferences.org"
+    xsi:schemaLocation="http://my.personforreferences.org PersonForReferences.ecore"
+    firstname="Firstname 2"
+    lastname="Lastname 2">
+  <works href="WorkPlace1.xmi#/"/>
+</personforreferences:PersonRenamed>

@@ -84,8 +84,11 @@ public class Inputs {
 		return """
 			package foo;
 
+			metamodel "foo"
+
 			def bar(String s) {
 				newEClass(s)
+				createInstance(ecoreref(FooClass)) []
 			}
 			""";
 	}

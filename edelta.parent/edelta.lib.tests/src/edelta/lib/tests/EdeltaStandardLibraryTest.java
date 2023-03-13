@@ -1,21 +1,28 @@
-/**
- * 
- */
 package edelta.lib.tests;
 
+import static edelta.lib.EdeltaEcoreUtil.createInstance;
+import static edelta.lib.EdeltaEcoreUtil.getValueAsList;
+import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
+import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
+import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.emf.ecore.EcorePackage.Literals.EOBJECT;
 import static org.eclipse.emf.ecore.EcorePackage.Literals.ESTRING;
+import static org.eclipse.emf.ecore.EcorePackage.Literals.EINT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.emf.ecore.EAttribute;
@@ -24,19 +31,27 @@ import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.ENamedElement;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.util.EcoreUtil.EqualityHelper;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaEcoreUtil;
+import edelta.lib.EdeltaEngine;
+import edelta.lib.EdeltaEngine.EdeltaRuntimeProvider;
 import edelta.lib.EdeltaIssuePresenter;
+import edelta.lib.EdeltaModelManager;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaStandardLibrary;
 
 /**
@@ -46,6 +61,10 @@ import edelta.lib.EdeltaStandardLibrary;
  *
  */
 public class EdeltaStandardLibraryTest {
+
+	private static final String TESTDATA = "../edelta.testdata/testdata/";
+	private static final String OUTPUT = "output/";
+	private static final String EXPECTATIONS = "../edelta.testdata/expectations/";
 
 	private static final String MYPACKAGE = "mypackage";
 	private static final String MYOTHERPACKAGE = "myotherpackage";
@@ -59,16 +78,39 @@ public class EdeltaStandardLibraryTest {
 
 	private EdeltaIssuePresenter issuePresenter;
 
+	private EdeltaModelManager modelManager;
+
+	@BeforeClass
+	static public void clearOutput() throws IOException {
+		cleanDirectoryRecursive(OUTPUT);
+	}
+
 	@Before
 	public void setup() {
 		issuePresenter = mock(EdeltaIssuePresenter.class);
-		lib = new EdeltaStandardLibrary();
+		modelManager = new EdeltaModelManager();
+		lib = new EdeltaStandardLibrary(modelManager);
 		lib.setIssuePresenter(issuePresenter);
+	}
+
+	private EdeltaEngine setupEngine(
+			String subdir,
+			Collection<String> ecoreFiles,
+			Collection<String> modelFiles,
+			EdeltaRuntimeProvider runtimeProvider
+		) {
+		var basedir = TESTDATA + subdir;
+		var engine = new EdeltaEngine(runtimeProvider);
+		ecoreFiles
+			.forEach(fileName -> engine.loadEcoreFile(basedir + fileName));
+		modelFiles
+			.forEach(fileName -> engine.loadModelFile(basedir + fileName));
+		return engine;
 	}
 
 	@Test
 	public void testGetEPackageWithOtherEdelta() {
-		AbstractEdelta other = new AbstractEdelta() {
+		EdeltaRuntime other = new EdeltaRuntime(modelManager) {
 		};
 		lib = new EdeltaStandardLibrary(other);
 		// now lib and other share the same package manager
@@ -735,6 +777,22 @@ public class EdeltaStandardLibraryTest {
 	}
 
 	@Test
+	public void test_copyToAsForClassifier() {
+		EPackage ePackage = ecoreFactory.createEPackage();
+		EClass eClassSrc = ecoreFactory.createEClass();
+		eClassSrc.setName("originalName");
+		ePackage.getEClassifiers().add(eClassSrc);
+		// before
+		assertThat(ePackage.getEClassifiers())
+			.containsExactly(eClassSrc);
+		var copy = lib.copyToAs(eClassSrc, ePackage, "newName");
+		// after
+		assertThat(ePackage.getEClassifiers())
+			.containsExactly(eClassSrc, copy);
+		assertEquals("newName", copy.getName());
+	}
+
+	@Test
 	public void test_copyAllTo() {
 		EClass eClassSrc = ecoreFactory.createEClass();
 		EClass eClassDest = ecoreFactory.createEClass();
@@ -848,8 +906,483 @@ public class EdeltaStandardLibraryTest {
 		assertThat(c3.getEReferences()).containsExactly(c3Ref);
 	}
 
+	@Test
+	public void modelMigrationUnchanged() throws Exception {
+		var subdir = "simpleTestData/";
+		var engine = setupEngine(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi"),
+			EdeltaDefaultRuntime::new
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void modelMigrationRenamed() throws Exception {
+		var subdir = "simpleTestData/";
+		var engine = setupEngine(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi"),
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					// refactoring of Ecore
+					stdLib.getEClass("mypackage", "MyClass")
+					.setName("MyClassRenamed");
+					stdLib.getEClass("mypackage", "MyRoot")
+					.setName("MyRootRenamed");
+				}
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			"renamedClass/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void modelMigrationCopyToAs() throws Exception {
+		var subdir = "simpleTestData/";
+		var engine = setupEngine(
+			subdir,
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi"),
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					var a = stdLib.getEAttribute("mypackage", "MyClass",
+							"myClassStringAttribute");
+					var myRoot = stdLib.getEClass("mypackage", "MyRoot");
+					var copied = stdLib.copyToAs(a, myRoot, "myRootStringAttribute");
+					// custom migration rule setting the default value for the copied feature
+					modelMigration(migrator -> {
+						migrator.createInstanceRule(
+							migrator.isRelatedTo(myRoot),
+							oldObj ->
+								EdeltaEcoreUtil.createInstance(myRoot, o -> {
+									o.eSet(copied, "default value");
+								})
+							);
+					});
+				}
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			"copyToAs/",
+			of("My.ecore"),
+			of("MyRoot.xmi", "MyClass.xmi")
+		);
+	}
+
+	@Test
+	public void changeAttributeType() throws Exception {
+		var subdir = "changedAttributeType/";
+		var engine = setupEngine(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi"),
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					var attribute = stdLib.getEAttribute("mypackage", "MyClass", "myAttribute");
+					stdLib.changeType(attribute, EINT, val -> {
+						try {
+							return Integer.parseInt(val.toString());
+						} catch (NumberFormatException e) {
+							return -1;
+						}
+					});
+				}
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi")
+		);
+	}
+
+	/**
+	 * Note that, since we handle multiplicity automatically, the code of the
+	 * refactoring and transformer is just the same as the previous test.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void changeAttributeTypeMultiple() throws Exception {
+		var subdir = "changedMultiAttributeType/";
+		var engine = setupEngine(
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi"),
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					var attribute = stdLib.getEAttribute("mypackage", "MyClass", "myAttribute");
+					stdLib.changeType(attribute, EINT, val -> {
+						try {
+							return Integer.parseInt(val.toString());
+						} catch (NumberFormatException e) {
+							return -1;
+						}
+					});
+				}
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			subdir,
+			of("My.ecore"),
+			of("MyClass.xmi")
+		);
+	}
+
+	/**
+	 * Since this is meant as a simulation of what a user would do in the
+	 * Edelta DSL, we access {@link ENamedElement}s with strings, since
+	 * that's how "ecoreref()" expressions are translated by the Edelta DSL
+	 * compiler.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void changeReferenceTypeContainment() throws Exception {
+		var subdir = "changeReferenceTypeContainment/";
+		var engine = setupEngine(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi"),
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					var reference = stdLib.getEReference("PersonList", "Person", "firstName");
+					// first add the new class similar to NameElement
+					var nameElement = stdLib.getEClass("PersonList", "NameElement");
+					var otherNameElement = stdLib.addNewEClassAsSibling(
+						nameElement,
+						"OtherNameElement",
+						c -> {
+							stdLib.addNewEAttribute(c,
+								"otherNameElementValue", ESTRING);
+						});
+					// the attribute of the original reference type
+					var nameElementFeature = stdLib.getEAttribute
+						("PersonList", "NameElement", "nameElementValue");
+					// the attribute we just added to the new class
+					var otherNameElementFeature = stdLib.getEAttribute
+						("PersonList", "OtherNameElement", "otherNameElementValue");
+					// change the reference type
+					stdLib.changeType(reference, otherNameElement,
+						// and provide the model migration for the changed reference
+						oldReferredObject ->
+						// oldReferredObject is part of the model being migrated
+						// so it's safe to use features retrieved above,
+						// like nameElementFeature
+						createInstance(otherNameElement,
+							// we refer to a new object of type OtherNameElement
+							newReferredObject ->
+							// copying its value from the original referred
+							// Object of type NameElement
+							newReferredObject.eSet(otherNameElementFeature,
+								oldReferredObject.eGet(nameElementFeature)
+							)
+						)
+						// since the original reference Person.firstName was a
+						// containment reference, just referring to the newly
+						// created object will add it to the model
+					);
+				}
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	/**
+	 * Since this is meant as a simulation of what a user would do in the
+	 * Edelta DSL, we access {@link ENamedElement}s with strings, since
+	 * that's how "ecoreref()" expressions are translated by the Edelta DSL
+	 * compiler.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void changeReferenceTypeNonContainment() throws Exception {
+		var subdir = "changeReferenceTypeNonContainment/";
+		var engine = setupEngine(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi"),
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					var reference = stdLib.getEReference("PersonList", "Person", "firstName");
+					// first add the new class similar to NameElement
+					var nameElement = stdLib.getEClass("PersonList", "NameElement");
+					// the attribute of the original reference type NameElement
+					var nameElementFeature = stdLib.getEAttribute
+						("PersonList", "NameElement", "nameElementValue");
+					var otherNameElement = stdLib.addNewEClassAsSibling(
+						nameElement,
+						"OtherNameElement");
+					// the attribute we copy and add to the new class
+					// of the new type OtherNameElement
+					var otherNameElementFeature = stdLib.copyToAs
+						(nameElementFeature, otherNameElement, "otherNameElementValue");
+					// since the references are non containment, we need to add
+					// a containment reference for the objects of the new type OtherNameElement
+					// somewhere, e.g., in the List class
+					var otherNameElements = stdLib.copyToAs(
+						stdLib.getEReference("PersonList", "List", "nameElements"),
+						stdLib.getEClass("PersonList", "List"),
+						"otherNameElements",
+						otherNameElement);
+					
+					// change the reference type
+					stdLib.changeType(reference, otherNameElement,
+						// and provide the model migration for the changed reference
+						oldReferredObject -> {
+							// oldReferredObject is part of the model being migrated
+							// so it's safe to use features retrieved above,
+							// like nameElementFeature
+							
+							// retrieve the copied List object
+							// remember also the oldReferredObject is part
+							// of the (new) model, the one being migrated
+							var listObject = oldReferredObject.eContainer();
+							var otherNameElementsCollection =
+								getValueAsList(listObject, otherNameElements);
+							return createInstance(otherNameElement,
+								// we refer to a new object of type OtherNameElement
+								newReferredObject -> {
+									// copying its value from the original referred
+									// Object of type NameElement
+									newReferredObject.eSet(otherNameElementFeature,
+										oldReferredObject.eGet(nameElementFeature)
+									);
+									// differently from the previous test
+									// it's now responsibility of the caller to store the new
+									// object in a container.
+									// Since the original reference Person.firstName was NOT
+									// containment reference, just referring to the newly
+									// created object will NOT add it to the model
+									otherNameElementsCollection.add(newReferredObject);
+								}
+							);
+						}
+					);
+				}
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi")
+		);
+	}
+
+	/**
+	 * Since this is meant as a simulation of what a user would do in the
+	 * Edelta DSL, we access {@link ENamedElement}s with strings, since
+	 * that's how "ecoreref()" expressions are translated by the Edelta DSL
+	 * compiler.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void changeReferenceTypeNonContainmentShared() throws Exception {
+		var subdir = "changeReferenceTypeNonContainmentShared/";
+		var engine = setupEngine(
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi", "List1.xmi", "List2.xmi"),
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					var reference = stdLib.getEReference("PersonList", "Person", "firstName");
+					// first add the new class similar to NameElement
+					var nameElement = stdLib.getEClass("PersonList", "NameElement");
+					// the attribute of the original reference type NameElement
+					var nameElementFeature = stdLib.getEAttribute
+						("PersonList", "NameElement", "nameElementValue");
+					var otherNameElement = stdLib.addNewEClassAsSibling(
+						nameElement,
+						"OtherNameElement");
+					// the attribute we copy and add to the new class
+					// of the new type OtherNameElement
+					var otherNameElementFeature = stdLib.copyToAs
+						(nameElementFeature, otherNameElement, "otherNameElementValue");
+					// since the references are non containment, we need to add
+					// a containment reference for the objects of the new type OtherNameElement
+					// somewhere, e.g., in the List class
+					var otherNameElements = stdLib.copyToAs(
+						stdLib.getEReference("PersonList", "List", "nameElements"),
+						stdLib.getEClass("PersonList", "List"),
+						"otherNameElements",
+						otherNameElement);
+					
+					// this is useful in the model migration rule to avoid
+					// creating two many new referred objects, since, in this
+					// test, referred objects were and are meant to be share
+					// this will also be useful to remove previously referred
+					// objects since they will not be referred anymore
+					var referredMap = new HashMap<EObject, EObject>();
+					// note that we use the same maps for migrating all the models
+					// and that's correct, since, like in this test, objects can
+					// refer to objects of other model XMI files.
+					
+					// change the reference type
+					stdLib.changeType(reference, otherNameElement,
+						// and provide the model migration for the changed reference
+						oldReferredObject -> {
+							// oldReferredObject is part of the model being migrated
+							// so it's safe to use features retrieved above,
+							// like nameElementFeature
+							
+							var newReferredObject = referredMap.computeIfAbsent(oldReferredObject,
+								oldReferred -> {
+								// ... avoiding duplicates like in this case
+								// where references are meant to be shared
+
+								// retrieve the copied List object
+								// remember also the oldReferredObject is part
+								// of the (new) model, the one migrateds
+								var listObject = oldReferredObject.eContainer();
+								var otherNameElementsCollection =
+									getValueAsList(listObject, otherNameElements);
+								// differently from the first test (and like the previous one)
+								// it's now responsibility of the caller to store the new
+								// object in a container.
+								// Since the original reference Person.firstName was NOT
+								// containment reference, just referring to the newly
+								// created object will NOT add it to the model
+								return EdeltaEcoreUtil.createInstance(otherNameElement,
+									otherNameElementsCollection::add);
+								}
+							);
+							
+							// we refer to a new object of type OtherNameElement
+							// copying its value from the original referred
+							// Object of type NameElement
+							newReferredObject.eSet(otherNameElementFeature,
+								oldReferredObject.eGet(nameElementFeature)
+							);
+							
+							return newReferredObject;
+						},
+						// old shared referred objects can be removed now
+						() -> EcoreUtil.removeAll(referredMap.keySet())
+					);
+				}
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			subdir,
+			of("PersonList.ecore"),
+			of("List.xmi", "List1.xmi", "List2.xmi")
+		);
+	}
+
+	@Test
+	public void changeToSingle() throws Exception {
+		var subdir = "toUpperCaseStringAttributesMultiple/";
+		var ecores = of("My.ecore");
+		var models = of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					EStructuralFeature feature = stdLib.getEAttribute(
+						"mypackage", "MyClass", "myAttribute");
+					stdLib.changeToSingle(feature);
+				}
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			"makeSingle/",
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	public void changeToMultipleTo2() throws Exception {
+		var subdir = "toUpperCaseStringAttributesMultiple/";
+		var ecores = of("My.ecore");
+		var models = of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					EStructuralFeature feature = stdLib.getEAttribute(
+						"mypackage", "MyClass", "myAttribute");
+					stdLib.changeToMultiple(feature, 2);
+				}
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			"makeMultipleTo2/",
+			ecores,
+			models
+		);
+	}
+
+	@Test
+	public void changeToMultiple() throws Exception {
+		var subdir = "toUpperCaseStringAttributes/";
+		var ecores = of("My.ecore");
+		var models = of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi");
+
+		var engine = setupEngine(
+			subdir,
+			ecores,
+			models,
+			other -> new EdeltaDefaultRuntime(other) {
+				@Override
+				protected void doExecute() {
+					EStructuralFeature feature = stdLib.getEAttribute(
+						"mypackage", "MyClass", "myAttribute");
+					stdLib.changeToMultiple(feature);
+				}
+			}
+		);
+		copyModelsSaveAndAssertOutputs(
+			engine,
+			"makeMultiple/",
+			ecores,
+			models
+		);
+	}
+
 	private Resource loadTestEcore(String ecoreFile) {
-		return lib.loadEcoreFile(TESTECORES+ecoreFile);
+		return modelManager.loadEcoreFile(TESTECORES+ecoreFile);
 	}
 
 	private IllegalArgumentException assertThrowsIAE(ThrowingRunnable executable,
@@ -868,5 +1401,34 @@ public class EdeltaStandardLibraryTest {
 			argThat(a -> a.getName().equals(elementName)),
 			argThat(a -> a.equals(expectedError)));
 		return assertThrows;
+	}
+
+	private void copyModelsSaveAndAssertOutputs(
+			EdeltaEngine engine,
+			String outputdir,
+			Collection<String> ecoreFiles,
+			Collection<String> modelFiles
+		) throws Exception {
+		engine.execute();
+		var output = OUTPUT + outputdir;
+		engine.save(output);
+		ecoreFiles.forEach
+			(fileName ->
+				assertGeneratedFiles(fileName, outputdir, output, fileName));
+		modelFiles.forEach
+			(fileName ->
+				assertGeneratedFiles(fileName, outputdir, output, fileName));
+	}
+
+	private void assertGeneratedFiles(String message, String subdir, String outputDir, String fileName) {
+		try {
+			assertFilesAreEquals(
+				message,
+				EXPECTATIONS + subdir + fileName,
+				outputDir + fileName);
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail(e.getClass().getName() + ": " + e.getMessage());
+		}
 	}
 }

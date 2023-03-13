@@ -2,18 +2,25 @@ package edelta.refactorings.lib;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
-import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaEcoreUtil;
+import edelta.lib.EdeltaModelMigrator;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaUtils;
 import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -39,11 +46,7 @@ import org.eclipse.xtext.xbase.lib.StringExtensions;
 
 @SuppressWarnings("all")
 public class EdeltaRefactorings extends EdeltaDefaultRuntime {
-  public EdeltaRefactorings() {
-    
-  }
-
-  public EdeltaRefactorings(final AbstractEdelta other) {
+  public EdeltaRefactorings(final EdeltaRuntime other) {
     super(other);
   }
 
@@ -62,20 +65,135 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   }
 
   /**
+   * Changes this feature to single (upper = 1); concerning model migration,
+   * it takes the first element of the previous model object's collection
+   * for this feature.
+   * 
+   * @param feature
+   */
+  public void changeToSingle(final EStructuralFeature feature) {
+    this.changeUpperBound(feature, 1);
+  }
+
+  /**
+   * Changes this feature to multiple (upper = -1); concerning model migration,
+   * it makes sure that a collection is created if the previous model object's value was set.
+   * 
+   * @param feature
+   */
+  public void changeToMultiple(final EStructuralFeature feature) {
+    this.changeUpperBound(feature, (-1));
+  }
+
+  /**
+   * Changes this feature to multiple with the given upper bound; concerning model migration,
+   * it makes sure that a collection is created with at most the specified upper bound
+   * if the previous model object's value was set, discarding possible additional values in
+   * the original collection.
+   * 
+   * @param feature
+   * @param upperBound
+   */
+  public void changeUpperBound(final EStructuralFeature feature, final int upperBound) {
+    feature.setUpperBound(upperBound);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      it.copyRule(
+        it.<EStructuralFeature>isRelatedTo(feature), 
+        it.multiplicityAwareCopy(feature));
+    };
+    this.modelMigration(_function);
+  }
+
+  /**
+   * Merges the given attributes into a single new attribute in the containing class.
+   * The attributes must be compatible (same containing class, same type, same cardinality, etc).
+   * 
+   * @param newAttributeName
+   * @param attributes
+   * @param valueMerger is used to merge the values of the original
+   * features in the new model
+   * @return the new attribute added to the containing class of the attributes
+   */
+  public EAttribute mergeAttributes(final String newAttributeName, final Collection<EAttribute> attributes, final Function<Collection<Object>, Object> valueMerger) {
+    return this.<EAttribute, Object>mergeFeatures(newAttributeName, attributes, valueMerger, null);
+  }
+
+  /**
+   * Merges the given references into a single new reference in the containing class.
+   * The references must be compatible (same containing class, same type, same cardinality, etc).
+   * 
+   * @param newReferenceName
+   * @param references
+   * @param valueMerger is used to merge the values of the original
+   * features in the new model
+   * @param postCopy executed after the model migrations
+   * @return the new reference added to the containing class of the references
+   */
+  public EReference mergeReferences(final String newReferenceName, final Collection<EReference> references, final Function<Collection<EObject>, EObject> valueMerger, final Runnable postCopy) {
+    return this.<EReference, EObject>mergeFeatures(newReferenceName, references, valueMerger, postCopy);
+  }
+
+  /**
    * Merges the given features into a single new feature in the containing class.
    * The features must be compatible (same containing class, same type, same cardinality, etc).
    * 
+   * @param <T> meant for both {@link EAttribute} and {@link EReference}
+   * @param <V> the type for the function (either {@link Object} or {@link EObject})
+   * @param newFeatureName
+   * @param features
+   * @param valueMerger is used to merge the values of the original
+   * features in the new model
+   * @param postCopy if not null, it is executed after the model migrations
+   * @return the new feature added to the containing class of the features
+   */
+  public <T extends EStructuralFeature, V> T mergeFeatures(final String newFeatureName, final Collection<T> features, final Function<Collection<V>, V> valueMerger, final Runnable postCopy) {
+    this.checkNoDifferences(features, 
+      new EdeltaFeatureDifferenceFinder().ignoringName(), 
+      "The two features cannot be merged");
+    final T firstFeature = IterableExtensions.<T>head(features);
+    final EClass owner = firstFeature.getEContainingClass();
+    final T mergedFeature = this.stdLib.<T>copyToAs(firstFeature, owner, newFeatureName);
+    EdeltaUtils.removeAllElements(features);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature __, EObject oldObj, EObject newObj) -> {
+        final Function<T, T> _function_2 = (T a) -> {
+          return it.<T>getOriginal(a);
+        };
+        Stream<T> originalFeatures = features.stream().<T>map(_function_2);
+        final Function<T, Object> _function_3 = (T f) -> {
+          return oldObj.eGet(f);
+        };
+        List<Object> oldValues = originalFeatures.<Object>map(_function_3).collect(Collectors.<Object>toList());
+        Collection<Object> _migrated = it.<Object>getMigrated(oldValues);
+        V merged = valueMerger.apply(((Collection<V>) _migrated));
+        newObj.eSet(mergedFeature, merged);
+      };
+      it.copyRule(
+        it.<EStructuralFeature>wasRelatedTo(firstFeature), _function_1, postCopy);
+    };
+    this.modelMigration(_function);
+    return mergedFeature;
+  }
+
+  /**
+   * Merges the given features into a single new feature in the containing class.
+   * The features must be compatible (same containing class, same type, same cardinality, etc).
+   * 
+   * TODO: this has to be removed once all the examples and tests have been ported
+   * to model migration as well.
+   * 
+   * @param <T>
    * @param newFeatureName
    * @param features
    * @return the new feature added to the containing class of the features
    */
-  public EStructuralFeature mergeFeatures(final String newFeatureName, final Collection<EStructuralFeature> features) {
+  public <T extends EStructuralFeature> T mergeFeatures(final String newFeatureName, final Collection<T> features) {
     this.checkNoDifferences(features, 
       new EdeltaFeatureDifferenceFinder().ignoringName(), 
       "The two features cannot be merged");
-    final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(features);
+    final T feature = IterableExtensions.<T>head(features);
     final EClass owner = feature.getEContainingClass();
-    final EStructuralFeature copy = this.stdLib.<EStructuralFeature>copyToAs(feature, owner, newFeatureName);
+    final T copy = this.stdLib.<T>copyToAs(feature, owner, newFeatureName);
     EdeltaUtils.removeAllElements(features);
     return copy;
   }
@@ -116,6 +234,102 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   }
 
   /**
+   * Split the given attribute into several attributes with the same type
+   * as the original one, using the specified names. The original attribute
+   * will be removed. The passed valueSplitter is used to migrate the
+   * original object into the corresponding split ones.
+   * 
+   * @param attribute
+   * @param newNames
+   * @param valueSplitter
+   * @return the collection of features
+   */
+  public Collection<EAttribute> splitAttribute(final EAttribute attribute, final Collection<String> newNames, final Function<Object, Collection<?>> valueSplitter) {
+    final Collection<EAttribute> splitAttributes = this.<EAttribute>splitFeature(attribute, newNames);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
+        Object oldValue = oldObj.eGet(feature);
+        Iterator<?> splittedValues = valueSplitter.apply(oldValue).iterator();
+        for (final EAttribute splitFeature : splitAttributes) {
+          {
+            boolean _hasNext = splittedValues.hasNext();
+            boolean _not = (!_hasNext);
+            if (_not) {
+              return;
+            }
+            newObj.eSet(splitFeature, splittedValues.next());
+          }
+        }
+      };
+      it.copyRule(
+        it.<EStructuralFeature>wasRelatedTo(attribute), _function_1);
+    };
+    this.modelMigration(_function);
+    return splitAttributes;
+  }
+
+  /**
+   * Split the given reference into several references with the same type
+   * as the original one, using the specified names. The original reference
+   * will be removed. The passed valueSplitter is used to migrate the
+   * original object into the corresponding split ones.
+   * 
+   * @param reference
+   * @param newNames
+   * @param valueSplitter
+   * @param postCopy executed after the model migrations
+   * @return the collection of features
+   */
+  public Collection<EReference> splitReference(final EReference reference, final Collection<String> newNames, final Function<EObject, Collection<EObject>> valueSplitter, final Runnable postCopy) {
+    final Collection<EReference> splitReferences = this.<EReference>splitFeature(reference, newNames);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
+        EObject oldValue = it.getMigrated(
+          EdeltaEcoreUtil.getValueAsEObject(oldObj, feature));
+        Iterator<EObject> splittedValues = valueSplitter.apply(oldValue).iterator();
+        for (final EReference splitFeature : splitReferences) {
+          {
+            boolean _hasNext = splittedValues.hasNext();
+            boolean _not = (!_hasNext);
+            if (_not) {
+              return;
+            }
+            newObj.eSet(splitFeature, splittedValues.next());
+          }
+        }
+      };
+      it.copyRule(
+        it.<EStructuralFeature>wasRelatedTo(reference), _function_1, postCopy);
+    };
+    this.modelMigration(_function);
+    return splitReferences;
+  }
+
+  /**
+   * Split the given feature into several features with the same type
+   * as the original one, using the specified names. The original feature
+   * will be removed.
+   * 
+   * @param <T>
+   * @param featureToSplit
+   * @param newFeatureNames
+   * @return the collection of features
+   */
+  public <T extends EStructuralFeature> Collection<T> splitFeature(final T featureToSplit, final Collection<String> newFeatureNames) {
+    this.checkNotMany(featureToSplit, 
+      "Cannot split \'many\' feature");
+    this.checkNoBidirectionalReferences(Collections.<EStructuralFeature>unmodifiableList(CollectionLiterals.<EStructuralFeature>newArrayList(featureToSplit)), 
+      "Cannot split a bidirectional reference");
+    final EClass owner = featureToSplit.getEContainingClass();
+    final Function<String, T> _function = (String newName) -> {
+      return this.stdLib.<T>copyToAs(featureToSplit, owner, newName);
+    };
+    List<T> splitFeatures = newFeatureNames.stream().<T>map(_function).collect(Collectors.<T>toList());
+    EdeltaUtils.removeElement(featureToSplit);
+    return splitFeatures;
+  }
+
+  /**
    * Given an EAttribute, expected to have an EEnum type, creates a subclass of
    * the containing class for each value of the referred EEnum
    * (each subclass is given a name corresponding to the the EEnumLiteral,
@@ -130,20 +344,17 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   public Collection<EClass> enumToSubclasses(final EAttribute attr) {
     final EDataType type = attr.getEAttributeType();
     if ((type instanceof EEnum)) {
-      final ArrayList<EClass> createdSubclasses = CollectionLiterals.<EClass>newArrayList();
       final EClass owner = attr.getEContainingClass();
-      EdeltaUtils.makeAbstract(owner);
-      EList<EEnumLiteral> _eLiterals = ((EEnum)type).getELiterals();
-      for (final EEnumLiteral subc : _eLiterals) {
-        {
-          final String subclassName = this.ensureEClassifierNameIsUnique(owner, StringExtensions.toFirstUpper(subc.getLiteral().toLowerCase()));
-          final Consumer<EClass> _function = (EClass it) -> {
-            this.stdLib.addESuperType(it, owner);
-          };
-          EClass _addNewEClassAsSibling = this.stdLib.addNewEClassAsSibling(owner, subclassName, _function);
-          createdSubclasses.add(_addNewEClassAsSibling);
-        }
-      }
+      final Function1<EEnumLiteral, String> _function = (EEnumLiteral it) -> {
+        return StringExtensions.toFirstUpper(it.toString().toLowerCase());
+      };
+      final EdeltaModelMigrator.EObjectFunction _function_1 = (EObject oldObj) -> {
+        final String literalValue = EdeltaEcoreUtil.getValueFromFeatureName(oldObj, attr.getName()).toString();
+        final EClass correspondingSubclass = EdeltaUtils.findSiblingByName(owner, StringExtensions.toFirstUpper(literalValue.toLowerCase()));
+        return EdeltaEcoreUtil.createInstance(correspondingSubclass);
+      };
+      final Collection<EClass> createdSubclasses = this.introduceSubclasses(owner, 
+        IterableExtensions.<String>toList(ListExtensions.<EEnumLiteral, String>map(((EEnum)type).getELiterals(), _function)), _function_1);
       EdeltaUtils.removeElement(type);
       return createdSubclasses;
     } else {
@@ -152,6 +363,29 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       this.showError(attr, _plus);
       return null;
     }
+  }
+
+  /**
+   * Creates the classes with the given names as subclasses of the passed
+   * superClass, which will then be made abstract; the objectMigrator is applied
+   * for migrating objects that were originally instances of the superClass.
+   * 
+   * @param superClass
+   * @param name
+   * @param objectMigration
+   */
+  public Collection<EClass> introduceSubclasses(final EClass superClass, final Collection<String> names, final EdeltaModelMigrator.EObjectFunction objectMigrator) {
+    EdeltaUtils.makeAbstract(superClass);
+    final Function1<String, EClass> _function = (String name) -> {
+      return this.stdLib.addNewSubclass(superClass, name);
+    };
+    final List<EClass> subclasses = IterableExtensions.<EClass>toList(IterableExtensions.<String, EClass>map(names, _function));
+    final Consumer<EdeltaModelMigrator> _function_1 = (EdeltaModelMigrator it) -> {
+      it.createInstanceRule(
+        it.<EClass>isRelatedTo(superClass), objectMigrator);
+    };
+    this.modelMigration(_function_1);
+    return subclasses;
   }
 
   /**
@@ -180,7 +414,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     final EClass superclass = this.getSingleDirectSuperclass(subclasses);
     final Consumer<EEnum> _function = (EEnum it) -> {
       final Procedure2<EClass, Integer> _function_1 = (EClass subClass, Integer index) -> {
-        final String enumLiteralName = this.ensureEClassifierNameIsUnique(superclass, subClass.getName().toUpperCase());
+        final String enumLiteralName = subClass.getName().toUpperCase();
         EEnumLiteral _addNewEEnumLiteral = this.stdLib.addNewEEnumLiteral(it, enumLiteralName);
         final Procedure1<EEnumLiteral> _function_2 = (EEnumLiteral it_1) -> {
           it_1.setValue((index).intValue());
@@ -193,6 +427,19 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     final EAttribute attribute = this.stdLib.addNewEAttribute(superclass, this.fromTypeToFeatureName(enum_), enum_);
     EdeltaUtils.makeConcrete(superclass);
     EdeltaUtils.removeAllElements(subclasses);
+    final Consumer<EdeltaModelMigrator> _function_1 = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.EObjectFunction _function_2 = (EObject oldObj) -> {
+        final EEnumLiteral enumLiteralName = enum_.getEEnumLiteral(
+          oldObj.eClass().getName().toUpperCase());
+        final Consumer<EObject> _function_3 = (EObject newObj) -> {
+          newObj.eSet(attribute, enumLiteralName);
+        };
+        return EdeltaEcoreUtil.createInstance(superclass, _function_3);
+      };
+      it.createInstanceRule(
+        it.<EClass>wasRelatedToAtLeastOneOf(subclasses), _function_2);
+    };
+    this.modelMigration(_function_1);
     return attribute;
   }
 
@@ -216,12 +463,23 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       "Cannot extract bidirectional references");
     final EClass owner = this.findSingleOwner(features);
     final EClass extracted = this.stdLib.addNewEClassAsSibling(owner, name);
-    EReference _addMandatoryReference = this.addMandatoryReference(owner, StringExtensions.toFirstLower(name), extracted);
-    final Procedure1<EReference> _function = (EReference it) -> {
-      this.makeContainmentBidirectional(it);
-    };
-    final EReference reference = ObjectExtensions.<EReference>operator_doubleArrow(_addMandatoryReference, _function);
+    final EReference reference = this.addMandatoryReference(owner, StringExtensions.toFirstLower(name), extracted);
+    this.makeContainmentBidirectional(reference);
     this.stdLib.moveAllTo(features, extracted);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_1 = (EStructuralFeature origFeature, EObject origObj, EObject migratedObj) -> {
+        final Supplier<EObject> _function_2 = () -> {
+          return EdeltaEcoreUtil.createInstance(extracted);
+        };
+        EObject extractedObj = EdeltaEcoreUtil.getOrSetEObject(migratedObj, reference, _function_2);
+        extractedObj.eSet(
+          it.<EStructuralFeature>getMigrated(origFeature), 
+          it.getMigrated(origObj.eGet(origFeature)));
+      };
+      it.copyRule(
+        it.<EStructuralFeature>wasRelatedToAtLeastOneOf(features), _function_1);
+    };
+    this.modelMigration(_function);
     return reference;
   }
 
@@ -247,11 +505,11 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * @return the features of the original class
    */
   public List<EStructuralFeature> inlineClass(final EClass cl, final String prefix) {
-    final EReference ref = this.findSingleContainmentReferenceToThisClass(cl);
-    this.checkNotMany(ref, 
+    final EReference reference = this.findSingleContainmentReferenceToThisClass(cl);
+    this.checkNotMany(reference, 
       "Cannot inline in a \'many\' reference");
     final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
-      EReference _eOpposite = ref.getEOpposite();
+      EReference _eOpposite = reference.getEOpposite();
       return Boolean.valueOf((it != _eOpposite));
     };
     final List<EStructuralFeature> featuresToInline = IterableExtensions.<EStructuralFeature>toList(IterableExtensions.<EStructuralFeature>filter(cl.getEStructuralFeatures(), _function));
@@ -261,8 +519,20 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       it.setName(_plus);
     };
     featuresToInline.forEach(_function_1);
-    this.stdLib.moveAllTo(featuresToInline, ref.getEContainingClass());
+    this.stdLib.moveAllTo(featuresToInline, reference.getEContainingClass());
     EdeltaUtils.removeElement(cl);
+    final Consumer<EdeltaModelMigrator> _function_2 = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.CopyProcedure _function_3 = (EStructuralFeature origFeature, EObject origObj, EObject migratedObj) -> {
+        final EObject origReferredObj = EdeltaEcoreUtil.getValueAsEObject(origObj, origFeature);
+        for (final EStructuralFeature feature : featuresToInline) {
+          migratedObj.eSet(feature, 
+            it.getMigrated(origReferredObj.eGet(it.<EStructuralFeature>getOriginal(feature))));
+        }
+      };
+      it.copyRule(
+        it.<EStructuralFeature>wasRelatedTo(reference), _function_3);
+    };
+    this.modelMigration(_function_2);
     return featuresToInline;
   }
 
@@ -330,6 +600,31 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     }
     reference.setEType(extracted);
     this.makeContainmentBidirectional(reference);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final Predicate<EStructuralFeature> _function_1 = (EStructuralFeature feature) -> {
+        return (it.isRelatedTo(feature, reference) || 
+          it.isRelatedTo(feature, eOpposite));
+      };
+      final EdeltaModelMigrator.CopyProcedure _function_2 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
+        boolean _isRelatedTo = it.isRelatedTo(feature, eOpposite);
+        if (_isRelatedTo) {
+          return;
+        }
+        Collection<Object> oldValueOrValues = EdeltaEcoreUtil.getValueForFeature(oldObj, feature, 
+          reference.getUpperBound());
+        final Function<Object, EObject> _function_3 = (Object oldValue) -> {
+          final EObject copy = it.getMigrated(((EObject) oldValue));
+          final Consumer<EObject> _function_4 = (EObject o) -> {
+            o.eSet(extractedRef, copy);
+          };
+          return EdeltaEcoreUtil.createInstance(extracted, _function_4);
+        };
+        List<EObject> copies = oldValueOrValues.stream().<EObject>map(_function_3).collect(Collectors.<EObject>toList());
+        EdeltaEcoreUtil.setValueForFeature(newObj, reference, copies);
+      };
+      it.copyRule(_function_1, _function_2);
+    };
+    this.modelMigration(_function);
     return extracted;
   }
 
@@ -383,8 +678,8 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * 
    * @param duplicates
    */
-  public EClass extractSuperclass(final List<? extends EStructuralFeature> duplicates) {
-    final EStructuralFeature feature = IterableExtensions.head(duplicates);
+  public EClass extractSuperclass(final List<EStructuralFeature> duplicates) {
+    final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(duplicates);
     String _firstUpper = StringExtensions.toFirstUpper(feature.getName());
     String _plus = (_firstUpper + "Element");
     final String superClassName = this.ensureEClassifierNameIsUnique(feature, _plus);
@@ -401,8 +696,8 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * @param name
    * @param duplicates
    */
-  public EClass extractSuperclass(final String name, final List<? extends EStructuralFeature> duplicates) {
-    final EStructuralFeature feature = IterableExtensions.head(duplicates);
+  public EClass extractSuperclass(final String name, final List<EStructuralFeature> duplicates) {
+    final EStructuralFeature feature = IterableExtensions.<EStructuralFeature>head(duplicates);
     final Consumer<EClass> _function = (EClass it) -> {
       EdeltaUtils.makeAbstract(it);
       final Function1<EStructuralFeature, EClass> _function_1 = (EStructuralFeature it_1) -> {
@@ -411,7 +706,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       final Consumer<EClass> _function_2 = (EClass c) -> {
         this.stdLib.addESuperType(c, it);
       };
-      ListExtensions.map(duplicates, _function_1).forEach(_function_2);
+      ListExtensions.<EStructuralFeature, EClass>map(duplicates, _function_1).forEach(_function_2);
       this.pullUpFeatures(it, duplicates);
     };
     return this.stdLib.addNewEClassAsSibling(feature.getEContainingClass(), name, _function);
@@ -426,16 +721,159 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
    * @param dest
    * @param duplicates
    */
-  public void pullUpFeatures(final EClass dest, final List<? extends EStructuralFeature> duplicates) {
+  public EStructuralFeature pullUpFeatures(final EClass dest, final Collection<EStructuralFeature> duplicates) {
     this.checkNoDifferences(duplicates, 
       new EdeltaFeatureDifferenceFinder().ignoringContainingClass(), 
       "The two features are not equal");
     final Function1<EStructuralFeature, EClass> _function = (EStructuralFeature it) -> {
       return it.getEContainingClass();
     };
-    this.checkAllDirectSubclasses(dest, ListExtensions.map(duplicates, _function));
-    this.stdLib.<EStructuralFeature>copyTo(IterableExtensions.head(duplicates), dest);
+    this.checkAllDirectSubclasses(dest, IterableExtensions.<EClass>toList(IterableExtensions.<EStructuralFeature, EClass>map(duplicates, _function)));
+    final EStructuralFeature pulledUp = this.stdLib.<EStructuralFeature>copyTo(IterableExtensions.<EStructuralFeature>head(duplicates), dest);
     EdeltaUtils.removeAllElements(duplicates);
+    final Consumer<EdeltaModelMigrator> _function_1 = (EdeltaModelMigrator it) -> {
+      it.mapFeaturesRule(duplicates, pulledUp);
+    };
+    this.modelMigration(_function_1);
+    return pulledUp;
+  }
+
+  /**
+   * Given a feature and a non empty list of {@link EClass}, which are known to
+   * be direct subclasses of the containing class of the feature, pushes the feature down in
+   * the given common subclasses
+   * (and removes the feature from the original containing class).
+   * 
+   * @param featureToPush
+   * @param subClasses
+   */
+  public Collection<EStructuralFeature> pushDownFeature(final EStructuralFeature featureToPush, final List<EClass> subClasses) {
+    this.checkAllDirectSubclasses(featureToPush.getEContainingClass(), subClasses);
+    final HashMap<EClass, EStructuralFeature> pushedDownFeatures = new HashMap<EClass, EStructuralFeature>();
+    for (final EClass subClass : subClasses) {
+      {
+        EStructuralFeature pushedDown = EcoreUtil.<EStructuralFeature>copy(featureToPush);
+        pushedDownFeatures.put(subClass, pushedDown);
+        subClass.getEStructuralFeatures().add(0, pushedDown);
+      }
+    }
+    EdeltaUtils.removeElement(featureToPush);
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.FeatureMigrator _function_1 = (EStructuralFeature feature, EObject oldObj, EObject newObj) -> {
+        return pushedDownFeatures.get(newObj.eClass());
+      };
+      it.featureMigratorRule(
+        it.<EStructuralFeature>wasRelatedTo(featureToPush), _function_1);
+    };
+    this.modelMigration(_function);
+    return pushedDownFeatures.values();
+  }
+
+  /**
+   * Create a new target class with the given name that merges all
+   * the passed classes.
+   * 
+   * The classes are expected to have the same single direct superclass
+   * and to define the same features.
+   * 
+   * @param mergedClassName
+   * @param toMerge
+   */
+  public EClass mergeClasses(final String mergedClassName, final Collection<EClass> toMerge) {
+    final EClass superClass = this.getSingleDirectSuperclass(toMerge);
+    this.checkSameFeatures(toMerge);
+    final Function1<EClass, EList<EStructuralFeature>> _function = (EClass it) -> {
+      return it.getEStructuralFeatures();
+    };
+    this.checkNoBidirectionalReferences(IterableExtensions.<EStructuralFeature>toList(Iterables.<EStructuralFeature>concat(IterableExtensions.<EClass, EList<EStructuralFeature>>map(toMerge, _function))), 
+      "Cannot merge in the presence of bidirectional references");
+    final EClass merged = this.stdLib.<EClass>copyToAs(IterableExtensions.<EClass>head(toMerge), superClass.getEPackage(), mergedClassName);
+    EdeltaUtils.removeAllElements(toMerge);
+    final Consumer<EdeltaModelMigrator> _function_1 = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.EObjectFunction _function_2 = (EObject origObj) -> {
+        EObject _xblockexpression = null;
+        {
+          final EList<EStructuralFeature> origFeatures = origObj.eClass().getEAllStructuralFeatures();
+          final Consumer<EObject> _function_3 = (EObject newObj) -> {
+            for (final EStructuralFeature origFeature : origFeatures) {
+              it.copyFrom(newObj, merged.getEStructuralFeature(origFeature.getName()), origObj, origFeature);
+            }
+          };
+          _xblockexpression = EdeltaEcoreUtil.createInstance(merged, _function_3);
+        }
+        return _xblockexpression;
+      };
+      it.createInstanceRule(
+        it.<EClass>wasRelatedToAtLeastOneOf(toMerge), _function_2);
+    };
+    this.modelMigration(_function_1);
+    return merged;
+  }
+
+  /**
+   * Splits the passed class into several classes with the given names;
+   * all classes will be copies of the original class (which will be removed).
+   * Concerning model migration, it creates an object of the first split class.
+   * 
+   * @param toSplit
+   * @param names
+   */
+  public Collection<EClass> splitClass(final EClass toSplit, final Collection<String> names) {
+    final EPackage containingPackage = toSplit.getEPackage();
+    final EdeltaModelMigrator.EObjectFunction _function = (EObject origObj) -> {
+      return EdeltaEcoreUtil.createInstance(this.getEClass(containingPackage, IterableExtensions.<String>head(names)));
+    };
+    return this.splitClass(toSplit, names, _function);
+  }
+
+  /**
+   * Splits the passed class into several classes with the given names;
+   * all classes will be copies of the original class (which will be removed).
+   * The objectMigrator is used when migrating the model objects of the original class:
+   * it is used to create an instance of the proper class and then all the features
+   * of the original object are copied into the created instance automatically
+   * 
+   * @param toSplit
+   * @param names
+   * @param objectMigration
+   */
+  public Collection<EClass> splitClass(final EClass toSplit, final Collection<String> names, final EdeltaModelMigrator.EObjectFunction objectMigrator) {
+    final Consumer<EdeltaModelMigrator> _function = (EdeltaModelMigrator it) -> {
+      final EdeltaModelMigrator.EObjectFunction _function_1 = (EObject origObj) -> {
+        final EList<EStructuralFeature> origFeatures = origObj.eClass().getEAllStructuralFeatures();
+        final EObject newObj = objectMigrator.apply(origObj);
+        final EClass newClass = newObj.eClass();
+        for (final EStructuralFeature origFeature : origFeatures) {
+          it.copyFrom(newObj, newClass.getEStructuralFeature(origFeature.getName()), origObj, origFeature);
+        }
+        return newObj;
+      };
+      it.createInstanceRule(
+        it.<EClass>wasRelatedTo(toSplit), _function_1);
+    };
+    return this.splitClass(toSplit, names, _function);
+  }
+
+  /**
+   * Splits the passed class into several classes with the given names;
+   * all classes will be copies of the original class (which will be removed).
+   * The migratorConsumer is used when migrating the model and the developer ahs
+   * the full control on such a migration by using the migratorConsumer appropriately
+   * to define migration rules.
+   * 
+   * @param toSplit
+   * @param names
+   * @param objectMigration
+   */
+  public Collection<EClass> splitClass(final EClass toSplit, final Collection<String> names, final Consumer<EdeltaModelMigrator> migratorConsumer) {
+    final EPackage containingPackage = toSplit.getEPackage();
+    final Function1<String, EClass> _function = (String n) -> {
+      return this.stdLib.<EClass>copyToAs(toSplit, containingPackage, n);
+    };
+    final List<EClass> split = IterableExtensions.<EClass>toList(IterableExtensions.<String, EClass>map(names, _function));
+    EdeltaUtils.removeElement(toSplit);
+    this.modelMigration(migratorConsumer);
+    return split;
   }
 
   /**
@@ -631,6 +1069,21 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     }
   }
 
+  public void checkType(final EStructuralFeature feature, final EClassifier expectedType) {
+    String _fullyQualifiedName = EdeltaUtils.getFullyQualifiedName(feature.getEType());
+    String _fullyQualifiedName_1 = EdeltaUtils.getFullyQualifiedName(expectedType);
+    boolean _notEquals = (!Objects.equal(_fullyQualifiedName, _fullyQualifiedName_1));
+    if (_notEquals) {
+      String _eObjectRepr = EdeltaUtils.getEObjectRepr(expectedType);
+      String _plus = ("expecting " + _eObjectRepr);
+      String _plus_1 = (_plus + " but was ");
+      String _eObjectRepr_1 = EdeltaUtils.getEObjectRepr(feature.getEType());
+      final String message = (_plus_1 + _eObjectRepr_1);
+      this.showError(feature, message);
+      throw new IllegalArgumentException(message);
+    }
+  }
+
   /**
    * Makes sure the passed EClasses have no features, if not, shows
    * error information and throws an IllegalArgumentException.
@@ -660,6 +1113,57 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
     boolean _not = (!_isEmpty);
     if (_not) {
       throw new IllegalArgumentException("Classes not empty");
+    }
+  }
+
+  /**
+   * Makes sure the passed EClasses have the same features,
+   * independently from the order, if not, shows
+   * error information and throws an IllegalArgumentException.
+   * 
+   * @param classes
+   */
+  public void checkSameFeatures(final Collection<EClass> classes) {
+    final EClass firstClass = IterableExtensions.<EClass>head(classes);
+    final Function1<EStructuralFeature, String> _function = (EStructuralFeature it) -> {
+      return it.getName();
+    };
+    final List<EStructuralFeature> features = IterableExtensions.<EStructuralFeature, String>sortBy(firstClass.getEStructuralFeatures(), _function);
+    final Iterable<EClass> otherClasses = IterableExtensions.<EClass>tail(classes);
+    for (final EClass otherClass : otherClasses) {
+      {
+        final Function1<EStructuralFeature, String> _function_1 = (EStructuralFeature it) -> {
+          return it.getName();
+        };
+        final List<EStructuralFeature> otherFeatures = IterableExtensions.<EStructuralFeature, String>sortBy(otherClass.getEStructuralFeatures(), _function_1);
+        final int expectedSize = features.size();
+        final int actualSize = otherFeatures.size();
+        if ((expectedSize != actualSize)) {
+          String _eObjectRepr = EdeltaUtils.getEObjectRepr(firstClass);
+          String _plus = (((((("Different features size: expected " + Integer.valueOf(expectedSize)) + " but was ") + Integer.valueOf(actualSize)) + "\n  ") + 
+            "in classes ") + _eObjectRepr);
+          String _plus_1 = (_plus + ", ");
+          String _eObjectRepr_1 = EdeltaUtils.getEObjectRepr(otherClass);
+          String _plus_2 = (_plus_1 + _eObjectRepr_1);
+          this.showError(otherClass, _plus_2);
+          throw new IllegalArgumentException("Features don\'t match in size");
+        } else {
+          final EdeltaFeatureDifferenceFinder finder = new EdeltaFeatureDifferenceFinder().ignoringContainingClass();
+          final Iterator<EStructuralFeature> otherIt = otherFeatures.iterator();
+          for (final EStructuralFeature f : features) {
+            {
+              final EStructuralFeature other = otherIt.next();
+              boolean _equals = finder.equals(f, other);
+              boolean _not = (!_equals);
+              if (_not) {
+                final String message = finder.getDifferenceDetails();
+                this.showError(otherClass, message);
+                throw new IllegalArgumentException(message);
+              }
+            }
+          }
+        }
+      }
     }
   }
 
@@ -929,10 +1433,10 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       invalid.forEach(_function_1);
       throw new IllegalArgumentException("Wrong superclasses");
     }
-    final EClass result = IterableExtensions.<EClass>head(IterableExtensions.<EClass>head(subclasses).getESuperTypes());
+    final EClass superclass = IterableExtensions.<EClass>head(IterableExtensions.<EClass>head(subclasses).getESuperTypes());
     final Function1<EClass, Boolean> _function_2 = (EClass it) -> {
       EClass _head = IterableExtensions.<EClass>head(it.getESuperTypes());
-      return Boolean.valueOf((_head != result));
+      return Boolean.valueOf((_head != superclass));
     };
     final Iterable<EClass> differences = IterableExtensions.<EClass>filter(subclasses, _function_2);
     boolean _isEmpty_1 = IterableExtensions.isEmpty(differences);
@@ -944,7 +1448,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
         String _plus_1 = (_plus + ":\n");
         String _plus_2 = (_plus_1 + 
           "  Expected: ");
-        String _eObjectRepr_1 = EdeltaUtils.getEObjectRepr(result);
+        String _eObjectRepr_1 = EdeltaUtils.getEObjectRepr(superclass);
         String _plus_3 = (_plus_2 + _eObjectRepr_1);
         String _plus_4 = (_plus_3 + "\n");
         String _plus_5 = (_plus_4 + 
@@ -956,21 +1460,24 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
       differences.forEach(_function_3);
       throw new IllegalArgumentException("Wrong superclasses");
     }
-    final Set<EClass> additionalSubclasses = IterableExtensions.<EClass>toSet(this.directSubclasses(result));
+    final Set<EClass> additionalSubclasses = IterableExtensions.<EClass>toSet(this.directSubclasses(superclass));
     additionalSubclasses.removeAll(IterableExtensions.<EClass>toSet(subclasses));
     boolean _isEmpty_2 = additionalSubclasses.isEmpty();
     boolean _not_2 = (!_isEmpty_2);
     if (_not_2) {
+      String _eObjectRepr = EdeltaUtils.getEObjectRepr(superclass);
+      String _plus = ("The class " + _eObjectRepr);
+      String _plus_1 = (_plus + " has additional subclasses:\n");
       final Function1<EClass, String> _function_4 = (EClass it) -> {
-        String _eObjectRepr = EdeltaUtils.getEObjectRepr(it);
-        return ("  " + _eObjectRepr);
+        String _eObjectRepr_1 = EdeltaUtils.getEObjectRepr(it);
+        return ("  " + _eObjectRepr_1);
       };
       String _join = IterableExtensions.join(IterableExtensions.<EClass, String>map(additionalSubclasses, _function_4), "\n");
-      final String message = ("The class has additional subclasses:\n" + _join);
-      this.showError(result, message);
+      final String message = (_plus_1 + _join);
+      this.showError(superclass, message);
       throw new IllegalArgumentException(message);
     }
-    return result;
+    return superclass;
   }
 
   public Iterable<EClass> directSubclasses(final EClass cl) {

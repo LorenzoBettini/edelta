@@ -1,0 +1,51 @@
+import edelta.lib.EdeltaModelMigrator
+import edelta.refactorings.lib.EdeltaRefactorings
+
+package edelta.examxml.example
+
+metamodel "examxml"
+metamodel "ecore"
+
+use EdeltaRefactorings as refactorings
+
+modifyEcore removeAttributes epackage examxml {
+	removeElement(ecoreref(question))
+	removeElement(ecoreref(optional))
+}
+
+modifyEcore introduceExerciseElement epackage examxml {
+	ecoreref(ExamElement).addNewSubclass("ExerciseElement")
+}
+
+modifyEcore splitOpenElement epackage examxml {
+	val toSplit = ecoreref(OpenElement)
+	val ePackage = ecoreref(examxml)
+	val elementsFeature = ecoreref(Exam.elements)
+	refactorings.splitClass(
+		toSplit,
+		#["OpenElement1", "OpenElement2"],
+		[EdeltaModelMigrator it |
+			copyRule(
+				wasRelatedTo(elementsFeature),
+				[origElementsFeature, origExam, newExam |
+					val newElements = newArrayList
+					val origElements = origExam.getValueAsList(origElementsFeature)
+					for (origElement : origElements) {
+						val origElementClass = origElement.eClass
+						if (origElementClass == getOriginal(toSplit)) {
+							if (origElement.isSet("specificQuestion1"))
+								newElements += createFrom(ePackage.getEClass("OpenElement1"), origElement)
+							if (origElement.isSet("specificQuestion2"))
+								newElements += createFrom(ePackage.getEClass("OpenElement2"), origElement)
+						} else {
+							newElements += getMigrated(origElement)
+						}
+					}
+					newExam.eSet(elementsFeature, newElements)
+				]
+			)
+		]
+	)
+	removeElement(ecoreref(examxml.OpenElement1.specificQuestion2))
+	removeElement(ecoreref(examxml.OpenElement2.specificQuestion1))
+}

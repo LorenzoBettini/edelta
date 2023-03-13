@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<person:List
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:person="http://cs.gssi.it/PersonMM"
+    xsi:schemaLocation="http://cs.gssi.it/PersonMM PersonList.ecore">
+  <members lastname="MaleLastName"
+      firstname="MaleFirstName"/>
+  <members lastname="FemaleLastName"
+      firstname="FemaleFirstName"
+      gender="FEMALE"/>
+  <members lastname="UnspecifiedLastName"
+      firstname="UnspecifiedFirstName"/>
+</person:List>

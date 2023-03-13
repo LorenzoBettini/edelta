@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<person:List
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:person="http://cs.gssi.it/PersonMM"
+    xsi:schemaLocation="http://cs.gssi.it/PersonMM PersonList.ecore">
+  <members xsi:type="person:Student"
+      name="a student"
+      address="//@addresses.0"/>
+  <members xsi:type="person:Employee"
+      name="an employee"
+      address="//@addresses.1"/>
+  <members xsi:type="person:Employee"
+      name="another employee"
+      works="//@wplaces.0"/>
+  <wplaces persons="//@members.0 //@members.2"
+      address="a workplace"/>
+  <addresses
+      street="first street"/>
+  <addresses
+      street="second street"/>
+</person:List>

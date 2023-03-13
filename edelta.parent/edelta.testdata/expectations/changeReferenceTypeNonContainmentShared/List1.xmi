@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<person:List
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:person="http://cs.gssi.it/PersonMM"
+    xsi:schemaLocation="http://cs.gssi.it/PersonMM PersonList.ecore">
+  <members firstName="//@otherNameElements.0"
+      lastName="//@nameElements.0"/>
+  <members/>
+  <members firstName="//@otherNameElements.1"
+      lastName="//@nameElements.1"/>
+  <members>
+    <firstName
+        href="List2.xmi#//@otherNameElements.0"/>
+    <lastName
+        href="List2.xmi#//@nameElements.2"/>
+  </members>
+  <nameElements
+      nameElementValue="aLastName1"/>
+  <nameElements
+      nameElementValue="aLastName2"/>
+  <otherNameElements
+      otherNameElementValue="aFirstName1"/>
+  <otherNameElements
+      otherNameElementValue="aFirstName2"/>
+</person:List>

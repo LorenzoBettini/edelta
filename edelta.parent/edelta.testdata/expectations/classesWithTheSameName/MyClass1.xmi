@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mypackage1:MyClass
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:mypackage1="http://my.package1.org"
+    xsi:schemaLocation="http://my.package1.org My1.ecore"
+    myClassStringAttribute="My Attribute Value"/>

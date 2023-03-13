@@ -158,6 +158,16 @@ public class EdeltaUtils {
 		return builder.toString();
 	}
 
+	/**
+	 * See {@link #getEObjectRepr(EObject)}
+	 * 
+	 * @param e
+	 * @return
+	 */
+	public static String getFullyQualifiedName(EObject e) {
+		return getEObjectRepr(e);
+	}
+
 	public static void removeESuperType(EClass subClass, EClass superClass) {
 		subClass.getESuperTypes().remove(superClass);
 	}
@@ -520,7 +530,7 @@ public class EdeltaUtils {
 		return p -> !EcorePackage.eNS_URI.equals(p.getNsURI());
 	}
 
-	private static <T, R> Stream<R> filterByType(Stream<T> stream, Class<R> desiredType) {
+	public static <T, R> Stream<R> filterByType(Stream<T> stream, Class<R> desiredType) {
 		return stream
 				.filter(desiredType::isInstance)
 				.map(desiredType::cast);
@@ -555,5 +565,12 @@ public class EdeltaUtils {
 				return type.cast(e);
 
 		return null;
+	}
+
+	public static EClass findSiblingByName(EClass cl, String sibingName) {
+		return EdeltaUtils.getEClassesStream(cl.getEPackage())
+				.filter(c -> c.getName().equals(sibingName))
+				.findFirst()
+				.orElse(null);
 	}
 }

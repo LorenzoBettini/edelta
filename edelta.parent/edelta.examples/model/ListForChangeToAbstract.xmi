@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<person:List
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:person="http://cs.gssi.it/PersonMM"
+    xsi:schemaLocation="http://cs.gssi.it/PersonMM PersonListForChangeToAbstract.ecore">
+  <members name="I'm an employee"/>
+  <members name="I'm a manager"
+      manager="true"/>
+  <members name="I'm another employee"/>
+  <members name="I'm another manager"
+      manager="true"/>
+</person:List>

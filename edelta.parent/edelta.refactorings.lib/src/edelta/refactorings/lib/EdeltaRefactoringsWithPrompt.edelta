@@ -1,0 +1,101 @@
+import edelta.refactorings.lib.helper.EdeltaEObjectHelper
+import edelta.refactorings.lib.helper.EdeltaPromptHelper
+import java.util.ArrayList
+import java.util.Collection
+import java.util.List
+import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EStructuralFeature
+
+package edelta.refactorings.lib
+
+metamodel "ecore"
+
+use EdeltaRefactorings as refactorings
+
+/**
+ * Creates the classes with the given names as subclasses of the passed
+ * superClass, which will then be made abstract; For model migration it
+ * prompts the user on the console.
+ * 
+ * @see EdeltaRefactorings#introduceSubclasses(EClass, Collection, edelta.lib.EdeltaModelMigrator.EObjectFunction)
+ * 
+ * @param superClass
+ * @param name
+ */
+def introduceSubclassesInteractive(EClass superClass, List<String> names) : Collection<EClass> {
+	refactorings.introduceSubclasses(superClass, names) [
+		oldObj |
+		val helper = new EdeltaEObjectHelper
+		EdeltaPromptHelper.show("Migrating " + helper.represent(oldObj))
+		EdeltaPromptHelper.show(helper.positionInContainter(oldObj))
+		val choice = EdeltaPromptHelper.choice(names)
+		return createInstance(superClass.EPackage.getEClass(choice))
+	]
+}
+
+/**
+ * Merges the given attributes, expected to be of type EString,
+ * into a single new attribute in the containing class; For model migration it
+ * prompts the user on the console.
+ * 
+ * @see EdeltaRefactorings#mergeAttributes(String, Collection, Function)
+ * 
+ * @param newAttributeName
+ * @param attributes
+ */
+def mergeStringAttributes(String newAttributeName, Collection<EAttribute> attributes) : EAttribute {
+	refactorings.checkType(attributes.head, ecoreref(EString))
+	refactorings.mergeAttributes(
+		newAttributeName,
+		attributes,
+		[oldValues|
+			val stringValues = oldValues.filterNull.map[toString]
+			if (stringValues.empty)
+				return null
+			EdeltaPromptHelper.show("Merging values: " +
+				stringValues.join(", ")
+			)
+			val sep = EdeltaPromptHelper.ask("Separator?")
+			return stringValues.join(sep)
+		]
+	)
+}
+
+/**
+ * Changes this feature to multiple with the given upper bound; concerning model migration,
+ * it makes sure that a collection is created with at most the specified upper bound
+ * if the previous model object's value was set, prompting the user to select the
+ * values (in case the original values are less than or equal to upperBound it
+ * performs the migration automatically).
+ * 
+ * @param feature
+ * @param upperBound
+ */
+def changeUpperBoundInteractive(EStructuralFeature feature, int upperBound) {
+	feature.upperBound = upperBound
+	modelMigration[
+		copyRule(
+			isRelatedTo(feature),
+			[origFeature, origObj, migratedObj |
+				// take all the original values
+				var origValues = origObj.getValueForFeature(origFeature, -1)
+				if (origValues.size <= upperBound) {
+					migratedObj.setValueForFeature(feature, getMigrated(origValues))
+					return
+				}
+				val helper = new EdeltaEObjectHelper
+				EdeltaPromptHelper.show("Migrating " + helper.represent(origObj))
+				val choices = origValues.map[helper.represent(it)].toList
+				val newValues = new ArrayList(upperBound)
+				for (var i = 1; i <= upperBound; i++) {
+					EdeltaPromptHelper.show("Choice " + i + " of " + upperBound)
+					val choice = EdeltaPromptHelper.choiceIndex(choices)
+					val chosen = origValues.get(choice)
+					newValues.add(getMigrated(chosen))
+				}
+				migratedObj.setValueForFeature(feature, newValues)
+			]
+		)
+	]
+}
