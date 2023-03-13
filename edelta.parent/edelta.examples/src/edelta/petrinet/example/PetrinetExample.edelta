@@ -10,8 +10,6 @@ metamodel "ecore"
 
 use EdeltaRefactorings as refactorings
 
-//Petrinet MM0-MM1
-
 def addWeightAttribute(EClass c) {
 	c.addNewEAttribute("weight", ecoreref(EInt)) [
 		makeRequired // lowerBound = 1
@@ -20,14 +18,9 @@ def addWeightAttribute(EClass c) {
 
 modifyEcore modifyNet epackage petrinet {
 	ecoreref(Net).name = "Petrinet"
-	ecoreref(Petrinet.places).makeRequired
-	ecoreref(Petrinet.transitions).makeRequired
 }
 
 modifyEcore introducePTArc epackage petrinet {
-//	refactorings.extractMetaClass("PTArc", ecoreref(Place.dst), 'out', 'in') => [
-//		addWeightAttribute
-//	]
 	refactorings.referenceToClass("PTArc", ecoreref(Place.dst)) => [
 		addWeightAttribute
 	]
@@ -38,9 +31,6 @@ modifyEcore introducePTArc epackage petrinet {
 }
 
 modifyEcore introduceTPArc epackage petrinet {
-//	refactorings.extractMetaClass("TPArc", ecoreref(Transition.dst), 'out', 'in') => [
-//		addWeightAttribute
-//	]
 	refactorings.referenceToClass("TPArc", ecoreref(Transition.dst)) => [
 		addWeightAttribute
 	]
@@ -51,6 +41,32 @@ modifyEcore introduceTPArc epackage petrinet {
 }
 
 modifyEcore introduceAbstractArc epackage petrinet {
-	refactorings.extractSuperclass("Arc",
+	val arc = refactorings.extractSuperclass("Arc",
 		#[ecoreref(PTArc.weight), ecoreref(TPArc.weight)])
+
+	val netRef = arc.addNewEReference("net", ecoreref(Petrinet))
+
+	val arcs = ecoreref(Petrinet).addNewEReference("arcs", arc) [
+		makeContainment
+		makeMultiple
+		makeBidirectional(netRef)
+	]
+
+	// drop containment from Place and Transition
+	val placeOut = ecoreref(Place.out)
+	placeOut.dropContainment
+	val transitionOut = ecoreref(Transition.out)
+	transitionOut.dropContainment
+
+	// because Arc objects must be contained in Petrinet.arcs
+	modelMigration[
+		copyRule(
+			[f | isRelatedTo(f, placeOut) || isRelatedTo(f, transitionOut)],
+			[f, oldObj, newObj |
+				val migratedNet = getMigrated(oldObj.eContainer)
+				val migratedArcs = getMigrated(oldObj.getValueAsList(f))
+				migratedNet.getValueAsList(arcs).addAll(migratedArcs)
+			]
+		)
+	]
 }

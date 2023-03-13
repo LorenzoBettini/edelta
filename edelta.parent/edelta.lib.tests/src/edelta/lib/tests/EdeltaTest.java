@@ -3,26 +3,20 @@
  */
 package edelta.lib.tests;
 
-import static edelta.testutils.EdeltaTestUtils.cleanDirectory;
-import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.eclipse.emf.common.util.WrappedException;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
@@ -34,10 +28,11 @@ import org.eclipse.xtext.util.Wrapper;
 import org.junit.Before;
 import org.junit.Test;
 
-import edelta.lib.AbstractEdelta;
-import edelta.lib.EdeltaEPackageManager;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaIssuePresenter;
+import edelta.lib.EdeltaModelManager;
+import edelta.lib.EdeltaModelMigrator;
 import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
 /**
@@ -51,8 +46,6 @@ public class EdeltaTest {
 	private static final String MY_CLASS = "MyClass";
 	private static final String MYOTHERPACKAGE = "myotherpackage";
 	private static final String MYPACKAGE = "mypackage";
-	private static final String MODIFIED = "modified";
-	private static final String NEW_MODIFIED = "new_modified";
 	private static final String MY2_ECORE = "My2.ecore";
 	private static final String MY_ECORE = "My.ecore";
 	private static final String MY_SUBPACKAGES_ECORE = "MySubPackages.ecore";
@@ -63,16 +56,17 @@ public class EdeltaTest {
 
 	public static class TestableEdelta extends EdeltaDefaultRuntime {
 
-		public TestableEdelta() {
-			super();
-		}
-
-		public TestableEdelta(AbstractEdelta other) {
+		public TestableEdelta(EdeltaRuntime other) {
 			super(other);
 		}
 
-		public TestableEdelta(EdeltaEPackageManager packageManager) {
-			super(packageManager);
+		public TestableEdelta(EdeltaModelManager modelManager) {
+			super(modelManager);
+		}
+
+		
+		public TestableEdelta(EdeltaModelMigrator modelMigrator) {
+			super(modelMigrator);
 		}
 
 		@Override
@@ -83,9 +77,12 @@ public class EdeltaTest {
 
 	protected TestableEdelta edelta;
 
+	protected EdeltaModelManager modelManager;
+
 	@Before
 	public void init() {
-		edelta = new TestableEdelta();
+		modelManager = new EdeltaModelManager();
+		edelta = new TestableEdelta(modelManager);
 	}
 
 	@Test
@@ -98,11 +95,6 @@ public class EdeltaTest {
 		var loadTestEcore = loadTestEcore(MY_ECORE);
 		assertThat(((EPackage) loadTestEcore.getContents().get(0)).getName())
 			.isEqualTo(MYPACKAGE);
-	}
-
-	@Test(expected=WrappedException.class)
-	public void testLoadNonExistantEcoreFile() {
-		edelta.loadEcoreFile("foo.ecore");
 	}
 
 	@Test
@@ -129,7 +121,7 @@ public class EdeltaTest {
 
 	@Test
 	public void testGetEPackageWithOtherEdelta() {
-		TestableEdelta other = edelta;
+		EdeltaRuntime other = edelta;
 		edelta = new TestableEdelta(other);
 		tryToRetrieveSomeEPackages();
 	}
@@ -146,7 +138,7 @@ public class EdeltaTest {
 
 	@Test
 	public void testGetEPackageWithExplicitPackageManager() {
-		edelta = new TestableEdelta(new EdeltaEPackageManager() {
+		edelta = new TestableEdelta(new EdeltaModelManager() {
 			@Override
 			public EPackage getEPackage(String packageName) {
 				if (packageName.equals("toFind"))
@@ -175,6 +167,8 @@ public class EdeltaTest {
 		loadTestEcore(MY_ECORE);
 		assertNotNull(edelta.getEClass(MYPACKAGE, MY_CLASS));
 		assertNull(edelta.getEClass(MYPACKAGE, "MyDataType"));
+		assertNotNull(edelta.getEClass(edelta.getEPackage(MYPACKAGE), MY_CLASS));
+		assertNull(edelta.getEClass(edelta.getEPackage(MYPACKAGE), "MyDataType"));
 	}
 
 	@Test
@@ -273,42 +267,6 @@ public class EdeltaTest {
 	}
 
 	@Test
-	public void testSaveModifiedEcores() throws IOException {
-		loadTestEcore(MY_ECORE);
-		loadTestEcore(MY2_ECORE);
-		wipeModifiedDirectoryContents();
-		edelta.saveModifiedEcores(MODIFIED);
-		// we did not modify anything so the generated files and the
-		// original ones must be the same
-		assertFilesAreEquals(
-				TESTECORES+"/"+MY_ECORE, MODIFIED+"/"+MY_ECORE);
-		assertFilesAreEquals(
-				TESTECORES+"/"+MY2_ECORE, MODIFIED+"/"+MY2_ECORE);
-	}
-
-	@Test
-	public void testSaveModifiedEcoresInNonExistingDirectory() throws IOException {
-		var nested = NEW_MODIFIED + "/nested";
-		deleteDirectory(nested);
-		deleteDirectory(NEW_MODIFIED);
-		try {
-			loadTestEcore(MY_ECORE);
-			loadTestEcore(MY2_ECORE);
-			wipeModifiedDirectoryContents();
-			edelta.saveModifiedEcores(nested);
-			// we did not modify anything so the generated files and the
-			// original ones must be the same
-			assertFilesAreEquals(
-				TESTECORES + "/" + MY_ECORE, nested + "/" + MY_ECORE);
-			assertFilesAreEquals(
-				TESTECORES + "/" + MY2_ECORE, nested + "/" + MY2_ECORE);
-		} finally {
-			deleteDirectory(nested);
-			deleteDirectory(NEW_MODIFIED);
-		}
-	}
-
-	@Test
 	public void testGetLogger() { // NOSONAR just make sure it runs
 		edelta.getLogger().info("test message");
 	}
@@ -369,8 +327,8 @@ public class EdeltaTest {
 	@Test
 	public void testSetIssuePresenterPropagatesToChildren() {
 		var issuePresenter = mock(EdeltaIssuePresenter.class);
-		AbstractEdelta child = new EdeltaDefaultRuntime(edelta);
-		AbstractEdelta grandchild = new EdeltaDefaultRuntime(child);
+		EdeltaRuntime child = new EdeltaDefaultRuntime(edelta);
+		EdeltaRuntime grandchild = new EdeltaDefaultRuntime(child);
 		edelta.setIssuePresenter(issuePresenter);
 		EPackage problematicObject = EcoreFactory.eINSTANCE.createEPackage();
 		problematicObject.setName("anEPackage");
@@ -388,8 +346,8 @@ public class EdeltaTest {
 	public void testIssuePresenterIsPropagatedToChildrenByConstructor() {
 		var issuePresenter = mock(EdeltaIssuePresenter.class);
 		edelta.setIssuePresenter(issuePresenter);
-		AbstractEdelta child = new EdeltaDefaultRuntime(edelta);
-		AbstractEdelta grandchild = new EdeltaDefaultRuntime(child);
+		EdeltaRuntime child = new EdeltaDefaultRuntime(edelta);
+		EdeltaRuntime grandchild = new EdeltaDefaultRuntime(child);
 		EPackage problematicObject = EcoreFactory.eINSTANCE.createEPackage();
 		problematicObject.setName("anEPackage");
 		child.showError(problematicObject, "an error");
@@ -424,20 +382,27 @@ public class EdeltaTest {
 			((EClass) eAttribute.eContainer()).getEPackage().getName());
 	}
 
-	private void wipeModifiedDirectoryContents() throws IOException {
-		cleanDirectory(MODIFIED);
+	@Test
+	public void testModelMigrationNull() {
+		loadTestEcore(MY_ECORE);
+		edelta.modelMigration(migrator -> {
+			// this should not be called
+			fail("should not come here");
+		});
 	}
 
-	private void deleteDirectory(String directory) throws IOException {
-		File dir = new File(directory);
-		if (dir.exists()) {
-			cleanDirectory(directory);
-			Files.delete(dir.toPath());
-		}
+	@Test(expected = IllegalArgumentException.class)
+	public void testModelMigrationNotNull() {
+		var other = new TestableEdelta(new EdeltaModelMigrator(new EdeltaModelManager()));
+		edelta = new TestableEdelta(other);
+		loadTestEcore(MY_ECORE);
+		edelta.modelMigration(migrator -> {
+			throw new IllegalArgumentException("expected");
+		});
 	}
 
 	private Resource loadTestEcore(String ecoreFile) {
-		return edelta.loadEcoreFile(TESTECORES+ecoreFile);
+		return modelManager.loadEcoreFile(TESTECORES+ecoreFile);
 	}
 
 	private void assertEAttribute(EAttribute f, String expectedName) {

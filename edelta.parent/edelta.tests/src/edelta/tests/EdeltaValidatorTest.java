@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import edelta.edelta.EdeltaPackage;
-import edelta.lib.AbstractEdelta;
+import edelta.lib.EdeltaRuntime;
 import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 import edelta.validation.EdeltaValidator;
 
@@ -65,11 +65,11 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
 			EdeltaValidator.TYPE_MISMATCH,
 			input.lastIndexOf("List"),
 			4,
-			"Not a valid type: must be an " + AbstractEdelta.class.getName());
+			"Not a valid type: must be an " + EdeltaRuntime.class.getName());
 	}
 
 	@Test
-	public void testInvalidUseAsAbstractEdelta() throws Exception {
+	public void testInvalidUseAsEdeltaRuntime() throws Exception {
 		var input = """
 			import edelta.tests.additional.MyCustomAbstractEdelta;
 			use MyCustomAbstractEdelta as foo
@@ -440,5 +440,42 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
 				input.indexOf("ANewSuperClass"),
 				"ANewSuperClass".length(),
 				"Element not yet available in this context: foo.ANewSuperClass");
+	}
+
+	@Test
+	public void testInvalidUseOfEcorerefInModelMigration() throws Exception {
+		var input = """
+		metamodel "foo"
+
+		modifyEcore aTest epackage foo {
+			ecoreref(FooDataType) // OK
+			modelMigration[
+				createInstanceRule(
+					isRelatedTo(ecoreref(FooClass)), // INVALID
+					[ o |
+						return edelta.lib.EdeltaEcoreUtil.createInstance
+							(ecoreref(FooClass)) []  // INVALID
+					]
+				)
+			]
+		}
+		""";
+		var prog = parseWithTestEcore(input);
+		assertErrorsAsStrings(prog, """
+			Invalid use of ecoreref() inside model migration
+			Invalid use of ecoreref() inside model migration
+			""");
+		validationTestHelper.assertError(prog,
+			EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION,
+			EdeltaValidator.INVALID_ECOREREF_USAGE,
+			input.indexOf("ecoreref(FooClass)"),
+			"ecoreref(FooClass)".length(),
+			"Invalid use of ecoreref() inside model migration");
+		validationTestHelper.assertError(prog,
+			EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION,
+			EdeltaValidator.INVALID_ECOREREF_USAGE,
+			input.lastIndexOf("ecoreref(FooClass)"),
+			"ecoreref(FooClass)".length(),
+			"Invalid use of ecoreref() inside model migration");
 	}
 }

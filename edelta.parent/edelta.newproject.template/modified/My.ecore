@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="myecore" nsURI="http://www.eclipse.org/emf/2002/Myecore" nsPrefix="myecore">
-  <eClassifiers xsi:type="ecore:EClass" name="MyEClass">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="astring" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="mypackage" nsURI="http://my.package.org" nsPrefix="mypackage">
+  <eClassifiers xsi:type="ecore:EClass" name="MyClass">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="stringAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EEnum" name="MyENum">
-    <eLiterals name="FirstEnumLiteral"/>
-    <eLiterals name="SecondEnumLiteral" value="1"/>
-    <eLiterals name="ANewEnumLiteral" value="3"/>
-    <eLiterals name="AnotherNewEnumLiteral" value="4"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="RenamedClass">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="addedNow" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  <eClassifiers xsi:type="ecore:EClass" name="MyRoot">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="myReferences" upperBound="-1"
+        eType="#//MyClass"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="myContents" upperBound="-1"
+        eType="#//MyClass" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="NewClass">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="myStringAttribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="myReference" upperBound="-1"
-        eType="#//MyEClass" containment="true"/>
+        eType="#//MyClass" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ASubclassOfMyEClass" eSuperTypes="#//MyEClass"/>
-  <eClassifiers xsi:type="ecore:EClass" name="AnotherSubclassOfMyEClass" eSuperTypes="#//MyEClass #//NewClass"/>
 </ecore:EPackage>

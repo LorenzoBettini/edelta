@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<examxml:Exam
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:examxml="http://examxml"
+    xsi:schemaLocation="http://examxml ExamXML.ecore">
+  <elements
+      xsi:type="examxml:OpenElement1"
+      specificQuestion1="a specific question"/>
+  <elements
+      xsi:type="examxml:OpenElement2"
+      specificQuestion2="another specific question"/>
+  <elements
+      xsi:type="examxml:OpenElement1"
+      specificQuestion1="question1"/>
+  <elements
+      xsi:type="examxml:MultipleChoiceElement"/>
+</examxml:Exam>

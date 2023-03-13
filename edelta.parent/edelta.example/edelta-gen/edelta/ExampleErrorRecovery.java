@@ -1,16 +1,12 @@
 package edelta;
 
-import edelta.lib.AbstractEdelta;
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaRuntime;
 import org.eclipse.emf.ecore.EPackage;
 
 @SuppressWarnings("all")
 public class ExampleErrorRecovery extends EdeltaDefaultRuntime {
-  public ExampleErrorRecovery() {
-    
-  }
-
-  public ExampleErrorRecovery(final AbstractEdelta other) {
+  public ExampleErrorRecovery(final EdeltaRuntime other) {
     super(other);
   }
 

@@ -1,7 +1,11 @@
+import edelta.lib.EdeltaModelMigrator.EObjectFunction
 import edelta.refactorings.lib.helper.EdeltaFeatureDifferenceFinder
 import java.util.Collection
+import java.util.HashMap
 import java.util.List
+import java.util.function.Function
 import java.util.function.Predicate
+import java.util.stream.Collectors
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EClassifier
@@ -13,6 +17,8 @@ import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.ETypedElement
 import org.eclipse.emf.ecore.util.EcoreUtil
+import java.util.function.Consumer
+import edelta.lib.EdeltaModelMigrator
 
 package edelta.refactorings.lib
 
@@ -31,14 +37,135 @@ def addMandatoryReference(EClass eClass, String referenceName, EClass type): ERe
 }
 
 /**
+ * Changes this feature to single (upper = 1); concerning model migration,
+ * it takes the first element of the previous model object's collection
+ * for this feature.
+ * 
+ * @param feature
+ */
+def changeToSingle(EStructuralFeature feature) {
+	changeUpperBound(feature, 1)
+}
+
+/**
+ * Changes this feature to multiple (upper = -1); concerning model migration,
+ * it makes sure that a collection is created if the previous model object's value was set.
+ * 
+ * @param feature
+ */
+def changeToMultiple(EStructuralFeature feature) {
+	changeUpperBound(feature, -1)
+}
+
+/**
+ * Changes this feature to multiple with the given upper bound; concerning model migration,
+ * it makes sure that a collection is created with at most the specified upper bound
+ * if the previous model object's value was set, discarding possible additional values in
+ * the original collection.
+ * 
+ * @param feature
+ * @param upperBound
+ */
+def changeUpperBound(EStructuralFeature feature, int upperBound) {
+	feature.upperBound = upperBound
+	modelMigration[
+		copyRule(
+			isRelatedTo(feature),
+			multiplicityAwareCopy(feature)
+		)
+	]
+}
+
+/**
+ * Merges the given attributes into a single new attribute in the containing class.
+ * The attributes must be compatible (same containing class, same type, same cardinality, etc).
+ * 
+ * @param newAttributeName
+ * @param attributes
+ * @param valueMerger is used to merge the values of the original
+ * features in the new model
+ * @return the new attribute added to the containing class of the attributes
+ */
+def mergeAttributes(String newAttributeName, Collection<EAttribute> attributes,
+	Function<Collection<Object>, Object> valueMerger) : EAttribute {
+	return mergeFeatures(newAttributeName, attributes, valueMerger, null)
+}
+
+/**
+ * Merges the given references into a single new reference in the containing class.
+ * The references must be compatible (same containing class, same type, same cardinality, etc).
+ * 
+ * @param newReferenceName
+ * @param references
+ * @param valueMerger is used to merge the values of the original
+ * features in the new model
+ * @param postCopy executed after the model migrations
+ * @return the new reference added to the containing class of the references
+ */
+def mergeReferences(String newReferenceName, Collection<EReference> references,
+		Function<Collection<EObject>, EObject> valueMerger, Runnable postCopy) : EReference {
+	return mergeFeatures(newReferenceName, references, valueMerger, postCopy)
+}
+
+/**
  * Merges the given features into a single new feature in the containing class.
  * The features must be compatible (same containing class, same type, same cardinality, etc).
  * 
+ * @param <T> meant for both {@link EAttribute} and {@link EReference}
+ * @param <V> the type for the function (either {@link Object} or {@link EObject})
+ * @param newFeatureName
+ * @param features
+ * @param valueMerger is used to merge the values of the original
+ * features in the new model
+ * @param postCopy if not null, it is executed after the model migrations
+ * @return the new feature added to the containing class of the features
+ */
+def <T extends EStructuralFeature, V> mergeFeatures(String newFeatureName, Collection<T> features,
+		Function<Collection<V>, V> valueMerger, Runnable postCopy) : T {
+	checkNoDifferences(
+		features,
+		new EdeltaFeatureDifferenceFinder().ignoringName,
+		"The two features cannot be merged"
+	)
+	val firstFeature = features.head
+	val owner = firstFeature.EContainingClass
+	val mergedFeature = firstFeature.copyToAs(owner, newFeatureName)
+	removeAllElements(features)
+	modelMigration[
+		copyRule(
+			wasRelatedTo(firstFeature),
+			[_, oldObj, newObj |
+				var originalFeatures = features.stream()
+						.map[a | getOriginal(a)]
+				// for references we must get the copied EObject
+				var oldValues = originalFeatures
+						.map[f | oldObj.eGet(f)]
+						.collect(Collectors.toList())
+				// the explicit cast is required to avoid compilation error
+				// in the generated Java code:
+				// The method apply(Collection<V>) in the type Function<Collection<V>,V> is not applicable for the arguments (Object)
+				var merged = valueMerger.apply(getMigrated(oldValues) as Collection<V>)
+				newObj.eSet(mergedFeature, merged)
+			],
+			postCopy
+		)
+	]
+	return mergedFeature
+}
+
+/**
+ * Merges the given features into a single new feature in the containing class.
+ * The features must be compatible (same containing class, same type, same cardinality, etc).
+ * 
+ * TODO: this has to be removed once all the examples and tests have been ported
+ * to model migration as well.
+ * 
+ * @param <T>
  * @param newFeatureName
  * @param features
  * @return the new feature added to the containing class of the features
  */
-def mergeFeatures(String newFeatureName, Collection<EStructuralFeature> features) : EStructuralFeature {
+def <T extends EStructuralFeature> mergeFeatures(String newFeatureName, Collection<T> features) : T {
 	checkNoDifferences(
 		features,
 		new EdeltaFeatureDifferenceFinder().ignoringName,
@@ -87,6 +214,104 @@ def mergeFeatures(String newFeatureName, EClassifier type, Collection<EStructura
 }
 
 /**
+ * Split the given attribute into several attributes with the same type
+ * as the original one, using the specified names. The original attribute
+ * will be removed. The passed valueSplitter is used to migrate the
+ * original object into the corresponding split ones.
+ * 
+ * @param attribute
+ * @param newNames
+ * @param valueSplitter
+ * @return the collection of features
+ */
+def splitAttribute(EAttribute attribute, Collection<String> newNames,
+		Function<Object, Collection<?>> valueSplitter) :
+		Collection<EAttribute> {
+	val splitAttributes = splitFeature(attribute, newNames)
+	modelMigration[
+		copyRule(
+			wasRelatedTo(attribute),
+			[feature, oldObj, newObj |
+				var oldValue = oldObj.eGet(feature)
+				var splittedValues = valueSplitter
+					.apply(oldValue).iterator()
+				for (splitFeature : splitAttributes) {
+					if (!splittedValues.hasNext())
+						return;
+					newObj.eSet(splitFeature, splittedValues.next())
+				}
+			]
+		)
+	]
+	return splitAttributes
+}
+
+/**
+ * Split the given reference into several references with the same type
+ * as the original one, using the specified names. The original reference
+ * will be removed. The passed valueSplitter is used to migrate the
+ * original object into the corresponding split ones.
+ * 
+ * @param reference
+ * @param newNames
+ * @param valueSplitter
+ * @param postCopy executed after the model migrations
+ * @return the collection of features
+ */
+def splitReference(EReference reference,
+			Collection<String> newNames,
+			Function<EObject, Collection<EObject>> valueSplitter,
+			Runnable postCopy) :
+		Collection<EReference> {
+	val splitReferences = splitFeature(reference, newNames)
+	modelMigration[
+		copyRule(
+			wasRelatedTo(reference),
+			[feature, oldObj, newObj |
+				// for references we must get the migrated EObject
+				var oldValue = getMigrated(
+					getValueAsEObject(oldObj, feature))
+				var splittedValues = valueSplitter
+					.apply(oldValue).iterator()
+				for (splitFeature : splitReferences) {
+					if (!splittedValues.hasNext())
+						return;
+					newObj.eSet(splitFeature, splittedValues.next())
+				}
+			],
+			postCopy
+		)
+	]
+	return splitReferences
+}
+
+/**
+ * Split the given feature into several features with the same type
+ * as the original one, using the specified names. The original feature
+ * will be removed.
+ * 
+ * @param <T>
+ * @param featureToSplit
+ * @param newFeatureNames
+ * @return the collection of features
+ */
+def <T extends EStructuralFeature> splitFeature(T featureToSplit,
+		Collection<String> newFeatureNames) : Collection<T> {
+	checkNotMany(featureToSplit,
+		"Cannot split 'many' feature")
+	checkNoBidirectionalReferences(#[featureToSplit],
+		"Cannot split a bidirectional reference")
+	val owner = featureToSplit.EContainingClass
+	var splitFeatures = newFeatureNames.stream()
+		.map[newName |
+			copyToAs(featureToSplit, owner, newName)
+		]
+		.collect(Collectors.toList())
+	removeElement(featureToSplit)
+	return splitFeatures;
+}
+
+/**
  * Given an EAttribute, expected to have an EEnum type, creates a subclass of
  * the containing class for each value of the referred EEnum
  * (each subclass is given a name corresponding to the the EEnumLiteral,
@@ -101,16 +326,17 @@ def mergeFeatures(String newFeatureName, EClassifier type, Collection<EStructura
 def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 	val type = attr.EAttributeType
 	if (type instanceof EEnum) {
-		val createdSubclasses = newArrayList
 		val owner = attr.EContainingClass
-		owner.makeAbstract
-		for (subc : type.ELiterals) {
-			val subclassName = ensureEClassifierNameIsUnique
-				(owner, subc.literal.toLowerCase.toFirstUpper)
-			createdSubclasses += owner.addNewEClassAsSibling(subclassName) [
-				addESuperType(owner)
+		val createdSubclasses = introduceSubclasses(owner,
+			type.ELiterals.map[toString.toLowerCase.toFirstUpper].toList,
+			[oldObj |
+				val literalValue =
+					oldObj.getValueFromFeatureName(attr.name).toString()
+				val correspondingSubclass =
+					owner.findSiblingByName(literalValue.toLowerCase.toFirstUpper)
+				return createInstance(correspondingSubclass)
 			]
-		}
+		)
 		removeElement(type) // will also remove the attribute
 		return createdSubclasses
 	} else {
@@ -119,6 +345,31 @@ def enumToSubclasses(EAttribute attr) : Collection<EClass> {
 		)
 		return null
 	}
+}
+
+/**
+ * Creates the classes with the given names as subclasses of the passed
+ * superClass, which will then be made abstract; the objectMigrator is applied
+ * for migrating objects that were originally instances of the superClass.
+ * 
+ * @param superClass
+ * @param name
+ * @param objectMigration
+ */
+def introduceSubclasses(EClass superClass, Collection<String> names,
+	EObjectFunction objectMigrator
+) : Collection<EClass> {
+	superClass.makeAbstract
+	val subclasses = names.map[name|
+		superClass.addNewSubclass(name)
+	].toList
+	modelMigration[
+		createInstanceRule(
+			isRelatedTo(superClass),
+			objectMigrator
+		)
+	]
+	return subclasses
 }
 
 /**
@@ -147,8 +398,7 @@ def subclassesToEnum(String name, Collection<EClass> subclasses) : EAttribute {
 	val superclass = getSingleDirectSuperclass(subclasses)
 	val enum = superclass.addNewEEnumAsSibling(name) [
 		subclasses.forEach[subClass, index |
-			val enumLiteralName = ensureEClassifierNameIsUnique
-				(superclass, subClass.name.toUpperCase)
+			val enumLiteralName = subClass.name.toUpperCase
 			addNewEEnumLiteral(enumLiteralName) => [
 				value = index
 			]
@@ -157,6 +407,19 @@ def subclassesToEnum(String name, Collection<EClass> subclasses) : EAttribute {
 	val attribute = superclass.addNewEAttribute(enum.fromTypeToFeatureName, enum)
 	superclass.makeConcrete
 	removeAllElements(subclasses)
+	modelMigration[
+		createInstanceRule(
+			wasRelatedToAtLeastOneOf(subclasses),
+			[oldObj |
+				val enumLiteralName = enum.getEEnumLiteral(
+					oldObj.eClass.name.toUpperCase)
+				return createInstance(
+					superclass,
+					[newObj | newObj.eSet(attribute, enumLiteralName)]
+				)
+			]
+		)
+	]
 	return attribute
 }
 
@@ -178,10 +441,22 @@ def extractClass(String name, Collection<EStructuralFeature> features) {
 		"Cannot extract bidirectional references")
 	val owner = findSingleOwner(features)
 	val extracted = owner.addNewEClassAsSibling(name)
-	val reference = owner.addMandatoryReference(name.toFirstLower, extracted) => [
-		makeContainmentBidirectional
-	]
+	val reference = owner.addMandatoryReference(name.toFirstLower, extracted)
+	makeContainmentBidirectional(reference)
 	features.moveAllTo(extracted)
+	modelMigration[
+		copyRule(
+			wasRelatedToAtLeastOneOf(features),
+			[origFeature, origObj, migratedObj |
+				var extractedObj = migratedObj.getOrSetEObject(reference,
+						[extracted.createInstance])
+				extractedObj.eSet(
+					getMigrated(origFeature),
+					getMigrated(origObj.eGet(origFeature))
+				)
+			]
+		)
+	]
 	return reference
 }
 
@@ -207,15 +482,29 @@ def inlineClass(EClass cl) {
  * @return the features of the original class
  */
 def inlineClass(EClass cl, String prefix) {
-	val ref = findSingleContainmentReferenceToThisClass(cl)
-	checkNotMany(ref,
+	val reference = findSingleContainmentReferenceToThisClass(cl)
+	checkNotMany(reference,
 		"Cannot inline in a 'many' reference")
 	val featuresToInline = cl.EStructuralFeatures
-		.filter[it !== ref.EOpposite] // skip the possible back reference
+		.filter[it !== reference.EOpposite] // skip the possible back reference
 		.toList
 	featuresToInline.forEach[name = prefix + name]
-	featuresToInline.moveAllTo(ref.EContainingClass)
+	featuresToInline.moveAllTo(reference.EContainingClass)
 	removeElement(cl)
+	modelMigration[
+		copyRule(
+			wasRelatedTo(reference),
+			[origFeature, origObj, migratedObj |
+				val origReferredObj = origObj.getValueAsEObject(origFeature)
+				for (feature : featuresToInline) {
+					migratedObj.eSet(
+						feature,
+						getMigrated(origReferredObj.eGet(getOriginal(feature)))
+					)
+				}
+			]
+		)
+	]
 	return featuresToInline
 }
 
@@ -277,6 +566,54 @@ def referenceToClass(String name, EReference reference) {
 	}
 	reference.EType = extracted
 	reference.makeContainmentBidirectional
+
+	// handle the migration of the reference that now has to refer
+	// to a new object (of the extracted class), or, transparently
+	// to a list of new objects in case of a multi reference
+	modelMigration[
+		copyRule(
+			[feature |
+				isRelatedTo(feature, reference) ||
+				isRelatedTo(feature, eOpposite)],
+			[feature, oldObj, newObj |
+				// feature: the feature of the original metamodel
+				// oldObj: the object of the original model
+				// newObj: the object of the new model, already created
+	
+				// the opposite reference now changed its type
+				// so we have to skip the copy or we'll have a ClassCastException
+				// the bidirectionality will be implied in the next migrator
+				if (isRelatedTo(feature, eOpposite))
+					return
+	
+				// retrieve the original value, wrapped in a list
+				// so this works (transparently) for both single and multi feature
+				// discard possible extra values, in case the multiplicity has changed
+				var oldValueOrValues =
+					getValueForFeature(oldObj, feature,
+						reference.getUpperBound())
+	
+				// for each old value create a new object for the
+				// extracted class, by setting the reference's value
+				// with the copied value of that reference
+				var copies = oldValueOrValues.stream()
+					.map[oldValue |
+						// since this is NOT a containment reference
+						// the referred oldValue has already been copied
+						val copy = getMigrated(oldValue as EObject)
+						return createInstance(extracted) [
+							o | o.eSet(extractedRef, copy)
+						]
+					]
+					.collect(Collectors.toList())
+				// in the new object set the value or values (transparently)
+				// with the created object (or objects, again, transparently)
+				setValueForFeature(
+					newObj, reference, copies)
+			]
+		);
+	]
+
 	return extracted
 }
 
@@ -336,7 +673,7 @@ def classToReference(EClass cl) : EReference {
  * 
  * @param duplicates
  */
-def extractSuperclass(List<? extends EStructuralFeature> duplicates) {
+def extractSuperclass(List<EStructuralFeature> duplicates) {
 	val feature = duplicates.head;
 	val superClassName =
 		ensureEClassifierNameIsUnique(feature,
@@ -355,7 +692,7 @@ def extractSuperclass(List<? extends EStructuralFeature> duplicates) {
  * @param name
  * @param duplicates
  */
-def extractSuperclass(String name, List<? extends EStructuralFeature> duplicates) {
+def extractSuperclass(String name, List<EStructuralFeature> duplicates) {
 	val feature = duplicates.head;
 
 	return feature.EContainingClass.addNewEClassAsSibling(name) [
@@ -376,15 +713,159 @@ def extractSuperclass(String name, List<? extends EStructuralFeature> duplicates
  * @param dest
  * @param duplicates
  */
-def pullUpFeatures(EClass dest, List<? extends EStructuralFeature> duplicates) : void {
+def pullUpFeatures(EClass dest, Collection<EStructuralFeature> duplicates) : EStructuralFeature {
 	checkNoDifferences(
 		duplicates,
 		new EdeltaFeatureDifferenceFinder().ignoringContainingClass,
 		"The two features are not equal"
 	)
-	checkAllDirectSubclasses(dest, duplicates.map[EContainingClass])
-	duplicates.head.copyTo(dest)
+	checkAllDirectSubclasses(dest, duplicates.map[EContainingClass].toList)
+	val pulledUp = duplicates.head.copyTo(dest)
 	removeAllElements(duplicates)
+	modelMigration[
+		mapFeaturesRule(duplicates, pulledUp)
+	]
+	return pulledUp
+}
+
+/**
+ * Given a feature and a non empty list of {@link EClass}, which are known to
+ * be direct subclasses of the containing class of the feature, pushes the feature down in
+ * the given common subclasses
+ * (and removes the feature from the original containing class).
+ * 
+ * @param featureToPush
+ * @param subClasses
+ */
+def pushDownFeature(EStructuralFeature featureToPush, List<EClass> subClasses) : Collection<EStructuralFeature> {
+	checkAllDirectSubclasses(featureToPush.EContainingClass, subClasses)
+	val pushedDownFeatures = new HashMap<EClass, EStructuralFeature>()
+	for (subClass : subClasses) {
+		var pushedDown = EcoreUtil.copy(featureToPush)
+		pushedDownFeatures.put(subClass, pushedDown)
+		subClass.getEStructuralFeatures().add(0, pushedDown)
+	}
+	removeElement(featureToPush)
+	modelMigration[
+		featureMigratorRule(
+			wasRelatedTo(featureToPush),
+			[feature, oldObj, newObj | // the object of the original model
+				// the result depends on the EClass of the original
+				// object being copied, but the map was built
+				// using evolved classes
+				pushedDownFeatures.get(newObj.eClass())
+			]
+		);
+	]
+	return pushedDownFeatures.values
+}
+
+/**
+ * Create a new target class with the given name that merges all
+ * the passed classes.
+ * 
+ * The classes are expected to have the same single direct superclass
+ * and to define the same features.
+ * 
+ * @param mergedClassName
+ * @param toMerge
+ */
+def mergeClasses(String mergedClassName, Collection<EClass> toMerge) : EClass {
+	val superClass = getSingleDirectSuperclass(toMerge)
+	checkSameFeatures(toMerge)
+	checkNoBidirectionalReferences(toMerge.map[EStructuralFeatures].flatten.toList,
+		"Cannot merge in the presence of bidirectional references"
+	)
+	val merged = copyToAs(toMerge.head, superClass.EPackage, mergedClassName)
+	removeAllElements(toMerge)
+	modelMigration[
+		createInstanceRule(
+			wasRelatedToAtLeastOneOf(toMerge),
+			[origObj |
+				val origFeatures = origObj.eClass.EAllStructuralFeatures
+				createInstance(merged) [
+					newObj |
+						for (origFeature : origFeatures)
+							copyFrom(
+								newObj, merged.getEStructuralFeature(origFeature.name),
+								origObj, origFeature
+							)
+				]
+			]
+		)
+	]
+	return merged
+}
+
+/**
+ * Splits the passed class into several classes with the given names;
+ * all classes will be copies of the original class (which will be removed).
+ * Concerning model migration, it creates an object of the first split class.
+ * 
+ * @param toSplit
+ * @param names
+ */
+def splitClass(EClass toSplit, Collection<String> names) : Collection<EClass> {
+	val containingPackage = toSplit.EPackage
+	return splitClass(toSplit, names, 
+		[origObj |
+			createInstance(containingPackage.getEClass(names.head))
+		]
+	)
+}
+
+/**
+ * Splits the passed class into several classes with the given names;
+ * all classes will be copies of the original class (which will be removed).
+ * The objectMigrator is used when migrating the model objects of the original class:
+ * it is used to create an instance of the proper class and then all the features
+ * of the original object are copied into the created instance automatically
+ * 
+ * @param toSplit
+ * @param names
+ * @param objectMigration
+ */
+def splitClass(EClass toSplit, Collection<String> names, EObjectFunction objectMigrator) 
+		: Collection<EClass> {
+	return splitClass(toSplit, names)
+		[EdeltaModelMigrator it |
+			createInstanceRule(
+				wasRelatedTo(toSplit),
+				[origObj |
+					val origFeatures = origObj.eClass.EAllStructuralFeatures
+					val newObj = objectMigrator.apply(origObj)
+					val newClass = newObj.eClass
+					for (origFeature : origFeatures)
+						copyFrom(
+							newObj, newClass.getEStructuralFeature(origFeature.name),
+							origObj, origFeature
+						)
+					return newObj
+				]
+			)
+		]
+}
+
+/**
+ * Splits the passed class into several classes with the given names;
+ * all classes will be copies of the original class (which will be removed).
+ * The migratorConsumer is used when migrating the model and the developer ahs
+ * the full control on such a migration by using the migratorConsumer appropriately
+ * to define migration rules.
+ * 
+ * @param toSplit
+ * @param names
+ * @param objectMigration
+ */
+def splitClass(EClass toSplit, Collection<String> names, Consumer<EdeltaModelMigrator> migratorConsumer) 
+		: Collection<EClass> {
+	val containingPackage = toSplit.EPackage
+	val split = names.map[ n |
+		copyToAs(toSplit, containingPackage, n)
+	].toList
+	removeElement(toSplit)
+	modelMigration(migratorConsumer)
+	return split
 }
 
 /**
@@ -537,6 +1018,18 @@ def checkCompliant(EStructuralFeature feature, Collection<? extends EStructuralF
 	}
 }
 
+def checkType(EStructuralFeature feature, EClassifier expectedType) : void {
+	// don't rely on equality because in the interpreter the types
+	// might be loaded from different Ecore models
+	if (feature.EType.fullyQualifiedName != expectedType.fullyQualifiedName) {
+		val message =
+			"expecting " + getEObjectRepr(expectedType) + " but was " +
+				getEObjectRepr(feature.EType)
+		showError(feature, message)
+		throw new IllegalArgumentException(message)
+	}
+}
+
 /**
  * Makes sure the passed EClasses have no features, if not, shows
  * error information and throws an IllegalArgumentException.
@@ -557,6 +1050,44 @@ def checkNoFeatures(Collection<EClass> classes) {
 	].toList
 	if (!classesWithFeatures.empty)
 		throw new IllegalArgumentException("Classes not empty")
+}
+
+/**
+ * Makes sure the passed EClasses have the same features,
+ * independently from the order, if not, shows
+ * error information and throws an IllegalArgumentException.
+ * 
+ * @param classes
+ */
+def checkSameFeatures(Collection<EClass> classes) {
+	// the order is not important
+	val firstClass = classes.head
+	val features = firstClass.EStructuralFeatures.sortBy[name]
+	val otherClasses = classes.tail
+	for (otherClass : otherClasses) {
+		val otherFeatures = otherClass.EStructuralFeatures.sortBy[name]
+		val expectedSize = features.size
+		val actualSize = otherFeatures.size
+		if (expectedSize !== actualSize) {
+			showError(otherClass, "Different features size: expected " +
+				expectedSize + " but was " + actualSize + "\n  " +
+				"in classes " + getEObjectRepr(firstClass) + ", " +
+				getEObjectRepr(otherClass)
+			)
+			throw new IllegalArgumentException("Features don't match in size")
+		} else {
+			val finder = new EdeltaFeatureDifferenceFinder().ignoringContainingClass
+			val otherIt = otherFeatures.iterator
+			for (f : features) {
+				val other = otherIt.next
+				if (!finder.equals(f, other)) {
+					val message = finder.differenceDetails
+					showError(otherClass, message)
+					throw new IllegalArgumentException(message)
+				}
+			}
+		}
+	}
 }
 
 /**
@@ -760,27 +1291,27 @@ def getSingleDirectSuperclass(Collection<EClass> subclasses) : EClass {
 		throw new IllegalArgumentException("Wrong superclasses")
 	}
 	// now all subclasses are known to have exactly one superclass
-	val result = subclasses.head.ESuperTypes.head
+	val superclass = subclasses.head.ESuperTypes.head
 	val differences = subclasses
-		.filter[ESuperTypes.head !== result]
+		.filter[ESuperTypes.head !== superclass]
 	if (!differences.empty) {
 		differences.forEach[
 			val message = "Wrong superclass of " + EObjectRepr + ":\n"+
-							"  Expected: " + getEObjectRepr(result) + "\n" +
+							"  Expected: " + getEObjectRepr(superclass) + "\n" +
 							"  Actual  : " + getEObjectRepr(ESuperTypes.head)
 			showError(it, message)
 		]
 		throw new IllegalArgumentException("Wrong superclasses")
 	}
-	val additionalSubclasses = directSubclasses(result).toSet
+	val additionalSubclasses = directSubclasses(superclass).toSet
 	additionalSubclasses.removeAll(subclasses.toSet)
 	if (!additionalSubclasses.empty) {
-		val message = "The class has additional subclasses:\n" +
+		val message = "The class " + getEObjectRepr(superclass) + " has additional subclasses:\n" +
 					additionalSubclasses.map["  " + EObjectRepr].join("\n")
-		showError(result, message)
+		showError(superclass, message)
 		throw new IllegalArgumentException(message)
 	}
-	return result
+	return superclass
 }
 
 def directSubclasses(EClass cl) {

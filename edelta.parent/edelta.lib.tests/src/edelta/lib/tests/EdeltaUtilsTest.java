@@ -29,6 +29,7 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.junit.Test;
 
 import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaUtils;
 
 /**
@@ -179,6 +180,12 @@ public class EdeltaUtilsTest {
 		assertThat(p2.getESubpackages()).contains(p1);
 		assertEquals("p1.p2.p1",
 				EdeltaUtils.getEObjectRepr(p1));
+	}
+
+	@Test
+	public void test_getFullyQualifiedName() {
+		assertEquals("ecore.EClass.eSuperTypes",
+			EdeltaUtils.getFullyQualifiedName(EcorePackage.eINSTANCE.getEClass_ESuperTypes()));
 	}
 
 	@Test
@@ -666,11 +673,12 @@ public class EdeltaUtilsTest {
 
 	@Test
 	public void test_usedPackages() {
-		var edelta = new EdeltaDefaultRuntime();
-		edelta.loadEcoreFile("testecores/TestEcoreForUsages1.ecore");
-		edelta.loadEcoreFile("testecores/TestEcoreForUsages2.ecore");
-		edelta.loadEcoreFile("testecores/TestEcoreForUsages3.ecore");
-		edelta.loadEcoreFile("testecores/TestEcoreForUsages4.ecore");
+		var modelManager = new EdeltaModelManager();
+		var edelta = new EdeltaDefaultRuntime(modelManager);
+		modelManager.loadEcoreFile("testecores/TestEcoreForUsages1.ecore");
+		modelManager.loadEcoreFile("testecores/TestEcoreForUsages2.ecore");
+		modelManager.loadEcoreFile("testecores/TestEcoreForUsages3.ecore");
+		modelManager.loadEcoreFile("testecores/TestEcoreForUsages4.ecore");
 		var package1 = edelta.getEPackage("testecoreforusages1");
 		var package2 = edelta.getEPackage("testecoreforusages2");
 		var package3 = edelta.getEPackage("testecoreforusages3");
@@ -706,5 +714,27 @@ public class EdeltaUtilsTest {
 		eClass.getEStructuralFeatures().add(feature);
 		assertThat(EdeltaUtils.getEContainingPackage(feature))
 			.isSameAs(ePackage);
+	}
+
+	@Test
+	public void testFindSiblingByName() {
+		var pack = EcoreFactory.eINSTANCE.createEPackage();
+
+		var c1 = EcoreFactory.eINSTANCE.createEClass();
+		c1.setName("C1");
+		var c2 = EcoreFactory.eINSTANCE.createEClass();
+		c2.setName("C2");
+		var c3 = EcoreFactory.eINSTANCE.createEClass();
+		c3.setName("C3");
+		pack.getEClassifiers().addAll(List.of(c1, c2, c3));
+
+		assertThat(EdeltaUtils.findSiblingByName(c1, "C1"))
+			.isSameAs(c1);
+		assertThat(EdeltaUtils.findSiblingByName(c1, "C2"))
+			.isSameAs(c2);
+		assertThat(EdeltaUtils.findSiblingByName(c1, "C3"))
+			.isSameAs(c3);
+		assertThat(EdeltaUtils.findSiblingByName(c1, "NonExisting"))
+			.isNull();;
 	}
 }

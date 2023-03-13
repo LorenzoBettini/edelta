@@ -1,0 +1,15 @@
+import edelta.refactorings.lib.EdeltaRefactoringsWithPrompt
+
+// IMPORTANT: ecores must be in a source directory
+// otherwise you can't refer to them
+package edelta.changeupperbound.example
+
+metamodel "PersonListForChangeUpperBound"
+metamodel "ecore"
+
+use EdeltaRefactoringsWithPrompt as refactorings
+
+modifyEcore changeAddressUpperBound epackage PersonListForChangeUpperBound {
+	refactorings.changeUpperBoundInteractive(ecoreref(Person.workAddress), 2)
+}
+

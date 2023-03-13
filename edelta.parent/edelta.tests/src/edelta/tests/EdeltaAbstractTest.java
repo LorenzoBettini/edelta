@@ -56,6 +56,7 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
 import edelta.edelta.EdeltaProgram;
+import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaStandardLibrary;
 import edelta.resource.derivedstate.EdeltaAccessibleElements;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
@@ -82,7 +83,7 @@ public abstract class EdeltaAbstractTest {
 	protected EdeltaDerivedStateHelper derivedStateHelper;
 
 	@Extension
-	protected EdeltaStandardLibrary stdLib = new EdeltaStandardLibrary();
+	protected EdeltaStandardLibrary stdLib = new EdeltaStandardLibrary(new EdeltaModelManager());
 
 	@Extension
 	protected Inputs inputs = new Inputs();

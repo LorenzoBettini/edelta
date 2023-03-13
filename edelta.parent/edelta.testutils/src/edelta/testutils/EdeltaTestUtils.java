@@ -25,6 +25,22 @@ public class EdeltaTestUtils {
 	}
 
 	/**
+	 * Removes all contents of the specified directory and of the first level
+	 * possible subdirectories, skipping ".gitignore" and possible further
+	 * subdirectories.
+	 * 
+	 * @param directory
+	 * @throws IOException
+	 */
+	public static void cleanDirectoryAndFirstSubdirectories(String directory) throws IOException {
+		File dir = new File(directory);
+		for (File file : dir.listFiles())
+			if (file.isDirectory())
+				cleanDirectory(directory + "/" + file.getName());
+		cleanDirectory(directory);
+	}
+
+	/**
 	 * Removes all contents of the specified directory, skipping ".gitignore"
 	 * and possible subdirectories.
 	 * 
@@ -36,6 +52,24 @@ public class EdeltaTestUtils {
 		for (File file : dir.listFiles())
 			if (!file.isDirectory() && !file.getName().equals(".gitignore"))
 				Files.delete(file.toPath());
+	}
+
+	/**
+	 * Removes all contents of the specified directory, skipping ".gitignore".
+	 * 
+	 * @param directory
+	 * @throws IOException
+	 */
+	public static void cleanDirectoryRecursive(String directory) throws IOException {
+		File dir = new File(directory);
+		for (File file : dir.listFiles()) {
+			if (!file.isDirectory() && !file.getName().equals(".gitignore"))
+				Files.delete(file.toPath());
+			if (file.isDirectory()) {
+				cleanDirectoryRecursive(directory + "/" + file.getName());
+				Files.delete(file.toPath());
+			}
+		}
 	}
 
 	public static String loadFile(String file) throws IOException {
@@ -52,7 +86,21 @@ public class EdeltaTestUtils {
 	 * @throws IOException
 	 */
 	public static void assertFilesAreEquals(String pathOfExpectedContents, String pathOfActualContents) throws IOException {
+		assertFilesAreEquals(null, pathOfExpectedContents, pathOfActualContents);
+	}
+
+	/**
+	 * Compares the string contents of the two files, given their paths,
+	 * {@link Assert#assertEquals(String, Object, Object)}
+	 * 
+	 * @param message
+	 * @param pathOfExpectedContents
+	 * @param pathOfActualContents
+	 * @throws IOException
+	 */
+	public static void assertFilesAreEquals(String message, String pathOfExpectedContents, String pathOfActualContents) throws IOException {
 		assertEquals(
+			message,
 			removeCR(loadFile(pathOfExpectedContents)),
 			removeCR(loadFile(pathOfActualContents)));
 	}

@@ -185,3 +185,94 @@ def isNotReferencedByOthers(EClassifier cl) {
 		.filter[!EcoreUtil.isAncestor(cl, EObject)]
 		.empty
 }
+
+/**
+ * Given an EAttribute, expected to have an EEnum type, creates a subclass of
+ * the containing class for each value of the referred EEnum
+ * (each subclass is given a name corresponding to the the EEnumLiteral,
+ * all lowercase but the first letter, for example, given the literal
+ * "LITERAL1", the subclass is given the name "Literal1").
+ * The attribute will then be removed and so will the EEnum.
+ * The original containing EClass is made abstract.
+ * 
+ * @param attr
+ * @return the collection of created subclasses
+ */
+def enumToSubclasses(EAttribute attr) : Collection<EClass> {
+	val type = attr.EAttributeType
+	if (type instanceof EEnum) {
+		val createdSubclasses = newHashMap
+		val owner = attr.EContainingClass
+		owner.makeAbstract
+		for (literal : type.ELiterals) {
+			val literalString = literal.getLiteral
+			val subclassName = ensureEClassifierNameIsUnique
+				(owner, literalString.toLowerCase.toFirstUpper)
+			createdSubclasses.put(
+				literalString,
+				owner.addNewEClassAsSibling(subclassName) [
+					addESuperType(owner)
+				]
+			)
+		}
+		removeElement(type) // will also remove the attribute
+		modelMigration[
+			createInstanceRule(
+				isRelatedTo(owner),
+				[oldObj |
+					val literalValue =
+						oldObj.eGet(getOriginal(attr)).toString()
+					val correspondingSubclass =
+						createdSubclasses.get(literalValue)
+					return EcoreUtil.create(correspondingSubclass)
+				]
+			)
+		]
+		return createdSubclasses.values
+	} else {
+		showError(attr,
+			"Not an EEnum: " + getEObjectRepr(type)
+		)
+		return null
+	}
+}
+
+/**
+ * Given a collection of subclasses, which are expected to be direct subclasses of
+ * an EClass, say superclass, generates an EEnum (in the superclass' package)
+ * with the specified name, representing the inheritance relation,
+ * with an EEnumLiteral for each subclass (the name is the name
+ * of the subclass in uppercase); the subclasses are removed, and
+ * an attributed is added to the superclass with the created EEnum as type
+ * (the name is the name of the EEnum, first letter lowercase).
+ * 
+ * For example, given the name "BaseType" and the collection of classes
+ * {"Derived1", "Derived2"} subclasses of the superclass "Base",
+ * it creates the EEnum "BaseType" with literals "DERIVED1", "DERIVED2",
+ * (the values will be incremental numbers starting from 0,
+ * according to the order of the subclasses in the collection)
+ * it adds to "Base" the EAttribute "baseType" of type "BaseType".
+ * The EClasses "Derived1" and "Derived2" are removed from the package.
+ * 
+ * @param name the name for the created EEnum
+ * @param subclasses
+ * @return the created EAttribute
+ */
+def subclassesToEnum(String name, Collection<EClass> subclasses) : EAttribute {
+	checkNoFeatures(subclasses)
+	val superclass = getSingleDirectSuperclass(subclasses)
+	val enum = superclass.addNewEEnumAsSibling(name) [
+		subclasses.forEach[subClass, index |
+			val enumLiteralName = ensureEClassifierNameIsUnique
+				(superclass, subClass.name.toUpperCase)
+			addNewEEnumLiteral(enumLiteralName) => [
+				value = index
+			]
+		]
+	]
+	val attribute = superclass.addNewEAttribute(enum.fromTypeToFeatureName, enum)
+	superclass.makeConcrete
+	removeAllElements(subclasses)
+	return attribute
+}
+
