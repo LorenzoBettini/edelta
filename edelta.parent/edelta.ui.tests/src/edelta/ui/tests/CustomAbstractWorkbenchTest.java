@@ -8,7 +8,7 @@ import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest;
  * @author Lorenzo Bettini
  *
  */
-public class CustomAbstractWorkbenchTest extends AbstractWorkbenchTest {
+public abstract class CustomAbstractWorkbenchTest extends AbstractWorkbenchTest {
 
 	/**
 	 * Avoids deleting project
