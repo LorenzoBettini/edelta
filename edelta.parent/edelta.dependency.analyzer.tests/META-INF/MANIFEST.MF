@@ -5,7 +5,7 @@ Bundle-SymbolicName: edelta.dependency.analyzer.tests
 Bundle-Version: 3.0.0.qualifier
 Bundle-Vendor: Lorenzo Bettini
 Automatic-Module-Name: edelta.dependency.analyzer.tests
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.junit,
  edelta.dependency.analyzer,
  edelta.testutils,
