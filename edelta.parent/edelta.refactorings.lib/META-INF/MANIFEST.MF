@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Edelta Refactorings Lib
 Bundle-Vendor: Lorenzo Bettini
-Bundle-Version: 3.0.0.qualifier
+Bundle-Version: 3.1.0.qualifier
 Bundle-SymbolicName: edelta.refactorings.lib; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: edelta.lib;visibility:=reexport
 Import-Package: org.apache.log4j,
  org.apache.commons.logging
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: edelta.refactorings.lib,
  edelta.refactorings.lib.helper
 Automatic-Module-Name: edelta.refactorings.lib
