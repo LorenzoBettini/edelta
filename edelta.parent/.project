@@ -26,4 +26,15 @@
 			<locationURI>PARENT-1-PROJECT_LOC/.mvn</locationURI>
 		</link>
 	</linkedResources>
+	<filteredResources>
+		<filter>
+			<id>1686215089091</id>
+			<name></name>
+			<type>10</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-edelta*</arguments>
+			</matcher>
+		</filter>
+	</filteredResources>
 </projectDescription>
