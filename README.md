@@ -10,9 +10,7 @@ An Xtext DSL for EMF metamodels refactoring and migration
 
 ### Requirements
 
-Edelta requires Java 11.
-
-For developing and building Edelta from sources, Java 17 is required (some tests rely on Java 17 features, like text-blocks)
+Since version 3.1.0, Edelta requires Java 17.
 
 ### Eclipse update site (new URL)
 
