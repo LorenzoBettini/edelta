@@ -93,10 +93,10 @@ public class EdeltaMojo extends AbstractMojo {
 	@Parameter(defaultValue = "true")
 	private Boolean failOnValidationError;
 
-	@Parameter(property = "maven.compiler.source", defaultValue = "11")
+	@Parameter(property = "maven.compiler.source", defaultValue = "17")
 	private String compilerSourceLevel;
 
-	@Parameter(property = "maven.compiler.target", defaultValue = "11")
+	@Parameter(property = "maven.compiler.target", defaultValue = "17")
 	private String compilerTargetLevel;
 
 	@Parameter(defaultValue = "false")
