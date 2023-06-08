@@ -13,4 +13,4 @@ Require-Bundle: org.eclipse.core.runtime,
  edelta.dependency.analyzer.model;visibility:=reexport,
  org.eclipse.emf.edit;visibility:=reexport
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
