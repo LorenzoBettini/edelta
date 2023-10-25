@@ -19,7 +19,7 @@
 			<unit id="org.eclipse.emf.ecoretools.design.feature.group"
 				version="0.0.0" />
 			<unit id="org.eclipse.eclemma.feature.feature.group" version="0.0.0" />
-			<repository location="https://download.eclipse.org/releases/2023-06" />
+			<repository location="https://download.eclipse.org/releases/2023-09" />
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="false"
 			includeMode="planner" includeSource="true" type="InstallableUnit">
@@ -53,7 +53,9 @@
 		<location includeAllPlatforms="false" includeConfigurePhase="false"
 			includeMode="planner" includeSource="true" type="InstallableUnit">
 			<unit id="org.apache.log4j" version="1.2.24.v20221221-2012" />
-			<unit id="org.apiguardian" version="0.0.0" />
+			<unit id="org.hamcrest" version="0.0.0"/>
+			<unit id="org.hamcrest.core" version="0.0.0"/>
+			<unit id="org.apiguardian.api" version="0.0.0" />
 			<unit id="junit-jupiter-api" version="0.0.0"/>
 			<unit id="junit-jupiter-engine" version="0.0.0"/>
 			<unit id="junit-jupiter-migrationsupport" version="0.0.0"/>
@@ -68,7 +70,7 @@
 			<unit id="org.mockito.mockito-core" version="4.8.1.v20221103-2317" />
 			<unit id="org.assertj" version="3.20.2.v20210706-1104" />
 			<repository
-				location="https://download.eclipse.org/oomph/simrel-orbit/2023-06" />
+				location="https://download.eclipse.org/oomph/simrel-orbit/2023-09" />
 		</location>
 	</locations>
 </target>
