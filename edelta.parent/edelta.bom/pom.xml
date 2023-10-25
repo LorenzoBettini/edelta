@@ -4,14 +4,15 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.lorenzobettini.edelta</groupId>
   <artifactId>edelta.bom</artifactId>
-  <version>3.1.0-SNAPSHOT</version>
+  <version>3.2.0-SNAPSHOT</version>
   <!-- IMPORTANT: the parent's version (unrelated to this artifact's version) 
     must come after this artifact's version to make the increment_version.ant behave 
     correctly. -->
   <parent>
     <groupId>io.github.lorenzobettini.xtextutils</groupId>
     <artifactId>xtext-tycho-parent</artifactId>
-    <version>0.12.0</version>
+    <version>0.13.0</version>
+    <!-- REMEMBER: update xtextVersion in edelta.maven.example -->
     <relativePath></relativePath>
   </parent>
   <packaging>pom</packaging>

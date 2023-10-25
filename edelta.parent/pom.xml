@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.github.lorenzobettini.edelta</groupId>
     <artifactId>edelta.bom</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.2.0-SNAPSHOT</version>
     <relativePath>edelta.bom</relativePath>
   </parent>
   <artifactId>edelta.parent</artifactId>
@@ -15,7 +15,7 @@
   <description>An Xtext DSL for EMF metamodels refactoring and migration.</description>
 
   <properties>
-    <eclipse-version>2023-06</eclipse-version>
+    <eclipse-version>2023-09</eclipse-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
@@ -126,7 +126,6 @@
     <module>edelta.lib</module>
     <module>edelta</module>
     <module>edelta.refactorings.lib</module>
-    <module>edelta.maven.plugin</module>
   </modules>
 
   <profiles>
@@ -239,28 +238,6 @@
       </modules>
     </profile>
     <profile>
-      <!-- This is crucial to run simple validate phase, e.g.,
-        to cache dependencies for creating an initial GitHub Actions cache.
-        Otherwise, the build would fail because this plugin (its dependencies)
-        could not be resolved. -->
-      <id>skip-edelta-maven-plugin</id>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>io.github.lorenzobettini.edelta</groupId>
-              <artifactId>edelta-maven-plugin</artifactId>
-              <executions>
-                <execution>
-                  <phase />
-                </execution>
-              </executions>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
-    </profile>
-    <profile>
       <id>sonatype-oss-release</id>
       <activation>
         <activeByDefault>false</activeByDefault>
@@ -362,8 +339,6 @@
           <artifactId>xtend-maven-plugin</artifactId>
         </plugin>
         <plugin>
-          <!-- We don't use it, since we have edelta-maven-plugin, we leave it here
-            just for historical reasons ;) -->
           <groupId>org.eclipse.xtext</groupId>
           <artifactId>xtext-maven-plugin</artifactId>
           <version>${xtextVersion}</version>
@@ -384,12 +359,13 @@
                 <setup>edelta.EdeltaStandaloneSetup</setup>
                 <outputConfigurations>
                   <outputConfiguration>
-                    <outputDirectory>${basedir}/edelta-gen</outputDirectory>
+                    <outputDirectory>edelta-gen</outputDirectory>
                     <installDslAsPrimarySource>true</installDslAsPrimarySource>
                   </outputConfiguration>
                 </outputConfigurations>
               </language>
             </languages>
+            <skip>${edelta.skip}</skip>
           </configuration>
           <dependencies>
             <dependency>
@@ -398,52 +374,7 @@
               <version>${project.version}</version>
             </dependency>
           </dependencies>
-        </plugin>
-        <plugin>
-          <groupId>io.github.lorenzobettini.edelta</groupId>
-          <artifactId>edelta-maven-plugin</artifactId>
-          <version>${project.version}</version>
-          <executions>
-            <execution>
-              <goals>
-                <goal>generate</goal>
-              </goals>
-            </execution>
-          </executions>
-          <configuration>
-            <!-- That is not required with maven.compiler.source/target set to 11
-              but it's required if we switch to a newer version of Java
-              that is not yet handled by Xbase -->
-            <compilerSourceLevel>11</compilerSourceLevel>
-            <compilerTargetLevel>11</compilerTargetLevel>
-          </configuration>
-        </plugin>
-        <!--This plugin's configuration is used to store Eclipse m2e settings only. 
-          It has no influence on the Maven build itself. -->
-        <plugin>
-          <groupId>org.eclipse.m2e</groupId>
-          <artifactId>lifecycle-mapping</artifactId>
-          <version>1.0.0</version>
-          <configuration>
-            <lifecycleMappingMetadata>
-              <pluginExecutions>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>io.github.lorenzobettini.edelta</groupId>
-                    <artifactId>edelta-maven-plugin</artifactId>
-                    <versionRange>[0.8.0-SNAPSHOT,)</versionRange>
-                    <goals>
-                      <goal>generate</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore></ignore>
-                  </action>
-                </pluginExecution>
-              </pluginExecutions>
-            </lifecycleMappingMetadata>
-          </configuration>
-        </plugin>
+         </plugin>
        </plugins>
     </pluginManagement>
   </build>
