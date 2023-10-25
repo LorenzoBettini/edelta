@@ -51,5 +51,5 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml', '**/*.target', '**/maven-wrapper.properties') }}
         restore-keys: ${{ runner.os }}-m2-
     - name: Build with Maven
-      run: ./mvnw -f edelta.parent/pom.xml clean verify '-Ptest-ide,run-its' -DskipTests
+      run: ./mvnw -f edelta.parent/pom.xml clean verify '-Ptest-ide' -DskipTests
       if: steps.m2cache.outputs.cache-hit != 'true' # note the use of the id 'm2cache'

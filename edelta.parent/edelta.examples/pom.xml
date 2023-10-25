@@ -31,21 +31,11 @@
       </plugin>
       <!-- Main configuration is in the parent POM -->
       <plugin>
-        <groupId>io.github.lorenzobettini.edelta</groupId>
-        <artifactId>edelta-maven-plugin</artifactId>
-        <configuration>
-          <!-- specify source roots just to speed up compilation -->
-          <sourceRoots>
-            <sourceRoot>${basedir}/src</sourceRoot>
-            <sourceRoot>${basedir}/model</sourceRoot>
-          </sourceRoots>
-          <javaSourceRoots>
-            <javaSourceRoot>${basedir}/src</javaSourceRoot>
-          </javaSourceRoots>
-        </configuration>
+        <groupId>org.eclipse.xtext</groupId>
+        <artifactId>xtext-maven-plugin</artifactId>
         <dependencies>
           <!-- If you use a library in the .edelta file, it must be available 
-            also during Edelta compilation with the edelta-maven-plugin -->
+            also during Edelta compilation with the xtext-maven-plugin -->
           <dependency>
             <groupId>io.github.lorenzobettini.edelta</groupId>
             <artifactId>edelta.refactorings.lib</artifactId>
