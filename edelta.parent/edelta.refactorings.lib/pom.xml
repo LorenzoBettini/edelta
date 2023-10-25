@@ -48,6 +48,7 @@
               </outputConfigurations>
             </language>
           </languages>
+          <skip>${edelta.skip}</skip>
         </configuration>
       </plugin>
     </plugins>
