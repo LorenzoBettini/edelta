@@ -365,7 +365,6 @@
                 </outputConfigurations>
               </language>
             </languages>
-            <skip>${edelta.skip}</skip>
           </configuration>
           <dependencies>
             <dependency>
