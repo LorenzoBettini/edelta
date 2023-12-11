@@ -33,7 +33,7 @@
       <properties>
         <!-- Tycho surefire should install additional bundles in the actual 
           installation directory of the unpacked Eclipse; for Mac it is different: -->
-        <test-work-directory>${project.build.directory}/work/edelta.app/Contents/Eclipse/</test-work-directory>
+        <test-work-directory>${project.build.directory}/work/edelta.app/</test-work-directory>
       </properties>
     </profile>
     <profile>
