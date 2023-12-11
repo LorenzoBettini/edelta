@@ -70,3 +70,10 @@ jobs:
       with:
         name: screenshots-${{ runner.os }}
         path: '**/*.tests/screenshots'
+    - name: Archive Logs
+      uses: actions/upload-artifact@v2
+      if: ${{ failure() || cancelled() }}
+      with:
+        name: logs-${{ runner.os }}
+        path: '**/*.tests/target/**/*.log'
+
