@@ -37,8 +37,8 @@ public class EdeltaDerivedStateHelper {
 	private String languageName;
 
 	public EdeltaDerivedState getOrInstallAdapter(final Resource resource) {
-		if (resource instanceof XtextResource) {
-			final var resourceLanguageName = ((XtextResource) resource).getLanguageName();
+		if (resource instanceof XtextResource xtextResource) {
+			final var resourceLanguageName = xtextResource.getLanguageName();
 			if (Objects.equals(resourceLanguageName, languageName)) {
 				var adapter = 
 					(EdeltaDerivedState) EcoreUtil.getAdapter
