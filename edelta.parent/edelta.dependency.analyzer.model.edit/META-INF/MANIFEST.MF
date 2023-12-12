@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: edelta.dependency.analyzer.model.edit;singleton:=true
 Automatic-Module-Name: edelta.dependency.analyzer.model.edit
-Bundle-Version: 3.2.0.qualifier
+Bundle-Version: 3.3.0.qualifier
 Bundle-ClassPath: .
 Bundle-Activator: GraphMM.provider.GraphMMEditPlugin$Implementation
 Bundle-Vendor: %providerName
