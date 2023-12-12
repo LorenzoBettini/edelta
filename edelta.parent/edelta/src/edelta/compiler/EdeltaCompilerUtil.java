@@ -1,7 +1,5 @@
 package edelta.compiler;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -59,12 +57,12 @@ public class EdeltaCompilerUtil {
 			ecoreReferenceInformationHelper.getOrComputeInformation(e);
 		return function.apply(
 			"get" + info.getType(),
-			Stream.of(
+			Stream.<Object>of(
 				info.getEPackageName(),
 				info.getEClassifierName(),
 				info.getENamedElementName())
 			.takeWhile(Objects::nonNull)
-			.collect(toList())
+			.toList()
 		);
 	}
 }

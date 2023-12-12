@@ -1,6 +1,8 @@
 package edelta.interpreter;
 
-import static org.eclipse.emf.ecore.EcorePackage.Literals.*;
+import static org.eclipse.emf.ecore.EcorePackage.Literals.ECLASS__ESUPER_TYPES;
+import static org.eclipse.emf.ecore.EcorePackage.Literals.ENAMED_ELEMENT__NAME;
+import static org.eclipse.emf.ecore.EcorePackage.Literals.EPACKAGE__ESUBPACKAGES;
 
 import java.util.Collection;
 import java.util.List;
@@ -27,12 +29,12 @@ import edelta.validation.EdeltaValidator;
 
 /**
  * Listens for changes on a {@link Resource} and performs tasks accordingly.
- * 
+ *
  * For example, it clears the {@link IResourceScopeCache} of the specified
  * {@link Resource} and removes issues added by the type system properly.
  * Scoping and type computation will be performed on the next access, taking now
  * into consideration the new information collected during interpretation.
- * 
+ *
  * @author Lorenzo Bettini
  *
  */
@@ -72,10 +74,9 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 				currentExpression);
 		} else {
 			if (notification.getEventType() == Notification.ADD &&
-					newValue instanceof ENamedElement) {
+					newValue instanceof ENamedElement enamedElement) {
 				enamedElementXExpressionMap.put(
-					(ENamedElement) newValue,
-					currentExpression);
+						enamedElement, currentExpression);
 				// cycles must be detected after performing the
 				// association to the current expression, otherwise
 				// the error won't be placed on the correct expression
@@ -97,8 +98,7 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 		 * cycles; we break the cycle for supertype hierarchy, but when doing so we get
 		 * another notification and in that case the cycle it's still there
 		 */
-		if (element instanceof ENamedElement) {
-			final var enamedElement = (ENamedElement) element;
+		if (element instanceof final ENamedElement enamedElement) {
 			if (modifiedElements.add(enamedElement))
 				updateModifiedElements(enamedElement.eContainer());
 		} else if (element instanceof Collection<?>) {
@@ -142,13 +142,13 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 			return false;
 		if (d instanceof XtextLinkingDiagnostic)
 			return true;
-		if (d instanceof EObjectDiagnosticImpl) {
+		if (d instanceof EObjectDiagnosticImpl diagnosticImpl) {
 			// during typing if the EdeltaEcoreReferenceExpression.EdeltaEcoreReference
 			// is not resolved, RootResolvedTypes will put an error of type mismatch
 			// the interpreter might change the metamodel and later the ecoreref
 			// might become valid, so we must remove previous errors when the metamodel
 			// changes
-			return ((EObjectDiagnosticImpl) d).getProblematicObject() instanceof EdeltaEcoreReferenceExpression;
+			return diagnosticImpl.getProblematicObject() instanceof EdeltaEcoreReferenceExpression;
 		}
 		return false;
 	}
