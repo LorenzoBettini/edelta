@@ -6,7 +6,6 @@ import static edelta.util.EdeltaModelUtil.getProgram;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toList;
 import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
 import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashMap;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.exists;
@@ -58,9 +57,9 @@ import edelta.edelta.EdeltaOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.edelta.EdeltaUseAs;
 import edelta.jvmmodel.EdeltaJvmModelHelper;
-import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaModelManager;
+import edelta.lib.EdeltaRuntime;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.util.EdeltaEcoreHelper;
@@ -410,7 +409,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			final var matching = ecoreHelper.getCurrentAccessibleElements(ecoreReferenceExpression)
 				.stream()
 				.filter(e -> e.getQualifiedName().toString().endsWith(toSearch))
-				.collect(toList());
+				.toList();
 			if (matching.size() > 1) {
 				Collection<String> matchingNames = matching.stream()
 					.map(e -> e.getQualifiedName().toString())
@@ -455,7 +454,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 			var enamedElements =
 				getAllContentsOfType(exp, EdeltaEcoreReference.class)
 					.stream().map(EdeltaEcoreReference::getEnamedelement)
-					.collect(toList());
+					.toList();
 			var expMap = derivedStateHelper
 				.getEcoreReferenceExpressionState(exp)
 				.getEnamedElementXExpressionMap();
