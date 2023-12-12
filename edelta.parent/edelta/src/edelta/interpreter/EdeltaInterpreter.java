@@ -122,16 +122,6 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	private Collection<EdeltaEcoreReferenceExpression> interpretedEcoreReferenceExpressions =
 		new HashSet<>();
 
-	class EdeltaInterpreterCancelIndicator implements CancelIndicator {
-		long stopAt = System.currentTimeMillis() +
-				interpreterTimeout;
-
-		@Override
-		public boolean isCanceled() {
-			return System.currentTimeMillis() > stopAt;
-		}
-	}
-
 	public void setInterpreterTimeout(final int interpreterTimeout) {
 		this.interpreterTimeout = interpreterTimeout;
 	}
@@ -266,7 +256,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		};
 		timeoutGuardThread.start();
 		final var result = evaluate(op.getBody(), context,
-				new EdeltaInterpreterCancelIndicator());
+				CancelIndicator.NullImpl);
 		timeoutGuardThread.interrupt();
 		if (result == null) {
 			// our cancel indicator reached timeout
