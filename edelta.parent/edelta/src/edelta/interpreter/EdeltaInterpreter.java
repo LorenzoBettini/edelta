@@ -298,10 +298,9 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	@Override
 	protected Object doEvaluate(final XExpression expression, final IEvaluationContext context,
 			final CancelIndicator indicator) {
-		if (expression instanceof EdeltaEcoreReferenceExpression) {
+		if (expression instanceof EdeltaEcoreReferenceExpression ecoreRefExp) {
 			return evaluateEcoreReferenceExpression(
-				((EdeltaEcoreReferenceExpression) expression),
-				context, indicator);
+				ecoreRefExp, context, indicator);
 		}
 		updateListenerCurrentExpression(expression);
 		try {
