@@ -4,7 +4,6 @@
 package edelta.interpreter;
 
 import static edelta.util.EdeltaModelUtil.findRootSuperPackage;
-import static java.util.stream.Collectors.toList;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -15,9 +14,9 @@ import com.google.inject.Singleton;
 
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaUseAs;
-import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaModelManager;
+import edelta.lib.EdeltaRuntime;
 
 /**
  * Helper class for the EdeltaInterpreter.
@@ -63,6 +62,6 @@ public class EdeltaInterpreterHelper {
 		return ops.stream()
 				.filter(op -> op.getEpackage() != null &&
 					findRootSuperPackage(op.getEpackage()) == null)
-				.collect(toList());
+				.toList();
 	}
 }
