@@ -1,6 +1,5 @@
 package edelta.resource.derivedstate;
 
-import static java.util.stream.Collectors.toList;
 import static org.eclipse.xtext.EcoreUtil2.getContainerOfType;
 
 import java.util.Collection;
@@ -38,8 +37,8 @@ public class EdeltaDerivedStateHelper {
 	private String languageName;
 
 	public EdeltaDerivedState getOrInstallAdapter(final Resource resource) {
-		if (resource instanceof XtextResource) {
-			final var resourceLanguageName = ((XtextResource) resource).getLanguageName();
+		if (resource instanceof XtextResource xtextResource) {
+			final var resourceLanguageName = xtextResource.getLanguageName();
 			if (Objects.equals(resourceLanguageName, languageName)) {
 				var adapter = 
 					(EdeltaDerivedState) EcoreUtil.getAdapter
@@ -82,7 +81,7 @@ public class EdeltaDerivedStateHelper {
 	public void copyEPackages(EdeltaProgram program, final Resource resource) {
 		final var packages = program.getMetamodels().stream()
 			.distinct()
-			.collect(toList());
+			.toList();
 		final var copiedEPackagesMap = getCopiedEPackagesMap(resource);
 		Copier copier = new Copier();
 		Collection<EPackage> copies = copier.copyAll(packages);

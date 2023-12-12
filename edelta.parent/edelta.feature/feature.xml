@@ -2,48 +2,37 @@
 <feature
       id="edelta.feature"
       label="Edelta Feature "
-      version="3.2.0.qualifier"
+      version="3.3.0.qualifier"
       provider-name="Lorenzo Bettini">
 
    <requires>
-      <import feature="org.eclipse.xtext.xbase" version="2.32.0" match="equivalent"/>
-      <import feature="org.eclipse.xtext.ui" version="2.32.0" match="equivalent"/>
+      <import feature="org.eclipse.xtext.xbase" version="2.33.0" match="equivalent"/>
+      <import feature="org.eclipse.xtext.ui" version="2.33.0" match="equivalent"/>
       <import plugin="org.eclipse.pde.ui"/>
+      <import feature="org.eclipse.emf.ecore" version="2.36.0.v20231002-1156" match="greaterOrEqual"/>
+      <import feature="org.eclipse.emf.ecore.source" version="2.36.0.v20231002-1156" match="greaterOrEqual"/>
+      <import feature="org.eclipse.emf.common" version="2.30.0.v20230916-0637" match="greaterOrEqual"/>
+      <import feature="org.eclipse.emf.common.source" version="2.30.0.v20230916-0637" match="greaterOrEqual"/>
    </requires>
 
    <plugin
          id="edelta"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="edelta.ide"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="edelta.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="edelta.lib"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="edelta.refactorings.lib"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
 </feature>

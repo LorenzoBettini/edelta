@@ -7,7 +7,7 @@
   <parent>
     <groupId>io.github.lorenzobettini.edelta</groupId>
     <artifactId>edelta.parent</artifactId>
-    <version>3.2.0-SNAPSHOT</version>
+    <version>3.3.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>edelta.swtbot.tests</artifactId>
@@ -33,7 +33,7 @@
       <properties>
         <!-- Tycho surefire should install additional bundles in the actual 
           installation directory of the unpacked Eclipse; for Mac it is different: -->
-        <test-work-directory>${project.build.directory}/work/edelta.app/Contents/Eclipse/</test-work-directory>
+        <test-work-directory>${project.build.directory}/work/edelta.app/</test-work-directory>
       </properties>
     </profile>
     <profile>

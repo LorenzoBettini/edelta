@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Edelta Refactorings Lib Tests
 Bundle-SymbolicName: edelta.refactorings.lib.tests
-Bundle-Version: 3.2.0.qualifier
+Bundle-Version: 3.3.0.qualifier
 Bundle-Vendor: Lorenzo Bettini
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: edelta.testutils,
@@ -14,7 +14,7 @@ Require-Bundle: edelta.testutils,
  org.eclipse.xtend.lib.macro,
  org.eclipse.emf.ecore,
  org.junit;bundle-version="4.13.0",
- org.assertj;bundle-version="3.20.2"
+ assertj-core;bundle-version="3.24.2"
 Import-Package: org.junit.jupiter.api;version="[5.1.0,6.0.0)",
  org.junit.jupiter.api.function;version="[5.1.0,6.0.0)",
  org.junit.jupiter.params;version="[5.1.0,6.0.0)",
