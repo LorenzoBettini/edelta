@@ -23,12 +23,12 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 	private EdeltaOriginalENamedElementRecorder recorder;
 
 	@Test
-	public void testNull() throws Exception { // NOSONAR just check there's no NPE
+	public void testNull() { // NOSONAR just check there's no NPE
 		recorder.recordOriginalENamedElement(null);
 	}
 
 	@Test
-	public void testNullENamedElement() throws Exception {
+	public void testNullENamedElement() {
 		var ref = EdeltaFactory.eINSTANCE.createEdeltaEcoreDirectReference();
 		recorder.recordOriginalENamedElement(ref);
 		assertNull(derivedStateHelper.getOriginalEnamedelement(ref));

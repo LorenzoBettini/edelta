@@ -287,7 +287,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	public void testSourceElementOfNull() throws Exception {
+	public void testSourceElementOfNull() {
 		assertNull(
 			derivedStateComputer.getPrimarySourceElement(null));
 	}
@@ -411,8 +411,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		validationTestHelper.assertNoErrors(prog);
 	}
 
-	private EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program)
-			throws Exception {
+	private EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {
 		return getEdeltaEcoreQualifiedReference(
 			lastOrNull(getAllContentsOfType(
 				lastModifyEcoreOperation(program).getBody(),
@@ -420,8 +419,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 					.getReference());
 	}
 
-	private void assertEClassContainsFeature(EClass c, EStructuralFeature f, boolean expected)
-			throws Exception {
+	private void assertEClassContainsFeature(EClass c, EStructuralFeature f, boolean expected) {
 		assertEquals(expected,
 			c.getEStructuralFeatures().contains(f));
 	}
