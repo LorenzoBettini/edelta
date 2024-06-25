@@ -17,7 +17,7 @@ modifyEcore introduceNodeSubclasses epackage statecharts {
 			
 			if (nodes.head == oldObj)
 				return createInstance(ePackage.getEClass("InitialState"))
-			else if (nodes.last == oldObj)
+			else if (nodes.lastOrNull == oldObj)
 				return createInstance(ePackage.getEClass("FinalState"))
 			
 			return createInstance(ePackage.getEClass("State"))
