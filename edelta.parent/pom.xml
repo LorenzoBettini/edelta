@@ -173,11 +173,6 @@
       </activation>
       <properties>
         <skipTests>true</skipTests>
-        <!-- 
-        we rely on the committed .java._trace files for
-        https://github.com/LorenzoBettini/edelta/issues/467
-        -->
-        <edelta.skip>true</edelta.skip>
       </properties>
     </profile>
     <profile>
@@ -187,11 +182,6 @@
       </activation>
       <properties>
         <skipTests>true</skipTests>
-        <!-- 
-        we rely on the committed .java._trace files for
-        https://github.com/LorenzoBettini/edelta/issues/467
-        -->
-        <edelta.skip>true</edelta.skip>
       </properties>
       <build>
         <pluginManagement>
@@ -244,11 +234,6 @@
       </activation>
       <properties>
         <skipTests>true</skipTests>
-        <!-- 
-        we rely on the committed .java._trace files for
-        https://github.com/LorenzoBettini/edelta/issues/467
-        -->
-        <edelta.skip>true</edelta.skip>
       </properties>
       <build>
         <plugins>
