@@ -1,6 +1,5 @@
 package edelta.examxml.example;
 
-import com.google.common.base.Objects;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaModelMigrator;
@@ -10,6 +9,7 @@ import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
@@ -48,7 +48,7 @@ public class ExamXMLExample2 extends EdeltaDefaultRuntime {
           {
             final EClass origElementClass = origElement.eClass();
             EClass _original = it_1.<EClass>getOriginal(toSplit);
-            boolean _equals = Objects.equal(origElementClass, _original);
+            boolean _equals = Objects.equals(origElementClass, _original);
             if (_equals) {
               boolean _isSet = EdeltaEcoreUtil.isSet(origElement, "specificQuestion1");
               if (_isSet) {
