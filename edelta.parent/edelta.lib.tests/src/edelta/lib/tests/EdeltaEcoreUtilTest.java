@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EcoreFactory;
@@ -87,7 +88,7 @@ public class EdeltaEcoreUtilTest {
 				EcorePackage.Literals.EPACKAGE__ECLASSIFIERS);
 
 		assertThat(result)
-			.asList()
+			.asInstanceOf(InstanceOfAssertFactories.LIST)
 			.isEmpty();
 
 		pack.setName("A name");

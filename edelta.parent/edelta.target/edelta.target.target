@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="edelta.target" sequenceNumber="26">
+<target name="edelta.target" sequenceNumber="27">
 	<locations>
 		<location includeAllPlatforms="false" includeConfigurePhase="false"
 			includeMode="planner" includeSource="true" type="InstallableUnit">
@@ -11,28 +11,31 @@
 			<unit id="org.eclipse.pde.feature.group" version="0.0.0" />
 			<unit id="org.eclipse.sdk" version="0.0.0" />
 			<unit id="org.eclipse.emf.sdk.feature.group" version="0.0.0" />
-			<unit id="org.eclipse.swtbot.forms.feature.group" version="0.0.0" />
-			<unit id="org.eclipse.swtbot.ide.feature.group" version="0.0.0" />
-			<unit id="org.eclipse.swtbot.eclipse.feature.group" version="0.0.0" />
 			<unit id="org.eclipse.egit.feature.group" version="0.0.0" />
 			<unit id="org.eclipse.m2e.feature.feature.group" version="0.0.0" />
 			<unit id="org.eclipse.emf.ecoretools.design.feature.group"
 				version="0.0.0" />
 			<unit id="org.eclipse.eclemma.feature.feature.group" version="0.0.0" />
-			<repository location="https://download.eclipse.org/releases/2023-12" />
+			<repository location="https://download.eclipse.org/releases/2024-06" />
+		</location>
+		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+			<unit id="org.eclipse.swtbot.forms.feature.group" version="0.0.0" />
+			<unit id="org.eclipse.swtbot.ide.feature.group" version="0.0.0" />
+			<unit id="org.eclipse.swtbot.eclipse.feature.group" version="0.0.0" />
+			<repository location="https://download.eclipse.org/technology/swtbot/releases/latest"/>
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="false"
 			includeMode="planner" includeSource="true" type="InstallableUnit">
 			<unit id="org.eclipse.emf.mwe2.launcher.feature.group"
 				version="0.0.0" />
 			<repository
-				location="https://download.eclipse.org/modeling/emft/mwe/updates/releases/2.16.0/" />
+				location="https://download.eclipse.org/modeling/emft/mwe/updates/releases/2.18.0/" />
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="false"
 			includeMode="planner" includeSource="true" type="InstallableUnit">
 			<unit id="org.eclipse.xtext.sdk.feature.group" version="0.0.0" />
 			<repository
-				location="https://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.33.0/" />
+				location="https://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.35.0/" />
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="true"
 			includeMode="planner" includeSource="true" type="InstallableUnit">
@@ -67,10 +70,10 @@
 			<unit id="junit-platform-suite-api" version="0.0.0"/>
 			<unit id="junit-platform-suite-commons" version="0.0.0"/>
 			<unit id="junit-vintage-engine" version="0.0.0"/>
-			<unit id="org.mockito.mockito-core" version="5.7.0" />
-			<unit id="assertj-core" version="3.24.2" />
+			<unit id="org.mockito.mockito-core" version="5.12.0" />
+			<unit id="assertj-core" version="3.26.0" />
 			<repository
-				location="https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/2023-12" />
+				location="https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/2024-06" />
 		</location>
 	</locations>
 </target>

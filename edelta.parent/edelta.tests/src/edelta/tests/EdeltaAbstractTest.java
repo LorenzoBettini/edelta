@@ -7,7 +7,7 @@ import static org.eclipse.xtext.xbase.lib.IterableExtensions.filter;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.findFirst;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.join;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.last;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.lastOrNull;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.map;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.sort;
 import static org.eclipse.xtext.xbase.lib.ListExtensions.map;
@@ -386,15 +386,15 @@ public abstract class EdeltaAbstractTest {
 	}
 
 	protected EdeltaModifyEcoreOperation lastModifyEcoreOperation(EdeltaProgram p) {
-		return last(p.getModifyEcoreOperations());
+		return lastOrNull(p.getModifyEcoreOperations());
 	}
 
 	protected EdeltaOperation lastOperation(EdeltaProgram p) {
-		return last(p.getOperations());
+		return lastOrNull(p.getOperations());
 	}
 
 	protected EClass getLastCopiedEPackageLastEClass(EObject context) {
-		return (EClass) last(getLastCopiedEPackage(context).getEClassifiers());
+		return (EClass) lastOrNull(getLastCopiedEPackage(context).getEClassifiers());
 	}
 
 	protected EClass getLastCopiedEPackageFirstEClass(EObject context) {
@@ -408,7 +408,7 @@ public abstract class EdeltaAbstractTest {
 	}
 
 	protected EPackage getLastCopiedEPackage(EObject context) {
-		return last(getCopiedEPackages(context));
+		return lastOrNull(getCopiedEPackages(context));
 	}
 
 	protected Collection<EPackage> getCopiedEPackages(EObject context) {
@@ -464,7 +464,7 @@ public abstract class EdeltaAbstractTest {
 	}
 
 	protected XExpression getBlockLastExpression(XExpression e) {
-		return last(getBlock(e).getExpressions());
+		return lastOrNull(getBlock(e).getExpressions());
 	}
 
 	protected XExpression getBlockFirstExpression(XExpression e) {
@@ -484,7 +484,7 @@ public abstract class EdeltaAbstractTest {
 	}
 
 	protected EClass getLastEClass(EPackage ePackage) {
-		return (EClass) last(ePackage.getEClassifiers());
+		return (EClass) lastOrNull(ePackage.getEClassifiers());
 	}
 
 	protected EClass getFirstEClass(EPackage ePackage) {
@@ -519,7 +519,7 @@ public abstract class EdeltaAbstractTest {
 	}
 
 	protected EdeltaEcoreReferenceExpression getLastOfAllEcoreReferenceExpressions(EdeltaProgram p) {
-		return last(getAllEcoreReferenceExpressions(p));
+		return lastOrNull(getAllEcoreReferenceExpressions(p));
 	}
 
 	protected List<EdeltaEcoreReferenceExpression> getAllEcoreReferenceExpressions(EdeltaProgram p) {

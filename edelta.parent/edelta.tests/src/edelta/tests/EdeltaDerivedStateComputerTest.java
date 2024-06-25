@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.forall;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.last;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.lastOrNull;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -162,7 +162,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		// since we don't install anything during preIndexingPhase
 		assertEquals("test.__synthetic0",
 			((JvmGenericType)
-				last(resource.getContents())).getIdentifier());
+				lastOrNull(resource.getContents())).getIdentifier());
 	}
 
 	@Test
@@ -178,7 +178,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		// only program must be there and the inferred Jvm Type
 		assertEquals("test.__synthetic0",
 			((JvmGenericType)
-				last(resource.getContents())).getIdentifier());
+				lastOrNull(resource.getContents())).getIdentifier());
 	}
 
 	@Test
@@ -200,7 +200,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		// only program must be there and the inferred Jvm Type
 		assertEquals("test.__synthetic0",
 			((JvmGenericType)
-				last(resource.getContents())).getIdentifier());
+				lastOrNull(resource.getContents())).getIdentifier());
 	}
 
 	@Test
@@ -287,7 +287,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	public void testSourceElementOfNull() throws Exception {
+	public void testSourceElementOfNull() {
 		assertNull(
 			derivedStateComputer.getPrimarySourceElement(null));
 	}
@@ -330,7 +330,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 			}
 		""");
 		var derivedEClass = getLastCopiedEPackageFirstEClass(program);
-		var derivedEAttribute = (EAttribute) last(derivedEClass.getEStructuralFeatures());
+		var derivedEAttribute = (EAttribute) lastOrNull(derivedEClass.getEStructuralFeatures());
 		assertEquals("newAttribute", derivedEAttribute.getName());
 		assertEquals("Renamed", derivedEAttribute.getEContainingClass().getName());
 	}
@@ -411,17 +411,15 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		validationTestHelper.assertNoErrors(prog);
 	}
 
-	private EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program)
-			throws Exception {
+	private EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {
 		return getEdeltaEcoreQualifiedReference(
-			last(getAllContentsOfType(
+			lastOrNull(getAllContentsOfType(
 				lastModifyEcoreOperation(program).getBody(),
 				EdeltaEcoreReferenceExpression.class))
 					.getReference());
 	}
 
-	private void assertEClassContainsFeature(EClass c, EStructuralFeature f, boolean expected)
-			throws Exception {
+	private void assertEClassContainsFeature(EClass c, EStructuralFeature f, boolean expected) {
 		assertEquals(expected,
 			c.getEStructuralFeatures().contains(f));
 	}

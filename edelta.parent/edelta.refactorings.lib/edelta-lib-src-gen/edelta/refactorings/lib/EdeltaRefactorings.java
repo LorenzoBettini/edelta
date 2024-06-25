@@ -1,6 +1,5 @@
 package edelta.refactorings.lib;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaEcoreUtil;
@@ -14,6 +13,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -1072,7 +1072,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   public void checkType(final EStructuralFeature feature, final EClassifier expectedType) {
     String _fullyQualifiedName = EdeltaUtils.getFullyQualifiedName(feature.getEType());
     String _fullyQualifiedName_1 = EdeltaUtils.getFullyQualifiedName(expectedType);
-    boolean _notEquals = (!Objects.equal(_fullyQualifiedName, _fullyQualifiedName_1));
+    boolean _notEquals = (!Objects.equals(_fullyQualifiedName, _fullyQualifiedName_1));
     if (_notEquals) {
       String _eObjectRepr = EdeltaUtils.getEObjectRepr(expectedType);
       String _plus = ("expecting " + _eObjectRepr);
@@ -1483,7 +1483,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   public Iterable<EClass> directSubclasses(final EClass cl) {
     final Function1<EStructuralFeature.Setting, Boolean> _function = (EStructuralFeature.Setting it) -> {
       EStructuralFeature _eStructuralFeature = it.getEStructuralFeature();
-      return Boolean.valueOf(Objects.equal(_eStructuralFeature, getEReference("ecore", "EClass", "eSuperTypes")));
+      return Boolean.valueOf(Objects.equals(_eStructuralFeature, getEReference("ecore", "EClass", "eSuperTypes")));
     };
     final Function1<EStructuralFeature.Setting, EClass> _function_1 = (EStructuralFeature.Setting it) -> {
       EObject _eObject = it.getEObject();

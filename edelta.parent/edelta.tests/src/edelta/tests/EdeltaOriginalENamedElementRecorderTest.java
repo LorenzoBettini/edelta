@@ -1,6 +1,6 @@
 package edelta.tests;
 
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.last;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.lastOrNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
@@ -23,12 +23,12 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 	private EdeltaOriginalENamedElementRecorder recorder;
 
 	@Test
-	public void testNull() throws Exception { // NOSONAR just check there's no NPE
+	public void testNull() { // NOSONAR just check there's no NPE
 		recorder.recordOriginalENamedElement(null);
 	}
 
 	@Test
-	public void testNullENamedElement() throws Exception {
+	public void testNullENamedElement() {
 		var ref = EdeltaFactory.eINSTANCE.createEdeltaEcoreDirectReference();
 		recorder.recordOriginalENamedElement(ref);
 		assertNull(derivedStateHelper.getOriginalEnamedelement(ref));
@@ -54,7 +54,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 		);
 		var ref = lastEcoreReferenceExpression(prog).getReference();
 		recorder.recordOriginalENamedElement(ref);
-		var original = getEClassiferByName(last(prog.getMetamodels()),
+		var original = getEClassiferByName(lastOrNull(prog.getMetamodels()),
 				"FooClass");
 		assertSame(original, derivedStateHelper.getOriginalEnamedelement(ref));
 	}
@@ -73,10 +73,10 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 		var ref = getEdeltaEcoreQualifiedReference(
 			lastEcoreReferenceExpression(prog).getReference());
 		recorder.recordOriginalENamedElement(ref);
-		var original = getEClassiferByName(last(prog.getMetamodels()),
+		var original = getEClassiferByName(lastOrNull(prog.getMetamodels()),
 				"FooClass");
 		assertSame(original, derivedStateHelper.getOriginalEnamedelement(ref));
-		var originalPackage = last(prog.getMetamodels());
+		var originalPackage = lastOrNull(prog.getMetamodels());
 		assertSame(originalPackage,
 				derivedStateHelper.getOriginalEnamedelement(ref.getQualification()));
 	}
@@ -116,7 +116,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 		assertNull(derivedStateHelper.getOriginalEnamedelement(ref));
 		// note that the package actually links to the original EPackage
 		// not to the derived EPackage, but that's not a problem
-		var originalPackage = last(prog.getMetamodels());
+		var originalPackage = lastOrNull(prog.getMetamodels());
 		assertSame(originalPackage,
 			derivedStateHelper.getOriginalEnamedelement(
 					ref.getQualification()));

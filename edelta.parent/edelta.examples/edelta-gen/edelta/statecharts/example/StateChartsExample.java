@@ -1,6 +1,5 @@
 package edelta.statecharts.example;
 
-import com.google.common.base.Objects;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaEcoreUtil;
 import edelta.lib.EdeltaModelMigrator;
@@ -8,6 +7,7 @@ import edelta.lib.EdeltaRuntime;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
@@ -28,12 +28,12 @@ public class StateChartsExample extends EdeltaDefaultRuntime {
       final EObject container = oldObj.eContainer();
       final List<EObject> nodes = EdeltaEcoreUtil.getValueAsList(container, oldObj.eContainingFeature());
       EObject _head = IterableExtensions.<EObject>head(nodes);
-      boolean _equals = Objects.equal(_head, oldObj);
+      boolean _equals = Objects.equals(_head, oldObj);
       if (_equals) {
         return EdeltaEcoreUtil.createInstance(this.getEClass(ePackage, "InitialState"));
       } else {
-        EObject _last = IterableExtensions.<EObject>last(nodes);
-        boolean _equals_1 = Objects.equal(_last, oldObj);
+        EObject _lastOrNull = IterableExtensions.<EObject>lastOrNull(nodes);
+        boolean _equals_1 = Objects.equals(_lastOrNull, oldObj);
         if (_equals_1) {
           return EdeltaEcoreUtil.createInstance(this.getEClass(ePackage, "FinalState"));
         }

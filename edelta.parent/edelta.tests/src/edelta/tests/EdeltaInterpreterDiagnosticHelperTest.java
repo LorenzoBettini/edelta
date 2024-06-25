@@ -1,6 +1,6 @@
 package edelta.tests;
 
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.last;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.lastOrNull;
 
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
@@ -57,7 +57,7 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
 		var prog = parseWithTestEcore(input);
 		// just an ENamedElement to pass to show method as
 		// the problematic object
-		var problematic = last(getCopiedEPackages(prog));
+		var problematic = lastOrNull(getCopiedEPackages(prog));
 		// associate it to the first expression in the derived state
 		var correspondingExpression = getLastModifyEcoreOperationFirstExpression(prog);
 		derivedStateHelper.getEnamedElementXExpressionMap(
@@ -116,7 +116,7 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
 		var prog = parseWithTestEcore(input);
 		// just an ENamedElement to pass to show method as
 		// the problematic object
-		var problematic = last(getCopiedEPackages(prog));
+		var problematic = lastOrNull(getCopiedEPackages(prog));
 		// associate it to the first expression in the derived state
 		var correspondingExpression = 
 				getLastModifyEcoreOperationFirstExpression(prog);

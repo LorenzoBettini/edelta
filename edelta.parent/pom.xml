@@ -15,7 +15,7 @@
   <description>An Xtext DSL for EMF metamodels refactoring and migration.</description>
 
   <properties>
-    <eclipse-version>2023-12</eclipse-version>
+    <eclipse-version>2024-06</eclipse-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
@@ -173,11 +173,6 @@
       </activation>
       <properties>
         <skipTests>true</skipTests>
-        <!-- 
-        we rely on the committed .java._trace files for
-        https://github.com/LorenzoBettini/edelta/issues/467
-        -->
-        <edelta.skip>true</edelta.skip>
       </properties>
     </profile>
     <profile>
@@ -187,11 +182,6 @@
       </activation>
       <properties>
         <skipTests>true</skipTests>
-        <!-- 
-        we rely on the committed .java._trace files for
-        https://github.com/LorenzoBettini/edelta/issues/467
-        -->
-        <edelta.skip>true</edelta.skip>
       </properties>
       <build>
         <pluginManagement>
@@ -244,11 +234,6 @@
       </activation>
       <properties>
         <skipTests>true</skipTests>
-        <!-- 
-        we rely on the committed .java._trace files for
-        https://github.com/LorenzoBettini/edelta/issues/467
-        -->
-        <edelta.skip>true</edelta.skip>
       </properties>
       <build>
         <plugins>

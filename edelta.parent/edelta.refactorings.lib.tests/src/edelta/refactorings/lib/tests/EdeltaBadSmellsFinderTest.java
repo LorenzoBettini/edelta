@@ -4,7 +4,7 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.last;
+import static org.eclipse.xtext.xbase.lib.IterableExtensions.lastOrNull;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.map;
 
 import java.util.Map;
@@ -149,7 +149,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractEdeltaRefactoringsLibTest
 			});
 			stdLib.addNewEReference(containedWithOpposite, "correctWithOpposite", container, r -> {
 				r.setLowerBound(1);
-				r.setEOpposite(last(container.getEReferences()));
+				r.setEOpposite(lastOrNull(container.getEReferences()));
 			});
 			// this is correct since it's another containment relation
 			stdLib.addNewContainmentEReference(containedWithContained, "correctWithContainment", container,
