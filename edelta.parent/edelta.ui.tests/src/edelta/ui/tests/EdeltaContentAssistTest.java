@@ -8,8 +8,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
@@ -24,7 +22,6 @@ import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -43,8 +40,6 @@ import edelta.ui.tests.utils.ProjectImportUtil;
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
 public class EdeltaContentAssistTest extends AbstractContentAssistTest {
-	private static IJavaProject pluginJavaProject;
-
 	private static String PROJECT_NAME = "edelta.ui.tests.project";
 
 	@Rule
@@ -54,19 +49,12 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	public static void setUp() throws CoreException {
 		try {
 			EdeltaWorkbenchUtils.closeWelcomePage();
-			EdeltaContentAssistTest.pluginJavaProject = ProjectImportUtil
+			javaProject = ProjectImportUtil
 					.importJavaProject(EdeltaContentAssistTest.PROJECT_NAME);
 			IResourcesSetupUtil.waitForBuild();
 		} catch (Throwable _e) {
 			throw Exceptions.sneakyThrow(_e);
 		}
-	}
-
-	/**
-	 * just to make sure the project is not deleted
-	 */
-	@AfterClass
-	public static void tearDown() {
 	}
 
 	/**
@@ -77,11 +65,6 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	@After
 	public void after() {
 		EdeltaContentAssistTest.closeEditors();
-	}
-
-	@Override
-	public IJavaProject getJavaProject(ResourceSet resourceSet) {
-		return EdeltaContentAssistTest.pluginJavaProject;
 	}
 
 	/**

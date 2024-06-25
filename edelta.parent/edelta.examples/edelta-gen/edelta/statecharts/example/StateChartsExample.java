@@ -32,7 +32,7 @@ public class StateChartsExample extends EdeltaDefaultRuntime {
       if (_equals) {
         return EdeltaEcoreUtil.createInstance(this.getEClass(ePackage, "InitialState"));
       } else {
-        EObject _last = IterableExtensions.<EObject>last(nodes);
+        EObject _last = IterableExtensions.<EObject>lastOrNull(nodes);
         boolean _equals_1 = Objects.equal(_last, oldObj);
         if (_equals_1) {
           return EdeltaEcoreUtil.createInstance(this.getEClass(ePackage, "FinalState"));
