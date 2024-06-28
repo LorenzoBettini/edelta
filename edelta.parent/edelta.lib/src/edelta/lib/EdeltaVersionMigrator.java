@@ -79,19 +79,20 @@ public class EdeltaVersionMigrator {
 				var contents = resource.getContents();
 				var ePackage = contents.get(0).eClass().getEPackage();
 				for (var versionMigration : versionMigrations) {
-					if (versionMigration.uris().contains(ePackage.getNsURI())) {
+					if (versionMigration.uris.contains(ePackage.getNsURI())) {
 						var data = migrationDatas
-								.computeIfAbsent(versionMigration, x -> new MigrationData(new HashSet<>(), new ArrayList<>()));
-						data.ecores().add(ePackage);
-						data.models().add(resource);
+							.computeIfAbsent(versionMigration,
+								x -> new MigrationData(new HashSet<>(), new ArrayList<>()));
+						data.ecores.add(ePackage);
+						data.models.add(resource);
 					}
 				}
 			}
 			modelResources.clear();
 			for (var entry : migrationDatas.entrySet()) {
-				var toApply = entry.getKey();
-				var ecoresToMigrate = entry.getValue().ecores();
-				var modelsToMigrate = entry.getValue().models();
+				var toApply = entry.getKey().engine;
+				var ecoresToMigrate = entry.getValue().ecores;
+				var modelsToMigrate = entry.getValue().models;
 				var migrationModelManager = new EdeltaModelManager();
 				
 				var nsURIs = ecoresToMigrate.stream().map(e -> e.getNsURI()).toList();
@@ -104,12 +105,12 @@ public class EdeltaVersionMigrator {
 				for (var model : modelsToMigrate) {
 					migrationModelManager.addModelResource(model);
 				}
-				toApply.engine().setOriginalModelManager(migrationModelManager);
-				toApply.engine().execute();
+				toApply.setOriginalModelManager(migrationModelManager);
+				toApply.execute();
 				// note that we never save the evolved ecores: only the models
 				// the ecores are meant to be part of the application code, not of the client project
-				toApply.engine().saveModels(outputPath);
-				modelResources.addAll(toApply.engine().getEvolvingModelManager().getModelResources());
+				toApply.saveModels(outputPath);
+				modelResources.addAll(toApply.getEvolvingModelManager().getModelResources());
 			}
 		} while (!migrationDatas.isEmpty());
 	}
