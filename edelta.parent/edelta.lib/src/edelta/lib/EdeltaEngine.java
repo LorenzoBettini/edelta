@@ -65,7 +65,27 @@ public class EdeltaEngine {
 	 * @throws IOException
 	 */
 	public void save(String outputPath) throws IOException {
+		saveEcores(outputPath);
+		saveModels(outputPath);
+	}
+
+	/**
+	 * Saves the evolved Ecore files to the specified outputPath.
+	 * 
+	 * @param outputPath
+	 * @throws IOException
+	 */
+	public void saveEcores(String outputPath) throws IOException {
 		evolvingModelManager.saveEcores(outputPath);
+	}
+
+	/**
+	 * Saves the evolved model files to the specified outputPath.
+	 * 
+	 * @param outputPath
+	 * @throws IOException
+	 */
+	public void saveModels(String outputPath) throws IOException {
 		evolvingModelManager.saveModels(outputPath);
 	}
 
