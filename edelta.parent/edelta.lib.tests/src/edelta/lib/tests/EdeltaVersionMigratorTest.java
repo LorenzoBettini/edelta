@@ -36,29 +36,60 @@ class EdeltaVersionMigratorTest {
 		versionMigrator = new EdeltaVersionMigrator();
 	}
 
+	private EdeltaEngine renamePersonFirstAndLastName = new EdeltaEngine(runtime ->
+		new EdeltaDefaultRuntime(runtime) {
+			@Override
+			protected void performSanityChecks() throws Exception {
+				ensureEPackageIsLoaded("PersonList");
+			};
+			@Override
+			public void doExecute() throws Exception {
+				// simulate the renaming of the URI
+				getEPackage("PersonList").setNsURI("http://cs.gssi.it/PersonMM/v2");
+				// simulate the renaming to get to version 2
+				getEAttribute("PersonList", "Person", "firstname").setName("firstName");
+				getEAttribute("PersonList", "Person", "lastname").setName("lastName");
+			};
+		}
+	);
+
+	private EdeltaEngine renamePersonList = new EdeltaEngine(runtime ->
+		new EdeltaDefaultRuntime(runtime) {
+			@Override
+			protected void performSanityChecks() throws Exception {
+				ensureEPackageIsLoaded("PersonList");
+			};
+			@Override
+			public void doExecute() throws Exception {
+				// simulate the renaming of the URI
+				getEPackage("PersonList").setNsURI("http://cs.gssi.it/PersonMM/v3");
+				// simulate the renaming to get to version 3
+				getEClass("PersonList", "List").setName("PersonList");
+			};
+		}
+	);
+
 	@Test
-	void simpleCase() throws Exception {
+	void personListFromVersion1ToVersion2() throws Exception {
 		var subdir = "rename/";
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"), new EdeltaEngine(runtime ->
-			new EdeltaDefaultRuntime(runtime) {
-				@Override
-				protected void performSanityChecks() throws Exception {
-					ensureEPackageIsLoaded("PersonList");
-				};
-				@Override
-				public void doExecute() throws Exception {
-					// simulate the renaming of the URI
-					getEPackage("PersonList").setNsURI("http://cs.gssi.it/PersonMM/v2");
-					// simulate the renaming to get to version 2
-					getEAttribute("PersonList", "Person", "firstname").setName("firstName");
-					getEAttribute("PersonList", "Person", "lastname").setName("lastName");
-				};
-			}
-		));
+		var outputSubdir = "rename-v1-to-v2/";
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"), renamePersonFirstAndLastName);
 		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
 		versionMigrator.loadModelsFrom(TESTDATA + subdir + MODELS + "/v1");
-		versionMigrator.execute(OUTPUT + subdir);
-		executeAndAssertOutputs(subdir, List.of("List.xmi", "List2.xmi"));
+		versionMigrator.execute(OUTPUT + outputSubdir);
+		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
+	}
+
+	@Test
+	void personListFromVersion2ToVersion3() throws Exception {
+		var subdir = "rename/";
+		var outputSubdir = "rename-v2-to-v3/";
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"), renamePersonFirstAndLastName);
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v2"), renamePersonList);
+		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
+		versionMigrator.loadModelsFrom(TESTDATA + subdir + MODELS + "/v2");
+		versionMigrator.execute(OUTPUT + outputSubdir);
+		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
 	}
 
 	private void executeAndAssertOutputs(String subdir, Collection<String> modelFiles) {
