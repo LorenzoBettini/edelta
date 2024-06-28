@@ -72,8 +72,6 @@ public class EdeltaVersionMigrator {
 		var migrationDatas = new HashMap<VersionMigrationEntry, MigrationData>();
 		for (var resource : modelResources) {
 			var contents = resource.getContents();
-			if (contents.isEmpty())
-				continue;
 			var ePackage = contents.get(0).eClass().getEPackage();
 			for (var versionMigration : versionMigrations) {
 				if (versionMigration.uris().contains(ePackage.getNsURI())) {
