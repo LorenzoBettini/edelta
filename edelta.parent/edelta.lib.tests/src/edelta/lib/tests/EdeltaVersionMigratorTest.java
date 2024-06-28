@@ -92,6 +92,18 @@ class EdeltaVersionMigratorTest {
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
 	}
 
+	@Test
+	void personListFromVersion1ToVersion3() throws Exception {
+		var subdir = "rename/";
+		var outputSubdir = "rename-v1-to-v3/";
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"), renamePersonFirstAndLastName);
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v2"), renamePersonList);
+		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
+		versionMigrator.loadModelsFrom(TESTDATA + subdir + MODELS + "/v1");
+		versionMigrator.execute(OUTPUT + outputSubdir);
+		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
+	}
+
 	private void executeAndAssertOutputs(String subdir, Collection<String> modelFiles) {
 		var output = OUTPUT + subdir;
 		modelFiles.forEach

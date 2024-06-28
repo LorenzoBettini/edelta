@@ -70,38 +70,48 @@ public class EdeltaVersionMigrator {
 
 		var modelResources = modelManager.getModelResources();
 		var migrationDatas = new HashMap<VersionMigrationEntry, MigrationData>();
-		for (var resource : modelResources) {
-			var contents = resource.getContents();
-			var ePackage = contents.get(0).eClass().getEPackage();
-			for (var versionMigration : versionMigrations) {
-				if (versionMigration.uris().contains(ePackage.getNsURI())) {
-					var data = migrationDatas
-						.computeIfAbsent(versionMigration, x -> new MigrationData(new HashSet<>(), new ArrayList<>()));
-					data.ecores().add(ePackage);
-					data.models().add(resource);
+		do {
+			// at each iteration we must always use the already in-memory loaded resources
+			// to make sure that each migration from versionx to versiony always use the
+			// most up-to-date version of ecores and models.
+			migrationDatas.clear();
+			for (var resource : modelResources) {
+				var contents = resource.getContents();
+				var ePackage = contents.get(0).eClass().getEPackage();
+				for (var versionMigration : versionMigrations) {
+					if (versionMigration.uris().contains(ePackage.getNsURI())) {
+						var data = migrationDatas
+								.computeIfAbsent(versionMigration, x -> new MigrationData(new HashSet<>(), new ArrayList<>()));
+						data.ecores().add(ePackage);
+						data.models().add(resource);
+					}
 				}
 			}
-		}
-		for (var entry : migrationDatas.entrySet()) {
-			var toApply = entry.getKey();
-			var ecoresToMigrate = entry.getValue().ecores();
-			var modelsToMigrate = entry.getValue().models();
-			var migrationModelManager = new EdeltaModelManager();
-			
-			var nsURIs = ecoresToMigrate.stream().map(e -> e.getNsURI()).toList();
-			var modelPaths = modelsToMigrate.stream().map(e -> e.getURI().path()).toList();
-			nsURIs.forEach(e -> LOG.info("Stale Ecore nsURI: " + e));
-			modelPaths.forEach(e -> LOG.info("Model requiring migration: " + e));
-			for (var ecore : ecoresToMigrate) {
-				migrationModelManager.addEcoreResource(ecore.eResource());
+			modelResources.clear();
+			for (var entry : migrationDatas.entrySet()) {
+				var toApply = entry.getKey();
+				var ecoresToMigrate = entry.getValue().ecores();
+				var modelsToMigrate = entry.getValue().models();
+				var migrationModelManager = new EdeltaModelManager();
+				
+				var nsURIs = ecoresToMigrate.stream().map(e -> e.getNsURI()).toList();
+				var modelPaths = modelsToMigrate.stream().map(e -> e.getURI().path()).toList();
+				nsURIs.forEach(e -> LOG.info("Stale Ecore nsURI: " + e));
+				modelPaths.forEach(e -> LOG.info("Model requiring migration: " + e));
+				for (var ecore : ecoresToMigrate) {
+					migrationModelManager.addEcoreResource(ecore.eResource());
+				}
+				for (var model : modelsToMigrate) {
+					migrationModelManager.addModelResource(model);
+				}
+				toApply.engine().setOriginalModelManager(migrationModelManager);
+				toApply.engine().execute();
+				// note that we never save the evolved ecores: only the models
+				// the ecores are meant to be part of the application code, not of the client project
+				toApply.engine().saveModels(outputPath);
+				modelResources.addAll(toApply.engine().getEvolvingModelManager().getModelResources());
 			}
-			for (var model : modelsToMigrate) {
-				migrationModelManager.addModelResource(model);
-			}
-			toApply.engine().setOriginalModelManager(migrationModelManager);
-			toApply.engine().execute();
-			toApply.engine().saveModels(outputPath);
-		}
+		} while (!migrationDatas.isEmpty());
 	}
 
 }
