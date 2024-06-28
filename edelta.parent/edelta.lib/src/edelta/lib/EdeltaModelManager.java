@@ -85,6 +85,18 @@ public class EdeltaModelManager {
 		return loadResource(path, ecoreResources);
 	}
 
+	// TODO unit test
+	public void addEcoreResource(Resource ecoreResource) {
+		resourceSet.getResources().add(ecoreResource);
+		ecoreResources.add(ecoreResource);
+	}
+
+	// TODO unit test
+	public void addModelResource(Resource modelResource) {
+		resourceSet.getResources().add(modelResource);
+		modelResources.add(modelResource);
+	}
+
 	private Resource loadResource(String path, Collection<Resource> resourceMap) {
 		var uri = createAbsoluteFileURI(path);
 		// Demand load resource for this file.

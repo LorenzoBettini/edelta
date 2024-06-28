@@ -86,14 +86,19 @@ public class EdeltaVersionMigrator {
 			var toApply = entry.getKey();
 			var ecoresToMigrate = entry.getValue().ecores();
 			var modelsToMigrate = entry.getValue().models();
+			var migrationModelManager = new EdeltaModelManager();
+			
 			var nsURIs = ecoresToMigrate.stream().map(e -> e.getNsURI()).toList();
 			var modelPaths = modelsToMigrate.stream().map(e -> e.getURI().path()).toList();
 			nsURIs.forEach(e -> LOG.info("Stale Ecore nsURI: " + e));
 			modelPaths.forEach(e -> LOG.info("Model requiring migration: " + e));
-			for (var ecore : ecoresToMigrate)
-				toApply.engine().loadEcoreFile(ecore.eResource().getURI().path());
-			for (var model : modelPaths)
-				toApply.engine().loadModelFile(model);
+			for (var ecore : ecoresToMigrate) {
+				migrationModelManager.addEcoreResource(ecore.eResource());
+			}
+			for (var model : modelsToMigrate) {
+				migrationModelManager.addModelResource(model);
+			}
+			toApply.engine().setOriginalModelManager(migrationModelManager);
 			toApply.engine().execute();
 			toApply.engine().saveModels(outputPath);
 		}
