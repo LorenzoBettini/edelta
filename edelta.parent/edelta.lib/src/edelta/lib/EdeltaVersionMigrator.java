@@ -5,20 +5,29 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.xtext.xbase.lib.Pair;
 
 /**
  * @author Lorenzo Bettini
  */
 public class EdeltaVersionMigrator {
 
+	private static final Logger LOG = Logger.getLogger(EdeltaVersionMigrator.class);
+
 	private EdeltaModelManager modelManager = new EdeltaModelManager();
 
-	private List<Pair<Collection<String>, EdeltaEngine>> versionMigrations = new ArrayList<>();
+	private static record VersionMigrationEntry(Collection<String> uris, EdeltaEngine engine) {
+		
+	}
+
+	private List<VersionMigrationEntry> versionMigrations = new ArrayList<>();
 
 	/**
 	 * The loaded ecores are assumed to be different versions of the same ecores.
@@ -52,35 +61,43 @@ public class EdeltaVersionMigrator {
 	}
 
 	public void mapVersionMigration(Collection<String> uris, EdeltaEngine edeltaEngine) {
-		versionMigrations.add(Pair.of(uris, edeltaEngine));
+		versionMigrations.add(new VersionMigrationEntry(uris, edeltaEngine));
 	}
 
 	public void execute(String outputPath) throws Exception {
+		record MigrationData(Set<EPackage> ecores, Collection<Resource> models) {
+		}
+
 		var modelResources = modelManager.getModelResources();
-		var currentVersionsOfEcores = new HashSet<Resource>();
-		var modelsToMigrate = new ArrayList<Resource>();
-		// TODO consider clusters of unrelated ecores
-		EdeltaEngine toApply = null;
+		var migrationDatas = new HashMap<VersionMigrationEntry, MigrationData>();
 		for (var resource : modelResources) {
 			var contents = resource.getContents();
 			if (contents.isEmpty())
 				continue;
 			var ePackage = contents.get(0).eClass().getEPackage();
 			for (var versionMigration : versionMigrations) {
-				if (versionMigration.getKey().contains(ePackage.getNsURI())) {
-					currentVersionsOfEcores.add(ePackage.eResource());
-					modelsToMigrate.add(resource);
-					toApply = versionMigration.getValue();
+				if (versionMigration.uris().contains(ePackage.getNsURI())) {
+					var data = migrationDatas
+						.computeIfAbsent(versionMigration, x -> new MigrationData(new HashSet<>(), new ArrayList<>()));
+					data.ecores().add(ePackage);
+					data.models().add(resource);
 				}
 			}
 		}
-		if (toApply != null) {
-			for (var ecore : currentVersionsOfEcores)
-				toApply.loadEcoreFile(ecore.getURI().path());
-			for (var model : modelsToMigrate)
-				toApply.loadModelFile(model.getURI().path());
-			toApply.execute();
-			toApply.saveModels(outputPath);
+		for (var entry : migrationDatas.entrySet()) {
+			var toApply = entry.getKey();
+			var ecoresToMigrate = entry.getValue().ecores();
+			var modelsToMigrate = entry.getValue().models();
+			var nsURIs = ecoresToMigrate.stream().map(e -> e.getNsURI()).toList();
+			var modelPaths = modelsToMigrate.stream().map(e -> e.getURI().path()).toList();
+			nsURIs.forEach(e -> LOG.info("Stale Ecore nsURI: " + e));
+			modelPaths.forEach(e -> LOG.info("Model requiring migration: " + e));
+			for (var ecore : ecoresToMigrate)
+				toApply.engine().loadEcoreFile(ecore.eResource().getURI().path());
+			for (var model : modelPaths)
+				toApply.engine().loadModelFile(model);
+			toApply.engine().execute();
+			toApply.engine().saveModels(outputPath);
 		}
 	}
 
