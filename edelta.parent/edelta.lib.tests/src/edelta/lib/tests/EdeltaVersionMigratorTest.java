@@ -104,6 +104,38 @@ class EdeltaVersionMigratorTest {
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
 	}
 
+	private EdeltaEngine renameMyPackage = new EdeltaEngine(runtime ->
+		new EdeltaDefaultRuntime(runtime) {
+			@Override
+			protected void performSanityChecks() throws Exception {
+				ensureEPackageIsLoaded("mypackage");
+			};
+			@Override
+			public void doExecute() throws Exception {
+				// simulate the renaming of the URI
+				getEPackage("mypackage").setNsURI("http://my.package.org/v2");
+				// simulate the renaming to get to version 2
+				getEClass("mypackage", "MyClass").setName("MyRenamedClass");
+				getEAttribute("mypackage", "MyRenamedClass", "myClassStringAttribute")
+					.setName("myClassRenamedStringAttribute");
+				getEClass("mypackage", "MyRoot").setName("MyRenamedRoot");
+			};
+		}
+	);
+
+	@Test
+	void unrelatedEcoresAndModels() throws Exception {
+		var subdir = "rename/";
+		var outputSubdir = "rename-unrelated/";
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"), renamePersonFirstAndLastName);
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v2"), renamePersonList);
+		versionMigrator.mapVersionMigration(List.of("http://my.package.org"), renameMyPackage);
+		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
+		versionMigrator.loadModelsFrom(TESTDATA + subdir + MODELS + "/v1");
+		versionMigrator.execute(OUTPUT + outputSubdir);
+		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi", "MyClass.xmi", "MyRoot.xmi"));
+	}
+
 	private void executeAndAssertOutputs(String subdir, Collection<String> modelFiles) {
 		var output = OUTPUT + subdir;
 		modelFiles.forEach
