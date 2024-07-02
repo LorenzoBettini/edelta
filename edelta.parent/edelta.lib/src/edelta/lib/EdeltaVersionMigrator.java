@@ -148,12 +148,8 @@ public class EdeltaVersionMigrator {
 				migratedModelResources.addAll(evolvedModels);
 			}
 			if (!migratedModelResources.isEmpty()) {
-				// reload all Ecore files...
-				modelManager = new EdeltaModelManager();
-				for (var ecorePath : ecorePaths) {
-					loadEcoreFilesInternal(ecorePath);
-				}
-				// ... and only migrated models
+				// reload only migrated models
+				modelManager.clearModels();
 				for (var model : migratedModelResources) {
 					loadModelsFrom(resourceToURIString(model));
 				}
