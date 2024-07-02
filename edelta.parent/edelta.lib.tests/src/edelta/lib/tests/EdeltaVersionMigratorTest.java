@@ -59,7 +59,7 @@ class EdeltaVersionMigratorTest {
 			@Override
 			protected void performSanityChecks() throws Exception {
 				ensureEPackageIsLoadedByNsURI("PersonList", "http://cs.gssi.it/PersonMM/v1");
-			};
+			}
 			@Override
 			public void doExecute() throws Exception {
 				// simulate the renaming of the URI
@@ -67,7 +67,7 @@ class EdeltaVersionMigratorTest {
 				// simulate the renaming to get to version 2
 				getEAttribute("PersonList", "Person", "firstname").setName("firstName");
 				getEAttribute("PersonList", "Person", "lastname").setName("lastName");
-			};
+			}
 		}
 	);
 
@@ -76,14 +76,14 @@ class EdeltaVersionMigratorTest {
 			@Override
 			protected void performSanityChecks() throws Exception {
 				ensureEPackageIsLoadedByNsURI("PersonList", "http://cs.gssi.it/PersonMM/v2");
-			};
+			}
 			@Override
 			public void doExecute() throws Exception {
 				// simulate the renaming of the URI
 				getEPackage("PersonList").setNsURI("http://cs.gssi.it/PersonMM/v3");
 				// simulate the renaming to get to version 3
 				getEClass("PersonList", "List").setName("PersonList");
-			};
+			}
 		}
 	);
 
@@ -138,7 +138,7 @@ class EdeltaVersionMigratorTest {
 			@Override
 			protected void performSanityChecks() throws Exception {
 				ensureEPackageIsLoadedByNsURI("mypackage", "http://my.package.org");
-			};
+			}
 			@Override
 			public void doExecute() throws Exception {
 				// simulate the renaming of the URI
@@ -148,7 +148,7 @@ class EdeltaVersionMigratorTest {
 				getEAttribute("mypackage", "MyRenamedClass", "myClassStringAttribute")
 					.setName("myClassRenamedStringAttribute");
 				getEClass("mypackage", "MyRoot").setName("MyRenamedRoot");
-			};
+			}
 		}
 	);
 
