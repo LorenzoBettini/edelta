@@ -33,8 +33,6 @@ public class EdeltaVersionMigrator {
 
 	private List<VersionMigrationEntry> versionMigrations = new ArrayList<>();
 
-	private Set<String> ecorePaths = new HashSet<>();
-
 	private Set<String> modelExtensions = new HashSet<>();
 
 	public EdeltaVersionMigrator() {
@@ -57,11 +55,6 @@ public class EdeltaVersionMigrator {
 	 * @throws IOException
 	 */
 	public void loadEcoresFrom(String path) throws IOException {
-		ecorePaths.add(path);
-		loadEcoreFilesInternal(path);
-	}
-
-	private void loadEcoreFilesInternal(String path) throws IOException {
 		try (var stream = Files.walk(Paths.get(path))) {
 			stream
 				.filter(file -> !Files.isDirectory(file))
