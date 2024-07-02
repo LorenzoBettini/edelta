@@ -242,4 +242,13 @@ public class EdeltaModelManagerTest {
 		var registered = modelManager.getEPackage("PersonList");
 		assertEquals("http://cs.gssi.it/PersonMM/v1", registered.getNsURI());
 	}
+
+	@Test
+	public void testLoadFromClassLoader() throws IOException, EdeltaPackageNotLoadedException {
+		InputStream inputStream = this.getClass().getResourceAsStream("/subfolder/AnEcore.ecore");
+		modelManager.loadEcoreFile("An Ecore", inputStream);
+		modelManager.registerEPackageByNsURI("apackage", "http://my.apackage.org");
+		var registered = modelManager.getEPackage("apackage");
+		assertEquals("http://my.apackage.org", registered.getNsURI());
+	}
 }
