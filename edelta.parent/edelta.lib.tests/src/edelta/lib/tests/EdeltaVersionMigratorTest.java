@@ -170,6 +170,27 @@ class EdeltaVersionMigratorTest {
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi", "MyClass.xmi", "MyRoot.xmi"));
 	}
 
+	@Test
+	void unrelatedEcoresAndModelsWithCustomExtensions() throws Exception {
+		var subdir = "rename/";
+		var outputSubdir = "rename-unrelated-custom-extensions/";
+		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v1-custom-extension",
+				OUTPUT + outputSubdir);
+		versionMigrator.addModelFileExtension(".customextension");
+		versionMigrator.addModelFileExtension(".anothercustomextension");
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"),
+				renamePersonFirstAndLastName);
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v2"),
+				renamePersonList);
+		versionMigrator.mapVersionMigration(List.of("http://my.package.org"),
+				renameMyPackage);
+		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
+		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
+		versionMigrator.execute(OUTPUT + outputSubdir);
+		executeAndAssertOutputs(outputSubdir, List.of("List.customextension", "List2.customextension",
+				"MyClass.anothercustomextension", "MyRoot.anothercustomextension"));
+	}
+
 	private void executeAndAssertOutputs(String subdir, Collection<String> modelFiles) {
 		var output = OUTPUT + subdir;
 		modelFiles.forEach

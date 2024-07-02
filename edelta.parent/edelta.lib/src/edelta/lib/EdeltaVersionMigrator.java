@@ -14,11 +14,14 @@ import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.xmi.XMIResource;
 
 /**
  * @author Lorenzo Bettini
  */
 public class EdeltaVersionMigrator {
+
+	private static final String XMI_EXTENSION = "." + XMIResource.XMI_NS;
 
 	private static final Logger LOG = Logger.getLogger(EdeltaVersionMigrator.class);
 
@@ -30,7 +33,22 @@ public class EdeltaVersionMigrator {
 
 	private List<VersionMigrationEntry> versionMigrations = new ArrayList<>();
 
-	private Set<String> ecorePaths = new HashSet<String>();
+	private Set<String> ecorePaths = new HashSet<>();
+
+	private Set<String> modelExtensions = new HashSet<>();
+
+	public EdeltaVersionMigrator() {
+		modelExtensions.add(XMI_EXTENSION);
+	}
+
+	/**
+	 * By default, it loads only ".xmi" files as models.
+	 * 
+	 * @param modelFileExtension
+	 */
+	public void addModelFileExtension(String modelFileExtension) {
+		modelExtensions.add(modelFileExtension);
+	}
 
 	/**
 	 * The loaded ecores are assumed to be different versions of the same ecores.
@@ -67,8 +85,10 @@ public class EdeltaVersionMigrator {
 		try (var stream = Files.walk(Paths.get(path))) {
 			stream
 				.filter(file -> !Files.isDirectory(file))
-				// TODO: allow for custom model file extensions
-				.filter(file -> file.toString().endsWith(".xmi"))
+				.filter(file -> {
+					var fileToString = file.toString();
+					return modelExtensions.stream().anyMatch(ext -> fileToString.endsWith(ext));
+				})
 				.forEach(file -> modelManager.loadModelFile(file.toString()));
 		}
 	}
