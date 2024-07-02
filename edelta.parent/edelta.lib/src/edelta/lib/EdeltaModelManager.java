@@ -3,6 +3,7 @@ package edelta.lib;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -91,6 +92,24 @@ public class EdeltaModelManager {
 	 */
 	public Resource loadEcoreFile(String path) {
 		return loadResource(path, ecoreResources);
+	}
+
+	/**
+	 * Creates a {@link Resource} and loads it from the passed {@link InputStream};
+	 * the ecoreFile doesn't need to exist, it is used only to create a {@link URI}.
+	 * 
+	 * @param ecoreFile
+	 * @param inputStream
+	 * @return the created and loaded resource
+	 * @throws IOException
+	 */
+	public Resource loadEcoreFile(String ecoreFile, InputStream inputStream) throws IOException {
+		var uri = createAbsoluteFileURI(ecoreFile);
+		var resource = resourceSet.createResource(uri);
+		LOG.info("Loading from stream: " + ecoreFile + " (URI: " + uri + ")");
+		resource.load(inputStream, null);
+		ecoreResources.add(resource);
+		return resource;
 	}
 
 	private Resource loadResource(String path, Collection<Resource> resourceMap) {

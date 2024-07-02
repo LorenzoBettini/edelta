@@ -11,7 +11,9 @@ import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -229,5 +231,15 @@ public class EdeltaModelManagerTest {
 		modelManager.registerEPackageByNsURI("mypackage", "http://my.package.org");
 		registered = modelManager.getEPackage("mypackage");
 		assertEquals("http://my.package.org", registered.getNsURI());
+	}
+
+	@Test
+	public void testLoadFromInputStream() throws IOException, EdeltaPackageNotLoadedException {
+		var ecoreFile = TESTDATA+"version-migration/rename/metamodels/v1/PersonList.ecore";
+		InputStream inputStream = new FileInputStream(ecoreFile);
+		modelManager.loadEcoreFile("PersonList file", inputStream);
+		modelManager.registerEPackageByNsURI("PersonList", "http://cs.gssi.it/PersonMM/v1");
+		var registered = modelManager.getEPackage("PersonList");
+		assertEquals("http://cs.gssi.it/PersonMM/v1", registered.getNsURI());
 	}
 }
