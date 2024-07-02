@@ -87,7 +87,7 @@ public class EdeltaVersionMigrator {
 				.filter(file -> !Files.isDirectory(file))
 				.filter(file -> {
 					var fileToString = file.toString();
-					return modelExtensions.stream().anyMatch(ext -> fileToString.endsWith(ext));
+					return modelExtensions.stream().anyMatch(fileToString::endsWith);
 				})
 				.forEach(file -> modelManager.loadModelFile(file.toString()));
 		}
