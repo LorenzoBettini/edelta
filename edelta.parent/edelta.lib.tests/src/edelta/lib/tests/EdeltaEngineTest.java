@@ -161,7 +161,7 @@ public class EdeltaEngineTest {
 					turnMyClassAttributeValueToUpperCase(firstAttribute, migrator);
 				});
 			}
-		};
+		}
 		class MyEDelta extends EdeltaRuntime {
 			TestLib testLib;
 
@@ -223,7 +223,7 @@ public class EdeltaEngineTest {
 					turnMyClassAttributeValueToUpperCase(firstAttribute, migrator);
 				});
 			}
-		};
+		}
 		class TestLib2 extends EdeltaRuntime {
 			public TestLib2(EdeltaRuntime other) {
 				super(other);
@@ -239,7 +239,7 @@ public class EdeltaEngineTest {
 					createCustomInstanceOfMyRoot(myClass, myRoot, migrator);
 				});
 			}
-		};
+		}
 		class MyEDelta extends EdeltaRuntime {
 			TestLib1 testLib1;
 			TestLib2 testLib2;
@@ -299,7 +299,7 @@ public class EdeltaEngineTest {
 					turnMyClassAttributeValueToUpperCase(firstAttribute, migrator);
 				});
 			}
-		};
+		}
 		class TestLib2 extends EdeltaRuntime {
 			TestLib1 testLib1;
 
@@ -319,7 +319,7 @@ public class EdeltaEngineTest {
 				});
 				testLib1.testLib1Method();
 			}
-		};
+		}
 		class MyEDelta extends EdeltaRuntime {
 			TestLib2 testLib2;
 
