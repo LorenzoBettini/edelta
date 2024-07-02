@@ -4,7 +4,7 @@
     xmlns:xmi="http://www.omg.org/XMI"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:person="http://cs.gssi.it/PersonMM/v2"
-    xsi:schemaLocation="http://cs.gssi.it/PersonMM/v2 ../../metamodels/v1/PersonList.ecore">
+    xsi:schemaLocation="http://cs.gssi.it/PersonMM/v2 ../../../../edelta.testdata/testdata/version-migration/rename/metamodels/v2/PersonList.ecore">
   <members firstName="MaleFirstName"
       lastName="MaleLastName"/>
   <members firstName="FemaleFirstName"

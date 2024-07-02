@@ -122,6 +122,18 @@ public abstract class EdeltaRuntime {
 		}
 	}
 
+	/**
+	 * Throws an {@link EdeltaPackageNotLoadedException} if the specified
+	 * EPackage (its Ecore), by name and nsURI, has not been loaded.
+	 * 
+	 * @param packageName
+	 * @param nsURI
+	 * @throws EdeltaPackageNotLoadedException
+	 */
+	protected void ensureEPackageIsLoadedByNsURI(String packageName, String nsURI) throws EdeltaPackageNotLoadedException {
+		modelManager.registerEPackageByNsURI(packageName, nsURI);
+	}
+
 	public Logger getLogger() {
 		return logger;
 	}

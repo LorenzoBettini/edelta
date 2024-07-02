@@ -15,11 +15,29 @@ import org.junit.jupiter.api.Test;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaEngine;
 import edelta.lib.EdeltaVersionMigrator;
+import edelta.testutils.EdeltaTestUtils;
 
+/**
+ * The trick in these tests is to have a nesting level in output and expectations directory
+ * so that the <code>xsi:schemaLocation</code> relative path points to a real Ecore file.
+ * 
+ * For example, in the "expectations" and in the "output", with the current subdirectory levels,
+ * this works (and can be opened with the EMF reflective editor):
+ * 
+ * <pre>
+ * xsi:schemaLocation="http://cs.gssi.it/PersonMM/v2 ../../../../edelta.testdata/testdata/version-migration/rename/metamodels/v2/PersonList.ecore">
+ * </pre>
+ * 
+ * This also assumes that the correct versions of Ecore are found in the subdirectories.
+ * 
+ * These tests NEVER save Ecore files: only model files.
+ * So, the Ecore files must be manually and correctly modified, according to the
+ * evolutions written in these tests.
+ */
 class EdeltaVersionMigratorTest {
 
 	private static final String TESTDATA = "../edelta.testdata/testdata/version-migration/";
-	private static final String OUTPUT = "output/";
+	private static final String OUTPUT = "output/version-migration/";
 	private static final String EXPECTATIONS = "../edelta.testdata/expectations/version-migration/";
 	private static final String METAMODELS = "metamodels/";
 	private static final String MODELS = "models/";
@@ -40,7 +58,7 @@ class EdeltaVersionMigratorTest {
 		new EdeltaDefaultRuntime(runtime) {
 			@Override
 			protected void performSanityChecks() throws Exception {
-				ensureEPackageIsLoaded("PersonList");
+				ensureEPackageIsLoadedByNsURI("PersonList", "http://cs.gssi.it/PersonMM/v1");
 			};
 			@Override
 			public void doExecute() throws Exception {
@@ -57,7 +75,7 @@ class EdeltaVersionMigratorTest {
 		new EdeltaDefaultRuntime(runtime) {
 			@Override
 			protected void performSanityChecks() throws Exception {
-				ensureEPackageIsLoaded("PersonList");
+				ensureEPackageIsLoadedByNsURI("PersonList", "http://cs.gssi.it/PersonMM/v2");
 			};
 			@Override
 			public void doExecute() throws Exception {
@@ -73,9 +91,12 @@ class EdeltaVersionMigratorTest {
 	void personListFromVersion1ToVersion2() throws Exception {
 		var subdir = "rename/";
 		var outputSubdir = "rename-v1-to-v2/";
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"), renamePersonFirstAndLastName);
+		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v1",
+				OUTPUT + outputSubdir);
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"),
+				renamePersonFirstAndLastName);
 		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
-		versionMigrator.loadModelsFrom(TESTDATA + subdir + MODELS + "/v1");
+		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
 		versionMigrator.execute(OUTPUT + outputSubdir);
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
 	}
@@ -84,10 +105,14 @@ class EdeltaVersionMigratorTest {
 	void personListFromVersion2ToVersion3() throws Exception {
 		var subdir = "rename/";
 		var outputSubdir = "rename-v2-to-v3/";
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"), renamePersonFirstAndLastName);
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v2"), renamePersonList);
+		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v2",
+				OUTPUT + outputSubdir);
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"),
+				renamePersonFirstAndLastName);
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v2"),
+				renamePersonList);
 		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
-		versionMigrator.loadModelsFrom(TESTDATA + subdir + MODELS + "/v2");
+		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
 		versionMigrator.execute(OUTPUT + outputSubdir);
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
 	}
@@ -96,10 +121,14 @@ class EdeltaVersionMigratorTest {
 	void personListFromVersion1ToVersion3() throws Exception {
 		var subdir = "rename/";
 		var outputSubdir = "rename-v1-to-v3/";
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"), renamePersonFirstAndLastName);
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v2"), renamePersonList);
+		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v1",
+				OUTPUT + outputSubdir);
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"),
+				renamePersonFirstAndLastName);
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v2"),
+				renamePersonList);
 		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
-		versionMigrator.loadModelsFrom(TESTDATA + subdir + MODELS + "/v1");
+		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
 		versionMigrator.execute(OUTPUT + outputSubdir);
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
 	}
@@ -108,7 +137,7 @@ class EdeltaVersionMigratorTest {
 		new EdeltaDefaultRuntime(runtime) {
 			@Override
 			protected void performSanityChecks() throws Exception {
-				ensureEPackageIsLoaded("mypackage");
+				ensureEPackageIsLoadedByNsURI("mypackage", "http://my.package.org");
 			};
 			@Override
 			public void doExecute() throws Exception {
@@ -127,11 +156,16 @@ class EdeltaVersionMigratorTest {
 	void unrelatedEcoresAndModels() throws Exception {
 		var subdir = "rename/";
 		var outputSubdir = "rename-unrelated/";
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"), renamePersonFirstAndLastName);
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v2"), renamePersonList);
-		versionMigrator.mapVersionMigration(List.of("http://my.package.org"), renameMyPackage);
+		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v1",
+				OUTPUT + outputSubdir);
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"),
+				renamePersonFirstAndLastName);
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v2"),
+				renamePersonList);
+		versionMigrator.mapVersionMigration(List.of("http://my.package.org"),
+				renameMyPackage);
 		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
-		versionMigrator.loadModelsFrom(TESTDATA + subdir + MODELS + "/v1");
+		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
 		versionMigrator.execute(OUTPUT + outputSubdir);
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi", "MyClass.xmi", "MyRoot.xmi"));
 	}

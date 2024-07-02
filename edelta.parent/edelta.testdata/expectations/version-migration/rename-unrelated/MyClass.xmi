@@ -4,5 +4,5 @@
     xmlns:xmi="http://www.omg.org/XMI"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:mypackage="http://my.package.org/v2"
-    xsi:schemaLocation="http://my.package.org/v2 ../../metamodels/v1/My.ecore"
+    xsi:schemaLocation="http://my.package.org/v2 ../../../../edelta.testdata/testdata/version-migration/rename/metamodels/v2/My.ecore"
     myClassRenamedStringAttribute="My Attribute Value"/>
