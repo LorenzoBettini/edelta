@@ -130,7 +130,7 @@ public class EdeltaVersionMigrator {
 
 				var nsURIs = ecoresToMigrate.stream().map(e -> e.getNsURI()).toList();
 				var modelPaths = modelsToMigrate.stream()
-						.map(e -> e.getURI().path())
+						.map(this::resourceToURIString)
 						.collect(Collectors.toSet());
 				nsURIs.forEach(e -> LOG.info("Stale Ecore nsURI: " + e));
 				modelPaths.forEach(e -> LOG.info("Model requiring migration: " + e));
@@ -142,7 +142,7 @@ public class EdeltaVersionMigrator {
 				// note that we never save the evolved ecores: only the models
 				// the ecores are meant to be part of the application code, not of the client project
 				var evolvedModels = toApply.getEvolvingModelManager().getModelResources().stream()
-						.filter(r -> modelPaths.contains(r.getURI().path()))
+						.filter(r -> modelPaths.contains(resourceToURIString(r)))
 						.toList();
 				saveInPlace(evolvedModels);
 				migratedModelResources.addAll(evolvedModels);
@@ -155,7 +155,7 @@ public class EdeltaVersionMigrator {
 				}
 				// ... and only migrated models
 				for (var model : migratedModelResources) {
-					loadModelsFrom(model.getURI().path());
+					loadModelsFrom(resourceToURIString(model));
 				}
 				// it is important to save after all the migrations took place
 				// this way, the models refer to the most up-to-date Ecore loaded
@@ -169,10 +169,15 @@ public class EdeltaVersionMigrator {
 		} while (!migrationDatas.isEmpty());
 	}
 
+	private String resourceToURIString(Resource resource) {
+		return resource.getURI().path();
+	}
+
 	private void saveInPlace(Collection<Resource> resources) throws IOException {
 		for (var resource : resources) {
 			LOG.info("Saving: " + resource.getURI());
 			resource.save(null);
 		}
 	}
+
 }
