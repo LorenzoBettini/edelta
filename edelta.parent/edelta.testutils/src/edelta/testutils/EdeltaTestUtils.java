@@ -63,7 +63,10 @@ public class EdeltaTestUtils {
 	 */
 	public static void cleanDirectoryRecursive(String directory) throws IOException {
 		File dir = new File(directory);
-		for (File file : dir.listFiles()) {
+		var listFiles = dir.listFiles();
+		if (listFiles == null)
+			return;
+		for (File file : listFiles) {
 			if (!file.isDirectory() && !file.getName().equals(".gitignore"))
 				Files.delete(file.toPath());
 			if (file.isDirectory()) {
