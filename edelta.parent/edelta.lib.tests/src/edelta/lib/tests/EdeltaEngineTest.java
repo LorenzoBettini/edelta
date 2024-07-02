@@ -42,7 +42,7 @@ public class EdeltaEngineTest {
 	private static final String MY_ROOT = "MyRoot.xmi";
 
 	@BeforeClass
-	static public void clearOutput() throws IOException {
+	public static void clearOutput() throws IOException {
 		cleanDirectoryRecursive(OUTPUT);
 	}
 
