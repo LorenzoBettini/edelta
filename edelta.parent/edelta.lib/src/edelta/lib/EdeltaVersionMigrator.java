@@ -112,15 +112,15 @@ public class EdeltaVersionMigrator {
 			for (var resource : modelManager.getModelResources()) {
 				var contents = resource.getContents();
 				var ePackage = contents.get(0).eClass().getEPackage();
-				for (var versionMigration : versionMigrations) {
-					if (versionMigration.uris.contains(ePackage.getNsURI())) {
+				versionMigrations.stream()
+					.filter(versionMigration -> versionMigration.uris.contains(ePackage.getNsURI()))
+					.forEach(versionMigration -> {
 						var data = migrationDatas
 							.computeIfAbsent(versionMigration,
 								x -> new MigrationData(new HashSet<>(), new ArrayList<>()));
 						data.ecores.add(ePackage);
 						data.models.add(resource);
-					}
-				}
+					});
 			}
 			Collection<Resource> migratedModelResources = new ArrayList<>();
 			for (var entry : migrationDatas.entrySet()) {
@@ -144,10 +144,7 @@ public class EdeltaVersionMigrator {
 				var evolvedModels = toApply.getEvolvingModelManager().getModelResources().stream()
 						.filter(r -> modelPaths.contains(r.getURI().path()))
 						.toList();
-				for (var resource : evolvedModels) {
-					LOG.info("Saving: " + resource.getURI());
-					resource.save(null);
-				}
+				saveInPlace(evolvedModels);
 				migratedModelResources.addAll(evolvedModels);
 			}
 			if (!migratedModelResources.isEmpty()) {
@@ -167,12 +164,15 @@ public class EdeltaVersionMigrator {
 				// REMEMBER: in this method, evolved Ecore files are NEVER saved to disk:
 				// they are used in memory only to migrate models
 				// Ecore files are meant to be in the Application code, not in the client
-				for (var resource : modelManager.getModelResources()) {
-					LOG.info("Saving: " + resource.getURI());
-					resource.save(null);
-				}
+				saveInPlace(modelManager.getModelResources());
 			}
 		} while (!migrationDatas.isEmpty());
 	}
 
+	private void saveInPlace(Collection<Resource> resources) throws IOException {
+		for (var resource : resources) {
+			LOG.info("Saving: " + resource.getURI());
+			resource.save(null);
+		}
+	}
 }
