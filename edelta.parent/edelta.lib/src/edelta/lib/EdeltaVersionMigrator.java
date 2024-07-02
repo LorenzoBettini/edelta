@@ -97,7 +97,12 @@ public class EdeltaVersionMigrator {
 		versionMigrations.add(new VersionMigrationEntry(uris, edeltaEngine));
 	}
 
-	public void execute(String outputPath) throws Exception {
+	/**
+	 * Executes all the needed model migrations, saving the model files in-place.
+	 * 
+	 * @throws Exception
+	 */
+	public void execute() throws Exception {
 		record MigrationData(Set<EPackage> ecores, Collection<Resource> models) {
 		}
 

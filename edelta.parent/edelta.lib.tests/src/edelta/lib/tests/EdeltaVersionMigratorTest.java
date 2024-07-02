@@ -97,7 +97,7 @@ class EdeltaVersionMigratorTest {
 				renamePersonFirstAndLastName);
 		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
 		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
-		versionMigrator.execute(OUTPUT + outputSubdir);
+		versionMigrator.execute();
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
 	}
 
@@ -113,7 +113,7 @@ class EdeltaVersionMigratorTest {
 				renamePersonList);
 		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
 		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
-		versionMigrator.execute(OUTPUT + outputSubdir);
+		versionMigrator.execute();
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
 	}
 
@@ -129,7 +129,7 @@ class EdeltaVersionMigratorTest {
 				renamePersonList);
 		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
 		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
-		versionMigrator.execute(OUTPUT + outputSubdir);
+		versionMigrator.execute();
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
 	}
 
@@ -166,7 +166,7 @@ class EdeltaVersionMigratorTest {
 				renameMyPackage);
 		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
 		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
-		versionMigrator.execute(OUTPUT + outputSubdir);
+		versionMigrator.execute();
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi", "MyClass.xmi", "MyRoot.xmi"));
 	}
 
@@ -186,7 +186,7 @@ class EdeltaVersionMigratorTest {
 				renameMyPackage);
 		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
 		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
-		versionMigrator.execute(OUTPUT + outputSubdir);
+		versionMigrator.execute();
 		executeAndAssertOutputs(outputSubdir, List.of("List.customextension", "List2.customextension",
 				"MyClass.anothercustomextension", "MyRoot.anothercustomextension"));
 	}
