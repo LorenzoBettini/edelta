@@ -41,12 +41,10 @@ public class EdeltaEngine {
 		return originalModelManager.loadModelFile(path);
 	}
 
-	// TODO unit test
 	public void setOriginalModelManager(EdeltaModelManager manager) {
 		originalModelManager = manager;
 	}
 
-	// TODO unit test
 	public EdeltaModelManager getEvolvingModelManager() {
 		return evolvingModelManager;
 	}

@@ -18,6 +18,7 @@ import org.junit.Test;
 
 import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaEngine;
+import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaModelMigrator;
 import edelta.lib.EdeltaResourceUtils;
 
@@ -79,6 +80,53 @@ public class EdeltaEngineTest {
 			myClassModel.getContents().get(0).eClass().getName());
 		engine.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
 		engine.execute();
+		// make sure the original Ecore is not changed
+		assertEquals("MyClass", eClass.getName());
+
+		var subdir = "engineModification/";
+		engine.save(OUTPUT + subdir);
+		assertGeneratedFiles(subdir, MY_ECORE);
+		assertGeneratedFiles(subdir, MY_CLASS);
+		assertGeneratedFiles(subdir, MY_ROOT);
+	}
+
+	@Test
+	public void testAccessToModelManagers() throws Exception {
+		var engine = new EdeltaEngine(other -> 
+			new EdeltaRuntime(other) {
+				/**
+				 * The implementation doesn't have to make sense:
+				 * it's just to verify that Ecore and models are
+				 * evolved as expected.
+				 */
+				@Override
+				protected void doExecute() {
+					var myClass = getEClass(MYPACKAGE, "MyClass");
+					var myRoot = getEClass(MYPACKAGE, "MyRoot");
+					myClass.setName("Renamed");
+					var firstAttribute =
+						(EAttribute) myClass.getEStructuralFeatures().get(0);
+					modelMigration(migrator -> {
+						turnMyClassAttributeValueToUpperCase(firstAttribute, migrator);
+						createCustomInstanceOfMyRoot(myClass, myRoot, migrator);
+					});
+				}
+			}
+		);
+		var originalModelManager = new EdeltaModelManager();
+		engine.setOriginalModelManager(originalModelManager);
+		var ecoreResource = originalModelManager.loadEcoreFile(
+				TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		var ePackage = EdeltaResourceUtils.getEPackage(ecoreResource);
+		assertNotNull(ePackage);
+		var eClass = ePackage.getEClassifier("MyClass");
+		assertNotNull(eClass);
+		var myClassModel = engine.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
+		assertEquals("MyClass",
+			myClassModel.getContents().get(0).eClass().getName());
+		originalModelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
+		engine.execute();
+		assertNotNull(engine.getEvolvingModelManager());
 		// make sure the original Ecore is not changed
 		assertEquals("MyClass", eClass.getName());
 
