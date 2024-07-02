@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -23,6 +24,8 @@ import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
+
+import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
 /**
  * Loads Ecore files and model files, and provides some methods.
@@ -48,6 +51,11 @@ public class EdeltaModelManager {
 	 * Here we store all the Ecores and models used by the Edelta
 	 */
 	private ResourceSet resourceSet = new ResourceSetImpl();
+
+	/**
+	 * Here we store EPackages mapped by name registered by {@link #registerEPackageByNsURI(String, String)}
+	 */
+	private Map<String, EPackage> nsURIToEPackage = new HashMap<>();
 
 	/**
 	 * Performs EMF initialization (resource factories and package registry)
@@ -117,6 +125,9 @@ public class EdeltaModelManager {
 		if (EcorePackage.eNAME.equals(packageName)) {
 			return EcorePackage.eINSTANCE;
 		}
+		var registered = nsURIToEPackage.get(packageName);
+		if (registered != null)
+			return registered;
 		return EdeltaResourceUtils.getEPackages(ecoreResources)
 			.stream()
 			.filter(p -> p.getName().equals(packageName))
@@ -265,5 +276,30 @@ public class EdeltaModelManager {
 				.getResources().remove(resource);
 		}
 		models.clear();
+	}
+
+	/**
+	 * Loads an {@link EPackage} by name and nsURI; if found, the loaded EPackage is
+	 * cached, so that subsequent {@link #getEPackage(String)} will use the cached
+	 * version.
+	 * 
+	 * This is useful when several versions of an {@link EPackage} is loaded, and we
+	 * want to ensure the one with a given registered nsURI is used, and not simply
+	 * the first found by name.
+	 * 
+	 * @param packageName
+	 * @param nsURI
+	 * @throws EdeltaPackageNotLoadedException
+	 */
+	public void registerEPackageByNsURI(String packageName, String nsURI) throws EdeltaPackageNotLoadedException {
+		var ePackage = EdeltaResourceUtils.getEPackages(ecoreResources)
+			.stream()
+			.filter(p -> p.getName().equals(packageName) && p.getNsURI().equals(nsURI))
+			.findFirst()
+			.orElse(null);
+		if (ePackage == null)
+			throw new EdeltaPackageNotLoadedException(String.format("EPackage with name '%s' and nsURI '%s'",
+					packageName, nsURI));
+		nsURIToEPackage.put(packageName, ePackage);
 	}
 }

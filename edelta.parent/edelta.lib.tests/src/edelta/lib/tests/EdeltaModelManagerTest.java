@@ -8,8 +8,12 @@ import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirector
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EClass;
@@ -23,6 +27,7 @@ import org.junit.Test;
 
 import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaUtils;
+import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
 /**
  * Tests for the {@link EdeltaModelManager}.
@@ -201,5 +206,28 @@ public class EdeltaModelManagerTest {
 
 		assertThat(map.values())
 			.containsAnyElementsOf(copiedContents);
+	}
+
+	@Test
+	public void testRegisterNsURI() throws IOException, EdeltaPackageNotLoadedException {
+		var ecoreSubdir = TESTDATA+"version-migration/rename/metamodels";
+		try (var stream = Files.walk(Paths.get(ecoreSubdir))) {
+			stream
+				.filter(file -> !Files.isDirectory(file))
+				.filter(file -> file.toString().endsWith(".ecore"))
+				.forEach(file -> modelManager.loadEcoreFile(file.toString()));
+		}
+		var thrown = assertThrows(EdeltaPackageNotLoadedException.class,
+			() -> modelManager.registerEPackageByNsURI("PersonList", "foo"));
+		assertEquals("EPackage with name 'PersonList' and nsURI 'foo' not loaded.", thrown.getMessage());
+		modelManager.registerEPackageByNsURI("PersonList", "http://cs.gssi.it/PersonMM/v2");
+		var registered = modelManager.getEPackage("PersonList");
+		assertEquals("http://cs.gssi.it/PersonMM/v2", registered.getNsURI());
+		modelManager.registerEPackageByNsURI("mypackage", "http://my.package.org/v2");
+		registered = modelManager.getEPackage("mypackage");
+		assertEquals("http://my.package.org/v2", registered.getNsURI());
+		modelManager.registerEPackageByNsURI("mypackage", "http://my.package.org");
+		registered = modelManager.getEPackage("mypackage");
+		assertEquals("http://my.package.org", registered.getNsURI());
 	}
 }
