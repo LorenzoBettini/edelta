@@ -171,6 +171,24 @@ class EdeltaVersionMigratorTest {
 	}
 
 	@Test
+	void orderOfMappingsDoesNotMatter() throws Exception {
+		var subdir = "rename/";
+		var outputSubdir = "rename-unrelated/";
+		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v1",
+				OUTPUT + outputSubdir);
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v2"),
+				renamePersonList);
+		versionMigrator.mapVersionMigration(List.of("http://my.package.org"),
+				renameMyPackage);
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"),
+				renamePersonFirstAndLastName);
+		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
+		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
+		versionMigrator.execute();
+		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi", "MyClass.xmi", "MyRoot.xmi"));
+	}
+
+	@Test
 	void unrelatedEcoresAndModelsWithCustomExtensions() throws Exception {
 		var subdir = "rename/";
 		var outputSubdir = "rename-unrelated-custom-extensions/";
