@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.xmi.XMIResource;
 
 /**
@@ -75,7 +76,19 @@ public class EdeltaVersionMigrator {
 	 */
 	private void updatePackageRegistry(Resource resource) {
 		var ePackage = EdeltaResourceUtils.getEPackage(resource);
-		resource.getResourceSet().getPackageRegistry()
+		var resourceSet = resource.getResourceSet();
+		updatePackageRegistry(ePackage, resourceSet);
+	}
+
+	/**
+	 * Ensure that the nsURI is mapped to the loaded {@link EPackage}, so that when
+	 * loading an XMI the referenced Ecore file is found by nsURI.
+	 * 
+	 * @param ePackage
+	 * @param resourceSet
+	 */
+	private void updatePackageRegistry(EPackage ePackage, ResourceSet resourceSet) {
+		resourceSet.getPackageRegistry()
 			.put(ePackage.getNsURI(), ePackage);
 	}
 
@@ -89,6 +102,18 @@ public class EdeltaVersionMigrator {
 	public void loadEcore(String ecoreFile, InputStream inputStream) throws IOException {
 		var resource = modelManager.loadEcoreFile(ecoreFile, inputStream);
 		updatePackageRegistry(resource);
+	}
+
+	/**
+	 * See {@link EdeltaModelManager#loadEPackage(EPackage)}.
+	 * 
+	 * @param ePackage 
+	 */
+	public void loadEPackage(EPackage ePackage) {
+		modelManager.loadEPackage(ePackage);
+		// since the EPackage might be in a different ResourceSet than our modelManager's one
+		// we must ensure the registration is performed in the modelManager's ResourceSet
+		updatePackageRegistry(ePackage, modelManager.getResourceSet());
 	}
 
 	/**

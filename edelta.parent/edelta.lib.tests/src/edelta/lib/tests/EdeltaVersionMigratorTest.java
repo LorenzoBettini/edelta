@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Test;
 
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaEngine;
+import edelta.lib.EdeltaModelManager;
+import edelta.lib.EdeltaResourceUtils;
 import edelta.lib.EdeltaVersionMigrator;
 import edelta.testutils.EdeltaTestUtils;
 
@@ -240,7 +242,11 @@ class EdeltaVersionMigratorTest {
 		// the final Ecores are instead loaded as real files, so that their references in models will be effective
 		// and refer to real ecores
 		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v3/PersonList.ecore");
-		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v2/My.ecore");
+		// simulate the loading of an EPackage (e.g., by the direct access to its instance through EMF API)
+		var modelManager = new EdeltaModelManager();
+		var resource = modelManager.loadEcoreFile(TESTDATA + subdir + METAMODELS + "v2/My.ecore");
+		var ePackage = EdeltaResourceUtils.getEPackage(resource);
+		versionMigrator.loadEPackage(ePackage);
 
 		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
 		versionMigrator.execute();

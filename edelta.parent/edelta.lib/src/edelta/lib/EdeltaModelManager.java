@@ -86,6 +86,15 @@ public class EdeltaModelManager {
 	}
 
 	/**
+	 * Used internally
+	 * 
+	 * @return
+	 */
+	ResourceSet getResourceSet() {
+		return resourceSet;
+	}
+
+	/**
 	 * Loads the ecore file specified in the path
 	 * @param path
 	 * @return the loaded {@link Resource}
