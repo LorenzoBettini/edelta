@@ -1,6 +1,7 @@
 package edelta.lib;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -61,11 +62,33 @@ public class EdeltaVersionMigrator {
 				.filter(file -> file.toString().endsWith(".ecore"))
 				.forEach(file -> {
 					var resource = modelManager.loadEcoreFile(file.toString());
-					var ePackage = EdeltaResourceUtils.getEPackage(resource);
-					resource.getResourceSet().getPackageRegistry()
-						.put(ePackage.getNsURI(), ePackage);
+					updatePackageRegistry(resource);
 				});
 		}
+	}
+
+	/**
+	 * Ensure that the nsURI is mapped to the loaded {@link EPackage}, so that
+	 * when loading an XMI the referenced Ecore file is found by nsURI.
+	 * 
+	 * @param resource
+	 */
+	private void updatePackageRegistry(Resource resource) {
+		var ePackage = EdeltaResourceUtils.getEPackage(resource);
+		resource.getResourceSet().getPackageRegistry()
+			.put(ePackage.getNsURI(), ePackage);
+	}
+
+	/**
+	 * See {@link EdeltaModelManager#loadEcoreFile(String, InputStream)}.
+	 * 
+	 * @param ecoreFile
+	 * @param inputStream
+	 * @throws IOException 
+	 */
+	public void loadEcore(String ecoreFile, InputStream inputStream) throws IOException {
+		var resource = modelManager.loadEcoreFile(ecoreFile, inputStream);
+		updatePackageRegistry(resource);
 	}
 
 	/**

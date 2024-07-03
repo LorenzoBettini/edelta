@@ -4,7 +4,10 @@ import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 
@@ -183,6 +186,62 @@ class EdeltaVersionMigratorTest {
 		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"),
 				renamePersonFirstAndLastName);
 		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
+		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
+		versionMigrator.execute();
+		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi", "MyClass.xmi", "MyRoot.xmi"));
+	}
+
+	/**
+	 * This aims at simulating the real situation (e.g., when running in Eclipse on a real client's project
+	 * or RCP): the previous versions of Ecores are loaded from the classpath and will not correspond to real
+	 * filesystem paths, while the current latest versions of Ecores are effective and are to be referred by
+	 * the migrated models when in their final state.
+	 * 
+	 * During the intermediate migrations phases, instead, references to Ecores would not be valid.
+	 * We only care about the migrated models final state.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	void loadingWithInputStreams() throws Exception {
+		var subdir = "rename/";
+		var outputSubdir = "rename-unrelated/";
+		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v1",
+				OUTPUT + outputSubdir);
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v2"),
+				renamePersonList);
+		versionMigrator.mapVersionMigration(List.of("http://my.package.org"),
+				renameMyPackage);
+		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"),
+				renamePersonFirstAndLastName);
+
+		// note that during this scan we also load with this strategy the final versions of Ecores
+		// but then (*) we load the final Ecores by their effective path
+		try (var stream = Files.walk(Paths.get(TESTDATA + subdir + METAMODELS))) {
+			stream
+				.filter(file -> !Files.isDirectory(file))
+				.filter(file -> file.toString().endsWith(".ecore"))
+				.forEach(file -> {
+					try {
+						/*
+						 * use only the file name (not the full path), to simulate the situation where
+						 * previous metamodels are temporarily in memory; this means that, until the
+						 * models are in their final migrated versions the references to the ecores will
+						 * not be correct
+						 */
+						versionMigrator.loadEcore(file.getFileName().toString(), new FileInputStream(file.toFile()));
+					} catch (IOException e) {
+						fail(e);
+					}
+				});
+		}
+
+		// (*)
+		// the final Ecores are instead loaded as real files, so that their references in models will be effective
+		// and refer to real ecores
+		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v3/PersonList.ecore");
+		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v2/My.ecore");
+
 		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
 		versionMigrator.execute();
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi", "MyClass.xmi", "MyRoot.xmi"));
