@@ -251,4 +251,19 @@ public class EdeltaModelManagerTest {
 		var registered = modelManager.getEPackage("apackage");
 		assertEquals("http://my.apackage.org", registered.getNsURI());
 	}
+
+	@Test
+	public void testLoadEPackage() {
+		modelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		var ePackage = modelManager.getEPackage(MYPACKAGE);
+		assertNotNull(ePackage);
+		var anotherModelManager = new EdeltaModelManager();
+		anotherModelManager.loadEPackage(ePackage);
+		// the EPackage is still present in the original model manager
+		ePackage = modelManager.getEPackage(MYPACKAGE);
+		assertNotNull(ePackage);
+		// and in the other model manager
+		ePackage = anotherModelManager.getEPackage(MYPACKAGE);
+		assertNotNull(ePackage);
+	}
 }

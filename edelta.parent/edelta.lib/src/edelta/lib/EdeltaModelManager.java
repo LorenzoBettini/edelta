@@ -112,6 +112,17 @@ public class EdeltaModelManager {
 		return resource;
 	}
 
+	/**
+	 * Stores an existing {@link EPackage}, which is meant to be already part of a {@link ResourceSet}
+	 * into this model manager.
+	 * 
+	 * @param ePackage
+	 */
+	public void loadEPackage(EPackage ePackage) {
+		LOG.info(String.format("Loading EPackage: %s (nsURI: %s)", ePackage.getName(), ePackage.getNsURI()));
+		ecoreResources.add(ePackage.eResource());
+	}
+
 	private Resource loadResource(String path, Collection<Resource> resourceMap) {
 		var uri = createAbsoluteFileURI(path);
 		// Demand load resource for this file.
