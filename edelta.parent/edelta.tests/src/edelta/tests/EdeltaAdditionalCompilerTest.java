@@ -1,46 +1,17 @@
 package edelta.tests;
 
-import static org.eclipse.xtext.xbase.lib.Conversions.unwrapArray;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.filter;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.isEmpty;
-import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.xtext.diagnostics.Severity;
-import org.eclipse.xtext.resource.FileExtensionProvider;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.util.JavaVersion;
-import org.eclipse.xtext.xbase.lib.Pair;
-import org.eclipse.xtext.xbase.testing.CompilationTestHelper;
-import org.eclipse.xtext.xbase.testing.TemporaryFolder;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.google.common.base.Joiner;
-import com.google.inject.Inject;
-
 import edelta.tests.injectors.EdeltaInjectorProviderTestableDerivedStateComputer;
-import edelta.testutils.EdeltaTestUtils;
 
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer.class)
-public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
-	@Rule
-	@Inject
-	public TemporaryFolder temporaryFolder;
-
-	@Inject
-	private CompilationTestHelper compilationTestHelper;
-
-	@Inject
-	private FileExtensionProvider extensionProvider;
-
+public class EdeltaAdditionalCompilerTest extends EdeltaAbstractCompilerTest {
 	@Before
 	public void setup() {
 		compilationTestHelper.setJavaVersion(JavaVersion.JAVA8);
@@ -194,69 +165,5 @@ public class EdeltaAdditionalCompilerTest extends EdeltaAbstractTest {
 		}
 		"""
 		);
-	}
-
-	private void checkCompilation(CharSequence input, CharSequence expectedGeneratedJava) throws Exception {
-		checkCompilation(input, expectedGeneratedJava, true);
-	}
-
-	private void checkCompilation(CharSequence input, CharSequence expectedGeneratedJava,
-			boolean checkValidationErrors) throws Exception {
-		var rs = createResourceSet(input);
-		checkCompilation(rs, expectedGeneratedJava, checkValidationErrors);
-	}
-
-	private void checkCompilation(ResourceSet rs, CharSequence expectedGeneratedJava,
-			boolean checkValidationErrors) {
-		compilationTestHelper.compile(rs, it -> {
-			if (checkValidationErrors) {
-				assertNoValidationErrors(it);
-			}
-			if (expectedGeneratedJava != null) {
-				assertGeneratedJavaCode(it, expectedGeneratedJava);
-			}
-			if (checkValidationErrors) {
-				assertGeneratedJavaCodeCompiles(it);
-			}
-		});
-	}
-
-	private void assertNoValidationErrors(CompilationTestHelper.Result res) {
-		var allErrors = filter(res.getErrorsAndWarnings(), it -> it.getSeverity() == Severity.ERROR);
-		if (!isEmpty(allErrors)) {
-			throw new IllegalStateException(
-				"One or more resources contained errors : " +
-					Joiner.on(",").join(allErrors));
-		}
-	}
-
-	private void assertGeneratedJavaCode(CompilationTestHelper.Result r, CharSequence expected) {
-		assertEquals(expected.toString(),
-			EdeltaTestUtils.removeCR(r.getSingleGeneratedCode()));
-	}
-
-	private Class<?> assertGeneratedJavaCodeCompiles(CompilationTestHelper.Result r) {
-		return r.getCompiledClass();
-	}
-
-	private ResourceSet createResourceSet(CharSequence... inputs) throws Exception {
-		var pairs = createInputPairs(inputs);
-		@SuppressWarnings("unchecked")
-		var rs = compilationTestHelper
-			.resourceSet(((Pair<String, ? extends CharSequence>[])
-					unwrapArray(pairs, Pair.class)));
-		addEPackageForTests(rs);
-		return rs;
-	}
-
-	private List<Pair<String, CharSequence>> createInputPairs(CharSequence[] inputs) {
-		var result = new ArrayList<Pair<String, CharSequence>>();
-		for (int i = 0; i < inputs.length; i++) {
-			result.add(Pair.of(
-				"MyFile" + i + "." + 
-					extensionProvider.getPrimaryFileExtension(),
-				inputs[i]));
-		}
-		return result;
 	}
 }
