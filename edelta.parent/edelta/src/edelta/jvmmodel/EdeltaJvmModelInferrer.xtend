@@ -16,6 +16,7 @@ import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import edelta.lib.EdeltaRuntime
 import edelta.util.EdeltaModelUtil
+import java.util.List
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -127,6 +128,16 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 						«FOR migration : program.getMigrations»
 						getEPackage("«migration.nsURI.name»").setNsURI("«migration.to»");
 						«ENDFOR»
+					'''
+				]
+			}
+			if (!program.getMigrations.empty) {
+				members += program.toMethod("getMigratedNsURIs", List.typeRef(String.typeRef())) [
+					//annotations += Override.annotationRef
+					body = '''
+						return List.of(
+						  «program.getMigrations.map['"' + nsURI.nsURI + '"'].join(",\n")»
+						);
 					'''
 				]
 			}

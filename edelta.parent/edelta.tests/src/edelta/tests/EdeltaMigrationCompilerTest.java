@@ -72,22 +72,23 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractTest {
 		}
 		""","""
 		package foo;
-
+		
 		import edelta.lib.EdeltaDefaultRuntime;
 		import edelta.lib.EdeltaEcoreUtil;
 		import edelta.lib.EdeltaModelMigrator;
 		import edelta.lib.EdeltaRuntime;
+		import java.util.List;
 		import java.util.function.Consumer;
 		import org.eclipse.emf.ecore.EClass;
 		import org.eclipse.emf.ecore.EObject;
 		import org.eclipse.emf.ecore.EPackage;
-
+		
 		@SuppressWarnings("all")
 		public class MyFile0 extends EdeltaDefaultRuntime {
 		  public MyFile0(final EdeltaRuntime other) {
 		    super(other);
 		  }
-		  
+		
 		  public void aTest(final EPackage it) {
 		    final EClass fooClass = getEClass("foo", "FooClass");
 		    final EClass mySubClass = this.stdLib.addNewSubclass(fooClass, "MySubClass");
@@ -101,7 +102,7 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractTest {
 		    };
 		    this.modelMigration(_function);
 		  }
-		  
+		
 		  @Override
 		  public void performSanityChecks() throws Exception {
 		    ensureEPackageIsLoadedByNsURI("foo", "http://foo");
@@ -113,6 +114,13 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractTest {
 		    aTest(getEPackage("foo"));
 		    getEPackage("foo").setNsURI("http://foo/v2");
 		    getEPackage("bar").setNsURI("http://bar/v2");
+		  }
+		
+		  public List<String> getMigratedNsURIs() {
+		    return List.of(
+		      "http://foo",
+		      "http://bar"
+		    );
 		  }
 		}
 		"""
