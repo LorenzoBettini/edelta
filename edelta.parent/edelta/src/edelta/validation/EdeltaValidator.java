@@ -117,7 +117,7 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 	public void checkProgram(EdeltaProgram p) {
 		var metamodelIndex = 0;
 		HashSet<String> metamodelImportSet = newHashSet();
-		var metamodels = EdeltaModelUtil.getMetamodels(p);
+		var metamodels = p.getEPackages();
 		for (var metamodel : metamodels) {
 			var rootPackage = EdeltaModelUtil.findRootSuperPackage(metamodel);
 			if (rootPackage != null) {

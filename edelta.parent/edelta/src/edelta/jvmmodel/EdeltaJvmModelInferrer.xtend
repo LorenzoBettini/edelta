@@ -106,8 +106,11 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 					// for each reference to a metamodel, we generate a sanity check
 					// to make sure that at run-time all the referred Ecores are loaded
 					body = '''
-						«FOR p : metamodels»
-						ensureEPackageIsLoaded("«p.name»");
+						«FOR ePackage : program.getEPackages»
+						ensureEPackageIsLoaded("«ePackage.name»");
+						«ENDFOR»
+						«FOR migration : program.getMigrations»
+						ensureEPackageIsLoadedByNsURI("«migration.nsURI.name»", "«migration.nsURI.nsURI»");
 						«ENDFOR»
 					'''
 				]
@@ -120,6 +123,9 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 					body = '''
 						«FOR o : program.modifyEcoreOperations»
 						«o.name»(getEPackage("«o.epackage.EPackageNameOrNull»"));
+						«ENDFOR»
+						«FOR migration : program.getMigrations»
+						getEPackage("«migration.nsURI.name»").setNsURI("«migration.to»");
 						«ENDFOR»
 					'''
 				]
