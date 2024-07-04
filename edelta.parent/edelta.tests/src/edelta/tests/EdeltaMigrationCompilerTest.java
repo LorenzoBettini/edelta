@@ -97,6 +97,13 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		      "http://bar"
 		    );
 		  }
+		
+		  public List<String> getEcorePaths() {
+		    return List.of(
+		      "/foo.ecore",
+		      "/bar.ecore"
+		    );
+		  }
 		}
 		"""
 		);
@@ -152,6 +159,13 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		    return List.of(
 		      "http://www.simple",
 		      "http://www.anothersimple"
+		    );
+		  }
+		
+		  public List<String> getEcorePaths() {
+		    return List.of(
+		      "/Simple.ecore",
+		      "/AnotherSimple.ecore"
 		    );
 		  }
 		}
