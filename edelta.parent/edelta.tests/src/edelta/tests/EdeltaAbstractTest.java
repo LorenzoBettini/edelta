@@ -132,6 +132,10 @@ public abstract class EdeltaAbstractTest {
 		return parseHelper.parse(input, resourceSetWithTestEcore());
 	}
 
+	protected EdeltaProgram parseWithTestEcoreDifferentNsURI(CharSequence input) throws Exception {
+		return parseHelper.parse(input, resourceSetWithTestEcoreDifferentNsURI());
+	}
+
 	protected EdeltaProgram parseWithTestEcores(CharSequence input) throws Exception {
 		return parseHelper.parse(input, resourceSetWithTestEcores());
 	}
@@ -164,6 +168,10 @@ public abstract class EdeltaAbstractTest {
 		return addEPackageForTests(resourceSetProvider.get());
 	}
 
+	protected ResourceSet resourceSetWithTestEcoreDifferentNsURI() {
+		return addEPackageForTestsDifferentNsURI(resourceSetProvider.get());
+	}
+
 	protected ResourceSet resourceSetWithTestEcoreWithSubPackage() {
 		return addEPackageWithSubPackageForTests(resourceSetProvider.get());
 	}
@@ -183,6 +191,10 @@ public abstract class EdeltaAbstractTest {
 
 	protected ResourceSet addEPackageForTests(ResourceSet resourceSet) {
 		return createTestResource(resourceSet, "foo", EPackageForTests());
+	}
+
+	protected ResourceSet addEPackageForTestsDifferentNsURI(ResourceSet resourceSet) {
+		return createTestResource(resourceSet, "foo", EPackageForTestsDifferentNsURI());
 	}
 
 	protected ResourceSet addEPackageWithSubPackageForTests(ResourceSet resourceSet) {
@@ -239,6 +251,20 @@ public abstract class EdeltaAbstractTest {
 				createEOperation(c, "myOp");
 			});
 			stdLib.addNewEDataType(p, "FooDataType", null);
+			stdLib.addNewEEnum(p, "FooEnum", e -> {
+				stdLib.addNewEEnumLiteral(e, "FooEnumLiteral");
+			});
+		});
+	}
+
+	protected EPackage EPackageForTestsDifferentNsURI() {
+		return createEPackage("foo", "foo", "http://foo/v2", p -> {
+			stdLib.addNewEClass(p, "RenamedFooClass", c -> {
+				stdLib.addNewEAttribute(c, "myAttribute", null);
+				stdLib.addNewEReference(c, "myReference", null);
+				createEOperation(c, "myOp");
+			});
+			stdLib.addNewEDataType(p, "RenamedFooDataType", null);
 			stdLib.addNewEEnum(p, "FooEnum", e -> {
 				stdLib.addNewEEnumLiteral(e, "FooEnumLiteral");
 			});
