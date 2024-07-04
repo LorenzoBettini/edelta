@@ -516,7 +516,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		assertScope(
 			parseWithTestEcoreDifferentNsURI("""
 			migrations {
-				nsURI "http://foo/v2" to "http://foo/v3"
+				nsURI "http://foo.org/v2" to "http://foo.org/v3"
 			}
 
 			// that's required to have copied EPackages

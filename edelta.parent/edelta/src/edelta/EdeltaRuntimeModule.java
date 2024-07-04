@@ -5,6 +5,7 @@ package edelta;
 
 import org.eclipse.xtext.generator.IContextualOutputConfigurationProvider;
 import org.eclipse.xtext.generator.IOutputConfigurationProvider;
+import org.eclipse.xtext.linking.ILinkingService;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.resource.IDefaultResourceDescriptionStrategy;
 import org.eclipse.xtext.resource.IDerivedStateComputer;
@@ -20,6 +21,7 @@ import edelta.compiler.EdeltaXbaseCompiler;
 import edelta.interpreter.EdeltaInterpreter;
 import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaSafeInterpreter;
+import edelta.linking.EdeltaLinkingService;
 import edelta.resource.EdeltaDerivedStateComputer;
 import edelta.resource.EdeltaResourceDescriptionStrategy;
 import edelta.scoping.EdeltaImplicitlyImportedFeatures;
@@ -83,5 +85,10 @@ public class EdeltaRuntimeModule extends AbstractEdeltaRuntimeModule {
 
 	public Class<? extends ImplicitlyImportedFeatures> bindImplicitlyImportedFeatures() {
 		return EdeltaImplicitlyImportedFeatures.class;
+	}
+
+	@Override
+	public Class<? extends ILinkingService> bindILinkingService() {
+		return EdeltaLinkingService.class;
 	}
 }

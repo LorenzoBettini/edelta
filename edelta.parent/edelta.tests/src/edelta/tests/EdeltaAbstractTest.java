@@ -258,7 +258,7 @@ public abstract class EdeltaAbstractTest {
 	}
 
 	protected EPackage EPackageForTestsDifferentNsURI() {
-		return createEPackage("foo", "foo", "http://foo/v2", p -> {
+		return createEPackage("foo", "foo", "http://foo.org/v2", p -> {
 			stdLib.addNewEClass(p, "RenamedFooClass", c -> {
 				stdLib.addNewEAttribute(c, "myAttribute", null);
 				stdLib.addNewEReference(c, "myReference", null);

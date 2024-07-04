@@ -1,5 +1,7 @@
 package edelta.tests;
 
+import java.util.List;
+
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
@@ -98,6 +100,63 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		}
 		"""
 		);
+	}
+
+	@Test
+	public void testCompilationOfMigrationWithRealEcoreFiles() throws Exception {
+		var rs = createResourceSetWithEcores(List.of(SIMPLE_ECORE, ANOTHER_SIMPLE_ECORE),
+		"""
+		package foo;
+
+		migrations {
+			nsURI "http://www.simple" to "http://www.simple/v2"
+			nsURI "http://www.anothersimple" to "http://www.anothersimple/v2"
+		}
+
+		modifyEcore aTest epackage simple {
+			ecoreref(SimpleClass).name = "RenamedSimpleClass"
+		}
+		""");
+		checkCompilation(rs, """
+		package foo;
+		
+		import edelta.lib.EdeltaDefaultRuntime;
+		import edelta.lib.EdeltaRuntime;
+		import java.util.List;
+		import org.eclipse.emf.ecore.EPackage;
+		
+		@SuppressWarnings("all")
+		public class Example extends EdeltaDefaultRuntime {
+		  public Example(final EdeltaRuntime other) {
+		    super(other);
+		  }
+		
+		  public void aTest(final EPackage it) {
+		    getEClass("simple", "SimpleClass").setName("RenamedSimpleClass");
+		  }
+		
+		  @Override
+		  public void performSanityChecks() throws Exception {
+		    ensureEPackageIsLoadedByNsURI("simple", "http://www.simple");
+		    ensureEPackageIsLoadedByNsURI("anothersimple", "http://www.anothersimple");
+		  }
+		
+		  @Override
+		  protected void doExecute() throws Exception {
+		    aTest(getEPackage("simple"));
+		    getEPackage("simple").setNsURI("http://www.simple/v2");
+		    getEPackage("anothersimple").setNsURI("http://www.anothersimple/v2");
+		  }
+		
+		  public List<String> getMigratedNsURIs() {
+		    return List.of(
+		      "http://www.simple",
+		      "http://www.anothersimple"
+		    );
+		  }
+		}
+		""",
+		true);
 	}
 
 	@Override
