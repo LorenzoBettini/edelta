@@ -12,7 +12,7 @@ EdeltaProgram:
 	importSection=XImportSection?
 	('package' name=QualifiedName ';'?)?
 	('metamodel' ePackages+=[ecore::EPackage|STRING])*
-	('migrations' '{' migrations+=EdeltaMigration '}')*
+	('migrations' '{' migrations+=EdeltaMigration+ '}')*
 	(useAsClauses+=EdeltaUseAs)*
 	operations+=EdeltaOperation*
 	modifyEcoreOperations+=EdeltaModifyEcoreOperation*
