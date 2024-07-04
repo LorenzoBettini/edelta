@@ -6,11 +6,9 @@ import edelta.lib.EdeltaIssuePresenter
 import edelta.lib.EdeltaModelManager
 import edelta.lib.EdeltaRuntime
 import edelta.tests.injectors.EdeltaInjectorProviderTestableDerivedStateComputer
-import edelta.testutils.EdeltaTestUtils
 import java.util.List
 import java.util.function.Consumer
 import org.eclipse.emf.ecore.ENamedElement
-import org.eclipse.xtext.resource.FileExtensionProvider
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.util.JavaVersion
@@ -24,15 +22,12 @@ import org.junit.runner.RunWith
 import static edelta.testutils.EdeltaTestUtils.*
 import static org.assertj.core.api.Assertions.*
 
-import static extension org.junit.Assert.*
-
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
 class EdeltaCompilerTest extends EdeltaAbstractCompilerTest {
 
 	@Rule @Inject public TemporaryFolder temporaryFolder
 	@Inject extension CompilationTestHelper compilationTestHelper
-	@Inject FileExtensionProvider extensionProvider
 
 	static final String MODIFIED = "modified";
 
@@ -1938,43 +1933,6 @@ class EdeltaCompilerTest extends EdeltaAbstractCompilerTest {
 			''',
 			true
 		)
-	}
-
-	private def void checkCompilationOfSeveralFiles(List<? extends CharSequence> inputs,
-		List<Pair<String, CharSequence>> expectations) {
-		createResourceSet(inputs).compile [
-			assertNoValidationErrors
-			for (expectation : expectations) {
-				expectation.value.toString.assertEquals
-					(getGeneratedCode(expectation.key))
-			}
-			assertGeneratedJavaCodeCompiles
-		]
-	}
-
-	def private createResourceSetWithEcores(List<String> ecoreNames, CharSequence input) {
-		val pairs = newArrayList(
-			ECORE_ECORE -> EdeltaTestUtils.loadFile(METAMODEL_PATH + ECORE_ECORE),
-			"Example." + 
-					extensionProvider.getPrimaryFileExtension() -> input
-		)
-		pairs +=
-			ecoreNames.map[ecoreName |
-				ecoreName -> EdeltaTestUtils.loadFile(METAMODEL_PATH + ecoreName)]
-		val rs = resourceSet(pairs)
-		return rs
-	}
-
-	def private createResourceSetWithEcoresAndSeveralInputs(List<String> ecoreNames, List<CharSequence> inputs) {
-		val ecorePairs = newArrayList(
-			ECORE_ECORE -> EdeltaTestUtils.loadFile(METAMODEL_PATH + ECORE_ECORE)
-		)
-		ecorePairs +=
-			ecoreNames.map[ecoreName |
-				ecoreName -> EdeltaTestUtils.loadFile(METAMODEL_PATH + ecoreName)]
-		val inputPairs = createInputPairs(inputs)
-		val rs = resourceSet(ecorePairs + inputPairs)
-		return rs
 	}
 
 	def private checkCompiledCodeExecution(CharSequence input, CharSequence expectedGeneratedEcore,
