@@ -53,6 +53,7 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractTest {
 
 		migrations {
 			nsURI "http://foo" to "http://foo/v2"
+			nsURI "http://bar" to "http://bar/v2"
 		}
 
 		modifyEcore aTest epackage foo {
@@ -104,12 +105,14 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractTest {
 		  @Override
 		  public void performSanityChecks() throws Exception {
 		    ensureEPackageIsLoadedByNsURI("foo", "http://foo");
+		    ensureEPackageIsLoadedByNsURI("bar", "http://bar");
 		  }
-		  
+		
 		  @Override
 		  protected void doExecute() throws Exception {
 		    aTest(getEPackage("foo"));
 		    getEPackage("foo").setNsURI("http://foo/v2");
+		    getEPackage("bar").setNsURI("http://bar/v2");
 		  }
 		}
 		"""
@@ -166,6 +169,7 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractTest {
 			.resourceSet(((Pair<String, ? extends CharSequence>[])
 					unwrapArray(pairs, Pair.class)));
 		addEPackageForTests(rs);
+		addEPackageForTests2(rs);
 		return rs;
 	}
 
