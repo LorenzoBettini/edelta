@@ -83,7 +83,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		modifyEcore aTest epackage foo {
 		}
 		""");
-		var firstMetamodel = prog.getMetamodels().get(0);
+		var firstMetamodel = prog.getEPackages().get(0);
 		assertThatThrownBy(() -> {
 			firstMetamodel.setName("changed");
 		})

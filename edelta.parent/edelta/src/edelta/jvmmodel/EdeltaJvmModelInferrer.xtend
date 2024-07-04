@@ -15,6 +15,7 @@ import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import edelta.lib.EdeltaRuntime
+import edelta.util.EdeltaModelUtil
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -97,14 +98,15 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 					body = o.body
 				]
 			}
-			if (!program.metamodels.empty) {
+			val metamodels = EdeltaModelUtil.getMetamodels(program)
+			if (!metamodels.empty) {
 				members += program.toMethod("performSanityChecks", Void.TYPE.typeRef) [
 					annotations += Override.annotationRef
 					exceptions += Exception.typeRef
 					// for each reference to a metamodel, we generate a sanity check
 					// to make sure that at run-time all the referred Ecores are loaded
 					body = '''
-						«FOR p : program.metamodels»
+						«FOR p : metamodels»
 						ensureEPackageIsLoaded("«p.name»");
 						«ENDFOR»
 					'''

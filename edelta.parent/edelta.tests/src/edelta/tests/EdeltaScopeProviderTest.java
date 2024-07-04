@@ -254,7 +254,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		// must be a reference to the original EPackage's datatype
 		assertSame(
 				head(filter(
-					head(prog.getMetamodels()).getEClassifiers(),
+					head(prog.getEPackages()).getEClassifiers(),
 				EDataType.class)),
 				dataType);
 	}
@@ -455,7 +455,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	}
 
 	private EReference metamodelsReference() {
-		return EdeltaPackage.eINSTANCE.getEdeltaProgram_Metamodels();
+		return EdeltaPackage.eINSTANCE.getEdeltaProgram_EPackages();
 	}
 
 	@Test
@@ -485,6 +485,29 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			myClassAttribute
 			subsubpackage
 			MyClass
+			""");
+	}
+
+	@Test
+	public void testScopeForMigrationElement() throws Exception {
+		assertScope(
+			parseWithTestEcore("""
+			migrations {
+				nsURI "http://foo" to "http://foo/v2"
+			}
+
+			// that's required to have copied EPackages
+			modifyEcore aTest foo {}
+			"""),
+			enamedElementReference(),
+			"""
+			foo
+			FooClass
+			myAttribute
+			myReference
+			FooDataType
+			FooEnum
+			FooEnumLiteral
 			""");
 	}
 

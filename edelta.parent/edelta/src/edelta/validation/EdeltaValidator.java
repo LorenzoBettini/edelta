@@ -117,12 +117,13 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 	public void checkProgram(EdeltaProgram p) {
 		var metamodelIndex = 0;
 		HashSet<String> metamodelImportSet = newHashSet();
-		for (var metamodel : p.getMetamodels()) {
+		var metamodels = EdeltaModelUtil.getMetamodels(p);
+		for (var metamodel : metamodels) {
 			var rootPackage = EdeltaModelUtil.findRootSuperPackage(metamodel);
 			if (rootPackage != null) {
 				error("Invalid subpackage import \'" + metamodel.getName() + "\'",
 					p,
-					EDELTA_PROGRAM__METAMODELS,
+					EDELTA_PROGRAM__EPACKAGES,
 					metamodelIndex,
 					INVALID_SUBPACKAGE_IMPORT,
 					rootPackage.getName() // the fix for the import
@@ -132,7 +133,7 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 			if (metamodelImportSet.contains(metamodelImport)) {
 				error("Duplicate metamodel import " + metamodelImport,
 					p,
-					EDELTA_PROGRAM__METAMODELS,
+					EDELTA_PROGRAM__EPACKAGES,
 					metamodelIndex,
 					DUPLICATE_METAMODEL_IMPORT,
 					"" + metamodelIndex // the fix for the import

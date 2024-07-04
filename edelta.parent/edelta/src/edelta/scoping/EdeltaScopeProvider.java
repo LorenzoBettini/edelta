@@ -42,11 +42,15 @@ public class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 			}
 			return Scopes.scopeFor(edeltaEcoreHelper.getProgramENamedElements(context));
 		} else if (reference == EDELTA_MODIFY_ECORE_OPERATION__EPACKAGE) {
-			return Scopes.scopeFor(getProgram(context).getMetamodels());
-		} else if (reference == EDELTA_PROGRAM__METAMODELS) {
+			return Scopes.scopeFor(getMetamodels(context));
+		} else if (reference == EDELTA_PROGRAM__EPACKAGES) {
 			return cache.get("scopeMetamodels", context.eResource(),
 				() -> new FilteringScope(delegateGetScope(context, reference),
 						it -> "false".equals(it.getUserData("nsURI"))));
+		} else if (reference == EDELTA_MIGRATION__NS_URI) {
+			return cache.get("scopeMetamodelsURI", context.eResource(),
+				() -> new FilteringScope(delegateGetScope(context, reference),
+						it -> "true".equals(it.getUserData("nsURI"))));
 		}
 		return super.getScope(context, reference);
 	}

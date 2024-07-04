@@ -101,7 +101,7 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 	 * to be directly imported.
 	 */
 	@Override
-	public void completeEdeltaProgram_Metamodels(EObject model, Assignment assignment, ContentAssistContext context,
+	public void completeEdeltaProgram_EPackages(EObject model, Assignment assignment, ContentAssistContext context,
 			ICompletionProposalAcceptor acceptor) {
 		lookupCrossReference(
 			((CrossReference) assignment.getTerminal()),
@@ -129,7 +129,7 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 			accessibleElements = 
 				cache.get("getOriginalMetamodelsAccessibleElements", model.eResource(),
 					() -> ecoreHelper.fromEPackagesToAccessibleElements(
-						EdeltaModelUtil.getProgram(model).getMetamodels()));
+						EdeltaModelUtil.getMetamodels(model)));
 		} else {
 			accessibleElements = getAccessibleElements(model);
 		}

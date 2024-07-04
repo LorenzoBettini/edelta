@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import edelta.edelta.EdeltaProgram;
 import edelta.resource.EdeltaDerivedStateComputer;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
+import edelta.util.EdeltaModelUtil;
 
 /**
  * Some protected methods are made public so that we can call them in the tests
@@ -22,7 +23,7 @@ public class TestableEdeltaDerivedStateComputer extends EdeltaDerivedStateComput
 
 	@Override
 	protected void copyEPackages(EdeltaProgram program) {
-		program.getMetamodels().stream()
+		EdeltaModelUtil.getMetamodels(program).stream()
 			.forEach(p -> p.eAdapters().add(new EdeltaEContentAdapter()));
 		super.copyEPackages(program);
 	}
