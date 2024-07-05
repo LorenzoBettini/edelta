@@ -4,10 +4,7 @@ import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 
@@ -16,7 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import edelta.lib.EdeltaDefaultRuntime;
-import edelta.lib.EdeltaEngine;
+import edelta.lib.EdeltaEngine.EdeltaRuntimeProvider;
 import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaResourceUtils;
 import edelta.lib.EdeltaVersionMigrator;
@@ -38,6 +35,13 @@ import edelta.testutils.EdeltaTestUtils;
  * These tests NEVER save Ecore files: only model files.
  * So, the Ecore files must be manually and correctly modified, according to the
  * evolutions written in these tests.
+ * 
+ * The previous versions of Ecores are loaded from the classpath and will not correspond to real
+ * filesystem paths, while the current latest versions of Ecores are effective and are to be referred by
+ * the migrated models when in their final state.
+ * 
+ * During the intermediate migrations phases, instead, references to Ecores would not be valid.
+ * We only care about the migrated models final state.
  */
 class EdeltaVersionMigratorTest {
 
@@ -46,6 +50,11 @@ class EdeltaVersionMigratorTest {
 	private static final String EXPECTATIONS = "../edelta.testdata/expectations/version-migration/";
 	private static final String METAMODELS = "metamodels/";
 	private static final String MODELS = "models/";
+
+	private static final String PERSON_LIST_ECORE = "PersonList.ecore";
+	private static final String MY_ECORE = "My.ecore";
+
+	private static final String CLASS_TESTDATA = "/version-migration/";
 
 	private EdeltaVersionMigrator versionMigrator;
 
@@ -59,7 +68,7 @@ class EdeltaVersionMigratorTest {
 		versionMigrator = new EdeltaVersionMigrator();
 	}
 
-	private EdeltaEngine renamePersonFirstAndLastName = new EdeltaEngine(runtime ->
+	private EdeltaRuntimeProvider renamePersonFirstAndLastNameProvider = runtime ->
 		new EdeltaDefaultRuntime(runtime) {
 			@Override
 			protected void performSanityChecks() throws Exception {
@@ -73,10 +82,17 @@ class EdeltaVersionMigratorTest {
 				getEAttribute("PersonList", "Person", "firstname").setName("firstName");
 				getEAttribute("PersonList", "Person", "lastname").setName("lastName");
 			}
-		}
-	);
+			@Override
+			public List<String> getMigratedNsURIs() {
+				return List.of("http://cs.gssi.it/PersonMM/v1");
+			}
+			@Override
+			public List<String> getMigratedEcorePaths() {
+				return List.of(CLASS_TESTDATA + "rename/" + METAMODELS + "v1/" + PERSON_LIST_ECORE);
+			}
+		};
 
-	private EdeltaEngine renamePersonList = new EdeltaEngine(runtime ->
+	private EdeltaRuntimeProvider renamePersonListProvider = runtime ->
 		new EdeltaDefaultRuntime(runtime) {
 			@Override
 			protected void performSanityChecks() throws Exception {
@@ -89,8 +105,15 @@ class EdeltaVersionMigratorTest {
 				// simulate the renaming to get to version 3
 				getEClass("PersonList", "List").setName("PersonList");
 			}
-		}
-	);
+			@Override
+			public List<String> getMigratedNsURIs() {
+				return List.of("http://cs.gssi.it/PersonMM/v2");
+			}
+			@Override
+			public List<String> getMigratedEcorePaths() {
+				return List.of(CLASS_TESTDATA + "rename/" + METAMODELS + "v2/" + PERSON_LIST_ECORE);
+			}
+		};
 
 	@Test
 	void personListFromVersion1ToVersion2() throws Exception {
@@ -98,10 +121,15 @@ class EdeltaVersionMigratorTest {
 		var outputSubdir = "rename-v1-to-v2/";
 		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v1",
 				OUTPUT + outputSubdir);
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"),
-				renamePersonFirstAndLastName);
-		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
-		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
+
+		// initialize with migrations
+		versionMigrator.registerMigration(renamePersonFirstAndLastNameProvider);
+		// load the latest version of the Ecore
+		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v2/" + PERSON_LIST_ECORE);
+		// load the models to check for migration
+		versionMigrator.loadModel(OUTPUT + outputSubdir + "List.xmi");
+		versionMigrator.loadModel(OUTPUT + outputSubdir + "List2.xmi");
+
 		versionMigrator.execute();
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
 	}
@@ -112,12 +140,16 @@ class EdeltaVersionMigratorTest {
 		var outputSubdir = "rename-v2-to-v3/";
 		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v2",
 				OUTPUT + outputSubdir);
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"),
-				renamePersonFirstAndLastName);
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v2"),
-				renamePersonList);
-		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
-		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
+
+		// initialize with migrations
+		versionMigrator.registerMigration(renamePersonFirstAndLastNameProvider);
+		versionMigrator.registerMigration(renamePersonListProvider);
+		// load the latest version of the Ecore
+		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
+		// load the models to check for migration
+		versionMigrator.loadModel(OUTPUT + outputSubdir + "List.xmi");
+		versionMigrator.loadModel(OUTPUT + outputSubdir + "List2.xmi");
+
 		versionMigrator.execute();
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
 	}
@@ -128,17 +160,41 @@ class EdeltaVersionMigratorTest {
 		var outputSubdir = "rename-v1-to-v3/";
 		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v1",
 				OUTPUT + outputSubdir);
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"),
-				renamePersonFirstAndLastName);
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v2"),
-				renamePersonList);
-		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
-		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
+
+		// initialize with migrations
+		versionMigrator.registerMigration(renamePersonFirstAndLastNameProvider);
+		versionMigrator.registerMigration(renamePersonListProvider);
+		// load the latest version of the Ecore
+		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
+		// load the models to check for migration
+		versionMigrator.loadModel(OUTPUT + outputSubdir + "List.xmi");
+		versionMigrator.loadModel(OUTPUT + outputSubdir + "List2.xmi");
+
 		versionMigrator.execute();
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
 	}
 
-	private EdeltaEngine renameMyPackage = new EdeltaEngine(runtime ->
+	@Test
+	void alreadyAtTheLatestVersion() throws Exception {
+		var subdir = "rename/";
+		var outputSubdir = "rename-already-latest-version/";
+		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v3",
+				OUTPUT + outputSubdir);
+
+		// initialize with migrations
+		versionMigrator.registerMigration(renamePersonFirstAndLastNameProvider);
+		versionMigrator.registerMigration(renamePersonListProvider);
+		// load the latest version of the Ecore
+		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
+		// load the models to check for migration
+		versionMigrator.loadModel(OUTPUT + outputSubdir + "List.xmi");
+		versionMigrator.loadModel(OUTPUT + outputSubdir + "List2.xmi");
+
+		versionMigrator.execute();
+		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
+	}
+
+	private EdeltaRuntimeProvider renameMyPackageProvider = runtime ->
 		new EdeltaDefaultRuntime(runtime) {
 			@Override
 			protected void performSanityChecks() throws Exception {
@@ -154,8 +210,15 @@ class EdeltaVersionMigratorTest {
 					.setName("myClassRenamedStringAttribute");
 				getEClass("mypackage", "MyRoot").setName("MyRenamedRoot");
 			}
-		}
-	);
+			@Override
+			public List<String> getMigratedNsURIs() {
+				return List.of("http://my.package.org");
+			}
+			@Override
+			public List<String> getMigratedEcorePaths() {
+				return List.of(CLASS_TESTDATA + "rename/" + METAMODELS + "v1/" + MY_ECORE);
+			}
+		};
 
 	@Test
 	void unrelatedEcoresAndModels() throws Exception {
@@ -163,88 +226,41 @@ class EdeltaVersionMigratorTest {
 		var outputSubdir = "rename-unrelated/";
 		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v1",
 				OUTPUT + outputSubdir);
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"),
-				renamePersonFirstAndLastName);
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v2"),
-				renamePersonList);
-		versionMigrator.mapVersionMigration(List.of("http://my.package.org"),
-				renameMyPackage);
-		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
-		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
-		versionMigrator.execute();
-		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi", "MyClass.xmi", "MyRoot.xmi"));
-	}
 
-	@Test
-	void orderOfMappingsDoesNotMatter() throws Exception {
-		var subdir = "rename/";
-		var outputSubdir = "rename-unrelated/";
-		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v1",
-				OUTPUT + outputSubdir);
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v2"),
-				renamePersonList);
-		versionMigrator.mapVersionMigration(List.of("http://my.package.org"),
-				renameMyPackage);
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"),
-				renamePersonFirstAndLastName);
-		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
+		// initialize with migrations
+		versionMigrator.registerMigration(renamePersonFirstAndLastNameProvider);
+		versionMigrator.registerMigration(renameMyPackageProvider);
+		versionMigrator.registerMigration(renamePersonListProvider);
+		// load the latest version of the Ecore
+		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
+		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v2/" + MY_ECORE);
+		// load the models to check for migration
 		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
+
 		versionMigrator.execute();
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi", "MyClass.xmi", "MyRoot.xmi"));
 	}
 
 	/**
-	 * This aims at simulating the real situation (e.g., when running in Eclipse on a real client's project
-	 * or RCP): the previous versions of Ecores are loaded from the classpath and will not correspond to real
-	 * filesystem paths, while the current latest versions of Ecores are effective and are to be referred by
-	 * the migrated models when in their final state.
-	 * 
-	 * During the intermediate migrations phases, instead, references to Ecores would not be valid.
-	 * We only care about the migrated models final state.
+	 * One of the latest version of an Ecore is specified directly with an EPackage loaded instance.
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	void loadingWithInputStreams() throws Exception {
+	void loadEPackageDirectly() throws Exception {
 		var subdir = "rename/";
 		var outputSubdir = "rename-unrelated/";
 		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v1",
 				OUTPUT + outputSubdir);
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v2"),
-				renamePersonList);
-		versionMigrator.mapVersionMigration(List.of("http://my.package.org"),
-				renameMyPackage);
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"),
-				renamePersonFirstAndLastName);
 
-		// note that during this scan we also load with this strategy the final versions of Ecores
-		// but then (*) we load the final Ecores by their effective path
-		try (var stream = Files.walk(Paths.get(TESTDATA + subdir + METAMODELS))) {
-			stream
-				.filter(file -> !Files.isDirectory(file))
-				.filter(file -> file.toString().endsWith(".ecore"))
-				.forEach(file -> {
-					try {
-						/*
-						 * use only the file name (not the full path), to simulate the situation where
-						 * previous metamodels are temporarily in memory; this means that, until the
-						 * models are in their final migrated versions the references to the ecores will
-						 * not be correct
-						 */
-						versionMigrator.loadEcore(file.getFileName().toString(), new FileInputStream(file.toFile()));
-					} catch (IOException e) {
-						fail(e);
-					}
-				});
-		}
+		versionMigrator.registerMigration(renamePersonListProvider);
+		versionMigrator.registerMigration(renameMyPackageProvider);
+		versionMigrator.registerMigration(renamePersonFirstAndLastNameProvider);
 
-		// (*)
-		// the final Ecores are instead loaded as real files, so that their references in models will be effective
-		// and refer to real ecores
-		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v3/PersonList.ecore");
+		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
 		// simulate the loading of an EPackage (e.g., by the direct access to its instance through EMF API)
 		var modelManager = new EdeltaModelManager();
-		var resource = modelManager.loadEcoreFile(TESTDATA + subdir + METAMODELS + "v2/My.ecore");
+		var resource = modelManager.loadEcoreFile(TESTDATA + subdir + METAMODELS + "v2/" + MY_ECORE);
 		var ePackage = EdeltaResourceUtils.getEPackage(resource);
 		versionMigrator.loadEPackage(ePackage);
 
@@ -261,14 +277,17 @@ class EdeltaVersionMigratorTest {
 				OUTPUT + outputSubdir);
 		versionMigrator.addModelFileExtension(".customextension");
 		versionMigrator.addModelFileExtension(".anothercustomextension");
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v1"),
-				renamePersonFirstAndLastName);
-		versionMigrator.mapVersionMigration(List.of("http://cs.gssi.it/PersonMM/v2"),
-				renamePersonList);
-		versionMigrator.mapVersionMigration(List.of("http://my.package.org"),
-				renameMyPackage);
-		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS);
+
+		// initialize with migrations
+		versionMigrator.registerMigration(renamePersonFirstAndLastNameProvider);
+		versionMigrator.registerMigration(renameMyPackageProvider);
+		versionMigrator.registerMigration(renamePersonListProvider);
+		// load the latest version of the Ecore
+		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
+		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v2/" + MY_ECORE);
+		// load the models to check for migration
 		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
+
 		versionMigrator.execute();
 		executeAndAssertOutputs(outputSubdir, List.of("List.customextension", "List2.customextension",
 				"MyClass.anothercustomextension", "MyRoot.anothercustomextension"));

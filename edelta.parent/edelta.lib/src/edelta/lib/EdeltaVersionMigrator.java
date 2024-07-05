@@ -18,6 +18,8 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.xmi.XMIResource;
 
+import edelta.lib.EdeltaEngine.EdeltaRuntimeProvider;
+
 /**
  * @author Lorenzo Bettini
  */
@@ -130,12 +132,33 @@ public class EdeltaVersionMigrator {
 					var fileToString = file.toString();
 					return modelExtensions.stream().anyMatch(fileToString::endsWith);
 				})
-				.forEach(file -> modelManager.loadModelFile(file.toString()));
+				.forEach(file -> loadModel(file.toString()));
 		}
+	}
+
+	public Resource loadModel(String path) {
+		return modelManager.loadModelFile(path);
 	}
 
 	public void mapVersionMigration(Collection<String> uris, EdeltaEngine edeltaEngine) {
 		versionMigrations.add(new VersionMigrationEntry(uris, edeltaEngine));
+	}
+
+	/**
+	 * Registers an {@link EdeltaRuntimeProvider} by recording the nsURIs handled by the
+	 * corresponding {@link EdeltaRuntime} implementation and by loading the corresponding
+	 * Ecore files from the classpath, e.g., with {@link Class#getResourceAsStream(String)}.
+	 * 
+	 * @param provider
+	 * @throws IOException
+	 */
+	public void registerMigration(EdeltaRuntimeProvider provider) throws IOException {
+		var tempRuntime = provider.apply(new EdeltaDefaultRuntime(modelManager));
+		mapVersionMigration(tempRuntime.getMigratedNsURIs(), new EdeltaEngine(provider));
+		var ecorePaths = tempRuntime.getMigratedEcorePaths();
+		for (var ecorePath : ecorePaths) {
+			loadEcore(ecorePath, tempRuntime.getClass().getResourceAsStream(ecorePath));
+		}
 	}
 
 	/**
