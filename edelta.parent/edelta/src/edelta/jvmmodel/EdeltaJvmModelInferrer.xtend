@@ -162,7 +162,7 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 						var engine = new «EdeltaEngine»(«className.lastSegment»::new);
 						«FOR migration : program.getMigrations»
 						engine.loadEcoreFile("«migration.nsURI.eResource.URI.lastSegment»",
-							«className.lastSegment».class.getResourceAsStream("/«migration.nsURI.eResource.URI.lastSegment»"));
+						  «className.lastSegment».class.getResourceAsStream("/«migration.nsURI.eResource.URI.lastSegment»"));
 						«ENDFOR»
 						engine.execute();
 						engine.save("modified");

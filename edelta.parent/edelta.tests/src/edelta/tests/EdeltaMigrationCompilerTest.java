@@ -113,9 +113,9 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		  public static void main(final String[] args) throws Exception {
 		    var engine = new EdeltaEngine(MyFile0::new);
 		    engine.loadEcoreFile("foo.ecore",
-		    	MyFile0.class.getResourceAsStream("/foo.ecore"));
+		      MyFile0.class.getResourceAsStream("/foo.ecore"));
 		    engine.loadEcoreFile("bar.ecore",
-		    	MyFile0.class.getResourceAsStream("/bar.ecore"));
+		      MyFile0.class.getResourceAsStream("/bar.ecore"));
 		    engine.execute();
 		    engine.save("modified");
 		  }
@@ -192,9 +192,9 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		  public static void main(final String[] args) throws Exception {
 		    var engine = new EdeltaEngine(Example::new);
 		    engine.loadEcoreFile("Simple.ecore",
-		    	Example.class.getResourceAsStream("/Simple.ecore"));
+		      Example.class.getResourceAsStream("/Simple.ecore"));
 		    engine.loadEcoreFile("AnotherSimple.ecore",
-		    	Example.class.getResourceAsStream("/AnotherSimple.ecore"));
+		      Example.class.getResourceAsStream("/AnotherSimple.ecore"));
 		    engine.execute();
 		    engine.save("modified");
 		  }
@@ -261,9 +261,9 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		  public static void main(final String[] args) throws Exception {
 		    var engine = new EdeltaEngine(Example::new);
 		    engine.loadEcoreFile("Simple.ecore",
-		    	Example.class.getResourceAsStream("/Simple.ecore"));
+		      Example.class.getResourceAsStream("/Simple.ecore"));
 		    engine.loadEcoreFile("AnotherSimple.ecore",
-		    	Example.class.getResourceAsStream("/AnotherSimple.ecore"));
+		      Example.class.getResourceAsStream("/AnotherSimple.ecore"));
 		    engine.execute();
 		    engine.save("modified");
 		  }
