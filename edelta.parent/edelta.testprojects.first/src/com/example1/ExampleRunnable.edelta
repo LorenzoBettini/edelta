@@ -1,0 +1,15 @@
+package com.example1
+
+migrations {
+	nsURI "http://www.eclipse.org/emf/2002/Myecore1" to "http://www.eclipse.org/emf/2002/Myecore1/v2"
+}
+
+modifyEcore someModifications epackage myecore1 {
+	addNewEClass("NewClass") [
+		addNewEReference("myReference", ecoreref(myecore1.MyEClass)) [
+			upperBound = -1;
+			containment = true;
+			lowerBound = 0
+		]
+	]
+}

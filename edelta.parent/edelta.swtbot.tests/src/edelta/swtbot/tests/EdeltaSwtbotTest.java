@@ -7,6 +7,7 @@ import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.waitForBuild
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -23,6 +24,7 @@ import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
+import org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.waits.ICondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
@@ -61,9 +63,7 @@ public class EdeltaSwtbotTest {
 	private static final String PERSONS_MM_TEMPLATE_EDELTA = "PersonsMMTemplate.edelta";
 
 	@BeforeClass
-	public static void beforeClass() throws Exception {
-//		PDETargetPlatformUtils.setTargetPlatform();
-
+	public static void beforeClass() {
 		bot = new SWTWorkbenchBot();
 
 		closeWelcomePage();
@@ -212,6 +212,50 @@ public class EdeltaSwtbotTest {
 		});
 	}
 
+	private void waitingForBuild() {
+		// building seems to be flaky, so better to try again in case of failure
+		bot.waitUntil(new ICondition() {
+			@Override
+			public boolean test() throws Exception {
+				System.out.println("**** WAITING FOR BUILD...");
+				waitForBuild();
+				Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_REFRESH, null);
+				Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+				System.out.println("**** BUILD DONE");
+				assertErrorsInProject(0);
+				return true;
+			}
+	
+			@Override
+			public void init(SWTBot bot) {
+			}
+	
+			@Override
+			public String getFailureMessage() {
+				return "build failed";
+			}
+		});
+	}
+
+	private void waitingForPluginModel() {
+		bot.waitUntil(new ICondition() {
+			@Override
+			public boolean test() throws Exception {
+				System.out.println("Waiting for the plugin model...");
+				return PDECore.getDefault().getModelManager().isInitialized();
+			}
+	
+			@Override
+			public void init(SWTBot bot) {
+			}
+	
+			@Override
+			public String getFailureMessage() {
+				return "Failed waiting for inizialize of plugin models";
+			}
+		});
+	}
+
 	@Test
 	public void canCreateANewProject() throws OperationCanceledException {
 		bot.waitUntil(new ICondition() {
@@ -246,45 +290,9 @@ public class EdeltaSwtbotTest {
 		bot.waitUntil(shellCloses(shell), SWTBotPreferences.TIMEOUT);
 		assertTrue("Project doesn't exist: " + MY_TEST_PROJECT, isProjectCreated(MY_TEST_PROJECT));
 
-		bot.waitUntil(new ICondition() {
-			@Override
-			public boolean test() throws Exception {
-				System.out.println("Waiting for the plugin model...");
-				return PDECore.getDefault().getModelManager().isInitialized();
-			}
+		waitingForPluginModel();
 
-			@Override
-			public void init(SWTBot bot) {
-			}
-
-			@Override
-			public String getFailureMessage() {
-				return "Failed waiting for inizialize of plugin models";
-			}
-		});
-
-		// building seems to be flaky, so better to try again in case of failure
-		bot.waitUntil(new ICondition() {
-			@Override
-			public boolean test() throws Exception {
-				System.out.println("**** WAITING FOR BUILD...");
-				waitForBuild();
-				Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_REFRESH, null);
-				Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
-				System.out.println("**** BUILD DONE");
-				assertErrorsInProject(0);
-				return true;
-			}
-
-			@Override
-			public void init(SWTBot bot) {
-			}
-
-			@Override
-			public String getFailureMessage() {
-				return "build failed";
-			}
-		});
+		waitingForBuild();
 
 		bot.waitUntil(new ICondition() {
 			@Override
@@ -312,6 +320,33 @@ public class EdeltaSwtbotTest {
 				return "Example.java does not exist";
 			}
 		});
+	}
+
+	@Test
+	public void canRunAnXklaimFileAsJavaApplication() throws CoreException, OperationCanceledException, InterruptedException, InvocationTargetException {
+		final String TEST_PROJECT = "edelta.testprojects.first";
+		ProjectImportUtil.importJavaProject(TEST_PROJECT);
+		waitingForPluginModel();
+		waitingForBuild();
+		SWTBotTreeItem tree = getProjectTreeItem(TEST_PROJECT)
+				.expand()
+				.expandNode("src")
+				.expandNode("com.example1")
+				.getNode("ExampleRunnable.edelta");
+		checkLaunchContextMenu(tree.contextMenu("Run As"));
+		checkLaunchContextMenu(tree.contextMenu("Debug As"));
+	}
+
+	private void checkLaunchContextMenu(SWTBotMenu contextMenu) {
+		try {
+			// depending on the installed features, on a new workbench, any file has "Run As
+			// Java Application" as the
+			// first menu, so we need to look for the second entry
+			contextMenu.menu(WidgetMatcherFactory.withRegex("\\d Edelta Application"), false, 0);
+		} catch (WidgetNotFoundException e) {
+			System.out.println("MENUS: " + contextMenu.menuItems());
+			throw e;
+		}
 	}
 
 	@Test
