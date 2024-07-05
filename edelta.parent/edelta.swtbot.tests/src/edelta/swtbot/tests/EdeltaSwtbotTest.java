@@ -171,6 +171,7 @@ public class EdeltaSwtbotTest {
 				buffer.append(iMarker.getAttribute(IMarker.MESSAGE) + "\n");
 				buffer.append(iMarker.getAttribute(IMarker.SEVERITY) + "\n");
 			} catch (CoreException e) {
+				// nothing to do
 			}
 		}
 		return buffer.toString();
