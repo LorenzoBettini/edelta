@@ -17,6 +17,8 @@ import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import edelta.lib.EdeltaRuntime
 import edelta.util.EdeltaModelUtil
 import java.util.List
+import edelta.lib.annotation.EdeltaGenerated
+import edelta.lib.EdeltaEngine
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -149,6 +151,22 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 					'''
 					// previously it was nsURI.eResource.URI.deresolve(program.eResource.URI)
 					// but it's better to always use the filename only and rely on the ecores to be found in the classpath
+				]
+				// also generate a "main" method
+				members += program.toMethod("main", Void.TYPE.typeRef) [
+					static = true
+					annotations += EdeltaGenerated.annotationRef
+					parameters += program.toParameter("args", String.typeRef().addArrayTypeDimension)
+					exceptions += Exception.typeRef()
+					body = '''
+						var engine = new «EdeltaEngine»(«className.lastSegment»::new);
+						«FOR migration : program.getMigrations»
+						engine.loadEcoreFile("«migration.nsURI.eResource.URI.lastSegment»",
+							«className.lastSegment».class.getResourceAsStream("/«migration.nsURI.eResource.URI.lastSegment»"));
+						«ENDFOR»
+						engine.execute();
+						engine.save("modified");
+					'''
 				]
 			}
 		]

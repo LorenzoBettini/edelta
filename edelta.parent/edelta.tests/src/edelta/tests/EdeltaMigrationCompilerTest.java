@@ -50,8 +50,10 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		
 		import edelta.lib.EdeltaDefaultRuntime;
 		import edelta.lib.EdeltaEcoreUtil;
+		import edelta.lib.EdeltaEngine;
 		import edelta.lib.EdeltaModelMigrator;
 		import edelta.lib.EdeltaRuntime;
+		import edelta.lib.annotation.EdeltaGenerated;
 		import java.util.List;
 		import java.util.function.Consumer;
 		import org.eclipse.emf.ecore.EClass;
@@ -106,6 +108,17 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		      "/bar.ecore"
 		    );
 		  }
+		
+		  @EdeltaGenerated
+		  public static void main(final String[] args) throws Exception {
+		    var engine = new EdeltaEngine(MyFile0::new);
+		    engine.loadEcoreFile("foo.ecore",
+		    	MyFile0.class.getResourceAsStream("/foo.ecore"));
+		    engine.loadEcoreFile("bar.ecore",
+		    	MyFile0.class.getResourceAsStream("/bar.ecore"));
+		    engine.execute();
+		    engine.save("modified");
+		  }
 		}
 		"""
 		);
@@ -130,7 +143,9 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		package foo;
 		
 		import edelta.lib.EdeltaDefaultRuntime;
+		import edelta.lib.EdeltaEngine;
 		import edelta.lib.EdeltaRuntime;
+		import edelta.lib.annotation.EdeltaGenerated;
 		import java.util.List;
 		import org.eclipse.emf.ecore.EPackage;
 		
@@ -172,6 +187,17 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		      "/AnotherSimple.ecore"
 		    );
 		  }
+		
+		  @EdeltaGenerated
+		  public static void main(final String[] args) throws Exception {
+		    var engine = new EdeltaEngine(Example::new);
+		    engine.loadEcoreFile("Simple.ecore",
+		    	Example.class.getResourceAsStream("/Simple.ecore"));
+		    engine.loadEcoreFile("AnotherSimple.ecore",
+		    	Example.class.getResourceAsStream("/AnotherSimple.ecore"));
+		    engine.execute();
+		    engine.save("modified");
+		  }
 		}
 		""",
 		true);
@@ -192,7 +218,9 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		package foo;
 		
 		import edelta.lib.EdeltaDefaultRuntime;
+		import edelta.lib.EdeltaEngine;
 		import edelta.lib.EdeltaRuntime;
+		import edelta.lib.annotation.EdeltaGenerated;
 		import java.util.List;
 		
 		@SuppressWarnings("all")
@@ -227,6 +255,17 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		      "/Simple.ecore",
 		      "/AnotherSimple.ecore"
 		    );
+		  }
+		
+		  @EdeltaGenerated
+		  public static void main(final String[] args) throws Exception {
+		    var engine = new EdeltaEngine(Example::new);
+		    engine.loadEcoreFile("Simple.ecore",
+		    	Example.class.getResourceAsStream("/Simple.ecore"));
+		    engine.loadEcoreFile("AnotherSimple.ecore",
+		    	Example.class.getResourceAsStream("/AnotherSimple.ecore"));
+		    engine.execute();
+		    engine.save("modified");
 		  }
 		}
 		""",
