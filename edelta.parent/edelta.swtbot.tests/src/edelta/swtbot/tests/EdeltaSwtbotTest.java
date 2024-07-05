@@ -82,7 +82,7 @@ public class EdeltaSwtbotTest {
 		waitForBuild();
 	}
 
-	protected static void closeWelcomePage() throws InterruptedException {
+	protected static void closeWelcomePage() {
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
@@ -201,7 +201,7 @@ public class EdeltaSwtbotTest {
 		});
 	}
 
-	protected static void openViewById(String viewId) throws InterruptedException {
+	protected static void openViewById(String viewId) {
 		Display.getDefault().syncExec(() -> {
 			IWorkbench workbench = PlatformUI.getWorkbench();
 			try {
@@ -213,7 +213,7 @@ public class EdeltaSwtbotTest {
 	}
 
 	@Test
-	public void canCreateANewProject() throws CoreException, OperationCanceledException, InterruptedException {
+	public void canCreateANewProject() throws OperationCanceledException {
 		bot.waitUntil(new ICondition() {
 			@Override
 			public boolean test() throws Exception {
