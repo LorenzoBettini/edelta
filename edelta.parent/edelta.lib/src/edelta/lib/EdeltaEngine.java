@@ -1,6 +1,7 @@
 package edelta.lib;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.function.UnaryOperator;
 
 import org.eclipse.emf.ecore.resource.Resource;
@@ -35,6 +36,18 @@ public class EdeltaEngine {
 
 	public Resource loadEcoreFile(String path) {
 		return originalModelManager.loadEcoreFile(path);
+	}
+
+	/**
+	 * See {@link EdeltaModelManager#loadEcoreFile(String, InputStream)}.
+	 * 
+	 * @param ecoreFile
+	 * @param inputStream
+	 * @return 
+	 * @throws IOException 
+	 */
+	public Resource loadEcoreFile(String ecoreFile, InputStream inputStream) throws IOException {
+		return originalModelManager.loadEcoreFile(ecoreFile, inputStream);
 	}
 
 	public Resource loadModelFile(String path) {
