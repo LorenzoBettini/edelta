@@ -191,6 +191,7 @@ public class EdeltaSwtbotTest {
 	
 			@Override
 			public void init(SWTBot bot) {
+				// nothing to do
 			}
 	
 			@Override
@@ -228,6 +229,7 @@ public class EdeltaSwtbotTest {
 	
 			@Override
 			public void init(SWTBot bot) {
+				// nothing to do
 			}
 	
 			@Override
@@ -247,6 +249,7 @@ public class EdeltaSwtbotTest {
 	
 			@Override
 			public void init(SWTBot bot) {
+				// nothing to do
 			}
 	
 			@Override
@@ -268,6 +271,7 @@ public class EdeltaSwtbotTest {
 
 			@Override
 			public void init(SWTBot bot) {
+				// nothing to do
 			}
 
 			@Override
@@ -313,6 +317,7 @@ public class EdeltaSwtbotTest {
 
 			@Override
 			public void init(SWTBot bot) {
+				// nothing to do
 			}
 
 			@Override
