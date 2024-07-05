@@ -133,15 +133,15 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 			}
 			if (!program.getMigrations.empty) {
 				members += program.toMethod("getMigratedNsURIs", List.typeRef(String.typeRef())) [
-					//annotations += Override.annotationRef
+					annotations += Override.annotationRef
 					body = '''
 						return List.of(
 						  «program.getMigrations.map['"' + nsURI.nsURI + '"'].join(",\n")»
 						);
 					'''
 				]
-				members += program.toMethod("getEcorePaths", List.typeRef(String.typeRef())) [
-					//annotations += Override.annotationRef
+				members += program.toMethod("getMigratedEcorePaths", List.typeRef(String.typeRef())) [
+					annotations += Override.annotationRef
 					body = '''
 						return List.of(
 						  «program.getMigrations.map['"/' +nsURI.eResource.URI.deresolve(program.eResource.URI) + '"'].join(",\n")»

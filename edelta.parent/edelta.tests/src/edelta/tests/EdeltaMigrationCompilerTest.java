@@ -91,6 +91,7 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		    getEPackage("bar").setNsURI("http://bar/v2");
 		  }
 		
+		  @Override
 		  public List<String> getMigratedNsURIs() {
 		    return List.of(
 		      "http://foo",
@@ -98,7 +99,8 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		    );
 		  }
 		
-		  public List<String> getEcorePaths() {
+		  @Override
+		  public List<String> getMigratedEcorePaths() {
 		    return List.of(
 		      "/foo.ecore",
 		      "/bar.ecore"
@@ -155,6 +157,7 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		    getEPackage("anothersimple").setNsURI("http://www.anothersimple/v2");
 		  }
 		
+		  @Override
 		  public List<String> getMigratedNsURIs() {
 		    return List.of(
 		      "http://www.simple",
@@ -162,7 +165,8 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		    );
 		  }
 		
-		  public List<String> getEcorePaths() {
+		  @Override
+		  public List<String> getMigratedEcorePaths() {
 		    return List.of(
 		      "/Simple.ecore",
 		      "/AnotherSimple.ecore"
