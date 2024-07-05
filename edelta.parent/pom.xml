@@ -53,6 +53,7 @@
       we cover the original Xtend files, using xtendAsPrimaryDebugSource
       inherited from the xtext-build-utils parent -->
     <sonar.coverage.exclusions>
+      **/edelta/ui/launching/*.java,
       **/EdeltaMaven*.java,
       **/xtend-gen/**/*.java,
     </sonar.coverage.exclusions>
