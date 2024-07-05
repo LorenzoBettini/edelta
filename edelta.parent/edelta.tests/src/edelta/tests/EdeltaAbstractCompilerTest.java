@@ -75,7 +75,7 @@ public abstract class EdeltaAbstractCompilerTest extends EdeltaAbstractTest {
 	}
 
 	protected void assertGeneratedJavaCode(CompilationTestHelper.Result r, CharSequence expected) {
-		assertEquals(expected.toString(),
+		assertEquals(EdeltaTestUtils.removeCR(expected.toString()),
 			EdeltaTestUtils.removeCR(r.getSingleGeneratedCode()));
 	}
 
