@@ -135,13 +135,11 @@ public class EdeltaSwtbotTest {
 
 	protected static SWTBotTree getProjectTree() {
 		SWTBotView packageExplorer = getProjectExplorer();
-		SWTBotTree tree = packageExplorer.bot().tree();
-		return tree;
+		return packageExplorer.bot().tree();
 	}
 
 	protected static SWTBotView getProjectExplorer() {
-		SWTBotView view = bot.viewByTitle(PROJECT_EXPLORER);
-		return view;
+		return bot.viewByTitle(PROJECT_EXPLORER);
 	}
 
 	protected SWTBotTreeItem getProjectTreeItem(String myTestProject) {
