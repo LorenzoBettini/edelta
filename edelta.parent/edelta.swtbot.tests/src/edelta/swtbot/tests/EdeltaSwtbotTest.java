@@ -323,7 +323,7 @@ public class EdeltaSwtbotTest {
 	}
 
 	@Test
-	public void canRunAnXklaimFileAsJavaApplication() throws CoreException, OperationCanceledException, InterruptedException, InvocationTargetException {
+	public void canRunAnEdeltaFileAsJavaApplication() throws CoreException, OperationCanceledException, InterruptedException, InvocationTargetException {
 		final String TEST_PROJECT = "edelta.testprojects.first";
 		ProjectImportUtil.importJavaProject(TEST_PROJECT);
 		waitingForPluginModel();

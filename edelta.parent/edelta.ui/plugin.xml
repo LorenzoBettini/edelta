@@ -638,13 +638,13 @@
 			name="Debug Edelta Application"
 			description="Debug Edelta Application"
 			categoryId="org.eclipse.debug.ui.category.run"
-			id="xklaim.ui.launching.localJavaShortcut.debug">
+			id="edelta.ui.launching.localJavaShortcut.debug">
 		</command>
 		<command
 			name="Run Edelta Application"
 			description="Run Edelta Application"
 			categoryId="org.eclipse.debug.ui.category.run"
-			id="xklaim.ui.launching.localJavaShortcut.run">
+			id="edelta.ui.launching.localJavaShortcut.run">
 		</command>
 	</extension>
 	<extension point="org.eclipse.core.runtime.adapters">
