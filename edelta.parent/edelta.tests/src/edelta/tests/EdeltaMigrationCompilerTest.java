@@ -177,6 +177,62 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		true);
 	}
 
+	@Test
+	public void testAlwaysGenerateChangeOfNsURI() throws Exception {
+		var rs = createResourceSetWithEcores(List.of(SIMPLE_ECORE, ANOTHER_SIMPLE_ECORE),
+		"""
+		package foo;
+
+		migrations {
+			nsURI "http://www.simple" to "http://www.simple/v2"
+			nsURI "http://www.anothersimple" to "http://www.anothersimple/v2"
+		}
+		""");
+		checkCompilation(rs, """
+		package foo;
+		
+		import edelta.lib.EdeltaDefaultRuntime;
+		import edelta.lib.EdeltaRuntime;
+		import java.util.List;
+		
+		@SuppressWarnings("all")
+		public class Example extends EdeltaDefaultRuntime {
+		  public Example(final EdeltaRuntime other) {
+		    super(other);
+		  }
+		
+		  @Override
+		  public void performSanityChecks() throws Exception {
+		    ensureEPackageIsLoadedByNsURI("simple", "http://www.simple");
+		    ensureEPackageIsLoadedByNsURI("anothersimple", "http://www.anothersimple");
+		  }
+		
+		  @Override
+		  protected void doExecute() throws Exception {
+		    getEPackage("simple").setNsURI("http://www.simple/v2");
+		    getEPackage("anothersimple").setNsURI("http://www.anothersimple/v2");
+		  }
+		
+		  @Override
+		  public List<String> getMigratedNsURIs() {
+		    return List.of(
+		      "http://www.simple",
+		      "http://www.anothersimple"
+		    );
+		  }
+		
+		  @Override
+		  public List<String> getMigratedEcorePaths() {
+		    return List.of(
+		      "/Simple.ecore",
+		      "/AnotherSimple.ecore"
+		    );
+		  }
+		}
+		""",
+		true);
+	}
+
 	@Override
 	protected ResourceSet createResourceSet(CharSequence... inputs) throws Exception {
 		var rs = super.createResourceSet(inputs);

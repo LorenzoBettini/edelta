@@ -116,7 +116,7 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 					'''
 				]
 			}
-			if (!program.modifyEcoreOperations.empty) {
+			if (!program.modifyEcoreOperations.empty || !program.getMigrations.empty) {
 				members += program.toMethod("doExecute", Void.TYPE.typeRef) [
 					visibility = JvmVisibility.PROTECTED
 					annotations += Override.annotationRef
@@ -144,9 +144,11 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 					annotations += Override.annotationRef
 					body = '''
 						return List.of(
-						  «program.getMigrations.map['"/' +nsURI.eResource.URI.deresolve(program.eResource.URI) + '"'].join(",\n")»
+						  «program.getMigrations.map['"/' +nsURI.eResource.URI.lastSegment + '"'].join(",\n")»
 						);
 					'''
+					// previously it was nsURI.eResource.URI.deresolve(program.eResource.URI)
+					// but it's better to always use the filename only and rely on the ecores to be found in the classpath
 				]
 			}
 		]
