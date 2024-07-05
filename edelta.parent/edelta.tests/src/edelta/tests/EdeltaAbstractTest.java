@@ -529,11 +529,12 @@ public abstract class EdeltaAbstractTest {
 
 	protected CharSequence inputInsideModifyEcoreWithTestMetamodelFoo(CharSequence body) {
 		return String.format(
-			"metamodel \"foo\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage foo {\n"
-			+ "  %s\n"
-			+ "}", body);
+			"""
+				metamodel "foo"
+				
+				modifyEcore aTest epackage foo {
+				  %s
+				}""", body);
 	}
 
 	protected EdeltaEcoreReferenceExpression lastEcoreReferenceExpression(EdeltaProgram p) {
