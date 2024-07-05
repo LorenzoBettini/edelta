@@ -534,6 +534,21 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			""");
 	}
 
+	@Test
+	public void testScopeForMigrationElementUnresolvedNsURI() throws Exception {
+		assertScope(
+			parseWithTestEcoreDifferentNsURI("""
+			migrations {
+				nsURI "http://nonexistent.org/v2" to "http://foo.org/v3"
+			}
+
+			// that's required to have copied EPackages
+			modifyEcore aTest foo {}
+			"""),
+			enamedElementReference(),
+			"");
+	}
+
 	private void assertScope(EObject context, EReference reference, CharSequence expected) {
 		var end = "";
 		if (expected.toString().endsWith("\n")) {
