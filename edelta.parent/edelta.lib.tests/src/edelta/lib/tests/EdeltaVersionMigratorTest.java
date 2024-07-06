@@ -125,7 +125,7 @@ class EdeltaVersionMigratorTest {
 		// initialize with migrations
 		versionMigrator.registerMigration(renamePersonFirstAndLastNameProvider);
 		// load the latest version of the Ecore
-		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v2/" + PERSON_LIST_ECORE);
+		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v2/" + PERSON_LIST_ECORE);
 		// load the models to check for migration
 		versionMigrator.loadModel(OUTPUT + outputSubdir + "List.xmi");
 		versionMigrator.loadModel(OUTPUT + outputSubdir + "List2.xmi");
@@ -145,7 +145,7 @@ class EdeltaVersionMigratorTest {
 		versionMigrator.registerMigration(renamePersonFirstAndLastNameProvider);
 		versionMigrator.registerMigration(renamePersonListProvider);
 		// load the latest version of the Ecore
-		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
+		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
 		// load the models to check for migration
 		versionMigrator.loadModel(OUTPUT + outputSubdir + "List.xmi");
 		versionMigrator.loadModel(OUTPUT + outputSubdir + "List2.xmi");
@@ -165,7 +165,7 @@ class EdeltaVersionMigratorTest {
 		versionMigrator.registerMigration(renamePersonFirstAndLastNameProvider);
 		versionMigrator.registerMigration(renamePersonListProvider);
 		// load the latest version of the Ecore
-		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
+		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
 		// load the models to check for migration
 		versionMigrator.loadModel(OUTPUT + outputSubdir + "List.xmi");
 		versionMigrator.loadModel(OUTPUT + outputSubdir + "List2.xmi");
@@ -185,7 +185,7 @@ class EdeltaVersionMigratorTest {
 		versionMigrator.registerMigration(renamePersonFirstAndLastNameProvider);
 		versionMigrator.registerMigration(renamePersonListProvider);
 		// load the latest version of the Ecore
-		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
+		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
 		// load the models to check for migration
 		versionMigrator.loadModel(OUTPUT + outputSubdir + "List.xmi");
 		versionMigrator.loadModel(OUTPUT + outputSubdir + "List2.xmi");
@@ -232,8 +232,8 @@ class EdeltaVersionMigratorTest {
 		versionMigrator.registerMigration(renameMyPackageProvider);
 		versionMigrator.registerMigration(renamePersonListProvider);
 		// load the latest version of the Ecore
-		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
-		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v2/" + MY_ECORE);
+		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
+		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v2/" + MY_ECORE);
 		// load the models to check for migration
 		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
 
@@ -257,7 +257,7 @@ class EdeltaVersionMigratorTest {
 		versionMigrator.registerMigration(renameMyPackageProvider);
 		versionMigrator.registerMigration(renamePersonFirstAndLastNameProvider);
 
-		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
+		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
 		// simulate the loading of an EPackage (e.g., by the direct access to its instance through EMF API)
 		var modelManager = new EdeltaModelManager();
 		var resource = modelManager.loadEcoreFile(TESTDATA + subdir + METAMODELS + "v2/" + MY_ECORE);
@@ -283,8 +283,8 @@ class EdeltaVersionMigratorTest {
 		versionMigrator.registerMigration(renameMyPackageProvider);
 		versionMigrator.registerMigration(renamePersonListProvider);
 		// load the latest version of the Ecore
-		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
-		versionMigrator.loadEcoresFrom(TESTDATA + subdir + METAMODELS + "v2/" + MY_ECORE);
+		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
+		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v2/" + MY_ECORE);
 		// load the models to check for migration
 		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
 

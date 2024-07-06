@@ -53,24 +53,6 @@ public class EdeltaVersionMigrator {
 	}
 
 	/**
-	 * The loaded ecores are assumed to be different versions of the same ecores.
-	 * 
-	 * @param path
-	 * @throws IOException
-	 */
-	public void loadEcoresFrom(String path) throws IOException {
-		try (var stream = Files.walk(Paths.get(path))) {
-			stream
-				.filter(file -> !Files.isDirectory(file))
-				.filter(file -> file.toString().endsWith(".ecore"))
-				.forEach(file -> {
-					var resource = modelManager.loadEcoreFile(file.toString());
-					updatePackageRegistry(resource);
-				});
-		}
-	}
-
-	/**
 	 * Ensure that the nsURI is mapped to the loaded {@link EPackage}, so that
 	 * when loading an XMI the referenced Ecore file is found by nsURI.
 	 * 
@@ -92,6 +74,17 @@ public class EdeltaVersionMigrator {
 	private void updatePackageRegistry(EPackage ePackage, ResourceSet resourceSet) {
 		resourceSet.getPackageRegistry()
 			.put(ePackage.getNsURI(), ePackage);
+	}
+
+	/**
+	 * See {@link EdeltaModelManager#loadEcoreFile(String)}.
+	 * 
+	 * @param ecorePath
+	 * @throws IOException 
+	 */
+	public void loadEcore(String ecorePath) {
+		var resource = modelManager.loadEcoreFile(ecorePath);
+		updatePackageRegistry(resource);
 	}
 
 	/**
