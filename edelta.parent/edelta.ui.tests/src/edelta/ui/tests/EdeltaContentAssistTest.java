@@ -545,6 +545,12 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
 				ecoreref(mainpackage.subpackage.MyClass.myAttribute""");
 	}
 
+	@Test
+	public void testProposalForMigrationToNsUri() throws Exception {
+		newBuilder().append("migrate \"http://my.package.org\" to ")
+			.assertText("\"http://my.package.org\"");
+	}
+
 	private String[] fromLinesOfStringsToStringArray(CharSequence strings) {
 		return EdeltaTestUtils.removeCR(strings.toString()).split("\n");
 	}

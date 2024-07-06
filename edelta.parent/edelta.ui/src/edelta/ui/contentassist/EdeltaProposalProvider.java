@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 
 import edelta.edelta.EdeltaEcoreQualifiedReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
+import edelta.edelta.EdeltaMigration;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaPackage;
 import edelta.resource.derivedstate.EdeltaAccessibleElements;
@@ -206,4 +207,14 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 		return new EdeltaProposalCreator(contentAssistContext, ruleName, getQualifiedNameConverter());
 	}
 
+	/**
+	 * Proposes as 'to' nsURI the same as the original one: it will be invalid,
+	 * but it's a good starting point since it's enough to change the version.
+	 */
+	@Override
+	public void completeEdeltaMigration_To(EObject model, Assignment assignment, ContentAssistContext context,
+			ICompletionProposalAcceptor acceptor) {
+		acceptor.accept(createCompletionProposal(
+			"\"" + "" + ((EdeltaMigration) model).getNsURI().getNsURI() + "\"", context));
+	}
 }
