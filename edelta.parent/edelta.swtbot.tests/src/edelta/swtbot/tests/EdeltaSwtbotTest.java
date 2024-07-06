@@ -258,8 +258,7 @@ public class EdeltaSwtbotTest {
 		});
 	}
 
-	@Test
-	public void canCreateANewProject() throws OperationCanceledException {
+	private void fileNewProject() {
 		bot.waitUntil(new ICondition() {
 			@Override
 			public boolean test() throws Exception {
@@ -267,25 +266,35 @@ public class EdeltaSwtbotTest {
 				bot.menu("File").menu("New").menu("Project...").click();
 				return true;
 			}
-
+	
 			@Override
 			public void init(SWTBot bot) {
 				// nothing to do
 			}
-
+	
 			@Override
 			public String getFailureMessage() {
 				return "Failed File -> New -> Project...";
 			}
 		});
+	}
+
+	@Test
+	public void canCreateANewExampleProject() throws OperationCanceledException {
+		fileNewProject();
 
 		SWTBotShell shell = bot.shell("New Project");
 		shell.activate();
 		SWTBotTreeItem categoryNode = bot.tree().expandNode(CATEGORY_NAME);
 		categoryNode.select("Edelta Project");
+
 		bot.button("Next >").click();
 
 		bot.textWithLabel("Project name:").setText(MY_TEST_PROJECT);
+
+		bot.button("Next >").click();
+
+		bot.table().select("Edelta Example Project");
 
 		bot.button("Finish").click();
 
@@ -304,13 +313,6 @@ public class EdeltaSwtbotTest {
 				getProjectTreeItem(MY_TEST_PROJECT)
 					.expand()
 					.expandNode("edelta-gen", "com.example", "Example.java");
-//				var expectedSrcGenFolderSubDir = "edelta-gen/com/example";
-//				var srcGenFolder = project.getFolder(expectedSrcGenFolderSubDir);
-//				System.out.println("contents of " + srcGenFolder);
-//				System.out.println(Stream.of(srcGenFolder.members())
-//						.map(IResource::getName)
-//						.collect(Collectors.joining("\n")));
-//				var genfile = srcGenFolder.getFile("Example.java");
 				return true;
 			}
 
@@ -324,6 +326,34 @@ public class EdeltaSwtbotTest {
 				return "Example.java does not exist";
 			}
 		});
+	}
+
+	@Test
+	public void canCreateANewEmptyProject() throws OperationCanceledException {
+		fileNewProject();
+
+		SWTBotShell shell = bot.shell("New Project");
+		shell.activate();
+		SWTBotTreeItem categoryNode = bot.tree().expandNode(CATEGORY_NAME);
+		categoryNode.select("Edelta Project");
+
+		bot.button("Next >").click();
+
+		bot.textWithLabel("Project name:").setText(MY_TEST_PROJECT);
+
+		bot.button("Next >").click();
+
+		bot.table().select("Edelta Empty Project");
+
+		bot.button("Finish").click();
+
+		// creation of a project might require some time
+		bot.waitUntil(shellCloses(shell), SWTBotPreferences.TIMEOUT);
+		assertTrue("Project doesn't exist: " + MY_TEST_PROJECT, isProjectCreated(MY_TEST_PROJECT));
+
+		waitingForPluginModel();
+
+		waitingForBuild();
 	}
 
 	@Test

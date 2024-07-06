@@ -20,7 +20,57 @@ import static org.eclipse.core.runtime.IStatus.*
  */
 class EdeltaProjectTemplateProvider implements IProjectTemplateProvider {
 	override getProjectTemplates() {
-		#[new EdeltaExampleProjectTemplate]
+		#[new EdeltaEmptyProjectTemplate, new EdeltaExampleProjectTemplate]
+	}
+}
+
+@ProjectTemplate(
+	label="Edelta Empty Project",
+	icon="project_template.png",
+	description="<p><b>Edelta Empty Project</b></p>
+<p>An Edelta Empty Project, with source folders and minimal dependencies.</p>")
+final class EdeltaEmptyProjectTemplate {
+	val advanced = check("Advanced:", false)
+	val advancedGroup = group("Properties")
+	val path = text("Package:", "com/example", "The package path to place the files in", advancedGroup)
+
+	override protected updateVariables() {
+		path.enabled = advanced.value
+		if (!advanced.value) {
+			path.value = "com/example"
+		}
+	}
+
+	override protected validate() {
+		if (path.value.matches('[a-z][a-z0-9_]*(/[a-z][a-z0-9_]*)*'))
+			null
+		else
+			new Status(ERROR, "Wizard", "'" + path + "' is not a valid package name")
+	}
+
+	override generateProjects(IProjectGenerator generator) {
+		generator.generate(new PluginProjectFactory => [
+			projectName = projectInfo.projectName
+			location = projectInfo.locationPath
+			projectNatures += #[JavaCore.NATURE_ID, "org.eclipse.pde.PluginNature", XtextProjectHelper.NATURE_ID]
+			builderIds += #[JavaCore.BUILDER_ID, XtextProjectHelper.BUILDER_ID]
+			requiredBundles += "edelta.lib"
+			folders += #["src", "edelta-gen", "ecoreversions"]
+			addFile(".settings/org.eclipse.core.resources.prefs", '''
+				eclipse.preferences.version=1
+				encoding/<project>=UTF-8
+			'''
+			)
+			addFile("README", '''
+				Modified ecores will be saved in the directory "modified".
+				Place the versions of Ecore files in "ecoreversions"
+			'''
+			)
+			addFile("modified/.gitignore", '''
+				*
+				!.gitignore
+			''')
+		])
 	}
 }
 
