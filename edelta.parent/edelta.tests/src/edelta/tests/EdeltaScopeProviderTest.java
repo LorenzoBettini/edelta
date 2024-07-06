@@ -492,9 +492,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	public void testScopeForMigrationElement() throws Exception {
 		assertScope(
 			parseWithTestEcore("""
-			migrations {
-				nsURI "http://foo" to "http://foo/v2"
-			}
+			migrate "http://foo" to "http://foo/v2"
 
 			// that's required to have copied EPackages
 			modifyEcore aTest foo {}
@@ -515,9 +513,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	public void testScopeForMigrationElementDifferentNsURI() throws Exception {
 		assertScope(
 			parseWithTestEcoreDifferentNsURI("""
-			migrations {
-				nsURI "http://foo.org/v2" to "http://foo.org/v3"
-			}
+			migrate "http://foo.org/v2" to "http://foo.org/v3"
 
 			// that's required to have copied EPackages
 			modifyEcore aTest foo {}
@@ -538,9 +534,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	public void testScopeForMigrationElementUnresolvedNsURI() throws Exception {
 		assertScope(
 			parseWithTestEcoreDifferentNsURI("""
-			migrations {
-				nsURI "http://nonexistent.org/v2" to "http://foo.org/v3"
-			}
+			migrate "http://nonexistent.org/v2" to "http://foo.org/v3"
 
 			// that's required to have copied EPackages
 			modifyEcore aTest foo {}

@@ -12,7 +12,7 @@ EdeltaProgram:
 	importSection=XImportSection?
 	('package' name=QualifiedName ';'?)?
 	('metamodel' ePackages+=[ecore::EPackage|STRING])*
-	('migrations' '{' migrations+=EdeltaMigration+ '}')*
+	(migrations+=EdeltaMigration)*
 	(useAsClauses+=EdeltaUseAs)*
 	operations+=EdeltaOperation*
 	modifyEcoreOperations+=EdeltaModifyEcoreOperation*
@@ -23,7 +23,7 @@ EdeltaUseAs:
 ;
 
 EdeltaMigration:
-	{EdeltaMigration} 'nsURI' nsURI=[ecore::EPackage|STRING] 'to' to=STRING
+	{EdeltaMigration} 'migrate' nsURI=[ecore::EPackage|STRING] 'to' to=STRING
 ;
 
 EdeltaModifyEcoreOperation:

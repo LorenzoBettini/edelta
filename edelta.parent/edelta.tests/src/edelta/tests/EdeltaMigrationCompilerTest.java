@@ -26,10 +26,8 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		checkCompilation("""
 		package foo;
 
-		migrations {
-			nsURI "http://foo" to "http://foo/v2"
-			nsURI "http://bar" to "http://bar/v2"
-		}
+		migrate "http://foo" to "http://foo/v2"
+		migrate "http://bar" to "http://bar/v2"
 
 		modifyEcore aTest epackage foo {
 			val fooClass = ecoreref(FooClass)
@@ -130,10 +128,8 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		"""
 		package foo;
 
-		migrations {
-			nsURI "http://www.simple" to "http://www.simple/v2"
-			nsURI "http://www.anothersimple" to "http://www.anothersimple/v2"
-		}
+		migrate "http://www.simple" to "http://www.simple/v2"
+		migrate "http://www.anothersimple" to "http://www.anothersimple/v2"
 
 		modifyEcore aTest epackage simple {
 			ecoreref(SimpleClass).name = "RenamedSimpleClass"
@@ -209,10 +205,8 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		"""
 		package foo;
 
-		migrations {
-			nsURI "http://www.simple" to "http://www.simple/v2"
-			nsURI "http://www.anothersimple" to "http://www.anothersimple/v2"
-		}
+		migrate "http://www.simple" to "http://www.simple/v2"
+		migrate "http://www.anothersimple" to "http://www.anothersimple/v2"
 		""");
 		checkCompilation(rs, """
 		package foo;
