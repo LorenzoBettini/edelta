@@ -478,4 +478,44 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
 			"ecoreref(FooClass)".length(),
 			"Invalid use of ecoreref() inside model migration");
 	}
+
+	@Test
+	public void testValidMigration() throws Exception {
+		validationTestHelper.assertNoErrors(
+			parseWithTestEcore("""
+			migrate "http://foo" to "http://bar"
+			"""));
+	}
+
+	@Test
+	public void testInvalidEmptyNsURIInTo() throws Exception {
+		validationTestHelper.assertError(
+			parseWithTestEcore("""
+			migrate "http://foo" to ""
+			"""),
+			EdeltaPackage.Literals.EDELTA_MIGRATION,
+			EdeltaValidator.INVALID_NS_URI,
+			"Invalid blank nsURI");
+	}
+
+	@Test
+	public void testInvalidEqualNsURIInTo() throws Exception {
+		validationTestHelper.assertError(
+			parseWithTestEcore("""
+			migrate "http://foo" to "http://foo"
+			"""),
+			EdeltaPackage.Literals.EDELTA_MIGRATION,
+			EdeltaValidator.INVALID_NS_URI,
+			"The nsURI must be different from the original one");
+	}
+
+	@Test
+	public void testNsURINull() throws Exception {
+		validationTestHelper.assertNoError(
+			parseWithTestEcore("""
+			migrate "http://foo"
+			"""),
+			EdeltaValidator.INVALID_NS_URI,
+			"Invalid blank nsURI");
+	}
 }

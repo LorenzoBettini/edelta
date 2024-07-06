@@ -10,6 +10,7 @@ import static org.eclipse.xtext.xbase.lib.IteratorExtensions.head;
 import static org.eclipse.xtext.xbase.typesystem.util.Multimaps2.newLinkedHashListMultimap;
 
 import java.util.HashSet;
+import java.util.Objects;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.EcoreUtil2;
@@ -29,6 +30,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.inject.Inject;
 
 import edelta.edelta.EdeltaEcoreReferenceExpression;
+import edelta.edelta.EdeltaMigration;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.edelta.EdeltaUseAs;
@@ -79,6 +81,9 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 
 	public static final String INVALID_ECOREREF_USAGE = PREFIX
 			+ "InvalidEcoreRefUsage";
+
+	public static final String INVALID_NS_URI = PREFIX
+			+ "InvalidNsURI";
 
 	@Inject
 	private CommonTypeComputationServices services;
@@ -200,15 +205,30 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 		}
 	}
 
-	public boolean isConformant(EObject context, Class<?> expected, JvmTypeReference actual) {
+	@Check
+	public void checkMigration(EdeltaMigration migration) {
+		var toNsURI = migration.getTo();
+		if (toNsURI != null) {
+			if (toNsURI.isBlank())
+				error("Invalid blank nsURI",
+					EDELTA_MIGRATION__TO,
+					INVALID_NS_URI);
+			else if (Objects.equals(migration.getNsURI().getNsURI(), toNsURI))
+				error("The nsURI must be different from the original one",
+					EDELTA_MIGRATION__TO,
+					INVALID_NS_URI);
+		}
+	}
+
+	private boolean isConformant(EObject context, Class<?> expected, JvmTypeReference actual) {
 		return toLightweightTypeReference(actual, context).isSubtypeOf(expected);
 	}
 
-	public LightweightTypeReference toLightweightTypeReference(JvmTypeReference typeRef, EObject context) {
+	private LightweightTypeReference toLightweightTypeReference(JvmTypeReference typeRef, EObject context) {
 		return newTypeReferenceOwner(context).toLightweightTypeReference(typeRef);
 	}
 
-	protected StandardTypeReferenceOwner newTypeReferenceOwner(EObject context) {
+	private StandardTypeReferenceOwner newTypeReferenceOwner(EObject context) {
 		return new StandardTypeReferenceOwner(services, context);
 	}
 }
