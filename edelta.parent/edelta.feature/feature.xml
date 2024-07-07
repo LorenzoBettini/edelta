@@ -35,4 +35,8 @@
          id="edelta.refactorings.lib"
          version="0.0.0"/>
 
+   <plugin
+         id="edelta.testutils"
+         version="0.0.0"/>
+
 </feature>
