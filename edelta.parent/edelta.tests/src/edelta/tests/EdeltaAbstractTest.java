@@ -156,8 +156,7 @@ public abstract class EdeltaAbstractTest {
 				EdeltaAbstractTest.METAMODEL_PATH + EdeltaAbstractTest.ECORE_ECORE), true);
 		var uri = createFileURIFromPath(path);
 		resourceSet.getResource(uri, true);
-		var prog = parseHelper.parse(input, resourceSet);
-		return prog;
+		return parseHelper.parse(input, resourceSet);
 	}
 
 	protected URI createFileURIFromPath(String path) {
