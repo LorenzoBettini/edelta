@@ -88,19 +88,19 @@ public abstract class EdeltaAbstractTest {
 	@Extension
 	protected Inputs inputs = new Inputs();
 
-	protected static String METAMODEL_PATH = "src/edelta/tests/input/models/";
+	protected static final String METAMODEL_PATH = "src/edelta/tests/input/models/";
 
-	protected static String ECORE_ECORE = "EcoreForTests.ecore";
+	protected static final String ECORE_ECORE = "EcoreForTests.ecore";
 
-	protected static String PERSON_LIST_ECORE = "PersonList.ecore";
+	protected static final String PERSON_LIST_ECORE = "PersonList.ecore";
 
-	protected static String TEST1_REFS_ECORE = "TestEcoreForReferences1.ecore";
+	protected static final String TEST1_REFS_ECORE = "TestEcoreForReferences1.ecore";
 
-	protected static String TEST2_REFS_ECORE = "TestEcoreForReferences2.ecore";
+	protected static final String TEST2_REFS_ECORE = "TestEcoreForReferences2.ecore";
 
-	protected static String SIMPLE_ECORE = "Simple.ecore";
+	protected static final String SIMPLE_ECORE = "Simple.ecore";
 
-	protected static String ANOTHER_SIMPLE_ECORE = "AnotherSimple.ecore";
+	protected static final String ANOTHER_SIMPLE_ECORE = "AnotherSimple.ecore";
 
 	/**
 	 * Parse several input sources using the "foo" EPackage and returns the parsed
