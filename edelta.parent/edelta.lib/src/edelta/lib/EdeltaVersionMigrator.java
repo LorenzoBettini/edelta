@@ -31,8 +31,14 @@ public class EdeltaVersionMigrator {
 
 	private EdeltaModelManager modelManager = new EdeltaModelManager();
 
-	private static record VersionMigrationEntry(Collection<String> uris, EdeltaEngine engine) {
-		
+	private static class VersionMigrationEntry {
+		private Collection<String> uris;
+		private EdeltaEngine engine;
+
+		VersionMigrationEntry(Collection<String> uris, EdeltaEngine engine) {
+			this.uris = uris;
+			this.engine = engine;
+		}
 	}
 
 	private List<VersionMigrationEntry> versionMigrations = new ArrayList<>();
@@ -160,7 +166,14 @@ public class EdeltaVersionMigrator {
 	 * @throws Exception
 	 */
 	public void execute() throws Exception {
-		record MigrationData(Set<EPackage> ecores, Collection<Resource> models) {
+		class MigrationData {
+			private Set<EPackage> ecores;
+			private Collection<Resource> models;
+
+			MigrationData(Set<EPackage> ecores, Collection<Resource> models) {
+				this.ecores = ecores;
+				this.models = models;
+			}
 		}
 
 		var migrationDatas = new HashMap<VersionMigrationEntry, MigrationData>();
