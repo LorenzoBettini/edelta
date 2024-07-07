@@ -118,7 +118,9 @@ public class EdeltaVersionMigrator {
 	}
 
 	/**
-	 * The loaded models are assumed to belong to the same version of ecores.
+	 * Load all models in the given path (possibly recursively in subdirectories),
+	 * using the configured file extensions, by default ".xmi" files (see
+	 * {@link #addModelFileExtension(String)}).
 	 * 
 	 * @param path
 	 * @throws IOException
