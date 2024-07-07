@@ -40,7 +40,7 @@ import edelta.ui.tests.utils.ProjectImportUtil;
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
 public class EdeltaContentAssistTest extends AbstractContentAssistTest {
-	private static String PROJECT_NAME = "edelta.ui.tests.project";
+	private static final String PROJECT_NAME = "edelta.ui.tests.project";
 
 	@Rule
 	public Flaky.Rule testRule = new Flaky.Rule();
@@ -52,8 +52,8 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			javaProject = ProjectImportUtil
 					.importJavaProject(EdeltaContentAssistTest.PROJECT_NAME);
 			IResourcesSetupUtil.waitForBuild();
-		} catch (Throwable _e) {
-			throw Exceptions.sneakyThrow(_e);
+		} catch (Throwable e) {
+			throw Exceptions.sneakyThrow(e);
 		}
 	}
 
@@ -85,8 +85,8 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			IResourcesSetupUtil.waitForBuild();
 			var editor = this.openEditor(createdFile);
 			return editor.getDocument().readOnly(it -> it);
-		} catch (Throwable _e) {
-			throw Exceptions.sneakyThrow(_e);
+		} catch (Throwable e) {
+			throw Exceptions.sneakyThrow(e);
 		}
 	}
 

@@ -23,8 +23,8 @@ import edelta.ui.tests.utils.PluginProjectHelper;
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
 public class EdeltaTwoProjectsWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest {
-	private static String FIRST_PROJECT = "edelta.testprojects.first";
-	private static String SECOND_PROJECT = "edelta.testprojects.second";
+	private static final String FIRST_PROJECT = "edelta.testprojects.first";
+	private static final String SECOND_PROJECT = "edelta.testprojects.second";
 
 	@BeforeClass
 	public static void clean() throws Exception {
