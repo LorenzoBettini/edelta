@@ -30,24 +30,6 @@ class EdeltaProjectTemplateProvider implements IProjectTemplateProvider {
 	description="<p><b>Edelta Empty Project</b></p>
 <p>An Edelta Empty Project, with source folders and minimal dependencies.</p>")
 final class EdeltaEmptyProjectTemplate {
-	val advanced = check("Advanced:", false)
-	val advancedGroup = group("Properties")
-	val path = text("Package:", "com/example", "The package path to place the files in", advancedGroup)
-
-	override protected updateVariables() {
-		path.enabled = advanced.value
-		if (!advanced.value) {
-			path.value = "com/example"
-		}
-	}
-
-	override protected validate() {
-		if (path.value.matches('[a-z][a-z0-9_]*(/[a-z][a-z0-9_]*)*'))
-			null
-		else
-			new Status(ERROR, "Wizard", "'" + path + "' is not a valid package name")
-	}
-
 	override generateProjects(IProjectGenerator generator) {
 		generator.generate(new PluginProjectFactory => [
 			projectName = projectInfo.projectName
