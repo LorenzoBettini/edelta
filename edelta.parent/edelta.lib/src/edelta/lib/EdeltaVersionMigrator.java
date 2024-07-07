@@ -71,8 +71,9 @@ public class EdeltaVersionMigrator {
 	}
 
 	/**
-	 * Ensure that the nsURI is mapped to the loaded {@link EPackage}, so that when
-	 * loading an XMI the referenced Ecore file is found by nsURI.
+	 * Ensure that the nsURI is mapped to the loaded {@link EPackage}, in the
+	 * specified {@link ResourceSet} so that when loading an XMI the referenced
+	 * Ecore file is found by nsURI.
 	 * 
 	 * @param ePackage
 	 * @param resourceSet
@@ -106,11 +107,15 @@ public class EdeltaVersionMigrator {
 	}
 
 	/**
+	 * Loads an {@link EPackage}, assumed to be properly part of a
+	 * {@link ResourceSet}, which represents the current (and latest) version of a
+	 * metamodel.
+	 * 
 	 * See {@link EdeltaModelManager#loadEPackage(EPackage)}.
 	 * 
-	 * @param ePackage 
+	 * @param ePackage
 	 */
-	public void loadEPackage(EPackage ePackage) {
+	public void loadCurrentEPackage(EPackage ePackage) {
 		modelManager.loadEPackage(ePackage);
 		// since the EPackage might be in a different ResourceSet than our modelManager's one
 		// we must ensure the registration is performed in the modelManager's ResourceSet

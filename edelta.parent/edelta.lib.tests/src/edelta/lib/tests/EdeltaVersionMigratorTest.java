@@ -262,7 +262,7 @@ class EdeltaVersionMigratorTest {
 		var modelManager = new EdeltaModelManager();
 		var resource = modelManager.loadEcoreFile(TESTDATA + subdir + METAMODELS + "v2/" + MY_ECORE);
 		var ePackage = EdeltaResourceUtils.getEPackage(resource);
-		versionMigrator.loadEPackage(ePackage);
+		versionMigrator.loadCurrentEPackage(ePackage);
 
 		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
 		versionMigrator.execute();
