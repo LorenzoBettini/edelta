@@ -7,5 +7,5 @@ Bundle-Vendor: Lorenzo Bettini
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: edelta.testutils
 Require-Bundle: org.junit;bundle-version="4.12.0",
- org.apache.commons.commons-io;bundle-version="2.16.1"
+ org.apache.commons.commons-io;bundle-version="2.16.1";visibility:=reexport
 Automatic-Module-Name: edelta.testutils
