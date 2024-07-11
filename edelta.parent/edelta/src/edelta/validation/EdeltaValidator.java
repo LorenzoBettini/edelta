@@ -108,7 +108,7 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 				TYPE_MISMATCH);
 		} else {
 			var type = useAs.getType().getType();
-			if (type instanceof JvmGenericType && ((JvmGenericType) type).isAbstract()) {
+			if (type instanceof JvmGenericType genericType && genericType.isAbstract()) {
 				// otherwise it's a JvmVoid, which means, unresolved
 				// and an error is issued by other validators
 				error("Cannot be an abstract type",
