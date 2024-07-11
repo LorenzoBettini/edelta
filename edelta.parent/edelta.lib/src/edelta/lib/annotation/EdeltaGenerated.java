@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 
 /**
  * By annotating a class or method with this annotation, JaCoCo will not
- * considered the annotated member.
+ * consider the annotated member.
  *
  * @author Lorenzo Bettini
  */
