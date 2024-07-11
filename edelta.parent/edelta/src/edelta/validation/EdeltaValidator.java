@@ -5,11 +5,12 @@ package edelta.validation;
 
 import static com.google.common.collect.Iterables.filter;
 import static edelta.edelta.EdeltaPackage.Literals.*;
-import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashSet;
 import static org.eclipse.xtext.xbase.lib.IteratorExtensions.head;
 import static org.eclipse.xtext.xbase.typesystem.util.Multimaps2.newLinkedHashListMultimap;
 
 import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.EcoreUtil2;
@@ -29,6 +30,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.inject.Inject;
 
 import edelta.edelta.EdeltaEcoreReferenceExpression;
+import edelta.edelta.EdeltaMigration;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.edelta.EdeltaUseAs;
@@ -62,6 +64,8 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 
 	public static final String DUPLICATE_METAMODEL_IMPORT = PREFIX + "DuplicateMetamodelImport";
 
+	public static final String DUPLICATE_EPACKAGE_IN_MIGRATE = PREFIX + "DuplicateEPackageInMigrate";
+
 	public static final String INVALID_SUBPACKAGE_IMPORT = PREFIX + "InvalidSubPackageImport";
 
 	public static final String INVALID_SUBPACKAGE_MODIFICATION = PREFIX
@@ -79,6 +83,9 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 
 	public static final String INVALID_ECOREREF_USAGE = PREFIX
 			+ "InvalidEcoreRefUsage";
+
+	public static final String INVALID_NS_URI = PREFIX
+			+ "InvalidNsURI";
 
 	@Inject
 	private CommonTypeComputationServices services;
@@ -103,7 +110,7 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 				TYPE_MISMATCH);
 		} else {
 			var type = useAs.getType().getType();
-			if (type instanceof JvmGenericType && ((JvmGenericType) type).isAbstract()) {
+			if (type instanceof JvmGenericType genericType && genericType.isAbstract()) {
 				// otherwise it's a JvmVoid, which means, unresolved
 				// and an error is issued by other validators
 				error("Cannot be an abstract type",
@@ -115,32 +122,8 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 
 	@Check
 	public void checkProgram(EdeltaProgram p) {
-		var metamodelIndex = 0;
-		HashSet<String> metamodelImportSet = newHashSet();
-		for (var metamodel : p.getMetamodels()) {
-			var rootPackage = EdeltaModelUtil.findRootSuperPackage(metamodel);
-			if (rootPackage != null) {
-				error("Invalid subpackage import \'" + metamodel.getName() + "\'",
-					p,
-					EDELTA_PROGRAM__METAMODELS,
-					metamodelIndex,
-					INVALID_SUBPACKAGE_IMPORT,
-					rootPackage.getName() // the fix for the import
-				);
-			}
-			var metamodelImport = EdeltaModelUtil.getMetamodelImportText(p, metamodelIndex);
-			if (metamodelImportSet.contains(metamodelImport)) {
-				error("Duplicate metamodel import " + metamodelImport,
-					p,
-					EDELTA_PROGRAM__METAMODELS,
-					metamodelIndex,
-					DUPLICATE_METAMODEL_IMPORT,
-					"" + metamodelIndex // the fix for the import
-				);
-			}
-			metamodelImportSet.add(metamodelImport);
-			metamodelIndex++;
-		}
+		Set<String> metamodelImportSet = checkDuplicateMetamodelImports(p);
+		checkDuplicateMigrationImports(p, metamodelImportSet);
 		var javaClass = head(
 			filter(jvmModelAssociations.getJvmElements(p), JvmGenericType.class).iterator());
 		var methods = overrideHelper.getResolvedFeatures(javaClass)
@@ -177,6 +160,64 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 		}
 	}
 
+	private Set<String> checkDuplicateMetamodelImports(EdeltaProgram p) {
+		var metamodelIndex = 0;
+		Set<String> metamodelImportSet = new HashSet<>();
+		var metamodels = p.getEPackages();
+		for (var metamodel : metamodels) {
+			var rootPackage = EdeltaModelUtil.findRootSuperPackage(metamodel);
+			if (rootPackage != null) {
+				error("Invalid subpackage import \'" + metamodel.getName() + "\'",
+					p,
+					EDELTA_PROGRAM__EPACKAGES,
+					metamodelIndex,
+					INVALID_SUBPACKAGE_IMPORT,
+					rootPackage.getName() // the fix for the import
+				);
+			}
+			var metamodelImport = EdeltaModelUtil.getMetamodelImportText(p, metamodelIndex);
+			if (metamodelImportSet.contains(metamodelImport)) {
+				error("Duplicate metamodel import " + metamodelImport,
+					p,
+					EDELTA_PROGRAM__EPACKAGES,
+					metamodelIndex,
+					DUPLICATE_METAMODEL_IMPORT,
+					"" + metamodelIndex // the fix for the import
+				);
+			}
+			metamodelImportSet.add(metamodelImport);
+			metamodelIndex++;
+		}
+		return metamodelImportSet;
+	}
+
+	private void checkDuplicateMigrationImports(EdeltaProgram p, Set<String> metamodelImportSet) {
+		var migrations = p.getMigrations();
+		Set<String> migrationImports = new HashSet<>();
+		for (var migration : migrations) {
+			var ePackage = migration.getNsURI();
+			if (!ePackage.eIsProxy()) {
+				var ePackageName = ePackage.getName();
+				if (migrationImports.contains(ePackageName)) {
+					error(String.format("Duplicate EPackage import with name '%s'", ePackageName),
+						migration,
+						EDELTA_MIGRATION__NS_URI,
+						DUPLICATE_EPACKAGE_IN_MIGRATE
+					);
+				}
+				migrationImports.add(ePackageName);
+				// metamodelsImportSet also contains " "
+				if (metamodelImportSet.contains(String.format("\"%s\"", ePackageName))) {
+					error(String.format("Duplicate metamodel with name '%s' in 'migrate' and 'metamodel'", ePackageName),
+						migration,
+						EDELTA_MIGRATION__NS_URI,
+						DUPLICATE_EPACKAGE_IN_MIGRATE
+					);
+				}
+			}
+		}
+	}
+
 	@Check
 	public void checkModifyEcore(EdeltaModifyEcoreOperation op) {
 		if (EdeltaModelUtil.findRootSuperPackage(op.getEpackage()) != null) {
@@ -199,15 +240,30 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 		}
 	}
 
-	public boolean isConformant(EObject context, Class<?> expected, JvmTypeReference actual) {
+	@Check
+	public void checkMigration(EdeltaMigration migration) {
+		var toNsURI = migration.getTo();
+		if (toNsURI != null) {
+			if (toNsURI.isBlank())
+				error("Invalid blank nsURI",
+					EDELTA_MIGRATION__TO,
+					INVALID_NS_URI);
+			else if (Objects.equals(migration.getNsURI().getNsURI(), toNsURI))
+				error("The nsURI must be different from the original one",
+					EDELTA_MIGRATION__TO,
+					INVALID_NS_URI);
+		}
+	}
+
+	private boolean isConformant(EObject context, Class<?> expected, JvmTypeReference actual) {
 		return toLightweightTypeReference(actual, context).isSubtypeOf(expected);
 	}
 
-	public LightweightTypeReference toLightweightTypeReference(JvmTypeReference typeRef, EObject context) {
+	private LightweightTypeReference toLightweightTypeReference(JvmTypeReference typeRef, EObject context) {
 		return newTypeReferenceOwner(context).toLightweightTypeReference(typeRef);
 	}
 
-	protected StandardTypeReferenceOwner newTypeReferenceOwner(EObject context) {
+	private StandardTypeReferenceOwner newTypeReferenceOwner(EObject context) {
 		return new StandardTypeReferenceOwner(services, context);
 	}
 }

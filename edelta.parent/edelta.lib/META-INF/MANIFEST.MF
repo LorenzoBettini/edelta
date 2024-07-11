@@ -10,5 +10,6 @@ Require-Bundle: org.eclipse.xtext.xbase.lib;visibility:=reexport,
  org.eclipse.emf.ecore.xmi;visibility:=reexport,
  org.apache.log4j;bundle-version="1.2.24";visibility:=reexport
 Export-Package: edelta.lib,
+ edelta.lib.annotation,
  edelta.lib.exception
 Automatic-Module-Name: edelta.lib

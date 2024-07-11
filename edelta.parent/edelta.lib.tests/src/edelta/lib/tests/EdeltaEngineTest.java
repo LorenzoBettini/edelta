@@ -18,6 +18,7 @@ import org.junit.Test;
 
 import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaEngine;
+import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaModelMigrator;
 import edelta.lib.EdeltaResourceUtils;
 
@@ -41,7 +42,7 @@ public class EdeltaEngineTest {
 	private static final String MY_ROOT = "MyRoot.xmi";
 
 	@BeforeClass
-	static public void clearOutput() throws IOException {
+	public static void clearOutput() throws IOException {
 		cleanDirectoryRecursive(OUTPUT);
 	}
 
@@ -89,6 +90,90 @@ public class EdeltaEngineTest {
 		assertGeneratedFiles(subdir, MY_ROOT);
 	}
 
+	@Test
+	public void testAccessToModelManagers() throws Exception {
+		var engine = new EdeltaEngine(other -> 
+			new EdeltaRuntime(other) {
+				/**
+				 * The implementation doesn't have to make sense:
+				 * it's just to verify that Ecore and models are
+				 * evolved as expected.
+				 */
+				@Override
+				protected void doExecute() {
+					var myClass = getEClass(MYPACKAGE, "MyClass");
+					var myRoot = getEClass(MYPACKAGE, "MyRoot");
+					myClass.setName("Renamed");
+					var firstAttribute =
+						(EAttribute) myClass.getEStructuralFeatures().get(0);
+					modelMigration(migrator -> {
+						turnMyClassAttributeValueToUpperCase(firstAttribute, migrator);
+						createCustomInstanceOfMyRoot(myClass, myRoot, migrator);
+					});
+				}
+			}
+		);
+		var originalModelManager = new EdeltaModelManager();
+		engine.setOriginalModelManager(originalModelManager);
+		var ecoreResource = originalModelManager.loadEcoreFile(
+				TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		var ePackage = EdeltaResourceUtils.getEPackage(ecoreResource);
+		assertNotNull(ePackage);
+		var eClass = ePackage.getEClassifier("MyClass");
+		assertNotNull(eClass);
+		var myClassModel = engine.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_CLASS);
+		assertEquals("MyClass",
+			myClassModel.getContents().get(0).eClass().getName());
+		originalModelManager.loadModelFile(TESTDATA+SIMPLE_TEST_DATA+MY_ROOT);
+		engine.execute();
+		assertNotNull(engine.getEvolvingModelManager());
+		// make sure the original Ecore is not changed
+		assertEquals("MyClass", eClass.getName());
+
+		var subdir = "engineModification/";
+		engine.save(OUTPUT + subdir);
+		assertGeneratedFiles(subdir, MY_ECORE);
+		assertGeneratedFiles(subdir, MY_CLASS);
+		assertGeneratedFiles(subdir, MY_ROOT);
+	}
+
+	/**
+	 * Note that "My.ecore" in this test is different from the other tests: it's loaded
+	 * from the class, i.e., from this project "testecores" subdirectory (actually, it's loaded
+	 * from its version copied into "target" subdirectory.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testLoadFromClassLoader() throws Exception {
+		var engine = new EdeltaEngine(other -> 
+			new EdeltaRuntime(other) {
+				/**
+				 * The implementation doesn't have to make sense:
+				 * it's just to verify that Ecore and models are
+				 * evolved as expected.
+				 */
+				@Override
+				protected void doExecute() {
+					var myClass = getEClass(MYPACKAGE, "MyClass");
+					myClass.setName("Renamed");
+				}
+			}
+		);
+		var ecoreResource = engine.loadEcoreFile(MY_ECORE, this.getClass().getResourceAsStream("/" + MY_ECORE));
+		var ePackage = EdeltaResourceUtils.getEPackage(ecoreResource);
+		assertNotNull(ePackage);
+		var eClass = ePackage.getEClassifier("MyClass");
+		assertNotNull(eClass);
+		engine.execute();
+		// make sure the original Ecore is not changed
+		assertEquals("MyClass", eClass.getName());
+
+		var subdir = "loadedFromClassLoader/";
+		engine.save(OUTPUT + subdir);
+		assertGeneratedFiles(subdir, MY_ECORE);
+	}
+
 	/**
 	 * An Edelta calling a Library
 	 * 
@@ -113,7 +198,7 @@ public class EdeltaEngineTest {
 					turnMyClassAttributeValueToUpperCase(firstAttribute, migrator);
 				});
 			}
-		};
+		}
 		class MyEDelta extends EdeltaRuntime {
 			TestLib testLib;
 
@@ -175,7 +260,7 @@ public class EdeltaEngineTest {
 					turnMyClassAttributeValueToUpperCase(firstAttribute, migrator);
 				});
 			}
-		};
+		}
 		class TestLib2 extends EdeltaRuntime {
 			public TestLib2(EdeltaRuntime other) {
 				super(other);
@@ -191,7 +276,7 @@ public class EdeltaEngineTest {
 					createCustomInstanceOfMyRoot(myClass, myRoot, migrator);
 				});
 			}
-		};
+		}
 		class MyEDelta extends EdeltaRuntime {
 			TestLib1 testLib1;
 			TestLib2 testLib2;
@@ -251,7 +336,7 @@ public class EdeltaEngineTest {
 					turnMyClassAttributeValueToUpperCase(firstAttribute, migrator);
 				});
 			}
-		};
+		}
 		class TestLib2 extends EdeltaRuntime {
 			TestLib1 testLib1;
 
@@ -271,7 +356,7 @@ public class EdeltaEngineTest {
 				});
 				testLib1.testLib1Method();
 			}
-		};
+		}
 		class MyEDelta extends EdeltaRuntime {
 			TestLib2 testLib2;
 

@@ -54,7 +54,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 		);
 		var ref = lastEcoreReferenceExpression(prog).getReference();
 		recorder.recordOriginalENamedElement(ref);
-		var original = getEClassiferByName(lastOrNull(prog.getMetamodels()),
+		var original = getEClassiferByName(lastOrNull(prog.getEPackages()),
 				"FooClass");
 		assertSame(original, derivedStateHelper.getOriginalEnamedelement(ref));
 	}
@@ -73,10 +73,10 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 		var ref = getEdeltaEcoreQualifiedReference(
 			lastEcoreReferenceExpression(prog).getReference());
 		recorder.recordOriginalENamedElement(ref);
-		var original = getEClassiferByName(lastOrNull(prog.getMetamodels()),
+		var original = getEClassiferByName(lastOrNull(prog.getEPackages()),
 				"FooClass");
 		assertSame(original, derivedStateHelper.getOriginalEnamedelement(ref));
-		var originalPackage = lastOrNull(prog.getMetamodels());
+		var originalPackage = lastOrNull(prog.getEPackages());
 		assertSame(originalPackage,
 				derivedStateHelper.getOriginalEnamedelement(ref.getQualification()));
 	}
@@ -116,7 +116,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 		assertNull(derivedStateHelper.getOriginalEnamedelement(ref));
 		// note that the package actually links to the original EPackage
 		// not to the derived EPackage, but that's not a problem
-		var originalPackage = lastOrNull(prog.getMetamodels());
+		var originalPackage = lastOrNull(prog.getEPackages());
 		assertSame(originalPackage,
 			derivedStateHelper.getOriginalEnamedelement(
 					ref.getQualification()));

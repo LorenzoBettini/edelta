@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 
 /**
@@ -62,7 +63,10 @@ public class EdeltaTestUtils {
 	 */
 	public static void cleanDirectoryRecursive(String directory) throws IOException {
 		File dir = new File(directory);
-		for (File file : dir.listFiles()) {
+		var listFiles = dir.listFiles();
+		if (listFiles == null)
+			return;
+		for (File file : listFiles) {
 			if (!file.isDirectory() && !file.getName().equals(".gitignore"))
 				Files.delete(file.toPath());
 			if (file.isDirectory()) {
@@ -130,5 +134,16 @@ public class EdeltaTestUtils {
 		if (!OS_WINDOWS)
 			return s;
 		return s.replace("\r", "");
+	}
+
+	/**
+	 * See {@link FileUtils#copyDirectory(File, File)}
+	 * 
+	 * @param source
+	 * @param dest
+	 * @throws IOException
+	 */
+	public static void copyDirectory(String source, String dest) throws IOException {
+		FileUtils.copyDirectory(new File(source), new File(dest));
 	}
 }

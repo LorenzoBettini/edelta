@@ -88,19 +88,19 @@ public abstract class EdeltaAbstractTest {
 	@Extension
 	protected Inputs inputs = new Inputs();
 
-	protected static String METAMODEL_PATH = "src/edelta/tests/input/models/";
+	protected static final String METAMODEL_PATH = "src/edelta/tests/input/models/";
 
-	protected static String ECORE_ECORE = "EcoreForTests.ecore";
+	protected static final String ECORE_ECORE = "EcoreForTests.ecore";
 
-	protected static String PERSON_LIST_ECORE = "PersonList.ecore";
+	protected static final String PERSON_LIST_ECORE = "PersonList.ecore";
 
-	protected static String TEST1_REFS_ECORE = "TestEcoreForReferences1.ecore";
+	protected static final String TEST1_REFS_ECORE = "TestEcoreForReferences1.ecore";
 
-	protected static String TEST2_REFS_ECORE = "TestEcoreForReferences2.ecore";
+	protected static final String TEST2_REFS_ECORE = "TestEcoreForReferences2.ecore";
 
-	protected static String SIMPLE_ECORE = "Simple.ecore";
+	protected static final String SIMPLE_ECORE = "Simple.ecore";
 
-	protected static String ANOTHER_SIMPLE_ECORE = "AnotherSimple.ecore";
+	protected static final String ANOTHER_SIMPLE_ECORE = "AnotherSimple.ecore";
 
 	/**
 	 * Parse several input sources using the "foo" EPackage and returns the parsed
@@ -132,6 +132,10 @@ public abstract class EdeltaAbstractTest {
 		return parseHelper.parse(input, resourceSetWithTestEcore());
 	}
 
+	protected EdeltaProgram parseWithTestEcoreDifferentNsURI(CharSequence input) throws Exception {
+		return parseHelper.parse(input, resourceSetWithTestEcoreDifferentNsURI());
+	}
+
 	protected EdeltaProgram parseWithTestEcores(CharSequence input) throws Exception {
 		return parseHelper.parse(input, resourceSetWithTestEcores());
 	}
@@ -152,8 +156,7 @@ public abstract class EdeltaAbstractTest {
 				EdeltaAbstractTest.METAMODEL_PATH + EdeltaAbstractTest.ECORE_ECORE), true);
 		var uri = createFileURIFromPath(path);
 		resourceSet.getResource(uri, true);
-		var prog = parseHelper.parse(input, resourceSet);
-		return prog;
+		return parseHelper.parse(input, resourceSet);
 	}
 
 	protected URI createFileURIFromPath(String path) {
@@ -162,6 +165,10 @@ public abstract class EdeltaAbstractTest {
 
 	protected ResourceSet resourceSetWithTestEcore() {
 		return addEPackageForTests(resourceSetProvider.get());
+	}
+
+	protected ResourceSet resourceSetWithTestEcoreDifferentNsURI() {
+		return addEPackageForTestsDifferentNsURI(resourceSetProvider.get());
 	}
 
 	protected ResourceSet resourceSetWithTestEcoreWithSubPackage() {
@@ -183,6 +190,10 @@ public abstract class EdeltaAbstractTest {
 
 	protected ResourceSet addEPackageForTests(ResourceSet resourceSet) {
 		return createTestResource(resourceSet, "foo", EPackageForTests());
+	}
+
+	protected ResourceSet addEPackageForTestsDifferentNsURI(ResourceSet resourceSet) {
+		return createTestResource(resourceSet, "foo", EPackageForTestsDifferentNsURI());
 	}
 
 	protected ResourceSet addEPackageWithSubPackageForTests(ResourceSet resourceSet) {
@@ -239,6 +250,20 @@ public abstract class EdeltaAbstractTest {
 				createEOperation(c, "myOp");
 			});
 			stdLib.addNewEDataType(p, "FooDataType", null);
+			stdLib.addNewEEnum(p, "FooEnum", e -> {
+				stdLib.addNewEEnumLiteral(e, "FooEnumLiteral");
+			});
+		});
+	}
+
+	protected EPackage EPackageForTestsDifferentNsURI() {
+		return createEPackage("foo", "foo", "http://foo.org/v2", p -> {
+			stdLib.addNewEClass(p, "RenamedFooClass", c -> {
+				stdLib.addNewEAttribute(c, "myAttribute", null);
+				stdLib.addNewEReference(c, "myReference", null);
+				createEOperation(c, "myOp");
+			});
+			stdLib.addNewEDataType(p, "RenamedFooDataType", null);
 			stdLib.addNewEEnum(p, "FooEnum", e -> {
 				stdLib.addNewEEnumLiteral(e, "FooEnumLiteral");
 			});
@@ -503,11 +528,12 @@ public abstract class EdeltaAbstractTest {
 
 	protected CharSequence inputInsideModifyEcoreWithTestMetamodelFoo(CharSequence body) {
 		return String.format(
-			"metamodel \"foo\"\n"
-			+ "\n"
-			+ "modifyEcore aTest epackage foo {\n"
-			+ "  %s\n"
-			+ "}", body);
+			"""
+				metamodel "foo"
+				
+				modifyEcore aTest epackage foo {
+				  %s
+				}""", body);
 	}
 
 	protected EdeltaEcoreReferenceExpression lastEcoreReferenceExpression(EdeltaProgram p) {

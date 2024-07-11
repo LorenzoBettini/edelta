@@ -1,12 +1,13 @@
 package edelta.util;
 
-import static edelta.edelta.EdeltaPackage.Literals.EDELTA_PROGRAM__METAMODELS;
+import static edelta.edelta.EdeltaPackage.Literals.*;
 import static org.eclipse.xtext.EcoreUtil2.getContainerOfType;
 import static org.eclipse.xtext.nodemodel.util.NodeModelUtils.*;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
@@ -17,6 +18,7 @@ import org.eclipse.xtext.xbase.XExpression;
 
 import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
+import edelta.edelta.EdeltaMigration;
 import edelta.edelta.EdeltaProgram;
 
 /**
@@ -33,6 +35,18 @@ public class EdeltaModelUtil {
 		return getContainerOfType(context, EdeltaProgram.class);
 	}
 
+	public static List<EPackage> getMetamodels(final EObject context) {
+		return getMetamodels(getProgram(context));
+	}
+
+	public static List<EPackage> getMetamodels(EdeltaProgram p) {
+		return Stream.concat(
+					p.getEPackages().stream(),
+					p.getMigrations().stream()
+						.map(EdeltaMigration::getNsURI))
+				.toList();
+	}
+
 	public static String getEcoreReferenceText(EdeltaEcoreReference ref) {
 		return getTokenText(findActualNodeFor(ref));
 	}
@@ -43,7 +57,7 @@ public class EdeltaModelUtil {
 	}
 
 	public static List<INode> getMetamodelImportNodes(EdeltaProgram p) {
-		return findNodesForFeature(p, EDELTA_PROGRAM__METAMODELS);
+		return findNodesForFeature(p, EDELTA_PROGRAM__EPACKAGES);
 	}
 
 	public static boolean hasCycleInSuperPackage(EPackage ePackage) {

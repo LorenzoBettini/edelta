@@ -39,7 +39,7 @@ public class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
 		var target = navigationTargetHelper
 				.getTarget(getFirstOfAllEcoreReferenceExpressions(prog).getReference());
 		var original = getEClassiferByName(
-				prog.getMetamodels().get(0), "FooClass");
+				prog.getEPackages().get(0), "FooClass");
 		assertThat(target)
 			.isNotNull().isSameAs(original);
 	}

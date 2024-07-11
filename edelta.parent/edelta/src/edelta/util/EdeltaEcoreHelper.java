@@ -104,7 +104,7 @@ public class EdeltaEcoreHelper {
 		final var copied = derivedStateHelper.getCopiedEPackagesMap(prog.eResource())
 				.values();
 		// copied EPackage are present only when there's at least one modifyEcore
-		return copied.isEmpty() ? prog.getMetamodels() : copied;
+		return copied.isEmpty() ? EdeltaModelUtil.getMetamodels(prog) : copied;
 	}
 
 	private Stream<ENamedElement> getAllENamedElements(final EPackage e) {

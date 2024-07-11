@@ -8,8 +8,14 @@ import static edelta.testutils.EdeltaTestUtils.cleanDirectoryAndFirstSubdirector
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.emf.ecore.EClass;
@@ -23,6 +29,7 @@ import org.junit.Test;
 
 import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaUtils;
+import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
 /**
  * Tests for the {@link EdeltaModelManager}.
@@ -201,5 +208,62 @@ public class EdeltaModelManagerTest {
 
 		assertThat(map.values())
 			.containsAnyElementsOf(copiedContents);
+	}
+
+	@Test
+	public void testRegisterNsURI() throws IOException, EdeltaPackageNotLoadedException {
+		var ecoreSubdir = TESTDATA+"version-migration/rename/metamodels";
+		try (var stream = Files.walk(Paths.get(ecoreSubdir))) {
+			stream
+				.filter(file -> !Files.isDirectory(file))
+				.filter(file -> file.toString().endsWith(".ecore"))
+				.forEach(file -> modelManager.loadEcoreFile(file.toString()));
+		}
+		var thrown = assertThrows(EdeltaPackageNotLoadedException.class,
+			() -> modelManager.registerEPackageByNsURI("PersonList", "foo"));
+		assertEquals("EPackage with name 'PersonList' and nsURI 'foo' not loaded.", thrown.getMessage());
+		modelManager.registerEPackageByNsURI("PersonList", "http://cs.gssi.it/PersonMM/v2");
+		var registered = modelManager.getEPackage("PersonList");
+		assertEquals("http://cs.gssi.it/PersonMM/v2", registered.getNsURI());
+		modelManager.registerEPackageByNsURI("mypackage", "http://my.package.org/v2");
+		registered = modelManager.getEPackage("mypackage");
+		assertEquals("http://my.package.org/v2", registered.getNsURI());
+		modelManager.registerEPackageByNsURI("mypackage", "http://my.package.org");
+		registered = modelManager.getEPackage("mypackage");
+		assertEquals("http://my.package.org", registered.getNsURI());
+	}
+
+	@Test
+	public void testLoadFromInputStream() throws IOException, EdeltaPackageNotLoadedException {
+		var ecoreFile = TESTDATA+"version-migration/rename/metamodels/v1/PersonList.ecore";
+		InputStream inputStream = new FileInputStream(ecoreFile);
+		modelManager.loadEcoreFile("PersonList file", inputStream);
+		modelManager.registerEPackageByNsURI("PersonList", "http://cs.gssi.it/PersonMM/v1");
+		var registered = modelManager.getEPackage("PersonList");
+		assertEquals("http://cs.gssi.it/PersonMM/v1", registered.getNsURI());
+	}
+
+	@Test
+	public void testLoadFromClassLoader() throws IOException, EdeltaPackageNotLoadedException {
+		InputStream inputStream = this.getClass().getResourceAsStream("/subfolder/AnEcore.ecore");
+		modelManager.loadEcoreFile("An Ecore", inputStream);
+		modelManager.registerEPackageByNsURI("apackage", "http://my.apackage.org");
+		var registered = modelManager.getEPackage("apackage");
+		assertEquals("http://my.apackage.org", registered.getNsURI());
+	}
+
+	@Test
+	public void testLoadEPackage() {
+		modelManager.loadEcoreFile(TESTDATA+SIMPLE_TEST_DATA+MY_ECORE);
+		var ePackage = modelManager.getEPackage(MYPACKAGE);
+		assertNotNull(ePackage);
+		var anotherModelManager = new EdeltaModelManager();
+		anotherModelManager.loadEPackage(ePackage);
+		// the EPackage is still present in the original model manager
+		ePackage = modelManager.getEPackage(MYPACKAGE);
+		assertNotNull(ePackage);
+		// and in the other model manager
+		ePackage = anotherModelManager.getEPackage(MYPACKAGE);
+		assertNotNull(ePackage);
 	}
 }

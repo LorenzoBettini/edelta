@@ -401,6 +401,13 @@ public class EdeltaTest {
 		});
 	}
 
+	@Test
+	public void testDefaultImplementationsOfGetterMethods() {
+		edelta = new TestableEdelta((EdeltaModelManager)null);
+		assertTrue(edelta.getMigratedNsURIs().isEmpty());
+		assertTrue(edelta.getMigratedEcorePaths().isEmpty());
+	}
+
 	private Resource loadTestEcore(String ecoreFile) {
 		return modelManager.loadEcoreFile(TESTECORES+ecoreFile);
 	}

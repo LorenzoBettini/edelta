@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 
 import edelta.edelta.EdeltaEcoreQualifiedReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
+import edelta.edelta.EdeltaMigration;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaPackage;
 import edelta.resource.derivedstate.EdeltaAccessibleElements;
@@ -73,24 +74,21 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 			final var completionProposal = super.apply(candidate);
 			if (completionProposal == null)
 				return completionProposal;
-			if (candidate instanceof EdeltaContentAssistEObjectDescription) {
-				EdeltaContentAssistEObjectDescription desc = (EdeltaContentAssistEObjectDescription) candidate;
-				if (desc.isAmbiguous()) {
-					final var configurableProposal = (ConfigurableCompletionProposal) completionProposal;
-					final var originalReplacement = configurableProposal.getReplacementString();
-					final var qualifiedReplacement = desc.getQualifiedName().toString();
-					configurableProposal.setReplacementString(qualifiedReplacement);
-					// the cursor position after applying the proposal must be updated as well
-					// to the length of the new replacement string
-					configurableProposal.setCursorPosition(qualifiedReplacement.length());
-					final var originalMatcher = configurableProposal.getMatcher();
-					// the prefix matcher must be updated so that it takes into
-					// consideration the original replacement string, i.e., the one
-					// not fully qualified, otherwise the filtering won't work after
-					// the proposals have been shown and the user keeps on typing.
-					configurableProposal.setMatcher(
-						new EdeltaOverriddenPrefixMatcher(originalMatcher, originalReplacement));
-				}
+			if (candidate instanceof EdeltaContentAssistEObjectDescription desc && desc.isAmbiguous()) {
+				final var configurableProposal = (ConfigurableCompletionProposal) completionProposal;
+				final var originalReplacement = configurableProposal.getReplacementString();
+				final var qualifiedReplacement = desc.getQualifiedName().toString();
+				configurableProposal.setReplacementString(qualifiedReplacement);
+				// the cursor position after applying the proposal must be updated as well
+				// to the length of the new replacement string
+				configurableProposal.setCursorPosition(qualifiedReplacement.length());
+				final var originalMatcher = configurableProposal.getMatcher();
+				// the prefix matcher must be updated so that it takes into
+				// consideration the original replacement string, i.e., the one
+				// not fully qualified, otherwise the filtering won't work after
+				// the proposals have been shown and the user keeps on typing.
+				configurableProposal.setMatcher(
+					new EdeltaOverriddenPrefixMatcher(originalMatcher, originalReplacement));
 			}
 			return completionProposal;
 		}
@@ -101,7 +99,7 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 	 * to be directly imported.
 	 */
 	@Override
-	public void completeEdeltaProgram_Metamodels(EObject model, Assignment assignment, ContentAssistContext context,
+	public void completeEdeltaProgram_EPackages(EObject model, Assignment assignment, ContentAssistContext context,
 			ICompletionProposalAcceptor acceptor) {
 		lookupCrossReference(
 			((CrossReference) assignment.getTerminal()),
@@ -129,7 +127,7 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 			accessibleElements = 
 				cache.get("getOriginalMetamodelsAccessibleElements", model.eResource(),
 					() -> ecoreHelper.fromEPackagesToAccessibleElements(
-						EdeltaModelUtil.getProgram(model).getMetamodels()));
+						EdeltaModelUtil.getMetamodels(model)));
 		} else {
 			accessibleElements = getAccessibleElements(model);
 		}
@@ -206,4 +204,14 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 		return new EdeltaProposalCreator(contentAssistContext, ruleName, getQualifiedNameConverter());
 	}
 
+	/**
+	 * Proposes as 'to' nsURI the same as the original one: it will be invalid,
+	 * but it's a good starting point since it's enough to change the version.
+	 */
+	@Override
+	public void completeEdeltaMigration_To(EObject model, Assignment assignment, ContentAssistContext context,
+			ICompletionProposalAcceptor acceptor) {
+		acceptor.accept(createCompletionProposal(
+			"\"" + "" + ((EdeltaMigration) model).getNsURI().getNsURI() + "\"", context));
+	}
 }
