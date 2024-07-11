@@ -5,12 +5,12 @@ package edelta.validation;
 
 import static com.google.common.collect.Iterables.filter;
 import static edelta.edelta.EdeltaPackage.Literals.*;
-import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashSet;
 import static org.eclipse.xtext.xbase.lib.IteratorExtensions.head;
 import static org.eclipse.xtext.xbase.typesystem.util.Multimaps2.newLinkedHashListMultimap;
 
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.EcoreUtil2;
@@ -63,6 +63,8 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 	public static final String DUPLICATE_DECLARATION = PREFIX + "DuplicateDeclaration";
 
 	public static final String DUPLICATE_METAMODEL_IMPORT = PREFIX + "DuplicateMetamodelImport";
+
+	public static final String DUPLICATE_EPACKAGE_IN_MIGRATE = PREFIX + "DuplicateEPackageInMigrate";
 
 	public static final String INVALID_SUBPACKAGE_IMPORT = PREFIX + "InvalidSubPackageImport";
 
@@ -121,7 +123,7 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 	@Check
 	public void checkProgram(EdeltaProgram p) {
 		var metamodelIndex = 0;
-		HashSet<String> metamodelImportSet = newHashSet();
+		Set<String> metamodelImportSet = new HashSet<>();
 		var metamodels = p.getEPackages();
 		for (var metamodel : metamodels) {
 			var rootPackage = EdeltaModelUtil.findRootSuperPackage(metamodel);
@@ -146,6 +148,22 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 			}
 			metamodelImportSet.add(metamodelImport);
 			metamodelIndex++;
+		}
+		var migrations = p.getMigrations();
+		Set<String> migrationImports = new HashSet<>();
+		for (var migration : migrations) {
+			var ePackage = migration.getNsURI();
+			if (!ePackage.eIsProxy()) {
+				var ePackageName = ePackage.getName();
+				if (migrationImports.contains(ePackageName)) {
+					error(String.format("Duplicate EPackage import with name '%s'", ePackageName),
+						migration,
+						EDELTA_MIGRATION__NS_URI,
+						DUPLICATE_EPACKAGE_IN_MIGRATE
+					);
+				}
+				migrationImports.add(ePackageName);
+			}
 		}
 		var javaClass = head(
 			filter(jvmModelAssociations.getJvmElements(p), JvmGenericType.class).iterator());

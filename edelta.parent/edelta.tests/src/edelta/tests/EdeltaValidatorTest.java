@@ -518,4 +518,22 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
 			EdeltaValidator.INVALID_NS_URI,
 			"Invalid blank nsURI");
 	}
+
+	@Test
+	public void testEpackagesWithTheSameNameAndDifferentEcores() throws Exception {
+		var rs = resourceSetWithTestEcore();
+		createTestResource(rs, "foo2", EPackageForTestsDifferentNsURI());
+		var text = """
+		migrate "http://foo" to "http://foo2"
+		migrate "" to ""
+		migrate "http://foo.org/v2" to "http://foo.org/v3"
+		""";
+		var program = parseHelper.parse(text, rs);
+		validationTestHelper.assertError(
+			program,
+			EdeltaPackage.Literals.EDELTA_MIGRATION,
+			EdeltaValidator.DUPLICATE_EPACKAGE_IN_MIGRATE,
+			text.indexOf("\"http://foo.org/v2\""), "\"http://foo.org/v2\"".length(),
+			"Duplicate EPackage import with name 'foo'");
+	}
 }
