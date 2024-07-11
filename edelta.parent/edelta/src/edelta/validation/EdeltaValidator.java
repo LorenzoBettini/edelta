@@ -122,57 +122,8 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 
 	@Check
 	public void checkProgram(EdeltaProgram p) {
-		var metamodelIndex = 0;
-		Set<String> metamodelImportSet = new HashSet<>();
-		var metamodels = p.getEPackages();
-		for (var metamodel : metamodels) {
-			var rootPackage = EdeltaModelUtil.findRootSuperPackage(metamodel);
-			if (rootPackage != null) {
-				error("Invalid subpackage import \'" + metamodel.getName() + "\'",
-					p,
-					EDELTA_PROGRAM__EPACKAGES,
-					metamodelIndex,
-					INVALID_SUBPACKAGE_IMPORT,
-					rootPackage.getName() // the fix for the import
-				);
-			}
-			var metamodelImport = EdeltaModelUtil.getMetamodelImportText(p, metamodelIndex);
-			if (metamodelImportSet.contains(metamodelImport)) {
-				error("Duplicate metamodel import " + metamodelImport,
-					p,
-					EDELTA_PROGRAM__EPACKAGES,
-					metamodelIndex,
-					DUPLICATE_METAMODEL_IMPORT,
-					"" + metamodelIndex // the fix for the import
-				);
-			}
-			metamodelImportSet.add(metamodelImport);
-			metamodelIndex++;
-		}
-		var migrations = p.getMigrations();
-		Set<String> migrationImports = new HashSet<>();
-		for (var migration : migrations) {
-			var ePackage = migration.getNsURI();
-			if (!ePackage.eIsProxy()) {
-				var ePackageName = ePackage.getName();
-				if (migrationImports.contains(ePackageName)) {
-					error(String.format("Duplicate EPackage import with name '%s'", ePackageName),
-						migration,
-						EDELTA_MIGRATION__NS_URI,
-						DUPLICATE_EPACKAGE_IN_MIGRATE
-					);
-				}
-				migrationImports.add(ePackageName);
-				// metamodelsImportSet also contains " "
-				if (metamodelImportSet.contains(String.format("\"%s\"", ePackageName))) {
-					error(String.format("Duplicate metamodel with name '%s' in 'migrate' and 'metamodel'", ePackageName),
-						migration,
-						EDELTA_MIGRATION__NS_URI,
-						DUPLICATE_EPACKAGE_IN_MIGRATE
-					);
-				}
-			}
-		}
+		Set<String> metamodelImportSet = checkDuplicateMetamodelImports(p);
+		checkDuplicateMigrationImports(p, metamodelImportSet);
 		var javaClass = head(
 			filter(jvmModelAssociations.getJvmElements(p), JvmGenericType.class).iterator());
 		var methods = overrideHelper.getResolvedFeatures(javaClass)
@@ -205,6 +156,64 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 					ecoreRef,
 					EDELTA_ECORE_REFERENCE__ENAMEDELEMENT,
 					INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT);
+			}
+		}
+	}
+
+	private Set<String> checkDuplicateMetamodelImports(EdeltaProgram p) {
+		var metamodelIndex = 0;
+		Set<String> metamodelImportSet = new HashSet<>();
+		var metamodels = p.getEPackages();
+		for (var metamodel : metamodels) {
+			var rootPackage = EdeltaModelUtil.findRootSuperPackage(metamodel);
+			if (rootPackage != null) {
+				error("Invalid subpackage import \'" + metamodel.getName() + "\'",
+					p,
+					EDELTA_PROGRAM__EPACKAGES,
+					metamodelIndex,
+					INVALID_SUBPACKAGE_IMPORT,
+					rootPackage.getName() // the fix for the import
+				);
+			}
+			var metamodelImport = EdeltaModelUtil.getMetamodelImportText(p, metamodelIndex);
+			if (metamodelImportSet.contains(metamodelImport)) {
+				error("Duplicate metamodel import " + metamodelImport,
+					p,
+					EDELTA_PROGRAM__EPACKAGES,
+					metamodelIndex,
+					DUPLICATE_METAMODEL_IMPORT,
+					"" + metamodelIndex // the fix for the import
+				);
+			}
+			metamodelImportSet.add(metamodelImport);
+			metamodelIndex++;
+		}
+		return metamodelImportSet;
+	}
+
+	private void checkDuplicateMigrationImports(EdeltaProgram p, Set<String> metamodelImportSet) {
+		var migrations = p.getMigrations();
+		Set<String> migrationImports = new HashSet<>();
+		for (var migration : migrations) {
+			var ePackage = migration.getNsURI();
+			if (!ePackage.eIsProxy()) {
+				var ePackageName = ePackage.getName();
+				if (migrationImports.contains(ePackageName)) {
+					error(String.format("Duplicate EPackage import with name '%s'", ePackageName),
+						migration,
+						EDELTA_MIGRATION__NS_URI,
+						DUPLICATE_EPACKAGE_IN_MIGRATE
+					);
+				}
+				migrationImports.add(ePackageName);
+				// metamodelsImportSet also contains " "
+				if (metamodelImportSet.contains(String.format("\"%s\"", ePackageName))) {
+					error(String.format("Duplicate metamodel with name '%s' in 'migrate' and 'metamodel'", ePackageName),
+						migration,
+						EDELTA_MIGRATION__NS_URI,
+						DUPLICATE_EPACKAGE_IN_MIGRATE
+					);
+				}
 			}
 		}
 	}
