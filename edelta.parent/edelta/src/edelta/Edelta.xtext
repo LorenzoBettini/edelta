@@ -11,7 +11,8 @@ EdeltaProgram:
 	{EdeltaProgram}
 	importSection=XImportSection?
 	('package' name=QualifiedName ';'?)?
-	('metamodel' metamodels+=[ecore::EPackage|STRING])*
+	('metamodel' ePackages+=[ecore::EPackage|STRING])*
+	(migrations+=EdeltaMigration)*
 	(useAsClauses+=EdeltaUseAs)*
 	operations+=EdeltaOperation*
 	modifyEcoreOperations+=EdeltaModifyEcoreOperation*
@@ -19,6 +20,10 @@ EdeltaProgram:
 
 EdeltaUseAs:
 	{EdeltaUseAs} 'use' type=JvmTypeReference 'as' extension?='extension'? name=ValidID
+;
+
+EdeltaMigration:
+	{EdeltaMigration} 'migrate' nsURI=[ecore::EPackage|STRING] 'to' to=STRING
 ;
 
 EdeltaModifyEcoreOperation:

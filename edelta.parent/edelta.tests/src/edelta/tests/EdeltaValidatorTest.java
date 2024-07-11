@@ -478,4 +478,80 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
 			"ecoreref(FooClass)".length(),
 			"Invalid use of ecoreref() inside model migration");
 	}
+
+	@Test
+	public void testValidMigration() throws Exception {
+		validationTestHelper.assertNoErrors(
+			parseWithTestEcore("""
+			migrate "http://foo" to "http://bar"
+			"""));
+	}
+
+	@Test
+	public void testInvalidEmptyNsURIInTo() throws Exception {
+		validationTestHelper.assertError(
+			parseWithTestEcore("""
+			migrate "http://foo" to ""
+			"""),
+			EdeltaPackage.Literals.EDELTA_MIGRATION,
+			EdeltaValidator.INVALID_NS_URI,
+			"Invalid blank nsURI");
+	}
+
+	@Test
+	public void testInvalidEqualNsURIInTo() throws Exception {
+		validationTestHelper.assertError(
+			parseWithTestEcore("""
+			migrate "http://foo" to "http://foo"
+			"""),
+			EdeltaPackage.Literals.EDELTA_MIGRATION,
+			EdeltaValidator.INVALID_NS_URI,
+			"The nsURI must be different from the original one");
+	}
+
+	@Test
+	public void testNsURINull() throws Exception {
+		validationTestHelper.assertNoError(
+			parseWithTestEcore("""
+			migrate "http://foo"
+			"""),
+			EdeltaValidator.INVALID_NS_URI,
+			"Invalid blank nsURI");
+	}
+
+	@Test
+	public void testEpackagesWithTheSameNameAndDifferentNsURI() throws Exception {
+		var rs = resourceSetWithTestEcore();
+		createTestResource(rs, "foo2", EPackageForTestsDifferentNsURI());
+		var text = """
+		migrate "http://foo" to "http://foo2"
+		migrate "" to ""
+		migrate "http://foo.org/v2" to "http://foo.org/v3"
+		""";
+		var program = parseHelper.parse(text, rs);
+		var nsURI = "\"http://foo.org/v2\"";
+		validationTestHelper.assertError(
+			program,
+			EdeltaPackage.Literals.EDELTA_MIGRATION,
+			EdeltaValidator.DUPLICATE_EPACKAGE_IN_MIGRATE,
+			text.indexOf(nsURI), nsURI.length(),
+			"Duplicate EPackage import with name 'foo'");
+	}
+
+	@Test
+	public void testSameEpackagesInMigrateAndMetamodel() throws Exception {
+		var rs = resourceSetWithTestEcore();
+		var text = """
+		metamodel "foo"
+		migrate "http://foo" to "http://foo2"
+		""";
+		var program = parseHelper.parse(text, rs);
+		var nsURI = "\"http://foo\"";
+		validationTestHelper.assertError(
+				program,
+				EdeltaPackage.Literals.EDELTA_MIGRATION,
+				EdeltaValidator.DUPLICATE_EPACKAGE_IN_MIGRATE,
+				text.indexOf(nsURI), nsURI.length(),
+				"Duplicate metamodel with name 'foo' in 'migrate' and 'metamodel'");
+	}
 }

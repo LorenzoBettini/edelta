@@ -1,0 +1,4 @@
+The Ecores are not loaded from this directory: they are loaded through classpath in EdeltaVersionMigratorTest.
+The Ecores are duplicated here only to easily open the XMI files and possibly create new ones as dynamic instances.
+
+Unfortunately, such Ecores must be kept in sync in this project and in edelta.lib.tests.

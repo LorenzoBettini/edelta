@@ -22,6 +22,7 @@ import com.google.inject.name.Named;
 import edelta.edelta.EdeltaEcoreReference;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
+import edelta.util.EdeltaModelUtil;
 
 /**
  * Provides access (and possibly install) to the {@link EdeltaDerivedState}.
@@ -79,7 +80,7 @@ public class EdeltaDerivedStateHelper {
 	 * @param resource
 	 */
 	public void copyEPackages(EdeltaProgram program, final Resource resource) {
-		final var packages = program.getMetamodels().stream()
+		final var packages = EdeltaModelUtil.getMetamodels(program).stream()
 			.distinct()
 			.toList();
 		final var copiedEPackagesMap = getCopiedEPackagesMap(resource);

@@ -23,8 +23,8 @@ import edelta.ui.tests.utils.PluginProjectHelper;
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
 public class EdeltaTwoProjectsWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest {
-	private static String FIRST_PROJECT = "edelta.testprojects.first";
-	private static String SECOND_PROJECT = "edelta.testprojects.second";
+	private static final String FIRST_PROJECT = "edelta.testprojects.first";
+	private static final String SECOND_PROJECT = "edelta.testprojects.second";
 
 	@BeforeClass
 	public static void clean() throws Exception {
@@ -38,6 +38,8 @@ public class EdeltaTwoProjectsWorkbenchIntegrationTest extends CustomAbstractWor
 		var project2 = importProject(EdeltaTwoProjectsWorkbenchIntegrationTest.SECOND_PROJECT);
 		cleanup(project1);
 		cleanup(project2);
+		// build twice to avoid possible flakyness
+		waitForBuild();
 		waitForBuild();
 		PluginProjectHelper.assertNoErrors();
 		assertSrcGenFolderFile(project1, "com/example1", "Example1.java");

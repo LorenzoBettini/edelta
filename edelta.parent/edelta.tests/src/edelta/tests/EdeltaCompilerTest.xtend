@@ -1,23 +1,18 @@
 package edelta.tests
 
-import com.google.common.base.Joiner
 import com.google.inject.Inject
 import edelta.lib.EdeltaDefaultRuntime
 import edelta.lib.EdeltaIssuePresenter
 import edelta.lib.EdeltaModelManager
+import edelta.lib.EdeltaRuntime
 import edelta.tests.injectors.EdeltaInjectorProviderTestableDerivedStateComputer
-import edelta.testutils.EdeltaTestUtils
 import java.util.List
 import java.util.function.Consumer
 import org.eclipse.emf.ecore.ENamedElement
-import org.eclipse.emf.ecore.resource.ResourceSet
-import org.eclipse.xtext.diagnostics.Severity
-import org.eclipse.xtext.resource.FileExtensionProvider
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.util.JavaVersion
 import org.eclipse.xtext.xbase.testing.CompilationTestHelper
-import org.eclipse.xtext.xbase.testing.CompilationTestHelper.Result
 import org.eclipse.xtext.xbase.testing.TemporaryFolder
 import org.junit.Before
 import org.junit.Rule
@@ -27,16 +22,12 @@ import org.junit.runner.RunWith
 import static edelta.testutils.EdeltaTestUtils.*
 import static org.assertj.core.api.Assertions.*
 
-import static extension org.junit.Assert.*
-import edelta.lib.EdeltaRuntime
-
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
-class EdeltaCompilerTest extends EdeltaAbstractTest {
+class EdeltaCompilerTest extends EdeltaAbstractCompilerTest {
 
 	@Rule @Inject public TemporaryFolder temporaryFolder
 	@Inject extension CompilationTestHelper compilationTestHelper
-	@Inject FileExtensionProvider extensionProvider
 
 	static final String MODIFIED = "modified";
 
@@ -1944,101 +1935,6 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 		)
 	}
 
-	def private checkCompilation(CharSequence input, CharSequence expectedGeneratedJava) {
-		checkCompilation(input, expectedGeneratedJava, true)
-	}
-
-	def private checkCompilation(CharSequence input, CharSequence expectedGeneratedJava,
-		boolean checkValidationErrors) {
-		val rs = createResourceSet(input)
-		checkCompilation(rs, expectedGeneratedJava, checkValidationErrors)
-	}
-
-	private def void checkCompilation(ResourceSet rs, CharSequence expectedGeneratedJava, boolean checkValidationErrors) {
-		rs.compile [
-			if (checkValidationErrors) {
-				assertNoValidationErrors
-			}
-			if (expectedGeneratedJava !== null) {
-				assertGeneratedJavaCode(expectedGeneratedJava)
-			}
-			if (checkValidationErrors) {
-				assertGeneratedJavaCodeCompiles
-			}
-		]
-	}
-
-	private def void checkCompilationOfSeveralFiles(List<? extends CharSequence> inputs,
-		List<Pair<String, CharSequence>> expectations) {
-		createResourceSet(inputs).compile [
-			assertNoValidationErrors
-			for (expectation : expectations) {
-				expectation.value.toString.assertEquals
-					(getGeneratedCode(expectation.key))
-			}
-			assertGeneratedJavaCodeCompiles
-		]
-	}
-
-	private def assertNoValidationErrors(Result it) {
-		val allErrors = getErrorsAndWarnings.filter[severity == Severity.ERROR]
-		if (!allErrors.empty) {
-			throw new IllegalStateException(
-				"One or more resources contained errors : " + Joiner.on(',').join(allErrors)
-			);
-		}
-	}
-
-	def private assertGeneratedJavaCode(CompilationTestHelper.Result r, CharSequence expected) {
-		expected.toString.assertEquals(r.singleGeneratedCode)
-	}
-
-	def private assertGeneratedJavaCodeCompiles(CompilationTestHelper.Result r) {
-		r.compiledClass // check Java compilation succeeds
-	}
-
-	def private createResourceSet(CharSequence... inputs) {
-		val pairs = createInputPairs(inputs)
-		val rs = resourceSet(pairs)
-		addEPackageForTests(rs)
-		return rs
-	}
-
-	def private createInputPairs(CharSequence[] inputs) {
-		newArrayList() => [
-			list |
-			inputs.forEach[e, i|
-				list += "MyFile" + i + "." + 
-					extensionProvider.getPrimaryFileExtension() -> e
-			]
-		]
-	}
-
-	def private createResourceSetWithEcores(List<String> ecoreNames, CharSequence input) {
-		val pairs = newArrayList(
-			ECORE_ECORE -> EdeltaTestUtils.loadFile(METAMODEL_PATH + ECORE_ECORE),
-			"Example." + 
-					extensionProvider.getPrimaryFileExtension() -> input
-		)
-		pairs +=
-			ecoreNames.map[ecoreName |
-				ecoreName -> EdeltaTestUtils.loadFile(METAMODEL_PATH + ecoreName)]
-		val rs = resourceSet(pairs)
-		return rs
-	}
-
-	def private createResourceSetWithEcoresAndSeveralInputs(List<String> ecoreNames, List<CharSequence> inputs) {
-		val ecorePairs = newArrayList(
-			ECORE_ECORE -> EdeltaTestUtils.loadFile(METAMODEL_PATH + ECORE_ECORE)
-		)
-		ecorePairs +=
-			ecoreNames.map[ecoreName |
-				ecoreName -> EdeltaTestUtils.loadFile(METAMODEL_PATH + ecoreName)]
-		val inputPairs = createInputPairs(inputs)
-		val rs = resourceSet(ecorePairs + inputPairs)
-		return rs
-	}
-
 	def private checkCompiledCodeExecution(CharSequence input, CharSequence expectedGeneratedEcore,
 			boolean checkValidationErrors) {
 		wipeModifiedDirectoryContents
@@ -2054,7 +1950,7 @@ class EdeltaCompilerTest extends EdeltaAbstractTest {
 			val modelManager = new EdeltaModelManager
 			val defaultEdelta = new EdeltaDefaultRuntime(modelManager)
 			val edeltaObj = genClass
-				.getDeclaredConstructor(edelta.lib.EdeltaRuntime)
+				.getDeclaredConstructor(EdeltaRuntime)
 				.newInstance(defaultEdelta) as EdeltaRuntime
 			// load ecore files
 			modelManager.loadEcoreFile("testecores/foo.ecore")

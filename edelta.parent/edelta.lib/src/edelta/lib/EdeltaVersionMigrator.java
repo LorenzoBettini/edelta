@@ -18,6 +18,8 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.xmi.XMIResource;
 
+import edelta.lib.EdeltaEngine.EdeltaRuntimeProvider;
+
 /**
  * @author Lorenzo Bettini
  */
@@ -29,8 +31,14 @@ public class EdeltaVersionMigrator {
 
 	private EdeltaModelManager modelManager = new EdeltaModelManager();
 
-	private static record VersionMigrationEntry(Collection<String> uris, EdeltaEngine engine) {
-		
+	private static class VersionMigrationEntry {
+		private Collection<String> uris;
+		private EdeltaEngine engine;
+
+		VersionMigrationEntry(Collection<String> uris, EdeltaEngine engine) {
+			this.uris = uris;
+			this.engine = engine;
+		}
 	}
 
 	private List<VersionMigrationEntry> versionMigrations = new ArrayList<>();
@@ -51,24 +59,6 @@ public class EdeltaVersionMigrator {
 	}
 
 	/**
-	 * The loaded ecores are assumed to be different versions of the same ecores.
-	 * 
-	 * @param path
-	 * @throws IOException
-	 */
-	public void loadEcoresFrom(String path) throws IOException {
-		try (var stream = Files.walk(Paths.get(path))) {
-			stream
-				.filter(file -> !Files.isDirectory(file))
-				.filter(file -> file.toString().endsWith(".ecore"))
-				.forEach(file -> {
-					var resource = modelManager.loadEcoreFile(file.toString());
-					updatePackageRegistry(resource);
-				});
-		}
-	}
-
-	/**
 	 * Ensure that the nsURI is mapped to the loaded {@link EPackage}, so that
 	 * when loading an XMI the referenced Ecore file is found by nsURI.
 	 * 
@@ -81,8 +71,9 @@ public class EdeltaVersionMigrator {
 	}
 
 	/**
-	 * Ensure that the nsURI is mapped to the loaded {@link EPackage}, so that when
-	 * loading an XMI the referenced Ecore file is found by nsURI.
+	 * Ensure that the nsURI is mapped to the loaded {@link EPackage}, in the
+	 * specified {@link ResourceSet} so that when loading an XMI the referenced
+	 * Ecore file is found by nsURI.
 	 * 
 	 * @param ePackage
 	 * @param resourceSet
@@ -90,6 +81,17 @@ public class EdeltaVersionMigrator {
 	private void updatePackageRegistry(EPackage ePackage, ResourceSet resourceSet) {
 		resourceSet.getPackageRegistry()
 			.put(ePackage.getNsURI(), ePackage);
+	}
+
+	/**
+	 * See {@link EdeltaModelManager#loadEcoreFile(String)}.
+	 * 
+	 * @param ecorePath
+	 * @throws IOException 
+	 */
+	public void loadEcore(String ecorePath) {
+		var resource = modelManager.loadEcoreFile(ecorePath);
+		updatePackageRegistry(resource);
 	}
 
 	/**
@@ -105,11 +107,15 @@ public class EdeltaVersionMigrator {
 	}
 
 	/**
+	 * Loads an {@link EPackage}, assumed to be properly part of a
+	 * {@link ResourceSet}, which represents the current (and latest) version of a
+	 * metamodel.
+	 * 
 	 * See {@link EdeltaModelManager#loadEPackage(EPackage)}.
 	 * 
-	 * @param ePackage 
+	 * @param ePackage
 	 */
-	public void loadEPackage(EPackage ePackage) {
+	public void loadCurrentEPackage(EPackage ePackage) {
 		modelManager.loadEPackage(ePackage);
 		// since the EPackage might be in a different ResourceSet than our modelManager's one
 		// we must ensure the registration is performed in the modelManager's ResourceSet
@@ -117,7 +123,9 @@ public class EdeltaVersionMigrator {
 	}
 
 	/**
-	 * The loaded models are assumed to belong to the same version of ecores.
+	 * Load all models in the given path (possibly recursively in subdirectories),
+	 * using the configured file extensions, by default ".xmi" files (see
+	 * {@link #addModelFileExtension(String)}).
 	 * 
 	 * @param path
 	 * @throws IOException
@@ -130,12 +138,33 @@ public class EdeltaVersionMigrator {
 					var fileToString = file.toString();
 					return modelExtensions.stream().anyMatch(fileToString::endsWith);
 				})
-				.forEach(file -> modelManager.loadModelFile(file.toString()));
+				.forEach(file -> loadModel(file.toString()));
 		}
+	}
+
+	public Resource loadModel(String path) {
+		return modelManager.loadModelFile(path);
 	}
 
 	public void mapVersionMigration(Collection<String> uris, EdeltaEngine edeltaEngine) {
 		versionMigrations.add(new VersionMigrationEntry(uris, edeltaEngine));
+	}
+
+	/**
+	 * Registers an {@link EdeltaRuntimeProvider} by recording the nsURIs handled by the
+	 * corresponding {@link EdeltaRuntime} implementation and by loading the corresponding
+	 * Ecore files from the classpath, e.g., with {@link Class#getResourceAsStream(String)}.
+	 * 
+	 * @param provider
+	 * @throws IOException
+	 */
+	public void registerMigration(EdeltaRuntimeProvider provider) throws IOException {
+		var tempRuntime = provider.apply(new EdeltaDefaultRuntime(modelManager));
+		mapVersionMigration(tempRuntime.getMigratedNsURIs(), new EdeltaEngine(provider));
+		var ecorePaths = tempRuntime.getMigratedEcorePaths();
+		for (var ecorePath : ecorePaths) {
+			loadEcore(ecorePath, tempRuntime.getClass().getResourceAsStream(ecorePath));
+		}
 	}
 
 	/**
@@ -144,7 +173,14 @@ public class EdeltaVersionMigrator {
 	 * @throws Exception
 	 */
 	public void execute() throws Exception {
-		record MigrationData(Set<EPackage> ecores, Collection<Resource> models) {
+		class MigrationData {
+			private Set<EPackage> ecores;
+			private Collection<Resource> models;
+
+			MigrationData(Set<EPackage> ecores, Collection<Resource> models) {
+				this.ecores = ecores;
+				this.models = models;
+			}
 		}
 
 		var migrationDatas = new HashMap<VersionMigrationEntry, MigrationData>();

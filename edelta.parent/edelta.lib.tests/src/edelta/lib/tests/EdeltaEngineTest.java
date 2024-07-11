@@ -138,6 +138,43 @@ public class EdeltaEngineTest {
 	}
 
 	/**
+	 * Note that "My.ecore" in this test is different from the other tests: it's loaded
+	 * from the class, i.e., from this project "testecores" subdirectory (actually, it's loaded
+	 * from its version copied into "target" subdirectory.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testLoadFromClassLoader() throws Exception {
+		var engine = new EdeltaEngine(other -> 
+			new EdeltaRuntime(other) {
+				/**
+				 * The implementation doesn't have to make sense:
+				 * it's just to verify that Ecore and models are
+				 * evolved as expected.
+				 */
+				@Override
+				protected void doExecute() {
+					var myClass = getEClass(MYPACKAGE, "MyClass");
+					myClass.setName("Renamed");
+				}
+			}
+		);
+		var ecoreResource = engine.loadEcoreFile(MY_ECORE, this.getClass().getResourceAsStream("/" + MY_ECORE));
+		var ePackage = EdeltaResourceUtils.getEPackage(ecoreResource);
+		assertNotNull(ePackage);
+		var eClass = ePackage.getEClassifier("MyClass");
+		assertNotNull(eClass);
+		engine.execute();
+		// make sure the original Ecore is not changed
+		assertEquals("MyClass", eClass.getName());
+
+		var subdir = "loadedFromClassLoader/";
+		engine.save(OUTPUT + subdir);
+		assertGeneratedFiles(subdir, MY_ECORE);
+	}
+
+	/**
 	 * An Edelta calling a Library
 	 * 
 	 * @throws Exception

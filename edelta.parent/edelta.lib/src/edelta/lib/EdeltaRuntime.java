@@ -2,6 +2,8 @@ package edelta.lib;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -107,6 +109,30 @@ public abstract class EdeltaRuntime {
 	 */
 	protected void doExecute() throws Exception { // NOSONAR we can't predict a specific exception
 		// to be implemented by the generated code
+	}
+
+	/**
+	 * Returns the list of migrated ecores' nsURIs; the default implementation
+	 * returns an empty list: the DSL compiler is meant to generate an overridden
+	 * version of this method.
+	 * 
+	 * @return
+	 */
+	public List<String> getMigratedNsURIs() {
+		return Collections.emptyList();
+	}
+
+	/**
+	 * Returns the list of migrated ecores' paths, meant to be loaded from the
+	 * classpath, e.g., with {@link Class#getResourceAsStream(String)}, so they are
+	 * meant to be absolute paths, where the root will be resolved through the class
+	 * loader; the default implementation returns an empty list: the DSL compiler is
+	 * meant to generate an overridden version of this method.
+	 * 
+	 * @return
+	 */
+	public List<String> getMigratedEcorePaths() {
+		return Collections.emptyList();
 	}
 
 	/**

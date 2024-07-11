@@ -396,7 +396,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 				.remove(ecoreref(FooClass))
 		}
 		""");
-		var eClassifier = program.getMetamodels().get(0)
+		var eClassifier = program.getEPackages().get(0)
 				.getEClassifiers().get(0);
 		assertThatThrownBy(() -> eClassifier.setName("bar"))
 			.isInstanceOf(EdeltaInterpreterRuntimeException.class)

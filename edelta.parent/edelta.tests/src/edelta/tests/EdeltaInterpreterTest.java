@@ -83,7 +83,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		modifyEcore aTest epackage foo {
 		}
 		""");
-		var firstMetamodel = prog.getMetamodels().get(0);
+		var firstMetamodel = prog.getEPackages().get(0);
 		assertThatThrownBy(() -> {
 			firstMetamodel.setName("changed");
 		})
@@ -1070,7 +1070,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testRenameReferencesAcrossEPackagesModifyingOnePackageOnly() throws Exception {
-		var it = parseWithTestEcoresWithReferences("""
+		var model = parseWithTestEcoresWithReferences("""
 		package test
 
 		metamodel "testecoreforreferences1"
@@ -1081,14 +1081,14 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreref(Person.works).EOpposite.name = "renamedPersons"
 		}
 		""");
-		var map = interpretProgram(it);
+		var map = interpretProgram(model);
 		var testecoreforreferences1 = map.get("testecoreforreferences1");
 		var testecoreforreferences2 = map.get("testecoreforreferences2");
 		var person = getEClassByName(testecoreforreferences1, "Person");
 		assertThat(
 			map(
 			filter(person.getEStructuralFeatures(), EReference.class),
-			it_1 -> it_1.getEOpposite().getName()))
+			it -> it.getEOpposite().getName()))
 				.containsOnly("renamedPersons");
 		var workplace = getEClassByName(testecoreforreferences2, "WorkPlace");
 		assertThat(
@@ -1104,7 +1104,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		assertThat(eOpposite)
 				.isSameAs(expected);
 		var unresolvedEcoreRefs = derivedStateHelper
-				.getUnresolvedEcoreReferences(it.eResource());
+				.getUnresolvedEcoreReferences(model.eResource());
 		assertThat(unresolvedEcoreRefs).isEmpty();
 	}
 
@@ -2183,13 +2183,12 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(EdeltaProgram program,
 			boolean doValidate, Procedure1<? super EPackage> testExecutor) {
-		Procedure1<EPackage> _function = (var it) -> {
+		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, it -> {
 			if (doValidate) {
 				validationTestHelper.assertNoErrors(program);
 			}
 			testExecutor.apply(it);
-		};
-		assertAfterInterpretationOfEdeltaModifyEcoreOperation(program, _function);
+		});
 	}
 
 	private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(EdeltaProgram program,

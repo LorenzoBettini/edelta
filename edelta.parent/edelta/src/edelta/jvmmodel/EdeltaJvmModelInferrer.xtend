@@ -15,6 +15,10 @@ import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import edelta.lib.EdeltaRuntime
+import edelta.util.EdeltaModelUtil
+import java.util.List
+import edelta.lib.annotation.EdeltaGenerated
+import edelta.lib.EdeltaEngine
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -97,20 +101,24 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 					body = o.body
 				]
 			}
-			if (!program.metamodels.empty) {
+			val metamodels = EdeltaModelUtil.getMetamodels(program)
+			if (!metamodels.empty) {
 				members += program.toMethod("performSanityChecks", Void.TYPE.typeRef) [
 					annotations += Override.annotationRef
 					exceptions += Exception.typeRef
 					// for each reference to a metamodel, we generate a sanity check
 					// to make sure that at run-time all the referred Ecores are loaded
 					body = '''
-						«FOR p : program.metamodels»
-						ensureEPackageIsLoaded("«p.name»");
+						«FOR ePackage : program.getEPackages»
+						ensureEPackageIsLoaded("«ePackage.name»");
+						«ENDFOR»
+						«FOR migration : program.getMigrations»
+						ensureEPackageIsLoadedByNsURI("«migration.nsURI.name»", "«migration.nsURI.nsURI»");
 						«ENDFOR»
 					'''
 				]
 			}
-			if (!program.modifyEcoreOperations.empty) {
+			if (!program.modifyEcoreOperations.empty || !program.getMigrations.empty) {
 				members += program.toMethod("doExecute", Void.TYPE.typeRef) [
 					visibility = JvmVisibility.PROTECTED
 					annotations += Override.annotationRef
@@ -119,6 +127,45 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 						«FOR o : program.modifyEcoreOperations»
 						«o.name»(getEPackage("«o.epackage.EPackageNameOrNull»"));
 						«ENDFOR»
+						«FOR migration : program.getMigrations»
+						getEPackage("«migration.nsURI.name»").setNsURI("«migration.to»");
+						«ENDFOR»
+					'''
+				]
+			}
+			if (!program.getMigrations.empty) {
+				members += program.toMethod("getMigratedNsURIs", List.typeRef(String.typeRef())) [
+					annotations += Override.annotationRef
+					body = '''
+						return List.of(
+						  «program.getMigrations.map['"' + nsURI.nsURI + '"'].join(",\n")»
+						);
+					'''
+				]
+				members += program.toMethod("getMigratedEcorePaths", List.typeRef(String.typeRef())) [
+					annotations += Override.annotationRef
+					body = '''
+						return List.of(
+						  «program.getMigrations.map['"/' +nsURI.eResource.URI.lastSegment + '"'].join(",\n")»
+						);
+					'''
+					// previously it was nsURI.eResource.URI.deresolve(program.eResource.URI)
+					// but it's better to always use the filename only and rely on the ecores to be found in the classpath
+				]
+				// also generate a "main" method
+				members += program.toMethod("main", Void.TYPE.typeRef) [
+					static = true
+					annotations += EdeltaGenerated.annotationRef
+					parameters += program.toParameter("args", String.typeRef().addArrayTypeDimension)
+					exceptions += Exception.typeRef()
+					body = '''
+						var engine = new «EdeltaEngine»(«className.lastSegment»::new);
+						«FOR migration : program.getMigrations»
+						engine.loadEcoreFile("«migration.nsURI.eResource.URI.lastSegment»",
+						  «className.lastSegment».class.getResourceAsStream("/«migration.nsURI.eResource.URI.lastSegment»"));
+						«ENDFOR»
+						engine.execute();
+						engine.save("modified");
 					'''
 				]
 			}
