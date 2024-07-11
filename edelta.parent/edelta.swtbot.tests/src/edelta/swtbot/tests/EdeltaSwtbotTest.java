@@ -187,12 +187,12 @@ public class EdeltaSwtbotTest {
 					.contextMenu("Edelta").menu(menu).click();
 				return true;
 			}
-	
+
 			@Override
 			public void init(SWTBot bot) {
 				// nothing to do
 			}
-	
+
 			@Override
 			public String getFailureMessage() {
 				return "Cannot find menu for "
@@ -225,12 +225,12 @@ public class EdeltaSwtbotTest {
 				assertErrorsInProject(0);
 				return true;
 			}
-	
+
 			@Override
 			public void init(SWTBot bot) {
 				// nothing to do
 			}
-	
+
 			@Override
 			public String getFailureMessage() {
 				return "build failed";
@@ -245,12 +245,12 @@ public class EdeltaSwtbotTest {
 				System.out.println("Waiting for the plugin model...");
 				return PDECore.getDefault().getModelManager().isInitialized();
 			}
-	
+
 			@Override
 			public void init(SWTBot bot) {
 				// nothing to do
 			}
-	
+
 			@Override
 			public String getFailureMessage() {
 				return "Failed waiting for inizialize of plugin models";
@@ -266,12 +266,12 @@ public class EdeltaSwtbotTest {
 				bot.menu("File").menu("New").menu("Project...").click();
 				return true;
 			}
-	
+
 			@Override
 			public void init(SWTBot bot) {
 				// nothing to do
 			}
-	
+
 			@Override
 			public String getFailureMessage() {
 				return "Failed File -> New -> Project...";
