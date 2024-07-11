@@ -163,6 +163,14 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 					);
 				}
 				migrationImports.add(ePackageName);
+				// metamodelsImportSet also contains " "
+				if (metamodelImportSet.contains(String.format("\"%s\"", ePackageName))) {
+					error(String.format("Duplicate metamodel with name '%s' in 'migrate' and 'metamodel'", ePackageName),
+						migration,
+						EDELTA_MIGRATION__NS_URI,
+						DUPLICATE_EPACKAGE_IN_MIGRATE
+					);
+				}
 			}
 		}
 		var javaClass = head(

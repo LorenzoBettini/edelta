@@ -520,7 +520,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	public void testEpackagesWithTheSameNameAndDifferentEcores() throws Exception {
+	public void testEpackagesWithTheSameNameAndDifferentNsURI() throws Exception {
 		var rs = resourceSetWithTestEcore();
 		createTestResource(rs, "foo2", EPackageForTestsDifferentNsURI());
 		var text = """
@@ -529,11 +529,29 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
 		migrate "http://foo.org/v2" to "http://foo.org/v3"
 		""";
 		var program = parseHelper.parse(text, rs);
+		var nsURI = "\"http://foo.org/v2\"";
 		validationTestHelper.assertError(
 			program,
 			EdeltaPackage.Literals.EDELTA_MIGRATION,
 			EdeltaValidator.DUPLICATE_EPACKAGE_IN_MIGRATE,
-			text.indexOf("\"http://foo.org/v2\""), "\"http://foo.org/v2\"".length(),
+			text.indexOf(nsURI), nsURI.length(),
 			"Duplicate EPackage import with name 'foo'");
+	}
+
+	@Test
+	public void testSameEpackagesInMigrateAndMetamodel() throws Exception {
+		var rs = resourceSetWithTestEcore();
+		var text = """
+		metamodel "foo"
+		migrate "http://foo" to "http://foo2"
+		""";
+		var program = parseHelper.parse(text, rs);
+		var nsURI = "\"http://foo\"";
+		validationTestHelper.assertError(
+				program,
+				EdeltaPackage.Literals.EDELTA_MIGRATION,
+				EdeltaValidator.DUPLICATE_EPACKAGE_IN_MIGRATE,
+				text.indexOf(nsURI), nsURI.length(),
+				"Duplicate metamodel with name 'foo' in 'migrate' and 'metamodel'");
 	}
 }
