@@ -21,6 +21,12 @@ import org.eclipse.emf.ecore.xmi.XMIResource;
 import edelta.lib.EdeltaEngine.EdeltaRuntimeProvider;
 
 /**
+ * Handles the migration of model files according to the information configured.
+ * 
+ * It is meant to scan a path, loading model files, check which ones need to be migrated
+ * from a version of metamodels to the next one. It repeats the scan until all model files
+ * are migrated to the latest current version of metamodels.
+ * 
  * @author Lorenzo Bettini
  */
 public class EdeltaVersionMigrator {
