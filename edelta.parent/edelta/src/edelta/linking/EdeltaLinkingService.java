@@ -18,7 +18,7 @@ import edelta.edelta.EdeltaPackage;
 /**
  * Custom implementation to correctly link to {@link EPackage}s
  * specified through nsURI, which typically contains "." and that
- * would make the qualified name converted to create a qualified name
+ * would make the qualified name converter to create a qualified name
  * separated by dots.
  * 
  * @author Lorenzo Bettini
