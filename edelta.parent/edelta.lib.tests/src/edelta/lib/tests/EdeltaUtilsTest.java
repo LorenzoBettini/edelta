@@ -735,6 +735,6 @@ public class EdeltaUtilsTest {
 		assertThat(EdeltaUtils.findSiblingByName(c1, "C3"))
 			.isSameAs(c3);
 		assertThat(EdeltaUtils.findSiblingByName(c1, "NonExisting"))
-			.isNull();;
+			.isNull();
 	}
 }

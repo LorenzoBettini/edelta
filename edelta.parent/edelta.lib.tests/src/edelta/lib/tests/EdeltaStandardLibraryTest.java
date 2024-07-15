@@ -81,7 +81,7 @@ public class EdeltaStandardLibraryTest {
 	private EdeltaModelManager modelManager;
 
 	@BeforeClass
-	static public void clearOutput() throws IOException {
+	public static void clearOutput() throws IOException {
 		cleanDirectoryRecursive(OUTPUT);
 	}
 
