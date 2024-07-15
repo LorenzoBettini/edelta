@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
@@ -92,7 +91,7 @@ public class EdeltaDependencyAnalizer {
 			.filter(file -> !Files.isDirectory(file))
 			.filter(file -> file.toString().endsWith(".ecore"))
 			.map(file -> modelManager.loadEcoreFile(file.toString()))
-			.collect(Collectors.toList());
+			.toList();
 	}
 
 	private Repository analyzeEPackages(EPackage ePackage, Collection<EPackage> packages) {
@@ -141,7 +140,7 @@ public class EdeltaDependencyAnalizer {
 		return EdeltaUtils.usedPackages(ePackage)
 				.stream()
 				.sorted(EdeltaResourceUtils.ePackageComparator()) // we must be deterministic
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 	private Metamodel createGraphMetamodelHighlighted(Repository repository, EPackage ePackage) {
