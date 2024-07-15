@@ -52,7 +52,7 @@ public class EdeltaEcoreHelper {
 			final var epackages = getCurrentEPackagesToProcess(context);
 			return epackages.stream()
 				.flatMap(this::getAllENamedElements)
-				.collect(Collectors.toList());
+				.toList();
 		});
 	}
 
