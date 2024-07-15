@@ -38,8 +38,8 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
 	public void setUp() {
 		try {
 			createjavaProject(AbstractOutlineTest.TEST_PROJECT);
-		} catch (Throwable _e) {
-			throw Exceptions.sneakyThrow(_e);
+		} catch (Throwable e) {
+			throw Exceptions.sneakyThrow(e);
 		}
 	}
 
@@ -64,8 +64,8 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
 			IJavaProject javaProject = ProjectImportUtil.importJavaProject(AbstractOutlineTest.TEST_PROJECT);
 			waitForBuild();
 			return javaProject;
-		} catch (Throwable _e) {
-			throw Exceptions.sneakyThrow(_e);
+		} catch (Throwable e) {
+			throw Exceptions.sneakyThrow(e);
 		}
 	}
 

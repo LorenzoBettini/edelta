@@ -23,7 +23,7 @@ import edelta.ui.tests.utils.ProjectImportUtil;
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
 public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
-	private static String TEST_PROJECT = "edelta.ui.tests.project";
+	private static final String TEST_PROJECT = "edelta.ui.tests.project";
 
 	private XtextEditor xtextEditor;
 
@@ -36,8 +36,8 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 		try {
 			ProjectImportUtil.importProject(TEST_PROJECT);
 			IResourcesSetupUtil.waitForBuild();
-		} catch (Throwable _e) {
-			throw Exceptions.sneakyThrow(_e);
+		} catch (Throwable e) {
+			throw Exceptions.sneakyThrow(e);
 		}
 	}
 
