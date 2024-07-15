@@ -4411,7 +4411,7 @@ class EdeltaModelMigratorTest {
 				}
 
 				private EObject createCopy(EObject oldElement) {
-					var newElement = EdeltaEcoreUtil.createInstance(subElementClass,
+					return EdeltaEcoreUtil.createInstance(subElementClass,
 						o -> {
 							var oldElementFeatures = oldElement.eClass().getEAllStructuralFeatures();
 							for (var oldElementFeature : oldElementFeatures) {
@@ -4424,7 +4424,6 @@ class EdeltaModelMigratorTest {
 							}
 						}
 					);
-					return newElement;
 				}
 			}
 		);
@@ -4470,7 +4469,7 @@ class EdeltaModelMigratorTest {
 				}
 
 				private EObject createCopy(EObject oldElement) {
-					var newElement = EdeltaEcoreUtil.createInstance(subElementClass,
+					return EdeltaEcoreUtil.createInstance(subElementClass,
 						o -> {
 							var oldElementFeatures = oldElement.eClass().getEAllStructuralFeatures();
 							for (var oldElementFeature : oldElementFeatures) {
@@ -4483,7 +4482,6 @@ class EdeltaModelMigratorTest {
 							}
 						}
 					);
-					return newElement;
 				}
 			}
 		);
@@ -4529,10 +4527,9 @@ class EdeltaModelMigratorTest {
 				}
 
 				private EObject createCopy(EObject oldElement) {
-					var newElement = EdeltaEcoreUtil.createInstance(subElementClass,
+					return EdeltaEcoreUtil.createInstance(subElementClass,
 						o -> modelMigrator.copyFrom(o, oldElement)
 					);
-					return newElement;
 				}
 			}
 		);
@@ -4771,14 +4768,11 @@ class EdeltaModelMigratorTest {
 	}
 
 	private <T extends EObject> T createCopy(T o) {
-		var copy = EcoreUtil.copy(o);
-		return copy;
+		return EcoreUtil.copy(o);
 	}
 
 	private <T extends EObject> T createSingleCopy(Collection<T> elements) {
-		var iterator = elements.iterator();
-		var copy = createCopy(iterator.next());
-		return copy;
+		return createCopy(elements.iterator().next());
 	}
 
 	private EStructuralFeature pullUp(EdeltaModelMigrator modelMigrator,
@@ -4898,10 +4892,9 @@ class EdeltaModelMigratorTest {
 						// since this is NOT a containment reference
 						// the referred oldValue has already been copied
 						var copy = modelMigrator.getMigrated((EObject) oldValue);
-						var created = EdeltaEcoreUtil.createInstance(extracted,
+						return EdeltaEcoreUtil.createInstance(extracted,
 							o -> o.eSet(extractedRef, copy)
 						);
-						return created;
 					})
 					.toList();
 				// in the new object set the value or values (transparently)
