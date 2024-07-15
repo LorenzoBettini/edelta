@@ -245,7 +245,7 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
 			.returns(null, t -> t.getENamedElementName());
 	}
 
-	private EdeltaEcoreReferenceExpression lastEcoreRef(EdeltaProgram p) throws Exception {
+	private EdeltaEcoreReferenceExpression lastEcoreRef(EdeltaProgram p) {
 		return lastEcoreReferenceExpression(p);
 	}
 }

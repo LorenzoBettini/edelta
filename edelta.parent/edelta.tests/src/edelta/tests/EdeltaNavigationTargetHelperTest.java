@@ -20,7 +20,7 @@ public class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
 	private EdeltaNavigationTargetHelper navigationTargetHelper;
 
 	@Test
-	public void testNotEdeltaEcoreReference() throws Exception {
+	public void testNotEdeltaEcoreReference() {
 		assertThat(navigationTargetHelper
 			.getTarget(EcoreFactory.eINSTANCE.createEClass()))
 			.isNull();

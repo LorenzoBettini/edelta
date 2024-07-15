@@ -1,9 +1,10 @@
 package edelta.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
-
-import java.util.stream.Collectors;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.xtext.testing.InjectWith;
@@ -31,7 +32,7 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	public void testHasCycleInSuperPackageWithNoCycle() throws Exception {
+	public void testHasCycleInSuperPackageWithNoCycle() {
 		var ePackage = createEPackage("p", p -> 
 			p.getESubpackages().add(createEPackage("p2", p2 ->
 				p2.getESubpackages().add(createEPackage("p3"))
@@ -43,7 +44,7 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	public void testHasCycleInSuperPackageWithCycle() throws Exception {
+	public void testHasCycleInSuperPackageWithCycle() {
 		var ePackage = createEPackage("p", p -> 
 			p.getESubpackages().add(createEPackage("p2", p2 ->
 				p2.getESubpackages().add(createEPackage("p3"))
@@ -57,7 +58,7 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	public void testFindRootSuperPackage() throws Exception {
+	public void testFindRootSuperPackage() {
 		var rootPackage = createEPackage("p", p -> 
 			p.getESubpackages().add(createEPackage("p2", p2 ->
 				p2.getESubpackages().add(createEPackage("p3"))
@@ -116,7 +117,7 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	public void testHasCycleInHierarchy() throws Exception {
+	public void testHasCycleInHierarchy() {
 		var ecoreFactory = EcoreFactory.eINSTANCE;
 		var c1 = ecoreFactory.createEClass();
 		assertThat(EdeltaModelUtil.hasCycleInHierarchy(c1)).isFalse();
@@ -156,7 +157,7 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
 		var mainBlock = getLastModifyEcoreOperationBlock(prog);
 		var ecoreRefs = getAllEcoreReferenceExpressions(prog).stream()
 			.map(EdeltaEcoreReferenceExpression::getReference)
-			.collect(Collectors.toList());
+			.toList();
 		var ecoreRef = ecoreRefs.get(0);
 		assertThat(EdeltaModelUtil.getContainingBlockXExpression(ecoreRef))
 				.isSameAs(ecoreRef.eContainer());

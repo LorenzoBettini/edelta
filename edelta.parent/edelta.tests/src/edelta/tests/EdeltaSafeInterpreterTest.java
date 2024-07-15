@@ -176,7 +176,7 @@ public class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	private void assertAfterInterpretationOfEdeltaModifyEcoreOperation(EdeltaProgram program,
-			Consumer<EPackage> testExecutor) throws Exception {
+			Consumer<EPackage> testExecutor) {
 		interpreter.evaluateModifyEcoreOperations(program);
 		var packageName = lastModifyEcoreOperation(program)
 				.getEpackage().getName();

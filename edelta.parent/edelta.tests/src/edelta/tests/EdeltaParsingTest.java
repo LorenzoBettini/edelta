@@ -116,7 +116,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 				parseHelper.parse(textForEcoreRef(ecoreRefArg))));
 	}
 
-	private String textForEcoreRef(CharSequence ecoreRefArg) throws Exception {
+	private String textForEcoreRef(CharSequence ecoreRefArg) {
 		return "modifyEcore aTest epackage foo { ecoreref(" +
 				ecoreRefArg;
 	}
