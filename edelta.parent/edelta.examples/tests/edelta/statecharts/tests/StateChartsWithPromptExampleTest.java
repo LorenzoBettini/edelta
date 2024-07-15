@@ -13,7 +13,7 @@ import edelta.statecharts.example.StateChartsWithPromptExample;
 class StateChartsWithPromptExampleTest extends AbstractEdeltaExamplesWithPromptTest {
 
 	@Test
-	void testStateChartsWithPrompt() throws Exception {
+	void testStateChartsWithPrompt() {
 		var subdir = "";
 		var ecores = of("StateCharts.ecore");
 		var models = of("StateChartsModel.xmi");

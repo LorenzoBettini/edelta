@@ -12,7 +12,7 @@ import edelta.examples.tests.AbstractEdeltaExamplesWithPromptTest;
 
 class PersonChangeUpperBoundWithPromptExampleTest extends AbstractEdeltaExamplesWithPromptTest {
 	@Test
-	void testChangeUpperBoundInteractive() throws Exception {
+	void testChangeUpperBoundInteractive() {
 		var subdir = "";
 		var ecores = of("PersonListForChangeUpperBound.ecore");
 		var models = of("ListForChangeUpperBound.xmi");

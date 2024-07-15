@@ -12,7 +12,7 @@ import edelta.mergename.example.PersonMargeNameWithPromptExample;
 
 class PersonMergeNameWithPromptExampleTest extends AbstractEdeltaExamplesWithPromptTest {
 	@Test
-	void testMergeNameWithPrompt() throws Exception {
+	void testMergeNameWithPrompt() {
 		var subdir = "";
 		var ecores = of("AddressBook.ecore");
 		var models = of("AddressBook.xmi");
