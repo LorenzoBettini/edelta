@@ -79,37 +79,37 @@ public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest 
 	}
 
 	@Test
-	public void testSelectOperation() throws Exception {
+	public void testSelectOperation() {
 		whenEditorTextIsSelectedThenOutlineNodeIsSelected
 			("anOp", "anOp() : Object");
 	}
 
 	@Test
-	public void testSelectModifyEcore() throws Exception {
+	public void testSelectModifyEcore() {
 		whenEditorTextIsSelectedThenOutlineNodeIsSelected
 			("modifyEcore", "aTest(EPackage) : void");
 	}
 
 	@Test
-	public void testSelectNonResponsibleExpressionInModifyEcore() throws Exception {
+	public void testSelectNonResponsibleExpressionInModifyEcore() {
 		whenEditorTextIsSelectedThenOutlineNodeIsSelected
 			("ecoreref(MyClass)", "aTest(EPackage) : void");
 	}
 
 	@Test
-	public void testSelectExpressionThatCreatesEClass() throws Exception {
+	public void testSelectExpressionThatCreatesEClass() {
 		whenEditorTextIsSelectedThenOutlineNodeIsSelected
 			("addNewEClass", "MyNewClass");
 	}
 
 	@Test
-	public void testSelectExpressionThatCreatesEAttributeInCreatedEClass() throws Exception {
+	public void testSelectExpressionThatCreatesEAttributeInCreatedEClass() {
 		whenEditorTextIsSelectedThenOutlineNodeIsSelected
 			("addNewEAttribute(\"MyNewAttribute", "MyNewAttribute");
 	}
 
 	@Test
-	public void testSelectExpressionThatCreatesEAttributeInExistingEClass() throws Exception {
+	public void testSelectExpressionThatCreatesEAttributeInExistingEClass() {
 		whenEditorTextIsSelectedThenOutlineNodeIsSelected
 			("addNewEAttribute(\"MyNewDerivedClassAttribute", "MyNewDerivedClassAttribute");
 	}
