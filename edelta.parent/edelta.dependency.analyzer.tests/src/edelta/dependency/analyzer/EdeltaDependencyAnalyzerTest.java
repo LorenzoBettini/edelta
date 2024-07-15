@@ -54,7 +54,7 @@ public class EdeltaDependencyAnalyzerTest {
 	}
 
 	@Test
-	public void testEPackageNotFound() throws IOException {
+	public void testEPackageNotFound() {
 		var analyzer = new EdeltaDependencyAnalizer();
 		assertThatThrownBy(
 			() -> analyzer.analyzeEPackage(TESTECORES + "/unidirectional/", "nonexistent"))

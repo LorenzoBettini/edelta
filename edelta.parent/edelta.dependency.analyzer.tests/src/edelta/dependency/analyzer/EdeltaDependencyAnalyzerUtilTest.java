@@ -15,7 +15,7 @@ public class EdeltaDependencyAnalyzerUtilTest {
 	private static final String TESTECORES = "testecores";
 
 	@Test
-	public void testHighlightedNotFound() throws IOException {
+	public void testHighlightedNotFound() {
 		var repository = GraphMMFactory.eINSTANCE.createRepository();
 		assertThatThrownBy(
 			() -> EdeltaDependencyAnalyzerUtils.computeMetamodelDependencies(repository))
