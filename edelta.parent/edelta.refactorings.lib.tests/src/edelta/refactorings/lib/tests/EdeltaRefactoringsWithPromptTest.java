@@ -72,7 +72,7 @@ class EdeltaRefactoringsWithPromptTest extends AbstractEdeltaRefactoringsLibTest
 	}
 
 	@Test
-	void test_introduceSubclassesInteractive() throws Exception {
+	void test_introduceSubclassesInteractive() {
 		var subdir = "enumToSubclasses/";
 		var ecores = of("PersonList.ecore");
 		var models = of("List.xmi");
@@ -127,7 +127,7 @@ class EdeltaRefactoringsWithPromptTest extends AbstractEdeltaRefactoringsLibTest
 	}
 
 	@Test
-	void test_mergeStringAttributes() throws Exception {
+	void test_mergeStringAttributes() {
 		var subdir = "mergeAttributes/";
 		var ecores = of("PersonList.ecore");
 		var models = of("List.xmi");
@@ -170,7 +170,7 @@ class EdeltaRefactoringsWithPromptTest extends AbstractEdeltaRefactoringsLibTest
 	}
 
 	@Test
-	void test_changeUpperBoundInteractive() throws Exception {
+	void test_changeUpperBoundInteractive() {
 		var subdir = "changeUpperBound/";
 		var ecores = of("PersonList.ecore");
 		var models = of("List.xmi");

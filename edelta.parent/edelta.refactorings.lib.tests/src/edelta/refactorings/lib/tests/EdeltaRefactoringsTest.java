@@ -408,7 +408,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 						() -> EcoreUtil.removeAll(
 								merged.keySet().stream()
 									.flatMap(Collection<EObject>::stream)
-									.collect(Collectors.toList()))
+									.toList())
 					);
 				}
 			}
@@ -649,7 +649,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 										containerCollection.add(o);
 									}
 								))
-								.collect(Collectors.toList());
+								.toList();
 
 							// record that we associated the several objects (2 in this example)
 							// to the original one, which is now splitted
@@ -852,7 +852,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 						() -> EcoreUtil.removeAll(
 								merged.keySet().stream()
 									.flatMap(Collection<EObject>::stream)
-									.collect(Collectors.toList()))
+									.toList())
 					);
 
 					// keep track of objects that are split into several ones
@@ -892,7 +892,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 										containerCollection.add(o);
 									}
 								))
-								.collect(Collectors.toList());
+								.toList();
 
 							// record that we associated the several objects (2 in this example)
 							// to the original one, which is now splitted
@@ -972,7 +972,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 										containerCollection.add(o);
 									}
 								))
-								.collect(Collectors.toList());
+								.toList();
 
 							// record that we associated the several objects (2 in this example)
 							// to the original one, which is now splitted
@@ -989,7 +989,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 
 					mergeReferences(
 						"name",
-						splitFeatures.stream().map(EReference.class::cast).collect(Collectors.toList()),
+						splitFeatures.stream().map(EReference.class::cast).toList(),
 						values -> {
 							// it is responsibility of the merger to create an instance
 							// of the (now single) referred object with the result
@@ -1029,7 +1029,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 						() -> EcoreUtil.removeAll(
 								merged.keySet().stream()
 									.flatMap(Collection<EObject>::stream)
-									.collect(Collectors.toList()))
+									.toList())
 					);
 				}
 			}
@@ -1352,7 +1352,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
-	void test_extractClassWithReferencesBidirectional() throws IOException {
+	void test_extractClassWithReferencesBidirectional() {
 		withInputModels("extractClassWithReferencesBidirectional", "PersonList.ecore");
 		loadEcoreFiles();
 		assertThrowsIAE(() -> refactorings.extractClass("WorkAddress",
@@ -1451,7 +1451,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	}
 
 	@Test
-	void test_inlineClassWithReferencesBidirectional() throws IOException {
+	void test_inlineClassWithReferencesBidirectional() {
 		withInputModels("inlineClassWithReferencesBidirectional", "PersonList.ecore");
 		loadEcoreFiles();
 		assertThrowsIAE(() ->
