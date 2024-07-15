@@ -66,7 +66,7 @@ public class ProjectImportUtil {
 		return project;
 	}
 
-	private static IProject importProject(final File projectPath, final String projectName) throws CoreException, InvocationTargetException, InterruptedException {
+	private static IProject importProject(final File projectPath, final String projectName) throws InvocationTargetException, InterruptedException {
 		IProject project = getProjectFromWorkspace(projectName);
 		ImportOperation importOperation = new ImportOperation(
 				project.getFullPath(), // relative to the workspace
