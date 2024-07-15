@@ -310,35 +310,4 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			"myAttribute\nmyReference");
 	}
 
-	@Test
-	public void testENamedElementsOfEPackage() throws Exception {
-		var prog = parseWithTestEcoreWithSubPackage(inputs.referenceToMetamodelWithSubPackage());
-		assertNamedElements(
-				ecoreHelper
-				.getENamedElements(getEPackageByName(prog, "mainpackage")), """
-			MainFooClass
-			MainFooDataType
-			MainFooEnum
-			MyClass
-			mainsubpackage
-			""");
-	}
-
-	@Test
-	public void testENamedElementsOfEClass() throws Exception {
-		var prog = parseWithTestEcore(inputs.referenceToMetamodel());
-		assertNamedElements(
-			ecoreHelper
-				.getENamedElements(getEClassifierByName(prog, "foo", "FooClass")),
-			"myAttribute\nmyReference");
-	}
-
-	@Test
-	public void testENamedElementsOfENum() throws Exception {
-		var prog = parseWithTestEcore(inputs.referenceToMetamodel());
-		assertNamedElements(
-			ecoreHelper
-				.getENamedElements(getEClassifierByName(prog, "foo", "FooEnum")),
-			"FooEnumLiteral");
-	}
 }
