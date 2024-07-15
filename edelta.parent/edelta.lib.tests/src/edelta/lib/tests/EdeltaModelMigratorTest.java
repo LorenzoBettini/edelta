@@ -1049,7 +1049,7 @@ class EdeltaModelMigratorTest {
 								return -1;
 							}
 						})
-						.collect(Collectors.toList()),
+						.toList(),
 					feature);
 			}
 		);
@@ -2228,8 +2228,7 @@ class EdeltaModelMigratorTest {
 		var attribute = getAttribute(evolvingModelManager,
 				"mypackage", "MyClass", "myClassStringAttribute");
 
-//		replaceWithCopy(modelMigrator, attribute, "myAttributeRenamed");
-		var copy = createCopy(modelMigrator, attribute);
+		var copy = createCopy(attribute);
 		copy.setName("myAttributeRenamed");
 		var containingClass = attribute.getEContainingClass();
 		EdeltaUtils.removeElement(attribute);
@@ -2283,7 +2282,7 @@ class EdeltaModelMigratorTest {
 		var reference = getReference(evolvingModelManager,
 				"mypackage", "MyRoot", "myReferences");
 
-		var copy = createCopy(modelMigrator, reference);
+		var copy = createCopy(reference);
 		var containingClass = reference.getEContainingClass();
 		EdeltaUtils.removeElement(reference);
 		// put it in first position to have the same order as the original one
@@ -3046,7 +3045,7 @@ class EdeltaModelMigratorTest {
 			() -> EcoreUtil.removeAll(
 					merged.keySet().stream()
 						.flatMap(Collection<EObject>::stream)
-						.collect(Collectors.toList()))
+						.toList())
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -3128,7 +3127,7 @@ class EdeltaModelMigratorTest {
 							o -> o.eSet(nameElementAttribute, val)
 						)
 					)
-					.collect(Collectors.toList());
+					.toList();
 			}, null
 		);
 
@@ -3197,7 +3196,7 @@ class EdeltaModelMigratorTest {
 							containerCollection.add(o);
 						}
 					))
-					.collect(Collectors.toList());
+					.toList();
 			}, null
 		);
 
@@ -3277,7 +3276,7 @@ class EdeltaModelMigratorTest {
 							containerCollection.add(o);
 						}
 					))
-					.collect(Collectors.toList());
+					.toList();
 
 				// record that we associated the several objects (2 in this example)
 				// to the original one, which is now splitted
@@ -3471,7 +3470,7 @@ class EdeltaModelMigratorTest {
 							o -> o.eSet(nameElementAttribute, val)
 						)
 					)
-					.collect(Collectors.toList());
+					.toList();
 			}, null
 		);
 
@@ -3574,7 +3573,7 @@ class EdeltaModelMigratorTest {
 							containerCollection.add(o);
 						}
 					))
-					.collect(Collectors.toList());
+					.toList();
 			}, null
 		);
 
@@ -3660,7 +3659,7 @@ class EdeltaModelMigratorTest {
 			() -> EcoreUtil.removeAll(
 					merged.keySet().stream()
 						.flatMap(Collection<EObject>::stream)
-						.collect(Collectors.toList()))
+						.toList())
 		);
 
 		// keep track of objects that are splitted into several ones
@@ -3701,7 +3700,7 @@ class EdeltaModelMigratorTest {
 							containerCollection.add(o);
 						}
 					))
-					.collect(Collectors.toList());
+					.toList();
 
 				// record that we associated the several objects (2 in this example)
 				// to the original one, which is now splitted
@@ -3767,7 +3766,7 @@ class EdeltaModelMigratorTest {
 							o -> o.eSet(nameElementAttribute, val)
 						)
 					)
-					.collect(Collectors.toList());
+					.toList();
 			}, null
 		);
 		mergeReferences(
@@ -3860,7 +3859,7 @@ class EdeltaModelMigratorTest {
 							containerCollection.add(o);
 						}
 					))
-					.collect(Collectors.toList());
+					.toList();
 			}, null
 		);
 		mergeReferences(
@@ -3968,7 +3967,7 @@ class EdeltaModelMigratorTest {
 							containerCollection.add(o);
 						}
 					))
-					.collect(Collectors.toList());
+					.toList();
 
 				// record that we associated the several objects (2 in this example)
 				// to the original one, which is now splitted
@@ -3986,7 +3985,7 @@ class EdeltaModelMigratorTest {
 		mergeReferences(
 			modelMigrator,
 			"name",
-			splitFeatures.stream().map(EReference.class::cast).collect(Collectors.toList()),
+			splitFeatures.stream().map(EReference.class::cast).toList(),
 			values -> {
 				// it is responsibility of the merger to create an instance
 				// of the (now single) referred object with the result
@@ -4026,7 +4025,7 @@ class EdeltaModelMigratorTest {
 			() -> EcoreUtil.removeAll(
 					merged.keySet().stream()
 						.flatMap(Collection<EObject>::stream)
-						.collect(Collectors.toList()))
+						.toList())
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -4199,7 +4198,7 @@ class EdeltaModelMigratorTest {
 		pullUp(modelMigrator, person,
 			subclasses.stream()
 				.map(c -> c.getEStructuralFeature("name"))
-				.collect(Collectors.toList())
+				.toList()
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -4227,7 +4226,7 @@ class EdeltaModelMigratorTest {
 			evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 
 		// add a new class similar to NameElement
-		var otherNameElement = createCopy(modelMigrator, nameElement);
+		var otherNameElement = createCopy(nameElement);
 		otherNameElement.setName("OtherNameElement");
 		var otherNameElementFeature = otherNameElement.getEStructuralFeatures().get(0);
 		otherNameElementFeature.setName("otherNameElementValue");
@@ -4268,7 +4267,7 @@ class EdeltaModelMigratorTest {
 			evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 
 		// add a new class similar to NameElement
-		var otherNameElement = createCopy(modelMigrator, nameElement);
+		var otherNameElement = createCopy(nameElement);
 		otherNameElement.setName("OtherNameElement");
 		var otherNameElementFeature = otherNameElement.getEStructuralFeatures().get(0);
 		otherNameElementFeature.setName("otherNameElementValue");
@@ -4328,7 +4327,7 @@ class EdeltaModelMigratorTest {
 			evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 
 		// add a new class similar to NameElement
-		var otherNameElement = createCopy(modelMigrator, nameElement);
+		var otherNameElement = createCopy(nameElement);
 		otherNameElement.setName("OtherNameElement");
 		var otherNameElementFeature = otherNameElement.getEStructuralFeatures().get(0);
 		otherNameElementFeature.setName("otherNameElementValue");
@@ -4711,7 +4710,7 @@ class EdeltaModelMigratorTest {
 					EdeltaEcoreUtil.getValueForFeature(oldObj, feature, attribute.getUpperBound())
 						.stream()
 						.map(singleValueTransformer)
-						.collect(Collectors.toList())
+						.toList()
 				);
 			}
 		);
@@ -4741,14 +4740,14 @@ class EdeltaModelMigratorTest {
 					EdeltaEcoreUtil.wrapAsCollection(oldValue, attribute.getUpperBound())
 						.stream()
 						.map(singleValueTransformer)
-						.collect(Collectors.toList()),
+						.toList(),
 					attribute
 				)
 		);
 	}
 
 	private EAttribute replaceWithCopy(EdeltaModelMigrator modelMigrator, EAttribute attribute, String newName) {
-		var copy = createCopy(modelMigrator, attribute);
+		var copy = createCopy(attribute);
 		copy.setName(newName);
 		var containingClass = attribute.getEContainingClass();
 		EdeltaUtils.removeElement(attribute);
@@ -4762,7 +4761,7 @@ class EdeltaModelMigratorTest {
 	}
 
 	private EAttribute replaceWithCopyWithMap(EdeltaModelMigrator modelMigrator, EAttribute attribute, String newName) {
-		var copy = createCopy(modelMigrator, attribute);
+		var copy = createCopy(attribute);
 		copy.setName(newName);
 		var containingClass = attribute.getEContainingClass();
 		EdeltaUtils.removeElement(attribute);
@@ -4771,20 +4770,20 @@ class EdeltaModelMigratorTest {
 		return copy;
 	}
 
-	private <T extends EObject> T createCopy(EdeltaModelMigrator modelMigrator, T o) {
+	private <T extends EObject> T createCopy(T o) {
 		var copy = EcoreUtil.copy(o);
 		return copy;
 	}
 
-	private <T extends EObject> T createSingleCopy(EdeltaModelMigrator modelMigrator, Collection<T> elements) {
+	private <T extends EObject> T createSingleCopy(Collection<T> elements) {
 		var iterator = elements.iterator();
-		var copy = createCopy(modelMigrator, iterator.next());
+		var copy = createCopy(iterator.next());
 		return copy;
 	}
 
 	private EStructuralFeature pullUp(EdeltaModelMigrator modelMigrator,
 			EClass superClass, Collection<EStructuralFeature> features) {
-		var pulledUp = createSingleCopy(modelMigrator, features);
+		var pulledUp = createSingleCopy(features);
 		superClass.getEStructuralFeatures().add(pulledUp);
 		EdeltaUtils.removeAllElements(features);
 		// remember we must map the original metamodel element to the new one
@@ -4796,7 +4795,7 @@ class EdeltaModelMigratorTest {
 			EStructuralFeature featureToPush, Collection<EClass> subClasses) {
 		var pushedDownFeatures = new HashMap<EClass, EStructuralFeature>();
 		for (var subClass : subClasses) {
-			var pushedDown = createCopy(modelMigrator, featureToPush);
+			var pushedDown = createCopy(featureToPush);
 			pushedDownFeatures.put(subClass, pushedDown);
 			// we add it in the very first position just to have exactly the
 			// same Ecore model as the starting one of pullUpAttributes
@@ -4904,7 +4903,7 @@ class EdeltaModelMigratorTest {
 						);
 						return created;
 					})
-					.collect(Collectors.toList());
+					.toList();
 				// in the new object set the value or values (transparently)
 				// with the created object (or objects, again, transparently)
 				EdeltaEcoreUtil.setValueForFeature(
@@ -4937,7 +4936,7 @@ class EdeltaModelMigratorTest {
 			reference.getEReferenceType());
 		final EReference eOpposite = reference.getEOpposite();
 		if (eOpposite != null) {
-			var newOpposite = createCopy(modelMigrator, eOpposite);
+			var newOpposite = createCopy(eOpposite);
 			// put it in first position to have the same order as the original one
 			eOpposite.getEContainingClass().getEStructuralFeatures().
 				add(0, newOpposite);
@@ -4979,7 +4978,7 @@ class EdeltaModelMigratorTest {
 							o -> o.eSet(extractedRef, copy)
 						);
 					})
-					.collect(Collectors.toList());
+					.toList();
 				// in the new object set the value or values (transparently)
 				// with the created object (or objects, again, transparently)
 				EdeltaEcoreUtil.setValueForFeature(
@@ -5072,7 +5071,7 @@ class EdeltaModelMigratorTest {
 						// object, it will be possibly copied later
 						return modelMigrator.getMigrated(oldReferred);
 					})
-					.collect(Collectors.toList());
+					.toList();
 	
 				// in the new object set the value or values (transparently)
 				// with the created object (or objects, again, transparently)
@@ -5143,7 +5142,7 @@ class EdeltaModelMigratorTest {
 			final Collection<EAttribute> features,
 			Function<Collection<?>, Object> valueMerger, Runnable postCopy) {
 		var firstFeature = features.iterator().next();
-		var mergedFeature = mergeFeatures(modelMigrator, newFeatureName, features);
+		var mergedFeature = mergeFeatures(newFeatureName, features);
 		if (valueMerger != null) {
 			modelMigrator.copyRule(
 				modelMigrator.wasRelatedTo(firstFeature),
@@ -5152,7 +5151,7 @@ class EdeltaModelMigratorTest {
 							.map(modelMigrator::getOriginal);
 					var oldValues = originalFeatures
 							.map(f -> oldObj.eGet(f))
-							.collect(Collectors.toList());
+							.toList();
 					var merged = valueMerger.apply(oldValues);
 					newObj.eSet(mergedFeature, merged);
 				},
@@ -5179,7 +5178,7 @@ class EdeltaModelMigratorTest {
 			final Collection<EReference> features,
 			Function<Collection<EObject>, EObject> valueMerger, Runnable postCopy) {
 		var firstFeature = features.iterator().next();
-		var mergedFeature = mergeFeatures(modelMigrator, newFeatureName, features);
+		var mergedFeature = mergeFeatures(newFeatureName, features);
 		if (valueMerger != null) {
 			modelMigrator.copyRule(
 				modelMigrator.wasRelatedTo(firstFeature),
@@ -5190,7 +5189,7 @@ class EdeltaModelMigratorTest {
 					var oldValues = originalFeatures
 							.map(f -> oldObj.eGet(f))
 							.map(EObject.class::cast)
-							.collect(Collectors.toList());
+							.toList();
 					var merged = valueMerger.apply(
 						modelMigrator.getMigrated(oldValues));
 					newObj.eSet(mergedFeature, merged);
@@ -5207,20 +5206,15 @@ class EdeltaModelMigratorTest {
 	 * cardinality, etc).
 	 * @param newFeatureName
 	 * @param features
-	 * 
 	 * @return the new feature added to the containing class of the features
 	 */
-	private <T extends EStructuralFeature> T mergeFeatures(EdeltaModelMigrator modelMigrator,
-			final String newFeatureName,
+	private <T extends EStructuralFeature> T mergeFeatures(final String newFeatureName,
 			final Collection<T> features) {
-		// THIS SHOULD BE CHECKED IN THE FINAL IMPLEMENTATION (ALREADY DONE IN refactorings.lib)
-//		this.checkNoDifferences(features, new EdeltaFeatureDifferenceFinder().ignoringName(),
-//				"The two features cannot be merged");
 		// ALSO MAKE SURE IT'S A SINGLE FEATURE, NOT MULTI (TO BE DONE ALSO IN refactorings.lib)
 		// ALSO MAKE SURE IT'S NOT BIDIRECTIONAL (TO BE DONE ALSO IN refactorings.lib)
 		var firstFeature = features.iterator().next();
 		final EClass owner = firstFeature.getEContainingClass();
-		var mergedFeature = createCopy(modelMigrator, firstFeature);
+		var mergedFeature = createCopy(firstFeature);
 		mergedFeature.setName(newFeatureName);
 		owner.getEStructuralFeatures().add(mergedFeature);
 		EdeltaUtils.removeAllElements(features);
@@ -5231,7 +5225,7 @@ class EdeltaModelMigratorTest {
 			final EAttribute featureToSplit,
 			final Collection<String> newFeatureNames,
 			Function<Object, Collection<?>> valueSplitter, Runnable postCopy) {
-		var splitFeatures = splitFeature(modelMigrator, featureToSplit, newFeatureNames);
+		var splitFeatures = splitFeature(featureToSplit, newFeatureNames);
 		if (valueSplitter != null) {
 			modelMigrator.copyRule(
 				modelMigrator.wasRelatedTo(featureToSplit),
@@ -5255,7 +5249,7 @@ class EdeltaModelMigratorTest {
 			final Collection<String> newFeatureNames,
 			Function<EObject, Collection<EObject>> objectValueSplitter,
 			Runnable postCopy) {
-		var splitFeatures = splitFeature(modelMigrator, featureToSplit, newFeatureNames);
+		var splitFeatures = splitFeature(featureToSplit, newFeatureNames);
 		if (objectValueSplitter != null) {
 			modelMigrator.copyRule(
 				modelMigrator.wasRelatedTo(featureToSplit),
@@ -5276,19 +5270,18 @@ class EdeltaModelMigratorTest {
 		return splitFeatures;
 	}
 
-	private <T extends EStructuralFeature> Collection<T> splitFeature(EdeltaModelMigrator modelMigrator,
-			final T featureToSplit,
+	private <T extends EStructuralFeature> Collection<T> splitFeature(final T featureToSplit,
 			final Collection<String> newFeatureNames) {
 		// THIS SHOULD BE CHECKED IN THE FINAL IMPLEMENTATION
 		// ALSO MAKE SURE IT'S A SINGLE FEATURE, NOT MULTI (TO BE DONE ALSO IN refactorings.lib)
 		// ALSO MAKE SURE IT'S NOT BIDIRECTIONAL (TO BE DONE ALSO IN refactorings.lib)
 		var splitFeatures = newFeatureNames.stream()
 			.map(newName -> {
-				var newFeature = createCopy(modelMigrator, featureToSplit);
+				var newFeature = createCopy(featureToSplit);
 				newFeature.setName(newName);
 				return newFeature;
 			})
-			.collect(Collectors.toList());
+			.toList();
 		featureToSplit.getEContainingClass()
 			.getEStructuralFeatures().addAll(splitFeatures);
 		EdeltaUtils.removeElement(featureToSplit);
@@ -5365,8 +5358,7 @@ class EdeltaModelMigratorTest {
 	 */
 	private EAttribute subclassesToEnum(EdeltaModelMigrator modelMigrator,
 			String name, final Collection<EClass> subclasses) {
-		// TO BE DONE (already implemented in refactorings.lib) this.checkNoFeatures(subclasses);
-		// ORIGINAL : final EClass superclass = this.getSingleDirectSuperclass(subclasses);
+		// ORIGINAL : getSingleDirectSuperclass(subclasses)
 		// SIMPLIFIED HERE: TAKE THE FIRST ONE
 		var superclass = subclasses.iterator().next().getESuperTypes().get(0);
 		var containingPackage = superclass.getEPackage();
