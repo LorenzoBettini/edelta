@@ -296,7 +296,7 @@ public class EdeltaTest {
 		assertTrue(errorSupplierCalled.get());
 		assertTrue(warnSupplierCalled.get());
 		// this seems to give problems when run from Maven/Tycho
-		// assertTrue(infoSupplierCalled.get());
+		// assert True infoSupplierCalled.get()
 		assertFalse(debugSupplierCalled.get());
 	}
 
