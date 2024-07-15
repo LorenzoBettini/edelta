@@ -28,7 +28,7 @@ import edelta.validation.EdeltaValidator;
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
 public class EdeltaQuickfixTest extends AbstractQuickfixTest {
-	private static String TEST_PROJECT = "edelta.ui.tests.project";
+	private static final String TEST_PROJECT = "edelta.ui.tests.project";
 
 	@Rule
 	public Flaky.Rule testRule = new Flaky.Rule();

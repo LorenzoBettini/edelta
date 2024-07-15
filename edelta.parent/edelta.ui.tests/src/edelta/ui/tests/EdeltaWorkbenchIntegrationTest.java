@@ -29,7 +29,7 @@ public class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest 
 
 	private static IProject project;
 
-	private static String TEST_PROJECT = "edelta.ui.tests.project";
+	private static final String TEST_PROJECT = "edelta.ui.tests.project";
 
 	@BeforeClass
 	public static void importTestProject() throws Exception {
