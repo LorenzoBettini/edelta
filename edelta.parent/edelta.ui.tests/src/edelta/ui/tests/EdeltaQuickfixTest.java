@@ -44,6 +44,7 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
 	 */
 	@Override
 	public void setUp() {
+		// avoid deleting project
 	}
 
 	/**

@@ -46,6 +46,7 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 	 */
 	@Override
 	public void setUp() {
+		// avoid deleting project
 	}
 
 	/**
