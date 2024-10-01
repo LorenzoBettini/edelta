@@ -3,10 +3,12 @@
  */
 package edelta.validation;
 
-import static com.google.common.collect.Iterables.filter;
-import static edelta.edelta.EdeltaPackage.Literals.*;
-import static org.eclipse.xtext.xbase.lib.IteratorExtensions.head;
-import static org.eclipse.xtext.xbase.typesystem.util.Multimaps2.newLinkedHashListMultimap;
+import static edelta.edelta.EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE__ENAMEDELEMENT;
+import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MIGRATION__NS_URI;
+import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MIGRATION__TO;
+import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MODIFY_ECORE_OPERATION__EPACKAGE;
+import static edelta.edelta.EdeltaPackage.Literals.EDELTA_PROGRAM__EPACKAGES;
+import static edelta.edelta.EdeltaPackage.Literals.EDELTA_USE_AS__TYPE;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -15,18 +17,16 @@ import java.util.Set;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.common.types.JvmGenericType;
-import org.eclipse.xtext.common.types.JvmOperation;
 import org.eclipse.xtext.common.types.JvmTypeReference;
 import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.validation.Check;
+import org.eclipse.xtext.validation.ComposedChecks;
 import org.eclipse.xtext.xbase.XAbstractFeatureCall;
-import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations;
-import org.eclipse.xtext.xbase.typesystem.override.OverrideHelper;
 import org.eclipse.xtext.xbase.typesystem.references.LightweightTypeReference;
 import org.eclipse.xtext.xbase.typesystem.references.StandardTypeReferenceOwner;
 import org.eclipse.xtext.xbase.typesystem.util.CommonTypeComputationServices;
+import org.eclipse.xtext.xbase.validation.JvmGenericTypeValidator;
 
-import com.google.common.collect.ListMultimap;
 import com.google.inject.Inject;
 
 import edelta.edelta.EdeltaEcoreReferenceExpression;
@@ -44,6 +44,7 @@ import edelta.util.EdeltaModelUtil;
  * See
  * https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#validation
  */
+@ComposedChecks(validators = {JvmGenericTypeValidator.class})
 public class EdeltaValidator extends AbstractEdeltaValidator {
 	public static final String PREFIX = "edelta.";
 
@@ -59,8 +60,6 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 
 	public static final String INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT = PREFIX
 			+ "InterpreterAccessNotYetExistingElement";
-
-	public static final String DUPLICATE_DECLARATION = PREFIX + "DuplicateDeclaration";
 
 	public static final String DUPLICATE_METAMODEL_IMPORT = PREFIX + "DuplicateMetamodelImport";
 
@@ -91,12 +90,6 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 	private CommonTypeComputationServices services;
 
 	@Inject
-	private OverrideHelper overrideHelper;
-
-	@Inject
-	private IJvmModelAssociations jvmModelAssociations;
-
-	@Inject
 	private IQualifiedNameProvider qualifiedNameProvider;
 
 	@Inject
@@ -124,26 +117,6 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 	public void checkProgram(EdeltaProgram p) {
 		Set<String> metamodelImportSet = checkDuplicateMetamodelImports(p);
 		checkDuplicateMigrationImports(p, metamodelImportSet);
-		var javaClass = head(
-			filter(jvmModelAssociations.getJvmElements(p), JvmGenericType.class).iterator());
-		var methods = overrideHelper.getResolvedFeatures(javaClass)
-				.getDeclaredOperations();
-		ListMultimap<String, JvmOperation> map = newLinkedHashListMultimap();
-		for (var d : methods) {
-			map.put(d.getResolvedErasureSignature(), d.getDeclaration());
-		}
-		for (var entry : map.asMap().entrySet()) {
-			var duplicates = entry.getValue();
-			if (duplicates.size() > 1) {
-				for (var dup : duplicates) {
-					var source = jvmModelAssociations.getPrimarySourceElement(dup);
-					error("Duplicate definition \'" + dup.getSimpleName() + "\'",
-						source,
-						source.eClass().getEStructuralFeature("name"),
-						DUPLICATE_DECLARATION);
-				}
-			}
-		}
 		var unresolvedEcoreReferences = edeltaDerivedStateHelper
 				.getUnresolvedEcoreReferences(p.eResource());
 		for (var ecoreRef : unresolvedEcoreReferences) {

@@ -248,23 +248,23 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
 		var prog = parseWithTestEcore(input);
 		validationTestHelper.assertError(
 				prog, EdeltaPackage.eINSTANCE.getEdeltaOperation(),
-				EdeltaValidator.DUPLICATE_DECLARATION,
+				IssueCodes.DUPLICATE_METHOD,
 				input.indexOf("anotherDuplicate"),
 				"anotherDuplicate".length(),
-				"Duplicate definition \'anotherDuplicate\'");
+				"Duplicate method anotherDuplicate");
 		validationTestHelper.assertError(
 				prog, EdeltaPackage.eINSTANCE.getEdeltaModifyEcoreOperation(),
-				EdeltaValidator.DUPLICATE_DECLARATION,
+				IssueCodes.DUPLICATE_METHOD,
 				input.lastIndexOf("anotherDuplicate"),
 				"anotherDuplicate".length(),
-				"Duplicate definition \'anotherDuplicate\'");
+				"Duplicate method anotherDuplicate");
 		assertErrorsAsStrings(prog, """
-		Duplicate definition 'aTest'
-		Duplicate definition 'aTest'
-		Duplicate definition 'anotherDuplicate'
-		Duplicate definition 'anotherDuplicate'
-		Duplicate definition 'myFun'
-		Duplicate definition 'myFun'
+		Duplicate method aTest(EPackage) in type __synthetic0
+		Duplicate method aTest(EPackage) in type __synthetic0
+		Duplicate method anotherDuplicate(EPackage) in type __synthetic0
+		Duplicate method anotherDuplicate(EPackage) in type __synthetic0
+		The method myFun(List<Integer>) has the same erasure myFun(java.util.List) as another method in type __synthetic0
+		The method myFun(List<String>) has the same erasure myFun(java.util.List) as another method in type __synthetic0
 		""");
 	}
 
