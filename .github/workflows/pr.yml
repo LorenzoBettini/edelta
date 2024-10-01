@@ -29,7 +29,7 @@ jobs:
         distribution: temurin
 
     - name: Restore cache
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: |
           ~/.m2
@@ -42,7 +42,7 @@ jobs:
       run: ./mvnw -f edelta.parent/pom.xml clean verify '-Ptest-ide'
 
     - name: Save cache
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       if: always()
       with:
         path: |
