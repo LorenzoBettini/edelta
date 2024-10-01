@@ -48,7 +48,7 @@ public abstract class EdeltaRuntime {
 	private Collection<EdeltaRuntime> children = new ArrayList<>();
 
 	/**
-	 * Reuses the {@link EdeltaEPackageManager} from the other object
+	 * Reuses the {@link EdeltaRuntime} from the other object
 	 * and also keeps track of updating the children of the other objects.
 	 * 
 	 * @param other

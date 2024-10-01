@@ -187,8 +187,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 	/**
 	 * Uses the passed {@link EdeltaCopiedEPackagesMap} to create an
-	 * {@link EdeltaEPackageManager} that implements
-	 * {@link EdeltaEPackageManager#getEPackage(String)} by simply delegating to the
+	 * {@link EdeltaDefaultRuntime} that implements
+	 * {@link EdeltaDefaultRuntime#getEPackage(String)} by simply delegating to the
 	 * passed map. Note that the passed map will be shared, so that updates to that
 	 * map are automatically used.
 	 * 

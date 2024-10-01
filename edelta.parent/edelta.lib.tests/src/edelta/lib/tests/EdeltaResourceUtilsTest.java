@@ -16,7 +16,7 @@ import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaResourceUtils;
 
 /**
- * Tests for the {@link EdeltaEPackageManager}.
+ * Tests for the {@link EdeltaResourceUtils}.
  * 
  * @author Lorenzo Bettini
  *
