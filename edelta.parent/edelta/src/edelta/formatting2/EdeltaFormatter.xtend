@@ -14,26 +14,7 @@ import edelta.edelta.EdeltaEcoreReferenceExpression
 
 class EdeltaFormatter extends XbaseWithAnnotationsFormatter {
 
-	override void format(Object expr, extension IFormattableDocument document) {
-		// you could use dispatch methods, but that will generate many other
-		// if cases for inherited dispatch methods that will never be executed during the
-		// tests and I prefer to have full control on code coverage.
-		if (expr instanceof EdeltaProgram) {
-			_format(expr, document)
-		} else if (expr instanceof EdeltaUseAs) {
-			_format(expr, document)
-		} else if (expr instanceof EdeltaOperation) {
-			_format(expr, document)
-		} else if (expr instanceof EdeltaModifyEcoreOperation) {
-			_format(expr, document)
-		} else if (expr instanceof EdeltaEcoreReferenceExpression) {
-			_format(expr, document)
-		} else {
-			super.format(expr, document)
-		}
-	}
-
-	def void _format(EdeltaProgram edeltaProgram, extension IFormattableDocument document) {
+	def dispatch void format(EdeltaProgram edeltaProgram, extension IFormattableDocument document) {
 		edeltaProgram.prepend[setNewLines(0, 0, 1); noSpace].append[newLine]
 		edeltaProgram.getImportSection.format;
 		edeltaProgram.regionFor.keyword("package").append[oneSpace]
@@ -51,7 +32,7 @@ class EdeltaFormatter extends XbaseWithAnnotationsFormatter {
 		}
 	}
 
-	def void _format(EdeltaUseAs useAs, extension IFormattableDocument document) {
+	def dispatch void format(EdeltaUseAs useAs, extension IFormattableDocument document) {
 		useAs.regionFor.keyword("use").append[oneSpace]
 		useAs.type.append[oneSpace]
 		useAs.type.format
@@ -59,7 +40,7 @@ class EdeltaFormatter extends XbaseWithAnnotationsFormatter {
 		useAs.regionFor.keyword("extension").append[oneSpace]
 	}
 
-	def void _format(EdeltaOperation operation, extension IFormattableDocument document) {
+	def dispatch void format(EdeltaOperation operation, extension IFormattableDocument document) {
 		operation.regionFor.keyword("def").append[oneSpace]
 		operation.regionFor.keyword("(").surround[noSpace]
 		if (!operation.params.isEmpty) {
@@ -79,14 +60,14 @@ class EdeltaFormatter extends XbaseWithAnnotationsFormatter {
 		operation.body.format
 	}
 
-	def void _format(EdeltaModifyEcoreOperation operation, extension IFormattableDocument document) {
+	def dispatch void format(EdeltaModifyEcoreOperation operation, extension IFormattableDocument document) {
 		operation.regionFor.keyword("modifyEcore").append[oneSpace]
 		operation.regionFor.keyword("epackage").surround[oneSpace]
 		operation.regionFor.feature(EDELTA_MODIFY_ECORE_OPERATION__EPACKAGE).surround[oneSpace]
 		operation.body.format
 	}
 
-	def void _format(EdeltaEcoreReferenceExpression ecoreref, extension IFormattableDocument document) {
+	def dispatch void format(EdeltaEcoreReferenceExpression ecoreref, extension IFormattableDocument document) {
 		ecoreref.regionFor.keyword("(").surround[noSpace]
 		for (node : ecoreref.reference.regionFor.keywords("."))
 			node.surround[noSpace]
