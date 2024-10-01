@@ -18,7 +18,7 @@ jobs:
 #      MAVEN_OPTS: --add-opens java.base/java.lang=ALL-UNNAMED
 
     steps:
-    - uses: actions/checkout@v2.5.0
+    - uses: actions/checkout@v4.2.0
       with:
         # Shallow clones should be disabled for a better relevancy of SonarQube analysis
         fetch-depth: 0
