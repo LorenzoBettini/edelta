@@ -9,6 +9,8 @@ on:
 
 jobs:
   build:
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     runs-on: ubuntu-latest
 # not required anymore, thanks to Guice 5
 #    env:
@@ -35,18 +37,23 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml', '**/*.target', '**/maven-wrapper.properties') }}
         restore-keys: ${{ runner.os }}-m2-
 
+    # execute sonar:sonar only for internal PRs
+    - name: Set Maven Additional Goals
+      run: |
+        echo "SONARGOAL=sonar:sonar" >> $GITHUB_ENV
+      if: ${{ env.SONAR_TOKEN }}
+
     - name: Build with Maven and SonarCloud
       run: >
         xvfb-run
         ./mvnw -f edelta.parent/pom.xml
         clean verify
         -Pjacoco,test-ide
-        sonar:sonar
         -Dsonar.organization=lorenzobettini-github
         -Dsonar.host.url=https://sonarcloud.io
+        $SONARGOAL
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
     - name: Save cache
       uses: actions/cache/save@v3
