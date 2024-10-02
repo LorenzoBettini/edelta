@@ -3,7 +3,7 @@ Automatic-Module-Name: edelta.testprojects.second
 Bundle-ManifestVersion: 2
 Bundle-Name: edelta.testprojects.second
 Bundle-Vendor: My Company
-Bundle-Version: 3.5.0.qualifier
+Bundle-Version: 3.6.0.qualifier
 Bundle-SymbolicName: edelta.testprojects.second; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: edelta.lib,
