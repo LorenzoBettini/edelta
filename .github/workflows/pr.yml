@@ -22,10 +22,10 @@ jobs:
       with:
         # Shallow clones should be disabled for a better relevancy of SonarQube analysis
         fetch-depth: 0
-    - name: Set up JDK 17
+    - name: Set up JDK
       uses: actions/setup-java@v4.6.0
       with:
-        java-version: 17
+        java-version: 21
         distribution: temurin
 
     - name: Restore cache
