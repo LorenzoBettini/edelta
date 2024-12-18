@@ -1,48 +1,58 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>io.github.lorenzobettini.edelta</groupId>
-    <artifactId>edelta.parent</artifactId>
-    <version>3.6.0-SNAPSHOT</version>
-  </parent>
-  <artifactId>edelta</artifactId>
-  <packaging>eclipse-plugin</packaging>
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>io.github.lorenzobettini.edelta</groupId>
+		<artifactId>edelta.parent</artifactId>
+		<version>3.6.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>edelta</artifactId>
+	<packaging>eclipse-plugin</packaging>
 
-  <properties>
-    <!-- required to run MWE2 -->
-    <mwe2-file>src/edelta/GenerateEdelta.mwe2</mwe2-file>
-  </properties>
+	<properties>
+		<!-- required to run MWE2 -->
+		<mwe2-file>src/edelta/GenerateEdelta.mwe2</mwe2-file>
+	</properties>
 
-  <dependencies>
-    <dependency>
-      <groupId>io.github.lorenzobettini.edelta</groupId>
-      <artifactId>edelta.lib</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.xtext</groupId>
-      <artifactId>org.eclipse.xtext.ecore</artifactId>
-    </dependency>
-  </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>io.github.lorenzobettini.edelta</groupId>
+			<artifactId>edelta.lib</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.xtext</groupId>
+			<artifactId>org.eclipse.xtext.ecore</artifactId>
+		</dependency>
+	</dependencies>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>mwe2Launcher</id>
-            <phase>generate-sources</phase>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.eclipse.xtend</groupId>
-        <artifactId>xtend-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>mwe2Launcher</id>
+						<phase>generate-sources</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<includePluginDependencies>true</includePluginDependencies>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.eclipse.xtext</groupId>
+						<artifactId>org.eclipse.xtext.xtext.generator.dependencies</artifactId>
+						<version>${xtext-version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.xtend</groupId>
+				<artifactId>xtend-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>
