@@ -10,6 +10,8 @@ An Xtext DSL for EMF metamodels refactoring and migration
 
 ### Requirements
 
+Since version 3.7.0, the Edelta Eclipse distribution requires Java 21.
+
 Since version 3.1.0, Edelta requires Java 17.
 
 ### Eclipse update site (new URL)
