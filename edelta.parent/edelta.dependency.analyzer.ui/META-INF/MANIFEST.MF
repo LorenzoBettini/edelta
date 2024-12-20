@@ -13,7 +13,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.xtext.util,
  edelta.dependency.analyzer.picto,
  org.eclipse.core.expressions,
- edelta.ui
+ edelta.ui,
+ org.eclipse.epsilon.picto;bundle-version="2.5.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: edelta.dependency.analyzer.ui
 Bundle-ActivationPolicy: lazy
