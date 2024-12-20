@@ -54,7 +54,7 @@
 			<unit id="org.eclipse.epsilon.emf.feature.feature.group"
 				version="0.0.0" />
 			<repository
-				location="https://download.eclipse.org/epsilon/updates/2.4/" />
+				location="https://download.eclipse.org/epsilon/updates/2.5/" />
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="false"
 			includeMode="planner" includeSource="true" type="InstallableUnit">
