@@ -73,7 +73,7 @@
 			<unit id="junit-platform-suite-api" version="0.0.0"/>
 			<unit id="junit-platform-suite-commons" version="0.0.0"/>
 			<unit id="junit-vintage-engine" version="0.0.0"/>
-			<unit id="org.mockito.mockito-core" version="5.14.2" />
+			<unit id="org.mockito.mockito-core" version="0.0.0" />
 			<unit id="assertj-core" version="3.26.3" />
 			<repository
 				location="https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/2024-09" />
