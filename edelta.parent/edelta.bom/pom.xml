@@ -11,7 +11,7 @@
   <parent>
     <groupId>io.github.lorenzobettini.xtextutils</groupId>
     <artifactId>xtext-tycho-parent</artifactId>
-    <version>0.17.0</version>
+    <version>0.18.0</version>
     <!-- REMEMBER: update xtextVersion in edelta.maven.example -->
     <relativePath></relativePath>
   </parent>
@@ -116,7 +116,7 @@
         <plugin>
           <groupId>org.sonarsource.scanner.maven</groupId>
           <artifactId>sonar-maven-plugin</artifactId>
-          <version>3.9.0.2155</version>
+          <version>3.9.1.2184</version>
         </plugin>
       </plugins>
     </pluginManagement>
