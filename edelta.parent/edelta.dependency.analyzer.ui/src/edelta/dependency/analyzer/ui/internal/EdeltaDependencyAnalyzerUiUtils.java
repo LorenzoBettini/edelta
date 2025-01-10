@@ -34,9 +34,9 @@ public class EdeltaDependencyAnalyzerUiUtils {
 
 	public static void executeOnIFileSelection(ExecutionEvent event, IFileRunnable consumer) throws ExecutionException {
 		var selection = HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().getSelection();
-		if (selection instanceof IStructuredSelection) {
-			var firstElement = ((IStructuredSelection) selection).getFirstElement();
-			if (firstElement instanceof IFile) {
+		if (selection instanceof IStructuredSelection structuredSelection) {
+			var firstElement = structuredSelection.getFirstElement();
+			if (firstElement instanceof IFile file) {
 				try {
 					var service = PlatformUI.getWorkbench().getProgressService();
 					service.run(false, false, new WorkspaceModifyOperation() {
@@ -44,7 +44,7 @@ public class EdeltaDependencyAnalyzerUiUtils {
 						protected void execute(IProgressMonitor monitor)
 								throws CoreException, InvocationTargetException, InterruptedException {
 							try {
-								consumer.accept((IFile) firstElement, monitor);
+								consumer.accept(file, monitor);
 							} catch (IOException e) {
 								throw new CoreException(
 										new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));

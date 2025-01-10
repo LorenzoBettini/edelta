@@ -20,7 +20,7 @@ rule Repo2Graphviz
 }
 
 rule SingleArtifact
- 
+
 	transform node : GraphMM::Metamodel{
 
 	template : "ecosystem2graphd3.egl"
@@ -32,17 +32,22 @@ rule SingleArtifact
 		"layers" = Sequence {
 		},
 		"subject" = node,
-		
-        "nodes" =  node.getConnected(),
-       
-        "edges" = node.graph.edges.select(e|e.src==node or e.trg==node)
-       
+
+		"nodes" =  node.getConnected(),
+
+		"edges" = node.graph.edges.select(e|e.src==node or e.trg==node)
 	}
-	
+
 }
 
-operation Node getConnected(): Set(Artifact){
-var ecosystem = self.graph;
-return ecosystem.nodes.select(a|ecosystem.edges.select(rel| emfTool.EcoreUtil.equals(rel.src,a) or emfTool.EcoreUtil.equals(rel.trg,a)).select(r|emfTool.EcoreUtil.equals(r.src,self) or emfTool.EcoreUtil.equals(r.trg,self)).size()>0);
+operation Node getConnected(){
+	var ecosystem = self.graph;
+	var edges = ecosystem.edges;
+
+	return ecosystem.nodes.select
+		(a | edges.select
+			(rel| emfTool.EcoreUtil.equals(rel.src,a)
+				or emfTool.EcoreUtil.equals(rel.trg,a)).select(r|emfTool.EcoreUtil.equals(r.src,self)
+				or emfTool.EcoreUtil.equals(r.trg,self)).size()>0);
 }
 
