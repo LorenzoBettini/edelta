@@ -30,9 +30,12 @@ public class EdeltaRunDependencyAnalysisHandler extends AbstractHandler {
 	private static final int MONITOR_CHILD_WORK = 20;
 	private static final int MONITOR_WORK = 100;
 
-	private static final String PICTO_FILE_CONTENTS = "<?nsuri picto?>\n" + "<picto\n"
-			+ "  transformation=\"platform:/plugin/edelta.dependency.analyzer.picto/picto/ecosystem2graphd3.egx\">\n"
-			+ "</picto>\n";
+	private static final String PICTO_FILE_CONTENTS = """
+		<?nsuri picto?>
+		<picto
+		  transformation="platform:/plugin/edelta.dependency.analyzer.picto/picto/ecosystem2graphd3.egx">
+		</picto>
+		""";
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
