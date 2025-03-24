@@ -16,5 +16,5 @@
    <category-def name="main.source" label="Edelta 3.7.x (Sources)"/>
    <repository-reference location="https://download.eclipse.org/modeling/tmf/xtext/updates/releases/${xtextVersion}/" enabled="true" />
    <repository-reference location="https://download.eclipse.org/releases/${eclipse-version}/" enabled="true" />
-   <repository-reference location="https://download.eclipse.org/epsilon/updates/2.6/" enabled="true" />
+   <repository-reference location="https://download.eclipse.org/epsilon/updates/2.8/" enabled="true" />
 </site>

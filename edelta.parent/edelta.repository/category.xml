@@ -14,7 +14,7 @@
    </feature>
    <category-def name="main" label="Edelta 3.7.x"/>
    <category-def name="main.source" label="Edelta 3.7.x (Sources)"/>
-   <repository-reference location="https://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.37.0/" enabled="true" />
-   <repository-reference location="https://download.eclipse.org/releases/2024-12/" enabled="true" />
-   <repository-reference location="https://download.eclipse.org/epsilon/updates/2.6/" enabled="true" />
+   <repository-reference location="https://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.38.0/" enabled="true" />
+   <repository-reference location="https://download.eclipse.org/releases/2025-03/" enabled="true" />
+   <repository-reference location="https://download.eclipse.org/epsilon/updates/2.8/" enabled="true" />
 </site>
