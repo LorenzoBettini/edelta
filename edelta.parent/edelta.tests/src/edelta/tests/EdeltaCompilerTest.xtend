@@ -13,7 +13,6 @@ import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.util.JavaVersion
 import org.eclipse.xtext.xbase.testing.CompilationTestHelper
-import org.eclipse.xtext.xbase.testing.TemporaryFolder
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -21,6 +20,7 @@ import org.junit.runner.RunWith
 
 import static edelta.testutils.EdeltaTestUtils.*
 import static org.assertj.core.api.Assertions.*
+import org.eclipse.xtext.testing.TemporaryFolder
 
 @RunWith(XtextRunner)
 @InjectWith(EdeltaInjectorProviderTestableDerivedStateComputer)
