@@ -38,8 +38,6 @@ public class EdeltaTwoProjectsWorkbenchIntegrationTest extends CustomAbstractWor
 		var project2 = importProject(EdeltaTwoProjectsWorkbenchIntegrationTest.SECOND_PROJECT);
 		cleanup(project1);
 		cleanup(project2);
-		// build twice to avoid possible flakyness
-		waitForBuild();
 		waitForBuild();
 		PluginProjectHelper.assertNoErrors();
 		assertSrcGenFolderFile(project1, "com/example1", "Example1.java");

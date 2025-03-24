@@ -1,6 +1,6 @@
 package edelta.ui.tests;
 
-import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.createFile;
+import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -18,7 +18,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import edelta.ui.internal.EdeltaActivator;
-import edelta.ui.tests.utils.EdeltaWorkbenchUtils;
 import edelta.ui.tests.utils.ProjectImportUtil;
 
 @RunWith(XtextRunner.class)
@@ -64,7 +63,7 @@ public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest 
 			TEST_PROJECT + "/src/Test.edelta",
 			program
 		);
-		EdeltaWorkbenchUtils.waitForBuildWithRetries();
+		waitForBuild();
 	}
 
 	/**

@@ -15,7 +15,7 @@
   <description>An Xtext DSL for EMF metamodels refactoring and migration.</description>
 
   <properties>
-    <eclipse-version>2024-12</eclipse-version>
+    <eclipse-version>2025-03</eclipse-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
