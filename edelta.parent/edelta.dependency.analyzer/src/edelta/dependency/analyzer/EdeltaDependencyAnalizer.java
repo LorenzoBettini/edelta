@@ -54,7 +54,7 @@ public class EdeltaDependencyAnalizer {
 	public Repository analyzeEPackage(String ecoreFile) throws IOException {
 		var loaded = modelManager.loadEcoreFile(ecoreFile);
 		var packageToAnalyze = EdeltaResourceUtils.getEPackage(loaded);
-		String path = new File(ecoreFile).getParent();
+		var path = new File(ecoreFile).getParent();
 		return analyzeEPackage(path, packageToAnalyze.getName());
 	}
 
