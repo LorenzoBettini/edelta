@@ -25,7 +25,7 @@ class EdeltaPromptHelperTest {
 	private final InputStream originalIn = System.in;
 
 	@BeforeEach
-	public void setUpStreams() {
+	void setUpStreams() {
 		outContent = new ByteArrayOutputStream();
 		errContent = new ByteArrayOutputStream();
 		System.setOut(new PrintStream(outContent));
@@ -33,7 +33,7 @@ class EdeltaPromptHelperTest {
 	}
 
 	@AfterEach
-	public void restoreStreams() {
+	void restoreStreams() {
 		EdeltaPromptHelper.close();
 		System.setOut(originalOut);
 		System.setErr(originalErr);
