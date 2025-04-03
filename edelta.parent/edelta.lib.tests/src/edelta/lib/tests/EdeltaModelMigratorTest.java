@@ -217,10 +217,10 @@ class EdeltaModelMigratorTest {
 		);
 
 		// refactoring of Ecore
-		getFeature(evolvingModelManager, 
+		getFeature(evolvingModelManager,
 				"mypackage", "MyRoot", "myReferences")
 			.setName("myReferencesRenamed");
-		getFeature(evolvingModelManager, 
+		getFeature(evolvingModelManager,
 				"mypackage", "MyRoot", "myContents")
 			.setName("myContentsRenamed");
 
@@ -747,7 +747,7 @@ class EdeltaModelMigratorTest {
 	 * From the metamodel point of view we get the same Ecore,
 	 * but of course from the model point of view, during the first migration,
 	 * we lose some elements (the ones after the first one).
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -778,18 +778,18 @@ class EdeltaModelMigratorTest {
 	@Test
 	void testMakeSingleNonContainmentReference() throws IOException {
 		var subdir = "referencesMultiple/";
-	
+
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("My.ecore"),
 			of("MyRoot.xmi")
 		);
-	
+
 		var reference = getReference(evolvingModelManager,
 				"mypackage", "MyRoot", "myReferences");
-	
+
 		makeSingle(modelMigrator, reference);
-	
+
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			"makeSingleNonContainmentReference/",
@@ -802,24 +802,24 @@ class EdeltaModelMigratorTest {
 	 * Since the list is turned into a single element and the second element used
 	 * to be the only referred class, the non containment references will be empty
 	 * in the migrated model.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
 	void testMakeSingleContainmentReference() throws IOException {
 		var subdir = "referencesMultiple/";
-	
+
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("My.ecore"),
 			of("MyRoot.xmi")
 		);
-	
+
 		var reference = getReference(evolvingModelManager,
 				"mypackage", "MyRoot", "myContents");
-	
+
 		makeSingle(modelMigrator, reference);
-	
+
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			"makeSingleContainmentReference/",
@@ -831,18 +831,18 @@ class EdeltaModelMigratorTest {
 	@Test
 	void testMakeMultipleNonContainmentReference() throws IOException {
 		var subdir = "referencesSingle/";
-	
+
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi")
 		);
-	
+
 		var reference = getReference(evolvingModelManager,
 				"mypackage", "MyRoot", "myReferences");
-	
+
 		makeMultiple(modelMigrator, reference);
-	
+
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			"makeMultipleNonContainmentReference/",
@@ -854,18 +854,18 @@ class EdeltaModelMigratorTest {
 	@Test
 	void testMakeMultipleContainmentReference() throws IOException {
 		var subdir = "referencesSingle/";
-	
+
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("My.ecore"),
 			of("MyRoot.xmi", "MyClass.xmi")
 		);
-	
+
 		var reference = getReference(evolvingModelManager,
 				"mypackage", "MyRoot", "myContents");
-	
+
 		makeMultiple(modelMigrator, reference);
-	
+
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			"makeMultipleContainmentReference/",
@@ -903,7 +903,7 @@ class EdeltaModelMigratorTest {
 	 * From the metamodel point of view we get the same Ecore,
 	 * but of course from the model point of view, during the first migration,
 	 * we lose some elements (the ones after the first one).
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -960,11 +960,11 @@ class EdeltaModelMigratorTest {
 	 * From the metamodel point of view we get the same Ecore,
 	 * but of course from the model point of view, during the first migration,
 	 * we lose some elements (the ones after the first one).
-	 * 
+	 *
 	 * Since the list is turned into a single element and the second element used
 	 * to be the only referred class, the non containment references will be empty
 	 * in the migrated model.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -1132,7 +1132,7 @@ class EdeltaModelMigratorTest {
 	 * multiplicity before, will lead to an empty list for original null string
 	 * values. These two behaviors must be the same, that's why we have
 	 * the check eObject.eIsSet(feature) in {@link EdeltaModelMigrator#copyRule(Predicate, EdeltaModelMigrator.CopyProcedure)}.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -1753,7 +1753,7 @@ class EdeltaModelMigratorTest {
 	 * original one, but we have to adjust some mappings to make the copy work,
 	 * because the value from the original object has to be put in an inherited
 	 * attribute in the copied object.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -1970,13 +1970,13 @@ class EdeltaModelMigratorTest {
 	@Test
 	void testMakeBidirectionalExisting() throws IOException {
 		var subdir = "makeBidirectionalExisting/";
-	
+
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
 		);
-	
+
 		var personWorks = getReference(evolvingModelManager,
 				"PersonList", "Person", "works");
 		// refactoring
@@ -1985,7 +1985,7 @@ class EdeltaModelMigratorTest {
 		assertNotNull(workPlacePerson);
 		// this should not change anything
 		EdeltaUtils.makeBidirectional(personWorks, workPlacePerson);
-	
+
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
@@ -1997,10 +1997,10 @@ class EdeltaModelMigratorTest {
 	/**
 	 * Makes sure that when copying a model, getting the migrated version of an
 	 * object will use the current copier (and don't copy the same object twice).
-	 * 
+	 *
 	 * IMPORTANT: this strongly relies on the contents of the test model MyRoot.xmi,
 	 * which contains two MyClass objects.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2050,7 +2050,7 @@ class EdeltaModelMigratorTest {
 					assertThat(migratedValue.toString())
 						.isUpperCase();
 				}
-				
+
 				return oldValue.toString().toUpperCase();
 			}
 		);
@@ -2066,10 +2066,10 @@ class EdeltaModelMigratorTest {
 	/**
 	 * Makes sure that when copying a model, getting the migrated version of an
 	 * object will use the current copier (and don't copy the same object twice).
-	 * 
+	 *
 	 * IMPORTANT: this strongly relies on the contents of the test model MyRoot.xmi,
 	 * which contains two MyClass objects.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2117,7 +2117,7 @@ class EdeltaModelMigratorTest {
 					assertThat(migratedValue.toString())
 						.isUpperCase();
 				}
-				
+
 				return oldValue.toString().toUpperCase();
 			}
 		);
@@ -2133,10 +2133,10 @@ class EdeltaModelMigratorTest {
 	/**
 	 * Makes sure that when copying a model, getting the migrated version of an
 	 * object will use the current copier (and don't copy the same object twice).
-	 * 
+	 *
 	 * IMPORTANT: this strongly relies on the contents of the test model MyRoot.xmi,
 	 * which contains two MyClass objects.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2205,10 +2205,10 @@ class EdeltaModelMigratorTest {
 	/**
 	 * Makes sure that when copying a model, getting the migrated version of an
 	 * object will use the current copier (and don't copy the same object twice).
-	 * 
+	 *
 	 * IMPORTANT: this strongly relies on the contents of the test model MyRoot.xmi,
 	 * which contains two MyClass objects.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2252,10 +2252,10 @@ class EdeltaModelMigratorTest {
 	/**
 	 * Makes sure that when copying a model, getting the migrated version of an
 	 * object will use the current copier (and don't copy the same object twice).
-	 * 
+	 *
 	 * IMPORTANT: this strongly relies on the contents of the test model MyRoot.xmi,
 	 * which contains two MyClass objects.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2315,7 +2315,7 @@ class EdeltaModelMigratorTest {
 		"referenceToClassBidirectionalDifferentOrder/",
 		"referenceToClassBidirectionalOppositeMultiple/",
 		"referenceToClassMultipleBidirectional/",
-		
+
 	})
 	void testReferenceToClass(String directory) throws IOException {
 		var subdir = directory;
@@ -2389,7 +2389,7 @@ class EdeltaModelMigratorTest {
 	 * Changing from multi to single only the main reference after performing
 	 * referenceToClass does not make much sense, since in the evolved model we lose
 	 * some associations. This is just to make sure that nothing else bad happens
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2420,7 +2420,7 @@ class EdeltaModelMigratorTest {
 	 * Changing from multi to single only the opposite reference after performing
 	 * referenceToClass does not make much sense, since in the evolved model we lose
 	 * some associations. This is just to make sure that nothing else bad happens
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2457,7 +2457,7 @@ class EdeltaModelMigratorTest {
 	 * Changing from multi to single only the opposite reference after performing
 	 * referenceToClass does not make much sense, since in the evolved model we lose
 	 * some associations. This is just to make sure that nothing else bad happens
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2494,7 +2494,7 @@ class EdeltaModelMigratorTest {
 	 * Changing from multi to single the two bidirectional references after performing
 	 * referenceToClass does not make much sense, since in the evolved model we lose
 	 * some associations. This is just to make sure that nothing else bad happens
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2530,7 +2530,7 @@ class EdeltaModelMigratorTest {
 	 * Changing from multi to single the two bidirectional references after performing
 	 * referenceToClass does not make much sense, since in the evolved model we lose
 	 * some associations. This is just to make sure that nothing else bad happens
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2594,7 +2594,7 @@ class EdeltaModelMigratorTest {
 
 	/**
 	 * The inversion works both for the metamodel and for the model.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2744,13 +2744,13 @@ class EdeltaModelMigratorTest {
 	@Test
 	void testMergeAttributesManual() throws IOException {
 		var subdir = "mergeAttributesManual/";
-	
+
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("Person.ecore"),
 			of("Person.xmi")
 		);
-	
+
 		var firstName = getAttribute(evolvingModelManager,
 				"person", "Person", "firstname");
 		var lastName = getAttribute(evolvingModelManager,
@@ -2767,13 +2767,13 @@ class EdeltaModelMigratorTest {
 				// so we must use the original feature to retrieve the value to copy
 				// that is, don't use attribute, which is the one of the new package
 				var eClass = o.eClass();
-				return 
+				return
 					o.eGet(feature) +
 					" " +
 					o.eGet(eClass.getEStructuralFeature("lastname"));
 			}
 		);
-	
+
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
@@ -2872,11 +2872,12 @@ class EdeltaModelMigratorTest {
 				// of merging the original objects' values
 				var mergedValue = values.stream()
 					.map(EObject.class::cast)
-					.map(o -> 
+					.map(o ->
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
-				if (mergedValue.isEmpty())
+				if (mergedValue.isEmpty()) {
 					return null;
+				}
 				return EdeltaEcoreUtil.createInstance(nameElement,
 					// since it's a containment feature, setting it will also
 					// add it to the resource
@@ -2896,14 +2897,14 @@ class EdeltaModelMigratorTest {
 	/**
 	 * It might not make much sense to merge features concerning non containment
 	 * references, but we just check that we can do it.
-	 * 
+	 *
 	 * We assume that referred NameElements are not shared among Person, so that we
 	 * remove them while performing the copy (and split and merging), otherwise we
 	 * end up with a few additional objects in the final model.
-	 * 
+	 *
 	 * In a more realistic scenario, the modeler will have to take care of that,
 	 * e.g., by later removing NameElements that are not referred anymore.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2931,8 +2932,9 @@ class EdeltaModelMigratorTest {
 				// it is responsibility of the merger to create an instance
 				// of the (now single) referred object with the result
 				// of merging the original objects' values
-				if (values.isEmpty())
+				if (values.isEmpty()) {
 					return null;
+				}
 
 				var firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
@@ -2943,7 +2945,7 @@ class EdeltaModelMigratorTest {
 				EcoreUtil.removeAll(values);
 
 				var mergedValue = values.stream()
-					.map(o -> 
+					.map(o ->
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
 				return EdeltaEcoreUtil.createInstance(nameElement,
@@ -2973,9 +2975,9 @@ class EdeltaModelMigratorTest {
 	 * semantics is kept in the evolved models, and we can then remove the old
 	 * objects that have been merged (indeed they don't make sense anymore in the
 	 * evolved model).
-	 * 
+	 *
 	 * This requires some additional effort, but it shows that we can do it!
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -3007,14 +3009,16 @@ class EdeltaModelMigratorTest {
 				// it is responsibility of the merger to create an instance
 				// of the (now single) referred object with the result
 				// of merging the original objects' values
-				if (values.isEmpty())
+				if (values.isEmpty()) {
 					return null;
+				}
 
 				var alreadyMerged = merged.get(values);
-				if (alreadyMerged != null)
+				if (alreadyMerged != null) {
 					return alreadyMerged;
 				// we have already processed the object collection
 				// and created a merged one so we reuse it
+				}
 
 				var firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
@@ -3022,7 +3026,7 @@ class EdeltaModelMigratorTest {
 					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				var mergedValue = values.stream()
-					.map(o -> 
+					.map(o ->
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
 				return EdeltaEcoreUtil.createInstance(nameElement,
@@ -3073,8 +3077,9 @@ class EdeltaModelMigratorTest {
 				"lastName"),
 			value -> {
 				// a few more checks should be performed in a realistic context
-				if (value == null)
+				if (value == null) {
 					return Collections.emptyList();
+				}
 				var split = value.toString().split("\\s+");
 				return Arrays.asList(split);
 			}, null
@@ -3112,14 +3117,15 @@ class EdeltaModelMigratorTest {
 				"lastName"),
 			obj -> {
 				// a few more checks should be performed in a realistic context
-				if (obj == null)
+				if (obj == null) {
 					return Collections.emptyList();
+				}
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
 				// that is, in case of a single element, the lastName will be empty
 				var split = obj.eGet(nameElementAttribute).toString().split("\\s+");
 				return Stream.of(split)
-					.map(val -> 
+					.map(val ->
 						EdeltaEcoreUtil.createInstance(nameElement,
 							o -> o.eSet(nameElementAttribute, val)
 						)
@@ -3140,10 +3146,10 @@ class EdeltaModelMigratorTest {
 	 * We assume that referred NameElements are not shared among Person, so that we
 	 * remove them while performing the copy (and split and merging), otherwise we
 	 * end up with a few additional objects in the final model.
-	 * 
+	 *
 	 * In a more realistic scenario, the modeler will have to take care of that,
 	 * e.g., by later removing NameElements that are not referred anymore.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -3170,8 +3176,9 @@ class EdeltaModelMigratorTest {
 				"lastName"),
 			obj -> {
 				// a few more checks should be performed in a realistic context
-				if (obj == null)
+				if (obj == null) {
 					return Collections.emptyList();
+				}
 
 				var containingFeature = obj.eContainingFeature();
 				var containerCollection =
@@ -3213,9 +3220,9 @@ class EdeltaModelMigratorTest {
 	 * semantics is kept in the evolved models, and we can then remove the old
 	 * objects that have been splitted (indeed they don't make sense anymore in the
 	 * evolved model).
-	 * 
+	 *
 	 * This requires some additional effort, but it shows that we can do it!
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -3246,14 +3253,16 @@ class EdeltaModelMigratorTest {
 				"lastName"),
 			obj -> {
 				// a few more checks should be performed in a realistic context
-				if (obj == null)
+				if (obj == null) {
 					return Collections.emptyList();
+				}
 
 				var alreadySplitted = splitted.get(obj);
-				if (alreadySplitted != null)
+				if (alreadySplitted != null) {
 					return alreadySplitted;
 				// we have already processed the object collection
 				// and created a merged one so we reuse it
+				}
 
 				var containingFeature = obj.eContainingFeature();
 				var containerCollection =
@@ -3298,9 +3307,9 @@ class EdeltaModelMigratorTest {
 	 * long the merge and split can be inversed. For example, in this test we have
 	 * "firstname lastname" or no string at all. If you had "lastname" then the
 	 * model wouldn't be reversable.
-	 * 
+	 *
 	 * The input directory and the output one will contain the same data.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -3323,8 +3332,9 @@ class EdeltaModelMigratorTest {
 				"lastName"),
 			value -> {
 				// a few more checks should be performed in a realistic context
-				if (value == null)
+				if (value == null) {
 					return Collections.emptyList();
+				}
 				var split = value.toString().split("\\s+");
 				return Arrays.asList(split);
 			}, null
@@ -3352,9 +3362,9 @@ class EdeltaModelMigratorTest {
 
 	/**
 	 * The evolved metamodel and model are just the same as the original ones.
-	 * 
+	 *
 	 * The input directory and the output one will contain the same data.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -3391,8 +3401,9 @@ class EdeltaModelMigratorTest {
 				personLastName.getName()),
 			value -> {
 				// a few more checks should be performed in a realistic context
-				if (value == null)
+				if (value == null) {
 					return Collections.emptyList();
+				}
 				var split = value.toString().split("\\s+");
 				return Arrays.asList(split);
 			}, null
@@ -3435,11 +3446,12 @@ class EdeltaModelMigratorTest {
 				// of merging the original objects' values
 				var mergedValue = values.stream()
 					.map(EObject.class::cast)
-					.map(o -> 
+					.map(o ->
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
-				if (mergedValue.isEmpty())
+				if (mergedValue.isEmpty()) {
 					return null;
+				}
 				return EdeltaEcoreUtil.createInstance(nameElement,
 					// since it's a containment feature, setting it will also
 					// add it to the resource
@@ -3455,14 +3467,15 @@ class EdeltaModelMigratorTest {
 				personLastName.getName()),
 			obj -> {
 				// a few more checks should be performed in a realistic context
-				if (obj == null)
+				if (obj == null) {
 					return Collections.emptyList();
+				}
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
 				// that is, in case of a single element, the lastName will be empty
 				var split = obj.eGet(nameElementAttribute).toString().split("\\s+");
 				return Stream.of(split)
-					.map(val -> 
+					.map(val ->
 						EdeltaEcoreUtil.createInstance(nameElement,
 							o -> o.eSet(nameElementAttribute, val)
 						)
@@ -3484,7 +3497,7 @@ class EdeltaModelMigratorTest {
 	 * {@link #testMergeFeaturesNonContainment()}
 	 * and
 	 * {@link #testSplitFeatureNonContainment()}
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -3514,8 +3527,9 @@ class EdeltaModelMigratorTest {
 				// it is responsibility of the merger to create an instance
 				// of the (now single) referred object with the result
 				// of merging the original objects' values
-				if (values.isEmpty())
+				if (values.isEmpty()) {
 					return null;
+				}
 
 				var firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
@@ -3526,7 +3540,7 @@ class EdeltaModelMigratorTest {
 				EcoreUtil.removeAll(values);
 
 				var mergedValue = values.stream()
-					.map(o -> 
+					.map(o ->
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
 				return EdeltaEcoreUtil.createInstance(nameElement,
@@ -3547,8 +3561,9 @@ class EdeltaModelMigratorTest {
 				personLastName.getName()),
 			obj -> {
 				// a few more checks should be performed in a realistic context
-				if (obj == null)
+				if (obj == null) {
 					return Collections.emptyList();
+				}
 
 				var containingFeature = obj.eContainingFeature();
 				var containerCollection =
@@ -3587,7 +3602,7 @@ class EdeltaModelMigratorTest {
 	 * {@link #testMergeFeaturesNonContainmentShared()}
 	 * and
 	 * {@link #testSplitFeatureNonContainmentShared()}
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -3621,14 +3636,16 @@ class EdeltaModelMigratorTest {
 				// it is responsibility of the merger to create an instance
 				// of the (now single) referred object with the result
 				// of merging the original objects' values
-				if (values.isEmpty())
+				if (values.isEmpty()) {
 					return null;
+				}
 
 				var alreadyMerged = merged.get(values);
-				if (alreadyMerged != null)
+				if (alreadyMerged != null) {
 					return alreadyMerged;
 				// we have already processed the object collection
 				// and created a merged one so we reuse it
+				}
 
 				var firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
@@ -3636,7 +3653,7 @@ class EdeltaModelMigratorTest {
 					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				var mergedValue = values.stream()
-					.map(o -> 
+					.map(o ->
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
 				return EdeltaEcoreUtil.createInstance(nameElement,
@@ -3670,14 +3687,16 @@ class EdeltaModelMigratorTest {
 				personLastName.getName()),
 			obj -> {
 				// a few more checks should be performed in a realistic context
-				if (obj == null)
+				if (obj == null) {
 					return Collections.emptyList();
+				}
 
 				var alreadySplitted = splitted.get(obj);
-				if (alreadySplitted != null)
+				if (alreadySplitted != null) {
 					return alreadySplitted;
 				// we have already processed the object collection
 				// and created a merged one so we reuse it
+				}
 
 				var containingFeature = obj.eContainingFeature();
 				var containerCollection =
@@ -3722,21 +3741,21 @@ class EdeltaModelMigratorTest {
 	 * long the merge and split can be inversed. For example, in this test we have
 	 * "firstname lastname" or no string at all. If you had "lastname" then the
 	 * model wouldn't be reversable.
-	 * 
+	 *
 	 * The input directory and the output one will contain the same data.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
 	void testSplitAndMergeFeatureContainment() throws IOException {
 		var subdir = "splitAndMergeFeatureContainment/";
-	
+
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("PersonList.ecore"),
 			of("List.xmi")
 		);
-	
+
 		final var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		var personName = (EReference) person.getEStructuralFeature("name");
 		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
@@ -3751,14 +3770,15 @@ class EdeltaModelMigratorTest {
 				"lastName"),
 			obj -> {
 				// a few more checks should be performed in a realistic context
-				if (obj == null)
+				if (obj == null) {
 					return Collections.emptyList();
+				}
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
 				// that is, in case of a single element, the lastName will be empty
 				var split = obj.eGet(nameElementAttribute).toString().split("\\s+");
 				return Stream.of(split)
-					.map(val -> 
+					.map(val ->
 						EdeltaEcoreUtil.createInstance(nameElement,
 							o -> o.eSet(nameElementAttribute, val)
 						)
@@ -3776,11 +3796,12 @@ class EdeltaModelMigratorTest {
 				// of merging the original objects' values
 				var mergedValue = values.stream()
 					.map(EObject.class::cast)
-					.map(o -> 
+					.map(o ->
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
-				if (mergedValue.isEmpty())
+				if (mergedValue.isEmpty()) {
 					return null;
+				}
 				return EdeltaEcoreUtil.createInstance(nameElement,
 					// since it's a containment feature, setting it will also
 					// add it to the resource
@@ -3788,7 +3809,7 @@ class EdeltaModelMigratorTest {
 				);
 			}, null
 		);
-	
+
 		copyModelsSaveAndAssertOutputs(
 			modelMigrator,
 			subdir,
@@ -3803,10 +3824,10 @@ class EdeltaModelMigratorTest {
 	 * performing the copy (and split and merging), otherwise we end up with a few
 	 * additional objects in the final model, which will not be exactly the same as
 	 * the initial one.
-	 * 
+	 *
 	 * In a more realistic scenario, the modeler will have to take care of that,
 	 * e.g., by later removing NameElements that are not referred anymore.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -3833,8 +3854,9 @@ class EdeltaModelMigratorTest {
 				"lastName"),
 			obj -> {
 				// a few more checks should be performed in a realistic context
-				if (obj == null)
+				if (obj == null) {
 					return Collections.emptyList();
+				}
 
 				var containingFeature = obj.eContainingFeature();
 				var containerCollection =
@@ -3867,8 +3889,9 @@ class EdeltaModelMigratorTest {
 				// it is responsibility of the merger to create an instance
 				// of the (now single) referred object with the result
 				// of merging the original objects' values
-				if (values.isEmpty())
+				if (values.isEmpty()) {
 					return null;
+				}
 
 				var firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
@@ -3879,7 +3902,7 @@ class EdeltaModelMigratorTest {
 				EcoreUtil.removeAll(values);
 
 				var mergedValue = values.stream()
-					.map(o -> 
+					.map(o ->
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
 				return EdeltaEcoreUtil.createInstance(nameElement,
@@ -3906,7 +3929,7 @@ class EdeltaModelMigratorTest {
 	 * {@link #testSplitFeatureNonContainmentShared()}
 	 * and
 	 * {@link #testMergeFeaturesNonContainmentShared()}
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -3937,14 +3960,16 @@ class EdeltaModelMigratorTest {
 				"lastName"),
 			obj -> {
 				// a few more checks should be performed in a realistic context
-				if (obj == null)
+				if (obj == null) {
 					return Collections.emptyList();
+				}
 
 				var alreadySplitted = splitted.get(obj);
-				if (alreadySplitted != null)
+				if (alreadySplitted != null) {
 					return alreadySplitted;
 				// we have already processed the object collection
 				// and created a merged one so we reuse it
+				}
 
 				var containingFeature = obj.eContainingFeature();
 				var containerCollection =
@@ -3987,14 +4012,16 @@ class EdeltaModelMigratorTest {
 				// it is responsibility of the merger to create an instance
 				// of the (now single) referred object with the result
 				// of merging the original objects' values
-				if (values.isEmpty())
+				if (values.isEmpty()) {
 					return null;
+				}
 
 				var alreadyMerged = merged.get(values);
-				if (alreadyMerged != null)
+				if (alreadyMerged != null) {
 					return alreadyMerged;
 				// we have already processed the object collection
 				// and created a merged one so we reuse it
+				}
 
 				var firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
@@ -4002,7 +4029,7 @@ class EdeltaModelMigratorTest {
 					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				var mergedValue = values.stream()
-					.map(o -> 
+					.map(o ->
 						"" + o.eGet(nameElementAttribute))
 					.collect(Collectors.joining(" "));
 				return EdeltaEcoreUtil.createInstance(nameElement,
@@ -4058,7 +4085,7 @@ class EdeltaModelMigratorTest {
 	@Test
 	void testSubclassesToEnum() throws IOException {
 		var subdir = "subclassesToEnum/";
-		
+
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("PersonList.ecore"),
@@ -4112,7 +4139,7 @@ class EdeltaModelMigratorTest {
 	@Test
 	void testSubclassesToEnumAndEnumToSubclasses() throws IOException {
 		var subdir = "subclassesToEnum/";
-		
+
 		var modelMigrator = setupMigrator(
 			subdir,
 			of("PersonList.ecore"),
@@ -4140,9 +4167,9 @@ class EdeltaModelMigratorTest {
 	/**
 	 * enumToSubclasses, pushDown twice, merge attributes twice, pull up the merged
 	 * attributes.
-	 * 
+	 *
 	 * Just for testing, the refactorings might not make sense.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -4282,7 +4309,7 @@ class EdeltaModelMigratorTest {
 			oldReferredObject -> {
 				// it's responsibility of the caller to store the new
 				// object in a container
-				
+
 				// retrieve the copied List object
 				// remember also the oldReferredObject is part
 				// of the (new) model, the one being migrated
@@ -4644,7 +4671,7 @@ class EdeltaModelMigratorTest {
 
 	/**
 	 * Makes this feature multiple (upper = -1)
-	 * 
+	 *
 	 * @param feature
 	 */
 	private static void makeMultiple(EdeltaModelMigrator modelMigrator, EStructuralFeature feature) {
@@ -4653,7 +4680,7 @@ class EdeltaModelMigratorTest {
 
 	/**
 	 * Makes this feature multiple with a specific upper bound
-	 * 
+	 *
 	 * @param feature
 	 * @param upperBound
 	 */
@@ -4667,7 +4694,7 @@ class EdeltaModelMigratorTest {
 
 	/**
 	 * Makes this feature single (upper = 1)
-	 * 
+	 *
 	 * @param feature
 	 */
 	private static void makeSingle(EdeltaModelMigrator modelMigrator, EStructuralFeature feature) {
@@ -4682,7 +4709,7 @@ class EdeltaModelMigratorTest {
 	 * Changes the type of the attribute and when migrating the model
 	 * it applies the passed lambda to transform the value or values
 	 * (transparently).
-	 * 
+	 *
 	 * @param modelMigrator
 	 * @param attribute
 	 * @param type
@@ -4714,7 +4741,7 @@ class EdeltaModelMigratorTest {
 	 * Changes the type of the attribute and when migrating the model
 	 * it applies the passed lambda to transform the value or values
 	 * (transparently).
-	 * 
+	 *
 	 * @param modelMigrator
 	 * @param attribute
 	 * @param type
@@ -4810,25 +4837,25 @@ class EdeltaModelMigratorTest {
 	 * features. The original reference will be made a containment reference, (its
 	 * other properties will not be changed) to the added EClass (and made
 	 * bidirectional).
-	 * 
+	 *
 	 * For example, given
-	 * 
+	 *
 	 * <pre>
 	 *    b2    b1
 	 * A <-------> C
 	 * </pre>
-	 * 
+	 *
 	 * (where the opposite "b2" might not be present) if we pass "b1" and the name
 	 * "B", then the result will be
-	 * 
+	 *
 	 * <pre>
 	 *    a     b1    b2    c
 	 * A <-------> B <------> C
 	 * </pre>
-	 * 
+	 *
 	 * where "b1" will be a containment reference. Note the names inferred for the
 	 * new additional opposite references.
-	 * 
+	 *
 	 * @param name      the name for the extracted class
 	 * @param reference the reference to turn into a reference to the extracted
 	 *                  class
@@ -4841,7 +4868,7 @@ class EdeltaModelMigratorTest {
 		var ePackage = reference.getEContainingClass().getEPackage();
 		var extracted = EdeltaUtils.newEClass(name);
 		ePackage.getEClassifiers().add(extracted);
-		var extractedRef = addMandatoryReference(extracted, 
+		var extractedRef = addMandatoryReference(extracted,
 			fromTypeToFeatureName(reference.getEType()),
 			reference.getEReferenceType());
 		final var eOpposite = reference.getEOpposite();
@@ -4865,8 +4892,9 @@ class EdeltaModelMigratorTest {
 				// the opposite reference now changed its type
 				// so we have to skip the copy or we'll have a ClassCastException
 				// the bidirectionality will be implied in the next migrator
-				if (modelMigrator.isRelatedTo(feature, eOpposite))
+				if (modelMigrator.isRelatedTo(feature, eOpposite)) {
 					return;
+				}
 
 				// retrieve the original value, wrapped in a list
 				// so this works (transparently) for both single and multi feature
@@ -4903,7 +4931,7 @@ class EdeltaModelMigratorTest {
 	 * opposite reference (this way, we don't have to handle it in the
 	 * migration rule). On the other hand, we have to handle copy,
 	 * add and remove explicitly.
-	 * 
+	 *
 	 * @param modelMigrator
 	 * @param reference
 	 * @param name
@@ -4916,7 +4944,7 @@ class EdeltaModelMigratorTest {
 		var ePackage = reference.getEContainingClass().getEPackage();
 		var extracted = EdeltaUtils.newEClass(name);
 		ePackage.getEClassifiers().add(extracted);
-		var extractedRef = addMandatoryReference(extracted, 
+		var extractedRef = addMandatoryReference(extracted,
 			fromTypeToFeatureName(reference.getEType()),
 			reference.getEReferenceType());
 		final var eOpposite = reference.getEOpposite();
@@ -4981,25 +5009,25 @@ class EdeltaModelMigratorTest {
 	/**
 	 * SIMPLIFIED VERSION OF THE ACTUAL REFACTORING: directly pass the reference b1
 	 * to B instead of passing B
-	 * 
+	 *
 	 * Given an EClass, which is meant to represent a relation, removes such a
 	 * class, transforming the relation into an EReference.
-	 * 
+	 *
 	 * For example, given
-	 * 
+	 *
 	 * <pre>
 	 *    a     b1    b2    c
 	 * A <-------> B <------> C
 	 * </pre>
-	 * 
+	 *
 	 * (where the opposites "a" and "b2" might not be present) if we pass "B", then
 	 * the result will be
-	 * 
+	 *
 	 * <pre>
 	 *    b2    b1
 	 * A <-------> C
 	 * </pre>
-	 * 
+	 *
 	 * @param cl
 	 * @return the EReference that now represents the relation, that is, the
 	 *         EReference originally of type cl ("b1" above)
@@ -5029,7 +5057,7 @@ class EdeltaModelMigratorTest {
 				// feature: the feature of the original metamodel
 				// oldObj: the object of the original model
 				// newObj: the object of the new model, already created
-	
+
 				// retrieve the original value, wrapped in a list
 				// so this works (transparently) for both single and multi feature
 				// discard possible extra values, in case the multiplicity has changed
@@ -5037,7 +5065,7 @@ class EdeltaModelMigratorTest {
 					EdeltaEcoreUtil
 						.getValueForFeature(oldObj, feature,
 								reference.getUpperBound());
-	
+
 				var copyOfOldReferred = oldValueOrValues.stream()
 					.map(value -> {
 						// the object of the class to remove
@@ -5057,7 +5085,7 @@ class EdeltaModelMigratorTest {
 						return modelMigrator.getMigrated(oldReferred);
 					})
 					.toList();
-	
+
 				// in the new object set the value or values (transparently)
 				// with the created object (or objects, again, transparently)
 				EdeltaEcoreUtil.setValueForFeature(
@@ -5071,7 +5099,7 @@ class EdeltaModelMigratorTest {
 	 * Makes the EReference, which is assumed to be already part of an EClass, a
 	 * single required containment reference, adds to the referred type, which is
 	 * assumed to be set, an opposite required single reference.
-	 * 
+	 *
 	 * @param reference
 	 */
 	private EReference makeContainmentBidirectional(final EReference reference) {
@@ -5093,12 +5121,12 @@ class EdeltaModelMigratorTest {
 
 	/**
 	 * SIMPLIFIED VERSION WITHOUT ERROR CHECKING
-	 * 
+	 *
 	 * Finds the single EReference, in the EReferences of the given EClass, with a
 	 * type different from the given type, performing validation (that is, no
 	 * reference is found, or more than one) checks and in case show errors and
 	 * throws an IllegalArgumentException
-	 * 
+	 *
 	 * @param cl
 	 * @param target
 	 */
@@ -5118,7 +5146,7 @@ class EdeltaModelMigratorTest {
 	 * @param valueMerger if not null, it is used to merge the values of the original
 	 * features in the new model
 	 * @param postCopy executed after the model migrations
-	 * 
+	 *
 	 * @return the new feature added to the containing class of the features
 	 */
 	private EAttribute mergeAttributes(EdeltaModelMigrator modelMigrator,
@@ -5154,7 +5182,7 @@ class EdeltaModelMigratorTest {
 	 * @param valueMerger if not null, it is used to merge the values of the original
 	 * features in the new model
 	 * @param postCopy executed after the model migrations
-	 * 
+	 *
 	 * @return the new feature added to the containing class of the features
 	 */
 	private EReference mergeReferences(EdeltaModelMigrator modelMigrator,
@@ -5217,8 +5245,9 @@ class EdeltaModelMigratorTest {
 					var oldValue = oldObj.eGet(feature);
 					var splittedValues = valueSplitter.apply(oldValue).iterator();
 					for (var splitFeature : splitFeatures) {
-						if (!splittedValues.hasNext())
+						if (!splittedValues.hasNext()) {
 							break;
+						}
 						newObj.eSet(splitFeature, splittedValues.next());
 					}
 				},
@@ -5243,8 +5272,9 @@ class EdeltaModelMigratorTest {
 						EdeltaEcoreUtil.getValueAsEObject(oldObj, feature));
 					var splittedValues = objectValueSplitter.apply(oldValue).iterator();
 					for (var splitFeature : splitFeatures) {
-						if (!splittedValues.hasNext())
+						if (!splittedValues.hasNext()) {
 							break;
+						}
 						newObj.eSet(splitFeature, splittedValues.next());
 					}
 				},
@@ -5279,7 +5309,7 @@ class EdeltaModelMigratorTest {
 	 * first letter, for example, given the literal "LITERAL1", the subclass is
 	 * given the name "Literal1"). The attribute will then be removed and so will
 	 * the EEnum. The original containing EClass is made abstract.
-	 * 
+	 *
 	 * @param attr
 	 * @return the collection of created subclasses
 	 */
@@ -5295,7 +5325,7 @@ class EdeltaModelMigratorTest {
 		for (final EEnumLiteral literal : literals) {
 			// ensureEClassifierNameIsUnique (already done in refactorings.lib)
 			var literalString = literal.getLiteral();
-			var subclassName = 
+			var subclassName =
 				StringExtensions.toFirstUpper(literalString.toLowerCase());
 			createdSubclasses.put(literalString, EdeltaUtils.newEClass(subclassName,
 				c -> {
@@ -5327,7 +5357,7 @@ class EdeltaModelMigratorTest {
 	 * uppercase); the subclasses are removed, and an attributed is added to the
 	 * superclass with the created EEnum as type (the name is the name of the EEnum,
 	 * first letter lowercase).
-	 * 
+	 *
 	 * For example, given the name "BaseType" and the collection of classes
 	 * {"Derived1", "Derived2"} subclasses of the superclass "Base", it creates the
 	 * EEnum "BaseType" with literals "DERIVED1", "DERIVED2", (the values will be
@@ -5335,7 +5365,7 @@ class EdeltaModelMigratorTest {
 	 * in the collection) it adds to "Base" the EAttribute "baseType" of type
 	 * "BaseType". The EClasses "Derived1" and "Derived2" are removed from the
 	 * package.
-	 * 
+	 *
 	 * @param name       the name for the created EEnum
 	 * @param subclasses
 	 * @return the created EAttribute
@@ -5407,9 +5437,9 @@ class EdeltaModelMigratorTest {
 			Runnable postCopy) {
 		// change type of the reference
 		reference.setEType(newType);
-	
+
 		// and adjust model migration...
-	
+
 		modelMigrator.copyRule(
 			modelMigrator.isRelatedTo(reference),
 			modelMigrator

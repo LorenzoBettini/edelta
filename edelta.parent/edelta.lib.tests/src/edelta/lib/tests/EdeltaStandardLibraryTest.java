@@ -6,9 +6,9 @@ import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
 import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.emf.ecore.EcorePackage.Literals.EINT;
 import static org.eclipse.emf.ecore.EcorePackage.Literals.EOBJECT;
 import static org.eclipse.emf.ecore.EcorePackage.Literals.ESTRING;
-import static org.eclipse.emf.ecore.EcorePackage.Literals.EINT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -50,7 +50,7 @@ import edelta.lib.EdeltaStandardLibrary;
 
 /**
  * Library functions for manipulating an Ecore model.
- * 
+ *
  * @author Lorenzo Bettini
  *
  */
@@ -1010,7 +1010,7 @@ public class EdeltaStandardLibraryTest {
 	/**
 	 * Note that, since we handle multiplicity automatically, the code of the
 	 * refactoring and transformer is just the same as the previous test.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -1047,7 +1047,7 @@ public class EdeltaStandardLibraryTest {
 	 * Edelta DSL, we access {@link ENamedElement}s with strings, since
 	 * that's how "ecoreref()" expressions are translated by the Edelta DSL
 	 * compiler.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -1112,7 +1112,7 @@ public class EdeltaStandardLibraryTest {
 	 * Edelta DSL, we access {@link ENamedElement}s with strings, since
 	 * that's how "ecoreref()" expressions are translated by the Edelta DSL
 	 * compiler.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -1146,7 +1146,7 @@ public class EdeltaStandardLibraryTest {
 						stdLib.getEClass("PersonList", "List"),
 						"otherNameElements",
 						otherNameElement);
-					
+
 					// change the reference type
 					stdLib.changeType(reference, otherNameElement,
 						// and provide the model migration for the changed reference
@@ -1154,7 +1154,7 @@ public class EdeltaStandardLibraryTest {
 							// oldReferredObject is part of the model being migrated
 							// so it's safe to use features retrieved above,
 							// like nameElementFeature
-							
+
 							// retrieve the copied List object
 							// remember also the oldReferredObject is part
 							// of the (new) model, the one being migrated
@@ -1196,7 +1196,7 @@ public class EdeltaStandardLibraryTest {
 	 * Edelta DSL, we access {@link ENamedElement}s with strings, since
 	 * that's how "ecoreref()" expressions are translated by the Edelta DSL
 	 * compiler.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -1230,7 +1230,7 @@ public class EdeltaStandardLibraryTest {
 						stdLib.getEClass("PersonList", "List"),
 						"otherNameElements",
 						otherNameElement);
-					
+
 					// this is useful in the model migration rule to avoid
 					// creating two many new referred objects, since, in this
 					// test, referred objects were and are meant to be share
@@ -1240,7 +1240,7 @@ public class EdeltaStandardLibraryTest {
 					// note that we use the same maps for migrating all the models
 					// and that's correct, since, like in this test, objects can
 					// refer to objects of other model XMI files.
-					
+
 					// change the reference type
 					stdLib.changeType(reference, otherNameElement,
 						// and provide the model migration for the changed reference
@@ -1248,7 +1248,7 @@ public class EdeltaStandardLibraryTest {
 							// oldReferredObject is part of the model being migrated
 							// so it's safe to use features retrieved above,
 							// like nameElementFeature
-							
+
 							var newReferredObject = referredMap.computeIfAbsent(oldReferredObject,
 								oldReferred -> {
 								// ... avoiding duplicates like in this case
@@ -1270,14 +1270,14 @@ public class EdeltaStandardLibraryTest {
 									otherNameElementsCollection::add);
 								}
 							);
-							
+
 							// we refer to a new object of type OtherNameElement
 							// copying its value from the original referred
 							// Object of type NameElement
 							newReferredObject.eSet(otherNameElementFeature,
 								oldReferredObject.eGet(nameElementFeature)
 							);
-							
+
 							return newReferredObject;
 						},
 						// old shared referred objects can be removed now

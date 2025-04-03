@@ -22,24 +22,24 @@ import edelta.testutils.EdeltaTestUtils;
 /**
  * The trick in these tests is to have a nesting level in output and expectations directory
  * so that the <code>xsi:schemaLocation</code> relative path points to a real Ecore file.
- * 
+ *
  * For example, in the "expectations" and in the "output", with the current subdirectory levels,
  * this works (and can be opened with the EMF reflective editor):
- * 
+ *
  * <pre>
  * xsi:schemaLocation="http://cs.gssi.it/PersonMM/v2 ../../../../edelta.testdata/testdata/version-migration/rename/metamodels/v2/PersonList.ecore">
  * </pre>
- * 
+ *
  * This also assumes that the correct versions of Ecore are found in the subdirectories.
- * 
+ *
  * These tests NEVER save Ecore files: only model files.
  * So, the Ecore files must be manually and correctly modified, according to the
  * evolutions written in these tests.
- * 
+ *
  * The previous versions of Ecores are loaded from the classpath and will not correspond to real
  * filesystem paths, while the current latest versions of Ecores are effective and are to be referred by
  * the migrated models when in their final state.
- * 
+ *
  * During the intermediate migrations phases, instead, references to Ecores would not be valid.
  * We only care about the migrated models final state.
  */
@@ -243,7 +243,7 @@ class EdeltaVersionMigratorTest {
 
 	/**
 	 * One of the latest version of an Ecore is specified directly with an EPackage loaded instance.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test

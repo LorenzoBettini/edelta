@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edelta.lib.tests;
 
@@ -21,14 +21,14 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.Before;
 import org.junit.Test;
 
-import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaModelManager;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaUtils;
 
 /**
  * Tests manipulations of Ecore models.
- * 
+ *
  * @author Lorenzo Bettini
  *
  */

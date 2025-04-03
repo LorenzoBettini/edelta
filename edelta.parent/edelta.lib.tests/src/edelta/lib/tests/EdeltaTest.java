@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edelta.lib.tests;
 
@@ -27,16 +27,16 @@ import org.eclipse.xtext.util.Wrapper;
 import org.junit.Before;
 import org.junit.Test;
 
-import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaModelMigrator;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
 /**
  * Tests for the base class of generated Edelta programs.
- * 
+ *
  * @author Lorenzo Bettini
  *
  */
@@ -63,7 +63,7 @@ public class EdeltaTest {
 			super(modelManager);
 		}
 
-		
+
 		public TestableEdelta(EdeltaModelMigrator modelMigrator) {
 			super(modelMigrator);
 		}
@@ -140,8 +140,9 @@ public class EdeltaTest {
 		edelta = new TestableEdelta(new EdeltaModelManager() {
 			@Override
 			public EPackage getEPackage(String packageName) {
-				if (packageName.equals("toFind"))
+				if (packageName.equals("toFind")) {
 					return EcoreFactory.eINSTANCE.createEPackage();
+				}
 				return super.getEPackage(packageName);
 			}
 		});

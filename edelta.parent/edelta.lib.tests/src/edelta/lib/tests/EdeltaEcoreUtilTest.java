@@ -131,22 +131,22 @@ public class EdeltaEcoreUtilTest {
 
 		assertThat(collection)
 			.isEmpty();
-	
+
 		pack.setName("A name");
-	
+
 		collection = EdeltaEcoreUtil.getValueForFeature(
 				pack, EcorePackage.Literals.ENAMED_ELEMENT__NAME, -1);
-	
+
 		assertThat(collection)
 			.containsExactly("A name");
-	
+
 		collection = EdeltaEcoreUtil.getValueForFeature(
 				pack, EcorePackage.Literals.EPACKAGE__ECLASSIFIERS, -1);
-	
+
 		assertThat(collection)
 			.isSameAs(pack.getEClassifiers())
 			.isEmpty();
-	
+
 		var c1 = EcoreFactory.eINSTANCE.createEClass();
 		var c2 = EcoreFactory.eINSTANCE.createEDataType();
 		var c3 = EcoreFactory.eINSTANCE.createEEnum();
@@ -233,11 +233,11 @@ public class EdeltaEcoreUtilTest {
 
 		var collection = EdeltaEcoreUtil.getValueAsList(
 				pack, EcorePackage.Literals.EPACKAGE__ECLASSIFIERS);
-	
+
 		assertThat(collection)
 			.isSameAs(pack.getEClassifiers())
 			.isEmpty();
-	
+
 		var c1 = EcoreFactory.eINSTANCE.createEClass();
 		var c2 = EcoreFactory.eINSTANCE.createEDataType();
 		var c3 = EcoreFactory.eINSTANCE.createEEnum();
@@ -278,7 +278,7 @@ public class EdeltaEcoreUtilTest {
 		assertThat(dest.getEAttributeType())
 			.isSameAs(EcorePackage.Literals.ESTRING);
 
-		assertThatThrownBy(() -> 
+		assertThatThrownBy(() ->
 			EdeltaEcoreUtil.setValueFrom(
 				dest,
 				EcorePackage.Literals.ETYPED_ELEMENT__ETYPE,

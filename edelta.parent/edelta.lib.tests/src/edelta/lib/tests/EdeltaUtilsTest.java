@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edelta.lib.tests;
 
@@ -26,7 +26,7 @@ import edelta.lib.EdeltaUtils;
 
 /**
  * Library functions for manipulating an Ecore model.
- * 
+ *
  * @author Lorenzo Bettini
  *
  */
@@ -147,7 +147,7 @@ public class EdeltaUtilsTest {
 			public String toString() {
 				return "test";
 			}
-			
+
 			@Override
 			public EObject eContainer() {
 				return null;
@@ -305,7 +305,7 @@ public class EdeltaUtilsTest {
 
 		var resource2 = new ResourceImpl();
 		resource2.getContents().add(p2);
-		
+
 		var resourceSet = new ResourceSetImpl();
 		resourceSet.getResources().add(resource1);
 		resourceSet.getResources().add(resource2);
@@ -331,7 +331,7 @@ public class EdeltaUtilsTest {
 
 		var resource2 = new ResourceImpl();
 		resource2.getContents().add(p2);
-		
+
 		var resourceSet = new ResourceSetImpl();
 		resourceSet.getResources().add(resource1);
 		resourceSet.getResources().add(resource2);
@@ -363,7 +363,7 @@ public class EdeltaUtilsTest {
 
 		var resource2 = new ResourceImpl();
 		resource2.getContents().add(p2);
-		
+
 		var resourceSet = new ResourceSetImpl();
 		resourceSet.getResources().add(resource1);
 		resourceSet.getResources().add(resource2);
@@ -403,7 +403,7 @@ public class EdeltaUtilsTest {
 
 		var resource2 = new ResourceImpl();
 		resource2.getContents().add(p2);
-		
+
 		var resourceSet = new ResourceSetImpl();
 		resourceSet.getResources().add(resource1);
 		resourceSet.getResources().add(resource2);
@@ -416,7 +416,7 @@ public class EdeltaUtilsTest {
 		var f4 = ecoreFactory.createEReference();
 		eClass2.getEStructuralFeatures().addAll(List.of(f3, f4));
 
-		
+
 		assertThat(EdeltaUtils.allEStructuralFeatures(p1))
 			.containsExactlyInAnyOrder(f1, f2, f3, f4);
 	}
