@@ -9,7 +9,6 @@ import static org.junit.Assert.assertSame;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
@@ -119,7 +118,7 @@ public class EdeltaEcoreModificationsTest {
 				classifiers.stream().
 				filter(EClass.class::isInstance).
 				map(e -> (EClass)e).
-				collect(Collectors.toList()),
+				toList(),
 			nameToSearch);
 	}
 
@@ -128,7 +127,7 @@ public class EdeltaEcoreModificationsTest {
 				features.stream().
 				filter(EReference.class::isInstance).
 				map(e -> (EReference)e).
-				collect(Collectors.toList()),
+				toList(),
 			nameToSearch);
 	}
 

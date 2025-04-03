@@ -5162,7 +5162,7 @@ class EdeltaModelMigratorTest {
 					var originalFeatures = features.stream()
 							.map(modelMigrator::getOriginal);
 					var oldValues = originalFeatures
-							.map(f -> oldObj.eGet(f))
+							.map(oldObj::eGet)
 							.toList();
 					var merged = valueMerger.apply(oldValues);
 					newObj.eSet(mergedFeature, merged);
@@ -5199,7 +5199,7 @@ class EdeltaModelMigratorTest {
 							.map(modelMigrator::getOriginal);
 					// for references we must get the copied EObject
 					var oldValues = originalFeatures
-							.map(f -> oldObj.eGet(f))
+							.map(oldObj::eGet)
 							.map(EObject.class::cast)
 							.toList();
 					var merged = valueMerger.apply(
