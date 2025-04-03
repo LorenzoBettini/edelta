@@ -7,7 +7,7 @@ import GraphMM.Metamodel;
 /**
  * Represents a {@link Metamodel} and all the other {@link Metamodel}s that are
  * its dependencies (references or incoming references).
- * 
+ *
  * @author Lorenzo Bettini
  *
  */

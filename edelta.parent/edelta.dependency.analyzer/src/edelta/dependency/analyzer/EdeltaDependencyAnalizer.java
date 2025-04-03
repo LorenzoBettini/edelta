@@ -31,7 +31,7 @@ import edelta.lib.EdeltaUtils;
 
 /**
  * Analyzes the dependencies of {@link EPackage}s and creates a {@link Repository}.
- * 
+ *
  * @author Lorenzo Bettini
  *
  */
@@ -46,7 +46,7 @@ public class EdeltaDependencyAnalizer {
 	/**
 	 * Analyzes the dependencies of the specified Ecore file together
 	 * with all the other {@link EPackage}s found in the specified path.
-	 * 
+	 *
 	 * @param ecoreFile
 	 * @return
 	 * @throws IOException
@@ -61,7 +61,7 @@ public class EdeltaDependencyAnalizer {
 	/**
 	 * Analyzes the dependencies of the specified {@link EPackage} (by name) together
 	 * with all the other {@link EPackage}s found in the specified path.
-	 * 
+	 *
 	 * @param path
 	 * @param packageName
 	 * @return
@@ -105,7 +105,7 @@ public class EdeltaDependencyAnalizer {
 
 	/**
 	 * Analyzes the dependencies of the specified {@link EPackage}.
-	 * 
+	 *
 	 * @param ePackage
 	 * @return
 	 */
@@ -121,8 +121,9 @@ public class EdeltaDependencyAnalizer {
 	}
 
 	private void analyzeEPackage(Repository repository, EPackage current, Set<EPackage> seen) {
-		if (seen.contains(current))
+		if (seen.contains(current)) {
 			return;
+		}
 		seen.add(current);
 		var metamodel = createGraphMetamodel(repository, current);
 		var usedPackages = usedPackages(current);
@@ -172,7 +173,7 @@ public class EdeltaDependencyAnalizer {
 	/**
 	 * Whether there already exists a dependency from target to source (that is,
 	 * the opposite dependency that will then have to be set as bidirectional).
-	 * 
+	 *
 	 * @param repository
 	 * @param src
 	 * @param trg
@@ -199,15 +200,15 @@ public class EdeltaDependencyAnalizer {
 	public void saveRepository(Repository repository, String outputPath, String fileName) throws IOException {
 		// Create a resource set to hold the resources.
 		var resourceSet = new ResourceSetImpl();
-		
+
 		// Register the appropriate resource factory to handle all file extensions.
 		resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put
-			(Resource.Factory.Registry.DEFAULT_EXTENSION, 
+			(Resource.Factory.Registry.DEFAULT_EXTENSION,
 			 new XMIResourceFactoryImpl());
 
 		// Register the package to ensure it is available during loading.
 		resourceSet.getPackageRegistry().put
-			(GraphMMPackage.eNS_URI, 
+			(GraphMMPackage.eNS_URI,
 			 GraphMMPackage.eINSTANCE);
 
 		LOG.info("Saving " + outputPath + "/" + fileName);

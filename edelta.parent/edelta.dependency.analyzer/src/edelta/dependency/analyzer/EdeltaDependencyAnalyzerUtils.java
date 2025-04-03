@@ -15,8 +15,8 @@ import GraphMM.Node;
 import GraphMM.Repository;
 
 /**
- * Utilities for {@link EPackage} and {@link Repository} 
- * 
+ * Utilities for {@link EPackage} and {@link Repository}
+ *
  * @author Lorenzo Bettini
  *
  */
