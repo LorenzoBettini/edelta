@@ -68,7 +68,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	public void sanityTestCheck() throws Exception {
 		// make sure we use the same interpreter implementation
 		// in fact the interpreter can create another interpreter using the factory
-		var interpreterFactory = injector
+		EdeltaInterpreterFactory interpreterFactory = injector
 				.getInstance(EdeltaInterpreterFactory.class);
 		var anotherInterprter = interpreterFactory.create(parseHelper.parse("").eResource());
 		assertThat(anotherInterprter.getClass())

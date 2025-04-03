@@ -18,6 +18,7 @@ import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputer;
 import edelta.compiler.EdeltaGeneratorConfigProvider;
 import edelta.compiler.EdeltaOutputConfigurationProvider;
 import edelta.compiler.EdeltaXbaseCompiler;
+import edelta.interpreter.EdeltaDefaultInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreter;
 import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaSafeInterpreter;
@@ -36,7 +37,7 @@ import edelta.validation.EdeltaDiagnosticConverter;
 public class EdeltaRuntimeModule extends AbstractEdeltaRuntimeModule {
 
 	public Class<? extends EdeltaInterpreterFactory> bindEdeltaInterpreterFactory() {
-		return EdeltaInterpreterFactory.class;
+		return EdeltaDefaultInterpreterFactory.class;
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 package edelta.tests;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.assertEquals;
 
 import java.util.function.Consumer;
@@ -42,7 +42,7 @@ public class EdeltaSafeInterpreterTest extends EdeltaAbstractTest {
 	public void sanityTestCheck() throws Exception {
 		// make sure we use the same interpreter implementation
 		// in fact the interpreter can create another interpreter using the factory
-		var interpreterFactory = injector
+		EdeltaInterpreterFactory interpreterFactory = injector
 				.getInstance(EdeltaInterpreterFactory.class);
 		var anotherInterprter = interpreterFactory.create(parseHelper.parse("").eResource());
 		assertThat(anotherInterprter.getClass())

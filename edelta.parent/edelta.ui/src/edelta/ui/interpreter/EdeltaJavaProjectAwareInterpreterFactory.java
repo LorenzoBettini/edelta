@@ -5,7 +5,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import com.google.inject.Inject;
 
 import edelta.interpreter.EdeltaInterpreter;
-import edelta.interpreter.EdeltaInterpreterFactory;
+import edelta.interpreter.EdeltaDefaultInterpreterFactory;
 import edelta.ui.interpreter.internal.EdeltaJavaProjectAwareInterpreterConfigurator;
 
 /**
@@ -15,7 +15,7 @@ import edelta.ui.interpreter.internal.EdeltaJavaProjectAwareInterpreterConfigura
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaJavaProjectAwareInterpreterFactory extends EdeltaInterpreterFactory {
+public class EdeltaJavaProjectAwareInterpreterFactory extends EdeltaDefaultInterpreterFactory {
 
 	@Inject
 	private EdeltaJavaProjectAwareInterpreterConfigurator configurator;
