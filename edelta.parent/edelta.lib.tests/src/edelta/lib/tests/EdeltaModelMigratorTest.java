@@ -1037,21 +1037,18 @@ class EdeltaModelMigratorTest {
 		modelMigrator.transformAttributeValueRule(
 			a ->
 				modelMigrator.isRelatedTo(a, attribute),
-			(feature, o, oldValue) -> {
-				// if we come here the old attribute was set
-				return EdeltaEcoreUtil.unwrapCollection(
-					EdeltaEcoreUtil.wrapAsCollection(oldValue, -1)
-						.stream()
-						.map(val -> {
-							try {
-								return Integer.parseInt(val.toString());
-							} catch (NumberFormatException e) {
-								return -1;
-							}
-						})
-						.toList(),
-					feature);
-			}
+			(feature, o, oldValue) -> EdeltaEcoreUtil.unwrapCollection( // if we come here the old attribute was set
+				EdeltaEcoreUtil.wrapAsCollection(oldValue, -1)
+					.stream()
+					.map(val -> {
+						try {
+							return Integer.parseInt(val.toString());
+						} catch (NumberFormatException e) {
+							return -1;
+						}
+					})
+					.toList(),
+				feature)
 		);
 
 		copyModelsSaveAndAssertOutputs(
@@ -2795,7 +2792,7 @@ class EdeltaModelMigratorTest {
 			of("List.xmi")
 		);
 
-		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		final var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		var personFirstName = (EAttribute) person.getEStructuralFeature("firstName");
 		var personLastName = (EAttribute) person.getEStructuralFeature("lastName");
 		mergeAttributes(
@@ -2824,7 +2821,7 @@ class EdeltaModelMigratorTest {
 			of("List.xmi")
 		);
 
-		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		final var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		mergeAttributes(
 			modelMigrator,
 			"name",
@@ -2858,9 +2855,9 @@ class EdeltaModelMigratorTest {
 			of("List.xmi")
 		);
 
-		EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
-		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
-		EAttribute nameElementAttribute =
+		var person = getEClass(evolvingModelManager, "PersonList", "Person");
+		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		var nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		assertNotNull(nameElementAttribute);
 		mergeReferences(
@@ -2919,9 +2916,9 @@ class EdeltaModelMigratorTest {
 			of("List.xmi")
 		);
 
-		EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
-		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
-		EAttribute nameElementAttribute =
+		var person = getEClass(evolvingModelManager, "PersonList", "Person");
+		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		var nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		assertNotNull(nameElementAttribute);
 		mergeReferences(
@@ -2937,9 +2934,9 @@ class EdeltaModelMigratorTest {
 				if (values.isEmpty())
 					return null;
 
-				EObject firstObject = values.iterator().next();
+				var firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
-				List<EObject> containerCollection =
+				var containerCollection =
 					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
@@ -2991,9 +2988,9 @@ class EdeltaModelMigratorTest {
 			of("List.xmi")
 		);
 
-		EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
-		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
-		EAttribute nameElementAttribute =
+		var person = getEClass(evolvingModelManager, "PersonList", "Person");
+		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		var nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		assertNotNull(nameElementAttribute);
 
@@ -3019,9 +3016,9 @@ class EdeltaModelMigratorTest {
 				// we have already processed the object collection
 				// and created a merged one so we reuse it
 
-				EObject firstObject = values.iterator().next();
+				var firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
-				List<EObject> containerCollection =
+				var containerCollection =
 					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				var mergedValue = values.stream()
@@ -3066,7 +3063,7 @@ class EdeltaModelMigratorTest {
 			of("List.xmi")
 		);
 
-		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		final var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		var personName = (EAttribute) person.getEStructuralFeature("name");
 		splitAttribute(
 			modelMigrator,
@@ -3078,7 +3075,7 @@ class EdeltaModelMigratorTest {
 				// a few more checks should be performed in a realistic context
 				if (value == null)
 					return Collections.emptyList();
-				String[] split = value.toString().split("\\s+");
+				var split = value.toString().split("\\s+");
 				return Arrays.asList(split);
 			}, null
 		);
@@ -3101,10 +3098,10 @@ class EdeltaModelMigratorTest {
 			of("List.xmi")
 		);
 
-		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		final var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		var personName = (EReference) person.getEStructuralFeature("name");
-		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
-		EAttribute nameElementAttribute =
+		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		var nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		assertNotNull(nameElementAttribute);
 		splitReference(
@@ -3120,7 +3117,7 @@ class EdeltaModelMigratorTest {
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
 				// that is, in case of a single element, the lastName will be empty
-				String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+				var split = obj.eGet(nameElementAttribute).toString().split("\\s+");
 				return Stream.of(split)
 					.map(val -> 
 						EdeltaEcoreUtil.createInstance(nameElement,
@@ -3159,10 +3156,10 @@ class EdeltaModelMigratorTest {
 			of("List.xmi")
 		);
 
-		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		final var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		var personName = (EReference) person.getEStructuralFeature("name");
-		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
-		EAttribute nameElementAttribute =
+		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		var nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		assertNotNull(nameElementAttribute);
 		splitReference(
@@ -3177,7 +3174,7 @@ class EdeltaModelMigratorTest {
 					return Collections.emptyList();
 
 				var containingFeature = obj.eContainingFeature();
-				List<EObject> containerCollection =
+				var containerCollection =
 					getValueAsList(obj.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
@@ -3186,7 +3183,7 @@ class EdeltaModelMigratorTest {
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
 				// that is, in case of a single element, the lastName will be empty
-				String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+				var split = obj.eGet(nameElementAttribute).toString().split("\\s+");
 				return Stream.of(split)
 					.map(val -> EdeltaEcoreUtil.createInstance(nameElement,
 						o -> {
@@ -3231,10 +3228,10 @@ class EdeltaModelMigratorTest {
 			of("List.xmi")
 		);
 
-		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		final var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		var personName = (EReference) person.getEStructuralFeature("name");
-		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
-		EAttribute nameElementAttribute =
+		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		var nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		assertNotNull(nameElementAttribute);
 
@@ -3259,13 +3256,13 @@ class EdeltaModelMigratorTest {
 				// and created a merged one so we reuse it
 
 				var containingFeature = obj.eContainingFeature();
-				List<EObject> containerCollection =
+				var containerCollection =
 					getValueAsList(obj.eContainer(), containingFeature);
 
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
 				// that is, in case of a single element, the lastName will be empty
-				String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+				var split = obj.eGet(nameElementAttribute).toString().split("\\s+");
 				var result = Stream.of(split)
 					.map(val -> EdeltaEcoreUtil.createInstance(nameElement,
 						o -> {
@@ -3316,7 +3313,7 @@ class EdeltaModelMigratorTest {
 			of("List.xmi")
 		);
 
-		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		final var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		var personName = (EAttribute) person.getEStructuralFeature("name");
 		var splitFeatures = splitAttribute(
 			modelMigrator,
@@ -3328,7 +3325,7 @@ class EdeltaModelMigratorTest {
 				// a few more checks should be performed in a realistic context
 				if (value == null)
 					return Collections.emptyList();
-				String[] split = value.toString().split("\\s+");
+				var split = value.toString().split("\\s+");
 				return Arrays.asList(split);
 			}, null
 		);
@@ -3370,7 +3367,7 @@ class EdeltaModelMigratorTest {
 			of("List.xmi")
 		);
 
-		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		final var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		var personFirstName = (EAttribute) person.getEStructuralFeature("firstName");
 		var personLastName = (EAttribute) person.getEStructuralFeature("lastName");
 		var mergedFeature = mergeAttributes(
@@ -3396,7 +3393,7 @@ class EdeltaModelMigratorTest {
 				// a few more checks should be performed in a realistic context
 				if (value == null)
 					return Collections.emptyList();
-				String[] split = value.toString().split("\\s+");
+				var split = value.toString().split("\\s+");
 				return Arrays.asList(split);
 			}, null
 		);
@@ -3419,9 +3416,9 @@ class EdeltaModelMigratorTest {
 			of("List.xmi")
 		);
 
-		EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
-		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
-		EAttribute nameElementAttribute =
+		var person = getEClass(evolvingModelManager, "PersonList", "Person");
+		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		var nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		var personFirstName = (EReference) person.getEStructuralFeature("firstName");
 		var personLastName = (EReference) person.getEStructuralFeature("lastName");
@@ -3463,7 +3460,7 @@ class EdeltaModelMigratorTest {
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
 				// that is, in case of a single element, the lastName will be empty
-				String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+				var split = obj.eGet(nameElementAttribute).toString().split("\\s+");
 				return Stream.of(split)
 					.map(val -> 
 						EdeltaEcoreUtil.createInstance(nameElement,
@@ -3500,9 +3497,9 @@ class EdeltaModelMigratorTest {
 			of("List.xmi")
 		);
 
-		EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
-		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
-		EAttribute nameElementAttribute =
+		var person = getEClass(evolvingModelManager, "PersonList", "Person");
+		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		var nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		var personFirstName = (EReference) person.getEStructuralFeature("firstName");
 		var personLastName = (EReference) person.getEStructuralFeature("lastName");
@@ -3520,9 +3517,9 @@ class EdeltaModelMigratorTest {
 				if (values.isEmpty())
 					return null;
 
-				EObject firstObject = values.iterator().next();
+				var firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
-				List<EObject> containerCollection =
+				var containerCollection =
 					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
@@ -3554,7 +3551,7 @@ class EdeltaModelMigratorTest {
 					return Collections.emptyList();
 
 				var containingFeature = obj.eContainingFeature();
-				List<EObject> containerCollection =
+				var containerCollection =
 					getValueAsList(obj.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
@@ -3563,7 +3560,7 @@ class EdeltaModelMigratorTest {
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
 				// that is, in case of a single element, the lastName will be empty
-				String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+				var split = obj.eGet(nameElementAttribute).toString().split("\\s+");
 				return Stream.of(split)
 					.map(val -> EdeltaEcoreUtil.createInstance(nameElement,
 						o -> {
@@ -3603,9 +3600,9 @@ class EdeltaModelMigratorTest {
 			of("List.xmi")
 		);
 
-		EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
-		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
-		EAttribute nameElementAttribute =
+		var person = getEClass(evolvingModelManager, "PersonList", "Person");
+		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		var nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		var personFirstName = (EReference) person.getEStructuralFeature("firstName");
 		var personLastName = (EReference) person.getEStructuralFeature("lastName");
@@ -3633,9 +3630,9 @@ class EdeltaModelMigratorTest {
 				// we have already processed the object collection
 				// and created a merged one so we reuse it
 
-				EObject firstObject = values.iterator().next();
+				var firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
-				List<EObject> containerCollection =
+				var containerCollection =
 					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				var mergedValue = values.stream()
@@ -3683,13 +3680,13 @@ class EdeltaModelMigratorTest {
 				// and created a merged one so we reuse it
 
 				var containingFeature = obj.eContainingFeature();
-				List<EObject> containerCollection =
+				var containerCollection =
 					getValueAsList(obj.eContainer(), containingFeature);
 
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
 				// that is, in case of a single element, the lastName will be empty
-				String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+				var split = obj.eGet(nameElementAttribute).toString().split("\\s+");
 				var result = Stream.of(split)
 					.map(val -> EdeltaEcoreUtil.createInstance(nameElement,
 						o -> {
@@ -3740,10 +3737,10 @@ class EdeltaModelMigratorTest {
 			of("List.xmi")
 		);
 	
-		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		final var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		var personName = (EReference) person.getEStructuralFeature("name");
-		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
-		EAttribute nameElementAttribute =
+		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		var nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		assertNotNull(nameElementAttribute);
 		var splitFeatures = splitReference(
@@ -3759,7 +3756,7 @@ class EdeltaModelMigratorTest {
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
 				// that is, in case of a single element, the lastName will be empty
-				String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+				var split = obj.eGet(nameElementAttribute).toString().split("\\s+");
 				return Stream.of(split)
 					.map(val -> 
 						EdeltaEcoreUtil.createInstance(nameElement,
@@ -3822,10 +3819,10 @@ class EdeltaModelMigratorTest {
 			of("List.xmi")
 		);
 
-		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		final var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		var personName = (EReference) person.getEStructuralFeature("name");
-		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
-		EAttribute nameElementAttribute =
+		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		var nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		assertNotNull(nameElementAttribute);
 		var splitFeatures = splitReference(
@@ -3840,7 +3837,7 @@ class EdeltaModelMigratorTest {
 					return Collections.emptyList();
 
 				var containingFeature = obj.eContainingFeature();
-				List<EObject> containerCollection =
+				var containerCollection =
 					getValueAsList(obj.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
@@ -3849,7 +3846,7 @@ class EdeltaModelMigratorTest {
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
 				// that is, in case of a single element, the lastName will be empty
-				String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+				var split = obj.eGet(nameElementAttribute).toString().split("\\s+");
 				return Stream.of(split)
 					.map(val -> EdeltaEcoreUtil.createInstance(nameElement,
 						o -> {
@@ -3873,9 +3870,9 @@ class EdeltaModelMigratorTest {
 				if (values.isEmpty())
 					return null;
 
-				EObject firstObject = values.iterator().next();
+				var firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
-				List<EObject> containerCollection =
+				var containerCollection =
 					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				// assume that a referred NameElement object is not shared
@@ -3922,10 +3919,10 @@ class EdeltaModelMigratorTest {
 			of("List.xmi")
 		);
 
-		final EClass person = getEClass(evolvingModelManager, "PersonList", "Person");
+		final var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		var personName = (EReference) person.getEStructuralFeature("name");
-		EClass nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
-		EAttribute nameElementAttribute =
+		var nameElement = getEClass(evolvingModelManager, "PersonList", "NameElement");
+		var nameElementAttribute =
 				getAttribute(evolvingModelManager, "PersonList", "NameElement", "nameElementValue");
 		assertNotNull(nameElementAttribute);
 
@@ -3950,13 +3947,13 @@ class EdeltaModelMigratorTest {
 				// and created a merged one so we reuse it
 
 				var containingFeature = obj.eContainingFeature();
-				List<EObject> containerCollection =
+				var containerCollection =
 					getValueAsList(obj.eContainer(), containingFeature);
 
 				// of course if there's no space and only one element in the array
 				// it will assigned to the first feature value
 				// that is, in case of a single element, the lastName will be empty
-				String[] split = obj.eGet(nameElementAttribute).toString().split("\\s+");
+				var split = obj.eGet(nameElementAttribute).toString().split("\\s+");
 				var result = Stream.of(split)
 					.map(val -> EdeltaEcoreUtil.createInstance(nameElement,
 						o -> {
@@ -3999,9 +3996,9 @@ class EdeltaModelMigratorTest {
 				// we have already processed the object collection
 				// and created a merged one so we reuse it
 
-				EObject firstObject = values.iterator().next();
+				var firstObject = values.iterator().next();
 				var containingFeature = firstObject.eContainingFeature();
-				List<EObject> containerCollection =
+				var containerCollection =
 					getValueAsList(firstObject.eContainer(), containingFeature);
 
 				var mergedValue = values.stream()
@@ -4097,7 +4094,7 @@ class EdeltaModelMigratorTest {
 		var genreAttribute = (EAttribute) person.getEStructuralFeature("gender");
 		var genreName = genreAttribute.getEAttributeType().getName();
 
-		Collection<EClass> subclasses =
+		var subclasses =
 			enumToSubclasses(modelMigrator, genreAttribute);
 
 		subclassesToEnum(modelMigrator,
@@ -4124,7 +4121,7 @@ class EdeltaModelMigratorTest {
 
 		var personList = evolvingModelManager.getEPackage("PersonList");
 
-		EAttribute genreAttribute = subclassesToEnum(modelMigrator,
+		var genreAttribute = subclassesToEnum(modelMigrator,
 			"Gender",
 			asList(
 				(EClass) personList.getEClassifier("Male"),
@@ -4161,7 +4158,7 @@ class EdeltaModelMigratorTest {
 		var person = getEClass(evolvingModelManager, "PersonList", "Person");
 		var genreAttribute = (EAttribute) person.getEStructuralFeature("gender");
 
-		Collection<EClass> subclasses =
+		var subclasses =
 			enumToSubclasses(modelMigrator, genreAttribute);
 
 		var personFirstName = person.getEStructuralFeature("firstname");
@@ -4801,12 +4798,7 @@ class EdeltaModelMigratorTest {
 		// remember we must compare to the original metamodel element
 		modelMigrator.featureMigratorRule(
 			modelMigrator.wasRelatedTo(featureToPush),
-			(feature, oldObj, newObj) -> { // the object of the original model
-				// the result depends on the EClass of the original
-				// object being copied, but the map was built
-				// using evolved classes
-				return pushedDownFeatures.get(newObj.eClass());
-			}
+			(feature, oldObj, newObj) -> pushedDownFeatures.get(newObj.eClass())
 		);
 		return pushedDownFeatures.values();
 	}
@@ -4852,7 +4844,7 @@ class EdeltaModelMigratorTest {
 		var extractedRef = addMandatoryReference(extracted, 
 			fromTypeToFeatureName(reference.getEType()),
 			reference.getEReferenceType());
-		final EReference eOpposite = reference.getEOpposite();
+		final var eOpposite = reference.getEOpposite();
 		if (eOpposite != null) {
 			EdeltaUtils.makeBidirectional(eOpposite, extractedRef);
 		}
@@ -4927,7 +4919,7 @@ class EdeltaModelMigratorTest {
 		var extractedRef = addMandatoryReference(extracted, 
 			fromTypeToFeatureName(reference.getEType()),
 			reference.getEReferenceType());
-		final EReference eOpposite = reference.getEOpposite();
+		final var eOpposite = reference.getEOpposite();
 		if (eOpposite != null) {
 			var newOpposite = createCopy(eOpposite);
 			// put it in first position to have the same order as the original one
@@ -5015,17 +5007,17 @@ class EdeltaModelMigratorTest {
 	private EReference classToReference(EdeltaModelMigrator modelMigrator,
 			final EReference reference) {
 		// "B" above
-		final EClass toRemove = reference.getEReferenceType();
+		final var toRemove = reference.getEReferenceType();
 		// "A" above
-		final EClass owner = reference.getEContainingClass();
+		final var owner = reference.getEContainingClass();
 		// search for a single EReference ("c" above) in cl that has not type owner
 		// (the one with type owner, if exists, would be the EOpposite
 		// of reference, which we are not interested in, "a" above).
-		final EReference referenceToTarget =
+		final var referenceToTarget =
 				findSingleReferenceNotOfType(toRemove, owner);
 		reference.setEType(referenceToTarget.getEType());
 		EdeltaUtils.dropContainment(reference);
-		final EReference opposite = referenceToTarget.getEOpposite();
+		final var opposite = referenceToTarget.getEOpposite();
 		if (opposite != null) {
 			EdeltaUtils.makeBidirectional(reference, opposite);
 		}
@@ -5084,17 +5076,16 @@ class EdeltaModelMigratorTest {
 	 */
 	private EReference makeContainmentBidirectional(final EReference reference) {
 		EdeltaUtils.makeContainment(reference);
-		final EClass owner = reference.getEContainingClass();
-		final EClass referredType = reference.getEReferenceType();
-		EReference addedMandatoryReference = this.addMandatoryReference(referredType,
-				this.fromTypeToFeatureName(owner), owner);
+		final var owner = reference.getEContainingClass();
+		final var referredType = reference.getEReferenceType();
+		var addedMandatoryReference = addMandatoryReference(referredType,
+				fromTypeToFeatureName(owner), owner);
 		EdeltaUtils.makeBidirectional(addedMandatoryReference, reference);
 		return addedMandatoryReference;
 	}
 
 	private EReference addMandatoryReference(final EClass eClass, final String referenceName, final EClass type) {
-		var reference = EdeltaUtils.newEReference(referenceName, type, it -> 
-			EdeltaUtils.makeSingleRequired(it)
+		var reference = EdeltaUtils.newEReference(referenceName, type, EdeltaUtils::makeSingleRequired
 		);
 		eClass.getEStructuralFeatures().add(reference);
 		return reference;
@@ -5206,7 +5197,7 @@ class EdeltaModelMigratorTest {
 		// ALSO MAKE SURE IT'S A SINGLE FEATURE, NOT MULTI (TO BE DONE ALSO IN refactorings.lib)
 		// ALSO MAKE SURE IT'S NOT BIDIRECTIONAL (TO BE DONE ALSO IN refactorings.lib)
 		var firstFeature = features.iterator().next();
-		final EClass owner = firstFeature.getEContainingClass();
+		final var owner = firstFeature.getEContainingClass();
 		var mergedFeature = createCopy(firstFeature);
 		mergedFeature.setName(newFeatureName);
 		owner.getEStructuralFeatures().add(mergedFeature);

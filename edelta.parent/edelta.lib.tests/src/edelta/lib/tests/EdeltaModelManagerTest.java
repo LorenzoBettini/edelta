@@ -245,7 +245,7 @@ public class EdeltaModelManagerTest {
 
 	@Test
 	public void testLoadFromClassLoader() throws IOException, EdeltaPackageNotLoadedException {
-		InputStream inputStream = this.getClass().getResourceAsStream("/subfolder/AnEcore.ecore");
+		var inputStream = this.getClass().getResourceAsStream("/subfolder/AnEcore.ecore");
 		modelManager.loadEcoreFile("An Ecore", inputStream);
 		modelManager.registerEPackageByNsURI("apackage", "http://my.apackage.org");
 		var registered = modelManager.getEPackage("apackage");

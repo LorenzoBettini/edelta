@@ -12,7 +12,6 @@ import java.util.List;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.eclipse.emf.ecore.EClassifier;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.junit.Test;
@@ -256,7 +255,7 @@ public class EdeltaEcoreUtilTest {
 		var attr = EcoreFactory.eINSTANCE.createEAttribute();
 		attr.setEType(EcorePackage.Literals.ESTRING);
 
-		EObject o = EdeltaEcoreUtil.getValueAsEObject(attr,
+		var o = EdeltaEcoreUtil.getValueAsEObject(attr,
 			EcorePackage.Literals.ETYPED_ELEMENT__ETYPE);
 
 		assertThat(o)
@@ -294,7 +293,7 @@ public class EdeltaEcoreUtilTest {
 		var attr = EcoreFactory.eINSTANCE.createEAttribute();
 		attr.setEType(EcorePackage.Literals.ESTRING);
 
-		Object o = EdeltaEcoreUtil.getValueFromFeatureName(attr,
+		var o = EdeltaEcoreUtil.getValueFromFeatureName(attr,
 			EcorePackage.Literals.ETYPED_ELEMENT__ETYPE.getName());
 
 		assertThat(o)
@@ -306,7 +305,7 @@ public class EdeltaEcoreUtilTest {
 		var attr = EcoreFactory.eINSTANCE.createEAttribute();
 		attr.setEType(EcorePackage.Literals.ESTRING);
 
-		boolean o = EdeltaEcoreUtil.isSet(attr,
+		var o = EdeltaEcoreUtil.isSet(attr,
 			EcorePackage.Literals.ETYPED_ELEMENT__ETYPE.getName());
 
 		assertThat(o)

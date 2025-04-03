@@ -410,9 +410,7 @@ public class EdeltaEngineTest {
 	private void turnMyClassAttributeValueToUpperCase(EAttribute firstAttribute, EdeltaModelMigrator migrator) {
 		migrator.transformAttributeValueRule(
 			migrator.isRelatedTo(firstAttribute),
-			(feature, oldVal, newVal) -> {
-				return newVal.toString().toUpperCase();
-			}
+			(feature, oldVal, newVal) -> newVal.toString().toUpperCase()
 		);
 	}
 

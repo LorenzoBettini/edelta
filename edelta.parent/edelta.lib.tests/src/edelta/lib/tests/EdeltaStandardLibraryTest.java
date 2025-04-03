@@ -25,15 +25,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
-import org.eclipse.emf.ecore.EAttribute;
-import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EDataType;
-import org.eclipse.emf.ecore.EEnum;
-import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcoreFactory;
@@ -117,7 +111,7 @@ public class EdeltaStandardLibraryTest {
 		// so if we load something with lib we can get it with other
 		loadTestEcore(MY_ECORE);
 		loadTestEcore(MY2_ECORE);
-		EPackage ePackage = other.getEPackage(MYPACKAGE);
+		var ePackage = other.getEPackage(MYPACKAGE);
 		assertEquals(MYPACKAGE, ePackage.getName());
 		assertNotNull(ePackage);
 		assertNotNull(other.getEPackage(MYOTHERPACKAGE));
@@ -126,8 +120,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addEClass() {
-		EPackage ePackage = ecoreFactory.createEPackage();
-		EClass eClass = ecoreFactory.createEClass();
+		var ePackage = ecoreFactory.createEPackage();
+		var eClass = ecoreFactory.createEClass();
 		lib.addEClass(ePackage, eClass);
 		assertSame(eClass,
 				ePackage.getEClassifiers().get(0));
@@ -150,8 +144,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEClass() {
-		EPackage ePackage = ecoreFactory.createEPackage();
-		EClass eClass = lib.addNewEClass(ePackage, "test");
+		var ePackage = ecoreFactory.createEPackage();
+		var eClass = lib.addNewEClass(ePackage, "test");
 		assertEquals("test", eClass.getName());
 		assertSame(eClass,
 			ePackage.getEClassifiers().get(0));
@@ -159,8 +153,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEClassWithInitializer() {
-		EPackage ePackage = ecoreFactory.createEPackage();
-		EClass eClass = lib.addNewEClass(ePackage, "test",
+		var ePackage = ecoreFactory.createEPackage();
+		var eClass = lib.addNewEClass(ePackage, "test",
 				cl -> {
 					assertNotNull(cl.getEPackage());
 					cl.setName("changed");
@@ -183,7 +177,7 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEClassAsSiblingWithInitializer() {
-		EPackage ePackage = ecoreFactory.createEPackage();
+		var ePackage = ecoreFactory.createEPackage();
 		var sibling = ecoreFactory.createEClass();
 		ePackage.getEClassifiers().add(sibling);
 		var eClass = lib.addNewEClassAsSibling(sibling, "test",
@@ -198,8 +192,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewAbstractEClass() {
-		EPackage ePackage = ecoreFactory.createEPackage();
-		EClass eClass = lib.addNewAbstractEClass(ePackage, "test");
+		var ePackage = ecoreFactory.createEPackage();
+		var eClass = lib.addNewAbstractEClass(ePackage, "test");
 		assertEquals("test", eClass.getName());
 		assertThat(eClass.isAbstract())
 			.isTrue();
@@ -209,8 +203,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewAbstractEClassWithInitializer() {
-		EPackage ePackage = ecoreFactory.createEPackage();
-		EClass eClass = lib.addNewAbstractEClass(ePackage, "test",
+		var ePackage = ecoreFactory.createEPackage();
+		var eClass = lib.addNewAbstractEClass(ePackage, "test",
 				cl -> {
 					assertNotNull(cl.getEPackage());
 					cl.setName("changed");
@@ -224,8 +218,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addEEnum() {
-		EPackage ePackage = ecoreFactory.createEPackage();
-		EEnum eEnum = ecoreFactory.createEEnum();
+		var ePackage = ecoreFactory.createEPackage();
+		var eEnum = ecoreFactory.createEEnum();
 		lib.addEEnum(ePackage, eEnum);
 		assertSame(eEnum,
 				ePackage.getEClassifiers().get(0));
@@ -233,8 +227,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEEnum() {
-		EPackage ePackage = ecoreFactory.createEPackage();
-		EEnum eEnum = lib.addNewEEnum(ePackage, "test");
+		var ePackage = ecoreFactory.createEPackage();
+		var eEnum = lib.addNewEEnum(ePackage, "test");
 		assertEquals("test", eEnum.getName());
 		assertSame(eEnum,
 			ePackage.getEClassifiers().get(0));
@@ -242,8 +236,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEEnumWithInitializer() {
-		EPackage ePackage = ecoreFactory.createEPackage();
-		EEnum eEnum = lib.addNewEEnum(ePackage, "test",
+		var ePackage = ecoreFactory.createEPackage();
+		var eEnum = lib.addNewEEnum(ePackage, "test",
 				cl -> {
 					assertNotNull(cl.getEPackage());
 					cl.setName("changed");
@@ -255,10 +249,10 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEEnumAsSibling() {
-		EPackage ePackage = ecoreFactory.createEPackage();
+		var ePackage = ecoreFactory.createEPackage();
 		var sibling = ecoreFactory.createEEnum();
 		ePackage.getEClassifiers().add(sibling);
-		EEnum eEnum = lib.addNewEEnumAsSibling(sibling, "test");
+		var eEnum = lib.addNewEEnumAsSibling(sibling, "test");
 		assertEquals("test", eEnum.getName());
 		assertSame(eEnum,
 			ePackage.getEClassifiers().get(1));
@@ -266,10 +260,10 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEEnumAsSiblingWithInitializer() {
-		EPackage ePackage = ecoreFactory.createEPackage();
+		var ePackage = ecoreFactory.createEPackage();
 		var sibling = ecoreFactory.createEEnum();
 		ePackage.getEClassifiers().add(sibling);
-		EEnum eEnum = lib.addNewEEnumAsSibling(sibling, "test",
+		var eEnum = lib.addNewEEnumAsSibling(sibling, "test",
 				cl -> {
 					assertNotNull(cl.getEPackage());
 					cl.setName("changed");
@@ -281,8 +275,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addEEnumLiteral() {
-		EEnum eEnum = ecoreFactory.createEEnum();
-		EEnumLiteral eEnumLiteral = ecoreFactory.createEEnumLiteral();
+		var eEnum = ecoreFactory.createEEnum();
+		var eEnumLiteral = ecoreFactory.createEEnumLiteral();
 		lib.addEEnumLiteral(eEnum, eEnumLiteral);
 		assertSame(eEnumLiteral,
 				eEnum.getELiterals().get(0));
@@ -306,8 +300,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEEnumLiteral() {
-		EEnum eEnum = ecoreFactory.createEEnum();
-		EEnumLiteral eEnumLiteral =
+		var eEnum = ecoreFactory.createEEnum();
+		var eEnumLiteral =
 				lib.addNewEEnumLiteral(eEnum, "test");
 		assertEquals("test", eEnumLiteral.getName());
 		assertSame(eEnumLiteral,
@@ -316,8 +310,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEEnumLiteralWithInitializer() {
-		EEnum eEnum = ecoreFactory.createEEnum();
-		EEnumLiteral eEnumLiteral = lib.addNewEEnumLiteral(eEnum, "test",
+		var eEnum = ecoreFactory.createEEnum();
+		var eEnumLiteral = lib.addNewEEnumLiteral(eEnum, "test",
 				lit -> {
 					assertNotNull(lit.getEEnum());
 					lit.setName("changed");
@@ -329,10 +323,10 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEEnumLiteralAsSibling() {
-		EEnum eEnum = ecoreFactory.createEEnum();
+		var eEnum = ecoreFactory.createEEnum();
 		var sibling = ecoreFactory.createEEnumLiteral();
 		eEnum.getELiterals().add(sibling);
-		EEnumLiteral eEnumLiteral =
+		var eEnumLiteral =
 				lib.addNewEEnumLiteralAsSibling(sibling, "test");
 		assertEquals("test", eEnumLiteral.getName());
 		assertSame(eEnumLiteral,
@@ -341,10 +335,10 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEEnumLiteralAsSiblingWithInitializer() {
-		EEnum eEnum = ecoreFactory.createEEnum();
+		var eEnum = ecoreFactory.createEEnum();
 		var sibling = ecoreFactory.createEEnumLiteral();
 		eEnum.getELiterals().add(sibling);
-		EEnumLiteral eEnumLiteral = lib.addNewEEnumLiteralAsSibling(sibling, "test",
+		var eEnumLiteral = lib.addNewEEnumLiteralAsSibling(sibling, "test",
 				lit -> {
 					assertNotNull(lit.getEEnum());
 					lit.setName("changed");
@@ -356,8 +350,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addEDataType() {
-		EPackage ePackage = ecoreFactory.createEPackage();
-		EDataType eEnum = ecoreFactory.createEDataType();
+		var ePackage = ecoreFactory.createEPackage();
+		var eEnum = ecoreFactory.createEDataType();
 		lib.addEDataType(ePackage, eEnum);
 		assertSame(eEnum,
 				ePackage.getEClassifiers().get(0));
@@ -365,8 +359,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEDataType() {
-		EPackage ePackage = ecoreFactory.createEPackage();
-		EDataType eDataType = lib.addNewEDataType(ePackage, "test", "java.lang.String");
+		var ePackage = ecoreFactory.createEPackage();
+		var eDataType = lib.addNewEDataType(ePackage, "test", "java.lang.String");
 		assertEquals("test", eDataType.getName());
 		assertSame(eDataType,
 			ePackage.getEClassifiers().get(0));
@@ -377,8 +371,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEDataTypeWithInitializer() {
-		EPackage ePackage = ecoreFactory.createEPackage();
-		EDataType eDataType = lib.addNewEDataType(ePackage, "test", "java.lang.String",
+		var ePackage = ecoreFactory.createEPackage();
+		var eDataType = lib.addNewEDataType(ePackage, "test", "java.lang.String",
 				cl -> {
 					assertNotNull(cl.getEPackage());
 					cl.setName("changed");
@@ -393,10 +387,10 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEDataTypeAsSibling() {
-		EPackage ePackage = ecoreFactory.createEPackage();
+		var ePackage = ecoreFactory.createEPackage();
 		var sibling = ecoreFactory.createEClass();
 		ePackage.getEClassifiers().add(sibling);
-		EDataType eDataType = lib.addNewEDataTypeAsSibling(sibling, "test", "java.lang.String");
+		var eDataType = lib.addNewEDataTypeAsSibling(sibling, "test", "java.lang.String");
 		assertEquals("test", eDataType.getName());
 		assertSame(eDataType,
 			ePackage.getEClassifiers().get(1));
@@ -407,10 +401,10 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEDataTypeAsSiblingWithInitializer() {
-		EPackage ePackage = ecoreFactory.createEPackage();
+		var ePackage = ecoreFactory.createEPackage();
 		var sibling = ecoreFactory.createEClass();
 		ePackage.getEClassifiers().add(sibling);
-		EDataType eDataType = lib.addNewEDataTypeAsSibling(sibling, "test", "java.lang.String",
+		var eDataType = lib.addNewEDataTypeAsSibling(sibling, "test", "java.lang.String",
 				cl -> {
 					assertNotNull(cl.getEPackage());
 					cl.setName("changed");
@@ -425,8 +419,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addEAttribute() {
-		EClass eClass = ecoreFactory.createEClass();
-		EAttribute eAttribute = ecoreFactory.createEAttribute();
+		var eClass = ecoreFactory.createEClass();
+		var eAttribute = ecoreFactory.createEAttribute();
 		lib.addEAttribute(eClass, eAttribute);
 		assertSame(eAttribute,
 				eClass.getEStructuralFeatures().get(0));
@@ -452,8 +446,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEAttribute() {
-		EClass eClass = ecoreFactory.createEClass();
-		EAttribute eAttribute =
+		var eClass = ecoreFactory.createEClass();
+		var eAttribute =
 				lib.addNewEAttribute(eClass, "test", ESTRING);
 		assertEquals("test", eAttribute.getName());
 		assertEquals(ESTRING, eAttribute.getEType());
@@ -464,8 +458,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEAttributeWithInitializer() {
-		EClass eClass = ecoreFactory.createEClass();
-		EAttribute eAttribute =
+		var eClass = ecoreFactory.createEClass();
+		var eAttribute =
 			lib.addNewEAttribute(eClass, "test", ESTRING,
 				attr -> {
 					assertNotNull(attr.getEContainingClass());
@@ -480,10 +474,10 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEAttributeAsSibling() {
-		EClass eClass = ecoreFactory.createEClass();
+		var eClass = ecoreFactory.createEClass();
 		var sibling = ecoreFactory.createEAttribute();
 		eClass.getEStructuralFeatures().add(sibling);
-		EAttribute eAttribute =
+		var eAttribute =
 				lib.addNewEAttributeAsSibling(sibling, "test", ESTRING);
 		assertEquals("test", eAttribute.getName());
 		assertEquals(ESTRING, eAttribute.getEType());
@@ -494,10 +488,10 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEAttributeAsSiblingWithInitializer() {
-		EClass eClass = ecoreFactory.createEClass();
+		var eClass = ecoreFactory.createEClass();
 		var sibling = ecoreFactory.createEAttribute();
 		eClass.getEStructuralFeatures().add(sibling);
-		EAttribute eAttribute =
+		var eAttribute =
 			lib.addNewEAttributeAsSibling(sibling, "test", ESTRING,
 				attr -> {
 					assertNotNull(attr.getEContainingClass());
@@ -512,8 +506,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addEReference() {
-		EClass eClass = ecoreFactory.createEClass();
-		EReference eReference = ecoreFactory.createEReference();
+		var eClass = ecoreFactory.createEClass();
+		var eReference = ecoreFactory.createEReference();
 		lib.addEReference(eClass, eReference);
 		assertSame(eReference,
 				eClass.getEStructuralFeatures().get(0));
@@ -521,8 +515,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEReference() {
-		EClass eClass = ecoreFactory.createEClass();
-		EReference eReference =
+		var eClass = ecoreFactory.createEClass();
+		var eReference =
 				lib.addNewEReference(eClass, "test", EOBJECT);
 		assertEquals("test", eReference.getName());
 		assertEquals(EOBJECT, eReference.getEType());
@@ -533,8 +527,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEReferenceWithInitializer() {
-		EClass eClass = ecoreFactory.createEClass();
-		EReference eReference =
+		var eClass = ecoreFactory.createEClass();
+		var eReference =
 			lib.addNewEReference(eClass, "test", EOBJECT,
 				ref -> {
 					assertNotNull(ref.getEContainingClass());
@@ -549,10 +543,10 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEReferenceAsSibling() {
-		EClass eClass = ecoreFactory.createEClass();
+		var eClass = ecoreFactory.createEClass();
 		var sibling = ecoreFactory.createEAttribute();
 		eClass.getEStructuralFeatures().add(sibling);
-		EReference eReference =
+		var eReference =
 				lib.addNewEReferenceAsSibling(sibling, "test", EOBJECT);
 		assertEquals("test", eReference.getName());
 		assertEquals(EOBJECT, eReference.getEType());
@@ -563,10 +557,10 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewEReferenceAsSiblingWithInitializer() {
-		EClass eClass = ecoreFactory.createEClass();
+		var eClass = ecoreFactory.createEClass();
 		var sibling = ecoreFactory.createEAttribute();
 		eClass.getEStructuralFeatures().add(sibling);
-		EReference eReference =
+		var eReference =
 			lib.addNewEReferenceAsSibling(sibling, "test", EOBJECT,
 				ref -> {
 					assertNotNull(ref.getEContainingClass());
@@ -581,8 +575,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewContainmentEReference() {
-		EClass eClass = ecoreFactory.createEClass();
-		EReference eReference =
+		var eClass = ecoreFactory.createEClass();
+		var eReference =
 				lib.addNewContainmentEReference(eClass, "test", EOBJECT);
 		assertEquals("test", eReference.getName());
 		assertEquals(EOBJECT, eReference.getEType());
@@ -594,8 +588,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewContainmentEReferenceWithInitializer() {
-		EClass eClass = ecoreFactory.createEClass();
-		EReference eReference =
+		var eClass = ecoreFactory.createEClass();
+		var eReference =
 			lib.addNewContainmentEReference(eClass, "test", EOBJECT,
 				ref -> {
 					assertNotNull(ref.getEContainingClass());
@@ -611,19 +605,19 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addESuperType() {
-		EClass superClass = ecoreFactory.createEClass();
-		EClass subClass = ecoreFactory.createEClass();
+		var superClass = ecoreFactory.createEClass();
+		var subClass = ecoreFactory.createEClass();
 		lib.addESuperType(subClass, superClass);
 		assertThat(subClass.getESuperTypes()).containsExactly(superClass);
 	}
 
 	@Test
 	public void test_addNewSubclass() {
-		EPackage ePackage = ecoreFactory.createEPackage();
-		EClass superClass = ecoreFactory.createEClass();
+		var ePackage = ecoreFactory.createEPackage();
+		var superClass = ecoreFactory.createEClass();
 		superClass.setName("Superclass");
 		ePackage.getEClassifiers().add(superClass);
-		EClass subClass = lib.addNewSubclass(superClass, "test");
+		var subClass = lib.addNewSubclass(superClass, "test");
 		assertEquals("test", subClass.getName());
 		assertThat(subClass.getESuperTypes())
 			.containsExactly(superClass);
@@ -633,11 +627,11 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewSubclassWithInitializer() {
-		EPackage ePackage = ecoreFactory.createEPackage();
-		EClass superClass = ecoreFactory.createEClass();
+		var ePackage = ecoreFactory.createEPackage();
+		var superClass = ecoreFactory.createEClass();
 		superClass.setName("Superclass");
 		ePackage.getEClassifiers().add(superClass);
-		EClass subClass = lib.addNewSubclass(superClass, "test",
+		var subClass = lib.addNewSubclass(superClass, "test",
 				cl -> {
 					assertNotNull(cl.getEPackage());
 					cl.setName("changed");
@@ -651,8 +645,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_removeESuperType() {
-		EClass superClass = ecoreFactory.createEClass();
-		EClass subClass = ecoreFactory.createEClass();
+		var superClass = ecoreFactory.createEClass();
+		var subClass = ecoreFactory.createEClass();
 		subClass.getESuperTypes().add(superClass);
 		assertThat(subClass.getESuperTypes()).containsExactly(superClass);
 		lib.removeESuperType(subClass, superClass);
@@ -661,8 +655,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewESubpackage() {
-		EPackage superPackage = ecoreFactory.createEPackage();
-		EPackage subPackage =
+		var superPackage = ecoreFactory.createEPackage();
+		var subPackage =
 			lib.addNewESubpackage(superPackage, "newSubpackage", "prefix", "nsURI");
 		assertThat(subPackage)
 			.returns("newSubpackage", EPackage::getName)
@@ -674,8 +668,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_addNewESubpackageWithInitializer() {
-		EPackage superPackage = ecoreFactory.createEPackage();
-		EPackage subPackage =
+		var superPackage = ecoreFactory.createEPackage();
+		var subPackage =
 			lib.addNewESubpackage(superPackage, "newSubpackage", "prefix", "nsURI",
 				(EPackage p) -> p.setName("changed"));
 		assertThat(subPackage)
@@ -688,8 +682,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_copyTo() {
-		EClass eClassSrc = ecoreFactory.createEClass();
-		EClass eClassDest = ecoreFactory.createEClass();
+		var eClassSrc = ecoreFactory.createEClass();
+		var eClassDest = ecoreFactory.createEClass();
 		EStructuralFeature feature = ecoreFactory.createEAttribute();
 		eClassSrc.getEStructuralFeatures().add(feature);
 		// before
@@ -707,12 +701,12 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_copyTo_alreadyExisting() {
-		EClass eClassSrc = ecoreFactory.createEClass();
+		var eClassSrc = ecoreFactory.createEClass();
 		eClassSrc.setName("Src");
 		EStructuralFeature feature = ecoreFactory.createEAttribute();
 		feature.setName("Attr");
 		eClassSrc.getEStructuralFeatures().add(feature);
-		EClass eClassDest = ecoreFactory.createEClass();
+		var eClassDest = ecoreFactory.createEClass();
 		eClassDest.setName("Dest");
 		EStructuralFeature existing = ecoreFactory.createEAttribute();
 		existing.setName("Attr");
@@ -729,8 +723,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_copyToAs() {
-		EClass eClassSrc = ecoreFactory.createEClass();
-		EClass eClassDest = ecoreFactory.createEClass();
+		var eClassSrc = ecoreFactory.createEClass();
+		var eClassDest = ecoreFactory.createEClass();
 		EStructuralFeature feature = ecoreFactory.createEAttribute();
 		eClassSrc.getEStructuralFeatures().add(feature);
 		feature.setName("originalName");
@@ -752,8 +746,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_copyToAsWithType() {
-		EClass eClassSrc = ecoreFactory.createEClass();
-		EClass eClassDest = ecoreFactory.createEClass();
+		var eClassSrc = ecoreFactory.createEClass();
+		var eClassDest = ecoreFactory.createEClass();
 		EStructuralFeature feature = ecoreFactory.createEAttribute();
 		eClassSrc.getEStructuralFeatures().add(feature);
 		feature.setName("originalName");
@@ -778,8 +772,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_copyToAsForClassifier() {
-		EPackage ePackage = ecoreFactory.createEPackage();
-		EClass eClassSrc = ecoreFactory.createEClass();
+		var ePackage = ecoreFactory.createEPackage();
+		var eClassSrc = ecoreFactory.createEClass();
 		eClassSrc.setName("originalName");
 		ePackage.getEClassifiers().add(eClassSrc);
 		// before
@@ -794,8 +788,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_copyAllTo() {
-		EClass eClassSrc = ecoreFactory.createEClass();
-		EClass eClassDest = ecoreFactory.createEClass();
+		var eClassSrc = ecoreFactory.createEClass();
+		var eClassDest = ecoreFactory.createEClass();
 		EStructuralFeature feature1 = ecoreFactory.createEAttribute();
 		eClassSrc.getEStructuralFeatures().add(feature1);
 		EStructuralFeature feature2 = ecoreFactory.createEReference();
@@ -816,12 +810,12 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_copyAllTo_alreadyExisting() {
-		EClass eClassSrc = ecoreFactory.createEClass();
+		var eClassSrc = ecoreFactory.createEClass();
 		eClassSrc.setName("Src");
 		EStructuralFeature feature = ecoreFactory.createEAttribute();
 		feature.setName("Attr");
 		eClassSrc.getEStructuralFeatures().add(feature);
-		EClass eClassDest = ecoreFactory.createEClass();
+		var eClassDest = ecoreFactory.createEClass();
 		eClassDest.setName("Dest");
 		EStructuralFeature existing = ecoreFactory.createEAttribute();
 		existing.setName("Attr");
@@ -838,8 +832,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_moveTo() {
-		EClass eClassSrc = ecoreFactory.createEClass();
-		EClass eClassDest = ecoreFactory.createEClass();
+		var eClassSrc = ecoreFactory.createEClass();
+		var eClassDest = ecoreFactory.createEClass();
 		EStructuralFeature feature = ecoreFactory.createEAttribute();
 		eClassSrc.getEStructuralFeatures().add(feature);
 		// before
@@ -855,8 +849,8 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_moveAllTo() {
-		EClass eClassSrc = ecoreFactory.createEClass();
-		EClass eClassDest = ecoreFactory.createEClass();
+		var eClassSrc = ecoreFactory.createEClass();
+		var eClassDest = ecoreFactory.createEClass();
 		EStructuralFeature feature1 = ecoreFactory.createEAttribute();
 		eClassSrc.getEStructuralFeatures().add(feature1);
 		EStructuralFeature feature2 = ecoreFactory.createEReference();
@@ -874,11 +868,11 @@ public class EdeltaStandardLibraryTest {
 
 	@Test
 	public void test_createOpposite() {
-		EClass c1 = ecoreFactory.createEClass();
-		EClass c2 = ecoreFactory.createEClass();
-		EReference c1Ref = ecoreFactory.createEReference();
+		var c1 = ecoreFactory.createEClass();
+		var c2 = ecoreFactory.createEClass();
+		var c1Ref = ecoreFactory.createEReference();
 		c1.getEStructuralFeatures().add(c1Ref);
-		EReference c2Ref = lib.createOpposite(c1Ref, "c2Ref", c2);
+		var c2Ref = lib.createOpposite(c1Ref, "c2Ref", c2);
 		assertThat(c1Ref.getEOpposite()).isNotNull();
 		assertThat(c2Ref.getEOpposite()).isNotNull();
 		assertThat(c1Ref.getEOpposite()).isSameAs(c2Ref);
@@ -890,8 +884,8 @@ public class EdeltaStandardLibraryTest {
 		assertThat(c1.getEReferences()).containsExactly(c1Ref);
 		assertThat(c2.getEReferences()).containsExactly(c2Ref);
 		// test it with an existing opposite
-		EClass c3 = ecoreFactory.createEClass();
-		EReference c3Ref = lib.createOpposite(c1Ref, "c3Ref", c3);
+		var c3 = ecoreFactory.createEClass();
+		var c3Ref = lib.createOpposite(c1Ref, "c3Ref", c3);
 		assertThat(c1Ref.getEOpposite()).isNotNull();
 		assertThat(c3Ref.getEOpposite()).isNotNull();
 		assertThat(c1Ref.getEOpposite()).isSameAs(c3Ref);
