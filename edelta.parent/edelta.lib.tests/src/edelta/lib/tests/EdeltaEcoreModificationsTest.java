@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edelta.lib.tests;
 
@@ -8,9 +8,7 @@ import static org.junit.Assert.assertSame;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
@@ -22,14 +20,14 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.Before;
 import org.junit.Test;
 
-import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaModelManager;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaUtils;
 
 /**
  * Tests manipulations of Ecore models.
- * 
+ *
  * @author Lorenzo Bettini
  *
  */
@@ -84,21 +82,21 @@ public class EdeltaEcoreModificationsTest {
 	public void testCopyENamedElementEOppositeReferenceWorksAcrossEPackages() {
 		loadTestEcore(TEST_ECORE_FOR_REFERENCES1);
 		loadTestEcore(TEST_ECORE_FOR_REFERENCES2);
-		EPackage original1 = edelta.getEPackage(TEST_PACKAGE_FOR_REFERENCES1);
-		EPackage original2 = edelta.getEPackage(TEST_PACKAGE_FOR_REFERENCES2);
-		EClass person = getEClassByName(original1.getEClassifiers(), "Person");
-		EClass workplace = getEClassByName(original2.getEClassifiers(), "WorkPlace");
-		EReference works = getEReferenceByName(person.getEStructuralFeatures(), "works");
-		EReference persons = getEReferenceByName(workplace.getEStructuralFeatures(), "persons");
+		var original1 = edelta.getEPackage(TEST_PACKAGE_FOR_REFERENCES1);
+		var original2 = edelta.getEPackage(TEST_PACKAGE_FOR_REFERENCES2);
+		var person = getEClassByName(original1.getEClassifiers(), "Person");
+		var workplace = getEClassByName(original2.getEClassifiers(), "WorkPlace");
+		var works = getEReferenceByName(person.getEStructuralFeatures(), "works");
+		var persons = getEReferenceByName(workplace.getEStructuralFeatures(), "persons");
 		assertSame(works.getEOpposite(), persons);
 		assertSame(persons.getEOpposite(), works);
 		// perform copy and EOpposite refers to the copied opposite
 		// and that is good for us!
 		Collection<EPackage> copyEPackages =
 			EcoreUtil.copyAll(Arrays.asList(original1, original2));
-		Iterator<EPackage> iterator = copyEPackages.iterator();
-		EPackage copied1 = iterator.next();
-		EPackage copied2 = iterator.next();
+		var iterator = copyEPackages.iterator();
+		var copied1 = iterator.next();
+		var copied2 = iterator.next();
 		// the following is not true anymore, since we resolve proxies while copying:
 		// everything must be in a resource set, and the resources
 		// for the copied EPackages must have the same URIs of the
@@ -118,18 +116,18 @@ public class EdeltaEcoreModificationsTest {
 	private EClass getEClassByName(List<EClassifier> classifiers, String nameToSearch) {
 		return getByName(
 				classifiers.stream().
-				filter(e -> e instanceof EClass).
+				filter(EClass.class::isInstance).
 				map(e -> (EClass)e).
-				collect(Collectors.toList()),
+				toList(),
 			nameToSearch);
 	}
 
 	private EReference getEReferenceByName(List<EStructuralFeature> features, String nameToSearch) {
 		return getByName(
 				features.stream().
-				filter(e -> e instanceof EReference).
+				filter(EReference.class::isInstance).
 				map(e -> (EReference)e).
-				collect(Collectors.toList()),
+				toList(),
 			nameToSearch);
 	}
 

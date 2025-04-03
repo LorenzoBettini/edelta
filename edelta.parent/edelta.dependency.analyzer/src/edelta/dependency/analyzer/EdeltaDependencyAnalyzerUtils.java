@@ -3,7 +3,6 @@ package edelta.dependency.analyzer;
 import static java.util.Comparator.comparing;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EPackage;
@@ -15,8 +14,8 @@ import GraphMM.Node;
 import GraphMM.Repository;
 
 /**
- * Utilities for {@link EPackage} and {@link Repository} 
- * 
+ * Utilities for {@link EPackage} and {@link Repository}
+ *
  * @author Lorenzo Bettini
  *
  */
@@ -41,7 +40,7 @@ public class EdeltaDependencyAnalyzerUtils {
 			.flatMap(d -> Stream.of(d.getSrc(), d.getTrg())))
 			.filter(m -> m != subject)
 			.sorted(comparing(Metamodel::getName))
-			.collect(Collectors.toList());
+			.toList();
 	}
 
 	private static Stream<Metamodel> metamodelStream(Stream<Node> nodes) {

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edelta.lib.tests;
 
@@ -17,7 +17,7 @@ import edelta.lib.EdeltaResourceUtils;
 
 /**
  * Tests for the {@link EdeltaResourceUtils}.
- * 
+ *
  * @author Lorenzo Bettini
  *
  */

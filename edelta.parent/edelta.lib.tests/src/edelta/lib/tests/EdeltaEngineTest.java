@@ -16,16 +16,16 @@ import org.eclipse.emf.ecore.EClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaEngine;
 import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaModelMigrator;
 import edelta.lib.EdeltaResourceUtils;
+import edelta.lib.EdeltaRuntime;
 
 /**
  * This is also meant to simulate what the final Java main for a generated
  * runtime Edelta should look like.
- * 
+ *
  * @author Lorenzo Bettini
  *
  */
@@ -48,7 +48,7 @@ public class EdeltaEngineTest {
 
 	@Test
 	public void testCreationAndExecution() throws Exception {
-		var engine = new EdeltaEngine(other -> 
+		var engine = new EdeltaEngine(other ->
 			new EdeltaRuntime(other) {
 				/**
 				 * The implementation doesn't have to make sense:
@@ -92,7 +92,7 @@ public class EdeltaEngineTest {
 
 	@Test
 	public void testAccessToModelManagers() throws Exception {
-		var engine = new EdeltaEngine(other -> 
+		var engine = new EdeltaEngine(other ->
 			new EdeltaRuntime(other) {
 				/**
 				 * The implementation doesn't have to make sense:
@@ -141,12 +141,12 @@ public class EdeltaEngineTest {
 	 * Note that "My.ecore" in this test is different from the other tests: it's loaded
 	 * from the class, i.e., from this project "testecores" subdirectory (actually, it's loaded
 	 * from its version copied into "target" subdirectory.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	public void testLoadFromClassLoader() throws Exception {
-		var engine = new EdeltaEngine(other -> 
+		var engine = new EdeltaEngine(other ->
 			new EdeltaRuntime(other) {
 				/**
 				 * The implementation doesn't have to make sense:
@@ -176,7 +176,7 @@ public class EdeltaEngineTest {
 
 	/**
 	 * An Edelta calling a Library
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -238,7 +238,7 @@ public class EdeltaEngineTest {
 
 	/**
 	 * An Edelta calling two Libraries
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -314,7 +314,7 @@ public class EdeltaEngineTest {
 
 	/**
 	 * An Edelta calling a Library calling a Library
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -403,22 +403,20 @@ public class EdeltaEngineTest {
 
 	/**
 	 * turn the MyClass objects values to uppercase
-	 * 
+	 *
 	 * @param firstAttribute
 	 * @param migrator
 	 */
 	private void turnMyClassAttributeValueToUpperCase(EAttribute firstAttribute, EdeltaModelMigrator migrator) {
 		migrator.transformAttributeValueRule(
 			migrator.isRelatedTo(firstAttribute),
-			(feature, oldVal, newVal) -> {
-				return newVal.toString().toUpperCase();
-			}
+			(feature, oldVal, newVal) -> newVal.toString().toUpperCase()
 		);
 	}
 
 	/**
 	 * completely creates new contents and references for MyRoot objects
-	 * 
+	 *
 	 * @param myClass
 	 * @param myRoot
 	 * @param migrator

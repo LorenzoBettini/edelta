@@ -1,6 +1,12 @@
+/**
+ * 
+ */
 package edelta.interpreter;
 
 import org.eclipse.emf.ecore.resource.Resource;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  * Creates an {@link EdeltaInterpreter}.
@@ -8,7 +14,10 @@ import org.eclipse.emf.ecore.resource.Resource;
  * @author Lorenzo Bettini
  *
  */
-public interface EdeltaInterpreterFactory {
+public class EdeltaDefaultInterpreterFactory implements EdeltaInterpreterFactory {
+
+	@Inject
+	private Provider<EdeltaInterpreter> provider;
 
 	/**
 	 * The {@link Resource} can be used to retrieve important information, like the
@@ -18,6 +27,8 @@ public interface EdeltaInterpreterFactory {
 	 *                 project in the UI.
 	 * @return
 	 */
-	EdeltaInterpreter create(Resource resource);
-
+	@Override
+	public EdeltaInterpreter create(Resource resource) {
+		return provider.get();
+	}
 }
