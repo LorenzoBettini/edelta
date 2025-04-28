@@ -71,7 +71,7 @@ import edelta.validation.EdeltaValidator;
  * 
  * @author Lorenzo Bettini
  */
-public class EdeltaInterpreter extends XbaseInterpreter {
+public class EdeltaInterpreter extends XbaseInterpreter implements EdeltaInterpreterInterface {
 	@Inject
 	private EdeltaInterpreterFactory edeltaInterpreterFactory;
 
@@ -121,22 +121,27 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	private Collection<EdeltaEcoreReferenceExpression> interpretedEcoreReferenceExpressions =
 		new HashSet<>();
 
+	@Override
 	public void setInterpreterTimeout(final int interpreterTimeout) {
 		this.interpreterTimeout = interpreterTimeout;
 	}
 
+	@Override
 	public void setCurrentProgram(EdeltaProgram currentProgram) {
 		this.currentProgram = currentProgram;
 	}
 
+	@Override
 	public void setThisObject(EdeltaRuntime thisObject) {
 		this.thisObject = thisObject;
 	}
 
+	@Override
 	public void setDiagnosticHelper(EdeltaInterpreterDiagnosticHelper diagnosticHelper) {
 		this.diagnosticHelper = diagnosticHelper;
 	}
 
+	@Override
 	public void evaluateModifyEcoreOperations(final EdeltaProgram program) {
 		currentProgram = program;
 		final var eResource = program.eResource();
@@ -655,7 +660,8 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 	 * @param indicator
 	 * @return
 	 */
-	private Object evaluateEdeltaOperation(EdeltaOperation edeltaOperation, List<Object> argumentValues,
+	@Override
+	public Object evaluateEdeltaOperation(EdeltaOperation edeltaOperation, List<Object> argumentValues,
 			IEvaluationContext context, CancelIndicator indicator) {
 		configureContextForParameterArguments(context,
 				edeltaOperation.getParams(), argumentValues);
