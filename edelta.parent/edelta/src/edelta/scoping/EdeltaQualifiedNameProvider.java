@@ -21,8 +21,7 @@ public class EdeltaQualifiedNameProvider extends XbaseQualifiedNameProvider {
 
 	@Override
 	public QualifiedName getFullyQualifiedName(EObject obj) {
-		if (obj instanceof EdeltaProgram) {
-			var program = (EdeltaProgram) obj;
+		if (obj instanceof EdeltaProgram program) {
 			var packageName = program.getName();
 			packageName = packageName != null ? packageName : "edelta";
 			return getConverter().toQualifiedName(
@@ -38,12 +37,9 @@ public class EdeltaQualifiedNameProvider extends XbaseQualifiedNameProvider {
 	 */
 	@Override
 	protected QualifiedName computeFullyQualifiedNameFromNameAttribute(EObject obj) {
-		if (obj instanceof EPackage) {
-			var ePackage = (EPackage) obj;
-			if (EdeltaModelUtil.hasCycleInSuperPackage(ePackage)) {
-				// avoid StackOverflowError
-				return getConverter().toQualifiedName(ePackage.getName());
-			}
+		if (obj instanceof EPackage ePackage && EdeltaModelUtil.hasCycleInSuperPackage(ePackage)) {
+			// avoid StackOverflowError
+			return getConverter().toQualifiedName(ePackage.getName());
 		}
 		return super.computeFullyQualifiedNameFromNameAttribute(obj);
 	}

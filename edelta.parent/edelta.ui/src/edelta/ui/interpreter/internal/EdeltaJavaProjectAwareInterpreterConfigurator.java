@@ -33,11 +33,10 @@ public class EdeltaJavaProjectAwareInterpreterConfigurator {
 
 	public void configureInterpreter(EdeltaInterpreter interpreter, Resource resource) {
 		var set = resource.getResourceSet();
-		if (set instanceof XtextResourceSet) {
-			Object context = ((XtextResourceSet) set).getClasspathURIContext();
-			if (context instanceof IJavaProject) {
+		if (set instanceof XtextResourceSet xtextResourceSet) {
+			Object context = xtextResourceSet.getClasspathURIContext();
+			if (context instanceof IJavaProject javaProject) {
 				try {
-					var javaProject = (IJavaProject) context;
 					var classPathEntries = JavaRuntime.computeDefaultRuntimeClassPath(javaProject);
 					var urlList = new ArrayList<>();
 					for (int i = 0; i < classPathEntries.length; i++) {

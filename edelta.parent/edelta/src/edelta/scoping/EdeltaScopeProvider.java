@@ -35,10 +35,9 @@ public class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 	@Override
 	public IScope getScope(final EObject context, final EReference reference) {
 		if (reference == EDELTA_ECORE_REFERENCE__ENAMEDELEMENT) {
-			if (context instanceof EdeltaEcoreQualifiedReference) {
+			if (context instanceof EdeltaEcoreQualifiedReference ecoreQualifiedReference) {
 				return Scopes.scopeFor(edeltaEcoreHelper.getENamedElements(
-					((EdeltaEcoreQualifiedReference) context)
-						.getQualification().getEnamedelement()));
+						ecoreQualifiedReference.getQualification().getEnamedelement()));
 			}
 			return Scopes.scopeFor(edeltaEcoreHelper.getProgramENamedElements(context));
 		} else if (reference == EDELTA_MODIFY_ECORE_OPERATION__EPACKAGE) {

@@ -38,9 +38,9 @@ public class EdeltaInterpreterDiagnosticHelper {
 	private void addDiagnostic(EObject problematicObject, String problemCode, String message, Severity severity) {
 		XExpression correspondingExpression = null;
 		final var eResource = currentExpression.eResource();
-		if (problematicObject instanceof ENamedElement) {
+		if (problematicObject instanceof ENamedElement namedElement) {
 			correspondingExpression = derivedStateHelper
-				.getLastResponsibleExpression(currentExpression, (ENamedElement) problematicObject);
+				.getLastResponsibleExpression(currentExpression, namedElement);
 		}
 		final var issues = 
 			severity == Severity.WARNING ? eResource.getWarnings() : eResource.getErrors();

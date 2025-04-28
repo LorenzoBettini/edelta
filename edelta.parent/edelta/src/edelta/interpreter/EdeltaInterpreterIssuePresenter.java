@@ -7,7 +7,7 @@ import edelta.lib.EdeltaIssuePresenter;
 import edelta.validation.EdeltaValidator;
 
 /**
- * Used by the {@link EdeltaInterpreter} to catch issues reported by
+ * Used by the {@link EdeltaDefaultInterpreter} to catch issues reported by
  * {@link EdeltaRuntime#showError(ENamedElement, String)},
  * {@link EdeltaRuntime#showWarning(ENamedElement, String)}, etc, using
  * {@link EdeltaInterpreterDiagnosticHelper}.

@@ -27,20 +27,17 @@ public class EdeltaOutlineWithEditorLinker extends OutlineWithEditorLinker {
 	@Override
 	protected IOutlineNode findBestNode(IOutlineNode input, ITextRegion selectedTextRegion) {
 		final var findBestNode = super.findBestNode(input, selectedTextRegion);
-		if (findBestNode instanceof EObjectNode) {
-			var eObjectNode = (EObjectNode) findBestNode;
-			if (eObjectNode.getEClass() == EDELTA_MODIFY_ECORE_OPERATION) {
-				/* since XExpressions are not shown in the outline, when we select
-				 * such an expression, by default the containing modifyEcore node is
-				 * selected. We try and find a node representing an Ecore element
-				 * that is modified by the selected XExpressionv*/
-				return eObjectNode.getParent().getChildren().stream()
-					.filter(node -> EPACKAGE == ((EObjectNode) node).getEClass())
-					.map(node -> findENamedElementNode(node, selectedTextRegion))
-					.filter(Objects::nonNull)
-					.findFirst()
-					.orElse(findBestNode);
-			}
+		if (findBestNode instanceof EObjectNode eObjectNode && eObjectNode.getEClass() == EDELTA_MODIFY_ECORE_OPERATION) {
+			/* since XExpressions are not shown in the outline, when we select
+			 * such an expression, by default the containing modifyEcore node is
+			 * selected. We try and find a node representing an Ecore element
+			 * that is modified by the selected XExpressionv*/
+			return eObjectNode.getParent().getChildren().stream()
+				.filter(node -> EPACKAGE == ((EObjectNode) node).getEClass())
+				.map(node -> findENamedElementNode(node, selectedTextRegion))
+				.filter(Objects::nonNull)
+				.findFirst()
+				.orElse(findBestNode);
 		}
 		return findBestNode;
 	}
