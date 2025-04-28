@@ -125,6 +125,18 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 		this.interpreterTimeout = interpreterTimeout;
 	}
 
+	public void setCurrentProgram(EdeltaProgram currentProgram) {
+		this.currentProgram = currentProgram;
+	}
+
+	public void setThisObject(EdeltaRuntime thisObject) {
+		this.thisObject = thisObject;
+	}
+
+	public void setDiagnosticHelper(EdeltaInterpreterDiagnosticHelper diagnosticHelper) {
+		this.diagnosticHelper = diagnosticHelper;
+	}
+
 	public void evaluateModifyEcoreOperations(final EdeltaProgram program) {
 		currentProgram = program;
 		final var eResource = program.eResource();
@@ -599,15 +611,15 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 
 				var newInterpreter =
 						edeltaInterpreterFactory.create(containingProgram.eResource());
-				newInterpreter.currentProgram = containingProgram;
+				newInterpreter.setCurrentProgram(containingProgram);
 				// since we pass thisObject, the new interpreter will share
 				// the same package manager (see creatThisObject) and
 				// the same issue representer.
-				newInterpreter.thisObject = new EdeltaDefaultRuntime(thisObject);
+				newInterpreter.setThisObject(new EdeltaDefaultRuntime(thisObject));
 				// it is crucial to share the diagnosticHelper where the
 				// currentExpression is correctly set to avoid a NPE
 				// see testExecutionOfSeveralFilesWithUseAsAndIssuePresenter
-				newInterpreter.diagnosticHelper = diagnosticHelper;
+				newInterpreter.setDiagnosticHelper(diagnosticHelper);
 				var context = newInterpreter.createContext();
 				newInterpreter.configureContextForJavaThis(context);
 				return newInterpreter.evaluateEdeltaOperation(edeltaOperation, argumentValues,
