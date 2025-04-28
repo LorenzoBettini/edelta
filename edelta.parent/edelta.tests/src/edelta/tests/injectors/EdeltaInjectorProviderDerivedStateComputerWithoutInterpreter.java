@@ -13,7 +13,7 @@ import edelta.tests.additional.MockJavaReflectAccess;
 /**
  * Avoids the derived state computer run the interpreter since the tests in this
  * class must concern interpreter only and we don't want side effects from the
- * derived state computer running the interpreter. The {@link EdeltaDefInterpreter} can
+ * derived state computer running the interpreter. The {@link EdeltaInterpreter} can
  * still be injected in the tests and it will be a {@link EdeltaDefaultInterpreter}.
  * 
  * @author Lorenzo Bettini
