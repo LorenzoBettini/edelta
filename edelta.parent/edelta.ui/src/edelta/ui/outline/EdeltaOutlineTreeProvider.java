@@ -21,7 +21,7 @@ import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 
 /**
  * Customization of the default outline structure.
- * 
+ *
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#outline
  */
 public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
@@ -52,9 +52,10 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 			// the cool thing is that we don't need to provide
 			// customization in the label provider for EPackage and EClass
 			// since Xtext defaults to the .edit plugin :)
-			if (modifiedElements.contains(ePackage))
+			if (modifiedElements.contains(ePackage)) {
 				createNode(parentNode, ePackage);
-			// only show EPackage with some modifications
+				// only show EPackage with some modifications
+			}
 		}
 	}
 
@@ -85,10 +86,10 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 					return getDocument().tryReadOnly(state -> work.exec(modelElement));
 				}
 			};
-			if (modelElement instanceof ENamedElement) {
+			if (modelElement instanceof ENamedElement namedElement) {
 				// try to associate the node to the responsible XExpression
 				var expression = derivedStateHelper.
-					getLastResponsibleExpression(currentProgram, (ENamedElement) modelElement);
+					getLastResponsibleExpression(currentProgram, namedElement);
 				if (expression != null) {
 					elementForSignificantTestRegion = expression;
 				}
