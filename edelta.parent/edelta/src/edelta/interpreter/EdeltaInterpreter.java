@@ -605,7 +605,7 @@ public class EdeltaInterpreter extends XbaseInterpreter {
 				// the same issue representer.
 				newInterpreter.thisObject = new EdeltaDefaultRuntime(thisObject);
 				// it is crucial to share the diagnosticHelper where the
-				// currentExpression is correctly set to avoid a NP2
+				// currentExpression is correctly set to avoid a NPE
 				// see testExecutionOfSeveralFilesWithUseAsAndIssuePresenter
 				newInterpreter.diagnosticHelper = diagnosticHelper;
 				var context = newInterpreter.createContext();
