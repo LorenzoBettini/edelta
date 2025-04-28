@@ -19,8 +19,8 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
 public class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 	@Override
 	public void computeTypes(final XExpression e, final ITypeComputationState state) {
-		if (e instanceof EdeltaEcoreReferenceExpression) {
-			computeTypesOfEdeltaEcoreReferenceExpression((EdeltaEcoreReferenceExpression) e, state);
+		if (e instanceof EdeltaEcoreReferenceExpression ecoreReferenceExpression) {
+			computeTypesOfEdeltaEcoreReferenceExpression(ecoreReferenceExpression, state);
 		} else {
 			super.computeTypes(e, state);
 		}

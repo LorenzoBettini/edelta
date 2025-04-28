@@ -31,9 +31,8 @@ public class EdeltaOriginalENamedElementRecorder {
 			.getEcoreReferenceState(edeltaEcoreReference)
 			.setOriginalEnamedelement
 				(original);
-		if (edeltaEcoreReference instanceof EdeltaEcoreQualifiedReference) {
-			recordOriginalENamedElement(
-				((EdeltaEcoreQualifiedReference) edeltaEcoreReference).getQualification());
+		if (edeltaEcoreReference instanceof EdeltaEcoreQualifiedReference ecoreQualifiedReference) {
+			recordOriginalENamedElement(ecoreQualifiedReference.getQualification());
 		}
 	}
 

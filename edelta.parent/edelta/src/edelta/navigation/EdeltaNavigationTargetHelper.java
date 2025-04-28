@@ -23,8 +23,7 @@ public class EdeltaNavigationTargetHelper {
 	private EdeltaDerivedStateHelper derivedStateHelper;
 
 	public EObject getTarget(EObject obj) {
-		if (obj instanceof EdeltaEcoreReference) {
-			final var ecoreReference = (EdeltaEcoreReference) obj;
+		if (obj instanceof EdeltaEcoreReference ecoreReference) {
 			final var original = derivedStateHelper
 				.getOriginalEnamedelement(ecoreReference);
 			if (original != null) {
