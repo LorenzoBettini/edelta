@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edelta.lib.tests;
 
@@ -16,7 +16,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
@@ -28,16 +27,16 @@ import org.eclipse.xtext.util.Wrapper;
 import org.junit.Before;
 import org.junit.Test;
 
-import edelta.lib.EdeltaRuntime;
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaIssuePresenter;
 import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaModelMigrator;
+import edelta.lib.EdeltaRuntime;
 import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
 /**
  * Tests for the base class of generated Edelta programs.
- * 
+ *
  * @author Lorenzo Bettini
  *
  */
@@ -64,7 +63,7 @@ public class EdeltaTest {
 			super(modelManager);
 		}
 
-		
+
 		public TestableEdelta(EdeltaModelMigrator modelMigrator) {
 			super(modelMigrator);
 		}
@@ -99,7 +98,7 @@ public class EdeltaTest {
 
 	@Test
 	public void testEcorePackageIsAlwaysAvailable() {
-		EPackage ePackage = edelta.getEPackage("ecore");
+		var ePackage = edelta.getEPackage("ecore");
 		assertNotNull(ePackage);
 		assertEquals("ecore", ePackage.getName());
 	}
@@ -129,7 +128,7 @@ public class EdeltaTest {
 	private void tryToRetrieveSomeEPackages() {
 		loadTestEcore(MY_ECORE);
 		loadTestEcore(MY2_ECORE);
-		EPackage ePackage = edelta.getEPackage(MYPACKAGE);
+		var ePackage = edelta.getEPackage(MYPACKAGE);
 		assertEquals(MYPACKAGE, ePackage.getName());
 		assertNotNull(ePackage);
 		assertNotNull(edelta.getEPackage(MYOTHERPACKAGE));
@@ -141,8 +140,9 @@ public class EdeltaTest {
 		edelta = new TestableEdelta(new EdeltaModelManager() {
 			@Override
 			public EPackage getEPackage(String packageName) {
-				if (packageName.equals("toFind"))
+				if (packageName.equals("toFind")) {
 					return EcoreFactory.eINSTANCE.createEPackage();
+				}
 				return super.getEPackage(packageName);
 			}
 		});
@@ -302,9 +302,9 @@ public class EdeltaTest {
 
 	@Test
 	public void testShowMethods() {
-		Logger logger = spy(edelta.getLogger());
+		var logger = spy(edelta.getLogger());
 		edelta.setLogger(logger);
-		EPackage problematicObject = EcoreFactory.eINSTANCE.createEPackage();
+		var problematicObject = EcoreFactory.eINSTANCE.createEPackage();
 		problematicObject.setName("anEPackage");
 		edelta.showError(problematicObject, "an error");
 		edelta.showWarning(problematicObject, "a warning");
@@ -316,7 +316,7 @@ public class EdeltaTest {
 	public void testSetIssuePresenter() {
 		var issuePresenter = mock(EdeltaIssuePresenter.class);
 		edelta.setIssuePresenter(issuePresenter);
-		EPackage problematicObject = EcoreFactory.eINSTANCE.createEPackage();
+		var problematicObject = EcoreFactory.eINSTANCE.createEPackage();
 		problematicObject.setName("anEPackage");
 		edelta.showError(problematicObject, "an error");
 		edelta.showWarning(problematicObject, "a warning");
@@ -330,7 +330,7 @@ public class EdeltaTest {
 		EdeltaRuntime child = new EdeltaDefaultRuntime(edelta);
 		EdeltaRuntime grandchild = new EdeltaDefaultRuntime(child);
 		edelta.setIssuePresenter(issuePresenter);
-		EPackage problematicObject = EcoreFactory.eINSTANCE.createEPackage();
+		var problematicObject = EcoreFactory.eINSTANCE.createEPackage();
 		problematicObject.setName("anEPackage");
 		child.showError(problematicObject, "an error");
 		child.showWarning(problematicObject, "a warning");
@@ -348,7 +348,7 @@ public class EdeltaTest {
 		edelta.setIssuePresenter(issuePresenter);
 		EdeltaRuntime child = new EdeltaDefaultRuntime(edelta);
 		EdeltaRuntime grandchild = new EdeltaDefaultRuntime(child);
-		EPackage problematicObject = EcoreFactory.eINSTANCE.createEPackage();
+		var problematicObject = EcoreFactory.eINSTANCE.createEPackage();
 		problematicObject.setName("anEPackage");
 		child.showError(problematicObject, "an error");
 		child.showWarning(problematicObject, "a warning");
@@ -373,7 +373,7 @@ public class EdeltaTest {
 	@Test
 	public void testGetSubPackageEAttribute() {
 		loadTestEcore(MY_SUBPACKAGES_ECORE);
-		EAttribute eAttribute = edelta.getEAttribute(
+		var eAttribute = edelta.getEAttribute(
 			MY_MAINPACKAGE + "." + MY_SUBPACKAGE + "." + MY_SUBSUBPACKAGE,
 			MY_CLASS,
 			"myAttribute");

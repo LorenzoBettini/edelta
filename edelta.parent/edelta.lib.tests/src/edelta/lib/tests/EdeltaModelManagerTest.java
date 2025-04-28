@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edelta.lib.tests;
 
@@ -33,7 +33,7 @@ import edelta.lib.exception.EdeltaPackageNotLoadedException;
 
 /**
  * Tests for the {@link EdeltaModelManager}.
- * 
+ *
  * @author Lorenzo Bettini
  *
  */
@@ -194,14 +194,14 @@ public class EdeltaModelManagerTest {
 
 		var map = modelManager.copyEcores(otherModelManager);
 
-		Iterable<EObject> originalContents = () -> 
+		Iterable<EObject> originalContents = () ->
 			EcoreUtil.getAllContents(ecoreResource, true);
 
 		// NOT exactly, because we don't care about GenericType elements
 		assertThat(map.keySet())
 			.containsAnyElementsOf(originalContents);
 
-		Iterable<EObject> copiedContents = () -> 
+		Iterable<EObject> copiedContents = () ->
 			EcoreUtil.getAllContents(
 				modelManager.getEcoreResources().iterator().next(),
 				true);
@@ -245,7 +245,7 @@ public class EdeltaModelManagerTest {
 
 	@Test
 	public void testLoadFromClassLoader() throws IOException, EdeltaPackageNotLoadedException {
-		InputStream inputStream = this.getClass().getResourceAsStream("/subfolder/AnEcore.ecore");
+		var inputStream = this.getClass().getResourceAsStream("/subfolder/AnEcore.ecore");
 		modelManager.loadEcoreFile("An Ecore", inputStream);
 		modelManager.registerEPackageByNsURI("apackage", "http://my.apackage.org");
 		var registered = modelManager.getEPackage("apackage");

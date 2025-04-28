@@ -12,7 +12,6 @@ import java.util.List;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.eclipse.emf.ecore.EClassifier;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.junit.Test;
@@ -132,22 +131,22 @@ public class EdeltaEcoreUtilTest {
 
 		assertThat(collection)
 			.isEmpty();
-	
+
 		pack.setName("A name");
-	
+
 		collection = EdeltaEcoreUtil.getValueForFeature(
 				pack, EcorePackage.Literals.ENAMED_ELEMENT__NAME, -1);
-	
+
 		assertThat(collection)
 			.containsExactly("A name");
-	
+
 		collection = EdeltaEcoreUtil.getValueForFeature(
 				pack, EcorePackage.Literals.EPACKAGE__ECLASSIFIERS, -1);
-	
+
 		assertThat(collection)
 			.isSameAs(pack.getEClassifiers())
 			.isEmpty();
-	
+
 		var c1 = EcoreFactory.eINSTANCE.createEClass();
 		var c2 = EcoreFactory.eINSTANCE.createEDataType();
 		var c3 = EcoreFactory.eINSTANCE.createEEnum();
@@ -234,11 +233,11 @@ public class EdeltaEcoreUtilTest {
 
 		var collection = EdeltaEcoreUtil.getValueAsList(
 				pack, EcorePackage.Literals.EPACKAGE__ECLASSIFIERS);
-	
+
 		assertThat(collection)
 			.isSameAs(pack.getEClassifiers())
 			.isEmpty();
-	
+
 		var c1 = EcoreFactory.eINSTANCE.createEClass();
 		var c2 = EcoreFactory.eINSTANCE.createEDataType();
 		var c3 = EcoreFactory.eINSTANCE.createEEnum();
@@ -256,7 +255,7 @@ public class EdeltaEcoreUtilTest {
 		var attr = EcoreFactory.eINSTANCE.createEAttribute();
 		attr.setEType(EcorePackage.Literals.ESTRING);
 
-		EObject o = EdeltaEcoreUtil.getValueAsEObject(attr,
+		var o = EdeltaEcoreUtil.getValueAsEObject(attr,
 			EcorePackage.Literals.ETYPED_ELEMENT__ETYPE);
 
 		assertThat(o)
@@ -279,7 +278,7 @@ public class EdeltaEcoreUtilTest {
 		assertThat(dest.getEAttributeType())
 			.isSameAs(EcorePackage.Literals.ESTRING);
 
-		assertThatThrownBy(() -> 
+		assertThatThrownBy(() ->
 			EdeltaEcoreUtil.setValueFrom(
 				dest,
 				EcorePackage.Literals.ETYPED_ELEMENT__ETYPE,
@@ -294,7 +293,7 @@ public class EdeltaEcoreUtilTest {
 		var attr = EcoreFactory.eINSTANCE.createEAttribute();
 		attr.setEType(EcorePackage.Literals.ESTRING);
 
-		Object o = EdeltaEcoreUtil.getValueFromFeatureName(attr,
+		var o = EdeltaEcoreUtil.getValueFromFeatureName(attr,
 			EcorePackage.Literals.ETYPED_ELEMENT__ETYPE.getName());
 
 		assertThat(o)
@@ -306,7 +305,7 @@ public class EdeltaEcoreUtilTest {
 		var attr = EcoreFactory.eINSTANCE.createEAttribute();
 		attr.setEType(EcorePackage.Literals.ESTRING);
 
-		boolean o = EdeltaEcoreUtil.isSet(attr,
+		var o = EdeltaEcoreUtil.isSet(attr,
 			EcorePackage.Literals.ETYPED_ELEMENT__ETYPE.getName());
 
 		assertThat(o)

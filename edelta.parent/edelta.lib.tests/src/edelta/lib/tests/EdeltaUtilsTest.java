@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edelta.lib.tests;
 
@@ -10,20 +10,12 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
-import org.eclipse.emf.ecore.EAttribute;
-import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EDataType;
-import org.eclipse.emf.ecore.EEnum;
-import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.impl.BasicEObjectImpl;
-import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.junit.Test;
@@ -34,7 +26,7 @@ import edelta.lib.EdeltaUtils;
 
 /**
  * Library functions for manipulating an Ecore model.
- * 
+ *
  * @author Lorenzo Bettini
  *
  */
@@ -44,13 +36,13 @@ public class EdeltaUtilsTest {
 
 	@Test
 	public void testNewEClass() {
-		EClass c = EdeltaUtils.newEClass("test");
+		var c = EdeltaUtils.newEClass("test");
 		assertEquals("test", c.getName());
 	}
 
 	@Test
 	public void testNewEClassWithInitializer() {
-		EClass c = EdeltaUtils.newEClass("test", cl -> {
+		var c = EdeltaUtils.newEClass("test", cl -> {
 			cl.setName("changed");
 		});
 		assertEquals("changed", c.getName());
@@ -58,14 +50,14 @@ public class EdeltaUtilsTest {
 
 	@Test
 	public void testNewEAttribute() {
-		EAttribute e = EdeltaUtils.newEAttribute("test", ESTRING);
+		var e = EdeltaUtils.newEAttribute("test", ESTRING);
 		assertEquals("test", e.getName());
 		assertEquals(ESTRING, e.getEAttributeType());
 	}
 
 	@Test
 	public void testNewEAttributeWithInitializer() {
-		EAttribute e = EdeltaUtils.newEAttribute("test", ESTRING, ee -> {
+		var e = EdeltaUtils.newEAttribute("test", ESTRING, ee -> {
 			ee.setName("changed");
 		});
 		assertEquals("changed", e.getName());
@@ -74,14 +66,14 @@ public class EdeltaUtilsTest {
 
 	@Test
 	public void testNewEReference() {
-		EReference e = EdeltaUtils.newEReference("test", EOBJECT);
+		var e = EdeltaUtils.newEReference("test", EOBJECT);
 		assertEquals("test", e.getName());
 		assertEquals(EOBJECT, e.getEReferenceType());
 	}
 
 	@Test
 	public void testNewEReferenceWithInitializer() {
-		EReference e = EdeltaUtils.newEReference("test", EOBJECT, ee -> {
+		var e = EdeltaUtils.newEReference("test", EOBJECT, ee -> {
 			ee.setName("changed");
 		});
 		assertEquals("changed", e.getName());
@@ -90,7 +82,7 @@ public class EdeltaUtilsTest {
 
 	@Test
 	public void testNewEDataType() {
-		EDataType e = EdeltaUtils.newEDataType("test", "java.lang.String");
+		var e = EdeltaUtils.newEDataType("test", "java.lang.String");
 		assertEquals("test", e.getName());
 		assertEquals("java.lang.String", e.getInstanceTypeName());
 		assertEquals("java.lang.String", e.getInstanceClassName());
@@ -99,7 +91,7 @@ public class EdeltaUtilsTest {
 
 	@Test
 	public void testNewEDataTypeWithInitializer() {
-		EDataType e = EdeltaUtils.newEDataType("test", "java.lang.String", ee -> {
+		var e = EdeltaUtils.newEDataType("test", "java.lang.String", ee -> {
 			ee.setName("changed");
 		});
 		assertEquals("changed", e.getName());
@@ -110,13 +102,13 @@ public class EdeltaUtilsTest {
 
 	@Test
 	public void testNewEEnum() {
-		EEnum e = EdeltaUtils.newEEnum("test");
+		var e = EdeltaUtils.newEEnum("test");
 		assertEquals("test", e.getName());
 	}
 
 	@Test
 	public void testNewEEnumWithInitializer() {
-		EEnum e = EdeltaUtils.newEEnum("test", ee -> {
+		var e = EdeltaUtils.newEEnum("test", ee -> {
 			ee.setName("changed");
 		});
 		assertEquals("changed", e.getName());
@@ -124,13 +116,13 @@ public class EdeltaUtilsTest {
 
 	@Test
 	public void testNewEEnumLiteral() {
-		EEnumLiteral e = EdeltaUtils.newEEnumLiteral("test");
+		var e = EdeltaUtils.newEEnumLiteral("test");
 		assertEquals("test", e.getName());
 	}
 
 	@Test
 	public void testNewEEnumLiteralWithInitializer() {
-		EEnumLiteral e = EdeltaUtils.newEEnumLiteral("test", ee -> {
+		var e = EdeltaUtils.newEEnumLiteral("test", ee -> {
 			ee.setName("changed");
 		});
 		assertEquals("changed", e.getName());
@@ -138,8 +130,8 @@ public class EdeltaUtilsTest {
 
 	@Test
 	public void test_removeESuperType() {
-		EClass superClass = ecoreFactory.createEClass();
-		EClass subClass = ecoreFactory.createEClass();
+		var superClass = ecoreFactory.createEClass();
+		var subClass = ecoreFactory.createEClass();
 		subClass.getESuperTypes().add(superClass);
 		assertThat(subClass.getESuperTypes()).containsExactly(superClass);
 		EdeltaUtils.removeESuperType(subClass, superClass);
@@ -155,7 +147,7 @@ public class EdeltaUtilsTest {
 			public String toString() {
 				return "test";
 			}
-			
+
 			@Override
 			public EObject eContainer() {
 				return null;
@@ -169,9 +161,9 @@ public class EdeltaUtilsTest {
 
 	@Test
 	public void testGetEObjectReprWithCycle() {
-		EPackage p1 = ecoreFactory.createEPackage();
+		var p1 = ecoreFactory.createEPackage();
 		p1.setName("p1");
-		EPackage p2 = ecoreFactory.createEPackage();
+		var p2 = ecoreFactory.createEPackage();
 		p2.setName("p2");
 		// create the cycle
 		p1.getESubpackages().add(p2);
@@ -190,17 +182,17 @@ public class EdeltaUtilsTest {
 
 	@Test
 	public void test_removeElement() {
-		EPackage ePackage = ecoreFactory.createEPackage();
-		EClass superClass = ecoreFactory.createEClass();
-		EClass subClass = ecoreFactory.createEClass();
+		var ePackage = ecoreFactory.createEPackage();
+		var superClass = ecoreFactory.createEClass();
+		var subClass = ecoreFactory.createEClass();
 		ePackage.getEClassifiers().add(superClass);
 		ePackage.getEClassifiers().add(subClass);
 		subClass.getESuperTypes().add(superClass);
-		EReference referenceToSuperClass = ecoreFactory.createEReference();
+		var referenceToSuperClass = ecoreFactory.createEReference();
 		referenceToSuperClass.setEType(superClass);
-		EReference referenceToSubClass = ecoreFactory.createEReference();
+		var referenceToSubClass = ecoreFactory.createEReference();
 		referenceToSubClass.setEType(subClass);
-		EReference opposite = ecoreFactory.createEReference();
+		var opposite = ecoreFactory.createEReference();
 		opposite.setEOpposite(referenceToSubClass);
 		referenceToSubClass.setEOpposite(opposite);
 		subClass.getEStructuralFeatures().add(referenceToSubClass);
@@ -218,7 +210,7 @@ public class EdeltaUtilsTest {
 			.containsOnly(opposite);
 		assertThat(opposite.getEOpposite()).isNull();
 		// try to remove something simpler
-		EAttribute attribute = ecoreFactory.createEAttribute();
+		var attribute = ecoreFactory.createEAttribute();
 		subClass.getEStructuralFeatures().add(attribute);
 		EdeltaUtils.removeElement(attribute);
 		assertThat(subClass.getEStructuralFeatures())
@@ -250,11 +242,11 @@ public class EdeltaUtilsTest {
 		var subClass = ecoreFactory.createEClass();
 		p2.getEClassifiers().add(subClass);
 		subClass.getESuperTypes().add(superClass);
-		EReference referenceToSuperClass = ecoreFactory.createEReference();
+		var referenceToSuperClass = ecoreFactory.createEReference();
 		referenceToSuperClass.setEType(superClass);
-		EReference referenceToSubClass = ecoreFactory.createEReference();
+		var referenceToSubClass = ecoreFactory.createEReference();
 		referenceToSubClass.setEType(subClass);
-		EReference opposite = ecoreFactory.createEReference();
+		var opposite = ecoreFactory.createEReference();
 		opposite.setEOpposite(referenceToSubClass);
 		referenceToSubClass.setEOpposite(opposite);
 		subClass.getEStructuralFeatures().add(referenceToSubClass);
@@ -272,7 +264,7 @@ public class EdeltaUtilsTest {
 			.containsOnly(opposite);
 		assertThat(opposite.getEOpposite()).isNull();
 		// try to remove something simpler
-		EAttribute attribute = ecoreFactory.createEAttribute();
+		var attribute = ecoreFactory.createEAttribute();
 		subClass.getEStructuralFeatures().add(attribute);
 		EdeltaUtils.removeElement(attribute);
 		assertThat(subClass.getEStructuralFeatures())
@@ -287,9 +279,9 @@ public class EdeltaUtilsTest {
 	@Test
 	public void test_allEClasses() {
 		assertThat(EdeltaUtils.allEClasses(null)).isEmpty();
-		EPackage ePackage = ecoreFactory.createEPackage();
-		EClass eClass = ecoreFactory.createEClass();
-		EDataType dataType = ecoreFactory.createEDataType();
+		var ePackage = ecoreFactory.createEPackage();
+		var eClass = ecoreFactory.createEClass();
+		var dataType = ecoreFactory.createEDataType();
 		ePackage.getEClassifiers().add(eClass);
 		ePackage.getEClassifiers().add(dataType);
 		assertThat(EdeltaUtils.allEClasses(ePackage))
@@ -313,7 +305,7 @@ public class EdeltaUtilsTest {
 
 		var resource2 = new ResourceImpl();
 		resource2.getContents().add(p2);
-		
+
 		var resourceSet = new ResourceSetImpl();
 		resourceSet.getResources().add(resource1);
 		resourceSet.getResources().add(resource2);
@@ -339,7 +331,7 @@ public class EdeltaUtilsTest {
 
 		var resource2 = new ResourceImpl();
 		resource2.getContents().add(p2);
-		
+
 		var resourceSet = new ResourceSetImpl();
 		resourceSet.getResources().add(resource1);
 		resourceSet.getResources().add(resource2);
@@ -371,7 +363,7 @@ public class EdeltaUtilsTest {
 
 		var resource2 = new ResourceImpl();
 		resource2.getContents().add(p2);
-		
+
 		var resourceSet = new ResourceSetImpl();
 		resourceSet.getResources().add(resource1);
 		resourceSet.getResources().add(resource2);
@@ -411,7 +403,7 @@ public class EdeltaUtilsTest {
 
 		var resource2 = new ResourceImpl();
 		resource2.getContents().add(p2);
-		
+
 		var resourceSet = new ResourceSetImpl();
 		resourceSet.getResources().add(resource1);
 		resourceSet.getResources().add(resource2);
@@ -424,18 +416,18 @@ public class EdeltaUtilsTest {
 		var f4 = ecoreFactory.createEReference();
 		eClass2.getEStructuralFeatures().addAll(List.of(f3, f4));
 
-		
+
 		assertThat(EdeltaUtils.allEStructuralFeatures(p1))
 			.containsExactlyInAnyOrder(f1, f2, f3, f4);
 	}
 
 	@Test
 	public void test_setEOppositeDoesNotMakeReferenceBidirectionalAutomatically() {
-		EClass c1 = ecoreFactory.createEClass();
-		EClass c2 = ecoreFactory.createEClass();
-		EReference c1Ref = ecoreFactory.createEReference();
+		var c1 = ecoreFactory.createEClass();
+		var c2 = ecoreFactory.createEClass();
+		var c1Ref = ecoreFactory.createEReference();
 		c1.getEStructuralFeatures().add(c1Ref);
-		EReference c2Ref = ecoreFactory.createEReference();
+		var c2Ref = ecoreFactory.createEReference();
 		c2.getEStructuralFeatures().add(c2Ref);
 
 		c1Ref.setEOpposite(c2Ref);
@@ -444,11 +436,11 @@ public class EdeltaUtilsTest {
 
 	@Test
 	public void test_makeBidirectional() {
-		EClass c1 = ecoreFactory.createEClass();
-		EClass c2 = ecoreFactory.createEClass();
-		EReference c1Ref = ecoreFactory.createEReference();
+		var c1 = ecoreFactory.createEClass();
+		var c2 = ecoreFactory.createEClass();
+		var c1Ref = ecoreFactory.createEReference();
 		c1.getEStructuralFeatures().add(c1Ref);
-		EReference c2Ref = ecoreFactory.createEReference();
+		var c2Ref = ecoreFactory.createEReference();
 		c2.getEStructuralFeatures().add(c2Ref);
 		EdeltaUtils.makeBidirectional(c1Ref, c2Ref);
 		assertThat(c1Ref.getEOpposite()).isNotNull();
@@ -460,8 +452,8 @@ public class EdeltaUtilsTest {
 		assertThat(c1Ref.getEOpposite().getEReferenceType()).isSameAs(c1);
 		assertThat(c2Ref.getEOpposite().getEReferenceType()).isSameAs(c2);
 		// test it with an existing opposite
-		EClass c3 = ecoreFactory.createEClass();
-		EReference c3Ref = ecoreFactory.createEReference();
+		var c3 = ecoreFactory.createEClass();
+		var c3Ref = ecoreFactory.createEReference();
 		c3.getEStructuralFeatures().add(c3Ref);
 		EdeltaUtils.makeBidirectional(c1Ref, c3Ref);
 		assertThat(c1Ref.getEOpposite()).isNotNull();
@@ -477,11 +469,11 @@ public class EdeltaUtilsTest {
 
 	@Test
 	public void test_dropOpposite() {
-		EClass c1 = ecoreFactory.createEClass();
-		EClass c2 = ecoreFactory.createEClass();
-		EReference c1Ref = ecoreFactory.createEReference();
+		var c1 = ecoreFactory.createEClass();
+		var c2 = ecoreFactory.createEClass();
+		var c1Ref = ecoreFactory.createEReference();
 		c1.getEStructuralFeatures().add(c1Ref);
-		EReference c2Ref = ecoreFactory.createEReference();
+		var c2Ref = ecoreFactory.createEReference();
 		c2.getEStructuralFeatures().add(c2Ref);
 		// test it with no existing opposite
 		EdeltaUtils.dropOpposite(c1Ref);
@@ -498,11 +490,11 @@ public class EdeltaUtilsTest {
 
 	@Test
 	public void test_removeOpposite() {
-		EClass c1 = ecoreFactory.createEClass();
-		EClass c2 = ecoreFactory.createEClass();
-		EReference c1Ref = ecoreFactory.createEReference();
+		var c1 = ecoreFactory.createEClass();
+		var c2 = ecoreFactory.createEClass();
+		var c1Ref = ecoreFactory.createEReference();
 		c1.getEStructuralFeatures().add(c1Ref);
-		EReference c2Ref = ecoreFactory.createEReference();
+		var c2Ref = ecoreFactory.createEReference();
 		c2.getEStructuralFeatures().add(c2Ref);
 		// test it with no existing opposite
 		EdeltaUtils.removeOpposite(c1Ref);
@@ -599,10 +591,10 @@ public class EdeltaUtilsTest {
 
 	@Test
 	public void test_referringANewEClassDoesNotAddItToEPackageAutomatically() {
-		EPackage ePackage = ecoreFactory.createEPackage();
-		EClass client = ecoreFactory.createEClass();
+		var ePackage = ecoreFactory.createEPackage();
+		var client = ecoreFactory.createEClass();
 		ePackage.getEClassifiers().add(client);
-		EClass referred = ecoreFactory.createEClass();
+		var referred = ecoreFactory.createEClass();
 		client.getESuperTypes().add(referred);
 		assertThat(client.getEPackage()).isSameAs(ePackage);
 		assertThat(referred.getEPackage()).isNull();
@@ -665,7 +657,7 @@ public class EdeltaUtilsTest {
 		resourceSet.getResources().add(anotherResource);
 		var anotherPackage = ecoreFactory.createEPackage();
 		anotherResource.getContents().add(anotherPackage);
-		Resource ecorePackageResource = EcorePackage.eINSTANCE.eResource();
+		var ecorePackageResource = EcorePackage.eINSTANCE.eResource();
 		resourceSet.getResources().add(ecorePackageResource);
 		var packages = EdeltaUtils.packagesToInspect(c);
 		assertThat(packages).containsExactlyInAnyOrder(p, anotherPackage);
