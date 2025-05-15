@@ -2,6 +2,7 @@ package edelta.lib.tests;
 
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -170,8 +171,11 @@ class EdeltaVersionMigratorTest {
 		versionMigrator.loadModel(OUTPUT + outputSubdir + "List.xmi");
 		versionMigrator.loadModel(OUTPUT + outputSubdir + "List2.xmi");
 
-		versionMigrator.execute();
+		var collected = versionMigrator.execute();
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
+		assertThat(collected)
+			.extracting(EdeltaResourceUtils::getFileName)
+			.containsExactlyInAnyOrder("List.xmi", "List2.xmi");
 	}
 
 	@Test
@@ -190,8 +194,9 @@ class EdeltaVersionMigratorTest {
 		versionMigrator.loadModel(OUTPUT + outputSubdir + "List.xmi");
 		versionMigrator.loadModel(OUTPUT + outputSubdir + "List2.xmi");
 
-		versionMigrator.execute();
+		var collected = versionMigrator.execute();
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
+		assertThat(collected).isEmpty();
 	}
 
 	private EdeltaRuntimeProvider renameMyPackageProvider = runtime ->
