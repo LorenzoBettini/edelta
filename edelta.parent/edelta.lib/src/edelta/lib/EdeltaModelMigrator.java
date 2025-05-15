@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -482,8 +481,8 @@ public class EdeltaModelMigrator {
 	 * @return
 	 */
 	public Object getMigrated(Object o) {
-		if (o instanceof EObject) {
-			return modelCopier.copy((EObject) o);
+		if (o instanceof EObject eObj) {
+			return modelCopier.copy(eObj);
 		}
 		return o;
 	}
@@ -514,7 +513,7 @@ public class EdeltaModelMigrator {
 		if (objects.stream().anyMatch(EObject.class::isInstance))
 			return modelCopier.copyAll(objects);
 		return (Collection<T>) objects.stream()
-				.filter(Objects::nonNull).collect(Collectors.toList());
+				.filter(Objects::nonNull).toList();
 	}
 
 	/**
@@ -601,8 +600,8 @@ public class EdeltaModelMigrator {
 			var oldValues = EdeltaEcoreUtil
 				.getValueForFeature(oldObj, oldFeature, newFeature.getUpperBound());
 			var isContainmentReference =
-				newFeature instanceof EReference &&
-				((EReference) newFeature).isContainment();
+				newFeature instanceof EReference reference &&
+				reference.isContainment();
 			var oldForceCopy = modelCopier.forceCopy;
 			if (isContainmentReference) {
 				modelCopier.forceCopy = true;
@@ -696,7 +695,7 @@ public class EdeltaModelMigrator {
 				EdeltaEcoreUtil.wrapAsCollection(oldValue, attribute.getUpperBound())
 					.stream()
 					.map(transformer)
-					.collect(Collectors.toList()),
+					.toList(),
 				attribute
 			);
 	}
@@ -723,7 +722,7 @@ public class EdeltaModelMigrator {
 					.stream()
 					.map(EObject.class::cast)
 					.map(transformer)
-					.collect(Collectors.toList())
+					.toList()
 				// use the upper bound of the destination attribute, since it might
 				// be different from the original one
 			);
