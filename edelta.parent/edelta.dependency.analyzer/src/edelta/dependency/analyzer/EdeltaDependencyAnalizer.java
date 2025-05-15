@@ -215,13 +215,12 @@ public class EdeltaDependencyAnalizer {
 
 		var newFile = new File(outputPath, fileName);
 		newFile.getParentFile().mkdirs();
-		var fos = new FileOutputStream(newFile);
 
-		var resource = resourceSet.createResource(URI.createURI("http:///My.graphmm"));
-		resource.getContents().add(repository);
-		resource.save(fos, null);
-		fos.flush();
-		fos.close();
+		try (var fos = new FileOutputStream(newFile)) {
+			var resource = resourceSet.createResource(URI.createURI("http:///My.graphmm"));
+			resource.getContents().add(repository);
+			resource.save(fos, null);
+		}
 	}
 
 	// for testing
