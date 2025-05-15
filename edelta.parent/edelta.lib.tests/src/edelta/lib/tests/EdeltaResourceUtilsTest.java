@@ -50,4 +50,12 @@ public class EdeltaResourceUtilsTest {
 		var r2 = modelManager.loadEcoreFile(MODELS + "My2.ecore");
 		assertEquals("My2.ecore", EdeltaResourceUtils.getFileName(r2));
 	}
+
+	@Test
+	public void testGetRelativePath() {
+		var r2 = modelManager.loadEcoreFile(MODELS + "My2.ecore");
+		assertEquals("models/My2.ecore", EdeltaResourceUtils.getRelativePath(r2, MODELS));
+		assertEquals("models/My2.ecore", EdeltaResourceUtils.getRelativePath(r2, List.of(MODELS, MODELS+ "/anonmatching")));
+		assertEquals(r2.getURI().path(), EdeltaResourceUtils.getRelativePath(r2, List.of(MODELS+ "/anonmatching")));
+	}
 }

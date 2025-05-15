@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -175,10 +176,11 @@ public class EdeltaVersionMigrator {
 
 	/**
 	 * Executes all the needed model migrations, saving the model files in-place.
+	 * @return the migrated model resources
 	 * 
 	 * @throws Exception
 	 */
-	public void execute() throws Exception {
+	public Collection<Resource> execute() throws Exception {
 		class MigrationData {
 			private Set<EPackage> ecores;
 			private Collection<Resource> models;
@@ -190,6 +192,8 @@ public class EdeltaVersionMigrator {
 		}
 
 		var migrationDatas = new HashMap<VersionMigrationEntry, MigrationData>();
+		var collectedMigratedResources = new ArrayList<Resource>();
+
 		do {
 			migrationDatas.clear();
 			for (var resource : modelManager.getModelResources()) {
@@ -234,7 +238,9 @@ public class EdeltaVersionMigrator {
 				// reload only migrated models
 				modelManager.clearModels();
 				for (var model : migratedModelResources) {
-					loadModelsFrom(resourceToURIString(model));
+					var resourceToURIString = resourceToURIString(model);
+					loadModelsFrom(resourceToURIString);
+					collectedMigratedResources.add(model);
 				}
 				// it is important to save after all the migrations took place
 				// this way, the models refer to the most up-to-date Ecore loaded
@@ -246,6 +252,14 @@ public class EdeltaVersionMigrator {
 				saveInPlace(modelManager.getModelResources());
 			}
 		} while (!migrationDatas.isEmpty());
+
+		return collectedMigratedResources.stream()
+				.collect(
+					Collectors.toMap(Resource::getURI, // key mapper: use URI as key
+						r -> r, // value mapper: resource itself
+						(r1, r2) -> r2, // merge function: keep latest in case of duplicates
+						LinkedHashMap::new // preserve order if needed
+				)).values();
 	}
 
 	private String resourceToURIString(Resource resource) {

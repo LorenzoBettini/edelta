@@ -6,11 +6,14 @@ package edelta.lib;
 import static java.util.Comparator.comparing;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 
@@ -88,5 +91,49 @@ public class EdeltaResourceUtils {
 		var resourceURI = resource.getURI();
 		var resourcePath = Paths.get(resourceURI.toFileString());
 		return resourcePath.getFileName().toString();
+	}
+
+	/**
+	 * Gets the relative path of a resource from a base path.
+	 *
+	 * @param resource The EMF resource
+	 * @param basePath The base path
+	 * @return The relative path, or the full path if no base path matches
+	 */
+	public static String getRelativePath(Resource resource, String basePath) {
+		return getRelativePath(resource, List.of(basePath));
+	}
+
+	/**
+	 * Gets the relative path of a resource from one of the provided base paths.
+	 *
+	 * @param resource  The EMF resource
+	 * @param basePaths Collection of possible base paths
+	 * @return The relative path, or the full path if no base path matches
+	 */
+	public static String getRelativePath(Resource resource, Collection<String> basePaths) {
+		URI resourceURI = resource.getURI();
+		String resourcePath = resourceURI.toString();
+
+		// Ensure base paths are absolute and normalized
+		basePaths = basePaths.stream()
+			.map(path -> Paths.get(path).toAbsolutePath().normalize().toString())
+			.toList();
+
+		// Sort base paths by length (descending) to match the most specific path first
+		List<String> sortedPaths = new ArrayList<>(basePaths);
+		sortedPaths.sort((a, b) -> Integer.compare(b.length(), a.length()));
+
+		for (String basePath : sortedPaths) {
+			URI baseURI = URI.createFileURI(basePath);
+			String baseURIString = baseURI.toString();
+
+			if (resourcePath.startsWith(baseURIString)) {
+				return resourceURI.deresolve(baseURI).path();
+			}
+		}
+
+		// If no base path matches, return the full path
+		return resourceURI.path();
 	}
 }
