@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -70,20 +71,19 @@ public class EdeltaDependencyAnalizer {
 	public Repository analyzeEPackage(String path, String packageName) throws IOException {
 		try (var stream = Files.walk(Paths.get(path))) {
 			var resources = loadEcoreFiles(stream);
-			var packages = EdeltaResourceUtils.getEPackages(resources);
-			var packageToAnalyze = getEPackageByName(packages, packageName);
-			packages.remove(packageToAnalyze);
+			var packages = new ArrayList<>(EdeltaResourceUtils.getEPackages(resources).toList());
+			var packageToAnalyze = removePackageToAnalyze(packages, packageName);
 			return analyzeEPackages(packageToAnalyze, packages);
 		}
 	}
 
-	private EPackage getEPackageByName(Collection<EPackage> packages, String packageName) {
-		return packages.stream()
+	private EPackage removePackageToAnalyze(Collection<EPackage> packages, String packageName) {
+		var packageToAnalyze = packages.stream()
 			.filter(p -> packageName.equals(p.getName()))
 			.findFirst()
-			.orElseThrow(
-				() -> new IllegalArgumentException
-					("No EPackage with name: " + packageName));
+			.orElseThrow(() -> new IllegalArgumentException("No EPackage with name: " + packageName));
+		packages.remove(packageToAnalyze);
+		return packageToAnalyze;
 	}
 
 	private List<Resource> loadEcoreFiles(Stream<Path> stream) {
@@ -215,13 +215,12 @@ public class EdeltaDependencyAnalizer {
 
 		var newFile = new File(outputPath, fileName);
 		newFile.getParentFile().mkdirs();
-		var fos = new FileOutputStream(newFile);
 
-		var resource = resourceSet.createResource(URI.createURI("http:///My.graphmm"));
-		resource.getContents().add(repository);
-		resource.save(fos, null);
-		fos.flush();
-		fos.close();
+		try (var fos = new FileOutputStream(newFile)) {
+			var resource = resourceSet.createResource(URI.createURI("http:///My.graphmm"));
+			resource.getContents().add(repository);
+			resource.save(fos, null);
+		}
 	}
 
 	// for testing

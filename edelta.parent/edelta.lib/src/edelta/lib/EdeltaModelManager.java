@@ -156,7 +156,6 @@ public class EdeltaModelManager {
 		if (registered != null)
 			return registered;
 		return EdeltaResourceUtils.getEPackages(ecoreResources)
-			.stream()
 			.filter(p -> p.getName().equals(packageName))
 			.findFirst()
 			.orElse(null);
@@ -320,7 +319,6 @@ public class EdeltaModelManager {
 	 */
 	public void registerEPackageByNsURI(String packageName, String nsURI) throws EdeltaPackageNotLoadedException {
 		var ePackage = EdeltaResourceUtils.getEPackages(ecoreResources)
-			.stream()
 			.filter(p -> p.getName().equals(packageName) && p.getNsURI().equals(nsURI))
 			.findFirst()
 			.orElse(null);

@@ -145,8 +145,8 @@ public class EdeltaUtils {
 		while (current != null) {
 			if (builder.length() > 0)
 				builder.insert(0, ".");
-			if (current instanceof ENamedElement) {
-				builder.insert(0, ((ENamedElement) current).getName());
+			if (current instanceof ENamedElement namedElement) {
+				builder.insert(0, namedElement.getName());
 			} else {
 				builder.insert(0, current.toString());
 			}
@@ -202,23 +202,20 @@ public class EdeltaUtils {
 	}
 
 	private static void removeFutureDanglingReferences(EObject element) {
-		if (element instanceof EClassifier) {
-			var classifier = (EClassifier) element;
+		if (element instanceof EClassifier classifier) {
 			// first remove possible references to this classifier as type
 			final var allEClasses = allEClasses(classifier.getEPackage());
 			final var featuresToRemove = allEClasses.stream()
 				.flatMap(c -> c.getEStructuralFeatures().stream())
 				.filter(f -> f.getEType() == classifier)
-				.collect(Collectors.toList());
+				.toList();
 			removeAllElements(featuresToRemove);
 			// then remove possible superclass relations referring this classifier
 			for (EClass eClass : allEClasses) {
 				eClass.getESuperTypes().remove(classifier);
 			}
-		} else if (element instanceof EReference) {
-			var reference = (EReference) element;
-			if (reference.getEOpposite() != null)
-				reference.getEOpposite().setEOpposite(null);
+		} else if (element instanceof EReference reference && reference.getEOpposite() != null) {
+			reference.getEOpposite().setEOpposite(null);
 		}
 		removeAllElements(element.eContents());
 	}
@@ -233,8 +230,7 @@ public class EdeltaUtils {
 	 * @see #packagesToInspect(EClassifier)
 	 */
 	public static List<EClass> allEClasses(EPackage ePackage) {
-		return allEClassesStream(ePackage)
-			.collect(Collectors.toList());
+		return allEClassesStream(ePackage).toList();
 	}
 
 	/**
@@ -263,8 +259,7 @@ public class EdeltaUtils {
 	 * @return an empty list if the ePackage is null
 	 */
 	public static List<EClass> getEClasses(EPackage ePackage) {
-		return getEClassesStream(ePackage)
-			.collect(Collectors.toList());
+		return getEClassesStream(ePackage).toList();
 	}
 
 	/**
@@ -292,8 +287,7 @@ public class EdeltaUtils {
 	 * @see #packagesToInspect(EClassifier)
 	 */
 	public static List<EStructuralFeature> allEStructuralFeatures(EPackage ePackage) {
-		return allEStructuralFeaturesStream(ePackage)
-				.collect(Collectors.toList());
+		return allEStructuralFeaturesStream(ePackage).toList();
 	}
 
 	/**
@@ -318,8 +312,7 @@ public class EdeltaUtils {
 	 * @return an empty list if the ePackage is null
 	 */
 	public static List<EStructuralFeature> getEStructuralFeatures(EPackage ePackage) {
-		return getEStructuralFeaturesStream(ePackage)
-				.collect(Collectors.toList());
+		return getEStructuralFeaturesStream(ePackage).toList();
 	}
 
 	/**
@@ -523,7 +516,7 @@ public class EdeltaUtils {
 	private static List<EPackage> filterEPackages(Stream<EObject> objectsStream) {
 		return filterByType(objectsStream, EPackage.class)
 				.filter(notEcore())
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 	private static Predicate<? super EPackage> notEcore() {

@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
@@ -79,7 +78,7 @@ public class EdeltaEcoreUtil {
 		else if (value != null)
 			result = Collections.singletonList(value);
 		if (limit > 0)
-			return result.stream().limit(limit).collect(Collectors.toList());
+			return result.stream().limit(limit).toList();
 		return result;
 	}
 
@@ -100,8 +99,7 @@ public class EdeltaEcoreUtil {
 	public static Object unwrapCollection(Object value, EStructuralFeature feature) {
 		if (feature.isMany())
 			return value;
-		else if (value instanceof Collection<?>) {
-			var collection = (Collection<?>) value;
+		else if (value instanceof Collection<?> collection) {
 			Iterator<?> iterator = collection.iterator();
 			if (iterator.hasNext())
 				return iterator.next();
