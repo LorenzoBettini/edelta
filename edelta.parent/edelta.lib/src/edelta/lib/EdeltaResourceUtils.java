@@ -94,6 +94,17 @@ public class EdeltaResourceUtils {
 	}
 
 	/**
+	 * Gets the relative path of a resource from a base path.
+	 *
+	 * @param resource The EMF resource
+	 * @param basePath The base path
+	 * @return The relative path, or the full path if no base path matches
+	 */
+	public static String getRelativePath(Resource resource, String basePath) {
+		return getRelativePath(resource, List.of(basePath));
+	}
+
+	/**
 	 * Gets the relative path of a resource from one of the provided base paths.
 	 *
 	 * @param resource  The EMF resource
