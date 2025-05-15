@@ -9,7 +9,6 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EPackage;
@@ -34,9 +33,8 @@ public class EdeltaResourceUtils {
 	 * @param resources
 	 * @return
 	 */
-	public static Collection<EPackage> getEPackages(Collection<Resource> resources) {
-		return getEPackagesStream(resources) // we must be deterministic
-			.collect(Collectors.toList());
+	public static Stream<EPackage> getEPackages(Collection<Resource> resources) {
+		return getEPackagesStream(resources); // we must be deterministic
 	}
 
 	/**
