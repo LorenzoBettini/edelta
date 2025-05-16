@@ -27,7 +27,7 @@ public class EdeltaUiTestUtils {
 	}
 
 	/**
-	 * Imports an existing project into the running workspace for SWTBot tests.
+	 * Imports (as a copy) an existing project into the running workspace for UI tests.
 	 * 
 	 * IMPORTANT: the project path is meant to be relative to the current directory.
 	 * 
@@ -43,7 +43,7 @@ public class EdeltaUiTestUtils {
 	}
 
 	/**
-	 * Imports an existing project into the running workspace for SWTBot tests.
+	 * Imports (as a copy) an existing project into the running workspace for UI tests.
 	 * 
 	 * IMPORTANT: the project path is meant to be relative to the current directory.
 	 * 
@@ -63,25 +63,19 @@ public class EdeltaUiTestUtils {
 		File currDir = new File("./");
 		String path = currDir.getAbsolutePath();
 		String projectToImportPath = String.format("%s/%s", path, projectPath);
-		project = importProject(new File(projectToImportPath), projectName);
-		project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
-		return project;
-	}
-
-	private static IProject importProject(final File projectPath, final String projectName) throws InvocationTargetException, InterruptedException {
-		IProject project = getProjectFromWorkspace(projectName);
 		ImportOperation importOperation = new ImportOperation(
 				project.getFullPath(), // relative to the workspace
-				projectPath, // absolute path
+				new File(projectToImportPath), // absolute path
 				FileSystemStructureProvider.INSTANCE,
 				s -> IOverwriteQuery.ALL);
 		// this means: copy the imported project into workspace
 		importOperation.setCreateContainerStructure(false);
 		importOperation.run(new NullProgressMonitor());
+		project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 		return project;
 	}
 
-	private static IProject getProjectFromWorkspace(final String projectName) {
+	public static IProject getProjectFromWorkspace(final String projectName) {
 		return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 	}
 }
