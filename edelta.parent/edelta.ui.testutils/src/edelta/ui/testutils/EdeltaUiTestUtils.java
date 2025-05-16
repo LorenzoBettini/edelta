@@ -5,11 +5,18 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchException;
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.wizards.datatransfer.FileSystemStructureProvider;
 import org.eclipse.ui.wizards.datatransfer.ImportOperation;
@@ -76,6 +83,49 @@ public class EdeltaUiTestUtils {
 	}
 
 	public static IProject getProjectFromWorkspace(final String projectName) {
-		return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		return workspaceRoot().getProject(projectName);
+	}
+
+	public static IWorkspaceRoot workspaceRoot() {
+		return ResourcesPlugin.getWorkspace().getRoot();
+	}
+
+	public static void closeWelcomePage() {
+		Display.getDefault().syncExec(() -> {
+			var introManager = PlatformUI.getWorkbench().getIntroManager();
+			if (introManager.getIntro() != null) {
+				introManager.closeIntro(introManager.getIntro());
+			}
+		});
+	}
+
+	public static void cleanWorkspace() throws InvocationTargetException, InterruptedException  {
+		new WorkspaceModifyOperation() {
+			@Override
+			protected void execute(IProgressMonitor monitor)
+					throws CoreException, InvocationTargetException, InterruptedException {
+				IProject[] projects = workspaceRoot().getProjects();
+				for (IProject project : projects) {
+					if (project.exists()) {
+						project.delete(true, true, monitor);
+					}
+				}
+			}
+		}.run(new NullProgressMonitor());
+	}
+
+	public static void openProjectExplorer() {
+		openViewById("org.eclipse.ui.navigator.ProjectExplorer");
+	}
+
+	public static void openViewById(String viewId) {
+		Display.getDefault().syncExec(() -> {
+			IWorkbench workbench = PlatformUI.getWorkbench();
+			try {
+				workbench.getActiveWorkbenchWindow().getActivePage().showView(viewId);
+			} catch (WorkbenchException e) {
+				e.printStackTrace();
+			}
+		});
 	}
 }
