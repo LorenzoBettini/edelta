@@ -18,7 +18,8 @@ Require-Bundle: edelta,
  org.eclipse.xtext.ui.testing,
  org.eclipse.xtext.xbase.ui.testing,
  edelta.testutils,
- assertj-core;bundle-version="3.24.2"
+ assertj-core;bundle-version="3.24.2",
+ edelta.ui.testutils;bundle-version="3.8.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: edelta.ui.tests;x-internal=true
 Import-Package: org.hamcrest.core,

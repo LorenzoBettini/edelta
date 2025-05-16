@@ -18,7 +18,7 @@ import org.junit.runner.RunWith;
 
 import edelta.testutils.EdeltaTestUtils;
 import edelta.ui.internal.EdeltaActivator;
-import edelta.ui.tests.utils.ProjectImportUtil;
+import edelta.ui.testutils.EdeltaUiTestUtils;
 
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
@@ -61,7 +61,7 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
 	@Override
 	protected IJavaProject createjavaProject(String projectName) throws CoreException {
 		try {
-			IJavaProject javaProject = ProjectImportUtil.importJavaProject(AbstractOutlineTest.TEST_PROJECT);
+			IJavaProject javaProject = EdeltaUiTestUtils.importJavaProject("../" + AbstractOutlineTest.TEST_PROJECT);
 			waitForBuild();
 			return javaProject;
 		} catch (Throwable e) {

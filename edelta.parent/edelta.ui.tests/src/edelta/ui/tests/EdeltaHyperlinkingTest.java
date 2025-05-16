@@ -18,7 +18,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import edelta.ui.tests.utils.ProjectImportUtil;
+import edelta.ui.testutils.EdeltaUiTestUtils;
 
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
@@ -34,7 +34,7 @@ public class EdeltaHyperlinkingTest extends AbstractHyperlinkingTest {
 	@BeforeClass
 	public static void importProject() {
 		try {
-			ProjectImportUtil.importProject(TEST_PROJECT);
+			EdeltaUiTestUtils.importProject("../" + TEST_PROJECT);
 			IResourcesSetupUtil.waitForBuild();
 		} catch (Throwable e) {
 			throw Exceptions.sneakyThrow(e);

@@ -18,7 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import edelta.ui.internal.EdeltaActivator;
-import edelta.ui.tests.utils.ProjectImportUtil;
+import edelta.ui.testutils.EdeltaUiTestUtils;
 
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
@@ -58,7 +58,7 @@ public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest 
 
 	@BeforeClass
 	public static void setupTestProject() throws InvocationTargetException, CoreException, InterruptedException {
-		ProjectImportUtil.importJavaProject(TEST_PROJECT);
+		EdeltaUiTestUtils.importJavaProject("../" + TEST_PROJECT);
 		file = createFile(
 			TEST_PROJECT + "/src/Test.edelta",
 			program

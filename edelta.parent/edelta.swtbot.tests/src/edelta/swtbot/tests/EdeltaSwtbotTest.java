@@ -40,7 +40,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import edelta.swtbot.tests.utils.ProjectImportUtil;
+import edelta.ui.testutils.EdeltaUiTestUtils;
 
 /**
  * Better to have all SWTBot tests in a single file, since if executed in
@@ -359,7 +359,7 @@ public class EdeltaSwtbotTest {
 	@Test
 	public void canRunAnEdeltaFileAsJavaApplication() throws CoreException, OperationCanceledException, InterruptedException, InvocationTargetException {
 		final String TEST_PROJECT = "edelta.testprojects.first";
-		ProjectImportUtil.importJavaProject(TEST_PROJECT);
+		EdeltaUiTestUtils.importJavaProject("../" + TEST_PROJECT);
 		waitingForPluginModel();
 		waitingForBuild();
 		SWTBotTreeItem tree = getProjectTreeItem(TEST_PROJECT)
@@ -386,7 +386,7 @@ public class EdeltaSwtbotTest {
 	@Test
 	public void canAnalyzeEcoreFiles() throws Exception {
 		final String TEST_PROJECT = "edelta.dependency.analyzer.swtbot.tests.project";
-		ProjectImportUtil.importJavaProject(TEST_PROJECT);
+		EdeltaUiTestUtils.importJavaProject("../" + TEST_PROJECT);
 		waitForBuild();
 		assertErrorsInProject(0);
 		edeltaContextMenu(TEST_PROJECT, PERSONS_MM_ECORE, "Analyze Ecore Files");
@@ -400,7 +400,7 @@ public class EdeltaSwtbotTest {
 	@Test
 	public void canGenerateTemplateFiles() throws Exception {
 		final String TEST_PROJECT = "edelta.dependency.analyzer.swtbot.tests.project";
-		ProjectImportUtil.importJavaProject(TEST_PROJECT);
+		EdeltaUiTestUtils.importJavaProject("../" + TEST_PROJECT);
 		waitForBuild();
 		assertErrorsInProject(0);
 		edeltaContextMenu(TEST_PROJECT, PERSONS_MM_ECORE, "Generate Edelta Template File");
