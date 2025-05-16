@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import edelta.ui.tests.utils.CarriageReturnAwareXtextDocument;
-import edelta.ui.tests.utils.ProjectImportUtil;
+import edelta.ui.testutils.EdeltaUiTestUtils;
 import edelta.validation.EdeltaValidator;
 
 /**
@@ -35,7 +35,7 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
 
 	@BeforeClass
 	public static void importProject() throws Exception {
-		ProjectImportUtil.importProject(EdeltaQuickfixTest.TEST_PROJECT);
+		EdeltaUiTestUtils.importProject("../" + EdeltaQuickfixTest.TEST_PROJECT);
 		IResourcesSetupUtil.waitForBuild();
 	}
 

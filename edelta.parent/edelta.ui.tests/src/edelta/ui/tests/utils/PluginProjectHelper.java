@@ -1,6 +1,5 @@
 package edelta.ui.tests.utils;
 
-import static java.util.stream.Collectors.toList;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.join;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.map;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.size;
@@ -51,7 +50,7 @@ public class PluginProjectHelper {
 	public static Iterable<IMarker> getErrorMarkers() throws CoreException {
 		return Stream.of(IResourcesSetupUtil.root().findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE))
 			.filter(it -> it.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO) == IMarker.SEVERITY_ERROR)
-			.collect(toList());
+			.toList();
 	}
 
 	protected static void assertEqualsStrings(final CharSequence expected, final CharSequence actual) {

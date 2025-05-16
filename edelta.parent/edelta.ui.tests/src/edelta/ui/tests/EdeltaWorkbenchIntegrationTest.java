@@ -1,6 +1,6 @@
 package edelta.ui.tests;
 
-import static edelta.ui.tests.utils.ProjectImportUtil.importProject;
+import static edelta.ui.testutils.EdeltaUiTestUtils.importProject;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.cleanWorkspace;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.createFile;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.waitForBuild;
@@ -34,7 +34,7 @@ public class EdeltaWorkbenchIntegrationTest extends CustomAbstractWorkbenchTest 
 	@BeforeClass
 	public static void importTestProject() throws Exception {
 		cleanWorkspace();
-		project = importProject(EdeltaWorkbenchIntegrationTest.TEST_PROJECT);
+		project = importProject("../" + EdeltaWorkbenchIntegrationTest.TEST_PROJECT);
 		waitForBuild();
 	}
 

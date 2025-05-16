@@ -1,6 +1,6 @@
 package edelta.ui.tests;
 
-import static edelta.ui.tests.utils.ProjectImportUtil.importProject;
+import static edelta.ui.testutils.EdeltaUiTestUtils.importProject;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*;
 
 import org.eclipse.core.resources.IProject;
@@ -34,8 +34,8 @@ public class EdeltaTwoProjectsWorkbenchIntegrationTest extends CustomAbstractWor
 
 	@Test
 	public void testDependentProjects() throws Exception {
-		var project1 = importProject(EdeltaTwoProjectsWorkbenchIntegrationTest.FIRST_PROJECT);
-		var project2 = importProject(EdeltaTwoProjectsWorkbenchIntegrationTest.SECOND_PROJECT);
+		var project1 = importProject("../" + EdeltaTwoProjectsWorkbenchIntegrationTest.FIRST_PROJECT);
+		var project2 = importProject("../" + EdeltaTwoProjectsWorkbenchIntegrationTest.SECOND_PROJECT);
 		cleanup(project1);
 		cleanup(project2);
 		waitForBuild();

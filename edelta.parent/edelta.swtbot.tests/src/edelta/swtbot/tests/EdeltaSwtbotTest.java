@@ -1,7 +1,6 @@
 package edelta.swtbot.tests;
 
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
-import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.cleanWorkspace;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.root;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.waitForBuild;
 import static org.junit.Assert.assertEquals;
@@ -18,7 +17,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.pde.internal.core.PDECore;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
@@ -31,16 +29,13 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.WorkbenchException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import edelta.swtbot.tests.utils.ProjectImportUtil;
+import edelta.ui.testutils.EdeltaUiTestUtils;
 
 /**
  * Better to have all SWTBot tests in a single file, since if executed in
@@ -66,9 +61,8 @@ public class EdeltaSwtbotTest {
 	public static void beforeClass() {
 		bot = new SWTWorkbenchBot();
 
-		closeWelcomePage();
-
-		openViewById("org.eclipse.ui.navigator.ProjectExplorer");
+		EdeltaUiTestUtils.closeWelcomePage();
+		EdeltaUiTestUtils.openProjectExplorer();
 	}
 
 	@AfterClass
@@ -77,21 +71,9 @@ public class EdeltaSwtbotTest {
 	}
 
 	@After
-	public void runAfterEveryTest() throws CoreException {
-		cleanWorkspace();
+	public void runAfterEveryTest() throws InvocationTargetException, InterruptedException {
+		EdeltaUiTestUtils.cleanWorkspace();
 		waitForBuild();
-	}
-
-	protected static void closeWelcomePage() {
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				if (PlatformUI.getWorkbench().getIntroManager().getIntro() != null) {
-					PlatformUI.getWorkbench().getIntroManager()
-							.closeIntro(PlatformUI.getWorkbench().getIntroManager().getIntro());
-				}
-			}
-		});
 	}
 
 	protected void disableBuildAutomatically() {
@@ -197,17 +179,6 @@ public class EdeltaSwtbotTest {
 			public String getFailureMessage() {
 				return "Cannot find menu for "
 					+ project + " " + ecoreFile + " " + menu;
-			}
-		});
-	}
-
-	protected static void openViewById(String viewId) {
-		Display.getDefault().syncExec(() -> {
-			IWorkbench workbench = PlatformUI.getWorkbench();
-			try {
-				workbench.getActiveWorkbenchWindow().getActivePage().showView(viewId);
-			} catch (WorkbenchException e) {
-				e.printStackTrace();
 			}
 		});
 	}
@@ -359,7 +330,7 @@ public class EdeltaSwtbotTest {
 	@Test
 	public void canRunAnEdeltaFileAsJavaApplication() throws CoreException, OperationCanceledException, InterruptedException, InvocationTargetException {
 		final String TEST_PROJECT = "edelta.testprojects.first";
-		ProjectImportUtil.importJavaProject(TEST_PROJECT);
+		EdeltaUiTestUtils.importJavaProject("../" + TEST_PROJECT);
 		waitingForPluginModel();
 		waitingForBuild();
 		SWTBotTreeItem tree = getProjectTreeItem(TEST_PROJECT)
@@ -386,7 +357,7 @@ public class EdeltaSwtbotTest {
 	@Test
 	public void canAnalyzeEcoreFiles() throws Exception {
 		final String TEST_PROJECT = "edelta.dependency.analyzer.swtbot.tests.project";
-		ProjectImportUtil.importJavaProject(TEST_PROJECT);
+		EdeltaUiTestUtils.importJavaProject("../" + TEST_PROJECT);
 		waitForBuild();
 		assertErrorsInProject(0);
 		edeltaContextMenu(TEST_PROJECT, PERSONS_MM_ECORE, "Analyze Ecore Files");
@@ -400,7 +371,7 @@ public class EdeltaSwtbotTest {
 	@Test
 	public void canGenerateTemplateFiles() throws Exception {
 		final String TEST_PROJECT = "edelta.dependency.analyzer.swtbot.tests.project";
-		ProjectImportUtil.importJavaProject(TEST_PROJECT);
+		EdeltaUiTestUtils.importJavaProject("../" + TEST_PROJECT);
 		waitForBuild();
 		assertErrorsInProject(0);
 		edeltaContextMenu(TEST_PROJECT, PERSONS_MM_ECORE, "Generate Edelta Template File");

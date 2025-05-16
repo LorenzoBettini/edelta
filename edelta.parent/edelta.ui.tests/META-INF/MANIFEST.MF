@@ -9,7 +9,6 @@ Require-Bundle: edelta,
  edelta.ui,
  org.junit;bundle-version="4.7.0",
  org.eclipse.core.runtime,
- org.eclipse.ui.workbench;resolution:=optional,
  org.eclipse.xtext.common.types.ui,
  org.eclipse.jdt.core,
  org.eclipse.ui.ide,
@@ -18,7 +17,8 @@ Require-Bundle: edelta,
  org.eclipse.xtext.ui.testing,
  org.eclipse.xtext.xbase.ui.testing,
  edelta.testutils,
- assertj-core;bundle-version="3.24.2"
+ assertj-core;bundle-version="3.24.2",
+ edelta.ui.testutils
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: edelta.ui.tests;x-internal=true
 Import-Package: org.hamcrest.core,

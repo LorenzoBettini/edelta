@@ -30,7 +30,7 @@ import org.junit.runner.RunWith;
 import edelta.testutils.EdeltaTestUtils;
 import edelta.ui.internal.EdeltaActivator;
 import edelta.ui.tests.utils.EdeltaWorkbenchUtils;
-import edelta.ui.tests.utils.ProjectImportUtil;
+import edelta.ui.testutils.EdeltaUiTestUtils;
 
 /**
  * The tests rely on the ecore files in: /edelta.ui.tests.project/model/
@@ -49,8 +49,8 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	public static void setUp() throws CoreException {
 		try {
 			EdeltaWorkbenchUtils.closeWelcomePage();
-			javaProject = ProjectImportUtil
-					.importJavaProject(EdeltaContentAssistTest.PROJECT_NAME);
+			javaProject = EdeltaUiTestUtils
+					.importJavaProject("../" + EdeltaContentAssistTest.PROJECT_NAME);
 			IResourcesSetupUtil.waitForBuild();
 		} catch (Throwable e) {
 			throw Exceptions.sneakyThrow(e);
