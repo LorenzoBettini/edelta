@@ -85,6 +85,16 @@
         <artifactId>edelta.refactorings.lib</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>io.github.lorenzobettini.edelta</groupId>
+        <artifactId>edelta.testutils</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.18.0</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
