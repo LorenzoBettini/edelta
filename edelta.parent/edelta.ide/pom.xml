@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>io.github.lorenzobettini.edelta</groupId>
 		<artifactId>edelta.parent</artifactId>
-		<version>3.8.2-SNAPSHOT</version>
+		<version>3.8.3-SNAPSHOT</version>
 	</parent>
 	<artifactId>edelta.ide</artifactId>
 	<packaging>eclipse-plugin</packaging>
