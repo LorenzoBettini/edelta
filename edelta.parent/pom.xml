@@ -132,6 +132,7 @@
     <module>edelta.lib</module>
     <module>edelta</module>
     <module>edelta.refactorings.lib</module>
+    <module>edelta.testutils</module>
   </modules>
 
   <profiles>

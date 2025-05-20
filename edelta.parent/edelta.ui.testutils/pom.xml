@@ -4,9 +4,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>io.github.lorenzobettini.edelta</groupId>
-		<artifactId>edelta.tests.parent</artifactId>
+		<artifactId>edelta.parent</artifactId>
 		<version>3.8.2-SNAPSHOT</version>
-		<relativePath>../edelta.tests.parent/pom.xml</relativePath>
 	</parent>
 	<artifactId>edelta.ui.testutils</artifactId>
 	<packaging>eclipse-plugin</packaging>
