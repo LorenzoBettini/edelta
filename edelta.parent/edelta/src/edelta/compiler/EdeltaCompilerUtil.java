@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.resource.Resource;
 
 import com.google.inject.Inject;
 
@@ -64,5 +65,17 @@ public class EdeltaCompilerUtil {
 			.takeWhile(Objects::nonNull)
 			.toList()
 		);
+	}
+
+	public String getEcoreversionsRelativePath(Resource resource) {
+		var segments = resource.getURI().segments();
+		for (int i = 0; i < segments.length; i++) {
+			if (segments[i].equals("ecoreversions")) {
+				return Stream.of(segments)
+					.skip(i + 1L)
+					.collect(Collectors.joining("/"));
+			}
+		}
+		return "";
 	}
 }

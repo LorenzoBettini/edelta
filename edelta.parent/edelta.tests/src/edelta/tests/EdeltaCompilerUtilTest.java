@@ -1,6 +1,7 @@
 package edelta.tests;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.xtext.testing.InjectWith;
@@ -13,6 +14,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import com.google.inject.Inject;
 
 import edelta.compiler.EdeltaCompilerUtil;
+import edelta.lib.EdeltaModelManager;
 import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 
 @ExtendWith(InjectionExtension.class)
@@ -61,5 +63,29 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 		assertEquals(
 			"getEAttribute(\"mainpackage.mainsubpackage\", \"MainSubPackageFooClass\", \"mySubPackageAttribute\")",
 			edeltaCompilerUtil.getStringForEcoreReferenceExpression(ecoreRefExp));
+	}
+
+	@Test
+	void testGetEcoreversionsRelativePathEmpty() {
+		var modelManager = new EdeltaModelManager();
+		var resource = modelManager.loadEcoreFile(METAMODEL_PATH + SIMPLE_ECORE);
+		String path = edeltaCompilerUtil.getEcoreversionsRelativePath(resource);
+		assertEquals("", path);
+	}
+
+	@Test
+	void testGetEcoreversionsRelativePathNonEmpty() {
+		var modelManager = new EdeltaModelManager();
+		var resource = modelManager.loadEcoreFile(METAMODEL_PATH + ECOREVERSIONS + ECORE_IN_ECORE_VERSIONS_ECORE);
+		String path = edeltaCompilerUtil.getEcoreversionsRelativePath(resource);
+		assertEquals(ECORE_IN_ECORE_VERSIONS_ECORE, path);
+	}
+
+	@Test
+	void testGetEcoreversionsRelativePathInSubdir() {
+		var modelManager = new EdeltaModelManager();
+		var resource = modelManager.loadEcoreFile(METAMODEL_PATH + ECOREVERSIONS_V1 + ECORE_IN_ECORE_VERSIONS_SUBDIR_ECORE);
+		String path = edeltaCompilerUtil.getEcoreversionsRelativePath(resource);
+		assertEquals("v1/EcoreInEcoreVersionsSubdir.ecore", path);
 	}
 }
