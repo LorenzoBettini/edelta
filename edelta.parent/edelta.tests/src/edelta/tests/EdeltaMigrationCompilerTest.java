@@ -267,7 +267,7 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		  public List<String> getMigratedEcorePaths() {
 		    return List.of(
 		      "/EcoreInEcoreVersions.ecore",
-		      "/EcoreInEcoreVersionsSubdir.ecore"
+		      "/v1/EcoreInEcoreVersionsSubdir.ecore"
 		    );
 		  }
 		
@@ -277,7 +277,7 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		    engine.loadEcoreFile("EcoreInEcoreVersions.ecore",
 		      Example.class.getResourceAsStream("/EcoreInEcoreVersions.ecore"));
 		    engine.loadEcoreFile("EcoreInEcoreVersionsSubdir.ecore",
-		      Example.class.getResourceAsStream("/EcoreInEcoreVersionsSubdir.ecore"));
+		      Example.class.getResourceAsStream("/v1/EcoreInEcoreVersionsSubdir.ecore"));
 		    engine.execute();
 		    engine.save("modified");
 		  }

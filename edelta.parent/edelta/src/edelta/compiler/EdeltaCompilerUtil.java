@@ -68,7 +68,8 @@ public class EdeltaCompilerUtil {
 	}
 
 	public String getEcoreversionsRelativePath(Resource resource) {
-		var segments = resource.getURI().segments();
+		var uri = resource.getURI();
+		var segments = uri.segments();
 		for (int i = 0; i < segments.length; i++) {
 			if (segments[i].equals("ecoreversions")) {
 				return Stream.of(segments)
@@ -76,6 +77,6 @@ public class EdeltaCompilerUtil {
 					.collect(Collectors.joining("/"));
 			}
 		}
-		return "";
+		return uri.lastSegment();
 	}
 }

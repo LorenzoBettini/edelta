@@ -70,7 +70,7 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 		var modelManager = new EdeltaModelManager();
 		var resource = modelManager.loadEcoreFile(METAMODEL_PATH + SIMPLE_ECORE);
 		String path = edeltaCompilerUtil.getEcoreversionsRelativePath(resource);
-		assertEquals("", path);
+		assertEquals(SIMPLE_ECORE, path);
 	}
 
 	@Test
