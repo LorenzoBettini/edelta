@@ -287,8 +287,12 @@ class EdeltaVersionMigratorTest {
 		versionMigrator.registerMigration(renameMyPackageProvider);
 		versionMigrator.registerMigration(renamePersonListProvider);
 		// load the latest version of the Ecore
-		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
-		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v2/" + MY_ECORE);
+		var modelManager = new EdeltaModelManager();
+		var resource1 = modelManager.loadEcoreFile(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
+		var resource2 = modelManager.loadEcoreFile(TESTDATA + subdir + METAMODELS + "v2/" + MY_ECORE);
+		versionMigrator.loadCurrentEPackages(
+			EdeltaResourceUtils.getEPackage(resource1),
+			EdeltaResourceUtils.getEPackage(resource2));
 		// load the models to check for migration
 		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
 
