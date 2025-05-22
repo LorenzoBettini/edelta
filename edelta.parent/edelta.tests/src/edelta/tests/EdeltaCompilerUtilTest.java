@@ -1,5 +1,6 @@
 package edelta.tests;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -66,26 +67,20 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	void testGetEcoreversionsRelativePathEmpty() {
-		assertEquals(SIMPLE_ECORE,
-			edeltaCompilerUtil
-				.getEcoreversionsRelativePath(
-					new EdeltaModelManager().loadEcoreFile(METAMODEL_PATH + SIMPLE_ECORE)));
+	void testGetEcoreversionsRelativePath() {
+		var modelManager = new EdeltaModelManager();
+	
+		assertAll("Ecoreversions relative path tests",
+			() -> assertEquals(SIMPLE_ECORE,
+				edeltaCompilerUtil.getEcoreversionsRelativePath(
+					modelManager.loadEcoreFile(METAMODEL_PATH + SIMPLE_ECORE))),
+			() -> assertEquals(ECORE_IN_ECORE_VERSIONS_ECORE,
+				edeltaCompilerUtil.getEcoreversionsRelativePath(
+					modelManager.loadEcoreFile(METAMODEL_PATH + ECOREVERSIONS + ECORE_IN_ECORE_VERSIONS_ECORE))),
+			() -> assertEquals("v1/EcoreInEcoreVersionsSubdir.ecore",
+				edeltaCompilerUtil.getEcoreversionsRelativePath(
+					modelManager.loadEcoreFile(METAMODEL_PATH + ECOREVERSIONS_V1 + ECORE_IN_ECORE_VERSIONS_SUBDIR_ECORE)))
+		);
 	}
 
-	@Test
-	void testGetEcoreversionsRelativePathNonEmpty() {
-		assertEquals(ECORE_IN_ECORE_VERSIONS_ECORE,
-			edeltaCompilerUtil
-				.getEcoreversionsRelativePath(
-					new EdeltaModelManager().loadEcoreFile(METAMODEL_PATH + ECOREVERSIONS + ECORE_IN_ECORE_VERSIONS_ECORE)));
-	}
-
-	@Test
-	void testGetEcoreversionsRelativePathInSubdir() {
-		assertEquals("v1/EcoreInEcoreVersionsSubdir.ecore",
-			edeltaCompilerUtil
-				.getEcoreversionsRelativePath(
-					new EdeltaModelManager().loadEcoreFile(METAMODEL_PATH + ECOREVERSIONS_V1 + ECORE_IN_ECORE_VERSIONS_SUBDIR_ECORE)));
-	}
 }
