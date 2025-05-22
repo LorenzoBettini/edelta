@@ -20,6 +20,11 @@ import edelta.util.EdeltaEcoreReferenceInformationHelper;
  * @author Lorenzo Bettini
  */
 public class EdeltaCompilerUtil {
+	/**
+	 * The name of the folder where the Ecore versions are meant to be stored
+	 */
+	public static final String ECOREVERSIONS = "ecoreversions";
+
 	@Inject
 	private EdeltaEcoreReferenceInformationHelper ecoreReferenceInformationHelper;
 
@@ -71,7 +76,7 @@ public class EdeltaCompilerUtil {
 		var uri = resource.getURI();
 		var segments = uri.segments();
 		for (int i = 0; i < segments.length; i++) {
-			if (segments[i].equals("ecoreversions")) {
+			if (segments[i].equals(ECOREVERSIONS)) {
 				return Stream.of(segments)
 					.skip(i + 1L)
 					.collect(Collectors.joining("/"));
