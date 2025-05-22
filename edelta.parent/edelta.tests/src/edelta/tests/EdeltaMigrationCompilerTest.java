@@ -200,6 +200,93 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 	}
 
 	@Test
+	public void testCompilationOfMigrationWithRealEcoreFilesInEcoreVersionsDirectory() throws Exception {
+		var rs = createResourceSetWithEcores(List.of(
+				ECOREVERSIONS + ECORE_IN_ECORE_VERSIONS_ECORE,
+				ECOREVERSIONS_V1 + ECORE_IN_ECORE_VERSIONS_SUBDIR_ECORE),
+		"""
+		package foo;
+
+		migrate "http://www.simple.in.ecoreversions" to "http://www.simple/v2"
+		migrate "http://www.simple.in.ecoreversions.v1" to "http://www.anothersimple/v2"
+
+		modifyEcore aTest epackage simpleinecoreversions {
+			ecoreref(simpleinecoreversions.SimpleClass).name = "RenamedSimpleClass"
+		}
+		modifyEcore aTest2 epackage simpleinecoreversionsv1 {
+			ecoreref(simpleinecoreversionsv1.SimpleClass).name = "RenamedSimpleClass"
+		}
+		""");
+		checkCompilation(rs, """
+		package foo;
+		
+		import edelta.lib.EdeltaDefaultRuntime;
+		import edelta.lib.EdeltaEngine;
+		import edelta.lib.EdeltaRuntime;
+		import edelta.lib.annotation.EdeltaGenerated;
+		import java.util.List;
+		import org.eclipse.emf.ecore.EPackage;
+		
+		@SuppressWarnings("all")
+		public class Example extends EdeltaDefaultRuntime {
+		  public Example(final EdeltaRuntime other) {
+		    super(other);
+		  }
+		
+		  public void aTest(final EPackage it) {
+		    getEClass("simpleinecoreversions", "SimpleClass").setName("RenamedSimpleClass");
+		  }
+		
+		  public void aTest2(final EPackage it) {
+		    getEClass("simpleinecoreversionsv1", "SimpleClass").setName("RenamedSimpleClass");
+		  }
+		
+		  @Override
+		  public void performSanityChecks() throws Exception {
+		    ensureEPackageIsLoadedByNsURI("simpleinecoreversions", "http://www.simple.in.ecoreversions");
+		    ensureEPackageIsLoadedByNsURI("simpleinecoreversionsv1", "http://www.simple.in.ecoreversions.v1");
+		  }
+		
+		  @Override
+		  protected void doExecute() throws Exception {
+		    aTest(getEPackage("simpleinecoreversions"));
+		    aTest2(getEPackage("simpleinecoreversionsv1"));
+		    getEPackage("simpleinecoreversions").setNsURI("http://www.simple/v2");
+		    getEPackage("simpleinecoreversionsv1").setNsURI("http://www.anothersimple/v2");
+		  }
+		
+		  @Override
+		  public List<String> getMigratedNsURIs() {
+		    return List.of(
+		      "http://www.simple.in.ecoreversions",
+		      "http://www.simple.in.ecoreversions.v1"
+		    );
+		  }
+		
+		  @Override
+		  public List<String> getMigratedEcorePaths() {
+		    return List.of(
+		      "/EcoreInEcoreVersions.ecore",
+		      "/v1/EcoreInEcoreVersionsSubdir.ecore"
+		    );
+		  }
+		
+		  @EdeltaGenerated
+		  public static void main(final String[] args) throws Exception {
+		    var engine = new EdeltaEngine(Example::new);
+		    engine.loadEcoreFile("EcoreInEcoreVersions.ecore",
+		      Example.class.getResourceAsStream("/EcoreInEcoreVersions.ecore"));
+		    engine.loadEcoreFile("EcoreInEcoreVersionsSubdir.ecore",
+		      Example.class.getResourceAsStream("/v1/EcoreInEcoreVersionsSubdir.ecore"));
+		    engine.execute();
+		    engine.save("modified");
+		  }
+		}
+		""",
+		true);
+	}
+
+	@Test
 	public void testAlwaysGenerateChangeOfNsURI() throws Exception {
 		var rs = createResourceSetWithEcores(List.of(SIMPLE_ECORE, ANOTHER_SIMPLE_ECORE),
 		"""

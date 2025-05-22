@@ -857,7 +857,7 @@ public class EdeltaRefactorings extends EdeltaDefaultRuntime {
   /**
    * Splits the passed class into several classes with the given names;
    * all classes will be copies of the original class (which will be removed).
-   * The migratorConsumer is used when migrating the model and the developer ahs
+   * The migratorConsumer is used when migrating the model and the developer has
    * the full control on such a migration by using the migratorConsumer appropriately
    * to define migration rules.
    * 

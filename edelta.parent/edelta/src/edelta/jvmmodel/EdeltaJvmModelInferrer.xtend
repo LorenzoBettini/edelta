@@ -146,7 +146,7 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 					annotations += Override.annotationRef
 					body = '''
 						return List.of(
-						  «program.getMigrations.map['"/' +nsURI.eResource.URI.lastSegment + '"'].join(",\n")»
+						  «program.getMigrations.map['"/' +nsURI.eResource.ecoreversionsRelativePath + '"'].join(",\n")»
 						);
 					'''
 					// previously it was nsURI.eResource.URI.deresolve(program.eResource.URI)
@@ -162,7 +162,7 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 						var engine = new «EdeltaEngine»(«className.lastSegment»::new);
 						«FOR migration : program.getMigrations»
 						engine.loadEcoreFile("«migration.nsURI.eResource.URI.lastSegment»",
-						  «className.lastSegment».class.getResourceAsStream("/«migration.nsURI.eResource.URI.lastSegment»"));
+						  «className.lastSegment».class.getResourceAsStream("/«migration.nsURI.eResource.ecoreversionsRelativePath»"));
 						«ENDFOR»
 						engine.execute();
 						engine.save("modified");
