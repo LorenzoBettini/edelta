@@ -144,6 +144,21 @@ public class EdeltaVersionMigrator {
 	}
 
 	/**
+	 * Loads all the {@link EPackage}s, assumed to be properly part of a
+	 * {@link ResourceSet}, which represent the current (and latest) version of
+	 * metamodels.
+	 * 
+	 * See {@link EdeltaModelManager#loadEPackage(EPackage)}.
+	 * 
+	 * @param ePackages
+	 */
+	public void loadCurrentEPackages(EPackage... ePackages) {
+		for (var ePackage : ePackages) {
+			loadCurrentEPackage(ePackage);
+		}
+	}
+
+	/**
 	 * Load all models in the given path (possibly recursively in subdirectories),
 	 * using the configured file extensions, by default ".xmi" files (see
 	 * {@link #addModelFileExtension(String)}).
