@@ -57,12 +57,26 @@ public class EdeltaVersionMigrator {
 	}
 
 	/**
+	 * Adds the given model file extension to the list of model file extensions.
 	 * By default, it loads only ".xmi" files as models.
 	 * 
 	 * @param modelFileExtension including the "."
 	 */
 	public void addModelFileExtension(String modelFileExtension) {
 		modelExtensions.add(modelFileExtension);
+	}
+
+	/**
+	 * Adds the given model file extensions to the list of model file extensions.
+	 * 
+	 * see {@link #addModelFileExtension(String)}
+	 * 
+	 * @param modelFileExtensions
+	 */
+	public void addModelFileExtensions(String... modelFileExtensions) {
+		for (var modelFileExtension : modelFileExtensions) {
+			addModelFileExtension(modelFileExtension);
+		}
 	}
 
 	/**

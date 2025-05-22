@@ -280,8 +280,7 @@ class EdeltaVersionMigratorTest {
 		var outputSubdir = "rename-unrelated-custom-extensions/";
 		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v1-custom-extension",
 				OUTPUT + outputSubdir);
-		versionMigrator.addModelFileExtension(".customextension");
-		versionMigrator.addModelFileExtension(".anothercustomextension");
+		versionMigrator.addModelFileExtensions(".customextension", ".anothercustomextension");
 
 		// initialize with migrations
 		versionMigrator.registerMigration(renamePersonFirstAndLastNameProvider);
