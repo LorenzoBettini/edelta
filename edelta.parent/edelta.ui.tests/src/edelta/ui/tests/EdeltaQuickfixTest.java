@@ -1,5 +1,7 @@
 package edelta.ui.tests;
 
+import static org.eclipse.xtext.xbase.lib.InputOutput.println;
+
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.testing.Flaky;
 import org.eclipse.xtext.testing.InjectWith;
@@ -9,7 +11,6 @@ import org.eclipse.xtext.ui.editor.model.XtextDocument;
 import org.eclipse.xtext.ui.testing.AbstractQuickfixTest;
 import org.eclipse.xtext.ui.testing.AbstractWorkbenchTest;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
-import org.eclipse.xtext.xbase.lib.InputOutput;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -85,7 +86,7 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
 	@Test
 	@Flaky
 	public void fixSubPackageImport() {
-		InputOutput.<String>println("*** Executing fixSubPackageImport...");
+		println("*** Executing fixSubPackageImport...");
 		testQuickfixesOn(
 			"metamodel \"mainpackage.subpackage\"",
 			EdeltaValidator.INVALID_SUBPACKAGE_IMPORT,
