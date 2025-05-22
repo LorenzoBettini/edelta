@@ -67,25 +67,25 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 
 	@Test
 	void testGetEcoreversionsRelativePathEmpty() {
-		var modelManager = new EdeltaModelManager();
-		var resource = modelManager.loadEcoreFile(METAMODEL_PATH + SIMPLE_ECORE);
-		String path = edeltaCompilerUtil.getEcoreversionsRelativePath(resource);
-		assertEquals(SIMPLE_ECORE, path);
+		assertEquals(SIMPLE_ECORE,
+			edeltaCompilerUtil
+				.getEcoreversionsRelativePath(
+					new EdeltaModelManager().loadEcoreFile(METAMODEL_PATH + SIMPLE_ECORE)));
 	}
 
 	@Test
 	void testGetEcoreversionsRelativePathNonEmpty() {
-		var modelManager = new EdeltaModelManager();
-		var resource = modelManager.loadEcoreFile(METAMODEL_PATH + ECOREVERSIONS + ECORE_IN_ECORE_VERSIONS_ECORE);
-		String path = edeltaCompilerUtil.getEcoreversionsRelativePath(resource);
-		assertEquals(ECORE_IN_ECORE_VERSIONS_ECORE, path);
+		assertEquals(ECORE_IN_ECORE_VERSIONS_ECORE,
+			edeltaCompilerUtil
+				.getEcoreversionsRelativePath(
+					new EdeltaModelManager().loadEcoreFile(METAMODEL_PATH + ECOREVERSIONS + ECORE_IN_ECORE_VERSIONS_ECORE)));
 	}
 
 	@Test
 	void testGetEcoreversionsRelativePathInSubdir() {
-		var modelManager = new EdeltaModelManager();
-		var resource = modelManager.loadEcoreFile(METAMODEL_PATH + ECOREVERSIONS_V1 + ECORE_IN_ECORE_VERSIONS_SUBDIR_ECORE);
-		String path = edeltaCompilerUtil.getEcoreversionsRelativePath(resource);
-		assertEquals("v1/EcoreInEcoreVersionsSubdir.ecore", path);
+		assertEquals("v1/EcoreInEcoreVersionsSubdir.ecore",
+			edeltaCompilerUtil
+				.getEcoreversionsRelativePath(
+					new EdeltaModelManager().loadEcoreFile(METAMODEL_PATH + ECOREVERSIONS_V1 + ECORE_IN_ECORE_VERSIONS_SUBDIR_ECORE)));
 	}
 }

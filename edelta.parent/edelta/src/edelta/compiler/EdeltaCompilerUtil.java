@@ -1,5 +1,6 @@
 package edelta.compiler;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -72,16 +73,26 @@ public class EdeltaCompilerUtil {
 		);
 	}
 
+	/**
+	 * Returns the relative path of the Resource with respect to the
+	 * {@value #ECOREVERSIONS} folder.
+	 * 
+	 * @param resource
+	 * @return the relative path of the Resource with respect to the
+	 *         {@value #ECOREVERSIONS} folder, or the last segment of the URI if
+	 *         {@value #ECOREVERSIONS} is not found in the URI.
+	 */
 	public String getEcoreversionsRelativePath(Resource resource) {
 		var uri = resource.getURI();
 		var segments = uri.segments();
+
 		for (int i = 0; i < segments.length; i++) {
-			if (segments[i].equals(ECOREVERSIONS)) {
-				return Stream.of(segments)
-					.skip(i + 1L)
-					.collect(Collectors.joining("/"));
+			if (ECOREVERSIONS.equals(segments[i])) {
+				return String.join("/", Arrays.copyOfRange(segments, i + 1, segments.length));
 			}
 		}
+
 		return uri.lastSegment();
 	}
+
 }
