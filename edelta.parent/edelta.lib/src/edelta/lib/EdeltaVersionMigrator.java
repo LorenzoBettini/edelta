@@ -108,11 +108,13 @@ public class EdeltaVersionMigrator {
 	 * See {@link EdeltaModelManager#loadEcoreFile(String)}.
 	 * 
 	 * @param ecorePath
+	 * @return the loaded {@link Resource} containing the Ecore model
 	 * @throws IOException 
 	 */
-	public void loadEcore(String ecorePath) {
+	public Resource loadEcore(String ecorePath) {
 		var resource = modelManager.loadEcoreFile(ecorePath);
 		updatePackageRegistry(resource);
+		return resource;
 	}
 
 	/**
@@ -120,11 +122,13 @@ public class EdeltaVersionMigrator {
 	 * 
 	 * @param ecoreFile
 	 * @param inputStream
+	 * @return the loaded {@link Resource} containing the Ecore model
 	 * @throws IOException 
 	 */
-	public void loadEcore(String ecoreFile, InputStream inputStream) throws IOException {
+	public Resource loadEcore(String ecoreFile, InputStream inputStream) throws IOException {
 		var resource = modelManager.loadEcoreFile(ecoreFile, inputStream);
 		updatePackageRegistry(resource);
+		return resource;
 	}
 
 	/**
@@ -269,7 +273,6 @@ public class EdeltaVersionMigrator {
 				for (var model : migratedModelResources) {
 					var resourceToURIString = resourceToURIString(model);
 					loadModelsFrom(resourceToURIString);
-					collectedMigratedResources.add(model);
 				}
 				// it is important to save after all the migrations took place
 				// this way, the models refer to the most up-to-date Ecore loaded
@@ -279,6 +282,9 @@ public class EdeltaVersionMigrator {
 				// they are used in memory only to migrate models
 				// Ecore files are meant to be in the Application code, not in the client
 				saveInPlace(modelManager.getModelResources());
+				// collect the migrated resources taken from the model manager
+				// that correspond to the saved models
+				collectedMigratedResources.addAll(modelManager.getModelResources());
 			}
 		} while (!migrationDatas.isEmpty());
 
