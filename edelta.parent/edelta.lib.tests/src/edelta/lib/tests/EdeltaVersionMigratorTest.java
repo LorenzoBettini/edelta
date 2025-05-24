@@ -166,7 +166,7 @@ class EdeltaVersionMigratorTest {
 		versionMigrator.registerMigration(renamePersonFirstAndLastNameProvider);
 		versionMigrator.registerMigration(renamePersonListProvider);
 		// load the latest version of the Ecore
-		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
+		var latestEcoreResource = versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
 		// load the models to check for migration
 		versionMigrator.loadModel(OUTPUT + outputSubdir + "List.xmi");
 		versionMigrator.loadModel(OUTPUT + outputSubdir + "List2.xmi");
@@ -176,6 +176,14 @@ class EdeltaVersionMigratorTest {
 		assertThat(collected)
 			.extracting(EdeltaResourceUtils::getFileName)
 			.containsExactlyInAnyOrder("List.xmi", "List2.xmi");
+		var migratedModelResource = collected.iterator().next();
+		var migratedModelEPackage = migratedModelResource.getContents().get(0).eClass().getEPackage();
+		// check that the Resource of the migrated model's EPackage is the one as the latest version
+		// of the Ecore.
+		assertThat(migratedModelEPackage.eResource())
+			.isSameAs(latestEcoreResource);
+		// This ensure that the model Resources returned by the migrator are
+		// effectively the migrated saved resources.
 	}
 
 	@Test
