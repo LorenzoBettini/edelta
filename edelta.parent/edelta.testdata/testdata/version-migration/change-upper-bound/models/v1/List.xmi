@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<person:List
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:person="http://cs.gssi.it/PersonMM"
+    xsi:schemaLocation="http://cs.gssi.it/PersonMM ../../metamodels/v1/PersonList.ecore">
+  <members firstname="firstPerson">
+    <workAddress
+        street="XXX road"
+        houseNumber="1"
+        workplace="//@wplaces.0"/>
+    <workAddress
+        street="YYY road (main address)"/>
+  </members>
+  <members firstname="secondPerson">
+    <workAddress
+        street="ZZZ street"
+        houseNumber="2"
+        workplace="//@wplaces.1"/>
+  </members>
+  <members firstname="thirdPerson">
+    <workAddress
+        street="a street"
+        houseNumber="3"
+        workplace="//@wplaces.0"/>
+    <workAddress
+        street="another street"
+        houseNumber="3"
+        workplace="//@wplaces.0"/>
+    <workAddress
+        street="some street"
+        houseNumber="3"
+        workplace="//@wplaces.0"/>
+  </members>
+  <members firstname="fourPerson"/>
+  <wplaces wplaceName="WP1"/>
+  <wplaces wplaceName="WP2"/>
+</person:List>

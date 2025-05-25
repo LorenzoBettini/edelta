@@ -1,14 +1,21 @@
 package edelta.testutils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.emf.common.util.Diagnostic;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.util.Diagnostician;
 import org.junit.Assert;
 
 /**
@@ -145,5 +152,57 @@ public class EdeltaTestUtils {
 	 */
 	public static void copyDirectory(String source, String dest) throws IOException {
 		FileUtils.copyDirectory(new File(source), new File(dest));
+	}
+
+	/**
+	 * @see #assertResourcesAreValid(Collection)
+	 * 
+	 * @param resources
+	 */
+	public static void assertResourcesAreValid(Resource... resources) {
+		assertResourcesAreValid(List.of(resources));
+	}
+
+	/**
+	 * Asserts that the given resources are valid, i.e., that they do not contain
+	 * any validation errors. This is done by validating each EObject in the
+	 * resources and checking the severity of the resulting {@link Diagnostic}
+	 * object. If any EObject is not valid, the test fails with a message containing
+	 * the validation errors.
+	 * 
+	 * @see Diagnostician#validate(EObject)
+	 * @see Diagnostic#getSeverity()
+	 * 
+	 * @param resources
+	 */
+	public static void assertResourcesAreValid(Collection<Resource> resources) {
+		var diagnosticMessages = new StringBuilder();
+		for (var resource : resources) {
+			for (var eObject : resource.getContents()) {
+				var diagnostic = Diagnostician.INSTANCE.validate(eObject);
+				if (diagnostic.getSeverity() != Diagnostic.OK) {
+					prettyDiagnostic(diagnosticMessages, diagnostic, "");
+				}
+			}
+		}
+		if (!diagnosticMessages.isEmpty()) {
+			fail(diagnosticMessages.toString());
+		}
+	}
+
+	/**
+	 * Pretty prints the diagnostic messages of the given diagnostic and its
+	 * children, indenting them with the specified string.
+	 * 
+	 * @param diagnosticMessages
+	 * @param diagnostic
+	 * @param indent
+	 */
+	public static void prettyDiagnostic(StringBuilder diagnosticMessages, Diagnostic diagnostic, String indent) {
+		diagnosticMessages.append(indent);
+		diagnosticMessages.append(diagnostic.getMessage() + "\n");
+		for (var child : diagnostic.getChildren()) {
+			prettyDiagnostic(diagnosticMessages, child, indent + "  ");
+		}
 	}
 }
