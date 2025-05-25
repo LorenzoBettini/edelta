@@ -311,6 +311,16 @@ class EdeltaVersionMigratorTest {
 		EdeltaTestUtils.assertResourcesAreValid(migrated);
 	}
 
+	/**
+	 * Changing the upper bound of a reference in a metamodel can break the validity
+	 * of the models after migration.
+	 * 
+	 * This simulates such a situation.
+	 * 
+	 * Note that our Refactoring Library has a function "changeUpperBound", which
+	 * also takes care of migrating the models keeping their validity, e.g., by
+	 * removing additional values if the upper bound has been reduced.
+	 */
 	private EdeltaRuntimeProvider changeUpperBoundBreakingModel = runtime ->
 		new EdeltaDefaultRuntime(runtime) {
 			@Override
@@ -357,6 +367,60 @@ class EdeltaVersionMigratorTest {
 				"The feature 'workAddress'",
 				"with 3 values may have at most 2 values",
 				"with 4 values may have at most 2 values");
+	}
+
+	/**
+	 * This is based on our Refactoring Library has a function "changeUpperBound", which
+	 * also takes care of migrating the models keeping their validity, e.g., by
+	 * removing additional values if the upper bound has been reduced.
+	 */
+	private EdeltaRuntimeProvider changeUpperBoundWithoutBreakingModel = runtime ->
+		new EdeltaDefaultRuntime(runtime) {
+			@Override
+			protected void performSanityChecks() throws Exception {
+				ensureEPackageIsLoadedByNsURI("PersonList", "http://cs.gssi.it/PersonMM");
+			}
+			@Override
+			public void doExecute() throws Exception {
+				// simulate the renaming of the URI
+				getEPackage("PersonList").setNsURI("http://cs.gssi.it/PersonMM/v2");
+				// directly change the upper bound of PersonList.Person.workAddress
+				var reference = getEReference("PersonList", "Person", "workAddress");
+				reference.setUpperBound(2);
+				// migrate the model to keep it valid by discarding the additional values
+				this.modelMigration(it ->
+					it.copyRule(
+						it.isRelatedTo(reference),
+						it.multiplicityAwareCopy(reference)));
+			}
+			@Override
+			public List<String> getMigratedNsURIs() {
+				return List.of("http://cs.gssi.it/PersonMM");
+			}
+			@Override
+			public List<String> getMigratedEcorePaths() {
+				return List.of(CLASS_TESTDATA + "change-upper-bound/" + METAMODELS + "v1/" + PERSON_LIST_ECORE);
+			}
+		};
+
+	@Test
+	void migrationKeepingValidity() throws Exception {
+		var subdir = "change-upper-bound/";
+		var outputSubdir = "changed-upper-bound-keeping-model-valid/";
+		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v1",
+				OUTPUT + outputSubdir);
+
+		// initialize with migrations
+		versionMigrator.registerMigration(changeUpperBoundWithoutBreakingModel);
+		// load the latest version of the Ecore
+		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v2/" + PERSON_LIST_ECORE);
+		// load the models to check for migration
+		versionMigrator.loadModel(OUTPUT + outputSubdir + "List.xmi");
+		versionMigrator.loadModel(OUTPUT + outputSubdir + "List2.xmi");
+	
+		var migrated = versionMigrator.execute();
+		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
+		EdeltaTestUtils.assertResourcesAreValid(migrated);
 	}
 
 	private void executeAndAssertOutputs(String subdir, Collection<String> modelFiles) {
