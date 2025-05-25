@@ -3,6 +3,7 @@ package edelta.lib.tests;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -304,9 +305,58 @@ class EdeltaVersionMigratorTest {
 		// load the models to check for migration
 		versionMigrator.loadModelsFrom(OUTPUT + outputSubdir);
 
-		versionMigrator.execute();
+		var migrated = versionMigrator.execute();
 		executeAndAssertOutputs(outputSubdir, List.of("List.customextension", "List2.customextension",
 				"MyClass.anothercustomextension", "MyRoot.anothercustomextension"));
+		EdeltaTestUtils.assertResourcesAreValid(migrated);
+	}
+
+	private EdeltaRuntimeProvider changeUpperBoundBreakingModel = runtime ->
+		new EdeltaDefaultRuntime(runtime) {
+			@Override
+			protected void performSanityChecks() throws Exception {
+				ensureEPackageIsLoadedByNsURI("PersonList", "http://cs.gssi.it/PersonMM");
+			}
+			@Override
+			public void doExecute() throws Exception {
+				// simulate the renaming of the URI
+				getEPackage("PersonList").setNsURI("http://cs.gssi.it/PersonMM/v2");
+				// directly change the upper bound of PersonList.Person.workAddress
+				getEReference("PersonList", "Person", "workAddress")
+					.setUpperBound(2);
+			}
+			@Override
+			public List<String> getMigratedNsURIs() {
+				return List.of("http://cs.gssi.it/PersonMM");
+			}
+			@Override
+			public List<String> getMigratedEcorePaths() {
+				return List.of(CLASS_TESTDATA + "change-upper-bound/" + METAMODELS + "v1/" + PERSON_LIST_ECORE);
+			}
+		};
+
+	@Test
+	void migrationBreakingModelValidity() throws Exception {
+		var subdir = "change-upper-bound/";
+		var outputSubdir = "changed-upper-bound-breaking-model/";
+		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v1",
+				OUTPUT + outputSubdir);
+
+		// initialize with migrations
+		versionMigrator.registerMigration(changeUpperBoundBreakingModel);
+		// load the latest version of the Ecore
+		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v2/" + PERSON_LIST_ECORE);
+		// load the models to check for migration
+		versionMigrator.loadModel(OUTPUT + outputSubdir + "List.xmi");
+		versionMigrator.loadModel(OUTPUT + outputSubdir + "List2.xmi");
+
+		var migrated = versionMigrator.execute();
+		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi"));
+		assertThatThrownBy(() -> EdeltaTestUtils.assertResourcesAreValid(migrated))
+			.hasMessageContainingAll(
+				"The feature 'workAddress'",
+				"with 3 values may have at most 2 values",
+				"with 4 values may have at most 2 values");
 	}
 
 	private void executeAndAssertOutputs(String subdir, Collection<String> modelFiles) {
