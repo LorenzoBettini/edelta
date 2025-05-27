@@ -16,21 +16,21 @@ Since version 3.1.0, Edelta requires Java 17.
 
 ### Eclipse update site (new URL)
 
-Copy the following URL and paste it into your Eclipse "Install New Software" dialog ("Help" => "Install New Software..."), wait for the list of available features to show and select the latest version of "Edelta Feature". (The URL is NOT meant to be opened with a browser)
+Copy the following URL and paste it into your Eclipse "Install New Software" dialog ("Help" => "Install New Software..."), wait for the list of available features to show and select the latest version of "Edelta Feature" (You can install additional Edelta features listed, including the "Edelta IDE External Components" to install additional external features to have the same installed software as the one in the Edelta Eclipse distribution, see below). (The URL is NOT meant to be opened with a browser.)
 
 https://lorenzobettini.github.io/edelta-releases/
 
-IMPORTANT: Edelta requires Xtext, if this is not already installed, all dependencies will be automatically installed from this update site, which is self-contained.
+IMPORTANT: Edelta requires Xtext; if this is not already installed, all dependencies will be automatically installed from this update site, which is self-contained.
 
-WARNING: the previous update site hosted on bintray does not exist anymore, so please make sure you update your existing Eclipse distribution where you were already using Edelta.
+WARNING: The previous update site hosted on bintray does not exist anymore, so please make sure you update your existing Eclipse distribution where you were already using Edelta.
 
 ### Pre-configured Eclipse distributions with Edelta installed, for several architectures.
 
 Download a complete Eclipse distribution with Edelta installed; choose the one for your OS and architecture (since version 2.8.0, we also provide a version for the `aarch64` architecture, for Linux and macOS): https://sourceforge.net/projects/edelta/files/products
 
-**WARNING** If you downloaded one of Edelta Eclipse distributions earlier than version 0.3.x you won't be able to update it; please download a brand new Edelta Eclipse distribution with version at least 0.3.x (issue [#13](https://github.com/LorenzoBettini/edelta/issues/13)).
+**WARNING** If you downloaded one of the Edelta Eclipse distributions earlier than version 0.3.x you won't be able to update it; please download a brand new Edelta Eclipse distribution with version at least 0.3.x (issue [#13](https://github.com/LorenzoBettini/edelta/issues/13)).
 
-**For macOS users**: depending on the version of your macOS, when you try to run the `edelta.app` you may run into an error that says "the application is damaged and can't be opened". This problem can be overcome by running the following command from the terminal (from the directory where the `edelta.app` is located): `xattr -c edelta.app`.
+**For macOS users**: depending on the version of your macOS, when you try to run the `edelta.app`, you may run into an error that says "the application is damaged and can't be opened". This problem can be overcome by running the following command from the terminal (from the directory where the `edelta.app` is located): `xattr -c edelta.app`.
 
 ### Development Snapshots (new URL)
 
