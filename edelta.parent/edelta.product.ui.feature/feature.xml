@@ -17,6 +17,11 @@
       <import feature="org.eclipse.egit" version="6.1.0.202203080745-r" match="greaterOrEqual"/>
       <import feature="org.eclipse.emf.ecoretools.design" version="3.4.0.202201202026" match="greaterOrEqual"/>
       <import feature="org.eclipse.eclemma.feature" version="3.1.5.202109082215" match="greaterOrEqual"/>
+      <import feature="org.eclipse.swtbot.eclipse" version="4.2.1.202406141605" match="greaterOrEqual"/>
+      <import plugin="assertj-core"/>
+      <import plugin="assertj-core.source"/>
+      <import plugin="org.mockito.mockito-core"/>
+      <import plugin="org.mockito.mockito-core.source"/>
    </requires>
 
 </feature>
