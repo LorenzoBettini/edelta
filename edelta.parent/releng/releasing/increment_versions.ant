@@ -98,6 +98,16 @@
 			</fileset>
 		</replaceregexp>
 
+		<!-- p2.inf if major and major.minor are mentioned -->
+		<replaceregexp flags="g" byline="true">
+			<regexp pattern="/updates/(\d+)(\.x)/(\d+\.\d+)(\.x)" />
+			<substitution expression="/updates/${version.major}\2/${majorMinorVersion}\4" />
+			<fileset id="path.pom" dir="${WORKSPACE}">
+				<include name="**/*.p2.inf" />
+				<exclude name="**/target/**" />
+			</fileset>
+		</replaceregexp>
+
 		<!-- MANIFEST.MF -->
 		<replaceregexp>
 			<regexp pattern="Bundle-Version: .*" />
