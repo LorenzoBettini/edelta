@@ -12,9 +12,18 @@
    <feature id="edelta.dependency.analyzer.feature.source" version="0.0.0">
       <category name="main.source"/>
    </feature>
+   <feature id="edelta.product.ui.feature" version="0.0.0">
+      <category name="ide"/>
+   </feature>
    <category-def name="main" label="Edelta 3.8.x"/>
    <category-def name="main.source" label="Edelta 3.8.x (Sources)"/>
-   <repository-reference location="https://download.eclipse.org/modeling/tmf/xtext/updates/releases/${xtextVersion}/" enabled="true" />
-   <repository-reference location="https://download.eclipse.org/releases/${eclipse-version}/" enabled="true" />
-   <repository-reference location="https://download.eclipse.org/epsilon/updates/2.8/" enabled="true" />
+   <category-def name="ide" label="Edelta 3.8.x (IDE Distribution)">
+      <description>
+         Additional external features that are part of the Edelta Eclipse distribution.
+      </description>
+   </category-def>
+   <repository-reference location="https://download.eclipse.org/modeling/tmf/xtext/updates/releases/${xtextVersion}/" name="" enabled="true" />
+   <repository-reference location="https://download.eclipse.org/releases/${eclipse-version}/" name="" enabled="true" />
+   <repository-reference location="https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/${eclipse-version}/" name="" enabled="true" />
+   <repository-reference location="https://download.eclipse.org/epsilon/updates/2.8/" name="" enabled="true" />
 </site>
