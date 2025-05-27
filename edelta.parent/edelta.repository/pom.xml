@@ -12,7 +12,7 @@
   <properties>
     <!-- for verifying our p2 repository and its references -->
     <build.destination>${project.build.directory}/installed-plugins</build.destination>
-    <features>edelta.feature.feature.group,edelta.dependency.analyzer.feature.feature.group</features>
+    <features>edelta.feature.feature.group,edelta.dependency.analyzer.feature.feature.group,edelta.product.ui.feature.feature.group</features>
     <sites>file:/${project.build.directory}/repository</sites>
   </properties>
 
