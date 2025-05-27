@@ -5,6 +5,10 @@
       version="3.8.5.qualifier"
       provider-name="Lorenzo Bettini">
 
+   <description>
+      This feature refers to additional external dependency features and plugins that are installed in the Edelta Eclipse distribution.
+   </description>
+
    <requires>
       <import feature="org.eclipse.jdt" version="3.10.0.v20140925-0400" match="greaterOrEqual"/>
       <import feature="org.eclipse.platform" version="4.4.0.v20140925-0400" match="greaterOrEqual"/>
