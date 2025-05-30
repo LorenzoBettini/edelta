@@ -4612,6 +4612,36 @@ class EdeltaModelMigratorTest {
 		);
 	}
 
+	@Test
+	void testCopyGroupingCoutingRule() throws IOException {
+		var subdir = "copyGroupingCountingRule/";
+
+		var modelMigrator = setupMigrator(
+			subdir,
+			of("LibraryBookListBookDatabase.ecore"),
+			of("Library.xmi")
+		);
+
+		// refactoring of Ecore
+		var bookItemClass = getEClass(evolvingModelManager, "library", "BookItem");
+		var bookListBookItemsReference = getReference(evolvingModelManager, "library", "BookList", "bookItems");
+		var bookItemBookReference = getFeature(evolvingModelManager, "library", "BookItem", "book");
+		var bookCountAttribute = EdeltaUtils.newEAttribute("bookCount", EcorePackage.Literals.EINT);
+		bookItemClass.getEStructuralFeatures().add(bookCountAttribute);
+
+		modelMigrator.copyGroupingCountingRule(
+			bookListBookItemsReference,
+			bookItemBookReference,
+			bookCountAttribute);
+
+		copyModelsSaveAndAssertOutputs(
+			modelMigrator,
+			"copyGroupingCountingRule/",
+			of("LibraryBookListBookDatabase.ecore"),
+			of("Library.xmi")
+		);
+	}
+
 	private void copyModelsSaveAndAssertOutputs(
 			EdeltaModelMigrator modelMigrator,
 			String outputdir,

@@ -4,11 +4,13 @@ import static edelta.lib.EdeltaEcoreUtil.wrapAsCollection;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -346,6 +348,80 @@ public class EdeltaModelMigrator {
 		if (postCopy != null)
 			postCopy.run();
 		updateMigrationContext();
+	}
+
+	/**
+	 * Groups and counts items during model migration.
+	 * <p>
+	 * For example, consider a model where a {@code BookList} contains multiple
+	 * {@code BookItem} objects (via the {@code bookItems} feature), each referring
+	 * to a {@code Book} (via the {@code book} feature). In the original model,
+	 * several {@code BookItem} objects may refer to the same {@code Book}.
+	 * <p>
+	 * In the evolved metamodel, suppose {@code BookItem} has a new feature
+	 * {@code copies} to count how many times a {@code Book} is referenced.
+	 * <p>
+	 * This method migrates the model so that, for each distinct {@code Book}
+	 * referenced by {@code BookItem}, only one {@code BookItem} is created in the
+	 * new model, and its {@code copies} feature is set to the number of original
+	 * {@code BookItem} objects that referred to that {@code Book}.
+	 * <p>
+	 * Example:
+	 * <ul>
+	 *   <li>Original model:
+	 *     <ul>
+	 *       <li>{@code BookList.bookItems = [item1, item2, item3]}</li>
+	 *       <li>{@code item1.book = bookA}</li>
+	 *       <li>{@code item2.book = bookA}</li>
+	 *       <li>{@code item3.book = bookB}</li>
+	 *     </ul>
+	 *   </li>
+	 *   <li>Migrated model:
+	 *     <ul>
+	 *       <li>{@code BookList.bookItems = [itemA, itemB]}</li>
+	 *       <li>{@code itemA.book = bookA}, {@code itemA.copies = 2}</li>
+	 *       <li>{@code itemB.book = bookB}, {@code itemB.copies = 1}</li>
+	 *     </ul>
+	 *   </li>
+	 * </ul>
+	 *
+	 * @param containmentFeature The containment feature in the new Ecore (e.g., {@code bookItems} in {@code BookList})
+	 * @param groupByFeature The feature to group by in the new Ecore (e.g., {@code book} in {@code BookItem})
+	 * @param newCountingFeature The feature to set the count in the new Ecore (e.g., {@code copies} in {@code BookItem})
+	 */
+	public void copyGroupingCountingRule(EStructuralFeature containmentFeature, EStructuralFeature groupByFeature,
+			EStructuralFeature newCountingFeature) {
+		copyRule(
+			wasRelatedTo(containmentFeature),
+			(oldFeature, oldObject, newObject) -> {
+				var oldItems = EdeltaEcoreUtil.getValueAsList(oldObject, oldFeature);
+				var oldGropByFeature = getOriginal(groupByFeature);
+				var groupedOldItems = oldItems.stream()
+					.filter(oldItem -> oldItem.eIsSet(oldGropByFeature))
+					.collect(
+						// group by the old grouping feature
+						Collectors.groupingBy(
+							oldItem -> EdeltaEcoreUtil.getValueAsEObject(oldItem, oldGropByFeature),
+							LinkedHashMap::new, // use a LinkedHashMap to preserve the order
+							Collectors.toList()
+						)
+					);
+				var newItems = groupedOldItems.entrySet().stream()
+					.map(entry -> {
+						// create a single copy for the old items referring to the same object
+						// (take the first one since they are all the same)
+						var oldItem = entry.getValue().get(0);
+						var newItem = createFrom(
+							getMigrated(oldItem.eClass()),
+							oldItem
+						);
+						// set the new counting value to the number of items in the old model
+						newItem.eSet(newCountingFeature, entry.getValue().size());
+						return newItem;
+					}).toList();
+				newObject.eSet(containmentFeature, newItems);
+			}
+		);
 	}
 
 	/**
