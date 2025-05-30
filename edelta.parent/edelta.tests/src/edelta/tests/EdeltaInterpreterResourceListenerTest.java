@@ -22,6 +22,7 @@ import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.XbaseFactory;
 import org.eclipse.xtext.xbase.XbasePackage;
+import org.eclipse.xtext.xbase.validation.IssueCodes;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -125,23 +126,25 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	public void testClearEcoreReferenceExpressionDiagnosticWhenEPackageChanges() {
+	public void testClearTypeMismatchDiagnosticWhenEPackageChanges() {
 		// fill the resource with EObjectDiagnosticImpl
-		var ecoreRefExpDiagnosticError = createEObjectDiagnosticMock(
+		var typeMismatchDiagnosticError = createEObjectDiagnosticMock(
 				edeltaFactory.createEdeltaEcoreReferenceExpression());
-		var nonEcoreRefExpDiagnosticError = createEObjectDiagnosticMock(
+		when(typeMismatchDiagnosticError.getCode())
+			.thenReturn(IssueCodes.INCOMPATIBLE_TYPES);
+		var nonTypeMismatchDiagnosticError = createEObjectDiagnosticMock(
 				ecoreFactory.createEClass());
 		var nonEObjectDiagnostic = mock(Resource.Diagnostic.class);
 		resource.getErrors().add(nonEObjectDiagnostic);
-		resource.getErrors().add(ecoreRefExpDiagnosticError);
-		resource.getErrors().add(nonEcoreRefExpDiagnosticError);
+		resource.getErrors().add(typeMismatchDiagnosticError);
+		resource.getErrors().add(nonTypeMismatchDiagnosticError);
 		// change the package contents
 		ePackage.getEClassifiers().get(0).setName("Modified");
 		// make sure only EObjectDiagnosticImpl with EdeltaEcoreReferenceExpression are removed
 		assertThat(resource.getErrors())
 			.containsExactlyInAnyOrder(
 				nonEObjectDiagnostic,
-				nonEcoreRefExpDiagnosticError);
+				nonTypeMismatchDiagnosticError);
 	}
 
 	@Test
