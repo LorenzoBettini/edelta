@@ -5,9 +5,11 @@ import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.extensions.InjectionExtension;
+import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -91,6 +93,25 @@ public class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 				modifyEcore aTest epackage foo {
 					ecoreref(foo.FooClass).name = "RenamedClass"
 					ecoreref(foo.RenamedClass)
+				}
+			"""
+		);
+		var ecoreRefExp = getEdeltaEcoreReferenceExpression(
+				getBlockLastExpression(lastModifyEcoreOperation(prog).getBody()));
+		assertEquals(EClass.class.getCanonicalName(),
+			typeResolver.resolveTypes(ecoreRefExp)
+				.getActualType(ecoreRefExp).getIdentifier());
+	}
+
+	@Test
+	public void testTypeForNewEClassInModifyEcore() throws Exception {
+		var prog = parseWithTestEcore(
+			"""
+				metamodel "foo"
+				
+				modifyEcore aTest epackage foo {
+					addNewEClass("newClass")
+					ecoreref(newClass)
 				}
 			"""
 		);

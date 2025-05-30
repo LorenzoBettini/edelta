@@ -18,8 +18,8 @@ import org.eclipse.xtext.linking.impl.XtextLinkingDiagnostic;
 import org.eclipse.xtext.util.IResourceScopeCache;
 import org.eclipse.xtext.validation.EObjectDiagnosticImpl;
 import org.eclipse.xtext.xbase.XExpression;
+import org.eclipse.xtext.xbase.validation.IssueCodes;
 
-import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.lib.EdeltaUtils;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
@@ -147,8 +147,12 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 			// is not resolved, RootResolvedTypes will put an error of type mismatch
 			// the interpreter might change the metamodel and later the ecoreref
 			// might become valid, so we must remove previous errors when the metamodel
-			// changes
-			return diagnosticImpl.getProblematicObject() instanceof EdeltaEcoreReferenceExpression;
+			// changes.
+			// Note that this is not only the case for a diagnostic on an ecoreref itself,
+			// but also for other expressions that might have a type mismatch
+			// due to an ecoreref.
+			// See https://github.com/LorenzoBettini/edelta/issues/560
+			return IssueCodes.INCOMPATIBLE_TYPES.equals(diagnosticImpl.getCode());
 		}
 		return false;
 	}

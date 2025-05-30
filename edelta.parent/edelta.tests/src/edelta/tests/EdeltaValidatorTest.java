@@ -333,15 +333,15 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
 
 		modifyEcore aTest epackage foo {
 			ecoreref(foo.FooClass).name = "RenamedClass"
-			val EClass c = ecoreref(RenamedClass) // OK after interpretation
 			val EPackage p = ecoreref(RenamedClass) // ERROR also after interpretation
+			val EClass c = ecoreref(RenamedClass) // OK after interpretation
 		}
 		""";
 		var prog = parseWithTestEcore(input);
 		validationTestHelper.assertError(prog,
 				EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION,
 				IssueCodes.INCOMPATIBLE_TYPES,
-				input.lastIndexOf("ecoreref(RenamedClass)"),
+				input.indexOf("ecoreref(RenamedClass)"),
 				"ecoreref(RenamedClass)".length(),
 				"Type mismatch: cannot convert from EClass to EPackage");
 		assertErrorsAsStrings(prog,
@@ -554,4 +554,26 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
 				text.indexOf(nsURI), nsURI.length(),
 				"Duplicate metamodel with name 'foo' in 'migrate' and 'metamodel'");
 	}
+
+	/**
+	 * See https://github.com/LorenzoBettini/edelta/issues/560
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testCanUseVariableReferringToNewAddedElementWithProperType() throws Exception {
+		var rs = resourceSetWithTestEcore();
+		var text = """
+		metamodel "foo"
+		
+		modifyEcore aTest epackage foo {
+			addNewEClass("newClass")
+			val c = ecoreref(newClass)
+			val org.eclipse.emf.ecore.EClass c1 = c
+		}
+		""";
+		var program = parseHelper.parse(text, rs);
+		validationTestHelper.assertNoErrors(program);
+	}
+
 }
