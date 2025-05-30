@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<library:Library
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:library="http://example.org/library"
+    xsi:schemaLocation="http://example.org/library LibraryBookListBookDatabase.ecore">
+  <bookList>
+    <bookItems
+        book="//@bookDatabase/@books.0"
+        bookCount="2"/>
+    <bookItems
+        book="//@bookDatabase/@books.1"
+        bookCount="1"/>
+  </bookList>
+  <bookDatabase>
+    <books title="Title 1"/>
+    <books title="Title 2"/>
+  </bookDatabase>
+</library:Library>
