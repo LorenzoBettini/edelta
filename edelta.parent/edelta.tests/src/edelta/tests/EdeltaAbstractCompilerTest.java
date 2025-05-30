@@ -1,8 +1,6 @@
 package edelta.tests;
 
 import static org.eclipse.xtext.xbase.lib.Conversions.unwrapArray;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.filter;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.isEmpty;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
@@ -10,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.resource.FileExtensionProvider;
 import org.eclipse.xtext.testing.TemporaryFolder;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
@@ -22,7 +19,6 @@ import org.eclipse.xtext.xbase.testing.CompilationTestHelper;
 import org.junit.Assert;
 import org.junit.Rule;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 
@@ -66,12 +62,7 @@ public abstract class EdeltaAbstractCompilerTest extends EdeltaAbstractTest {
 	}
 
 	protected void assertNoValidationErrors(CompilationTestHelper.Result res) {
-		var allErrors = filter(res.getErrorsAndWarnings(), it -> it.getSeverity() == Severity.ERROR);
-		if (!isEmpty(allErrors)) {
-			throw new IllegalStateException(
-				"One or more resources contained errors : " +
-					Joiner.on(",").join(allErrors));
-		}
+		res.assertNoErrors();
 	}
 
 	protected void assertGeneratedJavaCode(CompilationTestHelper.Result r, CharSequence expected) {
