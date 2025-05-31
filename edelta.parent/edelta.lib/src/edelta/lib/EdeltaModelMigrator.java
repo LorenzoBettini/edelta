@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -411,13 +412,12 @@ public class EdeltaModelMigrator {
 						// create a single copy for the old items referring to the same object
 						// (take the first one since they are all the same)
 						var oldItem = entry.getValue().get(0);
-						var newItem = createFrom(
+						return createFrom(
 							getMigrated(oldItem.eClass()),
-							oldItem
+							oldItem,
+							// set the new counting value to the number of items in the old model
+							newObj -> newObj.eSet(newCountingFeature, entry.getValue().size())
 						);
-						// set the new counting value to the number of items in the old model
-						newItem.eSet(newCountingFeature, entry.getValue().size());
-						return newItem;
 					}).toList();
 				newObject.eSet(containmentFeature, newItems);
 			}
@@ -725,6 +725,21 @@ public class EdeltaModelMigrator {
 				oldFeature
 			);
 		}
+	}
+
+	/**
+	 * Calls {@link #createFrom(EClass, EObject)} and then initializes the
+	 * created instance by calling the passed initializer on it.
+	 * 
+	 * @param newEClass
+	 * @param oldObj
+	 * @param initializer
+	 * @return
+	 */
+	public EObject createFrom(EClass newEClass, EObject oldObj, Consumer<EObject> initializer) {
+		var instance = createFrom(newEClass, oldObj);
+		initializer.accept(instance);
+		return instance;
 	}
 
 	/**
