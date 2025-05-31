@@ -249,32 +249,32 @@ public abstract class EdeltaRuntime {
 
 	public EClass getEClass(String packageName, String className) {
 		var c = getEClassifier(packageName, className);
-		if (c instanceof EClass) {
-			return (EClass) c;
+		if (c instanceof EClass eClass) {
+			return eClass;
 		}
 		return null;
 	}
 
 	public EClass getEClass(EPackage ePackage, String className) {
 		var c = ePackage.getEClassifier(className);
-		if (c instanceof EClass) {
-			return (EClass) c;
+		if (c instanceof EClass eClass) {
+			return eClass;
 		}
 		return null;
 	}
 
 	public EDataType getEDataType(String packageName, String datatypeName) {
 		var c = getEClassifier(packageName, datatypeName);
-		if (c instanceof EDataType) {
-			return (EDataType) c;
+		if (c instanceof EDataType eDataType) {
+			return eDataType;
 		}
 		return null;
 	}
 
 	public EEnum getEEnum(String packageName, String enumName) {
 		var c = getEClassifier(packageName, enumName);
-		if (c instanceof EEnum) {
-			return (EEnum) c;
+		if (c instanceof EEnum eEnum) {
+			return eEnum;
 		}
 		return null;
 	}
@@ -289,16 +289,16 @@ public abstract class EdeltaRuntime {
 
 	public EAttribute getEAttribute(String packageName, String className, String attributeName) {
 		var f = getEStructuralFeature(packageName, className, attributeName);
-		if (f instanceof EAttribute) {
-			return (EAttribute) f;
+		if (f instanceof EAttribute eAttribute) {
+			return eAttribute;
 		}
 		return null;
 	}
 
 	public EReference getEReference(String packageName, String className, String referenceName) {
 		var f = getEStructuralFeature(packageName, className, referenceName);
-		if (f instanceof EReference) {
-			return (EReference) f;
+		if (f instanceof EReference eReference) {
+			return eReference;
 		}
 		return null;
 	}
