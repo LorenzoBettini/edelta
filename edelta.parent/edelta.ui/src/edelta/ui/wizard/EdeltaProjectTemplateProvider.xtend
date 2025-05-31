@@ -32,6 +32,7 @@ class EdeltaProjectTemplateProvider implements IProjectTemplateProvider {
 final class EdeltaEmptyProjectTemplate {
 	override generateProjects(IProjectGenerator generator) {
 		generator.generate(new PluginProjectFactory => [
+			withPluginXml = false
 			projectName = projectInfo.projectName
 			location = projectInfo.locationPath
 			projectNatures += #[JavaCore.NATURE_ID, "org.eclipse.pde.PluginNature", XtextProjectHelper.NATURE_ID]
@@ -79,6 +80,7 @@ final class EdeltaExampleProjectTemplate {
 
 	override generateProjects(IProjectGenerator generator) {
 		generator.generate(new PluginProjectFactory => [
+			withPluginXml = false
 			projectName = projectInfo.projectName
 			location = projectInfo.locationPath
 			projectNatures += #[JavaCore.NATURE_ID, "org.eclipse.pde.PluginNature", XtextProjectHelper.NATURE_ID]
