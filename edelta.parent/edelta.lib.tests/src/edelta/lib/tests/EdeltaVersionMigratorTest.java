@@ -270,7 +270,7 @@ class EdeltaVersionMigratorTest {
 		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
 		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v2/" + MY_ECORE);
 		// load the models to check for migration
-		versionMigrator.loadModelsFrom(
+		versionMigrator.loadModelsFromPaths(
 				OUTPUT + outputSubdir + "path1",
 				OUTPUT + outputSubdir + "path2");
 
