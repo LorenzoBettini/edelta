@@ -182,6 +182,14 @@ public class EdeltaVersionMigrator {
 		}
 	}
 
+	/**
+	 * Loads the model file at the given path, assuming it is a valid model file
+	 * (i.e., differently from {@link #loadCurrentEPackage(EPackage)}, it does not
+	 * check the file extension).
+	 * 
+	 * @param path the path to the model file, e.g., "path/to/model.xmi"
+	 * @return the loaded {@link Resource} containing the model
+	 */
 	public Resource loadModel(String path) {
 		return modelManager.loadModelFile(path);
 	}
