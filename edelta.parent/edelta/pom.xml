@@ -10,6 +10,8 @@
 	<artifactId>edelta</artifactId>
 	<packaging>eclipse-plugin</packaging>
 
+	<name>Edelta DSL</name>
+
 	<properties>
 		<!-- required to run MWE2 -->
 		<mwe2-file>src/edelta/GenerateEdelta.mwe2</mwe2-file>

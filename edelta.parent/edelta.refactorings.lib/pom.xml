@@ -10,6 +10,8 @@
 	<artifactId>edelta.refactorings.lib</artifactId>
 	<packaging>eclipse-plugin</packaging>
 
+	<name>Edelta Refactorings Library</name>
+
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

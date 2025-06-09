@@ -9,4 +9,5 @@
 	<artifactId>edelta.target</artifactId>
 	<packaging>eclipse-target-definition</packaging>
 
+	<name>Edelta Target Platform</name>
 </project>

@@ -10,6 +10,8 @@
 	<artifactId>edelta.testutils</artifactId>
 	<packaging>eclipse-plugin</packaging>
 
+	<name>Edelta Test Utilities</name>
+
 	<properties>
 		<!-- Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=397015 -->
 		<sonar.sources></sonar.sources>
