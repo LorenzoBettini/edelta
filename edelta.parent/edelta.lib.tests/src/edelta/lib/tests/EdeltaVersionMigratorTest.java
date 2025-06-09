@@ -255,6 +255,29 @@ class EdeltaVersionMigratorTest {
 		executeAndAssertOutputs(outputSubdir, List.of("List.xmi", "List2.xmi", "MyClass.xmi", "MyRoot.xmi"));
 	}
 
+	@Test
+	void loadModelsFromSeveralPaths() throws Exception {
+		var subdir = "rename/";
+		var outputSubdir = "rename-unrelated-separate-paths/";
+		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v1-separate-paths",
+				OUTPUT + outputSubdir);
+
+		// initialize with migrations
+		versionMigrator.registerMigration(renamePersonFirstAndLastNameProvider);
+		versionMigrator.registerMigration(renameMyPackageProvider);
+		versionMigrator.registerMigration(renamePersonListProvider);
+		// load the latest version of the Ecore
+		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
+		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v2/" + MY_ECORE);
+		// load the models to check for migration
+		versionMigrator.loadModelsFrom(
+				OUTPUT + outputSubdir + "path1",
+				OUTPUT + outputSubdir + "path2");
+
+		versionMigrator.execute();
+		executeAndAssertOutputs(outputSubdir, List.of("path1/List.xmi", "path2/List2.xmi", "path1/MyClass.xmi", "path2/MyRoot.xmi"));
+	}
+
 	/**
 	 * One of the latest version of an Ecore is specified directly with an EPackage loaded instance.
 	 *
