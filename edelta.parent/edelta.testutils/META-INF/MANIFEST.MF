@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Edelta Test Utilities
 Bundle-SymbolicName: edelta.testutils
-Bundle-Version: 3.8.7.qualifier
+Bundle-Version: 3.8.8.qualifier
 Bundle-Vendor: Lorenzo Bettini
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: edelta.testutils
