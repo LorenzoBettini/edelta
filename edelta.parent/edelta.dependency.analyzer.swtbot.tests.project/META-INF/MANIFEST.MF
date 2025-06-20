@@ -7,4 +7,4 @@ Bundle-Version: 3.9.0.qualifier
 Bundle-SymbolicName: edelta.dependency.analyzer.swtbot.tests.project;singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: edelta.lib
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21

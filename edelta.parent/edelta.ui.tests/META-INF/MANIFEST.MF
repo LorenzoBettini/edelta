@@ -20,7 +20,7 @@ Require-Bundle: edelta,
  assertj-core;bundle-version="3.24.2",
  edelta.ui.testutils,
  org.eclipse.ui.workbench;resolution:=optional
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Export-Package: edelta.ui.tests;x-internal=true
 Import-Package: org.hamcrest.core,
  org.junit;version="4.5.0",

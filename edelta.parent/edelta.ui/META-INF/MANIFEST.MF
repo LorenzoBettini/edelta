@@ -27,7 +27,7 @@ Require-Bundle: edelta,
  org.eclipse.ui.forms,
  org.eclipse.jdt.launching
 Import-Package: org.apache.log4j
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Export-Package: edelta.ui.contentassist,
  edelta.ui.editor,
  edelta.ui.internal,

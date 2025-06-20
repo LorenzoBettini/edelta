@@ -8,4 +8,4 @@ Bundle-SymbolicName: edelta.testprojects.second; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: edelta.lib,
  edelta.testprojects.first;bundle-version="1.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
