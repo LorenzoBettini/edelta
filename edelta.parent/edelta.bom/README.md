@@ -4,7 +4,7 @@ When you want to use SNAPSHOTs of `xtext-build-utils` (e.g., `xtext-tycho-parent
   <repositories>
     <repository>
       <id>sonatype-snapshots</id>
-      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
       <releases><enabled>false</enabled></releases>
       <snapshots><enabled>true</enabled></snapshots>
     </repository>
@@ -12,7 +12,7 @@ When you want to use SNAPSHOTs of `xtext-build-utils` (e.g., `xtext-tycho-parent
   <pluginRepositories>
     <pluginRepository>
       <id>sonatype-snapshots</id>
-      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
       <releases><enabled>false</enabled></releases>
       <snapshots><enabled>true</enabled></snapshots>
     </pluginRepository>
