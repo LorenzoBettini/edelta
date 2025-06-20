@@ -7,5 +7,5 @@ Bundle-Version: 3.9.0.qualifier
 Bundle-SymbolicName: edelta.testprojects.first; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: edelta.lib
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Export-Package: com.example1

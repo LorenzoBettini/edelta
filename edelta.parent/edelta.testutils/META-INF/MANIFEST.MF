@@ -4,7 +4,7 @@ Bundle-Name: Edelta Test Utilities
 Bundle-SymbolicName: edelta.testutils
 Bundle-Version: 3.9.0.qualifier
 Bundle-Vendor: Lorenzo Bettini
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Export-Package: edelta.testutils
 Require-Bundle: org.junit;bundle-version="4.12.0",
  org.apache.commons.commons-io;bundle-version="2.16.1";visibility:=reexport,
