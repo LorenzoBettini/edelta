@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Edelta Dependency Analyzer
 Bundle-SymbolicName: edelta.dependency.analyzer
-Bundle-Version: 3.8.9.qualifier
+Bundle-Version: 3.9.0.qualifier
 Bundle-Vendor: Lorenzo Bettini
 Automatic-Module-Name: edelta.dependency.analyzer
 Bundle-RequiredExecutionEnvironment: JavaSE-17

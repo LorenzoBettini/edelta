@@ -15,9 +15,9 @@
    <feature id="edelta.product.ui.feature" version="0.0.0">
       <category name="ide"/>
    </feature>
-   <category-def name="main" label="Edelta 3.8.x"/>
-   <category-def name="main.source" label="Edelta 3.8.x (Sources)"/>
-   <category-def name="ide" label="Edelta 3.8.x (IDE Distribution)">
+   <category-def name="main" label="Edelta 3.9.x"/>
+   <category-def name="main.source" label="Edelta 3.9.x (Sources)"/>
+   <category-def name="ide" label="Edelta 3.9.x (IDE Distribution)">
       <description>
          Additional external features that are part of the Edelta Eclipse distribution.
       </description>

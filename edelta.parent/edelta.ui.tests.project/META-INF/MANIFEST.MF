@@ -3,7 +3,7 @@ Automatic-Module-Name: edelta.ui.tests.project
 Bundle-ManifestVersion: 2
 Bundle-Name: edelta.ui.tests.project
 Bundle-Vendor: Lorenzo Bettini
-Bundle-Version: 3.8.9.qualifier
+Bundle-Version: 3.9.0.qualifier
 Bundle-SymbolicName: edelta.ui.tests.project; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: edelta.lib
