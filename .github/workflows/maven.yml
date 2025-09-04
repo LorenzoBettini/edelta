@@ -51,6 +51,7 @@ jobs:
         -Pjacoco,test-ide
         -Dsonar.organization=lorenzobettini-github
         -Dsonar.host.url=https://sonarcloud.io
+        -Dsonar.projectKey=io.github.lorenzobettini.edelta:edelta.parent
         $SONARGOAL
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
