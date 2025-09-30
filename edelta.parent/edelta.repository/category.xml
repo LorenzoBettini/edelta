@@ -22,8 +22,8 @@
          Additional external features that are part of the Edelta Eclipse distribution.
       </description>
    </category-def>
-   <repository-reference location="https://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.38.0/" name="" enabled="true" />
-   <repository-reference location="https://download.eclipse.org/releases/2025-03/" name="" enabled="true" />
-   <repository-reference location="https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/2025-03/" name="" enabled="true" />
+   <repository-reference location="https://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.39.0/" name="" enabled="true" />
+   <repository-reference location="https://download.eclipse.org/releases/2025-06/" name="" enabled="true" />
+   <repository-reference location="https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/2025-06/" name="" enabled="true" />
    <repository-reference location="https://download.eclipse.org/epsilon/updates/2.8/" name="" enabled="true" />
 </site>
