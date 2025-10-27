@@ -54,19 +54,19 @@ jobs:
       run: ./mvnw -f edelta.parent/pom.xml clean verify '-Ptest-ide' -DskipTests
       if: steps.m2cache.outputs.cache-hit != 'true' # note the use of the id 'm2cache'
     - name: Archive Test Results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: ${{ failure() || cancelled() }}
       with:
         name: test-results-${{ runner.os }}
         path: '**/*.tests/target/surefire-reports'
     - name: Archive UI Tests Screenshots
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: ${{ failure() || cancelled() }}
       with:
         name: screenshots-${{ runner.os }}
         path: '**/*.tests/screenshots'
     - name: Archive Logs
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: ${{ failure() || cancelled() }}
       with:
         name: logs-${{ runner.os }}
