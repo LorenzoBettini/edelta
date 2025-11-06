@@ -6,8 +6,8 @@
       provider-name="Lorenzo Bettini">
 
    <requires>
-      <import feature="org.eclipse.xtext.xbase" version="2.39.0" match="equivalent"/>
-      <import feature="org.eclipse.xtext.ui" version="2.39.0" match="equivalent"/>
+      <import feature="org.eclipse.xtext.xbase" version="2.40.0" match="equivalent"/>
+      <import feature="org.eclipse.xtext.ui" version="2.40.0" match="equivalent"/>
       <import plugin="org.eclipse.pde.ui"/>
       <import feature="org.eclipse.emf.ecore" version="2.36.0.v20231002-1156" match="greaterOrEqual"/>
       <import feature="org.eclipse.emf.ecore.source" version="2.36.0.v20231002-1156" match="greaterOrEqual"/>
