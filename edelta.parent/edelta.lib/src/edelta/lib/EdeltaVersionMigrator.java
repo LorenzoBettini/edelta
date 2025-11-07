@@ -164,6 +164,20 @@ public class EdeltaVersionMigrator {
 	}
 
 	/**
+	 * Load all models in the given paths (possibly recursively in subdirectories),
+	 * using the configured file extensions, by default ".xmi" files (see
+	 * {@link #addModelFileExtension(String)}).
+	 * 
+	 * @param paths one or more paths to scan for model files
+	 * @throws IOException
+	 */
+	public void loadModelsFromPaths(String... paths) throws IOException {
+		for (var path : paths) {
+			loadModelsFrom(path);
+		}
+	}
+
+	/**
 	 * Load all models in the given path (possibly recursively in subdirectories),
 	 * using the configured file extensions, by default ".xmi" files (see
 	 * {@link #addModelFileExtension(String)}).
@@ -180,20 +194,6 @@ public class EdeltaVersionMigrator {
 					return modelExtensions.stream().anyMatch(fileToString::endsWith);
 				})
 				.forEach(file -> loadModel(file.toString()));
-		}
-	}
-
-	/**
-	 * Load all models in the given paths (possibly recursively in subdirectories),
-	 * using the configured file extensions, by default ".xmi" files (see
-	 * {@link #addModelFileExtension(String)}).
-	 * 
-	 * @param paths one or more paths to scan for model files
-	 * @throws IOException
-	 */
-	public void loadModelsFromPaths(String... paths) throws IOException {
-		for (var path : paths) {
-			loadModelsFrom(path);
 		}
 	}
 
