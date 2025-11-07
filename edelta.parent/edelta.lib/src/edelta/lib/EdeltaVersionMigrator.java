@@ -230,6 +230,16 @@ public class EdeltaVersionMigrator {
 		}
 	}
 
+	public boolean isMigrationNeeded() {
+		for (var resource : modelManager.getModelResources()) {
+			var ePackage = getEPackageFromModel(resource);
+			if (versionMigrationsForStaleEPackage(ePackage).findAny().isPresent()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Executes all the needed model migrations, saving the model files in-place.
 	 * @return the migrated model resources
