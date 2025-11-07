@@ -231,13 +231,10 @@ public class EdeltaVersionMigrator {
 	}
 
 	public boolean isMigrationNeeded() {
-		for (var resource : modelManager.getModelResources()) {
-			var ePackage = getEPackageFromModel(resource);
-			if (versionMigrationsForStaleEPackage(ePackage).findAny().isPresent()) {
-				return true;
-			}
-		}
-		return false;
+		return modelManager.getModelResources().stream()
+			.anyMatch(resource ->
+				versionMigrationsForStaleEPackage(getEPackageFromModel(resource))
+					.findFirst().isPresent());
 	}
 
 	/**
