@@ -230,6 +230,11 @@ public class EdeltaVersionMigrator {
 		}
 	}
 
+	/**
+	 * Checks whether any model needs to be migrated.
+	 * 
+	 * @return true if at least one model needs to be migrated
+	 */
 	public boolean isMigrationNeeded() {
 		return modelManager.getModelResources().stream()
 			.anyMatch(resource ->
