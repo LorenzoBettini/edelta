@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.ecore.EPackage;
@@ -163,6 +164,20 @@ public class EdeltaVersionMigrator {
 	}
 
 	/**
+	 * Load all models in the given paths (possibly recursively in subdirectories),
+	 * using the configured file extensions, by default ".xmi" files (see
+	 * {@link #addModelFileExtension(String)}).
+	 * 
+	 * @param paths one or more paths to scan for model files
+	 * @throws IOException
+	 */
+	public void loadModelsFromPaths(String... paths) throws IOException {
+		for (var path : paths) {
+			loadModelsFrom(path);
+		}
+	}
+
+	/**
 	 * Load all models in the given path (possibly recursively in subdirectories),
 	 * using the configured file extensions, by default ".xmi" files (see
 	 * {@link #addModelFileExtension(String)}).
@@ -179,20 +194,6 @@ public class EdeltaVersionMigrator {
 					return modelExtensions.stream().anyMatch(fileToString::endsWith);
 				})
 				.forEach(file -> loadModel(file.toString()));
-		}
-	}
-
-	/**
-	 * Load all models in the given paths (possibly recursively in subdirectories),
-	 * using the configured file extensions, by default ".xmi" files (see
-	 * {@link #addModelFileExtension(String)}).
-	 * 
-	 * @param paths one or more paths to scan for model files
-	 * @throws IOException
-	 */
-	public void loadModelsFromPaths(String... paths) throws IOException {
-		for (var path : paths) {
-			loadModelsFrom(path);
 		}
 	}
 
@@ -230,6 +231,18 @@ public class EdeltaVersionMigrator {
 	}
 
 	/**
+	 * Checks whether any model needs to be migrated.
+	 * 
+	 * @return true if at least one model needs to be migrated
+	 */
+	public boolean isMigrationNeeded() {
+		return modelManager.getModelResources().stream()
+			.anyMatch(resource ->
+				versionMigrationsForStaleEPackage(getEPackageFromModel(resource))
+					.findFirst().isPresent());
+	}
+
+	/**
 	 * Executes all the needed model migrations, saving the model files in-place.
 	 * @return the migrated model resources
 	 * 
@@ -252,10 +265,8 @@ public class EdeltaVersionMigrator {
 		do {
 			migrationDatas.clear();
 			for (var resource : modelManager.getModelResources()) {
-				var contents = resource.getContents();
-				var ePackage = contents.get(0).eClass().getEPackage();
-				versionMigrations.stream()
-					.filter(versionMigration -> versionMigration.uris.contains(ePackage.getNsURI()))
+				var ePackage = getEPackageFromModel(resource);
+				versionMigrationsForStaleEPackage(ePackage)
 					.forEach(versionMigration -> {
 						var data = migrationDatas
 							.computeIfAbsent(versionMigration,
@@ -317,6 +328,28 @@ public class EdeltaVersionMigrator {
 						(r1, r2) -> r2, // merge function: keep latest in case of duplicates
 						LinkedHashMap::new // preserve order if needed
 				)).values();
+	}
+
+	/**
+	 * Returns a stream of {@link VersionMigrationEntry} if the given
+	 * {@link EPackage} is stale, i.e., its nsURI is mapped to
+	 * a {@link VersionMigrationEntry}.
+	 *
+	 * @param ePackage
+	 * @return
+	 */
+	 private Stream<VersionMigrationEntry> versionMigrationsForStaleEPackage(EPackage ePackage) {
+		return versionMigrations.stream()
+			.filter(versionMigration -> versionMigration.uris.contains(ePackage.getNsURI()));
+	}
+
+	/**
+	 * Returns the {@link EPackage} from the given model {@link Resource}.
+	 * @param resource
+	 * @return
+	 */
+	 private EPackage getEPackageFromModel(Resource resource) {
+		return resource.getContents().get(0).eClass().getEPackage();
 	}
 
 	private String resourceToURIString(Resource resource) {

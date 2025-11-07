@@ -446,6 +446,45 @@ class EdeltaVersionMigratorTest {
 		EdeltaTestUtils.assertResourcesAreValid(migrated);
 	}
 
+	@Test
+	void isMigrationNeededReturnsTrueWhenMigrationIsRequired() throws Exception {
+		var subdir = "rename/";
+		var outputSubdir = "rename-v1-to-v2-migration-needed/";
+		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v1",
+				OUTPUT + outputSubdir);
+
+		// initialize with migrations
+		versionMigrator.registerMigration(renamePersonFirstAndLastNameProvider);
+		// load the latest version of the Ecore
+		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v2/" + PERSON_LIST_ECORE);
+		// load the models to check for migration
+		versionMigrator.loadModel(OUTPUT + outputSubdir + "List.xmi");
+		versionMigrator.loadModel(OUTPUT + outputSubdir + "List2.xmi");
+
+		// models are v1, but we loaded v2 Ecore, so migration is needed
+		assertThat(versionMigrator.isMigrationNeeded()).isTrue();
+	}
+
+	@Test
+	void isMigrationNeededReturnsFalseWhenNoMigrationIsRequired() throws Exception {
+		var subdir = "rename/";
+		var outputSubdir = "rename-already-latest-version-no-migration-needed/";
+		EdeltaTestUtils.copyDirectory(TESTDATA + subdir + MODELS + "/v3",
+				OUTPUT + outputSubdir);
+
+		// initialize with migrations
+		versionMigrator.registerMigration(renamePersonFirstAndLastNameProvider);
+		versionMigrator.registerMigration(renamePersonListProvider);
+		// load the latest version of the Ecore
+		versionMigrator.loadEcore(TESTDATA + subdir + METAMODELS + "v3/" + PERSON_LIST_ECORE);
+		// load the models to check for migration
+		versionMigrator.loadModel(OUTPUT + outputSubdir + "List.xmi");
+		versionMigrator.loadModel(OUTPUT + outputSubdir + "List2.xmi");
+
+		// models are already v3, same as the loaded Ecore, so no migration is needed
+		assertThat(versionMigrator.isMigrationNeeded()).isFalse();
+	}
+
 	private void executeAndAssertOutputs(String subdir, Collection<String> modelFiles) {
 		var output = OUTPUT + subdir;
 		modelFiles.forEach
