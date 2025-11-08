@@ -41,6 +41,7 @@ jobs:
     - name: Publish to Apache Maven Central
       run: >
         ./mvnw -f edelta.parent/pom.xml
+        -Declipse.p2.mirrors=false
         -P!development
         -Psonatype-oss-release
         clean deploy

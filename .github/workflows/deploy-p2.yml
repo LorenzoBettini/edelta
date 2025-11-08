@@ -36,6 +36,7 @@ jobs:
     - name: Deploy p2
       run: >
         ./mvnw -f edelta.parent/pom.xml
+        -Declipse.p2.mirrors=false
         clean deploy
         -Prelease-composite,release-ide
         -Dgithub-update-repo=https://x-access-token:${{ secrets.ACTIONS_TOKEN }}@github.com/LorenzoBettini/edelta-releases
