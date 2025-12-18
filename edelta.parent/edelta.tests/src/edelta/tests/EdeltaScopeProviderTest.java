@@ -63,7 +63,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	public void testScopeForEnamedElementInProgram() throws Exception {
 		assertScope(
 			parseWithTestEcore(inputs.referenceToMetamodelWithCopiedEPackage()),
-			enamedElementReference(),
+			getEcoreReferenceENamedElement(),
 			"""
 			foo
 			FooClass
@@ -75,8 +75,8 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			""");
 	}
 
-	private EReference enamedElementReference() {
-		return EdeltaPackage.eINSTANCE.getEdeltaEcoreReference_Enamedelement();
+	private EReference getEcoreReferenceENamedElement() {
+		return EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE__ENAMEDELEMENT;
 	}
 
 	@Test
@@ -90,7 +90,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			}
 			"""))
 			.getReference(),
-			enamedElementReference(),
+			getEcoreReferenceENamedElement(),
 			"""
 			mainpackage
 			MainFooClass
@@ -123,7 +123,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			}
 			"""))
 				.getReference(),
-			enamedElementReference(),
+			getEcoreReferenceENamedElement(),
 			"""
 			MainSubPackageFooClass
 			MyClass
@@ -143,7 +143,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			}
 			"""))
 				.getReference(),
-			enamedElementReference(),
+			getEcoreReferenceENamedElement(),
 			"""
 			mySubPackageAttribute
 			mySubPackageReference
@@ -160,7 +160,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 				ecoreref(mainsubpackage.subsubpackage.
 			}
 			""")).getReference(),
-			enamedElementReference(),
+			getEcoreReferenceENamedElement(),
 			"MyClass");
 	}
 
@@ -168,7 +168,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	public void testScopeForEnamedElementInEcoreReferenceExpression() throws Exception {
 		assertScope(
 			ecoreReferenceExpression("ecoreref(").getReference(),
-			enamedElementReference(),
+			getEcoreReferenceENamedElement(),
 			"""
 			foo
 			FooClass
@@ -184,7 +184,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	public void testScopeForEnamedElementInEcoreReferenceExpressionQualifiedPackage() throws Exception {
 		assertScope(
 			ecoreReferenceExpression("ecoreref(foo.").getReference(),
-			enamedElementReference(),
+			getEcoreReferenceENamedElement(),
 			"""
 			FooClass
 			FooDataType
@@ -196,7 +196,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	public void testScopeForEnamedElementInEcoreReferenceExpressionQualifiedEClass() throws Exception {
 		assertScope(
 			ecoreReferenceExpression("ecoreref(foo.FooClass.").getReference(),
-			enamedElementReference(),
+			getEcoreReferenceENamedElement(),
 			"myAttribute\nmyReference");
 	}
 
@@ -290,7 +290,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			lastEcoreReferenceExpression(
 			parseWithTestEcore(inputs.referenceToCreatedEAttributeSimple()))
 				.getReference(),
-			enamedElementReference(),
+			getEcoreReferenceENamedElement(),
 			"""
 			foo
 			FooClass
@@ -312,7 +312,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			lastEcoreReferenceExpression(
 			parseWithTestEcore(inputs.referenceToCreatedEAttributeRenamed()))
 				.getReference(),
-			enamedElementReference(),
+			getEcoreReferenceENamedElement(),
 			"""
 			foo
 			FooClass
@@ -353,7 +353,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 				}
 				""")))
 					.getReference(),
-				enamedElementReference(),
+				getEcoreReferenceENamedElement(),
 				"""
 				RenamedClass
 				FooDataType
@@ -375,7 +375,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 				ecoreref(foo.RenamedClass.)
 			}
 			"""))).getReference(),
-			enamedElementReference(),
+			getEcoreReferenceENamedElement(),
 			"""
 			myAttribute
 			myReference
@@ -398,7 +398,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 					ecoreref(RenamedClass.)
 				}
 				"""))).getReference(),
-				enamedElementReference(),
+				getEcoreReferenceENamedElement(),
 				"""
 				myAttribute
 				myReference
@@ -466,7 +466,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		assertScope(
 			parseWithTestEcoreWithSubPackage(
 				inputs.referenceToMetamodelWithSubPackageWithCopiedEPackages()),
-			enamedElementReference(),
+			getEcoreReferenceENamedElement(),
 			"""
 			mainpackage
 			MainFooClass
@@ -497,7 +497,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			// that's required to have copied EPackages
 			modifyEcore aTest foo {}
 			"""),
-			enamedElementReference(),
+			getEcoreReferenceENamedElement(),
 			"""
 			foo
 			FooClass
@@ -518,7 +518,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			// that's required to have copied EPackages
 			modifyEcore aTest foo {}
 			"""),
-			enamedElementReference(),
+			getEcoreReferenceENamedElement(),
 			"""
 			foo
 			RenamedFooClass
@@ -539,7 +539,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			// that's required to have copied EPackages
 			modifyEcore aTest foo {}
 			"""),
-			enamedElementReference(),
+			getEcoreReferenceENamedElement(),
 			"");
 	}
 
