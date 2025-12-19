@@ -351,12 +351,12 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			}
 			""");
 		assertScope(
-			// given the reference expression of the last ecoreref expression
+			// given the argument of the last ecoreref expression
 			// i.e., foo.RenamedClass in ecoreref(foo.RenamedClass)
 			getLastEcoreReferenceExpression(prog).getArgument(),
-			// if we compute the scope of the its argument
+			// if we compute the scope of the its reference
 			getEcoreReferenceArgumentReference(),
-			// these should be the available elements
+			// these should be the available candidates
 			"""
 			RenamedClass
 			FooDataType
