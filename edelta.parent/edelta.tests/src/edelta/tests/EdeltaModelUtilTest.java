@@ -156,7 +156,7 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
 		var prog = parseWithTestEcore(input);
 		var mainBlock = getLastModifyEcoreOperationBlock(prog);
 		var ecoreRefs = getAllEcoreReferenceExpressions(prog).stream()
-			.map(EdeltaEcoreReferenceExpression::getReference)
+			.map(EdeltaEcoreReferenceExpression::getArgument)
 			.toList();
 		var ecoreRef = ecoreRefs.get(0);
 		assertThat(EdeltaModelUtil.getContainingBlockXExpression(ecoreRef))

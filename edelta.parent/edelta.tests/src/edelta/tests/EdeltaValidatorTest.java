@@ -362,7 +362,7 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
 		""";
 		var prog = parseWithTestEcore(input);
 		validationTestHelper.assertError(prog,
-				EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE,
+				EdeltaPackage.Literals.EDELTA_ECORE_SIMPLE_ARGUMENT,
 				EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
 				input.indexOf("ANewClass"),
 				"ANewClass".length(),
@@ -395,13 +395,13 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
 			The method ESuperTypes(EClass) is undefined for the type EClass
 			""");
 		validationTestHelper.assertError(prog,
-				EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE,
+				EdeltaPackage.Literals.EDELTA_ECORE_SIMPLE_ARGUMENT,
 				EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
 				input.indexOf("ANewClass"),
 				"ANewClass".length(),
 				"Element not yet available in this context: foo.ANewClass");
 		validationTestHelper.assertError(prog,
-				EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE,
+				EdeltaPackage.Literals.EDELTA_ECORE_SIMPLE_ARGUMENT,
 				EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
 				input.indexOf("ANewSuperClass"),
 				"ANewSuperClass".length(),
@@ -429,13 +429,13 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
 			Element not yet available in this context: foo.ANewSuperClass
 			""");
 		validationTestHelper.assertError(prog,
-				EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE,
+				EdeltaPackage.Literals.EDELTA_ECORE_SIMPLE_ARGUMENT,
 				EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
 				input.indexOf("ANewClass"),
 				"ANewClass".length(),
 				"Element not yet available in this context: foo.ANewClass");
 		validationTestHelper.assertError(prog,
-				EdeltaPackage.Literals.EDELTA_ECORE_DIRECT_REFERENCE,
+				EdeltaPackage.Literals.EDELTA_ECORE_SIMPLE_ARGUMENT,
 				EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
 				input.indexOf("ANewSuperClass"),
 				"ANewSuperClass".length(),

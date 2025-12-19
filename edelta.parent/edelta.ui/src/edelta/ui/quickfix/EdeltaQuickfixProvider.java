@@ -14,7 +14,7 @@ import org.eclipse.xtext.xbase.annotations.ui.quickfix.XbaseWithAnnotationsQuick
 
 import com.google.inject.Inject;
 
-import edelta.edelta.EdeltaEcoreReference;
+import edelta.edelta.EdeltaEcoreArgument;
 import edelta.edelta.EdeltaProgram;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.util.EdeltaModelUtil;
@@ -124,7 +124,7 @@ public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider
 			"Move to the right position",
 			E_OBJECT_GIF,
 			(var element, var context) -> {
-				var forwardEcoreRef = (EdeltaEcoreReference) element;
+				var forwardEcoreRef = (EdeltaEcoreArgument) element;
 				// the expression to move
 				var expToMove = getContainingBlockXExpression(forwardEcoreRef);
 				// the block containing the expression to move
@@ -132,7 +132,7 @@ public class EdeltaQuickfixProvider extends XbaseWithAnnotationsQuickfixProvider
 				// the expression that creates the element referred by the forward reference
 				var responsibleExpression =
 					derivedStateHelper
-					.getLastResponsibleExpression(element, forwardEcoreRef.getEnamedelement());
+					.getLastResponsibleExpression(element, forwardEcoreRef.getElement());
 				var responsibleExpressionBlockExp = getContainingBlockXExpression(responsibleExpression);
 				// the block where we want to move our expression containing the forward reference
 				var destBlock = (XBlockExpression) responsibleExpression.eContainer();

@@ -28,10 +28,10 @@ public class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 
 	public void computeTypesOfEdeltaEcoreReferenceExpression(final EdeltaEcoreReferenceExpression e,
 			final ITypeComputationState state) {
-		var reference = e.getReference();
+		var reference = e.getArgument();
 		ENamedElement enamedelement = null;
 		if (reference != null) {
-			enamedelement = reference.getEnamedelement();
+			enamedelement = reference.getElement();
 		}
 		if (enamedelement == null || enamedelement.eIsProxy()) {
 			// if it's unresolved, but there's a type expectation, then

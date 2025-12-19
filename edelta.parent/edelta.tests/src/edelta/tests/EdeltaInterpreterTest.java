@@ -31,7 +31,7 @@ import org.junit.runner.RunWith;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-import edelta.edelta.EdeltaEcoreReference;
+import edelta.edelta.EdeltaEcoreArgument;
 import edelta.edelta.EdeltaPackage;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreter;
@@ -1148,7 +1148,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		var it =
 				getLastOfAllEcoreReferenceExpressions(prog);
 		// ecoreref(NewClass) -> addNewEClass
-		assertEcoreRefExpElementMapsToXExpression(it.getReference(),
+		assertEcoreRefExpElementMapsToXExpression(it.getArgument(),
 				"addNewEClass");
 	}
 
@@ -1171,7 +1171,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		var it =
 				getLastOfAllEcoreReferenceExpressions(prog);
 		// ecoreref(NewClass) -> addNewEClass
-		assertEcoreRefExpElementMapsToXExpression(it.getReference(),
+		assertEcoreRefExpElementMapsToXExpression(it.getArgument(),
 				"addNewEClass");
 	}
 
@@ -1198,7 +1198,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		var it =
 				getLastOfAllEcoreReferenceExpressions(prog);
 		// ecoreref(NewClass) -> create
-		assertEcoreRefExpElementMapsToXExpression(it.getReference(),
+		assertEcoreRefExpElementMapsToXExpression(it.getArgument(),
 				"create");
 	}
 
@@ -1220,10 +1220,10 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		var ecoreRefs = getAllEcoreReferenceExpressions(prog);
 		// ecoreref(NewClass) -> addNewEClass
 		assertEcoreRefExpElementMapsToXExpression(
-			ecoreRefs.get(0).getReference(), "addNewEClass");
+			ecoreRefs.get(0).getArgument(), "addNewEClass");
 		// ecoreref(Renamed) -> name = "Renamed"
 		assertEcoreRefExpElementMapsToXExpression(
-			lastOrNull(ecoreRefs).getReference(), "setName");
+			lastOrNull(ecoreRefs).getArgument(), "setName");
 	}
 
 	@Test
@@ -1246,13 +1246,13 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		interpretProgram(prog);
 		var it = getAllEcoreReferenceExpressions(prog);
 		assertEcoreRefExpElementMapsToXExpression(
-				it.get(0).getReference(), "addNewEClass");
+				it.get(0).getArgument(), "addNewEClass");
 		assertEcoreRefExpElementMapsToXExpression(
-				it.get(1).getReference(), "addNewEClass");
+				it.get(1).getArgument(), "addNewEClass");
 		assertEcoreRefExpElementMapsToXExpression(
-				it.get(2).getReference(), "addEClass");
+				it.get(2).getArgument(), "addEClass");
 		assertEcoreRefExpElementMapsToXExpression(
-				it.get(3).getReference(), "addNewESubpackage");
+				it.get(3).getArgument(), "addNewESubpackage");
 	}
 
 	@Test
@@ -1271,7 +1271,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			derivedStateHelper
 				.getResponsibleExpression(
 					getFirstOfAllEcoreReferenceExpressions(it)
-						.getReference()));
+						.getArgument()));
 	}
 
 	@Test
@@ -1294,10 +1294,10 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		var ecoreRefs = getAllEcoreReferenceExpressions(prog);
 		// ecoreref(NewClass) -> addNewEClass
 		assertEcoreRefExpElementMapsToXExpression(
-			ecoreRefs.get(0).getReference(), "addNewEClass");
+			ecoreRefs.get(0).getArgument(), "addNewEClass");
 		// ecoreref(Renamed) -> name = "Renamed"
 		assertEcoreRefExpElementMapsToXExpression(
-				lastOrNull(ecoreRefs).getReference(), "setName");
+				lastOrNull(ecoreRefs).getArgument(), "setName");
 	}
 
 	@Test
@@ -1319,10 +1319,10 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		var ecoreRefs = getAllEcoreReferenceExpressions(prog);
 		// ecoreref(NewClass) -> addNewEClass
 		assertEcoreRefExpElementMapsToXExpression(
-			ecoreRefs.get(0).getReference(), "addNewEClass");
+			ecoreRefs.get(0).getArgument(), "addNewEClass");
 		// ecoreref(Renamed) -> name = "Renamed"
 		assertEcoreRefExpElementMapsToXExpression(
-			lastOrNull(ecoreRefs).getReference(), "setName");
+			lastOrNull(ecoreRefs).getArgument(), "setName");
 	}
 
 	@Test
@@ -1807,18 +1807,18 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		""";
 		var it = parseWithTestEcore(input);
 		interpretProgram(it);
-		var ecoreref1 = getAllEcoreReferenceExpressions(it).get(0).getReference();
-		var ecoreref2 = getAllEcoreReferenceExpressions(it).get(1).getReference();
+		var ecoreref1 = getAllEcoreReferenceExpressions(it).get(0).getArgument();
+		var ecoreref2 = getAllEcoreReferenceExpressions(it).get(1).getArgument();
 		var unresolved = derivedStateHelper
 				.getUnresolvedEcoreReferences(it.eResource());
 		assertThat(unresolved).containsOnly(ecoreref1, ecoreref2);
 		// also check what's resolved in the end
-		assertThat(ecoreref1.getEnamedelement().eIsProxy()).isFalse();
-		assertThat(ecoreref2.getEnamedelement().eIsProxy()).isTrue();
+		assertThat(ecoreref1.getElement().eIsProxy()).isFalse();
+		assertThat(ecoreref2.getElement().eIsProxy()).isTrue();
 		var map = derivedStateHelper.getEnamedElementXExpressionMap(it.eResource());
 		// we can access the expression that created the element
 		// that is not available in the current context
-		assertThat(map.get(ecoreref1.getEnamedelement())).isNotNull()
+		assertThat(map.get(ecoreref1.getElement())).isNotNull()
 			.isSameAs(
 				getLastModifyEcoreOperationBlock(it).getExpressions().get(2));
 	}
@@ -1936,11 +1936,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		// mainpackage.mainsubpackage.MyClass
 		var mainSubPackageClass = getLastEClass(
 				head(map.values()).getESubpackages().get(0));
-		var lastEcoreRef = getLastOfAllEcoreReferenceExpressions(it).getReference();
-		assertNotNull(lastEcoreRef.getEnamedelement());
+		var lastEcoreRef = getLastOfAllEcoreReferenceExpressions(it).getArgument();
+		assertNotNull(lastEcoreRef.getElement());
 		// the non ambiguous ecoreref should be correctly linked
 		// to the only available element in that context
-		assertSame(mainSubPackageClass, lastEcoreRef.getEnamedelement());
+		assertSame(mainSubPackageClass, lastEcoreRef.getElement());
 	}
 
 	@Test
@@ -2206,7 +2206,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		return derivedStateHelper.getCopiedEPackagesMap(program.eResource());
 	}
 
-	private void assertEcoreRefExpElementMapsToXExpression(EdeltaEcoreReference reference,
+	private void assertEcoreRefExpElementMapsToXExpression(EdeltaEcoreArgument reference,
 			String expectedFeatureCallSimpleName) {
 		var exp = derivedStateHelper.getResponsibleExpression(reference);
 		assertNotNull(exp);

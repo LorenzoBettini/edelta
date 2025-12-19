@@ -42,22 +42,22 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 	public void testDirectEcoreReference() throws Exception {
 		var exp = getEcoreReferenceExpression("foo");
 		assertNotNull(
-			getEdeltaEcoreDirectReference(exp.getReference())
-				.getEnamedelement());
+			getEdeltaEcoreDirectReference(exp.getArgument())
+				.getElement());
 	}
 
 	@Test
 	public void testDirectEcoreReferenceIncomplete() throws Exception {
 		var exp = getEcoreReferenceExpression("");
 		assertNull(
-			getEdeltaEcoreDirectReference(exp.getReference())
-				.getEnamedelement());
+			getEdeltaEcoreDirectReference(exp.getArgument())
+				.getElement());
 	}
 
 	@Test
 	public void testQualifiedEcoreReference() throws Exception {
 		var ref = getEdeltaEcoreQualifiedReference(
-			getEcoreReferenceExpression("foo.bar").getReference());
+			getEcoreReferenceExpression("foo.bar").getArgument());
 		assertEquals("foo", getTextualRepresentation(ref.getQualification()));
 		assertEquals("bar", getTextualReferenceRepresentation(ref));
 		assertEquals("foo.bar", getTextualRepresentation(ref));
@@ -66,7 +66,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 	@Test
 	public void testQualifiedEcoreReference2() throws Exception {
 		var ref = getEdeltaEcoreQualifiedReference(
-			getEcoreReferenceExpression("foo.bar.baz").getReference());
+			getEcoreReferenceExpression("foo.bar.baz").getArgument());
 		assertEquals("foo.bar", getTextualRepresentation(ref.getQualification()));
 		assertEquals("baz", getTextualReferenceRepresentation(ref));
 		assertEquals("foo.bar.baz", getTextualRepresentation(ref));
@@ -75,9 +75,9 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 	@Test
 	public void testQualifiedEcoreReferenceIncomplete() throws Exception {
 		var ref = getEdeltaEcoreQualifiedReference(
-			getEcoreReferenceExpression("foo.").getReference());
+			getEcoreReferenceExpression("foo.").getArgument());
 		assertEquals("foo", getTextualRepresentation(ref.getQualification()));
-		assertNull(ref.getEnamedelement());
+		assertNull(ref.getElement());
 		assertEquals("foo.", getTextualRepresentation(ref));
 	}
 
@@ -129,7 +129,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 	private String getTextualReferenceRepresentation(EObject o) {
 		return NodeModelUtils.getTokenText(NodeModelUtils
 				.findNodesForFeature(o,
-					EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE__ENAMEDELEMENT)
+					EdeltaPackage.Literals.EDELTA_ECORE_ARGUMENT__ELEMENT)
 						.get(0));
 	}
 }

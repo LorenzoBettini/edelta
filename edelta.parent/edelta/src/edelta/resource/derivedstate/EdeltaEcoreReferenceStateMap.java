@@ -2,15 +2,15 @@ package edelta.resource.derivedstate;
 
 import java.util.HashMap;
 
-import edelta.edelta.EdeltaEcoreReference;
+import edelta.edelta.EdeltaEcoreArgument;
 
 /**
- * Associates {@link EdeltaEcoreReference} to {@link EdeltaEcoreReferenceState}.
+ * Associates {@link EdeltaEcoreArgument} to {@link EdeltaEcoreReferenceState}.
  * 
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaEcoreReferenceStateMap extends HashMap<EdeltaEcoreReference, EdeltaEcoreReferenceState> {
+public class EdeltaEcoreReferenceStateMap extends HashMap<EdeltaEcoreArgument, EdeltaEcoreReferenceState> {
 
 	private static final long serialVersionUID = 1L;
 

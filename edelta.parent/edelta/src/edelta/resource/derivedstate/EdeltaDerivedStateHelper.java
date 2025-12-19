@@ -19,7 +19,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-import edelta.edelta.EdeltaEcoreReference;
+import edelta.edelta.EdeltaEcoreArgument;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
 import edelta.util.EdeltaModelUtil;
@@ -102,7 +102,7 @@ public class EdeltaDerivedStateHelper {
 		resource.getContents().addAll(copiedEPackagesMap.values());
 	}
 
-	public EdeltaEcoreReferenceState getEcoreReferenceState(EdeltaEcoreReference edeltaEcoreReference) {
+	public EdeltaEcoreReferenceState getEcoreReferenceState(EdeltaEcoreArgument edeltaEcoreReference) {
 		return getOrInstallAdapter(edeltaEcoreReference.eResource())
 				.getEcoreReferenceStateMap()
 				.computeIfAbsent(edeltaEcoreReference,
@@ -123,20 +123,20 @@ public class EdeltaDerivedStateHelper {
 
 	/**
 	 * Returns the original {@link ENamedElement} referred by the given
-	 * {@link EdeltaEcoreReference}, that is, the one in the original imported
+	 * {@link EdeltaEcoreArgument}, that is, the one in the original imported
 	 * {@link EPackage}, if the element is not one created in this program.
 	 * 
 	 * @param ecoreReference
 	 * @return
 	 */
-	public ENamedElement getOriginalEnamedelement(EdeltaEcoreReference ecoreReference) {
+	public ENamedElement getOriginalEnamedelement(EdeltaEcoreArgument ecoreReference) {
 		return getEcoreReferenceState(ecoreReference)
 				.getOriginalEnamedelement();
 	}
 
 	/**
 	 * Returns the {@link XExpression} that created/changed the name of the
-	 * {@link ENamedElement} of the passed {@link EdeltaEcoreReference}, keeping
+	 * {@link ENamedElement} of the passed {@link EdeltaEcoreArgument}, keeping
 	 * into consideration the current location of the 'ecoreref' expression
 	 * ({@link EdeltaEcoreReferenceExpression}).
 	 * 
@@ -158,12 +158,12 @@ public class EdeltaDerivedStateHelper {
 	 * @param ecoreReference
 	 * @return
 	 */
-	public XExpression getResponsibleExpression(EdeltaEcoreReference ecoreReference) {
+	public XExpression getResponsibleExpression(EdeltaEcoreArgument ecoreReference) {
 		return getEcoreReferenceExpressionState(
 					getContainerOfType(ecoreReference,
 						EdeltaEcoreReferenceExpression.class))
 				.getEnamedElementXExpressionMap()
-				.get(ecoreReference.getEnamedelement());
+				.get(ecoreReference.getElement());
 	}
 
 	/**
