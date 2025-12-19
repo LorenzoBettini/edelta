@@ -11,6 +11,7 @@ import org.eclipse.xtext.testing.XtextRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import edelta.edelta.EdeltaEcoreQualifiedArgument;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaPackage;
 
@@ -56,8 +57,12 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testQualifiedEcoreReference() throws Exception {
-		var ref = getEdeltaEcoreQualifiedReference(
-			getEcoreReferenceExpression("foo.bar").getArgument());
+		var prog = parseHelper.parse("""
+			modifyEcore aTest epackage foo {
+				ecoreref(foo.bar)
+			}
+		""");
+		var ref = (EdeltaEcoreQualifiedArgument) getLastEcoreReferenceExpression(prog).getArgument();
 		assertEquals("foo", getTextualRepresentation(ref.getQualification()));
 		assertEquals("bar", getTextualReferenceRepresentation(ref));
 		assertEquals("foo.bar", getTextualRepresentation(ref));
