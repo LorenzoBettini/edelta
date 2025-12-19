@@ -52,7 +52,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 				}
 			"""
 		);
-		var ref = lastEcoreReferenceExpression(prog).getReference();
+		var ref = getLastEcoreReferenceExpression(prog).getReference();
 		recorder.recordOriginalENamedElement(ref);
 		var original = getEClassiferByName(lastOrNull(prog.getEPackages()),
 				"FooClass");
@@ -71,7 +71,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 			"""
 		);
 		var ref = getEdeltaEcoreQualifiedReference(
-			lastEcoreReferenceExpression(prog).getReference());
+			getLastEcoreReferenceExpression(prog).getReference());
 		recorder.recordOriginalENamedElement(ref);
 		var original = getEClassiferByName(lastOrNull(prog.getEPackages()),
 				"FooClass");
@@ -93,7 +93,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 				}
 			"""
 		);
-		var ref = lastEcoreReferenceExpression(prog).getReference();
+		var ref = getLastEcoreReferenceExpression(prog).getReference();
 		recorder.recordOriginalENamedElement(ref);
 		assertNull(derivedStateHelper.getOriginalEnamedelement(ref));
 	}
@@ -111,7 +111,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 			"""
 		);
 		var ref = getEdeltaEcoreQualifiedReference(
-				lastEcoreReferenceExpression(prog).getReference());
+				getLastEcoreReferenceExpression(prog).getReference());
 		recorder.recordOriginalENamedElement(ref);
 		assertNull(derivedStateHelper.getOriginalEnamedelement(ref));
 		// note that the package actually links to the original EPackage

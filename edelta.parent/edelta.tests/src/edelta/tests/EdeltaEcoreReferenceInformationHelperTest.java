@@ -246,6 +246,6 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
 	}
 
 	private EdeltaEcoreReferenceExpression lastEcoreRef(EdeltaProgram p) {
-		return lastEcoreReferenceExpression(p);
+		return getLastEcoreReferenceExpression(p);
 	}
 }

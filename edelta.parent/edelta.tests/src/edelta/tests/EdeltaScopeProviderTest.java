@@ -81,7 +81,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testScopeForEnamedElementInEcoreReferenceExpressionWithSubPackages() throws Exception {
-		assertScope(lastEcoreReferenceExpression(
+		assertScope(getLastEcoreReferenceExpression(
 			parseWithTestEcoreWithSubPackage("""
 			metamodel "mainpackage"
 
@@ -114,7 +114,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testScopeForSubPackageInEcoreReferenceExpressionWithSubPackages() throws Exception {
-		assertScope(lastEcoreReferenceExpression(parseWithTestEcoreWithSubPackage(
+		assertScope(getLastEcoreReferenceExpression(parseWithTestEcoreWithSubPackage(
 			"""
 			metamodel "mainpackage"
 
@@ -134,7 +134,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	@Test
 	public void testScopeForSubPackageEClassInEcoreReferenceExpressionWithSubPackages() throws Exception {
 		assertScope(
-			lastEcoreReferenceExpression(parseWithTestEcoreWithSubPackage(
+			getLastEcoreReferenceExpression(parseWithTestEcoreWithSubPackage(
 			"""
 			metamodel "mainpackage"
 
@@ -152,7 +152,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testScopeForSubSubPackageInEcoreReferenceExpressionWithSubPackages() throws Exception {
-		assertScope(lastEcoreReferenceExpression(parseWithTestEcoreWithSubPackage(
+		assertScope(getLastEcoreReferenceExpression(parseWithTestEcoreWithSubPackage(
 			"""
 			metamodel "mainpackage"
 
@@ -287,7 +287,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	@Test
 	public void testScopeForReferenceToCreatedEAttribute() throws Exception {
 		assertScope(
-			lastEcoreReferenceExpression(
+			getLastEcoreReferenceExpression(
 			parseWithTestEcore(inputs.referenceToCreatedEAttributeSimple()))
 				.getReference(),
 			getEcoreReferenceArgumentReference(),
@@ -309,7 +309,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	@Test
 	public void testScopeForReferenceToCreatedEAttributeChangingNameInBody() throws Exception {
 		assertScope(
-			lastEcoreReferenceExpression(
+			getLastEcoreReferenceExpression(
 			parseWithTestEcore(inputs.referenceToCreatedEAttributeRenamed()))
 				.getReference(),
 			getEcoreReferenceArgumentReference(),
@@ -342,22 +342,19 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testScopeForRenamedEClassInModifyEcore() throws Exception {
+		var prog = parseWithTestEcore("""
+			metamodel "foo"
+			metamodel "bar"
+			modifyEcore aTest epackage foo {
+				ecoreref(foo.FooClass).name = "RenamedClass"
+				ecoreref(foo.RenamedClass)
+			}
+			""");
 		assertScope(
-			// given the last ecoreref expression in the modifyEcore
-			// i.e., ecoreref(foo.RenamedClass)
-			getEdeltaEcoreReferenceExpression(
-				getLastModifyEcoreOperationLastExpression(
-					parseWithTestEcore("""
-						metamodel "foo"
-						metamodel "bar"
-						modifyEcore aTest epackage foo {
-							ecoreref(foo.FooClass).name = "RenamedClass"
-							ecoreref(foo.RenamedClass)
-						}
-						""")
-					)
-				).getReference(),
-			// if we compute the scope of its argument
+			// given the reference expression of the last ecoreref expression
+			// i.e., foo.RenamedClass in ecoreref(foo.RenamedClass)
+			getLastEcoreReferenceExpression(prog).getReference(),
+			// if we compute the scope of the its argument
 			getEcoreReferenceArgumentReference(),
 			// these should be the available elements
 			"""
@@ -425,9 +422,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			}
 			""");
 		validationTestHelper.assertNoErrors(prog);
-		var referred =
-			getEdeltaEcoreReferenceExpression(
-				getLastModifyEcoreOperationLastExpression(prog)).getReference();
+		var referred = getLastEcoreReferenceExpression(prog).getReference();
 		var copiedEPackage = head(getCopiedEPackages(prog));
 		assertSame(
 			// the one copied by the derived state computer
@@ -446,9 +441,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			}
 			""");
 		validationTestHelper.assertNoErrors(prog);
-		var referred =
-			(EdeltaEcoreQualifiedReference) getEdeltaEcoreReferenceExpression(
-					getLastModifyEcoreOperationLastExpression(prog)).getReference();
+		var referred = (EdeltaEcoreQualifiedReference) getLastEcoreReferenceExpression(prog).getReference();
 		var copiedEPackage = head(getCopiedEPackages(prog));
 		assertSame(
 			// the one copied by the derived state computer

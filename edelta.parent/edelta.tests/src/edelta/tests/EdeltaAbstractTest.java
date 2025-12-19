@@ -525,7 +525,7 @@ public abstract class EdeltaAbstractTest {
 	}
 
 	protected EdeltaEcoreReferenceExpression ecoreReferenceExpression(CharSequence ecoreRefString) throws Exception {
-		return lastEcoreReferenceExpression(
+		return getLastEcoreReferenceExpression(
 			parseInsideModifyEcoreWithTestMetamodelFoo(ecoreRefString));
 	}
 
@@ -544,7 +544,7 @@ public abstract class EdeltaAbstractTest {
 				}""", body);
 	}
 
-	protected EdeltaEcoreReferenceExpression lastEcoreReferenceExpression(EdeltaProgram p) {
+	protected EdeltaEcoreReferenceExpression getLastEcoreReferenceExpression(EdeltaProgram p) {
 		return (EdeltaEcoreReferenceExpression) getBlockLastExpression(lastModifyEcoreOperation(p).getBody());
 	}
 
