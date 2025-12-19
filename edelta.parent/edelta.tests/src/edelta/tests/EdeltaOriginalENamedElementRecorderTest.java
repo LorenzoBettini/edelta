@@ -70,7 +70,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 				}
 			"""
 		);
-		var ref = getEdeltaEcoreQualifiedReference(
+		var ref = getEdeltaEcoreQualifiedArgument(
 			getLastEcoreReferenceExpression(prog).getArgument());
 		recorder.recordOriginalENamedElement(ref);
 		var original = getEClassiferByName(lastOrNull(prog.getEPackages()),
@@ -110,7 +110,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 				}
 			"""
 		);
-		var ref = getEdeltaEcoreQualifiedReference(
+		var ref = getEdeltaEcoreQualifiedArgument(
 				getLastEcoreReferenceExpression(prog).getArgument());
 		recorder.recordOriginalENamedElement(ref);
 		assertNull(derivedStateHelper.getOriginalEnamedelement(ref));

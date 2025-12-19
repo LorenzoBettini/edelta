@@ -92,7 +92,7 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
 
 		assertThat(expressions)
 			.extracting(e -> EdeltaModelUtil
-				.getEcoreReferenceText(getEdeltaEcoreReference(e)))
+				.getEcoreReferenceText(getEdeltaEcoreArgument(e)))
 			.containsExactly("FooClass", "foo.FooClass", "NonExistingClass", "");
 	}
 

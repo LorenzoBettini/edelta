@@ -484,15 +484,15 @@ public abstract class EdeltaAbstractTest {
 		return (EdeltaEcoreReferenceExpression) e;
 	}
 
-	protected EdeltaEcoreArgument getEdeltaEcoreReference(XExpression e) {
+	protected EdeltaEcoreArgument getEdeltaEcoreArgument(XExpression e) {
 		return getEdeltaEcoreReferenceExpression(e).getArgument();
 	}
 
-	protected EdeltaEcoreSimpleArgument getEdeltaEcoreDirectReference(EObject e) {
+	protected EdeltaEcoreSimpleArgument getEdeltaEcoreSimpleArgument(EObject e) {
 		return (EdeltaEcoreSimpleArgument) e;
 	}
 
-	protected EdeltaEcoreQualifiedArgument getEdeltaEcoreQualifiedReference(EObject e) {
+	protected EdeltaEcoreQualifiedArgument getEdeltaEcoreQualifiedArgument(EObject e) {
 		return (EdeltaEcoreQualifiedArgument) e;
 	}
 

@@ -43,7 +43,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 	public void testDirectEcoreReference() throws Exception {
 		var exp = getEcoreReferenceExpression("foo");
 		assertNotNull(
-			getEdeltaEcoreDirectReference(exp.getArgument())
+			getEdeltaEcoreSimpleArgument(exp.getArgument())
 				.getElement());
 	}
 
@@ -51,7 +51,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 	public void testDirectEcoreReferenceIncomplete() throws Exception {
 		var exp = getEcoreReferenceExpression("");
 		assertNull(
-			getEdeltaEcoreDirectReference(exp.getArgument())
+			getEdeltaEcoreSimpleArgument(exp.getArgument())
 				.getElement());
 	}
 
@@ -70,7 +70,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testQualifiedEcoreReference2() throws Exception {
-		var ref = getEdeltaEcoreQualifiedReference(
+		var ref = getEdeltaEcoreQualifiedArgument(
 			getEcoreReferenceExpression("foo.bar.baz").getArgument());
 		assertEquals("foo.bar", getTextualRepresentation(ref.getQualification()));
 		assertEquals("baz", getTextualReferenceRepresentation(ref));
@@ -79,7 +79,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 
 	@Test
 	public void testQualifiedEcoreReferenceIncomplete() throws Exception {
-		var ref = getEdeltaEcoreQualifiedReference(
+		var ref = getEdeltaEcoreQualifiedArgument(
 			getEcoreReferenceExpression("foo.").getArgument());
 		assertEquals("foo", getTextualRepresentation(ref.getQualification()));
 		assertNull(ref.getElement());

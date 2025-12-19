@@ -412,7 +412,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	private EdeltaEcoreQualifiedArgument getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {
-		return getEdeltaEcoreQualifiedReference(
+		return getEdeltaEcoreQualifiedArgument(
 			lastOrNull(getAllContentsOfType(
 				lastModifyEcoreOperation(program).getBody(),
 				EdeltaEcoreReferenceExpression.class))
