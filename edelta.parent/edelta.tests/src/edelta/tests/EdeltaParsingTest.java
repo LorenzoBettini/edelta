@@ -79,6 +79,23 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 	public void testQualifiedEcoreReference1() throws Exception {
 		var prog = parseHelper.parse("""
 			modifyEcore aTest epackage foo {
+				ecoreref(foo.MyEClass.myEAttribute)
+			}
+		""");
+		var arg = getLastEcoreReferenceExpression(prog).getArgument();
+		assertThat(arg).asInstanceOf(type(EdeltaEcoreQualifiedArgument.class))
+			.extracting(EdeltaEcoreQualifiedArgument::getQualification)
+				.asInstanceOf(type(EdeltaEcoreQualifiedArgument.class))
+					.extracting(EdeltaEcoreQualifiedArgument::getQualification)
+						.isInstanceOf(EdeltaEcoreSimpleArgument.class)
+			.extracting(EdeltaEcoreArgument::getElement)
+				.isInstanceOf(ENamedElement.class);
+	}
+
+	@Test
+	public void testQualifiedEcoreReference2() throws Exception {
+		var prog = parseHelper.parse("""
+			modifyEcore aTest epackage foo {
 				ecoreref(foo.bar)
 			}
 		""");
@@ -89,7 +106,7 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	public void testQualifiedEcoreReference2() throws Exception {
+	public void testQualifiedEcoreReference3() throws Exception {
 		var arg = getEdeltaEcoreQualifiedArgument(
 			getEcoreReferenceExpression("foo.bar.baz").getArgument());
 		assertEquals("foo.bar", getTextualRepresentation(arg.getQualification()));
