@@ -84,8 +84,10 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 		""");
 		var arg = getLastEcoreReferenceExpression(prog).getArgument();
 		assertThat(arg).asInstanceOf(type(EdeltaEcoreQualifiedArgument.class))
-			.satisfies(a -> {
-				var qualification = a.getQualification();
+			.satisfies(qualifiedArg -> {
+				assertThat(NodeModelUtils.findActualNodeFor(qualifiedArg).getText())
+					.isEqualTo("foo.MyEClass.myEAttribute");
+				var qualification = qualifiedArg.getQualification();
 				assertThat(NodeModelUtils.findActualNodeFor(qualification).getText())
 					.isEqualTo("foo.MyEClass");
 				assertThat(qualification).asInstanceOf(type(EdeltaEcoreQualifiedArgument.class))
