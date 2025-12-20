@@ -1,9 +1,12 @@
 package edelta.tests;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.InstanceOfAssertFactories.type;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.testing.InjectWith;
@@ -11,8 +14,10 @@ import org.eclipse.xtext.testing.XtextRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import edelta.edelta.EdeltaEcoreArgument;
 import edelta.edelta.EdeltaEcoreQualifiedArgument;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
+import edelta.edelta.EdeltaEcoreSimpleArgument;
 import edelta.edelta.EdeltaPackage;
 
 @RunWith(XtextRunner.class)
@@ -62,19 +67,34 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 				ecoreref(foo.bar)
 			}
 		""");
-		var ref = (EdeltaEcoreQualifiedArgument) getLastEcoreReferenceExpression(prog).getArgument();
-		assertEquals("foo", getTextualRepresentation(ref.getQualification()));
-		assertEquals("bar", getTextualRepresentationForElement(ref));
-		assertEquals("foo.bar", getTextualRepresentation(ref));
+		var arg = getLastEcoreReferenceExpression(prog).getArgument();
+		assertThat(arg).asInstanceOf(type(EdeltaEcoreQualifiedArgument.class))
+			.extracting(EdeltaEcoreQualifiedArgument::getQualification)
+				.isInstanceOf(EdeltaEcoreSimpleArgument.class)
+			.extracting(EdeltaEcoreArgument::getElement)
+				.isInstanceOf(ENamedElement.class);
+	}
+
+	@Test
+	public void testQualifiedEcoreReference1() throws Exception {
+		var prog = parseHelper.parse("""
+			modifyEcore aTest epackage foo {
+				ecoreref(foo.bar)
+			}
+		""");
+		var arg = (EdeltaEcoreQualifiedArgument) getLastEcoreReferenceExpression(prog).getArgument();
+		assertEquals("foo", getTextualRepresentation(arg.getQualification()));
+		assertEquals("bar", getTextualRepresentationForElement(arg));
+		assertEquals("foo.bar", getTextualRepresentation(arg));
 	}
 
 	@Test
 	public void testQualifiedEcoreReference2() throws Exception {
-		var ref = getEdeltaEcoreQualifiedArgument(
+		var arg = getEdeltaEcoreQualifiedArgument(
 			getEcoreReferenceExpression("foo.bar.baz").getArgument());
-		assertEquals("foo.bar", getTextualRepresentation(ref.getQualification()));
-		assertEquals("baz", getTextualRepresentationForElement(ref));
-		assertEquals("foo.bar.baz", getTextualRepresentation(ref));
+		assertEquals("foo.bar", getTextualRepresentation(arg.getQualification()));
+		assertEquals("baz", getTextualRepresentationForElement(arg));
+		assertEquals("foo.bar.baz", getTextualRepresentation(arg));
 	}
 
 	@Test
