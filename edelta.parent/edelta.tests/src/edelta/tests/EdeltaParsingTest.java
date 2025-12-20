@@ -84,12 +84,18 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 		""");
 		var arg = getLastEcoreReferenceExpression(prog).getArgument();
 		assertThat(arg).asInstanceOf(type(EdeltaEcoreQualifiedArgument.class))
-			.extracting(EdeltaEcoreQualifiedArgument::getQualification)
-				.asInstanceOf(type(EdeltaEcoreQualifiedArgument.class))
-					.extracting(EdeltaEcoreQualifiedArgument::getQualification)
-						.isInstanceOf(EdeltaEcoreSimpleArgument.class)
-			.extracting(EdeltaEcoreArgument::getElement)
-				.isInstanceOf(ENamedElement.class);
+			.satisfies(a -> {
+				var qualification = a.getQualification();
+				assertThat(NodeModelUtils.findActualNodeFor(qualification).getText())
+					.isEqualTo("foo.MyEClass");
+				assertThat(qualification).asInstanceOf(type(EdeltaEcoreQualifiedArgument.class))
+					.satisfies(q -> {
+						var innerQualification = q.getQualification();
+						assertThat(NodeModelUtils.findActualNodeFor(innerQualification).getText())
+							.isEqualTo("foo");
+						assertThat(innerQualification).isInstanceOf(EdeltaEcoreSimpleArgument.class);
+					});
+			});
 	}
 
 	@Test
