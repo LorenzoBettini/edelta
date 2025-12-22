@@ -1423,17 +1423,17 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	@Test
 	public void testReferenceToEClassRemoved() throws Exception {
 		var input = inputs.referenceToEClassRemoved().toString();
-		var it = parseWithTestEcore(input);
+		var prog = parseWithTestEcore(input);
 		assertThatThrownBy(
-			() -> interpretProgram(it))
-		.isInstanceOf(EdeltaInterpreterWrapperException.class);
+			() -> interpretProgram(prog))
+			.isInstanceOf(EdeltaInterpreterWrapperException.class);
 		validationTestHelper.assertError(
-			it,
-			EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(),
+			prog,
+			EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION,
 			EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT,
 			input.lastIndexOf("FooClass"), "FooClass".length(),
 			"The element is not available anymore in this context: \'FooClass\'");
-		assertErrorsAsStrings(it,
+		assertErrorsAsStrings(prog,
 			"The element is not available anymore in this context: \'FooClass\'");
 	}
 
@@ -1458,7 +1458,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		.isInstanceOf(EdeltaInterpreterWrapperException.class);
 		validationTestHelper.assertError(
 			it,
-			EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(),
+			EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION,
 			EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT,
 			input.lastIndexOf("FooClass"), "FooClass".length(),
 			"The element is not available anymore in this context: \'FooClass\'");
@@ -1484,14 +1484,14 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		interpretProgram(it);
 		validationTestHelper.assertError(
 			it,
-			EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(),
+			EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION,
 			EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT,
 			input.lastIndexOf("NewClass1"),
 			"NewClass1".length(),
 			"The element is not available anymore in this context: \'NewClass1\'");
 		validationTestHelper.assertError(
 			it,
-			EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(),
+			EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION,
 			EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT,
 			input.lastIndexOf("NewClass2"),
 			"NewClass2".length(),
@@ -1521,7 +1521,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		var it = parseWithTestEcore(input);
 		interpretProgram(it);
 		validationTestHelper.assertError(it,
-			EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(),
+			EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION,
 			EdeltaValidator.INTERPRETER_ACCESS_REMOVED_ELEMENT,
 			input.lastIndexOf("NewClass"), "NewClass".length(),
 			"The element is not available anymore in this context: \'NewClass\'");
@@ -1535,7 +1535,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		var it = parseWithTestEcore(input);
 		interpretProgram(it);
 		validationTestHelper.assertError(it,
-			EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(),
+			EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION,
 			EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT,
 			input.lastIndexOf("FooClass"), "FooClass".length(),
 			"The element \'FooClass\' is now available as \'foo.Renamed\'");
@@ -1549,7 +1549,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		var it = parseWithTestEcore(input);
 		interpretProgram(it);
 		validationTestHelper.assertError(it,
-			EdeltaPackage.eINSTANCE.getEdeltaEcoreReferenceExpression(),
+			EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION,
 			EdeltaValidator.INTERPRETER_ACCESS_RENAMED_ELEMENT,
 			input.lastIndexOf("NewClass"), "NewClass".length(),
 			"The element \'NewClass\' is now available as \'foo.changed\'");
