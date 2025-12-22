@@ -279,13 +279,13 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
 		""";
 		var prog = parseWithTestEcores(input);
 		validationTestHelper.assertError(prog,
-				EdeltaPackage.eINSTANCE.getEdeltaProgram(),
+				prog.eClass(),
 				EdeltaValidator.DUPLICATE_METAMODEL_IMPORT,
 				input.lastIndexOf("\"nonexistent\""),
 				"\"nonexistent\"".length(),
 				"Duplicate metamodel import \"nonexistent\"");
 		validationTestHelper.assertError(prog,
-				EdeltaPackage.eINSTANCE.getEdeltaProgram(),
+				prog.eClass(),
 				EdeltaValidator.DUPLICATE_METAMODEL_IMPORT,
 				input.lastIndexOf("\"foo\""), "\"foo\"".length(),
 				"Duplicate metamodel import \"foo\"");
