@@ -1772,21 +1772,21 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreref(subpackage.foo) // NOT valid
 		}
 		""";
-		var it = parseWithTestEcore(input);
-		interpretProgram(it);
-		validationTestHelper.assertError(it,
-			XbasePackage.eINSTANCE.getXBinaryOperation(),
+		var prog = parseWithTestEcore(input);
+		interpretProgram(prog);
+		validationTestHelper.assertError(prog,
+			XbasePackage.Literals.XBINARY_OPERATION,
 			EdeltaValidator.ECLASS_CYCLE,
 			input.lastIndexOf("ecoreref(C1).ESuperTypes += ecoreref(C3)"),
 			"ecoreref(C1).ESuperTypes += ecoreref(C3)".length(),
 			"Cycle in inheritance hierarchy: foo.C3");
-		validationTestHelper.assertError(it,
-			XbasePackage.eINSTANCE.getXBinaryOperation(),
+		validationTestHelper.assertError(prog,
+			XbasePackage.Literals.XBINARY_OPERATION,
 			EdeltaValidator.EPACKAGE_CYCLE,
 			input.lastIndexOf("ecoreref(subpackage).ESubpackages += it"),
 			"ecoreref(subpackage).ESubpackages += it".length(),
 			"Cycle in superpackage/subpackage: foo.subpackage.foo");
-		assertErrorsAsStrings(it, """
+		assertErrorsAsStrings(prog, """
 		Cycle in inheritance hierarchy: foo.C3
 		Cycle in superpackage/subpackage: foo.subpackage.foo
 		foo cannot be resolved.
