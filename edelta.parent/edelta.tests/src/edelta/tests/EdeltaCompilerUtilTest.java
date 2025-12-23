@@ -52,7 +52,7 @@ class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 	@Test
 	void testGetStringForEcoreReferenceExpressionEAttributeInSubPackage() throws Exception {
 		var ecoreRefExp = 
-			lastEcoreReferenceExpression(
+			getLastEcoreReferenceExpression(
 				parseWithTestEcoreWithSubPackage(
 				"""
 					metamodel "mainpackage"

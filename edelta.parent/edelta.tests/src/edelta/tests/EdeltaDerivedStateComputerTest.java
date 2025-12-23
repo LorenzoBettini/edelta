@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
 
 import com.google.inject.Inject;
 
-import edelta.edelta.EdeltaEcoreQualifiedReference;
+import edelta.edelta.EdeltaEcoreQualifiedArgument;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
@@ -219,7 +219,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		var derivedStateEClass = getLastCopiedEPackageLastEClass(program);
 		var eclassRef =
 			getEdeltaEcoreReferenceExpression(getLastModifyEcoreOperationLastExpression(program))
-			.getReference().getEnamedelement();
+			.getArgument().getElement();
 		assertSame(derivedStateEClass, eclassRef);
 		assertEquals("First", derivedStateEClass.getName());
 		assertFalse("should be resolved now", eclassRef.eIsProxy());
@@ -350,8 +350,8 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		// at this point of the program
 		// otherwise in the editor we then get an unresolved error.
 		var ecoreref = getEcoreRefInManipulationExpressionBlock(program);
-		var eClass = ((EClass) ecoreref.getQualification().getEnamedelement());
-		var eAttr = ((EAttribute) ecoreref.getEnamedelement());
+		var eClass = ((EClass) ecoreref.getQualification().getElement());
+		var eAttr = ((EAttribute) ecoreref.getElement());
 		// Note that the interpreter changed the attribute container
 		assertEClassContainsFeature(eClass, eAttr, false);
 		// but the original enamed element stored in the reference is OK
@@ -411,12 +411,12 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		validationTestHelper.assertNoErrors(prog);
 	}
 
-	private EdeltaEcoreQualifiedReference getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {
-		return getEdeltaEcoreQualifiedReference(
+	private EdeltaEcoreQualifiedArgument getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {
+		return getEdeltaEcoreQualifiedArgument(
 			lastOrNull(getAllContentsOfType(
 				lastModifyEcoreOperation(program).getBody(),
 				EdeltaEcoreReferenceExpression.class))
-					.getReference());
+					.getArgument());
 	}
 
 	private void assertEClassContainsFeature(EClass c, EStructuralFeature f, boolean expected) {

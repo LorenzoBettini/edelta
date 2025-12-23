@@ -49,9 +49,9 @@ import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import edelta.edelta.EdeltaEcoreDirectReference;
-import edelta.edelta.EdeltaEcoreQualifiedReference;
-import edelta.edelta.EdeltaEcoreReference;
+import edelta.edelta.EdeltaEcoreSimpleArgument;
+import edelta.edelta.EdeltaEcoreQualifiedArgument;
+import edelta.edelta.EdeltaEcoreArgument;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
@@ -484,16 +484,16 @@ public abstract class EdeltaAbstractTest {
 		return (EdeltaEcoreReferenceExpression) e;
 	}
 
-	protected EdeltaEcoreReference getEdeltaEcoreReference(XExpression e) {
-		return getEdeltaEcoreReferenceExpression(e).getReference();
+	protected EdeltaEcoreArgument getEdeltaEcoreArgument(XExpression e) {
+		return getEdeltaEcoreReferenceExpression(e).getArgument();
 	}
 
-	protected EdeltaEcoreDirectReference getEdeltaEcoreDirectReference(EObject e) {
-		return (EdeltaEcoreDirectReference) e;
+	protected EdeltaEcoreSimpleArgument getEdeltaEcoreSimpleArgument(EObject e) {
+		return (EdeltaEcoreSimpleArgument) e;
 	}
 
-	protected EdeltaEcoreQualifiedReference getEdeltaEcoreQualifiedReference(EObject e) {
-		return (EdeltaEcoreQualifiedReference) e;
+	protected EdeltaEcoreQualifiedArgument getEdeltaEcoreQualifiedArgument(EObject e) {
+		return (EdeltaEcoreQualifiedArgument) e;
 	}
 
 	protected XExpression getBlockLastExpression(XExpression e) {
@@ -525,7 +525,7 @@ public abstract class EdeltaAbstractTest {
 	}
 
 	protected EdeltaEcoreReferenceExpression ecoreReferenceExpression(CharSequence ecoreRefString) throws Exception {
-		return lastEcoreReferenceExpression(
+		return getLastEcoreReferenceExpression(
 			parseInsideModifyEcoreWithTestMetamodelFoo(ecoreRefString));
 	}
 
@@ -544,7 +544,7 @@ public abstract class EdeltaAbstractTest {
 				}""", body);
 	}
 
-	protected EdeltaEcoreReferenceExpression lastEcoreReferenceExpression(EdeltaProgram p) {
+	protected EdeltaEcoreReferenceExpression getLastEcoreReferenceExpression(EdeltaProgram p) {
 		return (EdeltaEcoreReferenceExpression) getBlockLastExpression(lastModifyEcoreOperation(p).getBody());
 	}
 

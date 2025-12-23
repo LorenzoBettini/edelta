@@ -157,7 +157,8 @@ public class EdeltaQuickfixTest extends AbstractQuickfixTest {
 			""",
 			EdeltaValidator.AMBIGUOUS_REFERENCE,
 			new AbstractQuickfixTest.Quickfix(
-				"Fix ambiguity with \'mainpackage.MyClass\'", "Fix ambiguity with \'mainpackage.MyClass\'",
+				"Fix ambiguity with \'mainpackage.MyClass\'",
+				"Fix ambiguity with \'mainpackage.MyClass\'",
 				"""
 				metamodel "mainpackage"
 				

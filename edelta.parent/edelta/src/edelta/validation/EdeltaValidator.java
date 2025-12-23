@@ -3,7 +3,7 @@
  */
 package edelta.validation;
 
-import static edelta.edelta.EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE__ENAMEDELEMENT;
+import static edelta.edelta.EdeltaPackage.Literals.EDELTA_ECORE_ARGUMENT__ELEMENT;
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MIGRATION__NS_URI;
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MIGRATION__TO;
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MODIFY_ECORE_OPERATION__EPACKAGE;
@@ -120,14 +120,14 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 		var unresolvedEcoreReferences = edeltaDerivedStateHelper
 				.getUnresolvedEcoreReferences(p.eResource());
 		for (var ecoreRef : unresolvedEcoreReferences) {
-			if (!ecoreRef.getEnamedelement().eIsProxy()) {
+			if (!ecoreRef.getElement().eIsProxy()) {
 				// it wasn't resolved during interpretation but it is
 				// in the end
 				error("Element not yet available in this context: " +
 						qualifiedNameProvider
-							.getFullyQualifiedName(ecoreRef.getEnamedelement()),
+							.getFullyQualifiedName(ecoreRef.getElement()),
 					ecoreRef,
-					EDELTA_ECORE_REFERENCE__ENAMEDELEMENT,
+					EDELTA_ECORE_ARGUMENT__ELEMENT,
 					INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT);
 			}
 		}

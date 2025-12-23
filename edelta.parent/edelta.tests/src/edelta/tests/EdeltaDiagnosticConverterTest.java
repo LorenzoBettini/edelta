@@ -27,7 +27,7 @@ public class EdeltaDiagnosticConverterTest {
 	public void testEcoreReferenceDiagnosticIsDiscarded() {
 		var diagnostic = new BasicDiagnostic(Diagnostic.ERROR, null, 0, null,
 				new Object[] {
-					EdeltaFactory.eINSTANCE.createEdeltaEcoreDirectReference()
+					EdeltaFactory.eINSTANCE.createEdeltaEcoreSimpleArgument()
 				});
 		converter.convertValidatorDiagnostic(diagnostic,
 			issue -> fail(("unwanted issue: " + issue)));
