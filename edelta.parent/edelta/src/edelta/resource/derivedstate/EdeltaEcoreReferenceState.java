@@ -2,10 +2,10 @@ package edelta.resource.derivedstate;
 
 import org.eclipse.emf.ecore.ENamedElement;
 
-import edelta.edelta.EdeltaEcoreReference;
+import edelta.edelta.EdeltaEcoreArgument;
 
 /**
- * Additional information on {@link EdeltaEcoreReference}
+ * Additional information on {@link EdeltaEcoreArgument}
  * 
  * @author Lorenzo Bettini
  *

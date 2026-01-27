@@ -68,7 +68,7 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 			getAllContentsOfType(resource.getContents().get(0),
 				EdeltaEcoreReferenceExpression.class);
 		for (var r : references) {
-			originalENamedElementRecorder.recordOriginalENamedElement(r.getReference());
+			originalENamedElementRecorder.recordOriginalENamedElement(r.getArgument());
 		}
 	}
 

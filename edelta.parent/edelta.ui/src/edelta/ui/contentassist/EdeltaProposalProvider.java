@@ -27,7 +27,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 
-import edelta.edelta.EdeltaEcoreQualifiedReference;
+import edelta.edelta.EdeltaEcoreQualifiedArgument;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaMigration;
 import edelta.edelta.EdeltaModifyEcoreOperation;
@@ -119,7 +119,7 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 	 * used then by {@link EdeltaProposalCreator#apply(IEObjectDescription)}
 	 */
 	@Override
-	public void completeEdeltaEcoreDirectReference_Enamedelement(EObject model,
+	public void completeEdeltaEcoreSimpleArgument_Element(EObject model,
 			Assignment assignment, ContentAssistContext context,
 			ICompletionProposalAcceptor acceptor) {
 		EdeltaAccessibleElements accessibleElements;
@@ -157,15 +157,14 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 	 * Only proposes children that are available in this context.
 	 */
 	@Override
-	public void completeEdeltaEcoreReference_Enamedelement(EObject model, Assignment assignment,
+	public void completeEdeltaEcoreArgument_Element(EObject model, Assignment assignment,
 			ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 		if (notInsideModifyEcore(model)) {
-			super.completeEdeltaEcoreReference_Enamedelement(
-					model, assignment, context, acceptor);
+			super.completeEdeltaEcoreArgument_Element(model, assignment, context, acceptor);
 			return;
 		}
 		final var accessibleElements = getAccessibleElements(model);
-		final var qualification = ((EdeltaEcoreQualifiedReference) model)
+		final var qualification = ((EdeltaEcoreQualifiedArgument) model)
 			.getQualification();
 		String qualificationText = EdeltaModelUtil.getEcoreReferenceText(qualification);
 		accessibleElements.stream()
@@ -192,7 +191,7 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 			.lookupCrossReference(
 				scope,
 				model,
-				EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE__ENAMEDELEMENT,
+				EdeltaPackage.Literals.EDELTA_ECORE_ARGUMENT__ELEMENT,
 				acceptor,
 				Predicates.<IEObjectDescription> alwaysTrue(),
 				getProposalFactory("ID", context));

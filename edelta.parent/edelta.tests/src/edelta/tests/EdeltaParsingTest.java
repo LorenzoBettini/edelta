@@ -1,9 +1,12 @@
 package edelta.tests;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.InstanceOfAssertFactories.type;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.testing.InjectWith;
@@ -11,7 +14,10 @@ import org.eclipse.xtext.testing.XtextRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import edelta.edelta.EdeltaEcoreArgument;
+import edelta.edelta.EdeltaEcoreQualifiedArgument;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
+import edelta.edelta.EdeltaEcoreSimpleArgument;
 import edelta.edelta.EdeltaPackage;
 
 @RunWith(XtextRunner.class)
@@ -42,42 +48,86 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 	public void testDirectEcoreReference() throws Exception {
 		var exp = getEcoreReferenceExpression("foo");
 		assertNotNull(
-			getEdeltaEcoreDirectReference(exp.getReference())
-				.getEnamedelement());
+			getEdeltaEcoreSimpleArgument(exp.getArgument())
+				.getElement());
 	}
 
 	@Test
 	public void testDirectEcoreReferenceIncomplete() throws Exception {
 		var exp = getEcoreReferenceExpression("");
 		assertNull(
-			getEdeltaEcoreDirectReference(exp.getReference())
-				.getEnamedelement());
+			getEdeltaEcoreSimpleArgument(exp.getArgument())
+				.getElement());
 	}
 
 	@Test
 	public void testQualifiedEcoreReference() throws Exception {
-		var ref = getEdeltaEcoreQualifiedReference(
-			getEcoreReferenceExpression("foo.bar").getReference());
-		assertEquals("foo", getTextualRepresentation(ref.getQualification()));
-		assertEquals("bar", getTextualReferenceRepresentation(ref));
-		assertEquals("foo.bar", getTextualRepresentation(ref));
+		var prog = parseHelper.parse("""
+			modifyEcore aTest epackage foo {
+				ecoreref(foo.bar)
+			}
+		""");
+		var arg = getLastEcoreReferenceExpression(prog).getArgument();
+		assertThat(arg).asInstanceOf(type(EdeltaEcoreQualifiedArgument.class))
+			.extracting(EdeltaEcoreQualifiedArgument::getQualification)
+				.isInstanceOf(EdeltaEcoreSimpleArgument.class)
+			.extracting(EdeltaEcoreArgument::getElement)
+				.isInstanceOf(ENamedElement.class);
+	}
+
+	@Test
+	public void testQualifiedEcoreReference1() throws Exception {
+		var prog = parseHelper.parse("""
+			modifyEcore aTest epackage foo {
+				ecoreref(foo.MyEClass.myEAttribute)
+			}
+		""");
+		var arg = getLastEcoreReferenceExpression(prog).getArgument();
+		assertThat(arg).asInstanceOf(type(EdeltaEcoreQualifiedArgument.class))
+			.satisfies(qualifiedArg -> {
+				assertThat(NodeModelUtils.findActualNodeFor(qualifiedArg).getText())
+					.isEqualTo("foo.MyEClass.myEAttribute");
+				var qualification = qualifiedArg.getQualification();
+				assertThat(NodeModelUtils.findActualNodeFor(qualification).getText())
+					.isEqualTo("foo.MyEClass");
+				assertThat(qualification).asInstanceOf(type(EdeltaEcoreQualifiedArgument.class))
+					.satisfies(q -> {
+						var innerQualification = q.getQualification();
+						assertThat(NodeModelUtils.findActualNodeFor(innerQualification).getText())
+							.isEqualTo("foo");
+						assertThat(innerQualification).isInstanceOf(EdeltaEcoreSimpleArgument.class);
+					});
+			});
 	}
 
 	@Test
 	public void testQualifiedEcoreReference2() throws Exception {
-		var ref = getEdeltaEcoreQualifiedReference(
-			getEcoreReferenceExpression("foo.bar.baz").getReference());
-		assertEquals("foo.bar", getTextualRepresentation(ref.getQualification()));
-		assertEquals("baz", getTextualReferenceRepresentation(ref));
-		assertEquals("foo.bar.baz", getTextualRepresentation(ref));
+		var prog = parseHelper.parse("""
+			modifyEcore aTest epackage foo {
+				ecoreref(foo.bar)
+			}
+		""");
+		var arg = (EdeltaEcoreQualifiedArgument) getLastEcoreReferenceExpression(prog).getArgument();
+		assertEquals("foo", getTextualRepresentation(arg.getQualification()));
+		assertEquals("bar", getTextualRepresentationForElement(arg));
+		assertEquals("foo.bar", getTextualRepresentation(arg));
+	}
+
+	@Test
+	public void testQualifiedEcoreReference3() throws Exception {
+		var arg = getEdeltaEcoreQualifiedArgument(
+			getEcoreReferenceExpression("foo.bar.baz").getArgument());
+		assertEquals("foo.bar", getTextualRepresentation(arg.getQualification()));
+		assertEquals("baz", getTextualRepresentationForElement(arg));
+		assertEquals("foo.bar.baz", getTextualRepresentation(arg));
 	}
 
 	@Test
 	public void testQualifiedEcoreReferenceIncomplete() throws Exception {
-		var ref = getEdeltaEcoreQualifiedReference(
-			getEcoreReferenceExpression("foo.").getReference());
+		var ref = getEdeltaEcoreQualifiedArgument(
+			getEcoreReferenceExpression("foo.").getArgument());
 		assertEquals("foo", getTextualRepresentation(ref.getQualification()));
-		assertNull(ref.getEnamedelement());
+		assertNull(ref.getElement());
 		assertEquals("foo.", getTextualRepresentation(ref));
 	}
 
@@ -126,10 +176,10 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 				NodeModelUtils.findActualNodeFor(o));
 	}
 
-	private String getTextualReferenceRepresentation(EObject o) {
+	private String getTextualRepresentationForElement(EObject o) {
 		return NodeModelUtils.getTokenText(NodeModelUtils
 				.findNodesForFeature(o,
-					EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE__ENAMEDELEMENT)
+					EdeltaPackage.Literals.EDELTA_ECORE_ARGUMENT__ELEMENT)
 						.get(0));
 	}
 }

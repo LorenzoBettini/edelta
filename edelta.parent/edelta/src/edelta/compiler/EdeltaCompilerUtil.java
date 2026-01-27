@@ -37,7 +37,7 @@ public class EdeltaCompilerUtil {
 	}
 
 	public String getStringForEcoreReferenceExpression(final EdeltaEcoreReferenceExpression e) {
-		final var reference = e.getReference();
+		final var reference = e.getArgument();
 		if (reference == null) {
 			return "null";
 		}

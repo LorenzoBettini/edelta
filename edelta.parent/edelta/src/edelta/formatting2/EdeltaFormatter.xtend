@@ -69,7 +69,7 @@ class EdeltaFormatter extends XbaseWithAnnotationsFormatter {
 
 	def dispatch void format(EdeltaEcoreReferenceExpression ecoreref, extension IFormattableDocument document) {
 		ecoreref.regionFor.keyword("(").surround[noSpace]
-		for (node : ecoreref.reference.regionFor.keywords("."))
+		for (node : ecoreref.argument.regionFor.keywords("."))
 			node.surround[noSpace]
 		ecoreref.regionFor.keyword(")").surround[noSpace]
 	}

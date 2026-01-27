@@ -14,11 +14,11 @@ import org.eclipse.xtext.xbase.ui.navigation.XbaseHyperLinkHelper;
 
 import com.google.inject.Inject;
 
-import edelta.edelta.EdeltaEcoreReference;
+import edelta.edelta.EdeltaEcoreArgument;
 import edelta.navigation.EdeltaNavigationTargetHelper;
 
 /**
- * Customizations for {@link EdeltaEcoreReference}: jump to the original element
+ * Customizations for {@link EdeltaEcoreArgument}: jump to the original element
  * (in an ecore file) or to the {@link XExpression} that created the element.
  * 
  * @author Lorenzo Bettini

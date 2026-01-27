@@ -252,22 +252,25 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
 			metamodel "mypackage"
 			
 			modifyEcore aTest epackage mypackage {
-				addNewEClass("AAA")
-				ecoreref(""")
-			.assertProposal("AAA");
+				addNewEClass("NewClass")
+				ecoreref(<|>)
+				""")
+			.assertProposalAtCursor("NewClass");
 	}
 
 	@Test
 	@Flaky
 	public void testEClassifierAfterRenamingAnEClass() throws Exception {
-		newBuilder().append(
+		var proposalTester = newBuilder().append(
 			"""
 			metamodel "mypackage"
 			
 			modifyEcore aTest epackage mypackage {
 				ecoreref(MyClass).name = "Renamed"
-				ecoreref(""")
-			.assertProposal("Renamed");
+				ecoreref(<|>)
+			""");
+		proposalTester.assertProposalAtCursor("Renamed");
+		proposalTester.assertNoProposalAtCursor("MyClass");
 	}
 
 	@Test

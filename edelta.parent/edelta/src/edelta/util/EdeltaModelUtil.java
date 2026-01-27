@@ -16,7 +16,7 @@ import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.xbase.XBlockExpression;
 import org.eclipse.xtext.xbase.XExpression;
 
-import edelta.edelta.EdeltaEcoreReference;
+import edelta.edelta.EdeltaEcoreArgument;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaMigration;
 import edelta.edelta.EdeltaProgram;
@@ -47,7 +47,7 @@ public class EdeltaModelUtil {
 				.toList();
 	}
 
-	public static String getEcoreReferenceText(EdeltaEcoreReference ref) {
+	public static String getEcoreReferenceText(EdeltaEcoreArgument ref) {
 		return getTokenText(findActualNodeFor(ref));
 	}
 
@@ -112,7 +112,7 @@ public class EdeltaModelUtil {
 	 * @param reference
 	 * @return
 	 */
-	public static XExpression getContainingBlockXExpression(EdeltaEcoreReference reference) {
+	public static XExpression getContainingBlockXExpression(EdeltaEcoreArgument reference) {
 		return getContainingBlockXExpression(
 			getContainerOfType(reference, EdeltaEcoreReferenceExpression.class));
 	}

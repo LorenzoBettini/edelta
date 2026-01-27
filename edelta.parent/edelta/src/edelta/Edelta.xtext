@@ -44,19 +44,19 @@ EdeltaOperation:
 // redefine Xbase primary expression with our special expressions
 @Override 
 XPrimaryExpression returns xbase::XExpression:
-	{EdeltaEcoreReferenceExpression} 'ecoreref' '(' reference=EdeltaEcoreReference ')' |
+	{EdeltaEcoreReferenceExpression} 'ecoreref' '(' argument=EdeltaEcoreArgument ')' |
 	super
 ;
 
-EdeltaEcoreReference:
-	EdeltaEcoreDirectReference
+EdeltaEcoreArgument:
+	EdeltaEcoreSimpleArgument
 	(
-		{EdeltaEcoreQualifiedReference.qualification=current} '.'
-		enamedelement=[ecore::ENamedElement]
+		{EdeltaEcoreQualifiedArgument.qualification=current} '.'
+		element=[ecore::ENamedElement]
 	)*
 ;
 
-EdeltaEcoreDirectReference returns EdeltaEcoreReference:
-	{EdeltaEcoreDirectReference} enamedelement=[ecore::ENamedElement]
+EdeltaEcoreSimpleArgument returns EdeltaEcoreArgument:
+	{EdeltaEcoreSimpleArgument} element=[ecore::ENamedElement]
 ;
 

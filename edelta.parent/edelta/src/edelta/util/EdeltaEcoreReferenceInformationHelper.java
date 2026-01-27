@@ -35,7 +35,7 @@ public class EdeltaEcoreReferenceInformationHelper {
 
 	public EdeltaEcoreReferenceState.EdeltaEcoreReferenceStateInformation getOrComputeInformation(
 			final EdeltaEcoreReferenceExpression exp) {
-		final var reference = exp.getReference();
+		final var reference = exp.getArgument();
 		final var ecoreReferenceState =
 			derivedStateHelper.getEcoreReferenceState(reference);
 		var existing = ecoreReferenceState.getInformation();
@@ -46,7 +46,7 @@ public class EdeltaEcoreReferenceInformationHelper {
 		ecoreReferenceState.setInformation(info);
 		final var type = typeResolver.resolveTypes(exp).getActualType(exp);
 		info.setType(type.getSimpleName());
-		final var element = reference.getEnamedelement();
+		final var element = reference.getElement();
 		if (element == null)
 			return info;
 

@@ -14,7 +14,7 @@ import org.junit.runner.RunWith;
 
 import com.google.inject.Inject;
 
-import edelta.edelta.EdeltaEcoreReference;
+import edelta.edelta.EdeltaEcoreArgument;
 import edelta.edelta.EdeltaFactory;
 import edelta.resource.derivedstate.EdeltaDerivedState;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
@@ -51,7 +51,7 @@ public class EdeltaDerivedStateHelperTest extends EdeltaAbstractTest {
 	@Test
 	public void testGetEdeltaEcoreReferenceState() throws Exception {
 		final Resource res = parseHelper.parse("").eResource();
-		final EdeltaEcoreReference ref = edeltaFactory.createEdeltaEcoreReference();
+		final EdeltaEcoreArgument ref = edeltaFactory.createEdeltaEcoreArgument();
 		res.getContents().add(ref);
 		assertNull(edeltaDerivedStateHelper.getOriginalEnamedelement(ref));
 		final EAttribute el = ecoreFactory.createEAttribute();

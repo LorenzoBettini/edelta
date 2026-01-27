@@ -15,7 +15,7 @@ import org.eclipse.xtext.util.IResourceScopeCache;
 
 import com.google.inject.Inject;
 
-import edelta.edelta.EdeltaEcoreQualifiedReference;
+import edelta.edelta.EdeltaEcoreQualifiedArgument;
 import edelta.util.EdeltaEcoreHelper;
 
 /**
@@ -34,10 +34,10 @@ public class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 
 	@Override
 	public IScope getScope(final EObject context, final EReference reference) {
-		if (reference == EDELTA_ECORE_REFERENCE__ENAMEDELEMENT) {
-			if (context instanceof EdeltaEcoreQualifiedReference ecoreQualifiedReference) {
+		if (reference == EDELTA_ECORE_ARGUMENT__ELEMENT) {
+			if (context instanceof EdeltaEcoreQualifiedArgument ecoreQualifiedReference) {
 				return Scopes.scopeFor(edeltaEcoreHelper.getENamedElements(
-						ecoreQualifiedReference.getQualification().getEnamedelement()));
+						ecoreQualifiedReference.getQualification().getElement()));
 			}
 			return Scopes.scopeFor(edeltaEcoreHelper.getProgramENamedElements(context));
 		} else if (reference == EDELTA_MODIFY_ECORE_OPERATION__EPACKAGE) {

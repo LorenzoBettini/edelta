@@ -37,7 +37,7 @@ public class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
 				}
 			""");
 		var target = navigationTargetHelper
-				.getTarget(getFirstOfAllEcoreReferenceExpressions(prog).getReference());
+				.getTarget(getFirstOfAllEcoreReferenceExpressions(prog).getArgument());
 		var original = getEClassiferByName(
 				prog.getEPackages().get(0), "FooClass");
 		assertThat(target)
@@ -56,7 +56,7 @@ public class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
 				}
 			""");
 		var target = navigationTargetHelper
-				.getTarget(getFirstOfAllEcoreReferenceExpressions(prog).getReference());
+				.getTarget(getFirstOfAllEcoreReferenceExpressions(prog).getArgument());
 		var exp = getLastModifyEcoreOperationFirstExpression(prog);
 		assertThat(target)
 			.isNotNull().isSameAs(exp);
@@ -74,7 +74,7 @@ public class EdeltaNavigationTargetHelperTest extends EdeltaAbstractTest {
 				}
 			""");
 		var target = navigationTargetHelper
-				.getTarget(getFirstOfAllEcoreReferenceExpressions(prog).getReference());
+				.getTarget(getFirstOfAllEcoreReferenceExpressions(prog).getArgument());
 		var exp = getLastModifyEcoreOperationLastExpression(prog);
 		assertThat(target)
 			.isNotNull().isSameAs(exp);

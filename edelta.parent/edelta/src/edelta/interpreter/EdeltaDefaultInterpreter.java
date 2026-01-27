@@ -1,6 +1,6 @@
 package edelta.interpreter;
 
-import static edelta.edelta.EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE;
+import static edelta.edelta.EdeltaPackage.Literals.EDELTA_ECORE_REFERENCE_EXPRESSION__ARGUMENT;
 import static edelta.util.EdeltaModelUtil.getEcoreReferenceText;
 import static edelta.util.EdeltaModelUtil.getProgram;
 import static java.util.function.Predicate.not;
@@ -49,8 +49,8 @@ import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter;
 import com.google.inject.Inject;
 
 import edelta.compiler.EdeltaCompilerUtil;
-import edelta.edelta.EdeltaEcoreDirectReference;
-import edelta.edelta.EdeltaEcoreReference;
+import edelta.edelta.EdeltaEcoreSimpleArgument;
+import edelta.edelta.EdeltaEcoreArgument;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
@@ -116,7 +116,7 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 	private EdeltaInterpreterResourceListener listener;
 
 	/**
-	 * Keeps track of {@link EdeltaEcoreReference} already evaluated.
+	 * Keeps track of {@link EdeltaEcoreArgument} already evaluated.
 	 */
 	private Collection<EdeltaEcoreReferenceExpression> interpretedEcoreReferenceExpressions =
 		new HashSet<>();
@@ -401,10 +401,10 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 	}
 
 	private boolean checkValidReference(EdeltaEcoreReferenceExpression ecoreReferenceExpression) {
-		final var ecoreReference = ecoreReferenceExpression.getReference();
+		final var ecoreReference = ecoreReferenceExpression.getArgument();
 		if (ecoreReference == null)
 			return false;
-		if (ecoreReference.getEnamedelement() == null) {
+		if (ecoreReference.getElement() == null) {
 			// it might be due to an element removed with EcoreUtil.delete ...
 			// (see https://github.com/LorenzoBettini/edelta/issues/271)
 			final var ecoreReferenceText = getEcoreReferenceText(ecoreReference);
@@ -425,9 +425,9 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 	 * @param ecoreReferenceExpression
 	 */
 	private void checkLinking(EdeltaEcoreReferenceExpression ecoreReferenceExpression) {
-		final var ecoreReference = ecoreReferenceExpression.getReference();
+		final var ecoreReference = ecoreReferenceExpression.getArgument();
 		// qualified references are not considered since they cannot be ambiguous
-		if (ecoreReference instanceof EdeltaEcoreDirectReference) {
+		if (ecoreReference instanceof EdeltaEcoreSimpleArgument) {
 			var refText = EdeltaModelUtil.getEcoreReferenceText(ecoreReference);
 			// qualification '.' is the boundary for searching for matches
 			var toSearch = "." + refText;
@@ -447,13 +447,13 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 								.map(m -> "  " + m)
 								.collect(joining("\n")),
 						ecoreReferenceExpression,
-						EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE,
+						EDELTA_ECORE_REFERENCE_EXPRESSION__ARGUMENT,
 						-1,
 						matchingNames.toArray(new String[0])));
 			} else if (matching.size() == 1) {
 				var newCandidate = matching.get(0).getElement();
-				if (newCandidate != ecoreReference.getEnamedelement())
-					ecoreReference.setEnamedelement(newCandidate);
+				if (newCandidate != ecoreReference.getElement())
+					ecoreReference.setElement(newCandidate);
 			}
 		}
 	}
@@ -469,7 +469,7 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 	private void recordUnresolvedReference(EdeltaEcoreReferenceExpression ecoreReferenceExpression) {
 		derivedStateHelper
 			.getUnresolvedEcoreReferences(ecoreReferenceExpression.eResource())
-			.add(ecoreReferenceExpression.getReference());
+			.add(ecoreReferenceExpression.getArgument());
 	}
 
 	private void postProcess(Object result, EdeltaEcoreReferenceExpression exp) {
@@ -477,8 +477,8 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 			// takes a snapshot of the mapping EEnamedElement -> XExpression
 			// and associates it to this EdeltaEcoreReferenceExpression
 			var enamedElements =
-				getAllContentsOfType(exp, EdeltaEcoreReference.class)
-					.stream().map(EdeltaEcoreReference::getEnamedelement)
+				getAllContentsOfType(exp, EdeltaEcoreArgument.class)
+					.stream().map(EdeltaEcoreArgument::getElement)
 					.toList();
 			var expMap = derivedStateHelper
 				.getEcoreReferenceExpressionState(exp)
@@ -493,7 +493,7 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 
 	private void checkStaleAccess(Object result, EdeltaEcoreReferenceExpression ecoreReferenceExpression) {
 		final var ecoreReferenceText = getEcoreReferenceText
-				(ecoreReferenceExpression.getReference());
+				(ecoreReferenceExpression.getArgument());
 		if (result == null) {
 			addNotAvailableAnymoreError(ecoreReferenceExpression, ecoreReferenceText);
 		} else {
@@ -536,7 +536,7 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 				errorCode,
 				errorMessage,
 				ecoreReferenceExpression,
-				EDELTA_ECORE_REFERENCE_EXPRESSION__REFERENCE,
+				EDELTA_ECORE_REFERENCE_EXPRESSION__ARGUMENT,
 				-1,
 				errorData));
 	}

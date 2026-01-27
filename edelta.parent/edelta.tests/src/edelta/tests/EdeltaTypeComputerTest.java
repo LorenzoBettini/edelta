@@ -77,11 +77,8 @@ public class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 				}
 			"""
 		);
-		var ecoreRefExp = getEdeltaEcoreReferenceExpression(
-				getBlockLastExpression(lastModifyEcoreOperation(prog).getBody()));
-		assertEquals(EClass.class.getCanonicalName(),
-			typeResolver.resolveTypes(ecoreRefExp)
-				.getActualType(ecoreRefExp).getIdentifier());
+		var ecoreRefExp = getLastEcoreReferenceExpression(prog);
+		assertType(ecoreRefExp, EClass.class);
 	}
 
 	@Test
@@ -96,11 +93,8 @@ public class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 				}
 			"""
 		);
-		var ecoreRefExp = getEdeltaEcoreReferenceExpression(
-				getBlockLastExpression(lastModifyEcoreOperation(prog).getBody()));
-		assertEquals(EClass.class.getCanonicalName(),
-			typeResolver.resolveTypes(ecoreRefExp)
-				.getActualType(ecoreRefExp).getIdentifier());
+		var ecoreRefExp = getLastEcoreReferenceExpression(prog);
+		assertType(ecoreRefExp, EClass.class);
 	}
 
 	@Test
@@ -115,16 +109,19 @@ public class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 				}
 			"""
 		);
-		var ecoreRefExp = getEdeltaEcoreReferenceExpression(
-				getBlockLastExpression(lastModifyEcoreOperation(prog).getBody()));
-		assertEquals(EClass.class.getCanonicalName(),
-			typeResolver.resolveTypes(ecoreRefExp)
-				.getActualType(ecoreRefExp).getIdentifier());
+		var ecoreRefExp = getLastEcoreReferenceExpression(prog);
+		assertType(ecoreRefExp, EClass.class);
 	}
 
 	private void assertType(CharSequence input, String expectedTypeFQN) throws Exception {
 		var ecoreRefExp = ecoreReferenceExpression(input);
 		assertEquals(expectedTypeFQN,
+			typeResolver.resolveTypes(ecoreRefExp)
+				.getActualType(ecoreRefExp).getIdentifier());
+	}
+
+	private void assertType(XExpression ecoreRefExp, Class<?> expectedType) throws Exception {
+		assertEquals(expectedType.getCanonicalName(),
 			typeResolver.resolveTypes(ecoreRefExp)
 				.getActualType(ecoreRefExp).getIdentifier());
 	}

@@ -107,7 +107,7 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
 				}
 				"""));
 		// create cycle in sub package relation
-		var subpackage = ((EPackage) ref.getReference().getEnamedelement());
+		var subpackage = ((EPackage) ref.getArgument().getElement());
 		subpackage.getESubpackages().add(subpackage.getESuperPackage());
 
 		var info = informationHelper
@@ -214,7 +214,7 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
 			.returns("FooClass", t -> t.getEClassifierName())
 			.returns("myAttribute", t -> t.getENamedElementName());
 		// change the underlying model
-		var attr = (EAttribute) ref.getReference().getEnamedelement();
+		var attr = (EAttribute) ref.getArgument().getElement();
 		attr.setName("renamed");
 		attr.getEContainingClass().setName("Renamed");
 		// but the information stored hasn't changed
@@ -246,6 +246,6 @@ public class EdeltaEcoreReferenceInformationHelperTest extends EdeltaAbstractTes
 	}
 
 	private EdeltaEcoreReferenceExpression lastEcoreRef(EdeltaProgram p) {
-		return lastEcoreReferenceExpression(p);
+		return getLastEcoreReferenceExpression(p);
 	}
 }

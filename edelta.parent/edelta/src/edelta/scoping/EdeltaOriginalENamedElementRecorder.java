@@ -4,13 +4,13 @@ import org.eclipse.emf.ecore.ENamedElement;
 
 import com.google.inject.Inject;
 
-import edelta.edelta.EdeltaEcoreQualifiedReference;
-import edelta.edelta.EdeltaEcoreReference;
+import edelta.edelta.EdeltaEcoreQualifiedArgument;
+import edelta.edelta.EdeltaEcoreArgument;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 
 /**
  * Records the original referred {@link ENamedElement} in an
- * {@link EdeltaEcoreReference} expression, that is elements in the original
+ * {@link EdeltaEcoreArgument} expression, that is elements in the original
  * imported metamodels.
  * 
  * @author Lorenzo Bettini
@@ -19,11 +19,11 @@ public class EdeltaOriginalENamedElementRecorder {
 	@Inject
 	private EdeltaDerivedStateHelper derivedStateHelper;
 
-	public void recordOriginalENamedElement(final EdeltaEcoreReference edeltaEcoreReference) {
+	public void recordOriginalENamedElement(final EdeltaEcoreArgument edeltaEcoreReference) {
 		if (edeltaEcoreReference == null) {
 			return;
 		}
-		final var enamedElement = edeltaEcoreReference.getEnamedelement();
+		final var enamedElement = edeltaEcoreReference.getElement();
 		var copiedEPackagesMap =
 			derivedStateHelper.getCopiedEPackagesMap(edeltaEcoreReference.eResource());
 		var original = copiedEPackagesMap.getOriginal(enamedElement);
@@ -31,7 +31,7 @@ public class EdeltaOriginalENamedElementRecorder {
 			.getEcoreReferenceState(edeltaEcoreReference)
 			.setOriginalEnamedelement
 				(original);
-		if (edeltaEcoreReference instanceof EdeltaEcoreQualifiedReference ecoreQualifiedReference) {
+		if (edeltaEcoreReference instanceof EdeltaEcoreQualifiedArgument ecoreQualifiedReference) {
 			recordOriginalENamedElement(ecoreQualifiedReference.getQualification());
 		}
 	}

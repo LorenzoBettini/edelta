@@ -8,7 +8,7 @@ import org.eclipse.xtext.util.IAcceptor;
 import org.eclipse.xtext.validation.DiagnosticConverterImpl;
 import org.eclipse.xtext.validation.Issue;
 
-import edelta.edelta.EdeltaEcoreReference;
+import edelta.edelta.EdeltaEcoreArgument;
 
 /**
  * Customization to avoid error messages from EMF about dangling references
@@ -24,7 +24,7 @@ public class EdeltaDiagnosticConverter extends DiagnosticConverterImpl {
 	@Override
 	public void convertValidatorDiagnostic(Diagnostic diagnostic, IAcceptor<Issue> acceptor) {
 		var causer = getCauser(diagnostic);
-		if (causer instanceof EdeltaEcoreReference &&
+		if (causer instanceof EdeltaEcoreArgument &&
 				!EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT
 					.equals(getIssueCode(diagnostic))) {
 			return;

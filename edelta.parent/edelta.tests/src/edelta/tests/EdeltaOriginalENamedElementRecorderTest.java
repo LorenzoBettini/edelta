@@ -29,14 +29,14 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 
 	@Test
 	public void testNullENamedElement() {
-		var ref = EdeltaFactory.eINSTANCE.createEdeltaEcoreDirectReference();
+		var ref = EdeltaFactory.eINSTANCE.createEdeltaEcoreSimpleArgument();
 		recorder.recordOriginalENamedElement(ref);
 		assertNull(derivedStateHelper.getOriginalEnamedelement(ref));
 	}
 
 	@Test
 	public void testUnresolvedENamedElement() throws Exception {
-		var ref = ecoreReferenceExpression("ecoreref(NonExistant)").getReference();
+		var ref = ecoreReferenceExpression("ecoreref(NonExistant)").getArgument();
 		recorder.recordOriginalENamedElement(ref);
 		assertNull(derivedStateHelper.getOriginalEnamedelement(ref));
 	}
@@ -52,7 +52,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 				}
 			"""
 		);
-		var ref = lastEcoreReferenceExpression(prog).getReference();
+		var ref = getLastEcoreReferenceExpression(prog).getArgument();
 		recorder.recordOriginalENamedElement(ref);
 		var original = getEClassiferByName(lastOrNull(prog.getEPackages()),
 				"FooClass");
@@ -70,8 +70,8 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 				}
 			"""
 		);
-		var ref = getEdeltaEcoreQualifiedReference(
-			lastEcoreReferenceExpression(prog).getReference());
+		var ref = getEdeltaEcoreQualifiedArgument(
+			getLastEcoreReferenceExpression(prog).getArgument());
 		recorder.recordOriginalENamedElement(ref);
 		var original = getEClassiferByName(lastOrNull(prog.getEPackages()),
 				"FooClass");
@@ -93,7 +93,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 				}
 			"""
 		);
-		var ref = lastEcoreReferenceExpression(prog).getReference();
+		var ref = getLastEcoreReferenceExpression(prog).getArgument();
 		recorder.recordOriginalENamedElement(ref);
 		assertNull(derivedStateHelper.getOriginalEnamedelement(ref));
 	}
@@ -110,8 +110,8 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 				}
 			"""
 		);
-		var ref = getEdeltaEcoreQualifiedReference(
-				lastEcoreReferenceExpression(prog).getReference());
+		var ref = getEdeltaEcoreQualifiedArgument(
+				getLastEcoreReferenceExpression(prog).getArgument());
 		recorder.recordOriginalENamedElement(ref);
 		assertNull(derivedStateHelper.getOriginalEnamedelement(ref));
 		// note that the package actually links to the original EPackage

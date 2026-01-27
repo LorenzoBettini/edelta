@@ -5,12 +5,12 @@ import org.eclipse.xtext.xbase.XExpression;
 
 import com.google.inject.Inject;
 
-import edelta.edelta.EdeltaEcoreReference;
+import edelta.edelta.EdeltaEcoreArgument;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 
 /**
  * Navigation helper for navigating to the target of an
- * {@link EdeltaEcoreReference}, for example, to the original element, or to the
+ * {@link EdeltaEcoreArgument}, for example, to the original element, or to the
  * {@link XExpression} that created/renamed it (possibly handling forward
  * references, which are errors).
  * 
@@ -23,7 +23,7 @@ public class EdeltaNavigationTargetHelper {
 	private EdeltaDerivedStateHelper derivedStateHelper;
 
 	public EObject getTarget(EObject obj) {
-		if (obj instanceof EdeltaEcoreReference ecoreReference) {
+		if (obj instanceof EdeltaEcoreArgument ecoreReference) {
 			final var original = derivedStateHelper
 				.getOriginalEnamedelement(ecoreReference);
 			if (original != null) {
@@ -36,7 +36,7 @@ public class EdeltaNavigationTargetHelper {
 			}
 			// last resort, in case of a forward reference
 			return derivedStateHelper
-				.getLastResponsibleExpression(obj, ecoreReference.getEnamedelement());
+				.getLastResponsibleExpression(obj, ecoreReference.getElement());
 		}
 		return null;
 	}
