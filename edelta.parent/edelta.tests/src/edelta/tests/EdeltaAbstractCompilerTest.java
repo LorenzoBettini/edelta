@@ -102,7 +102,8 @@ public abstract class EdeltaAbstractCompilerTest extends EdeltaAbstractTest {
 			it -> {
 				assertNoValidationErrors(it);
 				for (var expectation : expectations) {
-					Assert.assertEquals(expectation.getValue().toString(), it.getGeneratedCode(expectation.getKey()));
+					Assert.assertEquals(expectation.getValue().toString(),
+						EdeltaTestUtils.removeCR(it.getGeneratedCode(expectation.getKey())));
 				}
 				assertGeneratedJavaCodeCompiles(it);
 			});
