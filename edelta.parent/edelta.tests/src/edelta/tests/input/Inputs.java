@@ -306,13 +306,11 @@ public class Inputs {
 				// since 'refactorings' is an 'extension'
 				// we use its method as an extension method
 				ecoreref(Person.gender).enumToSubclasses()
-				refactorings.mergeFeatures("name",
-					#[ecoreref(Person.firstname), ecoreref(Person.lastname)])
+				refactorings.mergeFeatures("name", #[ecoreref(Person.firstname), ecoreref(Person.lastname)])
 			}
 
 			modifyEcore introducePlace epackage PersonList {
-				extractSuperclass("Place",
-					#[ecoreref(LivingPlace.address), ecoreref(WorkPlace.address)])
+				extractSuperclass("Place", #[ecoreref(LivingPlace.address), ecoreref(WorkPlace.address)])
 			}
 
 			modifyEcore introduceWorkingPosition epackage PersonList {
@@ -323,9 +321,7 @@ public class Inputs {
 			}
 
 			modifyEcore improveList epackage PersonList {
-				refactorings.mergeFeatures("places",
-					ecoreref(Place),
-					#[ecoreref(List.wplaces), ecoreref(List.lplaces)]
+				refactorings.mergeFeatures("places", ecoreref(Place), #[ecoreref(List.wplaces), ecoreref(List.lplaces)]
 				)
 			}
 
