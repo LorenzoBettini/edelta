@@ -17,4 +17,19 @@
 		<sonar.tests>src</sonar.tests>
 	</properties>
 
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>edelta</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>edelta.lib</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>edelta.testutils</artifactId>
+		</dependency>
+	</dependencies>
+
 </project>
