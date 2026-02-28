@@ -24,7 +24,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>edelta.lib</artifactId>
+			<artifactId>edelta.refactorings.lib</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
