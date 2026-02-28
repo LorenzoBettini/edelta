@@ -15,4 +15,11 @@
 		<sonar.sources></sonar.sources>
 		<sonar.tests>src</sonar.tests>
 	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>edelta.testutils</artifactId>
+		</dependency>
+	</dependencies>
 </project>

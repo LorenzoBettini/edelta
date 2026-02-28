@@ -18,6 +18,28 @@
 		<sonar.tests>src</sonar.tests>
 	</properties>
 
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>edelta.ui</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>edelta.ui.testutils</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>edelta.refactorings.lib</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>edelta.feature</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
+
 	<profiles>
 		<profile>
 			<id>macos</id>
@@ -36,8 +58,8 @@
 								<extraRequirements combine.children="append">
 									<!-- This allows us to take the fragment
 									org.eclipse.jdt.launching.macosx
-                    See https://github.com/LorenzoBettini/jbase/issues/3 
-                    https://www.eclipse.org/forums/index.php/t/1073366/ -->
+									See https://github.com/LorenzoBettini/jbase/issues/3 
+									https://www.eclipse.org/forums/index.php/t/1073366/ -->
 									<requirement>
 										<type>eclipse-feature</type>
 										<id>org.eclipse.jdt</id>
