@@ -6,7 +6,7 @@ An Xtext DSL for EMF metamodels refactoring and migration
 
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=io.github.lorenzobettini.edelta%3Aedelta.parent&metric=coverage)](https://sonarcloud.io/dashboard?id=io.github.lorenzobettini.edelta%3Aedelta.parent) 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=io.github.lorenzobettini.edelta%3Aedelta.parent&metric=alert_status)](https://sonarcloud.io/dashboard?id=io.github.lorenzobettini.edelta%3Aedelta.parent)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.lorenzobettini.edelta/edelta.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.github.lorenzobettini.edelta%22%20AND%20a:%22edelta%22)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.lorenzobettini.edelta/edelta.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.lorenzobettini.edelta/edelta)
 
 ### Requirements
 
