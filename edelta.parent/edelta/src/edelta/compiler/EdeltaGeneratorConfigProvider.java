@@ -7,7 +7,7 @@ import org.eclipse.xtext.xbase.compiler.GeneratorConfigProvider;
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler;
 
 /**
- * In order to make {@link XbaseCompiler} generate Java 8 lambdas also when
+ * In order to make {@link XbaseCompiler} generate Java 21 code also when
  * running from xtext-maven-plugin.
  * 
  * @see https://github.com/LorenzoBettini/edelta/issues/60
@@ -20,7 +20,7 @@ public class EdeltaGeneratorConfigProvider extends GeneratorConfigProvider {
 	@Override
 	public GeneratorConfig get(EObject context) {
 		final var generatorConfig = super.get(context);
-		generatorConfig.setJavaSourceVersion(JavaVersion.JAVA17);
+		generatorConfig.setJavaSourceVersion(JavaVersion.JAVA21);
 		return generatorConfig;
 	}
 }
