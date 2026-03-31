@@ -146,11 +146,11 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 					annotations += Override.annotationRef
 					body = '''
 						return List.of(
-						  «program.getMigrations.map['"/' +nsURI.eResource.ecoreversionsRelativePath + '"'].join(",\n")»
+						  «program.getMigrations.map['"/' +nsURI.eResource.relativeSourcePath + '"'].join(",\n")»
 						);
 					'''
 					// previously it was nsURI.eResource.URI.deresolve(program.eResource.URI)
-					// but it's better to always use the filename only and rely on the ecores to be found in the classpath
+					// but it's better to rely on the ecores' position relative to their source folder
 				]
 				// also generate a "main" method
 				members += program.toMethod("main", Void.TYPE.typeRef) [
@@ -162,7 +162,7 @@ class EdeltaJvmModelInferrer extends AbstractModelInferrer {
 						var engine = new «EdeltaEngine»(«className.lastSegment»::new);
 						«FOR migration : program.getMigrations»
 						engine.loadEcoreFile("«migration.nsURI.eResource.URI.lastSegment»",
-						  «className.lastSegment».class.getResourceAsStream("/«migration.nsURI.eResource.ecoreversionsRelativePath»"));
+						  «className.lastSegment».class.getResourceAsStream("/«migration.nsURI.eResource.relativeSourcePath»"));
 						«ENDFOR»
 						engine.execute();
 						engine.save("modified");

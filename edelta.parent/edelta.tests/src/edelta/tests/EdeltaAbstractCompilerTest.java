@@ -5,15 +5,17 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.xtext.resource.FileExtensionProvider;
 import org.eclipse.xtext.testing.TemporaryFolder;
+import org.eclipse.xtext.workspace.FileProjectConfig;
+import org.eclipse.xtext.workspace.ProjectConfigAdapter;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Extension;
-import org.eclipse.xtext.xbase.lib.ListExtensions;
 import org.eclipse.xtext.xbase.lib.Pair;
 import org.eclipse.xtext.xbase.testing.CompilationTestHelper;
 import org.junit.Assert;
@@ -115,16 +117,29 @@ public abstract class EdeltaAbstractCompilerTest extends EdeltaAbstractTest {
 				Pair.of(EdeltaAbstractTest.ECORE_ECORE,
 						EdeltaTestUtils.loadFile(EdeltaAbstractTest.METAMODEL_PATH + EdeltaAbstractTest.ECORE_ECORE)),
 				Pair.of("Example." + extensionProvider.getPrimaryFileExtension(), input));
-		Iterables.addAll(pairs, ListExtensions.map(ecoreNames, ecoreName -> {
-			try {
-				return Pair.of(ecoreName, EdeltaTestUtils.loadFile(EdeltaAbstractTest.METAMODEL_PATH + ecoreName));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+		// Ecore files with a path containing "/" (e.g., "ecoreversions/Foo.ecore") are
+		// treated specially: they must be placed outside the default "src/" source folder
+		// so that their top-level directory becomes a dedicated source folder in the
+		// project config. This ensures EdeltaCompilerUtil.getRelativeSourcePath() returns
+		// only the path relative to that source folder (e.g., "/Foo.ecore"), without
+		// including the source folder name itself in the result.
+		var ecoresInSubdirectory = new ArrayList<String>();
+		for (var ecoreName : ecoreNames) {
+			if (ecoreName.contains("/")) {
+				ecoresInSubdirectory.add(ecoreName);
+			} else {
+				try {
+					pairs.add(Pair.of(ecoreName,
+							EdeltaTestUtils.loadFile(EdeltaAbstractTest.METAMODEL_PATH + ecoreName)));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
-		}));
+		}
 		@SuppressWarnings("unchecked")
 		final ResourceSet rs = compilationTestHelper
 				.resourceSet(pairs.toArray(new Pair[0]));
+		addEcoresInSubdirectoryToResourceSet(rs, ecoresInSubdirectory);
 		return rs;
 	}
 
@@ -133,19 +148,57 @@ public abstract class EdeltaAbstractCompilerTest extends EdeltaAbstractTest {
 		var ecorePairs = CollectionLiterals.newArrayList(
 				Pair.of(EdeltaAbstractTest.ECORE_ECORE,
 						EdeltaTestUtils.loadFile(EdeltaAbstractTest.METAMODEL_PATH + EdeltaAbstractTest.ECORE_ECORE)));
-		Iterables.addAll(ecorePairs, ListExtensions.map(ecoreNames, ecoreName -> {
-			try {
-				return Pair.of(ecoreName, EdeltaTestUtils.loadFile(EdeltaAbstractTest.METAMODEL_PATH + ecoreName));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+		// Same rationale as in createResourceSetWithEcores: ecore names containing "/"
+		// are handled separately so their subdirectory becomes a dedicated source folder.
+		var ecoresInSubdirectory = new ArrayList<String>();
+		for (var ecoreName : ecoreNames) {
+			if (ecoreName.contains("/")) {
+				ecoresInSubdirectory.add(ecoreName);
+			} else {
+				try {
+					ecorePairs.add(Pair.of(ecoreName,
+							EdeltaTestUtils.loadFile(EdeltaAbstractTest.METAMODEL_PATH + ecoreName)));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
-		}));
+		}
 		var inputPairs = createInputPairs(inputs.toArray(new CharSequence[0]));
 		Iterable<Pair<String, ? extends CharSequence>> concat = Iterables
 				.concat(ecorePairs, inputPairs);
 		@SuppressWarnings("unchecked")
 		final ResourceSet rs = compilationTestHelper
 				.resourceSet(((Pair<String, ? extends CharSequence>[]) Conversions.unwrapArray(concat, Pair.class)));
+		addEcoresInSubdirectoryToResourceSet(rs, ecoresInSubdirectory);
 		return rs;
+	}
+
+	/**
+	 * Places each ecore-in-subdirectory file at the project root level (outside
+	 * {@code src/}) and registers its top-level directory as a dedicated source
+	 * folder in the {@link FileProjectConfig}. This guarantees that
+	 * {@code IProjectConfig.findSourceFolderContaining(URI)} matches that directory
+	 * rather than {@code src/}, so that
+	 * {@code EdeltaCompilerUtil.getRelativeSourcePath()} returns only the filename
+	 * (and any deeper relative path) without the source folder name as a prefix.
+	 */
+	private void addEcoresInSubdirectoryToResourceSet(ResourceSet rs, List<String> ecoresInSubdirectory)
+			throws IOException {
+		if (ecoresInSubdirectory.isEmpty()) {
+			return;
+		}
+		var projectConfig = (FileProjectConfig) ProjectConfigAdapter.findInEmfObject(rs).getProjectConfig();
+		var addedSourceFolders = new HashSet<String>();
+		for (var ecoreName : ecoresInSubdirectory) {
+			var sourceFolderName = ecoreName.substring(0, ecoreName.indexOf('/'));
+			if (addedSourceFolders.add(sourceFolderName)) {
+				projectConfig.addSourceFolder(sourceFolderName);
+			}
+			var uri = compilationTestHelper.copyToWorkspace(
+					CompilationTestHelper.PROJECT_NAME + "/" + ecoreName,
+					EdeltaTestUtils.loadFile(EdeltaAbstractTest.METAMODEL_PATH + ecoreName));
+			var resource = rs.createResource(uri);
+			resource.load(rs.getLoadOptions());
+		}
 	}
 }

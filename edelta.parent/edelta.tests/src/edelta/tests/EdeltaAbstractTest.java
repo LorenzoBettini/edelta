@@ -110,6 +110,10 @@ public abstract class EdeltaAbstractTest {
 
 	protected static final String ECOREVERSIONS = "ecoreversions/";
 
+	protected static final String ECOREOTHER = "ecoreother/";
+
+	protected static final String ECORE_IN_ECORE_OTHER_ECORE = "EcoreInEcoreOther.ecore";
+
 	/**
 	 * Parse several input sources using the "foo" EPackage and returns the parsed
 	 * program corresponding to the last input source.
