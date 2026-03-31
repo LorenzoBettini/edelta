@@ -117,6 +117,14 @@ public class EdeltaModelUtilTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	public void testGetMetamodelImportTextWhenIndexOutOfBounds() throws Exception {
+		var prog = parseWithTestEcore("metamodel \"foo\"");
+		// index out of bounds should return empty string, not throw exception
+		assertThat(EdeltaModelUtil.getMetamodelImportText(prog, 1)).isEmpty();
+		assertThat(EdeltaModelUtil.getMetamodelImportText(prog, -1)).isEmpty();
+	}
+
+	@Test
 	public void testHasCycleInHierarchy() {
 		var ecoreFactory = EcoreFactory.eINSTANCE;
 		var c1 = ecoreFactory.createEClass();

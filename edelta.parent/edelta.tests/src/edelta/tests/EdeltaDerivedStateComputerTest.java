@@ -13,6 +13,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -31,6 +34,7 @@ import edelta.edelta.EdeltaEcoreQualifiedArgument;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
+import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.tests.additional.TestableEdeltaDerivedStateComputer;
 import edelta.tests.injectors.EdeltaInjectorProviderTestableDerivedStateComputer;
 
@@ -409,6 +413,53 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 			EdeltaAbstractTest.METAMODEL_PATH + EdeltaAbstractTest.PERSON_LIST_ECORE,
 			inputs.personListExampleModifyEcore());
 		validationTestHelper.assertNoErrors(prog);
+	}
+
+	@Test
+	public void testUnloadDerivedPackagesWithNullPackage() {
+		var ePackage = createEPackage("testPackage");
+		ePackage.eAdapters().add(new AdapterImpl());
+		// unloadDerivedPackages should NOT throw with null packages
+		// and should still unload non-null packages
+		derivedStateComputer.unloadDerivedPackages(
+			new EdeltaCopiedEPackagesMap() {
+				@Override
+				public Collection<EPackage> values() {
+					var list = new ArrayList<EPackage>();
+					list.add(null); // simulate a null package
+					list.add(ePackage);
+					return list;
+				}
+			});
+		// adapter removed from non-null package means it was properly processed
+		assertTrue(ePackage.eAdapters().isEmpty());
+	}
+
+	@Test
+	public void testDerivedStateIsCorrectlyDiscardedAfterMovingAllEClassifiers() throws Exception {
+		var program = parseWithTestEcores("""
+			package test
+			
+			metamodel "foo"
+			metamodel "bar"
+			
+			modifyEcore aTest epackage foo {
+				ecoreref(bar).EClassifiers.addAll(new java.util.ArrayList(EClassifiers))
+			}
+		""");
+		var resource = ((DerivedStateAwareResource) program.eResource());
+		var nameToCopiedEPackageMap = derivedStateHelper.getCopiedEPackagesMap(resource);
+		// after interpretation, foo should have no classifiers (they were all moved to bar)
+		assertThat(nameToCopiedEPackageMap.get("foo").getEClassifiers()).isEmpty();
+		// discard derived state - this should NOT throw NullPointerException
+		program.getModifyEcoreOperations().clear();
+		resource.discardDerivedState();
+		// maps are empty now
+		assertTrue(nameToCopiedEPackageMap.values().isEmpty());
+		// only program must be there and the inferred Jvm Type
+		assertEquals("test.__synthetic0",
+			((JvmGenericType)
+				lastOrNull(resource.getContents())).getIdentifier());
 	}
 
 	private EdeltaEcoreQualifiedArgument getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {
