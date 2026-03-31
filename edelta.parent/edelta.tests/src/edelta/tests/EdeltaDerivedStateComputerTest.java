@@ -416,7 +416,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	public void testUnloadDerivedPackagesWithNullPackage() throws Exception {
+	public void testUnloadDerivedPackagesWithNullPackage() {
 		var ePackage = createEPackage("testPackage");
 		ePackage.eAdapters().add(new AdapterImpl());
 		// unloadDerivedPackages should NOT throw with null packages
