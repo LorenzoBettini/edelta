@@ -289,9 +289,10 @@
               ${project.basedir}/../edelta.target/${target-file-name}
             </file>
           </target>
-          <!-- Epsilon p2 site refers to old Orbit sites for its dependencies,
-            so we must tell Tycho to consider referenced repositories -->
-          <referencedRepositoryMode>include</referencedRepositoryMode>
+          <!-- Epsilon p2 site refers to old Orbit and emfatic sites for its
+            dependencies; we ignore referenced repositories and manually add them
+            in HTTPS form below to avoid HTTP blocking in CI environments -->
+          <referencedRepositoryMode>ignore</referencedRepositoryMode>
         </configuration>
       </plugin>
     </plugins>

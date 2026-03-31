@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="edelta.target" sequenceNumber="33">
+<target name="edelta.target" sequenceNumber="36">
 	<targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-21"/>
 	<locations>
 		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
@@ -41,6 +41,18 @@
 			<unit id="org.eclipse.epsilon.picto.feature.feature.group" version="0.0.0"/>
 			<unit id="org.eclipse.epsilon.emf.feature.feature.group" version="0.0.0"/>
 			<repository location="https://download.eclipse.org/epsilon/updates/2.8/"/>
+		</location>
+		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+			<unit id="org.eclipse.emf.emfatic.feature.group" version="0.0.0"/>
+			<repository location="https://download.eclipse.org/emfatic/update"/>
+		</location>
+		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+			<unit id="org.apache.commons.csv" version="0.0.0"/>
+			<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20211213173813/repository"/>
+		</location>
+		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+			<unit id="org.commonmark-gfm-strikethrough" version="0.0.0"/>
+			<repository location="https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/2024-12"/>
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 			<unit id="org.apache.log4j" version="1.2.26"/>
