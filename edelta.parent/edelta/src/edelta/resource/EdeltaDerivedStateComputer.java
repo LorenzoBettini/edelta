@@ -86,7 +86,8 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 	 */
 	protected void unloadDerivedPackages(final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
 		for (final var p : copiedEPackagesMap.values()) {
-			unloader.unloadRoot(p);
+			if (p != null)
+				unloader.unloadRoot(p);
 		}
 	}
 }

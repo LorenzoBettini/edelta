@@ -52,8 +52,10 @@ public class EdeltaModelUtil {
 	}
 
 	public static String getMetamodelImportText(EdeltaProgram p, int index) {
-		return getTokenText(
-			getMetamodelImportNodes(p).get(index));
+		var nodes = getMetamodelImportNodes(p);
+		if (index < 0 || index >= nodes.size())
+			return "";
+		return getTokenText(nodes.get(index));
 	}
 
 	public static List<INode> getMetamodelImportNodes(EdeltaProgram p) {
