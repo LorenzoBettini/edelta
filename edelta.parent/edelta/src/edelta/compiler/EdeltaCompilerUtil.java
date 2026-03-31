@@ -1,6 +1,5 @@
 package edelta.compiler;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -9,6 +8,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.xtext.workspace.IProjectConfigProvider;
 
 import com.google.inject.Inject;
 
@@ -21,10 +21,9 @@ import edelta.util.EdeltaEcoreReferenceInformationHelper;
  * @author Lorenzo Bettini
  */
 public class EdeltaCompilerUtil {
-	/**
-	 * The name of the folder where the Ecore versions are meant to be stored
-	 */
-	public static final String ECOREVERSIONS = "ecoreversions";
+
+	@Inject
+	private IProjectConfigProvider projectConfigProvider;
 
 	@Inject
 	private EdeltaEcoreReferenceInformationHelper ecoreReferenceInformationHelper;
@@ -74,24 +73,26 @@ public class EdeltaCompilerUtil {
 	}
 
 	/**
-	 * Returns the relative path of the Resource with respect to the
-	 * {@value #ECOREVERSIONS} folder.
+	 * Returns the relative path of the Resource with respect to its source folder
+	 * as determined by
+	 * {@link org.eclipse.xtext.workspace.IProjectConfig#findSourceFolderContaining(org.eclipse.emf.common.util.URI)}.
 	 * 
 	 * @param resource
-	 * @return the relative path of the Resource with respect to the
-	 *         {@value #ECOREVERSIONS} folder, or the last segment of the URI if
-	 *         {@value #ECOREVERSIONS} is not found in the URI.
+	 * @return the relative path of the Resource with respect to its source folder,
+	 *         or the last segment of the URI if no source folder is found.
 	 */
-	public String getEcoreversionsRelativePath(Resource resource) {
+	public String getRelativeSourcePath(Resource resource) {
 		var uri = resource.getURI();
-		var segments = uri.segments();
-
-		for (int i = 0; i < segments.length; i++) {
-			if (ECOREVERSIONS.equals(segments[i])) {
-				return String.join("/", Arrays.copyOfRange(segments, i + 1, segments.length));
+		var resourceSet = resource.getResourceSet();
+		if (resourceSet != null) {
+			var projectConfig = projectConfigProvider.getProjectConfig(resourceSet);
+			if (projectConfig != null) {
+				var sourceFolder = projectConfig.findSourceFolderContaining(uri);
+				if (sourceFolder != null) {
+					return uri.deresolve(sourceFolder.getPath()).toString();
+				}
 			}
 		}
-
 		return uri.lastSegment();
 	}
 

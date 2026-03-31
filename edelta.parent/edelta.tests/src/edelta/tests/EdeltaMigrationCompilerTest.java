@@ -360,4 +360,75 @@ public class EdeltaMigrationCompilerTest extends EdeltaAbstractCompilerTest {
 		return rs;
 	}
 
+	@Test
+	public void testCompilationOfMigrationWithRealEcoreFilesInOtherDirectory() throws Exception {
+		var rs = createResourceSetWithEcores(List.of(
+				ECOREOTHER + ECORE_IN_ECORE_OTHER_ECORE),
+		"""
+		package foo;
+
+		migrate "http://www.simple.in.ecoreother" to "http://www.simple.in.ecoreother/v2"
+
+		modifyEcore aTest epackage simpleinecoreother {
+			ecoreref(simpleinecoreother.SimpleClass).name = "RenamedSimpleClass"
+		}
+		""");
+		checkCompilation(rs, """
+		package foo;
+		
+		import edelta.lib.EdeltaDefaultRuntime;
+		import edelta.lib.EdeltaEngine;
+		import edelta.lib.EdeltaRuntime;
+		import edelta.lib.annotation.EdeltaGenerated;
+		import java.util.List;
+		import org.eclipse.emf.ecore.EPackage;
+		
+		@SuppressWarnings("all")
+		public class Example extends EdeltaDefaultRuntime {
+		  public Example(final EdeltaRuntime other) {
+		    super(other);
+		  }
+		
+		  public void aTest(final EPackage it) {
+		    getEClass("simpleinecoreother", "SimpleClass").setName("RenamedSimpleClass");
+		  }
+		
+		  @Override
+		  public void performSanityChecks() throws Exception {
+		    ensureEPackageIsLoadedByNsURI("simpleinecoreother", "http://www.simple.in.ecoreother");
+		  }
+		
+		  @Override
+		  protected void doExecute() throws Exception {
+		    aTest(getEPackage("simpleinecoreother"));
+		    getEPackage("simpleinecoreother").setNsURI("http://www.simple.in.ecoreother/v2");
+		  }
+		
+		  @Override
+		  public List<String> getMigratedNsURIs() {
+		    return List.of(
+		      "http://www.simple.in.ecoreother"
+		    );
+		  }
+		
+		  @Override
+		  public List<String> getMigratedEcorePaths() {
+		    return List.of(
+		      "/EcoreInEcoreOther.ecore"
+		    );
+		  }
+		
+		  @EdeltaGenerated
+		  public static void main(final String[] args) throws Exception {
+		    var engine = new EdeltaEngine(Example::new);
+		    engine.loadEcoreFile("EcoreInEcoreOther.ecore",
+		      Example.class.getResourceAsStream("/EcoreInEcoreOther.ecore"));
+		    engine.execute();
+		    engine.save("modified");
+		  }
+		}
+		""",
+		true);
+	}
+
 }
