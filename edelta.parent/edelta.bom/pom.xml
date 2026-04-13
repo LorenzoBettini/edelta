@@ -12,7 +12,8 @@
     <groupId>io.github.lorenzobettini.xtextutils</groupId>
     <artifactId>xtext-tycho-parent</artifactId>
     <version>0.24.0</version>
-    <!-- REMEMBER: update xtextVersion in edelta.maven.example -->
+    <!-- REMEMBER: update xtextVersion in edelta.maven.example
+    	and the version range in edelta.feature -->
     <relativePath></relativePath>
   </parent>
   <packaging>pom</packaging>
