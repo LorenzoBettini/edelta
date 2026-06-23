@@ -34,7 +34,7 @@ jobs:
 #      MAVEN_OPTS: --add-opens java.base/java.lang=ALL-UNNAMED
 
     steps:
-    - uses: actions/checkout@v6.0.3
+    - uses: actions/checkout@v7.0.0
     - name: Set up JDK
       uses: actions/setup-java@v5.3.0
       with:
