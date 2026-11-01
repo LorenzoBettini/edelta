@@ -10,6 +10,10 @@ An Xtext DSL for EMF metamodels refactoring and migration
 
 ### Requirements
 
+The current development version uses Xtext 2.44.0, MWE2 2.27.0, and Eclipse
+2026-09, built with the released `xtext-tycho-parent` 0.26.0 (Tycho 5.0.4).
+Jupiter tests use JUnit 6 to match Xtext's testing bundles.
+
 Since version 3.9.0, Edelta requires Java 21.
 
 Since version 3.7.0, the Edelta Eclipse distribution requires Java 21.
