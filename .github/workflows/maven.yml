@@ -27,6 +27,11 @@ jobs:
         java-version: 21
         distribution: temurin
 
+    - name: Install SWT browser runtime for Picto
+      run: |
+        sudo apt-get update
+        sudo apt-get install --no-install-recommends -y libwebkit2gtk-4.1-0
+
     - name: Restore cache
       uses: actions/cache/restore@v6
       with:
@@ -84,4 +89,5 @@ jobs:
       with:
         name: logs-${{ runner.os }}
         path: '**/*.tests/target/**/*.log'
+        include-hidden-files: true
 

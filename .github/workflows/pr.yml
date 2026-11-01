@@ -69,3 +69,4 @@ jobs:
       with:
         name: logs-${{ runner.os }}
         path: '**/*.tests/target/**/*.log'
+        include-hidden-files: true

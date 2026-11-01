@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.epsilon.picto.PictoView;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.progress.UIJob;
 import org.eclipse.xtext.util.StringInputStream;
 
 import GraphMM.Repository;
@@ -20,7 +21,8 @@ import edelta.dependency.analyzer.ui.internal.EdeltaDependencyAnalyzerUiUtils;
  * Runs the dependency analysis on the selected ecore file and the other ecore
  * files in the same directory, creates the {@link Repository} model, saves it,
  * generates the corresponding picto file and opens the EMF editor and Picto
- * view.
+ * view. Editor/view opening is deferred until the workspace modification has
+ * finished, so Picto does not start rendering resources that are still changing.
  * 
  * @author Lorenzo Bettini
  *
@@ -64,12 +66,17 @@ public class EdeltaRunDependencyAnalysisHandler extends AbstractHandler {
 				generatedPictoFile.create(stream, true, subMonitor.newChild(MONITOR_CHILD_WORK));
 			}
 
-			var page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-			page.openEditor(new FileEditorInput(generatedFile),
-					"org.eclipse.emf.ecore.presentation.ReflectiveEditorID");
-
-			page.showView(PictoView.ID);
 			subMonitor.done();
+
+			// Start Picto after the workspace operation and its progress service finish.
+			// Starting its background jobs inside that operation can cancel the EGL
+			// execution, producing "Terminated by the user" instead of graph HTML.
+			var page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+			UIJob.create("Open dependency analysis", uiMonitor -> {
+				page.openEditor(new FileEditorInput(generatedFile),
+					"org.eclipse.emf.ecore.presentation.ReflectiveEditorID");
+				page.showView(PictoView.ID);
+			}).schedule();
 		});
 		return null;
 	}

@@ -10,6 +10,10 @@ An Xtext DSL for EMF metamodels refactoring and migration
 
 ### Requirements
 
+The current development version uses Xtext 2.44.0, MWE2 2.27.0, and Eclipse
+2026-09, built with the released `xtext-tycho-parent` 0.26.0 (Tycho 5.0.4).
+Jupiter tests use JUnit 6 to match Xtext's testing bundles.
+
 Since version 3.9.0, Edelta requires Java 21.
 
 Since version 3.7.0, the Edelta Eclipse distribution requires Java 21.
@@ -56,6 +60,43 @@ https://lorenzobettini.github.io/edelta-snapshots/
 ### Maven artifacts
 
 Since version 0.7.1, Maven artifacts for Edelta (mainly the compiler and the libraries) are available on Maven Central (the groupId is `io.github.lorenzobettini.edelta`), and can be used, for instance, together with the `xtext-maven-plugin`, to compile `.edelta` files into Java files during a Maven build, both a Maven/Tycho build and a pure Maven build. An example of a pure Maven project using this mechanism can be found here: https://github.com/LorenzoBettini/edelta/tree/master/edelta.parent/edelta.maven.example.
+
+### Picto integration tests
+
+The dependency analyzer uses Epsilon/Picto 2.9. Its
+`EdeltaRunDependencyAnalysisHandler` schedules editor and Picto opening in a UI
+job after the workspace modification operation finishes. Starting Picto outside
+that operation avoids the cancelled rendering that displayed "Terminated by the
+user" instead of the graph.
+
+The packaged IDE tests in
+`edelta.parent/edelta.swtbot.tests/src/edelta/swtbot/tests/EdeltaSwtbotTest.java`
+check that Picto renders the generated dependency analysis, keeps focus after
+rendering, and can render it again when its editor is closed and reopened. They
+also fail on asynchronous Epsilon and Eclipse UI errors recorded in the Eclipse
+log, including failures to create the Picto view. Cleanup waits for Picto rendering
+and closes the view before deleting workspace files retained by its background jobs.
+The tests also wait for the command's queued UI job before checking a reopened
+view, so they cannot inspect stale content from the previous editor.
+
+On Ubuntu, install the native SWT browser runtime before running Picto tests:
+
+```sh
+sudo apt-get update
+sudo apt-get install --no-install-recommends -y libwebkit2gtk-4.1-0
+```
+
+Xvfb provides a display for headless tests; Picto's embedded browser additionally
+requires WebKitGTK. On headless Linux, prefix the Maven command below with
+`xvfb-run -a`. CI log artifacts include hidden `.metadata/.log` workspace logs so
+native browser initialization failures retain their original diagnostics.
+
+Run the complete build, including these tests and aggregate coverage, with a
+working display:
+
+```sh
+./mvnw -B -f edelta.parent/pom.xml clean verify -Pjacoco,test-ide
+```
 
 ### Contributors
 

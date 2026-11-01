@@ -15,7 +15,7 @@
   <description>An Xtext DSL for EMF metamodels refactoring and migration.</description>
 
   <properties>
-    <eclipse-version>2026-03</eclipse-version>
+    <eclipse-version>2026-09</eclipse-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
@@ -298,6 +298,24 @@
     </plugins>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-surefire-plugin</artifactId>
+          <executions>
+            <!-- Tycho 5.0.4's JUnit 6 runner only discovers Jupiter tests.
+              Modules with Jupiter tests enable this separate execution. -->
+            <execution>
+              <id>junit6-tests</id>
+              <phase>none</phase>
+              <goals>
+                <goal>test</goal>
+              </goals>
+              <configuration>
+                <providerHint>junit6</providerHint>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-packaging-plugin</artifactId>
