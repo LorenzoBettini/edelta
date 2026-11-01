@@ -12,6 +12,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 
 import java.util.List;
 
@@ -34,6 +37,7 @@ import com.google.inject.Injector;
 import edelta.edelta.EdeltaEcoreArgument;
 import edelta.edelta.EdeltaPackage;
 import edelta.edelta.EdeltaProgram;
+import edelta.interpreter.EdeltaDefaultInterpreter;
 import edelta.interpreter.EdeltaInterpreter;
 import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
@@ -62,6 +66,28 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		// actually we set it to several minutes
 		// this also makes it easier to debug tests
 		interpreter.setInterpreterTimeout(1200000);
+	}
+
+	@Test
+	public void testEvaluationExceptionCancelsTimeoutGuard() throws Exception {
+		var program = parseWithTestEcore("""
+		metamodel "foo"
+		modifyEcore aTest epackage foo {
+		}
+		""");
+		var failingInterpreter = spy((EdeltaDefaultInterpreter) interpreter);
+		failingInterpreter.setInterpreterTimeout(1000);
+		var failure = new IllegalArgumentException("evaluation failed");
+		doThrow(failure).when(failingInterpreter).evaluate(any(), any(), any());
+		try {
+			assertThatThrownBy(() -> failingInterpreter.evaluateModifyEcoreOperations(program))
+				.isSameAs(failure);
+			// A leaked guard would interrupt this unrelated work after one second.
+			Thread.sleep(1500);
+			assertThat(Thread.currentThread().isInterrupted()).isFalse();
+		} finally {
+			Thread.interrupted();
+		}
 	}
 
 	@Test

@@ -98,6 +98,11 @@ working display:
 ./mvnw -B -f edelta.parent/pom.xml clean verify -Pjacoco,test-ide
 ```
 
+### Interpreter timeouts
+
+See [Interpreter timeouts](docs/interpreter-timeouts.md) for timeout cleanup,
+interrupt handling, and the regression tests for intermittent compilation failures.
+
 ### Contributors
 
 - Lorenzo Bettini
