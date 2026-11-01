@@ -301,10 +301,6 @@
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-surefire-plugin</artifactId>
-          <configuration>
-            <!-- Run JUnit 4 suites explicitly; mixed-suite detection selects JUnit 5. -->
-            <providerHint>junit4</providerHint>
-          </configuration>
           <executions>
             <!-- Tycho 5.0.4's JUnit 6 runner only discovers Jupiter tests.
               Modules with Jupiter tests enable this separate execution. -->
