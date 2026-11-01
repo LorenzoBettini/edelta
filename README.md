@@ -61,6 +61,28 @@ https://lorenzobettini.github.io/edelta-snapshots/
 
 Since version 0.7.1, Maven artifacts for Edelta (mainly the compiler and the libraries) are available on Maven Central (the groupId is `io.github.lorenzobettini.edelta`), and can be used, for instance, together with the `xtext-maven-plugin`, to compile `.edelta` files into Java files during a Maven build, both a Maven/Tycho build and a pure Maven build. An example of a pure Maven project using this mechanism can be found here: https://github.com/LorenzoBettini/edelta/tree/master/edelta.parent/edelta.maven.example.
 
+### Picto integration tests
+
+The dependency analyzer uses Epsilon/Picto 2.9. Its
+`EdeltaRunDependencyAnalysisHandler` schedules editor and Picto opening in a UI
+job after the workspace modification operation finishes. Starting Picto outside
+that operation avoids the cancelled rendering that displayed "Terminated by the
+user" instead of the graph.
+
+The packaged IDE tests in
+`edelta.parent/edelta.swtbot.tests/src/edelta/swtbot/tests/EdeltaSwtbotTest.java`
+check that Picto renders the generated dependency analysis, keeps focus after
+rendering, and can render it again when its editor is closed and reopened. They
+also fail on asynchronous Epsilon errors recorded in the Eclipse log. Cleanup waits for Picto rendering and closes
+the view before deleting workspace files retained by its background jobs.
+
+Run the complete build, including these tests and aggregate coverage, with a
+working display:
+
+```sh
+./mvnw -B -f edelta.parent/pom.xml clean verify -Pjacoco,test-ide
+```
+
 ### Contributors
 
 - Lorenzo Bettini

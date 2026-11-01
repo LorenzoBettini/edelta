@@ -10,6 +10,8 @@ Require-Bundle: org.eclipse.swtbot.go;bundle-version="2.3.0",
  org.eclipse.jdt.core,
  org.eclipse.ui.ide,
  org.eclipse.pde.core;bundle-version="3.15.0",
- edelta.ui.testutils
+ edelta.ui.testutils,
+ org.eclipse.epsilon.picto;bundle-version="2.9.0",
+ assertj-core;bundle-version="3.24.2"
 Bundle-Vendor: Lorenzo Bettini
 Automatic-Module-Name: edelta.swtbot.tests

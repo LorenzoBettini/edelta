@@ -25,5 +25,5 @@
    <repository-reference location="https://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.44.0/" name="" enabled="true" />
    <repository-reference location="https://download.eclipse.org/releases/2026-09/" name="" enabled="true" />
    <repository-reference location="https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/2026-09/" name="" enabled="true" />
-   <repository-reference location="https://download.eclipse.org/epsilon/updates/2.8/" name="" enabled="true" />
+   <repository-reference location="https://download.eclipse.org/epsilon/updates/2.9/" name="" enabled="true" />
 </site>
