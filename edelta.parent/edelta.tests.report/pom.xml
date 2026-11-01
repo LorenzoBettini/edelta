@@ -24,6 +24,7 @@
                 <exclude>**/edelta/edelta/**/*.class</exclude>
                 <exclude>**/EdeltaMaven*.class</exclude>
                 <exclude>**/HelpMojo*.class</exclude>
+                <exclude>**/edelta/ui/launching/*.class</exclude>
               </excludes>
             </configuration>
             <executions>
