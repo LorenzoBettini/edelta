@@ -73,8 +73,23 @@ The packaged IDE tests in
 `edelta.parent/edelta.swtbot.tests/src/edelta/swtbot/tests/EdeltaSwtbotTest.java`
 check that Picto renders the generated dependency analysis, keeps focus after
 rendering, and can render it again when its editor is closed and reopened. They
-also fail on asynchronous Epsilon errors recorded in the Eclipse log. Cleanup waits for Picto rendering and closes
-the view before deleting workspace files retained by its background jobs.
+also fail on asynchronous Epsilon and Eclipse UI errors recorded in the Eclipse
+log, including failures to create the Picto view. Cleanup waits for Picto rendering
+and closes the view before deleting workspace files retained by its background jobs.
+The tests also wait for the command's queued UI job before checking a reopened
+view, so they cannot inspect stale content from the previous editor.
+
+On Ubuntu, install the native SWT browser runtime before running Picto tests:
+
+```sh
+sudo apt-get update
+sudo apt-get install --no-install-recommends -y libwebkit2gtk-4.1-0
+```
+
+Xvfb provides a display for headless tests; Picto's embedded browser additionally
+requires WebKitGTK. On headless Linux, prefix the Maven command below with
+`xvfb-run -a`. CI log artifacts include hidden `.metadata/.log` workspace logs so
+native browser initialization failures retain their original diagnostics.
 
 Run the complete build, including these tests and aggregate coverage, with a
 working display:
