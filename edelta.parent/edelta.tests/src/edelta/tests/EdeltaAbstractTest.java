@@ -10,13 +10,13 @@ import static org.eclipse.xtext.xbase.lib.IterableExtensions.join;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.lastOrNull;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.map;
 import static org.eclipse.xtext.xbase.lib.IterableExtensions.sort;
-import static org.eclipse.xtext.xbase.lib.ListExtensions.map;
 import static org.junit.Assert.assertEquals;
 
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
@@ -49,10 +49,10 @@ import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import edelta.edelta.EdeltaEcoreSimpleArgument;
-import edelta.edelta.EdeltaEcoreQualifiedArgument;
 import edelta.edelta.EdeltaEcoreArgument;
+import edelta.edelta.EdeltaEcoreQualifiedArgument;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
+import edelta.edelta.EdeltaEcoreSimpleArgument;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
 import edelta.edelta.EdeltaProgram;
@@ -385,10 +385,10 @@ public abstract class EdeltaAbstractTest {
 			end = "\n";
 		}
 		assertEqualsStrings(expected,
-			join(
-				sort(
-					map(elements, it -> it.getQualifiedName().toString())),
-				"\n")
+			elements.stream()
+				.map(it -> it.getQualifiedName().toString())
+				.sorted()
+				.collect(Collectors.joining("\n"))
 			+ end);
 	}
 
