@@ -118,7 +118,7 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 	/**
 	 * Keeps track of {@link EdeltaEcoreArgument} already evaluated.
 	 */
-	private Collection<EdeltaEcoreReferenceExpression> interpretedEcoreReferenceExpressions =
+	private final Collection<EdeltaEcoreReferenceExpression> interpretedEcoreReferenceExpressions =
 		new HashSet<>();
 
 	@Override
