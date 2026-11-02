@@ -16,8 +16,8 @@ import org.eclipse.xtext.resource.EObjectDescription;
  */
 public class EdeltaContentAssistEObjectDescription extends EObjectDescription {
 
-	private QualifiedName fullyQualifiedName;
-	private boolean ambiguous;
+	private final QualifiedName fullyQualifiedName;
+	private final boolean ambiguous;
 
 	/**
 	 * @param qualifiedName

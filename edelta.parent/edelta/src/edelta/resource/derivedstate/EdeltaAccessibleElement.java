@@ -11,8 +11,8 @@ import org.eclipse.xtext.naming.QualifiedName;
  */
 public class EdeltaAccessibleElement {
 
-	private ENamedElement element;
-	private QualifiedName qualifiedName;
+	private final ENamedElement element;
+	private final QualifiedName qualifiedName;
 
 	public EdeltaAccessibleElement(ENamedElement element, QualifiedName qualifiedName) {
 		this.element = element;

@@ -37,11 +37,11 @@ public class EdeltaVersionMigrator {
 
 	private static final Logger LOG = Logger.getLogger(EdeltaVersionMigrator.class);
 
-	private EdeltaModelManager modelManager = new EdeltaModelManager();
+	private final EdeltaModelManager modelManager = new EdeltaModelManager();
 
 	private static class VersionMigrationEntry {
-		private Collection<String> uris;
-		private EdeltaEngine engine;
+		private final Collection<String> uris;
+		private final EdeltaEngine engine;
 
 		VersionMigrationEntry(Collection<String> uris, EdeltaEngine engine) {
 			this.uris = uris;
@@ -49,9 +49,9 @@ public class EdeltaVersionMigrator {
 		}
 	}
 
-	private List<VersionMigrationEntry> versionMigrations = new ArrayList<>();
+	private final List<VersionMigrationEntry> versionMigrations = new ArrayList<>();
 
-	private Set<String> modelExtensions = new HashSet<>();
+	private final Set<String> modelExtensions = new HashSet<>();
 
 	public EdeltaVersionMigrator() {
 		modelExtensions.add(XMI_EXTENSION);
@@ -255,8 +255,8 @@ public class EdeltaVersionMigrator {
 	 */
 	public Collection<Resource> execute() throws Exception {
 		class MigrationData {
-			private Set<EPackage> ecores;
-			private Collection<Resource> models;
+			private final Set<EPackage> ecores;
+			private final Collection<Resource> models;
 
 			MigrationData(Set<EPackage> ecores, Collection<Resource> models) {
 				this.ecores = ecores;

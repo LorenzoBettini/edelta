@@ -18,7 +18,7 @@ import com.google.common.collect.HashBiMap;
  */
 public class EdeltaCopiedEPackagesMap {
 
-	private Map<String, EPackage> packagesByName = new HashMap<>();
+	private final Map<String, EPackage> packagesByName = new HashMap<>();
 	private Map<EObject,EObject> inverse;
 
 	public void setCopies(Collection<EPackage> copies, Map<EObject, EObject> copyMap) {

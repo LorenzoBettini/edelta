@@ -51,7 +51,7 @@ public class EdeltaModelMigrator {
 	public static class EdeltaModelCopier extends Copier {
 		private static final long serialVersionUID = 1L;
 
-		private transient BiMap<EObject, EObject> ecoreCopyMap;
+		private final transient BiMap<EObject, EObject> ecoreCopyMap;
 
 		private boolean forceCopy = false;
 
@@ -159,7 +159,7 @@ public class EdeltaModelMigrator {
 	}
 
 	private EdeltaModelManager originalModelManager;
-	private EdeltaModelManager evolvingModelManager;
+	private final EdeltaModelManager evolvingModelManager;
 	private Map<EObject, EObject> mapOfCopiedEcores;
 	private EdeltaModelCopier modelCopier;
 

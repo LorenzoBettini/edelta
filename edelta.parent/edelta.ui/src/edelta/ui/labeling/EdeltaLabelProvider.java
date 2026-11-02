@@ -35,7 +35,7 @@ public class EdeltaLabelProvider extends XbaseWithAnnotationsLabelProvider {
 	@Inject
 	private EdeltaDerivedStateHelper derivedStateHelper;
 
-	private AdapterFactoryLabelProvider delegate;
+	private final AdapterFactoryLabelProvider delegate;
 
 	private static final Styler BOLD_FONT_STYLER = new Styler() {
 		@Override

@@ -17,7 +17,7 @@ import edelta.validation.EdeltaValidator;
  */
 public class EdeltaInterpreterIssuePresenter implements EdeltaIssuePresenter {
 
-	private EdeltaInterpreterDiagnosticHelper diagnosticHelper;
+	private final EdeltaInterpreterDiagnosticHelper diagnosticHelper;
 
 	public EdeltaInterpreterIssuePresenter(EdeltaInterpreterDiagnosticHelper diagnosticHelper) {
 		this.diagnosticHelper = diagnosticHelper;
