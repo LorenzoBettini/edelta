@@ -17,6 +17,7 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.xbase.XbasePackage;
@@ -29,6 +30,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import edelta.edelta.EdeltaEcoreArgument;
+import edelta.edelta.EdeltaFactory;
 import edelta.edelta.EdeltaPackage;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaDefaultInterpreter;
@@ -37,6 +39,7 @@ import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
 import edelta.interpreter.EdeltaInterpreterTimeoutGuard;
 import edelta.interpreter.EdeltaInterpreterWrapperException;
+import edelta.jvmmodel.EdeltaJvmModelHelper;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.tests.additional.EdeltaEContentAdapter.EdeltaEContentAdapterException;
 import edelta.tests.additional.MyCustomEdeltaThatCannotBeLoadedAtRuntime;
@@ -72,6 +75,37 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		// actually we set it to several minutes
 		// this also makes it easier to debug tests
 		interpreter.setInterpreterTimeout(1200000);
+	}
+
+	@Test
+	public void testConfigureJavaThisWithoutInferredType() {
+		var program = EdeltaFactory.eINSTANCE.createEdeltaProgram();
+		assertThat(injector.getInstance(EdeltaJvmModelHelper.class).findJvmGenericType(program))
+			.isNull();
+		interpreter.setCurrentProgram(program);
+		interpreter.setThisObject(stdLib);
+		var context = interpreter.createContext();
+
+		interpreter.configureContextForJavaThis(context);
+
+		assertThat(context.getValue(QualifiedName.create("this"))).isSameAs(stdLib);
+	}
+
+	@Test
+	public void testConfigureJavaThisWithInferredType() throws Exception {
+		var program = parseHelper.parse("package test");
+		var inferredType = injector.getInstance(EdeltaJvmModelHelper.class)
+			.findJvmGenericType(program);
+		assertThat(inferredType).isNotNull();
+		interpreter.setCurrentProgram(program);
+		interpreter.setThisObject(stdLib);
+		var context = interpreter.createContext();
+
+		interpreter.configureContextForJavaThis(context);
+
+		assertThat(context.getValue(QualifiedName.create("this"))).isSameAs(stdLib);
+		assertThat(context.getValue(QualifiedName.create(inferredType.getSimpleName())))
+			.isSameAs(stdLib);
 	}
 
 	@Test

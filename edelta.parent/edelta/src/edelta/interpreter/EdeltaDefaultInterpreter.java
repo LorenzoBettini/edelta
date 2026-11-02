@@ -292,9 +292,10 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 		 * original source's XBlockExpression
 		 */
 		context.newValue(QualifiedName.create("this"), thisObject);
-		context.newValue(QualifiedName.create(
-				edeltaJvmModelHelper.findJvmGenericType(currentProgram).getSimpleName()),
-				thisObject);
+		final var inferredType = edeltaJvmModelHelper.findJvmGenericType(currentProgram);
+		if (inferredType != null) {
+			context.newValue(QualifiedName.create(inferredType.getSimpleName()), thisObject);
+		}
 	}
 
 	private void handleResultException(Throwable resultException) {
