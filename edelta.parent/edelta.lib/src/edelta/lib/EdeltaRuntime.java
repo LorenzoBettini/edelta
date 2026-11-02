@@ -45,7 +45,7 @@ public abstract class EdeltaRuntime {
 
 	private EdeltaIssuePresenter issuePresenter = EdeltaNopIssuePresenter.INSTANCE;
 
-	private Collection<EdeltaRuntime> children = new ArrayList<>();
+	private final Collection<EdeltaRuntime> children = new ArrayList<>();
 
 	/**
 	 * Reuses the {@link EdeltaRuntime} from the other object

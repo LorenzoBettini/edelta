@@ -24,8 +24,8 @@ import org.eclipse.emf.ecore.util.EcoreUtil.EqualityHelper;
  */
 public class EdeltaFeatureDifferenceFinder {
 
-	private List<EStructuralFeature> featuresToIgnore = new ArrayList<>();
-	private StringBuilder details = new StringBuilder();
+	private final List<EStructuralFeature> featuresToIgnore = new ArrayList<>();
+	private final StringBuilder details = new StringBuilder();
 
 	public boolean equals(EStructuralFeature feature1, EStructuralFeature feature2) {
 		var eClass1 = feature1.eClass();

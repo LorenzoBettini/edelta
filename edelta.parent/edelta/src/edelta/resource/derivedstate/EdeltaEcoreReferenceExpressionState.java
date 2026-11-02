@@ -10,7 +10,7 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
  */
 public class EdeltaEcoreReferenceExpressionState {
 
-	private EdeltaENamedElementXExpressionMap enamedElementXExpressionMap = new EdeltaENamedElementXExpressionMap();
+	private final EdeltaENamedElementXExpressionMap enamedElementXExpressionMap = new EdeltaENamedElementXExpressionMap();
 	private EdeltaAccessibleElements ecoreReferenceExpressionAccessibleElements = new EdeltaAccessibleElements();
 
 	public EdeltaENamedElementXExpressionMap getEnamedElementXExpressionMap() {

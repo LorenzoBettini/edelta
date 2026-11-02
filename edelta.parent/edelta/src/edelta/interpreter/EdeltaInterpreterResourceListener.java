@@ -40,17 +40,17 @@ import edelta.validation.EdeltaValidator;
  */
 public class EdeltaInterpreterResourceListener extends EContentAdapter {
 
-	private IResourceScopeCache cache;
+	private final IResourceScopeCache cache;
 
-	private Resource resource;
+	private final Resource resource;
 
-	private EdeltaENamedElementXExpressionMap enamedElementXExpressionMap;
+	private final EdeltaENamedElementXExpressionMap enamedElementXExpressionMap;
 
 	private XExpression currentExpression;
 
-	private EdeltaInterpreterDiagnosticHelper diagnosticHelper;
+	private final EdeltaInterpreterDiagnosticHelper diagnosticHelper;
 
-	private EdeltaModifiedElements modifiedElements;
+	private final EdeltaModifiedElements modifiedElements;
 
 	public EdeltaInterpreterResourceListener(IResourceScopeCache cache, Resource resource,
 			EdeltaDerivedStateHelper derivedStateHelper,

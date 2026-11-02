@@ -41,22 +41,22 @@ public class EdeltaModelManager {
 	/**
 	 * Here we store loaded Ecore Resources.
 	 */
-	private Collection<Resource> ecoreResources = new ArrayList<>();
+	private final Collection<Resource> ecoreResources = new ArrayList<>();
 
 	/**
 	 * Here we store the loaded model Resources.
 	 */
-	private Collection<Resource> modelResources = new ArrayList<>();
+	private final Collection<Resource> modelResources = new ArrayList<>();
 
 	/**
 	 * Here we store all the Ecores and models used by the Edelta
 	 */
-	private ResourceSet resourceSet = new ResourceSetImpl();
+	private final ResourceSet resourceSet = new ResourceSetImpl();
 
 	/**
 	 * Here we store EPackages mapped by name registered by {@link #registerEPackageByNsURI(String, String)}
 	 */
-	private Map<String, EPackage> nsURIToEPackage = new HashMap<>();
+	private final Map<String, EPackage> nsURIToEPackage = new HashMap<>();
 
 	/**
 	 * Performs EMF initialization (resource factories and package registry)

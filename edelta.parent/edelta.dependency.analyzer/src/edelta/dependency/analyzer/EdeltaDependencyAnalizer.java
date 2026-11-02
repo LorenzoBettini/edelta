@@ -42,7 +42,7 @@ public class EdeltaDependencyAnalizer {
 
 	private static final Logger LOG = Logger.getLogger(EdeltaDependencyAnalizer.class);
 
-	private EdeltaModelManager modelManager = new EdeltaModelManager();
+	private final EdeltaModelManager modelManager = new EdeltaModelManager();
 
 	/**
 	 * Analyzes the dependencies of the specified Ecore file together

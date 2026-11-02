@@ -13,8 +13,8 @@ import GraphMM.Metamodel;
  */
 public class EdeltaMetamodelDependencies {
 
-	private Metamodel highlighted;
-	private List<Metamodel> dependencies;
+	private final Metamodel highlighted;
+	private final List<Metamodel> dependencies;
 
 	public EdeltaMetamodelDependencies(Metamodel highlighted, List<Metamodel> dependencies) {
 		this.highlighted = highlighted;

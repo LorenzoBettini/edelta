@@ -25,7 +25,7 @@ public class EdeltaEngine {
 	public static interface EdeltaRuntimeProvider extends UnaryOperator<EdeltaRuntime> {
 	}
 
-	private EdeltaRuntimeProvider provider;
+	private final EdeltaRuntimeProvider provider;
 
 	private EdeltaModelManager originalModelManager = new EdeltaModelManager();
 	private EdeltaModelManager evolvingModelManager;
