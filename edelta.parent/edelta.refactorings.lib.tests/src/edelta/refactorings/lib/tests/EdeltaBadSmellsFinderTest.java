@@ -3,11 +3,10 @@ package edelta.refactorings.lib.tests;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.lastOrNull;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.map;
 
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.StreamSupport;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
@@ -17,8 +16,6 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.xtext.xbase.lib.Pair;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.google.common.base.Objects;
 
 import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaModelManager;
@@ -115,8 +112,8 @@ public class EdeltaBadSmellsFinderTest extends AbstractEdeltaRefactoringsLibTest
 		// during the comparison.
 		final var result = finder.findDuplicatedFeaturesCustom(p,
 			(f1, f2) -> 
-				Objects.equal(f1.getName(), f2.getName())
-						&& Objects.equal(f1.getEType(), f2.getEType()));
+				Objects.equals(f1.getName(), f2.getName())
+						&& Objects.equals(f1.getEType(), f2.getEType()));
 		assertThat(result)
 			.containsExactly(entry(
 				findEStructuralFeature(p, "C1", "a1"),
@@ -149,7 +146,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractEdeltaRefactoringsLibTest
 			});
 			stdLib.addNewEReference(containedWithOpposite, "correctWithOpposite", container, r -> {
 				r.setLowerBound(1);
-				r.setEOpposite(lastOrNull(container.getEReferences()));
+				r.setEOpposite(container.getEReferences().getLast());
 			});
 			// this is correct since it's another containment relation
 			stdLib.addNewContainmentEReference(containedWithContained, "correctWithContainment", container,
@@ -208,7 +205,7 @@ public class EdeltaBadSmellsFinderTest extends AbstractEdeltaRefactoringsLibTest
 				stdLib.addNewEReference(c, "used1", used1);
 			});
 		});
-		assertThat(finder.doesNotReferToClasses(head(EClasses(p))))
+		assertThat(finder.doesNotReferToClasses(EClasses(p).stream().findFirst().orElse(null)))
 			.isFalse();
 		var hasNoReference = stdLib.addNewEClass(p, "HasNoReference");
 		assertThat(finder.doesNotReferToClasses(hasNoReference))
@@ -368,14 +365,12 @@ public class EdeltaBadSmellsFinderTest extends AbstractEdeltaRefactoringsLibTest
 			stdLib.addNewSubclass(superclass, "ASubclass2");
 		});
 		assertThat(
-			map(
-				finder.directSubclasses(findEClass(p, "ASuperclass")),
-				ENamedElement::getName))
+			StreamSupport.stream(finder.directSubclasses(findEClass(p, "ASuperclass")).spliterator(), false)
+				.map(ENamedElement::getName))
 			.containsExactlyInAnyOrder("ASubclass1", "ASubclass2");
 		assertThat(
-			map(
-				finder.directSubclasses(findEClass(p, "ASubclass1")),
-				ENamedElement::getName))
+			StreamSupport.stream(finder.directSubclasses(findEClass(p, "ASubclass1")).spliterator(), false)
+				.map(ENamedElement::getName))
 			.containsExactlyInAnyOrder("ASubclass1Subclass");
 		assertThat(finder.directSubclasses(findEClass(p, "ASubclass1Subclass"))).isEmpty();
 	}
@@ -396,9 +391,8 @@ public class EdeltaBadSmellsFinderTest extends AbstractEdeltaRefactoringsLibTest
 		p2Resource.getContents().add(p2);
 		resourceSet.getResources().add(p2Resource);
 		assertThat(
-			map(
-				finder.directSubclasses(superclass),
-				ENamedElement::getName))
+			StreamSupport.stream(finder.directSubclasses(superclass).spliterator(), false)
+				.map(ENamedElement::getName))
 			.containsExactlyInAnyOrder("ASubclass1", "ASubclass2");
 	}
 

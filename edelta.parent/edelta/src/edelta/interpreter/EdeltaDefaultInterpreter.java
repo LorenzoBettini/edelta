@@ -8,9 +8,6 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toCollection;
 import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
 import static org.eclipse.xtext.xbase.lib.CollectionLiterals.newHashMap;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.exists;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.filter;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.forEach;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -522,9 +519,10 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 		var errors = ecoreReferenceExpression.eResource().getErrors();
 		// Avoid adding the same errors several times on the same expression.
 		// This can happen if we're interpreting a loop, removing the same element
-		if (exists(
-				filter(errors, EdeltaInterpreterDiagnostic.class),
-				error -> error.getProblematicObject() == ecoreReferenceExpression))
+		if (errors.stream()
+			.filter(EdeltaInterpreterDiagnostic.class::isInstance)
+			.map(EdeltaInterpreterDiagnostic.class::cast)
+			.anyMatch(error -> error.getProblematicObject() == ecoreReferenceExpression))
 			return;
 		errors.add(
 			new EdeltaInterpreterDiagnostic(Severity.ERROR,
@@ -641,12 +639,11 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 
 	private void configureContextForParameterArguments(final IEvaluationContext context, List<JvmFormalParameter> params,
 			final List<Object> argumentValues) {
-		forEach(params,
-			(param, index) ->
-				context.newValue(
-					QualifiedName.create(param.getName()),
-					argumentValues.get(index))
-		);
+		for (var index = 0; index < params.size(); index++) {
+			context.newValue(
+				QualifiedName.create(params.get(index).getName()),
+				argumentValues.get(index));
+		}
 	}
 
 	/**

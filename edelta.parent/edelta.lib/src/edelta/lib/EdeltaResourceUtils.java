@@ -66,10 +66,7 @@ public class EdeltaResourceUtils {
 		var contents = r.getContents();
 		if (contents.isEmpty())
 			return null;
-		var first = contents.get(0);
-		if (!(first instanceof EPackage))
-			return null;
-		return (EPackage) first;
+		return contents.getFirst() instanceof EPackage ePackage ? ePackage : null;
 	}
 
 	/**

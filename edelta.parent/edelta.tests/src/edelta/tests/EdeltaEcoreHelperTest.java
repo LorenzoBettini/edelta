@@ -1,11 +1,10 @@
 package edelta.tests;
 
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
-import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -198,7 +197,9 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 			""");
 		assertNamedElements(
 			ecoreHelper.getENamedElements(
-				head(getCopiedEPackages(prog)).getESubpackages().get(0)),
+				getCopiedEPackages(prog).stream()
+					.findFirst()
+					.orElse(null).getESubpackages().get(0)),
 			"AddedInSubpackage");
 	}
 
@@ -289,7 +290,15 @@ public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	@Test
 	public void testNullENamedElements() throws Exception {
 		parseWithTestEcore(inputs.referenceToMetamodel());
-		assertTrue(IterableExtensions.isEmpty(ecoreHelper.getENamedElements(null)));
+		assertThat(ecoreHelper.getENamedElements(null)).isEmpty();
+	}
+
+	@Test
+	public void testUnnamedElementInNamedElementsAssertion() {
+		var factory = EcoreFactory.eINSTANCE;
+		var ePackage = factory.createEPackage();
+		ePackage.getEClassifiers().add(factory.createEClass());
+		assertNamedElements(ecoreHelper.getENamedElements(ePackage), "null");
 	}
 
 	@Test

@@ -3,9 +3,6 @@
  */
 package edelta.ui.labeling;
 
-import static com.google.common.collect.Iterables.filter;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
-
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
@@ -84,6 +81,10 @@ public class EdeltaLabelProvider extends XbaseWithAnnotationsLabelProvider {
 	}
 
 	private JvmOperation inferredJavaMethod(final EObject e) {
-		return head(filter(jvmModelAssociations.getJvmElements(e), JvmOperation.class));
+		return jvmModelAssociations.getJvmElements(e).stream()
+			.filter(JvmOperation.class::isInstance)
+			.map(JvmOperation.class::cast)
+			.findFirst()
+			.orElse(null);
 	}
 }

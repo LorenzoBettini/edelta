@@ -1,7 +1,6 @@
 package edelta.refactorings.lib.tests;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
 
 import java.io.IOException;
 import java.util.List;
@@ -49,7 +48,6 @@ public class EdeltaBadSmellsResolverTest extends AbstractEdeltaRefactoringsLibTe
 	public void cleanModifiedOutputDirectory() throws IOException {
 		EdeltaTestUtils.cleanDirectory(AbstractEdeltaRefactoringsLibTest.MODIFIED);
 	}
-
 
 	private void loadModelFiles(String testModelDirectory, String... testModelFiles) {
 		this.testModelDirectory = testModelDirectory;
@@ -140,7 +138,7 @@ public class EdeltaBadSmellsResolverTest extends AbstractEdeltaRefactoringsLibTe
 	public void test_resolveAbstractConcreteMetaclass() {
 		final EPackage p = createEPackage("p",
 			pack -> stdLib.addNewAbstractEClass(pack, "AbstractConcreteMetaclass"));
-		final EClass c = head(EClasses(p));
+		final EClass c = EClasses(p).stream().findFirst().orElse(null);
 		resolver.resolveAbstractConcreteMetaclass(p);
 		Assertions.assertThat(c.isAbstract()).isFalse();
 	}

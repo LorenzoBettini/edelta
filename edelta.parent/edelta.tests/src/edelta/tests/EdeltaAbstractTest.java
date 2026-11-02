@@ -3,20 +3,15 @@ package edelta.tests;
 import static edelta.testutils.EdeltaTestUtils.removeCR;
 import static java.util.Arrays.asList;
 import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.filter;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.findFirst;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.join;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.lastOrNull;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.map;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.sort;
 import static org.junit.Assert.assertEquals;
 
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
@@ -44,8 +39,6 @@ import org.eclipse.xtext.xbase.XVariableDeclaration;
 import org.eclipse.xtext.xbase.jvmmodel.IJvmModelAssociations;
 import org.eclipse.xtext.xbase.lib.Extension;
 
-import com.google.common.base.Objects;
-import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -355,11 +348,12 @@ public abstract class EdeltaAbstractTest {
 
 	protected void assertErrorsAsStrings(EObject o, CharSequence expected) {
 		assertEqualsStrings(expected.toString().trim(),
-			join(sort(
-				map(
-					filter(validationTestHelper.validate(o), it -> it.getSeverity() == Severity.ERROR),
-					Issue::getMessage)),
-			"\n"));
+			validationTestHelper.validate(o).stream()
+				.filter(it -> it.getSeverity() == Severity.ERROR)
+				.map(Issue::getMessage)
+				.sorted()
+				.map(String::valueOf)
+				.collect(Collectors.joining("\n")));
 	}
 
 	protected void assertEqualsStrings(CharSequence expected, CharSequence actual) {
@@ -373,9 +367,10 @@ public abstract class EdeltaAbstractTest {
 			end = "\n";
 		}
 		assertEqualsStrings(expected,
-			join(
-				map(elements, ENamedElement::getName),
-				"\n")
+			StreamSupport.stream(elements.spliterator(), false)
+				.map(ENamedElement::getName)
+				.map(String::valueOf)
+				.collect(Collectors.joining("\n"))
 			+ end);
 	}
 
@@ -393,21 +388,27 @@ public abstract class EdeltaAbstractTest {
 	}
 
 	protected EPackage getEPackageByName(EdeltaProgram context, String packagename) {
-		return findFirst(
-				map(
-					Iterables.<XMIResource>filter(
-						context.eResource().getResourceSet().getResources(), XMIResource.class),
-					it -> (EPackage) head(it.getContents())),
-				it -> Objects.equal(it.getName(), packagename));
+		return context.eResource().getResourceSet().getResources().stream()
+			.filter(XMIResource.class::isInstance)
+			.map(XMIResource.class::cast)
+			.map(it -> (EPackage) it.getContents().getFirst())
+			.filter(it -> Objects.equals(it.getName(), packagename))
+			.findFirst()
+			.orElse(null);
 	}
 
 	protected EClassifier getEClassifierByName(EdeltaProgram context, String packagename, String classifiername) {
-		return findFirst(getEPackageByName(context, packagename).getEClassifiers(),
-			it -> Objects.equal(it.getName(), classifiername));
+		return getEPackageByName(context, packagename).getEClassifiers().stream()
+			.filter(it -> Objects.equals(it.getName(), classifiername))
+			.findFirst()
+			.orElse(null);
 	}
 
 	protected <T extends ENamedElement> T getByName(Iterable<T> namedElements, String nameToSearch) {
-		return findFirst(namedElements, it -> Objects.equal(it.getName(), nameToSearch));
+		return StreamSupport.stream(namedElements.spliterator(), false)
+			.filter(it -> Objects.equals(it.getName(), nameToSearch))
+			.findFirst()
+			.orElse(null);
 	}
 
 	protected XExpression getLastModifyEcoreOperationLastExpression(EdeltaProgram p) {
@@ -423,29 +424,34 @@ public abstract class EdeltaAbstractTest {
 	}
 
 	protected EdeltaModifyEcoreOperation lastModifyEcoreOperation(EdeltaProgram p) {
-		return lastOrNull(p.getModifyEcoreOperations());
+		return p.getModifyEcoreOperations().reversed().stream().findFirst().orElse(null);
 	}
 
 	protected EdeltaOperation lastOperation(EdeltaProgram p) {
-		return lastOrNull(p.getOperations());
+		return p.getOperations().reversed().stream().findFirst().orElse(null);
 	}
 
 	protected EClass getLastCopiedEPackageLastEClass(EObject context) {
-		return (EClass) lastOrNull(getLastCopiedEPackage(context).getEClassifiers());
+		return (EClass) getLastCopiedEPackage(context).getEClassifiers().reversed().stream()
+			.findFirst()
+			.orElse(null);
 	}
 
 	protected EClass getLastCopiedEPackageFirstEClass(EObject context) {
-		return (EClass) head(getLastCopiedEPackage(context).getEClassifiers());
+		return (EClass) getLastCopiedEPackage(context).getEClassifiers().stream()
+			.findFirst()
+			.orElse(null);
 	}
 
 	protected EClass getLastCopiedEPackageFirstEClass(EObject context, String nameToSearch) {
-		return (EClass) findFirst(
-			getLastCopiedEPackage(context).getEClassifiers(),
-				it -> Objects.equal(it.getName(), nameToSearch));
+		return (EClass) getLastCopiedEPackage(context).getEClassifiers().stream()
+			.filter(it -> Objects.equals(it.getName(), nameToSearch))
+			.findFirst()
+			.orElse(null);
 	}
 
 	protected EPackage getLastCopiedEPackage(EObject context) {
-		return lastOrNull(getCopiedEPackages(context));
+		return getCopiedEPackages(context).stream().reduce((first, last) -> last).orElse(null);
 	}
 
 	protected Collection<EPackage> getCopiedEPackages(EObject context) {
@@ -453,35 +459,47 @@ public abstract class EdeltaAbstractTest {
 	}
 
 	protected EClassifier getEClassiferByName(EPackage p, String nameToSearch) {
-		return findFirst(p.getEClassifiers(),
-			it -> Objects.equal(it.getName(), nameToSearch));
+		return p.getEClassifiers().stream()
+			.filter(it -> Objects.equals(it.getName(), nameToSearch))
+			.findFirst()
+			.orElse(null);
 	}
 
 	protected EClass getEClassByName(EPackage p, String nameToSearch) {
-		return findFirst(Iterables.<EClass>filter(p.getEClassifiers(), EClass.class),
-			it -> Objects.equal(it.getName(), nameToSearch));
+		return p.getEClassifiers().stream()
+			.filter(EClass.class::isInstance)
+			.map(EClass.class::cast)
+			.filter(it -> Objects.equals(it.getName(), nameToSearch))
+			.findFirst()
+			.orElse(null);
 	}
 
 	protected EStructuralFeature getEStructuralFeatureByName(EClassifier e, String nameToSearch) {
-		return findFirst(((EClass) e).getEStructuralFeatures(),
-			it -> Objects.equal(it.getName(), nameToSearch));
+		return ((EClass) e).getEStructuralFeatures().stream()
+			.filter(it -> Objects.equals(it.getName(), nameToSearch))
+			.findFirst()
+			.orElse(null);
 	}
 
 	protected EReference getEReferenceByName(EClassifier e, String nameToSearch) {
-		return findFirst(
-			((EClass) e).getEReferences(),
-				it -> Objects.equal(it.getName(), nameToSearch));
+		return ((EClass) e).getEReferences().stream()
+			.filter(it -> Objects.equals(it.getName(), nameToSearch))
+			.findFirst()
+			.orElse(null);
 	}
 
 	protected EAttribute getEAttributeByName(EClassifier e, String nameToSearch) {
-		return findFirst(
-			((EClass) e).getEAttributes(),
-				it -> Objects.equal(it.getName(), nameToSearch));
+		return ((EClass) e).getEAttributes().stream()
+			.filter(it -> Objects.equals(it.getName(), nameToSearch))
+			.findFirst()
+			.orElse(null);
 	}
 
 	protected EEnumLiteral getEEnumLiteralByName(EClassifier e, String nameToSearch) {
-		return findFirst(((EEnum) e).getELiterals(),
-			it -> Objects.equal(it.getName(), nameToSearch));
+		return ((EEnum) e).getELiterals().stream()
+			.filter(it -> Objects.equals(it.getName(), nameToSearch))
+			.findFirst()
+			.orElse(null);
 	}
 
 	protected EdeltaEcoreReferenceExpression getEdeltaEcoreReferenceExpression(XExpression e) {
@@ -501,11 +519,11 @@ public abstract class EdeltaAbstractTest {
 	}
 
 	protected XExpression getBlockLastExpression(XExpression e) {
-		return lastOrNull(getBlock(e).getExpressions());
+		return getBlock(e).getExpressions().reversed().stream().findFirst().orElse(null);
 	}
 
 	protected XExpression getBlockFirstExpression(XExpression e) {
-		return head(getBlock(e).getExpressions());
+		return getBlock(e).getExpressions().stream().findFirst().orElse(null);
 	}
 
 	protected XBlockExpression getBlock(XExpression e) {
@@ -521,11 +539,11 @@ public abstract class EdeltaAbstractTest {
 	}
 
 	protected EClass getLastEClass(EPackage ePackage) {
-		return (EClass) lastOrNull(ePackage.getEClassifiers());
+		return (EClass) ePackage.getEClassifiers().reversed().stream().findFirst().orElse(null);
 	}
 
 	protected EClass getFirstEClass(EPackage ePackage) {
-		return (EClass) head(ePackage.getEClassifiers());
+		return (EClass) ePackage.getEClassifiers().stream().findFirst().orElse(null);
 	}
 
 	protected EdeltaEcoreReferenceExpression ecoreReferenceExpression(CharSequence ecoreRefString) throws Exception {
@@ -553,11 +571,11 @@ public abstract class EdeltaAbstractTest {
 	}
 
 	protected EdeltaEcoreReferenceExpression getFirstOfAllEcoreReferenceExpressions(EdeltaProgram p) {
-		return head(getAllEcoreReferenceExpressions(p));
+		return getAllEcoreReferenceExpressions(p).stream().findFirst().orElse(null);
 	}
 
 	protected EdeltaEcoreReferenceExpression getLastOfAllEcoreReferenceExpressions(EdeltaProgram p) {
-		return lastOrNull(getAllEcoreReferenceExpressions(p));
+		return getAllEcoreReferenceExpressions(p).reversed().stream().findFirst().orElse(null);
 	}
 
 	protected List<EdeltaEcoreReferenceExpression> getAllEcoreReferenceExpressions(EdeltaProgram p) {

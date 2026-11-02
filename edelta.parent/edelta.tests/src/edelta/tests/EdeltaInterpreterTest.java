@@ -1,12 +1,7 @@
 package edelta.tests;
 
-import static com.google.common.collect.Iterables.filter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.lastOrNull;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.map;
-import static org.eclipse.xtext.xbase.lib.ListExtensions.map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -25,7 +20,6 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.xbase.XbasePackage;
-import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.junit.Before;
 import org.junit.Test;
@@ -320,7 +314,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			var derivedEClass = getFirstEClass(ePackage);
 			assertEquals("Renamed", derivedEClass.getName());
 			var attr =
-					lastOrNull(derivedEClass.getEStructuralFeatures());
+					derivedEClass.getEStructuralFeatures().getLast();
 			assertEquals("newTestAttr", attr.getName());
 			assertEquals(1, attr.getLowerBound());
 			assertEquals(-1, attr.getUpperBound());
@@ -581,7 +575,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				var lastEClass = getLastEClass(derivedEPackage);
 				assertEquals("ANewClass", lastEClass.getName());
 				assertEquals("Base",
-						lastOrNull(lastEClass.getESuperTypes()).getName());
+						lastEClass.getESuperTypes().getLast().getName());
 			});
 	}
 
@@ -608,7 +602,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				var lastEClass = getLastEClass(derivedEPackage);
 				assertEquals("ANewClass", lastEClass.getName());
 				assertEquals("Base",
-						lastOrNull(lastEClass.getESuperTypes()).getName());
+						lastEClass.getESuperTypes().getLast().getName());
 				assertTrue(lastEClass.isAbstract());
 			});
 	}
@@ -638,10 +632,10 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				var firstEClass = getFirstEClass(derivedEPackage);
 				assertEquals("RenamedClass", firstEClass.getName());
 				assertEquals("Base",
-					lastOrNull(firstEClass.getESuperTypes()).getName());
+					firstEClass.getESuperTypes().getLast().getName());
 				assertTrue(firstEClass.isAbstract());
 				assertEquals("added",
-					lastOrNull(firstEClass.getEStructuralFeatures()).getName());
+					firstEClass.getEStructuralFeatures().getLast().getName());
 			});
 	}
 
@@ -665,7 +659,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				var firstEClass = getFirstEClass(derivedEPackage);
 				assertEquals("RenamedClass", firstEClass.getName());
 				assertEquals("added",
-					lastOrNull(firstEClass.getEStructuralFeatures()).getName());
+					firstEClass.getEStructuralFeatures().getLast().getName());
 			});
 	}
 
@@ -865,9 +859,9 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			"""),
 			true,
 			ePackage -> {
-				var newSubPackage = lastOrNull(ePackage.getESubpackages());
+				var newSubPackage = ePackage.getESubpackages().getLast();
 				assertEquals("anewsubpackage", newSubPackage.getName());
-				var derivedEClass = getLastEClass(IterableExtensions.<EPackage>lastOrNull(ePackage.getESubpackages()));
+				var derivedEClass = getLastEClass(ePackage.getESubpackages().getLast());
 				assertEquals("NewClass", derivedEClass.getName());
 				assertEquals(1, derivedEClass.getEStructuralFeatures().size());
 				var attr = derivedEClass.getEStructuralFeatures().get(0);
@@ -898,16 +892,16 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			"""),
 			true,
 			ePackage -> {
-				var newSubPackage = IterableExtensions.<EPackage>lastOrNull(ePackage.getESubpackages());
+				var newSubPackage = ePackage.getESubpackages().getLast();
 				assertEquals("anewsubpackage", newSubPackage.getName());
-				var derivedEClass = getLastEClass(IterableExtensions.<EPackage>lastOrNull(ePackage.getESubpackages()));
+				var derivedEClass = getLastEClass(ePackage.getESubpackages().getLast());
 				assertEquals("RenamedClass", derivedEClass.getName());
 				assertEquals(2, derivedEClass.getEStructuralFeatures().size());
 				var attr1 = derivedEClass.getEStructuralFeatures().get(0);
 				assertEquals("newTestAttr", attr1.getName());
 				assertEquals("MainFooDataType", attr1.getEType().getName());
 				var attr2 =
-						lastOrNull(derivedEClass.getEStructuralFeatures());
+						derivedEClass.getEStructuralFeatures().getLast();
 				assertEquals("added", attr2.getName());
 				assertEquals("MainFooDataType", attr2.getEType().getName());
 			});
@@ -1082,7 +1076,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			true,
 			derivedEPackage -> {
 				var firstEClass = getFirstEClass(derivedEPackage);
-				assertThat(map(firstEClass.getESuperTypes(), EClass::getName))
+				assertThat(firstEClass.getESuperTypes().stream().map(EClass::getName))
 						.containsExactly("BarClass");
 				assertThat(firstEClass.getESuperTypes().get(0).isAbstract()).isTrue();
 				assertEquals("Renamed", firstEClass.getName());
@@ -1115,15 +1109,13 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		var testecoreforreferences2 = map.get("testecoreforreferences2");
 		var person = getEClassByName(testecoreforreferences1, "Person");
 		assertThat(
-			map(
-			filter(person.getEStructuralFeatures(), EReference.class),
-			EReference::getName))
+			person.getEReferences().stream()
+				.map(EReference::getName))
 				.containsOnly("renamedWorks");
 		var workplace = getEClassByName(testecoreforreferences2, "WorkPlace");
 		assertThat(
-			map(
-			filter(workplace.getEStructuralFeatures(), EReference.class),
-			 EReference::getName))
+			workplace.getEReferences().stream()
+				.map(EReference::getName))
 				.containsOnly("renamedPersons");
 		var unresolvedEcoreRefs = derivedStateHelper
 				.getUnresolvedEcoreReferences(it.eResource());
@@ -1148,21 +1140,18 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		var testecoreforreferences2 = map.get("testecoreforreferences2");
 		var person = getEClassByName(testecoreforreferences1, "Person");
 		assertThat(
-			map(
-			filter(person.getEStructuralFeatures(), EReference.class),
-			it -> it.getEOpposite().getName()))
+			person.getEReferences().stream()
+				.map(it -> it.getEOpposite().getName()))
 				.containsOnly("renamedPersons");
 		var workplace = getEClassByName(testecoreforreferences2, "WorkPlace");
 		assertThat(
-			map(
-			filter(workplace.getEStructuralFeatures(), EReference.class),
-			EReference::getName))
+			workplace.getEReferences().stream()
+				.map(EReference::getName))
 				.containsOnly("renamedPersons");
 		var eOpposite =
-			head(filter(person.getEStructuralFeatures(), EReference.class))
-			.getEOpposite();
+			person.getEReferences().getFirst().getEOpposite();
 		var expected =
-			head(filter(workplace.getEStructuralFeatures(), EReference.class));
+			workplace.getEReferences().getFirst();
 		assertThat(eOpposite)
 				.isSameAs(expected);
 		var unresolvedEcoreRefs = derivedStateHelper
@@ -1285,7 +1274,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreRefs.get(0).getArgument(), "addNewEClass");
 		// ecoreref(Renamed) -> name = "Renamed"
 		assertEcoreRefExpElementMapsToXExpression(
-			lastOrNull(ecoreRefs).getArgument(), "setName");
+			ecoreRefs.getLast().getArgument(), "setName");
 	}
 
 	@Test
@@ -1359,7 +1348,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreRefs.get(0).getArgument(), "addNewEClass");
 		// ecoreref(Renamed) -> name = "Renamed"
 		assertEcoreRefExpElementMapsToXExpression(
-				lastOrNull(ecoreRefs).getArgument(), "setName");
+				ecoreRefs.getLast().getArgument(), "setName");
 	}
 
 	@Test
@@ -1384,7 +1373,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			ecoreRefs.get(0).getArgument(), "addNewEClass");
 		// ecoreref(Renamed) -> name = "Renamed"
 		assertEcoreRefExpElementMapsToXExpression(
-			lastOrNull(ecoreRefs).getArgument(), "setName");
+			ecoreRefs.getLast().getArgument(), "setName");
 	}
 
 	@Test
@@ -1761,7 +1750,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		validationTestHelper.assertError(it,
 			XbasePackage.eINSTANCE.getXFeatureCall(),
 			EdeltaValidator.LIVE_VALIDATION_ERROR,
-			lastOrNull(inputs).lastIndexOf("addNewEClass(\"NewClass\")"),
+			inputs.getLast().lastIndexOf("addNewEClass(\"NewClass\")"),
 			"addNewEClass(\"NewClass\")".length(),
 			"Found class NewClass");
 		assertErrorsAsStrings(it, "Found class NewClass");
@@ -1809,7 +1798,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		validationTestHelper.assertError(it,
 			XbasePackage.eINSTANCE.getXFeatureCall(),
 			EdeltaValidator.LIVE_VALIDATION_ERROR,
-			lastOrNull(inputs).lastIndexOf("addNewEClass(\"NewClass\")"),
+			inputs.getLast().lastIndexOf("addNewEClass(\"NewClass\")"),
 			"addNewEClass(\"NewClass\")".length(),
 			"Found class NewClass");
 		assertErrorsAsStrings(it, "Found class NewClass");
@@ -1997,7 +1986,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		validationTestHelper.assertNoErrors(it);
 		// mainpackage.mainsubpackage.MyClass
 		var mainSubPackageClass = getLastEClass(
-				head(map.values()).getESubpackages().get(0));
+				map.values().stream().findFirst().orElse(null).getESubpackages().get(0));
 		var lastEcoreRef = getLastOfAllEcoreReferenceExpressions(it).getArgument();
 		assertNotNull(lastEcoreRef.getElement());
 		// the non ambiguous ecoreref should be correctly linked
