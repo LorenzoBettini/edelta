@@ -14,6 +14,13 @@ The current development version uses Xtext 2.44.0, MWE2 2.27.0, and Eclipse
 2026-09, built with the released `xtext-tycho-parent` 0.26.0 (Tycho 5.0.4).
 Jupiter tests use JUnit 6 to match Xtext's testing bundles.
 
+The mixed JUnit 4/Jupiter projects (`edelta.tests`, `edelta.lib.tests`,
+`edelta.refactorings.lib.tests`, and `edelta.examples`) run both generations in
+one Tycho Surefire execution. Their POMs select `providerHint` `junit6`, since
+Tycho 5.0.4 otherwise selects JUnit 4 for mixed projects. Their manifests import
+`org.junit.vintage.engine` to expose Vintage to test discovery, and the target
+platform includes `junit-vintage-engine` at the same version as Jupiter.
+
 Since version 3.9.0, Edelta requires Java 21.
 
 Since version 3.7.0, the Edelta Eclipse distribution requires Java 21.
@@ -97,6 +104,11 @@ working display:
 ```sh
 ./mvnw -B -f edelta.parent/pom.xml clean verify -Pjacoco,test-ide
 ```
+
+### Interpreter timeouts
+
+See [Interpreter timeouts](docs/interpreter-timeouts.md) for timeout cleanup,
+interrupt handling, and the regression tests for intermittent compilation failures.
 
 ### Contributors
 

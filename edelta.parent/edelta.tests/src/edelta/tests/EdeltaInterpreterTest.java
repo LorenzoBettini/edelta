@@ -12,6 +12,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 
 import java.util.List;
 
@@ -34,9 +37,11 @@ import com.google.inject.Injector;
 import edelta.edelta.EdeltaEcoreArgument;
 import edelta.edelta.EdeltaPackage;
 import edelta.edelta.EdeltaProgram;
+import edelta.interpreter.EdeltaDefaultInterpreter;
 import edelta.interpreter.EdeltaInterpreter;
 import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreterRuntimeException;
+import edelta.interpreter.EdeltaInterpreterTimeoutGuard;
 import edelta.interpreter.EdeltaInterpreterWrapperException;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.tests.additional.EdeltaEContentAdapter.EdeltaEContentAdapterException;
@@ -56,12 +61,73 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 
 	private EdeltaProgram currentProgram;
 
+	/** Captures the real guard so cleanup can be checked without waiting for a timer. */
+	private static class CapturingTimeoutInterpreter extends EdeltaDefaultInterpreter {
+		private EdeltaInterpreterTimeoutGuard guard;
+
+		@Override
+		protected EdeltaInterpreterTimeoutGuard createTimeoutGuard() {
+			guard = super.createTimeoutGuard();
+			return guard;
+		}
+	}
+
 	@Before
 	public void setupInterpreter() {
 		// for standard tests we disable the timeout
 		// actually we set it to several minutes
 		// this also makes it easier to debug tests
 		interpreter.setInterpreterTimeout(1200000);
+	}
+
+	@Test
+	public void testEvaluationExceptionCancelsTimeoutGuard() throws Exception {
+		var program = parseWithTestEcore("""
+		metamodel "foo"
+		modifyEcore aTest epackage foo {
+		}
+		""");
+		var failingInterpreter = spy(new CapturingTimeoutInterpreter());
+		injector.injectMembers(failingInterpreter);
+		failingInterpreter.setInterpreterTimeout(0);
+		var failure = new IllegalArgumentException("evaluation failed");
+		doThrow(failure).when(failingInterpreter).evaluate(any(), any(), any());
+		try {
+			assertThatThrownBy(() -> failingInterpreter.evaluateModifyEcoreOperations(program))
+				.isSameAs(failure);
+			assertThat(failingInterpreter.guard).isNotNull();
+			// Simulate a callback dequeued before evaluation failed and closed its guard.
+			failingInterpreter.guard.run();
+			assertThat(Thread.currentThread().isInterrupted()).isFalse();
+		} finally {
+			if (failingInterpreter.guard != null) {
+				failingInterpreter.guard.close();
+			}
+			Thread.interrupted();
+		}
+	}
+
+	@Test
+	public void testSuccessfulEvaluationCancelsTimeoutGuard() throws Exception {
+		var program = parseWithTestEcore("""
+		metamodel "foo"
+		modifyEcore aTest epackage foo {
+		}
+		""");
+		var capturingInterpreter = new CapturingTimeoutInterpreter();
+		injector.injectMembers(capturingInterpreter);
+		capturingInterpreter.setInterpreterTimeout(0);
+		try {
+			capturingInterpreter.evaluateModifyEcoreOperations(program);
+			assertThat(capturingInterpreter.guard).isNotNull();
+			capturingInterpreter.guard.run();
+			assertThat(Thread.currentThread().isInterrupted()).isFalse();
+		} finally {
+			if (capturingInterpreter.guard != null) {
+				capturingInterpreter.guard.close();
+			}
+			Thread.interrupted();
+		}
 	}
 
 	@Test
@@ -609,15 +675,13 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		interpreter.setInterpreterTimeout(2000);
 		var input = """
 		import org.eclipse.emf.ecore.EClass
+		import java.util.concurrent.CountDownLatch
+		import java.util.concurrent.TimeUnit
 
 		metamodel "foo"
 
 		def op(EClass c) : void {
-			var i = 10;
-			while (i >= 0) {
-				Thread.sleep(1000);
-				i++
-			}
+			new CountDownLatch(1).await(30, TimeUnit.SECONDS)
 			// this will never be executed
 			c.abstract = true
 		}
@@ -633,7 +697,7 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 				var lastEClass = getLastEClass(derivedEPackage);
 				assertEquals("ANewClass", lastEClass.getName());
 				assertEquals(false, lastEClass.isAbstract());
-				var offendingString = "Thread.sleep(1000)";
+				var offendingString = "new CountDownLatch(1).await(30, TimeUnit.SECONDS)";
 				var initialIndex = input.lastIndexOf(offendingString);
 				validationTestHelper.assertWarning(
 					currentProgram,
@@ -685,13 +749,11 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		interpreter.setInterpreterTimeout(2000);
 		var lib1 = """
 		import org.eclipse.emf.ecore.EClass
+		import java.util.concurrent.CountDownLatch
+		import java.util.concurrent.TimeUnit
 
 		def op1(EClass c) : void {
-			var i = 10;
-			while (i >= 0) {
-				Thread.sleep(1000);
-				i++
-			}
+			new CountDownLatch(1).await(30, TimeUnit.SECONDS)
 			// this will never be executed
 			c.abstract = true
 		}

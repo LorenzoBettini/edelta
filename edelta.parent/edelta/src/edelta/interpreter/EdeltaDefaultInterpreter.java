@@ -118,7 +118,7 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 	/**
 	 * Keeps track of {@link EdeltaEcoreArgument} already evaluated.
 	 */
-	private Collection<EdeltaEcoreReferenceExpression> interpretedEcoreReferenceExpressions =
+	private final Collection<EdeltaEcoreReferenceExpression> interpretedEcoreReferenceExpressions =
 		new HashSet<>();
 
 	@Override
@@ -263,31 +263,26 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 		var context = createContext();
 		context.newValue(IT_QUALIFIED_NAME, ePackage);
 		configureContextForJavaThis(context);
-		var interpreterThread = Thread.currentThread();
-		// the following thread checks timeout when interpreting
-		// external Java code
-		// see https://github.com/LorenzoBettini/edelta/issues/179
-		var timeoutGuardThread = new Thread() {
-			@Override
-			public void run() {
-				try {
-					interpreterThread.join(interpreterTimeout);
-					interpreterThread.interrupt();
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
+		// External Java code may block, so cancellation also needs an interrupt.
+		// Always close the guard before this thread resumes other work.
+		try (var timeoutGuard = createTimeoutGuard()) {
+			final var result = evaluate(op.getBody(), context,
+					CancelIndicator.NullImpl);
+			if (result == null) {
+				addTimeoutWarning();
+			} else {
+				handleResultException(result.getException());
 			}
-		};
-		timeoutGuardThread.start();
-		final var result = evaluate(op.getBody(), context,
-				CancelIndicator.NullImpl);
-		timeoutGuardThread.interrupt();
-		if (result == null) {
-			// our cancel indicator reached timeout
-			addTimeoutWarning();
-		} else {
-			handleResultException(result.getException());
 		}
+	}
+
+	/**
+	 * Creates the guard owned by one modifyEcore evaluation. The caller closes it
+	 * on the interpreter thread, including when evaluation throws. Subclasses may
+	 * override this factory to control timeout delivery in tests.
+	 */
+	protected EdeltaInterpreterTimeoutGuard createTimeoutGuard() {
+		return new EdeltaInterpreterTimeoutGuard(interpreterTimeout);
 	}
 
 	@Override
