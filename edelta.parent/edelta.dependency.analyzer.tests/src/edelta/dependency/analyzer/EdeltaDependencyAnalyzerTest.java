@@ -4,8 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.eclipse.emf.common.util.URI;
 import org.junit.Test;
 
 import GraphMM.Dependency;
@@ -51,6 +54,18 @@ public class EdeltaDependencyAnalyzerTest {
 		dependencies
 			.extracting(Dependency::isBidirectional)
 			.containsExactly(false);
+	}
+
+	@Test
+	public void testAnalyzeResourceWithoutEPackage() {
+		var analyzer = new EdeltaDependencyAnalizer();
+		for (var fileName : List.of("EmptyResource.ecore", "NotEPackage.ecore")) {
+			var path = "../edelta.testdata/testdata/models/" + fileName;
+			var uri = URI.createFileURI(Path.of(path).toAbsolutePath().normalize().toString());
+			assertThatThrownBy(() -> analyzer.analyzeEPackage(path))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("No EPackage found in resource: " + uri);
+		}
 	}
 
 	@Test

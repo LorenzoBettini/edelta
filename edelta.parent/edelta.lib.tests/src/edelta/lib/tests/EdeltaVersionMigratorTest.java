@@ -7,9 +7,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.emf.common.util.URI;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,6 +71,30 @@ class EdeltaVersionMigratorTest {
 	@BeforeEach
 	void setup() {
 		versionMigrator = new EdeltaVersionMigrator();
+	}
+
+	@Test
+	void loadEcoreWithoutEPackage() {
+		for (var fileName : List.of("EmptyResource.ecore", "NotEPackage.ecore")) {
+			var path = "../edelta.testdata/testdata/models/" + fileName;
+			var uri = URI.createFileURI(Path.of(path).toAbsolutePath().normalize().toString());
+			assertThatThrownBy(() -> versionMigrator.loadEcore(path))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("No EPackage found in resource: " + uri);
+		}
+	}
+
+	@Test
+	void loadEcoreFromStreamWithoutEPackage() throws IOException {
+		for (var fileName : List.of("EmptyResource.ecore", "NotEPackage.ecore")) {
+			var uri = URI.createFileURI(Path.of(fileName).toAbsolutePath().toString());
+			try (var input = Files.newInputStream(
+					Path.of("../edelta.testdata/testdata/models/", fileName))) {
+				assertThatThrownBy(() -> versionMigrator.loadEcore(fileName, input))
+					.isInstanceOf(IllegalArgumentException.class)
+					.hasMessage("No EPackage found in resource: " + uri);
+			}
+		}
 	}
 
 	private EdeltaRuntimeProvider renamePersonFirstAndLastNameProvider = runtime ->
