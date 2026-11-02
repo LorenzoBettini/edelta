@@ -197,7 +197,7 @@ public class EdeltaUtils {
 	 * @see EdeltaUtils#removeElement(ENamedElement)
 	 */
 	public static void removeAllElements(Collection<? extends EObject> elements) {
-		elements.stream().forEach(EdeltaUtils::removeFutureDanglingReferences);
+		elements.forEach(EdeltaUtils::removeFutureDanglingReferences);
 		EcoreUtil.removeAll(elements);
 	}
 

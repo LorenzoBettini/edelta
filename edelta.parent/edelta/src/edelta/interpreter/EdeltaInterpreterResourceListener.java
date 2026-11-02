@@ -102,7 +102,7 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 			if (modifiedElements.add(enamedElement))
 				updateModifiedElements(enamedElement.eContainer());
 		} else if (element instanceof Collection<?>) {
-			((Collection<?>)element).stream().forEach(this::updateModifiedElements);
+			((Collection<?>)element).forEach(this::updateModifiedElements);
 		}
 	}
 

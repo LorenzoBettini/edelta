@@ -51,10 +51,14 @@ public class EdeltaDependencyAnalizer {
 	 * @param ecoreFile
 	 * @return
 	 * @throws IOException
+	 * @throws IllegalArgumentException if the resource does not start with an {@link EPackage}
 	 */
 	public Repository analyzeEPackage(String ecoreFile) throws IOException {
 		var loaded = modelManager.loadEcoreFile(ecoreFile);
 		var packageToAnalyze = EdeltaResourceUtils.getEPackage(loaded);
+		if (packageToAnalyze == null) {
+			throw new IllegalArgumentException("No EPackage found in resource: " + loaded.getURI());
+		}
 		var path = new File(ecoreFile).getParent();
 		return analyzeEPackage(path, packageToAnalyze.getName());
 	}

@@ -289,10 +289,6 @@
               ${project.basedir}/../edelta.target/${target-file-name}
             </file>
           </target>
-          <!-- Epsilon p2 site refers to old Orbit and emfatic sites for its
-            dependencies; we ignore referenced repositories and manually add them
-            in HTTPS form below to avoid HTTP blocking in CI environments -->
-          <referencedRepositoryMode>ignore</referencedRepositoryMode>
         </configuration>
       </plugin>
     </plugins>

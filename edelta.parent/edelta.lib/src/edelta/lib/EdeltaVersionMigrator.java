@@ -85,9 +85,13 @@ public class EdeltaVersionMigrator {
 	 * when loading an XMI the referenced Ecore file is found by nsURI.
 	 * 
 	 * @param resource
+	 * @throws IllegalArgumentException if the resource does not start with an {@link EPackage}
 	 */
 	private void updatePackageRegistry(Resource resource) {
 		var ePackage = EdeltaResourceUtils.getEPackage(resource);
+		if (ePackage == null) {
+			throw new IllegalArgumentException("No EPackage found in resource: " + resource.getURI());
+		}
 		var resourceSet = resource.getResourceSet();
 		updatePackageRegistry(ePackage, resourceSet);
 	}
@@ -110,7 +114,7 @@ public class EdeltaVersionMigrator {
 	 * 
 	 * @param ecorePath
 	 * @return the loaded {@link Resource} containing the Ecore model
-	 * @throws IOException 
+	 * @throws IllegalArgumentException if the resource does not start with an {@link EPackage}
 	 */
 	public Resource loadEcore(String ecorePath) {
 		var resource = modelManager.loadEcoreFile(ecorePath);
@@ -125,6 +129,7 @@ public class EdeltaVersionMigrator {
 	 * @param inputStream
 	 * @return the loaded {@link Resource} containing the Ecore model
 	 * @throws IOException 
+	 * @throws IllegalArgumentException if the resource does not start with an {@link EPackage}
 	 */
 	public Resource loadEcore(String ecoreFile, InputStream inputStream) throws IOException {
 		var resource = modelManager.loadEcoreFile(ecoreFile, inputStream);
