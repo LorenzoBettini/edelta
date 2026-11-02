@@ -1,7 +1,5 @@
 package edelta.typesystem;
 
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.findFirst;
-
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.annotations.typesystem.XbaseWithAnnotationsTypeComputer;
@@ -39,7 +37,10 @@ public class EdeltaTypeComputer extends XbaseWithAnnotationsTypeComputer {
 			// an ENamedElement: this way we will only get an error due to unresolved reference
 			// and not an addition type mismatch error, which would be superfluous
 			final ITypeExpectation expectation =
-				findFirst(state.getExpectations(), it -> it.getExpectedType() != null);
+				state.getExpectations().stream()
+					.filter(it -> it.getExpectedType() != null)
+					.findFirst()
+					.orElse(null);
 			if (expectation != null) {
 				final var atLeast =
 						getRawTypeForName(ENamedElement.class, state);

@@ -2,7 +2,6 @@ package edelta.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.lastOrNull;
 import static org.junit.Assert.assertEquals;
 
 import org.eclipse.xtext.common.types.util.JavaReflectAccess;
@@ -127,7 +126,7 @@ public class EdeltaInterpreterHelperTest extends EdeltaAbstractTest {
 			""");
 		assertThat(
 			interpreterHelper.filterOperations(prog.getModifyEcoreOperations()))
-				.containsExactly(lastOrNull(prog.getModifyEcoreOperations()));
+				.containsExactly(prog.getModifyEcoreOperations().getLast());
 	}
 
 	@Test

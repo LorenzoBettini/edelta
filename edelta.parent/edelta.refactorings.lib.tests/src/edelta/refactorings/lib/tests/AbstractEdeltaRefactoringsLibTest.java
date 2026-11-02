@@ -1,12 +1,11 @@
 package edelta.refactorings.lib.tests;
 
-import static com.google.common.collect.Iterables.filter;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.findFirst;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -126,12 +125,18 @@ public abstract class AbstractEdeltaRefactoringsLibTest {
 		return ref;
 	}
 
-	protected Iterable<EClass> EClasses(final EPackage p) {
-		return filter(p.getEClassifiers(), EClass.class);
+	protected List<EClass> EClasses(final EPackage p) {
+		return p.getEClassifiers().stream()
+			.filter(EClass.class::isInstance)
+			.map(EClass.class::cast)
+			.toList();
 	}
 
 	protected EClassifier findEClassifier(final EPackage p, final String byName) {
-		return findFirst(p.getEClassifiers(), it -> Objects.equals(it.getName(), byName));
+		return p.getEClassifiers().stream()
+			.filter(it -> Objects.equals(it.getName(), byName))
+			.findFirst()
+			.orElse(null);
 	}
 
 	protected EClass findEClass(final EPackage p, final String byName) {
@@ -139,7 +144,10 @@ public abstract class AbstractEdeltaRefactoringsLibTest {
 	}
 
 	protected EAttribute findEAttribute(final EClass c, final String byName) {
-		return findFirst(c.getEAttributes(), it -> Objects.equals(it.getName(), byName));
+		return c.getEAttributes().stream()
+			.filter(it -> Objects.equals(it.getName(), byName))
+			.findFirst()
+			.orElse(null);
 	}
 
 	protected EStructuralFeature findEStructuralFeature(final EPackage p, final String className,

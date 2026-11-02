@@ -3,9 +3,6 @@ package edelta.tests;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.eclipse.xtext.EcoreUtil2.getAllContentsOfType;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.forall;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.lastOrNull;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -57,7 +54,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		""");
 		var packages = derivedStateHelper.getCopiedEPackagesMap(program.eResource())
 				.values();
-		assertThat(map(packages, EPackage::getName))
+		assertThat(packages.stream().map(EPackage::getName))
 				.containsExactlyInAnyOrder("foo", "bar");
 	}
 
@@ -74,7 +71,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		var packages = derivedStateHelper.getCopiedEPackagesMap(program.eResource())
 				.values();
 		// even if bar is not modified it is still copied
-		assertThat(map(packages, EPackage::getName))
+		assertThat(packages.stream().map(EPackage::getName))
 				.containsExactlyInAnyOrder("foo", "bar");
 	}
 
@@ -91,7 +88,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		""");
 		var packages = derivedStateHelper.getCopiedEPackagesMap(program.eResource())
 				.values();
-		assertThat(map(packages, EPackage::getName))
+		assertThat(packages.stream().map(EPackage::getName))
 				.containsExactly("foo");
 	}
 
@@ -166,7 +163,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		// since we don't install anything during preIndexingPhase
 		assertEquals("test.__synthetic0",
 			((JvmGenericType)
-				lastOrNull(resource.getContents())).getIdentifier());
+				resource.getContents().getLast()).getIdentifier());
 	}
 
 	@Test
@@ -182,7 +179,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		// only program must be there and the inferred Jvm Type
 		assertEquals("test.__synthetic0",
 			((JvmGenericType)
-				lastOrNull(resource.getContents())).getIdentifier());
+				resource.getContents().getLast()).getIdentifier());
 	}
 
 	@Test
@@ -204,7 +201,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		// only program must be there and the inferred Jvm Type
 		assertEquals("test.__synthetic0",
 			((JvmGenericType)
-				lastOrNull(resource.getContents())).getIdentifier());
+				resource.getContents().getLast()).getIdentifier());
 	}
 
 	@Test
@@ -254,16 +251,16 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		// explicitly add an adapter to the EPackage
 		nameToCopiedEPackageMap.values().iterator().next().eAdapters()
 			.add(new AdapterImpl());
-		assertTrue(forall(nameToCopiedEPackageMap.values(),
-				it -> !it.eAdapters().isEmpty()));
+		assertTrue(nameToCopiedEPackageMap.values().stream()
+			.allMatch(it -> !it.eAdapters().isEmpty()));
 		// unload packages
 		derivedStateComputer.unloadDerivedPackages(nameToCopiedEPackageMap);
 		// maps are not empty yet
 		assertFalse(nameToCopiedEPackageMap.values().isEmpty());
 		assertFalse(resource.eAdapters().isEmpty());
 		// but adapters have been removed from EPackage
-		assertTrue(forall(nameToCopiedEPackageMap.values(),
-				it -> it.eAdapters().isEmpty()));
+		assertTrue(nameToCopiedEPackageMap.values().stream()
+			.allMatch(it -> it.eAdapters().isEmpty()));
 	}
 
 	@Test
@@ -334,7 +331,7 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 			}
 		""");
 		var derivedEClass = getLastCopiedEPackageFirstEClass(program);
-		var derivedEAttribute = (EAttribute) lastOrNull(derivedEClass.getEStructuralFeatures());
+		var derivedEAttribute = (EAttribute) derivedEClass.getEStructuralFeatures().getLast();
 		assertEquals("newAttribute", derivedEAttribute.getName());
 		assertEquals("Renamed", derivedEAttribute.getEContainingClass().getName());
 	}
@@ -459,14 +456,14 @@ public class EdeltaDerivedStateComputerTest extends EdeltaAbstractTest {
 		// only program must be there and the inferred Jvm Type
 		assertEquals("test.__synthetic0",
 			((JvmGenericType)
-				lastOrNull(resource.getContents())).getIdentifier());
+				resource.getContents().getLast()).getIdentifier());
 	}
 
 	private EdeltaEcoreQualifiedArgument getEcoreRefInManipulationExpressionBlock(EdeltaProgram program) {
 		return getEdeltaEcoreQualifiedArgument(
-			lastOrNull(getAllContentsOfType(
+			getAllContentsOfType(
 				lastModifyEcoreOperation(program).getBody(),
-				EdeltaEcoreReferenceExpression.class))
+				EdeltaEcoreReferenceExpression.class).getLast()
 					.getArgument());
 	}
 

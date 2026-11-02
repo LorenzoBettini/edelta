@@ -6,7 +6,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -144,7 +143,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	void test_addMandatoryAttribute() {
 		final EClass c = this.createEClassWithoutPackage("C1");
 		refactorings.addMandatoryAttribute(c, "test", this.stringDataType);
-		final EAttribute attr = head(c.getEAttributes());
+		final EAttribute attr = c.getEAttributes().stream().findFirst().orElse(null);
 		Assertions.<EAttribute>assertThat(attr)
 			.returns("test", EAttribute::getName)
 			.returns(this.stringDataType, EAttribute::getEAttributeType)
@@ -155,7 +154,7 @@ class EdeltaRefactoringsTest extends AbstractEdeltaRefactoringsLibTest {
 	void test_addMandatoryReference() {
 		final EClass c = this.createEClassWithoutPackage("C1");
 		refactorings.addMandatoryReference(c, "test", this.eClassReference);
-		final EReference attr = head(c.getEReferences());
+		final EReference attr = c.getEReferences().stream().findFirst().orElse(null);
 		Assertions.<EReference>assertThat(attr)
 			.returns("test", EReference::getName)
 			.returns(this.eClassReference, EReference::getEReferenceType)

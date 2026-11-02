@@ -72,8 +72,8 @@ public class EdeltaFeatureDifferenceFinder {
 
 	private String stringRepresentation(EObject eObject1, EStructuralFeature feature) {
 		var value = eObject1.eGet(feature);
-		if (value instanceof EObject) {
-			return getEObjectRepr((EObject) value);
+		if (value instanceof EObject object) {
+			return getEObjectRepr(object);
 		}
 		return "" + value;
 	}

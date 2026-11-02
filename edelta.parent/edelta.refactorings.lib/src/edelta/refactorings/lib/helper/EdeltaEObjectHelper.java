@@ -13,8 +13,7 @@ public class EdeltaEObjectHelper {
 	public String represent(Object o) {
 		if (o == null)
 			return null;
-		if (o instanceof EObject) {
-			EObject eObject = (EObject) o;
+		if (o instanceof EObject eObject) {
 			var eClass = eObject.eClass();
 			return
 					EdeltaUtils.getEObjectRepr(eClass) + "{" +

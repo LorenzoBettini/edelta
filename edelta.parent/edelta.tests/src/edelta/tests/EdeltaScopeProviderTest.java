@@ -1,11 +1,10 @@
 package edelta.tests;
 
-import static com.google.common.collect.Iterables.filter;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.join;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.map;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EDataType;
@@ -217,7 +216,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			getLastModifyEcoreOperationLastExpression(prog);
 		assertSame(
 			// the one copied
-			getFirstEClass(head(getCopiedEPackages(prog))),
+			getFirstEClass(getCopiedEPackages(prog).stream().findFirst().orElse(null)),
 			eclassExp.getArgument().getElement());
 	}
 
@@ -233,9 +232,13 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		var eclassExp = (EdeltaEcoreReferenceExpression) getLastModifyEcoreOperationLastExpression(prog);
 		var dataType = (EDataType) eclassExp.getArgument().getElement();
 		// must be a reference to the copied EPackage's datatype
-		assertSame(head(filter(
-					head(getCopiedEPackages(prog)).getEClassifiers(),
-						EDataType.class)),
+		assertSame(getCopiedEPackages(prog).stream()
+			.findFirst()
+			.orElse(null).getEClassifiers().stream()
+			.filter(EDataType.class::isInstance)
+			.map(EDataType.class::cast)
+			.findFirst()
+			.orElse(null),
 				dataType);
 	}
 
@@ -253,9 +256,13 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		var dataType = (EDataType) eclassExp.getArgument().getElement();
 		// must be a reference to the original EPackage's datatype
 		assertSame(
-				head(filter(
-					head(prog.getEPackages()).getEClassifiers(),
-				EDataType.class)),
+				prog.getEPackages().stream()
+					.findFirst()
+					.orElse(null).getEClassifiers().stream()
+					.filter(EDataType.class::isInstance)
+					.map(EDataType.class::cast)
+					.findFirst()
+					.orElse(null),
 				dataType);
 	}
 
@@ -278,9 +285,13 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		var dataType = (EDataType) eclassExp.getArgument().getElement();
 		// must be a reference to the original EPackage's datatype
 		assertSame(
-				head(filter(
-						head(getCopiedEPackages(prog)).getEClassifiers(),
-							EDataType.class)),
+				getCopiedEPackages(prog).stream()
+					.findFirst()
+					.orElse(null).getEClassifiers().stream()
+					.filter(EDataType.class::isInstance)
+					.map(EDataType.class::cast)
+					.findFirst()
+					.orElse(null),
 				dataType);
 	}
 
@@ -423,7 +434,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			""");
 		validationTestHelper.assertNoErrors(prog);
 		var referred = getLastEcoreReferenceExpression(prog).getArgument();
-		var copiedEPackage = head(getCopiedEPackages(prog));
+		var copiedEPackage = getCopiedEPackages(prog).stream().findFirst().orElse(null);
 		assertSame(
 			// the one copied by the derived state computer
 			getEClassiferByName(copiedEPackage, "RenamedClass"),
@@ -442,7 +453,7 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			""");
 		validationTestHelper.assertNoErrors(prog);
 		var referred = (EdeltaEcoreQualifiedArgument) getLastEcoreReferenceExpression(prog).getArgument();
-		var copiedEPackage = head(getCopiedEPackages(prog));
+		var copiedEPackage = getCopiedEPackages(prog).stream().findFirst().orElse(null);
 		assertSame(
 			// the one copied by the derived state computer
 			getEClassiferByName(copiedEPackage, "RenamedClass"),
@@ -550,9 +561,11 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 		}
 		assertEqualsStrings(
 			expected.toString(),
-			join(map(
-				scopeProvider.getScope(context, reference).getAllElements(),
-				IEObjectDescription::getName), "\n")
+			StreamSupport.stream(
+				scopeProvider.getScope(context, reference).getAllElements().spliterator(), false)
+				.map(IEObjectDescription::getName)
+				.map(String::valueOf)
+				.collect(Collectors.joining("\n"))
 			+ end);
 	}
 }

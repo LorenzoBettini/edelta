@@ -1,10 +1,8 @@
 package edelta.jvmmodel;
 
-import static com.google.common.collect.Iterables.filter;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.findFirst;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.head;
-
+import java.util.Collection;
 import java.util.Objects;
+import java.util.stream.StreamSupport;
 
 import org.eclipse.xtext.common.types.JvmField;
 import org.eclipse.xtext.common.types.JvmGenericType;
@@ -38,9 +36,12 @@ public class EdeltaJvmModelHelper {
 	}
 
 	public JvmOperation findJvmOperation(JvmGenericType jvmGenericType, String methodName) {
-		return findFirst(
-				filter(jvmGenericType.getAllFeatures(), JvmOperation.class),
-					it -> Objects.equals(it.getSimpleName(), methodName));
+		return StreamSupport.stream(jvmGenericType.getAllFeatures().spliterator(), false)
+			.filter(JvmOperation.class::isInstance)
+			.map(JvmOperation.class::cast)
+			.filter(it -> Objects.equals(it.getSimpleName(), methodName))
+			.findFirst()
+			.orElse(null);
 	}
 
 	public EdeltaUseAs findEdeltaUseAs(JvmField jvmField) {
@@ -48,10 +49,17 @@ public class EdeltaJvmModelHelper {
 	}
 
 	public EdeltaOperation findEdeltaOperation(JvmOperation operation) {
-		return (EdeltaOperation) head(jvmModelAssociations.getSourceElements(operation));
+		return jvmModelAssociations.getSourceElements(operation).stream()
+			.findFirst()
+			.map(EdeltaOperation.class::cast)
+			.orElse(null);
 	}
 
-	private static <T> T firstByType(final Iterable<?> unfiltered, final Class<T> desiredType) {
-		return head(filter(unfiltered, desiredType));
+	private static <T> T firstByType(final Collection<?> unfiltered, final Class<T> desiredType) {
+		return unfiltered.stream()
+			.filter(desiredType::isInstance)
+			.map(desiredType::cast)
+			.findFirst()
+			.orElse(null);
 	}
 }

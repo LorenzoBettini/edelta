@@ -1,7 +1,7 @@
 package edelta.tests;
 
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.join;
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EcorePackage;
@@ -60,10 +60,10 @@ public class EdeltaResourceDescriptionStrategyTest extends EdeltaAbstractTest {
 		var program = parseWithTestEcore(input);
 		validationTestHelper.validate(program);
 		assertEqualsStrings(expected,
-			join(map(
-				getExportedEPackageEObjectDescriptions(program),
-					IEObjectDescription::getName),
-			", "));
+			StreamSupport.stream(getExportedEPackageEObjectDescriptions(program).spliterator(), false)
+				.map(IEObjectDescription::getName)
+				.map(String::valueOf)
+				.collect(Collectors.joining(", ")));
 	}
 
 	private Iterable<IEObjectDescription> getExportedEPackageEObjectDescriptions(final EObject o) {

@@ -1,6 +1,5 @@
 package edelta.tests;
 
-import static org.eclipse.xtext.xbase.lib.IterableExtensions.lastOrNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
@@ -54,7 +53,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 		);
 		var ref = getLastEcoreReferenceExpression(prog).getArgument();
 		recorder.recordOriginalENamedElement(ref);
-		var original = getEClassiferByName(lastOrNull(prog.getEPackages()),
+		var original = getEClassiferByName(prog.getEPackages().getLast(),
 				"FooClass");
 		assertSame(original, derivedStateHelper.getOriginalEnamedelement(ref));
 	}
@@ -73,10 +72,10 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 		var ref = getEdeltaEcoreQualifiedArgument(
 			getLastEcoreReferenceExpression(prog).getArgument());
 		recorder.recordOriginalENamedElement(ref);
-		var original = getEClassiferByName(lastOrNull(prog.getEPackages()),
+		var original = getEClassiferByName(prog.getEPackages().getLast(),
 				"FooClass");
 		assertSame(original, derivedStateHelper.getOriginalEnamedelement(ref));
-		var originalPackage = lastOrNull(prog.getEPackages());
+		var originalPackage = prog.getEPackages().getLast();
 		assertSame(originalPackage,
 				derivedStateHelper.getOriginalEnamedelement(ref.getQualification()));
 	}
@@ -116,7 +115,7 @@ public class EdeltaOriginalENamedElementRecorderTest extends EdeltaAbstractTest 
 		assertNull(derivedStateHelper.getOriginalEnamedelement(ref));
 		// note that the package actually links to the original EPackage
 		// not to the derived EPackage, but that's not a problem
-		var originalPackage = lastOrNull(prog.getEPackages());
+		var originalPackage = prog.getEPackages().getLast();
 		assertSame(originalPackage,
 			derivedStateHelper.getOriginalEnamedelement(
 					ref.getQualification()));
