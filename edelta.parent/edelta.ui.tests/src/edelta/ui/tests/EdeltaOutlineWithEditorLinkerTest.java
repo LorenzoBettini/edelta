@@ -3,6 +3,7 @@ package edelta.ui.tests;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.core.resources.IFile;
@@ -116,27 +117,36 @@ public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest 
 	private void whenEditorTextIsSelectedThenOutlineNodeIsSelected(String textToSelect, String expectedNode) {
 		editor.getInternalSourceViewer()
 			.setSelectedRange(program.indexOf(textToSelect), 0);
-		var selection = waitForSelection();
-		assertEquals(expectedNode,
-			((EObjectNode) selection.getFirstElement()).getText().toString());
+		Assertions.assertThat(waitForSelection(expectedNode))
+			.as("Outline selection after selecting '%s'", textToSelect)
+			.isEqualTo(expectedNode);
 	}
 
-	@SuppressWarnings("all")
-	private TreeSelection waitForSelection() {
-		int attempts = 30;
-		for (int i = 0; i < attempts; ++i) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				System.err.println("Interrupted while waiting for selection");
+	/** Processes UI events until the expected node is selected or the deadline expires. */
+	private String waitForSelection(final String expectedNode) {
+		var display = outlinePage.getTreeViewer().getControl().getDisplay();
+		var timedOut = new AtomicBoolean();
+		Runnable deadline = () -> timedOut.set(true);
+		display.timerExec(3000, deadline);
+		try {
+			var actualNode = selectedNodeText();
+			while (!expectedNode.equals(actualNode) && !timedOut.get()) {
+				if (!display.readAndDispatch() && !timedOut.get()) {
+					display.sleep();
+				}
+				actualNode = selectedNodeText();
 			}
-			waitForEventProcessing();
-			var selection = (TreeSelection) outlinePage.getTreeViewer().getSelection();
-			if (!selection.isEmpty())
-				return selection;
+			return actualNode;
+		} finally {
+			display.timerExec(-1, deadline);
 		}
-		fail("No node is selected in the outline");
-		return null;
+	}
+
+	/** Returns the selected Ecore node's label, or null while no such node is selected. */
+	private String selectedNodeText() {
+		var selection = (TreeSelection) outlinePage.getTreeViewer().getSelection();
+		return selection.getFirstElement() instanceof EObjectNode node
+			? node.getText().toString() : null;
 	}
 
 }

@@ -265,7 +265,7 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 		configureContextForJavaThis(context);
 		// External Java code may block, so cancellation also needs an interrupt.
 		// Always close the guard before this thread resumes other work.
-		try (var timeoutGuard = new EdeltaInterpreterTimeoutGuard(interpreterTimeout)) {
+		try (var timeoutGuard = createTimeoutGuard()) {
 			final var result = evaluate(op.getBody(), context,
 					CancelIndicator.NullImpl);
 			if (result == null) {
@@ -274,6 +274,15 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 				handleResultException(result.getException());
 			}
 		}
+	}
+
+	/**
+	 * Creates the guard owned by one modifyEcore evaluation. The caller closes it
+	 * on the interpreter thread, including when evaluation throws. Subclasses may
+	 * override this factory to control timeout delivery in tests.
+	 */
+	protected EdeltaInterpreterTimeoutGuard createTimeoutGuard() {
+		return new EdeltaInterpreterTimeoutGuard(interpreterTimeout);
 	}
 
 	@Override
