@@ -46,7 +46,7 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
 	public Flaky.Rule testRule = new Flaky.Rule();
 
 	@BeforeClass
-	public static void setUp() throws CoreException {
+	public static void setUp() throws CoreException { // NOSONAR: we want the same method name as in the superclass to hide it
 		try {
 			EdeltaWorkbenchUtils.closeWelcomePage();
 			javaProject = EdeltaUiTestUtils
