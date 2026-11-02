@@ -21,12 +21,9 @@
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-surefire-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>junit6-tests</id>
-            <phase>integration-test</phase>
-          </execution>
-        </executions>
+        <configuration>
+          <providerHint>junit6</providerHint>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

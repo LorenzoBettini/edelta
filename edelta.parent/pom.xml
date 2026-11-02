@@ -300,24 +300,6 @@
       <plugins>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
-          <artifactId>tycho-surefire-plugin</artifactId>
-          <executions>
-            <!-- Tycho 5.0.4's JUnit 6 runner only discovers Jupiter tests.
-              Modules with Jupiter tests enable this separate execution. -->
-            <execution>
-              <id>junit6-tests</id>
-              <phase>none</phase>
-              <goals>
-                <goal>test</goal>
-              </goals>
-              <configuration>
-                <providerHint>junit6</providerHint>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-        <plugin>
-          <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-packaging-plugin</artifactId>
           <configuration>
             <!-- required to have valid consumable Maven artifacts
