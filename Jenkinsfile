@@ -77,14 +77,10 @@ node {
       }
       if (!isSnapshot) {
          stage('Remove SNAPSHOT') {
-            // Since edelta.parent has edelta.bom as parent, but the aggregator
-            // is edelta.parent, the versions:set must be run only on the BOM
-            // (to avoid the error "Project version is inherited from parent")
-            // this will remove the -SNAPSHOT.
-            // Then we run tycho-versions-plugin on the edelta.parent (the aggregator)
-            // to remove the .qualifier
+            // Remove the SNAPSHOT from Maven versions, then update Eclipse
+            // metadata to remove the .qualifier.
             sh (script:
-              "./mvnw -f edelta.parent/edelta.bom/pom.xml ${mavenOnlyProfile} \
+              "./mvnw -f edelta.parent/pom.xml ${mavenOnlyProfile} \
                     versions:set -DgenerateBackupPoms=false -DremoveSnapshot=true \
                && \
                ./mvnw -f edelta.parent/pom.xml ${mavenOnlyProfile} \
