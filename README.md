@@ -66,7 +66,7 @@ https://lorenzobettini.github.io/edelta-snapshots/
 
 ### Maven artifacts
 
-Since version 0.7.1, Maven artifacts for Edelta (mainly the compiler and the libraries) are available on Maven Central (the groupId is `io.github.lorenzobettini.edelta`), and can be used, for instance, together with the `xtext-maven-plugin`, to compile `.edelta` files into Java files during a Maven build, both a Maven/Tycho build and a pure Maven build. An example of a pure Maven project using this mechanism can be found here: https://github.com/LorenzoBettini/edelta/tree/master/edelta.parent/edelta.maven.example.
+Since version 0.7.1, Maven artifacts for Edelta (mainly the compiler and the libraries) are available on Maven Central (the groupId is `io.github.lorenzobettini.edelta`), and can be used, for instance, together with the `xtext-maven-plugin`, to compile `.edelta` files into Java files during a Maven build, both a Maven/Tycho build and a pure Maven build. An example of a pure Maven project using this mechanism is included in the Edelta reactor: https://github.com/LorenzoBettini/edelta/tree/master/edelta.parent/edelta.maven.example.
 
 ### Picto integration tests
 
