@@ -3,7 +3,7 @@
 
 # NOTE: better to use the increment_version.ant file
 
-./mvnw -f edelta.parent/edelta.bom/pom.xml \
+./mvnw -f edelta.parent/pom.xml \
     versions:set -DnewVersion=2.0.0-SNAPSHOT \
     -DgenerateBackupPoms=false \
     -Dtycho.mode=maven

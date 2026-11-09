@@ -1,22 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>io.github.lorenzobettini.edelta</groupId>
-    <artifactId>edelta.bom</artifactId>
-    <version>3.13.0-SNAPSHOT</version>
-    <relativePath>edelta.bom</relativePath>
-  </parent>
+  <groupId>io.github.lorenzobettini.edelta</groupId>
   <artifactId>edelta.parent</artifactId>
+  <version>3.13.0-SNAPSHOT</version>
+  <!-- Keep this version before the external parent's version for increment_versions.ant. -->
+  <parent>
+    <groupId>io.github.lorenzobettini.xtextutils</groupId>
+    <artifactId>xtext-tycho-parent</artifactId>
+    <version>0.26.0</version>
+    <!-- REMEMBER: update the Xtext version range in edelta.feature -->
+    <relativePath></relativePath>
+  </parent>
   <packaging>pom</packaging>
 
   <name>Edelta</name>
   <url>https://github.com/LorenzoBettini/edelta</url>
   <description>An Xtext DSL for EMF metamodels refactoring and migration.</description>
 
+  <licenses>
+    <license>
+      <name>Eclipse Public License</name>
+      <url>http://www.eclipse.org/legal/epl-v10.html</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Lorenzo Bettini</name>
+      <email>lorenzo.bettini@gmail.com</email>
+      <roles>
+        <role>architect</role>
+        <role>developer</role>
+      </roles>
+      <organization>DISIA Dipartimento di Statistica, Informatica, Applicazioni</organization>
+      <organizationUrl>https://www.disia.unifi.it/</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <url>git@github.com:LorenzoBettini/edelta.git</url>
+    <developerConnection>scm:git:https://github.com/LorenzoBettini/edelta.git</developerConnection>
+    <connection>scm:git:git@github.com:LorenzoBettini/edelta.git</connection>
+  </scm>
+
+  <issueManagement>
+    <system>Github</system>
+    <url>https://github.com/LorenzoBettini/edelta/issues</url>
+  </issueManagement>
+
   <properties>
     <eclipse-version>2026-09</eclipse-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <xtext-version>${xtextVersion}</xtext-version>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
 
@@ -124,10 +160,50 @@
     <remote.dir>lbettini@frs.sourceforge.net:/home/frs/project/edelta</remote.dir>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.eclipse.xtext</groupId>
+        <artifactId>org.eclipse.xtext.xbase.lib</artifactId>
+        <version>${xtextVersion}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.xtext</groupId>
+        <artifactId>org.eclipse.xtext.ecore</artifactId>
+        <version>${xtextVersion}</version>
+      </dependency>
+      <!-- Edelta Maven artifacts -->
+      <dependency>
+        <groupId>io.github.lorenzobettini.edelta</groupId>
+        <artifactId>edelta</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.lorenzobettini.edelta</groupId>
+        <artifactId>edelta.lib</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.lorenzobettini.edelta</groupId>
+        <artifactId>edelta.refactorings.lib</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.lorenzobettini.edelta</groupId>
+        <artifactId>edelta.testutils</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.18.0</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <!-- The modules common to all profiles. These also correspond
     to the Maven artifacts to be deployed on Maven Central -->
   <modules>
-    <module>edelta.bom</module>
     <module>edelta.target</module>
     <module>edelta.lib</module>
     <module>edelta</module>
@@ -182,6 +258,27 @@
       <properties>
         <skipTests>true</skipTests>
       </properties>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <artifactId>maven-install-plugin</artifactId>
+              <executions>
+                <execution>
+                  <id>default-install</id>
+                  <phase>none</phase>
+                </execution>
+              </executions>
+            </plugin>
+            <plugin>
+              <artifactId>maven-deploy-plugin</artifactId>
+              <configuration>
+                <skip>true</skip>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
     </profile>
     <profile>
       <id>release-ide</id> <!-- release IDE products on Sourceforge -->
@@ -294,6 +391,31 @@
     </plugins>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.eluder.coveralls</groupId>
+          <artifactId>coveralls-maven-plugin</artifactId>
+          <version>4.3.0</version>
+          <dependencies>
+            <!-- Explicit dep on jaxb-api to avoid problems with JDK9 and later,
+              until a new version of coveralls-maven-plugin is released.
+              See also https://github.com/trautonen/coveralls-maven-plugin/issues/112 -->
+            <dependency>
+              <groupId>javax.xml.bind</groupId>
+              <artifactId>jaxb-api</artifactId>
+              <version>2.3.1</version>
+            </dependency>
+          </dependencies>
+          <configuration>
+            <jacocoReports>
+              <jacocoReport>${project.basedir}/${jacoco-aggregate-report}</jacocoReport>
+            </jacocoReports>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+          <version>5.2.0.4988</version>
+        </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-packaging-plugin</artifactId>

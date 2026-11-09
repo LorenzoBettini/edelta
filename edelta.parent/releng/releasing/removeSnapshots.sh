@@ -1,4 +1,4 @@
-./mvnw -f edelta.parent/edelta.bom/pom.xml \
+./mvnw -f edelta.parent/pom.xml \
     '-P!development' \
 	versions:set \
 	-DgenerateBackupPoms=false \

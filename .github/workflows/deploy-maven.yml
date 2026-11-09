@@ -31,7 +31,7 @@ jobs:
         restore-keys: ${{ runner.os }}-maven-deploy-
     - name: Remove SNAPSHOT
       run: >
-        ./mvnw -f edelta.parent/edelta.bom/pom.xml
+        ./mvnw -f edelta.parent/pom.xml
         -P!development
         versions:set -DgenerateBackupPoms=false -DremoveSnapshot=true
         &&

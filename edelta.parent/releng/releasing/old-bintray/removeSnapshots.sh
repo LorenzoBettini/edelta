@@ -1,6 +1,6 @@
 #!/bin/sh
 
-./mvnw -f edelta.parent/edelta.bom/pom.xml -P!development \
+./mvnw -f edelta.parent/pom.xml -P!development \
     versions:set -DgenerateBackupPoms=false -DremoveSnapshot=true \
 && \
 ./mvnw -f edelta.parent/pom.xml -P!development \
