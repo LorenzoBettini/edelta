@@ -9,6 +9,27 @@
   <artifactId>edelta.repository</artifactId>
   <packaging>eclipse-repository</packaging>
 
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edelta.feature</artifactId>
+      <version>${project.version}</version>
+      <type>eclipse-feature</type>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edelta.dependency.analyzer.feature</artifactId>
+      <version>${project.version}</version>
+      <type>eclipse-feature</type>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edelta.product.ui.feature</artifactId>
+      <version>${project.version}</version>
+      <type>eclipse-feature</type>
+    </dependency>
+  </dependencies>
+
   <properties>
     <!-- for verifying our p2 repository and its references -->
     <build.destination>${project.build.directory}/installed-plugins</build.destination>
