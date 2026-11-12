@@ -419,6 +419,75 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
 
 	@Test
 	@Flaky
+	public void testEcoreReferenceInsideClassCreationLoop() throws Exception {
+		var inLoop = newBuilder().append("""
+			metamodel "mypackage"
+			modifyEcore aTest epackage mypackage {
+				for (var i = 0; i < 3; i++) {
+					addNewEClass("NewClass" + i)
+					ecoreref(<|>)
+				}
+			}
+			""");
+		inLoop.assertProposalAtCursor("NewClass0");
+		inLoop.assertNoProposalAtCursor("NewClass1");
+		inLoop.assertNoProposalAtCursor("NewClass2");
+	}
+
+	@Test
+	@Flaky
+	public void testEcoreReferenceAfterClassCreationLoop() throws Exception {
+		var afterLoop = newBuilder().append("""
+			metamodel "mypackage"
+			modifyEcore aTest epackage mypackage {
+				for (var i = 0; i < 3; i++) {
+					addNewEClass("NewClass" + i)
+				}
+				ecoreref(<|>)
+			}
+			""");
+		afterLoop.assertProposalAtCursor("NewClass0");
+		afterLoop.assertProposalAtCursor("NewClass1");
+		afterLoop.assertProposalAtCursor("NewClass2");
+	}
+
+	@Test
+	@Flaky
+	public void testEcoreReferenceInsideRenameLoop() throws Exception {
+		var tester = newBuilder().append("""
+			metamodel "mypackage"
+			modifyEcore aTest epackage mypackage {
+				for (var i = 0; i < 3; i++) {
+					if (i == 1) ecoreref(MyBaseClass).name = "Renamed"
+					ecoreref(<|>)
+				}
+			}
+			""");
+		tester.assertProposalAtCursor("MyClass");
+		tester.assertNoProposalAtCursor("MyBaseClass");
+		tester.assertNoProposalAtCursor("Renamed");
+	}
+
+	@Test
+	@Flaky
+	public void testQualifiedEcoreReferenceInsideFeatureCreationLoop() throws Exception {
+		var tester = newBuilder().append("""
+			metamodel "mypackage"
+			modifyEcore aTest epackage mypackage {
+				for (var i = 0; i < 3; i++) {
+					ecoreref(MyClass).addNewEAttribute("added" + i, null)
+					ecoreref(MyClass.<|>)
+				}
+			}
+			""");
+		tester.assertProposalAtCursor("myAttribute");
+		tester.assertProposalAtCursor("added0");
+		tester.assertNoProposalAtCursor("added1");
+		tester.assertNoProposalAtCursor("added2");
+	}
+
+	@Test
+	@Flaky
 	public void testUnqualifiedEcoreReferenceBeforeRename() throws Exception {
 		testContentAssistant("""
 			metamodel "mypackage"

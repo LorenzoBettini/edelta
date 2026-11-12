@@ -5,6 +5,7 @@ package edelta.ui.contentassist;
 
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toSet;
 import static org.eclipse.xtext.EcoreUtil2.getContainerOfType;
 
 import org.eclipse.emf.ecore.EObject;
@@ -33,6 +34,7 @@ import edelta.edelta.EdeltaMigration;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaPackage;
 import edelta.resource.derivedstate.EdeltaAccessibleElements;
+import edelta.resource.derivedstate.EdeltaAccessibleElement;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.util.EdeltaEcoreHelper;
 import edelta.util.EdeltaModelUtil;
@@ -167,13 +169,18 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 		final var qualification = ((EdeltaEcoreQualifiedArgument) model)
 			.getQualification();
 		String qualificationText = EdeltaModelUtil.getEcoreReferenceText(qualification);
+		final var accessibleNames = accessibleElements.stream()
+			.map(EdeltaAccessibleElement::getQualifiedName)
+			.collect(toSet());
 		accessibleElements.stream()
 			.filter(e -> e.getQualifiedName().toString().endsWith(qualificationText))
 			.findFirst()
 			.ifPresent(e -> 
 				createENamedElementProposals(model, context, acceptor,
-					Scopes.scopeFor(
-						ecoreHelper.getENamedElements(e.getElement()))));
+					Scopes.scopeFor(Iterables.filter(
+						ecoreHelper.getENamedElements(e.getElement()),
+						child -> accessibleNames.contains(
+							e.getQualifiedName().append(child.getName()))))));
 	}
 
 	private boolean notInsideModifyEcore(EObject model) {
@@ -181,7 +188,7 @@ public class EdeltaProposalProvider extends AbstractEdeltaProposalProvider {
 	}
 
 	private EdeltaAccessibleElements getAccessibleElements(EObject model) {
-		return derivedStateHelper.getAccessibleElements(
+		return derivedStateHelper.getAccessibleElementsInEveryEvaluation(
 			getContainerOfType(model, EdeltaEcoreReferenceExpression.class));
 	}
 
