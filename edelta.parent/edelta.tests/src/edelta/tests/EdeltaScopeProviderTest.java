@@ -23,10 +23,9 @@ import com.google.inject.Inject;
 import edelta.edelta.EdeltaEcoreQualifiedArgument;
 import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaPackage;
-import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 
 @RunWith(XtextRunner.class)
-@InjectWith(EdeltaInjectorProviderCustom.class)
+@InjectWith(EdeltaInjectorProvider.class)
 public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 	@Inject
 	private IScopeProvider scopeProvider;

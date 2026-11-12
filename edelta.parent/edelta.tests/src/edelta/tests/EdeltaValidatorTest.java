@@ -9,11 +9,10 @@ import org.junit.runner.RunWith;
 
 import edelta.edelta.EdeltaPackage;
 import edelta.lib.EdeltaRuntime;
-import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 import edelta.validation.EdeltaValidator;
 
 @RunWith(XtextRunner.class)
-@InjectWith(EdeltaInjectorProviderCustom.class)
+@InjectWith(EdeltaInjectorProvider.class)
 public class EdeltaValidatorTest extends EdeltaAbstractTest {
 	@Test
 	public void testEmptyProgram() throws Exception {

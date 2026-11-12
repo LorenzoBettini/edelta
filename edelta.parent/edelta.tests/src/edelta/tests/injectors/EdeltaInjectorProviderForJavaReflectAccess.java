@@ -6,7 +6,7 @@ import edelta.EdeltaRuntimeModule;
 import edelta.tests.EdeltaInjectorProvider;
 import edelta.tests.additional.MockJavaReflectAccess;
 
-public class EdeltaInjectorProviderForJavaReflectAccess extends EdeltaInjectorProviderCustom {
+public class EdeltaInjectorProviderForJavaReflectAccess extends EdeltaInjectorProvider {
 	@Override
 	protected EdeltaRuntimeModule createRuntimeModule() {
 		return new EdeltaRuntimeModule() {

@@ -13,7 +13,6 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.diagnostics.Severity;
-import org.eclipse.xtext.ecore.EcoreSupportStandaloneSetup;
 import org.eclipse.xtext.generator.GeneratorContext;
 import org.eclipse.xtext.generator.GeneratorDelegate;
 import org.eclipse.xtext.generator.JavaIoFileSystemAccess;
@@ -37,7 +36,6 @@ public class EdeltaStandaloneCompiler {
 	private final Injector injector;
 
 	public EdeltaStandaloneCompiler() {
-		EcoreSupportStandaloneSetup.setup();
 		injector = new EdeltaStandaloneSetup().createInjectorAndDoEMFRegistration();
 	}
 

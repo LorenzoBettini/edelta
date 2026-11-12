@@ -5,6 +5,7 @@ package edelta;
 
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.xml.namespace.XMLNamespacePackage;
+import org.eclipse.xtext.ecore.EcoreSupportStandaloneSetup;
 
 import com.google.inject.Injector;
 
@@ -17,6 +18,13 @@ import edelta.edelta.EdeltaPackage;
 public class EdeltaStandaloneSetup extends EdeltaStandaloneSetupGenerated {
 	public static void doSetup() {
 		new EdeltaStandaloneSetup().createInjectorAndDoEMFRegistration();
+	}
+
+	/** Registers Ecore services before creating and registering the Edelta injector. */
+	@Override
+	public Injector createInjectorAndDoEMFRegistration() {
+		EcoreSupportStandaloneSetup.setup();
+		return super.createInjectorAndDoEMFRegistration();
 	}
 
 	@Override

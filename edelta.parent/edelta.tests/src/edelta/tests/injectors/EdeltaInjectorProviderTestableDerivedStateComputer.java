@@ -12,7 +12,7 @@ import edelta.tests.additional.TestableEdeltaDerivedStateComputer;
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaInjectorProviderTestableDerivedStateComputer extends EdeltaInjectorProviderCustom {
+public class EdeltaInjectorProviderTestableDerivedStateComputer extends EdeltaInjectorProvider {
 
 	@Override
 	protected EdeltaRuntimeModule createRuntimeModule() {

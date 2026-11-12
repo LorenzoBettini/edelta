@@ -59,6 +59,7 @@
     <mwe2.skip>false</mwe2.skip>
     <xtend.skip>false</xtend.skip>
     <edelta.skip>false</edelta.skip>
+    <edelta.outputDirectory>edelta-gen</edelta.outputDirectory>
 
     <jacoco-aggregate-report>edelta.tests.report/target/site/jacoco-aggregate/jacoco.xml</jacoco-aggregate-report>
 
@@ -472,7 +473,7 @@
                 <setup>edelta.EdeltaStandaloneSetup</setup>
                 <outputConfigurations>
                   <outputConfiguration>
-                    <outputDirectory>edelta-gen</outputDirectory>
+                    <outputDirectory>${edelta.outputDirectory}</outputDirectory>
                     <installDslAsPrimarySource>true</installDslAsPrimarySource>
                   </outputConfiguration>
                 </outputConfigurations>
