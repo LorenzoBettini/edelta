@@ -119,7 +119,8 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 		checkDuplicateMigrationImports(p, metamodelImportSet);
 		var unresolvedEcoreReferences = edeltaDerivedStateHelper
 				.getUnresolvedEcoreReferences(p.eResource());
-		for (var ecoreRef : unresolvedEcoreReferences) {
+		// A loop can record the same syntactic reference on several iterations.
+		unresolvedEcoreReferences.stream().distinct().forEach(ecoreRef -> {
 			if (!ecoreRef.getElement().eIsProxy()) {
 				// it wasn't resolved during interpretation but it is
 				// in the end
@@ -130,7 +131,7 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 					EDELTA_ECORE_ARGUMENT__ELEMENT,
 					INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT);
 			}
-		}
+		});
 	}
 
 	private Set<String> checkDuplicateMetamodelImports(EdeltaProgram p) {
