@@ -1964,6 +1964,49 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	public void testAccessibleElementsInEveryLoopIteration() throws Exception {
+		var input = """
+		metamodel "foo"
+
+		modifyEcore aTest epackage foo {
+			for (var i = 0; i < 3; i++) {
+				addNewEClass("MyNewClass" + i)
+				ecoreref(MyNewClass0)
+				ecoreref(MyNewClass1)
+				ecoreref(MyNewClass2)
+			}
+			ecoreref(MyNewClass0)
+			ecoreref(MyNewClass1)
+			ecoreref(MyNewClass2)
+		}
+		""";
+		var program = parseWithTestEcore(input);
+		interpretProgram(program);
+		var references = getAllEcoreReferenceExpressions(program);
+		var inLoop = references.get(0);
+		assertThat(derivedStateHelper.getAccessibleElements(inLoop))
+			.extracting(e -> e.getQualifiedName().toString())
+			.contains("foo.MyNewClass0", "foo.MyNewClass1", "foo.MyNewClass2");
+		assertThat(derivedStateHelper.getAccessibleElementsInEveryEvaluation(inLoop))
+			.extracting(e -> e.getQualifiedName().toString())
+			.contains("foo.MyNewClass0")
+			.doesNotContain("foo.MyNewClass1", "foo.MyNewClass2");
+		assertThat(derivedStateHelper.getAccessibleElementsInEveryEvaluation(references.get(4)))
+			.extracting(e -> e.getQualifiedName().toString())
+			.contains("foo.MyNewClass0", "foo.MyNewClass1", "foo.MyNewClass2");
+		validationTestHelper.assertError(program,
+			EdeltaPackage.Literals.EDELTA_ECORE_SIMPLE_ARGUMENT,
+			EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
+			input.indexOf("MyNewClass1)"), "MyNewClass1".length(),
+			"Element not yet available in this context: foo.MyNewClass1");
+		validationTestHelper.assertError(program,
+			EdeltaPackage.Literals.EDELTA_ECORE_SIMPLE_ARGUMENT,
+			EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
+			input.indexOf("MyNewClass2)"), "MyNewClass2".length(),
+			"Element not yet available in this context: foo.MyNewClass2");
+	}
+
+	@Test
 	public void testInvalidAmbiguousEcoreref() // NOSONAR: parameterized test would not be feasible
 			throws Exception {
 		var input = """

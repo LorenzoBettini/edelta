@@ -202,6 +202,13 @@ public class EdeltaDerivedStateHelper {
 				.getAccessibleElements();
 	}
 
+	/** Returns elements accessible during every observed evaluation of the reference. */
+	public EdeltaAccessibleElements getAccessibleElementsInEveryEvaluation(
+			EdeltaEcoreReferenceExpression ecoreRefExp) {
+		return getEcoreReferenceExpressionState(ecoreRefExp)
+			.getAccessibleElementsInEveryEvaluation();
+	}
+
 	public void setAccessibleElements(EdeltaEcoreReferenceExpression ecoreRefExp,
 			EdeltaAccessibleElements accessibleElements) {
 		getEcoreReferenceExpressionState(ecoreRefExp)
