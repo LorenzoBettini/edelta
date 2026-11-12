@@ -9,10 +9,9 @@ import org.junit.runner.RunWith;
 import com.google.inject.Inject;
 
 import edelta.interpreter.EdeltaInterpreterDiagnosticHelper;
-import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 
 @RunWith(XtextRunner.class)
-@InjectWith(EdeltaInjectorProviderCustom.class)
+@InjectWith(EdeltaInjectorProvider.class)
 public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
 	@Inject
 	private EdeltaInterpreterDiagnosticHelper diagnosticHelper;

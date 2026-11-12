@@ -19,7 +19,7 @@ import edelta.tests.additional.MockJavaReflectAccess;
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter extends EdeltaInjectorProviderCustom {
+public class EdeltaInjectorProviderDerivedStateComputerWithoutInterpreter extends EdeltaInjectorProvider {
 
 	@Override
 	protected EdeltaRuntimeModule createRuntimeModule() {

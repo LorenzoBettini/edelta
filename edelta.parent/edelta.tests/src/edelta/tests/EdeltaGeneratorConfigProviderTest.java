@@ -12,10 +12,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import com.google.inject.Inject;
 
 import edelta.compiler.EdeltaGeneratorConfigProvider;
-import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 
 @ExtendWith(InjectionExtension.class)
-@InjectWith(EdeltaInjectorProviderCustom.class)
+@InjectWith(EdeltaInjectorProvider.class)
 class EdeltaGeneratorConfigProviderTest {
 
 	@Inject

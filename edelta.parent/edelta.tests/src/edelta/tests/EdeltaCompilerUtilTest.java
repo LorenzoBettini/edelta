@@ -24,10 +24,9 @@ import com.google.inject.Provider;
 
 import edelta.compiler.EdeltaCompilerUtil;
 import edelta.lib.EdeltaModelManager;
-import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 
 @ExtendWith(InjectionExtension.class)
-@InjectWith(EdeltaInjectorProviderCustom.class)
+@InjectWith(EdeltaInjectorProvider.class)
 class EdeltaCompilerUtilTest extends EdeltaAbstractTest {
 	@Inject
 	private EdeltaCompilerUtil edeltaCompilerUtil;

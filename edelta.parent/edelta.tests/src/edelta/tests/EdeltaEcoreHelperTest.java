@@ -10,11 +10,10 @@ import org.junit.runner.RunWith;
 
 import com.google.inject.Inject;
 
-import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 import edelta.util.EdeltaEcoreHelper;
 
 @RunWith(XtextRunner.class)
-@InjectWith(EdeltaInjectorProviderCustom.class)
+@InjectWith(EdeltaInjectorProvider.class)
 public class EdeltaEcoreHelperTest extends EdeltaAbstractTest {
 	@Inject
 	private EdeltaEcoreHelper ecoreHelper;

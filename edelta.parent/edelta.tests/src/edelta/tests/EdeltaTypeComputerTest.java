@@ -1,7 +1,6 @@
 package edelta.tests;
 
 import com.google.inject.Inject;
-import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -18,7 +17,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 @ExtendWith(InjectionExtension.class)
-@InjectWith(EdeltaInjectorProviderCustom.class)
+@InjectWith(EdeltaInjectorProvider.class)
 @SuppressWarnings("all")
 public class EdeltaTypeComputerTest extends EdeltaAbstractTest {
 	@Inject

@@ -14,11 +14,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import edelta.edelta.EdeltaEcoreReferenceExpression;
-import edelta.tests.injectors.EdeltaInjectorProviderCustom;
 import edelta.util.EdeltaModelUtil;
 
 @RunWith(XtextRunner.class)
-@InjectWith(EdeltaInjectorProviderCustom.class)
+@InjectWith(EdeltaInjectorProvider.class)
 public class EdeltaModelUtilTest extends EdeltaAbstractTest {
 	@Test
 	public void testGetProgram() throws Exception {
