@@ -68,6 +68,23 @@ https://lorenzobettini.github.io/edelta-snapshots/
 
 Since version 0.7.1, Maven artifacts for Edelta (mainly the compiler and the libraries) are available on Maven Central (the groupId is `io.github.lorenzobettini.edelta`), and can be used, for instance, together with the `xtext-maven-plugin`, to compile `.edelta` files into Java files during a Maven build, both a Maven/Tycho build and a pure Maven build. An example of a pure Maven project using this mechanism is included in the Edelta reactor: https://github.com/LorenzoBettini/edelta/tree/master/edelta.parent/edelta.maven.example.
 
+For Java applications that need to generate sources directly, the published
+`edelta.standalone` JAR provides `EdeltaStandaloneCompiler`. Add it and any Java
+libraries imported by your `.edelta` files to the application's runtime classpath:
+
+```java
+new EdeltaStandaloneCompiler().compile(
+    Path.of("my-project"),
+    List.of(Path.of("model"), Path.of("src/main/java")),
+    Path.of("generated"));
+```
+
+The compiler recursively loads `.ecore` and `.edelta` files from the listed
+source folders, validates them, and writes Java sources to the output directory.
+Source folders and a relative output directory are resolved against the project
+root. Validation errors throw `EdeltaCompilationException` with file and line
+diagnostics; no Java sources are generated for a failed compilation.
+
 ### Picto integration tests
 
 The dependency analyzer uses Epsilon/Picto 2.9. Its

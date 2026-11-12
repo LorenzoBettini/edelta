@@ -180,6 +180,11 @@
       </dependency>
       <dependency>
         <groupId>io.github.lorenzobettini.edelta</groupId>
+        <artifactId>edelta.standalone</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.lorenzobettini.edelta</groupId>
         <artifactId>edelta.lib</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -207,6 +212,7 @@
     <module>edelta.target</module>
     <module>edelta.lib</module>
     <module>edelta</module>
+    <module>edelta.standalone</module>
     <module>edelta.refactorings.lib</module>
     <module>edelta.testutils</module>
   </modules>
@@ -240,6 +246,7 @@
         <module>edelta.ui</module>
         <module>edelta.refactorings.lib.tests</module>
         <module>edelta.tests</module>
+        <module>edelta.standalone</module>
         <module>edelta.ui.tests</module>
         <module>edelta.examples</module>
         <module>edelta.maven.example</module>
