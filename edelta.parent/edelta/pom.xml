@@ -33,7 +33,6 @@
 		<dependency>
 			<groupId>org.eclipse.emf</groupId>
 			<artifactId>org.eclipse.emf.mwe2.runtime</artifactId>
-			<version>${mwe2Version}</version>
 		</dependency>
 	</dependencies>
 

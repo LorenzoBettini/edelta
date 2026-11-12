@@ -1,12 +1,12 @@
 package edelta.standalone;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.eclipse.emf.common.util.URI;
@@ -55,8 +55,16 @@ public class EdeltaStandaloneCompiler {
 	public void compile(final Path projectRoot, final List<Path> sourceFolders,
 			final Path outputDirectory) throws IOException {
 		final var root = projectRoot.toAbsolutePath().normalize();
-		final var ecoreFiles = new ArrayList<Path>();
-		final var edeltaFiles = new ArrayList<Path>();
+		final var projectConfig = createProjectConfig(root, sourceFolders);
+		final var sourceFiles = findSourceFiles(root, sourceFolders);
+		final var resourceSet = createResourceSet(projectConfig, root.resolve(sourceFolders.get(0)));
+		final var resources = loadResources(resourceSet, sourceFiles);
+		validateResources(resources);
+		generateJava(resources, root.resolve(outputDirectory).normalize());
+	}
+
+	private FileProjectConfig createProjectConfig(final Path root,
+			final List<Path> sourceFolders) {
 		final var projectConfig = new FileProjectConfig(root.toFile());
 		if (sourceFolders.isEmpty()) {
 			throw new IllegalArgumentException("At least one source folder is required");
@@ -71,6 +79,16 @@ public class EdeltaStandaloneCompiler {
 				throw new IllegalArgumentException("Source folder does not exist: " + folder);
 			}
 			projectConfig.addSourceFolder(sourceFolder.toString().replace('\\', '/'));
+		}
+		return projectConfig;
+	}
+
+	private List<Path> findSourceFiles(final Path root, final List<Path> sourceFolders)
+			throws IOException {
+		final var ecoreFiles = new ArrayList<Path>();
+		final var edeltaFiles = new ArrayList<Path>();
+		for (final var sourceFolder : sourceFolders) {
+			final var folder = root.resolve(sourceFolder).normalize();
 			try (Stream<Path> paths = Files.walk(folder)) {
 				paths.filter(Files::isRegularFile).sorted(Comparator.naturalOrder()).forEach(path -> {
 					final var name = path.getFileName().toString();
@@ -82,21 +100,31 @@ public class EdeltaStandaloneCompiler {
 				});
 			}
 		}
+		ecoreFiles.addAll(edeltaFiles);
+		return ecoreFiles;
+	}
 
+	private XtextResourceSet createResourceSet(final FileProjectConfig projectConfig,
+			final Path firstSourceFolder) throws IOException {
 		final var resourceSet = injector.getInstance(XtextResourceSet.class);
 		resourceSet.setClasspathURIContext(Thread.currentThread().getContextClassLoader());
 		ProjectConfigAdapter.install(resourceSet, projectConfig);
 		// Edelta's metamodel "ecore" resolves through the resource index. The
 		// generated EcorePackage in the global registry is not indexed by itself.
-		loadBuiltInEcore(resourceSet, root.resolve(sourceFolders.get(0)));
-		final var resources = new ArrayList<Resource>();
-		for (final var file : ecoreFiles) {
-			resources.add(load(resourceSet, file));
-		}
-		for (final var file : edeltaFiles) {
-			resources.add(load(resourceSet, file));
-		}
+		loadBuiltInEcore(resourceSet, firstSourceFolder);
+		return resourceSet;
+	}
 
+	private List<Resource> loadResources(final XtextResourceSet resourceSet,
+			final List<Path> sourceFiles) {
+		final var resources = new ArrayList<Resource>();
+		for (final var file : sourceFiles) {
+			resources.add(load(resourceSet, file));
+		}
+		return resources;
+	}
+
+	private void validateResources(final List<Resource> resources) {
 		final var diagnostics = new ArrayList<String>();
 		for (final var resource : resources) {
 			final var serviceProvider = IResourceServiceProvider.Registry.INSTANCE
@@ -112,9 +140,11 @@ public class EdeltaStandaloneCompiler {
 		if (!diagnostics.isEmpty()) {
 			throw new EdeltaCompilationException(diagnostics);
 		}
+	}
 
+	private void generateJava(final List<Resource> resources, final Path outputDirectory) {
 		final var fileAccess = injector.getInstance(JavaIoFileSystemAccess.class);
-		fileAccess.setOutputPath(root.resolve(outputDirectory).normalize().toString());
+		fileAccess.setOutputPath(outputDirectory.toString());
 		fileAccess.setWriteTrace(false);
 		final var generator = injector.getInstance(GeneratorDelegate.class);
 		final var context = new GeneratorContext();
@@ -133,6 +163,8 @@ public class EdeltaStandaloneCompiler {
 			final Path sourceFolder) throws IOException {
 		final var uri = URI.createFileURI(sourceFolder.resolve("__builtin__/Ecore.ecore").toString());
 		final var resource = resourceSet.createResource(uri);
+		// This resource is supplied by the transitive org.eclipse.emf.ecore JAR,
+		// regardless of where the calling project stores its own source files.
 		try (var input = Objects.requireNonNull(
 			EcorePackage.class.getResourceAsStream("/model/Ecore.ecore"))) {
 			resource.load(input, resourceSet.getLoadOptions());

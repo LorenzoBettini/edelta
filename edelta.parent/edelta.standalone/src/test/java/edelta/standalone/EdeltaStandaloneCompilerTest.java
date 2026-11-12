@@ -53,19 +53,21 @@ public class EdeltaStandaloneCompilerTest {
 	@Test
 	public void rejectsInvalidSourceFolders() throws Exception {
 		final var root = copyExample();
-		assertThatThrownBy(() -> compiler.compile(root, List.of(), Path.of("generated")))
+		final var output = Path.of("generated");
+		final var noFolders = List.<Path>of();
+		final var absoluteFolder = List.of(root.resolve("model"));
+		final var outsideFolder = List.of(Path.of("../outside"));
+		final var missingFolder = List.of(Path.of("missing"));
+		assertThatThrownBy(() -> compiler.compile(root, noFolders, output))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining("At least one source folder");
-		assertThatThrownBy(() -> compiler.compile(root, List.of(root.resolve("model")),
-			Path.of("generated")))
+		assertThatThrownBy(() -> compiler.compile(root, absoluteFolder, output))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining("relative to the project root");
-		assertThatThrownBy(() -> compiler.compile(root, List.of(Path.of("../outside")),
-			Path.of("generated")))
+		assertThatThrownBy(() -> compiler.compile(root, outsideFolder, output))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining("relative to the project root");
-		assertThatThrownBy(() -> compiler.compile(root, List.of(Path.of("missing")),
-			Path.of("generated")))
+		assertThatThrownBy(() -> compiler.compile(root, missingFolder, output))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining("does not exist");
 	}
@@ -76,7 +78,9 @@ public class EdeltaStandaloneCompilerTest {
 		final var source = root.resolve("src/main/java/example/example/Example.edelta");
 		Files.writeString(source,
 			"package com.example\nmetamodel \"myecore\"\nmodifyEcore broken epackage {\n");
-		assertThatThrownBy(() -> compiler.compile(root, sourceFolders(), Path.of("generated")))
+		final var folders = sourceFolders();
+		final var output = Path.of("generated");
+		assertThatThrownBy(() -> compiler.compile(root, folders, output))
 			.isInstanceOf(EdeltaCompilationException.class)
 			.satisfies(error -> assertThat(((EdeltaCompilationException) error).getDiagnostics())
 				.anySatisfy(diagnostic -> assertThat(diagnostic)
@@ -90,7 +94,9 @@ public class EdeltaStandaloneCompilerTest {
 		final var source = root.resolve("src/main/java/example/example/Example.edelta");
 		Files.writeString(source, Files.readString(source)
 			.replace("metamodel \"myecore\"", "metamodel \"missing\""));
-		assertThatThrownBy(() -> compiler.compile(root, sourceFolders(), Path.of("generated")))
+		final var folders = sourceFolders();
+		final var output = Path.of("generated");
+		assertThatThrownBy(() -> compiler.compile(root, folders, output))
 			.isInstanceOf(EdeltaCompilationException.class)
 			.hasMessageContaining("Example.edelta:");
 		assertThat(root.resolve("generated/com/example/Example.java")).doesNotExist();
