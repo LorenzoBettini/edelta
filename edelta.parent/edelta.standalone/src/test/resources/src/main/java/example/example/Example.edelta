@@ -1,0 +1,27 @@
+import edelta.refactorings.lib.EdeltaRefactorings
+
+// IMPORTANT: ecores must be in a source directory
+// otherwise you can't refer to them
+package com.example
+
+metamodel "myecore"
+metamodel "ecore"
+
+use EdeltaRefactorings as extension refactorings
+use ExampleReusableFunctions as extension myfunctions
+
+def createSubClassOfMyEClass(String name) {
+	createClassWithSubClass(name ,ecoreref(MyEClass))
+}
+
+modifyEcore aModification epackage myecore {
+	addNewEClass("MyNewClass") [
+		// using 'extension' from EdeltaRefactorings
+		addMandatoryAttribute("ANewAttribute", ecoreref(EString))
+		// corresponds to refactorings.addMandatoryAttr(it, "ANewAttribute", ecoreref(EString))
+		ecoreref(ANewAttribute).EType = ecoreref(EInt)
+	]
+	addEClass(createSubClassOfMyEClass("ANewDerivedEClass"))
+	ecoreref(ANewDerivedEClass).abstract = true
+}
+
