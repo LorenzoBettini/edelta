@@ -2004,6 +2004,10 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			EdeltaValidator.INTERPRETER_ACCESS_NOT_YET_EXISTING_ELEMENT,
 			input.indexOf("MyNewClass2)"), "MyNewClass2".length(),
 			"Element not yet available in this context: foo.MyNewClass2");
+		assertErrorsAsStrings(program, """
+		Element not yet available in this context: foo.MyNewClass1
+		Element not yet available in this context: foo.MyNewClass2
+		""");
 	}
 
 	@Test

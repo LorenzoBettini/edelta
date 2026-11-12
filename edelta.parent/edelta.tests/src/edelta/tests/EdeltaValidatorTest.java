@@ -374,6 +374,25 @@ public class EdeltaValidatorTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	public void testNotYetExistingElementInLoopReportedOncePerOccurrence() throws Exception {
+		var program = parseWithTestEcore("""
+		metamodel "foo"
+
+		modifyEcore aTest epackage foo {
+			for (var i = 0; i < 3; i++) {
+				ecoreref(ANewClass)
+				ecoreref(ANewClass)
+			}
+			addNewEClass("ANewClass")
+		}
+		""");
+		assertErrorsAsStrings(program, """
+		Element not yet available in this context: foo.ANewClass
+		Element not yet available in this context: foo.ANewClass
+		""");
+	}
+
+	@Test
 	public void testAccessToNotYetExistingElementInComplexExpression() throws Exception {
 		var input = """
 		metamodel "foo"
