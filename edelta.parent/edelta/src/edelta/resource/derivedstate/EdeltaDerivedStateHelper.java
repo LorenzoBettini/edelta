@@ -219,4 +219,8 @@ public class EdeltaDerivedStateHelper {
 		return getOrInstallAdapter(resource).getModifiedElements();
 	}
 
+	public EdeltaModifiedFeatures getModifiedFeatures(Resource resource) {
+		return getOrInstallAdapter(resource).getModifiedFeatures();
+	}
+
 }

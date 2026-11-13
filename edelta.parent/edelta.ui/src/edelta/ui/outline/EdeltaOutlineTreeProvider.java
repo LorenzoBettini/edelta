@@ -6,10 +6,12 @@ package edelta.ui.outline;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider;
 import org.eclipse.xtext.ui.editor.outline.impl.EObjectNode;
+import org.eclipse.xtext.ui.editor.outline.impl.EStructuralFeatureNode;
 import org.eclipse.xtext.util.concurrent.IUnitOfWork;
 
 import com.google.inject.Inject;
@@ -18,6 +20,7 @@ import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
+import edelta.ui.labeling.EdeltaLabelProvider;
 
 /**
  * Customization of the default outline structure.
@@ -29,7 +32,10 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	private EdeltaDerivedStateHelper derivedStateHelper;
 
 	@Inject
-	private EdeltaEcoreReferenceTargets referenceTargets;
+	private EdeltaEcorePropertyRows propertyRows;
+
+	@Inject
+	private EdeltaLabelProvider edeltaLabelProvider;
 
 	/**
 	 * This is needed to access the derived state when creating nodes for
@@ -74,17 +80,24 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	public boolean _isLeaf(final EObject modelElement) {
 		return super._isLeaf(modelElement) &&
 			(modelElement.eClass().getEPackage() != EcorePackage.eINSTANCE ||
-				referenceTargets.get(modelElement).isEmpty());
+				propertyRows.get(modelElement, labelProvider::getText).isEmpty());
 	}
 
 	@Override
 	protected void _createChildren(final IOutlineNode parentNode, final EObject modelElement) {
 		super._createChildren(parentNode, modelElement);
 		if (modelElement.eClass().getEPackage() == EcorePackage.eINSTANCE) {
-			for (final var target : referenceTargets.get(modelElement)) {
+			for (final var row : propertyRows.get(modelElement, labelProvider::getText)) {
 				checkCanceled();
-				createEcoreNode(parentNode, target, labelProvider.getImage(target),
-					textDispatcher.invoke(target), true, true);
+				var change = derivedStateHelper.getModifiedFeatures(currentProgram.eResource())
+					.get(modelElement, row.feature());
+				var propertyNode = new EcorePropertyOutlineNode(modelElement, row.feature(), parentNode,
+					edeltaLabelProvider.propertyText(row.label(), change != null),
+					change != null && !change.initial());
+				var expression = change == null ? null : change.expression();
+				propertyNode.setTextRegion(expression == null
+					? parentNode.getSignificantTextRegion()
+					: locationInFileProvider.getSignificantTextRegion(expression));
 			}
 		}
 	}
@@ -94,19 +107,19 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 			boolean isLeaf) {
 		// cannot simply check ENamedElement: EGenericType is not an ENamedElement
 		if (modelElement.eClass().getEPackage() == EcorePackage.eINSTANCE) {
-			return createEcoreNode(parentNode, modelElement, image, text, isLeaf, false);
+			return createEcoreNode(parentNode, modelElement, image, text, isLeaf);
 		}
 		return super.createEObjectNode(parentNode, modelElement, image, text, isLeaf);
 	}
 
 	private EObjectNode createEcoreNode(IOutlineNode parentNode, EObject modelElement, Image image,
-			Object text, boolean isLeaf, boolean reference) {
+			Object text, boolean isLeaf) {
 		var elementForSignificantTextRegion = modelElement;
 		/*
 		 * The default readOnly resolves the EObject URI in a resource. Copied
 		 * EPackages instead need the object from the evolved, in-memory metamodel.
 		 */
-		var eObjectNode = new EcoreOutlineNode(modelElement, parentNode, image, text, isLeaf, reference);
+		var eObjectNode = new EcoreOutlineNode(modelElement, parentNode, image, text, isLeaf);
 		if (modelElement instanceof ENamedElement namedElement) {
 			var expression = derivedStateHelper.
 				getLastResponsibleExpression(currentProgram, namedElement);
@@ -122,23 +135,39 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	/** Keeps copied Ecore objects available when Xtext lazily expands the outline. */
 	public static class EcoreOutlineNode extends EObjectNode {
 		private final EObject modelElement;
-		private final boolean reference;
 
 		EcoreOutlineNode(EObject modelElement, IOutlineNode parent, Image image, Object text,
-				boolean isLeaf, boolean reference) {
+				boolean isLeaf) {
 			super(modelElement, parent, image, text, isLeaf);
 			this.modelElement = modelElement;
-			this.reference = reference;
-		}
-
-		/** Whether this node represents a non-containment reference target. */
-		public boolean isReference() {
-			return reference;
 		}
 
 		@Override
 		public <T> T readOnly(IUnitOfWork<T, EObject> work) {
 			return getDocument().tryReadOnly(state -> work.exec(modelElement));
+		}
+	}
+
+	/** A property is a leaf even when its value refers back to an ancestor. */
+	public static class EcorePropertyOutlineNode extends EStructuralFeatureNode {
+		private final EObject owner;
+		private final boolean directChange;
+
+		EcorePropertyOutlineNode(EObject owner, EStructuralFeature feature, IOutlineNode parent,
+				Object text, boolean directChange) {
+			super(owner, feature, parent, (Image) null, text, true);
+			this.owner = owner;
+			this.directChange = directChange;
+		}
+
+		/** Whether a later expression changed this property after initialization. */
+		public boolean isDirectChange() {
+			return directChange;
+		}
+
+		@Override
+		public <T> T readOnly(IUnitOfWork<T, EObject> work) {
+			return getDocument().tryReadOnly(state -> work.exec(owner));
 		}
 	}
 }

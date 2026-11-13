@@ -7,7 +7,6 @@ import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MODIFY_ECORE_OPERATION
 import static org.eclipse.emf.ecore.EcorePackage.Literals.EPACKAGE;
 
 import java.util.Objects;
-import java.util.Optional;
 
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
@@ -17,6 +16,7 @@ import org.eclipse.xtext.util.ITextRegion;
 import org.eclipse.xtext.xbase.XExpression;
 
 import edelta.ui.outline.EdeltaOutlineTreeProvider.EcoreOutlineNode;
+import edelta.ui.outline.EdeltaOutlineTreeProvider.EcorePropertyOutlineNode;
 
 /**
  * From an {@link XExpression} responsible of the modification of an {@link ENamedElement}
@@ -38,16 +38,16 @@ public class EdeltaOutlineWithEditorLinker extends OutlineWithEditorLinker {
 			var ePackages = eObjectNode.getParent().getChildren().stream()
 				.filter(node -> EPACKAGE == ((EObjectNode) node).getEClass())
 				.toList();
-			var containment = ePackages.stream()
-				.map(node -> findENamedElementNode(node, selectedTextRegion, false))
+			var property = ePackages.stream()
+				.map(node -> findPropertyNode(node, selectedTextRegion))
 				.filter(Objects::nonNull)
 				.findFirst()
 				.orElse(null);
-			if (containment != null) {
-				return containment;
+			if (property != null) {
+				return property;
 			}
 			return ePackages.stream()
-				.map(node -> findENamedElementNode(node, selectedTextRegion, true))
+				.map(node -> findENamedElementNode(node, selectedTextRegion))
 				.filter(Objects::nonNull)
 				.findFirst()
 				.orElse(findBestNode);
@@ -55,26 +55,42 @@ public class EdeltaOutlineWithEditorLinker extends OutlineWithEditorLinker {
 		return findBestNode;
 	}
 
-	private IOutlineNode findENamedElementNode(IOutlineNode node, ITextRegion selectedTextRegion,
-			boolean referenceNodes) {
+	private IOutlineNode findPropertyNode(IOutlineNode node, ITextRegion selectedTextRegion) {
 		for (var child : node.getChildren()) {
-			// All children of a copied EPackage are EcoreOutlineNodes.
-			var ecoreNode = (EcoreOutlineNode) child;
-			var isReference = ecoreNode.isReference();
+			if (child instanceof EcorePropertyOutlineNode property && property.isDirectChange() &&
+					contains(property.getSignificantTextRegion(), selectedTextRegion)) {
+				return property;
+			}
+			if (child instanceof EcoreOutlineNode) {
+				var match = findPropertyNode(child, selectedTextRegion);
+				if (match != null) {
+					return match;
+				}
+			}
+		}
+		return null;
+	}
+
+	private IOutlineNode findENamedElementNode(IOutlineNode node, ITextRegion selectedTextRegion) {
+		for (var child : node.getChildren()) {
+			if (!(child instanceof EcoreOutlineNode ecoreNode)) {
+				continue;
+			}
 			// our Outline nodes for Ecore elements are already associated with the
 			// text region of the corresponding responsible XExpression
-			final var recursiveFind = isReference ? null :
-				findENamedElementNode(child, selectedTextRegion, referenceNodes);
+			final var recursiveFind = findENamedElementNode(child, selectedTextRegion);
 			// first check whether there's a child that matches, since,
 			// as said before, an outer expression region might match an inner one
 			if (recursiveFind != null) {
 				return recursiveFind;
-			} else if (isReference == referenceNodes &&
-					Optional.ofNullable(ecoreNode.getSignificantTextRegion())
-						.filter(region -> region.contains(selectedTextRegion)).isPresent()) {
+			} else if (contains(ecoreNode.getSignificantTextRegion(), selectedTextRegion)) {
 				return ecoreNode;
 			}
 		}
 		return null;
+	}
+
+	private boolean contains(ITextRegion region, ITextRegion selection) {
+		return region != null && region.contains(selection);
 	}
 }

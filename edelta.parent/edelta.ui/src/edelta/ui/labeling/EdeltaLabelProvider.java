@@ -80,6 +80,11 @@ public class EdeltaLabelProvider extends XbaseWithAnnotationsLabelProvider {
 		return text;
 	}
 
+	/** Applies the same bold style to a changed outline property. */
+	public Object propertyText(String label, boolean changed) {
+		return changed ? new StyledString(label, BOLD_FONT_STYLER) : label;
+	}
+
 	private JvmOperation inferredJavaMethod(final EObject e) {
 		return jvmModelAssociations.getJvmElements(e).stream()
 			.filter(JvmOperation.class::isInstance)

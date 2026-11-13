@@ -45,4 +45,9 @@ public class EdeltaCopiedEPackagesMap {
 			return null;
 		return (ENamedElement) inverse.get(e);
 	}
+
+	/** Returns the imported source of a copied object, or null for a newly created object. */
+	public EObject getOriginal(EObject e) {
+		return inverse == null ? null : inverse.get(e);
+	}
 }
