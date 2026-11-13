@@ -28,6 +28,9 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	@Inject
 	private EdeltaDerivedStateHelper derivedStateHelper;
 
+	@Inject
+	private EdeltaEcoreReferenceTargets referenceTargets;
+
 	/**
 	 * This is needed to access the derived state when creating nodes for
 	 * Ecore elements, which are stored in a different Resource.
@@ -68,36 +71,74 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	}
 
 	@Override
+	public boolean _isLeaf(final EObject modelElement) {
+		return super._isLeaf(modelElement) &&
+			(modelElement.eClass().getEPackage() != EcorePackage.eINSTANCE ||
+				referenceTargets.get(modelElement).isEmpty());
+	}
+
+	@Override
+	protected void _createChildren(final IOutlineNode parentNode, final EObject modelElement) {
+		super._createChildren(parentNode, modelElement);
+		if (modelElement.eClass().getEPackage() == EcorePackage.eINSTANCE) {
+			for (final var target : referenceTargets.get(modelElement)) {
+				checkCanceled();
+				createEcoreNode(parentNode, target, labelProvider.getImage(target),
+					textDispatcher.invoke(target), true, true);
+			}
+		}
+	}
+
+	@Override
 	protected EObjectNode createEObjectNode(IOutlineNode parentNode, EObject modelElement, Image image, Object text,
 			boolean isLeaf) {
 		// cannot simply check ENamedElement: EGenericType is not an ENamedElement
 		if (modelElement.eClass().getEPackage() == EcorePackage.eINSTANCE) {
-			var elementForSignificantTestRegion = modelElement;
-			/*
-			 * custom implementation of readOnly: the default one tries to retrieve the
-			 * EObject using the URI and then loading the corresponding resource, but for
-			 * copied EPackages we simply return the modelElement for the passed work.
-			 * readOnly is used for example by node.getChildren. (see
-			 * EdeltaOutlineWithEditorLinker).
-			 */
-			var eObjectNode = new EObjectNode(modelElement, parentNode, image, text, isLeaf) {
-				@Override
-				public <T> T readOnly(IUnitOfWork<T, EObject> work) {
-					return getDocument().tryReadOnly(state -> work.exec(modelElement));
-				}
-			};
-			if (modelElement instanceof ENamedElement namedElement) {
-				// try to associate the node to the responsible XExpression
-				var expression = derivedStateHelper.
-					getLastResponsibleExpression(currentProgram, namedElement);
-				if (expression != null) {
-					elementForSignificantTestRegion = expression;
-				}
-			}
-			eObjectNode.setShortTextRegion(
-				locationInFileProvider.getSignificantTextRegion(elementForSignificantTestRegion));
-			return eObjectNode;
+			return createEcoreNode(parentNode, modelElement, image, text, isLeaf, false);
 		}
 		return super.createEObjectNode(parentNode, modelElement, image, text, isLeaf);
+	}
+
+	private EObjectNode createEcoreNode(IOutlineNode parentNode, EObject modelElement, Image image,
+			Object text, boolean isLeaf, boolean reference) {
+		var elementForSignificantTextRegion = modelElement;
+		/*
+		 * The default readOnly resolves the EObject URI in a resource. Copied
+		 * EPackages instead need the object from the evolved, in-memory metamodel.
+		 */
+		var eObjectNode = new EcoreOutlineNode(modelElement, parentNode, image, text, isLeaf, reference);
+		if (modelElement instanceof ENamedElement namedElement) {
+			var expression = derivedStateHelper.
+				getLastResponsibleExpression(currentProgram, namedElement);
+			if (expression != null) {
+				elementForSignificantTextRegion = expression;
+			}
+		}
+		eObjectNode.setShortTextRegion(
+			locationInFileProvider.getSignificantTextRegion(elementForSignificantTextRegion));
+		return eObjectNode;
+	}
+
+	/** Keeps copied Ecore objects available when Xtext lazily expands the outline. */
+	public static class EcoreOutlineNode extends EObjectNode {
+		private final EObject modelElement;
+		private final boolean reference;
+
+		EcoreOutlineNode(EObject modelElement, IOutlineNode parent, Image image, Object text,
+				boolean isLeaf, boolean reference) {
+			super(modelElement, parent, image, text, isLeaf);
+			this.modelElement = modelElement;
+			this.reference = reference;
+		}
+
+		/** Whether this node represents a non-containment reference target. */
+		public boolean isReference() {
+			return reference;
+		}
+
+		@Override
+		public <T> T readOnly(IUnitOfWork<T, EObject> work) {
+			return getDocument().tryReadOnly(state -> work.exec(modelElement));
+		}
 	}
 }

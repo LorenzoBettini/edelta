@@ -125,17 +125,53 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
 		  mypackage
 		    MyClass
 		      myAttribute : EString
+		        EString
+		          EString [java.lang.String]
+		        EString [java.lang.String]
+		        MyClass
 		      myReference : EObject
+		        EObject
+		          EObject [org.eclipse.emf.ecore.EObject]
+		        EObject [org.eclipse.emf.ecore.EObject]
+		        MyClass
+		      mypackage
 		    MyDataType [java.lang.String]
+		      mypackage
 		    MyBaseClass
 		      myBaseAttribute : EString
+		        EString
+		          EString [java.lang.String]
+		        EString [java.lang.String]
+		        MyBaseClass
 		      myBaseReference : EObject
+		        EObject
+		          EObject [org.eclipse.emf.ecore.EObject]
+		        EObject [org.eclipse.emf.ecore.EObject]
+		        MyBaseClass
+		      mypackage
 		    MyDerivedClass -> MyBaseClass
 		      myDerivedAttribute : EString
+		        EString
+		          EString [java.lang.String]
+		        EString [java.lang.String]
+		        MyDerivedClass -> MyBaseClass
 		      myDerivedReference : EObject
+		        EObject
+		          EObject [org.eclipse.emf.ecore.EObject]
+		        EObject [org.eclipse.emf.ecore.EObject]
+		        MyDerivedClass -> MyBaseClass
+		      MyBaseClass
+		        MyBaseClass
+		      mypackage
 		      MyBaseClass
 		    A
 		      foo : MyDataType
+		        MyDataType
+		          MyDataType [java.lang.String]
+		        MyDataType [java.lang.String]
+		        A
+		      mypackage
+		    mypackage
 		""");
 	}
 
@@ -178,17 +214,53 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
 		  mypackage
 		    MyClass
 		      myAttribute : EString
+		        EString
+		          EString [java.lang.String]
+		        EString [java.lang.String]
+		        MyClass
 		      myReference : EObject
+		        EObject
+		          EObject [org.eclipse.emf.ecore.EObject]
+		        EObject [org.eclipse.emf.ecore.EObject]
+		        MyClass
+		      mypackage
 		    MyDataType [java.lang.String]
+		      mypackage
 		    MyBaseClass
 		      myBaseAttribute : EString
+		        EString
+		          EString [java.lang.String]
+		        EString [java.lang.String]
+		        MyBaseClass
 		      myBaseReference : EObject
+		        EObject
+		          EObject [org.eclipse.emf.ecore.EObject]
+		        EObject [org.eclipse.emf.ecore.EObject]
+		        MyBaseClass
+		      mypackage
 		    MyDerivedClass -> MyBaseClass
 		      myDerivedAttribute : EString
+		        EString
+		          EString [java.lang.String]
+		        EString [java.lang.String]
+		        MyDerivedClass -> MyBaseClass
 		      myDerivedReference : EObject
+		        EObject
+		          EObject [org.eclipse.emf.ecore.EObject]
+		        EObject [org.eclipse.emf.ecore.EObject]
+		        MyDerivedClass -> MyBaseClass
+		      MyBaseClass
+		        MyBaseClass
+		      mypackage
 		      MyBaseClass
 		    A
 		      foo : MyDataType
+		        MyDataType
+		          MyDataType [java.lang.String]
+		        MyDataType [java.lang.String]
+		        A
+		      mypackage
+		    mypackage
 		""");
 	}
 
@@ -212,9 +284,20 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
 		  aModification(EPackage) : void
 		  mypackage
 		    MyDataType [java.lang.String]
+		      mypackage
 		    MyDerivedClass
 		      myDerivedAttribute : EString
+		        EString
+		          EString [java.lang.String]
+		        EString [java.lang.String]
+		        MyDerivedClass
 		      myDerivedReference : EObject
+		        EObject
+		          EObject [org.eclipse.emf.ecore.EObject]
+		        EObject [org.eclipse.emf.ecore.EObject]
+		        MyDerivedClass
+		      mypackage
+		    mypackage
 		""");
 	}
 
