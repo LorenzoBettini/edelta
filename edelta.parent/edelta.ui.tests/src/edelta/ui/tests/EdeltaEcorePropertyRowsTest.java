@@ -24,6 +24,11 @@ import edelta.ui.outline.EdeltaOutlineTreeProvider;
 
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaUiInjectorProvider.class)
+/**
+ * Tests displayable Ecore property rows and outline leaf detection.
+ *
+ * @author Lorenzo Bettini
+ */
 public class EdeltaEcorePropertyRowsTest {
 
 	private final EdeltaEcorePropertyRows rows = new EdeltaEcorePropertyRows();
@@ -120,7 +125,11 @@ public class EdeltaEcorePropertyRowsTest {
 	public void emptyEcoreObjectIsALeafAndOtherModelTypesAreIgnored() throws Exception {
 		var eFactory = factory.createEFactory();
 		assertThat(labels(eFactory)).isEmpty();
+		assertThat(rows.hasRows(eFactory)).isFalse();
 		assertThat(treeProvider._isLeaf(eFactory)).isTrue();
+		var dataType = factory.createEDataType();
+		assertThat(rows.hasRows(dataType)).isTrue();
+		assertThat(treeProvider._isLeaf(dataType)).isFalse();
 		var program = parseHelper.parse("");
 		new ExposedTreeProvider().createNonEcoreChildren(program);
 	}

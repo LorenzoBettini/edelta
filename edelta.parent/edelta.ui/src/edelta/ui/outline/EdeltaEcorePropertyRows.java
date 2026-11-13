@@ -9,12 +9,21 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 
-/** Builds finite, display-only property rows from an evolved Ecore object. */
+/**
+ * Builds finite, display-only property rows from an evolved Ecore object.
+ *
+ * @author Lorenzo Bettini
+ */
 public class EdeltaEcorePropertyRows {
 
 	private static final int MAX_VALUES = 5;
 
 	public record Row(EStructuralFeature feature, String label) {}
+
+	/** Returns whether the object has displayable properties without reading their values. */
+	public boolean hasRows(EObject owner) {
+		return owner.eClass().getEAllStructuralFeatures().stream().anyMatch(this::isProperty);
+	}
 
 	/** Returns writable properties in Ecore feature order, including unset values. */
 	public List<Row> get(EObject owner, Function<EObject, String> objectLabel) {

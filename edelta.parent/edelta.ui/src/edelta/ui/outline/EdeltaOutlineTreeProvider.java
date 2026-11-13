@@ -80,7 +80,7 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	public boolean _isLeaf(final EObject modelElement) {
 		return super._isLeaf(modelElement) &&
 			(modelElement.eClass().getEPackage() != EcorePackage.eINSTANCE ||
-				propertyRows.get(modelElement, labelProvider::getText).isEmpty());
+				!propertyRows.hasRows(modelElement));
 	}
 
 	@Override
