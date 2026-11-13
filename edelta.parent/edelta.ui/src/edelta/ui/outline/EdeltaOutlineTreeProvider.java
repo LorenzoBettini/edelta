@@ -6,10 +6,12 @@ package edelta.ui.outline;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider;
 import org.eclipse.xtext.ui.editor.outline.impl.EObjectNode;
+import org.eclipse.xtext.ui.editor.outline.impl.EStructuralFeatureNode;
 import org.eclipse.xtext.util.concurrent.IUnitOfWork;
 
 import com.google.inject.Inject;
@@ -18,6 +20,7 @@ import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
+import edelta.ui.labeling.EdeltaLabelProvider;
 
 /**
  * Customization of the default outline structure.
@@ -27,6 +30,12 @@ import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	@Inject
 	private EdeltaDerivedStateHelper derivedStateHelper;
+
+	@Inject
+	private EdeltaEcorePropertyRows propertyRows;
+
+	@Inject
+	private EdeltaLabelProvider edeltaLabelProvider;
 
 	/**
 	 * This is needed to access the derived state when creating nodes for
@@ -68,36 +77,97 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	}
 
 	@Override
+	public boolean _isLeaf(final EObject modelElement) {
+		return super._isLeaf(modelElement) &&
+			(modelElement.eClass().getEPackage() != EcorePackage.eINSTANCE ||
+				!propertyRows.hasRows(modelElement));
+	}
+
+	@Override
+	protected void _createChildren(final IOutlineNode parentNode, final EObject modelElement) {
+		super._createChildren(parentNode, modelElement);
+		if (modelElement.eClass().getEPackage() == EcorePackage.eINSTANCE) {
+			for (final var row : propertyRows.get(modelElement, labelProvider::getText)) {
+				checkCanceled();
+				var change = derivedStateHelper.getModifiedFeatures(currentProgram.eResource())
+					.get(modelElement, row.feature());
+				var propertyNode = new EcorePropertyOutlineNode(modelElement, row.feature(), parentNode,
+					edeltaLabelProvider.propertyText(row.label(), change != null),
+					change != null && !change.initial());
+				var expression = change == null ? null : change.expression();
+				propertyNode.setTextRegion(expression == null
+					? parentNode.getSignificantTextRegion()
+					: locationInFileProvider.getSignificantTextRegion(expression));
+			}
+		}
+	}
+
+	@Override
 	protected EObjectNode createEObjectNode(IOutlineNode parentNode, EObject modelElement, Image image, Object text,
 			boolean isLeaf) {
 		// cannot simply check ENamedElement: EGenericType is not an ENamedElement
 		if (modelElement.eClass().getEPackage() == EcorePackage.eINSTANCE) {
-			var elementForSignificantTestRegion = modelElement;
-			/*
-			 * custom implementation of readOnly: the default one tries to retrieve the
-			 * EObject using the URI and then loading the corresponding resource, but for
-			 * copied EPackages we simply return the modelElement for the passed work.
-			 * readOnly is used for example by node.getChildren. (see
-			 * EdeltaOutlineWithEditorLinker).
-			 */
-			var eObjectNode = new EObjectNode(modelElement, parentNode, image, text, isLeaf) {
-				@Override
-				public <T> T readOnly(IUnitOfWork<T, EObject> work) {
-					return getDocument().tryReadOnly(state -> work.exec(modelElement));
-				}
-			};
-			if (modelElement instanceof ENamedElement namedElement) {
-				// try to associate the node to the responsible XExpression
-				var expression = derivedStateHelper.
-					getLastResponsibleExpression(currentProgram, namedElement);
-				if (expression != null) {
-					elementForSignificantTestRegion = expression;
-				}
-			}
-			eObjectNode.setShortTextRegion(
-				locationInFileProvider.getSignificantTextRegion(elementForSignificantTestRegion));
-			return eObjectNode;
+			return createEcoreNode(parentNode, modelElement, image, text, isLeaf);
 		}
 		return super.createEObjectNode(parentNode, modelElement, image, text, isLeaf);
+	}
+
+	private EObjectNode createEcoreNode(IOutlineNode parentNode, EObject modelElement, Image image,
+			Object text, boolean isLeaf) {
+		var elementForSignificantTextRegion = modelElement;
+		/*
+		 * The default readOnly resolves the EObject URI in a resource. Copied
+		 * EPackages instead need the object from the evolved, in-memory metamodel.
+		 */
+		var eObjectNode = new EcoreOutlineNode(modelElement, parentNode, image, text, isLeaf);
+		if (modelElement instanceof ENamedElement namedElement) {
+			var expression = derivedStateHelper.
+				getLastResponsibleExpression(currentProgram, namedElement);
+			if (expression != null) {
+				elementForSignificantTextRegion = expression;
+			}
+		}
+		eObjectNode.setShortTextRegion(
+			locationInFileProvider.getSignificantTextRegion(elementForSignificantTextRegion));
+		return eObjectNode;
+	}
+
+	/** Keeps copied Ecore objects available when Xtext lazily expands the outline. */
+	public static class EcoreOutlineNode extends EObjectNode {
+		private final EObject modelElement;
+
+		EcoreOutlineNode(EObject modelElement, IOutlineNode parent, Image image, Object text,
+				boolean isLeaf) {
+			super(modelElement, parent, image, text, isLeaf);
+			this.modelElement = modelElement;
+		}
+
+		@Override
+		public <T> T readOnly(IUnitOfWork<T, EObject> work) {
+			return getDocument().tryReadOnly(state -> work.exec(modelElement));
+		}
+	}
+
+	/** A property is a leaf even when its value refers back to an ancestor. */
+	public static class EcorePropertyOutlineNode extends EStructuralFeatureNode {
+		private final EObject owner;
+		private final boolean directChange;
+
+		EcorePropertyOutlineNode(EObject owner, EStructuralFeature feature, IOutlineNode parent,
+				Object text, boolean directChange) {
+			super(owner, feature, parent, (Image) null, text, true);
+			this.owner = owner;
+			this.directChange = directChange;
+		}
+
+		/** Whether a later expression changed this property after initialization. */
+		public boolean isDirectChange() {
+			return directChange;
+		}
+
+		@Override
+		public <T> T readOnly(IUnitOfWork<T, EObject> work) {
+			return getDocument().tryReadOnly(state -> work.exec(owner));
+		}
 	}
 }

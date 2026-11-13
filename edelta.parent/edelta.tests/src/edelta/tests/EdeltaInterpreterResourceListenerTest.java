@@ -9,10 +9,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 
+import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EcoreFactory;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.linking.impl.XtextLinkingDiagnostic;
 import org.eclipse.xtext.testing.InjectWith;
@@ -36,6 +38,7 @@ import edelta.interpreter.EdeltaInterpreterDiagnosticHelper;
 import edelta.interpreter.EdeltaInterpreterResourceListener;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 import edelta.resource.derivedstate.EdeltaModifiedElements;
+import edelta.resource.derivedstate.EdeltaModifiedFeatures;
 import edelta.validation.EdeltaValidator;
 
 @RunWith(XtextRunner.class)
@@ -67,6 +70,7 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 	private EdeltaENamedElementXExpressionMap enamedElementXExpressionMap;
 
 	private EdeltaModifiedElements modifiedElements;
+	private EdeltaModifiedFeatures modifiedFeatures;
 
 	private Provider<String> stringProvider;
 
@@ -77,6 +81,7 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 		resource = parseHelper.parse("").eResource();
 		enamedElementXExpressionMap = derivedStateHelper.getEnamedElementXExpressionMap(resource);
 		modifiedElements = derivedStateHelper.getModifiedElements(resource);
+		modifiedFeatures = derivedStateHelper.getModifiedFeatures(resource);
 		listener = new EdeltaInterpreterResourceListener(cache, resource,
 			derivedStateHelper, diagnosticHelper);
 		stringProvider = spy(new SpiedProvider());
@@ -300,6 +305,50 @@ public class EdeltaInterpreterResourceListenerTest extends EdeltaAbstractTest {
 	public void testModifiedElementsIsEmptyWhenNothingIsChanged() {
 		ePackage.eAdapters().remove(listener);
 		assertThat(modifiedElements).isEmpty();
+	}
+
+	@Test
+	public void testModifiedFeaturesRememberLastChangingExpression() {
+		var first = mock(XExpression.class);
+		var last = mock(XExpression.class);
+		var eClass = (EClass) ePackage.getEClassifiers().get(0);
+		listener.setCurrentExpression(first);
+		eClass.setAbstract(true);
+		listener.setCurrentExpression(last);
+		eClass.setAbstract(false);
+		assertThat(modifiedFeatures.get(eClass, EcorePackage.Literals.ECLASS__ABSTRACT))
+			.isEqualTo(new EdeltaModifiedFeatures.Change(last, false));
+		assertThat(modifiedFeatures.get(eClass, EcorePackage.Literals.ENAMED_ELEMENT__NAME))
+			.isNull();
+	}
+
+	@Test
+	public void testInitialValuesAreTrackedWhenNewObjectIsAdded() {
+		var expression = mock(XExpression.class);
+		listener.setCurrentExpression(expression);
+		var eClass = ecoreFactory.createEClass();
+		eClass.setName("New");
+		ePackage.getEClassifiers().add(eClass);
+		assertThat(modifiedFeatures.get(eClass, EcorePackage.Literals.ENAMED_ELEMENT__NAME))
+			.isEqualTo(new EdeltaModifiedFeatures.Change(expression, true));
+		assertThat(modifiedFeatures.get(eClass, EcorePackage.Literals.ECLASS__ABSTRACT))
+			.isNull();
+	}
+
+	@Test
+	public void testUnrelatedNotificationsDoNotRecordFeatureChanges() {
+		var nonEObject = mock(Notification.class);
+		when(nonEObject.getEventType()).thenReturn(Notification.SET);
+		when(nonEObject.getFeature()).thenReturn(EcorePackage.Literals.ECLASS__ABSTRACT);
+		when(nonEObject.getNotifier()).thenReturn("not an EObject");
+		var nonFeature = mock(Notification.class);
+		when(nonFeature.getEventType()).thenReturn(Notification.SET);
+		when(nonFeature.getFeature()).thenReturn("unrelated");
+		when(nonFeature.getNotifier()).thenReturn(ePackage);
+		listener.setCurrentExpression(mock(XExpression.class));
+		listener.notifyChanged(nonEObject);
+		listener.notifyChanged(nonFeature);
+		assertThat(modifiedFeatures.get(ePackage, EcorePackage.Literals.ECLASS__ABSTRACT)).isNull();
 	}
 
 	public EObjectDiagnosticImpl createEObjectDiagnosticMock(EObject problematicObject) {

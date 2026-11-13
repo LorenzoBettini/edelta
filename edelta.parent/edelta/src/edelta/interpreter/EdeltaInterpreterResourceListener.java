@@ -10,7 +10,10 @@ import java.util.List;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ENamedElement;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 import org.eclipse.emf.ecore.util.EContentAdapter;
@@ -21,9 +24,11 @@ import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.validation.IssueCodes;
 
 import edelta.lib.EdeltaUtils;
+import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.resource.derivedstate.EdeltaENamedElementXExpressionMap;
 import edelta.resource.derivedstate.EdeltaModifiedElements;
+import edelta.resource.derivedstate.EdeltaModifiedFeatures;
 import edelta.util.EdeltaModelUtil;
 import edelta.validation.EdeltaValidator;
 
@@ -51,6 +56,8 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 	private final EdeltaInterpreterDiagnosticHelper diagnosticHelper;
 
 	private final EdeltaModifiedElements modifiedElements;
+	private final EdeltaModifiedFeatures modifiedFeatures;
+	private final EdeltaCopiedEPackagesMap copiedEPackagesMap;
 
 	public EdeltaInterpreterResourceListener(IResourceScopeCache cache, Resource resource,
 			EdeltaDerivedStateHelper derivedStateHelper,
@@ -59,6 +66,8 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 		this.resource = resource;
 		enamedElementXExpressionMap = derivedStateHelper.getEnamedElementXExpressionMap(resource);
 		modifiedElements = derivedStateHelper.getModifiedElements(resource);
+		modifiedFeatures = derivedStateHelper.getModifiedFeatures(resource);
+		copiedEPackagesMap = derivedStateHelper.getCopiedEPackagesMap(resource);
 		this.diagnosticHelper = diagnosticHelper;
 	}
 
@@ -84,12 +93,26 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 			}
 		}
 		if (!notification.isTouch()) {
+			if (notifier instanceof EObject object && feature instanceof EStructuralFeature structuralFeature) {
+				modifiedFeatures.recordChange(object, structuralFeature, currentExpression);
+				if (structuralFeature instanceof EReference reference && reference.isContainment()) {
+					recordInitialValues(newValue);
+				}
+			}
 			updateModifiedElements(notifier);
 			updateModifiedElements(newValue);
 		}
 		cache.clear(resource);
 		clearIssues(resource.getErrors());
 		clearIssues(resource.getWarnings());
+	}
+
+	private void recordInitialValues(Object value) {
+		if (value instanceof EObject object && copiedEPackagesMap.getOriginal(object) == null) {
+			modifiedFeatures.recordInitial(object, currentExpression);
+		} else if (value instanceof Collection<?> values) {
+			values.forEach(this::recordInitialValues);
+		}
 	}
 
 	private void updateModifiedElements(Object element) {
@@ -101,6 +124,8 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 		if (element instanceof final ENamedElement enamedElement) {
 			if (modifiedElements.add(enamedElement))
 				updateModifiedElements(enamedElement.eContainer());
+		} else if (element instanceof EObject object) {
+			updateModifiedElements(object.eContainer());
 		} else if (element instanceof Collection<?> elements) {
 			elements.forEach(this::updateModifiedElements);
 		}

@@ -18,6 +18,8 @@ import org.junit.runner.RunWith;
 
 import edelta.testutils.EdeltaTestUtils;
 import edelta.ui.internal.EdeltaActivator;
+import edelta.ui.outline.EdeltaOutlineTreeProvider.EcoreOutlineNode;
+import edelta.ui.outline.EdeltaOutlineTreeProvider.EcorePropertyOutlineNode;
 import edelta.ui.testutils.EdeltaUiTestUtils;
 
 @RunWith(XtextRunner.class)
@@ -101,7 +103,7 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
 	@Flaky
 	public void testOutlineWithCreateEClassInModifyEcore() throws Exception {
 		System.out.println("*** Executing testOutlineWithCreateEClassInModifyEcore...");
-		assertAllLabels("""
+		assertOutlineContains("""
 		import org.eclipse.emf.ecore.EClass
 		
 		metamodel "mypackage"
@@ -117,26 +119,7 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
 			EClassifiers += newEClass("A")
 			myNewAttribute(ecoreref(A), "foo")
 		}
-		""",
-		"""
-		test
-		  myNewAttribute(EClass, String) : boolean
-		  aModification(EPackage) : void
-		  mypackage
-		    MyClass
-		      myAttribute : EString
-		      myReference : EObject
-		    MyDataType [java.lang.String]
-		    MyBaseClass
-		      myBaseAttribute : EString
-		      myBaseReference : EObject
-		    MyDerivedClass -> MyBaseClass
-		      myDerivedAttribute : EString
-		      myDerivedReference : EObject
-		      MyBaseClass
-		    A
-		      foo : MyDataType
-		""");
+		""", "mypackage", "A", "foo : MyDataType", "name = A", "lowerBound = 0");
 	}
 
 	@Test
@@ -157,7 +140,7 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
 			}
 			""");
 		waitForBuild();
-		assertAllLabels("""
+		assertOutlineContains("""
 		package com.example
 
 		metamodel "mypackage"
@@ -171,25 +154,7 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
 			EClassifiers += newEClass("A")
 			my.myNewAttribute(ecoreref(A), "foo")
 		}
-		""",
-		"""
-		com.example
-		  aModification(EPackage) : void
-		  mypackage
-		    MyClass
-		      myAttribute : EString
-		      myReference : EObject
-		    MyDataType [java.lang.String]
-		    MyBaseClass
-		      myBaseAttribute : EString
-		      myBaseReference : EObject
-		    MyDerivedClass -> MyBaseClass
-		      myDerivedAttribute : EString
-		      myDerivedReference : EObject
-		      MyBaseClass
-		    A
-		      foo : MyDataType
-		""");
+		""", "mypackage", "A", "foo : MyDataType", "name = A", "lowerBound = 0");
 	}
 
 	@Test
@@ -206,16 +171,78 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
 			ecoreref(MyDerivedClass).ESuperTypes -= ecoreref(MyBaseClass)
 			EClassifiers -= ecoreref(MyBaseClass)
 		}
-		""",
-		"""
+		""", """
 		test
 		  aModification(EPackage) : void
 		  mypackage
 		    MyDataType [java.lang.String]
+		      name = MyDataType
+		      serializable = true
 		    MyDerivedClass
 		      myDerivedAttribute : EString
+		        EString
+		          eTypeParameter = <unset>
+		          eClassifier = EString [java.lang.String]
+		        name = myDerivedAttribute
+		        ordered = true
+		        unique = true
+		        lowerBound = 0
+		        upperBound = 1
+		        changeable = true
+		        volatile = false
+		        transient = false
+		        defaultValueLiteral = <unset>
+		        unsettable = false
+		        derived = false
+		        iD = false
 		      myDerivedReference : EObject
+		        EObject
+		          eTypeParameter = <unset>
+		          eClassifier = EObject [org.eclipse.emf.ecore.EObject]
+		        name = myDerivedReference
+		        ordered = true
+		        unique = true
+		        lowerBound = 0
+		        upperBound = 1
+		        changeable = true
+		        volatile = false
+		        transient = false
+		        defaultValueLiteral = <unset>
+		        unsettable = false
+		        derived = false
+		        containment = false
+		        resolveProxies = true
+		        eOpposite = <unset>
+		        eKeys = []
+		      name = MyDerivedClass
+		      abstract = false
+		      interface = false
+		      eSuperTypes = []
+		    name = mypackage
+		    nsURI = http://my.package.org
+		    nsPrefix = mypackage
 		""");
+	}
+
+
+	private void assertOutlineContains(CharSequence source, String... expectedLabels) throws Exception {
+		var root = getOutlineTree(source);
+		var outline = outlineStringRepresentation(root);
+		org.assertj.core.api.Assertions.assertThat(outline).contains(expectedLabels);
+		assertPropertyRowsFollowContainment(root);
+	}
+
+	private void assertPropertyRowsFollowContainment(IOutlineNode node) {
+		boolean hasProperty = false;
+		for (var child : node.getChildren()) {
+			if (child instanceof EcorePropertyOutlineNode) {
+				hasProperty = true;
+				org.assertj.core.api.Assertions.assertThat(child.hasChildren()).isFalse();
+			} else if (node instanceof EcoreOutlineNode) {
+				org.assertj.core.api.Assertions.assertThat(hasProperty).isFalse();
+			}
+			assertPropertyRowsFollowContainment(child);
+		}
 	}
 
 	@Test

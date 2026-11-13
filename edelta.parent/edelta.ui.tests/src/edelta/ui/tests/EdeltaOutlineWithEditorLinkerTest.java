@@ -8,17 +8,27 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.assertj.core.api.Assertions;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.ui.editor.XtextEditor;
-import org.eclipse.xtext.ui.editor.outline.impl.EObjectNode;
+import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
+import org.eclipse.xtext.ui.editor.outline.impl.OutlineNodeElementOpener;
 import org.eclipse.xtext.ui.editor.outline.impl.OutlinePage;
+import org.eclipse.xtext.ui.editor.outline.actions.OutlineWithEditorLinker;
+import org.eclipse.xtext.util.TextRegion;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+
 import edelta.ui.internal.EdeltaActivator;
+import edelta.ui.outline.EdeltaOutlineTreeProvider.EcoreOutlineNode;
+import edelta.ui.outline.EdeltaOutlineTreeProvider.EcorePropertyOutlineNode;
 import edelta.ui.testutils.EdeltaUiTestUtils;
 
 @RunWith(XtextRunner.class)
@@ -39,6 +49,11 @@ public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest 
 				addNewEClass("MyNewClass") [
 					addNewEAttribute("MyNewAttribute", null)
 				]
+				ecoreref(MyClass).addNewEReference("referencesNewClass", ecoreref(MyNewClass))
+				ecoreref(MyNewClass).addNewEReference("backReference", ecoreref(MyClass)) [
+					EOpposite = ecoreref(MyClass.referencesNewClass)
+				]
+				ecoreref(MyClass.referencesNewClass).EOpposite = ecoreref(MyNewClass.backReference)
 				ecoreref(MyClass)
 				ecoreref(MyDerivedClass) => [
 					addNewEAttribute("MyNewDerivedClassAttribute", null)
@@ -51,6 +66,12 @@ public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest 
 	private OutlinePage outlinePage;
 
 	private static IFile file;
+
+	@Inject
+	private OutlineNodeElementOpener elementOpener;
+
+	@Inject
+	private Injector injector;
 
 	@Override
 	protected String getEditorId() {
@@ -114,11 +135,80 @@ public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest 
 			("addNewEAttribute(\"MyNewDerivedClassAttribute", "MyNewDerivedClassAttribute");
 	}
 
+	@Test
+	public void testInitialNamePropertyIsBoldAndLinksToCreation() {
+		var property = findPropertyNode(outlinePage.getTreeViewer().getInput(), "name = MyNewClass");
+		Assertions.assertThat(property).isNotNull();
+		Assertions.assertThat(property.hasChildren()).isFalse();
+		EObject propertyOwner = property.readOnly(object -> object);
+		EObject element = ((EcoreOutlineNode) property.getParent()).readOnly(object -> object);
+		Assertions.assertThat(propertyOwner).isSameAs(element);
+		Assertions.assertThat(property.getText()).isInstanceOf(StyledString.class);
+		Assertions.assertThat(((StyledString) property.getText()).getStyleRanges()).isNotEmpty();
+		Assertions.assertThat(property.getSignificantTextRegion().getOffset())
+			.isEqualTo(program.indexOf("addNewEClass(\"MyNewClass\")"));
+
+		elementOpener.open(property, editor.getInternalSourceViewer());
+		Assertions.assertThat(editor.getInternalSourceViewer().getSelectedRange().x)
+			.isEqualTo(program.indexOf("addNewEClass(\"MyNewClass\")"));
+	}
+
+	@Test
+	public void testEditorLinkSelectsContainmentNodeForCreation() {
+		whenEditorTextIsSelectedThenOutlineNodeIsSelected("addNewEClass", "MyNewClass");
+		var selection = (TreeSelection) outlinePage.getTreeViewer().getSelection();
+		Assertions.assertThat(selection.getFirstElement()).isInstanceOf(EcoreOutlineNode.class);
+	}
+
+	@Test
+	public void testChangedOppositePropertyIsBoldAndDoesNotRecurse() {
+		var property = findPropertyNode(outlinePage.getTreeViewer().getInput(), "eOpposite = ");
+		Assertions.assertThat(property).isNotNull();
+		Assertions.assertThat(property.hasChildren()).isFalse();
+		Assertions.assertThat(property.getText()).isInstanceOf(StyledString.class);
+		Assertions.assertThat(((StyledString) property.getText()).getStyleRanges()).isNotEmpty();
+		Assertions.assertThat(property.getSignificantTextRegion()).isNotNull();
+		var offset = property.getSignificantTextRegion().getOffset();
+		Assertions.assertThat(offset).isGreaterThanOrEqualTo(
+			program.indexOf("ecoreref(MyClass.referencesNewClass).EOpposite"));
+		whenEditorOffsetIsSelectedThenOutlineNodeIsSelected(offset, property.getText().toString());
+	}
+
+	@Test
+	public void testLinkerIgnoresMissingSourceRegion() throws Exception {
+		var linker = injector.getInstance(OutlineWithEditorLinker.class);
+		var method = linker.getClass().getDeclaredMethod("contains",
+			org.eclipse.xtext.util.ITextRegion.class, org.eclipse.xtext.util.ITextRegion.class);
+		method.setAccessible(true);
+		Assertions.assertThat(method.invoke(linker, null, new TextRegion(0, 0))).isEqualTo(false);
+	}
+
+	private EcorePropertyOutlineNode findPropertyNode(Object root, String label) {
+		if (!(root instanceof IOutlineNode node)) {
+			return null;
+		}
+		for (var child : node.getChildren()) {
+			if (child instanceof EcorePropertyOutlineNode property &&
+					property.getText().toString().startsWith(label) &&
+					property.getText() instanceof StyledString) {
+				return property;
+			}
+			var result = findPropertyNode(child, label);
+			if (result != null) {
+				return result;
+			}
+		}
+		return null;
+	}
+
 	private void whenEditorTextIsSelectedThenOutlineNodeIsSelected(String textToSelect, String expectedNode) {
-		editor.getInternalSourceViewer()
-			.setSelectedRange(program.indexOf(textToSelect), 0);
+		whenEditorOffsetIsSelectedThenOutlineNodeIsSelected(program.indexOf(textToSelect), expectedNode);
+	}
+
+	private void whenEditorOffsetIsSelectedThenOutlineNodeIsSelected(int offset, String expectedNode) {
+		editor.getInternalSourceViewer().setSelectedRange(offset, 0);
 		Assertions.assertThat(waitForSelection(expectedNode))
-			.as("Outline selection after selecting '%s'", textToSelect)
+			.as("Outline selection at offset %d", offset)
 			.isEqualTo(expectedNode);
 	}
 
@@ -142,10 +232,10 @@ public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest 
 		}
 	}
 
-	/** Returns the selected Ecore node's label, or null while no such node is selected. */
+	/** Returns the selected outline node's label, or null while none is selected. */
 	private String selectedNodeText() {
 		var selection = (TreeSelection) outlinePage.getTreeViewer().getSelection();
-		return selection.getFirstElement() instanceof EObjectNode node
+		return selection.getFirstElement() instanceof IOutlineNode node
 			? node.getText().toString() : null;
 	}
 
