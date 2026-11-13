@@ -161,7 +161,7 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
 	@Flaky
 	public void testOutlineWithRemovedElementsInModifyEcore() throws Exception {
 		System.out.println("*** Executing testOutlineWithRemovedElementsInModifyEcore...");
-		assertOutlineContains("""
+		assertAllLabels("""
 		import org.eclipse.emf.ecore.EClass
 		
 		metamodel "mypackage"
@@ -171,7 +171,57 @@ public class EdeltaOutlineTest extends AbstractOutlineTest {
 			ecoreref(MyDerivedClass).ESuperTypes -= ecoreref(MyBaseClass)
 			EClassifiers -= ecoreref(MyBaseClass)
 		}
-		""", "mypackage", "MyDerivedClass", "name = MyDerivedClass");
+		""", """
+		test
+		  aModification(EPackage) : void
+		  mypackage
+		    MyDataType [java.lang.String]
+		      name = MyDataType
+		      serializable = true
+		    MyDerivedClass
+		      myDerivedAttribute : EString
+		        EString
+		          eTypeParameter = <unset>
+		          eClassifier = EString [java.lang.String]
+		        name = myDerivedAttribute
+		        ordered = true
+		        unique = true
+		        lowerBound = 0
+		        upperBound = 1
+		        changeable = true
+		        volatile = false
+		        transient = false
+		        defaultValueLiteral = <unset>
+		        unsettable = false
+		        derived = false
+		        iD = false
+		      myDerivedReference : EObject
+		        EObject
+		          eTypeParameter = <unset>
+		          eClassifier = EObject [org.eclipse.emf.ecore.EObject]
+		        name = myDerivedReference
+		        ordered = true
+		        unique = true
+		        lowerBound = 0
+		        upperBound = 1
+		        changeable = true
+		        volatile = false
+		        transient = false
+		        defaultValueLiteral = <unset>
+		        unsettable = false
+		        derived = false
+		        containment = false
+		        resolveProxies = true
+		        eOpposite = <unset>
+		        eKeys = []
+		      name = MyDerivedClass
+		      abstract = false
+		      interface = false
+		      eSuperTypes = []
+		    name = mypackage
+		    nsURI = http://my.package.org
+		    nsPrefix = mypackage
+		""");
 	}
 
 
