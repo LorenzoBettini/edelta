@@ -6,10 +6,14 @@ package edelta.ui.outline.actions;
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MODIFY_ECORE_OPERATION;
 import static org.eclipse.emf.ecore.EcorePackage.Literals.EPACKAGE;
 
+import java.util.Comparator;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.actions.OutlineWithEditorLinker;
 import org.eclipse.xtext.ui.editor.outline.impl.EObjectNode;
@@ -44,39 +48,32 @@ public class EdeltaOutlineWithEditorLinker extends OutlineWithEditorLinker {
 				.filter(Objects::nonNull)
 				.findFirst()
 				.orElse(null);
-			if (property != null) {
-				return property;
-			}
 			var element = ePackages.stream()
 				.map(node -> findENamedElementNode(node, selectedTextRegion))
 				.filter(Objects::nonNull)
 				.findFirst()
 				.orElse(null);
-			if (element != null) {
-				return element;
-			}
+			var exact = property != null ? property : element;
 			if (selectedTextRegion.getLength() == 0) {
-				try {
-					var document = textViewer.getDocument();
-					var line = document.getLineOfOffset(selectedTextRegion.getOffset());
-					LineCandidate nearest = null;
-					for (var ePackage : ePackages) {
-						var candidate = findNearestOnLine(ePackage, line, selectedTextRegion.getOffset());
-						if (candidate != null && (nearest == null ||
-							candidate.distance() < nearest.distance() ||
-							(candidate.distance() == nearest.distance() &&
-								candidate.priority() < nearest.priority()))) {
-							nearest = candidate;
-						}
-					}
-					if (nearest != null) {
-						return nearest.node();
-					}
-				} catch (BadLocationException e) {
-					// The outline may be based on an older editor document.
+				var line = lineAt(selectedTextRegion.getOffset());
+				if (exact != null && startsOnLine(exact.getSignificantTextRegion(), line)) {
+					return exact;
+				}
+				var nearest = ePackages.stream()
+					.flatMap(this::descendants)
+					.filter(this::isResponsibleNode)
+					.filter(this::hasSourceRegion)
+					.filter(node -> startsOnLine(node.getSignificantTextRegion(), line))
+					.min(Comparator
+						.comparingInt((IOutlineNode node) ->
+							distance(node.getSignificantTextRegion(), selectedTextRegion.getOffset()))
+						.thenComparingInt(node -> node instanceof EcoreOutlineNode ? 0 : 1))
+					.orElse(null);
+				if (nearest != null) {
+					return nearest;
 				}
 			}
-			return findBestNode;
+			return exact != null ? exact : findBestNode;
 		}
 		return findBestNode;
 	}
@@ -120,40 +117,36 @@ public class EdeltaOutlineWithEditorLinker extends OutlineWithEditorLinker {
 		return region != null && region.contains(selection);
 	}
 
-	private record LineCandidate(IOutlineNode node, int distance, int priority) {}
-
-	/** Finds the nearest changed element or property whose source region reaches the given line. */
-	private LineCandidate findNearestOnLine(IOutlineNode node, int line, int offset)
-			throws BadLocationException {
-		LineCandidate best = candidateOnLine(node, line, offset);
-		for (var child : node.getChildren()) {
-			if (child instanceof EcoreOutlineNode || child instanceof EcorePropertyOutlineNode) {
-				var candidate = findNearestOnLine(child, line, offset);
-				if (candidate != null && (best == null || candidate.distance() < best.distance() ||
-						(candidate.distance() == best.distance() && candidate.priority() < best.priority()))) {
-					best = candidate;
-				}
-			}
-		}
-		return best;
+	/** Includes nested metamodel elements and their property rows. */
+	private Stream<IOutlineNode> descendants(IOutlineNode node) {
+		return Stream.concat(Stream.of(node), node.getChildren().stream().flatMap(this::descendants));
 	}
 
-	private LineCandidate candidateOnLine(IOutlineNode node, int line, int offset)
-			throws BadLocationException {
-		if (!(node instanceof EcoreOutlineNode) &&
-				!(node instanceof EcorePropertyOutlineNode property && property.isDirectChange())) {
-			return null;
+	private boolean isResponsibleNode(IOutlineNode node) {
+		return node instanceof EcoreOutlineNode ||
+			(node instanceof EcorePropertyOutlineNode property && property.isDirectChange());
+	}
+
+	private boolean hasSourceRegion(IOutlineNode node) {
+		return node.getSignificantTextRegion() != null;
+	}
+
+	/** Returns an empty range if the outline and editor documents are temporarily out of sync. */
+	private IRegion lineAt(int offset) {
+		try {
+			return textViewer.getDocument().getLineInformationOfOffset(offset);
+		} catch (BadLocationException e) {
+			return new Region(0, 0);
 		}
-		var region = node.getSignificantTextRegion();
-		var document = textViewer.getDocument();
-		if (region == null || region.getLength() == 0 || region.getOffset() < 0 ||
-				region.getEndOffset() > document.getLength() ||
-				document.getLineOfOffset(region.getOffset()) > line ||
-				document.getLineOfOffset(region.getEndOffset() - 1) < line) {
-			return null;
-		}
-		var distance = offset < region.getOffset() ? region.getOffset() - offset
-			: Math.max(0, offset - region.getEndOffset());
-		return new LineCandidate(node, distance, node instanceof EcoreOutlineNode ? 0 : 1);
+	}
+
+	private boolean startsOnLine(ITextRegion region, IRegion line) {
+		return region.getLength() > 0 && region.getOffset() >= line.getOffset() &&
+			region.getOffset() < line.getOffset() + line.getLength();
+	}
+
+	private int distance(ITextRegion region, int offset) {
+		return Math.max(0, region.getOffset() - offset) +
+			Math.max(0, offset - region.getEndOffset());
 	}
 }

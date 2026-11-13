@@ -48,6 +48,9 @@ public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest 
 			modifyEcore aTest epackage mypackage {
 				addNewEClass("MyNewClass") [
 					addNewEAttribute("MyNewAttribute", null)
+					addNewEReference("publications", ecoreref(MyClass)) [
+						upperBound = -1
+					]
 				]
 				ecoreref(MyClass).addNewEReference("referencesNewClass", ecoreref(MyNewClass))
 				ecoreref(MyNewClass).addNewEReference("backReference", ecoreref(MyClass)) [
@@ -157,6 +160,24 @@ public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest 
 	}
 
 	@Test
+	public void testSelectNestedReferenceAcrossItsLine() {
+		var line = program.indexOf("addNewEReference(\"publications\"");
+		var end = program.indexOf('\n', line);
+		for (var offset = line - 2; offset < end; offset++) {
+			whenEditorOffsetIsSelectedThenOutlineNodeIsSelected(offset, "publications : Publication");
+		}
+	}
+
+	@Test
+	public void testSelectNestedUpperBoundAcrossItsLine() {
+		var line = program.indexOf("upperBound = -1");
+		var end = program.indexOf('\n', line);
+		for (var offset = line - 2; offset < end; offset++) {
+			whenEditorOffsetIsSelectedThenOutlineNodeIsSelected(offset, "upperBound = -1");
+		}
+	}
+
+	@Test
 	public void testSelectExpressionThatCreatesEAttributeInExistingEClass() {
 		whenEditorTextIsSelectedThenOutlineNodeIsSelected
 			("addNewEAttribute(\"MyNewDerivedClassAttribute", "MyNewDerivedClassAttribute");
@@ -208,6 +229,57 @@ public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest 
 			org.eclipse.xtext.util.ITextRegion.class, org.eclipse.xtext.util.ITextRegion.class);
 		method.setAccessible(true);
 		Assertions.assertThat(method.invoke(linker, null, new TextRegion(0, 0))).isEqualTo(false);
+	}
+
+	@Test
+	public void testLinkerIgnoresStaleEditorOffset() throws Exception {
+		var linker = injector.getInstance(OutlineWithEditorLinker.class);
+		var viewerField = OutlineWithEditorLinker.class.getDeclaredField("textViewer");
+		viewerField.setAccessible(true);
+		viewerField.set(linker, editor.getInternalSourceViewer());
+		var method = linker.getClass().getDeclaredMethod("lineAt", int.class);
+		method.setAccessible(true);
+		var line = (org.eclipse.jface.text.IRegion) method.invoke(linker, -1);
+		Assertions.assertThat(line.getLength()).isZero();
+	}
+
+	@Test
+	public void testLineSearchIgnoresElementWithoutSourceRegion() throws Exception {
+		var node = findEcoreNode((IOutlineNode) outlinePage.getTreeViewer().getInput(), "MyNewClass");
+		Assertions.assertThat(node).isNotNull();
+		var linker = injector.getInstance(OutlineWithEditorLinker.class);
+		var method = linker.getClass().getDeclaredMethod("hasSourceRegion", IOutlineNode.class);
+		method.setAccessible(true);
+		Assertions.assertThat(method.invoke(linker, node)).isEqualTo(true);
+		var region = node.getSignificantTextRegion();
+		try {
+			node.setShortTextRegion(null);
+			Assertions.assertThat(method.invoke(linker, node)).isEqualTo(false);
+		} finally {
+			node.setShortTextRegion(region);
+		}
+	}
+
+	@Test
+	public void testLineSearchIgnoresNonEcoreNode() throws Exception {
+		var linker = injector.getInstance(OutlineWithEditorLinker.class);
+		var method = linker.getClass().getDeclaredMethod("isResponsibleNode", IOutlineNode.class);
+		method.setAccessible(true);
+		var root = (IOutlineNode) outlinePage.getTreeViewer().getInput();
+		Assertions.assertThat(method.invoke(linker, root)).isEqualTo(false);
+	}
+
+	private EcoreOutlineNode findEcoreNode(IOutlineNode node, String label) {
+		for (var child : node.getChildren()) {
+			if (child instanceof EcoreOutlineNode ecoreNode && label.equals(child.getText().toString())) {
+				return ecoreNode;
+			}
+			var match = findEcoreNode(child, label);
+			if (match != null) {
+				return match;
+			}
+		}
+		return null;
 	}
 
 	private EcorePropertyOutlineNode findPropertyNode(Object root, String label) {
