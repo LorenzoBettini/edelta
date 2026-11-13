@@ -58,6 +58,8 @@ public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest 
 				ecoreref(MyDerivedClass) => [
 					addNewEAttribute("MyNewDerivedClassAttribute", null)
 				]
+				ecoreref(MyClass).name = "Publication"
+				addNewEClass("First"); addNewEClass("Second")
 			}
 			""";
 
@@ -113,14 +115,39 @@ public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest 
 
 	@Test
 	public void testSelectNonResponsibleExpressionInModifyEcore() {
-		whenEditorTextIsSelectedThenOutlineNodeIsSelected
-			("ecoreref(MyClass)", "aTest(EPackage) : void");
+		whenEditorOffsetIsSelectedThenOutlineNodeIsSelected(
+			program.indexOf("ecoreref(MyClass)\n"),
+			"aTest(EPackage) : void");
 	}
 
 	@Test
 	public void testSelectExpressionThatCreatesEClass() {
 		whenEditorTextIsSelectedThenOutlineNodeIsSelected
 			("addNewEClass", "MyNewClass");
+	}
+
+	@Test
+	public void testSelectCreatedClassFromIndentationAndAfterExpression() {
+		var expression = program.indexOf("addNewEClass(\"First\")");
+		whenEditorOffsetIsSelectedThenOutlineNodeIsSelected(expression - 1, "First");
+		var second = program.indexOf("addNewEClass(\"Second\")");
+		whenEditorOffsetIsSelectedThenOutlineNodeIsSelected(
+			second + "addNewEClass(\"Second\")".length(), "Second");
+	}
+
+	@Test
+	public void testSelectRenamedClassBeforeNameAssignment() {
+		var expression = program.indexOf("ecoreref(MyClass).name = \"Publication\"");
+		whenEditorOffsetIsSelectedThenOutlineNodeIsSelected(expression, "Publication");
+	}
+
+	@Test
+	public void testSelectNearestExpressionOnSharedLine() {
+		var first = program.indexOf("addNewEClass(\"First\")");
+		var second = program.indexOf("addNewEClass(\"Second\")");
+		whenEditorOffsetIsSelectedThenOutlineNodeIsSelected(first - 1, "First");
+		whenEditorOffsetIsSelectedThenOutlineNodeIsSelected(
+			second + "addNewEClass(\"Second\")".length(), "Second");
 	}
 
 	@Test

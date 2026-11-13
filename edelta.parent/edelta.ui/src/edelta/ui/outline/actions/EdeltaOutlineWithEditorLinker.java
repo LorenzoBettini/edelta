@@ -9,6 +9,7 @@ import static org.eclipse.emf.ecore.EcorePackage.Literals.EPACKAGE;
 import java.util.Objects;
 
 import org.eclipse.emf.ecore.ENamedElement;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.actions.OutlineWithEditorLinker;
 import org.eclipse.xtext.ui.editor.outline.impl.EObjectNode;
@@ -46,11 +47,36 @@ public class EdeltaOutlineWithEditorLinker extends OutlineWithEditorLinker {
 			if (property != null) {
 				return property;
 			}
-			return ePackages.stream()
+			var element = ePackages.stream()
 				.map(node -> findENamedElementNode(node, selectedTextRegion))
 				.filter(Objects::nonNull)
 				.findFirst()
-				.orElse(findBestNode);
+				.orElse(null);
+			if (element != null) {
+				return element;
+			}
+			if (selectedTextRegion.getLength() == 0) {
+				try {
+					var document = textViewer.getDocument();
+					var line = document.getLineOfOffset(selectedTextRegion.getOffset());
+					LineCandidate nearest = null;
+					for (var ePackage : ePackages) {
+						var candidate = findNearestOnLine(ePackage, line, selectedTextRegion.getOffset());
+						if (candidate != null && (nearest == null ||
+							candidate.distance() < nearest.distance() ||
+							(candidate.distance() == nearest.distance() &&
+								candidate.priority() < nearest.priority()))) {
+							nearest = candidate;
+						}
+					}
+					if (nearest != null) {
+						return nearest.node();
+					}
+				} catch (BadLocationException e) {
+					// The outline may be based on an older editor document.
+				}
+			}
+			return findBestNode;
 		}
 		return findBestNode;
 	}
@@ -92,5 +118,42 @@ public class EdeltaOutlineWithEditorLinker extends OutlineWithEditorLinker {
 
 	private boolean contains(ITextRegion region, ITextRegion selection) {
 		return region != null && region.contains(selection);
+	}
+
+	private record LineCandidate(IOutlineNode node, int distance, int priority) {}
+
+	/** Finds the nearest changed element or property whose source region reaches the given line. */
+	private LineCandidate findNearestOnLine(IOutlineNode node, int line, int offset)
+			throws BadLocationException {
+		LineCandidate best = candidateOnLine(node, line, offset);
+		for (var child : node.getChildren()) {
+			if (child instanceof EcoreOutlineNode || child instanceof EcorePropertyOutlineNode) {
+				var candidate = findNearestOnLine(child, line, offset);
+				if (candidate != null && (best == null || candidate.distance() < best.distance() ||
+						(candidate.distance() == best.distance() && candidate.priority() < best.priority()))) {
+					best = candidate;
+				}
+			}
+		}
+		return best;
+	}
+
+	private LineCandidate candidateOnLine(IOutlineNode node, int line, int offset)
+			throws BadLocationException {
+		if (!(node instanceof EcoreOutlineNode) &&
+				!(node instanceof EcorePropertyOutlineNode property && property.isDirectChange())) {
+			return null;
+		}
+		var region = node.getSignificantTextRegion();
+		var document = textViewer.getDocument();
+		if (region == null || region.getLength() == 0 || region.getOffset() < 0 ||
+				region.getEndOffset() > document.getLength() ||
+				document.getLineOfOffset(region.getOffset()) > line ||
+				document.getLineOfOffset(region.getEndOffset() - 1) < line) {
+			return null;
+		}
+		var distance = offset < region.getOffset() ? region.getOffset() - offset
+			: Math.max(0, offset - region.getEndOffset());
+		return new LineCandidate(node, distance, node instanceof EcoreOutlineNode ? 0 : 1);
 	}
 }
