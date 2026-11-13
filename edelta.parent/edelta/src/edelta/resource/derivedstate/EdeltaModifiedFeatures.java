@@ -16,7 +16,7 @@ public class EdeltaModifiedFeatures {
 	private final Map<EObject, Map<EStructuralFeature, Change>> changes = new IdentityHashMap<>();
 	private final Map<EObject, Boolean> initialized = new IdentityHashMap<>();
 
-	public void record(EObject object, EStructuralFeature feature, XExpression expression) {
+	public void recordChange(EObject object, EStructuralFeature feature, XExpression expression) {
 		if (expression != null) {
 			changes.computeIfAbsent(object, ignored -> new IdentityHashMap<>())
 				.put(feature, new Change(expression, false));

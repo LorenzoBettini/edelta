@@ -94,7 +94,7 @@ public class EdeltaInterpreterResourceListener extends EContentAdapter {
 		}
 		if (!notification.isTouch()) {
 			if (notifier instanceof EObject object && feature instanceof EStructuralFeature structuralFeature) {
-				modifiedFeatures.record(object, structuralFeature, currentExpression);
+				modifiedFeatures.recordChange(object, structuralFeature, currentExpression);
 				if (structuralFeature instanceof EReference reference && reference.isContainment()) {
 					recordInitialValues(newValue);
 				}
