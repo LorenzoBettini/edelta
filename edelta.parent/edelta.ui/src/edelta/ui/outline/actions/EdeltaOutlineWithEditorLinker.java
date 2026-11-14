@@ -7,6 +7,7 @@ import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MODIFY_ECORE_OPERATION
 import static org.eclipse.emf.ecore.EcorePackage.Literals.EPACKAGE;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -59,16 +60,7 @@ public class EdeltaOutlineWithEditorLinker extends OutlineWithEditorLinker {
 				if (exact != null && startsOnLine(exact.getSignificantTextRegion(), line)) {
 					return exact;
 				}
-				var nearest = ePackages.stream()
-					.flatMap(this::descendants)
-					.filter(this::isResponsibleNode)
-					.filter(this::hasSourceRegion)
-					.filter(node -> startsOnLine(node.getSignificantTextRegion(), line))
-					.min(Comparator
-						.comparingInt((IOutlineNode node) ->
-							distance(node.getSignificantTextRegion(), selectedTextRegion.getOffset()))
-						.thenComparingInt(node -> node instanceof EcoreOutlineNode ? 0 : 1))
-					.orElse(null);
+				var nearest = findNearestNodeOnLine(ePackages, line, selectedTextRegion.getOffset());
 				if (nearest != null) {
 					return nearest;
 				}
@@ -76,6 +68,21 @@ public class EdeltaOutlineWithEditorLinker extends OutlineWithEditorLinker {
 			return exact != null ? exact : findBestNode;
 		}
 		return findBestNode;
+	}
+
+	/** Finds the closest responsible node on the cursor's line. */
+	private IOutlineNode findNearestNodeOnLine(List<IOutlineNode> ePackages, IRegion line,
+			int offset) {
+		return ePackages.stream()
+			.flatMap(this::descendants)
+			.filter(this::isResponsibleNode)
+			.filter(this::hasSourceRegion)
+			.filter(node -> startsOnLine(node.getSignificantTextRegion(), line))
+			.min(Comparator
+				.comparingInt((IOutlineNode node) ->
+					distance(node.getSignificantTextRegion(), offset))
+				.thenComparingInt(node -> node instanceof EcoreOutlineNode ? 0 : 1))
+			.orElse(null);
 	}
 
 	private IOutlineNode findPropertyNode(IOutlineNode node, ITextRegion selectedTextRegion) {
