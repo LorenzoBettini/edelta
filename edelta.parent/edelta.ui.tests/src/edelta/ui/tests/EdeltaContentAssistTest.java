@@ -562,6 +562,36 @@ public class EdeltaContentAssistTest extends AbstractContentAssistTest {
 				"""));
 	}
 
+	/** Both colliding elements must remain available in content assist. */
+	@Test
+	public void testPackageAndFeatureWithSameNameAreProposed() throws Exception {
+		newBuilder().append("""
+			metamodel "mypackage"
+
+			modifyEcore aTest epackage mypackage {
+				ecoreref(MyClass).addNewEAttribute("mypackage", null)
+				ecoreref(myp""")
+			.assertText("mypackage", "mypackage.MyClass.mypackage");
+	}
+
+	/** Selecting the feature must insert a reference that resolves to that feature. */
+	@Test
+	public void testFeatureWithSameNameAsPackageIsInsertedFullyQualified() throws Exception {
+		newBuilder().append("""
+			metamodel "mypackage"
+
+			modifyEcore aTest epackage mypackage {
+				ecoreref(MyClass).addNewEAttribute("mypackage", null)
+				ecoreref(myp""")
+			.applyProposal("mypackage.MyClass.mypackage")
+			.expectContent("""
+				metamodel "mypackage"
+
+				modifyEcore aTest epackage mypackage {
+					ecoreref(MyClass).addNewEAttribute("mypackage", null)
+					ecoreref(mypackage.MyClass.mypackage""");
+	}
+
 	@Test
 	@Flaky
 	public void testForAmbiguousReferencesFullyQualifiedNameIsReplaced() throws Exception {

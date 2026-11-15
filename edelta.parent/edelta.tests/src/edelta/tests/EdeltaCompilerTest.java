@@ -1870,6 +1870,53 @@ public class EdeltaCompilerTest extends EdeltaAbstractCompilerTest {
 		);
 	}
 
+	/** Checks generated calls for a package and an identically named feature. */
+	@Test
+	public void testCompilationOfRootPackageAndQualifiedFeatureWithSameName() throws Exception {
+		checkCompilation("""
+			import org.eclipse.emf.ecore.EAttribute
+			import org.eclipse.emf.ecore.EPackage
+
+			metamodel "foo"
+
+			modifyEcore aTest epackage foo {
+				ecoreref(FooClass).addNewEAttribute("foo", null)
+				val EPackage packageRef = ecoreref(foo)
+				val EAttribute featureRef = ecoreref(foo.FooClass.foo)
+			}
+			""", """
+			package edelta;
+
+			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
+			import org.eclipse.emf.ecore.EAttribute;
+			import org.eclipse.emf.ecore.EPackage;
+
+			@SuppressWarnings("all")
+			public class MyFile0 extends EdeltaDefaultRuntime {
+			  public MyFile0(final EdeltaRuntime other) {
+			    super(other);
+			  }
+
+			  public void aTest(final EPackage it) {
+			    this.stdLib.addNewEAttribute(getEClass("foo", "FooClass"), "foo", null);
+			    final EPackage packageRef = getEPackage("foo");
+			    final EAttribute featureRef = getEAttribute("foo", "FooClass", "foo");
+			  }
+
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+
+			  @Override
+			  protected void doExecute() throws Exception {
+			    aTest(getEPackage("foo"));
+			  }
+			}
+			""");
+	}
+
 	@Test
 	public void testEcoreRefExpForCreatedEClassInInitializer() throws Exception {
 		checkCompilation(

@@ -2030,6 +2030,31 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 			""");
 	}
 
+	/** Verifies interpretation keeps both references distinct after a feature is created. */
+	@Test
+	public void testRootPackageAndQualifiedFeatureWithSameName() throws Exception {
+		var program = parseWithTestEcore("""
+			import org.eclipse.emf.ecore.EAttribute
+			import org.eclipse.emf.ecore.EPackage
+
+			metamodel "foo"
+
+			modifyEcore aTest epackage foo {
+				ecoreref(FooClass).addNewEAttribute("foo", null)
+				val EPackage packageRef = ecoreref(foo)
+				val EAttribute featureRef = ecoreref(foo.FooClass.foo)
+			}
+			""");
+		var copiedPackages = interpretProgram(program);
+		validationTestHelper.assertNoErrors(program);
+		var copiedPackage = copiedPackages.values().iterator().next();
+		var references = getAllEcoreReferenceExpressions(program);
+		assertSame(copiedPackage, references.get(1).getArgument().getElement());
+		assertSame(
+			((EClass) copiedPackage.getEClassifier("FooClass")).getEStructuralFeature("foo"),
+			references.get(2).getArgument().getElement());
+	}
+
 	@Test
 	public void testAmbiguousEcorerefAfterRemoval() throws Exception {
 		var input = """

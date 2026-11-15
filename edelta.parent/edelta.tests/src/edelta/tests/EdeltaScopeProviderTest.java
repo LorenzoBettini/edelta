@@ -219,6 +219,48 @@ public class EdeltaScopeProviderTest extends EdeltaAbstractTest {
 			eclassExp.getArgument().getElement());
 	}
 
+	/** Ensures a root package wins when a feature has the same short name. */
+	@Test
+	public void testRootPackageWinsOverFeatureWithSameName() throws Exception {
+		var program = parseWithTestEcore("""
+			metamodel "foo"
+
+			modifyEcore aTest epackage foo {
+				ecoreref(FooClass).addNewEAttribute("foo", null)
+				ecoreref(foo)
+				ecoreref(foo.FooClass.foo)
+			}
+			""");
+		validationTestHelper.assertNoErrors(program);
+		var copiedPackage = getCopiedEPackages(program).iterator().next();
+		var references = getAllEcoreReferenceExpressions(program);
+		assertSame(copiedPackage, references.get(1).getArgument().getElement());
+		assertSame(
+			((EClass) copiedPackage.getEClassifier("FooClass")).getEStructuralFeature("foo"),
+			references.get(2).getArgument().getElement());
+	}
+
+	/** Checks the same lookup in an operation, where the original EPackage is used. */
+	@Test
+	public void testRootPackageWinsOverFeatureWithSameNameInOperation() throws Exception {
+		var resourceSet = resourceSetWithTestEcore();
+		var originalPackage = (EPackage) resourceSet.getResources().get(0).getContents().get(0);
+		var fooClass = (EClass) originalPackage.getEClassifier("FooClass");
+		var feature = stdLib.addNewEAttribute(fooClass, "foo", null);
+		var program = parseHelper.parse("""
+			metamodel "foo"
+
+			def anOp() {
+				ecoreref(foo)
+				ecoreref(foo.FooClass.foo)
+			}
+			""", resourceSet);
+		validationTestHelper.assertNoErrors(program);
+		var references = getAllEcoreReferenceExpressions(program);
+		assertSame(originalPackage, references.get(0).getArgument().getElement());
+		assertSame(feature, references.get(1).getArgument().getElement());
+	}
+
 	@Test
 	public void testScopeForReferenceToCopiedEPackageEClassifierInModifyEcore() throws Exception {
 		var prog = parseWithTestEcore("""
