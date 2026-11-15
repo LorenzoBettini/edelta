@@ -6,7 +6,10 @@ package edelta.scoping;
 import static edelta.edelta.EdeltaPackage.Literals.*;
 import static edelta.util.EdeltaModelUtil.*;
 
+import java.util.stream.StreamSupport;
+
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.Scopes;
@@ -39,7 +42,14 @@ public class EdeltaScopeProvider extends AbstractEdeltaScopeProvider {
 				return Scopes.scopeFor(edeltaEcoreHelper.getENamedElements(
 						ecoreQualifiedReference.getQualification().getElement()));
 			}
-			return Scopes.scopeFor(edeltaEcoreHelper.getProgramENamedElements(context));
+			final var elements = edeltaEcoreHelper.getProgramENamedElements(context);
+			final var rootPackages = StreamSupport.stream(elements.spliterator(), false)
+				.filter(element -> element instanceof EPackage ePackage &&
+					ePackage.getESuperPackage() == null)
+				.toList();
+			// A root package has no longer qualification. Its name must win over a
+			// feature with the same name, which can still be referenced by qualification.
+			return Scopes.scopeFor(rootPackages, Scopes.scopeFor(elements));
 		} else if (reference == EDELTA_MODIFY_ECORE_OPERATION__EPACKAGE) {
 			return Scopes.scopeFor(getMetamodels(context));
 		} else if (reference == EDELTA_PROGRAM__EPACKAGES) {

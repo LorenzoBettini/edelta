@@ -413,7 +413,8 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 	/**
 	 * Checks whether the linked reference is ambiguous in the current context and
 	 * also makes sure to relink the reference in case in this context there's no
-	 * ambiguity.
+	 * ambiguity. A root EPackage takes precedence over a feature with the same
+	 * short name because the package has no longer qualification.
 	 * 
 	 * @param ecoreReferenceExpression
 	 */
@@ -422,12 +423,16 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 		// qualified references are not considered since they cannot be ambiguous
 		if (ecoreReference instanceof EdeltaEcoreSimpleArgument) {
 			var refText = EdeltaModelUtil.getEcoreReferenceText(ecoreReference);
+			final var accessible = ecoreHelper.getCurrentAccessibleElements(ecoreReferenceExpression);
+			final var rootPackages = accessible.stream()
+				.filter(e -> e.getElement() instanceof EPackage ePackage &&
+					ePackage.getESuperPackage() == null && refText.equals(ePackage.getName()))
+				.toList();
 			// qualification '.' is the boundary for searching for matches
 			var toSearch = "." + refText;
-			final var matching = ecoreHelper.getCurrentAccessibleElements(ecoreReferenceExpression)
-				.stream()
+			final var matching = rootPackages.isEmpty() ? accessible.stream()
 				.filter(e -> e.getQualifiedName().toString().endsWith(toSearch))
-				.toList();
+				.toList() : rootPackages;
 			if (matching.size() > 1) {
 				Collection<String> matchingNames = matching.stream()
 					.map(e -> e.getQualifiedName().toString())

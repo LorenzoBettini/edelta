@@ -126,6 +126,10 @@ working display:
 
 See [Interpreter timeouts](docs/interpreter-timeouts.md) for timeout cleanup,
 interrupt handling, and the regression tests for intermittent compilation failures.
+## Ecore references
+
+See [Ecore reference name clashes](docs/ecore-reference-name-clashes.md) for how
+`ecoreref` resolves a root package and a feature with the same name.
 
 ### Contributors
 
