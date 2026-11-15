@@ -1156,6 +1156,32 @@ public class EdeltaInterpreterTest extends EdeltaAbstractTest {
 		assertThat(unresolvedEcoreRefs).isEmpty();
 	}
 
+	/** A class moved to another package keeps references to classes left behind. */
+	@Test
+	public void testMoveEClassAcrossEPackages() throws Exception {
+		var program = parseWithTestEcores("""
+			metamodel "foo"
+			metamodel "bar"
+
+			modifyEcore move epackage foo {
+				val remaining = addNewEClass("Remaining")
+				ecoreref(foo.FooClass.myReference).EType = remaining
+				ecoreref(bar).EClassifiers += ecoreref(foo.FooClass)
+			}
+			""");
+		var packages = interpretProgram(program);
+		validationTestHelper.assertNoErrors(program);
+		var source = packages.get("foo");
+		var destination = packages.get("bar");
+		assertThat(source.getEClassifier("FooClass")).isNull();
+		var moved = (EClass) destination.getEClassifier("FooClass");
+		assertThat(moved).isNotNull();
+		assertThat(moved.getEStructuralFeature("myReference").getEType())
+			.isSameAs(source.getEClassifier("Remaining"));
+		assertThat(derivedStateHelper.getUnresolvedEcoreReferences(program.eResource()))
+			.isEmpty();
+	}
+
 	@Test
 	public void testRenameReferencesAcrossEPackagesModifyingOnePackageOnly() throws Exception {
 		var model = parseWithTestEcoresWithReferences("""

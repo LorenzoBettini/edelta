@@ -4,6 +4,7 @@ import static edelta.lib.EdeltaEcoreUtil.createInstance;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
 import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -11,8 +12,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 import java.util.List;
 
+import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.util.Diagnostician;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -44,6 +50,60 @@ public class EdeltaEngineTest {
 	@BeforeClass
 	public static void clearOutput() throws IOException {
 		cleanDirectoryRecursive(OUTPUT);
+	}
+
+	/**
+	 * A moved class keeps its references to its former package, and instances
+	 * migrate with their containment and non-containment references intact.
+	 */
+	@Test
+	public void testMoveEClassToAnotherEPackage() throws Exception {
+		var engine = new EdeltaEngine(other -> new EdeltaRuntime(other) {
+			@Override
+			protected void doExecute() {
+				getEPackage("destination").getEClassifiers()
+					.add(getEClass(MYPACKAGE, "MyRoot"));
+			}
+		});
+		var original = EdeltaResourceUtils.getEPackage(
+			engine.loadEcoreFile(TESTDATA + SIMPLE_TEST_DATA + MY_ECORE));
+		engine.loadEcoreFile(TESTDATA + SIMPLE_TEST_DATA + "MoveDestination.ecore");
+		engine.loadModelFile(TESTDATA + SIMPLE_TEST_DATA + MY_ROOT);
+		engine.execute();
+
+		assertThat(original.getEClassifier("MyRoot")).isNotNull();
+		var output = OUTPUT + "movedEClass/";
+		engine.save(output);
+
+		var reloaded = new EdeltaModelManager();
+		reloaded.loadEcoreFile(output + MY_ECORE);
+		reloaded.loadEcoreFile(output + "MoveDestination.ecore");
+		var source = reloaded.getEPackage(MYPACKAGE);
+		var destination = reloaded.getEPackage("destination");
+		assertThat(source.getEClassifier("MyRoot")).isNull();
+		var moved = (EClass) destination.getEClassifier("MyRoot");
+		var myClass = (EClass) source.getEClassifier("MyClass");
+		assertThat(moved).isNotNull();
+		assertThat(((EReference) moved.getEStructuralFeature("myContents")).getEType())
+			.isSameAs(myClass);
+		assertThat(((EReference) moved.getEStructuralFeature("myReferences")).getEType())
+			.isSameAs(myClass);
+		assertThat(Diagnostician.INSTANCE.validate(source).getSeverity()).isEqualTo(Diagnostic.OK);
+		assertThat(Diagnostician.INSTANCE.validate(destination).getSeverity()).isEqualTo(Diagnostic.OK);
+
+		var model = reloaded.loadModelFile(output + MY_ROOT);
+		EcoreUtil.resolveAll(model);
+		assertThat(model.getErrors()).isEmpty();
+		var root = model.getContents().getFirst();
+		assertThat(root.eClass()).isSameAs(moved);
+		var contents = (List<?>) root.eGet(moved.getEStructuralFeature("myContents"));
+		assertThat(contents).hasSize(2);
+		assertThat(((EObject) contents.get(1))
+			.eGet(myClass.getEStructuralFeature("myClassStringAttribute")))
+			.isEqualTo("contained referred");
+		assertThat(root.eGet(moved.getEStructuralFeature("myReferences")))
+			.isEqualTo(List.of(contents.get(1)));
+		assertThat(Diagnostician.INSTANCE.validate(root).getSeverity()).isEqualTo(Diagnostic.OK);
 	}
 
 	@Test
