@@ -40,7 +40,13 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.EcoreFactory;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
 import org.eclipse.xtext.xbase.lib.StringExtensions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -102,6 +108,136 @@ class EdeltaModelMigratorTest {
 		var modelMigrator = new EdeltaModelMigrator(originalModelManager);
 		evolvingModelManager = modelMigrator.getEvolvingModelManager();
 		return modelMigrator;
+	}
+
+	/** Registers independent copies in plain sandbox resources without moving them. */
+	private EdeltaModelMigrator setupBorrowedMigrator(String subdir,
+			Collection<String> ecoreFiles, Collection<String> modelFiles,
+			List<EPackage> borrowedPackages, ResourceSetImpl sandbox) {
+		basedir = TESTDATA + subdir;
+		ecoreFiles.forEach(name -> originalModelManager.loadEcoreFile(basedir + name));
+		modelFiles.forEach(name -> originalModelManager.loadModelFile(basedir + name));
+		var copier = new Copier();
+		for (var resource : originalModelManager.getEcoreResources()) {
+			var copy = (EPackage) copier.copy(resource.getContents().getFirst());
+			var sandboxResource = new ResourceImpl();
+			sandbox.getResources().add(sandboxResource);
+			sandboxResource.getContents().add(copy);
+			borrowedPackages.add(copy);
+			evolvingModelManager.loadEPackage(copy);
+		}
+		copier.copyReferences();
+		return new EdeltaModelMigrator(originalModelManager, evolvingModelManager, copier);
+	}
+
+	@Test
+	void testBorrowedEcoreIdentityAndSequentialMigration() {
+		var packages = new ArrayList<EPackage>();
+		var sandbox = new ResourceSetImpl();
+		var migrator = setupBorrowedMigrator("simpleTestData/", of("My.ecore"),
+			of("MyClass.xmi", "MyRoot.xmi"), packages, sandbox);
+		var borrowed = packages.getFirst();
+		var borrowedResource = borrowed.eResource();
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass",
+			"myClassStringAttribute");
+		assertThat(evolvingModelManager.getEPackage("mypackage")).isSameAs(borrowed);
+		assertThat(borrowed.eResource()).isSameAs(borrowedResource);
+		assertThat(borrowedResource.getResourceSet()).isSameAs(sandbox);
+
+		migrator.transformAttributeValueRule(migrator.isRelatedTo(attribute),
+			value -> value.toString().toUpperCase());
+		migrator.transformAttributeValueRule(migrator.isRelatedTo(attribute),
+			value -> value + "!");
+		migrator.copyModels();
+
+		assertThat(borrowed.eResource()).isSameAs(borrowedResource);
+		assertThat(borrowedResource.getResourceSet()).isSameAs(sandbox);
+		assertThat(evolvingModelManager.getEPackage("mypackage")).isSameAs(borrowed);
+		var migratedClass = evolvingModelManager.getModelResources().stream()
+			.filter(r -> r.getURI().lastSegment().equals("MyClass.xmi"))
+			.findFirst().orElseThrow().getContents().getFirst();
+		assertThat(migratedClass.eClass()).isSameAs(borrowed.getEClassifier("MyClass"));
+		assertThat(migratedClass.eGet(attribute)).isEqualTo("MY ATTRIBUTE VALUE!");
+		var migratedRoot = evolvingModelManager.getModelResources().stream()
+			.filter(r -> r.getURI().lastSegment().equals("MyRoot.xmi"))
+			.findFirst().orElseThrow().getContents().getFirst();
+		var contents = (List<?>) migratedRoot.eGet(getReference(evolvingModelManager,
+			"mypackage", "MyRoot", "myContents"));
+		assertThat(migratedRoot.eGet(getReference(evolvingModelManager,
+			"mypackage", "MyRoot", "myReferences")))
+			.isEqualTo(of(contents.get(1)));
+	}
+
+	@Test
+	void testBorrowedEcoreCrossResourceReferences() {
+		var packages = new ArrayList<EPackage>();
+		var migrator = setupBorrowedMigrator("mutualReferencesUnchanged/",
+			of("PersonForReferences.ecore", "WorkPlaceForReferences.ecore"),
+			of("Person1.xmi", "Person2.xmi", "WorkPlace1.xmi"),
+			packages, new ResourceSetImpl());
+		migrator.transformAttributeValueRule(a -> a.getName().equals("firstname"),
+			value -> value + " changed");
+		migrator.copyModels();
+		assertThat(evolvingModelManager.getEcoreResources())
+			.extracting(r -> r.getContents().getFirst()).containsExactlyElementsOf(packages);
+		var person = evolvingModelManager.getModelResources().stream()
+			.filter(r -> r.getURI().lastSegment().equals("Person1.xmi"))
+			.findFirst().orElseThrow().getContents().getFirst();
+		var workPlace = evolvingModelManager.getModelResources().stream()
+			.filter(r -> r.getURI().lastSegment().equals("WorkPlace1.xmi"))
+			.findFirst().orElseThrow().getContents().getFirst();
+		assertThat(person.eGet(getReference(evolvingModelManager,
+			"personforreferences", "Person", "works"))).isSameAs(workPlace);
+	}
+
+	@Test
+	void testBorrowedEcoreMustBeRegistered() {
+		originalModelManager.loadEcoreFile(TESTDATA + "simpleTestData/My.ecore");
+		var copier = new Copier();
+		copier.copy(originalModelManager.getEPackage("mypackage"));
+		assertThatThrownBy(() -> new EdeltaModelMigrator(
+			originalModelManager, evolvingModelManager, copier))
+			.isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	void testBorrowedEcoreRegistrationValidation() {
+		originalModelManager.loadEcoreFile(TESTDATA + "simpleTestData/My.ecore");
+		var original = originalModelManager.getEPackage("mypackage");
+		assertThatThrownBy(() -> new EdeltaModelMigrator(originalModelManager,
+			evolvingModelManager, Map.of(original, original.getEClassifier("MyClass"))))
+			.isInstanceOf(IllegalArgumentException.class);
+		var copied = EcoreFactory.eINSTANCE.createEPackage();
+		assertThatThrownBy(() -> new EdeltaModelMigrator(originalModelManager,
+			evolvingModelManager, Map.of(original, copied)))
+			.isInstanceOf(IllegalArgumentException.class);
+
+		var resource = new ResourceImpl();
+		new ResourceSetImpl().getResources().add(resource);
+		resource.getContents().add(copied);
+		assertThatThrownBy(() -> new EdeltaModelMigrator(originalModelManager,
+			evolvingModelManager, Map.of(original, copied)))
+			.isInstanceOf(IllegalArgumentException.class);
+
+		var other = EcoreFactory.eINSTANCE.createEPackage();
+		resource.getContents().add(0, other);
+		evolvingModelManager.loadEPackage(copied);
+		assertThatThrownBy(() -> new EdeltaModelMigrator(originalModelManager,
+			evolvingModelManager, Map.of(original, copied)))
+			.isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	void testBorrowedResourceWithUriCanBeBackedUp() {
+		var packages = new ArrayList<EPackage>();
+		var migrator = setupBorrowedMigrator("simpleTestData/", of("My.ecore"),
+			of("MyClass.xmi"), packages, new ResourceSetImpl());
+		packages.getFirst().eResource().setURI(URI.createURI("memory:/borrowed/My.ecore"));
+		migrator.transformAttributeValueRule(a -> a.getName().equals("myClassStringAttribute"),
+			value -> value + " changed");
+		migrator.copyModels();
+		assertThat(evolvingModelManager.getModelResources().iterator().next()
+			.getContents().getFirst().eClass()).isSameAs(packages.getFirst().getEClassifier("MyClass"));
 	}
 
 	@Test

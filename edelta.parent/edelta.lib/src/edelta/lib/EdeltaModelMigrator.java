@@ -20,6 +20,7 @@ import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.InternalEObject;
@@ -195,6 +196,38 @@ public class EdeltaModelMigrator {
 		this.mapOfCopiedEcores = evolvingModelManager.copyEcores(originalModelManager);
 		this.modelCopier = new EdeltaModelCopier(
 				mapOfCopiedEcores);
+	}
+
+	/**
+	 * Migrates models using Ecore copies owned by another component. The evolving
+	 * manager must already have registered those packages with
+	 * {@link EdeltaModelManager#loadEPackage(EPackage)}. Each original package must
+	 * map to the identical registered evolving package. This constructor neither
+	 * copies Ecore nor moves the borrowed resources; their owner must keep the
+	 * packages attached to resources while migration runs.
+	 *
+	 * @param originalModelManager manager containing the original Ecore and models
+	 * @param evolvingModelManager manager borrowing the already copied packages
+	 * @param originalToEvolved map from original to copied Ecore elements
+	 * @throws IllegalArgumentException if a package mapping is missing or unregistered
+	 */
+	public EdeltaModelMigrator(EdeltaModelManager originalModelManager,
+			EdeltaModelManager evolvingModelManager, Map<EObject, EObject> originalToEvolved) {
+		this.originalModelManager = Objects.requireNonNull(originalModelManager);
+		this.evolvingModelManager = Objects.requireNonNull(evolvingModelManager);
+		this.mapOfCopiedEcores = Map.copyOf(Objects.requireNonNull(originalToEvolved));
+		var borrowedResources = evolvingModelManager.getEcoreResources();
+		for (var originalPackage : EdeltaResourceUtils.getEPackagesStream(
+				originalModelManager.getEcoreResources()).toList()) {
+			var evolvedPackage = mapOfCopiedEcores.get(originalPackage);
+			if (!(evolvedPackage instanceof EPackage) || evolvedPackage.eResource() == null
+					|| !borrowedResources.contains(evolvedPackage.eResource())
+					|| EdeltaResourceUtils.getEPackage(evolvedPackage.eResource()) != evolvedPackage) {
+				throw new IllegalArgumentException("Missing registered Ecore copy for "
+					+ originalPackage.getName());
+			}
+		}
+		this.modelCopier = new EdeltaModelCopier(mapOfCopiedEcores);
 	}
 
 	public EdeltaModelManager getEvolvingModelManager() {

@@ -285,10 +285,20 @@ public class EdeltaModelManager {
 	public Map<EObject, EObject> copyEcores(EdeltaModelManager otherModelManager) {
 		var otherEcoreResources = otherModelManager.getEcoreResources();
 		var ecoreCopier = new Copier();
+		var unnamedResourceIndex = 0;
 		for (var resource : otherEcoreResources) {
-			var originalResource = (XMIResource) resource;
-			var newResource = this.createEcoreResource(originalResource);
-			var root = originalResource.getContents().get(0);
+			Resource newResource;
+			if (resource instanceof XMIResource xmiResource) {
+				newResource = createEcoreResource(xmiResource);
+			} else {
+				var uri = resource.getURI();
+				if (uri == null) {
+					uri = URI.createURI("memory:/edelta/ecore/" + unnamedResourceIndex++ + ".ecore");
+				}
+				newResource = resourceSet.createResource(uri);
+				ecoreResources.add(newResource);
+			}
+			var root = resource.getContents().get(0);
 			newResource.getContents().add(ecoreCopier.copy(root));
 		}
 		ecoreCopier.copyReferences();
