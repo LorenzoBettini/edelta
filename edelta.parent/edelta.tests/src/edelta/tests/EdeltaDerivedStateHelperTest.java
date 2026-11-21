@@ -1,7 +1,11 @@
 package edelta.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.*;
+
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EcoreFactory;
@@ -20,6 +24,7 @@ import edelta.edelta.EdeltaEcoreArgument;
 import edelta.edelta.EdeltaFactory;
 import edelta.resource.derivedstate.EdeltaAccessibleElement;
 import edelta.resource.derivedstate.EdeltaAccessibleElements;
+import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedState;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.resource.derivedstate.EdeltaEcoreReferenceExpressionState;
@@ -37,6 +42,24 @@ public class EdeltaDerivedStateHelperTest extends EdeltaAbstractTest {
 	@Test
 	public void testGetOrInstallAdapterWithNotXtextResource() {
 		assertNotNull(edeltaDerivedStateHelper.getOrInstallAdapter(new ResourceImpl()));
+	}
+
+	@Test
+	public void testCopiedEcoreMapSnapshotAndClear() {
+		var original = ecoreFactory.createEPackage();
+		var copied = ecoreFactory.createEPackage();
+		copied.setName("copied");
+		var copies = new EdeltaCopiedEPackagesMap();
+		assertThat(copies.getOriginalToCopyMap()).isEmpty();
+		copies.setCopies(List.of(copied), Map.of(original, copied));
+		var snapshot = copies.getOriginalToCopyMap();
+		assertThat(snapshot).containsEntry(original, copied);
+		assertThatThrownBy(() -> snapshot.clear())
+			.isInstanceOf(UnsupportedOperationException.class);
+		copies.clear();
+		assertThat(copies.getOriginalToCopyMap()).isEmpty();
+		assertThat(copies.getOriginal(copied)).isNull();
+		assertThat(snapshot).containsEntry(original, copied);
 	}
 
 	@Test

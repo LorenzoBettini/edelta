@@ -19,13 +19,27 @@ import com.google.common.collect.HashBiMap;
 public class EdeltaCopiedEPackagesMap {
 
 	private final Map<String, EPackage> packagesByName = new HashMap<>();
+	private Map<EObject, EObject> originalToCopy = Map.of();
 	private Map<EObject,EObject> inverse;
 
 	public void setCopies(Collection<EPackage> copies, Map<EObject, EObject> copyMap) {
 		for (var copy : copies) {
 			packagesByName.computeIfAbsent(copy.getName(), key -> copy);
 		}
-		inverse = HashBiMap.create(copyMap).inverse();
+		originalToCopy = Map.copyOf(copyMap);
+		inverse = HashBiMap.create(originalToCopy).inverse();
+	}
+
+	/**
+	 * Returns an immutable snapshot of the original-to-copied Ecore element map.
+	 * Its values are the exact objects stored in this derived state; callers must
+	 * not detach or replace them. A later {@link #setCopies(Collection, Map)} may
+	 * install a different map without changing this snapshot.
+	 *
+	 * @return the original-to-copied Ecore element map
+	 */
+	public Map<EObject, EObject> getOriginalToCopyMap() {
+		return originalToCopy;
 	}
 
 	public Collection<EPackage> values() {
@@ -34,6 +48,8 @@ public class EdeltaCopiedEPackagesMap {
 
 	public void clear() {
 		packagesByName.clear();
+		originalToCopy = Map.of();
+		inverse = null;
 	}
 
 	public EPackage get(String name) {
@@ -41,7 +57,7 @@ public class EdeltaCopiedEPackagesMap {
 	}
 
 	public ENamedElement getOriginal(ENamedElement e) {
-		if (e == null)
+		if (e == null || inverse == null)
 			return null;
 		return (ENamedElement) inverse.get(e);
 	}

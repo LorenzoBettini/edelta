@@ -153,7 +153,6 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 		final var copiedEPackagesMap = derivedStateHelper
 				.getCopiedEPackagesMap(eResource);
 		final var copiedEPackages = copiedEPackagesMap.values();
-		thisObject = createThisObject(copiedEPackagesMap);
 		useAsFields = newHashMap();
 		var filteredOperations =
 			edeltaInterpreterHelper.filterOperations(program.getModifyEcoreOperations());
@@ -162,6 +161,7 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 				diagnosticHelper);
 		var sandboxResourceSet = createSandboxResourceSet(copiedEPackages);
 		try {
+			thisObject = createThisObject(copiedEPackagesMap);
 			addResourceListener(copiedEPackages);
 			for (final var op : filteredOperations) {
 				evaluateModifyEcoreOperation(op, copiedEPackagesMap);
@@ -223,14 +223,27 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 	 * @param copiedEPackagesMap
 	 */
 	private EdeltaRuntime createThisObject(final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
-		var edeltaRuntime = new EdeltaDefaultRuntime(new EdeltaModelManager() {
-				@Override
-				public EPackage getEPackage(String packageName) {
-					return copiedEPackagesMap.get(packageName);
-				}
-			});
+		var edeltaRuntime = createRuntime(copiedEPackagesMap);
 		edeltaRuntime.setIssuePresenter(new EdeltaInterpreterIssuePresenter(diagnosticHelper));
 		return edeltaRuntime;
+	}
+
+	/**
+	 * Creates the runtime used for interpreting one program. The copied packages
+	 * are attached to the interpreter sandbox when this method runs. Subclasses
+	 * may supply a migration-aware runtime using these exact packages and their
+	 * original-to-copy map; the default runtime performs no model migration.
+	 *
+	 * @param copiedEPackagesMap the interpreter's evolving Ecore copies
+	 * @return the runtime for this interpretation
+	 */
+	protected EdeltaRuntime createRuntime(final EdeltaCopiedEPackagesMap copiedEPackagesMap) {
+		return new EdeltaDefaultRuntime(new EdeltaModelManager() {
+			@Override
+			public EPackage getEPackage(String packageName) {
+				return copiedEPackagesMap.get(packageName);
+			}
+		});
 	}
 
 	private void removeResourceListener(final Collection<EPackage> copiedEPackages) {
