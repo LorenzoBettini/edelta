@@ -14,6 +14,31 @@ public class EdeltaFormatterTest extends EdeltaAbstractTest {
 	@Inject
 	private FormatterTestHelper formatterTestHelper;
 
+	@Test
+	public void testFormattingTestModels() {
+		formatterTestHelper.assertFormatted(it -> {
+			it.setToBeFormatted("""
+				metamodel   "ecore"
+				testmodels   {  "models"    "othermodels/My.xmi"  }
+				""".replace("\n", System.lineSeparator()));
+			it.setExpectation("""
+				metamodel "ecore"
+				testmodels {
+					"models"
+					"othermodels/My.xmi"
+				}
+				""".replace("\n", System.lineSeparator()));
+		});
+	}
+
+	@Test
+	public void testFormattingEmptyTestModels() {
+		formatterTestHelper.assertFormatted(it -> {
+			it.setToBeFormatted("testmodels  {   }");
+			it.setExpectation("testmodels {}" + System.lineSeparator());
+		});
+	}
+
 	/**
 	 * Since we use text blocks, which do not contain "\r" in Windows,
 	 * we have to make sure that line separators are the ones of the

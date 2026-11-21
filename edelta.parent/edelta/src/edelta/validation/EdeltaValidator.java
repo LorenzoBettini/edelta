@@ -8,6 +8,7 @@ import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MIGRATION__NS_URI;
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MIGRATION__TO;
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MODIFY_ECORE_OPERATION__EPACKAGE;
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_PROGRAM__EPACKAGES;
+import static edelta.edelta.EdeltaPackage.Literals.EDELTA_TEST_MODEL_PATH__PATH;
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_USE_AS__TYPE;
 
 import java.util.HashSet;
@@ -33,6 +34,8 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaMigration;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaProgram;
+import edelta.edelta.EdeltaTestModelPath;
+import edelta.edelta.EdeltaTestModels;
 import edelta.edelta.EdeltaUseAs;
 import edelta.lib.EdeltaRuntime;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
@@ -85,6 +88,10 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 
 	public static final String INVALID_NS_URI = PREFIX
 			+ "InvalidNsURI";
+
+	public static final String INVALID_TEST_MODEL_PATH = PREFIX + "InvalidTestModelPath";
+
+	public static final String DUPLICATE_TEST_MODEL_PATH = PREFIX + "DuplicateTestModelPath";
 
 	@Inject
 	private CommonTypeComputationServices services;
@@ -188,6 +195,27 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 						DUPLICATE_EPACKAGE_IN_MIGRATE
 					);
 				}
+			}
+		}
+	}
+
+	/**
+	 * Checks literal model paths without resolving them against the filesystem.
+	 */
+	@Check
+	public void checkTestModelPaths(EdeltaTestModels testModels) {
+		Set<String> seen = new HashSet<>();
+		for (EdeltaTestModelPath entry : testModels.getPaths()) {
+			var path = entry.getPath();
+			if (path == null) {
+				continue; // An incomplete entry is handled by the parser.
+			}
+			if (path.isBlank()) {
+				error("Test model path must not be blank", entry,
+					EDELTA_TEST_MODEL_PATH__PATH, INVALID_TEST_MODEL_PATH);
+			} else if (!seen.add(path)) {
+				error("Duplicate test model path '" + path + "'", entry,
+					EDELTA_TEST_MODEL_PATH__PATH, DUPLICATE_TEST_MODEL_PATH);
 			}
 		}
 	}

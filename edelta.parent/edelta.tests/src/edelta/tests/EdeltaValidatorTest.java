@@ -7,6 +7,7 @@ import org.eclipse.xtext.xbase.validation.IssueCodes;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import edelta.edelta.EdeltaFactory;
 import edelta.edelta.EdeltaPackage;
 import edelta.lib.EdeltaRuntime;
 import edelta.validation.EdeltaValidator;
@@ -14,6 +15,50 @@ import edelta.validation.EdeltaValidator;
 @RunWith(XtextRunner.class)
 @InjectWith(EdeltaInjectorProvider.class)
 public class EdeltaValidatorTest extends EdeltaAbstractTest {
+	@Test
+	public void testBlankTestModelPath() throws Exception {
+		var input = "testmodels { \"  \" }";
+		validationTestHelper.assertError(parseHelper.parse(input),
+			EdeltaPackage.Literals.EDELTA_TEST_MODEL_PATH,
+			EdeltaValidator.INVALID_TEST_MODEL_PATH,
+			input.indexOf("\""), 4,
+			"Test model path must not be blank");
+	}
+
+	@Test
+	public void testEmptyTestModelPath() throws Exception {
+		var input = "testmodels { \"\" }";
+		validationTestHelper.assertError(parseHelper.parse(input),
+			EdeltaPackage.Literals.EDELTA_TEST_MODEL_PATH,
+			EdeltaValidator.INVALID_TEST_MODEL_PATH,
+			input.indexOf("\""), 2,
+			"Test model path must not be blank");
+	}
+
+	@Test
+	public void testIncompleteTestModelPath() throws Exception {
+		var program = parseHelper.parse("testmodels {}");
+		program.getTestModels().getPaths().add(
+			EdeltaFactory.eINSTANCE.createEdeltaTestModelPath());
+		validationTestHelper.assertNoErrors(program);
+	}
+
+	@Test
+	public void testDuplicateTestModelPath() throws Exception {
+		var input = "testmodels { \"models\" \"models\" }";
+		validationTestHelper.assertError(parseHelper.parse(input),
+			EdeltaPackage.Literals.EDELTA_TEST_MODEL_PATH,
+			EdeltaValidator.DUPLICATE_TEST_MODEL_PATH,
+			input.lastIndexOf("\"models\""), 8,
+			"Duplicate test model path 'models'");
+	}
+
+	@Test
+	public void testDistinctTestModelPaths() throws Exception {
+		validationTestHelper.assertNoErrors(parseHelper.parse(
+			"testmodels { \"models\" \"othermodels/My.xmi\" }"));
+	}
+
 	@Test
 	public void testEmptyProgram() throws Exception {
 		validationTestHelper.assertNoErrors(parseHelper.parse(""));

@@ -45,6 +45,52 @@ public class EdeltaParsingTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	public void testNoTestModelsDeclaration() throws Exception {
+		assertThat(parseHelper.parse("metamodel \"ecore\"").getTestModels()).isNull();
+	}
+
+	@Test
+	public void testSingleTestModelFile() throws Exception {
+		var program = parseHelper.parse("testmodels { \"models/My.xmi\" }");
+		assertThat(program.eResource().getErrors()).isEmpty();
+		assertThat(program.getTestModels().getPaths())
+			.extracting(path -> path.getPath())
+			.containsExactly("models/My.xmi");
+	}
+
+	@Test
+	public void testTestModelsPaths() throws Exception {
+		var program = parseWithTestEcore("""
+			metamodel "foo"
+			testmodels {
+				"models"
+				"othermodels/My.xmi"
+			}
+			use edelta.lib.EdeltaRuntime as runtime
+			""");
+		assertThat(program.eResource().getErrors()).isEmpty();
+		assertThat(program.getTestModels().getPaths())
+			.extracting(path -> path.getPath())
+			.containsExactly("models", "othermodels/My.xmi");
+	}
+
+	@Test
+	public void testEmptyTestModelsDeclaration() throws Exception {
+		var program = parseHelper.parse("testmodels {}");
+		assertThat(program.eResource().getErrors()).isEmpty();
+		assertThat(program.getTestModels().getPaths()).isEmpty();
+	}
+
+	@Test
+	public void testMalformedTestModelsDeclarations() throws Exception {
+		assertThat(parseHelper.parse("testmodels { models }").eResource().getErrors()).isNotEmpty();
+		assertThat(parseHelper.parse("testmodels { \"a.xmi\" } testmodels {}").eResource()
+			.getErrors()).isNotEmpty();
+		assertThat(parseHelper.parse("migrate \"foo\" to \"bar\" testmodels {}").eResource()
+			.getErrors()).isNotEmpty();
+	}
+
+	@Test
 	public void testDirectEcoreReference() throws Exception {
 		var exp = getEcoreReferenceExpression("foo");
 		assertNotNull(

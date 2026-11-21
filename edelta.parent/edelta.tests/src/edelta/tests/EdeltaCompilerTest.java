@@ -64,6 +64,36 @@ public class EdeltaCompilerTest extends EdeltaAbstractCompilerTest {
 	}
 
 	@Test
+	public void testTestModelsDoNotChangeGeneratedJava() throws Exception {
+		var expected = """
+			package edelta;
+
+			import edelta.lib.EdeltaDefaultRuntime;
+			import edelta.lib.EdeltaRuntime;
+
+			@SuppressWarnings("all")
+			public class MyFile0 extends EdeltaDefaultRuntime {
+			  public MyFile0(final EdeltaRuntime other) {
+			    super(other);
+			  }
+
+			  @Override
+			  public void performSanityChecks() throws Exception {
+			    ensureEPackageIsLoaded("foo");
+			  }
+			}
+			""";
+		checkCompilation("metamodel \"foo\"", expected);
+		checkCompilation("""
+			metamodel "foo"
+			testmodels {
+				"models"
+				"othermodels/My.xmi"
+			}
+			""", expected);
+	}
+
+	@Test
 	public void testIncompleteProgram() throws Exception {
 		checkCompilation(
 			"metamodel ",

@@ -11,6 +11,7 @@ import org.eclipse.xtext.xbase.annotations.formatting2.XbaseWithAnnotationsForma
 import static edelta.edelta.EdeltaPackage.Literals.*
 import edelta.edelta.EdeltaModifyEcoreOperation
 import edelta.edelta.EdeltaEcoreReferenceExpression
+import edelta.edelta.EdeltaTestModels
 
 class EdeltaFormatter extends XbaseWithAnnotationsFormatter {
 
@@ -19,6 +20,7 @@ class EdeltaFormatter extends XbaseWithAnnotationsFormatter {
 		edeltaProgram.getImportSection.format;
 		edeltaProgram.regionFor.keyword("package").append[oneSpace]
 		edeltaProgram.regionFor.keywords("metamodel").forEach[append[oneSpace]]
+		edeltaProgram.testModels.format
 		for (EdeltaUseAs edeltaUseAs : edeltaProgram.getUseAsClauses()) {
 			edeltaUseAs.format
 			edeltaUseAs.append[setNewLines(1, 1, 2)]
@@ -29,6 +31,21 @@ class EdeltaFormatter extends XbaseWithAnnotationsFormatter {
 		}
 		for (modifyEcore : edeltaProgram.modifyEcoreOperations) {
 			modifyEcore.format
+		}
+	}
+
+	def dispatch void format(EdeltaTestModels testModels, extension IFormattableDocument document) {
+		val open = testModels.regionFor.keyword("{")
+		val close = testModels.regionFor.keyword("}")
+		testModels.regionFor.keyword("testmodels").append[oneSpace]
+		if (testModels.paths.empty) {
+			open.append[noSpace]
+		} else {
+			interior(open, close)[indent]
+			for (path : testModels.paths) {
+				path.prepend[newLine]
+			}
+			close.prepend[newLine]
 		}
 	}
 
