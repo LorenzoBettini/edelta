@@ -57,7 +57,8 @@ public class EdeltaInterpreterMigrationTest extends EdeltaAbstractTest {
 
 	private XtextResourceSet resourceSet;
 
-	/** Counts actual migration-rule calls made by interpreted callbacks.
+	/**
+	 * Counts actual migration-rule calls made by interpreted callbacks.
 	 *
 	 * @author Lorenzo Bettini
 	 */
@@ -76,7 +77,8 @@ public class EdeltaInterpreterMigrationTest extends EdeltaAbstractTest {
 		}
 	}
 
-	/** Uses the interpreter's Ecore copies when constructing a migration runtime.
+	/**
+	 * Uses the interpreter's Ecore copies when constructing a migration runtime.
 	 *
 	 * @author Lorenzo Bettini
 	 */
@@ -114,6 +116,9 @@ public class EdeltaInterpreterMigrationTest extends EdeltaAbstractTest {
 		resourceSet.getResources().add(ecoreResource);
 	}
 
+	/**
+	 * A direct Xbase callback must transform a value in the copied model.
+	 */
 	@Test
 	public void directMigrationLambdaChangesModel() throws Exception {
 		var program = parse("""
@@ -137,6 +142,9 @@ public class EdeltaInterpreterMigrationTest extends EdeltaAbstractTest {
 		assertSameEcore(program, interpreter);
 	}
 
+	/**
+	 * The second rule must consume the first rule's result without losing references.
+	 */
 	@Test
 	public void successiveRulesPreserveValuesAndReferences() throws Exception {
 		var program = parse("""
@@ -172,10 +180,15 @@ public class EdeltaInterpreterMigrationTest extends EdeltaAbstractTest {
 		assertSameEcore(program, interpreter);
 	}
 
+	/**
+	 * An imported refactoring must run its migration rule when making a reference single.
+	 */
 	@Test
 	public void importedRefactoringExecutesItsMigrationRule() throws Exception {
 		var originalRoot = originalModel("MyRoot.xmi");
+		assertThat(originalRoot.eClass().getEStructuralFeature("myReferences").isMany()).isTrue();
 		var contents = referenced(originalRoot, "myContents");
+		// Give the many-valued reference two targets so retaining the first is observable.
 		referenced(originalRoot, "myReferences").add(0, contents.get(0));
 		resourceSet.getResource(createFileURIFromPath(METAMODEL_PATH + ECORE_ECORE), true);
 		var program = parse("""
@@ -193,12 +206,16 @@ public class EdeltaInterpreterMigrationTest extends EdeltaAbstractTest {
 
 		var root = model(interpreter, "MyRoot.xmi");
 		var firstContained = referenced(root, "myContents").get(0);
+		var migratedReference = root.eClass().getEStructuralFeature("myReferences");
 		assertThat(interpreter.migrator.copyRuleInvocations).isEqualTo(1);
-		assertThat(root.eGet(root.eClass().getEStructuralFeature("myReferences")))
-			.isSameAs(firstContained);
+		assertThat(migratedReference.isMany()).isFalse();
+		assertThat(root.eGet(migratedReference)).isSameAs(firstContained);
 		assertSameEcore(program, interpreter);
 	}
 
+	/**
+	 * Without an opt-in runtime, Ecore changes still run and migration remains inactive.
+	 */
 	@Test
 	public void withoutPreviewModelsMigrationRemainsInactive() throws Exception {
 		var program = parse("""
@@ -215,6 +232,9 @@ public class EdeltaInterpreterMigrationTest extends EdeltaAbstractTest {
 			.isNotNull();
 	}
 
+	/**
+	 * A callback failure must propagate while the sandbox returns its EPackage.
+	 */
 	@Test
 	public void callbackFailureRestoresCopiedPackageToProgram() throws Exception {
 		var program = parse("""
