@@ -188,8 +188,11 @@ public class EdeltaInterpreterMigrationTest extends EdeltaAbstractTest {
 		var originalRoot = originalModel("MyRoot.xmi");
 		assertThat(originalRoot.eClass().getEStructuralFeature("myReferences").isMany()).isTrue();
 		var contents = referenced(originalRoot, "myContents");
-		// Give the many-valued reference two targets so retaining the first is observable.
-		referenced(originalRoot, "myReferences").add(0, contents.get(0));
+		var originalReferences = referenced(originalRoot, "myReferences");
+		// The fixture already refers to the second object; add the first as another target.
+		assertThat(originalReferences).containsExactly(contents.get(1));
+		originalReferences.add(0, contents.get(0));
+		assertThat(originalReferences).containsExactly(contents.get(0), contents.get(1));
 		resourceSet.getResource(createFileURIFromPath(METAMODEL_PATH + ECORE_ECORE), true);
 		var program = parse("""
 			import edelta.refactorings.lib.EdeltaRefactorings
