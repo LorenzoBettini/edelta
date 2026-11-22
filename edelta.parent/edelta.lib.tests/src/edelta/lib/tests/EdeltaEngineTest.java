@@ -16,7 +16,6 @@ import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.BeforeClass;
@@ -84,9 +83,9 @@ public class EdeltaEngineTest {
 		var moved = (EClass) destination.getEClassifier("MyRoot");
 		var myClass = (EClass) source.getEClassifier("MyClass");
 		assertThat(moved).isNotNull();
-		assertThat(((EReference) moved.getEStructuralFeature("myContents")).getEType())
+		assertThat(moved.getEStructuralFeature("myContents").getEType())
 			.isSameAs(myClass);
-		assertThat(((EReference) moved.getEStructuralFeature("myReferences")).getEType())
+		assertThat(moved.getEStructuralFeature("myReferences").getEType())
 			.isSameAs(myClass);
 		assertThat(Diagnostician.INSTANCE.validate(source).getSeverity()).isEqualTo(Diagnostic.OK);
 		assertThat(Diagnostician.INSTANCE.validate(destination).getSeverity()).isEqualTo(Diagnostic.OK);
