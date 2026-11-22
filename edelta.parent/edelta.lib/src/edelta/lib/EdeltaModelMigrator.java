@@ -235,6 +235,16 @@ public class EdeltaModelMigrator {
 	}
 
 	/**
+	 * Runs a model-migration callback. Preview migrators can observe callback
+	 * failures here, before an interpreter recovers from the exception.
+	 *
+	 * @param callback the migration callback
+	 */
+	public void runMigrationCallback(Consumer<EdeltaModelMigrator> callback) {
+		callback.accept(this);
+	}
+
+	/**
 	 * This simulates what the final model migration should do.
 	 */
 	public void copyModels() {

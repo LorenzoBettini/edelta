@@ -14,7 +14,7 @@ import edelta.edelta.EdeltaProgram;
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaSafeInterpreter extends EdeltaDefaultInterpreter {
+public class EdeltaSafeInterpreter extends EdeltaModelPreviewInterpreter {
 
 	private static final Logger LOG = Logger.getLogger(EdeltaSafeInterpreter.class);
 

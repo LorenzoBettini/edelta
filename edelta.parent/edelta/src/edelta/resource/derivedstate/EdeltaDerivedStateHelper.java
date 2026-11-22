@@ -59,6 +59,17 @@ public class EdeltaDerivedStateHelper {
 	}
 
 	/**
+	 * Returns final preview models and structured failures for this resource.
+	 * Model resources are owned by derived state and become invalid on discard.
+	 *
+	 * @param resource the Edelta program resource
+	 * @return the current installation's preview
+	 */
+	public EdeltaModelPreview getModelPreview(final Resource resource) {
+		return getOrInstallAdapter(resource).getModelPreview();
+	}
+
+	/**
 	 * Copies all imported {@link EPackage}s of the passed {@link EdeltaProgram} in
 	 * the {@link EdeltaCopiedEPackagesMap} in the derived state of the program's
 	 * {@link Resource}; the copied {@link EPackage}s are also inserted in the

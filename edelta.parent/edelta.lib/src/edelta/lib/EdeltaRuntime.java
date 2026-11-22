@@ -321,7 +321,7 @@ public abstract class EdeltaRuntime {
 	 */
 	public void modelMigration(Consumer<EdeltaModelMigrator> migratorConsumer) {
 		if (modelMigrator != null)
-			migratorConsumer.accept(modelMigrator);
+			modelMigrator.runMigrationCallback(migratorConsumer);
 	}
 
 }

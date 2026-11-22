@@ -17,6 +17,7 @@ public class EdeltaDerivedState extends AdapterImpl {
 	private final EdeltaUnresolvedEcoreReferences unresolvedEcoreReferences = new EdeltaUnresolvedEcoreReferences();
 	private final EdeltaModifiedElements modifiedElements = new EdeltaModifiedElements();
 	private final EdeltaModifiedFeatures modifiedFeatures = new EdeltaModifiedFeatures();
+	private final EdeltaModelPreview modelPreview = new EdeltaModelPreview();
 
 	@Override
 	public boolean isAdapterForType(final Object type) {
@@ -51,6 +52,11 @@ public class EdeltaDerivedState extends AdapterImpl {
 		return modifiedFeatures;
 	}
 
+	/** Returns the preview owned by this derived-state installation. */
+	public EdeltaModelPreview getModelPreview() {
+		return modelPreview;
+	}
+
 	public void clear() {
 		copiedEPackagesMap.clear();
 		ecoreReferenceStateMap.clear();
@@ -59,6 +65,7 @@ public class EdeltaDerivedState extends AdapterImpl {
 		unresolvedEcoreReferences.clear();
 		modifiedElements.clear();
 		modifiedFeatures.clear();
+		modelPreview.clear();
 	}
 
 }
