@@ -1,12 +1,13 @@
 package edelta.ui.tests;
 
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.createFile;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.waitForBuild;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.assertj.core.api.Assertions;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
@@ -103,27 +104,40 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		super.setUp();
 		editor = openEditor(file);
 		outline = editor.getAdapter(OutlinePage.class);
-		Assertions.assertThat(outline).isNotNull();
+		then(outline).isNotNull();
 		editor.setFocus();
 	}
 
 	@Test
 	public void showsContainmentAndNavigatesToDeclaration() {
+		// Check the complete preview subtree, including resource order and every containment child.
 		var group = awaitNode(ModelGroupOutlineNode.class, "Evolved test models");
-		Assertions.assertThat(group.getChildren()).extracting(node -> node.getText().toString())
-			.containsExactly("Preview.xmi", "EmptyId.xmi");
+		then(outlineStringRepresentation(group)).isEqualTo("""
+			Evolved test models
+			  Preview.xmi
+			    Root #root1
+			      FirstChild alpha
+			      FirstChild beta
+			      FirstChild
+			  EmptyId.xmi
+			    Root
+			""");
+
+		// The linked Child appears once under Root; the non-containment link adds no node.
 		var emptyId = child(group, ModelResourceOutlineNode.class, "EmptyId.xmi");
 		child(emptyId, ModelObjectOutlineNode.class, "Root");
 		var resource = child(group, ModelResourceOutlineNode.class, "Preview.xmi");
 		var root = child(resource, ModelObjectOutlineNode.class, "Root #root1");
-		Assertions.assertThat(root.getChildren()).hasSize(3);
-		Assertions.assertThat(root.getChildren()).extracting(node -> node.getText().toString())
+		then(root.getChildren()).hasSize(3);
+		then(root.getChildren()).extracting(node -> node.getText().toString())
 			.containsExactly("FirstChild alpha", "FirstChild beta", "FirstChild");
 		var firstChild = (ModelObjectOutlineNode) root.getChildren().getFirst();
-		org.eclipse.emf.ecore.EObject childObject = firstChild.readOnly(object -> object);
-		org.eclipse.emf.ecore.EObject rootObject = root.readOnly(object -> object);
-		Assertions.assertThat(rootObject).isSameAs(childObject.eContainer());
-		Assertions.assertThat(root.getChildren().getFirst().getChildren()).isEmpty();
+		EObject childObject = firstChild.readOnly(object -> object);
+		EObject rootObject = root.readOnly(object -> object);
+		then(rootObject).isSameAs(childObject.eContainer());
+		then(root.getChildren().getFirst().getChildren()).isEmpty();
+
+		// Opening either level must select the quoted path in the actual editor.
 		assertNavigation(resource, FIRST.indexOf("\"model/Preview.xmi\""));
 		assertNavigation(root, FIRST.indexOf("\"model/Preview.xmi\""));
 		assertNavigation(root.getChildren().getFirst(), FIRST.indexOf("\"model/Preview.xmi\""));
@@ -131,28 +145,32 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 
 	@Test
 	public void editingProgramReplacesPreviewNodesAndPreservesEcoreLinking() {
+		// Keep old nodes, then edit the metamodel so every Child instance changes its class label.
 		var old = awaitNode(ModelObjectOutlineNode.class, "FirstChild alpha");
 		var oldResource = (ModelResourceOutlineNode) old.getParent().getParent();
 		editor.getInternalSourceViewer().getDocument().set(SECOND);
 		var fresh = awaitNode(ModelObjectOutlineNode.class, "SecondChild alpha");
-		Assertions.assertThat(fresh).isNotSameAs(old);
-		org.eclipse.emf.ecore.EObject freshObject = fresh.readOnly(object -> object);
-		org.eclipse.emf.ecore.EObject oldObject = old.readOnly(object -> object);
-		Assertions.assertThat(freshObject).isNotNull();
-		Assertions.assertThat(oldObject).isNull();
-		org.eclipse.emf.ecore.EObject oldDeclaration = oldResource.readOnly(object -> object);
-		Assertions.assertThat(oldDeclaration).isNull();
-		Assertions.assertThat(findNode(root(), ModelObjectOutlineNode.class, "FirstChild alpha")).isNull();
+		then(fresh).isNotSameAs(old);
+		EObject freshObject = fresh.readOnly(object -> object);
+		EObject oldObject = old.readOnly(object -> object);
+		then(freshObject).isNotNull();
+		then(oldObject).isNull();
+		EObject oldDeclaration = oldResource.readOnly(object -> object);
+		then(oldDeclaration).isNull();
+		then(findNode(root(), ModelObjectOutlineNode.class, "FirstChild alpha")).isNull();
+
+		// New nodes still navigate to the declaration, and editor-to-Ecore linking still works.
 		assertNavigation(fresh, SECOND.indexOf("\"model/Preview.xmi\""));
 		var ecore = awaitNode(EcoreOutlineNode.class, "SecondChild");
-		Assertions.assertThat(ecore).isNotNull();
+		then(ecore).isNotNull();
 		editor.getInternalSourceViewer().setSelectedRange(SECOND.indexOf("ecoreref(Child).name"), 0);
-		Assertions.assertThat(awaitSelected()).isEqualTo("SecondChild");
+		then(awaitSelected()).isEqualTo("SecondChild");
 	}
 
 	@Test
 	public void removingProgramClearsPreviewSection() {
-		var group = awaitNode(ModelGroupOutlineNode.class, "Evolved test models");
+		// Clear the editor and wait for the outline to replace the old preview tree.
+		awaitNode(ModelGroupOutlineNode.class, "Evolved test models");
 		editor.getInternalSourceViewer().getDocument().set("");
 		var display = outline.getTreeViewer().getControl().getDisplay();
 		var timedOut = new AtomicBoolean();
@@ -163,7 +181,7 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 					&& !timedOut.get()) {
 				if (!display.readAndDispatch() && !timedOut.get()) display.sleep();
 			}
-			Assertions.assertThat(findNode(root(), ModelGroupOutlineNode.class,
+			then(findNode(root(), ModelGroupOutlineNode.class,
 				"Evolved test models")).isNull();
 		} finally {
 			display.timerExec(-1, deadline);
@@ -172,11 +190,24 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 
 	private void assertNavigation(IOutlineNode node, int offset) {
 		opener.open(node, editor.getInternalSourceViewer());
-		Assertions.assertThat(editor.getInternalSourceViewer().getSelectedRange().x).isEqualTo(offset);
+		then(editor.getInternalSourceViewer().getSelectedRange().x).isEqualTo(offset);
 	}
 
 	private IOutlineNode root() {
 		return (IOutlineNode) outline.getTreeViewer().getInput();
+	}
+
+	private String outlineStringRepresentation(IOutlineNode node) {
+		var result = new StringBuilder();
+		appendOutline(node, result, 0);
+		return result.toString();
+	}
+
+	private void appendOutline(IOutlineNode node, StringBuilder result, int depth) {
+		result.append("  ".repeat(depth)).append(node.getText()).append('\n');
+		for (var child : node.getChildren()) {
+			appendOutline(child, result, depth + 1);
+		}
 	}
 
 	private <T extends IOutlineNode> T awaitNode(Class<T> type, String text) {
@@ -189,7 +220,7 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 			while ((node = findNode(root(), type, text)) == null && !timedOut.get()) {
 				if (!display.readAndDispatch() && !timedOut.get()) display.sleep();
 			}
-			Assertions.assertThat(node).as("Outline node %s", text).isNotNull();
+			then(node).as("Outline node %s", text).isNotNull();
 			return node;
 		} finally {
 			display.timerExec(-1, deadline);
