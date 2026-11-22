@@ -139,6 +139,18 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		}
 	}
 
+	/** Retains preview leaves even when Xtext's default label provider returns null. */
+	@Override
+	protected void _createNode(IOutlineNode parentNode, EObject modelElement) {
+		if (parentNode instanceof ModelResourceOutlineNode
+				|| parentNode instanceof ModelObjectOutlineNode) {
+			createEObjectNode(parentNode, modelElement, imageDispatcher.invoke(modelElement), null,
+				isLeafDispatcher.invoke(modelElement));
+		} else {
+			super._createNode(parentNode, modelElement);
+		}
+	}
+
 	@Override
 	protected EObjectNode createEObjectNode(IOutlineNode parentNode, EObject modelElement, Image image, Object text,
 			boolean isLeaf) {

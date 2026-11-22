@@ -47,8 +47,9 @@ public class EdeltaModelPropertyRows {
 	}
 
 	private boolean isProperty(EStructuralFeature feature) {
-		return feature instanceof EAttribute || feature instanceof EReference reference &&
-			!reference.isContainment() && !reference.isContainer();
+		if (feature instanceof EAttribute) return true;
+		var reference = (EReference) feature;
+		return !reference.isContainment() && !reference.isContainer();
 	}
 
 	private String format(Object value, boolean reference, EObject owner) {

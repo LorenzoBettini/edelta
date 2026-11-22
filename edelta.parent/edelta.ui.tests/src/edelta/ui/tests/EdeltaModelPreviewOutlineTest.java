@@ -190,6 +190,7 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		assertNavigation(root.getChildren().getFirst(), FIRST.indexOf("\"model/Preview.xmi\""));
 		assertNavigation(link, FIRST.indexOf("\"model/Preview.xmi\""));
 		EObject propertyOwner = link.readOnly(object -> object);
+		then(propertyOwner).isSameAs(rootObject);
 		propertyOwner.eResource().unload();
 		EObject unloadedOwner = link.readOnly(object -> object);
 		then(unloadedOwner).isNull();

@@ -143,10 +143,18 @@ public class EdeltaModelPropertyRowsTest {
 		manyName.setEType(EcorePackage.Literals.ESTRING);
 		manyName.setUpperBound(-1);
 		manyNameType.getEStructuralFeatures().add(manyName);
-		next.setEType(manyNameType);
+		var manyOwnerType = EcoreFactory.eINSTANCE.createEClass();
+		type.getEPackage().getEClassifiers().add(manyOwnerType);
+		var manyNext = EcoreFactory.eINSTANCE.createEReference();
+		manyNext.setName("next");
+		manyNext.setEType(manyNameType);
+		manyOwnerType.getEStructuralFeatures().add(manyNext);
+		var manyOwner = new DynamicEObjectImpl(manyOwnerType);
 		var manyTarget = new DynamicEObjectImpl(manyNameType);
-		owner.eSet(next, manyTarget);
-		assertThat(labels(owner).getLast()).contains("ManyName (");
+		var resource = new ResourceImpl(URI.createURI("memory:/many.xmi"));
+		resource.getContents().addAll(List.of(manyOwner, manyTarget));
+		manyOwner.eSet(manyNext, manyTarget);
+		assertThat(labels(manyOwner)).containsExactly("next [0..1] = ManyName (#/1)");
 	}
 
 	private List<String> labels(org.eclipse.emf.ecore.EObject object) {
