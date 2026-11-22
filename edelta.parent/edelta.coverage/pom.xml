@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>io.github.lorenzobettini.edelta</groupId>
+    <artifactId>edelta.parent</artifactId>
+    <version>3.13.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>edelta.coverage</artifactId>
+  <packaging>pom</packaging>
+  <name>Edelta Focused Coverage Report</name>
+
+  <!-- All paths are relative to edelta.parent/. No Maven module dependencies. -->
+  <properties>
+    <coverage.bundle>edelta.lib</coverage.bundle>
+    <coverage.exec.files>edelta.lib.tests/target/jacoco.exec</coverage.exec.files>
+    <coverage.classes>**/*.class</coverage.classes>
+    <coverage.excludes></coverage.excludes>
+    <coverage.line.minimum>1.00</coverage.line.minimum>
+    <coverage.branch.minimum>1.00</coverage.branch.minimum>
+    <jacoco.ant.version>0.8.14</jacoco.ant.version>
+  </properties>
+
+  <profiles>
+    <profile>
+      <id>coverage-focused</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>3.2.0</version>
+            <executions>
+              <execution>
+                <id>focused-coverage-report-and-check</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target xmlns:jacoco="antlib:org.jacoco.ant">
+                    <taskdef uri="antlib:org.jacoco.ant"
+                      resource="org/jacoco/ant/antlib.xml"
+                      classpathref="maven.plugin.classpath"/>
+
+                    <property name="coverage.reactor" location="${project.basedir}/.."/>
+                    <property name="coverage.class.dir"
+                      location="${coverage.reactor}/${coverage.bundle}/target/classes"/>
+                    <property name="coverage.source.dir"
+                      location="${coverage.reactor}/${coverage.bundle}/src"/>
+
+                    <available file="${coverage.class.dir}" type="dir"
+                      property="coverage.class.dir.exists"/>
+                    <fail unless="coverage.class.dir.exists"
+                      message="Missing compiled classes at ${coverage.class.dir}. Build the production module with -am first."/>
+                    <available file="${coverage.source.dir}" type="dir"
+                      property="coverage.source.dir.exists"/>
+                    <fail unless="coverage.source.dir.exists"
+                      message="Missing source directory at ${coverage.source.dir}. Check -Dcoverage.bundle."/>
+
+                    <!-- The filelist counts every explicitly requested .exec file,
+                         including missing ones; the fileset finds only existing files.
+                         This prevents silently reporting partial execution data. -->
+                    <filelist id="coverage.requested.exec"
+                      dir="${coverage.reactor}" files="${coverage.exec.files}"/>
+                    <fileset id="coverage.present.exec"
+                      dir="${coverage.reactor}" includes="${coverage.exec.files}"/>
+                    <resourcecount property="coverage.requested.exec.count"
+                      refid="coverage.requested.exec"/>
+                    <resourcecount property="coverage.present.exec.count"
+                      refid="coverage.present.exec"/>
+                    <fail message="No JaCoCo execution data files specified.">
+                      <condition><equals arg1="${coverage.requested.exec.count}" arg2="0"/></condition>
+                    </fail>
+                    <fail message="Missing JaCoCo execution data: expected ${coverage.requested.exec.count} file(s), found ${coverage.present.exec.count}. Verify -Dcoverage.exec.files and rerun the selected tests with -Pjacoco.">
+                      <condition>
+                        <not><equals arg1="${coverage.requested.exec.count}"
+                          arg2="${coverage.present.exec.count}"/></not>
+                      </condition>
+                    </fail>
+
+                    <fileset id="coverage.selected.classes"
+                      dir="${coverage.class.dir}"
+                      includes="${coverage.classes}"
+                      excludes="${coverage.excludes}"/>
+                    <resourcecount property="coverage.selected.classes.count"
+                      refid="coverage.selected.classes"/>
+                    <fail message="No class files matched -Dcoverage.classes=${coverage.classes} under ${coverage.class.dir}. Check the pattern and bundle.">
+                      <condition><equals arg1="${coverage.selected.classes.count}" arg2="0"/></condition>
+                    </fail>
+
+                    <echo message="Focused JaCoCo: ${coverage.bundle}; ${coverage.selected.classes.count} class file(s); ${coverage.present.exec.count} execution file(s)"/>
+                    <!-- Do not leave an obsolete HTML/XML report after a new run. -->
+                    <delete dir="${project.build.directory}/site/jacoco" quiet="true"/>
+                    <mkdir dir="${project.build.directory}/site/jacoco"/>
+                    <jacoco:report>
+                      <executiondata>
+                        <fileset refid="coverage.present.exec"/>
+                      </executiondata>
+                      <structure name="${coverage.bundle}">
+                        <classfiles>
+                          <fileset refid="coverage.selected.classes"/>
+                        </classfiles>
+                        <sourcefiles encoding="UTF-8">
+                          <fileset dir="${coverage.source.dir}"
+                            includes="**/*.java,**/*.xtend"/>
+                        </sourcefiles>
+                      </structure>
+                      <html destdir="${project.build.directory}/site/jacoco"/>
+                      <xml destfile="${project.build.directory}/site/jacoco/jacoco.xml"/>
+                      <csv destfile="${project.build.directory}/site/jacoco/jacoco.csv"/>
+                      <check>
+                        <rule element="BUNDLE">
+                          <limit counter="LINE" value="COVEREDRATIO"
+                            minimum="${coverage.line.minimum}"/>
+                          <limit counter="BRANCH" value="COVEREDRATIO"
+                            minimum="${coverage.branch.minimum}"/>
+                        </rule>
+                      </check>
+                    </jacoco:report>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+            <dependencies>
+              <dependency>
+                <groupId>org.jacoco</groupId>
+                <artifactId>org.jacoco.ant</artifactId>
+                <version>${jacoco.ant.version}</version>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>

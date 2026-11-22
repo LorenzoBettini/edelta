@@ -256,6 +256,8 @@
         <module>edelta.product.ui.feature</module>
         <module>edelta.tests.parent</module>
         <module>edelta.tests.report</module>
+        <!-- Independent Ant-based focused coverage report; runs only with -Pcoverage-focused. -->
+        <module>edelta.coverage</module>
       </modules>
     </profile>
     <profile>
