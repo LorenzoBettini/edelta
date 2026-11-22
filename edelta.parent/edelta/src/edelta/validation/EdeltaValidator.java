@@ -93,6 +93,10 @@ public class EdeltaValidator extends AbstractEdeltaValidator {
 
 	public static final String DUPLICATE_TEST_MODEL_PATH = PREFIX + "DuplicateTestModelPath";
 
+	public static final String MODEL_PREVIEW_INPUT_FAILURE = PREFIX + "ModelPreviewInputFailure";
+
+	public static final String MODEL_PREVIEW_FAILURE = PREFIX + "ModelPreviewFailure";
+
 	@Inject
 	private CommonTypeComputationServices services;
 

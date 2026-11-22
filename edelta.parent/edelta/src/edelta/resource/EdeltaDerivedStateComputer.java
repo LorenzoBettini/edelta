@@ -18,6 +18,7 @@ import edelta.edelta.EdeltaEcoreReferenceExpression;
 import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreterHelper;
+import edelta.interpreter.EdeltaInterpreterDiagnosticHelper;
 import edelta.interpreter.EdeltaModelPreviewInterpreter;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
@@ -45,12 +46,16 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 	private EdeltaModelSourceSelector modelSourceSelector;
 
 	@Inject
+	private EdeltaInterpreterDiagnosticHelper diagnosticHelper;
+
+	@Inject
 	private IProjectConfigProvider projectConfigProvider;
 
 	@Override
 	public void installDerivedState(final DerivedStateAwareResource resource, final boolean preIndexingPhase) {
 		super.installDerivedState(resource, preIndexingPhase);
 		final var program = (EdeltaProgram) resource.getContents().get(0);
+		diagnosticHelper.clearPreviewDiagnostics(resource);
 		if ((!preIndexingPhase)) {
 			final var modifyEcoreOperations = interpreterHelper
 					.filterOperations(program.getModifyEcoreOperations());
@@ -72,8 +77,9 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 
 	protected void runInterpreter(final EdeltaProgram program) {
 		final var interpreter = interpreterFactory.create(program.eResource());
+		EdeltaModelPreview preview = null;
 		if (program.getTestModels() != null) {
-			final var preview = derivedStateHelper.getModelPreview(program.eResource());
+			preview = derivedStateHelper.getModelPreview(program.eResource());
 			final var projectRoot = projectRoot(program.eResource());
 			if (projectRoot == null) {
 				preview.addFailure(new EdeltaModelPreview.Failure("PROJECT_ROOT_UNAVAILABLE",
@@ -95,7 +101,15 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 				}
 			}
 		}
-		interpreter.evaluateModifyEcoreOperations(program);
+		try {
+			interpreter.evaluateModifyEcoreOperations(program);
+		} finally {
+			if (preview != null) {
+				for (var failure : preview.getFailures()) {
+					diagnosticHelper.addPreviewFailure(program, failure);
+				}
+			}
+		}
 	}
 
 	/**
@@ -142,6 +156,7 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 
 	@Override
 	public void discardDerivedState(final DerivedStateAwareResource resource) {
+		diagnosticHelper.clearPreviewDiagnostics(resource);
 		final var copiedEPackagesMap = derivedStateHelper.getCopiedEPackagesMap(resource);
 		final var derivedState = derivedStateHelper.getOrInstallAdapter(resource);
 		// Preview models still reference copied EClasses; release them first.

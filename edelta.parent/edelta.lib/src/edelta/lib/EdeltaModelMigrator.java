@@ -24,6 +24,7 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.InternalEObject;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
 import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.xtext.xbase.lib.Functions.Function3;
@@ -254,14 +255,34 @@ public class EdeltaModelMigrator {
 	private void copyModels(EdeltaModelCopier edeltaModelCopier, EdeltaModelManager from, EdeltaModelManager into) {
 		var models = from.getModelResources();
 		for (var resource : models) {
-			var originalResource = (XMIResource) resource;
-			var newResource = into.createModelResource(originalResource);
-			var root = originalResource.getContents().get(0);
-			var copy = edeltaModelCopier.copy(root);
-			if (copy != null)
-				newResource.getContents().add(copy);
+			EObject root = null;
+			try {
+				var originalResource = (XMIResource) resource;
+				var newResource = into.createModelResource(originalResource);
+				root = originalResource.getContents().get(0);
+				var copy = edeltaModelCopier.copy(root);
+				if (copy != null)
+					newResource.getContents().add(copy);
+			} catch (RuntimeException | Error exception) {
+				onModelCopyFailure(resource, root, exception);
+				throw exception;
+			}
 		}
 		edeltaModelCopier.copyReferences();
+	}
+
+	/**
+	 * Observes a failed model copy before temporary model resources are released.
+	 * The default engine preserves the original exception and has no reporting work.
+	 * The root may be null when the source resource has no model objects.
+	 *
+	 * @param source the resource being copied, if known
+	 * @param root its original root, if available
+	 * @param cause the original failure
+	 */
+	protected void onModelCopyFailure(Resource source,
+			EObject root, Throwable cause) {
+		// Preview interpreters can retain source context before cleanup.
 	}
 
 	/**

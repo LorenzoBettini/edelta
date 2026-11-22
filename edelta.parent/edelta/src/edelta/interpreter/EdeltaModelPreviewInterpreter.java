@@ -1,11 +1,21 @@
 package edelta.interpreter;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.xtext.util.CancelIndicator;
+import org.eclipse.xtext.xbase.XAbstractFeatureCall;
+import org.eclipse.xtext.xbase.XBlockExpression;
+import org.eclipse.xtext.xbase.XExpression;
+import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 
+import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaProgram;
 import edelta.edelta.EdeltaTestModels;
 import edelta.lib.EdeltaDefaultRuntime;
@@ -28,6 +38,15 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 	private EdeltaModelPreview preview;
 	private EdeltaTestModels declaration;
 	private PreviewMigrator migrator;
+	private EdeltaProgram activeProgram;
+	private XExpression activeUserCall;
+	private XBlockExpression lastEvaluatedOperationBody;
+	private int callbackDepth;
+	private final IdentityHashMap<Throwable, XExpression> failingExpressions =
+		new IdentityHashMap<>();
+	private CopyFailure copyFailure;
+
+	private record CopyFailure(Path path, String objectContext) {}
 
 	/**
 	 * Configures one interpretation with selected originals. The interpreter
@@ -82,17 +101,20 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 			return;
 		}
 		var finalCopy = false;
+		activeProgram = program;
 		try {
 			super.evaluateModifyEcoreOperations(program);
 			if (!preview.hasFailures()) {
 				finalCopy = true;
+				copyFailure = null;
 				migrator.copyModels();
 				publishFinalModels();
 			}
 		} catch (RuntimeException | Error exception) {
 			if (!preview.hasFailures()) {
 				preview.addFailure(new EdeltaModelPreview.Failure(
-					finalCopy ? "FINAL_COPY" : "INTERPRETATION", declaration, null, exception));
+					finalCopy ? "FINAL_COPY" : "INTERPRETATION", fallbackExpression(),
+					failurePath(), exception, failureObjectContext()));
 			}
 			throw exception;
 		} finally {
@@ -110,7 +132,67 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 			preview = null;
 			declaration = null;
 			migrator = null;
+			activeProgram = null;
+			activeUserCall = null;
+			lastEvaluatedOperationBody = null;
+			callbackDepth = 0;
+			failingExpressions.clear();
+			copyFailure = null;
 		}
+	}
+
+	@Override
+	protected Object doEvaluate(XExpression expression, IEvaluationContext context,
+			CancelIndicator indicator) {
+		if (activeProgram == null) {
+			return super.doEvaluate(expression, context, indicator);
+		}
+		var previousCall = activeUserCall;
+		if (expression instanceof XBlockExpression body &&
+				body.eContainer() instanceof EdeltaModifyEcoreOperation) {
+			lastEvaluatedOperationBody = body;
+		}
+		if (expression instanceof XAbstractFeatureCall) {
+			activeUserCall = expression;
+		}
+		try {
+			return super.doEvaluate(expression, context, indicator);
+		} catch (RuntimeException | Error exception) {
+			if (callbackDepth > 0) {
+				for (var cause = (Throwable) exception; cause != null; cause = cause.getCause()) {
+					failingExpressions.putIfAbsent(cause, expression);
+				}
+			}
+			throw exception;
+		} finally {
+			activeUserCall = previousCall;
+		}
+	}
+
+	private EObject fallbackExpression() {
+		return lastEvaluatedOperationBody != null ? lastEvaluatedOperationBody :
+			activeProgram.getModifyEcoreOperations().getLast().getBody();
+	}
+
+	private EObject failureExpression(Throwable exception, XExpression caller) {
+		for (var cause = exception; cause != null; cause = cause.getCause()) {
+			var expression = failingExpressions.get(cause);
+			if (expression != null) {
+				return expression;
+			}
+		}
+		return caller != null ? caller : fallbackExpression();
+	}
+
+	private Path failurePath() {
+		if (copyFailure != null) {
+			return copyFailure.path();
+		}
+		return selection.selected().size() == 1 ? selection.selected().getFirst().path() : null;
+	}
+
+	private String failureObjectContext() {
+		return copyFailure != null ? copyFailure.objectContext() : null;
 	}
 
 	private void publishFinalModels() {
@@ -119,7 +201,7 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 	}
 
 	/** Records callback failures before Xbase or the safe interpreter can recover. */
-	private static class PreviewMigrator extends EdeltaModelMigrator {
+	private class PreviewMigrator extends EdeltaModelMigrator {
 		private final EdeltaModelPreview preview;
 		private final EdeltaTestModels declaration;
 
@@ -133,15 +215,34 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 
 		@Override
 		public void runMigrationCallback(Consumer<EdeltaModelMigrator> callback) {
+			var caller = activeUserCall;
+			if (callbackDepth++ == 0) {
+				failingExpressions.clear();
+				copyFailure = null;
+			}
 			try {
 				super.runMigrationCallback(callback);
 			} catch (RuntimeException | Error exception) {
 				if (!preview.hasFailures()) {
 					preview.addFailure(new EdeltaModelPreview.Failure("MIGRATION",
-						declaration, null, exception));
+						failureExpression(exception, caller), failurePath(), exception,
+						failureObjectContext()));
 				}
 				throw exception;
+			} finally {
+				if (--callbackDepth == 0) {
+					failingExpressions.clear();
+					copyFailure = null;
+				}
 			}
+		}
+
+		@Override
+		protected void onModelCopyFailure(Resource source, EObject root, Throwable cause) {
+			var path = Path.of(source.getURI().toFileString());
+			var context = root == null ? null : root.eClass().getName() +
+				" at " + source.getURIFragment(root);
+			copyFailure = new CopyFailure(path, context);
 		}
 	}
 }

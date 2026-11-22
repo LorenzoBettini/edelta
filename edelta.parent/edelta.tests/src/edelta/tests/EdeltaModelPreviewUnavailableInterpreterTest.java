@@ -24,6 +24,7 @@ import edelta.interpreter.EdeltaDefaultInterpreter;
 import edelta.interpreter.EdeltaInterpreter;
 import edelta.lib.EdeltaModelManager;
 import edelta.resource.derivedstate.EdeltaModelPreview;
+import edelta.validation.EdeltaValidator;
 
 /**
  * A custom interpreter without preview support still evolves Ecore safely.
@@ -77,11 +78,13 @@ public class EdeltaModelPreviewUnavailableInterpreterTest extends EdeltaAbstract
 			}
 			""", URI.createFileURI(root.resolve("src/Preview.edelta").toString()),
 			resourceSet);
-		validationTestHelper.assertNoErrors(program);
 		var preview = derivedStateHelper.getModelPreview(program.eResource());
 		assertThat(preview.getModels()).isEmpty();
 		assertThat(preview.getFailures()).extracting(EdeltaModelPreview.Failure::code)
 			.containsExactly("INTERPRETER_UNAVAILABLE");
+		assertThat(validationTestHelper.validate(program)).anyMatch(issue ->
+			EdeltaValidator.MODEL_PREVIEW_INPUT_FAILURE.equals(issue.getCode()) &&
+			issue.getMessage().contains("interpreter is unavailable"));
 		assertThat(derivedStateHelper.getCopiedEPackagesMap(program.eResource())
 			.get("mypackage").getEClassifier("Renamed")).isNotNull();
 	}

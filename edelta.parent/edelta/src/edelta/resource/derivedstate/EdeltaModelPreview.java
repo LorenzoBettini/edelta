@@ -23,7 +23,13 @@ public class EdeltaModelPreview {
 	public record Model(Path sourcePath, EdeltaTestModelPath declaration, Resource resource) {}
 
 	/** A preview failure retained for later source-diagnostic presentation. */
-	public record Failure(String code, EObject source, Path path, Throwable cause) {}
+	public record Failure(String code, EObject source, Path path, Throwable cause,
+			String objectContext) {
+		/** Creates a failure without model-object context. */
+		public Failure(String code, EObject source, Path path, Throwable cause) {
+			this(code, source, path, cause, null);
+		}
+	}
 
 	private List<Model> models = List.of();
 	private final List<Failure> failures = new ArrayList<>();

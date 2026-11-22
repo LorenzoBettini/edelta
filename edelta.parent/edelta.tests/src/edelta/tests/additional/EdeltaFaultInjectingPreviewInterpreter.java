@@ -36,6 +36,11 @@ public class EdeltaFaultInjectingPreviewInterpreter extends EdeltaSafeInterprete
 			}
 		}
 		var runtime = super.createRuntime(copies);
+		if (name.equals("callback.xmi")) {
+			runtime.modelMigration(migrator -> {
+				throw new IllegalStateException("callback without source expression");
+			});
+		}
 		if (name.equals("final.xmi")) {
 			selection.selected().getFirst().resource().getContents().clear();
 		}

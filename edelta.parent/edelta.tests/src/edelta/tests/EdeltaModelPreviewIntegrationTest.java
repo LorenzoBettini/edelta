@@ -31,6 +31,7 @@ import edelta.edelta.EdeltaFactory;
 import edelta.lib.EdeltaModelManager;
 import edelta.resource.EdeltaModelSourceSelector;
 import edelta.resource.derivedstate.EdeltaModelPreview;
+import edelta.validation.EdeltaValidator;
 
 /**
  * Exercises private model previews through the real derived-state lifecycle.
@@ -182,6 +183,9 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		assertThat(preview.getModels()).isEmpty();
 		assertThat(preview.getFailures()).extracting(EdeltaModelPreview.Failure::code)
 			.containsExactly("INTERPRETATION");
+		assertThat(validationTestHelper.validate(program)).anyMatch(issue ->
+			EdeltaValidator.MODEL_PREVIEW_FAILURE.equals(issue.getCode()) &&
+			issue.getMessage().contains("interpretation failed"));
 		assertThat(derivedStateHelper.getCopiedEPackagesMap(program.eResource())
 			.get("mypackage").getEClassifier("Renamed")).isNotNull();
 	}
@@ -218,6 +222,9 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		assertThat(preview.getModels()).isEmpty();
 		assertThat(preview.getFailures()).extracting(EdeltaModelPreview.Failure::code)
 			.containsExactly("PROJECT_ROOT_UNAVAILABLE");
+		assertThat(validationTestHelper.validate(program)).anyMatch(issue ->
+			EdeltaValidator.MODEL_PREVIEW_INPUT_FAILURE.equals(issue.getCode()) &&
+			issue.getMessage().contains("project root"));
 		assertThat(derivedStateHelper.getCopiedEPackagesMap(program.eResource())
 			.get("mypackage").getEClassifier("Renamed")).isNotNull();
 	}
@@ -392,7 +399,6 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		}
 		var uri = URI.createFileURI(root.resolve("src/Preview.edelta").toString());
 		var program = parseHelper.parse(source, uri, resourceSet);
-		validationTestHelper.assertNoErrors(program);
 		return program;
 	}
 

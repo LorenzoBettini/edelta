@@ -149,6 +149,7 @@ public class EdeltaDefaultInterpreter extends XbaseInterpreter implements Edelta
 	@Override
 	public void evaluateModifyEcoreOperations(final EdeltaProgram program) {
 		currentProgram = program;
+		diagnosticHelper.setFallbackSource(program);
 		final var eResource = program.eResource();
 		final var copiedEPackagesMap = derivedStateHelper
 				.getCopiedEPackagesMap(eResource);
