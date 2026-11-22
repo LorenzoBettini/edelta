@@ -22,11 +22,20 @@ public class EdeltaCopiedEPackagesMap {
 	private Map<EObject, EObject> originalToCopy = Map.of();
 	private Map<EObject,EObject> inverse;
 
+	/**
+	 * Registers additional copies without replacing mappings already used by the
+	 * interpreter. Callers must supply only packages not registered by name yet.
+	 *
+	 * @param copies newly copied packages
+	 * @param copyMap original-to-copy mapping for those packages
+	 */
 	public void setCopies(Collection<EPackage> copies, Map<EObject, EObject> copyMap) {
 		for (var copy : copies) {
 			packagesByName.computeIfAbsent(copy.getName(), key -> copy);
 		}
-		originalToCopy = Map.copyOf(copyMap);
+		var merged = new HashMap<>(originalToCopy);
+		merged.putAll(copyMap);
+		originalToCopy = Map.copyOf(merged);
 		inverse = HashBiMap.create(originalToCopy).inverse();
 	}
 
@@ -34,7 +43,7 @@ public class EdeltaCopiedEPackagesMap {
 	 * Returns an immutable snapshot of the original-to-copied Ecore element map.
 	 * Its values are the exact objects stored in this derived state; callers must
 	 * not detach or replace them. A later {@link #setCopies(Collection, Map)} may
-	 * install a different map without changing this snapshot.
+	 * add mappings without changing this snapshot.
 	 *
 	 * @return the original-to-copied Ecore element map
 	 */

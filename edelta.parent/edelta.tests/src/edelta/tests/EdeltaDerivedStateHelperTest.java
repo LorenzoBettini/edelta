@@ -62,6 +62,30 @@ public class EdeltaDerivedStateHelperTest extends EdeltaAbstractTest {
 		assertThat(snapshot).containsEntry(original, copied);
 	}
 
+	/** Additional library imports must retain the existing forward and inverse mappings. */
+	@Test
+	public void testAdditionalCopiedPackagePreservesExistingMappings() {
+		var originalFirst = ecoreFactory.createEPackage();
+		var originalSecond = ecoreFactory.createEPackage();
+		var copiedFirst = ecoreFactory.createEPackage();
+		copiedFirst.setName("first");
+		var copiedSecond = ecoreFactory.createEPackage();
+		copiedSecond.setName("second");
+		var copies = new EdeltaCopiedEPackagesMap();
+		copies.setCopies(List.of(copiedFirst), Map.of(originalFirst, copiedFirst));
+		var snapshot = copies.getOriginalToCopyMap();
+
+		copies.setCopies(List.of(copiedSecond), Map.of(originalSecond, copiedSecond));
+
+		assertThat(copies.values()).containsExactlyInAnyOrder(copiedFirst, copiedSecond);
+		assertThat(copies.getOriginalToCopyMap())
+			.containsEntry(originalFirst, copiedFirst)
+			.containsEntry(originalSecond, copiedSecond);
+		assertThat(copies.getOriginal(copiedFirst)).isSameAs(originalFirst);
+		assertThat(copies.getOriginal(copiedSecond)).isSameAs(originalSecond);
+		assertThat(snapshot).containsOnlyKeys(originalFirst);
+	}
+
 	@Test
 	public void testGetOrInstallAdapterWithXtextResourceOfADifferentLanguage() {
 		final XtextResource res = new XtextResource();

@@ -70,10 +70,9 @@ public class EdeltaDerivedStateHelper {
 	}
 
 	/**
-	 * Copies all imported {@link EPackage}s of the passed {@link EdeltaProgram} in
+	 * Ensures imported {@link EPackage}s of the passed {@link EdeltaProgram} are in
 	 * the {@link EdeltaCopiedEPackagesMap} in the derived state of the program's
-	 * {@link Resource}; the copied {@link EPackage}s are also inserted in the
-	 * resource.
+	 * {@link Resource}. Newly copied packages are also inserted in that resource.
 	 * 
 	 * @param program
 	 */
@@ -84,23 +83,28 @@ public class EdeltaDerivedStateHelper {
 	/**
 	 * Copies all imported {@link EPackage}s of the passed {@link EdeltaProgram} in
 	 * the {@link EdeltaCopiedEPackagesMap} in the derived state of the specified
-	 * {@link Resource}; the copied {@link EPackage}s are also inserted in the
-	 * specified resource.
+	 * {@link Resource}. Packages already copied for this resource keep their
+	 * identity and current owner, which can be the interpreter sandbox. Only new
+	 * copies are inserted in the specified resource.
 	 * 
 	 * @param program
 	 * @param resource
 	 */
 	public void copyEPackages(EdeltaProgram program, final Resource resource) {
+		final var copiedEPackagesMap = getCopiedEPackagesMap(resource);
 		final var packages = EdeltaModelUtil.getMetamodels(program).stream()
 			.distinct()
+			.filter(ePackage -> copiedEPackagesMap.get(ePackage.getName()) == null)
 			.toList();
-		final var copiedEPackagesMap = getCopiedEPackagesMap(resource);
+		if (packages.isEmpty()) {
+			return;
+		}
 		Copier copier = new Copier();
 		Collection<EPackage> copies = copier.copyAll(packages);
 		copier.copyReferences();
 		copiedEPackagesMap.setCopies(copies, copier);
-		// we must add the copied EPackages to the resource
-		addToProgramResource(resource, copiedEPackagesMap);
+		// Existing copies may belong to the interpreter sandbox until it is released.
+		resource.getContents().addAll(copies);
 	}
 
 	/**

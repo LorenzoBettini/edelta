@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.xtext.resource.DerivedStateAwareResource;
@@ -147,6 +148,84 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		var contents = references(model, "myContents");
 		assertThat(value(model, "myReferences")).isSameAs(contents.getFirst());
 		assertThat(model.eClass().getEStructuralFeature("myReferences").isMany()).isFalse();
+	}
+
+	/** Reproduces a source-interpreted library migration with two borrowed EPackages. */
+	@Test
+	public void interpretedLibraryKeepsBothBorrowedPackagesAndTheirMappings() throws Exception {
+		var root = projectWithModels();
+		var rootFile = root.resolve("models/MyRoot.xmi");
+		Files.writeString(rootFile, Files.readString(rootFile)
+			.replace("myReferences=\"//@myContents.1\"",
+				"myReferences=\"//@myContents.0 //@myContents.1\""));
+		var inputBytes = Files.readAllBytes(rootFile);
+		var name = "edeltaPreviewLibrary" + UUID.randomUUID().toString().replace("-", "");
+		var workspace = ResourcesPlugin.getWorkspace();
+		var project = workspace.getRoot().getProject(name);
+		var description = workspace.newProjectDescription(name);
+		description.setLocationURI(root.toUri());
+		project.create(description, null);
+		project.open(null);
+		try {
+			var resourceSet = resourceSetProvider.get();
+			ProjectConfigAdapter.install(resourceSet, new FileProjectConfig(
+				URI.createPlatformResourceURI(name, true), name));
+			resourceSet.getResources().add(new EdeltaModelManager().loadEcoreFile(
+				DATA.resolve("My.ecore").toString()));
+			resourceSet.getResource(createFileURIFromPath(METAMODEL_PATH + ECORE_ECORE), true);
+			// Loading source forces the cross-source interpreter path used by the editor.
+			parseHelper.parse("""
+				import org.eclipse.emf.ecore.EStructuralFeature
+				package previewrefactorings
+				metamodel "ecore"
+				def changeToSingle(EStructuralFeature feature) {
+					feature.upperBound = 1
+					modelMigration[
+						copyRule(isRelatedTo(feature), multiplicityAwareCopy(feature))
+					]
+				}
+				""", URI.createFileURI(root.resolve("src/EdeltaRefactorings.edelta").toString()),
+				resourceSet);
+			var program = parseHelper.parse("""
+				metamodel "mypackage"
+				metamodel "ecore"
+				testmodels { "models/MyRoot.xmi" }
+				use previewrefactorings.EdeltaRefactorings as extension refactorings
+				modifyEcore evolve epackage mypackage {
+					refactorings.changeToSingle(ecoreref(MyRoot.myReferences))
+				}
+				""", URI.createFileURI(root.resolve("src/LibraryRefactoring.edelta").toString()),
+				resourceSet);
+			var preview = derivedStateHelper.getModelPreview(program.eResource());
+			assertThat(preview.getFailures()).isEmpty();
+			assertThat(preview.getModels()).hasSize(1);
+			var copies = derivedStateHelper.getCopiedEPackagesMap(program.eResource());
+			var originalMy = program.getEPackages().get(0);
+			var originalEcore = program.getEPackages().get(1);
+			var evolvedMy = copies.get("mypackage");
+			var evolvedEcore = copies.get("ecore");
+			assertThat(copies.getOriginalToCopyMap().get(originalMy)).isSameAs(evolvedMy);
+			assertThat(copies.getOriginalToCopyMap().get(originalEcore)).isSameAs(evolvedEcore);
+			var originalFeature = ((EClass)
+				originalMy.getEClassifier("MyRoot")).getEStructuralFeature("myReferences");
+			var evolvedFeature = ((EClass)
+				evolvedMy.getEClassifier("MyRoot")).getEStructuralFeature("myReferences");
+			assertThat(copies.getOriginalToCopyMap().get(originalFeature)).isSameAs(evolvedFeature);
+			assertThat(copies.getOriginalToCopyMap().get(
+				originalEcore.getEClassifier("EAttribute")))
+				.isSameAs(evolvedEcore.getEClassifier("EAttribute"));
+			assertThat(copies.getOriginal(evolvedFeature)).isSameAs(originalFeature);
+			assertThat(evolvedMy.eResource()).isSameAs(program.eResource());
+			assertThat(evolvedEcore.eResource()).isSameAs(program.eResource());
+			assertThat(evolvedFeature.isMany()).isFalse();
+			var migrated = preview.getModels().getFirst().resource().getContents().getFirst();
+			var contents = references(migrated, "myContents");
+			assertThat(value(migrated, "myReferences")).isSameAs(contents.getFirst());
+			assertThat(migrated.eClass()).isSameAs(evolvedMy.getEClassifier("MyRoot"));
+			assertThat(Files.readAllBytes(rootFile)).isEqualTo(inputBytes);
+		} finally {
+			project.delete(false, true, null);
+		}
 	}
 
 	@Test
