@@ -4,11 +4,16 @@
 package edelta.ui.outline;
 
 import org.eclipse.emf.ecore.ENamedElement;
+import java.util.Objects;
+
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
+import org.eclipse.xtext.ui.editor.outline.impl.AbstractOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider;
 import org.eclipse.xtext.ui.editor.outline.impl.EObjectNode;
 import org.eclipse.xtext.ui.editor.outline.impl.EStructuralFeatureNode;
@@ -19,7 +24,9 @@ import com.google.inject.Inject;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
 import edelta.edelta.EdeltaProgram;
+import edelta.edelta.EdeltaTestModelPath;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
+import edelta.resource.derivedstate.EdeltaModelPreview;
 import edelta.ui.labeling.EdeltaLabelProvider;
 
 /**
@@ -49,9 +56,6 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 			createNode(parentNode, o);
 		}
 		final var modifyEcoreOperations = p.getModifyEcoreOperations();
-		if (modifyEcoreOperations.isEmpty()) {
-			return;
-		}
 		for (final var o : modifyEcoreOperations) {
 			createNode(parentNode, o);
 		}
@@ -65,6 +69,27 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 				createNode(parentNode, ePackage);
 				// only show EPackage with some modifications
 			}
+		}
+		if (!derivedStateHelper.getModelPreview(eResource).getModels().isEmpty()) {
+			var group = new ModelGroupOutlineNode(parentNode);
+			group.setTextRegion(locationInFileProvider.getSignificantTextRegion(p.getTestModels()));
+		}
+	}
+
+	/** Creates resource items from the current derived state when the group expands. */
+	protected void _createChildren(final ModelGroupOutlineNode parentNode, final EdeltaProgram program) {
+		for (var model : derivedStateHelper.getModelPreview(program.eResource()).getModels()) {
+			checkCanceled();
+			var node = new ModelResourceOutlineNode(model, parentNode);
+			node.setTextRegion(locationInFileProvider.getSignificantTextRegion(model.declaration()));
+		}
+	}
+
+	/** Creates roots from the private preview resource, without following references. */
+	protected void _createChildren(final ModelResourceOutlineNode parentNode,
+			final EdeltaTestModelPath declaration) {
+		for (var root : parentNode.model.resource().getContents()) {
+			createNode(parentNode, root);
 		}
 	}
 
@@ -105,11 +130,78 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	@Override
 	protected EObjectNode createEObjectNode(IOutlineNode parentNode, EObject modelElement, Image image, Object text,
 			boolean isLeaf) {
+		if (parentNode instanceof ModelResourceOutlineNode || parentNode instanceof ModelObjectOutlineNode) {
+			var node = new ModelObjectOutlineNode(modelElement, parentNode, image,
+				modelLabel(modelElement), isLeaf);
+			node.setShortTextRegion(parentNode.getSignificantTextRegion());
+			return node;
+		}
 		// cannot simply check ENamedElement: EGenericType is not an ENamedElement
 		if (modelElement.eClass().getEPackage() == EcorePackage.eINSTANCE) {
 			return createEcoreNode(parentNode, modelElement, image, text, isLeaf);
 		}
 		return super.createEObjectNode(parentNode, modelElement, image, text, isLeaf);
+	}
+
+	private String modelLabel(EObject element) {
+		var label = element.eClass().getName();
+		var name = element.eClass().getEAllAttributes().stream()
+			.filter(attribute -> "name".equals(attribute.getName()))
+			.findFirst().orElse(null);
+		var value = name == null ? "" : Objects.toString(element.eGet(name), "");
+		if (!value.isBlank()) {
+			return label + " " + value;
+		}
+		var id = EcoreUtil.getID(element);
+		return id == null || id.isBlank() ? label : label + " #" + id;
+	}
+
+	/** Groups final preview resources under a distinct outline heading. @author Lorenzo Bettini */
+	public static class ModelGroupOutlineNode extends AbstractOutlineNode {
+		ModelGroupOutlineNode(IOutlineNode parent) {
+			super(parent, (Image) null, "Evolved test models", false);
+		}
+
+		@Override
+		public <T> T readOnly(IUnitOfWork<T, EObject> work) {
+			return getDocument().tryReadOnly(state -> work.exec(state.getContents().getFirst()));
+		}
+	}
+
+	/** One source resource in the final preview. @author Lorenzo Bettini */
+	public static class ModelResourceOutlineNode extends AbstractOutlineNode {
+		private final EdeltaModelPreview.Model model;
+
+		ModelResourceOutlineNode(EdeltaModelPreview.Model model, IOutlineNode parent) {
+			super(parent, (Image) null, model.sourcePath().getFileName().toString(),
+				model.resource().getContents().isEmpty());
+			this.model = model;
+		}
+
+		@Override
+		public <T> T readOnly(IUnitOfWork<T, EObject> work) {
+			return getDocument().tryReadOnly(state -> model.resource().isLoaded()
+				? work.exec(model.declaration()) : null);
+		}
+	}
+
+	/** Keeps a private preview EObject available for lazy containment expansion. @author Lorenzo Bettini */
+	public static class ModelObjectOutlineNode extends EObjectNode {
+		private final EObject modelElement;
+
+		ModelObjectOutlineNode(EObject modelElement, IOutlineNode parent, Image image,
+				Object text, boolean isLeaf) {
+			super(modelElement, parent, image, text, isLeaf);
+			this.modelElement = modelElement;
+		}
+
+		@Override
+		public <T> T readOnly(IUnitOfWork<T, EObject> work) {
+			return getDocument().tryReadOnly(state -> {
+				Resource resource = modelElement.eResource();
+				return resource == null ? null : work.exec(modelElement);
+			});
+		}
 	}
 
 	private EObjectNode createEcoreNode(IOutlineNode parentNode, EObject modelElement, Image image,

@@ -4,7 +4,6 @@
 package edelta.ui.outline.actions;
 
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_MODIFY_ECORE_OPERATION;
-import static org.eclipse.emf.ecore.EcorePackage.Literals.EPACKAGE;
 
 import java.util.Comparator;
 import java.util.List;
@@ -42,7 +41,7 @@ public class EdeltaOutlineWithEditorLinker extends OutlineWithEditorLinker {
 			 * selected. We try and find a node representing an Ecore element
 			 * that is modified by the selected XExpression */
 			var ePackages = eObjectNode.getParent().getChildren().stream()
-				.filter(node -> EPACKAGE == ((EObjectNode) node).getEClass())
+				.filter(EcoreOutlineNode.class::isInstance)
 				.toList();
 			var property = ePackages.stream()
 				.map(node -> findPropertyNode(node, selectedTextRegion))
