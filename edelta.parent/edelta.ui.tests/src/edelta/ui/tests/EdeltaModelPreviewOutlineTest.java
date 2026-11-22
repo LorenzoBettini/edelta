@@ -25,6 +25,7 @@ import edelta.ui.internal.EdeltaActivator;
 import edelta.ui.outline.EdeltaOutlineTreeProvider.EcoreOutlineNode;
 import edelta.ui.outline.EdeltaOutlineTreeProvider.ModelGroupOutlineNode;
 import edelta.ui.outline.EdeltaOutlineTreeProvider.ModelObjectOutlineNode;
+import edelta.ui.outline.EdeltaOutlineTreeProvider.ModelPropertyOutlineNode;
 import edelta.ui.outline.EdeltaOutlineTreeProvider.ModelResourceOutlineNode;
 import edelta.ui.testutils.EdeltaUiTestUtils;
 
@@ -35,6 +36,27 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 	private static final String PROJECT = "edelta.ui.tests.project";
 	private static final String FIRST = program("FirstChild");
 	private static final String SECOND = program("SecondChild");
+	private static final String MIGRATED = """
+		import edelta.refactorings.lib.EdeltaRefactorings
+		metamodel "preview"
+		metamodel "ecore"
+		testmodels { "model/Preview.xmi" "model/EmptyId.xmi" }
+		use EdeltaRefactorings as extension refactorings
+		modifyEcore evolve epackage preview {
+			val name = ecoreref(Child.name)
+			modelMigration[
+				transformAttributeValueRule(isRelatedTo(name), [value |
+					value.toString.toUpperCase
+				])
+			]
+			modelMigration[
+				transformAttributeValueRule(isRelatedTo(name), [value |
+					value.toString + "!"
+				])
+			]
+			refactorings.changeToSingle(ecoreref(Root.links))
+		}
+		""";
 	private static IFile file;
 
 	@Inject
@@ -59,20 +81,27 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 			  <eStructuralFeatures xsi:type="ecore:EReference" name="children"
 			   upperBound="-1" containment="true" eType="#//Child"/>
 			  <eStructuralFeatures xsi:type="ecore:EReference" name="link" eType="#//Child"/>
+			  <eStructuralFeatures xsi:type="ecore:EReference" name="links"
+			   upperBound="-1" eType="#//Child"/>
+			  <eStructuralFeatures xsi:type="ecore:EReference" name="empty"
+			   containment="true" eType="#//Empty"/>
 			 </eClassifiers>
 			 <eClassifiers xsi:type="ecore:EClass" name="Child">
 			  <eStructuralFeatures xsi:type="ecore:EAttribute" name="name"
 			   eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
 			 </eClassifiers>
+			 <eClassifiers xsi:type="ecore:EClass" name="Empty"/>
 			</ecore:EPackage>
 			""");
 		createFile(PROJECT + "/model/Preview.xmi", """
 			<?xml version="1.0" encoding="UTF-8"?>
 			<preview:Root xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" id="root1"
-			 xmlns:preview="http://preview.example" link="//@children.0">
+			 xmlns:preview="http://preview.example" link="//@children.0"
+			 links="//@children.0 //@children.1">
 			 <children name="alpha"/>
 			 <children name="beta"/>
 			 <children name=""/>
+			 <empty/>
 			</preview:Root>
 			""");
 		createFile(PROJECT + "/model/EmptyId.xmi", """
@@ -117,10 +146,20 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 			  Preview.xmi
 			    Root #root1
 			      FirstChild alpha
+			        name = "alpha"
 			      FirstChild beta
+			        name = "beta"
 			      FirstChild
+			        name = ""
+			      Empty
+			      id = "root1"
+			      link [0..1] = FirstChild alpha (#//@children.0)
+			      links [0..*] = [FirstChild alpha (#//@children.0), FirstChild beta (#//@children.1)]
 			  EmptyId.xmi
 			    Root
+			      id = ""
+			      link [0..1] = <unset>
+			      links [0..*] = []
 			""");
 
 		// The linked Child appears once under Root; the non-containment link adds no node.
@@ -128,19 +167,52 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		child(emptyId, ModelObjectOutlineNode.class, "Root");
 		var resource = child(group, ModelResourceOutlineNode.class, "Preview.xmi");
 		var root = child(resource, ModelObjectOutlineNode.class, "Root #root1");
-		then(root.getChildren()).hasSize(3);
+		then(root.getChildren()).hasSize(7);
 		then(root.getChildren()).extracting(node -> node.getText().toString())
-			.containsExactly("FirstChild alpha", "FirstChild beta", "FirstChild");
+			.containsExactly("FirstChild alpha", "FirstChild beta", "FirstChild", "Empty",
+				"id = \"root1\"", "link [0..1] = FirstChild alpha (#//@children.0)",
+				"links [0..*] = [FirstChild alpha (#//@children.0), FirstChild beta (#//@children.1)]");
 		var firstChild = (ModelObjectOutlineNode) root.getChildren().getFirst();
 		EObject childObject = firstChild.readOnly(object -> object);
 		EObject rootObject = root.readOnly(object -> object);
 		then(rootObject).isSameAs(childObject.eContainer());
-		then(root.getChildren().getFirst().getChildren()).isEmpty();
+		then(root.getChildren().getFirst().getChildren()).hasSize(1);
+		var link = child(root, ModelPropertyOutlineNode.class,
+			"link [0..1] = FirstChild alpha (#//@children.0)");
+		then(link.getChildren()).isEmpty();
+		then(child(root, ModelObjectOutlineNode.class, "Empty").getChildren()).isEmpty();
+		then(group.getImage()).isNotNull().satisfies(image -> then(image.isDisposed()).isFalse());
+		then(resource.getImage()).isNotNull().satisfies(image -> then(image.isDisposed()).isFalse());
 
 		// Opening either level must select the quoted path in the actual editor.
 		assertNavigation(resource, FIRST.indexOf("\"model/Preview.xmi\""));
 		assertNavigation(root, FIRST.indexOf("\"model/Preview.xmi\""));
 		assertNavigation(root.getChildren().getFirst(), FIRST.indexOf("\"model/Preview.xmi\""));
+		assertNavigation(link, FIRST.indexOf("\"model/Preview.xmi\""));
+		EObject propertyOwner = link.readOnly(object -> object);
+		propertyOwner.eResource().unload();
+		EObject unloadedOwner = link.readOnly(object -> object);
+		then(unloadedOwner).isNull();
+	}
+
+	@Test
+	public void stagedMigrationAndLibraryMultiplicityRefreshPropertyRows() {
+		var old = child(awaitNode(ModelGroupOutlineNode.class, "Evolved test models"),
+			ModelResourceOutlineNode.class, "Preview.xmi");
+		editor.getInternalSourceViewer().getDocument().set(MIGRATED);
+		var migrated = awaitNode(ModelObjectOutlineNode.class, "Child ALPHA!");
+		then(migrated.getChildren()).extracting(node -> node.getText().toString())
+			.containsExactly("name = \"ALPHA!\"");
+		var root = (ModelObjectOutlineNode) migrated.getParent();
+		then(root.getChildren()).extracting(node -> node.getText().toString())
+			.contains("links [0..1] = Child ALPHA! (#//@children.0)");
+		then(root.getChildren()).noneMatch(node -> node.getText().toString()
+			.startsWith("links [0..*]"));
+		EObject oldDeclaration = old.readOnly(object -> object);
+		then(oldDeclaration).isNull();
+		assertNavigation(child(root, ModelPropertyOutlineNode.class,
+			"links [0..1] = Child ALPHA! (#//@children.0)"),
+			MIGRATED.indexOf("\"model/Preview.xmi\""));
 	}
 
 	@Test
@@ -148,6 +220,7 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		// Keep old nodes, then edit the metamodel so every Child instance changes its class label.
 		var old = awaitNode(ModelObjectOutlineNode.class, "FirstChild alpha");
 		var oldResource = (ModelResourceOutlineNode) old.getParent().getParent();
+		var oldProperty = child(old, ModelPropertyOutlineNode.class, "name = \"alpha\"");
 		editor.getInternalSourceViewer().getDocument().set(SECOND);
 		var fresh = awaitNode(ModelObjectOutlineNode.class, "SecondChild alpha");
 		then(fresh).isNotSameAs(old);
@@ -157,6 +230,8 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		then(oldObject).isNull();
 		EObject oldDeclaration = oldResource.readOnly(object -> object);
 		then(oldDeclaration).isNull();
+		EObject oldPropertyOwner = oldProperty.readOnly(object -> object);
+		then(oldPropertyOwner).isNull();
 		then(findNode(root(), ModelObjectOutlineNode.class, "FirstChild alpha")).isNull();
 
 		// New nodes still navigate to the declaration, and editor-to-Ecore linking still works.

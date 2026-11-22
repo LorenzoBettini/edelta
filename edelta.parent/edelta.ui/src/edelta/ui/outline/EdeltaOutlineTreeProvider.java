@@ -12,6 +12,8 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.impl.AbstractOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider;
@@ -40,6 +42,9 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 
 	@Inject
 	private EdeltaEcorePropertyRows propertyRows;
+
+	@Inject
+	private EdeltaModelPropertyRows modelPropertyRows;
 
 	@Inject
 	private EdeltaLabelProvider edeltaLabelProvider;
@@ -111,7 +116,14 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	@Override
 	protected void _createChildren(final IOutlineNode parentNode, final EObject modelElement) {
 		super._createChildren(parentNode, modelElement);
-		if (modelElement.eClass().getEPackage() == EcorePackage.eINSTANCE) {
+		if (parentNode instanceof ModelObjectOutlineNode) {
+			for (final var row : modelPropertyRows.get(modelElement)) {
+				checkCanceled();
+				var propertyNode = new ModelPropertyOutlineNode(modelElement, row.feature(),
+					parentNode, row.label());
+				propertyNode.setTextRegion(parentNode.getSignificantTextRegion());
+			}
+		} else if (modelElement.eClass().getEPackage() == EcorePackage.eINSTANCE) {
 			for (final var row : propertyRows.get(modelElement, labelProvider::getText)) {
 				checkCanceled();
 				var change = derivedStateHelper.getModifiedFeatures(currentProgram.eResource())
@@ -132,7 +144,7 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 			boolean isLeaf) {
 		if (parentNode instanceof ModelResourceOutlineNode || parentNode instanceof ModelObjectOutlineNode) {
 			var node = new ModelObjectOutlineNode(modelElement, parentNode, image,
-				modelLabel(modelElement), isLeaf);
+				modelLabel(modelElement), isLeaf && !modelPropertyRows.hasRows(modelElement));
 			node.setShortTextRegion(parentNode.getSignificantTextRegion());
 			return node;
 		}
@@ -159,7 +171,8 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	/** Groups final preview resources under a distinct outline heading. @author Lorenzo Bettini */
 	public static class ModelGroupOutlineNode extends AbstractOutlineNode {
 		ModelGroupOutlineNode(IOutlineNode parent) {
-			super(parent, (Image) null, "Evolved test models", false);
+			super(parent, PlatformUI.getWorkbench().getSharedImages()
+				.getImage(ISharedImages.IMG_OBJ_FOLDER), "Evolved test models", false);
 		}
 
 		@Override
@@ -173,7 +186,8 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		private final EdeltaModelPreview.Model model;
 
 		ModelResourceOutlineNode(EdeltaModelPreview.Model model, IOutlineNode parent) {
-			super(parent, (Image) null, model.sourcePath().getFileName().toString(),
+			super(parent, PlatformUI.getWorkbench().getSharedImages()
+				.getImage(ISharedImages.IMG_OBJ_FILE), model.sourcePath().getFileName().toString(),
 				model.resource().getContents().isEmpty());
 			this.model = model;
 		}
@@ -182,6 +196,25 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		public <T> T readOnly(IUnitOfWork<T, EObject> work) {
 			return getDocument().tryReadOnly(state -> model.resource().isLoaded()
 				? work.exec(model.declaration()) : null);
+		}
+	}
+
+	/** A non-navigating value row owned by one disposable preview object.
+	 * @author Lorenzo Bettini
+	 */
+	public static class ModelPropertyOutlineNode extends EStructuralFeatureNode {
+		private final EObject owner;
+
+		ModelPropertyOutlineNode(EObject owner, EStructuralFeature feature, IOutlineNode parent,
+				String text) {
+			super(owner, feature, parent, (Image) null, text, true);
+			this.owner = owner;
+		}
+
+		@Override
+		public <T> T readOnly(IUnitOfWork<T, EObject> work) {
+			return getDocument().tryReadOnly(state -> owner.eResource() == null
+				? null : work.exec(owner));
 		}
 	}
 
