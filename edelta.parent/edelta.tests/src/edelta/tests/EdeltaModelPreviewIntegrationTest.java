@@ -146,6 +146,38 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	public void customExtensionsKeepPreviewCrossResourceAssociations() throws Exception {
+		var root = projectWithModels();
+		var models = root.resolve("models");
+		var rootFile = models.resolve("MyRoot.library");
+		var classFile = models.resolve("MyClass.persons");
+		Files.copy(models.resolve("MyRoot.xmi"), rootFile);
+		Files.copy(models.resolve("MyClass.xmi"), classFile);
+		Files.writeString(rootFile, Files.readString(rootFile)
+			.replace("myReferences=\"//@myContents.1\"",
+				"myReferences=\"MyClass.persons#/\""));
+		var rootBytes = Files.readAllBytes(rootFile);
+		var classBytes = Files.readAllBytes(classFile);
+		var program = parse(root, true, """
+			metamodel "mypackage"
+			testmodels { "models/MyRoot.library" "models/MyClass.persons" }
+			modifyEcore evolve epackage mypackage {}
+			""");
+		var preview = derivedStateHelper.getModelPreview(program.eResource());
+		assertThat(preview.getFailures()).isEmpty();
+		assertThat(preview.getModels()).extracting(
+			m -> m.sourcePath().getFileName().toString())
+			.containsExactly("MyRoot.library", "MyClass.persons");
+		assertThat(preview.getModels()).extracting(EdeltaModelPreview.Model::declaration)
+			.containsExactlyElementsOf(program.getTestModels().getPaths());
+		var rootModel = preview.getModels().get(0).resource().getContents().getFirst();
+		var classModel = preview.getModels().get(1).resource().getContents().getFirst();
+		assertThat(references(rootModel, "myReferences")).containsExactly(classModel);
+		assertThat(Files.readAllBytes(rootFile)).isEqualTo(rootBytes);
+		assertThat(Files.readAllBytes(classFile)).isEqualTo(classBytes);
+	}
+
+	@Test
 	public void libraryRefactoringMigratesTheSelectedModel() throws Exception {
 		var root = projectWithModels();
 		var rootFile = root.resolve("models/MyRoot.xmi");
@@ -178,13 +210,14 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 	@Test
 	public void relativeSchemaLocationUsesTheImportedEcoreCopy() throws Exception {
 		var root = projectWithModels();
-		var input = root.resolve("models/MyRoot.xmi");
+		var input = root.resolve("models/MyRoot.library");
+		Files.move(root.resolve("models/MyRoot.xmi"), input);
 		var sourceBytes = Files.readAllBytes(input);
 		assertThat(Files.readString(input)).contains("xsi:schemaLocation",
 			"http://my.package.org My.ecore");
 		var program = parse(root, true, """
 			metamodel "mypackage"
-			testmodels { "models/MyRoot.xmi" }
+			testmodels { "models/MyRoot.library" }
 			modifyEcore evolve epackage mypackage {}
 			""");
 		var preview = derivedStateHelper.getModelPreview(program.eResource());
@@ -194,6 +227,33 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		var copied = derivedStateHelper.getCopiedEPackagesMap(program.eResource()).get("mypackage");
 		assertThat(model.eClass()).isSameAs(copied.getEClassifier("MyRoot"));
 		assertThat(Files.readAllBytes(input)).isEqualTo(sourceBytes);
+	}
+
+	@Test
+	public void directoryPreviewDiscoversCustomExtensionsAndIgnoresUnrelatedFiles()
+			throws Exception {
+		var root = projectWithModels();
+		var models = root.resolve("models");
+		Files.move(models.resolve("MyRoot.xmi"), models.resolve("MyRoot.library"));
+		Files.move(models.resolve("MyClass.xmi"), models.resolve("MyClass.persons"));
+		Files.writeString(models.resolve("notes.txt"), "not a model");
+		Files.writeString(models.resolve("unrelated.xml"),
+			"<other:Thing xmlns:other=\"http://other.example\"/>");
+		Files.writeString(models.resolve("broken.xml"), "<not recognizable");
+		var sourceBytes = Files.readAllBytes(models.resolve("MyRoot.library"));
+		var program = parse(root, true, """
+			metamodel "mypackage"
+			testmodels { "models" }
+			modifyEcore evolve epackage mypackage {}
+			""");
+		var preview = derivedStateHelper.getModelPreview(program.eResource());
+		assertThat(preview.getFailures()).isEmpty();
+		assertThat(preview.getModels()).extracting(
+			m -> m.sourcePath().getFileName().toString())
+			.containsExactly("MyClass.persons", "MyRoot.library");
+		assertThat(preview.getModels()).extracting(EdeltaModelPreview.Model::declaration)
+			.containsOnly(program.getTestModels().getPaths().getFirst());
+		assertThat(Files.readAllBytes(models.resolve("MyRoot.library"))).isEqualTo(sourceBytes);
 	}
 
 	@Test

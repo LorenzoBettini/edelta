@@ -25,20 +25,24 @@ modifyEcore evolve epackage PersonList {
 Paths are resolved relative to the filesystem location of the Eclipse project
 containing the Edelta file, not relative to the process working directory.
 Paths must be project-relative; absolute paths and paths whose normalized
-location escapes the project root are rejected. A quoted path can name an
-`.xmi` file or a directory. Directories are searched recursively; only
-lowercase `.xmi` files are considered, in lexical path order. Overlapping
-directory and file entries select a file once, attributed to the first
-declared path that found it.
+location escapes the project root are rejected. A quoted path can name an XMI
+model file with any extension (or no extension), or a directory. `.xmi` is not
+required: files are selected based on their XML/XMI content and imported
+namespace URIs, not their filename extension. Directories are searched
+recursively in lexical path order. Lightweight content inspection skips
+unrelated non-XML and malformed files; recognizable malformed XMI and malformed
+`.xmi` files are reported. Overlapping directory and file entries select a
+file once, attributed to the first declared path that found it.
 
 Only XMI resources whose namespaces match EPackages imported by the program
-(including packages declared by `migrate`) are loaded. Matching uses namespace
-URIs, not package names or filenames. Unrelated files are ignored without an
-error. An empty XMI file has no model namespace and is ignored in the same way.
-A file mixing imported and unknown model namespaces is unsupported and reports
-an input error. Invalid, missing, unreadable, malformed, or un-loadable inputs
-are reported on their quoted path. A preview with an input failure is not
-published.
+(including packages declared by `migrate`) are loaded. Both model-element roots
+and `xmi:XMI` document roots containing model elements are supported. Matching
+uses namespace URIs, not package names or filenames. Unrelated files are
+ignored without an error. An empty XMI file has no model namespace and is
+ignored in the same way. A file mixing imported and unknown model namespaces
+is unsupported and reports an input error. Invalid, missing, unreadable,
+malformed, or un-loadable explicitly declared inputs are reported on their
+quoted path. A preview with an input failure is not published.
 
 Resources selected together share a resource set, so references between
 selected XMI files can resolve. A resource outside the selected set is not

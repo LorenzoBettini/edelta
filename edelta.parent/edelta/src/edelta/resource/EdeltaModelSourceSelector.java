@@ -1,7 +1,11 @@
 package edelta.resource;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.SequenceInputStream;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -37,6 +41,8 @@ import edelta.util.EdeltaModelUtil;
  * @author Lorenzo Bettini
  */
 public class EdeltaModelSourceSelector {
+	private static final int CONTENT_SNIFF_SIZE = 8192;
+
 	/** The outcome for a declared source or an XMI file within it. */
 	public enum Status { SELECTED, IGNORED, MISSING, INVALID_PATH, UNREADABLE,
 		MALFORMED, MIXED_NAMESPACE, LOAD_FAILED }
@@ -50,6 +56,8 @@ public class EdeltaModelSourceSelector {
 	/** A testable source failure; {@code cause} retains the original parser or I/O exception. */
 	public record Failure(Status status, Path path, EdeltaTestModelPath entry, Throwable cause) {}
 
+	private record Candidate(EdeltaTestModelPath entry, boolean explicit) {}
+
 	/**
 	 * Ordered selection results. The map includes only selected files and retains the first
 	 * declaring entry when declarations overlap. Resources share {@code resourceSet} so references
@@ -62,8 +70,8 @@ public class EdeltaModelSourceSelector {
 	 * Selects sources declared by {@code program}, using its metamodel and migrate imports.
 	 * With no declaration, returns an empty result without inspecting the filesystem or imports.
 	 * Paths must be project relative; absolute paths and paths escaping the root are invalid.
-	 * Directory entries are traversed recursively in lexical path order; only lowercase
-	 * {@code .xmi} files are candidates. Explicit files must also have that extension.
+	 * Directory entries are traversed recursively in lexical path order. Explicit files may have
+	 * any extension; directory entries are inspected conservatively for XML model content.
 	 *
 	 * @param program the parsed Edelta program
 	 * @param projectRoot the containing Eclipse project's filesystem location
@@ -98,11 +106,13 @@ public class EdeltaModelSourceSelector {
 		var ignored = new ArrayList<Ignored>();
 		var failures = new ArrayList<Failure>();
 		var sourceEntries = new LinkedHashMap<Path, EdeltaTestModelPath>();
-		var candidates = new LinkedHashMap<Path, EdeltaTestModelPath>();
+		var candidates = new LinkedHashMap<Path, Candidate>();
 		var root = projectRoot.toAbsolutePath().normalize();
 		var namespaces = new LinkedHashSet<String>();
 		resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap()
-			.put("xmi", new XMIResourceFactoryImpl());
+			.putIfAbsent("xmi", new XMIResourceFactoryImpl());
+		resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap()
+			.putIfAbsent("*", new XMIResourceFactoryImpl());
 		for (var ePackage : packages) {
 			register(ePackage, namespaces, resourceSet);
 		}
@@ -129,31 +139,48 @@ public class EdeltaModelSourceSelector {
 			} else if (Files.isDirectory(path)) {
 				try (var files = Files.walk(path)) {
 					var discovered = files.filter(Files::isRegularFile)
-						.filter(file -> file.getFileName().toString().endsWith(".xmi"))
 						.sorted().toList();
 					for (var file : discovered) {
-						candidates.putIfAbsent(file, entry);
+						addCandidate(candidates, file, entry, false);
 					}
 				} catch (IOException | UncheckedIOException exception) {
 					failures.add(new Failure(Status.UNREADABLE, path, entry, exception));
 				}
-			} else if (Files.isRegularFile(path) && path.getFileName().toString().endsWith(".xmi")) {
-				candidates.putIfAbsent(path, entry);
+			} else if (Files.isRegularFile(path)) {
+				addCandidate(candidates, path, entry, true);
 			} else {
 				failures.add(new Failure(Status.INVALID_PATH, path, entry, null));
 			}
 		}
 		for (var candidate : candidates.entrySet()) {
 			var path = candidate.getKey();
-			var entry = candidate.getValue();
+			var source = candidate.getValue();
+			var entry = source.entry();
+			var xmiExtension = path.getFileName().toString().endsWith(".xmi");
+			var contentPrefix = new byte[0];
 			Set<String> found;
-			try {
-				found = namespaces(path);
+			try (var input = Files.newInputStream(path)) {
+				contentPrefix = input.readNBytes(CONTENT_SNIFF_SIZE);
+				if (!source.explicit() && !xmiExtension && !looksLikeXml(contentPrefix)) {
+					ignored.add(new Ignored(path, entry));
+					continue;
+				}
+				found = namespaces(new SequenceInputStream(
+					new ByteArrayInputStream(contentPrefix), input));
 			} catch (XMLStreamException exception) {
-				failures.add(new Failure(Status.MALFORMED, path, entry, exception));
+				if (source.explicit() || xmiExtension
+						|| looksLikeXmi(contentPrefix, namespaces)) {
+					failures.add(new Failure(Status.MALFORMED, path, entry, exception));
+				} else {
+					ignored.add(new Ignored(path, entry));
+				}
 				continue;
 			} catch (IOException exception) {
-				failures.add(new Failure(Status.UNREADABLE, path, entry, exception));
+				if (source.explicit() || xmiExtension) {
+					failures.add(new Failure(Status.UNREADABLE, path, entry, exception));
+				} else {
+					ignored.add(new Ignored(path, entry));
+				}
 				continue;
 			}
 			if (Collections.disjoint(found, namespaces)) {
@@ -179,6 +206,16 @@ public class EdeltaModelSourceSelector {
 			List.copyOf(failures), Collections.unmodifiableMap(sourceEntries));
 	}
 
+	private void addCandidate(Map<Path, Candidate> candidates, Path path,
+			EdeltaTestModelPath entry, boolean explicit) {
+		var existing = candidates.get(path);
+		if (existing == null) {
+			candidates.put(path, new Candidate(entry, explicit));
+		} else if (explicit && !existing.explicit()) {
+			candidates.put(path, new Candidate(existing.entry(), true));
+		}
+	}
+
 	private void register(EPackage ePackage, Set<String> namespaces, ResourceSet resourceSet) {
 		if (ePackage == null || ePackage.eIsProxy() || ePackage.getNsURI() == null) {
 			return;
@@ -190,40 +227,63 @@ public class EdeltaModelSourceSelector {
 		}
 	}
 
-	private Set<String> namespaces(Path path) throws IOException, XMLStreamException {
+	private boolean looksLikeXml(byte[] prefix) {
+		var content = contentText(prefix);
+		if (content.startsWith("\uFEFF")) {
+			content = content.substring(1);
+		}
+		return content.stripLeading().startsWith("<");
+	}
+
+	private boolean looksLikeXmi(byte[] prefix, Set<String> namespaces) {
+		var content = contentText(prefix);
+		return content.contains("xmi:XMI")
+			|| content.contains("http://www.omg.org/XMI")
+			|| namespaces.stream().anyMatch(content::contains);
+	}
+
+	private String contentText(byte[] prefix) {
+		if (prefix.length >= 2 && prefix[0] == (byte) 0xFE && prefix[1] == (byte) 0xFF) {
+			return new String(prefix, 2, prefix.length - 2, StandardCharsets.UTF_16BE);
+		}
+		if (prefix.length >= 2 && prefix[0] == (byte) 0xFF && prefix[1] == (byte) 0xFE) {
+			return new String(prefix, 2, prefix.length - 2, StandardCharsets.UTF_16LE);
+		}
+		return new String(prefix, StandardCharsets.UTF_8);
+	}
+
+	private Set<String> namespaces(InputStream input) throws IOException, XMLStreamException {
 		var factory = XMLInputFactory.newFactory();
 		factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
 		factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
 		var found = new LinkedHashSet<String>();
-		try (var input = Files.newInputStream(path)) {
-			var reader = factory.createXMLStreamReader(input);
-			try {
-				while (reader.hasNext()) {
-					if (reader.next() != XMLStreamConstants.START_ELEMENT) {
-						continue;
-					}
-					var namespace = reader.getNamespaceURI();
-					if (namespace != null && !namespace.equals("http://www.omg.org/XMI")) {
-						found.add(namespace);
-					}
-					var type = reader.getAttributeValue(XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI,
-						"type");
-					if (type != null) {
-						var colon = type.indexOf(':');
-						if (colon < 1) {
-							throw new XMLStreamException("Unqualified xsi:type: " + type);
-						}
-						var prefix = type.substring(0, colon);
-						var typeNamespace = reader.getNamespaceURI(prefix);
-						if (typeNamespace == null) {
-							throw new XMLStreamException("Unbound xsi:type prefix: " + prefix);
-						}
-						found.add(typeNamespace);
-					}
+		var reader = factory.createXMLStreamReader(input);
+		try {
+			while (reader.hasNext()) {
+				if (reader.next() != XMLStreamConstants.START_ELEMENT) {
+					continue;
 				}
-			} finally {
-				reader.close();
+				var namespace = reader.getNamespaceURI();
+				if (namespace != null && !namespace.equals("http://www.omg.org/XMI")) {
+					found.add(namespace);
+				}
+				var type = reader.getAttributeValue(XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI,
+					"type");
+				if (type != null) {
+					var colon = type.indexOf(':');
+					if (colon < 1) {
+						throw new XMLStreamException("Unqualified xsi:type: " + type);
+					}
+					var prefix = type.substring(0, colon);
+					var typeNamespace = reader.getNamespaceURI(prefix);
+					if (typeNamespace == null) {
+						throw new XMLStreamException("Unbound xsi:type prefix: " + prefix);
+					}
+					found.add(typeNamespace);
+				}
 			}
+		} finally {
+			reader.close();
 		}
 		found.remove("");
 		return found;
