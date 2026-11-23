@@ -136,6 +136,8 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 				var change = derivedStateHelper.getModifiedFeatures(currentProgram.eResource())
 					.get(modelElement, row.feature());
 				var propertyNode = new EcorePropertyOutlineNode(modelElement, row.feature(), parentNode,
+					imageHelper.getImage(row.feature() instanceof EAttribute
+						? "EAttribute.gif" : "EReference.gif"),
 					edeltaLabelProvider.propertyText(row.label(), change != null),
 					change != null && !change.initial());
 				var expression = change == null ? null : change.expression();
@@ -297,8 +299,8 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		private final boolean directChange;
 
 		EcorePropertyOutlineNode(EObject owner, EStructuralFeature feature, IOutlineNode parent,
-				Object text, boolean directChange) {
-			super(owner, feature, parent, (Image) null, text, true);
+				Image image, Object text, boolean directChange) {
+			super(owner, feature, parent, image, text, true);
 			this.owner = owner;
 			this.directChange = directChange;
 		}

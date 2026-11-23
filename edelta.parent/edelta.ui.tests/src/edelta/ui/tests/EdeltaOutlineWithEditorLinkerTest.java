@@ -13,6 +13,7 @@ import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
+import org.eclipse.xtext.ui.PluginImageHelper;
 import org.eclipse.xtext.ui.editor.XtextEditor;
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.impl.OutlineNodeElementOpener;
@@ -77,6 +78,9 @@ public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest 
 
 	@Inject
 	private Injector injector;
+
+	@Inject
+	private PluginImageHelper imageHelper;
 
 	@Override
 	protected String getEditorId() {
@@ -202,6 +206,36 @@ public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest 
 	}
 
 	@Test
+	public void testEcorePropertyIconsSurviveOutlineRefresh() {
+		var attributeImage = imageHelper.getImage("EAttribute.gif");
+		var referenceImage = imageHelper.getImage("EReference.gif");
+		Assertions.assertThat(attributeImage).isNotNull().isNotSameAs(referenceImage);
+		Assertions.assertThat(referenceImage).isNotNull();
+		var oldName = findPropertyNode(outlinePage.getTreeViewer().getInput(), "name = MyNewClass", false);
+		Assertions.assertThat(oldName).isNotNull();
+		Assertions.assertThat(oldName.getImage()).isSameAs(attributeImage);
+		Assertions.assertThat(findPropertyNode(outlinePage.getTreeViewer().getInput(), "nsURI = ", false)
+			.getImage()).isSameAs(attributeImage);
+		Assertions.assertThat(findPropertyNode(outlinePage.getTreeViewer().getInput(), "ordered = ", false)
+			.getImage()).isSameAs(attributeImage);
+		Assertions.assertThat(findPropertyNode(outlinePage.getTreeViewer().getInput(), "upperBound = ", false)
+			.getImage()).isSameAs(attributeImage);
+		Assertions.assertThat(findPropertyNode(outlinePage.getTreeViewer().getInput(), "eClassifier = ", false)
+			.getImage()).isSameAs(referenceImage);
+		Assertions.assertThat(findPropertyNode(outlinePage.getTreeViewer().getInput(), "eTypeParameter = ", false)
+			.getImage()).isSameAs(referenceImage);
+
+		editor.getInternalSourceViewer().getDocument().set(program.replace("MyNewClass", "RenamedClass"));
+		var freshName = waitForProperty("name = RenamedClass");
+		Assertions.assertThat(freshName).isNotNull().isNotSameAs(oldName);
+		Assertions.assertThat(attributeImage.isDisposed()).isFalse();
+		Assertions.assertThat(referenceImage.isDisposed()).isFalse();
+		Assertions.assertThat(freshName.getImage()).isSameAs(attributeImage);
+		Assertions.assertThat(findPropertyNode(outlinePage.getTreeViewer().getInput(), "eClassifier = ", false)
+			.getImage()).isSameAs(referenceImage);
+	}
+
+	@Test
 	public void testEditorLinkSelectsContainmentNodeForCreation() {
 		whenEditorTextIsSelectedThenOutlineNodeIsSelected("addNewEClass", "MyNewClass");
 		var selection = (TreeSelection) outlinePage.getTreeViewer().getSelection();
@@ -283,21 +317,42 @@ public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest 
 	}
 
 	private EcorePropertyOutlineNode findPropertyNode(Object root, String label) {
+		return findPropertyNode(root, label, true);
+	}
+
+	private EcorePropertyOutlineNode findPropertyNode(Object root, String label, boolean styledOnly) {
 		if (!(root instanceof IOutlineNode node)) {
 			return null;
 		}
 		for (var child : node.getChildren()) {
 			if (child instanceof EcorePropertyOutlineNode property &&
 					property.getText().toString().startsWith(label) &&
-					property.getText() instanceof StyledString) {
+					(!styledOnly || property.getText() instanceof StyledString)) {
 				return property;
 			}
-			var result = findPropertyNode(child, label);
+			var result = findPropertyNode(child, label, styledOnly);
 			if (result != null) {
 				return result;
 			}
 		}
 		return null;
+	}
+
+	private EcorePropertyOutlineNode waitForProperty(String label) {
+		var display = outlinePage.getTreeViewer().getControl().getDisplay();
+		var timedOut = new AtomicBoolean();
+		Runnable deadline = () -> timedOut.set(true);
+		display.timerExec(5000, deadline);
+		try {
+			EcorePropertyOutlineNode property;
+			while ((property = findPropertyNode(outlinePage.getTreeViewer().getInput(), label, false)) == null
+					&& !timedOut.get()) {
+				if (!display.readAndDispatch() && !timedOut.get()) display.sleep();
+			}
+			return property;
+		} finally {
+			display.timerExec(-1, deadline);
+		}
 	}
 
 	private void whenEditorTextIsSelectedThenOutlineNodeIsSelected(String textToSelect, String expectedNode) {
