@@ -9,8 +9,10 @@ import org.assertj.core.api.Assertions;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.ui.PluginImageHelper;
@@ -213,26 +215,37 @@ public class EdeltaOutlineWithEditorLinkerTest extends CustomAbstractEditorTest 
 		Assertions.assertThat(referenceImage).isNotNull();
 		var oldName = findPropertyNode(outlinePage.getTreeViewer().getInput(), "name = MyNewClass", false);
 		Assertions.assertThat(oldName).isNotNull();
-		Assertions.assertThat(oldName.getImage()).isSameAs(attributeImage);
-		Assertions.assertThat(findPropertyNode(outlinePage.getTreeViewer().getInput(), "nsURI = ", false)
-			.getImage()).isSameAs(attributeImage);
-		Assertions.assertThat(findPropertyNode(outlinePage.getTreeViewer().getInput(), "ordered = ", false)
-			.getImage()).isSameAs(attributeImage);
-		Assertions.assertThat(findPropertyNode(outlinePage.getTreeViewer().getInput(), "upperBound = ", false)
-			.getImage()).isSameAs(attributeImage);
-		Assertions.assertThat(findPropertyNode(outlinePage.getTreeViewer().getInput(), "eClassifier = ", false)
-			.getImage()).isSameAs(referenceImage);
-		Assertions.assertThat(findPropertyNode(outlinePage.getTreeViewer().getInput(), "eTypeParameter = ", false)
-			.getImage()).isSameAs(referenceImage);
+		Assertions.assertThat(outlineImage(oldName)).isSameAs(attributeImage);
+		Assertions.assertThat(outlineImage(
+			findPropertyNode(outlinePage.getTreeViewer().getInput(), "nsURI = ", false)))
+			.isSameAs(attributeImage);
+		Assertions.assertThat(outlineImage(
+			findPropertyNode(outlinePage.getTreeViewer().getInput(), "ordered = ", false)))
+			.isSameAs(attributeImage);
+		Assertions.assertThat(outlineImage(
+			findPropertyNode(outlinePage.getTreeViewer().getInput(), "upperBound = ", false)))
+			.isSameAs(attributeImage);
+		Assertions.assertThat(outlineImage(
+			findPropertyNode(outlinePage.getTreeViewer().getInput(), "eClassifier = ", false)))
+			.isSameAs(referenceImage);
+		Assertions.assertThat(outlineImage(
+			findPropertyNode(outlinePage.getTreeViewer().getInput(), "eTypeParameter = ", false)))
+			.isSameAs(referenceImage);
 
 		editor.getInternalSourceViewer().getDocument().set(program.replace("MyNewClass", "RenamedClass"));
 		var freshName = waitForProperty("name = RenamedClass");
 		Assertions.assertThat(freshName).isNotNull().isNotSameAs(oldName);
 		Assertions.assertThat(attributeImage.isDisposed()).isFalse();
 		Assertions.assertThat(referenceImage.isDisposed()).isFalse();
-		Assertions.assertThat(freshName.getImage()).isSameAs(attributeImage);
-		Assertions.assertThat(findPropertyNode(outlinePage.getTreeViewer().getInput(), "eClassifier = ", false)
-			.getImage()).isSameAs(referenceImage);
+		Assertions.assertThat(outlineImage(freshName)).isSameAs(attributeImage);
+		Assertions.assertThat(outlineImage(
+			findPropertyNode(outlinePage.getTreeViewer().getInput(), "eClassifier = ", false)))
+			.isSameAs(referenceImage);
+	}
+
+	/** Returns the image displayed by the outline for the given node. */
+	private Image outlineImage(IOutlineNode node) {
+		return ((ILabelProvider) outlinePage.getTreeViewer().getLabelProvider()).getImage(node);
 	}
 
 	@Test

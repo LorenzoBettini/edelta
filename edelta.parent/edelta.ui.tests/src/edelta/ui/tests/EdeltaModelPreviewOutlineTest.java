@@ -10,7 +10,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.testing.InjectWith;
@@ -191,22 +193,24 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		var referenceImage = assertEmfIcon("EReference.gif");
 		then(attributeImage).isNotSameAs(referenceImage);
 		var attribute = child(root, ModelPropertyOutlineNode.class, "id = \"root1\"");
-		then(attribute.getImage()).isSameAs(attributeImage);
+		then(outlineImage(attribute)).isSameAs(attributeImage);
 		then(attribute.getChildren()).isEmpty();
-		then(link.getImage()).isSameAs(referenceImage);
-		then(child(root, ModelPropertyOutlineNode.class,
-			"links [0..*] = [FirstChild alpha (#//@children.0), FirstChild beta (#//@children.1)]")
-			.getImage()).isSameAs(referenceImage);
+		then(outlineImage(link)).isSameAs(referenceImage);
+		then(outlineImage(child(root, ModelPropertyOutlineNode.class,
+			"links [0..*] = [FirstChild alpha (#//@children.0), FirstChild beta (#//@children.1)]")))
+			.isSameAs(referenceImage);
 		then(link.getChildren()).isEmpty();
 		then(child(root, ModelObjectOutlineNode.class, "Empty").getChildren()).isEmpty();
-		then(group.getImage()).isNotNull().satisfies(image -> then(image.isDisposed()).isFalse());
+		then(outlineImage(group)).isSameAs(PlatformUI.getWorkbench().getSharedImages()
+			.getImage(ISharedImages.IMG_OBJ_FOLDER))
+			.isNotNull().satisfies(image -> then(image.isDisposed()).isFalse());
 		then(EdeltaActivator.getInstance().getBundle().getEntry("icons/ModelFile.gif")).isNotNull();
 		var modelImage = imageHelper.getImage("ModelFile.gif");
 		then(modelImage).isNotNull().satisfies(image -> then(image.isDisposed()).isFalse());
 		then(modelImage).isNotSameAs(PlatformUI.getWorkbench().getSharedImages()
 			.getImage(ISharedImages.IMG_OBJ_FILE));
-		then(resource.getImage()).isSameAs(modelImage);
-		then(emptyId.getImage()).isSameAs(modelImage);
+		then(outlineImage(resource)).isSameAs(modelImage);
+		then(outlineImage(emptyId)).isSameAs(modelImage);
 
 		// Opening either level must select the quoted path in the actual editor.
 		assertNavigation(resource, FIRST.indexOf("\"model/Preview.xmi\""));
@@ -249,8 +253,8 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		var oldRoot = (ModelObjectOutlineNode) old.getParent();
 		var oldReference = child(oldRoot, ModelPropertyOutlineNode.class,
 			"link [0..1] = FirstChild alpha (#//@children.0)");
-		var attributeImage = oldProperty.getImage();
-		var referenceImage = oldReference.getImage();
+		var attributeImage = outlineImage(oldProperty);
+		var referenceImage = outlineImage(oldReference);
 		then(attributeImage).isNotNull();
 		then(referenceImage).isNotNull().isNotSameAs(attributeImage);
 		editor.getInternalSourceViewer().getDocument().set(SECOND);
@@ -267,11 +271,11 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		then(findNode(root(), ModelObjectOutlineNode.class, "FirstChild alpha")).isNull();
 		then(attributeImage.isDisposed()).isFalse();
 		then(referenceImage.isDisposed()).isFalse();
-		then(child(fresh, ModelPropertyOutlineNode.class, "name = \"alpha\"").getImage())
+		then(outlineImage(child(fresh, ModelPropertyOutlineNode.class, "name = \"alpha\"")))
 			.isSameAs(attributeImage);
 		var freshRoot = (ModelObjectOutlineNode) fresh.getParent();
-		then(child(freshRoot, ModelPropertyOutlineNode.class,
-			"link [0..1] = SecondChild alpha (#//@children.0)").getImage())
+		then(outlineImage(child(freshRoot, ModelPropertyOutlineNode.class,
+			"link [0..1] = SecondChild alpha (#//@children.0)")))
 			.isSameAs(referenceImage);
 
 		// New nodes still navigate to the declaration, and editor-to-Ecore linking still works.
@@ -306,6 +310,11 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 	private void assertNavigation(IOutlineNode node, int offset) {
 		opener.open(node, editor.getInternalSourceViewer());
 		then(editor.getInternalSourceViewer().getSelectedRange().x).isEqualTo(offset);
+	}
+
+	/** Returns the image displayed by the outline for the given node. */
+	private Image outlineImage(IOutlineNode node) {
+		return ((ILabelProvider) outline.getTreeViewer().getLabelProvider()).getImage(node);
 	}
 
 	private org.eclipse.swt.graphics.Image assertEmfIcon(String name) throws IOException {
