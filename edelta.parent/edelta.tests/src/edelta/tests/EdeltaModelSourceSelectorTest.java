@@ -440,7 +440,7 @@ public class EdeltaModelSourceSelectorTest extends EdeltaAbstractTest {
 		return entry;
 	}
 
-	private EPackage myPackage(String filename) throws Exception {
+	private EPackage myPackage(String filename) {
 		var resourceSet = new ResourceSetImpl();
 		resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap()
 			.put("ecore", new EcoreResourceFactoryImpl());

@@ -104,8 +104,12 @@ public class EdeltaInterpreterDiagnosticHelper {
 	}
 
 	private String previewMessage(EdeltaProgram program, EdeltaModelPreview.Failure failure) {
-		var path = failure.path() != null ? failure.path().toString() :
-			failure.source() instanceof EdeltaTestModelPath entry ? entry.getPath() : null;
+		String path = null;
+		if (failure.path() != null) {
+			path = failure.path().toString();
+		} else if (failure.source() instanceof EdeltaTestModelPath entry) {
+			path = entry.getPath();
+		}
 		var detail = causeDetail(failure.cause());
 		var namedPath = path == null ? "selected models" : "'" + path + "'";
 		return switch (failure.code()) {

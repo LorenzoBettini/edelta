@@ -107,7 +107,7 @@ public class EdeltaModelPreviewFailureTest extends EdeltaAbstractTest {
 			new FileProjectConfig(root.toFile(), "preview"));
 		var ecore = new EdeltaModelManager().loadEcoreFile(DATA.resolve("My.ecore").toString());
 		resourceSet.getResources().add(ecore);
-		var program = parseHelper.parse("""
+		return parseHelper.parse("""
 			metamodel "mypackage"
 			testmodels { "models/%s" }
 			modifyEcore evolve epackage mypackage {
@@ -115,6 +115,5 @@ public class EdeltaModelPreviewFailureTest extends EdeltaAbstractTest {
 			}
 			""".formatted(fileName),
 			URI.createFileURI(root.resolve("src/Preview.edelta").toString()), resourceSet);
-		return program;
 	}
 }

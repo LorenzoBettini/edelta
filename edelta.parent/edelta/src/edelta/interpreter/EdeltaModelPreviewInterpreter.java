@@ -174,16 +174,6 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 			activeProgram.getModifyEcoreOperations().getLast().getBody();
 	}
 
-	private EObject failureExpression(Throwable exception, XExpression caller) {
-		for (var cause = exception; cause != null; cause = cause.getCause()) {
-			var expression = failingExpressions.get(cause);
-			if (expression != null) {
-				return expression;
-			}
-		}
-		return caller != null ? caller : fallbackExpression();
-	}
-
 	private Path failurePath() {
 		if (copyFailure != null) {
 			return copyFailure.path();
@@ -205,6 +195,16 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 		private PreviewMigrator(EdeltaModelManager originals, EdeltaModelManager evolving,
 				EdeltaCopiedEPackagesMap copies) {
 			super(originals, evolving, copies.getOriginalToCopyMap());
+		}
+
+		private EObject failureExpression(Throwable exception, XExpression caller) {
+			for (var cause = exception; cause != null; cause = cause.getCause()) {
+				var expression = failingExpressions.get(cause);
+				if (expression != null) {
+					return expression;
+				}
+			}
+			return caller != null ? caller : fallbackExpression();
 		}
 
 		@Override

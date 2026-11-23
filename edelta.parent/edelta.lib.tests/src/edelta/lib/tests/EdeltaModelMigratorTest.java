@@ -284,26 +284,29 @@ class EdeltaModelMigratorTest {
 	void testBorrowedEcoreRegistrationValidation() {
 		originalModelManager.loadEcoreFile(TESTDATA + "simpleTestData/My.ecore");
 		var original = originalModelManager.getEPackage("mypackage");
+		Map<EObject, EObject> invalidMapping =
+			Map.of(original, original.getEClassifier("MyClass"));
 		assertThatThrownBy(() -> new EdeltaModelMigrator(originalModelManager,
-			evolvingModelManager, Map.of(original, original.getEClassifier("MyClass"))))
+			evolvingModelManager, invalidMapping))
 			.isInstanceOf(IllegalArgumentException.class);
 		var copied = EcoreFactory.eINSTANCE.createEPackage();
+		Map<EObject, EObject> mapping = Map.of(original, copied);
 		assertThatThrownBy(() -> new EdeltaModelMigrator(originalModelManager,
-			evolvingModelManager, Map.of(original, copied)))
+			evolvingModelManager, mapping))
 			.isInstanceOf(IllegalArgumentException.class);
 
 		var resource = new ResourceImpl();
 		new ResourceSetImpl().getResources().add(resource);
 		resource.getContents().add(copied);
 		assertThatThrownBy(() -> new EdeltaModelMigrator(originalModelManager,
-			evolvingModelManager, Map.of(original, copied)))
+			evolvingModelManager, mapping))
 			.isInstanceOf(IllegalArgumentException.class);
 
 		var other = EcoreFactory.eINSTANCE.createEPackage();
 		resource.getContents().add(0, other);
 		evolvingModelManager.loadEPackage(copied);
 		assertThatThrownBy(() -> new EdeltaModelMigrator(originalModelManager,
-			evolvingModelManager, Map.of(original, copied)))
+			evolvingModelManager, mapping))
 			.isInstanceOf(IllegalArgumentException.class);
 	}
 

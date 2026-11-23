@@ -15,6 +15,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
@@ -541,10 +542,12 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		var selected = List.of(
 			new EdeltaModelSourceSelector.Selected(Path.of("first.xmi"), entry1, first),
 			new EdeltaModelSourceSelector.Selected(Path.of("second.xmi"), entry2, second));
-		assertThatThrownBy(() -> EdeltaModelPreview.associate(selected, List.of(first)))
+		List<Resource> missing = List.of(first);
+		List<Resource> reordered = List.of(second, first);
+		assertThatThrownBy(() -> EdeltaModelPreview.associate(selected, missing))
 			.isInstanceOf(IllegalStateException.class)
 			.hasMessageContaining("count");
-		assertThatThrownBy(() -> EdeltaModelPreview.associate(selected, List.of(second, first)))
+		assertThatThrownBy(() -> EdeltaModelPreview.associate(selected, reordered))
 			.isInstanceOf(IllegalStateException.class)
 			.hasMessageContaining("order");
 	}
@@ -553,7 +556,8 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 	public void failedPreviewCannotPublishModels() {
 		var preview = new EdeltaModelPreview();
 		preview.addFailure(new EdeltaModelPreview.Failure("MIGRATION", null, null, null));
-		assertThatThrownBy(() -> preview.setModels(List.of()))
+		List<EdeltaModelPreview.Model> models = List.of();
+		assertThatThrownBy(() -> preview.setModels(models))
 			.isInstanceOf(IllegalStateException.class)
 			.hasMessageContaining("failed model preview");
 	}
@@ -630,8 +634,8 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		var newPreview = derivedStateHelper.getModelPreview(resource);
 		assertThat(newPreview.getFailures()).isEmpty();
 		assertThat(newPreview.getModels()).hasSize(1);
-		assertThat(newPreview.getModels().getFirst().sourcePath().getFileName().toString())
-			.isEqualTo("MyRoot.xmi");
+		assertThat(newPreview.getModels().getFirst().sourcePath().getFileName())
+			.hasToString("MyRoot.xmi");
 		assertThat(newPreview.getModels().getFirst().resource().getContents().getFirst())
 			.isNotSameAs(oldObject);
 	}
@@ -689,8 +693,7 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 			resourceSet.getResource(createFileURIFromPath(METAMODEL_PATH + ECORE_ECORE), true);
 		}
 		var uri = URI.createFileURI(root.resolve("src/Preview.edelta").toString());
-		var program = parseHelper.parse(source, uri, resourceSet);
-		return program;
+		return parseHelper.parse(source, uri, resourceSet);
 	}
 
 	private Object value(EObject object, String feature) {
