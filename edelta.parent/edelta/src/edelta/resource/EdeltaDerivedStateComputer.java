@@ -19,6 +19,7 @@ import edelta.edelta.EdeltaProgram;
 import edelta.interpreter.EdeltaInterpreterFactory;
 import edelta.interpreter.EdeltaInterpreterHelper;
 import edelta.interpreter.EdeltaInterpreterDiagnosticHelper;
+import edelta.interpreter.EdeltaInterpreter;
 import edelta.interpreter.EdeltaModelPreviewInterpreter;
 import edelta.resource.derivedstate.EdeltaCopiedEPackagesMap;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
@@ -80,26 +81,7 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 		EdeltaModelPreview preview = null;
 		if (program.getTestModels() != null) {
 			preview = derivedStateHelper.getModelPreview(program.eResource());
-			final var projectRoot = projectRoot(program.eResource());
-			if (projectRoot == null) {
-				preview.addFailure(new EdeltaModelPreview.Failure("PROJECT_ROOT_UNAVAILABLE",
-					program.getTestModels(), null, null));
-			} else {
-				final var selection = modelSourceSelector.select(program, projectRoot);
-				for (var failure : selection.failures()) {
-					preview.addFailure(new EdeltaModelPreview.Failure(failure.status().name(),
-						failure.entry(), failure.path(), failure.cause()));
-				}
-				if (preview.hasFailures() || selection.selected().isEmpty()) {
-					disposeSelection(selection);
-				} else if (interpreter instanceof EdeltaModelPreviewInterpreter previewInterpreter) {
-					previewInterpreter.configurePreview(selection, preview, program.getTestModels());
-				} else {
-					preview.addFailure(new EdeltaModelPreview.Failure("INTERPRETER_UNAVAILABLE",
-						program.getTestModels(), null, null));
-					disposeSelection(selection);
-				}
-			}
+			configurePreview(program, interpreter, preview);
 		}
 		try {
 			interpreter.evaluateModifyEcoreOperations(program);
@@ -109,6 +91,30 @@ public class EdeltaDerivedStateComputer extends JvmModelAssociator {
 					diagnosticHelper.addPreviewFailure(program, failure);
 				}
 			}
+		}
+	}
+
+	private void configurePreview(EdeltaProgram program, EdeltaInterpreter interpreter,
+			EdeltaModelPreview preview) {
+		final var projectRoot = projectRoot(program.eResource());
+		if (projectRoot == null) {
+			preview.addFailure(new EdeltaModelPreview.Failure("PROJECT_ROOT_UNAVAILABLE",
+				program.getTestModels(), null, null));
+			return;
+		}
+		final var selection = modelSourceSelector.select(program, projectRoot);
+		for (var failure : selection.failures()) {
+			preview.addFailure(new EdeltaModelPreview.Failure(failure.status().name(),
+				failure.entry(), failure.path(), failure.cause()));
+		}
+		if (preview.hasFailures() || selection.selected().isEmpty()) {
+			disposeSelection(selection);
+		} else if (interpreter instanceof EdeltaModelPreviewInterpreter previewInterpreter) {
+			previewInterpreter.configurePreview(selection, preview, program.getTestModels());
+		} else {
+			preview.addFailure(new EdeltaModelPreview.Failure("INTERPRETER_UNAVAILABLE",
+				program.getTestModels(), null, null));
+			disposeSelection(selection);
 		}
 	}
 

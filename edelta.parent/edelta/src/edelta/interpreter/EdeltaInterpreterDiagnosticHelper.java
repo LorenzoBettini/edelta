@@ -106,8 +106,8 @@ public class EdeltaInterpreterDiagnosticHelper {
 	private String previewMessage(EdeltaProgram program, EdeltaModelPreview.Failure failure) {
 		var path = failure.path() != null ? failure.path().toString() :
 			failure.source() instanceof EdeltaTestModelPath entry ? entry.getPath() : null;
-		var namedPath = path == null ? "selected models" : "'" + path + "'";
 		var detail = causeDetail(failure.cause());
+		var namedPath = path == null ? "selected models" : "'" + path + "'";
 		return switch (failure.code()) {
 		case "MISSING" -> "Model preview input " + namedPath + " does not exist.";
 		case "INVALID_PATH" -> "Invalid model preview input " + namedPath +
@@ -122,16 +122,21 @@ public class EdeltaInterpreterDiagnosticHelper {
 		case "INTERPRETER_UNAVAILABLE" -> "Model preview interpreter is unavailable.";
 		case "SETUP" -> "Cannot initialize model preview" + detail;
 		default -> {
-				if (path == null && program.getTestModels() != null) {
-					namedPath = program.getTestModels().getPaths().stream()
-						.map(EdeltaTestModelPath::getPath).collect(Collectors.joining(", "));
-				}
+				namedPath = previewPath(program, path, namedPath);
 				var context = failure.objectContext() == null ? "" :
 					" (resource root " + failure.objectContext() + ")";
 				yield "Model preview " + failure.code().toLowerCase(Locale.ROOT).replace('_', ' ') +
 					" failed for " + namedPath + context + detail;
 			}
 		};
+	}
+
+	private String previewPath(EdeltaProgram program, String path, String namedPath) {
+		if (path == null && program.getTestModels() != null) {
+			return program.getTestModels().getPaths().stream()
+				.map(EdeltaTestModelPath::getPath).collect(Collectors.joining(", "));
+		}
+		return namedPath;
 	}
 
 	private String causeDetail(Throwable cause) {

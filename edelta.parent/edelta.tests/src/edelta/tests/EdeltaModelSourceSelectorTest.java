@@ -190,7 +190,7 @@ public class EdeltaModelSourceSelectorTest extends EdeltaAbstractTest {
 		Files.writeString(root.resolve("malformed.xml"), "<unrelated");
 		var result = selector.select(List.of(entry(".")),
 			List.of(myPackage("My1.ecore")), root);
-		assertThat(result.failures()).extracting(f -> f.status())
+		assertThat(result.failures()).extracting(EdeltaModelSourceSelector.Failure::status)
 			.containsExactly(Status.MALFORMED, Status.MALFORMED, Status.MALFORMED,
 				Status.MALFORMED, Status.MALFORMED, Status.MALFORMED);
 		assertThat(result.failures()).extracting(f -> f.path().getFileName().toString())
@@ -247,11 +247,11 @@ public class EdeltaModelSourceSelectorTest extends EdeltaAbstractTest {
 		var result = selector.select(List.of(missing, invalid, absolute, nullPath, illegal,
 			blank, wrong, malformed, malformedOtherExtension),
 			List.of(myPackage("My1.ecore")), root);
-		assertThat(result.failures()).extracting(f -> f.status())
+		assertThat(result.failures()).extracting(EdeltaModelSourceSelector.Failure::status)
 			.containsExactly(Status.MISSING, Status.INVALID_PATH, Status.INVALID_PATH,
 				Status.INVALID_PATH, Status.INVALID_PATH, Status.INVALID_PATH,
 				Status.MALFORMED, Status.MALFORMED, Status.MALFORMED);
-		assertThat(result.failures()).extracting(f -> f.entry())
+		assertThat(result.failures()).extracting(EdeltaModelSourceSelector.Failure::entry)
 			.containsExactly(missing, invalid, absolute, nullPath, illegal, blank, wrong,
 				malformed, malformedOtherExtension);
 		assertThat(result.failures().get(4).cause()).isNotNull();
@@ -272,7 +272,7 @@ public class EdeltaModelSourceSelectorTest extends EdeltaAbstractTest {
 			""");
 		var result = selector.select(List.of(entry("mixed.xmi")),
 			List.of(myPackage("My1.ecore")), root);
-		assertThat(result.failures()).extracting(f -> f.status())
+		assertThat(result.failures()).extracting(EdeltaModelSourceSelector.Failure::status)
 			.containsExactly(Status.MIXED_NAMESPACE);
 		assertThat(result.selected()).isEmpty();
 		assertThat(result.resourceSet().getResources()).isEmpty();
@@ -286,7 +286,7 @@ public class EdeltaModelSourceSelectorTest extends EdeltaAbstractTest {
 			""");
 		var result = selector.select(List.of(entry("unknownType.xmi")),
 			List.of(myPackage("My1.ecore")), root);
-		assertThat(result.failures()).extracting(f -> f.status())
+		assertThat(result.failures()).extracting(EdeltaModelSourceSelector.Failure::status)
 			.containsExactly(Status.LOAD_FAILED);
 		assertThat(result.failures().get(0).cause()).isNotNull();
 		assertThat(result.ignored()).isEmpty();
@@ -340,7 +340,7 @@ public class EdeltaModelSourceSelectorTest extends EdeltaAbstractTest {
 		var result = selector.select(List.of(entry("mixedType.xmi"), entry("unbound.xmi"),
 			entry("unqualified.xmi")),
 			List.of(myPackage("My1.ecore")), root);
-		assertThat(result.failures()).extracting(f -> f.status())
+		assertThat(result.failures()).extracting(EdeltaModelSourceSelector.Failure::status)
 			.containsExactly(Status.MIXED_NAMESPACE, Status.MALFORMED, Status.MALFORMED);
 	}
 
@@ -366,7 +366,7 @@ public class EdeltaModelSourceSelectorTest extends EdeltaAbstractTest {
 			var result = selector.select(List.of(entry("unreadable.xmi"),
 				entry("unreadableFolder"), entry("unreadableModels")),
 				List.of(myPackage("My1.ecore")), root);
-			assertThat(result.failures()).extracting(f -> f.status())
+			assertThat(result.failures()).extracting(EdeltaModelSourceSelector.Failure::status)
 				.containsExactly(Status.UNREADABLE, Status.UNREADABLE, Status.UNREADABLE);
 			assertThat(result.ignored()).extracting(i -> i.path().getFileName().toString())
 				.containsExactly("hidden.library");
@@ -389,7 +389,7 @@ public class EdeltaModelSourceSelectorTest extends EdeltaAbstractTest {
 		Files.createSymbolicLink(root.resolve("device.xmi"), Path.of("/dev/null"));
 		var result = selector.select(List.of(entry("device.xmi")),
 			List.of(myPackage("My1.ecore")), root);
-		assertThat(result.failures()).extracting(f -> f.status())
+		assertThat(result.failures()).extracting(EdeltaModelSourceSelector.Failure::status)
 			.containsExactly(Status.INVALID_PATH);
 	}
 
@@ -404,7 +404,7 @@ public class EdeltaModelSourceSelectorTest extends EdeltaAbstractTest {
 			""");
 		var result = selector.select(List.of(entry("wrapper.xmi")),
 			List.of(myPackage("My1.ecore")), root);
-		assertThat(result.failures()).extracting(f -> f.status())
+		assertThat(result.failures()).extracting(EdeltaModelSourceSelector.Failure::status)
 			.containsExactly(Status.LOAD_FAILED);
 	}
 

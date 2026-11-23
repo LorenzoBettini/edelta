@@ -117,93 +117,116 @@ public class EdeltaModelSourceSelector {
 			register(ePackage, namespaces, resourceSet);
 		}
 		for (var entry : entries) {
-			Path path;
-			try {
-				var literal = entry.getPath();
-				if (literal == null || literal.isBlank()) {
-					failures.add(new Failure(Status.INVALID_PATH, null, entry, null));
-					continue;
-				}
-				var relative = Path.of(literal);
-				path = root.resolve(relative).normalize();
-				if (relative.isAbsolute() || !path.startsWith(root)) {
-					failures.add(new Failure(Status.INVALID_PATH, path, entry, null));
-					continue;
-				}
-			} catch (InvalidPathException exception) {
-				failures.add(new Failure(Status.INVALID_PATH, null, entry, exception));
-				continue;
-			}
-			if (!Files.exists(path)) {
-				failures.add(new Failure(Status.MISSING, path, entry, null));
-			} else if (Files.isDirectory(path)) {
-				try (var files = Files.walk(path)) {
-					var discovered = files.filter(Files::isRegularFile)
-						.sorted().toList();
-					for (var file : discovered) {
-						addCandidate(candidates, file, entry, false);
-					}
-				} catch (IOException | UncheckedIOException exception) {
-					failures.add(new Failure(Status.UNREADABLE, path, entry, exception));
-				}
-			} else if (Files.isRegularFile(path)) {
-				addCandidate(candidates, path, entry, true);
-			} else {
-				failures.add(new Failure(Status.INVALID_PATH, path, entry, null));
-			}
+			processEntry(entry, root, candidates, failures);
 		}
 		for (var candidate : candidates.entrySet()) {
-			var path = candidate.getKey();
-			var source = candidate.getValue();
-			var entry = source.entry();
-			var xmiExtension = path.getFileName().toString().endsWith(".xmi");
-			var contentPrefix = new byte[0];
-			Set<String> found;
-			try (var input = Files.newInputStream(path)) {
-				contentPrefix = input.readNBytes(CONTENT_SNIFF_SIZE);
-				if (!source.explicit() && !xmiExtension && !looksLikeXml(contentPrefix)) {
-					ignored.add(new Ignored(path, entry));
-					continue;
-				}
-				found = namespaces(new SequenceInputStream(
-					new ByteArrayInputStream(contentPrefix), input));
-			} catch (XMLStreamException exception) {
-				if (source.explicit() || xmiExtension
-						|| looksLikeXmi(contentPrefix, namespaces)) {
-					failures.add(new Failure(Status.MALFORMED, path, entry, exception));
-				} else {
-					ignored.add(new Ignored(path, entry));
-				}
-				continue;
-			} catch (IOException exception) {
-				if (source.explicit() || xmiExtension) {
-					failures.add(new Failure(Status.UNREADABLE, path, entry, exception));
-				} else {
-					ignored.add(new Ignored(path, entry));
-				}
-				continue;
-			}
-			if (Collections.disjoint(found, namespaces)) {
-				ignored.add(new Ignored(path, entry));
-				continue;
-			}
-			if (!namespaces.containsAll(found)) {
-				failures.add(new Failure(Status.MIXED_NAMESPACE, path, entry, null));
-				continue;
-			}
-			var uri = URI.createFileURI(path.toString());
-			var resource = resourceSet.createResource(uri);
-			try {
-				resource.load(Map.of());
-				selected.add(new Selected(path, entry, resource));
-				sourceEntries.put(path, entry);
-			} catch (IOException | RuntimeException exception) {
-				resourceSet.getResources().remove(resource);
-				failures.add(new Failure(Status.LOAD_FAILED, path, entry, exception));
-			}
+			inspectCandidate(candidate, namespaces, resourceSet, selected, ignored,
+				failures, sourceEntries);
 		}
 		return new Result(resourceSet, List.copyOf(selected), List.copyOf(ignored),
 			List.copyOf(failures), Collections.unmodifiableMap(sourceEntries));
+	}
+
+	private void processEntry(EdeltaTestModelPath entry, Path root,
+			Map<Path, Candidate> candidates, List<Failure> failures) {
+		Path path;
+		try {
+			var literal = entry.getPath();
+			if (literal == null || literal.isBlank()) {
+				failures.add(new Failure(Status.INVALID_PATH, null, entry, null));
+				return;
+			}
+			var relative = Path.of(literal);
+			path = root.resolve(relative).normalize();
+			if (relative.isAbsolute() || !path.startsWith(root)) {
+				failures.add(new Failure(Status.INVALID_PATH, path, entry, null));
+				return;
+			}
+		} catch (InvalidPathException exception) {
+			failures.add(new Failure(Status.INVALID_PATH, null, entry, exception));
+			return;
+		}
+		if (!Files.exists(path)) {
+			failures.add(new Failure(Status.MISSING, path, entry, null));
+		} else if (Files.isDirectory(path)) {
+			discoverDirectory(path, entry, candidates, failures);
+		} else if (Files.isRegularFile(path)) {
+			addCandidate(candidates, path, entry, true);
+		} else {
+			failures.add(new Failure(Status.INVALID_PATH, path, entry, null));
+		}
+	}
+
+	private void discoverDirectory(Path path, EdeltaTestModelPath entry,
+			Map<Path, Candidate> candidates, List<Failure> failures) {
+		try (var files = Files.walk(path)) {
+			files.filter(Files::isRegularFile).sorted()
+				.forEach(file -> addCandidate(candidates, file, entry, false));
+		} catch (IOException | UncheckedIOException exception) {
+			failures.add(new Failure(Status.UNREADABLE, path, entry, exception));
+		}
+	}
+
+	private void inspectCandidate(Map.Entry<Path, Candidate> candidate,
+			Set<String> namespaces, ResourceSet resourceSet, List<Selected> selected,
+			List<Ignored> ignored, List<Failure> failures,
+			Map<Path, EdeltaTestModelPath> sourceEntries) {
+		var path = candidate.getKey();
+		var source = candidate.getValue();
+		var entry = source.entry();
+		var xmiExtension = path.getFileName().toString().endsWith(".xmi");
+		var contentPrefix = new byte[0];
+		Set<String> found;
+		try (var input = Files.newInputStream(path)) {
+			contentPrefix = input.readNBytes(CONTENT_SNIFF_SIZE);
+			if (!source.explicit() && !xmiExtension && !looksLikeXml(contentPrefix)) {
+				ignored.add(new Ignored(path, entry));
+				return;
+			}
+			found = namespaces(new SequenceInputStream(
+				new ByteArrayInputStream(contentPrefix), input));
+		} catch (XMLStreamException exception) {
+			recordMalformed(path, entry, source.explicit() || xmiExtension
+				|| looksLikeXmi(contentPrefix, namespaces), exception, ignored, failures);
+			return;
+		} catch (IOException exception) {
+			if (source.explicit() || xmiExtension) {
+				failures.add(new Failure(Status.UNREADABLE, path, entry, exception));
+			} else {
+				ignored.add(new Ignored(path, entry));
+			}
+			return;
+		}
+		if (Collections.disjoint(found, namespaces)) {
+			ignored.add(new Ignored(path, entry));
+		} else if (!namespaces.containsAll(found)) {
+			failures.add(new Failure(Status.MIXED_NAMESPACE, path, entry, null));
+		} else {
+			loadCandidate(path, entry, resourceSet, selected, failures, sourceEntries);
+		}
+	}
+
+	private void recordMalformed(Path path, EdeltaTestModelPath entry, boolean recognizable,
+			XMLStreamException exception, List<Ignored> ignored, List<Failure> failures) {
+		if (recognizable) {
+			failures.add(new Failure(Status.MALFORMED, path, entry, exception));
+		} else {
+			ignored.add(new Ignored(path, entry));
+		}
+	}
+
+	private void loadCandidate(Path path, EdeltaTestModelPath entry, ResourceSet resourceSet,
+			List<Selected> selected, List<Failure> failures,
+			Map<Path, EdeltaTestModelPath> sourceEntries) {
+		var resource = resourceSet.createResource(URI.createFileURI(path.toString()));
+		try {
+			resource.load(Map.of());
+			selected.add(new Selected(path, entry, resource));
+			sourceEntries.put(path, entry);
+		} catch (IOException | RuntimeException exception) {
+			resourceSet.getResources().remove(resource);
+			failures.add(new Failure(Status.LOAD_FAILED, path, entry, exception));
+		}
 	}
 
 	private void addCandidate(Map<Path, Candidate> candidates, Path path,
@@ -252,7 +275,7 @@ public class EdeltaModelSourceSelector {
 		return new String(prefix, StandardCharsets.UTF_8);
 	}
 
-	private Set<String> namespaces(InputStream input) throws IOException, XMLStreamException {
+	private Set<String> namespaces(InputStream input) throws XMLStreamException {
 		var factory = XMLInputFactory.newFactory();
 		factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
 		factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);

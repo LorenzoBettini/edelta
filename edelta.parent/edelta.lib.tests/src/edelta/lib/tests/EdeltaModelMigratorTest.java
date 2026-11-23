@@ -104,13 +104,19 @@ class EdeltaModelMigratorTest {
 			Collection<String> modelFiles
 		) {
 		basedir = TESTDATA + subdir;
-		ecoreFiles
-			.forEach(fileName -> originalModelManager.loadEcoreFile(basedir + fileName));
-		modelFiles
-			.forEach(fileName -> originalModelManager.loadModelFile(basedir + fileName));
+		ecoreFiles.forEach(this::loadEcoreFile);
+		modelFiles.forEach(this::loadModelFile);
 		var modelMigrator = new EdeltaModelMigrator(originalModelManager);
 		evolvingModelManager = modelMigrator.getEvolvingModelManager();
 		return modelMigrator;
+	}
+
+	private void loadEcoreFile(String fileName) {
+		originalModelManager.loadEcoreFile(basedir + fileName);
+	}
+
+	private void loadModelFile(String fileName) {
+		originalModelManager.loadModelFile(basedir + fileName);
 	}
 
 	/** Registers independent copies in plain sandbox resources without moving them. */

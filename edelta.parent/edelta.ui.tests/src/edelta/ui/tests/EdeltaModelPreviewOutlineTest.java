@@ -189,6 +189,15 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		then(root.getChildren().getFirst().getChildren()).hasSize(1);
 		var link = child(root, ModelPropertyOutlineNode.class,
 			"link [0..1] = FirstChild alpha (#//@children.0)");
+		assertOutlineImages(group, emptyId, resource, root, link);
+
+		// Opening either level must select the quoted path in the actual editor.
+		assertNavigationAndUnload(resource, root, link, rootObject);
+	}
+
+	private void assertOutlineImages(ModelGroupOutlineNode group,
+			ModelResourceOutlineNode emptyId, ModelResourceOutlineNode resource,
+			ModelObjectOutlineNode root, ModelPropertyOutlineNode link) throws IOException {
 		var attributeImage = assertEmfIcon("EAttribute.gif");
 		var referenceImage = assertEmfIcon("EReference.gif");
 		then(attributeImage).isNotSameAs(referenceImage);
@@ -211,8 +220,10 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 			.getImage(ISharedImages.IMG_OBJ_FILE));
 		then(outlineImage(resource)).isSameAs(modelImage);
 		then(outlineImage(emptyId)).isSameAs(modelImage);
+	}
 
-		// Opening either level must select the quoted path in the actual editor.
+	private void assertNavigationAndUnload(ModelResourceOutlineNode resource,
+			ModelObjectOutlineNode root, ModelPropertyOutlineNode link, EObject rootObject) {
 		assertNavigation(resource, FIRST.indexOf("\"model/Preview.xmi\""));
 		assertNavigation(root, FIRST.indexOf("\"model/Preview.xmi\""));
 		assertNavigation(root.getChildren().getFirst(), FIRST.indexOf("\"model/Preview.xmi\""));

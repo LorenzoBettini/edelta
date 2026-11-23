@@ -113,35 +113,48 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	@Override
 	protected void _createChildren(final IOutlineNode parentNode, final EObject modelElement) {
 		if (parentNode instanceof ModelResourceOutlineNode modelResourceNode) {
-			for (var root : modelResourceNode.model.resource().getContents()) {
-				createNode(parentNode, root);
-			}
+			createModelResourceChildren(parentNode, modelResourceNode);
 			return;
 		}
 		super._createChildren(parentNode, modelElement);
 		if (parentNode instanceof ModelObjectOutlineNode) {
-			for (final var row : modelPropertyRows.get(modelElement)) {
-				checkCanceled();
-				var propertyNode = new ModelPropertyOutlineNode(modelElement, row.feature(),
-					parentNode, imageHelper.getImage(row.feature() instanceof EAttribute
-						? "EAttribute.gif" : "EReference.gif"), row.label());
-				propertyNode.setTextRegion(parentNode.getSignificantTextRegion());
-			}
+			createModelPropertyChildren(parentNode, modelElement);
 		} else if (modelElement.eClass().getEPackage() == EcorePackage.eINSTANCE) {
-			for (final var row : propertyRows.get(modelElement, labelProvider::getText)) {
-				checkCanceled();
-				var change = derivedStateHelper.getModifiedFeatures(currentProgram.eResource())
-					.get(modelElement, row.feature());
-				var propertyNode = new EcorePropertyOutlineNode(modelElement, row.feature(), parentNode,
-					imageHelper.getImage(row.feature() instanceof EAttribute
-						? "EAttribute.gif" : "EReference.gif"),
-					edeltaLabelProvider.propertyText(row.label(), change != null),
-					change != null && !change.initial());
-				var expression = change == null ? null : change.expression();
-				propertyNode.setTextRegion(expression == null
-					? parentNode.getSignificantTextRegion()
-					: locationInFileProvider.getSignificantTextRegion(expression));
-			}
+			createEcorePropertyChildren(parentNode, modelElement);
+		}
+	}
+
+	private void createModelResourceChildren(IOutlineNode parentNode,
+			ModelResourceOutlineNode modelResourceNode) {
+		for (var root : modelResourceNode.model.resource().getContents()) {
+			createNode(parentNode, root);
+		}
+	}
+
+	private void createModelPropertyChildren(IOutlineNode parentNode, EObject modelElement) {
+		for (final var row : modelPropertyRows.get(modelElement)) {
+			checkCanceled();
+			var propertyNode = new ModelPropertyOutlineNode(modelElement, row.feature(),
+				parentNode, imageHelper.getImage(row.feature() instanceof EAttribute
+					? "EAttribute.gif" : "EReference.gif"), row.label());
+			propertyNode.setTextRegion(parentNode.getSignificantTextRegion());
+		}
+	}
+
+	private void createEcorePropertyChildren(IOutlineNode parentNode, EObject modelElement) {
+		for (final var row : propertyRows.get(modelElement, labelProvider::getText)) {
+			checkCanceled();
+			var change = derivedStateHelper.getModifiedFeatures(currentProgram.eResource())
+				.get(modelElement, row.feature());
+			var propertyNode = new EcorePropertyOutlineNode(modelElement, row.feature(), parentNode,
+				imageHelper.getImage(row.feature() instanceof EAttribute
+					? "EAttribute.gif" : "EReference.gif"),
+				edeltaLabelProvider.propertyText(row.label(), change != null),
+				change != null && !change.initial());
+			var expression = change == null ? null : change.expression();
+			propertyNode.setTextRegion(expression == null
+				? parentNode.getSignificantTextRegion()
+				: locationInFileProvider.getSignificantTextRegion(expression));
 		}
 	}
 

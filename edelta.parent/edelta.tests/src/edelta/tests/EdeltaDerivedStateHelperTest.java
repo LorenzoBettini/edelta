@@ -54,7 +54,7 @@ public class EdeltaDerivedStateHelperTest extends EdeltaAbstractTest {
 		copies.setCopies(List.of(copied), Map.of(original, copied));
 		var snapshot = copies.getOriginalToCopyMap();
 		assertThat(snapshot).containsEntry(original, copied);
-		assertThatThrownBy(() -> snapshot.clear())
+		assertThatThrownBy(snapshot::clear)
 			.isInstanceOf(UnsupportedOperationException.class);
 		copies.clear();
 		assertThat(copies.getOriginalToCopyMap()).isEmpty();
