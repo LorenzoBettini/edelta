@@ -28,7 +28,6 @@ import com.google.inject.Inject;
 import edelta.edelta.EdeltaModifyEcoreOperation;
 import edelta.edelta.EdeltaOperation;
 import edelta.edelta.EdeltaProgram;
-import edelta.edelta.EdeltaTestModelPath;
 import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.resource.derivedstate.EdeltaModelPreview;
 import edelta.ui.labeling.EdeltaLabelProvider;
@@ -96,14 +95,6 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		}
 	}
 
-	/** Creates roots from the private preview resource, without following references. */
-	protected void _createChildren(final ModelResourceOutlineNode parentNode,
-			final EdeltaTestModelPath declaration) {
-		for (var root : parentNode.model.resource().getContents()) {
-			createNode(parentNode, root);
-		}
-	}
-
 	public boolean _isLeaf(final EdeltaOperation m) { // NOSONAR OutlineTreeProvider in Xtext is based on some redefined methods starting with _
 		return true;
 	}
@@ -121,6 +112,12 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 
 	@Override
 	protected void _createChildren(final IOutlineNode parentNode, final EObject modelElement) {
+		if (parentNode instanceof ModelResourceOutlineNode modelResourceNode) {
+			for (var root : modelResourceNode.model.resource().getContents()) {
+				createNode(parentNode, root);
+			}
+			return;
+		}
 		super._createChildren(parentNode, modelElement);
 		if (parentNode instanceof ModelObjectOutlineNode) {
 			for (final var row : modelPropertyRows.get(modelElement)) {
