@@ -266,7 +266,7 @@ public class EdeltaModelMigrator {
 					if (copy != null)
 						newResource.getContents().add(copy);
 				}
-			} catch (RuntimeException | Error exception) {
+			} catch (RuntimeException | Error exception) { // NOSONAR: catching RuntimeException and Error to allow preview interpreters to observe failures
 				onModelCopyFailure(resource, root, exception);
 				throw exception;
 			}
