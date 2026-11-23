@@ -6,6 +6,7 @@ package edelta.ui.outline;
 import org.eclipse.emf.ecore.ENamedElement;
 import java.util.Objects;
 
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -125,7 +126,8 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 			for (final var row : modelPropertyRows.get(modelElement)) {
 				checkCanceled();
 				var propertyNode = new ModelPropertyOutlineNode(modelElement, row.feature(),
-					parentNode, row.label());
+					parentNode, imageHelper.getImage(row.feature() instanceof EAttribute
+						? "EAttribute.gif" : "EReference.gif"), row.label());
 				propertyNode.setTextRegion(parentNode.getSignificantTextRegion());
 			}
 		} else if (modelElement.eClass().getEPackage() == EcorePackage.eINSTANCE) {
@@ -222,8 +224,8 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		private final EObject owner;
 
 		ModelPropertyOutlineNode(EObject owner, EStructuralFeature feature, IOutlineNode parent,
-				String text) {
-			super(owner, feature, parent, (Image) null, text, true);
+				Image image, String text) {
+			super(owner, feature, parent, image, text, true);
 			this.owner = owner;
 		}
 
