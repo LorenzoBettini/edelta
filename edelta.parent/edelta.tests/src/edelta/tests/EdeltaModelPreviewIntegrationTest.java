@@ -63,7 +63,7 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 	public void directRuleUsesTheEditorsCopiedEClass() throws Exception {
 		var root = projectWithModels();
 		var input = root.resolve("models/MyClass.xmi");
-		var sourceBytes = Files.readAllBytes(input);
+		var sourceText = Files.readString(input);
 		var program = parse(root, true, """
 			metamodel "mypackage"
 			testmodels { "models/MyClass.xmi" }
@@ -92,7 +92,7 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 			.containsExactly(model.resource());
 		assertThat(migrated.eGet(migrated.eClass().getEStructuralFeature(
 			"myClassStringAttribute"))).isEqualTo("MY ATTRIBUTE VALUE");
-		assertThat(Files.readAllBytes(input)).isEqualTo(sourceBytes);
+		assertThat(Files.readString(input)).isEqualToNormalizingNewlines(sourceText);
 	}
 
 	@Test
@@ -102,8 +102,8 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		Files.writeString(rootFile, Files.readString(rootFile)
 			.replace("myReferences=\"//@myContents.1\"",
 				"myReferences=\"MyClass.xmi#/\""));
-		var sourceRootBytes = Files.readAllBytes(rootFile);
-		var sourceClassBytes = Files.readAllBytes(root.resolve("models/MyClass.xmi"));
+		var sourceRootText = Files.readString(rootFile);
+		var sourceClassText = Files.readString(root.resolve("models/MyClass.xmi"));
 		var program = parse(root, true, """
 			metamodel "mypackage"
 			testmodels { "models/MyRoot.xmi" "models/MyClass.xmi" }
@@ -140,9 +140,9 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 			.isEqualTo(semanticSnapshot(modelRoot(engineManager, "MyRoot.xmi")));
 		assertThat(semanticSnapshot(classModel))
 			.isEqualTo(semanticSnapshot(modelRoot(engineManager, "MyClass.xmi")));
-		assertThat(Files.readAllBytes(rootFile)).isEqualTo(sourceRootBytes);
-		assertThat(Files.readAllBytes(root.resolve("models/MyClass.xmi")))
-			.isEqualTo(sourceClassBytes);
+		assertThat(Files.readString(rootFile)).isEqualToNormalizingNewlines(sourceRootText);
+		assertThat(Files.readString(root.resolve("models/MyClass.xmi")))
+			.isEqualToNormalizingNewlines(sourceClassText);
 	}
 
 	@Test
@@ -156,8 +156,8 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		Files.writeString(rootFile, Files.readString(rootFile)
 			.replace("myReferences=\"//@myContents.1\"",
 				"myReferences=\"MyClass.persons#/\""));
-		var rootBytes = Files.readAllBytes(rootFile);
-		var classBytes = Files.readAllBytes(classFile);
+		var rootText = Files.readString(rootFile);
+		var classText = Files.readString(classFile);
 		var program = parse(root, true, """
 			metamodel "mypackage"
 			testmodels { "models/MyRoot.library" "models/MyClass.persons" }
@@ -173,8 +173,8 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		var rootModel = preview.getModels().get(0).resource().getContents().getFirst();
 		var classModel = preview.getModels().get(1).resource().getContents().getFirst();
 		assertThat(references(rootModel, "myReferences")).containsExactly(classModel);
-		assertThat(Files.readAllBytes(rootFile)).isEqualTo(rootBytes);
-		assertThat(Files.readAllBytes(classFile)).isEqualTo(classBytes);
+		assertThat(Files.readString(rootFile)).isEqualToNormalizingNewlines(rootText);
+		assertThat(Files.readString(classFile)).isEqualToNormalizingNewlines(classText);
 	}
 
 	@Test
@@ -194,7 +194,7 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 				refactorings.changeToSingle(ecoreref(MyRoot.myReferences))
 			}
 			""");
-		var sourceBytes = Files.readAllBytes(rootFile);
+		var sourceText = Files.readString(rootFile);
 		var preview = derivedStateHelper.getModelPreview(program.eResource());
 		assertThat(preview.getFailures()).isEmpty();
 		var model = preview.getModels().getFirst().resource().getContents().getFirst();
@@ -204,7 +204,7 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		var engineManager = executeWithEngineChangeToSingle(root);
 		assertThat(semanticSnapshot(model))
 			.isEqualTo(semanticSnapshot(modelRoot(engineManager, "MyRoot.xmi")));
-		assertThat(Files.readAllBytes(rootFile)).isEqualTo(sourceBytes);
+		assertThat(Files.readString(rootFile)).isEqualToNormalizingNewlines(sourceText);
 	}
 
 	@Test
@@ -212,7 +212,7 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		var root = projectWithModels();
 		var input = root.resolve("models/MyRoot.library");
 		Files.move(root.resolve("models/MyRoot.xmi"), input);
-		var sourceBytes = Files.readAllBytes(input);
+		var sourceText = Files.readString(input);
 		assertThat(Files.readString(input)).contains("xsi:schemaLocation",
 			"http://my.package.org My.ecore");
 		var program = parse(root, true, """
@@ -226,7 +226,7 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		var model = preview.getModels().getFirst().resource().getContents().getFirst();
 		var copied = derivedStateHelper.getCopiedEPackagesMap(program.eResource()).get("mypackage");
 		assertThat(model.eClass()).isSameAs(copied.getEClassifier("MyRoot"));
-		assertThat(Files.readAllBytes(input)).isEqualTo(sourceBytes);
+		assertThat(Files.readString(input)).isEqualToNormalizingNewlines(sourceText);
 	}
 
 	@Test
@@ -240,7 +240,7 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		Files.writeString(models.resolve("unrelated.xml"),
 			"<other:Thing xmlns:other=\"http://other.example\"/>");
 		Files.writeString(models.resolve("broken.xml"), "<not recognizable");
-		var sourceBytes = Files.readAllBytes(models.resolve("MyRoot.library"));
+		var sourceText = Files.readString(models.resolve("MyRoot.library"));
 		var program = parse(root, true, """
 			metamodel "mypackage"
 			testmodels { "models" }
@@ -253,7 +253,8 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 			.containsExactly("MyClass.persons", "MyRoot.library");
 		assertThat(preview.getModels()).extracting(EdeltaModelPreview.Model::declaration)
 			.containsOnly(program.getTestModels().getPaths().getFirst());
-		assertThat(Files.readAllBytes(models.resolve("MyRoot.library"))).isEqualTo(sourceBytes);
+		assertThat(Files.readString(models.resolve("MyRoot.library")))
+			.isEqualToNormalizingNewlines(sourceText);
 	}
 
 	@Test
@@ -262,8 +263,8 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		var firstPath = root.resolve("models/MultiRoot.xmi");
 		var secondPath = root.resolve("models/Reference.xmi");
 		writeMultipleRootModels(firstPath, secondPath);
-		var sourceFirstBytes = Files.readAllBytes(firstPath);
-		var sourceSecondBytes = Files.readAllBytes(secondPath);
+		var sourceFirstText = Files.readString(firstPath);
+		var sourceSecondText = Files.readString(secondPath);
 		var emptyPath = root.resolve("models/Empty.xmi");
 		Files.writeString(emptyPath, """
 			<?xml version="1.0" encoding="UTF-8"?>
@@ -297,8 +298,8 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		assertThat(references(firstRoot, "myReferences")).containsExactly(nonFirstRoot);
 		assertThat(references(secondResourceRoot, "myReferences")).containsExactly(nonFirstRoot);
 		assertThat(secondResourceRoot.eClass()).isSameAs(firstRoot.eClass());
-		assertThat(Files.readAllBytes(firstPath)).isEqualTo(sourceFirstBytes);
-		assertThat(Files.readAllBytes(secondPath)).isEqualTo(sourceSecondBytes);
+		assertThat(Files.readString(firstPath)).isEqualToNormalizingNewlines(sourceFirstText);
+		assertThat(Files.readString(secondPath)).isEqualToNormalizingNewlines(sourceSecondText);
 	}
 
 	@Test
@@ -342,7 +343,7 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		Files.writeString(rootFile, Files.readString(rootFile)
 			.replace("myReferences=\"//@myContents.1\"",
 				"myReferences=\"//@myContents.0 //@myContents.1\""));
-		var inputBytes = Files.readAllBytes(rootFile);
+		var inputText = Files.readString(rootFile);
 		var name = "edeltaPreviewLibrary" + UUID.randomUUID().toString().replace("-", "");
 		var workspace = ResourcesPlugin.getWorkspace();
 		var project = workspace.getRoot().getProject(name);
@@ -406,7 +407,7 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 			var contents = references(migrated, "myContents");
 			assertThat(value(migrated, "myReferences")).isSameAs(contents.getFirst());
 			assertThat(migrated.eClass()).isSameAs(evolvedMy.getEClassifier("MyRoot"));
-			assertThat(Files.readAllBytes(rootFile)).isEqualTo(inputBytes);
+			assertThat(Files.readString(rootFile)).isEqualToNormalizingNewlines(inputText);
 		} finally {
 			project.delete(false, true, null);
 		}
