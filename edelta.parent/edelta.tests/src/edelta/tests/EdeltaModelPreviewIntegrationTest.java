@@ -5,14 +5,19 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.xtext.resource.DerivedStateAwareResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
 import org.eclipse.xtext.testing.InjectWith;
@@ -29,7 +34,11 @@ import com.google.inject.Provider;
 
 import edelta.edelta.EdeltaProgram;
 import edelta.edelta.EdeltaFactory;
+import edelta.lib.EdeltaDefaultRuntime;
+import edelta.lib.EdeltaEngine;
 import edelta.lib.EdeltaModelManager;
+import edelta.lib.EdeltaResourceUtils;
+import edelta.refactorings.lib.EdeltaRefactorings;
 import edelta.resource.EdeltaModelSourceSelector;
 import edelta.resource.derivedstate.EdeltaModelPreview;
 import edelta.validation.EdeltaValidator;
@@ -93,6 +102,8 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		Files.writeString(rootFile, Files.readString(rootFile)
 			.replace("myReferences=\"//@myContents.1\"",
 				"myReferences=\"MyClass.xmi#/\""));
+		var sourceRootBytes = Files.readAllBytes(rootFile);
+		var sourceClassBytes = Files.readAllBytes(root.resolve("models/MyClass.xmi"));
 		var program = parse(root, true, """
 			metamodel "mypackage"
 			testmodels { "models/MyRoot.xmi" "models/MyClass.xmi" }
@@ -123,6 +134,15 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		var copied = derivedStateHelper.getCopiedEPackagesMap(program.eResource()).get("mypackage");
 		assertThat(rootModel.eClass()).isSameAs(copied.getEClassifier("MyRoot"));
 		assertThat(classModel.eClass()).isSameAs(copied.getEClassifier("MyClass"));
+
+		var engineManager = executeWithSuccessiveEngineMigrations(root);
+		assertThat(semanticSnapshot(rootModel))
+			.isEqualTo(semanticSnapshot(modelRoot(engineManager, "MyRoot.xmi")));
+		assertThat(semanticSnapshot(classModel))
+			.isEqualTo(semanticSnapshot(modelRoot(engineManager, "MyClass.xmi")));
+		assertThat(Files.readAllBytes(rootFile)).isEqualTo(sourceRootBytes);
+		assertThat(Files.readAllBytes(root.resolve("models/MyClass.xmi")))
+			.isEqualTo(sourceClassBytes);
 	}
 
 	@Test
@@ -142,12 +162,116 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 				refactorings.changeToSingle(ecoreref(MyRoot.myReferences))
 			}
 			""");
+		var sourceBytes = Files.readAllBytes(rootFile);
 		var preview = derivedStateHelper.getModelPreview(program.eResource());
 		assertThat(preview.getFailures()).isEmpty();
 		var model = preview.getModels().getFirst().resource().getContents().getFirst();
 		var contents = references(model, "myContents");
 		assertThat(value(model, "myReferences")).isSameAs(contents.getFirst());
 		assertThat(model.eClass().getEStructuralFeature("myReferences").isMany()).isFalse();
+		var engineManager = executeWithEngineChangeToSingle(root);
+		assertThat(semanticSnapshot(model))
+			.isEqualTo(semanticSnapshot(modelRoot(engineManager, "MyRoot.xmi")));
+		assertThat(Files.readAllBytes(rootFile)).isEqualTo(sourceBytes);
+	}
+
+	@Test
+	public void relativeSchemaLocationUsesTheImportedEcoreCopy() throws Exception {
+		var root = projectWithModels();
+		var input = root.resolve("models/MyRoot.xmi");
+		var sourceBytes = Files.readAllBytes(input);
+		assertThat(Files.readString(input)).contains("xsi:schemaLocation",
+			"http://my.package.org My.ecore");
+		var program = parse(root, true, """
+			metamodel "mypackage"
+			testmodels { "models/MyRoot.xmi" }
+			modifyEcore evolve epackage mypackage {}
+			""");
+		var preview = derivedStateHelper.getModelPreview(program.eResource());
+		assertThat(preview.getFailures()).isEmpty();
+		assertThat(preview.getModels()).hasSize(1);
+		var model = preview.getModels().getFirst().resource().getContents().getFirst();
+		var copied = derivedStateHelper.getCopiedEPackagesMap(program.eResource()).get("mypackage");
+		assertThat(model.eClass()).isSameAs(copied.getEClassifier("MyRoot"));
+		assertThat(Files.readAllBytes(input)).isEqualTo(sourceBytes);
+	}
+
+	@Test
+	public void emptyAndMultiRootInputsKeepResourceAndReferenceStructure() throws Exception {
+		var root = projectWithModels();
+		var firstPath = root.resolve("models/MultiRoot.xmi");
+		var secondPath = root.resolve("models/Reference.xmi");
+		writeMultipleRootModels(firstPath, secondPath);
+		var sourceFirstBytes = Files.readAllBytes(firstPath);
+		var sourceSecondBytes = Files.readAllBytes(secondPath);
+		var emptyPath = root.resolve("models/Empty.xmi");
+		Files.writeString(emptyPath, """
+			<?xml version="1.0" encoding="UTF-8"?>
+			<xmi:XMI xmlns:xmi="http://www.omg.org/XMI"/>
+			""");
+
+		var program = parse(root, true, """
+			metamodel "mypackage"
+			testmodels { "models/MultiRoot.xmi" "models/Reference.xmi" "models/Empty.xmi" }
+			modifyEcore evolve epackage mypackage {}
+			""");
+		var preview = derivedStateHelper.getModelPreview(program.eResource());
+		assertThat(preview.getFailures()).isEmpty();
+		assertThat(preview.getModels()).hasSize(2);
+		assertThat(preview.getModels()).extracting(m -> m.sourcePath().getFileName().toString())
+			.containsExactly("MultiRoot.xmi", "Reference.xmi");
+		assertThat(preview.getModels()).extracting(EdeltaModelPreview.Model::declaration)
+			.containsExactly(program.getTestModels().getPaths().get(0),
+				program.getTestModels().getPaths().get(1));
+
+		var firstResource = preview.getModels().get(0).resource();
+		var secondResource = preview.getModels().get(1).resource();
+		assertThat(firstResource.getContents()).hasSize(2);
+		var firstRoot = firstResource.getContents().get(0);
+		var nonFirstRoot = firstResource.getContents().get(1);
+		var secondResourceRoot = secondResource.getContents().getFirst();
+		assertThat(firstRoot.eClass().getName()).isEqualTo("MyRoot");
+		assertThat(nonFirstRoot.eClass().getName()).isEqualTo("MyClass");
+		assertThat(value(nonFirstRoot, "myClassStringAttribute"))
+			.isEqualTo("target in the second root");
+		assertThat(references(firstRoot, "myReferences")).containsExactly(nonFirstRoot);
+		assertThat(references(secondResourceRoot, "myReferences")).containsExactly(nonFirstRoot);
+		assertThat(secondResourceRoot.eClass()).isSameAs(firstRoot.eClass());
+		assertThat(Files.readAllBytes(firstPath)).isEqualTo(sourceFirstBytes);
+		assertThat(Files.readAllBytes(secondPath)).isEqualTo(sourceSecondBytes);
+	}
+
+	@Test
+	public void invalidSelectedPathProducesFailureWithoutPartialPreview() throws Exception {
+		var root = projectWithModels();
+		var program = parse(root, true, """
+			metamodel "mypackage"
+			testmodels { "models/MyClass.xmi" "../outside.xmi" }
+			modifyEcore evolve epackage mypackage {}
+			""");
+		var preview = derivedStateHelper.getModelPreview(program.eResource());
+		assertThat(preview.getModels()).isEmpty();
+		assertThat(preview.getFailures()).extracting(EdeltaModelPreview.Failure::code)
+			.containsExactly("INVALID_PATH");
+		assertThat(preview.getFailures().getFirst().source())
+			.isSameAs(program.getTestModels().getPaths().get(1));
+	}
+
+	@Test
+	public void emptyXmiWithoutAnImportedNamespaceIsIgnored() throws Exception {
+		var root = projectWithModels();
+		Files.writeString(root.resolve("models/Empty.xmi"), """
+			<?xml version="1.0" encoding="UTF-8"?>
+			<xmi:XMI xmlns:xmi="http://www.omg.org/XMI"/>
+			""");
+		var program = parse(root, true, """
+			metamodel "mypackage"
+			testmodels { "models/Empty.xmi" }
+			modifyEcore evolve epackage mypackage {}
+			""");
+		var preview = derivedStateHelper.getModelPreview(program.eResource());
+		assertThat(preview.getModels()).isEmpty();
+		assertThat(preview.getFailures()).isEmpty();
 	}
 
 	/** Reproduces a source-interpreted library migration with two borrowed EPackages. */
@@ -455,9 +579,36 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		var root = folder.getRoot().toPath();
 		Files.createDirectories(root.resolve("src"));
 		Files.createDirectories(root.resolve("models"));
+		Files.copy(DATA.resolve("My.ecore"), root.resolve("models/My.ecore"));
 		Files.copy(DATA.resolve("MyClass.xmi"), root.resolve("models/MyClass.xmi"));
 		Files.copy(DATA.resolve("MyRoot.xmi"), root.resolve("models/MyRoot.xmi"));
 		return root;
+	}
+
+	private void writeMultipleRootModels(Path firstPath, Path secondPath) throws Exception {
+		var ecore = new EdeltaModelManager().loadEcoreFile(DATA.resolve("My.ecore").toString());
+		var ePackage = EdeltaResourceUtils.getEPackage(ecore);
+		var resourceSet = new ResourceSetImpl();
+		resourceSet.getPackageRegistry().put(ePackage.getNsURI(), ePackage);
+		resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap()
+			.put("xmi", new XMIResourceFactoryImpl());
+		var firstResource = resourceSet.createResource(URI.createFileURI(firstPath.toString()));
+		var secondResource = resourceSet.createResource(URI.createFileURI(secondPath.toString()));
+		var rootClass = (EClass) ePackage.getEClassifier("MyRoot");
+		var classClass = (EClass) ePackage.getEClassifier("MyClass");
+		var firstRoot = ePackage.getEFactoryInstance().create(rootClass);
+		var nonFirstRoot = ePackage.getEFactoryInstance().create(classClass);
+		nonFirstRoot.eSet(classClass.getEStructuralFeature("myClassStringAttribute"),
+			"target in the second root");
+		var secondResourceRoot = ePackage.getEFactoryInstance().create(rootClass);
+		firstRoot.eSet(rootClass.getEStructuralFeature("myReferences"), List.of(nonFirstRoot));
+		secondResourceRoot.eSet(rootClass.getEStructuralFeature("myReferences"),
+			List.of(nonFirstRoot));
+		firstResource.getContents().add(firstRoot);
+		firstResource.getContents().add(nonFirstRoot);
+		secondResource.getContents().add(secondResourceRoot);
+		firstResource.save(null);
+		secondResource.save(null);
 	}
 
 	private EdeltaProgram parse(Path root, boolean projectConfig, String source) throws Exception {
@@ -488,5 +639,83 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 	@SuppressWarnings("unchecked")
 	private List<EObject> references(EObject object, String feature) {
 		return (List<EObject>) value(object, feature);
+	}
+
+	private EdeltaModelManager executeWithSuccessiveEngineMigrations(Path root) throws Exception {
+		var engine = new EdeltaEngine(other -> new EdeltaDefaultRuntime(other) {
+			@Override
+			protected void doExecute() {
+				var attribute = getEAttribute("mypackage", "MyClass",
+					"myClassStringAttribute");
+				modelMigration(migrator -> migrator.transformAttributeValueRule(
+					migrator.isRelatedTo(attribute), value -> value.toString().toUpperCase()));
+				modelMigration(migrator -> migrator.transformAttributeValueRule(
+					migrator.isRelatedTo(attribute), value -> value + "!"));
+			}
+		});
+		loadEngineInputs(engine, root, "MyRoot.xmi", "MyClass.xmi");
+		engine.execute();
+		return engine.getEvolvingModelManager();
+	}
+
+	private EdeltaModelManager executeWithEngineChangeToSingle(Path root) throws Exception {
+		var engine = new EdeltaEngine(other -> new EdeltaRefactorings(other) {
+			@Override
+			protected void doExecute() {
+				changeToSingle(getEClass("mypackage", "MyRoot")
+					.getEStructuralFeature("myReferences"));
+			}
+		});
+		loadEngineInputs(engine, root, "MyRoot.xmi");
+		engine.execute();
+		return engine.getEvolvingModelManager();
+	}
+
+	private void loadEngineInputs(EdeltaEngine engine, Path root, String... models) {
+		engine.loadEcoreFile(root.resolve("models/My.ecore").toString());
+		for (var model : models) {
+			engine.loadModelFile(root.resolve("models").resolve(model).toString());
+		}
+	}
+
+	private EObject modelRoot(EdeltaModelManager manager, String fileName) {
+		return manager.getModelResources().stream()
+			.filter(resource -> resource.getURI().lastSegment().equals(fileName))
+			.findFirst().orElseThrow().getContents().getFirst();
+	}
+
+	private Map<String, Object> semanticSnapshot(EObject object) {
+		var result = new LinkedHashMap<String, Object>();
+		result.put("class", object.eClass().getName());
+		var features = new LinkedHashMap<String, Object>();
+		for (var feature : object.eClass().getEAllStructuralFeatures()) {
+			var featureValue = object.eGet(feature);
+			if (feature instanceof EReference reference) {
+				featureValue = reference.isContainment()
+					? mapReferences(featureValue, this::semanticSnapshot)
+					: mapReferences(featureValue, this::semanticLabel);
+			} else if (featureValue instanceof List<?> values) {
+				featureValue = List.copyOf(values);
+			}
+			features.put(feature.getName(), featureValue);
+		}
+		result.put("features", features);
+		return result;
+	}
+
+	private Object mapReferences(Object value,
+			java.util.function.Function<EObject, Object> mapper) {
+		if (value instanceof List<?> values) {
+			return values.stream().map(EObject.class::cast).map(mapper).toList();
+		}
+		return value instanceof EObject target ? mapper.apply(target) : value;
+	}
+
+	private String semanticLabel(EObject object) {
+		var attributes = new LinkedHashMap<String, Object>();
+		for (var attribute : object.eClass().getEAllAttributes()) {
+			attributes.put(attribute.getName(), object.eGet(attribute));
+		}
+		return object.eClass().getName() + attributes;
 	}
 }

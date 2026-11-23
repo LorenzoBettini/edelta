@@ -246,7 +246,8 @@ public class EdeltaModelMigrator {
 	}
 
 	/**
-	 * This simulates what the final model migration should do.
+	 * This simulates what the final model migration should do, preserving every
+	 * root in each model resource and the original resource order.
 	 */
 	public void copyModels() {
 		copyModels(modelCopier, originalModelManager, evolvingModelManager);
@@ -259,10 +260,12 @@ public class EdeltaModelMigrator {
 			try {
 				var originalResource = (XMIResource) resource;
 				var newResource = into.createModelResource(originalResource);
-				root = originalResource.getContents().get(0);
-				var copy = edeltaModelCopier.copy(root);
-				if (copy != null)
-					newResource.getContents().add(copy);
+				for (var originalRoot : originalResource.getContents()) {
+					root = originalRoot;
+					var copy = edeltaModelCopier.copy(originalRoot);
+					if (copy != null)
+						newResource.getContents().add(copy);
+				}
 			} catch (RuntimeException | Error exception) {
 				onModelCopyFailure(resource, root, exception);
 				throw exception;

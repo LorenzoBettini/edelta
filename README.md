@@ -126,6 +126,12 @@ working display:
 
 See [Interpreter timeouts](docs/interpreter-timeouts.md) for timeout cleanup,
 interrupt handling, and the regression tests for intermittent compilation failures.
+
+### Live model previews
+
+See [Live model previews](docs/model-preview.md) for the `testmodels` syntax,
+project-relative input selection, outline navigation, and preview limitations.
+
 ## Ecore references
 
 See [Ecore reference name clashes](docs/ecore-reference-name-clashes.md) for how

@@ -1,5 +1,8 @@
 package edelta.tests.additional;
 
+import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.impl.DynamicEObjectImpl;
+
 import edelta.edelta.EdeltaTestModels;
 import edelta.interpreter.EdeltaSafeInterpreter;
 import edelta.lib.EdeltaRuntime;
@@ -42,7 +45,14 @@ public class EdeltaFaultInjectingPreviewInterpreter extends EdeltaSafeInterprete
 			});
 		}
 		if (name.equals("final.xmi")) {
-			selection.selected().getFirst().resource().getContents().clear();
+			var resource = selection.selected().getFirst().resource();
+			var root = resource.getContents().getFirst();
+			resource.getContents().set(0, new DynamicEObjectImpl(root.eClass()) {
+				@Override
+				public boolean eIsSet(EStructuralFeature feature) {
+					throw new IllegalStateException("final copy failure");
+				}
+			});
 		}
 		return runtime;
 	}

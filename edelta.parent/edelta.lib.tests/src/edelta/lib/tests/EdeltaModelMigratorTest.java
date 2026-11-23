@@ -17,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,6 +47,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
 import org.eclipse.xtext.xbase.lib.StringExtensions;
@@ -128,6 +131,77 @@ class EdeltaModelMigratorTest {
 		}
 		copier.copyReferences();
 		return new EdeltaModelMigrator(originalModelManager, evolvingModelManager, copier);
+	}
+
+	@Test
+	void copyModelsPreservesAllRootsAndEmptyResources() throws IOException {
+		var tempDir = Files.createTempDirectory(Path.of(OUTPUT), "model-roots-");
+		try {
+			var ecorePath = Files.copy(Path.of(TESTDATA, "simpleTestData", "My.ecore"),
+				tempDir.resolve("My.ecore"));
+			originalModelManager.loadEcoreFile(ecorePath.toString());
+			var originalPackage = originalModelManager.getEPackage("mypackage");
+			var multipleRoots = tempDir.resolve("MultipleRoots.xmi");
+			writeMultipleRootModel(multipleRoots, originalPackage);
+			var emptyResource = tempDir.resolve("Empty.xmi");
+			Files.writeString(emptyResource, """
+				<?xml version="1.0" encoding="UTF-8"?>
+				<xmi:XMI xmlns:xmi="http://www.omg.org/XMI"/>
+				""");
+			originalModelManager.loadModelFile(multipleRoots.toString());
+			originalModelManager.loadModelFile(emptyResource.toString());
+
+			var migrator = new EdeltaModelMigrator(originalModelManager);
+			evolvingModelManager = migrator.getEvolvingModelManager();
+			migrator.copyModels();
+
+			assertThat(evolvingModelManager.getModelResources()).hasSize(2);
+			var copiedMultipleRoots = evolvingModelManager.getModelResources().stream()
+				.filter(r -> r.getURI().lastSegment().equals("MultipleRoots.xmi"))
+				.findFirst().orElseThrow();
+			assertThat(copiedMultipleRoots.getContents()).hasSize(2);
+			var copiedRoot = copiedMultipleRoots.getContents().get(0);
+			var copiedSecondRoot = copiedMultipleRoots.getContents().get(1);
+			assertThat(copiedRoot.eClass().getName()).isEqualTo("MyRoot");
+			assertThat(copiedSecondRoot.eClass().getName()).isEqualTo("MyClass");
+			assertThat(getValueAsList(copiedRoot, getReference(evolvingModelManager,
+				"mypackage", "MyRoot", "myReferences"))).containsExactly(copiedSecondRoot);
+			assertThat(copiedSecondRoot.eClass()).isSameAs(
+				evolvingModelManager.getEPackage("mypackage").getEClassifier("MyClass"));
+
+			var copiedEmptyResource = evolvingModelManager.getModelResources().stream()
+				.filter(r -> r.getURI().lastSegment().equals("Empty.xmi"))
+				.findFirst().orElseThrow();
+			assertThat(copiedEmptyResource.getContents()).isEmpty();
+		} finally {
+			cleanDirectoryRecursive(tempDir.toString());
+		}
+	}
+
+	private void writeMultipleRootModel(Path path, EPackage ePackage) throws IOException {
+		var resourceSet = new ResourceSetImpl();
+		resourceSet.getPackageRegistry().put(ePackage.getNsURI(), ePackage);
+		resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap()
+			.put("xmi", new XMIResourceFactoryImpl());
+		var resource = resourceSet.createResource(URI.createFileURI(path.toString()));
+		var rootClass = (EClass) ePackage.getEClassifier("MyRoot");
+		var root = ePackage.getEFactoryInstance().create(rootClass);
+		var secondRoot = ePackage.getEFactoryInstance().create(
+			(EClass) ePackage.getEClassifier("MyClass"));
+		root.eSet(rootClass.getEStructuralFeature("myReferences"), List.of(secondRoot));
+		resource.getContents().add(root);
+		resource.getContents().add(secondRoot);
+		resource.save(null);
+
+		var xml = Files.readString(path);
+		var tagEnd = xml.indexOf('>', xml.indexOf("<xmi:XMI"));
+		var tag = xml.substring(0, tagEnd);
+		var xsiNamespace = tag.contains("xmlns:xsi=") ? ""
+			: " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"";
+		var schemaLocation = tag.contains("xsi:schemaLocation=") ? ""
+			: " xsi:schemaLocation=\"http://my.package.org My.ecore\"";
+		Files.writeString(path, xml.substring(0, tagEnd) + xsiNamespace + schemaLocation
+			+ xml.substring(tagEnd));
 	}
 
 	@Test
