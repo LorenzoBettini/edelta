@@ -85,7 +85,7 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 			originals.getModelResources().add(selected.resource());
 		}
 		try {
-			migrator = new PreviewMigrator(originals, evolving, copies, preview);
+			migrator = new PreviewMigrator(originals, evolving, copies);
 			return new EdeltaDefaultRuntime(migrator);
 		} catch (RuntimeException exception) {
 			preview.addFailure(new EdeltaModelPreview.Failure("SETUP", declaration,
@@ -202,12 +202,9 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 
 	/** Records callback failures before Xbase or the safe interpreter can recover. */
 	private class PreviewMigrator extends EdeltaModelMigrator {
-		private final EdeltaModelPreview preview;
-
 		private PreviewMigrator(EdeltaModelManager originals, EdeltaModelManager evolving,
-				EdeltaCopiedEPackagesMap copies, EdeltaModelPreview preview) {
+				EdeltaCopiedEPackagesMap copies) {
 			super(originals, evolving, copies.getOriginalToCopyMap());
-			this.preview = preview;
 		}
 
 		@Override
