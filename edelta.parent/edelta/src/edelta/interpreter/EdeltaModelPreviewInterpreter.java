@@ -110,7 +110,7 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 				migrator.copyModels();
 				publishFinalModels();
 			}
-		} catch (RuntimeException | Error exception) {
+		} catch (RuntimeException | Error exception) { // NOSONAR: we want to catch all exceptions, even unchecked ones
 			if (!preview.hasFailures()) {
 				preview.addFailure(new EdeltaModelPreview.Failure(
 					finalCopy ? "FINAL_COPY" : "INTERPRETATION", fallbackExpression(),
@@ -157,9 +157,9 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 		}
 		try {
 			return super.doEvaluate(expression, context, indicator);
-		} catch (RuntimeException | Error exception) {
+		} catch (RuntimeException | Error exception) { // NOSONAR: we want to catch all exceptions, even unchecked ones
 			if (callbackDepth > 0) {
-				for (var cause = (Throwable) exception; cause != null; cause = cause.getCause()) {
+				for (var cause = exception; cause != null; cause = cause.getCause()) {
 					failingExpressions.putIfAbsent(cause, expression);
 				}
 			}
@@ -219,7 +219,7 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 			}
 			try {
 				super.runMigrationCallback(callback);
-			} catch (RuntimeException | Error exception) {
+			} catch (RuntimeException | Error exception) { // NOSONAR: we want to catch all exceptions, even unchecked ones
 				if (!preview.hasFailures()) {
 					preview.addFailure(new EdeltaModelPreview.Failure("MIGRATION",
 						failureExpression(exception, caller), failurePath(), exception,
