@@ -5,6 +5,10 @@ package edelta.examxml.example
 
 metamodel "examxml"
 metamodel "ecore"
+testmodels {
+    "preview-models/exam-split/Exam.xmi"
+}
+
 
 use EdeltaRefactorings as refactorings
 

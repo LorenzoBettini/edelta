@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addressbook2:AddressBook xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:addressbook2="http://addressbook2"
+    xsi:schemaLocation="http://addressbook2 ../../model/AddressBook2.ecore">
+  <persons firstname="Ada" lastname="Lovelace" street="Analytical Engine Rd"
+      zip="10001" city="London"/>
+  <persons firstname="Grace" lastname="Hopper" street="Compiler Avenue"
+      zip="02139" city="Cambridge"/>
+  <persons firstname="Barbara" lastname="Liskov" street="Data Abstraction St"
+      zip="02142" city="Cambridge"/>
+</addressbook2:AddressBook>

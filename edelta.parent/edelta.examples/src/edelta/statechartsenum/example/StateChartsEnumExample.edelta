@@ -3,6 +3,10 @@ import edelta.refactorings.lib.EdeltaRefactorings
 package edelta.statechartsenum.example
 
 metamodel "statechartsenum"
+testmodels {
+    "preview-models/statecharts-enum/Workflow.statechart"
+}
+
 
 use EdeltaRefactorings as refactorings
 

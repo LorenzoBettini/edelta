@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<petrinet:Net
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:petrinet="http://gssi.it/petrinet"
+    xsi:schemaLocation="http://gssi.it/petrinet ../../model/Petrinet.ecore"
+    name="Order processing">
+  <places name="Submitted"
+      dst="//@transitions.0 //@transitions.3"
+      src="//@transitions.2"/>
+  <places name="Processing"
+      dst="//@transitions.1"
+      src="//@transitions.0"/>
+  <places name="Done"
+      dst="//@transitions.2"
+      src="//@transitions.1 //@transitions.3"/>
+  <transitions
+      name="submit"
+      src="//@places.0"
+      dst="//@places.1"/>
+  <transitions
+      name="finish"
+      src="//@places.1"
+      dst="//@places.2"/>
+  <transitions
+      name="restart"
+      src="//@places.2"
+      dst="//@places.0"/>
+  <transitions
+      name="skip"
+      src="//@places.0"
+      dst="//@places.2"/>
+</petrinet:Net>

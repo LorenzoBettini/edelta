@@ -3,6 +3,10 @@ import edelta.refactorings.lib.EdeltaRefactorings
 package edelta.statecharts.example
 
 metamodel "statecharts"
+testmodels {
+    "preview-models/statecharts/Workflow.xmi"
+}
+
 
 use EdeltaRefactorings as refactorings
 

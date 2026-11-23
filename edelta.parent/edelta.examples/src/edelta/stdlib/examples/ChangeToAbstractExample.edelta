@@ -1,6 +1,10 @@
 package edelta.stdlib.examples
 
 metamodel "PersonListForChangeToAbstract"
+testmodels {
+    "preview-models/change-to-abstract/Staff.xmi"
+}
+
 
 modifyEcore exampleOfChangeToAbstract epackage PersonListForChangeToAbstract {
 	val personClass = ecoreref(Person)

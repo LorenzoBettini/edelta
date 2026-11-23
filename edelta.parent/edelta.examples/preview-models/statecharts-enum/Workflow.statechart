@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<statechartsenum:Model
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:statechartsenum="http://www.statechartsenum"
+    xsi:schemaLocation="http://www.statechartsenum ../../model/StateChartsEnum.ecore">
+  <nodes name="Main"
+      type="Initial">
+    <children
+        name="Start"
+        type="Initial"/>
+    <children
+        name="Processing"/>
+    <children
+        name="End"
+        type="Final"/>
+  </nodes>
+  <nodes name="Backup">
+    <children
+        name="BackupStart"
+        type="Initial"/>
+    <children
+        name="BackupProcess"/>
+    <children
+        name="BackupEnd"
+        type="Final"/>
+  </nodes>
+  <nodes name="OrphanFinal"
+      type="Final"/>
+  <transitions
+      name="Start edge"
+      source="//@nodes.0"
+      target="//@nodes.0/@children.0"/>
+  <transitions
+      name="Processing edge"
+      source="//@nodes.0/@children.0"
+      target="//@nodes.0/@children.1"/>
+  <transitions
+      name="End edge"
+      source="//@nodes.0/@children.1"
+      target="//@nodes.0/@children.2"/>
+</statechartsenum:Model>

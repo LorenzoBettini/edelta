@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<statecharts:Model
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:statecharts="http://www.statecharts"
+    xsi:schemaLocation="http://www.statecharts ../../model/StateCharts.ecore">
+  <nodes name="Main">
+    <children
+        name="Start"/>
+    <children
+        name="Working"/>
+    <children
+        name="Finished"/>
+  </nodes>
+  <nodes name="Secondary">
+    <children
+        name="First"/>
+    <children
+        name="Middle"/>
+    <children
+        name="Last"/>
+  </nodes>
+  <nodes name="Solo"/>
+  <transitions
+      name="Main to Start"
+      source="//@nodes.0"
+      target="//@nodes.0/@children.0"/>
+  <transitions
+      name="Start to Working"
+      source="//@nodes.0/@children.0"
+      target="//@nodes.0/@children.1"/>
+  <transitions
+      name="Working to Finished"
+      source="//@nodes.0/@children.1"
+      target="//@nodes.0/@children.2"/>
+</statecharts:Model>

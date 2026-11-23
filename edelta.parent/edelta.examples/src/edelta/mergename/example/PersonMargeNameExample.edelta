@@ -5,6 +5,10 @@ import edelta.refactorings.lib.EdeltaRefactorings
 package edelta.mergename.example
 
 metamodel "addressbook"
+testmodels {
+    "preview-models/merge-name"
+}
+
 
 use EdeltaRefactorings as extension refactorings
 

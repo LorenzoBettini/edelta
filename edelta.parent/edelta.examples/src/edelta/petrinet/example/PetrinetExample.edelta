@@ -7,6 +7,10 @@ package edelta.petrinet.example
 
 metamodel "petrinet" 
 metamodel "ecore"
+testmodels {
+    "preview-models/petrinet/OrderProcessing.xmi"
+}
+
 
 use EdeltaRefactorings as refactorings
 

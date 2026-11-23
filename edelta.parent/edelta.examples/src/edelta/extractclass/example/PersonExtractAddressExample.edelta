@@ -5,6 +5,10 @@ import edelta.refactorings.lib.EdeltaRefactorings
 package edelta.extractclass.example
 
 metamodel "addressbook2"
+testmodels {
+    "preview-models/extract-address/Offices.xmi"
+}
+
 
 use EdeltaRefactorings as extension refactorings
 

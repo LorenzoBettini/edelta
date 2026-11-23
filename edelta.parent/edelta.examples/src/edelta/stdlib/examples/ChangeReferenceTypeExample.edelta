@@ -1,6 +1,10 @@
 package edelta.stdlib.examples
 
 metamodel "PersonListForChangeType"
+testmodels {
+    "preview-models/change-reference-type/People.persons"
+}
+
 
 modifyEcore exampleOfChangeReferenceType epackage PersonListForChangeType {
 	// add another class similar to NameElement

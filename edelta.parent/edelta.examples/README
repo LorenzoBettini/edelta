@@ -9,3 +9,5 @@ Xtext and Xtend generated sources while compiling the Edelta files:
   -Dtycho.localArtifacts=ignore -Djgit.dirtyWorkingTree=ignore
 
 Omit -DskipMWE2 and -DskipXtend when generated sources are not current.
+
+For the live in-memory model previews, see LIVE-MODEL-PREVIEW.md.
