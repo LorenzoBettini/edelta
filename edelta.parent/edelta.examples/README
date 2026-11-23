@@ -1,2 +1,11 @@
 Modified ecores and models will be saved in "modified",
 possibly in subdirectories (see the main files and tests)
+
+To build and test the examples from the repository root, reusing existing
+Xtext and Xtend generated sources while compiling the Edelta files:
+
+./mvnw -B -f edelta.parent/pom.xml verify -pl :edelta.examples -am \
+  -DskipMWE2 -DskipXtend \
+  -Dtycho.localArtifacts=ignore -Djgit.dirtyWorkingTree=ignore
+
+Omit -DskipMWE2 and -DskipXtend when generated sources are not current.
