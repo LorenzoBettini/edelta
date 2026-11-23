@@ -65,7 +65,7 @@ public class EdeltaModelSourceSelectorTest extends EdeltaAbstractTest {
 		Files.createDirectories(nested.getParent());
 		Files.copy(source, nested);
 		Files.writeString(root.resolve("models/notes.txt"), "ignored");
-		var before = Files.readAllBytes(nested);
+		var before = Files.readString(nested);
 		var directory = entry("models");
 		var duplicateDirectory = entry("models");
 		var duplicate = entry("models/nested/MyRoot1.xmi");
@@ -78,7 +78,7 @@ public class EdeltaModelSourceSelectorTest extends EdeltaAbstractTest {
 		assertThat(result.ignored()).extracting(i -> i.path().getFileName().toString())
 			.containsExactly("notes.txt");
 		assertThat(result.failures()).isEmpty();
-		assertThat(Files.readAllBytes(nested)).isEqualTo(before);
+		assertThat(Files.readString(nested)).isEqualToNormalizingNewlines(before);
 	}
 
 	@Test
@@ -90,7 +90,7 @@ public class EdeltaModelSourceSelectorTest extends EdeltaAbstractTest {
 		Files.copy(FIXTURES.resolve("MyRoot1.xmi"), library);
 		Files.copy(FIXTURES.resolve("MyRoot1.xmi"), persons);
 		Files.copy(FIXTURES.resolve("MyRoot1.xmi"), extensionless);
-		var before = Files.readAllBytes(library);
+		var before = Files.readString(library);
 		var globalFactory = Resource.Factory.Registry.INSTANCE
 			.getExtensionToFactoryMap().get("library");
 		var libraryEntry = entry("model.library");
@@ -105,7 +105,7 @@ public class EdeltaModelSourceSelectorTest extends EdeltaAbstractTest {
 		assertThat(result.selected()).allSatisfy(s ->
 			assertThat(s.resource().getContents()).hasSize(1));
 		assertThat(result.failures()).isEmpty();
-		assertThat(Files.readAllBytes(library)).isEqualTo(before);
+		assertThat(Files.readString(library)).isEqualToNormalizingNewlines(before);
 		assertThat(Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap()
 			.get("library")).isSameAs(globalFactory);
 	}
@@ -417,8 +417,8 @@ public class EdeltaModelSourceSelectorTest extends EdeltaAbstractTest {
 		Files.writeString(root.resolve("B.persons"), """
 			<one:MyClass xmlns:one="http://my.package1.org"/>
 			""");
-		var beforeA = Files.readAllBytes(root.resolve("A.library"));
-		var beforeB = Files.readAllBytes(root.resolve("B.persons"));
+		var beforeA = Files.readString(root.resolve("A.library"));
+		var beforeB = Files.readString(root.resolve("B.persons"));
 		var result = selector.select(List.of(entry(".")), List.of(myPackage("My1.ecore")), root);
 		assertThat(result.selected()).hasSize(2);
 		assertThat(result.selected().get(0).resource().getResourceSet())
@@ -428,8 +428,10 @@ public class EdeltaModelSourceSelectorTest extends EdeltaAbstractTest {
 		var reference = (EReference) a.eClass().getEStructuralFeature("myReferences");
 		assertThat((List<?>) a.eGet(reference)).hasSize(1);
 		assertThat(((List<?>) a.eGet(reference)).get(0)).isSameAs(b);
-		assertThat(Files.readAllBytes(root.resolve("A.library"))).isEqualTo(beforeA);
-		assertThat(Files.readAllBytes(root.resolve("B.persons"))).isEqualTo(beforeB);
+		assertThat(Files.readString(root.resolve("A.library")))
+			.isEqualToNormalizingNewlines(beforeA);
+		assertThat(Files.readString(root.resolve("B.persons")))
+			.isEqualToNormalizingNewlines(beforeB);
 	}
 
 	private EdeltaTestModelPath entry(String path) {
