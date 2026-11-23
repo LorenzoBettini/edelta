@@ -14,6 +14,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.xtext.ui.PluginImageHelper;
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.impl.AbstractOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider;
@@ -48,6 +49,9 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 
 	@Inject
 	private EdeltaLabelProvider edeltaLabelProvider;
+
+	@Inject
+	private PluginImageHelper imageHelper;
 
 	/**
 	 * This is needed to access the derived state when creating nodes for
@@ -85,7 +89,8 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	protected void _createChildren(final ModelGroupOutlineNode parentNode, final EdeltaProgram program) {
 		for (var model : derivedStateHelper.getModelPreview(program.eResource()).getModels()) {
 			checkCanceled();
-			var node = new ModelResourceOutlineNode(model, parentNode);
+			var node = new ModelResourceOutlineNode(model, parentNode,
+				imageHelper.getImage("ModelFile.gif"));
 			node.setTextRegion(locationInFileProvider.getSignificantTextRegion(model.declaration()));
 		}
 	}
@@ -197,9 +202,8 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	public static class ModelResourceOutlineNode extends AbstractOutlineNode {
 		private final EdeltaModelPreview.Model model;
 
-		ModelResourceOutlineNode(EdeltaModelPreview.Model model, IOutlineNode parent) {
-			super(parent, PlatformUI.getWorkbench().getSharedImages()
-				.getImage(ISharedImages.IMG_OBJ_FILE), model.sourcePath().getFileName().toString(),
+		ModelResourceOutlineNode(EdeltaModelPreview.Model model, IOutlineNode parent, Image image) {
+			super(parent, image, model.sourcePath().getFileName().toString(),
 				model.resource().getContents().isEmpty());
 			this.model = model;
 		}

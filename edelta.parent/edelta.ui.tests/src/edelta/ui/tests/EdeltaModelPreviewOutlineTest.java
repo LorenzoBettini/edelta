@@ -9,8 +9,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
+import org.eclipse.xtext.ui.PluginImageHelper;
 import org.eclipse.xtext.ui.editor.XtextEditor;
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.impl.OutlineNodeElementOpener;
@@ -61,6 +64,9 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 
 	@Inject
 	private OutlineNodeElementOpener opener;
+
+	@Inject
+	private PluginImageHelper imageHelper;
 
 	private XtextEditor editor;
 	private OutlinePage outline;
@@ -182,7 +188,13 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		then(link.getChildren()).isEmpty();
 		then(child(root, ModelObjectOutlineNode.class, "Empty").getChildren()).isEmpty();
 		then(group.getImage()).isNotNull().satisfies(image -> then(image.isDisposed()).isFalse());
-		then(resource.getImage()).isNotNull().satisfies(image -> then(image.isDisposed()).isFalse());
+		then(EdeltaActivator.getInstance().getBundle().getEntry("icons/ModelFile.gif")).isNotNull();
+		var modelImage = imageHelper.getImage("ModelFile.gif");
+		then(modelImage).isNotNull().satisfies(image -> then(image.isDisposed()).isFalse());
+		then(modelImage).isNotSameAs(PlatformUI.getWorkbench().getSharedImages()
+			.getImage(ISharedImages.IMG_OBJ_FILE));
+		then(resource.getImage()).isSameAs(modelImage);
+		then(emptyId.getImage()).isSameAs(modelImage);
 
 		// Opening either level must select the quoted path in the actual editor.
 		assertNavigation(resource, FIRST.indexOf("\"model/Preview.xmi\""));
