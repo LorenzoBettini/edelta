@@ -1,7 +1,11 @@
 package edelta.tests.additional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.impl.DynamicEObjectImpl;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 
 import edelta.edelta.EdeltaTestModels;
 import edelta.interpreter.EdeltaSafeInterpreter;
@@ -21,8 +25,35 @@ public class EdeltaFaultInjectingPreviewInterpreter extends EdeltaSafeInterprete
 	@Override
 	public void configurePreview(EdeltaModelSourceSelector.Result selection,
 			EdeltaModelPreview preview, EdeltaTestModels declaration) {
-		super.configurePreview(selection, preview, declaration);
-		this.selection = selection;
+		this.selection = failsBeforeRoot(selection) ? replaceSelectedResource(selection) : selection;
+		super.configurePreview(this.selection, preview, declaration);
+	}
+
+	private boolean failsBeforeRoot(EdeltaModelSourceSelector.Result selection) {
+		return selection.selected().getFirst().path().getFileName().toString()
+			.equals("before-root.xmi");
+	}
+
+	private EdeltaModelSourceSelector.Result replaceSelectedResource(
+			EdeltaModelSourceSelector.Result selection) {
+		var selected = selection.selected().getFirst();
+		var original = selected.resource();
+		var replacement = new XMIResourceImpl(original.getURI()) {
+			@Override
+			public String getEncoding() {
+				throw new IllegalStateException("copy setup failure");
+			}
+		};
+		var roots = new ArrayList<>(original.getContents());
+		original.getContents().clear();
+		selection.resourceSet().getResources().remove(original);
+		replacement.getContents().addAll(roots);
+		selection.resourceSet().getResources().add(replacement);
+		var replacedSelection = new EdeltaModelSourceSelector.Selected(
+			selected.path(), selected.entry(), replacement);
+		return new EdeltaModelSourceSelector.Result(selection.resourceSet(),
+			List.of(replacedSelection), selection.ignored(), selection.failures(),
+			selection.sourceEntries());
 	}
 
 	@Override

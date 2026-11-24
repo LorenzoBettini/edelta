@@ -83,6 +83,21 @@ public class EdeltaModelPreviewFailureTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	public void finalCopyFailureBeforeRootHasNoObjectContext() throws Exception {
+		var program = parse("before-root.xmi");
+		var preview = derivedStateHelper.getModelPreview(program.eResource());
+		assertThat(preview.getModels()).isEmpty();
+		assertThat(preview.getFailures()).extracting(EdeltaModelPreview.Failure::code)
+			.containsExactly("FINAL_COPY");
+		assertThat(preview.getFailures().getFirst().objectContext()).isNull();
+		var issue = validationTestHelper.validate(program).stream()
+			.filter(i -> EdeltaValidator.MODEL_PREVIEW_FAILURE.equals(i.getCode()))
+			.findFirst().orElseThrow();
+		assertThat(issue.getMessage()).contains("before-root.xmi", "copy setup failure")
+			.doesNotContain("resource root");
+	}
+
+	@Test
 	public void callbackWithoutActiveExpressionUsesOperationBody() throws Exception {
 		var program = parse("callback.xmi");
 		var preview = derivedStateHelper.getModelPreview(program.eResource());
