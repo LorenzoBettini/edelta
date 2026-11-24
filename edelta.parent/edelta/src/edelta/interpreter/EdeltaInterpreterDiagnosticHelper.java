@@ -2,7 +2,12 @@ package edelta.interpreter;
 
 import static edelta.edelta.EdeltaPackage.Literals.EDELTA_TEST_MODEL_PATH__PATH;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.ENamedElement;
@@ -147,10 +152,76 @@ public class EdeltaInterpreterDiagnosticHelper {
 		if (cause == null) {
 			return ".";
 		}
-		while (cause.getCause() != null) {
-			cause = cause.getCause();
+		var chain = new ArrayList<Throwable>();
+		Set<Throwable> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+		for (var current = cause; current != null && seen.add(current);
+				current = current.getCause()) {
+			if (!isWrapper(current)) {
+				chain.add(current);
+			}
 		}
-		return ": " + cause.getClass().getSimpleName() +
-			(cause.getMessage() == null ? "" : ": " + cause.getMessage());
+		var result = new StringBuilder(": ").append(causeSummary(chain.getFirst()));
+		for (var i = 1; i < Math.min(chain.size(), 3); i++) {
+			result.append("\nCaused by: ").append(causeSummary(chain.get(i)));
+		}
+		if (chain.size() > 3) {
+			result.append("\n  ... further causes omitted");
+		}
+		var frames = usefulFrames(chain);
+		if (!frames.isEmpty()) {
+			result.append("\nRelevant stack:");
+			for (var i = 0; i < Math.min(frames.size(), 3); i++) {
+				var frame = frames.get(i);
+				var fileName = frame.getFileName().replace('\\', '/');
+				fileName = fileName.substring(fileName.lastIndexOf('/') + 1);
+				result.append("\n  at ").append(frame.getClassName()).append('.')
+					.append(frame.getMethodName()).append('(').append(fileName)
+					.append(':').append(frame.getLineNumber()).append(')');
+			}
+			if (frames.size() > 3) {
+				result.append("\n  ... further application frames omitted");
+			}
+		}
+		return result.toString();
+	}
+
+	/** Removes generic invocation wrappers while retaining explanatory application causes. */
+	private boolean isWrapper(Throwable cause) {
+		return cause.getCause() != null &&
+			(cause instanceof java.lang.reflect.InvocationTargetException ||
+			 cause instanceof java.lang.reflect.UndeclaredThrowableException);
+	}
+
+	/** Keeps exception text on one short diagnostic line. */
+	private String causeSummary(Throwable cause) {
+		var message = cause.getMessage();
+		var summary = cause.getClass().getSimpleName();
+		if (message != null && !message.isBlank()) {
+			var singleLine = message.replace('\n', ' ').replace('\r', ' ').trim();
+			summary += ": " + (singleLine.length() > 120 ?
+				singleLine.substring(0, 119) + "…" : singleLine);
+		}
+		return summary;
+	}
+
+	/** Selects the innermost useful throw site, without framework or absolute file paths. */
+	private List<StackTraceElement> usefulFrames(List<Throwable> chain) {
+		for (var i = chain.size() - 1; i >= 0; i--) {
+			var frames = new ArrayList<StackTraceElement>();
+			for (var frame : chain.get(i).getStackTrace()) {
+				var name = frame.getClassName();
+				if (frame.getFileName() != null && frame.getLineNumber() >= 0 &&
+						!name.startsWith("java.") && !name.startsWith("jdk.") &&
+						!name.startsWith("sun.") && !name.startsWith("org.eclipse.") &&
+						!name.startsWith("com.google.") &&
+						!name.startsWith("edelta.interpreter.")) {
+					frames.add(frame);
+				}
+			}
+			if (!frames.isEmpty()) {
+				return frames;
+			}
+		}
+		return List.of();
 	}
 }
