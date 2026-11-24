@@ -67,7 +67,13 @@ public class EdeltaModelPreviewDiagnosticsTest extends EdeltaAbstractTest {
 		var issue = onlyPreviewIssue(program);
 		assertIssue(issue, EdeltaValidator.MODEL_PREVIEW_FAILURE, source,
 			"Integer.parseInt(value.toString)");
-		assertThat(issue.getMessage()).contains("MyClass.xmi", "MyClass", "NumberFormatException");
+		assertThat(issue.getMessage())
+			.startsWith("Model preview migration failed for '")
+			.contains("MyClass.xmi' (resource root MyClass",
+				"NumberFormatException: For input string:")
+			.doesNotContain("\n  at java.", "\n  at org.eclipse.");
+		assertThat(issue.getMessage().lines().filter(line -> line.startsWith("  at ")).toList())
+			.hasSizeLessThanOrEqualTo(3);
 		assertFailedPreview(program, "MIGRATION");
 		var modelPath = root.resolve("models/MyClass.xmi");
 		Files.writeString(modelPath, Files.readString(modelPath)
@@ -124,7 +130,9 @@ public class EdeltaModelPreviewDiagnosticsTest extends EdeltaAbstractTest {
 		var firstNode = NodeModelUtils.getNode(firstBody);
 		assertThat(issue.getOffset()).isEqualTo(firstNode.getOffset());
 		assertThat(issue.getLength()).isEqualTo(firstNode.getLength());
-		assertThat(issue.getMessage()).contains("first operation failed", "MyClass.xmi");
+		assertThat(issue.getMessage())
+			.startsWith("Model preview interpretation failed for '")
+			.contains("MyClass.xmi'", "NullPointerException: first operation failed");
 		assertFailedPreview(program, "INTERPRETATION");
 	}
 
@@ -154,8 +162,10 @@ public class EdeltaModelPreviewDiagnosticsTest extends EdeltaAbstractTest {
 		var issue = onlyPreviewIssue(program);
 		assertIssue(issue, EdeltaValidator.MODEL_PREVIEW_FAILURE, source,
 			"refactorings.fail(it)");
-		assertThat(issue.getMessage()).contains("MyClass.xmi", "MyRoot.xmi",
-			"library failure");
+		assertThat(issue.getMessage())
+			.startsWith("Model preview migration failed for ")
+			.contains("MyClass.xmi", "MyRoot.xmi",
+				"IllegalStateException: library failure");
 		assertThat(library.eResource().getErrors()).noneMatch(d ->
 			d instanceof org.eclipse.xtext.validation.EObjectDiagnosticImpl diagnostic &&
 			EdeltaValidator.MODEL_PREVIEW_FAILURE.equals(diagnostic.getCode()));
