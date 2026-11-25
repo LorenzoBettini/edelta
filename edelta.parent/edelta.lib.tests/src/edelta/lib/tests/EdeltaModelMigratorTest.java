@@ -249,6 +249,211 @@ class EdeltaModelMigratorTest {
 	}
 
 	@Test
+	void attributeRuleCallbacksAndStageMappingAreDistinctFromValueChanges() {
+		var migrator = setupMigrator("simpleTestData/", of("My.ecore"),
+			of("MyClass.xmi", "MyRoot.xmi"));
+		var target = getAttribute(evolvingModelManager, "mypackage", "MyClass",
+			"myClassStringAttribute");
+		var callbacks = new ArrayList<String>();
+		var firstSources = new ArrayList<EAttribute>();
+		var secondSources = new ArrayList<EAttribute>();
+		var firstValues = new ArrayList<Object>();
+		var secondValues = new ArrayList<Object>();
+
+		migrator.runMigrationCallback(m -> {
+			callbacks.add("uppercase");
+			m.transformAttributeValueRule(attribute -> {
+				if (!m.isRelatedTo(attribute, target)) return false;
+				firstSources.add(attribute);
+				assertThat(m.getMigrated(attribute)).isSameAs(target);
+				return true;
+			}, value -> {
+				firstValues.add(value);
+				return value.toString().toUpperCase();
+			});
+		});
+		var firstStageBackup = migrator.getOriginal(target);
+		migrator.runMigrationCallback(m -> {
+			callbacks.add("suffix");
+			m.transformAttributeValueRule(attribute -> {
+				if (!m.isRelatedTo(attribute, target)) return false;
+				secondSources.add(attribute);
+				assertThat(m.getMigrated(attribute)).isSameAs(target);
+				return true;
+			}, value -> {
+				secondValues.add(value);
+				return value + "!";
+			});
+		});
+		migrator.copyModels();
+
+		assertThat(callbacks).containsExactly("uppercase", "suffix");
+		assertThat(firstSources).hasSize(3).containsOnly(firstSources.getFirst());
+		assertThat(secondSources).hasSize(3).containsOnly(secondSources.getFirst());
+		assertThat(secondSources.getFirst()).isNotSameAs(firstSources.getFirst());
+		assertThat(secondSources.getFirst()).isSameAs(firstStageBackup);
+		assertThat(secondSources.getFirst()).isNotSameAs(migrator.getOriginal(target));
+		assertThat(firstValues).containsExactly("My Attribute Value",
+			"contained not referred", "contained referred");
+		assertThat(secondValues).containsExactly("MY ATTRIBUTE VALUE",
+			"CONTAINED NOT REFERRED", "CONTAINED REFERRED");
+		var finalClass = evolvingModelManager.getModelResources().stream()
+			.filter(r -> r.getURI().lastSegment().equals("MyClass.xmi"))
+			.findFirst().orElseThrow().getContents().getFirst();
+		assertThat(finalClass.eGet(target)).isEqualTo("MY ATTRIBUTE VALUE!");
+	}
+
+	@Test
+	void laterUnrelatedAttributeRuleDoesNotApplyToFirstFeature() {
+		var migrator = setupMigrator("toUpperCaseStringAttributes/", of("My.ecore"),
+			of("MyClass.xmi"));
+		var first = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
+		var other = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myOtherAttribute");
+		var firstMatches = new ArrayList<EAttribute>();
+		var otherMatches = new ArrayList<EAttribute>();
+		migrator.transformAttributeValueRule(attribute -> {
+			if (!migrator.isRelatedTo(attribute, first)) return false;
+			firstMatches.add(attribute);
+			return true;
+		}, value -> value.toString().toUpperCase());
+		migrator.transformAttributeValueRule(attribute -> {
+			if (!migrator.isRelatedTo(attribute, other)) return false;
+			otherMatches.add(attribute);
+			assertThat(migrator.getMigrated(attribute)).isSameAs(other);
+			assertThat(migrator.isRelatedTo(attribute, first)).isFalse();
+			return true;
+		}, value -> value + "!");
+		migrator.copyModels();
+
+		assertThat(firstMatches).hasSize(1);
+		assertThat(otherMatches).hasSize(1);
+		var migrated = evolvingModelManager.getModelResources().iterator().next()
+			.getContents().getFirst();
+		assertThat(migrated.eGet(first)).isEqualTo("123");
+		assertThat(migrated.eGet(other)).isEqualTo("a string!");
+	}
+
+	@Test
+	void falsePredicateAndMissingObjectsDoNotRunAttributeTransformer() {
+		var migrator = setupMigrator("simpleTestData/", of("My.ecore"),
+			of("MyClass.xmi"));
+		var callbacks = new ArrayList<String>();
+		var seenFeatures = new ArrayList<EAttribute>();
+		var transformed = new ArrayList<Object>();
+		migrator.runMigrationCallback(m -> {
+			callbacks.add("false predicate");
+			m.transformAttributeValueRule(attribute -> {
+				seenFeatures.add(attribute);
+				return false;
+			}, value -> {
+				transformed.add(value);
+				return value;
+			});
+		});
+		assertThat(callbacks).containsExactly("false predicate");
+		assertThat(seenFeatures).isNotEmpty();
+		assertThat(transformed).isEmpty();
+
+		originalModelManager = new EdeltaModelManager();
+		var emptyMigrator = setupMigrator("simpleTestData/", of("My.ecore"), of());
+		var emptyCallbacks = new ArrayList<String>();
+		var emptyPredicates = new ArrayList<EAttribute>();
+		emptyMigrator.runMigrationCallback(m -> {
+			emptyCallbacks.add("no objects");
+			m.transformAttributeValueRule(attribute -> {
+				emptyPredicates.add(attribute);
+				return true;
+			}, value -> value);
+		});
+		assertThat(emptyCallbacks).containsExactly("no objects");
+		assertThat(emptyPredicates).isEmpty();
+	}
+
+	@Test
+	void matchedAttributeRuleCanLeaveSomeValuesUnchangedOrUntouched() {
+		var migrator = setupMigrator("toUpperCaseStringAttributes/", of("My.ecore"),
+			of("MyClass.xmi", "MyClass2.xmi", "MyClass3.xmi"));
+		var target = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
+		var originalThird = originalModelManager.getModelResources().stream()
+			.filter(r -> r.getURI().lastSegment().equals("MyClass3.xmi"))
+			.findFirst().orElseThrow().getContents().getFirst();
+		assertThat(originalThird.eIsSet(migrator.getOriginal(target))).isFalse();
+		var values = new ArrayList<Object>();
+		var changed = new ArrayList<Boolean>();
+		var objects = new ArrayList<EObject>();
+		migrator.transformAttributeValueRule(migrator.isRelatedTo(target),
+			(attribute, object, value) -> {
+				objects.add(object);
+				values.add(value);
+				var result = value.toString().toUpperCase();
+				changed.add(!Objects.equals(value, result));
+				return result;
+			});
+		assertThat(values).containsExactly("123", "not a number");
+		assertThat(changed).containsExactly(false, true);
+		assertThat(objects).hasSize(2).doesNotContain(originalThird);
+		migrator.copyModels();
+		var finalValues = evolvingModelManager.getModelResources().stream()
+			.map(r -> r.getContents().getFirst().eGet(target)).toList();
+		assertThat(finalValues).containsExactly("123", "NOT A NUMBER", null);
+	}
+
+	@Test
+	void emptyButSetAttributeStillRunsTheTransformer() {
+		var migrator = setupMigrator("toUpperCaseStringAttributes/", of("My.ecore"),
+			of("MyClass3.xmi"));
+		var target = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
+		var original = originalModelManager.getModelResources().iterator().next()
+			.getContents().getFirst();
+		original.eSet(migrator.getOriginal(target), "");
+		var values = new ArrayList<Object>();
+		migrator.transformAttributeValueRule(migrator.isRelatedTo(target), value -> {
+			values.add(value);
+			return value;
+		});
+		assertThat(values).containsExactly("");
+		migrator.copyModels();
+		var migrated = evolvingModelManager.getModelResources().iterator().next()
+			.getContents().getFirst();
+		assertThat(migrated.eIsSet(target)).isTrue();
+		assertThat(migrated.eGet(target)).isEqualTo("");
+	}
+
+	@Test
+	void matchingOnlyOneInstanceStillProducesAFeatureLevelMatch() {
+		var migrator = setupMigrator("simpleTestData/", of("My.ecore"),
+			of("MyClass.xmi", "MyRoot.xmi"));
+		var target = getAttribute(evolvingModelManager, "mypackage", "MyClass",
+			"myClassStringAttribute");
+		var visits = new ArrayList<EAttribute>();
+		var transformed = new ArrayList<Object>();
+		migrator.transformAttributeValueRule(attribute -> {
+			if (!migrator.isRelatedTo(attribute, target)) return false;
+			visits.add(attribute);
+			return visits.size() == 1;
+		}, value -> {
+			transformed.add(value);
+			return value + "!";
+		});
+		migrator.copyModels();
+		assertThat(visits).hasSize(3);
+		assertThat(transformed).hasSize(1);
+		var classRoot = evolvingModelManager.getModelResources().stream()
+			.filter(r -> r.getURI().lastSegment().equals("MyClass.xmi"))
+			.findFirst().orElseThrow().getContents().getFirst();
+		var root = evolvingModelManager.getModelResources().stream()
+			.filter(r -> r.getURI().lastSegment().equals("MyRoot.xmi"))
+			.findFirst().orElseThrow().getContents().getFirst();
+		var contents = getValueAsList(root,
+			getReference(evolvingModelManager, "mypackage", "MyRoot", "myContents"));
+		var values = new ArrayList<Object>();
+		values.add(classRoot.eGet(target));
+		contents.forEach(o -> values.add(o.eGet(target)));
+		assertThat(values).filteredOn(v -> v.toString().endsWith("!")).hasSize(1);
+		assertThat(values).filteredOn(v -> !v.toString().endsWith("!")).hasSize(2);
+	}
+
+	@Test
 	void testBorrowedEcoreCrossResourceReferences() {
 		var packages = new ArrayList<EPackage>();
 		var migrator = setupBorrowedMigrator("mutualReferencesUnchanged/",
