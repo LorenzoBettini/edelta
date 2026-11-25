@@ -9,6 +9,8 @@ import java.util.function.Consumer;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.xbase.XAbstractFeatureCall;
 import org.eclipse.xtext.xbase.XBlockExpression;
@@ -40,6 +42,7 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 	private PreviewMigrator migrator;
 	private EdeltaProgram activeProgram;
 	private XExpression activeUserCall;
+	private XExpression migrationExpression;
 	private XBlockExpression lastEvaluatedOperationBody;
 	private int callbackDepth;
 	private final IdentityHashMap<Throwable, XExpression> failingExpressions =
@@ -118,6 +121,7 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 			}
 			throw exception;
 		} finally {
+			if (migrator != null) migrator.clearTrace();
 			if (preview.hasFailures() && migrator != null) {
 				for (var resource : migrator.getEvolvingModelManager().getModelResources()) {
 					resource.unload();
@@ -134,6 +138,7 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 			migrator = null;
 			activeProgram = null;
 			activeUserCall = null;
+			migrationExpression = null;
 			lastEvaluatedOperationBody = null;
 			callbackDepth = 0;
 			failingExpressions.clear();
@@ -188,13 +193,37 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 	private void publishFinalModels() {
 		var resources = new ArrayList<>(migrator.getEvolvingModelManager().getModelResources());
 		preview.setModels(EdeltaModelPreview.associate(selection.selected(), resources));
+		preview.setMigrationExpressions(migrator.trace.snapshot());
+	}
+
+	/**
+	 * Returns a source token only for a parsed expression owned by this program.
+	 *
+	 * @param program the currently edited program
+	 * @param candidate the active caller
+	 * @return the eligible user expression, or {@code null}
+	 */
+	public static XExpression userMigrationExpression(EdeltaProgram program, XExpression candidate) {
+		if (candidate == null || program == null || program.eResource() == null
+				|| candidate.eResource() != program.eResource()
+				|| !EcoreUtil.isAncestor(program, candidate)) return null;
+		var node = NodeModelUtils.findActualNodeFor(candidate);
+		return node != null && node.getLength() > 0 ? candidate : null;
 	}
 
 	/** Records callback failures before Xbase or the safe interpreter can recover. */
 	private class PreviewMigrator extends EdeltaModelMigrator {
+		private final EdeltaModelMigrationTrace trace =
+			new EdeltaModelMigrationTrace(() -> migrationExpression);
+
 		private PreviewMigrator(EdeltaModelManager originals, EdeltaModelManager evolving,
 				EdeltaCopiedEPackagesMap copies) {
 			super(originals, evolving, copies.getOriginalToCopyMap());
+			setMigrationObserver(trace);
+		}
+
+		private void clearTrace() {
+			trace.invalidated();
 		}
 
 		private EObject failureExpression(Throwable exception, XExpression caller) {
@@ -210,6 +239,8 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 		@Override
 		public void runMigrationCallback(Consumer<EdeltaModelMigrator> callback) {
 			var caller = activeUserCall;
+			var previousMigrationExpression = migrationExpression;
+			migrationExpression = userMigrationExpression(activeProgram, caller);
 			if (callbackDepth++ == 0) {
 				failingExpressions.clear();
 				copyFailure = null;
@@ -224,6 +255,7 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 				}
 				throw exception;
 			} finally {
+				migrationExpression = previousMigrationExpression;
 				if (--callbackDepth == 0) {
 					failingExpressions.clear();
 					copyFailure = null;

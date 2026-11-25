@@ -10,10 +10,14 @@ Open any listed `.edelta` source in the current Edelta Eclipse editor and expand
 this Eclipse project, **not** to the directory containing the `.edelta` file.
 Selecting an instance whose EClass was renamed in this Edelta source, or a
 property row with a directly changed visible Ecore feature, can select the
-corresponding metamodel expression. Otherwise, selection goes to the declaring
-`testmodels` path. This navigation does not identify which migration expression
-changed a particular model value; imported refactoring expressions also fall
-back to the path when they cannot be tied to the current source.
+corresponding metamodel expression. An attribute row without such a link can
+select the last successfully applied `transformAttributeValueRule` invocation
+for that exact final object and attribute. A successful transformation that
+returns the same value still counts. Without a proven copy lineage or a source
+expression in the current document, selection goes to the declaring `testmodels`
+path. Imported refactoring expressions are never used as offsets in this editor.
+Arbitrary direct EObject modifications outside supported migration operations
+are not tracked and may leave an earlier attribute link stale.
 
 | Edelta program (under `src/edelta/`) | Sample input | What to inspect in the outline |
 | --- | --- | --- |

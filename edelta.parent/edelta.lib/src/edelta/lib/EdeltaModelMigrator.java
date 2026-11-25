@@ -4,7 +4,9 @@ import static edelta.lib.EdeltaEcoreUtil.wrapAsCollection;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -164,6 +166,67 @@ public class EdeltaModelMigrator {
 	private final EdeltaModelManager evolvingModelManager;
 	private Map<EObject, EObject> mapOfCopiedEcores;
 	private EdeltaModelCopier modelCopier;
+	private MigrationObserver migrationObserver;
+
+	/**
+	 * An operation that completed its write to the copied model.
+	 *
+	 * @author Lorenzo Bettini
+	 */
+	public record AppliedOperation(EObject sourceObject, EStructuralFeature sourceFeature,
+			EObject targetObject, EStructuralFeature targetFeature) {}
+
+	/**
+	 * Optional observer for semantic applications and complete model-copy stages.
+	 * It is independent of the language interpreter and receives detached snapshots,
+	 * never a mutable copier. Future migration rules may report through the same
+	 * application event once they have established their own success boundary.
+	 *
+	 * @author Lorenzo Bettini
+	 */
+	public interface MigrationObserver {
+		/**
+		 * Called after a migration operation successfully writes its target value.
+		 *
+		 * @param operation the exact source and target pair
+		 */
+		void applied(AppliedOperation operation);
+
+		/**
+		 * Called after all roots and references of a copy stage have succeeded.
+		 * The maps are read-only identity snapshots for this synchronous callback.
+		 *
+		 * @param objectCopies source to target model objects
+		 * @param ecoreCopies source to target Ecore elements
+		 * @param sources input model resources
+		 * @param targets output model resources
+		 */
+		void copied(Map<EObject, EObject> objectCopies, Map<EObject, EObject> ecoreCopies,
+				List<Resource> sources, List<Resource> targets);
+
+		/** Invalidates attribution before an operation with unsupported lineage. */
+		void invalidated();
+	}
+
+	/**
+	 * Installs optional observation for a private preview migrator.
+	 *
+	 * @param observer the observer, or {@code null} to disable observation
+	 */
+	protected void setMigrationObserver(MigrationObserver observer) {
+		migrationObserver = observer;
+	}
+
+	private void invalidateMigrationObservation() {
+		if (migrationObserver != null)
+			migrationObserver.invalidated();
+	}
+
+	private void reportApplied(EAttribute sourceFeature, EObject sourceObject, Setting target) {
+		if (migrationObserver != null)
+			migrationObserver.applied(new AppliedOperation(sourceObject, sourceFeature,
+				target.getEObject(), target.getEStructuralFeature()));
+	}
 
 	@FunctionalInterface
 	public static interface CopyProcedure
@@ -272,6 +335,15 @@ public class EdeltaModelMigrator {
 			}
 		}
 		edeltaModelCopier.copyReferences();
+		if (migrationObserver != null) {
+			var objectCopies = new IdentityHashMap<EObject, EObject>();
+			objectCopies.putAll(edeltaModelCopier);
+			var ecoreCopies = new IdentityHashMap<EObject, EObject>();
+			ecoreCopies.putAll(edeltaModelCopier.ecoreCopyMap);
+			migrationObserver.copied(Collections.unmodifiableMap(objectCopies),
+				Collections.unmodifiableMap(ecoreCopies), List.copyOf(models),
+				List.copyOf(into.getModelResources()));
+		}
 	}
 
 	/**
@@ -309,9 +381,12 @@ public class EdeltaModelMigrator {
 			@Override
 			protected void copyAttributeValue(EAttribute eAttribute,
 					EObject eObject, Object value, Setting setting) {
-				if (predicate.test(eAttribute))
+				var matched = predicate.test(eAttribute);
+				if (matched)
 					value = function.apply(value);
 				super.copyAttributeValue(eAttribute, eObject, value, setting);
+				if (matched)
+					reportApplied(eAttribute, eObject, setting);
 			}
 		};
 		copyModels(modelCopier, originalModelManager, evolvingModelManager);
@@ -340,10 +415,13 @@ public class EdeltaModelMigrator {
 			@Override
 			protected void copyAttributeValue(EAttribute eAttribute,
 					EObject eObject, Object value, Setting setting) {
-				if (predicate.test(eAttribute)) {
+				var matched = predicate.test(eAttribute);
+				if (matched) {
 					value = function.apply(eAttribute, eObject, value);
 				}
 				super.copyAttributeValue(eAttribute, eObject, value, setting);
+				if (matched)
+					reportApplied(eAttribute, eObject, setting);
 			}
 		};
 		copyModels(modelCopier, originalModelManager, evolvingModelManager);
@@ -380,6 +458,7 @@ public class EdeltaModelMigrator {
 	public void copyRule(Predicate<EStructuralFeature> predicate,
 			EdeltaModelMigrator.CopyProcedure procedure,
 			Runnable postCopy) {
+		invalidateMigrationObservation();
 		modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 			private static final long serialVersionUID = 1L;
 
@@ -505,6 +584,7 @@ public class EdeltaModelMigrator {
 	 */
 	public void featureMigratorRule(Predicate<EStructuralFeature> predicate,
 			FeatureMigrator function) {
+		invalidateMigrationObservation();
 		modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 			private static final long serialVersionUID = 1L;
 
@@ -548,6 +628,7 @@ public class EdeltaModelMigrator {
 	 */
 	public void mapFeaturesRule(Collection<EStructuralFeature> from,
 			EStructuralFeature to) {
+		invalidateMigrationObservation();
 		modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 			private static final long serialVersionUID = 1L;
 
@@ -573,6 +654,7 @@ public class EdeltaModelMigrator {
 	 */
 	public void createInstanceRule(Predicate<EClass> predicate,
 			EObjectFunction function) {
+		invalidateMigrationObservation();
 		modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 			private static final long serialVersionUID = 1L;
 
@@ -735,6 +817,7 @@ public class EdeltaModelMigrator {
 	 * @param oldFeature
 	 */
 	public void copyFrom(EObject newObj, EStructuralFeature newFeature, EObject oldObj, EStructuralFeature oldFeature) {
+		invalidateMigrationObservation();
 		// if the multiplicity changes and the type of the attribute changes we might
 		// end up with a list with a single default value.
 		// if instead we check that the original value of the object for the feature
@@ -782,6 +865,7 @@ public class EdeltaModelMigrator {
 	 * @see #copyFrom(EObject, EStructuralFeature, EObject, EStructuralFeature)
 	 */
 	public void copyFrom(EObject newObj, EObject oldObj) {
+		invalidateMigrationObservation();
 		var oldFeatures = oldObj.eClass().getEAllStructuralFeatures();
 		var newClass = newObj.eClass();
 		for (var oldFeature : oldFeatures) {
@@ -829,6 +913,7 @@ public class EdeltaModelMigrator {
 	 * {@link EdeltaEcoreUtil#createInstance(EClass)}
 	 */
 	public EObject createFrom(EClass newEClass, EObject oldObj) {
+		invalidateMigrationObservation();
 		return EdeltaEcoreUtil.createInstance(newEClass,
 			newObj -> copyFrom(newObj, oldObj)
 		);

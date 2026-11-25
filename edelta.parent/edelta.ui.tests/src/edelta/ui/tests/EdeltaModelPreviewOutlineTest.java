@@ -123,6 +123,42 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 			refactorings.changeToSingle(ecoreref(Root.links))
 		}
 		""";
+	private static final String STAGED = """
+		metamodel "preview"
+		testmodels { "model/Preview.xmi" "model/EmptyId.xmi" }
+		modifyEcore evolve epackage preview {
+			val name = ecoreref(Child.name)
+			modelMigration[
+				transformAttributeValueRule(isRelatedTo(name), [value |
+					value.toString.toUpperCase
+				])
+			]
+			modelMigration[
+				transformAttributeValueRule(isRelatedTo(name), [value |
+					value.toString + "!"
+				])
+			]
+		}
+		""";
+	private static final String MIXED = """
+		import java.util.concurrent.atomic.AtomicInteger
+		metamodel "preview"
+		testmodels { "model/Preview.xmi" "model/EmptyId.xmi" }
+		modifyEcore evolve epackage preview {
+			val name = ecoreref(Child.name)
+			val visits = new AtomicInteger(0)
+			modelMigration[
+				transformAttributeValueRule(isRelatedTo(name), [value |
+					value.toString.toUpperCase
+				])
+			]
+			modelMigration[
+				transformAttributeValueRule([attribute |
+					isRelatedTo(attribute, name) && visits.getAndIncrement() == 0
+				], [value | value.toString + "!"])
+			]
+		}
+		""";
 	private static IFile file;
 
 	@Inject
@@ -371,6 +407,47 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		assertNavigation(child(root, ModelPropertyOutlineNode.class,
 			"links [0..1] = Child ALPHA! (#//@children.0)"),
 			MIGRATED.indexOf("changeToSingle(ecoreref(Root.links))"));
+	}
+
+	@Test
+	public void stagedAttributeRowsNavigateToSecondSuccessfulMigration() {
+		editor.getInternalSourceViewer().getDocument().set(STAGED);
+		var first = awaitNode(ModelObjectOutlineNode.class, "Child ALPHA!");
+		var second = awaitNode(ModelObjectOutlineNode.class, "Child BETA!");
+		var expected = STAGED.lastIndexOf("modelMigration[");
+		assertNavigation(child(first, ModelPropertyOutlineNode.class, "name = \"ALPHA!\""),
+			expected);
+		assertNavigation(child(second, ModelPropertyOutlineNode.class, "name = \"BETA!\""),
+			expected);
+	}
+
+	@Test
+	public void sameAttributeRowsNavigateToDifferentAppliedMigrations() {
+		editor.getInternalSourceViewer().getDocument().set(MIXED);
+		var first = awaitNode(ModelObjectOutlineNode.class, "Child ALPHA!");
+		var second = awaitNode(ModelObjectOutlineNode.class, "Child BETA");
+		assertNavigation(child(first, ModelPropertyOutlineNode.class, "name = \"ALPHA!\""),
+			MIXED.lastIndexOf("modelMigration["));
+		assertNavigation(child(second, ModelPropertyOutlineNode.class, "name = \"BETA\""),
+			MIXED.indexOf("modelMigration["));
+	}
+
+	@Test
+	public void editingAndRestoringProgramReplacesAttributeNavigationTokens() {
+		editor.getInternalSourceViewer().getDocument().set(STAGED);
+		var transformed = awaitNode(ModelObjectOutlineNode.class, "Child ALPHA!");
+		var oldRow = child(transformed, ModelPropertyOutlineNode.class, "name = \"ALPHA!\"");
+		assertNavigation(oldRow, STAGED.lastIndexOf("modelMigration["));
+		editor.getInternalSourceViewer().getDocument().set(FIRST);
+		var original = awaitNode(ModelObjectOutlineNode.class, "FirstChild alpha");
+		assertNavigation(child(original, ModelPropertyOutlineNode.class, "name = \"alpha\""),
+			FIRST.indexOf("\"model/Preview.xmi\""));
+		EObject oldOwner = oldRow.readOnly(object -> object);
+		then(oldOwner).isNull();
+		editor.getInternalSourceViewer().getDocument().set(STAGED);
+		var restored = awaitNode(ModelObjectOutlineNode.class, "Child ALPHA!");
+		assertNavigation(child(restored, ModelPropertyOutlineNode.class, "name = \"ALPHA!\""),
+			STAGED.lastIndexOf("modelMigration["));
 	}
 
 	@Test

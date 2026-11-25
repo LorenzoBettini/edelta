@@ -2,12 +2,16 @@ package edelta.resource.derivedstate;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.xtext.xbase.XExpression;
 
 import edelta.edelta.EdeltaTestModelPath;
 import edelta.resource.EdeltaModelSourceSelector;
@@ -34,6 +38,8 @@ public class EdeltaModelPreview {
 	private List<Model> models = List.of();
 	private final List<Failure> failures = new ArrayList<>();
 	private ResourceSet finalResourceSet;
+	private final Map<EObject, Map<EAttribute, XExpression>> migrationExpressions =
+		new IdentityHashMap<>();
 
 	/**
 	 * Associates final resources with their selected sources. Migration stages
@@ -104,6 +110,36 @@ public class EdeltaModelPreview {
 		finalResourceSet = models.getFirst().resource().getResourceSet();
 	}
 
+	/**
+	 * Publishes exact final-instance attribute expressions after a successful copy.
+	 *
+	 * @param expressions final object and attribute identities mapped to user expressions
+	 */
+	public void setMigrationExpressions(Map<EObject, Map<EAttribute, XExpression>> expressions) {
+		if (hasFailures() || finalResourceSet == null)
+			throw new IllegalStateException("Cannot publish migration expressions without final models");
+		migrationExpressions.clear();
+		for (var entry : expressions.entrySet()) {
+			if (entry.getKey().eResource() != null &&
+					entry.getKey().eResource().getResourceSet() == finalResourceSet)
+				migrationExpressions.put(entry.getKey(), new IdentityHashMap<>(entry.getValue()));
+		}
+	}
+
+	/**
+	 * Returns a successful source expression for this exact final object and attribute.
+	 *
+	 * @param object the final preview object
+	 * @param attribute its final EAttribute
+	 * @return the last applied user expression, or {@code null}
+	 */
+	public XExpression getMigrationExpression(EObject object, EAttribute attribute) {
+		if (object == null || object.eResource() == null ||
+				object.eResource().getResourceSet() != finalResourceSet) return null;
+		var entries = migrationExpressions.get(object);
+		return entries == null ? null : entries.get(attribute);
+	}
+
 	/** Unloads the private final resource set and drops all preview references. */
 	public void clear() {
 		if (finalResourceSet != null) {
@@ -113,6 +149,7 @@ public class EdeltaModelPreview {
 			finalResourceSet.getResources().clear();
 		}
 		models = List.of();
+		migrationExpressions.clear();
 		failures.clear();
 		finalResourceSet = null;
 	}

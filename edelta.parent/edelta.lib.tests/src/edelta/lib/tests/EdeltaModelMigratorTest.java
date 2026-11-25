@@ -45,6 +45,7 @@ import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
@@ -62,6 +63,8 @@ import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaModelMigrator;
 import edelta.lib.EdeltaModelMigrator.CopyProcedure;
 import edelta.lib.EdeltaModelMigrator.EObjectFunction;
+import edelta.lib.EdeltaModelMigrator.AppliedOperation;
+import edelta.lib.EdeltaModelMigrator.MigrationObserver;
 import edelta.lib.EdeltaUtils;
 
 class EdeltaModelMigratorTest {
@@ -301,6 +304,118 @@ class EdeltaModelMigratorTest {
 			.filter(r -> r.getURI().lastSegment().equals("MyClass.xmi"))
 			.findFirst().orElseThrow().getContents().getFirst();
 		assertThat(finalClass.eGet(target)).isEqualTo("MY ATTRIBUTE VALUE!");
+	}
+
+	@Test
+	void semanticObserverUsesExactPairsAndCompletedStageSnapshots() {
+		basedir = TESTDATA + "simpleTestData/";
+		loadEcoreFile("My.ecore");
+		loadModelFile("MyClass.xmi");
+		loadModelFile("MyRoot.xmi");
+		var events = new ArrayList<AppliedOperation>();
+		var stages = new ArrayList<Map<EObject, EObject>>();
+		var mappedFeatures = new ArrayList<Map<EObject, EObject>>();
+		var invalidations = new ArrayList<Boolean>();
+		MigrationObserver observer = new MigrationObserver() {
+			@Override
+			public void applied(AppliedOperation operation) {
+				events.add(operation);
+			}
+
+			@Override
+			public void copied(Map<EObject, EObject> objects, Map<EObject, EObject> ecores,
+					List<Resource> sources, List<Resource> targets) {
+				stages.add(objects);
+				mappedFeatures.add(ecores);
+				assertThat(sources).hasSize(2);
+				assertThat(targets).hasSize(2);
+			}
+
+			@Override
+			public void invalidated() {
+				invalidations.add(true);
+			}
+		};
+		var migrator = new EdeltaModelMigrator(originalModelManager) {
+			{
+				setMigrationObserver(observer);
+			}
+		};
+		evolvingModelManager = migrator.getEvolvingModelManager();
+		var attribute = getAttribute(evolvingModelManager, "mypackage", "MyClass",
+			"myClassStringAttribute");
+		migrator.transformAttributeValueRule(migrator.isRelatedTo(attribute), value -> value);
+		assertThat(events).hasSize(3);
+		for (var event : events) {
+			assertThat(stages.getFirst().get(event.sourceObject()))
+				.isSameAs(event.targetObject());
+			assertThat(mappedFeatures.getFirst().get(event.sourceFeature()))
+				.isSameAs(event.targetFeature()).isSameAs(attribute);
+		}
+		assertThatThrownBy(stages.getFirst()::clear)
+			.isInstanceOf(UnsupportedOperationException.class);
+		var visits = new ArrayList<EAttribute>();
+		migrator.transformAttributeValueRule(source -> {
+			if (!migrator.isRelatedTo(source, attribute)) return false;
+			visits.add(source);
+			return visits.size() == 1;
+		}, (source, object, value) -> value + "!");
+		assertThat(events).hasSize(4);
+		migrator.copyRule(feature -> false, (feature, oldObject, newObject) -> {});
+		assertThat(invalidations).containsExactly(true);
+		migrator.copyModels();
+		assertThat(stages).hasSize(7);
+		var finalClass = evolvingModelManager.getModelResources().stream()
+			.filter(resource -> resource.getURI().lastSegment().equals("MyClass.xmi"))
+			.findFirst().orElseThrow().getContents().getFirst();
+		migrator.copyFrom(EcoreUtil.create(finalClass.eClass()), attribute,
+			finalClass, attribute);
+		assertThat(invalidations).containsExactly(true, true);
+	}
+
+	@Test
+	void semanticObserverSkipsUnsetAndFailedAttributeWrites() {
+		var events = new ArrayList<AppliedOperation>();
+		MigrationObserver observer = new MigrationObserver() {
+			@Override
+			public void applied(AppliedOperation operation) {
+				events.add(operation);
+			}
+
+			@Override
+			public void copied(Map<EObject, EObject> objects, Map<EObject, EObject> ecores,
+					List<Resource> sources, List<Resource> targets) {}
+
+			@Override
+			public void invalidated() {}
+		};
+		basedir = TESTDATA + "toUpperCaseStringAttributes/";
+		loadEcoreFile("My.ecore");
+		loadModelFile("MyClass3.xmi");
+		var migrator = new EdeltaModelMigrator(originalModelManager) {
+			{
+				setMigrationObserver(observer);
+			}
+		};
+		var attribute = getAttribute(migrator.getEvolvingModelManager(), "mypackage",
+			"MyClass", "myAttribute");
+		migrator.transformAttributeValueRule(migrator.isRelatedTo(attribute), value -> "x");
+		assertThat(events).isEmpty();
+
+		originalModelManager = new EdeltaModelManager();
+		loadEcoreFile("My.ecore");
+		loadModelFile("MyClass.xmi");
+		var failing = new EdeltaModelMigrator(originalModelManager) {
+			{
+				setMigrationObserver(observer);
+			}
+		};
+		var failingAttribute = getAttribute(failing.getEvolvingModelManager(), "mypackage",
+			"MyClass", "myAttribute");
+		assertThatThrownBy(() -> failing.transformAttributeValueRule(
+			failing.isRelatedTo(failingAttribute), value -> new Object()))
+			.isInstanceOf(ClassCastException.class);
+		assertThat(events).isEmpty();
 	}
 
 	@Test
@@ -2034,6 +2149,10 @@ class EdeltaModelMigratorTest {
 
 		var notAnEObject = "test".toUpperCase();
 		assertSame(notAnEObject, modelMigrator.getMigrated(notAnEObject));
+		Object originalModel = originalModelManager.getModelResources().iterator().next()
+			.getContents().getFirst();
+		assertSame(modelMigrator.getMigrated((EObject) originalModel),
+			modelMigrator.getMigrated(originalModel));
 
 		var origfeature1 = getAttribute(originalModelManager,
 				"mypackage", "MyClass", "myClassStringAttribute");

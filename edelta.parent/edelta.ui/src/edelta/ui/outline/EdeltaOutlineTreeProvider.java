@@ -143,17 +143,26 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 			var expression = EdeltaModelOutlineNavigation.featureExpression(row.feature(),
 				derivedStateHelper.getCopiedEPackagesMap(source).getOriginal(row.feature()),
 				derivedStateHelper.getModifiedFeatures(source));
-			propertyNode.setTextRegion(modelRegion(parentNode, expression));
+			var migrationExpression = row.feature() instanceof EAttribute attribute
+				? derivedStateHelper.getModelPreview(source)
+					.getMigrationExpression(modelElement, attribute) : null;
+			propertyNode.setTextRegion(modelRegion(parentNode, expression, migrationExpression));
 		}
 	}
 
 	/** Uses a source expression only when it is part of this editor's current program. */
 	private ITextRegion modelRegion(IOutlineNode node, XExpression expression) {
+		return modelRegion(node, expression, null);
+	}
+
+	private ITextRegion modelRegion(IOutlineNode node, XExpression expression,
+			XExpression migrationExpression) {
 		var declaration = node;
 		while (!(declaration instanceof ModelResourceOutlineNode)) {
 			declaration = declaration.getParent();
 		}
 		return EdeltaModelOutlineNavigation.sourceRegion(currentProgram, expression,
+			migrationExpression,
 			declaration.getSignificantTextRegion(),
 			locationInFileProvider::getSignificantTextRegion);
 	}

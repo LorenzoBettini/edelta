@@ -13,14 +13,20 @@ import java.util.UUID;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EcoreFactory;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.xtext.resource.DerivedStateAwareResource;
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
+import org.eclipse.xtext.nodemodel.impl.NodeModelBuilder;
 import org.eclipse.xtext.resource.XtextResourceSet;
+import org.eclipse.xtext.xbase.XbaseFactory;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.workspace.FileProjectConfig;
@@ -39,6 +45,7 @@ import edelta.lib.EdeltaDefaultRuntime;
 import edelta.lib.EdeltaEngine;
 import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaResourceUtils;
+import edelta.interpreter.EdeltaModelPreviewInterpreter;
 import edelta.refactorings.lib.EdeltaRefactorings;
 import edelta.resource.EdeltaModelSourceSelector;
 import edelta.resource.derivedstate.EdeltaModelPreview;
@@ -93,6 +100,14 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 			.containsExactly(model.resource());
 		assertThat(migrated.eGet(migrated.eClass().getEStructuralFeature(
 			"myClassStringAttribute"))).isEqualTo("MY ATTRIBUTE VALUE");
+		var attribute = (org.eclipse.emf.ecore.EAttribute) migrated.eClass()
+			.getEStructuralFeature("myClassStringAttribute");
+		assertThat(NodeModelUtils.findActualNodeFor(
+			preview.getMigrationExpression(migrated, attribute)).getText())
+			.contains("modelMigration", "toUpperCase");
+		assertThat(EdeltaModelPreviewInterpreter.userMigrationExpression(program,
+			preview.getMigrationExpression(migrated, attribute)))
+			.isSameAs(preview.getMigrationExpression(migrated, attribute));
 		assertThat(Files.readString(input)).isEqualToNormalizingNewlines(sourceText);
 	}
 
@@ -131,6 +146,11 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		var rootModel = preview.getModels().get(0).resource().getContents().getFirst();
 		var classModel = preview.getModels().get(1).resource().getContents().getFirst();
 		assertThat(value(classModel, "myClassStringAttribute")).isEqualTo("MY ATTRIBUTE VALUE!");
+		var attribute = (org.eclipse.emf.ecore.EAttribute) classModel.eClass()
+			.getEStructuralFeature("myClassStringAttribute");
+		assertThat(NodeModelUtils.findActualNodeFor(
+			preview.getMigrationExpression(classModel, attribute)).getText())
+			.contains("modelMigration", "value.toString + \"!\"");
 		assertThat(references(rootModel, "myReferences")).containsExactly(classModel);
 		var copied = derivedStateHelper.getCopiedEPackagesMap(program.eResource()).get("mypackage");
 		assertThat(rootModel.eClass()).isSameAs(copied.getEClassifier("MyRoot"));
@@ -144,6 +164,113 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 		assertThat(Files.readString(rootFile)).isEqualToNormalizingNewlines(sourceRootText);
 		assertThat(Files.readString(root.resolve("models/MyClass.xmi")))
 			.isEqualToNormalizingNewlines(sourceClassText);
+	}
+
+	@Test
+	public void sameAttributeInstancesKeepDifferentLastAppliedExpressions() throws Exception {
+		var root = projectWithModels();
+		var program = parse(root, true, """
+			import java.util.concurrent.atomic.AtomicInteger
+			metamodel "mypackage"
+			testmodels { "models/MyClass.xmi" "models/MyRoot.xmi" }
+			modifyEcore evolve epackage mypackage {
+				val attribute = ecoreref(MyClass.myClassStringAttribute)
+				val visits = new AtomicInteger(0)
+				modelMigration[
+					transformAttributeValueRule(isRelatedTo(attribute), [value |
+						value.toString.toUpperCase
+					])
+				]
+				modelMigration[
+					transformAttributeValueRule([candidate |
+						isRelatedTo(candidate, attribute) && visits.getAndIncrement() == 0
+					], [value | value.toString + "!"])
+				]
+			}
+			""");
+		var preview = derivedStateHelper.getModelPreview(program.eResource());
+		assertThat(preview.getFailures()).isEmpty();
+		var first = preview.getModels().get(0).resource().getContents().getFirst();
+		var rootObject = preview.getModels().get(1).resource().getContents().getFirst();
+		var second = references(rootObject, "myContents").getFirst();
+		var attribute = (org.eclipse.emf.ecore.EAttribute) first.eClass()
+			.getEStructuralFeature("myClassStringAttribute");
+		var firstExpression = preview.getMigrationExpression(first, attribute);
+		var secondExpression = preview.getMigrationExpression(second, attribute);
+		assertThat(firstExpression).isNotSameAs(secondExpression);
+		assertThat(NodeModelUtils.findActualNodeFor(firstExpression).getText())
+			.contains("value.toString + \"!\"");
+		assertThat(NodeModelUtils.findActualNodeFor(secondExpression).getText())
+			.contains("toUpperCase");
+	}
+
+	@Test
+	public void migrationExpressionStorageRequiresFinalOwnedModels() {
+		var failedPreview = new EdeltaModelPreview();
+		assertThatThrownBy(() -> failedPreview.setMigrationExpressions(Map.of()))
+			.isInstanceOf(IllegalStateException.class);
+		failedPreview.addFailure(new EdeltaModelPreview.Failure("MIGRATION", null, null, null));
+		assertThatThrownBy(() -> failedPreview.setMigrationExpressions(Map.of()))
+			.isInstanceOf(IllegalStateException.class);
+		var preview = new EdeltaModelPreview();
+		var resourceSet = new ResourceSetImpl();
+		var resource = new ResourceImpl(URI.createURI("memory:/final.xmi"));
+		resourceSet.getResources().add(resource);
+		var object = EcoreFactory.eINSTANCE.createEClass();
+		resource.getContents().add(object);
+		var unrecorded = EcoreFactory.eINSTANCE.createEClass();
+		resource.getContents().add(unrecorded);
+		var foreign = EcoreFactory.eINSTANCE.createEClass();
+		var foreignResource = new ResourceImpl(URI.createURI("memory:/foreign.xmi"));
+		new ResourceSetImpl().getResources().add(foreignResource);
+		foreignResource.getContents().add(foreign);
+		var detached = EcoreFactory.eINSTANCE.createEClass();
+		EAttribute attribute = EcorePackage.Literals.ENAMED_ELEMENT__NAME;
+		var expression = XbaseFactory.eINSTANCE.createXStringLiteral();
+		preview.setModels(List.of(new EdeltaModelPreview.Model(Path.of("input.xmi"),
+			null, resource)));
+		preview.setMigrationExpressions(Map.of(object, Map.of(attribute, expression),
+			foreign, Map.of(attribute, expression), detached, Map.of(attribute, expression)));
+		assertThat(preview.getMigrationExpression(object, attribute)).isSameAs(expression);
+		assertThat(preview.getMigrationExpression(unrecorded, attribute)).isNull();
+		assertThat(preview.getMigrationExpression(object,
+			EcorePackage.Literals.ETYPED_ELEMENT__LOWER_BOUND)).isNull();
+		assertThat(preview.getMigrationExpression(null, attribute)).isNull();
+		assertThat(preview.getMigrationExpression(foreign, attribute)).isNull();
+		assertThat(preview.getMigrationExpression(detached, attribute)).isNull();
+		preview.clear();
+		assertThat(preview.getMigrationExpression(object, attribute)).isNull();
+	}
+
+	@Test
+	public void migrationSourceTokenRejectsDetachedExternalAndUnparsedExpressions() {
+		var program = EdeltaFactory.eINSTANCE.createEdeltaProgram();
+		var candidate = XbaseFactory.eINSTANCE.createXStringLiteral();
+		assertThat(EdeltaModelPreviewInterpreter.userMigrationExpression(null, candidate)).isNull();
+		assertThat(EdeltaModelPreviewInterpreter.userMigrationExpression(program, null)).isNull();
+		assertThat(EdeltaModelPreviewInterpreter.userMigrationExpression(program, candidate))
+			.isNull();
+		var operation = EdeltaFactory.eINSTANCE.createEdeltaModifyEcoreOperation();
+		var body = XbaseFactory.eINSTANCE.createXBlockExpression();
+		body.getExpressions().add(candidate);
+		operation.setBody(body);
+		program.getModifyEcoreOperations().add(operation);
+		var resource = new ResourceImpl();
+		resource.getContents().add(program);
+		assertThat(EdeltaModelPreviewInterpreter.userMigrationExpression(program, candidate))
+			.isNull();
+		var emptyNode = new NodeModelBuilder();
+		emptyNode.associateWithSemanticElement(emptyNode.newRootNode(""), candidate);
+		assertThat(EdeltaModelPreviewInterpreter.userMigrationExpression(program, candidate))
+			.isNull();
+		var unrelated = XbaseFactory.eINSTANCE.createXStringLiteral();
+		resource.getContents().add(unrelated);
+		assertThat(EdeltaModelPreviewInterpreter.userMigrationExpression(program, unrelated))
+			.isNull();
+		var external = XbaseFactory.eINSTANCE.createXStringLiteral();
+		new ResourceImpl().getContents().add(external);
+		assertThat(EdeltaModelPreviewInterpreter.userMigrationExpression(program, external))
+			.isNull();
 	}
 
 	@Test
@@ -361,6 +488,7 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 			resourceSet.getResource(createFileURIFromPath(METAMODEL_PATH + ECORE_ECORE), true);
 			// Loading source forces the cross-source interpreter path used by the editor.
 			parseHelper.parse("""
+				import org.eclipse.emf.ecore.EAttribute
 				import org.eclipse.emf.ecore.EStructuralFeature
 				package previewrefactorings
 				metamodel "ecore"
@@ -368,6 +496,13 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 					feature.upperBound = 1
 					modelMigration[
 						copyRule(isRelatedTo(feature), multiplicityAwareCopy(feature))
+					]
+				}
+				def uppercase(EAttribute feature) {
+					modelMigration[
+						transformAttributeValueRule(isRelatedTo(feature), [value |
+							value.toString.toUpperCase
+						])
 					]
 				}
 				""", URI.createFileURI(root.resolve("src/EdeltaRefactorings.edelta").toString()),
@@ -379,6 +514,7 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 				use previewrefactorings.EdeltaRefactorings as extension refactorings
 				modifyEcore evolve epackage mypackage {
 					refactorings.changeToSingle(ecoreref(MyRoot.myReferences))
+					refactorings.uppercase(ecoreref(MyClass.myClassStringAttribute))
 				}
 				""", URI.createFileURI(root.resolve("src/LibraryRefactoring.edelta").toString()),
 				resourceSet);
@@ -406,6 +542,12 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 			assertThat(evolvedFeature.isMany()).isFalse();
 			var migrated = preview.getModels().getFirst().resource().getContents().getFirst();
 			var contents = references(migrated, "myContents");
+			var attribute = (EAttribute) contents.getFirst().eClass()
+				.getEStructuralFeature("myClassStringAttribute");
+			var sourceExpression = preview.getMigrationExpression(contents.getFirst(), attribute);
+			assertThat(sourceExpression.eResource()).isSameAs(program.eResource());
+			assertThat(NodeModelUtils.findActualNodeFor(sourceExpression).getText())
+				.contains("refactorings.uppercase");
 			assertThat(value(migrated, "myReferences")).isSameAs(contents.getFirst());
 			assertThat(migrated.eClass()).isSameAs(evolvedMy.getEClassifier("MyRoot"));
 			assertThat(Files.readString(rootFile)).isEqualToNormalizingNewlines(inputText);

@@ -118,5 +118,16 @@ public class EdeltaModelOutlineNavigationTest {
 			expr -> null)).isSameAs(declaration);
 		assertThat(EdeltaModelOutlineNavigation.sourceRegion(program, expression, declaration,
 			expr -> new TextRegion(10, 0))).isSameAs(declaration);
+		var secondary = xbase.createXStringLiteral();
+		body.getExpressions().add(secondary);
+		var secondRegion = new TextRegion(20, 8);
+		assertThat(EdeltaModelOutlineNavigation.sourceRegion(program, external, secondary,
+			declaration, expr -> expr == secondary ? secondRegion : selected))
+			.isSameAs(secondRegion);
+		assertThat(EdeltaModelOutlineNavigation.sourceRegion(program, expression, secondary,
+			declaration, expr -> expr == expression ? selected : secondRegion))
+			.isSameAs(selected);
+		assertThat(EdeltaModelOutlineNavigation.sourceRegion(program, external, unrelatedRoot,
+			declaration, expr -> selected)).isSameAs(declaration);
 	}
 }

@@ -91,10 +91,34 @@ public final class EdeltaModelOutlineNavigation {
 	 */
 	public static ITextRegion sourceRegion(EdeltaProgram program, XExpression expression,
 			ITextRegion declaration, Function<XExpression, ITextRegion> regions) {
+		return sourceRegion(program, expression, null, declaration, regions);
+	}
+
+	/**
+	 * Uses the first trustworthy expression, preserving Ecore navigation priority.
+	 *
+	 * @param program the current editor program
+	 * @param primary Ecore metadata expression
+	 * @param secondary attribute-migration expression
+	 * @param declaration declaring model path region
+	 * @param regions resolves source regions
+	 * @return the first eligible expression region, or the declaration
+	 */
+	public static ITextRegion sourceRegion(EdeltaProgram program, XExpression primary,
+			XExpression secondary, ITextRegion declaration,
+			Function<XExpression, ITextRegion> regions) {
+		var region = validRegion(program, primary, regions);
+		if (region != null) return region;
+		region = validRegion(program, secondary, regions);
+		return region == null ? declaration : region;
+	}
+
+	private static ITextRegion validRegion(EdeltaProgram program, XExpression expression,
+			Function<XExpression, ITextRegion> regions) {
 		if (expression == null || program.eResource() == null
 				|| expression.eResource() != program.eResource()
-				|| !EcoreUtil.isAncestor(program, expression)) return declaration;
+				|| !EcoreUtil.isAncestor(program, expression)) return null;
 		var region = regions.apply(expression);
-		return region != null && region.getLength() > 0 ? region : declaration;
+		return region != null && region.getLength() > 0 ? region : null;
 	}
 }
