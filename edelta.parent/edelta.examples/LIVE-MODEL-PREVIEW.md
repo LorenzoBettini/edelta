@@ -8,6 +8,12 @@ and existing regression tests are unchanged.
 Open any listed `.edelta` source in the current Edelta Eclipse editor and expand
 **Evolved test models** in the Outline view. Paths are relative to the root of
 this Eclipse project, **not** to the directory containing the `.edelta` file.
+Selecting an instance whose EClass was renamed in this Edelta source, or a
+property row with a directly changed visible Ecore feature, can select the
+corresponding metamodel expression. Otherwise, selection goes to the declaring
+`testmodels` path. This navigation does not identify which migration expression
+changed a particular model value; imported refactoring expressions also fall
+back to the path when they cannot be tied to the current source.
 
 | Edelta program (under `src/edelta/`) | Sample input | What to inspect in the outline |
 | --- | --- | --- |

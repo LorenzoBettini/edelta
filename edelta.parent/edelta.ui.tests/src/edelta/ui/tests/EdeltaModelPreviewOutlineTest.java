@@ -43,6 +43,65 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 	private static final String PROJECT = "edelta.ui.tests.project";
 	private static final String FIRST = program("FirstChild");
 	private static final String SECOND = program("SecondChild");
+	private static final String DIRECT = """
+		metamodel "preview"
+		testmodels { "model/Preview.xmi" "model/EmptyId.xmi" }
+		modifyEcore evolve epackage preview {
+			ecoreref(Root.link).lowerBound = 1
+		}
+		""";
+	private static final String RENAMED_FEATURE = """
+		metamodel "preview"
+		testmodels { "model/Preview.xmi" "model/EmptyId.xmi" }
+		modifyEcore evolve epackage preview {
+			ecoreref(Root.link).name = "primaryLink"
+		}
+		""";
+	private static final String MULTIPLE_ATTRIBUTE = """
+		import edelta.refactorings.lib.EdeltaRefactorings
+		metamodel "preview"
+		testmodels { "model/Preview.xmi" "model/EmptyId.xmi" }
+		use EdeltaRefactorings as extension refactorings
+		modifyEcore evolve epackage preview {
+			refactorings.changeToMultiple(ecoreref(Child.name))
+		}
+		""";
+	private static final String NEW_FEATURE = """
+		metamodel "preview"
+		metamodel "ecore"
+		testmodels { "model/Preview.xmi" "model/EmptyId.xmi" }
+		modifyEcore evolve epackage preview {
+			ecoreref(Root).EStructuralFeatures += newEAttribute("extra", ecoreref(EString))
+		}
+		""";
+	private static final String RESTORED_NAME = """
+		metamodel "preview"
+		testmodels { "model/Preview.xmi" "model/EmptyId.xmi" }
+		modifyEcore evolve epackage preview {
+			ecoreref(Child).name = "Temporary"
+			ecoreref(Temporary).name = "Child"
+		}
+		""";
+	private static final String SHARED_CHANGE = """
+		import org.eclipse.emf.ecore.EReference
+		metamodel "preview"
+		testmodels { "model/Preview.xmi" "model/EmptyId.xmi" }
+		def changeBoth(EReference feature) {
+			feature.lowerBound = 1
+			feature.upperBound = 3
+		}
+		modifyEcore evolve epackage preview {
+			changeBoth(ecoreref(Root.links))
+		}
+		""";
+	private static final String CONFLICTING = """
+		metamodel "preview"
+		testmodels { "model/Preview.xmi" "model/EmptyId.xmi" }
+		modifyEcore evolve epackage preview {
+			ecoreref(Root.links).lowerBound = 1
+			ecoreref(Root.links).upperBound = 3
+		}
+		""";
 	private static final String MIGRATED = """
 		import edelta.refactorings.lib.EdeltaRefactorings
 		metamodel "preview"
@@ -191,7 +250,7 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 			"link [0..1] = FirstChild alpha (#//@children.0)");
 		assertOutlineImages(group, emptyId, resource, root, link);
 
-		// Opening either level must select the quoted path in the actual editor.
+		// Only the renamed class uses the expression; unrelated rows use the path.
 		assertNavigationAndUnload(resource, root, link, rootObject);
 	}
 
@@ -226,13 +285,69 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 			ModelObjectOutlineNode root, ModelPropertyOutlineNode link, EObject rootObject) {
 		assertNavigation(resource, FIRST.indexOf("\"model/Preview.xmi\""));
 		assertNavigation(root, FIRST.indexOf("\"model/Preview.xmi\""));
-		assertNavigation(root.getChildren().getFirst(), FIRST.indexOf("\"model/Preview.xmi\""));
+		var renamed = root.getChildren().getFirst();
+		assertNavigation(renamed, FIRST.indexOf("name = \"FirstChild\""));
+		assertNavigation(renamed.getChildren().getFirst(), FIRST.indexOf("\"model/Preview.xmi\""));
 		assertNavigation(link, FIRST.indexOf("\"model/Preview.xmi\""));
 		EObject propertyOwner = link.readOnly(object -> object);
 		then(propertyOwner).isSameAs(rootObject);
 		propertyOwner.eResource().unload();
 		EObject unloadedOwner = link.readOnly(object -> object);
 		then(unloadedOwner).isNull();
+	}
+
+	@Test
+	public void directlyChangedReferenceBoundNavigatesToUserExpression() {
+		editor.getInternalSourceViewer().getDocument().set(DIRECT);
+		var row = awaitNode(ModelPropertyOutlineNode.class,
+			"link [1..1] = Child alpha (#//@children.0)");
+		assertNavigation(row, DIRECT.indexOf("lowerBound = 1"));
+		assertNavigation(row.getParent(), DIRECT.indexOf("\"model/Preview.xmi\""));
+	}
+
+	@Test
+	public void renamedFeatureNavigatesToUserExpression() {
+		editor.getInternalSourceViewer().getDocument().set(RENAMED_FEATURE);
+		var row = awaitNode(ModelPropertyOutlineNode.class,
+			"primaryLink [0..1] = Child alpha (#//@children.0)");
+		assertNavigation(row, RENAMED_FEATURE.indexOf("name = \"primaryLink\""));
+	}
+
+	@Test
+	public void attributeScalarToListNavigatesToUserCall() {
+		editor.getInternalSourceViewer().getDocument().set(MULTIPLE_ATTRIBUTE);
+		var row = awaitNode(ModelPropertyOutlineNode.class, "name = [\"alpha\"]");
+		assertNavigation(row, MULTIPLE_ATTRIBUTE.indexOf("changeToMultiple(ecoreref(Child.name))"));
+	}
+
+	@Test
+	public void newlyAddedFeatureKeepsDeclarationFallback() {
+		editor.getInternalSourceViewer().getDocument().set(NEW_FEATURE);
+		var row = awaitNode(ModelPropertyOutlineNode.class, "extra = <unset>");
+		assertNavigation(row, NEW_FEATURE.indexOf("\"model/Preview.xmi\""));
+	}
+
+	@Test
+	public void classRenamedBackToOriginalKeepsDeclarationFallback() {
+		editor.getInternalSourceViewer().getDocument().set(RESTORED_NAME);
+		var instance = awaitNode(ModelObjectOutlineNode.class, "Child alpha");
+		assertNavigation(instance, RESTORED_NAME.indexOf("\"model/Preview.xmi\""));
+	}
+
+	@Test
+	public void oneCallChangingBothVisibleBoundsKeepsDeclarationFallback() {
+		editor.getInternalSourceViewer().getDocument().set(SHARED_CHANGE);
+		var row = awaitNode(ModelPropertyOutlineNode.class,
+			"links [1..3] = [Child alpha (#//@children.0), Child beta (#//@children.1)]");
+		assertNavigation(row, SHARED_CHANGE.indexOf("\"model/Preview.xmi\""));
+	}
+
+	@Test
+	public void separateRelevantChangesKeepDeclarationFallback() {
+		editor.getInternalSourceViewer().getDocument().set(CONFLICTING);
+		var row = awaitNode(ModelPropertyOutlineNode.class,
+			"links [1..3] = [Child alpha (#//@children.0), Child beta (#//@children.1)]");
+		assertNavigation(row, CONFLICTING.indexOf("\"model/Preview.xmi\""));
 	}
 
 	@Test
@@ -250,9 +365,12 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 			.startsWith("links [0..*]"));
 		EObject oldDeclaration = old.readOnly(object -> object);
 		then(oldDeclaration).isNull();
+		assertNavigation(migrated, MIGRATED.indexOf("\"model/Preview.xmi\""));
+		assertNavigation(migrated.getChildren().getFirst(),
+			MIGRATED.indexOf("\"model/Preview.xmi\""));
 		assertNavigation(child(root, ModelPropertyOutlineNode.class,
 			"links [0..1] = Child ALPHA! (#//@children.0)"),
-			MIGRATED.indexOf("\"model/Preview.xmi\""));
+			MIGRATED.indexOf("changeToSingle(ecoreref(Root.links))"));
 	}
 
 	@Test
@@ -289,8 +407,13 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 			"link [0..1] = SecondChild alpha (#//@children.0)")))
 			.isSameAs(referenceImage);
 
-		// New nodes still navigate to the declaration, and editor-to-Ecore linking still works.
-		assertNavigation(fresh, SECOND.indexOf("\"model/Preview.xmi\""));
+		// Fresh nodes use the new source expression; stale objects and rows are detached.
+		assertNavigation(fresh, SECOND.indexOf("name = \"SecondChild\""));
+		assertNavigation(child(fresh, ModelPropertyOutlineNode.class, "name = \"alpha\""),
+			SECOND.indexOf("\"model/Preview.xmi\""));
+		then(fresh.getSignificantTextRegion().getOffset())
+			.isEqualTo(SECOND.indexOf("name = \"SecondChild\""));
+		// Editor-to-Ecore linking still works.
 		var ecore = awaitNode(EcoreOutlineNode.class, "SecondChild");
 		then(ecore).isNotNull();
 		editor.getInternalSourceViewer().setSelectedRange(SECOND.indexOf("ecoreref(Child).name"), 0);

@@ -3,10 +3,10 @@
  */
 package edelta.ui.outline;
 
-import org.eclipse.emf.ecore.ENamedElement;
 import java.util.Objects;
 
 import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -21,7 +21,9 @@ import org.eclipse.xtext.ui.editor.outline.impl.AbstractOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider;
 import org.eclipse.xtext.ui.editor.outline.impl.EObjectNode;
 import org.eclipse.xtext.ui.editor.outline.impl.EStructuralFeatureNode;
+import org.eclipse.xtext.util.ITextRegion;
 import org.eclipse.xtext.util.concurrent.IUnitOfWork;
+import org.eclipse.xtext.xbase.XExpression;
 
 import com.google.inject.Inject;
 
@@ -137,8 +139,23 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 			var propertyNode = new ModelPropertyOutlineNode(modelElement, row.feature(),
 				parentNode, imageHelper.getImage(row.feature() instanceof EAttribute
 					? "EAttribute.gif" : "EReference.gif"), row.label());
-			propertyNode.setTextRegion(parentNode.getSignificantTextRegion());
+			var source = currentProgram.eResource();
+			var expression = EdeltaModelOutlineNavigation.featureExpression(row.feature(),
+				derivedStateHelper.getCopiedEPackagesMap(source).getOriginal(row.feature()),
+				derivedStateHelper.getModifiedFeatures(source));
+			propertyNode.setTextRegion(modelRegion(parentNode, expression));
 		}
+	}
+
+	/** Uses a source expression only when it is part of this editor's current program. */
+	private ITextRegion modelRegion(IOutlineNode node, XExpression expression) {
+		var declaration = node;
+		while (!(declaration instanceof ModelResourceOutlineNode)) {
+			declaration = declaration.getParent();
+		}
+		return EdeltaModelOutlineNavigation.sourceRegion(currentProgram, expression,
+			declaration.getSignificantTextRegion(),
+			locationInFileProvider::getSignificantTextRegion);
 	}
 
 	private void createEcorePropertyChildren(IOutlineNode parentNode, EObject modelElement) {
@@ -176,7 +193,14 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		if (parentNode instanceof ModelResourceOutlineNode || parentNode instanceof ModelObjectOutlineNode) {
 			var node = new ModelObjectOutlineNode(modelElement, parentNode, image,
 				modelLabel(modelElement), isLeaf && !modelPropertyRows.hasRows(modelElement));
-			node.setShortTextRegion(parentNode.getSignificantTextRegion());
+			var eClass = modelElement.eClass();
+			var source = currentProgram.eResource();
+			var expression = EdeltaModelOutlineNavigation.classExpression(eClass,
+				derivedStateHelper.getCopiedEPackagesMap(source).getOriginal(eClass),
+				derivedStateHelper.getModifiedFeatures(source)
+					.get(eClass, EcorePackage.Literals.ENAMED_ELEMENT__NAME),
+				derivedStateHelper.getLastResponsibleExpression(currentProgram, eClass));
+			node.setShortTextRegion(modelRegion(parentNode, expression));
 			return node;
 		}
 		// cannot simply check ENamedElement: EGenericType is not an ENamedElement
