@@ -193,11 +193,15 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 	private void publishFinalModels() {
 		var resources = new ArrayList<>(migrator.getEvolvingModelManager().getModelResources());
 		preview.setModels(EdeltaModelPreview.associate(selection.selected(), resources));
+		// Only the final copy's identities belong in the outline. Once published,
+		// the migrator's working trace can be discarded in the outer finally block.
 		preview.setMigrationExpressions(migrator.trace.snapshot());
 	}
 
 	/**
 	 * Returns a source token only for a parsed expression owned by this program.
+	 * A migration executed inside an imported library can be attributed to the
+	 * user's call into that library, but never to a library-local AST offset.
 	 *
 	 * @param program the currently edited program
 	 * @param candidate the active caller
@@ -240,6 +244,8 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 		public void runMigrationCallback(Consumer<EdeltaModelMigrator> callback) {
 			var caller = activeUserCall;
 			var previousMigrationExpression = migrationExpression;
+			// Freeze the user call for this synchronous callback. The interpreter's
+			// activeUserCall changes while it evaluates nested/library expressions.
 			migrationExpression = userMigrationExpression(activeProgram, caller);
 			if (callbackDepth++ == 0) {
 				failingExpressions.clear();

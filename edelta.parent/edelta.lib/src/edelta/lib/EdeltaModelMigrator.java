@@ -170,6 +170,9 @@ public class EdeltaModelMigrator {
 
 	/**
 	 * An operation that completed its write to the copied model.
+	 * The source pair identifies the value read by the copier; the target pair
+	 * identifies the value written. Both are needed because every migration stage
+	 * has new model objects and may use copied Ecore features.
 	 *
 	 * @author Lorenzo Bettini
 	 */
@@ -181,6 +184,8 @@ public class EdeltaModelMigrator {
 	 * It is independent of the language interpreter and receives detached snapshots,
 	 * never a mutable copier. Future migration rules may report through the same
 	 * application event once they have established their own success boundary.
+	 * For example, a rule that visits two objects with the same attribute reports
+	 * two events, one for each object. A later rule may report only one of them.
 	 *
 	 * @author Lorenzo Bettini
 	 */
@@ -195,6 +200,8 @@ public class EdeltaModelMigrator {
 		/**
 		 * Called after all roots and references of a copy stage have succeeded.
 		 * The maps are read-only identity snapshots for this synchronous callback.
+		 * A preview may use them to replace its old object/feature keys with the
+		 * corresponding keys from this stage, including the final copy stage.
 		 *
 		 * @param objectCopies source to target model objects
 		 * @param ecoreCopies source to target Ecore elements
@@ -336,6 +343,9 @@ public class EdeltaModelMigrator {
 		}
 		edeltaModelCopier.copyReferences();
 		if (migrationObserver != null) {
+			// Report only a complete stage: targets are now attached to resources,
+			// and the copier has its final source-to-target identity associations.
+			// The observer cannot retain or mutate the copier through these snapshots.
 			var objectCopies = new IdentityHashMap<EObject, EObject>();
 			objectCopies.putAll(edeltaModelCopier);
 			var ecoreCopies = new IdentityHashMap<EObject, EObject>();
@@ -386,6 +396,8 @@ public class EdeltaModelMigrator {
 					value = function.apply(value);
 				super.copyAttributeValue(eAttribute, eObject, value, setting);
 				if (matched)
+					// Returning the input unchanged is still a successful application.
+					// An exception from the transformer or write skips this event.
 					reportApplied(eAttribute, eObject, setting);
 			}
 		};
@@ -421,6 +433,8 @@ public class EdeltaModelMigrator {
 				}
 				super.copyAttributeValue(eAttribute, eObject, value, setting);
 				if (matched)
+					// Keep the same success boundary for the overload that receives
+					// the source object and attribute.
 					reportApplied(eAttribute, eObject, setting);
 			}
 		};
@@ -671,6 +685,8 @@ public class EdeltaModelMigrator {
 
 	private void updateMigrationContext() {
 		// here we copy the Ecores and models that have been migrated
+		// copyModels reports this backup stage too. A preview must follow its
+		// object and feature mappings before the next rule reads from backup.
 		var backup = new EdeltaModelManager();
 		// first create a copy of the evolved ecores
 		// map: orig -> copy

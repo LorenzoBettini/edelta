@@ -21,7 +21,10 @@ import org.junit.Test;
 import edelta.interpreter.EdeltaModelMigrationTrace;
 import edelta.lib.EdeltaModelMigrator.AppliedOperation;
 
-/** Exercises exact pair propagation and conservative invalidation without an editor.
+/**
+ * Exercises exact pair propagation and conservative invalidation without an editor.
+ * Each {@link Stage} has fresh EObject and EAttribute identities, as a real
+ * migration stage does, even when the attribute name and values are the same.
  * @author Lorenzo Bettini
  */
 public class EdeltaModelMigrationTraceTest {
@@ -30,6 +33,8 @@ public class EdeltaModelMigrationTraceTest {
 
 	@Test
 	public void onlyTheProcessedPairReceivesTheLaterExpressionAcrossCopies() {
+		// First both objects are processed; then only the first is. The second
+		// must keep the first call's token through every later copy.
 		var firstExpression = XbaseFactory.eINSTANCE.createXStringLiteral();
 		var secondExpression = XbaseFactory.eINSTANCE.createXStringLiteral();
 		var token = new AtomicReference<XExpression>(firstExpression);
@@ -55,6 +60,7 @@ public class EdeltaModelMigrationTraceTest {
 			.isSameAs(firstExpression);
 		assertThat(trace.snapshot()).doesNotContainKey(transformed.first());
 
+		// The final copy has no new application, but replaces both identity keys.
 		var finalStage = stage("ALPHA!", "BETA");
 		copy(trace, next, finalStage);
 		assertThat(expression(trace, finalStage.first(), finalStage.attribute()))
@@ -62,6 +68,8 @@ public class EdeltaModelMigrationTraceTest {
 		assertThat(expression(trace, finalStage.second(), finalStage.attribute()))
 			.isSameAs(firstExpression);
 
+		// A later successful write with no eligible user expression removes the
+		// first object's older token; the untouched second object keeps its own.
 		var noSource = stage("ALPHA!", "BETA");
 		token.set(null);
 		trace.applied(operation(finalStage.first(), finalStage.attribute(),
@@ -70,6 +78,8 @@ public class EdeltaModelMigrationTraceTest {
 		assertThat(expression(trace, noSource.first(), noSource.attribute())).isNull();
 		assertThat(expression(trace, noSource.second(), noSource.attribute()))
 			.isSameAs(firstExpression);
+		// An unsupported operation has unknown scope, so neither old token may
+		// survive. A later supported event can establish a new token from scratch.
 		trace.invalidated();
 		assertThat(trace.snapshot()).isEmpty();
 		var afterUnsupported = stage("ALPHA!", "BETA");
@@ -85,6 +95,8 @@ public class EdeltaModelMigrationTraceTest {
 
 	@Test
 	public void uncertainObjectOrFeatureMappingsNeverTransferAToken() {
+		// Seed a real token, then replace the next copy map with one broken
+		// association at a time. None may retain a link by matching names.
 		var expression = XbaseFactory.eINSTANCE.createXStringLiteral();
 		var source = stage("one", "two");
 		var target = stage("one", "two");
@@ -101,6 +113,8 @@ public class EdeltaModelMigrationTraceTest {
 			List.of(source.resource()), List.of(target.resource()));
 		assertThat(trace.snapshot()).isEmpty();
 
+		// The EAttribute itself must have a copied identity; the EObjects alone
+		// are insufficient to claim which final property received the value.
 		trace = seeded(expression, source);
 		trace.copied(Map.of(source.first(), target.first()), Map.of(),
 			List.of(source.resource()), List.of(target.resource()));
@@ -128,6 +142,9 @@ public class EdeltaModelMigrationTraceTest {
 
 	@Test
 	public void invalidOrUnattributedEventsCannotCreateOrRetainHints() {
+		// These hand-built events resemble inconsistent copier reports: wrong
+		// target object, missing resource, nonattribute feature, wrong feature,
+		// unset input, and an attribute outside the target class.
 		var expression = XbaseFactory.eINSTANCE.createXStringLiteral();
 		var token = new AtomicReference<XExpression>(expression);
 		var source = stage("one", "two");

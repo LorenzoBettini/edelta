@@ -168,6 +168,8 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 
 	@Test
 	public void sameAttributeInstancesKeepDifferentLastAppliedExpressions() throws Exception {
+		// Both instances share one EAttribute and receive uppercase. Only the
+		// first predicate visit receives suffix, so the final tokens must differ.
 		var root = projectWithModels();
 		var program = parse(root, true, """
 			import java.util.concurrent.atomic.AtomicInteger
@@ -206,6 +208,8 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 
 	@Test
 	public void migrationExpressionStorageRequiresFinalOwnedModels() {
+		// A trace must be published after final models and must never expose
+		// objects from another ResourceSet or a discarded preview.
 		var failedPreview = new EdeltaModelPreview();
 		assertThatThrownBy(() -> failedPreview.setMigrationExpressions(Map.of()))
 			.isInstanceOf(IllegalStateException.class);
@@ -244,6 +248,8 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 
 	@Test
 	public void migrationSourceTokenRejectsDetachedExternalAndUnparsedExpressions() {
+		// Matching offsets alone cannot establish an editor target: the node
+		// needs the current program, its resource, and real parsed source text.
 		var program = EdeltaFactory.eINSTANCE.createEdeltaProgram();
 		var candidate = XbaseFactory.eINSTANCE.createXStringLiteral();
 		assertThat(EdeltaModelPreviewInterpreter.userMigrationExpression(null, candidate)).isNull();

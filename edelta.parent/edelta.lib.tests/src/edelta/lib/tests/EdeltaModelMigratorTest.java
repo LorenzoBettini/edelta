@@ -308,6 +308,8 @@ class EdeltaModelMigratorTest {
 
 	@Test
 	void semanticObserverUsesExactPairsAndCompletedStageSnapshots() {
+		// Two model resources contain three values of the same EAttribute.
+		// The no-op below must still report three completed writes.
 		basedir = TESTDATA + "simpleTestData/";
 		loadEcoreFile("My.ecore");
 		loadModelFile("MyClass.xmi");
@@ -354,6 +356,8 @@ class EdeltaModelMigratorTest {
 		}
 		assertThatThrownBy(stages.getFirst()::clear)
 			.isInstanceOf(UnsupportedOperationException.class);
+		// The three-argument overload matches only one of those values. The
+		// observer must see one new event, not a feature-wide application.
 		var visits = new ArrayList<EAttribute>();
 		migrator.transformAttributeValueRule(source -> {
 			if (!migrator.isRelatedTo(source, attribute)) return false;
@@ -361,6 +365,8 @@ class EdeltaModelMigratorTest {
 			return visits.size() == 1;
 		}, (source, object, value) -> value + "!");
 		assertThat(events).hasSize(4);
+		// Even a custom rule whose predicate matches nothing crosses an
+		// unsupported-operation boundary and invalidates prior provenance.
 		migrator.copyRule(feature -> false, (feature, oldObject, newObject) -> {});
 		assertThat(invalidations).containsExactly(true);
 		migrator.copyModels();
@@ -375,6 +381,8 @@ class EdeltaModelMigratorTest {
 
 	@Test
 	void semanticObserverSkipsUnsetAndFailedAttributeWrites() {
+		// A missing input value never reaches copyAttributeValue. An exception
+		// during the target write must likewise leave no success event.
 		var events = new ArrayList<AppliedOperation>();
 		MigrationObserver observer = new MigrationObserver() {
 			@Override

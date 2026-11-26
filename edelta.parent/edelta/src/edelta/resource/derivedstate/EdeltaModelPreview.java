@@ -112,6 +112,9 @@ public class EdeltaModelPreview {
 
 	/**
 	 * Publishes exact final-instance attribute expressions after a successful copy.
+	 * Intermediate copier objects are not valid outline owners. For example,
+	 * an attribute token from the uppercase stage is stored only under the
+	 * corresponding object and attribute from the final preview stage.
 	 *
 	 * @param expressions final object and attribute identities mapped to user expressions
 	 */
@@ -128,6 +131,7 @@ public class EdeltaModelPreview {
 
 	/**
 	 * Returns a successful source expression for this exact final object and attribute.
+	 * An object from an earlier preview or a different resource set has no link.
 	 *
 	 * @param object the final preview object
 	 * @param attribute its final EAttribute

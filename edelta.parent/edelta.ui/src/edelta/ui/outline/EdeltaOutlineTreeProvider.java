@@ -143,6 +143,8 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 			var expression = EdeltaModelOutlineNavigation.featureExpression(row.feature(),
 				derivedStateHelper.getCopiedEPackagesMap(source).getOriginal(row.feature()),
 				derivedStateHelper.getModifiedFeatures(source));
+			// Only an attribute value row has migration provenance. The navigation
+			// helper still gives a relevant Ecore metadata expression first choice.
 			var migrationExpression = row.feature() instanceof EAttribute attribute
 				? derivedStateHelper.getModelPreview(source)
 					.getMigrationExpression(modelElement, attribute) : null;

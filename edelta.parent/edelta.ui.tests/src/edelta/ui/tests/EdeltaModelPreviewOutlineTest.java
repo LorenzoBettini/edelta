@@ -411,6 +411,8 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 
 	@Test
 	public void stagedAttributeRowsNavigateToSecondSuccessfulMigration() {
+		// Both visible values pass through uppercase and suffix; the editor
+		// selection must land on the second invocation, not just any rule.
 		editor.getInternalSourceViewer().getDocument().set(STAGED);
 		var first = awaitNode(ModelObjectOutlineNode.class, "Child ALPHA!");
 		var second = awaitNode(ModelObjectOutlineNode.class, "Child BETA!");
@@ -423,6 +425,8 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 
 	@Test
 	public void sameAttributeRowsNavigateToDifferentAppliedMigrations() {
+		// The two rows share Child.name, but only ALPHA receives suffix. This
+		// catches a feature-level hint accidentally assigned to both rows.
 		editor.getInternalSourceViewer().getDocument().set(MIXED);
 		var first = awaitNode(ModelObjectOutlineNode.class, "Child ALPHA!");
 		var second = awaitNode(ModelObjectOutlineNode.class, "Child BETA");
@@ -434,6 +438,8 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 
 	@Test
 	public void editingAndRestoringProgramReplacesAttributeNavigationTokens() {
+		// Replacing the editor text disposes the old preview. Restoring the program
+		// must create a fresh token and must not revive the old outline row.
 		editor.getInternalSourceViewer().getDocument().set(STAGED);
 		var transformed = awaitNode(ModelObjectOutlineNode.class, "Child ALPHA!");
 		var oldRow = child(transformed, ModelPropertyOutlineNode.class, "name = \"ALPHA!\"");

@@ -96,6 +96,9 @@ public final class EdeltaModelOutlineNavigation {
 
 	/**
 	 * Uses the first trustworthy expression, preserving Ecore navigation priority.
+	 * For an attribute row, a visible feature rename uses {@code primary};
+	 * otherwise a successfully applied value rule may use {@code secondary}.
+	 * Each candidate must belong to this editor's current program.
 	 *
 	 * @param program the current editor program
 	 * @param primary Ecore metadata expression

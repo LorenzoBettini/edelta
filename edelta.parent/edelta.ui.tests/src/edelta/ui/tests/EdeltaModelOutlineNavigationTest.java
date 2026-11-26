@@ -121,6 +121,8 @@ public class EdeltaModelOutlineNavigationTest {
 		var secondary = xbase.createXStringLiteral();
 		body.getExpressions().add(secondary);
 		var secondRegion = new TextRegion(20, 8);
+		// An invalid Ecore candidate lets a valid migration candidate win;
+		// a valid Ecore candidate retains priority over the migration one.
 		assertThat(EdeltaModelOutlineNavigation.sourceRegion(program, external, secondary,
 			declaration, expr -> expr == secondary ? secondRegion : selected))
 			.isSameAs(secondRegion);
