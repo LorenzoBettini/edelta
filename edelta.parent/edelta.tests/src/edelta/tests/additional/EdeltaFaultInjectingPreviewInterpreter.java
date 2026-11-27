@@ -26,6 +26,17 @@ public class EdeltaFaultInjectingPreviewInterpreter extends EdeltaSafeInterprete
 	public void configurePreview(EdeltaModelSourceSelector.Result selection,
 			EdeltaModelPreview preview, EdeltaTestModels declaration) {
 		this.selection = failsBeforeRoot(selection) ? replaceSelectedResource(selection) : selection;
+		if (this.selection.selected().getFirst().path().getFileName().toString().equals("final.xmi")) {
+			// Install the faulty source before the migrator starts guarding it.
+			var resource = this.selection.selected().getFirst().resource();
+			var root = resource.getContents().getFirst();
+			resource.getContents().set(0, new DynamicEObjectImpl(root.eClass()) {
+				@Override
+				public boolean eIsSet(EStructuralFeature feature) {
+					throw new IllegalStateException("final copy failure");
+				}
+			});
+		}
 		super.configurePreview(this.selection, preview, declaration);
 	}
 
@@ -59,6 +70,9 @@ public class EdeltaFaultInjectingPreviewInterpreter extends EdeltaSafeInterprete
 	@Override
 	protected EdeltaRuntime createRuntime(EdeltaCopiedEPackagesMap copies) {
 		var name = selection.selected().getFirst().path().getFileName().toString();
+		if (name.equals("pre-runtime.xmi")) {
+			throw new IllegalStateException("runtime setup before migrator assignment");
+		}
 		if (name.equals("setup.xmi")) {
 			var copied = copies.values().iterator().next();
 			var sandbox = copied.eResource();
@@ -73,16 +87,6 @@ public class EdeltaFaultInjectingPreviewInterpreter extends EdeltaSafeInterprete
 		if (name.equals("callback.xmi")) {
 			runtime.modelMigration(migrator -> {
 				throw new IllegalStateException("callback without source expression");
-			});
-		}
-		if (name.equals("final.xmi")) {
-			var resource = selection.selected().getFirst().resource();
-			var root = resource.getContents().getFirst();
-			resource.getContents().set(0, new DynamicEObjectImpl(root.eClass()) {
-				@Override
-				public boolean eIsSet(EStructuralFeature feature) {
-					throw new IllegalStateException("final copy failure");
-				}
 			});
 		}
 		return runtime;

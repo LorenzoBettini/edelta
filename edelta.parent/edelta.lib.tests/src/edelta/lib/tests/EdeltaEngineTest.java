@@ -3,7 +3,6 @@ package edelta.lib.tests;
 import static edelta.lib.EdeltaEcoreUtil.createInstance;
 import static edelta.testutils.EdeltaTestUtils.assertFilesAreEquals;
 import static edelta.testutils.EdeltaTestUtils.cleanDirectoryRecursive;
-import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -481,38 +480,23 @@ public class EdeltaEngineTest {
 	 * @param migrator
 	 */
 	private void createCustomInstanceOfMyRoot(EClass myClass, EClass myRoot, EdeltaModelMigrator migrator) {
-		migrator.createInstanceRule(
-			migrator.isRelatedTo(myRoot),
-			oldObj -> {
-				var oldClass = oldObj.eClass();
-				oldObj.eSet(oldClass.getEStructuralFeatures().get(0), emptyList());
-				oldObj.eSet(oldClass.getEStructuralFeatures().get(1), emptyList());
-				return createInstance(
-					myRoot,
-					newObj -> {
-						// clear the old values or they will be copied by the
-						// default implementation of EcoreUtil.copy
-						var myContents = myRoot.getEStructuralFeature("myContents");
-						var myReferences = myRoot.getEStructuralFeature("myReferences");
-						var myClassAttribute = myClass.getEStructuralFeatures().get(0);
-						// set the new values completely
-						var contents = List.of(
-							createInstance(myClass, o -> {
-								o.eSet(myClassAttribute, "Created");
-							}),
-							createInstance(myClass, o -> {
-								o.eSet(myClassAttribute, "Created and referred");
-							})
-						);
-						var references = List.of(
-							contents.get(1)
-						);
-						newObj.eSet(myContents, contents);
-						newObj.eSet(myReferences, references);
-					}
-				);
-			}
-		);
+		var myContents = myRoot.getEStructuralFeature("myContents");
+		var myReferences = myRoot.getEStructuralFeature("myReferences");
+		var myClassAttribute = myClass.getEStructuralFeatures().get(0);
+		migrator.copyRule(
+			feature -> migrator.isRelatedTo(feature, myContents) ||
+				migrator.isRelatedTo(feature, myReferences),
+			(feature, oldObj, newObj) -> {
+				if (migrator.isRelatedTo(feature, myContents)) {
+					var contents = List.of(
+						createInstance(myClass, o -> o.eSet(myClassAttribute, "Created")),
+						createInstance(myClass, o -> o.eSet(myClassAttribute, "Created and referred")));
+					newObj.eSet(myContents, contents);
+				} else {
+					var contents = (List<?>) newObj.eGet(myContents);
+					newObj.eSet(myReferences, List.of(contents.get(1)));
+				}
+			});
 	}
 
 }

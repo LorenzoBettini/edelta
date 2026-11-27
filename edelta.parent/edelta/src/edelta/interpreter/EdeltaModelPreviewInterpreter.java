@@ -48,6 +48,7 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 	private final IdentityHashMap<Throwable, XExpression> failingExpressions =
 		new IdentityHashMap<>();
 	private CopyFailure copyFailure;
+	private EObject sourceViolationExpression;
 
 	private record CopyFailure(Path path, String objectContext) {}
 
@@ -111,16 +112,20 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 				finalCopy = true;
 				copyFailure = null;
 				migrator.copyModels();
+				migrator.checkSourceModel();
 				publishFinalModels();
 			}
 		} catch (RuntimeException | Error exception) { // NOSONAR: we want to catch all exceptions, even unchecked ones
 			if (!preview.hasFailures()) {
 				preview.addFailure(new EdeltaModelPreview.Failure(
-					finalCopy ? "FINAL_COPY" : "INTERPRETATION", fallbackExpression(),
+					finalCopy ? "FINAL_COPY" : "INTERPRETATION",
+					migrator == null ? fallbackExpression() :
+						migrator.failureExpression(exception, null),
 					failurePath(), exception, failureObjectContext()));
 			}
 			throw exception;
 		} finally {
+			if (migrator != null) migrator.close();
 			if (migrator != null) migrator.clearTrace();
 			if (preview.hasFailures() && migrator != null) {
 				for (var resource : migrator.getEvolvingModelManager().getModelResources()) {
@@ -143,6 +148,7 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 			callbackDepth = 0;
 			failingExpressions.clear();
 			copyFailure = null;
+			sourceViolationExpression = null;
 		}
 	}
 
@@ -231,13 +237,24 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 		}
 
 		private EObject failureExpression(Throwable exception, XExpression caller) {
+			if (sourceViolationExpression != null)
+				return sourceViolationExpression;
 			for (var cause = exception; cause != null; cause = cause.getCause()) {
-				var expression = failingExpressions.get(cause);
+				var expression = userMigrationExpression(activeProgram,
+					failingExpressions.get(cause));
 				if (expression != null) {
 					return expression;
 				}
 			}
-			return caller != null ? caller : fallbackExpression();
+			var userCaller = userMigrationExpression(activeProgram, caller);
+			return userCaller != null ? userCaller : fallbackExpression();
+		}
+
+		@Override
+		protected void onSourceModelMutation(IllegalStateException violation) {
+			// Capture now: a user callback may catch the adapter exception, after
+			// which the interpreter's current expression will have moved on.
+			sourceViolationExpression = userMigrationExpression(activeProgram, activeUserCall);
 		}
 
 		@Override

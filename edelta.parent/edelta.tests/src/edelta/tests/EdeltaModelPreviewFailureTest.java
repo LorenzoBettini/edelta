@@ -83,6 +83,23 @@ public class EdeltaModelPreviewFailureTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	public void earlyRuntimeFailureUsesOperationBodyWithoutMigrator() throws Exception {
+		var program = parse("pre-runtime.xmi");
+		var preview = derivedStateHelper.getModelPreview(program.eResource());
+		assertThat(preview.getModels()).isEmpty();
+		assertThat(preview.getFailures()).extracting(EdeltaModelPreview.Failure::code)
+			.containsExactly("INTERPRETATION");
+		var issue = validationTestHelper.validate(program).stream()
+			.filter(i -> EdeltaValidator.MODEL_PREVIEW_FAILURE.equals(i.getCode()))
+			.findFirst().orElseThrow();
+		var body = program.getModifyEcoreOperations().getFirst().getBody();
+		assertThat(issue.getSeverity()).isEqualTo(Severity.ERROR);
+		assertThat(issue.getOffset()).isEqualTo(NodeModelUtils.getNode(body).getOffset());
+		assertThat(issue.getLength()).isEqualTo(NodeModelUtils.getNode(body).getLength());
+		assertThat(issue.getMessage()).contains("runtime setup before migrator assignment");
+	}
+
+	@Test
 	public void finalCopyFailureBeforeRootHasNoObjectContext() throws Exception {
 		var program = parse("before-root.xmi");
 		var preview = derivedStateHelper.getModelPreview(program.eResource());

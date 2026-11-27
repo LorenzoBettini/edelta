@@ -41,7 +41,7 @@ import com.google.common.collect.HashBiMap;
  * @author Lorenzo Bettini
  *
  */
-public class EdeltaModelMigrator {
+public class EdeltaModelMigrator implements AutoCloseable {
 
 	/**
 	 * A custom {@link Copier} for EMF model (not Ecores, instances of Ecores)
@@ -167,6 +167,8 @@ public class EdeltaModelMigrator {
 	private Map<EObject, EObject> mapOfCopiedEcores;
 	private EdeltaModelCopier modelCopier;
 	private MigrationObserver migrationObserver;
+	private final EdeltaSourceModelGuard sourceModelGuard =
+		new EdeltaSourceModelGuard(this::onSourceModelMutation);
 
 	/**
 	 * An operation that completed its write to the copied model.
@@ -267,6 +269,7 @@ public class EdeltaModelMigrator {
 		this.mapOfCopiedEcores = evolvingModelManager.copyEcores(originalModelManager);
 		this.modelCopier = new EdeltaModelCopier(
 				mapOfCopiedEcores);
+		guardSources();
 	}
 
 	/**
@@ -299,6 +302,32 @@ public class EdeltaModelMigrator {
 			}
 		}
 		this.modelCopier = new EdeltaModelCopier(mapOfCopiedEcores);
+		guardSources();
+	}
+
+	private void guardSources() {
+		sourceModelGuard.watch(originalModelManager.getModelResources());
+		evolvingModelManager.setBeforeSave(sourceModelGuard::check);
+	}
+
+	/** Called synchronously when the source guard first detects a write. */
+	protected void onSourceModelMutation(IllegalStateException violation) {
+		// Preview migrators capture the current user expression here.
+	}
+
+	/** Rejects a previously detected source write, including one caught by a callback. */
+	public void checkSourceModel() {
+		sourceModelGuard.check();
+	}
+
+	IllegalStateException sourceModelViolation() {
+		return sourceModelGuard.violation();
+	}
+
+	/** Detaches source adapters while retaining any violation for later save checks. */
+	@Override
+	public void close() {
+		sourceModelGuard.close();
 	}
 
 	public EdeltaModelManager getEvolvingModelManager() {
@@ -312,7 +341,12 @@ public class EdeltaModelMigrator {
 	 * @param callback the migration callback
 	 */
 	public void runMigrationCallback(Consumer<EdeltaModelMigrator> callback) {
-		callback.accept(this);
+		checkSourceModel();
+		try {
+			callback.accept(this);
+		} finally {
+			checkSourceModel();
+		}
 	}
 
 	/**
@@ -321,9 +355,11 @@ public class EdeltaModelMigrator {
 	 */
 	public void copyModels() {
 		copyModels(modelCopier, originalModelManager, evolvingModelManager);
+		close();
 	}
 
 	private void copyModels(EdeltaModelCopier edeltaModelCopier, EdeltaModelManager from, EdeltaModelManager into) {
+		checkSourceModel();
 		var models = from.getModelResources();
 		for (var resource : models) {
 			EObject root = null;
@@ -342,6 +378,7 @@ public class EdeltaModelMigrator {
 			}
 		}
 		edeltaModelCopier.copyReferences();
+		checkSourceModel();
 		if (migrationObserver != null) {
 			// Report only a complete stage: targets are now attached to resources,
 			// and the copier has its final source-to-target identity associations.
@@ -684,6 +721,7 @@ public class EdeltaModelMigrator {
 	}
 
 	private void updateMigrationContext() {
+		checkSourceModel();
 		// here we copy the Ecores and models that have been migrated
 		// copyModels reports this backup stage too. A preview must follow its
 		// object and feature mappings before the next rule reads from backup.
@@ -696,12 +734,15 @@ public class EdeltaModelMigrator {
 		// we have to use our custom Copier because that will correctly
 		// create copies of models referring to the backup ecores
 		copyModels(new EdeltaModelCopier(map), evolvingModelManager, backup);
+		checkSourceModel();
 		// now we need an inverted map, because the backup is meant to become the
 		// new originals, for the next model migrations
 		mapOfCopiedEcores = HashBiMap.create(map).inverse();
 		modelCopier = new EdeltaModelCopier(mapOfCopiedEcores);
 		evolvingModelManager.clearModels();
 		// the original model manager is updated with the copies we have just created
+		// The old source is no longer used; the complete backup is the next source.
+		sourceModelGuard.watch(backup.getModelResources());
 		originalModelManager = backup;
 
 		// we must set the SettingDelegate to null

@@ -86,6 +86,92 @@ public class EdeltaModelPreviewDiagnosticsTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	public void sourceWritePointsToTheOffendingExpression() throws Exception {
+		var root = project();
+		var input = root.resolve("models/MyClass.xmi");
+		var original = Files.readString(input);
+		var source = """
+			metamodel "mypackage"
+			testmodels { "models/MyClass.xmi" }
+			modifyEcore evolve epackage mypackage {
+				val attribute = ecoreref(MyClass.myClassStringAttribute)
+				modelMigration[
+					copyRule(isRelatedTo(attribute), [feature, oldObj, newObj |
+						oldObj.eSet(feature, "illegal")
+					])
+				]
+			}
+			""";
+		var program = parse(root, source);
+		var issue = onlyPreviewIssue(program);
+		assertIssue(issue, EdeltaValidator.MODEL_PREVIEW_FAILURE, source,
+			"oldObj.eSet(feature, \"illegal\")");
+		assertThat(issue.getMessage()).contains("Migration source model is read-only:");
+		assertFailedPreview(program, "MIGRATION");
+		assertThat(Files.readString(input)).isEqualTo(original);
+	}
+
+	@Test
+	public void caughtSourceWriteStillPointsToTheOriginalExpression() throws Exception {
+		var root = project();
+		var source = """
+			metamodel "mypackage"
+			testmodels { "models/MyClass.xmi" }
+			modifyEcore evolve epackage mypackage {
+				val attribute = ecoreref(MyClass.myClassStringAttribute)
+				modelMigration[
+					copyRule(isRelatedTo(attribute), [feature, oldObj, newObj |
+						try {
+							oldObj.eSet(feature, "caught")
+						} catch (IllegalStateException e) {}
+					])
+				]
+			}
+			""";
+		var program = parse(root, source);
+		var issue = onlyPreviewIssue(program);
+		assertIssue(issue, EdeltaValidator.MODEL_PREVIEW_FAILURE, source,
+			"oldObj.eSet(feature, \"caught\")");
+		assertThat(issue.getMessage()).contains("Migration source model is read-only:");
+		assertFailedPreview(program, "MIGRATION");
+	}
+
+	@Test
+	public void librarySourceWritePointsToTheUserInvocation() throws Exception {
+		var root = project();
+		var resourceSet = resourceSet(root);
+		var library = parseHelper.parse("""
+			import org.eclipse.emf.ecore.EAttribute
+			package example
+			def mutate(EAttribute feature) {
+				modelMigration[
+					copyRule(isRelatedTo(feature), [oldFeature, oldObj, newObj |
+						oldObj.eSet(oldFeature, "library write")
+					])
+				]
+			}
+			""", URI.createFileURI(root.resolve("src/SourceWritingRefactorings.edelta").toString()),
+			resourceSet);
+		var source = """
+			metamodel "mypackage"
+			testmodels { "models/MyClass.xmi" }
+			use example.SourceWritingRefactorings as extension refactorings
+			modifyEcore evolve epackage mypackage {
+				val attribute = ecoreref(MyClass.myClassStringAttribute)
+				refactorings.mutate(attribute)
+			}
+			""";
+		var program = parse(root, source, resourceSet);
+		var issue = onlyPreviewIssue(program);
+		assertIssue(issue, EdeltaValidator.MODEL_PREVIEW_FAILURE, source,
+			"refactorings.mutate(attribute)");
+		assertFailedPreview(program, "MIGRATION");
+		assertThat(library.eResource().getErrors()).noneMatch(d ->
+			d instanceof org.eclipse.xtext.validation.EObjectDiagnosticImpl diagnostic &&
+			EdeltaValidator.MODEL_PREVIEW_FAILURE.equals(diagnostic.getCode()));
+	}
+
+	@Test
 	public void failureInSecondModelNamesTheSecondXmiFile() throws Exception {
 		var root = project();
 		Files.writeString(root.resolve("models/MyRoot.xmi"), Files.readString(

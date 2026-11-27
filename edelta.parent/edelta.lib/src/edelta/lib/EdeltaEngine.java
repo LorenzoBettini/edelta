@@ -29,6 +29,7 @@ public class EdeltaEngine {
 
 	private EdeltaModelManager originalModelManager = new EdeltaModelManager();
 	private EdeltaModelManager evolvingModelManager;
+	private IllegalStateException sourceModelViolation;
 
 	public EdeltaEngine(EdeltaRuntimeProvider provider) {
 		this.provider = provider;
@@ -72,11 +73,26 @@ public class EdeltaEngine {
 	 * @throws Exception
 	 */
 	public void execute() throws Exception {
+		evolvingModelManager = null;
+		sourceModelViolation = null;
 		var migrator = new EdeltaModelMigrator(originalModelManager);
-		evolvingModelManager = migrator.getEvolvingModelManager();
-		var edelta = provider.apply(new EdeltaDefaultRuntime(migrator));
-		edelta.execute();
-		migrator.copyModels();
+		try {
+			var edelta = provider.apply(new EdeltaDefaultRuntime(migrator));
+			edelta.execute();
+			migrator.copyModels();
+			migrator.checkSourceModel();
+			evolvingModelManager = migrator.getEvolvingModelManager();
+		} finally {
+			sourceModelViolation = migrator.sourceModelViolation();
+			migrator.close();
+		}
+	}
+
+	private void checkOutputReady() {
+		if (sourceModelViolation != null)
+			throw sourceModelViolation;
+		if (evolvingModelManager == null)
+			throw new IllegalStateException("No completed model migration to save");
 	}
 
 	/**
@@ -97,6 +113,7 @@ public class EdeltaEngine {
 	 * @throws IOException
 	 */
 	public void saveEcores(String outputPath) throws IOException {
+		checkOutputReady();
 		evolvingModelManager.saveEcores(outputPath);
 	}
 
@@ -107,6 +124,7 @@ public class EdeltaEngine {
 	 * @throws IOException
 	 */
 	public void saveModels(String outputPath) throws IOException {
+		checkOutputReady();
 		evolvingModelManager.saveModels(outputPath);
 	}
 

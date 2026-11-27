@@ -4,6 +4,7 @@ import static edelta.lib.tests.StageValueComparator.Result.DIFFERENT;
 import static edelta.lib.tests.StageValueComparator.Result.EQUAL;
 import static edelta.lib.tests.StageValueComparator.Result.UNKNOWN;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 
@@ -47,8 +48,7 @@ class StageDifferenceFeasibilityTest {
 
 	@Test
 	void laterUnrelatedFeatureRuleLeavesEarlierValueComparisonEqual() {
-		var f = new StageMigrationFixture();
-		f.first.eSet(f.tags, List.of("tag"));
+		var f = new StageMigrationFixture(true);
 		var evolvedValue = f.evolvedValue();
 		var evolvedTags = (EAttribute) f.migrator.getMigrated(f.tags);
 		f.migrator.transformAttributeValueRule(f.migrator.isRelatedTo(evolvedValue),
@@ -88,32 +88,28 @@ class StageDifferenceFeasibilityTest {
 	}
 
 	@Test
-	void postCopyCanMutateSourceAndMakeLateComparisonMisleading() {
+	void postCopySourceMutationIsRejected() {
 		var f = new StageMigrationFixture();
-		f.migrator.copyRule(feature -> false, (feature, source, target) -> {}, () -> {
+		assertThatThrownBy(() -> f.migrator.copyRule(feature -> false,
+			(feature, source, target) -> {}, () -> {
 			assertThat(f.stages.get(0).compare(f.first, f.value)).isEqualTo(EQUAL);
 			f.first.eSet(f.value, "source changed after copy");
-		});
-		// The copied target did not change, yet a comparison against the mutated
-		// source reports a difference. Arbitrary callbacks need source-value capture.
-		assertThat(f.stages.get(0).compare(f.first, f.value)).isEqualTo(DIFFERENT);
-		assertThat(f.stages.get(0).objects().get(f.first).eGet(
-			(EAttribute) f.stages.get(0).ecores().get(f.value)))
-			.isEqualTo("hello");
+		})).isInstanceOf(IllegalStateException.class)
+			.hasMessageMatching("Migration source model is read-only: .* :: Node#.*\\.value \\(SET\\)");
 	}
 
 	@Test
-	void copyProcedureCanMutateSourceBeforeCopiedCallback() {
+	void copyProcedureSourceMutationIsRejectedBeforeCopiedCallback() {
 		var f = new StageMigrationFixture();
 		var evolved = f.evolvedValue();
-		f.migrator.copyRule(feature -> feature == f.value,
+		assertThatThrownBy(() -> f.migrator.copyRule(feature -> feature == f.value,
 			(feature, source, target) -> {
 				// A custom procedure can change the input before any copied event.
 				source.eSet(feature, "mutated source");
 				target.eSet(evolved, "hello");
-			});
-		assertThat(f.stages.get(0).compare(f.first, f.value)).isEqualTo(DIFFERENT);
-		assertThat(f.stages.get(0).objects().get(f.first).eGet(evolved)).isEqualTo("hello");
+			})).isInstanceOf(IllegalStateException.class)
+				.hasMessageMatching("Migration source model is read-only: .* :: Node#.*\\.value \\(SET\\)");
+		assertThat(f.stages).isEmpty();
 	}
 
 	@Test

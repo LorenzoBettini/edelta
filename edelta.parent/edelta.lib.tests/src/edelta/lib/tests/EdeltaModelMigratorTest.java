@@ -523,12 +523,15 @@ class EdeltaModelMigratorTest {
 
 	@Test
 	void emptyButSetAttributeStillRunsTheTransformer() {
-		var migrator = setupMigrator("toUpperCaseStringAttributes/", of("My.ecore"),
-			of("MyClass3.xmi"));
-		var target = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
+		basedir = TESTDATA + "toUpperCaseStringAttributes/";
+		loadEcoreFile("My.ecore");
+		loadModelFile("MyClass3.xmi");
 		var original = originalModelManager.getModelResources().iterator().next()
 			.getContents().getFirst();
-		original.eSet(migrator.getOriginal(target), "");
+		original.eSet(original.eClass().getEStructuralFeature("myAttribute"), "");
+		var migrator = new EdeltaModelMigrator(originalModelManager);
+		evolvingModelManager = migrator.getEvolvingModelManager();
+		var target = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
 		var values = new ArrayList<Object>();
 		migrator.transformAttributeValueRule(migrator.isRelatedTo(target), value -> {
 			values.add(value);

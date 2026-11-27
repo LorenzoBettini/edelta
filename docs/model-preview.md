@@ -4,6 +4,8 @@ When an Edelta program declares `testmodels`, the editor can show the models
 after the program's metamodel changes and model-migration callbacks have run.
 The preview is kept in memory; it does not save changes to the input XMI files
 or generate Java.
+Migration source models are [read-only at every stage](model-migration.md).
+Source writes produce a validation error and prevent a successful preview.
 
 ## Declaring inputs
 

@@ -57,6 +57,12 @@ public class EdeltaModelManager {
 	 * Here we store EPackages mapped by name registered by {@link #registerEPackageByNsURI(String, String)}
 	 */
 	private final Map<String, EPackage> nsURIToEPackage = new HashMap<>();
+	private Runnable beforeSave = () -> {};
+
+	/** Registers a validity check for migrator-owned output resources. */
+	void setBeforeSave(Runnable check) {
+		beforeSave = check;
+	}
 
 	/**
 	 * Performs EMF initialization (resource factories and package registry)
@@ -177,6 +183,7 @@ public class EdeltaModelManager {
 	}
 
 	private void saveResources(String outputPath, Collection<Resource> resourceMap) throws IOException {
+		beforeSave.run();
 		for (var resource : resourceMap) {
 			var fileName = EdeltaResourceUtils.getFileName(resource);
 			LOG.info("Saving " + outputPath + "/" + fileName);

@@ -51,6 +51,10 @@ final class StageMigrationFixture {
 	final EdeltaModelMigrator migrator;
 
 	StageMigrationFixture() {
+		this(false);
+	}
+
+	StageMigrationFixture(boolean withTag) {
 		epackage.setName("probe");
 		epackage.setNsPrefix("probe");
 		epackage.setNsURI("urn:edelta:stage-probe");
@@ -72,6 +76,7 @@ final class StageMigrationFixture {
 		first = EcoreUtil.create(node);
 		second = EcoreUtil.create(node);
 		first.eSet(value, "hello");
+		if (withTag) first.eSet(tags, List.of("tag"));
 		second.eSet(value, "HELLO");
 		first.eSet(link, second);
 		for (var index = 0; index < 2; index++) {
