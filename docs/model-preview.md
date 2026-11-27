@@ -54,10 +54,36 @@ to the model file or the imported package is already available.
 
 The outline adds an **Evolved test models** section containing one in-memory
 resource for each selected input. All roots remain in their original order.
-The tree shows model containment and properties; non-containment references
-are displayed as values. Selecting a resource, object, or property navigates
-to the corresponding quoted path in the `testmodels` declaration, rather than
-to a location in the original XMI file.
+The tree shows the final containment hierarchy and model-property rows.
+Attributes and non-containment references appear as values; reference values
+are not expanded as children.
+
+Selecting the section goes to the `testmodels` block; selecting a resource
+goes to the quoted path that selected it.
+An object with a renamed EClass can instead go to the expression responsible
+for that rename. A property row can go to an expression responsible for a
+visible change to its Ecore feature: its name, a reference's displayed bounds,
+or an attribute's scalar/list shape.
+
+An EAttribute row can also go to the last successfully applied, observed
+`transformAttributeValueRule` for that exact surviving object and attribute.
+If a visible Ecore feature change and an attribute transformation both have
+trustworthy source expressions, the Ecore change takes priority. Different
+instances of the same attribute can therefore lead to different expressions.
+A transformation that returns the original value still counts as applied;
+the link does not establish that the value changed.
+
+Expression links require a clear source location in the current Edelta file.
+When no applicable expression is trustworthy because provenance is missing or
+ambiguous, or belongs to an older preview or another source file, selection
+uses the declaring `testmodels` path. This includes unchanged items without an
+observed attribute transformation and unsupported changes. Reference rows use
+visible Ecore feature changes, not proven reference-value migration history.
+Migration tracing currently covers only observed attribute transformations;
+arbitrary direct EObject changes outside supported migrator operations may
+leave an earlier attribute link stale. The outline does not open or edit the
+original XMI file, keep a full change history, or synchronize editor selection
+back to model objects.
 
 The preview shows only the final state after all applicable migration
 callbacks. Intermediate snapshots, diffs, and automatic validation of evolved
