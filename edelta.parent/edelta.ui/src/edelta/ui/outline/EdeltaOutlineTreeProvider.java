@@ -50,6 +50,9 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	private EdeltaModelPropertyRows modelPropertyRows;
 
 	@Inject
+	private EdeltaModelOutlineStyling modelOutlineStyling;
+
+	@Inject
 	private EdeltaLabelProvider edeltaLabelProvider;
 
 	@Inject
@@ -138,7 +141,9 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 			checkCanceled();
 			var propertyNode = new ModelPropertyOutlineNode(modelElement, row.feature(),
 				parentNode, imageHelper.getImage(row.feature() instanceof EAttribute
-					? "EAttribute.gif" : "EReference.gif"), row.label());
+					? "EAttribute.gif" : "EReference.gif"),
+				edeltaLabelProvider.propertyText(row.label(),
+					modelOutlineStyling.isChangedProperty(currentProgram, modelElement, row.feature())));
 			var source = currentProgram.eResource();
 			var expression = EdeltaModelOutlineNavigation.featureExpression(row.feature(),
 				derivedStateHelper.getCopiedEPackagesMap(source).getOriginal(row.feature()),
@@ -202,7 +207,9 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 			boolean isLeaf) {
 		if (parentNode instanceof ModelResourceOutlineNode || parentNode instanceof ModelObjectOutlineNode) {
 			var node = new ModelObjectOutlineNode(modelElement, parentNode, image,
-				modelLabel(modelElement), isLeaf && !modelPropertyRows.hasRows(modelElement));
+				edeltaLabelProvider.propertyText(modelLabel(modelElement),
+					modelOutlineStyling.isChangedObject(currentProgram, modelElement)),
+				isLeaf && !modelPropertyRows.hasRows(modelElement));
 			var eClass = modelElement.eClass();
 			var source = currentProgram.eResource();
 			var expression = EdeltaModelOutlineNavigation.classExpression(eClass,
@@ -270,7 +277,7 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		private final EObject owner;
 
 		ModelPropertyOutlineNode(EObject owner, EStructuralFeature feature, IOutlineNode parent,
-				Image image, String text) {
+				Image image, Object text) {
 			super(owner, feature, parent, image, text, true);
 			this.owner = owner;
 		}

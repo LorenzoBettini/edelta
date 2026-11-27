@@ -5,12 +5,18 @@ import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.createFile;
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.waitForBuild;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.emf.ecore.EcoreFactory;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
@@ -22,13 +28,18 @@ import org.eclipse.xtext.ui.editor.XtextEditor;
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.impl.OutlineNodeElementOpener;
 import org.eclipse.xtext.ui.editor.outline.impl.OutlinePage;
+import org.eclipse.xtext.testing.util.ParseHelper;
+import org.eclipse.xtext.xbase.XbaseFactory;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.inject.Inject;
 
+import edelta.edelta.EdeltaProgram;
+import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.ui.internal.EdeltaActivator;
+import edelta.ui.outline.EdeltaModelOutlineStyling;
 import edelta.ui.outline.EdeltaOutlineTreeProvider.EcoreOutlineNode;
 import edelta.ui.outline.EdeltaOutlineTreeProvider.ModelGroupOutlineNode;
 import edelta.ui.outline.EdeltaOutlineTreeProvider.ModelObjectOutlineNode;
@@ -55,6 +66,15 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		testmodels { "model/Preview.xmi" "model/EmptyId.xmi" }
 		modifyEcore evolve epackage preview {
 			ecoreref(Root.link).name = "primaryLink"
+		}
+		""";
+	private static final String RESTORED_FEATURE_NAME = """
+		metamodel "preview"
+		testmodels { "model/Preview.xmi" "model/EmptyId.xmi" }
+		modifyEcore evolve epackage preview {
+			ecoreref(Child.name).name = "temporary"
+			ecoreref(Child.temporary).name = "name"
+			ecoreref(Root.link).lowerBound = 1
 		}
 		""";
 	private static final String MULTIPLE_ATTRIBUTE = """
@@ -162,6 +182,11 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 	private static final String NO_OP = STAGED
 		.replace("value.toString.toUpperCase", "value.toString")
 		.replace("value.toString + \"!\"", "value.toString");
+	private static final String SELECTIVE = STAGED
+		.replace("value.toString.toUpperCase",
+			"if (value.toString == \"alpha\") value.toString.toUpperCase else value")
+		.replace("value.toString + \"!\"",
+			"if (value.toString == \"ALPHA\") value.toString + \"!\" else value");
 	private static final String CHANGED_THEN_NO_OP = STAGED
 		.replace("value.toString + \"!\"", "value.toString");
 	private static final String REVERSAL = STAGED
@@ -222,6 +247,15 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 
 	@Inject
 	private PluginImageHelper imageHelper;
+
+	@Inject
+	private EdeltaModelOutlineStyling modelOutlineStyling;
+
+	@Inject
+	private EdeltaDerivedStateHelper derivedStateHelper;
+
+	@Inject
+	private ParseHelper<EdeltaProgram> parseHelper;
 
 	private XtextEditor editor;
 	private OutlinePage outline;
@@ -441,6 +475,7 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 	public void attributeScalarToListNavigatesToUserCall() {
 		editor.getInternalSourceViewer().getDocument().set(MULTIPLE_ATTRIBUTE);
 		var row = awaitNode(ModelPropertyOutlineNode.class, "name = [\"alpha\"]");
+		assertStyled(row, true);
 		assertNavigation(row, MULTIPLE_ATTRIBUTE.indexOf("changeToMultiple(ecoreref(Child.name))"));
 	}
 
@@ -526,32 +561,69 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 	public void noOpAndLaterEqualStageSelectOnlyProvenChanges() {
 		editor.getInternalSourceViewer().getDocument().set(NO_OP);
 		var unchanged = awaitNode(ModelObjectOutlineNode.class, "Child alpha");
-		assertNavigation(child(unchanged, ModelPropertyOutlineNode.class, "name = \"alpha\""),
-			NO_OP, "\"model/Preview.xmi\"");
+		var unchangedRow = child(unchanged, ModelPropertyOutlineNode.class, "name = \"alpha\"");
+		assertStyled(unchanged, false);
+		assertStyled(unchangedRow, false);
+		assertNavigation(unchangedRow, NO_OP, "\"model/Preview.xmi\"");
 
 		editor.getInternalSourceViewer().getDocument().set(CHANGED_THEN_NO_OP);
 		var changed = awaitNode(ModelObjectOutlineNode.class, "Child ALPHA");
-		assertMigrationNavigation(child(changed, ModelPropertyOutlineNode.class,
-			"name = \"ALPHA\""), CHANGED_THEN_NO_OP, 0);
+		var changedRow = child(changed, ModelPropertyOutlineNode.class, "name = \"ALPHA\"");
+		assertStyled(changed, true);
+		assertStyled(changedRow, true);
+		assertMigrationNavigation(changedRow, CHANGED_THEN_NO_OP, 0);
 	}
 
 	@Test
 	public void restoringOriginalValueLinksToRestoringStage() {
 		editor.getInternalSourceViewer().getDocument().set(REVERSAL);
 		var restored = awaitNode(ModelObjectOutlineNode.class, "Child alpha");
-		assertMigrationNavigation(child(restored, ModelPropertyOutlineNode.class,
-			"name = \"alpha\""), REVERSAL, 1);
+		var restoredRow = child(restored, ModelPropertyOutlineNode.class, "name = \"alpha\"");
+		assertStyled(restored, true);
+		assertStyled(restoredRow, true);
+		assertMigrationNavigation(restoredRow, REVERSAL, 1);
+	}
+
+	@Test
+	public void stylesOnlyChangedInstancesAndTheirOwnProperties() {
+		editor.getInternalSourceViewer().getDocument().set(SELECTIVE);
+		var first = awaitNode(ModelObjectOutlineNode.class, "Child ALPHA!");
+		var second = awaitNode(ModelObjectOutlineNode.class, "Child beta");
+		var firstRow = child(first, ModelPropertyOutlineNode.class, "name = \"ALPHA!\"");
+		var secondRow = child(second, ModelPropertyOutlineNode.class, "name = \"beta\"");
+		var root = (ModelObjectOutlineNode) first.getParent();
+		var group = awaitNode(ModelGroupOutlineNode.class, "Evolved test models");
+		var resource = (ModelResourceOutlineNode) root.getParent();
+
+		assertStyled(first, true);
+		assertStyled(firstRow, true);
+		assertStyled(second, false);
+		assertStyled(secondRow, false);
+		assertStyled(root, false);
+		assertStyled(group, false);
+		assertStyled(resource, false);
+		then(outlineImage(firstRow)).isSameAs(imageHelper.getImage("EAttribute.gif"));
+		then(outlineImage(secondRow)).isSameAs(imageHelper.getImage("EAttribute.gif"));
+		var reference = child(root, ModelPropertyOutlineNode.class,
+			"link [0..1] = Child ALPHA! (#//@children.0)");
+		then(outlineImage(reference)).isSameAs(imageHelper.getImage("EReference.gif"));
+		assertMigrationNavigation(firstRow, SELECTIVE, 1);
+		assertNavigation(secondRow, SELECTIVE.indexOf("\"model/Preview.xmi\""));
+		assertNavigation(root, SELECTIVE.indexOf("\"model/Preview.xmi\""));
 	}
 
 	@Test
 	public void changedReferenceUsesMigrationExpressionAndUntouchedReferenceUsesDeclaration() {
 		editor.getInternalSourceViewer().getDocument().set(CHANGED_REFERENCE);
 		var root = awaitNode(ModelObjectOutlineNode.class, "Root #root1");
-		assertMigrationNavigation(child(root, ModelPropertyOutlineNode.class,
-			"link [0..1] = <unset>"), CHANGED_REFERENCE, 0);
-		assertNavigation(child(root, ModelPropertyOutlineNode.class,
-			"links [0..*] = [Child alpha (#//@children.0), Child beta (#//@children.1)]"),
-			CHANGED_REFERENCE, "\"model/Preview.xmi\"");
+		var changedLink = child(root, ModelPropertyOutlineNode.class, "link [0..1] = <unset>");
+		var untouchedLinks = child(root, ModelPropertyOutlineNode.class,
+			"links [0..*] = [Child alpha (#//@children.0), Child beta (#//@children.1)]");
+		assertStyled(root, true);
+		assertStyled(changedLink, true);
+		assertStyled(untouchedLinks, false);
+		assertMigrationNavigation(changedLink, CHANGED_REFERENCE, 0);
+		assertNavigation(untouchedLinks, CHANGED_REFERENCE, "\"model/Preview.xmi\"");
 	}
 
 	@Test
@@ -560,8 +632,10 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		var root = awaitNode(ModelObjectOutlineNode.class, "Root #cross1");
 		// The source endpoint is unresolved; neither its URI nor its display
 		// text can establish exact copied-object correspondence.
-		assertNavigation(child(root, ModelPropertyOutlineNode.class,
-			"link [0..1] = <unset>"), CROSS_RESOURCE_REFERENCE, "\"model/Cross.xmi\"");
+		var link = child(root, ModelPropertyOutlineNode.class, "link [0..1] = <unset>");
+		assertStyled(root, false);
+		assertStyled(link, false);
+		assertNavigation(link, CROSS_RESOURCE_REFERENCE, "\"model/Cross.xmi\"");
 	}
 
 	@Test
@@ -584,8 +658,10 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 	public void visibleEcoreChangePrecedesInstanceValueChange() {
 		editor.getInternalSourceViewer().getDocument().set(ECORE_AND_VALUE);
 		var changed = awaitNode(ModelObjectOutlineNode.class, "Child");
-		assertNavigation(child(changed, ModelPropertyOutlineNode.class, "label = \"ALPHA\""),
-			ECORE_AND_VALUE, "name = \"label\"");
+		var row = child(changed, ModelPropertyOutlineNode.class, "label = \"ALPHA\"");
+		assertStyled(changed, true);
+		assertStyled(row, true);
+		assertNavigation(row, ECORE_AND_VALUE, "name = \"label\"");
 	}
 
 	@Test
@@ -603,17 +679,128 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		editor.getInternalSourceViewer().getDocument().set(STAGED);
 		var transformed = awaitNode(ModelObjectOutlineNode.class, "Child ALPHA!");
 		var oldRow = child(transformed, ModelPropertyOutlineNode.class, "name = \"ALPHA!\"");
+		assertStyled(transformed, true);
+		assertStyled(oldRow, true);
 		assertNavigation(oldRow, STAGED.lastIndexOf("modelMigration["));
 		editor.getInternalSourceViewer().getDocument().set(FIRST);
 		var original = awaitNode(ModelObjectOutlineNode.class, "FirstChild alpha");
-		assertNavigation(child(original, ModelPropertyOutlineNode.class, "name = \"alpha\""),
-			FIRST.indexOf("\"model/Preview.xmi\""));
+		var originalRow = child(original, ModelPropertyOutlineNode.class, "name = \"alpha\"");
+		assertStyled(original, true);
+		assertStyled(originalRow, false);
+		assertNavigation(originalRow, FIRST.indexOf("\"model/Preview.xmi\""));
 		EObject oldOwner = oldRow.readOnly(object -> object);
 		then(oldOwner).isNull();
 		editor.getInternalSourceViewer().getDocument().set(STAGED);
 		var restored = awaitNode(ModelObjectOutlineNode.class, "Child ALPHA!");
-		assertNavigation(child(restored, ModelPropertyOutlineNode.class, "name = \"ALPHA!\""),
-			STAGED.lastIndexOf("modelMigration["));
+		var restoredRow = child(restored, ModelPropertyOutlineNode.class, "name = \"ALPHA!\"");
+		assertStyled(restored, true);
+		assertStyled(restoredRow, true);
+		assertNavigation(restoredRow, STAGED.lastIndexOf("modelMigration["));
+	}
+
+	@Test
+	public void visibleMetamodelChangesStyleRowsEvenWhenNavigationIsAmbiguous() {
+		editor.getInternalSourceViewer().getDocument().set(DIRECT);
+		var changedBound = awaitNode(ModelObjectOutlineNode.class, "Root #root1");
+		var link = child(changedBound, ModelPropertyOutlineNode.class,
+			"link [1..1] = Child alpha (#//@children.0)");
+		assertStyled(changedBound, true);
+		assertStyled(link, true);
+		assertNavigation(link, DIRECT.indexOf("lowerBound = 1"));
+
+		editor.getInternalSourceViewer().getDocument().set(NEW_FEATURE);
+		var extra = awaitNode(ModelPropertyOutlineNode.class, "extra = <unset>");
+		var added = (ModelObjectOutlineNode) extra.getParent();
+		assertStyled(added, true);
+		assertStyled(extra, true);
+		assertNavigation(extra, NEW_FEATURE.indexOf("\"model/Preview.xmi\""));
+
+		editor.getInternalSourceViewer().getDocument().set(CONFLICTING);
+		var links = awaitNode(ModelPropertyOutlineNode.class,
+			"links [1..3] = [Child alpha (#//@children.0), Child beta (#//@children.1)]");
+		var multiple = (ModelObjectOutlineNode) links.getParent();
+		assertStyled(multiple, true);
+		assertStyled(links, true);
+		assertNavigation(links, CONFLICTING.indexOf("\"model/Preview.xmi\""));
+	}
+
+	@Test
+	public void restoredFeatureMetadataDoesNotProduceBoldRows() {
+		editor.getInternalSourceViewer().getDocument().set(RESTORED_FEATURE_NAME);
+		var link = awaitNode(ModelPropertyOutlineNode.class, "link [1..1] = Child alpha (#//@children.0)");
+		var child = awaitNode(ModelObjectOutlineNode.class, "Child alpha");
+		var name = child(child, ModelPropertyOutlineNode.class, "name = \"alpha\"");
+		assertStyled(link, true);
+		assertStyled(child, false);
+		assertStyled(name, false);
+		assertNavigation(name, RESTORED_FEATURE_NAME.indexOf("\"model/Preview.xmi\""));
+	}
+
+	@Test
+	public void missingMappingsAndInitialEcoreValuesDoNotEstablishChanges() throws Exception {
+		var program = parseHelper.parse("");
+		var unmappedClass = EcoreFactory.eINSTANCE.createEClass();
+		var unmappedAttribute = EcoreFactory.eINSTANCE.createEAttribute();
+		unmappedAttribute.setName("value");
+		unmappedClass.getEStructuralFeatures().add(unmappedAttribute);
+		var parentClass = EcoreFactory.eINSTANCE.createEClass();
+		var childrenReference = EcoreFactory.eINSTANCE.createEReference();
+		childrenReference.setName("children");
+		childrenReference.setContainment(true);
+		childrenReference.setEType(unmappedClass);
+		parentClass.getEStructuralFeatures().add(childrenReference);
+		var containerReference = EcoreFactory.eINSTANCE.createEReference();
+		containerReference.setName("parent");
+		containerReference.setEType(parentClass);
+		unmappedClass.getEStructuralFeatures().add(containerReference);
+		var unmappedPackage = EcoreFactory.eINSTANCE.createEPackage();
+		unmappedPackage.getEClassifiers().add(parentClass);
+		unmappedPackage.getEClassifiers().add(unmappedClass);
+		childrenReference.setEOpposite(containerReference);
+		containerReference.setEOpposite(childrenReference);
+		then(containerReference.isContainer()).isTrue();
+		var owner = EcoreUtil.create(unmappedClass);
+
+		then(modelOutlineStyling.isChangedProperty(program, owner, unmappedAttribute)).isFalse();
+		then(modelOutlineStyling.isChangedObject(program, owner)).isFalse();
+
+		var originalClass = EcoreFactory.eINSTANCE.createEClass();
+		var originalAttribute = EcoreFactory.eINSTANCE.createEAttribute();
+		originalAttribute.setName("value");
+		originalClass.getEStructuralFeatures().add(originalAttribute);
+		var originalPackage = EcoreFactory.eINSTANCE.createEPackage();
+		originalPackage.getEClassifiers().add(originalClass);
+		var evolvedClass = EcoreFactory.eINSTANCE.createEClass();
+		var evolvedAttribute = EcoreFactory.eINSTANCE.createEAttribute();
+		evolvedAttribute.setName("value");
+		evolvedClass.getEStructuralFeatures().add(evolvedAttribute);
+		var evolvedPackage = EcoreFactory.eINSTANCE.createEPackage();
+		evolvedPackage.getEClassifiers().add(evolvedClass);
+		derivedStateHelper.getCopiedEPackagesMap(program.eResource()).setCopies(
+			List.of(evolvedPackage), Map.of(
+				originalPackage, evolvedPackage,
+				originalClass, evolvedClass,
+				originalAttribute, evolvedAttribute));
+		derivedStateHelper.getModifiedFeatures(program.eResource()).recordInitial(
+			evolvedAttribute, XbaseFactory.eINSTANCE.createXBlockExpression());
+		var evolvedOwner = EcoreUtil.create(evolvedClass);
+		then(modelOutlineStyling.isChangedProperty(program, evolvedOwner, evolvedAttribute))
+			.isFalse();
+		evolvedAttribute.setUpperBound(-1);
+		then(modelOutlineStyling.isChangedProperty(program, evolvedOwner, evolvedAttribute))
+			.isFalse();
+		derivedStateHelper.getModifiedFeatures(program.eResource()).recordChange(
+			evolvedAttribute, EcorePackage.Literals.ETYPED_ELEMENT__UPPER_BOUND,
+			XbaseFactory.eINSTANCE.createXBlockExpression());
+		then(evolvedAttribute.isMany()).isTrue();
+		then(originalAttribute.isMany()).isFalse();
+		then(derivedStateHelper.getCopiedEPackagesMap(program.eResource())
+			.getOriginal(evolvedAttribute)).isSameAs(originalAttribute);
+		then(derivedStateHelper.getModifiedFeatures(program.eResource())
+			.get(evolvedAttribute, EcorePackage.Literals.ETYPED_ELEMENT__UPPER_BOUND))
+			.isNotNull().satisfies(change -> then(change.initial()).isFalse());
+		then(modelOutlineStyling.isChangedProperty(program, evolvedOwner, evolvedAttribute))
+			.isTrue();
 	}
 
 	@Test
@@ -687,6 +874,15 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 	private void assertNavigation(IOutlineNode node, int offset) {
 		opener.open(node, editor.getInternalSourceViewer());
 		then(editor.getInternalSourceViewer().getSelectedRange().x).isEqualTo(offset);
+	}
+
+	private void assertStyled(IOutlineNode node, boolean styled) {
+		if (styled) {
+			then(node.getText()).isInstanceOf(StyledString.class);
+			then(((StyledString) node.getText()).getStyleRanges()).isNotEmpty();
+		} else {
+			then(node.getText()).isNotInstanceOf(StyledString.class);
+		}
 	}
 
 	private void assertNavigation(IOutlineNode node, String source, String selectedText) {
