@@ -178,6 +178,21 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		""";
 	private static final String CROSS_RESOURCE_REFERENCE = CHANGED_REFERENCE
 		.replace("\"model/EmptyId.xmi\"", "\"model/Cross.xmi\"");
+	private static final String CHANGED_KNOWN_CROSS_RESOURCE_REFERENCE = """
+		import org.eclipse.emf.ecore.EObject
+		metamodel "preview"
+		testmodels { "model/CrossSource.xmi" "model/CrossTargets.xmi" }
+		modifyEcore evolve epackage preview {
+			val link = ecoreref(Root.link)
+			modelMigration[
+				copyRule(isRelatedTo(link), [feature, source, target |
+					val first = source.eGet(feature) as EObject
+					if (first !== null)
+						target.eSet(link, getMigrated(first.eContainer.eContents.get(1)))
+				])
+			]
+		}
+		""";
 	private static final String ECORE_AND_VALUE = """
 		metamodel "preview"
 		testmodels { "model/Preview.xmi" "model/EmptyId.xmi" }
@@ -260,6 +275,20 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 			<preview:Root xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"
 			 xmlns:preview="http://preview.example" id="cross1"
 			 link="Preview.xmi#//@children.0"/>
+			""");
+		createFile(PROJECT + "/model/CrossSource.xmi", """
+			<?xml version="1.0" encoding="UTF-8"?>
+			<preview:Root xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"
+			 xmlns:preview="http://preview.example" id="crossSource"
+			 link="CrossTargets.xmi#//@children.0"/>
+			""");
+		createFile(PROJECT + "/model/CrossTargets.xmi", """
+			<?xml version="1.0" encoding="UTF-8"?>
+			<preview:Root xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"
+			 xmlns:preview="http://preview.example" id="crossTargets">
+			 <children name="alpha"/>
+			 <children name="beta"/>
+			</preview:Root>
 			""");
 		createFile(PROJECT + "/src/PreviewRefactorings.edelta", """
 			import org.eclipse.emf.ecore.EAttribute
@@ -533,6 +562,22 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		// text can establish exact copied-object correspondence.
 		assertNavigation(child(root, ModelPropertyOutlineNode.class,
 			"link [0..1] = <unset>"), CROSS_RESOURCE_REFERENCE, "\"model/Cross.xmi\"");
+	}
+
+	@Test
+	public void changedKnownCrossResourceReferenceSelectsMigrationExpression() {
+		editor.getInternalSourceViewer().getDocument().set(CHANGED_KNOWN_CROSS_RESOURCE_REFERENCE);
+		var source = awaitNode(ModelObjectOutlineNode.class, "Root #crossSource");
+		var targets = awaitNode(ModelObjectOutlineNode.class, "Root #crossTargets");
+		var row = child(source, ModelPropertyOutlineNode.class,
+			"link [0..1] = Child beta (CrossTargets.xmi#//@children.1)");
+		var sourceObject = source.readOnly(object -> object);
+		var secondTarget = ((ModelObjectOutlineNode) targets.getChildren().get(1))
+			.readOnly(object -> object);
+		then(sourceObject.eResource()).isNotSameAs(secondTarget.eResource());
+		then(sourceObject.eGet(sourceObject.eClass().getEStructuralFeature("link")))
+			.isSameAs(secondTarget);
+		assertMigrationNavigation(row, CHANGED_KNOWN_CROSS_RESOURCE_REFERENCE, 0);
 	}
 
 	@Test
