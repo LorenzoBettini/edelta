@@ -125,8 +125,10 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 			}
 			throw exception;
 		} finally {
-			if (migrator != null) migrator.close();
-			if (migrator != null) migrator.clearTrace();
+			if (migrator != null) {
+				migrator.close();
+				migrator.clearTrace();
+			}
 			if (preview.hasFailures() && migrator != null) {
 				for (var resource : migrator.getEvolvingModelManager().getModelResources()) {
 					resource.unload();
