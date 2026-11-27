@@ -65,8 +65,7 @@ for that rename. A property row can go to an expression responsible for a
 visible change to its Ecore feature: its name, a reference's displayed bounds,
 or an attribute's scalar/list shape.
 
-An EAttribute row can also go to the last successfully applied, observed
-`transformAttributeValueRule` for that exact surviving object and attribute.
+An EAttribute row can also navigate to the last observed, successfully executed `transformAttributeValueRule` transformation for that specific surviving object and attribute.
 If a visible Ecore feature change and an attribute transformation both have
 trustworthy source expressions, the Ecore change takes priority. Different
 instances of the same attribute can therefore lead to different expressions.
