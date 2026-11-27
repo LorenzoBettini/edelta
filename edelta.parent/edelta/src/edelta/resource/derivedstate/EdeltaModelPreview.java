@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.xtext.xbase.XExpression;
@@ -38,7 +38,7 @@ public class EdeltaModelPreview {
 	private List<Model> models = List.of();
 	private final List<Failure> failures = new ArrayList<>();
 	private ResourceSet finalResourceSet;
-	private final Map<EObject, Map<EAttribute, XExpression>> migrationExpressions =
+	private final Map<EObject, Map<EStructuralFeature, XExpression>> migrationExpressions =
 		new IdentityHashMap<>();
 
 	/**
@@ -111,14 +111,15 @@ public class EdeltaModelPreview {
 	}
 
 	/**
-	 * Publishes exact final-instance attribute expressions after a successful copy.
+	 * Publishes exact final-instance feature expressions after a successful copy.
 	 * Intermediate copier objects are not valid outline owners. For example,
-	 * an attribute token from the uppercase stage is stored only under the
-	 * corresponding object and attribute from the final preview stage.
+	 * a token from an earlier stage is stored only under the corresponding
+	 * object and feature from the final preview stage.
 	 *
-	 * @param expressions final object and attribute identities mapped to user expressions
+	 * @param expressions final object and feature identities mapped to user expressions
 	 */
-	public void setMigrationExpressions(Map<EObject, Map<EAttribute, XExpression>> expressions) {
+	public void setMigrationExpressions(
+			Map<EObject, Map<EStructuralFeature, XExpression>> expressions) {
 		if (hasFailures() || finalResourceSet == null)
 			throw new IllegalStateException("Cannot publish migration expressions without final models");
 		migrationExpressions.clear();
@@ -130,18 +131,18 @@ public class EdeltaModelPreview {
 	}
 
 	/**
-	 * Returns a successful source expression for this exact final object and attribute.
+	 * Returns the last proven value-changing expression for this exact final pair.
 	 * An object from an earlier preview or a different resource set has no link.
 	 *
 	 * @param object the final preview object
-	 * @param attribute its final EAttribute
-	 * @return the last applied user expression, or {@code null}
+	 * @param feature its final structural feature
+	 * @return the migration expression, or {@code null}
 	 */
-	public XExpression getMigrationExpression(EObject object, EAttribute attribute) {
+	public XExpression getMigrationExpression(EObject object, EStructuralFeature feature) {
 		if (object == null || object.eResource() == null ||
 				object.eResource().getResourceSet() != finalResourceSet) return null;
 		var entries = migrationExpressions.get(object);
-		return entries == null ? null : entries.get(attribute);
+		return entries == null ? null : entries.get(feature);
 	}
 
 	/** Unloads the private final resource set and drops all preview references. */

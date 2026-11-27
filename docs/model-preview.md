@@ -67,24 +67,39 @@ for that rename. A property row can go to an expression responsible for a
 visible change to its Ecore feature: its name, a reference's displayed bounds,
 or an attribute's scalar/list shape.
 
-An EAttribute row can also navigate to the last observed, successfully executed `transformAttributeValueRule` transformation for that specific surviving object and attribute.
-If a visible Ecore feature change and an attribute transformation both have
-trustworthy source expressions, the Ecore change takes priority. Different
-instances of the same attribute can therefore lead to different expressions.
-A transformation that returns the original value still counts as applied;
-the link does not establish that the value changed.
+A property row can also navigate to the last migration expression that
+**changed that exact object's value for that exact feature**. The preview
+compares each completed user migration stage with its read-only source after
+references and post-copy work are finished. An equal value does not replace
+an earlier changing expression: `hello → HELLO → HELLO` links to the first
+change, while `hello → HELLO → hello` links to the restoring change. Different
+instances of the same feature can lead to different expressions. An unchanged
+property with no earlier change has no migration link.
 
-Expression links require a clear source location in the current Edelta file.
-When no applicable expression is trustworthy because provenance is missing or
-ambiguous, or belongs to an older preview or another source file, selection
-uses the declaring `testmodels` path. This includes unchanged items without an
-observed attribute transformation and unsupported changes. Reference rows use
-visible Ecore feature changes, not proven reference-value migration history.
-Migration tracing currently covers only observed attribute transformations;
-arbitrary direct EObject changes outside supported migrator operations may
-leave an earlier attribute link stale. The outline does not open or edit the
-original XMI file, keep a full change history, or synchronize editor selection
-back to model objects.
+A visible Ecore change takes priority over a value change when both have
+trustworthy expressions. Moving a feature between classes without changing
+its value does not itself establish a value migration. For non-containment
+references, comparison uses only exact copied-object and EClass correspondence;
+a copied reference to the same object is equal, and a reference to a different
+known object is changed. Ambiguous or missing object/feature mappings, proxies,
+unsupported reference shapes, and unordered collections produce no inferred
+migration link. Containment relationships are represented by the tree and are
+not compared as property values.
+
+Expression links must have a clear source location in the current Edelta file.
+A library refactoring links to the user's call when that call is identifiable.
+When neither an applicable Ecore expression nor an exact value-changing
+expression is trustworthy, selection uses the declaring `testmodels` path.
+This also applies to unchanged properties, unknown correspondence, and objects
+from a discarded preview. The outline does not open or edit the original XMI
+file, keep a full change history, or synchronize editor selection back to
+model objects.
+
+The programmatic preview exposes one provenance lookup:
+`EdeltaModelPreview.getMigrationExpression(EObject, EStructuralFeature)`.
+It returns the last proven value-changing expression for a final preview
+object/feature pair, or `null` when none is available. The preview owns these
+tokens only until its derived state is discarded.
 
 The preview shows only the final state after all applicable migration
 callbacks. Intermediate snapshots, diffs, and automatic validation of evolved

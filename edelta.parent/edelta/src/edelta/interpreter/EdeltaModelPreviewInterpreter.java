@@ -235,7 +235,7 @@ public class EdeltaModelPreviewInterpreter extends EdeltaDefaultInterpreter {
 		}
 
 		private void clearTrace() {
-			trace.invalidated();
+			trace.lineageInvalidated();
 		}
 
 		private EObject failureExpression(Throwable exception, XExpression caller) {

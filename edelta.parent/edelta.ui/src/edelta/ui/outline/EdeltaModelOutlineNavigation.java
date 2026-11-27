@@ -17,8 +17,8 @@ import edelta.edelta.EdeltaProgram;
 import edelta.resource.derivedstate.EdeltaModifiedFeatures;
 
 /**
- * Selects only source regions justified by changes to the displayed Ecore definition.
- * It does not attribute migrations of individual model values.
+ * Selects source regions for displayed model elements and properties.
+ * Visible Ecore changes take priority over proven instance value changes.
  *
  * @author Lorenzo Bettini
  */
@@ -97,12 +97,12 @@ public final class EdeltaModelOutlineNavigation {
 	/**
 	 * Uses the first trustworthy expression, preserving Ecore navigation priority.
 	 * For an attribute row, a visible feature rename uses {@code primary};
-	 * otherwise a successfully applied value rule may use {@code secondary}.
+	 * otherwise a proven value-changing migration may use {@code secondary}.
 	 * Each candidate must belong to this editor's current program.
 	 *
 	 * @param program the current editor program
 	 * @param primary Ecore metadata expression
-	 * @param secondary attribute-migration expression
+	 * @param secondary object/feature migration expression
 	 * @param declaration declaring model path region
 	 * @param regions resolves source regions
 	 * @return the first eligible expression region, or the declaration

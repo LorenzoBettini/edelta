@@ -1,8 +1,8 @@
 package edelta.lib.tests;
 
-import static edelta.lib.tests.StageValueComparator.Result.DIFFERENT;
-import static edelta.lib.tests.StageValueComparator.Result.EQUAL;
-import static edelta.lib.tests.StageValueComparator.Result.UNKNOWN;
+import static edelta.lib.EdeltaStageValueComparator.Result.DIFFERENT;
+import static edelta.lib.EdeltaStageValueComparator.Result.EQUAL;
+import static edelta.lib.EdeltaStageValueComparator.Result.UNKNOWN;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.IdentityHashMap;
@@ -20,10 +20,13 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.jupiter.api.Test;
 
+import edelta.lib.EdeltaStageValueComparator;
+import edelta.lib.EdeltaStageValueComparator.Mappings;
+
 /** Direct contract tests for the isolated stage comparison probe.
  * @author Lorenzo Bettini
  */
-class StageValueComparatorTest {
+class EdeltaStageValueComparatorTest {
 	private final Fixture fixture = new Fixture();
 
 	@Test
@@ -59,6 +62,7 @@ class StageValueComparatorTest {
 		fixture.objects.put(oldReferred, newReferred);
 		assertThat(fixture.compareReference()).isEqualTo(EQUAL);
 		fixture.after.eSet(fixture.afterReference, another);
+		fixture.objects.put(EcoreUtil.create(fixture.beforeClass), another);
 		assertThat(fixture.compareReference()).isEqualTo(DIFFERENT);
 		fixture.objects.remove(oldReferred);
 		// A same-class object without exact lineage cannot prove a change.
@@ -124,7 +128,7 @@ class StageValueComparatorTest {
 		assertThat(fixture.compareAttribute()).isEqualTo(UNKNOWN);
 	}
 
-	private static final class Fixture {
+	static final class Fixture {
 		final EClass beforeClass = EcoreFactory.eINSTANCE.createEClass();
 		final EClass afterClass = EcoreFactory.eINSTANCE.createEClass();
 		final EAttribute beforeAttribute = EcoreFactory.eINSTANCE.createEAttribute();
@@ -163,14 +167,14 @@ class StageValueComparatorTest {
 			ecores.put(beforeReference, afterReference);
 		}
 
-		StageValueComparator.Result compareAttribute() {
-			return StageValueComparator.compare(before, beforeAttribute, after, afterAttribute,
-				objects, ecores);
+		EdeltaStageValueComparator.Result compareAttribute() {
+			return EdeltaStageValueComparator.compare(before, beforeAttribute, after,
+				afterAttribute, new Mappings(objects, ecores));
 		}
 
-		StageValueComparator.Result compareReference() {
-			return StageValueComparator.compare(before, beforeReference, after, afterReference,
-				objects, ecores);
+		EdeltaStageValueComparator.Result compareReference() {
+			return EdeltaStageValueComparator.compare(before, beforeReference, after,
+				afterReference, new Mappings(objects, ecores));
 		}
 	}
 }

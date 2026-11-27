@@ -19,8 +19,10 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 
 import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaModelMigrator;
-import edelta.lib.EdeltaModelMigrator.AppliedOperation;
+import edelta.lib.EdeltaModelMigrator.CopyStage;
 import edelta.lib.EdeltaModelMigrator.MigrationObserver;
+import edelta.lib.EdeltaStageValueComparator;
+import edelta.lib.EdeltaStageValueComparator.Mappings;
 
 /**
  * Small in-memory model and observer for test-only operation-boundary probes.
@@ -32,9 +34,10 @@ import edelta.lib.EdeltaModelMigrator.MigrationObserver;
 final class StageMigrationFixture {
 	record Stage(Map<EObject, EObject> objects, Map<EObject, EObject> ecores,
 			List<Resource> sources, List<Resource> targets) {
-		StageValueComparator.Result compare(EObject source, EAttribute feature) {
-			return StageValueComparator.compare(source, feature, objects.get(source),
-				(org.eclipse.emf.ecore.EStructuralFeature) ecores.get(feature), objects, ecores);
+		EdeltaStageValueComparator.Result compare(EObject source, EAttribute feature) {
+			return EdeltaStageValueComparator.compare(source, feature, objects.get(source),
+				(org.eclipse.emf.ecore.EStructuralFeature) ecores.get(feature),
+				new Mappings(objects, ecores));
 		}
 	}
 
@@ -47,6 +50,7 @@ final class StageMigrationFixture {
 	final EObject first;
 	final EObject second;
 	final List<Stage> stages = new ArrayList<>();
+	final List<CopyStage> completed = new ArrayList<>();
 	final List<Boolean> invalidations = new ArrayList<>();
 	final EdeltaModelMigrator migrator;
 
@@ -88,13 +92,14 @@ final class StageMigrationFixture {
 		migrator = new EdeltaModelMigrator(originals) {
 			{
 				setMigrationObserver(new MigrationObserver() {
-					@Override public void applied(AppliedOperation operation) {}
-					@Override public void copied(Map<EObject, EObject> objects,
-							Map<EObject, EObject> ecores, List<Resource> sources,
-							List<Resource> targets) {
-						stages.add(new Stage(objects, ecores, sources, targets));
-						}
-					@Override public void invalidated() { invalidations.add(true); }
+					@Override public void copied(CopyStage stage) {
+						stages.add(new Stage(stage.objectCopies(), stage.ecoreCopies(),
+							stage.sources(), stage.targets()));
+					}
+					@Override public void completed(CopyStage stage) {
+						completed.add(stage);
+					}
+					@Override public void lineageInvalidated() { invalidations.add(true); }
 				});
 			}
 		};

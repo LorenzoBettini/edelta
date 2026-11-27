@@ -167,54 +167,38 @@ public class EdeltaModelMigrator implements AutoCloseable {
 	private Map<EObject, EObject> mapOfCopiedEcores;
 	private EdeltaModelCopier modelCopier;
 	private MigrationObserver migrationObserver;
+	private int stagedCopyDepth;
 	private final EdeltaSourceModelGuard sourceModelGuard =
 		new EdeltaSourceModelGuard(this::onSourceModelMutation);
 
 	/**
-	 * An operation that completed its write to the copied model.
-	 * The source pair identifies the value read by the copier; the target pair
-	 * identifies the value written. Both are needed because every migration stage
-	 * has new model objects and may use copied Ecore features.
+	 * Exact identities from one successful copy, after reference fixup. Only a
+	 * user stage may later receive {@link MigrationObserver#completed(CopyStage)};
+	 * backup and final copies merely transport lineage.
 	 *
 	 * @author Lorenzo Bettini
 	 */
-	public record AppliedOperation(EObject sourceObject, EStructuralFeature sourceFeature,
-			EObject targetObject, EStructuralFeature targetFeature) {}
+	public record CopyStage(Map<EObject, EObject> objectCopies,
+			Map<EObject, EObject> ecoreCopies, List<Resource> sources,
+			List<Resource> targets, boolean userOperation) {}
 
 	/**
-	 * Optional observer for semantic applications and complete model-copy stages.
-	 * It is independent of the language interpreter and receives detached snapshots,
-	 * never a mutable copier. Future migration rules may report through the same
-	 * application event once they have established their own success boundary.
-	 * For example, a rule that visits two objects with the same attribute reports
-	 * two events, one for each object. A later rule may report only one of them.
+	 * Optional observer for complete model-copy stages. It receives detached
+	 * identity snapshots, never a mutable copier. A user stage completes after
+	 * reference fixup and post-copy work; backup and final copies only convey
+	 * lineage.
 	 *
 	 * @author Lorenzo Bettini
 	 */
 	public interface MigrationObserver {
-		/**
-		 * Called after a migration operation successfully writes its target value.
-		 *
-		 * @param operation the exact source and target pair
-		 */
-		void applied(AppliedOperation operation);
+		/** Receives exact, read-only identities after reference fixup. */
+		void copied(CopyStage stage);
 
-		/**
-		 * Called after all roots and references of a copy stage have succeeded.
-		 * The maps are read-only identity snapshots for this synchronous callback.
-		 * A preview may use them to replace its old object/feature keys with the
-		 * corresponding keys from this stage, including the final copy stage.
-		 *
-		 * @param objectCopies source to target model objects
-		 * @param ecoreCopies source to target Ecore elements
-		 * @param sources input model resources
-		 * @param targets output model resources
-		 */
-		void copied(Map<EObject, EObject> objectCopies, Map<EObject, EObject> ecoreCopies,
-				List<Resource> sources, List<Resource> targets);
+		/** Called only after a user stage and its post-copy callback succeed. */
+		void completed(CopyStage stage);
 
-		/** Invalidates attribution before an operation with unsupported lineage. */
-		void invalidated();
+		/** Invalidates attribution after an unstaged direct model write. */
+		void lineageInvalidated();
 	}
 
 	/**
@@ -226,15 +210,11 @@ public class EdeltaModelMigrator implements AutoCloseable {
 		migrationObserver = observer;
 	}
 
-	private void invalidateMigrationObservation() {
-		if (migrationObserver != null)
-			migrationObserver.invalidated();
-	}
-
-	private void reportApplied(EAttribute sourceFeature, EObject sourceObject, Setting target) {
-		if (migrationObserver != null)
-			migrationObserver.applied(new AppliedOperation(sourceObject, sourceFeature,
-				target.getEObject(), target.getEStructuralFeature()));
+	private void invalidateDirectMigrationObservation() {
+		// Writes inside a stage are compared at completion; an unstaged write
+		// has no copier map with which to prove surviving attribution.
+		if (migrationObserver != null && stagedCopyDepth == 0)
+			migrationObserver.lineageInvalidated();
 	}
 
 	@FunctionalInterface
@@ -354,11 +334,12 @@ public class EdeltaModelMigrator implements AutoCloseable {
 	 * root in each model resource and the original resource order.
 	 */
 	public void copyModels() {
-		copyModels(modelCopier, originalModelManager, evolvingModelManager);
+		copyModels(modelCopier, originalModelManager, evolvingModelManager, false);
 		close();
 	}
 
-	private void copyModels(EdeltaModelCopier edeltaModelCopier, EdeltaModelManager from, EdeltaModelManager into) {
+	private CopyStage copyModels(EdeltaModelCopier edeltaModelCopier, EdeltaModelManager from,
+			EdeltaModelManager into, boolean userOperation) {
 		checkSourceModel();
 		var models = from.getModelResources();
 		for (var resource : models) {
@@ -387,9 +368,28 @@ public class EdeltaModelMigrator implements AutoCloseable {
 			objectCopies.putAll(edeltaModelCopier);
 			var ecoreCopies = new IdentityHashMap<EObject, EObject>();
 			ecoreCopies.putAll(edeltaModelCopier.ecoreCopyMap);
-			migrationObserver.copied(Collections.unmodifiableMap(objectCopies),
+			var stage = new CopyStage(Collections.unmodifiableMap(objectCopies),
 				Collections.unmodifiableMap(ecoreCopies), List.copyOf(models),
-				List.copyOf(into.getModelResources()));
+				List.copyOf(into.getModelResources()), userOperation);
+			migrationObserver.copied(stage);
+			return stage;
+		}
+		return null;
+	}
+
+	private void finishStagedCopy(Runnable postCopy) {
+		var observed = migrationObserver != null;
+		if (observed) stagedCopyDepth++;
+		try {
+			var stage = copyModels(modelCopier, originalModelManager, evolvingModelManager, true);
+			if (postCopy != null)
+				postCopy.run();
+			checkSourceModel();
+			if (stage != null)
+				migrationObserver.completed(stage);
+			updateMigrationContext();
+		} finally {
+			if (observed) stagedCopyDepth--;
 		}
 	}
 
@@ -432,14 +432,9 @@ public class EdeltaModelMigrator implements AutoCloseable {
 				if (matched)
 					value = function.apply(value);
 				super.copyAttributeValue(eAttribute, eObject, value, setting);
-				if (matched)
-					// Returning the input unchanged is still a successful application.
-					// An exception from the transformer or write skips this event.
-					reportApplied(eAttribute, eObject, setting);
 			}
 		};
-		copyModels(modelCopier, originalModelManager, evolvingModelManager);
-		updateMigrationContext();
+		finishStagedCopy(null);
 	}
 
 	/**
@@ -469,14 +464,9 @@ public class EdeltaModelMigrator implements AutoCloseable {
 					value = function.apply(eAttribute, eObject, value);
 				}
 				super.copyAttributeValue(eAttribute, eObject, value, setting);
-				if (matched)
-					// Keep the same success boundary for the overload that receives
-					// the source object and attribute.
-					reportApplied(eAttribute, eObject, setting);
 			}
 		};
-		copyModels(modelCopier, originalModelManager, evolvingModelManager);
-		updateMigrationContext();
+		finishStagedCopy(null);
 	}
 
 	/**
@@ -509,7 +499,6 @@ public class EdeltaModelMigrator implements AutoCloseable {
 	public void copyRule(Predicate<EStructuralFeature> predicate,
 			EdeltaModelMigrator.CopyProcedure procedure,
 			Runnable postCopy) {
-		invalidateMigrationObservation();
 		modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 			private static final long serialVersionUID = 1L;
 
@@ -542,10 +531,7 @@ public class EdeltaModelMigrator implements AutoCloseable {
 					runnable.run();
 			}
 		};
-		copyModels(modelCopier, originalModelManager, evolvingModelManager);
-		if (postCopy != null)
-			postCopy.run();
-		updateMigrationContext();
+		finishStagedCopy(postCopy);
 	}
 
 	/**
@@ -635,7 +621,6 @@ public class EdeltaModelMigrator implements AutoCloseable {
 	 */
 	public void featureMigratorRule(Predicate<EStructuralFeature> predicate,
 			FeatureMigrator function) {
-		invalidateMigrationObservation();
 		modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 			private static final long serialVersionUID = 1L;
 
@@ -650,8 +635,7 @@ public class EdeltaModelMigrator implements AutoCloseable {
 					: ((InternalEObject) copyEObject).eSetting(targetEStructuralFeature);
 			}
 		};
-		copyModels(modelCopier, originalModelManager, evolvingModelManager);
-		updateMigrationContext();
+		finishStagedCopy(null);
 	}
 
 	/**
@@ -679,7 +663,6 @@ public class EdeltaModelMigrator implements AutoCloseable {
 	 */
 	public void mapFeaturesRule(Collection<EStructuralFeature> from,
 			EStructuralFeature to) {
-		invalidateMigrationObservation();
 		modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 			private static final long serialVersionUID = 1L;
 
@@ -690,8 +673,7 @@ public class EdeltaModelMigrator implements AutoCloseable {
 				return super.getTarget(eStructuralFeature);
 			}
 		};
-		copyModels(modelCopier, originalModelManager, evolvingModelManager);
-		updateMigrationContext();
+		finishStagedCopy(null);
 	}
 
 	/**
@@ -705,7 +687,6 @@ public class EdeltaModelMigrator implements AutoCloseable {
 	 */
 	public void createInstanceRule(Predicate<EClass> predicate,
 			EObjectFunction function) {
-		invalidateMigrationObservation();
 		modelCopier = new EdeltaModelCopier(mapOfCopiedEcores) {
 			private static final long serialVersionUID = 1L;
 
@@ -716,8 +697,7 @@ public class EdeltaModelMigrator implements AutoCloseable {
 				return super.createCopy(eObject);
 			}
 		};
-		copyModels(modelCopier, originalModelManager, evolvingModelManager);
-		updateMigrationContext();
+		finishStagedCopy(null);
 	}
 
 	private void updateMigrationContext() {
@@ -733,7 +713,7 @@ public class EdeltaModelMigrator implements AutoCloseable {
 		// now create a copy of the evolved models
 		// we have to use our custom Copier because that will correctly
 		// create copies of models referring to the backup ecores
-		copyModels(new EdeltaModelCopier(map), evolvingModelManager, backup);
+		copyModels(new EdeltaModelCopier(map), evolvingModelManager, backup, false);
 		checkSourceModel();
 		// now we need an inverted map, because the backup is meant to become the
 		// new originals, for the next model migrations
@@ -874,7 +854,7 @@ public class EdeltaModelMigrator implements AutoCloseable {
 	 * @param oldFeature
 	 */
 	public void copyFrom(EObject newObj, EStructuralFeature newFeature, EObject oldObj, EStructuralFeature oldFeature) {
-		invalidateMigrationObservation();
+		invalidateDirectMigrationObservation();
 		// if the multiplicity changes and the type of the attribute changes we might
 		// end up with a list with a single default value.
 		// if instead we check that the original value of the object for the feature
@@ -922,7 +902,7 @@ public class EdeltaModelMigrator implements AutoCloseable {
 	 * @see #copyFrom(EObject, EStructuralFeature, EObject, EStructuralFeature)
 	 */
 	public void copyFrom(EObject newObj, EObject oldObj) {
-		invalidateMigrationObservation();
+		invalidateDirectMigrationObservation();
 		var oldFeatures = oldObj.eClass().getEAllStructuralFeatures();
 		var newClass = newObj.eClass();
 		for (var oldFeature : oldFeatures) {
@@ -970,7 +950,7 @@ public class EdeltaModelMigrator implements AutoCloseable {
 	 * {@link EdeltaEcoreUtil#createInstance(EClass)}
 	 */
 	public EObject createFrom(EClass newEClass, EObject oldObj) {
-		invalidateMigrationObservation();
+		invalidateDirectMigrationObservation();
 		return EdeltaEcoreUtil.createInstance(newEClass,
 			newObj -> copyFrom(newObj, oldObj)
 		);

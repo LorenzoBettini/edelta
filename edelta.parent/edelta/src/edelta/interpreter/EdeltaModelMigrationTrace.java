@@ -1,43 +1,36 @@
 package edelta.interpreter;
 
-import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.xbase.XExpression;
 
-import edelta.lib.EdeltaModelMigrator.AppliedOperation;
+import edelta.lib.EdeltaModelMigrator.CopyStage;
 import edelta.lib.EdeltaModelMigrator.MigrationObserver;
+import edelta.lib.EdeltaStageValueComparator;
+import edelta.lib.EdeltaStageValueComparator.Mappings;
+import edelta.lib.EdeltaStageValueComparator.Result;
 
 /**
- * Keeps only the latest proven attribute application for each preview object.
- * A copy stage replaces every object and feature key by exact copier identities.
- * The trace is private to one interpretation and never retains a copier.
- * <p>
- * For example, if an uppercase rule processes {@code alpha} and {@code beta},
- * then a suffix rule processes only {@code alpha}, the final two rows point
- * to different calls even though they share an EAttribute. A rule returning
- * its input unchanged still counts as the last application.
+ * Tracks the last proven value-changing expression for each exact preview
+ * object and feature. Each completed user stage compares its immutable source
+ * with the target after reference fixup and post-copy work. Later copies carry
+ * tokens only through exact lineage; uncertain correspondence drops them.
+ * The trace belongs to one interpretation and retains no earlier-stage values.
  *
  * @author Lorenzo Bettini
  */
 public class EdeltaModelMigrationTrace implements MigrationObserver {
-	/**
-	 * A successful write awaiting the completed copier maps for its stage.
-	 * The expression is captured now, while its user callback is still active.
-	 *
-	 * @author Lorenzo Bettini
-	 */
-	private record Pending(AppliedOperation operation, XExpression expression) {}
-
 	private final Supplier<XExpression> currentExpression;
-	private final List<Pending> pending = new ArrayList<>();
-	private Map<EObject, Map<EAttribute, XExpression>> current = new IdentityHashMap<>();
+	private Map<EObject, Map<EStructuralFeature, XExpression>> expressions =
+		new IdentityHashMap<>();
+	private CopyStage latestStage;
 
 	/**
 	 * Creates a trace whose token supplier follows the current callback scope.
@@ -49,77 +42,71 @@ public class EdeltaModelMigrationTrace implements MigrationObserver {
 	}
 
 	@Override
-	public void applied(AppliedOperation operation) {
-		// The target may still be detached during copying. Wait for copied(),
-		// which can check both resource membership and the completed identity map.
-		pending.add(new Pending(operation, currentExpression.get()));
-	}
-
-	@Override
-	public void copied(Map<EObject, EObject> objectCopies, Map<EObject, EObject> ecoreCopies,
-			List<Resource> sources, List<Resource> targets) {
-		var sourceResources = identitySet(sources);
-		var targetResources = identitySet(targets);
-		var uniqueTargets = new IdentityHashMap<EObject, EObject>();
-		var ambiguousTargets = new IdentityHashMap<EObject, Boolean>();
-		// A target reached from two sources has no unique object lineage.
-		for (var entry : objectCopies.entrySet()) {
-			var prior = uniqueTargets.putIfAbsent(entry.getValue(), entry.getKey());
-			if (prior != null)
-				ambiguousTargets.put(entry.getValue(), Boolean.TRUE);
-		}
-		var next = new IdentityHashMap<EObject, Map<EAttribute, XExpression>>();
-		// Carry earlier applications through this stage. An unrelated later rule
-		// leaves each untouched pair's expression in place.
-		for (var entry : current.entrySet()) {
+	public void copied(CopyStage stage) {
+		var mappings = new Mappings(stage.objectCopies(), stage.ecoreCopies());
+		var sources = identitySet(stage.sources());
+		var targets = identitySet(stage.targets());
+		var next = new IdentityHashMap<EObject, Map<EStructuralFeature, XExpression>>();
+		for (var entry : expressions.entrySet()) {
 			var source = entry.getKey();
-			var target = objectCopies.get(source);
-			if (!validObjects(source, target, sourceResources, targetResources,
-					ambiguousTargets)) continue;
-			for (var attribute : entry.getValue().entrySet()) {
-				var mapped = mappedAttribute(source, attribute.getKey(), target, ecoreCopies);
-				if (mapped != null)
-					put(next, target, mapped, attribute.getValue());
+			var target = mappings.target(source);
+			if (!exactObjects(source, target, mappings, sources, targets)) continue;
+			for (var token : entry.getValue().entrySet()) {
+				var feature = token.getKey();
+				var mapped = mappings.feature(feature);
+				var result = EdeltaStageValueComparator.compare(source, feature, target,
+					mapped, mappings);
+				// A non-user copy must preserve the value as well as its identity.
+				if (result != Result.UNKNOWN && (stage.userOperation() || result == Result.EQUAL))
+					put(next, target, mapped, token.getValue());
 			}
 		}
-		// Apply this stage's successful writes in encounter order. They replace
-		// inherited tokens only for their exact mapped object/attribute pair.
-		for (var event : pending) {
-			var operation = event.operation();
-			var source = operation.sourceObject();
-			var target = operation.targetObject();
-			if (objectCopies.get(source) != target || !validObjects(source, target,
-					sourceResources, targetResources, ambiguousTargets)) continue;
-			if (!(operation.sourceFeature() instanceof EAttribute sourceAttribute)) continue;
-			var mapped = mappedAttribute(source, sourceAttribute, target, ecoreCopies);
-			if (mapped == null || mapped != operation.targetFeature()) continue;
-			var entries = next.get(target);
-			if (entries != null) entries.remove(mapped);
-			// A successful write without a trustworthy user expression cancels an
-			// older link for this pair; the outline then uses its declaration.
-			if (event.expression() != null)
-				put(next, target, mapped, event.expression());
-		}
-		current = next;
-		pending.clear();
+		expressions = next;
+		latestStage = stage;
 	}
 
 	@Override
-	public void invalidated() {
-		// Custom copy/replacement procedures can break lineage without reporting
-		// which pair they affected, so their boundary clears the whole trace.
-		current.clear();
-		pending.clear();
+	public void completed(CopyStage stage) {
+		// A nested callback can supersede this stage before its completion arrives.
+		if (stage != latestStage || !stage.userOperation()) return;
+		var mappings = new Mappings(stage.objectCopies(), stage.ecoreCopies());
+		var sources = identitySet(stage.sources());
+		var targets = identitySet(stage.targets());
+		var expression = currentExpression.get();
+		for (var entry : stage.objectCopies().entrySet()) {
+			var source = entry.getKey();
+			var target = entry.getValue();
+			if (!exactObjects(source, target, mappings, sources, targets)) continue;
+			for (var feature : source.eClass().getEAllStructuralFeatures()) {
+				if (feature instanceof EReference reference &&
+						(reference.isContainment() || reference.isContainer())) continue;
+				var mapped = mappings.feature(feature);
+				var result = EdeltaStageValueComparator.compare(source, feature, target,
+					mapped, mappings);
+				if (result == Result.EQUAL) continue;
+				remove(target, mapped);
+				if (result == Result.DIFFERENT && expression != null)
+					put(expressions, target, mapped, expression);
+			}
+		}
+		latestStage = null;
+	}
+
+	@Override
+	public void lineageInvalidated() {
+		expressions.clear();
+		latestStage = null;
 	}
 
 	/**
-	 * Returns a detached identity-map snapshot for the successfully published preview.
+	 * Returns a detached identity-map snapshot of the current object/feature tokens.
+	 * Only final-copy identities should be published to a preview.
 	 *
-	 * @return only current target objects and attributes
+	 * @return the exact object and feature attribution map
 	 */
-	public Map<EObject, Map<EAttribute, XExpression>> snapshot() {
-		var result = new IdentityHashMap<EObject, Map<EAttribute, XExpression>>();
-		for (var entry : current.entrySet())
+	public Map<EObject, Map<EStructuralFeature, XExpression>> snapshot() {
+		var result = new IdentityHashMap<EObject, Map<EStructuralFeature, XExpression>>();
+		for (var entry : expressions.entrySet())
 			result.put(entry.getKey(), new IdentityHashMap<>(entry.getValue()));
 		return result;
 	}
@@ -130,28 +117,22 @@ public class EdeltaModelMigrationTrace implements MigrationObserver {
 		return result;
 	}
 
-	private boolean validObjects(EObject source, EObject target,
-			Map<Resource, Boolean> sources, Map<Resource, Boolean> targets,
-			Map<EObject, Boolean> ambiguous) {
-		return target != null && sources.containsKey(source.eResource())
-			&& targets.containsKey(target.eResource()) && !ambiguous.containsKey(target);
+	private boolean exactObjects(EObject source, EObject target, Mappings mappings,
+			Map<Resource, Boolean> sources, Map<Resource, Boolean> targets) {
+		return target != null && mappings.target(source) == target
+			&& sources.containsKey(source.eResource()) && targets.containsKey(target.eResource());
 	}
 
-	private EAttribute mappedAttribute(EObject source, EAttribute attribute, EObject target,
-			Map<EObject, EObject> ecoreCopies) {
-		// Names and URI fragments are insufficient: require the actual copied
-		// EAttribute on the target class and a set value on both sides.
-		if (!source.eIsSet(attribute)) return null;
-		var mapped = ecoreCopies.get(attribute);
-		if (!(mapped instanceof EAttribute targetAttribute)
-				|| target.eClass().getEAllAttributes().stream().noneMatch(a -> a == targetAttribute)
-				|| !target.eIsSet(targetAttribute))
-			return null;
-		return targetAttribute;
+	private void remove(EObject object, EStructuralFeature feature) {
+		var entries = expressions.get(object);
+		if (entries != null) {
+			entries.remove(feature);
+			if (entries.isEmpty()) expressions.remove(object);
+		}
 	}
 
-	private void put(Map<EObject, Map<EAttribute, XExpression>> map, EObject object,
-			EAttribute feature, XExpression expression) {
+	private void put(Map<EObject, Map<EStructuralFeature, XExpression>> map,
+			EObject object, EStructuralFeature feature, XExpression expression) {
 		map.computeIfAbsent(object, ignored -> new IdentityHashMap<>()).put(feature, expression);
 	}
 }

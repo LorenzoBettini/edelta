@@ -159,6 +159,47 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 			]
 		}
 		""";
+	private static final String NO_OP = STAGED
+		.replace("value.toString.toUpperCase", "value.toString")
+		.replace("value.toString + \"!\"", "value.toString");
+	private static final String CHANGED_THEN_NO_OP = STAGED
+		.replace("value.toString + \"!\"", "value.toString");
+	private static final String REVERSAL = STAGED
+		.replace("value.toString + \"!\"", "value.toString.toLowerCase");
+	private static final String CHANGED_REFERENCE = """
+		metamodel "preview"
+		testmodels { "model/Preview.xmi" "model/EmptyId.xmi" }
+		modifyEcore evolve epackage preview {
+			val link = ecoreref(Root.link)
+			modelMigration[
+				copyRule(isRelatedTo(link), [feature, source, target | ])
+			]
+		}
+		""";
+	private static final String CROSS_RESOURCE_REFERENCE = CHANGED_REFERENCE
+		.replace("\"model/EmptyId.xmi\"", "\"model/Cross.xmi\"");
+	private static final String ECORE_AND_VALUE = """
+		metamodel "preview"
+		testmodels { "model/Preview.xmi" "model/EmptyId.xmi" }
+		modifyEcore evolve epackage preview {
+			val name = ecoreref(Child.name)
+			modelMigration[
+				transformAttributeValueRule(isRelatedTo(name), [value |
+					value.toString.toUpperCase
+				])
+			]
+			name.name = "label"
+		}
+		""";
+	private static final String LIBRARY_MIGRATION = """
+		import previewrefactorings.PreviewRefactorings
+		metamodel "preview"
+		testmodels { "model/Preview.xmi" "model/EmptyId.xmi" }
+		use PreviewRefactorings as extension refactorings
+		modifyEcore evolve epackage preview {
+			refactorings.uppercase(ecoreref(Child.name))
+		}
+		""";
 	private static IFile file;
 
 	@Inject
@@ -213,6 +254,24 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 			<?xml version="1.0" encoding="UTF-8"?>
 			<preview:Root xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"
 			 xmlns:preview="http://preview.example" id=""/>
+			""");
+		createFile(PROJECT + "/model/Cross.xmi", """
+			<?xml version="1.0" encoding="UTF-8"?>
+			<preview:Root xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"
+			 xmlns:preview="http://preview.example" id="cross1"
+			 link="Preview.xmi#//@children.0"/>
+			""");
+		createFile(PROJECT + "/src/PreviewRefactorings.edelta", """
+			import org.eclipse.emf.ecore.EAttribute
+			package previewrefactorings
+			metamodel "preview"
+			def uppercase(EAttribute feature) {
+				modelMigration[
+					transformAttributeValueRule(isRelatedTo(feature), [value |
+						value.toString.toUpperCase
+					])
+				]
+			}
 			""");
 		file = createFile(PROJECT + "/src/PreviewOutline.edelta", FIRST);
 		waitForBuild();
@@ -402,38 +461,94 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		EObject oldDeclaration = old.readOnly(object -> object);
 		then(oldDeclaration).isNull();
 		assertNavigation(migrated, MIGRATED.indexOf("\"model/Preview.xmi\""));
-		assertNavigation(migrated.getChildren().getFirst(),
-			MIGRATED.indexOf("\"model/Preview.xmi\""));
+		assertMigrationNavigation(migrated.getChildren().getFirst(), MIGRATED, 1);
 		assertNavigation(child(root, ModelPropertyOutlineNode.class,
 			"links [0..1] = Child ALPHA! (#//@children.0)"),
 			MIGRATED.indexOf("changeToSingle(ecoreref(Root.links))"));
 	}
 
 	@Test
-	public void stagedAttributeRowsNavigateToSecondSuccessfulMigration() {
+	public void stagedAttributeRowsNavigateToSecondChangingMigration() {
 		// Both visible values pass through uppercase and suffix; the editor
 		// selection must land on the second invocation, not just any rule.
 		editor.getInternalSourceViewer().getDocument().set(STAGED);
 		var first = awaitNode(ModelObjectOutlineNode.class, "Child ALPHA!");
 		var second = awaitNode(ModelObjectOutlineNode.class, "Child BETA!");
-		var expected = STAGED.lastIndexOf("modelMigration[");
-		assertNavigation(child(first, ModelPropertyOutlineNode.class, "name = \"ALPHA!\""),
-			expected);
-		assertNavigation(child(second, ModelPropertyOutlineNode.class, "name = \"BETA!\""),
-			expected);
+		assertMigrationNavigation(child(first, ModelPropertyOutlineNode.class, "name = \"ALPHA!\""),
+			STAGED, 1);
+		assertMigrationNavigation(child(second, ModelPropertyOutlineNode.class, "name = \"BETA!\""),
+			STAGED, 1);
 	}
 
 	@Test
-	public void sameAttributeRowsNavigateToDifferentAppliedMigrations() {
+	public void sameAttributeRowsNavigateToDifferentChangingMigrations() {
 		// The two rows share Child.name, but only ALPHA receives suffix. This
 		// catches a feature-level hint accidentally assigned to both rows.
 		editor.getInternalSourceViewer().getDocument().set(MIXED);
 		var first = awaitNode(ModelObjectOutlineNode.class, "Child ALPHA!");
 		var second = awaitNode(ModelObjectOutlineNode.class, "Child BETA");
-		assertNavigation(child(first, ModelPropertyOutlineNode.class, "name = \"ALPHA!\""),
-			MIXED.lastIndexOf("modelMigration["));
-		assertNavigation(child(second, ModelPropertyOutlineNode.class, "name = \"BETA\""),
-			MIXED.indexOf("modelMigration["));
+		assertMigrationNavigation(child(first, ModelPropertyOutlineNode.class, "name = \"ALPHA!\""),
+			MIXED, 1);
+		assertMigrationNavigation(child(second, ModelPropertyOutlineNode.class, "name = \"BETA\""),
+			MIXED, 0);
+	}
+
+	@Test
+	public void noOpAndLaterEqualStageSelectOnlyProvenChanges() {
+		editor.getInternalSourceViewer().getDocument().set(NO_OP);
+		var unchanged = awaitNode(ModelObjectOutlineNode.class, "Child alpha");
+		assertNavigation(child(unchanged, ModelPropertyOutlineNode.class, "name = \"alpha\""),
+			NO_OP, "\"model/Preview.xmi\"");
+
+		editor.getInternalSourceViewer().getDocument().set(CHANGED_THEN_NO_OP);
+		var changed = awaitNode(ModelObjectOutlineNode.class, "Child ALPHA");
+		assertMigrationNavigation(child(changed, ModelPropertyOutlineNode.class,
+			"name = \"ALPHA\""), CHANGED_THEN_NO_OP, 0);
+	}
+
+	@Test
+	public void restoringOriginalValueLinksToRestoringStage() {
+		editor.getInternalSourceViewer().getDocument().set(REVERSAL);
+		var restored = awaitNode(ModelObjectOutlineNode.class, "Child alpha");
+		assertMigrationNavigation(child(restored, ModelPropertyOutlineNode.class,
+			"name = \"alpha\""), REVERSAL, 1);
+	}
+
+	@Test
+	public void changedReferenceUsesMigrationExpressionAndUntouchedReferenceUsesDeclaration() {
+		editor.getInternalSourceViewer().getDocument().set(CHANGED_REFERENCE);
+		var root = awaitNode(ModelObjectOutlineNode.class, "Root #root1");
+		assertMigrationNavigation(child(root, ModelPropertyOutlineNode.class,
+			"link [0..1] = <unset>"), CHANGED_REFERENCE, 0);
+		assertNavigation(child(root, ModelPropertyOutlineNode.class,
+			"links [0..*] = [Child alpha (#//@children.0), Child beta (#//@children.1)]"),
+			CHANGED_REFERENCE, "\"model/Preview.xmi\"");
+	}
+
+	@Test
+	public void unresolvedCrossResourceReferenceUsesDeclaration() {
+		editor.getInternalSourceViewer().getDocument().set(CROSS_RESOURCE_REFERENCE);
+		var root = awaitNode(ModelObjectOutlineNode.class, "Root #cross1");
+		// The source endpoint is unresolved; neither its URI nor its display
+		// text can establish exact copied-object correspondence.
+		assertNavigation(child(root, ModelPropertyOutlineNode.class,
+			"link [0..1] = <unset>"), CROSS_RESOURCE_REFERENCE, "\"model/Cross.xmi\"");
+	}
+
+	@Test
+	public void visibleEcoreChangePrecedesInstanceValueChange() {
+		editor.getInternalSourceViewer().getDocument().set(ECORE_AND_VALUE);
+		var changed = awaitNode(ModelObjectOutlineNode.class, "Child");
+		assertNavigation(child(changed, ModelPropertyOutlineNode.class, "label = \"ALPHA\""),
+			ECORE_AND_VALUE, "name = \"label\"");
+	}
+
+	@Test
+	public void libraryMigrationSelectsTheUserCall() {
+		editor.getInternalSourceViewer().getDocument().set(LIBRARY_MIGRATION);
+		var changed = awaitNode(ModelObjectOutlineNode.class, "Child ALPHA");
+		assertNavigation(child(changed, ModelPropertyOutlineNode.class, "name = \"ALPHA\""),
+			LIBRARY_MIGRATION, "uppercase(ecoreref(Child.name))");
 	}
 
 	@Test
@@ -527,6 +642,28 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 	private void assertNavigation(IOutlineNode node, int offset) {
 		opener.open(node, editor.getInternalSourceViewer());
 		then(editor.getInternalSourceViewer().getSelectedRange().x).isEqualTo(offset);
+	}
+
+	private void assertNavigation(IOutlineNode node, String source, String selectedText) {
+		assertNavigation(node, source.indexOf(selectedText));
+		then(editor.getInternalSourceViewer().getSelectedRange().y).isEqualTo(selectedText.length());
+	}
+
+	/** Checks the complete selected call, including its nested closure brackets. */
+	private void assertMigrationNavigation(IOutlineNode node, String source, int occurrence) {
+		var start = -1;
+		for (var i = 0; i <= occurrence; i++)
+			start = source.indexOf("modelMigration[", start + 1);
+		var depth = 0;
+		var end = start;
+		for (; end < source.length(); end++) {
+			if (source.charAt(end) == '[') depth++;
+			if (source.charAt(end) == ']' && --depth == 0) break;
+		}
+		opener.open(node, editor.getInternalSourceViewer());
+		var selected = editor.getInternalSourceViewer().getSelectedRange();
+		then(selected.x).isEqualTo(start);
+		then(selected.y).isEqualTo(end - start + 1);
 	}
 
 	/** Returns the image displayed by the outline for the given node. */

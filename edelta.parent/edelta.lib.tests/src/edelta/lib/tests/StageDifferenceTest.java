@@ -1,12 +1,15 @@
 package edelta.lib.tests;
 
-import static edelta.lib.tests.StageValueComparator.Result.DIFFERENT;
-import static edelta.lib.tests.StageValueComparator.Result.EQUAL;
-import static edelta.lib.tests.StageValueComparator.Result.UNKNOWN;
+import static edelta.lib.EdeltaStageValueComparator.Result.DIFFERENT;
+import static edelta.lib.EdeltaStageValueComparator.Result.EQUAL;
+import static edelta.lib.EdeltaStageValueComparator.Result.UNKNOWN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
+
+import edelta.lib.EdeltaStageValueComparator;
+import edelta.lib.EdeltaStageValueComparator.Mappings;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -17,7 +20,7 @@ import org.junit.jupiter.api.Test;
 /** Test-only probes of the migrator's copy, post-copy, and backup timing.
  * @author Lorenzo Bettini
  */
-class StageDifferenceFeasibilityTest {
+class StageDifferenceTest {
 	@Test
 	void stagedChangesNoOpsAndReverseUseEachStagesOwnSource() {
 		var f = new StageMigrationFixture();
@@ -84,7 +87,7 @@ class StageDifferenceFeasibilityTest {
 			target.eSet(evolved, "hello");
 		});
 		assertThat(f.stages.get(2).compare(laterSource, laterFeature)).isEqualTo(DIFFERENT);
-		assertThat(f.invalidations).hasSize(2);
+		assertThat(f.invalidations).isEmpty();
 	}
 
 	@Test
@@ -120,11 +123,11 @@ class StageDifferenceFeasibilityTest {
 		var target = stage.objects().get(f.first);
 		var targetFeature = (org.eclipse.emf.ecore.EReference) stage.ecores().get(f.link);
 		assertThat(target.eGet(targetFeature)).isSameAs(stage.objects().get(f.second));
-		assertThat(StageValueComparator.compare(f.first, f.link, target, targetFeature,
-			stage.objects(), stage.ecores())).isEqualTo(EQUAL);
+		assertThat(EdeltaStageValueComparator.compare(f.first, f.link, target, targetFeature,
+			new Mappings(stage.objects(), stage.ecores()))).isEqualTo(EQUAL);
 		target.eSet(targetFeature, target);
-		assertThat(StageValueComparator.compare(f.first, f.link, target, targetFeature,
-			stage.objects(), stage.ecores())).isEqualTo(DIFFERENT);
+		assertThat(EdeltaStageValueComparator.compare(f.first, f.link, target, targetFeature,
+			new Mappings(stage.objects(), stage.ecores()))).isEqualTo(DIFFERENT);
 	}
 
 	@Test
@@ -154,15 +157,15 @@ class StageDifferenceFeasibilityTest {
 		var stage = f.stages.get(0);
 		assertThat(stage.objects().get(f.first).eGet(replacement)).isEqualTo("hello");
 		// The ordinary Ecore copy map still points at the old feature, not the remap.
-		assertThat(StageValueComparator.compare(f.first, f.value,
-			stage.objects().get(f.first), replacement, stage.objects(), stage.ecores()))
+		assertThat(EdeltaStageValueComparator.compare(f.first, f.value,
+			stage.objects().get(f.first), replacement, new Mappings(stage.objects(), stage.ecores())))
 			.isEqualTo(UNKNOWN);
 		var count = f.stages.size();
 		var target = stage.objects().get(f.first);
 		target.eSet(replacement, "temporary");
 		f.migrator.copyFrom(target, replacement, f.first, f.value);
 		assertThat(f.stages).hasSize(count);
-		assertThat(f.invalidations).hasSize(2);
+		assertThat(f.invalidations).hasSize(1);
 	}
 
 	@Test
@@ -177,8 +180,8 @@ class StageDifferenceFeasibilityTest {
 			(feature, source, target) -> replacement);
 		var stage = f.stages.get(0);
 		assertThat(stage.objects().get(f.first).eGet(replacement)).isEqualTo("hello");
-		assertThat(StageValueComparator.compare(f.first, f.value,
-			stage.objects().get(f.first), replacement, stage.objects(), stage.ecores()))
+		assertThat(EdeltaStageValueComparator.compare(f.first, f.value,
+			stage.objects().get(f.first), replacement, new Mappings(stage.objects(), stage.ecores())))
 			.isEqualTo(UNKNOWN);
 
 		var other = new StageMigrationFixture();

@@ -112,6 +112,34 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 	}
 
 	@Test
+	public void equalCopyRulePreservesLastValueChangingExpression() throws Exception {
+		var root = projectWithModels();
+		var program = parse(root, true, """
+			metamodel "mypackage"
+			testmodels { "models/MyClass.xmi" }
+			modifyEcore evolve epackage mypackage {
+				val attribute = ecoreref(MyClass.myClassStringAttribute)
+				modelMigration[
+					transformAttributeValueRule(isRelatedTo(attribute),
+						[value | value.toString.toUpperCase])
+				]
+				modelMigration[
+					copyRule([feature | false], [feature, source, target | ])
+				]
+			}
+			""");
+		var preview = derivedStateHelper.getModelPreview(program.eResource());
+		assertThat(preview.getFailures()).isEmpty();
+		var object = preview.getModels().getFirst().resource().getContents().getFirst();
+		var feature = (EAttribute) object.eClass()
+			.getEStructuralFeature("myClassStringAttribute");
+		var effective = preview.getMigrationExpression(object, feature);
+		assertThat(effective.eResource()).isSameAs(program.eResource());
+		assertThat(NodeModelUtils.findActualNodeFor(effective).getText())
+			.contains("toUpperCase");
+	}
+
+	@Test
 	public void stagedRulesKeepResourceAssociationsAndCrossReferences() throws Exception {
 		var root = projectWithModels();
 		var rootFile = root.resolve("models/MyRoot.xmi");
@@ -167,7 +195,7 @@ public class EdeltaModelPreviewIntegrationTest extends EdeltaAbstractTest {
 	}
 
 	@Test
-	public void sameAttributeInstancesKeepDifferentLastAppliedExpressions() throws Exception {
+	public void sameAttributeInstancesKeepDifferentLastChangingExpressions() throws Exception {
 		// Both instances share one EAttribute and receive uppercase. Only the
 		// first predicate visit receives suffix, so the final tokens must differ.
 		var root = projectWithModels();
