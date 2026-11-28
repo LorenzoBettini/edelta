@@ -492,7 +492,7 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		toggleModelsAndAssert(modelItem, models, viewer, metaAction, modelRoot);
 		collapseMetamodelsAndAssert(metaItem, metamodels, viewer, modelAction, modelRoot);
 		assertManualExpansionTracking(metaItem, metamodels, ecoreClass, viewer, metaAction, modelAction);
-		assertRefreshResetsMetamodelExpansion(metaItem, modelItem, metamodels, viewer, metaAction, modelAction);
+		assertRefreshResetsMetamodelExpansion(metaItem, metamodels, viewer, metaAction, modelAction);
 		notifyTreeChange(awaitNode(MetamodelGroupOutlineNode.class, "Evolved metamodels"), SWT.Collapse);
 		closeEditors();
 		waitForEventProcessing();
@@ -579,8 +579,8 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 	}
 
 	private void assertRefreshResetsMetamodelExpansion(ActionContributionItem metaItem,
-			ActionContributionItem modelItem, IOutlineNode metamodels, TreeViewer viewer,
-			IAction metaAction, IAction modelAction) {
+			IOutlineNode metamodels, TreeViewer viewer, IAction metaAction,
+			IAction modelAction) {
 		var oldRoot = root();
 		editor.getInternalSourceViewer().getDocument().set(SECOND);
 		awaitReplacedRoot(oldRoot);
