@@ -152,7 +152,7 @@ class StageDifferenceTest {
 		var replacement = EcoreFactory.eINSTANCE.createEAttribute();
 		replacement.setName("replacement");
 		replacement.setEType(evolved.getEType());
-		((EClass) f.migrator.getMigrated(f.node)).getEStructuralFeatures().add(replacement);
+		f.migrator.getMigrated(f.node).getEStructuralFeatures().add(replacement);
 		f.migrator.mapFeatureRule(evolved, replacement);
 		var stage = f.stages.get(0);
 		assertThat(stage.objects().get(f.first).eGet(replacement)).isEqualTo("hello");
@@ -175,7 +175,7 @@ class StageDifferenceTest {
 		var replacement = EcoreFactory.eINSTANCE.createEAttribute();
 		replacement.setName("replacement");
 		replacement.setEType(evolved.getEType());
-		((EClass) f.migrator.getMigrated(f.node)).getEStructuralFeatures().add(replacement);
+		f.migrator.getMigrated(f.node).getEStructuralFeatures().add(replacement);
 		f.migrator.featureMigratorRule(feature -> feature == f.value,
 			(feature, source, target) -> replacement);
 		var stage = f.stages.get(0);
