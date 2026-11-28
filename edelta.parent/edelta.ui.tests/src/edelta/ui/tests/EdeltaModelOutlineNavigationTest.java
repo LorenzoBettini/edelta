@@ -54,16 +54,16 @@ public class EdeltaModelOutlineNavigationTest {
 		var changes = new EdeltaModifiedFeatures();
 		var lower = xbase.createXStringLiteral();
 		var upper = xbase.createXStringLiteral();
-		assertThat(EdeltaModelOutlineNavigation.featureExpression(copy, null, changes)).isNull();
-		assertThat(EdeltaModelOutlineNavigation.featureExpression(copy, original, changes)).isNull();
+		assertThat(EdeltaModelOutlineNavigation.featureChange(copy, null, changes).expression()).isNull();
+		assertThat(EdeltaModelOutlineNavigation.featureChange(copy, original, changes).expression()).isNull();
 		copy.setLowerBound(1);
-		assertThat(EdeltaModelOutlineNavigation.featureExpression(copy, original, changes)).isNull();
+		assertThat(EdeltaModelOutlineNavigation.featureChange(copy, original, changes).expression()).isNull();
 		changes.recordChange(copy, EcorePackage.Literals.ETYPED_ELEMENT__LOWER_BOUND, lower);
-		assertThat(EdeltaModelOutlineNavigation.featureExpression(copy, original, changes))
+		assertThat(EdeltaModelOutlineNavigation.featureChange(copy, original, changes).expression())
 			.isSameAs(lower);
 		copy.setUpperBound(3);
 		changes.recordChange(copy, EcorePackage.Literals.ETYPED_ELEMENT__UPPER_BOUND, upper);
-		assertThat(EdeltaModelOutlineNavigation.featureExpression(copy, original, changes)).isNull();
+		assertThat(EdeltaModelOutlineNavigation.featureChange(copy, original, changes).expression()).isNull();
 	}
 
 	@Test
@@ -76,12 +76,42 @@ public class EdeltaModelOutlineNavigationTest {
 		var expression = xbase.createXStringLiteral();
 		copy.setUpperBound(2);
 		changes.recordInitial(copy, expression);
-		assertThat(EdeltaModelOutlineNavigation.featureExpression(copy, original, changes)).isNull();
+		assertThat(EdeltaModelOutlineNavigation.featureChange(copy, original, changes).expression()).isNull();
 		changes.recordChange(copy, EcorePackage.Literals.ETYPED_ELEMENT__UPPER_BOUND, expression);
-		assertThat(EdeltaModelOutlineNavigation.featureExpression(copy, original, changes))
+		assertThat(EdeltaModelOutlineNavigation.featureChange(copy, original, changes).expression())
 			.isSameAs(expression);
 		original.setUpperBound(2);
-		assertThat(EdeltaModelOutlineNavigation.featureExpression(copy, original, changes)).isNull();
+		assertThat(EdeltaModelOutlineNavigation.featureChange(copy, original, changes).expression()).isNull();
+	}
+
+	@Test
+	public void visibleEvidenceIsIndependentOfUniqueNavigation() {
+		var original = ecore.createEReference();
+		original.setName("link");
+		var copy = ecore.createEReference();
+		copy.setName("renamed");
+		copy.setLowerBound(1);
+		var changes = new EdeltaModifiedFeatures();
+		var expression = xbase.createXStringLiteral();
+		changes.recordChange(copy, EcorePackage.Literals.ENAMED_ELEMENT__NAME, expression);
+
+		var mixed = EdeltaModelOutlineNavigation.featureChange(copy, original, changes);
+		assertThat(mixed.visibleChange()).isTrue();
+		assertThat(mixed.expression()).isNull();
+
+		changes.recordChange(copy, EcorePackage.Literals.ETYPED_ELEMENT__LOWER_BOUND, expression);
+		var multiple = EdeltaModelOutlineNavigation.featureChange(copy, original, changes);
+		assertThat(multiple.visibleChange()).isTrue();
+		assertThat(multiple.expression()).isNull();
+
+		copy.setLowerBound(0);
+		var restoredBound = EdeltaModelOutlineNavigation.featureChange(copy, original, changes);
+		assertThat(restoredBound.visibleChange()).isTrue();
+		assertThat(restoredBound.expression()).isSameAs(expression);
+		copy.setName("link");
+		var restored = EdeltaModelOutlineNavigation.featureChange(copy, original, changes);
+		assertThat(restored.visibleChange()).isFalse();
+		assertThat(restored.expression()).isNull();
 	}
 
 	@Test

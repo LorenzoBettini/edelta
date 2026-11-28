@@ -42,18 +42,22 @@ public final class EdeltaModelOutlineNavigation {
 		return nameChange.expression() == responsible ? responsible : null;
 	}
 
+	/** Evidence for styling and, independently, unambiguous Ecore navigation. */
+	public record FeatureChange(boolean visibleChange, XExpression expression) {}
+
 	/**
-	 * Returns an expression only when one recorded Ecore metadata change explains a visible row.
+	 * Analyzes recorded changes to metadata visible in a property row.
 	 * Type-only changes are omitted because the row does not display its declared type.
 	 *
 	 * @param feature the evolving Ecore feature represented by the row
 	 * @param original its imported Ecore counterpart, if any
 	 * @param changes feature-specific Ecore provenance from the current derived state
-	 * @return the single justified expression, or {@code null}
+	 * @return proven visible change evidence and the single justified expression, if any
 	 */
-	public static XExpression featureExpression(EStructuralFeature feature, EObject original,
+	public static FeatureChange featureChange(EStructuralFeature feature, EObject original,
 			EdeltaModifiedFeatures changes) {
-		if (!(original instanceof EStructuralFeature originalFeature)) return null;
+		if (!(original instanceof EStructuralFeature originalFeature))
+			return new FeatureChange(false, null);
 		var candidates = new ArrayList<XExpression>();
 		var trustworthy = addVisibleChange(candidates, feature, originalFeature, changes,
 			EcorePackage.Literals.ENAMED_ELEMENT__NAME);
@@ -67,7 +71,8 @@ public final class EdeltaModelOutlineNavigation {
 			trustworthy &= addVisibleChange(candidates, feature, originalFeature, changes,
 				EcorePackage.Literals.ETYPED_ELEMENT__UPPER_BOUND);
 		}
-		return trustworthy && candidates.size() == 1 ? candidates.getFirst() : null;
+		return new FeatureChange(!candidates.isEmpty(),
+			trustworthy && candidates.size() == 1 ? candidates.getFirst() : null);
 	}
 
 	private static boolean addVisibleChange(ArrayList<XExpression> candidates,

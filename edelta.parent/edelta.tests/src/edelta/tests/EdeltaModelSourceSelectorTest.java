@@ -358,6 +358,7 @@ public class EdeltaModelSourceSelectorTest extends EdeltaAbstractTest {
 		var content = "<one:MyClass xmlns:one=\"http://my.package1.org\"/>";
 		Files.writeString(unreadableModel, content);
 		Files.writeString(unreadableXmi, content);
+		Assume.assumeTrue(Files.getFileStore(file).supportsFileAttributeView("posix"));
 		try {
 			Files.setPosixFilePermissions(file, Set.of());
 			Files.setPosixFilePermissions(folderPath, Set.of());
