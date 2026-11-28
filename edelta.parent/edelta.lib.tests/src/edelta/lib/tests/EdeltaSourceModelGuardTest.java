@@ -195,7 +195,7 @@ class EdeltaSourceModelGuardTest {
 		root.eNotify(new ENotificationImpl((InternalEObject) root,
 			Notification.RESOLVE, link, root, root));
 		root.eNotify(new ENotificationImpl((InternalEObject) root,
-			Notification.CREATE, name, "old", "new"));
+			Notification.REMOVING_ADAPTER, name, "old", "new"));
 		root.eNotify(new ENotificationImpl((InternalEObject) root,
 			Notification.SET, name, "before", "before"));
 		source.setURI(URI.createURI("memory:/renamed.xmi"));
