@@ -138,7 +138,7 @@ public class EdeltaInterpreterDiagnosticHelperTest extends EdeltaAbstractTest {
 			new StackTraceElement("org.eclipse.emf.Loader", "load", "Loader.java", 5)
 		});
 		diagnosticHelper.addPreviewFailure(program, new EdeltaModelPreview.Failure(
-			"LOAD_FAILED", program, Path.of("models/bad.xmi"), cause));
+			"LOAD_FAILED", program, Path.of("models\\bad.xmi"), cause));
 		var issue = validationTestHelper.validate(program).stream()
 			.filter(it -> EdeltaValidator.MODEL_PREVIEW_FAILURE.equals(it.getCode()))
 			.findFirst().orElseThrow();
