@@ -20,7 +20,6 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import edelta.lib.EdeltaModelManager;
 import edelta.lib.EdeltaModelMigrator;
 import edelta.lib.EdeltaModelMigrator.CopyStage;
-import edelta.lib.EdeltaModelMigrator.MigrationObserver;
 import edelta.lib.EdeltaStageValueComparator;
 import edelta.lib.EdeltaStageValueComparator.Mappings;
 

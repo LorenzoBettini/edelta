@@ -8,14 +8,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 
-import edelta.lib.EdeltaStageValueComparator;
-import edelta.lib.EdeltaStageValueComparator.Mappings;
-
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.jupiter.api.Test;
+
+import edelta.lib.EdeltaStageValueComparator;
+import edelta.lib.EdeltaStageValueComparator.Mappings;
 
 /** Test-only probes of the migrator's copy, post-copy, and backup timing.
  * @author Lorenzo Bettini
