@@ -6,11 +6,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.emf.common.notify.Adapter;
+import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.common.notify.impl.NotificationImpl;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.common.notify.Adapter;
-import org.eclipse.emf.common.notify.impl.NotificationImpl;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
@@ -195,7 +195,7 @@ class EdeltaSourceModelGuardTest {
 		root.eNotify(new ENotificationImpl((InternalEObject) root,
 			Notification.RESOLVE, link, root, root));
 		root.eNotify(new ENotificationImpl((InternalEObject) root,
-			Notification.CREATE, name, "old", "new"));
+			Notification.REMOVING_ADAPTER, name, "old", "new"));
 		root.eNotify(new ENotificationImpl((InternalEObject) root,
 			Notification.SET, name, "before", "before"));
 		source.setURI(URI.createURI("memory:/renamed.xmi"));

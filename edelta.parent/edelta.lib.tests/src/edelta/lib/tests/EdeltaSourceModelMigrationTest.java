@@ -33,18 +33,19 @@ class EdeltaSourceModelMigrationTest {
 		var originals = new EdeltaModelManager();
 		originals.loadEcoreFile(DATA.resolve("My.ecore").toString());
 		originals.loadModelFile(DATA.resolve("MyClass.xmi").toString());
-		var migrator = new EdeltaModelMigrator(originals);
-		var evolved = migrator.getEvolvingModelManager();
-		var type = (EClass) evolved.getEPackage("mypackage").getEClassifier("MyClass");
-		type.setName("Renamed");
-		var attribute = (EAttribute) type.getEStructuralFeature("myClassStringAttribute");
-		migrator.transformAttributeValueRule(migrator.isRelatedTo(attribute),
-			value -> value.toString().toUpperCase());
-		migrator.copyModels();
-		var migrated = evolved.getModelResources().iterator().next().getContents().getFirst();
-		migrated.eSet(attribute, "target remains writable");
-		assertThat(migrated.eGet(attribute)).isEqualTo("target remains writable");
-		assertThat(type.getName()).isEqualTo("Renamed");
+		try (var migrator = new EdeltaModelMigrator(originals)) {
+			var evolved = migrator.getEvolvingModelManager();
+			var type = (EClass) evolved.getEPackage("mypackage").getEClassifier("MyClass");
+			type.setName("Renamed");
+			var attribute = (EAttribute) type.getEStructuralFeature("myClassStringAttribute");
+			migrator.transformAttributeValueRule(migrator.isRelatedTo(attribute),
+				value -> value.toString().toUpperCase());
+			migrator.copyModels();
+			var migrated = evolved.getModelResources().iterator().next().getContents().getFirst();
+			migrated.eSet(attribute, "target remains writable");
+			assertThat(migrated.eGet(attribute)).isEqualTo("target remains writable");
+			assertThat(type.getName()).isEqualTo("Renamed");
+		}
 	}
 
 	@Test

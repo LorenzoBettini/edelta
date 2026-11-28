@@ -54,6 +54,21 @@ to the model file or the imported package is already available.
 
 ## Viewing the result
 
+The outline places modified EPackages under **Evolved metamodels** and the
+preview resources under the sibling **Evolved test models** section. Ordinary
+Edelta operations remain at the program level. Each section appears only when
+it has content. EPackages retain their existing classes, features, property
+rows, styling, and source links. Selecting the metamodel section itself goes
+to the current program; selecting a nested Ecore node can still go to the
+expression responsible for its change.
+
+The outline toolbar has two independent check buttons with EPackage and model
+file icons. Checking one expands its entire section, including nested children;
+unchecking it collapses that section while leaving its heading visible. A
+button is checked only when its section is fully expanded, including after
+manual expansion or an editor refresh. A button is disabled when its section
+is absent. Full expansion may take time for a large model.
+
 The outline adds an **Evolved test models** section containing one in-memory
 resource for each selected input. All roots remain in their original order.
 The tree shows the final containment hierarchy and model-property rows.

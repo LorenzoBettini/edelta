@@ -32,6 +32,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
@@ -39,18 +40,16 @@ import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.EcoreFactory;
-import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.xtext.xbase.lib.StringExtensions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -158,28 +157,29 @@ class EdeltaModelMigratorTest {
 			originalModelManager.loadModelFile(multipleRoots.toString());
 			originalModelManager.loadModelFile(emptyResource.toString());
 
-			var migrator = new EdeltaModelMigrator(originalModelManager);
-			evolvingModelManager = migrator.getEvolvingModelManager();
-			migrator.copyModels();
+			try (var migrator = new EdeltaModelMigrator(originalModelManager)) {
+				evolvingModelManager = migrator.getEvolvingModelManager();
+				migrator.copyModels();
 
-			assertThat(evolvingModelManager.getModelResources()).hasSize(2);
-			var copiedMultipleRoots = evolvingModelManager.getModelResources().stream()
-				.filter(r -> r.getURI().lastSegment().equals("MultipleRoots.xmi"))
-				.findFirst().orElseThrow();
-			assertThat(copiedMultipleRoots.getContents()).hasSize(2);
-			var copiedRoot = copiedMultipleRoots.getContents().get(0);
-			var copiedSecondRoot = copiedMultipleRoots.getContents().get(1);
-			assertThat(copiedRoot.eClass().getName()).isEqualTo("MyRoot");
-			assertThat(copiedSecondRoot.eClass().getName()).isEqualTo("MyClass");
-			assertThat(getValueAsList(copiedRoot, getReference(evolvingModelManager,
-				"mypackage", "MyRoot", "myReferences"))).containsExactly(copiedSecondRoot);
-			assertThat(copiedSecondRoot.eClass()).isSameAs(
-				evolvingModelManager.getEPackage("mypackage").getEClassifier("MyClass"));
+				assertThat(evolvingModelManager.getModelResources()).hasSize(2);
+				var copiedMultipleRoots = evolvingModelManager.getModelResources().stream()
+					.filter(r -> r.getURI().lastSegment().equals("MultipleRoots.xmi"))
+					.findFirst().orElseThrow();
+				assertThat(copiedMultipleRoots.getContents()).hasSize(2);
+				var copiedRoot = copiedMultipleRoots.getContents().get(0);
+				var copiedSecondRoot = copiedMultipleRoots.getContents().get(1);
+				assertThat(copiedRoot.eClass().getName()).isEqualTo("MyRoot");
+				assertThat(copiedSecondRoot.eClass().getName()).isEqualTo("MyClass");
+				assertThat(getValueAsList(copiedRoot, getReference(evolvingModelManager,
+					"mypackage", "MyRoot", "myReferences"))).containsExactly(copiedSecondRoot);
+				assertThat(copiedSecondRoot.eClass()).isSameAs(
+					evolvingModelManager.getEPackage("mypackage").getEClassifier("MyClass"));
 
-			var copiedEmptyResource = evolvingModelManager.getModelResources().stream()
-				.filter(r -> r.getURI().lastSegment().equals("Empty.xmi"))
-				.findFirst().orElseThrow();
-			assertThat(copiedEmptyResource.getContents()).isEmpty();
+				var copiedEmptyResource = evolvingModelManager.getModelResources().stream()
+					.filter(r -> r.getURI().lastSegment().equals("Empty.xmi"))
+					.findFirst().orElseThrow();
+				assertThat(copiedEmptyResource.getContents()).isEmpty();
+			}
 		} finally {
 			cleanDirectoryRecursive(tempDir.toString());
 		}
@@ -407,20 +407,21 @@ class EdeltaModelMigratorTest {
 		var original = originalModelManager.getModelResources().iterator().next()
 			.getContents().getFirst();
 		original.eSet(original.eClass().getEStructuralFeature("myAttribute"), "");
-		var migrator = new EdeltaModelMigrator(originalModelManager);
-		evolvingModelManager = migrator.getEvolvingModelManager();
-		var target = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
-		var values = new ArrayList<Object>();
-		migrator.transformAttributeValueRule(migrator.isRelatedTo(target), value -> {
-			values.add(value);
-			return value;
-		});
-		assertThat(values).containsExactly("");
-		migrator.copyModels();
-		var migrated = evolvingModelManager.getModelResources().iterator().next()
-			.getContents().getFirst();
-		assertThat(migrated.eIsSet(target)).isTrue();
-		assertThat(migrated.eGet(target)).isEqualTo("");
+		try (var migrator = new EdeltaModelMigrator(originalModelManager)) {
+			evolvingModelManager = migrator.getEvolvingModelManager();
+			var target = getAttribute(evolvingModelManager, "mypackage", "MyClass", "myAttribute");
+			var values = new ArrayList<Object>();
+			migrator.transformAttributeValueRule(migrator.isRelatedTo(target), value -> {
+				values.add(value);
+				return value;
+			});
+			assertThat(values).containsExactly("");
+			migrator.copyModels();
+			var migrated = evolvingModelManager.getModelResources().iterator().next()
+				.getContents().getFirst();
+			assertThat(migrated.eIsSet(target)).isTrue();
+			assertThat(migrated.eGet(target)).isEqualTo("");
+		}
 	}
 
 	@Test

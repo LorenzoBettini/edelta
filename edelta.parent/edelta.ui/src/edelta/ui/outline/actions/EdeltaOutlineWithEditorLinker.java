@@ -22,6 +22,7 @@ import org.eclipse.xtext.xbase.XExpression;
 
 import edelta.ui.outline.EdeltaOutlineTreeProvider.EcoreOutlineNode;
 import edelta.ui.outline.EdeltaOutlineTreeProvider.EcorePropertyOutlineNode;
+import edelta.ui.outline.EdeltaOutlineTreeProvider.MetamodelGroupOutlineNode;
 
 /**
  * From an {@link XExpression} responsible of the modification of an {@link ENamedElement}
@@ -41,6 +42,8 @@ public class EdeltaOutlineWithEditorLinker extends OutlineWithEditorLinker {
 			 * selected. We try and find a node representing an Ecore element
 			 * that is modified by the selected XExpression */
 			var ePackages = eObjectNode.getParent().getChildren().stream()
+				.filter(MetamodelGroupOutlineNode.class::isInstance)
+				.flatMap(group -> group.getChildren().stream())
 				.filter(EcoreOutlineNode.class::isInstance)
 				.toList();
 			var property = ePackages.stream()

@@ -11,24 +11,31 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
+import org.eclipse.xtext.testing.util.ParseHelper;
 import org.eclipse.xtext.ui.PluginImageHelper;
 import org.eclipse.xtext.ui.editor.XtextEditor;
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.impl.OutlineNodeElementOpener;
 import org.eclipse.xtext.ui.editor.outline.impl.OutlinePage;
-import org.eclipse.xtext.testing.util.ParseHelper;
 import org.eclipse.xtext.xbase.XbaseFactory;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -41,6 +48,8 @@ import edelta.resource.derivedstate.EdeltaDerivedStateHelper;
 import edelta.ui.internal.EdeltaActivator;
 import edelta.ui.outline.EdeltaModelOutlineStyling;
 import edelta.ui.outline.EdeltaOutlineTreeProvider.EcoreOutlineNode;
+import edelta.ui.outline.EdeltaOutlineTreeProvider.EcorePropertyOutlineNode;
+import edelta.ui.outline.EdeltaOutlineTreeProvider.MetamodelGroupOutlineNode;
 import edelta.ui.outline.EdeltaOutlineTreeProvider.ModelGroupOutlineNode;
 import edelta.ui.outline.EdeltaOutlineTreeProvider.ModelObjectOutlineNode;
 import edelta.ui.outline.EdeltaOutlineTreeProvider.ModelPropertyOutlineNode;
@@ -54,6 +63,23 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 	private static final String PROJECT = "edelta.ui.tests.project";
 	private static final String FIRST = program("FirstChild");
 	private static final String SECOND = program("SecondChild");
+	private static final String TWO_PACKAGES = """
+		metamodel "preview"
+		metamodel "second"
+		testmodels { "model/Preview.xmi" "model/EmptyId.xmi" }
+		def helper() {}
+		modifyEcore evolve epackage preview {
+			ecoreref(Child).name = "RenamedChild"
+		}
+		modifyEcore other epackage second {
+			ecoreref(Extra).name = "RenamedExtra"
+		}
+		""";
+	private static final String NO_MODIFIED_PACKAGE = """
+		metamodel "preview"
+		testmodels { "model/Preview.xmi" }
+		modifyEcore evolve epackage preview {}
+		""";
 	private static final String DIRECT = """
 		metamodel "preview"
 		testmodels { "model/Preview.xmi" "model/EmptyId.xmi" }
@@ -299,6 +325,15 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 			 <empty/>
 			</preview:Root>
 			""");
+		createFile(PROJECT + "/model/second.ecore", """
+			<?xml version="1.0" encoding="UTF-8"?>
+			<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"
+			 xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+			 name="second" nsURI="http://second.example" nsPrefix="second">
+			 <eClassifiers xsi:type="ecore:EClass" name="Extra"
+			  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
+			</ecore:EPackage>
+			""");
 		createFile(PROJECT + "/model/EmptyId.xmi", """
 			<?xml version="1.0" encoding="UTF-8"?>
 			<preview:Root xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"
@@ -362,6 +397,239 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		outline = editor.getAdapter(OutlinePage.class);
 		then(outline).isNotNull();
 		editor.setFocus();
+		waitForEventProcessing();
+	}
+
+	@Test
+	public void metamodelsAndModelsAreSiblingGroupsWithOriginalEcoreNodes() {
+		var oldRoot = root();
+		editor.getInternalSourceViewer().getDocument().set(TWO_PACKAGES);
+		awaitReplacedRoot(oldRoot);
+		var metamodels = awaitNode(MetamodelGroupOutlineNode.class, "Evolved metamodels");
+		var models = awaitNode(ModelGroupOutlineNode.class, "Evolved test models");
+		var programNode = root().getChildren().getFirst();
+		then(programNode.getChildren()).contains(metamodels, models);
+		then(programNode.getChildren().indexOf(metamodels))
+			.isLessThan(programNode.getChildren().indexOf(models));
+		then(programNode.getChildren()).extracting(node -> node.getText().toString())
+			.contains("helper() : Object", "evolve(EPackage) : void", "other(EPackage) : void");
+		then(metamodels.getChildren()).extracting(node -> node.getText().toString())
+			.containsExactly("preview", "second");
+		var preview = child(metamodels, EcoreOutlineNode.class, "preview");
+		var second = child(metamodels, EcoreOutlineNode.class, "second");
+		var copies = editor.getDocument().readOnly(resource ->
+			derivedStateHelper.getCopiedEPackagesMap(resource).values());
+		then(copies).contains((EPackage) preview.readOnly(object -> object),
+			(EPackage) second.readOnly(object -> object));
+		then(preview.readOnly(object -> object).eResource()).isNotNull();
+		then(second.readOnly(object -> object).eResource()).isNotNull();
+		then(metamodels.getSignificantTextRegion().getOffset())
+			.isLessThan(TWO_PACKAGES.indexOf("modifyEcore"));
+		assertNavigation(metamodels, metamodels.getSignificantTextRegion().getOffset());
+		var renamed = child(preview, EcoreOutlineNode.class, "RenamedChild");
+		assertNavigation(renamed, TWO_PACKAGES.indexOf("name = \"RenamedChild\""));
+		var row = child(renamed, EcorePropertyOutlineNode.class, "name = RenamedChild");
+		assertStyled(row, true);
+		assertNavigation(row, TWO_PACKAGES.indexOf("name = \"RenamedChild\""));
+		then(outlineImage(preview)).isNotNull().isSameAs(outlineImage(second));
+		then(models.getChildren()).extracting(node -> node.getText().toString())
+			.containsExactly("Preview.xmi", "EmptyId.xmi");
+		click(sectionAction("Evolved metamodels"));
+		then(outline.getTreeViewer().getExpandedState(preview)).isTrue();
+		then(outline.getTreeViewer().getExpandedState(second)).isTrue();
+		editor.getInternalSourceViewer().setSelectedRange(
+			TWO_PACKAGES.indexOf("ecoreref(Child).name"), 0);
+		then(awaitSelected()).isEqualTo("RenamedChild");
+	}
+
+	@Test
+	public void absentMetamodelsAndModelsDisableOnlyTheirOwnToggles() {
+		var metamodelAction = sectionAction("Evolved metamodels").getAction();
+		var modelAction = sectionAction("Evolved test models").getAction();
+		var oldRoot = root();
+		editor.getInternalSourceViewer().getDocument().set(NO_MODIFIED_PACKAGE);
+		awaitReplacedRoot(oldRoot);
+		awaitNode(ModelGroupOutlineNode.class, "Evolved test models");
+		waitForEventProcessing();
+		then(findNode(root(), MetamodelGroupOutlineNode.class, "Evolved metamodels")).isNull();
+		then(metamodelAction.isEnabled()).isFalse();
+		then(metamodelAction.isChecked()).isFalse();
+		then(modelAction.isEnabled()).isTrue();
+		metamodelAction.setChecked(true);
+		metamodelAction.run();
+		then(metamodelAction.isChecked()).isFalse();
+		oldRoot = root();
+		editor.getInternalSourceViewer().getDocument().set(SECOND.replace(
+			"testmodels { \"model/Preview.xmi\" \"model/EmptyId.xmi\" }", ""));
+		awaitReplacedRoot(oldRoot);
+		awaitNode(MetamodelGroupOutlineNode.class, "Evolved metamodels");
+		waitForEventProcessing();
+		then(findNode(root(), ModelGroupOutlineNode.class, "Evolved test models")).isNull();
+		then(metamodelAction.isEnabled()).isTrue();
+		then(modelAction.isEnabled()).isFalse();
+		then(modelAction.isChecked()).isFalse();
+		outline.getTreeViewer().setInput(null);
+		modelAction.setChecked(true);
+		modelAction.run();
+		then(modelAction.isChecked()).isFalse();
+	}
+
+	@Test
+	public void toolbarTogglesExpandIndependentlyAndTrackManualAndRefreshedState() {
+		var metamodels = awaitNode(MetamodelGroupOutlineNode.class, "Evolved metamodels");
+		var models = awaitNode(ModelGroupOutlineNode.class, "Evolved test models");
+		var viewer = outline.getTreeViewer();
+		var metaItem = sectionAction("Evolved metamodels");
+		var modelItem = sectionAction("Evolved test models");
+		var metaAction = metaItem.getAction();
+		var modelAction = modelItem.getAction();
+		assertSectionToggleActions(metaItem, modelItem);
+		var operation = root().getChildren().getFirst().getChildren().getFirst();
+		var operationExpanded = viewer.getExpandedState(operation);
+		var ecoreClass = expandMetamodelsAndAssert(metaItem, metamodels, models, viewer,
+			operation, operationExpanded);
+		var modelRoot = expandModelsAndAssert(modelItem, models, viewer, metaAction);
+		toggleModelsAndAssert(modelItem, models, viewer, metaAction, modelRoot);
+		collapseMetamodelsAndAssert(metaItem, metamodels, viewer, modelAction, modelRoot);
+		assertManualExpansionTracking(metaItem, metamodels, ecoreClass, viewer, metaAction, modelAction);
+		assertRefreshResetsMetamodelExpansion(metaItem, metamodels, viewer, metaAction, modelAction);
+		notifyTreeChange(awaitNode(MetamodelGroupOutlineNode.class, "Evolved metamodels"), SWT.Collapse);
+		closeEditors();
+		waitForEventProcessing();
+		metaAction.run();
+		modelAction.run();
+	}
+
+	private void assertSectionToggleActions(ActionContributionItem metaItem, ActionContributionItem modelItem) {
+		then(List.of(outline.getSite().getActionBars().getToolBarManager().getItems())
+			.stream().filter(ActionContributionItem.class::isInstance).count())
+			.isGreaterThanOrEqualTo(4);
+		assertToggleAction(metaItem.getAction(), "metamodels", "EPackage.gif");
+		assertToggleAction(modelItem.getAction(), "test models", "ModelFile.gif");
+	}
+
+	private void assertToggleAction(IAction action, String tooltipFragment, String image) {
+		then(action.getStyle()).isEqualTo(IAction.AS_CHECK_BOX);
+		then(action.getImageDescriptor()).isEqualTo(imageHelper.getImageDescriptor(image));
+		then(action.getToolTipText()).contains(tooltipFragment);
+		then(action.isChecked()).isFalse();
+	}
+
+	private IOutlineNode expandMetamodelsAndAssert(ActionContributionItem metaItem,
+			IOutlineNode metamodels, IOutlineNode models, TreeViewer viewer,
+			IOutlineNode operation, boolean operationExpanded) {
+		click(metaItem);
+		then(metaItem.getAction().isChecked()).isTrue();
+		then(viewer.getExpandedState(metamodels)).isTrue();
+		var ecoreClass = child(child(metamodels, EcoreOutlineNode.class, "preview"),
+			EcoreOutlineNode.class, "FirstChild");
+		then(viewer.getExpandedState(ecoreClass)).isTrue();
+		then(sectionAction("Evolved test models").getAction().isChecked()).isFalse();
+		then(viewer.getExpandedState(models)).isFalse();
+		then(viewer.getExpandedState(operation)).isEqualTo(operationExpanded);
+		return ecoreClass;
+	}
+
+	private IOutlineNode expandModelsAndAssert(ActionContributionItem modelItem,
+			IOutlineNode models, TreeViewer viewer, IAction metaAction) {
+		click(modelItem);
+		then(modelItem.getAction().isChecked()).isTrue();
+		var modelRoot = child(child(models, ModelResourceOutlineNode.class, "Preview.xmi"),
+			ModelObjectOutlineNode.class, "Root #root1");
+		then(viewer.getExpandedState(modelRoot)).isTrue();
+		then(viewer.getExpandedState(child(models, ModelResourceOutlineNode.class,
+			"EmptyId.xmi"))).isTrue();
+		then(metaAction.isChecked()).isTrue();
+		return modelRoot;
+	}
+
+	private void toggleModelsAndAssert(ActionContributionItem modelItem, IOutlineNode models,
+			TreeViewer viewer, IAction metaAction, IOutlineNode modelRoot) {
+		click(modelItem);
+		then(modelItem.getAction().isChecked()).isFalse();
+		then(viewer.getExpandedState(models)).isFalse();
+		then(metaAction.isChecked()).isTrue();
+		click(modelItem);
+		then(modelItem.getAction().isChecked()).isTrue();
+		then(viewer.getExpandedState(modelRoot)).isTrue();
+	}
+
+	private void collapseMetamodelsAndAssert(ActionContributionItem metaItem, IOutlineNode metamodels,
+			TreeViewer viewer, IAction modelAction, IOutlineNode modelRoot) {
+		click(metaItem);
+		then(metaItem.getAction().isChecked()).isFalse();
+		then(viewer.getExpandedState(metamodels)).isFalse();
+		then(modelAction.isChecked()).isTrue();
+		then(viewer.getExpandedState(modelRoot)).isTrue();
+	}
+
+	private void assertManualExpansionTracking(ActionContributionItem metaItem, IOutlineNode metamodels,
+			IOutlineNode ecoreClass, TreeViewer viewer, IAction metaAction, IAction modelAction) {
+		viewer.expandToLevel(metamodels, TreeViewer.ALL_LEVELS);
+		notifyTreeChange(metamodels, SWT.Expand);
+		waitForEventProcessing();
+		then(metaAction.isChecked()).isTrue();
+		viewer.collapseToLevel(ecoreClass, TreeViewer.ALL_LEVELS);
+		notifyTreeChange(ecoreClass, SWT.Collapse);
+		waitForEventProcessing();
+		then(metaAction.isChecked()).isFalse();
+		then(modelAction.isChecked()).isTrue();
+		click(metaItem);
+		then(metaAction.isChecked()).isTrue();
+	}
+
+	private void assertRefreshResetsMetamodelExpansion(ActionContributionItem metaItem,
+			IOutlineNode metamodels, TreeViewer viewer, IAction metaAction,
+			IAction modelAction) {
+		var oldRoot = root();
+		editor.getInternalSourceViewer().getDocument().set(SECOND);
+		awaitReplacedRoot(oldRoot);
+		var fresh = awaitNode(MetamodelGroupOutlineNode.class, "Evolved metamodels");
+		then(fresh).isNotSameAs(metamodels);
+		waitForEventProcessing();
+		then(viewer.getExpandedState(fresh)).isTrue();
+		then(metaAction.isChecked()).isFalse();
+		click(metaItem);
+		then(metaAction.isChecked()).isTrue();
+		click(metaItem);
+		then(viewer.getExpandedState(fresh)).isFalse();
+		then(modelAction.isChecked()).isFalse();
+	}
+
+	private ActionContributionItem sectionAction(String text) {
+		var items = outline.getSite().getActionBars().getToolBarManager().getItems();
+		then(List.of(items).stream().filter(ActionContributionItem.class::isInstance)
+			.map(ActionContributionItem.class::cast)
+			.filter(item -> item.getAction().getText().equals(text)).count()).isEqualTo(1);
+		return List.of(items).stream().filter(ActionContributionItem.class::isInstance)
+			.map(ActionContributionItem.class::cast)
+			.filter(item -> item.getAction().getText().equals(text)).findFirst().orElseThrow();
+	}
+
+	private void click(ActionContributionItem item) {
+		var button = (ToolItem) item.getWidget();
+		button.setSelection(!button.getSelection());
+		button.notifyListeners(SWT.Selection, new Event());
+		waitForEventProcessing();
+		then(button.getSelection()).isEqualTo(item.getAction().isChecked());
+	}
+
+	private void notifyTreeChange(IOutlineNode node, int eventType) {
+		var item = treeItem(outline.getTreeViewer().getTree().getItems(), node);
+		then(item).isNotNull();
+		var event = new Event();
+		event.item = item;
+		outline.getTreeViewer().getTree().notifyListeners(eventType, event);
+	}
+
+	private org.eclipse.swt.widgets.TreeItem treeItem(
+			org.eclipse.swt.widgets.TreeItem[] items, IOutlineNode node) {
+		for (var item : items) {
+			if (item.getData() == node) return item;
+			var child = treeItem(item.getItems(), node);
+			if (child != null) return child;
+		}
+		return null;
 	}
 
 	@Test
@@ -477,6 +745,18 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		var row = awaitNode(ModelPropertyOutlineNode.class, "name = [\"alpha\"]");
 		assertStyled(row, true);
 		assertNavigation(row, MULTIPLE_ATTRIBUTE.indexOf("changeToMultiple(ecoreref(Child.name))"));
+		var metamodels = awaitNode(MetamodelGroupOutlineNode.class, "Evolved metamodels");
+		var ecoreClass = child(child(metamodels, EcoreOutlineNode.class, "preview"),
+			EcoreOutlineNode.class, "Child");
+		var feature = ecoreClass.getChildren().stream()
+			.filter(EcoreOutlineNode.class::isInstance)
+			.filter(node -> node.getText().toString().startsWith("name :"))
+			.findFirst().orElseThrow();
+		var upperBound = child(feature, EcorePropertyOutlineNode.class, "upperBound = -1");
+		assertStyled(upperBound, true);
+		assertNavigation(upperBound, MULTIPLE_ATTRIBUTE.indexOf(
+			"changeToMultiple(ecoreref(Child.name))"));
+		then(feature.getParent().getParent()).isSameAs(metamodels.getChildren().getFirst());
 	}
 
 	@Test
@@ -937,6 +1217,21 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 
 	private IOutlineNode root() {
 		return (IOutlineNode) outline.getTreeViewer().getInput();
+	}
+
+	private void awaitReplacedRoot(IOutlineNode oldRoot) {
+		var display = outline.getTreeViewer().getControl().getDisplay();
+		var timedOut = new AtomicBoolean();
+		Runnable deadline = () -> timedOut.set(true);
+		display.timerExec(5000, deadline);
+		try {
+			while (root() == oldRoot && !timedOut.get()) {
+				if (!display.readAndDispatch() && !timedOut.get()) display.sleep();
+			}
+			then(root()).isNotSameAs(oldRoot);
+		} finally {
+			display.timerExec(-1, deadline);
+		}
 	}
 
 	private String outlineStringRepresentation(IOutlineNode node) {
