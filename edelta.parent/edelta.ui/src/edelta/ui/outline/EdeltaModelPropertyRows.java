@@ -46,7 +46,8 @@ public class EdeltaModelPropertyRows {
 		return rows;
 	}
 
-	private boolean isProperty(EStructuralFeature feature) {
+	/** Whether the feature is displayed as a property rather than a containment child. */
+	public boolean isProperty(EStructuralFeature feature) {
 		if (feature instanceof EAttribute) return true;
 		var reference = (EReference) feature;
 		return !reference.isContainment() && !reference.isContainer();

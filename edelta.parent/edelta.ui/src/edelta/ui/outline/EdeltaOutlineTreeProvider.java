@@ -139,20 +139,16 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	private void createModelPropertyChildren(IOutlineNode parentNode, EObject modelElement) {
 		for (final var row : modelPropertyRows.get(modelElement)) {
 			checkCanceled();
+			var change = modelOutlineStyling.propertyChange(currentProgram, modelElement,
+				row.feature());
 			var propertyNode = new ModelPropertyOutlineNode(modelElement, row.feature(),
 				parentNode, imageHelper.getImage(row.feature() instanceof EAttribute
 					? "EAttribute.gif" : "EReference.gif"),
-				edeltaLabelProvider.propertyText(row.label(),
-					modelOutlineStyling.isChangedProperty(currentProgram, modelElement, row.feature())));
-			var source = currentProgram.eResource();
-			var expression = EdeltaModelOutlineNavigation.featureExpression(row.feature(),
-				derivedStateHelper.getCopiedEPackagesMap(source).getOriginal(row.feature()),
-				derivedStateHelper.getModifiedFeatures(source));
+				edeltaLabelProvider.propertyText(row.label(), change.changed()));
 			// Source selection checks a visible Ecore change before this exact
 			// instance value change, then falls back to the input declaration.
-			var migrationExpression = derivedStateHelper.getModelPreview(source)
-				.getMigrationExpression(modelElement, row.feature());
-			propertyNode.setTextRegion(modelRegion(parentNode, expression, migrationExpression));
+			propertyNode.setTextRegion(modelRegion(parentNode, change.ecoreExpression(),
+				change.migrationExpression()));
 		}
 	}
 
@@ -206,10 +202,6 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	protected EObjectNode createEObjectNode(IOutlineNode parentNode, EObject modelElement, Image image, Object text,
 			boolean isLeaf) {
 		if (parentNode instanceof ModelResourceOutlineNode || parentNode instanceof ModelObjectOutlineNode) {
-			var node = new ModelObjectOutlineNode(modelElement, parentNode, image,
-				edeltaLabelProvider.propertyText(modelLabel(modelElement),
-					modelOutlineStyling.isChangedObject(currentProgram, modelElement)),
-				isLeaf && !modelPropertyRows.hasRows(modelElement));
 			var eClass = modelElement.eClass();
 			var source = currentProgram.eResource();
 			var expression = EdeltaModelOutlineNavigation.classExpression(eClass,
@@ -217,6 +209,10 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 				derivedStateHelper.getModifiedFeatures(source)
 					.get(eClass, EcorePackage.Literals.ENAMED_ELEMENT__NAME),
 				derivedStateHelper.getLastResponsibleExpression(currentProgram, eClass));
+			var node = new ModelObjectOutlineNode(modelElement, parentNode, image,
+				edeltaLabelProvider.propertyText(modelLabel(modelElement),
+					modelOutlineStyling.isChangedObject(currentProgram, modelElement, expression)),
+				isLeaf && !modelPropertyRows.hasRows(modelElement));
 			node.setShortTextRegion(modelRegion(parentNode, expression));
 			return node;
 		}

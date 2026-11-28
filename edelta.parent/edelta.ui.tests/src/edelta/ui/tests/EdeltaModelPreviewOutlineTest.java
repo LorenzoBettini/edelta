@@ -761,8 +761,8 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		then(containerReference.isContainer()).isTrue();
 		var owner = EcoreUtil.create(unmappedClass);
 
-		then(modelOutlineStyling.isChangedProperty(program, owner, unmappedAttribute)).isFalse();
-		then(modelOutlineStyling.isChangedObject(program, owner)).isFalse();
+		then(modelOutlineStyling.propertyChange(program, owner, unmappedAttribute).changed()).isFalse();
+		then(modelOutlineStyling.isChangedObject(program, owner, null)).isFalse();
 
 		var originalClass = EcoreFactory.eINSTANCE.createEClass();
 		var originalAttribute = EcoreFactory.eINSTANCE.createEAttribute();
@@ -784,10 +784,10 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		derivedStateHelper.getModifiedFeatures(program.eResource()).recordInitial(
 			evolvedAttribute, XbaseFactory.eINSTANCE.createXBlockExpression());
 		var evolvedOwner = EcoreUtil.create(evolvedClass);
-		then(modelOutlineStyling.isChangedProperty(program, evolvedOwner, evolvedAttribute))
+		then(modelOutlineStyling.propertyChange(program, evolvedOwner, evolvedAttribute).changed())
 			.isFalse();
 		evolvedAttribute.setUpperBound(-1);
-		then(modelOutlineStyling.isChangedProperty(program, evolvedOwner, evolvedAttribute))
+		then(modelOutlineStyling.propertyChange(program, evolvedOwner, evolvedAttribute).changed())
 			.isFalse();
 		derivedStateHelper.getModifiedFeatures(program.eResource()).recordChange(
 			evolvedAttribute, EcorePackage.Literals.ETYPED_ELEMENT__UPPER_BOUND,
@@ -799,8 +799,16 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		then(derivedStateHelper.getModifiedFeatures(program.eResource())
 			.get(evolvedAttribute, EcorePackage.Literals.ETYPED_ELEMENT__UPPER_BOUND))
 			.isNotNull().satisfies(change -> then(change.initial()).isFalse());
-		then(modelOutlineStyling.isChangedProperty(program, evolvedOwner, evolvedAttribute))
+		then(modelOutlineStyling.propertyChange(program, evolvedOwner, evolvedAttribute).changed())
 			.isTrue();
+		evolvedAttribute.setName("unrecorded");
+		var mixed = modelOutlineStyling.propertyChange(program, evolvedOwner, evolvedAttribute);
+		then(mixed.changed()).isTrue();
+		then(mixed.ecoreExpression()).isNull();
+		evolvedAttribute.setUpperBound(originalAttribute.getUpperBound());
+		var restored = modelOutlineStyling.propertyChange(program, evolvedOwner, evolvedAttribute);
+		then(restored.changed()).isFalse();
+		then(restored.ecoreExpression()).isNull();
 	}
 
 	@Test
