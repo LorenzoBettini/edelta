@@ -75,14 +75,10 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		}
 		final var eResource = p.eResource();
 		final var modifiedElements = derivedStateHelper.getModifiedElements(eResource);
-		for (final var ePackage : derivedStateHelper.getCopiedEPackagesMap(eResource).values()) {
-			// the cool thing is that we don't need to provide
-			// customization in the label provider for EPackage and EClass
-			// since Xtext defaults to the .edit plugin :)
-			if (modifiedElements.contains(ePackage)) {
-				createNode(parentNode, ePackage);
-				// only show EPackage with some modifications
-			}
+		if (derivedStateHelper.getCopiedEPackagesMap(eResource).values().stream()
+				.anyMatch(modifiedElements::contains)) {
+			var group = new MetamodelGroupOutlineNode(parentNode);
+			group.setTextRegion(locationInFileProvider.getSignificantTextRegion(p));
 		}
 		if (!derivedStateHelper.getModelPreview(eResource).getModels().isEmpty()) {
 			var group = new ModelGroupOutlineNode(parentNode);
@@ -90,8 +86,27 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		}
 	}
 
+	/** Creates the existing modified EPackage nodes only when the group expands. */
+	protected void _createChildren(final MetamodelGroupOutlineNode parentNode,
+			final EdeltaProgram program) {
+		currentProgram = program;
+		final var eResource = program.eResource();
+		final var modifiedElements = derivedStateHelper.getModifiedElements(eResource);
+		for (final var ePackage : derivedStateHelper.getCopiedEPackagesMap(eResource).values()) {
+			checkCanceled();
+			// the cool thing is that we don't need to provide
+			// customization in the label provider for EPackage and EClass
+			// since Xtext defaults to the .edit plugin :)
+			if (modifiedElements.contains(ePackage)) {
+				// only show EPackage with some modifications
+				createNode(parentNode, ePackage);
+			}
+		}
+	}
+
 	/** Creates resource items from the current derived state when the group expands. */
 	protected void _createChildren(final ModelGroupOutlineNode parentNode, final EdeltaProgram program) {
+		currentProgram = program;
 		for (var model : derivedStateHelper.getModelPreview(program.eResource()).getModels()) {
 			checkCanceled();
 			var node = new ModelResourceOutlineNode(model, parentNode,
@@ -234,6 +249,21 @@ public class EdeltaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		}
 		var id = EcoreUtil.getID(element);
 		return id == null || id.isBlank() ? label : label + " #" + id;
+	}
+
+	/** Groups the modified EPackages without retaining copied metamodel objects.
+	 * @author Lorenzo Bettini
+	 */
+	public static class MetamodelGroupOutlineNode extends AbstractOutlineNode {
+		MetamodelGroupOutlineNode(IOutlineNode parent) {
+			super(parent, PlatformUI.getWorkbench().getSharedImages()
+				.getImage(ISharedImages.IMG_OBJ_FOLDER), "Evolved metamodels", false);
+		}
+
+		@Override
+		public <T> T readOnly(IUnitOfWork<T, EObject> work) {
+			return getDocument().tryReadOnly(state -> work.exec(state.getContents().getFirst()));
+		}
 	}
 
 	/** Groups final preview resources under a distinct outline heading. @author Lorenzo Bettini */
