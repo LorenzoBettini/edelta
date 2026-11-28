@@ -1,6 +1,8 @@
 package edelta.ui.outline.actions;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -26,14 +28,14 @@ public class EdeltaOutlineSectionContribution implements IOutlineContribution {
 
 	private TreeViewer viewer;
 
-	private final Action metamodels = new Action("Evolved metamodels", Action.AS_CHECK_BOX) {
+	private final Action metamodels = new Action("Evolved metamodels", IAction.AS_CHECK_BOX) {
 		@Override
 		public void run() {
 			setExpanded(MetamodelGroupOutlineNode.class, this);
 		}
 	};
 
-	private final Action models = new Action("Evolved test models", Action.AS_CHECK_BOX) {
+	private final Action models = new Action("Evolved test models", IAction.AS_CHECK_BOX) {
 		@Override
 		public void run() {
 			setExpanded(ModelGroupOutlineNode.class, this);
@@ -49,6 +51,10 @@ public class EdeltaOutlineSectionContribution implements IOutlineContribution {
 		@Override
 		public void treeCollapsed(TreeExpansionEvent event) {
 			scheduleSync();
+		}
+
+		private void scheduleSync() {
+			viewer.getControl().getDisplay().asyncExec(EdeltaOutlineSectionContribution.this::sync);
 		}
 	};
 
@@ -90,9 +96,9 @@ public class EdeltaOutlineSectionContribution implements IOutlineContribution {
 		viewer.getControl().setRedraw(false);
 		try {
 			if (action.isChecked()) {
-				viewer.expandToLevel(group, TreeViewer.ALL_LEVELS);
+				viewer.expandToLevel(group, AbstractTreeViewer.ALL_LEVELS);
 			} else {
-				viewer.collapseToLevel(group, TreeViewer.ALL_LEVELS);
+				viewer.collapseToLevel(group, AbstractTreeViewer.ALL_LEVELS);
 			}
 		} finally {
 			viewer.getControl().setRedraw(true);
@@ -104,10 +110,6 @@ public class EdeltaOutlineSectionContribution implements IOutlineContribution {
 		if (!(viewer.getInput() instanceof IOutlineNode root)) return null;
 		return root.getChildren().stream().flatMap(program -> program.getChildren().stream())
 			.filter(type::isInstance).findFirst().orElse(null);
-	}
-
-	private void scheduleSync() {
-		viewer.getControl().getDisplay().asyncExec(this::sync);
 	}
 
 	private void sync() {

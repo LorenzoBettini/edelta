@@ -18,6 +18,7 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -481,51 +482,90 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		var viewer = outline.getTreeViewer();
 		var metaItem = sectionAction("Evolved metamodels");
 		var modelItem = sectionAction("Evolved test models");
+		var metaAction = metaItem.getAction();
+		var modelAction = modelItem.getAction();
+		assertSectionToggleActions(metaItem, modelItem);
+		var operation = root().getChildren().getFirst().getChildren().getFirst();
+		var operationExpanded = viewer.getExpandedState(operation);
+		var ecoreClass = expandMetamodelsAndAssert(metaItem, metamodels, models, viewer,
+			operation, operationExpanded);
+		var modelRoot = expandModelsAndAssert(modelItem, models, viewer, metaAction);
+		toggleModelsAndAssert(modelItem, models, viewer, metaAction, modelRoot);
+		collapseMetamodelsAndAssert(metaItem, metamodels, viewer, modelAction, modelRoot);
+		assertManualExpansionTracking(metaItem, metamodels, ecoreClass, viewer, metaAction, modelAction);
+		assertRefreshResetsMetamodelExpansion(metaItem, modelItem, metamodels, viewer, metaAction, modelAction);
+		notifyTreeChange(awaitNode(MetamodelGroupOutlineNode.class, "Evolved metamodels"), SWT.Collapse);
+		closeEditors();
+		waitForEventProcessing();
+		metaAction.run();
+		modelAction.run();
+	}
+
+	private void assertSectionToggleActions(ActionContributionItem metaItem, ActionContributionItem modelItem) {
 		then(List.of(outline.getSite().getActionBars().getToolBarManager().getItems())
 			.stream().filter(ActionContributionItem.class::isInstance).count())
 			.isGreaterThanOrEqualTo(4);
-		var metaAction = metaItem.getAction();
-		var modelAction = modelItem.getAction();
-		then(metaAction.getStyle()).isEqualTo(Action.AS_CHECK_BOX);
-		then(modelAction.getStyle()).isEqualTo(Action.AS_CHECK_BOX);
-		then(metaAction.getImageDescriptor())
-			.isEqualTo(imageHelper.getImageDescriptor("EPackage.gif"));
-		then(modelAction.getImageDescriptor())
-			.isEqualTo(imageHelper.getImageDescriptor("ModelFile.gif"));
-		then(metaAction.getToolTipText()).contains("metamodels");
-		then(modelAction.getToolTipText()).contains("test models");
-		then(metaAction.isChecked()).isFalse();
-		then(modelAction.isChecked()).isFalse();
-		var operation = root().getChildren().getFirst().getChildren().getFirst();
-		var operationExpanded = viewer.getExpandedState(operation);
+		assertToggleAction(metaItem.getAction(), "metamodels", "EPackage.gif");
+		assertToggleAction(modelItem.getAction(), "test models", "ModelFile.gif");
+	}
+
+	private void assertToggleAction(IAction action, String tooltipFragment, String image) {
+		then(action.getStyle()).isEqualTo(IAction.AS_CHECK_BOX);
+		then(action.getImageDescriptor()).isEqualTo(imageHelper.getImageDescriptor(image));
+		then(action.getToolTipText()).contains(tooltipFragment);
+		then(action.isChecked()).isFalse();
+	}
+
+	private IOutlineNode expandMetamodelsAndAssert(ActionContributionItem metaItem,
+			IOutlineNode metamodels, IOutlineNode models, TreeViewer viewer,
+			IOutlineNode operation, boolean operationExpanded) {
 		click(metaItem);
-		then(metaAction.isChecked()).isTrue();
+		then(metaItem.getAction().isChecked()).isTrue();
 		then(viewer.getExpandedState(metamodels)).isTrue();
 		var ecoreClass = child(child(metamodels, EcoreOutlineNode.class, "preview"),
 			EcoreOutlineNode.class, "FirstChild");
 		then(viewer.getExpandedState(ecoreClass)).isTrue();
-		then(modelAction.isChecked()).isFalse();
+		then(sectionAction("Evolved test models").getAction().isChecked()).isFalse();
 		then(viewer.getExpandedState(models)).isFalse();
 		then(viewer.getExpandedState(operation)).isEqualTo(operationExpanded);
+		return ecoreClass;
+	}
+
+	private IOutlineNode expandModelsAndAssert(ActionContributionItem modelItem,
+			IOutlineNode models, TreeViewer viewer, IAction metaAction) {
 		click(modelItem);
-		then(modelAction.isChecked()).isTrue();
+		then(modelItem.getAction().isChecked()).isTrue();
 		var modelRoot = child(child(models, ModelResourceOutlineNode.class, "Preview.xmi"),
 			ModelObjectOutlineNode.class, "Root #root1");
 		then(viewer.getExpandedState(modelRoot)).isTrue();
 		then(viewer.getExpandedState(child(models, ModelResourceOutlineNode.class,
 			"EmptyId.xmi"))).isTrue();
+		then(metaAction.isChecked()).isTrue();
+		return modelRoot;
+	}
+
+	private void toggleModelsAndAssert(ActionContributionItem modelItem, IOutlineNode models,
+			TreeViewer viewer, IAction metaAction, IOutlineNode modelRoot) {
 		click(modelItem);
-		then(modelAction.isChecked()).isFalse();
+		then(modelItem.getAction().isChecked()).isFalse();
 		then(viewer.getExpandedState(models)).isFalse();
 		then(metaAction.isChecked()).isTrue();
 		click(modelItem);
-		then(modelAction.isChecked()).isTrue();
+		then(modelItem.getAction().isChecked()).isTrue();
 		then(viewer.getExpandedState(modelRoot)).isTrue();
+	}
+
+	private void collapseMetamodelsAndAssert(ActionContributionItem metaItem, IOutlineNode metamodels,
+			TreeViewer viewer, IAction modelAction, IOutlineNode modelRoot) {
 		click(metaItem);
-		then(metaAction.isChecked()).isFalse();
+		then(metaItem.getAction().isChecked()).isFalse();
 		then(viewer.getExpandedState(metamodels)).isFalse();
 		then(modelAction.isChecked()).isTrue();
 		then(viewer.getExpandedState(modelRoot)).isTrue();
+	}
+
+	private void assertManualExpansionTracking(ActionContributionItem metaItem, IOutlineNode metamodels,
+			IOutlineNode ecoreClass, TreeViewer viewer, IAction metaAction, IAction modelAction) {
 		viewer.expandToLevel(metamodels, TreeViewer.ALL_LEVELS);
 		notifyTreeChange(metamodels, SWT.Expand);
 		waitForEventProcessing();
@@ -537,6 +577,11 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		then(modelAction.isChecked()).isTrue();
 		click(metaItem);
 		then(metaAction.isChecked()).isTrue();
+	}
+
+	private void assertRefreshResetsMetamodelExpansion(ActionContributionItem metaItem,
+			ActionContributionItem modelItem, IOutlineNode metamodels, TreeViewer viewer,
+			IAction metaAction, IAction modelAction) {
 		var oldRoot = root();
 		editor.getInternalSourceViewer().getDocument().set(SECOND);
 		awaitReplacedRoot(oldRoot);
@@ -550,11 +595,6 @@ public class EdeltaModelPreviewOutlineTest extends CustomAbstractEditorTest {
 		click(metaItem);
 		then(viewer.getExpandedState(fresh)).isFalse();
 		then(modelAction.isChecked()).isFalse();
-		notifyTreeChange(fresh, SWT.Collapse);
-		closeEditors();
-		waitForEventProcessing();
-		metaAction.run();
-		modelAction.run();
 	}
 
 	private ActionContributionItem sectionAction(String text) {
